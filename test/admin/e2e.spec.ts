@@ -297,7 +297,7 @@ describe('admin', () => {
         await createPost();
 
         await page.locator('.list-controls__toggle-columns').click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector
+        await page.waitForSelector('.column-selector'); // Waiting for column toggle UI
 
         const numberOfColumns = await page.locator(columnCountLocator).count();
         await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID');
@@ -306,13 +306,13 @@ describe('admin', () => {
 
         // Remove ID column
         await idButton.click();
-        await wait(100);
+        await wait(200);
         await expect(await page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1);
         await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('Number');
 
         // Add back ID column
         await idButton.click();
-        await wait(100);
+        await wait(200);
         await expect(await page.locator(columnCountLocator)).toHaveCount(numberOfColumns);
         await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID');
       });
