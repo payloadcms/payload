@@ -50,10 +50,22 @@ export const saveVersion = async ({
     if (autosave) {
       const query: FilterQuery<unknown> = {};
       if (collection) query.parent = id;
-      const latestVersion = await VersionModel.findOne(query, {}, { sort: { updatedAt: 'desc' } });
+      const { docs } = await payload.db.findVersions({
+        collection: entityConfig.slug,
+        limit: 1,
+        where: {
+          parent: {
+            equals: id,
+          },
+        },
+        sortOrder: 'desc',
+        sortProperty: 'updatedAt',
+      });
+      const [latestVersion] = docs;
+
 
       // overwrite the latest version if it's set to autosave
-      if (latestVersion?.autosave === true) {
+      if ((latestVersion as any)?.autosave === true) {
         createNewVersion = false;
 
         const data: Record<string, unknown> = {
@@ -64,7 +76,7 @@ export const saveVersion = async ({
 
         result = await VersionModel.findByIdAndUpdate(
           {
-            _id: latestVersion._id,
+            _id: latestVersion.id,
           },
           data,
           { new: true, lean: true },
