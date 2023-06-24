@@ -4,9 +4,24 @@ import { generateGraphQLSchema } from '../src/bin/generateGraphQLSchema';
 
 const [testConfigDir] = process.argv.slice(2);
 
-const testDir = path.resolve(__dirname, testConfigDir);
-setPaths(testDir);
-generateGraphQLSchema();
+let testDir;
+if (testConfigDir) {
+  testDir = path.resolve(__dirname, testConfigDir);
+  setPaths(testDir);
+  generateGraphQLSchema();
+} else {
+  // Generate types for entire directory
+  testDir = __dirname;
+
+  fs.readdirSync(__dirname, { withFileTypes: true })
+    .filter((f) => f.isDirectory())
+    .forEach((dir) => {
+      const suiteDir = path.resolve(testDir, dir.name);
+      const configFound = setPaths(suiteDir);
+      if (configFound) generateGraphQLSchema();
+    });
+}
+
 
 // Set config path and TS output path using test dir
 function setPaths(dir) {
