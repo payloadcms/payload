@@ -16,6 +16,8 @@ export async function create<T = unknown>(
   // custom id type reset
   result.id = result._id;
   result = JSON.parse(JSON.stringify(result));
-  result._verificationToken = verificationToken;
+  if (verificationToken) {
+    result._verificationToken = verificationToken;
+  }
   return result;
 }
