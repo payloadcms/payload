@@ -13,6 +13,7 @@ import { deleteOne } from './deleteOne';
 import { findVersions } from './findVersions';
 import { findGlobalVersions } from './findGlobalVersions';
 import type { Payload } from '../index';
+import { findGlobal } from './findGlobal';
 
 export interface Args {
   payload: Payload,
@@ -61,6 +62,7 @@ export function mongooseAdapter({ payload, url, connectOptions }: Args): Mongoos
     queryDrafts,
     find,
     findVersions,
+    findGlobal,
     findGlobalVersions,
     create,
     updateOne,

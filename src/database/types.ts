@@ -25,6 +25,7 @@ import type {
   UploadField,
 } from '../fields/config/types';
 import type { TypeWithID } from '../collections/config/types';
+import type { TypeWithID as GlobalsTypeWithID } from '../globals/config/types';
 import type { Payload } from '../payload';
 import type { Document, Where } from '../types';
 import type { TypeWithVersion } from '../versions/types';
@@ -117,7 +118,8 @@ export interface DatabaseAdapter {
   // operations
   find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>;
 
-  // TODO: ADD findGlobal method
+  findGlobal: FindGlobal;
+
   findVersions: <T = TypeWithID>(args: FindVersionArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
   findGlobalVersions: <T = TypeWithID>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
   findOne: FindOne;
@@ -178,6 +180,15 @@ export type FindGlobalVersionArgs = {
   locale?: string
 }
 
+export type FindGlobalArgs = {
+  slug: string
+  locale?: string
+  where: Where
+}
+
+type FindGlobal = <T extends GlobalsTypeWithID = any>(args: FindGlobalArgs) => Promise<T>
+
+
 export type FindOneArgs = {
   collection: string
   where: Where
@@ -186,6 +197,7 @@ export type FindOneArgs = {
     [key: string]: string,
   }
 }
+
 
 type FindOne = (args: FindOneArgs) => Promise<PaginatedDocs>
 
