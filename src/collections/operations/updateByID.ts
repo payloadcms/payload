@@ -99,7 +99,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   const findArgs: FindArgs = {
     collection: collectionConfig.slug,
     where: combineQueries({ id: { equals: id } }, accessResults),
-    locale: req.locale,
+    locale,
     limit: 1,
   };
 

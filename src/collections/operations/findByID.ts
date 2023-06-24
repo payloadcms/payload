@@ -49,6 +49,7 @@ async function findByID<T extends TypeWithID>(
     req,
     req: {
       t,
+      locale,
     },
     disableErrors,
     currentDepth,
@@ -70,7 +71,7 @@ async function findByID<T extends TypeWithID>(
   const findArgs: FindArgs = {
     collection: collectionConfig.slug,
     where: combineQueries({ id: { equals: id } }, accessResult),
-    locale: req.locale,
+    locale,
     limit: 1,
   };
 

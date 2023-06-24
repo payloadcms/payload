@@ -79,7 +79,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   const findArgs: FindArgs = {
     collection: collectionConfig.slug,
     where: combineQueries({ id: { equals: parentDocID } }, accessResults),
-    locale: req.locale,
+    locale,
     limit: 1,
   };
 
