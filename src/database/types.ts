@@ -211,7 +211,7 @@ type Create = (args: CreateArgs) => Promise<Document>
 export type UpdateOneArgs = {
   collection: string,
   data: Record<string, unknown>,
-  id: string,
+  id: string | number,
   locale?: string
 }
 
@@ -219,7 +219,7 @@ type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
 export type DeleteOneArgs = {
   collection: string,
-  id: string,
+  id: string | number,
 }
 
 type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
