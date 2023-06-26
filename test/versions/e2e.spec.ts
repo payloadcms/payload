@@ -116,16 +116,6 @@ describe('versions', () => {
 
     test('should retain localized data during autosave', async () => {
       const autosaveURL = new AdminUrlUtil(serverURL, autosaveSlug);
-      // .fill localized and non localized fields
-      // wait however long you need for it to autosave, using the wait utility
-      // click locale selector and change locale (harvest from localize test suite)
-      // fill localized and non localized fields again
-      // wait again for autosave
-      // click locale selector and change locale back to original
-      // .fill non localized field
-      // switch locales
-      // figure out how to force a page reload
-
       const locale = 'en';
       const spanishLocale = 'es';
       const title = 'english title';
@@ -151,11 +141,6 @@ describe('versions', () => {
       await page.reload();
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle);
       await expect(page.locator('#field-description')).toHaveValue(newDescription);
-
-      // await changeLocale(locale);
-      // await wait(500);
-      // await expect(page.locator('#field-title')).toHaveValue(title);
-      // await expect(page.locator('#field-description')).toHaveValue(description);
     });
   });
 
