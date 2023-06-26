@@ -129,7 +129,7 @@ export const getFields = ({
   }
 
   // If prefix is enabled, save it to db
-  if (prefix) {
+  if (prefix != undefined) {
     let existingPrefixFieldIndex = -1
 
     const existingPrefixField = fields.find((existingField, i) => {
