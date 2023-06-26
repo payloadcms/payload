@@ -64,7 +64,7 @@ export async function queryDrafts<T = unknown>(
       options: {
         limit,
       },
-      sort: sort.reduce((acc, cur) => {
+      sort: sort ? sort.reduce((acc, cur) => {
         let sanitizedSortProperty = cur.property;
         const sanitizedSortOrder = cur.order === 'asc' ? 1 : -1;
 
@@ -73,7 +73,7 @@ export async function queryDrafts<T = unknown>(
         }
         acc[sanitizedSortProperty] = sanitizedSortOrder;
         return acc;
-      }, {}),
+      }, {}) : undefined,
     };
 
     result = await VersionModel.aggregatePaginate(aggregate, aggregatePaginateOptions);

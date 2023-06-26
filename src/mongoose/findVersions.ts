@@ -26,10 +26,10 @@ export async function findVersions<T = unknown>(
 
   const paginationOptions = {
     page,
-    sort: sort.reduce((acc, cur) => {
+    sort: sort ? sort.reduce((acc, cur) => {
       acc[cur.property] = cur.order;
       return acc;
-    }, {}),
+    }, {}) : undefined,
     limit,
     lean: true,
     leanWithId: true,
