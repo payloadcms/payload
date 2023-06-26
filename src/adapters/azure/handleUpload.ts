@@ -15,8 +15,10 @@ interface Args {
 const multipartThreshold = 1024 * 1024 * 50 // 50MB
 export const getHandleUpload = ({ getStorageClient, prefix = '' }: Args): HandleUpload => {
   return async ({ data, file }) => {
+    const fileKey = path.posix.join(data.prefix || prefix, file.filename)
+    
     const blockBlobClient = getStorageClient().getBlockBlobClient(
-      path.posix.join(prefix, file.filename),
+      fileKey,
     )
 
     // when there are no temp files, or the upload is less than the threshold size, do not stream files
