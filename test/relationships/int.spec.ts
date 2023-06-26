@@ -7,7 +7,7 @@ import { RESTClient } from '../helpers/rest';
 import type { ChainedRelation, CustomIdNumberRelation, CustomIdRelation, Director, Post, Relation } from './payload-types';
 import { mapAsync } from '../../src/utilities/mapAsync';
 
-let client: RESTClient;
+let client;
 
 type EasierChained = { relation: EasierChained, id: string }
 
@@ -44,14 +44,14 @@ describe('Relationships', () => {
       const nameToQuery = 'name';
 
       beforeEach(async () => {
-        relation = await payload.create<Relation>({
+        relation = await payload.create({
           collection: relationSlug,
           data: {
             name: nameToQuery,
           },
         });
 
-        filteredRelation = await payload.create<Relation>({
+        filteredRelation = await payload.create({
           collection: relationSlug,
           data: {
             name: nameToQuery,
@@ -59,21 +59,21 @@ describe('Relationships', () => {
           },
         });
 
-        defaultAccessRelation = await payload.create<Relation>({
+        defaultAccessRelation = await payload.create({
           collection: defaultAccessRelSlug,
           data: {
             name: 'default access',
           },
         });
 
-        chained3 = await payload.create<ChainedRelation>({
+        chained3 = await payload.create({
           collection: chainedRelSlug,
           data: {
             name: 'chain3',
           },
         });
 
-        chained2 = await payload.create<ChainedRelation>({
+        chained2 = await payload.create({
           collection: chainedRelSlug,
           data: {
             name: 'chain2',
@@ -81,7 +81,7 @@ describe('Relationships', () => {
           },
         });
 
-        chained = await payload.create<ChainedRelation>({
+        chained = await payload.create({
           collection: chainedRelSlug,
           data: {
             name: 'chain1',
@@ -89,7 +89,7 @@ describe('Relationships', () => {
           },
         });
 
-        chained3 = await payload.update<ChainedRelation>({
+        chained3 = await payload.update({
           collection: chainedRelSlug,
           id: chained3.id,
           data: {
@@ -99,7 +99,7 @@ describe('Relationships', () => {
         });
 
         generatedCustomId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`;
-        customIdRelation = await payload.create<CustomIdRelation>({
+        customIdRelation = await payload.create({
           collection: customIdSlug,
           data: {
             id: generatedCustomId,
@@ -108,7 +108,7 @@ describe('Relationships', () => {
         });
 
         generatedCustomIdNumber = Math.floor(Math.random() * (1_000_000)) + 1;
-        customIdNumberRelation = await payload.create<CustomIdNumberRelation>({
+        customIdNumberRelation = await payload.create({
           collection: customIdNumberSlug,
           data: {
             id: generatedCustomIdNumber,
@@ -130,29 +130,29 @@ describe('Relationships', () => {
       });
 
       it('should prevent an unauthorized population of strict access', async () => {
-        const { doc } = await client.findByID<Post>({ id: post.id, auth: false });
+        const { doc } = await client.findByID({ id: post.id, auth: false });
         expect(doc.defaultAccessRelation).toEqual(defaultAccessRelation.id);
       });
 
       it('should populate strict access when authorized', async () => {
-        const { doc } = await client.findByID<Post>({ id: post.id });
+        const { doc } = await client.findByID({ id: post.id });
         expect(doc.defaultAccessRelation).toEqual(defaultAccessRelation);
       });
 
       it('should use filterOptions to limit relationship options', async () => {
-        const { doc } = await client.findByID<Post>({ id: post.id });
+        const { doc } = await client.findByID({ id: post.id });
 
         expect(doc.filteredRelation).toMatchObject({ id: filteredRelation.id });
 
-        await client.update<Relation>({ id: filteredRelation.id, slug: relationSlug, data: { disableRelation: true } });
+        await client.update({ id: filteredRelation.id, slug: relationSlug, data: { disableRelation: true } });
 
-        const { doc: docAfterUpdatingRel } = await client.findByID<Post>({ id: post.id });
+        const { doc: docAfterUpdatingRel } = await client.findByID({ id: post.id });
 
         // No change to existing relation
         expect(docAfterUpdatingRel.filteredRelation).toMatchObject({ id: filteredRelation.id });
 
         // Attempt to update post with a now filtered relation
-        const { status, errors } = await client.update<Post>({ id: post.id, data: { filteredRelation: filteredRelation.id } });
+        const { status, errors } = await client.update({ id: post.id, data: { filteredRelation: filteredRelation.id } });
 
         expect(errors?.[0]).toMatchObject({ name: 'ValidationError', message: expect.any(String), data: expect.anything() });
         expect(status).toEqual(400);
@@ -160,12 +160,12 @@ describe('Relationships', () => {
 
       describe('Custom ID', () => {
         it('should query a custom id relation', async () => {
-          const { doc } = await client.findByID<Post>({ id: post.id });
+          const { doc } = await client.findByID({ id: post.id });
           expect(doc?.customIdRelation).toMatchObject({ id: generatedCustomId });
         });
 
         it('should query a custom id number relation', async () => {
-          const { doc } = await client.findByID<Post>({ id: post.id });
+          const { doc } = await client.findByID({ id: post.id });
           expect(doc?.customIdNumberRelation).toMatchObject({ id: generatedCustomIdNumber });
         });
 
@@ -186,7 +186,7 @@ describe('Relationships', () => {
         });
 
         it('should allow update removing a relationship', async () => {
-          const result = await client.update<Post>({
+          const result = await client.update({
             slug,
             id: post.id,
             data: {
@@ -201,7 +201,7 @@ describe('Relationships', () => {
 
       describe('depth', () => {
         it('should populate to depth', async () => {
-          const { doc } = await client.findByID<Post>({ id: post.id, options: { depth: 2 } });
+          const { doc } = await client.findByID({ id: post.id, options: { depth: 2 } });
           const depth0 = doc?.chainedRelation as EasierChained;
           expect(depth0.id).toEqual(chained.id);
           expect(depth0.relation.id).toEqual(chained2.id);
@@ -210,12 +210,12 @@ describe('Relationships', () => {
         });
 
         it('should only populate ID if depth 0', async () => {
-          const { doc } = await client.findByID<Post>({ id: post.id, options: { depth: 0 } });
+          const { doc } = await client.findByID({ id: post.id, options: { depth: 0 } });
           expect(doc?.chainedRelation).toEqual(chained.id);
         });
 
         it('should respect maxDepth at field level', async () => {
-          const { doc } = await client.findByID<Post>({ id: post.id, options: { depth: 1 } });
+          const { doc } = await client.findByID({ id: post.id, options: { depth: 1 } });
           expect(doc?.maxDepthRelation).toEqual(relation.id);
           expect(doc?.maxDepthRelation).not.toHaveProperty('name');
           // should not affect other fields
@@ -343,6 +343,65 @@ describe('Relationships', () => {
         });
 
         expect(query.docs).toHaveLength(1);
+      });
+    });
+    describe('Multiple Docs', () => {
+      const movieList = [
+        'Pulp Fiction',
+        'Reservoir Dogs',
+        'Once Upon a Time in Hollywood',
+        'Shrek',
+        'Shrek 2',
+        'Shrek 3',
+        'Scream',
+        'The Matrix',
+        'The Matrix Reloaded',
+        'The Matrix Revolutions',
+        'The Matrix Resurrections',
+        'The Haunting',
+        'The Haunting of Hill House',
+        'The Haunting of Bly Manor',
+        'Insidious',
+      ];
+
+      beforeAll(async () => {
+        let movieDocs: any[] = [];
+        movieDocs = movieList.map(async (movie) => {
+          await payload.create({
+            collection: 'movies',
+            data: {
+              name: movie,
+            },
+          });
+        });
+      });
+
+      it('should return more than 10 docs in relationship', async () => {
+        const allMovies = await payload.find({
+          collection: 'movies',
+          limit: 20,
+        });
+
+        const movieIDs = allMovies.docs.map((doc) => doc.id);
+
+        await payload.create({
+          collection: 'directors',
+          data: {
+            name: 'Quentin Tarantino',
+            movies: movieIDs,
+          },
+        });
+
+        const director = await payload.find({
+          collection: 'directors',
+          where: {
+            name: {
+              equals: 'Quentin Tarantino',
+            },
+          },
+        });
+
+        expect(director.docs[0].movies).toHaveLength(15);
       });
     });
   });
