@@ -9,7 +9,7 @@ export const readMigrationFiles = async ({ payload }: { payload: Payload }): Pro
   const { config } = payload;
   const files = fs.readdirSync(config.db.migrationDir);
   return files.map((path) => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-dynamic-require
     return require(path);
   });
 };
