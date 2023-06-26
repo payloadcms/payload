@@ -129,7 +129,7 @@ const needsResize = (
  * Resize the image and provide the resize buffer. The image will be resized
  * according to the provided resize config. If no image sizes are requested,
  * the resolved data will be empty. For every image that dos not need to be
- * resized, an result object will `null` parameters will be returned.
+ * resized, an result object with `null` parameters will be returned.
  *
  * @param resizeConfig - the resize config
  * @returns the result of the resize operation(s)
