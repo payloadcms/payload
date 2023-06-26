@@ -63,7 +63,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam({
+  const sort = buildSortParam({
     sort: args.sort || '-updatedAt',
     fields: versionFields,
     timestamps: true,
@@ -75,8 +75,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     where: fullWhere,
     page: page || 1,
     limit: limit ?? 10,
-    sortProperty,
-    sortOrder,
+    sort,
     global: globalConfig.slug,
     locale,
   });

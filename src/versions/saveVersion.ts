@@ -58,8 +58,10 @@ export const saveVersion = async ({
             equals: id,
           },
         },
-        sortOrder: 'desc',
-        sortProperty: 'updatedAt',
+        sort: [{
+          property: 'updatedAt',
+          order: 'desc',
+        }],
       });
       const [latestVersion] = docs;
 

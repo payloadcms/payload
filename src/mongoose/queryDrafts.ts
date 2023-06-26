@@ -13,7 +13,7 @@ type AggregateVersion<T> = {
 
 export async function queryDrafts<T = unknown>(
   this: MongooseAdapter,
-  { collection, where, page, limit, sortProperty, sortOrder, locale, pagination }: QueryDraftsArgs,
+  { collection, where, page, limit, sort, locale, pagination }: QueryDraftsArgs,
 ): Promise<PaginatedDocs<T>> {
   const VersionModel = this.versions[collection];
 
@@ -51,12 +51,6 @@ export async function queryDrafts<T = unknown>(
       useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
     }
 
-    let sanitizedSortProperty = sortProperty;
-    const sanitizedSortOrder = sortOrder === 'asc' ? 1 : -1;
-
-    if (!['createdAt', 'updatedAt', '_id'].includes(sortProperty)) {
-      sanitizedSortProperty = `version.${sortProperty}`;
-    }
 
     const aggregatePaginateOptions = {
       page,
@@ -70,10 +64,16 @@ export async function queryDrafts<T = unknown>(
       options: {
         limit,
       },
+      sort: sort.reduce((acc, cur) => {
+        let sanitizedSortProperty = cur.property;
+        const sanitizedSortOrder = cur.order === 'asc' ? 1 : -1;
 
-      sort: {
-        [sanitizedSortProperty]: sanitizedSortOrder,
-      },
+        if (!['createdAt', 'updatedAt', '_id'].includes(cur.property)) {
+          sanitizedSortProperty = `version.${cur.property}`;
+        }
+        acc[sanitizedSortProperty] = sanitizedSortOrder;
+        return acc;
+      }, {}),
     };
 
     result = await VersionModel.aggregatePaginate(aggregate, aggregatePaginateOptions);
