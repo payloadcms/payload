@@ -366,14 +366,14 @@ describe('Relationships', () => {
 
       beforeAll(async () => {
         let movieDocs: any[] = [];
-        movieDocs = movieList.map(async (movie) => {
-          await payload.create({
+        movieDocs = await Promise.all(movieList.map((movie) => {
+          return payload.create({
             collection: 'movies',
             data: {
               name: movie,
             },
           });
-        });
+        }));
       });
 
       it('should return more than 10 docs in relationship', async () => {
