@@ -8,16 +8,12 @@ import executeAccess from '../../auth/executeAccess';
 import { APIError, ValidationError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { saveVersion } from '../../versions/saveVersion';
-import { uploadFiles } from '../../uploads/uploadFiles';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { generateFileData } from '../../uploads/generateFileData';
 import { AccessResult } from '../../config/types';
 import { queryDrafts } from '../../versions/drafts/queryDrafts';
-import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
-import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -60,15 +56,10 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     req,
     req: {
       t,
-      locale,
       payload,
-      payload: {
-        config,
-      },
     },
     overrideAccess,
     showHiddenFields,
-    overwriteExistingFiles = false,
     draft: draftArg = false,
   } = args;
 
@@ -76,7 +67,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     throw new APIError('Missing \'where\' query of documents to update.', httpStatus.BAD_REQUEST);
   }
 
-  let { data } = args;
+  const { data } = args;
   const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
 
   // /////////////////////////////////////
@@ -114,27 +105,10 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     docs = await Model.find(query, {}, { lean: true });
   }
 
-  // /////////////////////////////////////
-  // Generate data for all files and sizes
-  // /////////////////////////////////////
-
-  const {
-    data: newFileData,
-    files: filesToUpload,
-  } = await generateFileData({
-    config,
-    collection,
-    req,
-    data,
-    throwOnMissingFile: false,
-    overwriteExistingFiles,
-  });
-
-  data = newFileData;
-
   const errors = [];
 
   const promises = docs.map(async (doc) => {
+    let docData = data;
     let docWithLocales: Document = JSON.stringify(doc);
     docWithLocales = JSON.parse(docWithLocales);
 
@@ -150,14 +124,12 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         showHiddenFields: true,
       });
 
-      await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc: docWithLocales, t, overrideDelete: false });
-
       // /////////////////////////////////////
       // beforeValidate - Fields
       // /////////////////////////////////////
 
-      data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
-        data,
+      docData = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+        data: docData,
         doc: originalDoc,
         entityConfig: collectionConfig,
         id,
@@ -173,21 +145,13 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        data = (await hook({
-          data,
+        docData = (await hook({
+          data: docData,
           req,
           operation: 'update',
           originalDoc,
-        })) || data;
+        })) || docData;
       }, Promise.resolve());
-
-      // /////////////////////////////////////
-      // Write files to local storage
-      // /////////////////////////////////////
-
-      if (!collectionConfig.upload.disableLocalStorage) {
-        await uploadFiles(payload, filesToUpload, t);
-      }
 
       // /////////////////////////////////////
       // beforeChange - Collection
@@ -196,12 +160,12 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        data = (await hook({
-          data,
+        docData = (await hook({
+          data: docData,
           req,
           originalDoc,
           operation: 'update',
-        })) || data;
+        })) || docData;
       }, Promise.resolve());
 
       // /////////////////////////////////////
@@ -209,14 +173,14 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       // /////////////////////////////////////
 
       let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
-        data,
+        data: docData,
         doc: originalDoc,
         docWithLocales,
         entityConfig: collectionConfig,
         id,
         operation: 'update',
         req,
-        skipValidation: shouldSaveDraft || data._status === 'draft',
+        skipValidation: shouldSaveDraft || docData._status === 'draft',
       });
 
       // /////////////////////////////////////
@@ -294,7 +258,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       // /////////////////////////////////////
 
       result = await afterChange<GeneratedTypes['collections'][TSlug]>({
-        data,
+        data: docData,
         doc: result,
         previousDoc: originalDoc,
         entityConfig: collectionConfig,
@@ -316,12 +280,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           operation: 'update',
         }) || result;
       }, Promise.resolve());
-
-      await unlinkTempFiles({
-        req,
-        config,
-        collectionConfig,
-      });
 
       // /////////////////////////////////////
       // Return results
