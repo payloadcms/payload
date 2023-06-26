@@ -1,3 +1,4 @@
+import type { PaginateOptions } from 'mongoose';
 import type { MongooseAdapter } from '.';
 import { PaginatedDocs } from './types';
 import { FindArgs } from '../database/types';
@@ -6,7 +7,7 @@ import flattenWhereToOperators from '../database/flattenWhereToOperators';
 
 export async function find<T = unknown>(
   this: MongooseAdapter,
-  { collection, where, page, limit, sortProperty, sortOrder, locale, pagination }: FindArgs,
+  { collection, where, page, limit, sort, locale, pagination }: FindArgs,
 ): Promise<PaginatedDocs<T>> {
   const Model = this.collections[collection];
 
@@ -23,11 +24,12 @@ export async function find<T = unknown>(
     where,
   });
 
-  const paginationOptions = {
+  const paginationOptions: PaginateOptions = {
     page,
-    sort: {
-      [sortProperty]: sortOrder,
-    },
+    sort: sort ? sort.reduce((acc, cur) => {
+      acc[cur.property] = cur.order;
+      return acc;
+    }, {}) : undefined,
     limit,
     lean: true,
     leanWithId: true,

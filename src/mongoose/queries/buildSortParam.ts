@@ -1,7 +1,7 @@
 import { Config } from '../../config/types';
 import { getLocalizedSortProperty } from './getLocalizedSortProperty';
 import { Field } from '../../fields/config/types';
-import type { SortArgs } from '../../database/types';
+import type { SortArgs, SortOrder } from '../../database/types';
 
 type Args = {
   sort: string
@@ -11,9 +11,9 @@ type Args = {
   locale: string
 }
 
-export const buildSortParam = ({ sort, config, fields, timestamps, locale }: Args): [string, SortArgs] => {
+export const buildSortParam = ({ sort, config, fields, timestamps, locale }: Args): SortArgs => {
   let sortProperty: string;
-  let sortOrder: SortArgs = 'desc';
+  let sortOrder: SortOrder = 'desc';
 
   if (!sort) {
     if (timestamps) {
@@ -39,5 +39,5 @@ export const buildSortParam = ({ sort, config, fields, timestamps, locale }: Arg
     });
   }
 
-  return [sortProperty, sortOrder];
+  return [{ property: sortProperty, order: sortOrder }];
 };

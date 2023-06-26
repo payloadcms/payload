@@ -7,7 +7,7 @@ import type { TypeWithVersion } from '../versions/types';
 
 export async function findVersions<T = unknown>(
   this: MongooseAdapter,
-  { collection, where, page, limit, sortProperty, sortOrder, locale, pagination, skip }: FindVersionArgs,
+  { collection, where, page, limit, sort, locale, pagination, skip }: FindVersionArgs,
 ): Promise<PaginatedDocs<TypeWithVersion<T>>> {
   const Model = this.versions[collection];
 
@@ -26,9 +26,10 @@ export async function findVersions<T = unknown>(
 
   const paginationOptions = {
     page,
-    sort: {
-      [sortProperty]: sortOrder,
-    },
+    sort: sort ? sort.reduce((acc, cur) => {
+      acc[cur.property] = cur.order;
+      return acc;
+    }, {}) : undefined,
     limit,
     lean: true,
     leanWithId: true,

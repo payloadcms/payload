@@ -97,7 +97,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam({
+  const sort = buildSortParam({
     sort: args.sort ?? collectionConfig.defaultSort,
     config: payload.config,
     fields: collectionConfig.fields,
@@ -129,8 +129,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       where: fullWhere,
       page: sanitizedPage,
       limit: sanitizedLimit,
-      sortProperty,
-      sortOrder,
+      sort,
       pagination: usePagination,
       locale,
     });
@@ -147,8 +146,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       where: fullWhere,
       page: sanitizedPage,
       limit: sanitizedLimit,
-      sortProperty,
-      sortOrder,
+      sort,
       locale,
       pagination,
     });

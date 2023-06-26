@@ -135,8 +135,7 @@ export type QueryDraftsArgs = {
   page?: number
   limit?: number
   pagination?: boolean
-  sortProperty?: string
-  sortOrder?: SortArgs
+  sort?: SortArgs
   locale?: string
 }
 
@@ -149,8 +148,7 @@ export type FindArgs = {
   /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
   limit?: number
   pagination?: boolean
-  sortProperty?: string
-  sortOrder?: SortArgs
+  sort?: SortArgs
   locale?: string
 }
 
@@ -162,8 +160,7 @@ export type FindVersionArgs = {
   versions?: boolean
   limit?: number
   pagination?: boolean
-  sortProperty?: string
-  sortOrder?: SortArgs
+  sort?: SortArgs
   locale?: string
 }
 
@@ -175,8 +172,7 @@ export type FindGlobalVersionArgs = {
   versions?: boolean
   limit?: number
   pagination?: boolean
-  sortProperty?: string
-  sortOrder?: SortArgs
+  sort?: SortArgs
   locale?: string
 }
 
@@ -252,8 +248,7 @@ export type BuildSortParam = (args: {
   timestamps: boolean
   locale: string
 }) => {
-  sortProperty: string
-  sortOrder: SortArgs
+  sort?: SortArgs
 }
 
 export type PaginatedDocs<T = any> = {
@@ -328,4 +323,9 @@ export type FieldGenerator<TSchema, TField> = {
   options: BuildSchemaOptions,
 }
 
-export type SortArgs = 'asc' | 'desc';
+export type SortArgs = {
+  property: string
+  order: SortOrder
+}[]
+
+export type SortOrder = 'asc' | 'desc';
