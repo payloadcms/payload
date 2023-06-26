@@ -55,6 +55,11 @@ export interface DatabaseAdapter {
 
   // migrations
   /**
+   * Path to read and write migration files from
+   */
+  migrationDir: string
+
+  /**
    * Output a migration file
    */
   createMigration: () => Promise<void>;
@@ -229,6 +234,12 @@ type DeleteManyArgs = {
 }
 
 type DeleteMany = (args: DeleteManyArgs) => Promise<Document>
+
+export type Migration = {
+  name: string
+  up: ({ payload }: { payload }) => Promise<boolean>
+  down: ({ payload }: { payload }) => Promise<boolean>
+}
 
 export type BuildSchema<TSchema> = (args: {
   config: SanitizedConfig,
