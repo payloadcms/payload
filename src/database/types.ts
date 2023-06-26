@@ -25,8 +25,10 @@ import type {
   UploadField,
 } from '../fields/config/types';
 import type { TypeWithID } from '../collections/config/types';
+import type { TypeWithID as GlobalsTypeWithID } from '../globals/config/types';
 import type { Payload } from '../payload';
 import type { Document, Where } from '../types';
+import type { TypeWithVersion } from '../versions/types';
 
 export interface DatabaseAdapter {
   /**
@@ -116,12 +118,12 @@ export interface DatabaseAdapter {
   // operations
   find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>;
 
-  // TODO: ADD findGlobal method
-  findVersions: <T = TypeWithID>(args: FindVersionArgs) => Promise<PaginatedDocs<T>>;
-  findGlobalVersions: <T = TypeWithID>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<T>>;
+  findGlobal: FindGlobal;
+
+  findVersions: <T = TypeWithID>(args: FindVersionArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
+  findGlobalVersions: <T = TypeWithID>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
   findOne: FindOne;
   create: Create;
-  update: Update;
   updateOne: UpdateOne;
   deleteOne: DeleteOne;
   deleteMany: DeleteMany;
@@ -134,7 +136,7 @@ export type QueryDraftsArgs = {
   limit?: number
   pagination?: boolean
   sortProperty?: string
-  sortOrder?: string
+  sortOrder?: SortArgs
   locale?: string
 }
 
@@ -144,10 +146,11 @@ export type FindArgs = {
   page?: number
   skip?: number
   versions?: boolean
+  /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
   limit?: number
   pagination?: boolean
   sortProperty?: string
-  sortOrder?: string
+  sortOrder?: SortArgs
   locale?: string
 }
 
@@ -160,7 +163,7 @@ export type FindVersionArgs = {
   limit?: number
   pagination?: boolean
   sortProperty?: string
-  sortOrder?: string
+  sortOrder?: SortArgs
   locale?: string
 }
 
@@ -173,9 +176,18 @@ export type FindGlobalVersionArgs = {
   limit?: number
   pagination?: boolean
   sortProperty?: string
-  sortOrder?: string
+  sortOrder?: SortArgs
   locale?: string
 }
+
+export type FindGlobalArgs = {
+  slug: string
+  locale?: string
+  where: Where
+}
+
+type FindGlobal = <T extends GlobalsTypeWithID = any>(args: FindGlobalArgs) => Promise<T>
+
 
 export type FindOneArgs = {
   collection: string
@@ -186,6 +198,7 @@ export type FindOneArgs = {
   }
 }
 
+
 type FindOne = (args: FindOneArgs) => Promise<PaginatedDocs>
 
 export type CreateArgs = {
@@ -195,30 +208,18 @@ export type CreateArgs = {
 
 type Create = (args: CreateArgs) => Promise<Document>
 
-type UpdateArgs = {
-  collection: string
-  data: Record<string, unknown>
-  where: Where
-  draft?: boolean
-  locale?: string
-}
-
-type Update = (args: UpdateArgs) => Promise<Document>
-
-type UpdateOneArgs = {
+export type UpdateOneArgs = {
   collection: string,
   data: Record<string, unknown>,
-  where: Where,
-  draft?: boolean
+  id: string | number,
   locale?: string
 }
 
 type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
-type DeleteOneArgs = {
+export type DeleteOneArgs = {
   collection: string,
-  data: Record<string, unknown>,
-  where: Where,
+  id: string | number,
 }
 
 type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
@@ -252,7 +253,7 @@ export type BuildSortParam = (args: {
   locale: string
 }) => {
   sortProperty: string
-  sortOrder: string
+  sortOrder: SortArgs
 }
 
 export type PaginatedDocs<T = any> = {
@@ -326,3 +327,5 @@ export type FieldGenerator<TSchema, TField> = {
   config: SanitizedConfig,
   options: BuildSchemaOptions,
 }
+
+export type SortArgs = 'asc' | 'desc';

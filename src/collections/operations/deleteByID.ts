@@ -1,6 +1,5 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PayloadRequest } from '../../express/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { BeforeOperationHook, Collection } from '../config/types';
@@ -40,7 +39,6 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   const {
     depth,
     collection: {
-      Model,
       config: collectionConfig,
     },
     id,
@@ -80,34 +78,31 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   // Retrieve document
   // /////////////////////////////////////
 
-  const query = await Model.buildQuery({
-    payload,
-    locale: req.locale,
+  const { docs } = await req.payload.db.find({
+    collection: collectionConfig.slug,
     where: combineQueries({ id: { equals: id } }, accessResults),
+    locale: req.locale,
+    limit: 1,
   });
 
-  const docToDelete = await Model.findOne(query);
+  const [docToDelete] = docs;
 
   if (!docToDelete && !hasWhereAccess) throw new NotFound(t);
   if (!docToDelete && hasWhereAccess) throw new Forbidden(t);
 
-  const resultToDelete = docToDelete.toJSON({ virtuals: true });
 
-  await deleteAssociatedFiles({ config, collectionConfig, doc: resultToDelete, t, overrideDelete: true });
+  await deleteAssociatedFiles({ config, collectionConfig, doc: docToDelete, t, overrideDelete: true });
 
   // /////////////////////////////////////
   // Delete document
   // /////////////////////////////////////
 
-  const doc = await Model.findOneAndDelete({ _id: id });
 
-  let result: Document = doc.toJSON({ virtuals: true });
+  let result = await req.payload.db.deleteOne({
+    collection: collectionConfig.slug,
+    id,
+  });
 
-  // custom id type reset
-  result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
-  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // Delete Preferences

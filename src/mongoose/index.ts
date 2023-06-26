@@ -8,9 +8,12 @@ import { queryDrafts } from './queryDrafts';
 import { GlobalModel } from '../globals/config/types';
 import { find } from './find';
 import { create } from './create';
+import { updateOne } from './updateOne';
+import { deleteOne } from './deleteOne';
 import { findVersions } from './findVersions';
 import { findGlobalVersions } from './findGlobalVersions';
 import type { Payload } from '../index';
+import { findGlobal } from './findGlobal';
 
 export interface Args {
   payload: Payload,
@@ -59,7 +62,10 @@ export function mongooseAdapter({ payload, url, connectOptions }: Args): Mongoos
     queryDrafts,
     find,
     findVersions,
+    findGlobal,
     findGlobalVersions,
     create,
+    updateOne,
+    deleteOne,
   };
 }

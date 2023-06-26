@@ -32,11 +32,9 @@ async function verifyEmail(args: Args): Promise<boolean> {
   if (!user) throw new APIError('Verification token is invalid.', httpStatus.BAD_REQUEST);
   if (user && user._verified === true) throw new APIError('This account has already been activated.', httpStatus.ACCEPTED);
 
-  await req.payload.db.update({
+  await req.payload.db.updateOne({
     collection: collection.config.slug,
-    where: {
-      id: user.id,
-    },
+    id: user.id,
     data: {
       _verified: true,
       _verificationToken: undefined,

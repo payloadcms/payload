@@ -1,11 +1,9 @@
 import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
-import { Document } from '../../types';
 import { Collection } from '../config/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
-import { APIError, Forbidden, NotFound, ValidationError } from '../../errors';
+import { APIError, Forbidden, NotFound } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { saveVersion } from '../../versions/saveVersion';
@@ -20,6 +18,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
 import { combineQueries } from '../../database/combineQueries';
+import { FindArgs } from '../../database/types';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -57,7 +56,6 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     depth,
     collection,
     collection: {
-      Model,
       config: collectionConfig,
     },
     id,
@@ -85,7 +83,6 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   const { password } = data;
   const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
   const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft);
-  const lean = !shouldSavePassword;
 
   // /////////////////////////////////////
   // Access
@@ -98,26 +95,24 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // Retrieve document
   // /////////////////////////////////////
 
-  const query = await Model.buildQuery({
-    where: combineQueries({ id: { equals: id } }, accessResults),
-    payload,
-    locale,
-  });
 
-  const doc = await getLatestCollectionVersion({
+  const findArgs: FindArgs = {
+    collection: collectionConfig.slug,
+    where: combineQueries({ id: { equals: id } }, accessResults),
+    locale,
+    limit: 1,
+  };
+
+  const docWithLocales = await getLatestCollectionVersion({
     payload,
-    Model,
     config: collectionConfig,
     id,
-    query,
-    lean,
+    query: findArgs,
   });
 
-  if (!doc && !hasWherePolicy) throw new NotFound(t);
-  if (!doc && hasWherePolicy) throw new Forbidden(t);
+  if (!docWithLocales && !hasWherePolicy) throw new NotFound(t);
+  if (!docWithLocales && hasWherePolicy) throw new Forbidden(t);
 
-  let docWithLocales: Document = JSON.stringify(lean ? doc : doc.toJSON({ virtuals: true }));
-  docWithLocales = JSON.parse(docWithLocales);
 
   const originalDoc = await afterRead({
     depth: 0,
@@ -147,7 +142,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // Delete any associated files
   // /////////////////////////////////////
 
-  await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc, t, overrideDelete: false });
+  await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc: docWithLocales, t, overrideDelete: false });
 
   // /////////////////////////////////////
   // beforeValidate - Fields
@@ -235,23 +230,13 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // /////////////////////////////////////
 
   if (!shouldSaveDraft) {
-    try {
-      result = await Model.findByIdAndUpdate(
-        { _id: id },
-        dataToUpdate,
-        { new: true },
-      );
-    } catch (error) {
-      // Handle uniqueness error from MongoDB
-      throw error.code === 11000 && error.keyValue
-        ? new ValidationError([{ message: 'Value must be unique', field: Object.keys(error.keyValue)[0] }], t)
-        : error;
-    }
+    result = await req.payload.db.updateOne({
+      collection: collectionConfig.slug,
+      locale,
+      id,
+      data: dataToUpdate,
+    });
   }
-
-  result = JSON.parse(JSON.stringify(result));
-  result.id = result._id as string | number;
-  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // Create version

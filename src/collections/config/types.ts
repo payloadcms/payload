@@ -4,6 +4,7 @@ import { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateM
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
 import { Config as GeneratedTypes } from 'payload/generated-types';
+import { Where } from '../../types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
@@ -28,7 +29,7 @@ interface PassportLocalModel {
 }
 
 export interface CollectionModel extends Model<any>, PaginateModel<any>, AggregatePaginateModel<any>, PassportLocalModel {
-  buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>>
+  buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>> // TODO: Delete this
 }
 
 export interface AuthCollectionModel extends CollectionModel {
@@ -99,13 +100,13 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
 export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
-  query: { [key: string]: any };
+  query: Where;
 }) => any;
 
 export type AfterReadHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
-  query?: { [key: string]: any };
+  query?: Where;
   findMany?: boolean
 }) => any;
 

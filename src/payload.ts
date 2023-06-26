@@ -233,7 +233,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       registerGraphQLSchema(this);
     }
 
-    if (this.db.init) {
+    if (this.db?.init) {
       await this.db?.init({ config: this.config });
     }
 

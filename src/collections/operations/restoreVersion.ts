@@ -5,11 +5,11 @@ import { Collection, TypeWithID } from '../config/types';
 import { APIError, Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { hasWhereAccessResult } from '../../auth/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 import { combineQueries } from '../../database/combineQueries';
+import { FindArgs } from '../../database/types';
 
 export type Arguments = {
   collection: Collection
@@ -25,7 +25,6 @@ export type Arguments = {
 async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Promise<T> {
   const {
     collection: {
-      Model,
       config: collectionConfig,
     },
     id,
@@ -50,15 +49,19 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   const VersionModel = payload.versions[collectionConfig.slug];
 
-  let rawVersion = await VersionModel.findOne({
-    _id: id,
+
+  const { docs: versionDocs } = await req.payload.db.findVersions({
+    collection: collectionConfig.slug,
+    where: { id: { equals: id } },
+    locale,
+    limit: 1,
   });
+
+  const [rawVersion] = versionDocs;
 
   if (!rawVersion) {
     throw new NotFound(t);
   }
-
-  rawVersion = rawVersion.toJSON({ virtuals: true });
 
   const parentDocID = rawVersion.parent;
 
@@ -73,13 +76,16 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // Retrieve document
   // /////////////////////////////////////
 
-  const query = await Model.buildQuery({
+  const findArgs: FindArgs = {
+    collection: collectionConfig.slug,
     where: combineQueries({ id: { equals: parentDocID } }, accessResults),
-    payload,
     locale,
-  });
+    limit: 1,
+  };
 
-  const doc = await Model.findOne(query);
+  const { docs } = await req.payload.db.find(findArgs);
+
+  const [doc] = docs;
 
   if (!doc && !hasWherePolicy) throw new NotFound(t);
   if (!doc && hasWherePolicy) throw new Forbidden(t);
@@ -91,8 +97,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   const prevDocWithLocales = await getLatestCollectionVersion({
     payload,
     id: parentDocID,
-    query,
-    Model,
+    query: findArgs,
     config: collectionConfig,
   });
 
@@ -100,18 +105,12 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // Update
   // /////////////////////////////////////
 
-  let result = await Model.findByIdAndUpdate(
-    { _id: parentDocID },
-    rawVersion.version,
-    { new: true },
-  );
+  let result = await req.payload.db.updateOne({
+    collection: collectionConfig.slug,
+    id: parentDocID,
+    data: rawVersion.version,
 
-  result = result.toJSON({ virtuals: true });
-
-  // custom id type reset
-  result.id = result._id;
-  result = JSON.parse(JSON.stringify(result));
-  result = sanitizeInternalFields(result);
+  });
 
   // /////////////////////////////////////
   // Save `previousDoc` as a version after restoring
