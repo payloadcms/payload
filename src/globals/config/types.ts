@@ -49,7 +49,7 @@ export type AfterReadHook = (args: {
 }) => any;
 
 export interface GlobalModel extends Model<Document> {
-  buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
+  buildQuery: (query: unknown, locale?: string) => Promise<Record<string, unknown>>
 }
 
 export type GlobalAdminOptions = {
