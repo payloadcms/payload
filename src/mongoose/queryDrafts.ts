@@ -66,7 +66,7 @@ export async function queryDrafts<T = unknown>(
       },
       sort: sort ? sort.reduce((acc, cur) => {
         let sanitizedSortProperty = cur.property;
-        const sanitizedSortOrder = cur.order === 'asc' ? 1 : -1;
+        const sanitizedSortOrder = cur.direction === 'asc' ? 1 : -1;
 
         if (!['createdAt', 'updatedAt', '_id'].includes(cur.property)) {
           sanitizedSortProperty = `version.${cur.property}`;

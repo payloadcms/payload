@@ -39,7 +39,7 @@ export const enforceMaxVersions = async ({
         skip: max,
         sort: [{
           property: 'updatedAt',
-          order: 'desc',
+          direction: 'desc',
         }],
         pagination: false,
       });
@@ -52,7 +52,7 @@ export const enforceMaxVersions = async ({
         skip: max,
         sort: [{
           property: 'updatedAt',
-          order: 'desc',
+          direction: 'desc',
         }],
       });
 

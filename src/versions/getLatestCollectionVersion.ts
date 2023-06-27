@@ -25,7 +25,7 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
       where: { parent: { equals: id } },
       sort: [{
         property: 'updatedAt',
-        order: 'desc',
+        direction: 'desc',
       }],
     });
     [latestVersion] = docs;

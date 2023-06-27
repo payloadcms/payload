@@ -65,7 +65,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     limit: 1,
     sort: [{
       property: 'updatedAt',
-      order: 'desc',
+      direction: 'desc',
     }],
   };
 

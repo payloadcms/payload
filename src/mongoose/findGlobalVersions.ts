@@ -28,7 +28,7 @@ export async function findGlobalVersions<T = unknown>(
   const paginationOptions = {
     page,
     sort: sort ? sort.reduce((acc, cur) => {
-      acc[cur.property] = cur.order;
+      acc[cur.property] = cur.direction;
       return acc;
     }, {}) : undefined,
     limit,

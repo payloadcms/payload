@@ -322,7 +322,7 @@ export type FieldGenerator<TSchema, TField> = {
 
 export type SortArgs = {
   property: string
-  order: SortOrder
+  direction: SortDirection
 }[]
 
-export type SortOrder = 'asc' | 'desc';
+export type SortDirection = 'asc' | 'desc';
