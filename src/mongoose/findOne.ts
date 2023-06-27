@@ -1,12 +1,10 @@
 import type { MongooseAdapter } from '.';
-import type { FindOneArgs } from '../database/types';
-import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
+import type { FindOne } from '../database/types';
 import type { Document } from '../types';
+import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
-export async function findOne<T = unknown>(
-  this: MongooseAdapter,
-  { collection, where, locale }: FindOneArgs,
-): Promise<T> {
+export const findOne: FindOne = async function findOne(this: MongooseAdapter,
+  { collection, where, locale }) {
   const Model = this.collections[collection];
 
 
@@ -32,4 +30,4 @@ export async function findOne<T = unknown>(
   result = sanitizeInternalFields(result);
 
   return result;
-}
+};

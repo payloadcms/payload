@@ -18,7 +18,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
 import { combineQueries } from '../../database/combineQueries';
-import { FindArgs, FindOneArgs } from '../../database/types';
+import type { FindOneArgs } from '../../database/types';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection

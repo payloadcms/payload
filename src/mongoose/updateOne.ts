@@ -1,13 +1,11 @@
 import { t } from 'i18next';
 import type { MongooseAdapter } from '.';
-import type { UpdateOneArgs } from '../database/types';
+import type { UpdateOne } from '../database/types';
 import { ValidationError } from '../errors';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
-export async function updateOne<T = unknown>(
-  this: MongooseAdapter,
-  { collection, data, where, locale }: UpdateOneArgs,
-): Promise<T> {
+export const updateOne: UpdateOne = async function updateOne(this: MongooseAdapter,
+  { collection, data, where, locale }) {
   const Model = this.collections[collection];
 
   const query = await Model.buildQuery({
@@ -39,4 +37,4 @@ export async function updateOne<T = unknown>(
 
 
   return result;
-}
+};

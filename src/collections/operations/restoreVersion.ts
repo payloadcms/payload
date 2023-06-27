@@ -9,7 +9,7 @@ import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 import { combineQueries } from '../../database/combineQueries';
-import { FindOneArgs } from '../../database/types';
+import type { FindOneArgs } from '../../database/types';
 
 export type Arguments = {
   collection: Collection

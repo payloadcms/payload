@@ -1,6 +1,5 @@
 import type { MongooseAdapter } from '.';
-import { PaginatedDocs } from './types';
-import { QueryDraftsArgs } from '../database/types';
+import type { QueryDrafts } from '../database/types';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
@@ -11,10 +10,8 @@ type AggregateVersion<T> = {
   createdAt: string
 }
 
-export async function queryDrafts<T = unknown>(
-  this: MongooseAdapter,
-  { collection, where, page, limit, sort, locale, pagination }: QueryDraftsArgs,
-): Promise<PaginatedDocs<T>> {
+export const queryDrafts: QueryDrafts = async function queryDrafts<T>(this: MongooseAdapter,
+  { collection, where, page, limit, sort, locale, pagination }) {
   const VersionModel = this.versions[collection];
 
   const versionQuery = await VersionModel.buildQuery({
@@ -96,4 +93,4 @@ export async function queryDrafts<T = unknown>(
       return sanitizeInternalFields(sanitizedDoc);
     }),
   };
-}
+};

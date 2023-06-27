@@ -2,13 +2,11 @@
 import type { ConnectOptions } from 'mongoose';
 import mongoose from 'mongoose';
 
-import { SanitizedConfig } from 'payload/config';
 import type { MongooseAdapter } from '.';
+import type { Connect } from '../database/types';
 
-export async function connect(
-  this: MongooseAdapter,
-  { config }: { config: SanitizedConfig },
-): Promise<void> {
+export const connect: Connect = async function connect(this: MongooseAdapter,
+  { config }) {
   let urlToConnect = this.url;
   let successfulConnectionMessage = 'Connected to MongoDB server successfully!';
 
@@ -61,4 +59,4 @@ export async function connect(
   this.mongoMemoryServer = mongoMemoryServer;
 
   return mongoMemoryServer;
-}
+};

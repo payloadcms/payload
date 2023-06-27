@@ -1,14 +1,12 @@
 import type { PaginateOptions } from 'mongoose';
 import type { MongooseAdapter } from '.';
-import { PaginatedDocs } from './types';
-import { FindArgs } from '../database/types';
+import type { Find } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
 
-export async function find<T = unknown>(
-  this: MongooseAdapter,
-  { collection, where, page, limit, sort, locale, pagination }: FindArgs,
-): Promise<PaginatedDocs<T>> {
+
+export const find: Find = async function find(this: MongooseAdapter,
+  { collection, where, page, limit, sort, locale, pagination }) {
   const Model = this.collections[collection];
 
   let useEstimatedCount = false;
@@ -51,4 +49,4 @@ export async function find<T = unknown>(
       return sanitizeInternalFields(sanitizedDoc);
     }),
   };
-}
+};

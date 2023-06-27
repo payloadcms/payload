@@ -1,14 +1,10 @@
 import type { MongooseAdapter } from '.';
-import { PaginatedDocs } from './types';
-import { FindVersionArgs } from '../database/types';
+import type { FindVersions } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
-import type { TypeWithVersion } from '../versions/types';
 
-export async function findVersions<T = unknown>(
-  this: MongooseAdapter,
-  { collection, where, page, limit, sort, locale, pagination, skip }: FindVersionArgs,
-): Promise<PaginatedDocs<TypeWithVersion<T>>> {
+export const findVersions: FindVersions = async function findVersions(this: MongooseAdapter,
+  { collection, where, page, limit, sort, locale, pagination, skip }) {
   const Model = this.versions[collection];
 
   let useEstimatedCount = false;
@@ -53,4 +49,4 @@ export async function findVersions<T = unknown>(
       return sanitizeInternalFields(sanitizedDoc);
     }),
   };
-}
+};

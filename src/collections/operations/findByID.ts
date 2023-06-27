@@ -8,7 +8,7 @@ import executeAccess from '../../auth/executeAccess';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { combineQueries } from '../../database/combineQueries';
-import { FindArgs, FindOneArgs } from '../../database/types';
+import type { FindArgs, FindOneArgs } from '../../database/types';
 
 export type Arguments = {
   collection: Collection

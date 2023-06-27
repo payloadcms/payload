@@ -1,12 +1,10 @@
 import type { MongooseAdapter } from '.';
-import type { DeleteOneArgs } from '../database/types';
+import type { DeleteOne } from '../database/types';
+import type { Document } from '../types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
-import { Document } from '../types';
 
-export async function deleteOne<T = unknown>(
-  this: MongooseAdapter,
-  { collection, where }: DeleteOneArgs,
-): Promise<T> {
+export const deleteOne: DeleteOne = async function deleteOne(this: MongooseAdapter,
+  { collection, where }) {
   const Model = this.collections[collection];
 
   const query = await Model.buildQuery({
@@ -27,4 +25,4 @@ export async function deleteOne<T = unknown>(
 
 
   return result;
-}
+};

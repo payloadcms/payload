@@ -5,7 +5,7 @@ import { UploadedFile } from 'express-fileupload';
 import { Payload } from '../payload';
 import { Collection, TypeWithID } from '../collections/config/types';
 import { User } from '../auth/types';
-import { FindOneArgs } from '../database/types';
+import type { FindOneArgs } from '../database/types';
 
 /** Express request with some Payload related context added */
 export declare type PayloadRequest<U = any> = Request & {

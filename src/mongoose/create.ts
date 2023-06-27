@@ -1,11 +1,9 @@
 import type { MongooseAdapter } from '.';
-import { CreateArgs } from '../database/types';
+import type { Create } from '../database/types';
 import { Document } from '../types';
 
-export async function create<T = unknown>(
-  this: MongooseAdapter,
-  { collection, data }: CreateArgs,
-): Promise<T> {
+export const create: Create = async function create(this: MongooseAdapter,
+  { collection, data }) {
   const Model = this.collections[collection];
 
   const doc = await Model.create(data);
@@ -20,4 +18,4 @@ export async function create<T = unknown>(
     result._verificationToken = verificationToken;
   }
   return result;
-}
+};

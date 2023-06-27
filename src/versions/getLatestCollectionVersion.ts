@@ -2,7 +2,7 @@ import { docHasTimestamps } from '../types';
 import { Payload } from '../payload';
 import { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
 import { TypeWithVersion } from './types';
-import { FindOneArgs } from '../database/types';
+import type { FindOneArgs } from '../database/types';
 
 type Args = {
   payload: Payload

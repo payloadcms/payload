@@ -1,12 +1,9 @@
 import type { MongooseAdapter } from '.';
-import { FindGlobalArgs } from '../database/types';
+import type { FindGlobal } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
-import { TypeWithID } from '../globals/config/types';
 
-export async function findGlobal<T extends TypeWithID = any>(
-  this: MongooseAdapter,
-  { slug, locale, where }: FindGlobalArgs,
-): Promise<T> {
+export const findGlobal: FindGlobal = async function findGlobal(this: MongooseAdapter,
+  { slug, locale, where }) {
   const Model = this.globals;
 
   const query = await Model.buildQuery({
@@ -30,4 +27,4 @@ export async function findGlobal<T extends TypeWithID = any>(
 
 
   return doc;
-}
+};
