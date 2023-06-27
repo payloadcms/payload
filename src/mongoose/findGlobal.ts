@@ -1,4 +1,5 @@
 import type { MongooseAdapter } from '.';
+import { combineQueries } from '../database/combineQueries';
 import type { FindGlobal } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
@@ -7,7 +8,7 @@ export const findGlobal: FindGlobal = async function findGlobal(this: MongooseAd
   const Model = this.globals;
 
   const query = await Model.buildQuery({
-    where,
+    where: combineQueries({ globalType: { equals: slug } }, where),
     payload: this.payload,
     locale,
     globalSlug: slug,

@@ -1,10 +1,10 @@
+import type { Where } from '../../types';
 import executeAccess from '../../auth/executeAccess';
 import { AccessResult } from '../../config/types';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { SanitizedGlobalConfig } from '../config/types';
 import { PayloadRequest } from '../../express/types';
-import { combineQueries } from '../../database/combineQueries';
 
 type Args = {
   globalConfig: SanitizedGlobalConfig
@@ -48,7 +48,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
   let doc = await req.payload.db.findGlobal({
     slug,
     locale,
-    where: overrideAccess ? { globalType: { equals: slug } } : combineQueries({ globalType: { equals: slug } }, accessResult),
+    where: overrideAccess ? undefined : accessResult as Where,
   });
 
   // /////////////////////////////////////
