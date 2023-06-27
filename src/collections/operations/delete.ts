@@ -133,7 +133,14 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
       // Delete document
       // /////////////////////////////////////
 
-      await Model.deleteOne({ _id: id }, { lean: true });
+      await payload.db.deleteOne({
+        collection: collectionConfig.slug,
+        where: {
+          id: {
+            equals: id,
+          },
+        },
+      });
 
       // /////////////////////////////////////
       // Delete versions
