@@ -4,7 +4,7 @@ import { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateM
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Where } from '../../types';
+import type { Where } from '../../types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';

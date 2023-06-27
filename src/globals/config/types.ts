@@ -2,6 +2,7 @@ import React from 'react';
 import { Document, Model } from 'mongoose';
 import { DeepRequired } from 'ts-essentials';
 import { GraphQLNonNull, GraphQLObjectType } from 'graphql';
+import type { Where } from '../../types';
 import { User } from '../../auth/types';
 import { PayloadRequest } from '../../express/types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
@@ -44,7 +45,7 @@ export type BeforeReadHook = (args: {
 export type AfterReadHook = (args: {
   doc: any
   req: PayloadRequest
-  query?: { [key: string]: any }
+  query?: Where
   findMany?: boolean
 }) => any;
 
