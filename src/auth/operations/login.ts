@@ -77,8 +77,6 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
   const email = unsanitizedEmail ? (unsanitizedEmail as string).toLowerCase().trim() : null;
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore Improper typing in library, additional args should be optional
   let user = await payload.db.findOne<any>({
     collection: collectionConfig.slug,
     where: { email: { equals: email.toLowerCase() } },
