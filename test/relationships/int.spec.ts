@@ -401,7 +401,7 @@ describe('Relationships', () => {
           },
         });
 
-        expect(director.docs[0].movies).toBeGreaterThan(10);
+        expect(director.docs[0].movies.length).toBeGreaterThan(10);
       });
     });
   });
