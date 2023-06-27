@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-search",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "homepage:": "https://payloadcms.com",
   "repository": "git@github.com:payloadcms/plugin-search.git",
   "description": "Search plugin for Payload",
