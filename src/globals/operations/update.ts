@@ -34,11 +34,6 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     req: {
       payload,
       locale,
-      payload: {
-        globals: {
-          Model,
-        },
-      },
     },
     depth,
     overrideAccess,
@@ -154,19 +149,17 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 
   if (!shouldSaveDraft) {
     if (globalExists) {
-      result = await Model.findOneAndUpdate(
-        { globalType: slug },
-        result,
-        { new: true },
-      );
+      result = await payload.db.updateGlobal({
+        slug,
+        data: result,
+      });
     } else {
-      result.globalType = slug;
-      result = await Model.create(result);
+      result = await payload.db.createGlobal({
+        slug,
+        data: result,
+      });
     }
   }
-
-  result = JSON.parse(JSON.stringify(result));
-  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // Create version

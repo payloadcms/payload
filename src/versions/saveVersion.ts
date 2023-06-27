@@ -1,4 +1,3 @@
-import { FilterQuery } from 'mongoose';
 import { Payload } from '../payload';
 import { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
@@ -45,8 +44,6 @@ export const saveVersion = async ({
     const now = new Date().toISOString();
 
     if (autosave) {
-      const query: FilterQuery<unknown> = {};
-      if (collection) query.parent = id;
       const { docs } = await payload.db.findVersions({
         collection: entityConfig.slug,
         limit: 1,
