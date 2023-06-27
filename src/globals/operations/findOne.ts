@@ -50,6 +50,9 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     locale,
     where: overrideAccess ? undefined : accessResult as Where,
   });
+  if (!doc) {
+    doc = {};
+  }
 
   // /////////////////////////////////////
   // Replace document with draft if available

@@ -17,8 +17,8 @@ export const findGlobal: FindGlobal = async function findGlobal(this: MongooseAd
   let doc = await Model.findOne(query).lean() as any;
 
   if (!doc) {
-    doc = {};
-  } else if (doc._id) {
+    return null;
+  } if (doc._id) {
     doc.id = doc._id;
     delete doc._id;
   }
