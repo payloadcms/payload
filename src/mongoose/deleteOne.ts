@@ -5,11 +5,17 @@ import { Document } from '../types';
 
 export async function deleteOne<T = unknown>(
   this: MongooseAdapter,
-  { collection, id }: DeleteOneArgs,
+  { collection, where }: DeleteOneArgs,
 ): Promise<T> {
   const Model = this.collections[collection];
 
-  const doc = await Model.findOneAndDelete({ _id: id });
+  const query = await Model.buildQuery({
+    payload: this.payload,
+    where,
+  });
+
+
+  const doc = await Model.findOneAndDelete(query);
 
   let result: Document = doc.toJSON({ virtuals: true });
 

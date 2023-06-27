@@ -117,12 +117,12 @@ export interface DatabaseAdapter {
 
   // operations
   find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>;
+  findOne: FindOne;
 
   findGlobal: FindGlobal;
 
   findVersions: <T = TypeWithID>(args: FindVersionArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
   findGlobalVersions: <T = TypeWithID>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
-  findOne: FindOne;
   create: Create;
   updateOne: UpdateOne;
   deleteOne: DeleteOne;
@@ -207,7 +207,7 @@ type Create = (args: CreateArgs) => Promise<Document>
 export type UpdateOneArgs = {
   collection: string,
   data: Record<string, unknown>,
-  id: string | number,
+  where: Where,
   locale?: string
 }
 
@@ -215,7 +215,7 @@ type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
 export type DeleteOneArgs = {
   collection: string,
-  id: string | number,
+  where: Where,
 }
 
 type DeleteOne = (args: DeleteOneArgs) => Promise<Document>

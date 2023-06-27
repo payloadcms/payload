@@ -6,14 +6,20 @@ import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
 export async function updateOne<T = unknown>(
   this: MongooseAdapter,
-  { collection, data, id, locale }: UpdateOneArgs,
+  { collection, data, where, locale }: UpdateOneArgs,
 ): Promise<T> {
   const Model = this.collections[collection];
 
+  const query = await Model.buildQuery({
+    payload: this.payload,
+    locale,
+    where,
+  });
+
   let result;
   try {
-    result = await Model.findByIdAndUpdate(
-      { _id: id, locale },
+    result = await Model.findOneAndUpdate(
+      query,
       data,
       { new: true },
     );

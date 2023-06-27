@@ -107,7 +107,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   let result = await req.payload.db.updateOne({
     collection: collectionConfig.slug,
-    id: parentDocID,
+    where: { id: { equals: parentDocID } },
     data: rawVersion.version,
 
   });

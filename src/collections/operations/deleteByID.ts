@@ -100,7 +100,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
 
   let result = await req.payload.db.deleteOne({
     collection: collectionConfig.slug,
-    id,
+    where: { id: { equals: id } },
   });
 
 
