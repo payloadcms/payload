@@ -1,6 +1,5 @@
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { NotFound } from '../../errors';
@@ -25,11 +24,6 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     req: {
       t,
       payload,
-      payload: {
-        globals: {
-          Model,
-        },
-      },
     },
     overrideAccess,
     showHiddenFields,
@@ -80,23 +74,16 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
   let result = rawVersion.version;
 
   if (global) {
-    result = await Model.findOneAndUpdate(
-      { globalType: globalConfig.slug },
-      result,
-      { new: true },
-    );
+    result = await payload.db.updateGlobal({
+      slug: globalConfig.slug,
+      data: result,
+    });
   } else {
-    result.globalType = globalConfig.slug;
-    result = await Model.create(result);
+    result = await payload.db.createGlobal({
+      slug: globalConfig.slug,
+      data: result,
+    });
   }
-
-  result = result.toJSON({ virtuals: true });
-
-  // custom id type reset
-  result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
-  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // afterRead - Fields

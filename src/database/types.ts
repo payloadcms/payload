@@ -114,14 +114,19 @@ export interface DatabaseAdapter {
 
   queryDrafts: QueryDrafts;
 
-  // operations
+  // operations - collections
   find: Find;
   findOne: FindOne;
 
-  findGlobal: FindGlobal;
   create: Create;
   updateOne: UpdateOne;
   deleteOne: DeleteOne;
+
+  // operations - globals
+  findGlobal: FindGlobal;
+  createGlobal: CreateGlobal;
+  updateGlobal: UpdateGlobal;
+
 
   // versions
   findVersions: FindVersions;
@@ -207,6 +212,21 @@ export type FindGlobalArgs = {
 }
 
 export type FindGlobal = <T extends GlobalsTypeWithID = any>(args: FindGlobalArgs) => Promise<T>
+
+
+export type CreateGlobalArgs<T extends GlobalsTypeWithID = any> = {
+  slug: string
+  data: T
+}
+export type CreateGlobal = <T extends GlobalsTypeWithID = any>(args: CreateGlobalArgs<T>) => Promise<T>
+
+
+export type UpdateGlobalArgs<T extends GlobalsTypeWithID = any> = {
+  slug: string
+  data: T
+}
+export type UpdateGlobal = <T extends GlobalsTypeWithID = any>(args: UpdateGlobalArgs<T>) => Promise<T>
+
 
 export type FindGlobalVersions = <T = TypeWithID>(args: FindGlobalVersionsArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
 
