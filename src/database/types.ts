@@ -55,39 +55,44 @@ export interface DatabaseAdapter {
 
   // migrations
   /**
+   * Path to read and write migration files from
+   */
+  migrationDir: string;
+
+  /**
    * Output a migration file
    */
-  createMigration: () => Promise<void>;
+  createMigration: (adapter: DatabaseAdapter) => Promise<void>;
 
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
-  migrate: () => Promise<void>;
+  migrate: (adapter: DatabaseAdapter) => Promise<void>;
 
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
-  migrateStatus: () => Promise<void>;
+  migrateStatus: (adapter: DatabaseAdapter) => Promise<void>;
 
   /**
    * Run any migration down functions that have been performed
    */
-  migrateDown: () => Promise<void>;
+  migrateDown: (adapter: DatabaseAdapter) => Promise<void>;
 
   /**
    * Run all migration down functions before running up
    */
-  migrateRefresh: () => Promise<void>;
+  migrateRefresh: (adapter: DatabaseAdapter) => Promise<void>;
 
   /**
    * Run all migrate down functions
    */
-  migrateReset: () => Promise<void>;
+  migrateReset: (adapter: DatabaseAdapter) => Promise<void>;
 
   /**
    * Drop the current database and run all migrate up functions
    */
-  migrateFresh: () => Promise<void>;
+  migrateFresh: (adapter: DatabaseAdapter) => Promise<void>;
 
   // transactions
   /**
@@ -115,8 +120,6 @@ export interface DatabaseAdapter {
 
   // operations
   find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>;
-
-  // TODO: ADD findGlobal method
   findVersions: <T = TypeWithID>(args: FindVersionArgs) => Promise<PaginatedDocs<T>>;
   findGlobalVersions: <T = TypeWithID>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<T>>;
   findOne: FindOne;
@@ -182,15 +185,17 @@ export type FindOneArgs = {
   where: Where
   locale?: string
   sort?: {
-    [key: string]: string,
+    [key: string]: string
   }
 }
 
 type FindOne = (args: FindOneArgs) => Promise<PaginatedDocs>
 
-export type CreateArgs = {
+type CreateArgs = {
   collection: string
   data: Record<string, unknown>
+  draft?: boolean
+  locale?: string
 }
 
 type Create = (args: CreateArgs) => Promise<Document>
@@ -206,9 +211,9 @@ type UpdateArgs = {
 type Update = (args: UpdateArgs) => Promise<Document>
 
 type UpdateOneArgs = {
-  collection: string,
-  data: Record<string, unknown>,
-  where: Where,
+  collection: string
+  data: Record<string, unknown>
+  where: Where
   draft?: boolean
   locale?: string
 }
@@ -216,19 +221,25 @@ type UpdateOneArgs = {
 type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
 type DeleteOneArgs = {
-  collection: string,
-  data: Record<string, unknown>,
-  where: Where,
+  collection: string
+  data: Record<string, unknown>
+  where: Where
 }
 
 type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
 
 type DeleteManyArgs = {
-  collection: string,
-  where: Where,
+  collection: string
+  where: Where
 }
 
 type DeleteMany = (args: DeleteManyArgs) => Promise<Document>
+
+export type Migration = {
+  name: string
+  up: ({ payload }: { payload }) => Promise<boolean>
+  down: ({ payload }: { payload }) => Promise<boolean>
+};
 
 export type BuildSchema<TSchema> = (args: {
   config: SanitizedConfig,
