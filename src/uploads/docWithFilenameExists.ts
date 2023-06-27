@@ -1,7 +1,14 @@
-import { CollectionModel } from '../collections/config/types';
+import { Payload } from '..';
 
-const docWithFilenameExists = async (Model: CollectionModel, path: string, filename: string): Promise<boolean> => {
-  const doc = await Model.findOne({ filename });
+const docWithFilenameExists = async (payload: Payload, collectionSlug: string, path: string, filename: string): Promise<boolean> => {
+  const doc = await payload.db.findOne({
+    collection: collectionSlug,
+    where: {
+      filename: {
+        equals: filename,
+      },
+    },
+  });
   if (doc) return true;
 
   return false;
