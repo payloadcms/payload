@@ -203,7 +203,7 @@ export type FindGlobalVersionsArgs = {
 export type FindGlobalArgs = {
   slug: string
   locale?: string
-  where: Where
+  where?: Where
 }
 
 export type FindGlobal = <T extends GlobalsTypeWithID = any>(args: FindGlobalArgs) => Promise<T>

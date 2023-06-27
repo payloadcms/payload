@@ -73,7 +73,9 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
   // Update global
   // /////////////////////////////////////
 
-  const global = await Model.findOne({ globalType: globalConfig.slug });
+  const global = await payload.db.findGlobal({
+    slug: globalConfig.slug,
+  });
 
   let result = rawVersion.version;
 
