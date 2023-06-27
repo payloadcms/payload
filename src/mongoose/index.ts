@@ -14,6 +14,7 @@ import { findVersions } from './findVersions';
 import { findGlobalVersions } from './findGlobalVersions';
 import type { Payload } from '../index';
 import { findGlobal } from './findGlobal';
+import { findOne } from './findOne';
 
 export interface Args {
   payload: Payload,
@@ -60,6 +61,7 @@ export function mongooseAdapter({ payload, url, connectOptions }: Args): Mongoos
     rollbackTransaction: async () => true,
     commitTransaction: async () => true,
     queryDrafts,
+    findOne,
     find,
     findVersions,
     findGlobal,

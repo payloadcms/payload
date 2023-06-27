@@ -8,7 +8,7 @@ import executeAccess from '../../auth/executeAccess';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { combineQueries } from '../../database/combineQueries';
-import { FindArgs } from '../../database/types';
+import { FindArgs, FindOneArgs } from '../../database/types';
 
 export type Arguments = {
   collection: Collection
@@ -84,7 +84,7 @@ async function findByID<T extends TypeWithID>(
   if (!req.findByID) req.findByID = {};
 
   if (!req.findByID[collectionConfig.slug]) {
-    const nonMemoizedFindByID = async (query: FindArgs) => (await req.payload.db.find(query)).docs[0];
+    const nonMemoizedFindByID = async (query: FindOneArgs) => req.payload.db.findOne(query);
 
     req.findByID[collectionConfig.slug] = memoize(nonMemoizedFindByID, {
       isPromise: true,

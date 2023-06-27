@@ -79,13 +79,10 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore Improper typing in library, additional args should be optional
-  const { docs } = await payload.db.find<any>({
+  let user = await payload.db.findOne<any>({
     collection: collectionConfig.slug,
     where: { email: { equals: email.toLowerCase() } },
-    limit: 1,
   });
-
-  let [user] = docs;
 
   if (!user || (args.collection.config.auth.verify && user._verified === false)) {
     throw new AuthenticationError(req.t);

@@ -9,7 +9,7 @@ import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 import { combineQueries } from '../../database/combineQueries';
-import { FindArgs } from '../../database/types';
+import { FindOneArgs } from '../../database/types';
 
 export type Arguments = {
   collection: Collection
@@ -76,16 +76,14 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // Retrieve document
   // /////////////////////////////////////
 
-  const findArgs: FindArgs = {
+  const findOneArgs: FindOneArgs = {
     collection: collectionConfig.slug,
     where: combineQueries({ id: { equals: parentDocID } }, accessResults),
     locale,
-    limit: 1,
   };
 
-  const { docs } = await req.payload.db.find(findArgs);
+  const doc = await req.payload.db.findOne(findOneArgs);
 
-  const [doc] = docs;
 
   if (!doc && !hasWherePolicy) throw new NotFound(t);
   if (!doc && hasWherePolicy) throw new Forbidden(t);
@@ -97,7 +95,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   const prevDocWithLocales = await getLatestCollectionVersion({
     payload,
     id: parentDocID,
-    query: findArgs,
+    query: findOneArgs,
     config: collectionConfig,
   });
 

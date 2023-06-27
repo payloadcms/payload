@@ -68,13 +68,11 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     resetPasswordExpiration?: Date,
   }
 
-  const { docs } = await payload.db.find<UserDoc>({
+  let user = await payload.db.findOne<UserDoc>({
     collection: collectionConfig.slug,
     where: { email: { equals: (data.email as string).toLowerCase() } },
-    limit: 1,
   });
 
-  let [user] = docs;
 
   if (!user) return null;
 

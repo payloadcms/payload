@@ -139,6 +139,15 @@ export type QueryDraftsArgs = {
   locale?: string
 }
 
+export type FindOneArgs = {
+  collection: string
+  where?: Where
+  locale?: string
+}
+
+
+type FindOne = <T = TypeWithID>(args: FindOneArgs) => Promise<T|null>
+
 export type FindArgs = {
   collection: string
   where?: Where
@@ -184,18 +193,6 @@ export type FindGlobalArgs = {
 
 type FindGlobal = <T extends GlobalsTypeWithID = any>(args: FindGlobalArgs) => Promise<T>
 
-
-export type FindOneArgs = {
-  collection: string
-  where: Where
-  locale?: string
-  sort?: {
-    [key: string]: string,
-  }
-}
-
-
-type FindOne = (args: FindOneArgs) => Promise<PaginatedDocs>
 
 export type CreateArgs = {
   collection: string
