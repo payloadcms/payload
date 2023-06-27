@@ -51,6 +51,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     global: globalConfig.slug,
     where: combineQueries({ id: { equals: id } }, accessResults),
     locale,
+    limit: 1,
   };
 
   // /////////////////////////////////////

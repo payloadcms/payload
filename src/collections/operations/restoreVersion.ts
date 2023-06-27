@@ -47,9 +47,6 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
   // Retrieve original raw version
   // /////////////////////////////////////
 
-  const VersionModel = payload.versions[collectionConfig.slug];
-
-
   const { docs: versionDocs } = await req.payload.db.findVersions({
     collection: collectionConfig.slug,
     where: { id: { equals: id } },
@@ -118,9 +115,10 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   delete prevVersion.id;
 
-  await VersionModel.create({
+  await payload.db.createVersion({
+    collectionSlug: collectionConfig.slug,
     parent: parentDocID,
-    version: rawVersion.version,
+    versionData: rawVersion.version,
     autosave: false,
     createdAt: prevVersion.createdAt,
     updatedAt: new Date().toISOString(),

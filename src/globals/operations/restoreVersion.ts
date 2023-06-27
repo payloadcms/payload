@@ -47,17 +47,18 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
   // Retrieve original raw version
   // /////////////////////////////////////
 
-  const VersionModel = payload.versions[globalConfig.slug];
-
-  let rawVersion = await VersionModel.findOne({
-    _id: id,
+  const { docs: versionDocs } = await payload.db.findGlobalVersions<any>({
+    global: globalConfig.slug,
+    where: { id: { equals: id } },
+    limit: 1,
   });
 
-  if (!rawVersion) {
+
+  if (!versionDocs || versionDocs.length === 0) {
     throw new NotFound(t);
   }
 
-  rawVersion = rawVersion.toJSON({ virtuals: true });
+  const rawVersion = versionDocs[0];
 
   // /////////////////////////////////////
   // fetch previousDoc

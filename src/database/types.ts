@@ -126,6 +126,7 @@ export interface DatabaseAdapter {
   // versions
   findVersions: FindVersions;
   findGlobalVersions: FindGlobalVersions;
+  createVersion: CreateVersion;
   deleteVersions: DeleteVersions;
 }
 
@@ -213,6 +214,18 @@ export type DeleteVersionsArgs = {
   where: Where
   locale?: string
 };
+
+export type CreateVersionArgs<T = TypeWithID> = {
+  collectionSlug: string
+  /** ID of the parent document for which the version should be created for */
+  parent: string | number
+  versionData: T
+  autosave: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export type CreateVersion = <T = TypeWithID>(args: CreateVersionArgs<T>) => Promise<TypeWithVersion<T>>;
 
 export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>;
 
