@@ -17,6 +17,7 @@ import { findVersions } from './findVersions';
 import { findGlobalVersions } from './findGlobalVersions';
 import { deleteVersions } from './deleteVersions';
 import { createVersion } from './createVersion';
+import { updateVersion } from './updateVersion';
 
 export interface Args {
   payload: Payload,
@@ -72,6 +73,7 @@ export function mongooseAdapter({ payload, url, connectOptions }: Args): Mongoos
     findVersions,
     findGlobalVersions,
     createVersion,
+    updateVersion,
     deleteVersions,
   };
 }

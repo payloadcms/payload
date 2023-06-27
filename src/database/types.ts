@@ -127,6 +127,7 @@ export interface DatabaseAdapter {
   findVersions: FindVersions;
   findGlobalVersions: FindGlobalVersions;
   createVersion: CreateVersion;
+  updateVersion: UpdateVersion;
   deleteVersions: DeleteVersions;
 }
 
@@ -228,6 +229,16 @@ export type CreateVersionArgs<T = TypeWithID> = {
 export type CreateVersion = <T = TypeWithID>(args: CreateVersionArgs<T>) => Promise<TypeWithVersion<T>>;
 
 export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>;
+
+
+export type UpdateVersionArgs<T = TypeWithID> = {
+  collectionSlug: string,
+  where: Where,
+  locale?: string,
+  versionData: T
+}
+
+export type UpdateVersion = <T = TypeWithID>(args: UpdateVersionArgs<T>) => Promise<TypeWithVersion<T>>
 
 
 export type CreateArgs = {
