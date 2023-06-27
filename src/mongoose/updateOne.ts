@@ -1,8 +1,8 @@
-import { t } from 'i18next';
 import type { MongooseAdapter } from '.';
 import type { UpdateOne } from '../database/types';
 import { ValidationError } from '../errors';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
+import i18nInit from '../translations/init';
 
 export const updateOne: UpdateOne = async function updateOne(this: MongooseAdapter,
   { collection, data, where, locale }) {
@@ -27,7 +27,7 @@ export const updateOne: UpdateOne = async function updateOne(this: MongooseAdapt
       ? new ValidationError([{
         message: 'Value must be unique',
         field: Object.keys(error.keyValue)[0],
-      }], t)
+      }], i18nInit(this.payload.config.i18n).t)
       : error;
   }
 
