@@ -1,5 +1,6 @@
 import type { ConnectOptions } from 'mongoose';
 import type { DatabaseAdapter } from '../database/types';
+import type { Payload } from '../index';
 import { connect } from './connect';
 import { init } from './init';
 import { webpack } from './webpack';
@@ -10,11 +11,11 @@ import { find } from './find';
 import { create } from './create';
 import { updateOne } from './updateOne';
 import { deleteOne } from './deleteOne';
-import { findVersions } from './findVersions';
-import { findGlobalVersions } from './findGlobalVersions';
-import type { Payload } from '../index';
 import { findGlobal } from './findGlobal';
 import { findOne } from './findOne';
+import { findVersions } from './findVersions';
+import { findGlobalVersions } from './findGlobalVersions';
+import { deleteVersions } from './deleteVersions';
 
 export interface Args {
   payload: Payload,
@@ -63,11 +64,12 @@ export function mongooseAdapter({ payload, url, connectOptions }: Args): Mongoos
     queryDrafts,
     findOne,
     find,
-    findVersions,
     findGlobal,
-    findGlobalVersions,
     create,
     updateOne,
     deleteOne,
+    findVersions,
+    findGlobalVersions,
+    deleteVersions,
   };
 }

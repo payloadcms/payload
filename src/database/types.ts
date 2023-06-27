@@ -126,6 +126,7 @@ export interface DatabaseAdapter {
   // versions
   findVersions: FindVersions;
   findGlobalVersions: FindGlobalVersions;
+  deleteVersions: DeleteVersions;
 }
 
 export type Init = ({ config }: { config: SanitizedConfig }) => Promise<void>;
@@ -206,6 +207,15 @@ export type FindGlobalArgs = {
 export type FindGlobal = <T extends GlobalsTypeWithID = any>(args: FindGlobalArgs) => Promise<T>
 
 export type FindGlobalVersions = <T = TypeWithID>(args: FindGlobalVersionsArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
+
+export type DeleteVersionsArgs = {
+  collection: string
+  where: Where
+  locale?: string
+};
+
+export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>;
+
 
 export type CreateArgs = {
   collection: string
