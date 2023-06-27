@@ -112,7 +112,6 @@ export interface DatabaseAdapter {
    */
   commitTransaction?: () => Promise<boolean>;
 
-  // versions
   queryDrafts: QueryDrafts;
 
   // operations
@@ -120,12 +119,13 @@ export interface DatabaseAdapter {
   findOne: FindOne;
 
   findGlobal: FindGlobal;
-
-  findVersions: FindVersions;
-  findGlobalVersions: FindGlobalVersions;
   create: Create;
   updateOne: UpdateOne;
   deleteOne: DeleteOne;
+
+  // versions
+  findVersions: FindVersions;
+  findGlobalVersions: FindGlobalVersions;
 }
 
 export type Init = ({ config }: { config: SanitizedConfig }) => Promise<void>;
