@@ -25,5 +25,23 @@
       "type": "node-terminal",
       "cwd": "${workspaceFolder}"
     },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Migrate CLI",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register"
+      ],
+      "args": [
+        "src/bin/migrate.ts",
+        "migrate:create",
+        "my-migration"
+      ],
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
+      },
+      "outputCapture": "std",
+    },
   ]
 }

@@ -1,9 +1,6 @@
 import payload from '..';
-import loadConfig from '../config/load';
 
 export const migrate = async (args: string[]): Promise<void> => {
-  const config = await loadConfig();
-
   // Barebones instance to access database adapter
   await payload.init({
     secret: '--unused--',
@@ -11,7 +8,7 @@ export const migrate = async (args: string[]): Promise<void> => {
     local: true,
   });
 
-  const adapter = config.db;
+  const adapter = payload.config.db;
 
   if (!adapter) {
     throw new Error('No database adapter found');
@@ -37,10 +34,17 @@ export const migrate = async (args: string[]): Promise<void> => {
       await adapter.migrateFresh(adapter);
       break;
     case 'migrate:create':
-      await adapter.createMigration(adapter);
+      await adapter.createMigration(adapter, args[1]);
       break;
 
     default:
       throw new Error(`Unknown migration command: ${args[0]}`);
   }
 };
+
+// when launched directly
+if (module.id === require.main.id) {
+  const args = process.argv.slice(2);
+  console.log({ args });
+  migrate(args);
+}

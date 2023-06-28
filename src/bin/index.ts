@@ -4,6 +4,7 @@ import swcRegister from '@swc/register';
 import { getTsconfig as getTSconfig } from 'get-tsconfig';
 import { generateTypes } from './generateTypes';
 import { generateGraphQLSchema } from './generateGraphQLSchema';
+import { migrate } from './migrate';
 
 const tsConfig = getTSconfig();
 
@@ -38,7 +39,6 @@ if (tsConfig?.config?.compilerOptions?.paths) {
 swcRegister(swcOptions);
 
 const { build } = require('./build');
-const { migrate } = require('./migrate');
 
 const args = minimist(process.argv.slice(2));
 

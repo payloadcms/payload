@@ -18,10 +18,10 @@ export const migrationCollection = ({ payload: Payload }): CollectionConfig => {
         type: 'number',
       },
       // TODO: determine how schema will impact migration workflow
-      // {
-      //   name: 'schema',
-      //   type: 'json',
-      // },
+      {
+        name: 'schema',
+        type: 'json',
+      },
       // TODO: do we need to persist the indexes separate from the schema?
       // {
       //   name: 'indexes',
@@ -37,7 +37,6 @@ export const migrationCollection = ({ payload: Payload }): CollectionConfig => {
       //     },
       //   ],
       // },
-
     ],
   };
 };

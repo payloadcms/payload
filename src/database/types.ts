@@ -62,7 +62,7 @@ export interface DatabaseAdapter {
   /**
    * Output a migration file
    */
-  createMigration: (adapter: DatabaseAdapter) => Promise<void>;
+  createMigration: (adapter: DatabaseAdapter, migrationName: string) => Promise<void>;
 
   /**
    * Run any migration up functions that have not yet been performed and update the status

@@ -1,4 +1,5 @@
 import type { ConnectOptions } from 'mongoose';
+import fs from 'fs';
 import type { DatabaseAdapter } from '../database/types';
 import { connect } from './connect';
 import { init } from './init';
@@ -11,28 +12,41 @@ import { create } from './create';
 import { findVersions } from './findVersions';
 import { findGlobalVersions } from './findGlobalVersions';
 import type { Payload } from '../index';
+import { slugify } from '../utilities/slugify';
 
 export interface Args {
-  payload: Payload,
+  payload: Payload;
   /** The URL to connect to MongoDB */
-  url: string
+  url: string;
   connectOptions?: ConnectOptions & {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
-    useFacet?: boolean
-  }
+    useFacet?: boolean;
+  };
 }
 
 export type MongooseAdapter = DatabaseAdapter &
   Args & {
-    mongoMemoryServer: any
+    mongoMemoryServer: any;
     collections: {
-      [slug: string]: CollectionModel
-    }
-    globals: GlobalModel
+      [slug: string]: CollectionModel;
+    };
+    globals: GlobalModel;
     versions: {
-      [slug: string]: CollectionModel
-    }
-  }
+      [slug: string]: CollectionModel;
+    };
+  };
+
+const migrationTemplate = `
+import payload, { Payload } from 'payload';
+
+export async function up(payload: Payload): Promise<void> {
+  // Migration code
+};
+
+export async function down(payload: Payload): Promise<void> {
+  // Migration code
+};
+`;
 
 export function mongooseAdapter({ payload, url, connectOptions }: Args): MongooseAdapter {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -52,6 +66,19 @@ export function mongooseAdapter({ payload, url, connectOptions }: Args): Mongoos
     migrateRefresh: async () => null,
     migrateReset: async () => null,
     migrateFresh: async () => null,
+    migrationDir: '.migrations',
+    async createMigration(adapter, migrationName) {
+      const migrationDir = adapter.migrationDir || '.migrations'; // TODO: Verify path after linking
+      if (!fs.existsSync(migrationDir)) {
+        fs.mkdirSync(migrationDir);
+      }
+
+      const timestamp = new Date().toISOString().split('.')[0].replace(/[^\d]/gi, '');
+      const fileName = `${timestamp}-${slugify(migrationName)}.ts`;
+      const filePath = `${migrationDir}/${fileName}`;
+      fs.writeFileSync(filePath, migrationTemplate);
+      payload.logger.info({ msg: `Migration created at ${filePath}` });
+    },
     transaction: async () => true,
     beginTransaction: async () => true,
     rollbackTransaction: async () => true,
