@@ -101,25 +101,6 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       rows.splice(rowIndex, 1);
       rowsMetadata.splice(rowIndex, 1);
 
-      const pathSegments = splitPathByArrayFields(path);
-      for (let i = 0; i < pathSegments.length; i += 1) {
-        const fieldPath = pathSegments.slice(0, i + 1).join('.');
-        const formField = remainingFields?.[fieldPath];
-
-        if (formField && 'rows' in formField) {
-          // is array or block field
-          const segmentRowIndex = pathSegments[i + 1] ?? rowIndex;
-          const parentChildErrorPaths = new Set([...formField.rows[segmentRowIndex].childErrorPaths]);
-          // console.log(parentChildErrorPaths);
-
-          parentChildErrorPaths.forEach((childPath) => {
-            if (childPath.startsWith(`${path}.${rowIndex}`)) {
-              formField.rows[segmentRowIndex].childErrorPaths.delete(childPath);
-            }
-          });
-        }
-      }
-
       const newState: Fields = {
         ...remainingFields,
         [path]: {
@@ -131,7 +112,6 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         ...flattenRows(path, rows),
       };
 
-      console.log({ newState });
       return newState;
     }
 

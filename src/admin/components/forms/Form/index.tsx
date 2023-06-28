@@ -21,12 +21,13 @@ import wait from '../../../../utilities/wait';
 import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
-import { Fields, Context as FormContextType, FormField, GetDataByPath, Props, Row, SubmitOptions } from './types';
+import { Fields, Context as FormContextType, GetDataByPath, Props, Row, SubmitOptions } from './types';
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
 import { WatchFormErrors } from './WatchFormErrors';
 import { splitPathByArrayFields } from '../../../../utilities/splitPathByArrayFields';
+import { setsAreEqual } from '../../../../utilities/setsAreEqual';
 
 const baseClass = 'form';
 
@@ -104,7 +105,7 @@ const Form: React.FC<Props> = (props) => {
           const childFieldPath = pathSegments.slice(i + 1).join('.');
 
           if (field.valid === false && childFieldPath) {
-            newFieldRows[fieldPath][rowIndex].childErrorPaths.add(childFieldPath);
+            newFieldRows[fieldPath][rowIndex].childErrorPaths.add(`${fieldPath}.${childFieldPath}`);
           }
         }
       }
@@ -116,7 +117,7 @@ const Form: React.FC<Props> = (props) => {
     Object.entries(newFieldRows).forEach(([path, newRows]) => {
       const stateMatches = newRows.every((newRow, i) => {
         const existingRowErrorPaths = existingFieldRows[path][i]?.childErrorPaths;
-        return [...newRow.childErrorPaths].every((newChildErrorPath) => existingRowErrorPaths.has(newChildErrorPath));
+        return setsAreEqual(newRow.childErrorPaths, existingRowErrorPaths);
       });
 
       if (!stateMatches) {
