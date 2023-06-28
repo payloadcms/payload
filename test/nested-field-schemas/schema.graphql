@@ -1,0 +1,1319 @@
+type Query {
+  Post(id: String!, draft: Boolean): Post
+  Posts(where: Post_where, draft: Boolean, page: Int, limit: Int, sort: String): Posts
+  docAccessPost(id: String!): postsDocAccess
+  User(id: String!, draft: Boolean): User
+  Users(where: User_where, draft: Boolean, page: Int, limit: Int, sort: String): Users
+  docAccessUser(id: String!): usersDocAccess
+  meUser: usersMe
+  initializedUser: Boolean
+  Preference(key: String): Preference
+  Access: Access
+}
+
+type Post {
+  id: String
+  arrayField: [Post_ArrayField!]
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+type Post_ArrayField {
+  group23field: Post_ArrayField_Group23field
+  id: String
+}
+
+type Post_ArrayField_Group23field {
+  arrayField: [Post_ArrayField_Group23field_ArrayField!]!
+}
+
+type Post_ArrayField_Group23field_ArrayField {
+  group23field: Post_ArrayField_Group23field_ArrayField_Group23field
+  id: String
+}
+
+type Post_ArrayField_Group23field_ArrayField_Group23field {
+  arrayField: [Post_ArrayField_Group23field_ArrayField_Group23field_ArrayField!]!
+}
+
+type Post_ArrayField_Group23field_ArrayField_Group23field_ArrayField {
+  textField: String!
+  id: String
+}
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+type Posts {
+  docs: [Post]
+  totalDocs: Int
+  offset: Int
+  limit: Int
+  totalPages: Int
+  page: Int
+  pagingCounter: Int
+  hasPrevPage: Boolean
+  hasNextPage: Boolean
+  prevPage: Int
+  nextPage: Int
+}
+
+input Post_where {
+  arrayField__group23field__arrayField__group23field__arrayField__textField: Post_arrayField__group23field__arrayField__group23field__arrayField__textField_operator
+  arrayField__group23field__arrayField__group23field__arrayField__id: Post_arrayField__group23field__arrayField__group23field__arrayField__id_operator
+  arrayField__group23field__arrayField__id: Post_arrayField__group23field__arrayField__id_operator
+  arrayField__id: Post_arrayField__id_operator
+  updatedAt: Post_updatedAt_operator
+  createdAt: Post_createdAt_operator
+  id: Post_id_operator
+  OR: [Post_where_or]
+  AND: [Post_where_and]
+}
+
+input Post_arrayField__group23field__arrayField__group23field__arrayField__textField_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input Post_arrayField__group23field__arrayField__group23field__arrayField__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Post_arrayField__group23field__arrayField__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Post_arrayField__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Post_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Post_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Post_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Post_where_or {
+  arrayField__group23field__arrayField__group23field__arrayField__textField: Post_arrayField__group23field__arrayField__group23field__arrayField__textField_operator
+  arrayField__group23field__arrayField__group23field__arrayField__id: Post_arrayField__group23field__arrayField__group23field__arrayField__id_operator
+  arrayField__group23field__arrayField__id: Post_arrayField__group23field__arrayField__id_operator
+  arrayField__id: Post_arrayField__id_operator
+  updatedAt: Post_updatedAt_operator
+  createdAt: Post_createdAt_operator
+  id: Post_id_operator
+}
+
+input Post_where_and {
+  arrayField__group23field__arrayField__group23field__arrayField__textField: Post_arrayField__group23field__arrayField__group23field__arrayField__textField_operator
+  arrayField__group23field__arrayField__group23field__arrayField__id: Post_arrayField__group23field__arrayField__group23field__arrayField__id_operator
+  arrayField__group23field__arrayField__id: Post_arrayField__group23field__arrayField__id_operator
+  arrayField__id: Post_arrayField__id_operator
+  updatedAt: Post_updatedAt_operator
+  createdAt: Post_createdAt_operator
+  id: Post_id_operator
+}
+
+type postsDocAccess {
+  fields: PostsDocAccessFields
+  create: PostsCreateDocAccess
+  read: PostsReadDocAccess
+  update: PostsUpdateDocAccess
+  delete: PostsDeleteDocAccess
+}
+
+type PostsDocAccessFields {
+  arrayField: PostsDocAccessFields_arrayField
+  updatedAt: PostsDocAccessFields_updatedAt
+  createdAt: PostsDocAccessFields_createdAt
+}
+
+type PostsDocAccessFields_arrayField {
+  create: PostsDocAccessFields_arrayField_Create
+  read: PostsDocAccessFields_arrayField_Read
+  update: PostsDocAccessFields_arrayField_Update
+  delete: PostsDocAccessFields_arrayField_Delete
+  fields: PostsDocAccessFields_arrayField_Fields
+}
+
+type PostsDocAccessFields_arrayField_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_Fields {
+  group23field: PostsDocAccessFields_arrayField_group23field
+  id: PostsDocAccessFields_arrayField_id
+}
+
+type PostsDocAccessFields_arrayField_group23field {
+  create: PostsDocAccessFields_arrayField_group23field_Create
+  read: PostsDocAccessFields_arrayField_group23field_Read
+  update: PostsDocAccessFields_arrayField_group23field_Update
+  delete: PostsDocAccessFields_arrayField_group23field_Delete
+  fields: PostsDocAccessFields_arrayField_group23field_Fields
+}
+
+type PostsDocAccessFields_arrayField_group23field_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_Fields {
+  arrayField: PostsDocAccessFields_arrayField_group23field_arrayField
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField {
+  create: PostsDocAccessFields_arrayField_group23field_arrayField_Create
+  read: PostsDocAccessFields_arrayField_group23field_arrayField_Read
+  update: PostsDocAccessFields_arrayField_group23field_arrayField_Update
+  delete: PostsDocAccessFields_arrayField_group23field_arrayField_Delete
+  fields: PostsDocAccessFields_arrayField_group23field_arrayField_Fields
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_Fields {
+  group23field: PostsDocAccessFields_arrayField_group23field_arrayField_group23field
+  id: PostsDocAccessFields_arrayField_group23field_arrayField_id
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field {
+  create: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_Create
+  read: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_Read
+  update: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_Update
+  delete: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_Delete
+  fields: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_Fields
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_Fields {
+  arrayField: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField {
+  create: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_Create
+  read: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_Read
+  update: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_Update
+  delete: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_Delete
+  fields: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_Fields
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_Fields {
+  textField: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_textField
+  id: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_id
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_textField {
+  create: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Create
+  read: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Read
+  update: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Update
+  delete: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Delete
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_id {
+  create: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_id_Create
+  read: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_id_Read
+  update: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_id_Update
+  delete: PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_id_Delete
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_id_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_id_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_id_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_group23field_arrayField_id_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_id {
+  create: PostsDocAccessFields_arrayField_group23field_arrayField_id_Create
+  read: PostsDocAccessFields_arrayField_group23field_arrayField_id_Read
+  update: PostsDocAccessFields_arrayField_group23field_arrayField_id_Update
+  delete: PostsDocAccessFields_arrayField_group23field_arrayField_id_Delete
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_id_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_id_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_id_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_group23field_arrayField_id_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_id {
+  create: PostsDocAccessFields_arrayField_id_Create
+  read: PostsDocAccessFields_arrayField_id_Read
+  update: PostsDocAccessFields_arrayField_id_Update
+  delete: PostsDocAccessFields_arrayField_id_Delete
+}
+
+type PostsDocAccessFields_arrayField_id_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_id_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_id_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_arrayField_id_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_updatedAt {
+  create: PostsDocAccessFields_updatedAt_Create
+  read: PostsDocAccessFields_updatedAt_Read
+  update: PostsDocAccessFields_updatedAt_Update
+  delete: PostsDocAccessFields_updatedAt_Delete
+}
+
+type PostsDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_createdAt {
+  create: PostsDocAccessFields_createdAt_Create
+  read: PostsDocAccessFields_createdAt_Read
+  update: PostsDocAccessFields_createdAt_Update
+  delete: PostsDocAccessFields_createdAt_Delete
+}
+
+type PostsDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PostsCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
+type PostsReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PostsUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PostsDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type User {
+  id: String
+  updatedAt: DateTime
+  createdAt: DateTime
+  email: EmailAddress
+  resetPasswordToken: String
+  resetPasswordExpiration: DateTime
+  salt: String
+  hash: String
+  loginAttempts: Float
+  lockUntil: DateTime
+  password: String!
+}
+
+"""
+A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
+"""
+scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+
+type Users {
+  docs: [User]
+  totalDocs: Int
+  offset: Int
+  limit: Int
+  totalPages: Int
+  page: Int
+  pagingCounter: Int
+  hasPrevPage: Boolean
+  hasNextPage: Boolean
+  prevPage: Int
+  nextPage: Int
+}
+
+input User_where {
+  updatedAt: User_updatedAt_operator
+  createdAt: User_createdAt_operator
+  email: User_email_operator
+  id: User_id_operator
+  OR: [User_where_or]
+  AND: [User_where_and]
+}
+
+input User_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input User_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input User_email_operator {
+  equals: EmailAddress
+  not_equals: EmailAddress
+  like: EmailAddress
+  contains: EmailAddress
+  in: [EmailAddress]
+  not_in: [EmailAddress]
+  all: [EmailAddress]
+  exists: Boolean
+}
+
+input User_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input User_where_or {
+  updatedAt: User_updatedAt_operator
+  createdAt: User_createdAt_operator
+  email: User_email_operator
+  id: User_id_operator
+}
+
+input User_where_and {
+  updatedAt: User_updatedAt_operator
+  createdAt: User_createdAt_operator
+  email: User_email_operator
+  id: User_id_operator
+}
+
+type usersDocAccess {
+  fields: UsersDocAccessFields
+  create: UsersCreateDocAccess
+  read: UsersReadDocAccess
+  update: UsersUpdateDocAccess
+  delete: UsersDeleteDocAccess
+  unlock: UsersUnlockDocAccess
+}
+
+type UsersDocAccessFields {
+  updatedAt: UsersDocAccessFields_updatedAt
+  createdAt: UsersDocAccessFields_createdAt
+  email: UsersDocAccessFields_email
+  password: UsersDocAccessFields_password
+}
+
+type UsersDocAccessFields_updatedAt {
+  create: UsersDocAccessFields_updatedAt_Create
+  read: UsersDocAccessFields_updatedAt_Read
+  update: UsersDocAccessFields_updatedAt_Update
+  delete: UsersDocAccessFields_updatedAt_Delete
+}
+
+type UsersDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_createdAt {
+  create: UsersDocAccessFields_createdAt_Create
+  read: UsersDocAccessFields_createdAt_Read
+  update: UsersDocAccessFields_createdAt_Update
+  delete: UsersDocAccessFields_createdAt_Delete
+}
+
+type UsersDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_email {
+  create: UsersDocAccessFields_email_Create
+  read: UsersDocAccessFields_email_Read
+  update: UsersDocAccessFields_email_Update
+  delete: UsersDocAccessFields_email_Delete
+}
+
+type UsersDocAccessFields_email_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_email_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_email_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_email_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_password {
+  create: UsersDocAccessFields_password_Create
+  read: UsersDocAccessFields_password_Read
+  update: UsersDocAccessFields_password_Update
+  delete: UsersDocAccessFields_password_Delete
+}
+
+type UsersDocAccessFields_password_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_password_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_password_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_password_Delete {
+  permission: Boolean!
+}
+
+type UsersCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersUnlockDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type usersMe {
+  token: String
+  user: User
+  exp: Int
+  collection: String
+}
+
+type Preference {
+  key: String!
+  value: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+type Access {
+  canAccessAdmin: Boolean!
+  posts: postsAccess
+  users: usersAccess
+}
+
+type postsAccess {
+  fields: PostsFields
+  create: PostsCreateAccess
+  read: PostsReadAccess
+  update: PostsUpdateAccess
+  delete: PostsDeleteAccess
+}
+
+type PostsFields {
+  arrayField: PostsFields_arrayField
+  updatedAt: PostsFields_updatedAt
+  createdAt: PostsFields_createdAt
+}
+
+type PostsFields_arrayField {
+  create: PostsFields_arrayField_Create
+  read: PostsFields_arrayField_Read
+  update: PostsFields_arrayField_Update
+  delete: PostsFields_arrayField_Delete
+  fields: PostsFields_arrayField_Fields
+}
+
+type PostsFields_arrayField_Create {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_Read {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_Update {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_Fields {
+  group23field: PostsFields_arrayField_group23field
+  id: PostsFields_arrayField_id
+}
+
+type PostsFields_arrayField_group23field {
+  create: PostsFields_arrayField_group23field_Create
+  read: PostsFields_arrayField_group23field_Read
+  update: PostsFields_arrayField_group23field_Update
+  delete: PostsFields_arrayField_group23field_Delete
+  fields: PostsFields_arrayField_group23field_Fields
+}
+
+type PostsFields_arrayField_group23field_Create {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_Read {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_Update {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_Fields {
+  arrayField: PostsFields_arrayField_group23field_arrayField
+}
+
+type PostsFields_arrayField_group23field_arrayField {
+  create: PostsFields_arrayField_group23field_arrayField_Create
+  read: PostsFields_arrayField_group23field_arrayField_Read
+  update: PostsFields_arrayField_group23field_arrayField_Update
+  delete: PostsFields_arrayField_group23field_arrayField_Delete
+  fields: PostsFields_arrayField_group23field_arrayField_Fields
+}
+
+type PostsFields_arrayField_group23field_arrayField_Create {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_Read {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_Update {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_Fields {
+  group23field: PostsFields_arrayField_group23field_arrayField_group23field
+  id: PostsFields_arrayField_group23field_arrayField_id
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field {
+  create: PostsFields_arrayField_group23field_arrayField_group23field_Create
+  read: PostsFields_arrayField_group23field_arrayField_group23field_Read
+  update: PostsFields_arrayField_group23field_arrayField_group23field_Update
+  delete: PostsFields_arrayField_group23field_arrayField_group23field_Delete
+  fields: PostsFields_arrayField_group23field_arrayField_group23field_Fields
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_Create {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_Read {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_Update {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_Fields {
+  arrayField: PostsFields_arrayField_group23field_arrayField_group23field_arrayField
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField {
+  create: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_Create
+  read: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_Read
+  update: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_Update
+  delete: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_Delete
+  fields: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_Fields
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_Create {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_Read {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_Update {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_Fields {
+  textField: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_textField
+  id: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_id
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_textField {
+  create: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Create
+  read: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Read
+  update: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Update
+  delete: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Delete
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Create {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Read {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Update {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_textField_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_id {
+  create: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_id_Create
+  read: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_id_Read
+  update: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_id_Update
+  delete: PostsFields_arrayField_group23field_arrayField_group23field_arrayField_id_Delete
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_id_Create {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_id_Read {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_id_Update {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_group23field_arrayField_id_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_id {
+  create: PostsFields_arrayField_group23field_arrayField_id_Create
+  read: PostsFields_arrayField_group23field_arrayField_id_Read
+  update: PostsFields_arrayField_group23field_arrayField_id_Update
+  delete: PostsFields_arrayField_group23field_arrayField_id_Delete
+}
+
+type PostsFields_arrayField_group23field_arrayField_id_Create {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_id_Read {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_id_Update {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_group23field_arrayField_id_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_id {
+  create: PostsFields_arrayField_id_Create
+  read: PostsFields_arrayField_id_Read
+  update: PostsFields_arrayField_id_Update
+  delete: PostsFields_arrayField_id_Delete
+}
+
+type PostsFields_arrayField_id_Create {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_id_Read {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_id_Update {
+  permission: Boolean!
+}
+
+type PostsFields_arrayField_id_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_updatedAt {
+  create: PostsFields_updatedAt_Create
+  read: PostsFields_updatedAt_Read
+  update: PostsFields_updatedAt_Update
+  delete: PostsFields_updatedAt_Delete
+}
+
+type PostsFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type PostsFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type PostsFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type PostsFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_createdAt {
+  create: PostsFields_createdAt_Create
+  read: PostsFields_createdAt_Read
+  update: PostsFields_createdAt_Update
+  delete: PostsFields_createdAt_Delete
+}
+
+type PostsFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type PostsFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type PostsFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type PostsFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type PostsCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PostsReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PostsUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type PostsDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type usersAccess {
+  fields: UsersFields
+  create: UsersCreateAccess
+  read: UsersReadAccess
+  update: UsersUpdateAccess
+  delete: UsersDeleteAccess
+  unlock: UsersUnlockAccess
+}
+
+type UsersFields {
+  updatedAt: UsersFields_updatedAt
+  createdAt: UsersFields_createdAt
+  email: UsersFields_email
+  password: UsersFields_password
+}
+
+type UsersFields_updatedAt {
+  create: UsersFields_updatedAt_Create
+  read: UsersFields_updatedAt_Read
+  update: UsersFields_updatedAt_Update
+  delete: UsersFields_updatedAt_Delete
+}
+
+type UsersFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type UsersFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type UsersFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type UsersFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_createdAt {
+  create: UsersFields_createdAt_Create
+  read: UsersFields_createdAt_Read
+  update: UsersFields_createdAt_Update
+  delete: UsersFields_createdAt_Delete
+}
+
+type UsersFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type UsersFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type UsersFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type UsersFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_email {
+  create: UsersFields_email_Create
+  read: UsersFields_email_Read
+  update: UsersFields_email_Update
+  delete: UsersFields_email_Delete
+}
+
+type UsersFields_email_Create {
+  permission: Boolean!
+}
+
+type UsersFields_email_Read {
+  permission: Boolean!
+}
+
+type UsersFields_email_Update {
+  permission: Boolean!
+}
+
+type UsersFields_email_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_password {
+  create: UsersFields_password_Create
+  read: UsersFields_password_Read
+  update: UsersFields_password_Update
+  delete: UsersFields_password_Delete
+}
+
+type UsersFields_password_Create {
+  permission: Boolean!
+}
+
+type UsersFields_password_Read {
+  permission: Boolean!
+}
+
+type UsersFields_password_Update {
+  permission: Boolean!
+}
+
+type UsersFields_password_Delete {
+  permission: Boolean!
+}
+
+type UsersCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type UsersUnlockAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type Mutation {
+  createPost(data: mutationPostInput!, draft: Boolean): Post
+  updatePost(id: String!, data: mutationPostUpdateInput!, draft: Boolean, autosave: Boolean): Post
+  deletePost(id: String!): Post
+  createUser(data: mutationUserInput!, draft: Boolean): User
+  updateUser(id: String!, data: mutationUserUpdateInput!, draft: Boolean, autosave: Boolean): User
+  deleteUser(id: String!): User
+  refreshTokenUser(token: String): usersRefreshedUser
+  logoutUser: String
+  unlockUser(email: String!): Boolean!
+  loginUser(email: String, password: String): usersLoginResult
+  forgotPasswordUser(email: String!, disableEmail: Boolean, expiration: Int): Boolean!
+  resetPasswordUser(token: String, password: String): usersResetPassword
+  verifyEmailUser(token: String): Boolean
+  updatePreference(key: String!, value: JSON): Preference
+  deletePreference(key: String!): Preference
+}
+
+input mutationPostInput {
+  arrayField: [mutationPost_ArrayFieldInput]
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationPost_ArrayFieldInput {
+  group23field: mutationPost_ArrayField_Group23fieldInput!
+  id: String
+}
+
+input mutationPost_ArrayField_Group23fieldInput {
+  arrayField: [mutationPost_ArrayField_Group23field_ArrayFieldInput!]
+}
+
+input mutationPost_ArrayField_Group23field_ArrayFieldInput {
+  group23field: mutationPost_ArrayField_Group23field_ArrayField_Group23fieldInput!
+  id: String
+}
+
+input mutationPost_ArrayField_Group23field_ArrayField_Group23fieldInput {
+  arrayField: [mutationPost_ArrayField_Group23field_ArrayField_Group23field_ArrayFieldInput!]
+}
+
+input mutationPost_ArrayField_Group23field_ArrayField_Group23field_ArrayFieldInput {
+  textField: String!
+  id: String
+}
+
+input mutationPostUpdateInput {
+  arrayField: [mutationPostUpdate_ArrayFieldInput]
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationPostUpdate_ArrayFieldInput {
+  group23field: mutationPostUpdate_ArrayField_Group23fieldInput!
+  id: String
+}
+
+input mutationPostUpdate_ArrayField_Group23fieldInput {
+  arrayField: [mutationPostUpdate_ArrayField_Group23field_ArrayFieldInput!]
+}
+
+input mutationPostUpdate_ArrayField_Group23field_ArrayFieldInput {
+  group23field: mutationPostUpdate_ArrayField_Group23field_ArrayField_Group23fieldInput!
+  id: String
+}
+
+input mutationPostUpdate_ArrayField_Group23field_ArrayField_Group23fieldInput {
+  arrayField: [mutationPostUpdate_ArrayField_Group23field_ArrayField_Group23field_ArrayFieldInput!]
+}
+
+input mutationPostUpdate_ArrayField_Group23field_ArrayField_Group23field_ArrayFieldInput {
+  textField: String!
+  id: String
+}
+
+input mutationUserInput {
+  updatedAt: String
+  createdAt: String
+  email: String
+  resetPasswordToken: String
+  resetPasswordExpiration: String
+  salt: String
+  hash: String
+  loginAttempts: Float
+  lockUntil: String
+  password: String!
+}
+
+input mutationUserUpdateInput {
+  updatedAt: String
+  createdAt: String
+  email: String
+  resetPasswordToken: String
+  resetPasswordExpiration: String
+  salt: String
+  hash: String
+  loginAttempts: Float
+  lockUntil: String
+  password: String
+}
+
+type usersRefreshedUser {
+  user: usersJWT
+  refreshedToken: String
+  exp: Int
+}
+
+type usersJWT {
+  email: EmailAddress!
+  collection: String!
+}
+
+type usersLoginResult {
+  token: String
+  user: User
+  exp: Int
+}
+
+type usersResetPassword {
+  token: String
+  user: User
+}

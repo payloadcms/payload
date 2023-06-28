@@ -9,6 +9,10 @@ import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import FieldDescription from '../../FieldDescription';
 import { RowLabel } from '../../RowLabel';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
+import { WatchChildErrors } from '../../WatchChildErrors';
+import { RowLabel as RowLabelType } from '../../RowLabel/types';
+import Pill from '../../../elements/Pill';
+import { useFormSubmitted } from '../../Form/context';
 
 import './index.scss';
 
@@ -34,6 +38,8 @@ const CollapsibleField: React.FC<Props> = (props) => {
   const { preferencesKey } = useDocumentInfo();
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>();
   const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./gi, '__')}`;
+  const [errorCount, setErrorCount] = useState(0);
+  const submitted = useFormSubmitted();
 
   const onToggle = useCallback(async (newCollapsedState: boolean) => {
     const existingPreferences: DocumentPreferences = await getPreference(preferencesKey);
@@ -76,19 +82,47 @@ const CollapsibleField: React.FC<Props> = (props) => {
 
   if (typeof collapsedOnMount !== 'boolean') return null;
 
+  const CustomRowLabel: RowLabelType = () => {
+    return (
+      <React.Fragment>
+        {label as string}
+        {errorCount > 0 && (
+          <Pill
+            pillStyle="error"
+            rounded
+            className={`${baseClass}__error-pill`}
+          >
+            {errorCount}
+          </Pill>
+        )}
+      </React.Fragment>
+    );
+  };
+
+  const fieldHasErrors = submitted && errorCount > 0;
+
+  const classes = [
+    'field-type',
+    baseClass,
+    className,
+    fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
+  ].filter(Boolean).join(' ');
+
   return (
     <div id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./gi, '__')}` : ''}`}>
+      <WatchChildErrors
+        setErrorCount={setErrorCount}
+        path={path}
+        fieldSchema={fields}
+      />
       <Collapsible
         initCollapsed={collapsedOnMount}
-        className={[
-          'field-type',
-          baseClass,
-          className,
-        ].filter(Boolean).join(' ')}
+        className={classes}
+        collapsibleStyle={errorCount > 0 ? 'error' : 'default'}
         header={(
           <RowLabel
             path={path}
-            label={label}
+            label={CustomRowLabel}
           />
         )}
         onToggle={onToggle}

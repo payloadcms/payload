@@ -53,6 +53,7 @@
   &__tab-button {
     @extend %btn-reset;
     @extend %h4;
+    display: flex;
     padding-bottom: base(.75);
     margin: 0 $baseline 0 0;
     cursor: pointer;
@@ -98,6 +99,12 @@
     margin-bottom: $baseline;
   }
 
+  &__error-pill {
+    margin-left: base(.5);
+    align-self: center;
+    font-size: 10px;
+  }
+
   @include small-break {
     &--within-collapsible {
       margin-left: calc(var(--gutter-h) * -1);
@@ -109,6 +116,28 @@
 
       &:last-child {
         margin: 0;
+      }
+    }
+  }
+}
+
+html[data-theme=light] {
+  .tabs-field {
+    &__tab-button--has-error {
+      color: var(--theme-error-750);
+      &:after {
+        background: var(--theme-error-500);
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .tabs-field {
+    &__tab-button--has-error {
+      color: var(--theme-error-500);
+      &:after {
+        background: var(--theme-error-500);
       }
     }
   }

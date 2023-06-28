@@ -21,10 +21,21 @@ import wait from '../../../../utilities/wait';
 import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
-import { Fields, Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types';
+import { Fields, Context as FormContextType, FormField, GetDataByPath, Props, SubmitOptions } from './types';
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
+import { WatchFormErrors } from './WatchFormErrors';
+
+/**
+  Turns: 'arrayField.0.group123field.arrayField.0.textField'
+
+  Into: ['arrayField', '0', 'group123field.arrayField', '0', 'textField']
+*/
+function splitPathByArrayFields(str) {
+  const regex = /\.(\d+)\./g;
+  return str.split(regex).filter(Boolean);
+}
 
 const baseClass = 'form';
 
@@ -70,6 +81,58 @@ const Form: React.FC<Props> = (props) => {
 
   contextRef.current.fields = fields;
   contextRef.current.dispatchFields = dispatchFields;
+
+  // loops over all flattened field state
+  const calculateNestedErrorPaths = useCallback(() => {
+    const pathErrorCountsMap = new Map();
+    const newArrayFieldsState: { [key: string]: FormField } = {};
+
+    Object.entries(fields).forEach(([path, field]) => {
+      const pathSegments = splitPathByArrayFields(path);
+
+      for (let i = 0; i < pathSegments.length; i += 1) {
+        const fieldPath = pathSegments.slice(0, i + 1).join('.');
+        const formField = { ...fields[fieldPath] };
+
+        if (formField && formField?.rows) {
+          // is array field
+          const rowIndex = pathSegments[i + 1];
+          const childFieldPath = pathSegments.slice(i + 1).join('.');
+
+          // copy the array field
+          if (!newArrayFieldsState[fieldPath]) {
+            newArrayFieldsState[fieldPath] = { ...formField };
+          }
+
+          if ('valid' in field && childFieldPath) {
+            const { rowErrorCount } = newArrayFieldsState[fieldPath];
+            const { childErrorPaths } = newArrayFieldsState[fieldPath].rows[rowIndex];
+
+            if (!field.valid && !childErrorPaths.has(path)) {
+              childErrorPaths.add(path);
+              pathErrorCountsMap.set(fieldPath, Math.max(0, (rowErrorCount || 0) + 1));
+            } else if (field.valid && childErrorPaths.has(path)) {
+              childErrorPaths.delete(path);
+              pathErrorCountsMap.set(fieldPath, Math.max(0, (rowErrorCount || 0) - 1));
+            }
+          }
+        }
+      }
+    });
+
+    // We cannot do this in 1 loop over `fields`
+    // Need to ensure stale paths are removed, i.e. when a row is removed
+    Object.entries(newArrayFieldsState).forEach(([path, newArrayField]) => {
+      if (pathErrorCountsMap.has(path)) {
+        dispatchFields({
+          type: 'UPDATE',
+          path,
+          rows: newArrayField.rows,
+          rowErrorCount: pathErrorCountsMap.get(path),
+        });
+      }
+    });
+  }, [fields, dispatchFields]);
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {};
@@ -140,6 +203,7 @@ const Form: React.FC<Props> = (props) => {
     if (waitForAutocomplete) await wait(100);
 
     const isValid = skipValidation ? true : await contextRef.current.validateForm();
+    contextRef.current.calculateNestedErrorPaths();
 
     if (!skipValidation) setSubmitted(true);
 
@@ -277,8 +341,6 @@ const Form: React.FC<Props> = (props) => {
 
         toast.error(message);
       }
-
-      return;
     } catch (err) {
       setProcessing(false);
 
@@ -360,6 +422,7 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.formRef = formRef;
   contextRef.current.reset = reset;
   contextRef.current.replaceState = replaceState;
+  contextRef.current.calculateNestedErrorPaths = calculateNestedErrorPaths;
 
   useEffect(() => {
     if (initialState) {
@@ -410,6 +473,7 @@ const Form: React.FC<Props> = (props) => {
             <ProcessingContext.Provider value={processing}>
               <ModifiedContext.Provider value={modified}>
                 <FormFieldsContext.Provider value={fieldsReducer}>
+                  <WatchFormErrors calculateNestedErrorPaths={calculateNestedErrorPaths} />
                   {children}
                 </FormFieldsContext.Provider>
               </ModifiedContext.Provider>

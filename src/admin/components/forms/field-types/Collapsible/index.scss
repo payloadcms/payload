@@ -6,4 +6,13 @@
   &__label {
     pointer-events: none;
   }
+
+  &__error-pill {
+    margin-left: base(.5);
+    font-size: 10px;
+  }
+
+  &--has-error {
+    border: 1px solid var(--theme-error-500);
+  }
 }
