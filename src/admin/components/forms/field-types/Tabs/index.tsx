@@ -14,6 +14,8 @@ import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 import { WatchChildErrors } from '../../WatchChildErrors';
+import Pill from '../../../elements/Pill';
+import { useFormSubmitted } from '../../Form/context';
 
 import './index.scss';
 
@@ -29,11 +31,13 @@ const Tab: React.FC<TabProps> = ({ tab, isActive, setIsActive, parentPath }) => 
   const { i18n } = useTranslation();
   const [errorCount, setErrorCount] = useState(undefined);
   const hasName = tabHasName(tab);
+  const submitted = useFormSubmitted();
 
   const pathSegments = [];
   if (parentPath) pathSegments.push(parentPath);
   if (hasName) pathSegments.push(tab.name);
   const path = pathSegments.join('.');
+  const tabHasErrors = submitted && errorCount > 0;
 
   return (
     <React.Fragment>
@@ -46,19 +50,22 @@ const Tab: React.FC<TabProps> = ({ tab, isActive, setIsActive, parentPath }) => 
         type="button"
         className={[
           `${baseClass}__tab-button`,
+          tabHasErrors && `${baseClass}__tab-button--has-error`,
           isActive && `${baseClass}__tab-button--active`,
         ].filter(Boolean).join(' ')}
         onClick={setIsActive}
       >
         {tab.label ? getTranslation(tab.label, i18n) : (hasName && tab.name)}
-        {(typeof errorCount === 'number' && errorCount > 0) && (
-          <code>
-            {' - '}
-            Errors:
-            {' '}
-            {errorCount}
-          </code>
-        )}
+        {tabHasErrors
+          && (
+            <Pill
+              pillStyle="error"
+              rounded
+              className={`${baseClass}__error-pill`}
+            >
+              {errorCount}
+            </Pill>
+          )}
       </button>
     </React.Fragment>
   );

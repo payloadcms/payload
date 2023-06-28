@@ -11,6 +11,7 @@ import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types';
 import type { Row } from '../../Form/types';
 import type { RowLabel as RowLabelType } from '../../RowLabel/types';
+import Pill from '../../../elements/Pill';
 
 import './index.scss';
 
@@ -83,16 +84,20 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         }}
         header={(
           <React.Fragment>
-            <code>
-              {path}
-              {' '}
-              {rowErrorCount}
-            </code>
             <RowLabel
               path={path}
               label={CustomRowLabel || fallbackLabel}
               rowNumber={rowIndex + 1}
             />
+            {rowErrorCount > 0 && (
+              <Pill
+                pillStyle="error"
+                rounded
+                className={`${baseClass}__row-error-pill`}
+              >
+                {rowErrorCount}
+              </Pill>
+            )}
           </React.Fragment>
         )}
         actions={!readOnly ? (

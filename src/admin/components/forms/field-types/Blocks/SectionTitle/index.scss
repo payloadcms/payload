@@ -9,7 +9,7 @@
     content: attr(data-value) ' ';
     visibility: hidden;
     white-space: nowrap;
-    min-width: base(3);
+    min-width: base(2.5);
   }
 
   &:after,

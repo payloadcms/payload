@@ -4,7 +4,7 @@ import { useAuth } from '../../../utilities/Auth';
 import { useLocale } from '../../../utilities/Locale';
 import withCondition from '../../withCondition';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
-import { useForm } from '../../Form/context';
+import { useForm, useFormSubmitted } from '../../Form/context';
 import buildStateFromSchema from '../../Form/buildStateFromSchema';
 import Error from '../../Error';
 import useField from '../../useField';
@@ -50,6 +50,7 @@ type BlockFieldProps = UseDraggableSortableReturn & Pick<Props, 'path' | 'labels
   readOnly: boolean
   rowCount: number
   blockToRender: Block
+  rowErrorCount: number
 }
 const BlockRow: React.FC<BlockFieldProps> = ({
   path: parentPath,
@@ -72,10 +73,16 @@ const BlockRow: React.FC<BlockFieldProps> = ({
   permissions,
   blocks,
   blockToRender,
+  rowErrorCount = 0,
 }) => {
   const path = `${parentPath}.${rowIndex}`;
   const { i18n } = useTranslation();
   const [errorCount, setErrorCount] = React.useState(0);
+
+  const classNames = [
+    `${baseClass}__row`,
+    rowErrorCount > 0 ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
+  ].filter(Boolean).join(' ');
 
   return (
     <div
@@ -94,7 +101,8 @@ const BlockRow: React.FC<BlockFieldProps> = ({
       <Collapsible
         collapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
-        className={`${baseClass}__row`}
+        className={classNames}
+        collapsibleStyle={rowErrorCount > 0 ? 'error' : 'default'}
         key={row.id}
         dragHandleProps={{
           id: row.id,
@@ -116,12 +124,15 @@ const BlockRow: React.FC<BlockFieldProps> = ({
               path={`${path}.blockName`}
               readOnly={readOnly}
             />
-            <code>
-              {' '}
-              Errors:
-              {' '}
-              {errorCount}
-            </code>
+            {rowErrorCount > 0 && (
+              <Pill
+                pillStyle="error"
+                rounded
+                className={`${baseClass}__error-pill`}
+              >
+                {rowErrorCount}
+              </Pill>
+            )}
           </div>
         )}
         actions={!readOnly ? (
@@ -193,6 +204,7 @@ const BlocksField: React.FC<Props> = (props) => {
   const { localization } = useConfig();
   const drawerSlug = useDrawerSlug('blocks-drawer');
   const [errorCount, setErrorCount] = React.useState(0);
+  const submitted = useFormSubmitted();
 
   const labels = {
     singular: t('block'),
@@ -200,25 +212,29 @@ const BlocksField: React.FC<Props> = (props) => {
     ...labelsFromProps,
   };
 
-  const checkSkipValidation = useCallback((value) => {
-    const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
-    const isEditingDefaultLocale = locale === defaultLocale;
-    const fallbackEnabled = (localization && localization.fallback);
+  const editingDefaultLocale = (() => {
+    if (localization && localization.fallback) {
+      const defaultLocale = localization.defaultLocale || 'en';
+      return locale === defaultLocale;
+    }
 
-    if (value === null && !isEditingDefaultLocale && fallbackEnabled) return true;
-    return false;
-  }, [locale, localization]);
-
+    return true;
+  })();
   const memoizedValidate = useCallback((value, options) => {
-    if (checkSkipValidation(value)) return true;
+    // alternative locales can be null
+    if (!editingDefaultLocale && value === null) {
+      return true;
+    }
     return validate(value, { ...options, minRows, maxRows, required });
-  }, [maxRows, minRows, required, validate, checkSkipValidation]);
+  }, [maxRows, minRows, required, validate, editingDefaultLocale]);
+
 
   const {
     showError,
     errorMessage,
     value,
     rows,
+    valid,
   } = useField<number>({
     path,
     validate: memoizedValidate,
@@ -267,10 +283,15 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const hasMaxRows = maxRows && rows?.length >= maxRows;
 
+  const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0);
+  // TODO: change submitted var
+  const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0;
+
   const classes = [
     'field-type',
     baseClass,
     className,
+    fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
   ].filter(Boolean).join(' ');
 
   if (!rows) return null;
@@ -288,13 +309,21 @@ const BlocksField: React.FC<Props> = (props) => {
       </div>
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
-          <h3>{getTranslation(label || name, i18n)}</h3>
-          <code>
-            {' - '}
-            Errors:
-            {' '}
-            {errorCount}
-          </code>
+          <div className={`${baseClass}__heading-with-error`}>
+            <h3>
+              {getTranslation(label || name, i18n)}
+            </h3>
+
+            {fieldHasErrors && fieldErrorCount > 0 && (
+              <Pill
+                pillStyle="error"
+                rounded
+                className={`${baseClass}__header-error-pill`}
+              >
+                {`${fieldErrorCount} ${fieldErrorCount > 1 ? t('error:plural') : t('error:singular')}`}
+              </Pill>
+            )}
+          </div>
           <ul className={`${baseClass}__header-actions`}>
             <li>
               <button
@@ -367,6 +396,7 @@ const BlocksField: React.FC<Props> = (props) => {
                     rowCount={rows.length}
                     labels={labels}
                     path={path}
+                    rowErrorCount={row.childErrorPaths?.size || 0}
                   />
                 )}
               </DraggableSortableItem>
@@ -375,7 +405,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
           return null;
         })}
-        {!checkSkipValidation(value) && (
+        {!editingDefaultLocale && (
           <React.Fragment>
             {(rows.length < minRows || (required && rows.length === 0)) && (
               <Banner type="error">

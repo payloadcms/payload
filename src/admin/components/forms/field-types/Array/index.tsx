@@ -144,8 +144,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const hasMaxRows = maxRows && rows?.length >= maxRows;
   const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0) + (valid ? 0 : 1);
-  // TODO: change submitted var
-  const fieldHasErrors = !submitted && fieldErrorCount > 0;
+  const fieldHasErrors = submitted && fieldErrorCount > 0;
 
   const classes = [
     'field-type',
@@ -180,7 +179,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                 rounded
                 className={`${baseClass}__error-pill`}
               >
-                {`${path} ${fieldErrorCount} ${fieldErrorCount > 1 ? t('error:plural') : t('error:singular')}`}
+                {`${fieldErrorCount} ${fieldErrorCount > 1 ? t('error:plural') : t('error:singular')}`}
               </Pill>
             )}
           </div>

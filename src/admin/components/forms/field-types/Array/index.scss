@@ -13,14 +13,10 @@
     }
   }
 
-  &--has-error {
-    >.array-field__header .array-field__heading-with-error {
-      color: var(--theme-error-500);
-    }
-  }
 
-  &__error-pill {
+  &__error-pill, &__row-error-pill {
     margin-left: base(.5);
+    font-size: 10px;
   }
 
   &__error-count {
@@ -81,6 +77,26 @@
 
       &:hover {
         color: var(--theme-elevation-800);
+      }
+    }
+  }
+}
+
+html[data-theme=light] {
+  .array-field {
+    &--has-error {
+      >.array-field__header .array-field__heading-with-error {
+        color: var(--theme-error-750);
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .array-field {
+    &--has-error {
+      >.array-field__header .array-field__heading-with-error {
+        color: var(--theme-error-500);
       }
     }
   }
