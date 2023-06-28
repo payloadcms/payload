@@ -5,7 +5,6 @@ import { Payload } from '../../../payload';
 import { PayloadRequest } from '../../../express/types';
 import findVersions from '../findVersions';
 import { getDataLoader } from '../../../collections/dataloader';
-import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { TypeWithVersion } from '../../../versions/types';
 
@@ -42,7 +41,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   } = options;
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
-  const i18n = i18nInit(payload.config.i18n);
+  const i18n = payload.config.initializedi18n;
 
   if (!globalConfig) {
     throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`);

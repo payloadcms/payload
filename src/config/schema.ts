@@ -102,6 +102,7 @@ export default joi.object({
   }),
   email: joi.object(),
   i18n: joi.object(),
+  initializedi18n: joi.object(),
   defaultDepth: joi.number()
     .min(0)
     .max(30),

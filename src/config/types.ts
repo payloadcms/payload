@@ -8,7 +8,7 @@ import GraphQL from 'graphql';
 import { ConnectOptions } from 'mongoose';
 import React from 'react';
 import { LoggerOptions } from 'pino';
-import type { InitOptions as i18nInitOptions } from 'i18next';
+import type { i18n, InitOptions as i18nInitOptions } from 'i18next';
 import { Payload } from '../payload';
 import {
   AfterErrorHook,
@@ -376,6 +376,8 @@ export type Config = {
    * }
    */
   i18n?: i18nInitOptions;
+
+  initializedi18n?: i18n;
   /**
    * Define the absolute URL of your app including the protocol, for example `https://example.org`.
    * No paths allowed, only protocol, domain and (optionally) port.

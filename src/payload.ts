@@ -62,6 +62,8 @@ import { defaults as emailDefaults } from './email/defaults';
 import type { DatabaseAdapter } from '.';
 import { mongooseAdapter } from './mongoose';
 
+import { i18nInit } from './translations/init';
+
 /**
  * @description Payload
  */
@@ -189,6 +191,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       const loadConfig = require('./config/load').default;
       this.config = await loadConfig(this.logger);
     }
+
+    // init i18n. Not sure why we need to cast this as any
+    this.config.initializedi18n = i18nInit(this.config) as any;
 
     this.globals = {
       config: this.config.globals,

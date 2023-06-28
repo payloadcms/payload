@@ -4,7 +4,6 @@ import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import { getDataLoader } from '../../dataloader';
 import restoreVersion from '../restoreVersion';
-import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
@@ -39,7 +38,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
     throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
-  const i18n = i18nInit(payload.config.i18n);
+  const i18n = payload.config.initializedi18n;
   const req = {
     user,
     payloadAPI: 'local',

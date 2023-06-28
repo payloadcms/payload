@@ -7,7 +7,6 @@ import update from '../update';
 import { PayloadRequest } from '../../../express/types';
 import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
-import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
 import updateByID from '../updateByID';
 import { BulkOperationResult } from '../../config/types';
@@ -68,7 +67,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
 
-  const i18n = i18nInit(payload.config.i18n);
+  const i18n = payload.config.initializedi18n;
   const defaultLocale = payload.config.localization ? payload.config.localization?.defaultLocale : null;
 
   const req = {

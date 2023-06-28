@@ -4,7 +4,6 @@ import { getDataLoader } from '../../../collections/dataloader';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import findOne from '../findOne';
-import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
@@ -34,7 +33,7 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
   } = options;
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
-  const i18n = i18nInit(payload.config.i18n);
+  const i18n = payload.config.initializedi18n;
 
 
   if (!globalConfig) {
