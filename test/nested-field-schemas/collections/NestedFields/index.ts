@@ -194,28 +194,47 @@ export const NestedFieldCollection: CollectionConfig = {
     //   ],
     // },
     {
-      type: 'tabs',
-      tabs: [
+      type: 'array',
+      name: 'parentArray',
+      fields: [
         {
-          label: 'Home',
-          name: 'home',
-          fields: nestedFields,
-        },
-        {
-          label: 'Hero',
-          fields: nestedFields,
-        },
-      ],
-    },
-    {
-      type: 'blocks',
-      name: 'layout',
-      blocks: [
-        {
-          slug: 'block1',
-          fields: nestedFields,
+          type: 'array',
+          name: 'childArray',
+          required: true,
+          minRows: 2,
+          fields: [
+            {
+              type: 'text',
+              name: 'childArrayText',
+              required: true,
+            },
+          ],
         },
       ],
     },
+    // {
+    //   type: 'tabs',
+    //   tabs: [
+    //     {
+    //       label: 'Home',
+    //       name: 'home',
+    //       fields: nestedFields,
+    //     },
+    //     {
+    //       label: 'Hero',
+    //       fields: nestedFields,
+    //     },
+    //   ],
+    // },
+    // {
+    //   type: 'blocks',
+    //   name: 'layout',
+    //   blocks: [
+    //     {
+    //       slug: 'block1',
+    //       fields: nestedFields,
+    //     },
+    //   ],
+    // },
   ],
 };

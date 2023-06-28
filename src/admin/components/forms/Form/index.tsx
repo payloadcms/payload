@@ -92,15 +92,16 @@ const Form: React.FC<Props> = (props) => {
 
       for (let i = 0; i < pathSegments.length; i += 1) {
         const fieldPath = pathSegments.slice(0, i + 1).join('.');
-        const arrayField = { ...fields[fieldPath] };
+        const formField = { ...fields[fieldPath] };
 
-        if (arrayField && arrayField?.rows) {
+        if (formField && formField?.rows) {
+          // is array field
           const rowIndex = pathSegments[i + 1];
           const childFieldPath = pathSegments.slice(i + 1).join('.');
 
           // copy the array field
           if (!newArrayFieldsState[fieldPath]) {
-            newArrayFieldsState[fieldPath] = { ...arrayField };
+            newArrayFieldsState[fieldPath] = { ...formField };
           }
 
           if ('valid' in field && childFieldPath) {
@@ -340,8 +341,6 @@ const Form: React.FC<Props> = (props) => {
 
         toast.error(message);
       }
-
-      return;
     } catch (err) {
       setProcessing(false);
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Collapsible } from '../../../elements/Collapsible';
 import RenderFields from '../../RenderFields';
@@ -62,6 +62,10 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
     `${baseClass}__row`,
     rowErrorCount > 0 ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
   ].filter(Boolean).join(' ');
+
+  useEffect(() => {
+    console.log(path, rowErrorCount);
+  });
 
   return (
     <div

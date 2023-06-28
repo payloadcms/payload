@@ -104,18 +104,20 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       const pathSegments = splitPathByArrayFields(path);
       for (let i = 0; i < pathSegments.length; i += 1) {
         const fieldPath = pathSegments.slice(0, i + 1).join('.');
-        const arrayField = remainingFields?.[fieldPath];
+        const formField = remainingFields?.[fieldPath];
 
-        if (arrayField && 'rows' in arrayField) {
+        if (formField && 'rows' in formField) {
+          // is array or block field
           const segmentRowIndex = pathSegments[i + 1] ?? rowIndex;
-          const { childErrorPaths: parentChildErrorPaths } = arrayField.rows[segmentRowIndex];
+          const parentChildErrorPaths = new Set([...formField.rows[segmentRowIndex].childErrorPaths]);
+          // console.log(parentChildErrorPaths);
 
           parentChildErrorPaths.forEach((childPath) => {
             if (childPath.startsWith(`${path}.${rowIndex}`)) {
-              arrayField.rows[segmentRowIndex].childErrorPaths.delete(childPath);
-              arrayField.rowErrorCount = Math.max(0, arrayField.rowErrorCount - 1);
+              formField.rows[segmentRowIndex].childErrorPaths.delete(childPath);
             }
           });
+          formField.rowErrorCount = formField.rows.reduce((total, row) => total + row.childErrorPaths.size, 0);
         }
       }
 
@@ -130,6 +132,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         ...flattenRows(path, rows),
       };
 
+      console.log({ newState });
       return newState;
     }
 
