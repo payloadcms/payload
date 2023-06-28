@@ -47,6 +47,8 @@ if (process.env.NEXT_BUILD) {
     await nextBuild(path.join(__dirname, '../'))
     process.exit()
   })
+
+  return
 }
 
 // Attach Next.js routes and start the server

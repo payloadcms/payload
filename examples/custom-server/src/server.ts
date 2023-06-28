@@ -37,6 +37,8 @@ const start = async (): Promise<void> => {
       await nextBuild(path.join(__dirname, '../'))
       process.exit()
     })
+
+    return
   }
 
   const nextApp = next({
