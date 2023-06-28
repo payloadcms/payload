@@ -18,9 +18,10 @@ export const readMigrationFiles = async ({
     .map((file) => {
       return path.resolve(config.db.migrationDir, file);
     });
-  payload.logger.info({ files });
   return files.map((filePath) => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-dynamic-require
-    return require(filePath);
+    const migration = require(filePath) as Migration;
+    migration.name = path.basename(filePath).split('.')?.[0];
+    return migration;
   });
 };

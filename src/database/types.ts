@@ -236,7 +236,7 @@ type DeleteManyArgs = {
 type DeleteMany = (args: DeleteManyArgs) => Promise<Document>
 
 export type Migration = {
-  name: string
+  name?: string
   up: ({ payload }: { payload }) => Promise<boolean>
   down: ({ payload }: { payload }) => Promise<boolean>
 };
