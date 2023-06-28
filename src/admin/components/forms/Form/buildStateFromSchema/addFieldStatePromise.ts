@@ -135,7 +135,6 @@ export const addFieldStatePromise = async ({
         }
 
         fieldState.rows = rowMetadata;
-        fieldState.rowErrorCount = fieldState.rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0);
 
         // Add field to state
         state[`${path}${field.name}`] = fieldState;
@@ -216,7 +215,6 @@ export const addFieldStatePromise = async ({
         }
 
         fieldState.rows = rowMetadata;
-        fieldState.rowErrorCount = fieldState.rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0);
 
         // Add field to state
         state[`${path}${field.name}`] = fieldState;

@@ -76,9 +76,11 @@ const BlockRow: React.FC<BlockFieldProps> = ({
   const path = `${parentPath}.${rowIndex}`;
   const { i18n } = useTranslation();
 
+  const childErrorPathsCount = row.childErrorPaths?.size;
+
   const classNames = [
     `${baseClass}__row`,
-    rowErrorCount > 0 ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
+    childErrorPathsCount > 0 ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
   ].filter(Boolean).join(' ');
 
   return (
@@ -90,16 +92,11 @@ const BlockRow: React.FC<BlockFieldProps> = ({
         transform,
       }}
     >
-      <WatchChildErrors
-        path={path}
-        setErrorCount={setErrorCount}
-      />
-
       <Collapsible
         collapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
         className={classNames}
-        collapsibleStyle={rowErrorCount > 0 ? 'error' : 'default'}
+        collapsibleStyle={childErrorPathsCount > 0 ? 'error' : 'default'}
         key={row.id}
         dragHandleProps={{
           id: row.id,
@@ -121,13 +118,13 @@ const BlockRow: React.FC<BlockFieldProps> = ({
               path={`${path}.blockName`}
               readOnly={readOnly}
             />
-            {rowErrorCount > 0 && (
+            {childErrorPathsCount > 0 && (
               <Pill
                 pillStyle="error"
                 rounded
                 className={`${baseClass}__error-pill`}
               >
-                {rowErrorCount}
+                {childErrorPathsCount}
               </Pill>
             )}
           </div>
@@ -200,7 +197,6 @@ const BlocksField: React.FC<Props> = (props) => {
   const operation = useOperation();
   const { localization } = useConfig();
   const drawerSlug = useDrawerSlug('blocks-drawer');
-  const [errorCount, setErrorCount] = React.useState(0);
   const submitted = useFormSubmitted();
 
   const labels = {
@@ -281,8 +277,8 @@ const BlocksField: React.FC<Props> = (props) => {
   const hasMaxRows = maxRows && rows?.length >= maxRows;
 
   const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0);
-  // TODO: change submitted var
-  const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0;
+  // TODO: change !submitted to submitted
+  const fieldHasErrors = !submitted && fieldErrorCount + (valid ? 0 : 1) > 0;
 
   const classes = [
     'field-type',
@@ -354,11 +350,6 @@ const BlocksField: React.FC<Props> = (props) => {
         fieldValue={value}
       />
 
-      <WatchChildErrors
-        path={path}
-        setErrorCount={setErrorCount}
-      />
-
       <DraggableSortable
         ids={rows.map((row) => row.id)}
         onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
@@ -393,7 +384,6 @@ const BlocksField: React.FC<Props> = (props) => {
                     rowCount={rows.length}
                     labels={labels}
                     path={path}
-                    rowErrorCount={row.childErrorPaths?.size || 0}
                   />
                 )}
               </DraggableSortableItem>

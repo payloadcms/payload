@@ -106,7 +106,6 @@ const useField = <T, >(options: Options): FieldType<T> => {
         valid: false,
         errorMessage: undefined,
         rows: field?.rows,
-        rowErrorCount: field?.rowErrorCount || 0,
       };
 
       const validateOptions = {
@@ -147,7 +146,6 @@ const useField = <T, >(options: Options): FieldType<T> => {
     user,
     validate,
     field?.rows,
-    field?.rowErrorCount,
   ]);
 
   return result;

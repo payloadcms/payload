@@ -77,7 +77,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
 
     case 'UPDATE': {
       const newField = Object.entries(action).reduce((field, [key, value]) => {
-        if (['value', 'valid', 'errorMessage', 'disableFormData', 'initialValue', 'validate', 'condition', 'passesCondition', 'rows', 'rowErrorCount'].includes(key)) {
+        if (['value', 'valid', 'errorMessage', 'disableFormData', 'initialValue', 'validate', 'condition', 'passesCondition', 'rows'].includes(key)) {
           return {
             ...field,
             [key]: value,
@@ -117,7 +117,6 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
               formField.rows[segmentRowIndex].childErrorPaths.delete(childPath);
             }
           });
-          formField.rowErrorCount = formField.rows.reduce((total, row) => total + row.childErrorPaths.size, 0);
         }
       }
 
@@ -173,7 +172,6 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           value: rows.length,
           disableFormData: true,
           rows: rowsMetadata,
-          rowErrorCount: 0,
         },
       };
 
@@ -184,7 +182,6 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       const { rowIndex, path } = action;
       const { remainingFields, rows } = separateRows(path, state);
       const rowsMetadata = state[path]?.rows || [];
-      const rowErrorCount = state[path]?.rowErrorCount || 0;
 
       const duplicateRowMetadata = deepCopyObject(rowsMetadata[rowIndex]);
       if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectID().toHexString();
@@ -206,7 +203,6 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           value: rows.length,
           disableFormData: true,
           rows: rowsMetadata,
-          rowErrorCount,
         },
         ...flattenRows(path, rows),
       };
