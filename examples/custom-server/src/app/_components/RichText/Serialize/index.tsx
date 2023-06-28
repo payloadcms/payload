@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react'
 import escapeHTML from 'escape-html'
+import Link from 'next/link'
 
 type Node = {
   type: string
@@ -79,60 +80,70 @@ export const Serialize: SerializeFunction = ({ content, customRenderers }) => {
         switch (node.type) {
           case 'br':
             return <br key={i} />
+
           case 'h1':
             return (
               <h1 key={i}>
                 <Serialize content={node.children} customRenderers={customRenderers} />
               </h1>
             )
+
           case 'h2':
             return (
               <h2 key={i}>
                 <Serialize content={node.children} customRenderers={customRenderers} />
               </h2>
             )
+
           case 'h3':
             return (
               <h3 key={i}>
                 <Serialize content={node.children} customRenderers={customRenderers} />
               </h3>
             )
+
           case 'h4':
             return (
               <h4 key={i}>
                 <Serialize content={node.children} customRenderers={customRenderers} />
               </h4>
             )
+
           case 'h5':
             return (
               <h5 key={i}>
                 <Serialize content={node.children} customRenderers={customRenderers} />
               </h5>
             )
+
           case 'h6':
             return (
               <h6 key={i}>
                 <Serialize content={node.children} customRenderers={customRenderers} />
               </h6>
             )
+
           case 'quote':
             return (
               <blockquote key={i}>
                 <Serialize content={node.children} customRenderers={customRenderers} />
               </blockquote>
             )
+
           case 'ul':
             return (
               <ul key={i}>
                 <Serialize content={node.children} customRenderers={customRenderers} />
               </ul>
             )
+
           case 'ol':
             return (
               <ol key={i}>
                 <Serialize content={node.children} customRenderers={customRenderers} />
               </ol>
             )
+
           case 'li':
             return (
               <li key={i}>
@@ -142,7 +153,7 @@ export const Serialize: SerializeFunction = ({ content, customRenderers }) => {
 
           case 'link':
             return (
-              <a
+              <Link
                 href={escapeHTML(node.url)}
                 key={i}
                 {...(node.newTab
@@ -153,7 +164,7 @@ export const Serialize: SerializeFunction = ({ content, customRenderers }) => {
                   : {})}
               >
                 <Serialize content={node.children} customRenderers={customRenderers} />
-              </a>
+              </Link>
             )
 
           default:
