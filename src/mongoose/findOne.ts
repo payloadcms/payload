@@ -14,19 +14,17 @@ export const findOne: FindOne = async function findOne(this: MongooseAdapter,
     where,
   });
 
-  const doc = await Model.findOne(query);
+  const doc = await Model.findOne(query).lean();
 
   if (!doc) {
     return null;
   }
 
 
-  let result: Document = doc.toJSON({ virtuals: true });
+  let result: Document = JSON.parse(JSON.stringify(doc));
 
   // custom id type reset
   result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
   result = sanitizeInternalFields(result);
 
   return result;

@@ -40,13 +40,14 @@ export const findVersions: FindVersions = async function findVersions(this: Mong
   };
 
   const result = await Model.paginate(query, paginationOptions);
+  const docs = JSON.parse(JSON.stringify(result.docs));
 
   return {
     ...result,
-    docs: result.docs.map((doc) => {
-      const sanitizedDoc = JSON.parse(JSON.stringify(doc));
-      sanitizedDoc.id = sanitizedDoc._id;
-      return sanitizeInternalFields(sanitizedDoc);
+    docs: docs.map((doc) => {
+      // eslint-disable-next-line no-param-reassign
+      doc.id = doc._id;
+      return sanitizeInternalFields(doc);
     }),
   };
 };

@@ -15,12 +15,11 @@ export const createVersion: CreateVersion = async function createVersion(this: M
     updatedAt,
   });
 
-  let result: Document = doc.toJSON({ virtuals: true });
+  const result: Document = JSON.parse(JSON.stringify(doc));
   const verificationToken = doc._verificationToken;
 
   // custom id type reset
   result.id = result._id;
-  result = JSON.parse(JSON.stringify(result));
   if (verificationToken) {
     result._verificationToken = verificationToken;
   }

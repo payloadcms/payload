@@ -1,7 +1,5 @@
 import type { MongooseAdapter } from '.';
 import type { UpdateVersion } from '../database/types';
-import type { Document } from '../types';
-import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
 export const updateVersion: UpdateVersion = async function updateVersion(this: MongooseAdapter,
   { collectionSlug, where, locale, versionData }) {
@@ -18,14 +16,14 @@ export const updateVersion: UpdateVersion = async function updateVersion(this: M
     query,
     versionData,
     { new: true, lean: true },
-  );
+  ).lean();
 
-  let result: Document = doc.toJSON({ virtuals: true });
+  const result = JSON.parse(JSON.stringify(doc));
+
   const verificationToken = doc._verificationToken;
 
   // custom id type reset
   result.id = result._id;
-  result = JSON.parse(JSON.stringify(result));
   if (verificationToken) {
     result._verificationToken = verificationToken;
   }

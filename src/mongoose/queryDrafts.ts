@@ -78,19 +78,21 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(this: Mong
     result = aggregate.exec();
   }
 
+  const docs = JSON.parse(JSON.stringify(result.docs));
+
   return {
     ...result,
-    docs: result.docs.map((doc) => {
-      let sanitizedDoc = {
+    docs: docs.map((doc) => {
+      // eslint-disable-next-line no-param-reassign
+      doc = {
         _id: doc._id,
+        id: doc._id,
         ...doc.version,
         updatedAt: doc.updatedAt,
         createdAt: doc.createdAt,
       };
 
-      sanitizedDoc = JSON.parse(JSON.stringify(sanitizedDoc));
-      sanitizedDoc.id = sanitizedDoc._id;
-      return sanitizeInternalFields(sanitizedDoc);
+      return sanitizeInternalFields(doc);
     }),
   };
 };

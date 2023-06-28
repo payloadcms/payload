@@ -13,14 +13,12 @@ export const deleteOne: DeleteOne = async function deleteOne(this: MongooseAdapt
   });
 
 
-  const doc = await Model.findOneAndDelete(query);
+  const doc = await Model.findOneAndDelete(query).lean();
 
-  let result: Document = doc.toJSON({ virtuals: true });
+  let result: Document = JSON.parse(JSON.stringify(doc));
 
   // custom id type reset
   result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
   result = sanitizeInternalFields(result);
 
 

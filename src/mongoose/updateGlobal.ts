@@ -10,14 +10,13 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(this: Mong
   result = await Model.findOneAndUpdate(
     { globalType: slug },
     data,
-    { new: true },
-  );
+    { new: true, lean: true },
+  ).lean();
 
-  result = result.toJSON({ virtuals: true });
+  result = JSON.parse(JSON.stringify(result));
 
   // custom id type reset
   result.id = result._id;
-  result = JSON.parse(JSON.stringify(result));
   result = sanitizeInternalFields(result);
 
 

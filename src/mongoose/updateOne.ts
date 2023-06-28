@@ -19,8 +19,8 @@ export const updateOne: UpdateOne = async function updateOne(this: MongooseAdapt
     result = await Model.findOneAndUpdate(
       query,
       data,
-      { new: true },
-    );
+      { new: true, lean: true },
+    ).lean();
   } catch (error) {
     // Handle uniqueness error from MongoDB
     throw error.code === 11000 && error.keyValue
@@ -32,7 +32,7 @@ export const updateOne: UpdateOne = async function updateOne(this: MongooseAdapt
   }
 
   result = JSON.parse(JSON.stringify(result));
-  result.id = result._id as string | number;
+  result.id = result._id;
   result = sanitizeInternalFields(result);
 
 

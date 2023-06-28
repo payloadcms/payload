@@ -12,5 +12,5 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(this
     where,
   });
 
-  await VersionsModel.deleteMany(query);
+  await VersionsModel.deleteMany(query).lean();
 };
