@@ -57,7 +57,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
   }).lean();
 
   user = JSON.parse(JSON.stringify(user));
-  user = sanitizeInternalFields(user);
+  user = user ? sanitizeInternalFields(user) : null;
 
   if (!user) throw new APIError('Token is either invalid or has expired.');
 
