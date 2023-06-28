@@ -45,14 +45,11 @@ async function unlock(args: Args): Promise<boolean> {
   // Unlock
   // /////////////////////////////////////
 
-  const { docs } = await req.payload.db.find({
+  const user = await req.payload.db.findOne({
     collection: collectionConfig.slug,
     where: { email: { equals: data.email.toLowerCase() } },
-    limit: 1,
     locale,
   });
-
-  const [user] = docs;
 
   if (!user) return null;
 

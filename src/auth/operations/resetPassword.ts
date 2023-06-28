@@ -50,16 +50,13 @@ async function resetPassword(args: Arguments): Promise<Result> {
   // Reset Password
   // /////////////////////////////////////
 
-  const { docs } = await payload.db.find<any>({
+  const user = await payload.db.findOne<any>({
     collection: collectionConfig.slug,
-    limit: 1,
     where: {
       resetPasswordToken: { equals: data.token },
       resetPasswordExpiration: { greater_than: Date.now() },
     },
   });
-
-  const [user] = docs;
 
   if (!user) throw new APIError('Token is either invalid or has expired.');
 
@@ -77,7 +74,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
 
   const doc = await payload.db.updateOne({
     collection: collectionConfig.slug,
-    id: user.id,
+    where: { id: { equals: user.id } },
     data: user,
   });
 

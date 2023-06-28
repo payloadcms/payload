@@ -1,14 +1,12 @@
 import type { PaginateOptions } from 'mongoose';
 import type { MongooseAdapter } from '.';
-import { PaginatedDocs } from './types';
-import { FindArgs } from '../database/types';
+import type { Find } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
 
-export async function find<T = unknown>(
-  this: MongooseAdapter,
-  { collection, where, page, limit, sort, locale, pagination }: FindArgs,
-): Promise<PaginatedDocs<T>> {
+
+export const find: Find = async function find(this: MongooseAdapter,
+  { collection, where, page, limit, sort, locale, pagination }) {
   const Model = this.collections[collection];
 
   let useEstimatedCount = false;
@@ -27,7 +25,7 @@ export async function find<T = unknown>(
   const paginationOptions: PaginateOptions = {
     page,
     sort: sort ? sort.reduce((acc, cur) => {
-      acc[cur.property] = cur.order;
+      acc[cur.property] = cur.direction;
       return acc;
     }, {}) : undefined,
     limit,
@@ -42,13 +40,14 @@ export async function find<T = unknown>(
   };
 
   const result = await Model.paginate(query, paginationOptions);
+  const docs = JSON.parse(JSON.stringify(result.docs));
 
   return {
     ...result,
-    docs: result.docs.map((doc) => {
-      const sanitizedDoc = JSON.parse(JSON.stringify(doc));
-      sanitizedDoc.id = sanitizedDoc._id;
-      return sanitizeInternalFields(sanitizedDoc);
+    docs: docs.map((doc) => {
+      // eslint-disable-next-line no-param-reassign
+      doc.id = doc._id;
+      return sanitizeInternalFields(doc);
     }),
   };
-}
+};

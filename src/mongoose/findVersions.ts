@@ -1,14 +1,10 @@
 import type { MongooseAdapter } from '.';
-import { PaginatedDocs } from './types';
-import { FindVersionArgs } from '../database/types';
+import type { FindVersions } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
-import type { TypeWithVersion } from '../versions/types';
 
-export async function findVersions<T = unknown>(
-  this: MongooseAdapter,
-  { collection, where, page, limit, sort, locale, pagination, skip }: FindVersionArgs,
-): Promise<PaginatedDocs<TypeWithVersion<T>>> {
+export const findVersions: FindVersions = async function findVersions(this: MongooseAdapter,
+  { collection, where, page, limit, sort, locale, pagination, skip }) {
   const Model = this.versions[collection];
 
   let useEstimatedCount = false;
@@ -27,7 +23,7 @@ export async function findVersions<T = unknown>(
   const paginationOptions = {
     page,
     sort: sort ? sort.reduce((acc, cur) => {
-      acc[cur.property] = cur.order;
+      acc[cur.property] = cur.direction;
       return acc;
     }, {}) : undefined,
     limit,
@@ -44,13 +40,14 @@ export async function findVersions<T = unknown>(
   };
 
   const result = await Model.paginate(query, paginationOptions);
+  const docs = JSON.parse(JSON.stringify(result.docs));
 
   return {
     ...result,
-    docs: result.docs.map((doc) => {
-      const sanitizedDoc = JSON.parse(JSON.stringify(doc));
-      sanitizedDoc.id = sanitizedDoc._id;
-      return sanitizeInternalFields(sanitizedDoc);
+    docs: docs.map((doc) => {
+      // eslint-disable-next-line no-param-reassign
+      doc.id = doc._id;
+      return sanitizeInternalFields(doc);
     }),
   };
-}
+};

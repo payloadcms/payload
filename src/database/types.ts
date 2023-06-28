@@ -38,12 +38,12 @@ export interface DatabaseAdapter {
   /**
    * Open the connection to the database
    */
-  connect?: ({ config }: { config: SanitizedConfig }) => Promise<void>;
+  connect?: Connect;
 
   /**
    * Perform startup tasks required to interact with the database such as building Schema and models
    */
-  init?: ({ config }: { config: SanitizedConfig }) => Promise<void>;
+  init?: Init;
 
   /**
    * Terminate the connection with the database
@@ -53,7 +53,7 @@ export interface DatabaseAdapter {
   /**
    * Used to alias server only modules or make other changes to webpack configuration
    */
-  webpack?: (config: Configuration) => Configuration;
+  webpack?: Webpack;
 
   // migrations
   /**
@@ -112,22 +112,35 @@ export interface DatabaseAdapter {
    */
   commitTransaction?: () => Promise<boolean>;
 
-  // versions
-  queryDrafts: <T = TypeWithID>(args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>;
+  queryDrafts: QueryDrafts;
 
-  // operations
-  find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>;
-
-  findGlobal: FindGlobal;
-
-  findVersions: <T = TypeWithID>(args: FindVersionArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
-  findGlobalVersions: <T = TypeWithID>(args: FindGlobalVersionArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
+  // operations - collections
+  find: Find;
   findOne: FindOne;
+
   create: Create;
   updateOne: UpdateOne;
   deleteOne: DeleteOne;
-  deleteMany: DeleteMany;
+
+  // operations - globals
+  findGlobal: FindGlobal;
+  createGlobal: CreateGlobal;
+  updateGlobal: UpdateGlobal;
+
+
+  // versions
+  findVersions: FindVersions;
+  findGlobalVersions: FindGlobalVersions;
+  createVersion: CreateVersion;
+  updateVersion: UpdateVersion;
+  deleteVersions: DeleteVersions;
 }
+
+export type Init = ({ config }: { config: SanitizedConfig }) => Promise<void>;
+
+export type Connect = ({ config }: { config: SanitizedConfig }) => Promise<void>
+
+export type Webpack = (config: Configuration) => Configuration;
 
 export type QueryDraftsArgs = {
   collection: string
@@ -138,6 +151,17 @@ export type QueryDraftsArgs = {
   sort?: SortArgs
   locale?: string
 }
+
+export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>;
+
+export type FindOneArgs = {
+  collection: string
+  where?: Where
+  locale?: string
+}
+
+
+export type FindOne = <T = TypeWithID>(args: FindOneArgs) => Promise<T|null>
 
 export type FindArgs = {
   collection: string
@@ -152,7 +176,9 @@ export type FindArgs = {
   locale?: string
 }
 
-export type FindVersionArgs = {
+export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>;
+
+export type FindVersionsArgs = {
   collection: string
   where?: Where
   page?: number
@@ -164,7 +190,10 @@ export type FindVersionArgs = {
   locale?: string
 }
 
-export type FindGlobalVersionArgs = {
+export type FindVersions = <T = TypeWithID>(args: FindVersionsArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
+
+
+export type FindGlobalVersionsArgs = {
   global: string
   where?: Where
   page?: number
@@ -179,53 +208,81 @@ export type FindGlobalVersionArgs = {
 export type FindGlobalArgs = {
   slug: string
   locale?: string
-  where: Where
+  where?: Where
 }
 
-type FindGlobal = <T extends GlobalsTypeWithID = any>(args: FindGlobalArgs) => Promise<T>
+export type FindGlobal = <T extends GlobalsTypeWithID = any>(args: FindGlobalArgs) => Promise<T>
 
 
-export type FindOneArgs = {
+export type CreateGlobalArgs<T extends GlobalsTypeWithID = any> = {
+  slug: string
+  data: T
+}
+export type CreateGlobal = <T extends GlobalsTypeWithID = any>(args: CreateGlobalArgs<T>) => Promise<T>
+
+
+export type UpdateGlobalArgs<T extends GlobalsTypeWithID = any> = {
+  slug: string
+  data: T
+}
+export type UpdateGlobal = <T extends GlobalsTypeWithID = any>(args: UpdateGlobalArgs<T>) => Promise<T>
+
+
+export type FindGlobalVersions = <T = TypeWithID>(args: FindGlobalVersionsArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
+
+export type DeleteVersionsArgs = {
   collection: string
   where: Where
   locale?: string
-  sort?: {
-    [key: string]: string,
-  }
+};
+
+export type CreateVersionArgs<T = TypeWithID> = {
+  collectionSlug: string
+  /** ID of the parent document for which the version should be created for */
+  parent: string | number
+  versionData: T
+  autosave: boolean
+  createdAt: string
+  updatedAt: string
 }
 
+export type CreateVersion = <T = TypeWithID>(args: CreateVersionArgs<T>) => Promise<TypeWithVersion<T>>;
 
-type FindOne = (args: FindOneArgs) => Promise<PaginatedDocs>
+export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>;
+
+
+export type UpdateVersionArgs<T = TypeWithID> = {
+  collectionSlug: string,
+  where: Where,
+  locale?: string,
+  versionData: T
+}
+
+export type UpdateVersion = <T = TypeWithID>(args: UpdateVersionArgs<T>) => Promise<TypeWithVersion<T>>
+
 
 export type CreateArgs = {
   collection: string
   data: Record<string, unknown>
 }
 
-type Create = (args: CreateArgs) => Promise<Document>
+export type Create = (args: CreateArgs) => Promise<Document>
 
 export type UpdateOneArgs = {
   collection: string,
   data: Record<string, unknown>,
-  id: string | number,
+  where: Where,
   locale?: string
 }
 
-type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
+export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
 export type DeleteOneArgs = {
-  collection: string,
-  id: string | number,
-}
-
-type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
-
-type DeleteManyArgs = {
   collection: string,
   where: Where,
 }
 
-type DeleteMany = (args: DeleteManyArgs) => Promise<Document>
+export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
 
 export type BuildSchema<TSchema> = (args: {
   config: SanitizedConfig,
@@ -325,7 +382,7 @@ export type FieldGenerator<TSchema, TField> = {
 
 export type SortArgs = {
   property: string
-  order: SortOrder
+  direction: SortDirection
 }[]
 
-export type SortOrder = 'asc' | 'desc';
+export type SortDirection = 'asc' | 'desc';

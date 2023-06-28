@@ -2,13 +2,12 @@
 import memoize from 'micro-memoize';
 import { PayloadRequest } from '../../express/types';
 import { Collection, TypeWithID } from '../config/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { combineQueries } from '../../database/combineQueries';
-import { FindArgs } from '../../database/types';
+import type { FindOneArgs } from '../../database/types';
 
 export type Arguments = {
   collection: Collection
@@ -68,23 +67,22 @@ async function findByID<T extends TypeWithID>(
   if (accessResult === false) return null;
 
 
-  const findArgs: FindArgs = {
+  const findOneArgs: FindOneArgs = {
     collection: collectionConfig.slug,
     where: combineQueries({ id: { equals: id } }, accessResult),
     locale,
-    limit: 1,
   };
 
   // /////////////////////////////////////
   // Find by ID
   // /////////////////////////////////////
 
-  if (!findArgs.where.and[0].id) throw new NotFound(t);
+  if (!findOneArgs.where.and[0].id) throw new NotFound(t);
 
   if (!req.findByID) req.findByID = {};
 
   if (!req.findByID[collectionConfig.slug]) {
-    const nonMemoizedFindByID = async (query: FindArgs) => (await req.payload.db.find(query)).docs[0];
+    const nonMemoizedFindByID = async (query: FindOneArgs) => req.payload.db.findOne(query);
 
     req.findByID[collectionConfig.slug] = memoize(nonMemoizedFindByID, {
       isPromise: true,
@@ -95,7 +93,7 @@ async function findByID<T extends TypeWithID>(
     });
   }
 
-  let result = await req.findByID[collectionConfig.slug](findArgs) as T;
+  let result = await req.findByID[collectionConfig.slug](findOneArgs) as T;
 
   if (!result) {
     if (!disableErrors) {
@@ -108,7 +106,6 @@ async function findByID<T extends TypeWithID>(
   // Clone the result - it may have come back memoized
   result = JSON.parse(JSON.stringify(result));
 
-  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // Replace document with draft if available
@@ -134,7 +131,7 @@ async function findByID<T extends TypeWithID>(
 
     result = await hook({
       req,
-      query: findArgs.where,
+      query: findOneArgs.where,
       doc: result,
     }) || result;
   }, Promise.resolve());
@@ -162,7 +159,7 @@ async function findByID<T extends TypeWithID>(
 
     result = await hook({
       req,
-      query: findArgs.where,
+      query: findOneArgs.where,
       doc: result,
     }) || result;
   }, Promise.resolve());

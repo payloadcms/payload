@@ -1,14 +1,10 @@
 import type { MongooseAdapter } from '.';
-import { PaginatedDocs } from './types';
-import { FindGlobalVersionArgs } from '../database/types';
+import type { FindGlobalVersions } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
-import type { TypeWithVersion } from '../versions/types';
 
-export async function findGlobalVersions<T = unknown>(
-  this: MongooseAdapter,
-  { global, where, page, limit, sort, locale, pagination, skip }: FindGlobalVersionArgs,
-): Promise<PaginatedDocs<TypeWithVersion<T>>> {
+export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(this: MongooseAdapter,
+  { global, where, page, limit, sort, locale, pagination, skip }) {
   const Model = this.versions[global];
 
   let useEstimatedCount = false;
@@ -28,7 +24,7 @@ export async function findGlobalVersions<T = unknown>(
   const paginationOptions = {
     page,
     sort: sort ? sort.reduce((acc, cur) => {
-      acc[cur.property] = cur.order;
+      acc[cur.property] = cur.direction;
       return acc;
     }, {}) : undefined,
     limit,
@@ -45,13 +41,14 @@ export async function findGlobalVersions<T = unknown>(
   };
 
   const result = await Model.paginate(query, paginationOptions);
+  const docs = JSON.parse(JSON.stringify(result.docs));
 
   return {
     ...result,
-    docs: result.docs.map((doc) => {
-      const sanitizedDoc = JSON.parse(JSON.stringify(doc));
-      sanitizedDoc.id = sanitizedDoc._id;
-      return sanitizeInternalFields(sanitizedDoc);
+    docs: docs.map((doc) => {
+      // eslint-disable-next-line no-param-reassign
+      doc.id = doc._id;
+      return sanitizeInternalFields(doc);
     }),
   };
-}
+};

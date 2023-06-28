@@ -18,7 +18,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
 import { combineQueries } from '../../database/combineQueries';
-import { FindArgs } from '../../database/types';
+import type { FindOneArgs } from '../../database/types';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -96,18 +96,17 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   // /////////////////////////////////////
 
 
-  const findArgs: FindArgs = {
+  const findOneArgs: FindOneArgs = {
     collection: collectionConfig.slug,
     where: combineQueries({ id: { equals: id } }, accessResults),
     locale,
-    limit: 1,
   };
 
   const docWithLocales = await getLatestCollectionVersion({
     payload,
     config: collectionConfig,
     id,
-    query: findArgs,
+    query: findOneArgs,
   });
 
   if (!docWithLocales && !hasWherePolicy) throw new NotFound(t);
@@ -233,7 +232,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     result = await req.payload.db.updateOne({
       collection: collectionConfig.slug,
       locale,
-      id,
+      where: { id: { equals: id } },
       data: dataToUpdate,
     });
   }

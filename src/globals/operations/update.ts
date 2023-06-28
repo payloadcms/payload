@@ -1,5 +1,6 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
+import type { Where } from '../../types';
 import { SanitizedGlobalConfig } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
 import { beforeChange } from '../../fields/hooks/beforeChange';
@@ -10,11 +11,10 @@ import { PayloadRequest } from '../../express/types';
 import { saveVersion } from '../../versions/saveVersion';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion';
-import { combineQueries } from '../../database/combineQueries';
 
 type Args<T extends { [field: string | number | symbol]: unknown }> = {
   globalConfig: SanitizedGlobalConfig
-  slug: string | number | symbol
+  slug: string
   req: PayloadRequest
   depth?: number
   overrideAccess?: boolean
@@ -34,11 +34,6 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     req: {
       payload,
       locale,
-      payload: {
-        globals: {
-          Model,
-        },
-      },
     },
     depth,
     overrideAccess,
@@ -61,24 +56,17 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   // Retrieve document
   // /////////////////////////////////////
 
-  const query = await Model.buildQuery({
-    where: combineQueries({ globalType: { equals: slug } }, accessResults),
-    payload,
-    locale,
-    overrideAccess,
-    globalSlug: slug,
-  });
+  const query: Where = overrideAccess ? undefined : accessResults as Where;
 
   // /////////////////////////////////////
   // 2. Retrieve document
   // /////////////////////////////////////
-
   const { global, globalExists } = await getLatestGlobalVersion({
     payload,
-    Model,
     config: globalConfig,
-    query,
-    lean: true,
+    slug,
+    where: query,
+    locale,
   });
 
   let globalJSON: Record<string, unknown> = {};
@@ -161,19 +149,17 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 
   if (!shouldSaveDraft) {
     if (globalExists) {
-      result = await Model.findOneAndUpdate(
-        { globalType: slug },
-        result,
-        { new: true },
-      );
+      result = await payload.db.updateGlobal({
+        slug,
+        data: result,
+      });
     } else {
-      result.globalType = slug;
-      result = await Model.create(result);
+      result = await payload.db.createGlobal({
+        slug,
+        data: result,
+      });
     }
   }
-
-  result = JSON.parse(JSON.stringify(result));
-  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // Create version

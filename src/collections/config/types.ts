@@ -4,7 +4,7 @@ import { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateM
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Where } from '../../types';
+import type { Where } from '../../types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
@@ -29,6 +29,7 @@ interface PassportLocalModel {
 }
 
 export interface CollectionModel extends Model<any>, PaginateModel<any>, AggregatePaginateModel<any>, PassportLocalModel {
+  /** buildQuery is used to transform payload's where operator into what can be used by mongoose (e.g. id => _id) */
   buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>> // TODO: Delete this
 }
 

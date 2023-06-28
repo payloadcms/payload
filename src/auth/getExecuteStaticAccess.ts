@@ -42,13 +42,10 @@ const getExecuteStaticAccess = (config: SanitizedCollectionConfig) => async (req
           });
         }
 
-        const { docs } = await req.payload.db.find({
+        const doc = await req.payload.db.findOne({
           collection: config.slug,
           where: queryToBuild,
-          limit: 1,
         });
-
-        const doc = docs[0];
 
         if (!doc) {
           throw new Forbidden(req.t);

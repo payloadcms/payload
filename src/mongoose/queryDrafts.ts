@@ -1,6 +1,5 @@
 import type { MongooseAdapter } from '.';
-import { PaginatedDocs } from './types';
-import { QueryDraftsArgs } from '../database/types';
+import type { QueryDrafts } from '../database/types';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
@@ -11,10 +10,8 @@ type AggregateVersion<T> = {
   createdAt: string
 }
 
-export async function queryDrafts<T = unknown>(
-  this: MongooseAdapter,
-  { collection, where, page, limit, sort, locale, pagination }: QueryDraftsArgs,
-): Promise<PaginatedDocs<T>> {
+export const queryDrafts: QueryDrafts = async function queryDrafts<T>(this: MongooseAdapter,
+  { collection, where, page, limit, sort, locale, pagination }) {
   const VersionModel = this.versions[collection];
 
   const versionQuery = await VersionModel.buildQuery({
@@ -66,7 +63,7 @@ export async function queryDrafts<T = unknown>(
       },
       sort: sort ? sort.reduce((acc, cur) => {
         let sanitizedSortProperty = cur.property;
-        const sanitizedSortOrder = cur.order === 'asc' ? 1 : -1;
+        const sanitizedSortOrder = cur.direction === 'asc' ? 1 : -1;
 
         if (!['createdAt', 'updatedAt', '_id'].includes(cur.property)) {
           sanitizedSortProperty = `version.${cur.property}`;
@@ -81,19 +78,21 @@ export async function queryDrafts<T = unknown>(
     result = aggregate.exec();
   }
 
+  const docs = JSON.parse(JSON.stringify(result.docs));
+
   return {
     ...result,
-    docs: result.docs.map((doc) => {
-      let sanitizedDoc = {
+    docs: docs.map((doc) => {
+      // eslint-disable-next-line no-param-reassign
+      doc = {
         _id: doc._id,
+        id: doc._id,
         ...doc.version,
         updatedAt: doc.updatedAt,
         createdAt: doc.createdAt,
       };
 
-      sanitizedDoc = JSON.parse(JSON.stringify(sanitizedDoc));
-      sanitizedDoc.id = sanitizedDoc._id;
-      return sanitizeInternalFields(sanitizedDoc);
+      return sanitizeInternalFields(doc);
     }),
   };
-}
+};

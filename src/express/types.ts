@@ -5,7 +5,7 @@ import { UploadedFile } from 'express-fileupload';
 import { Payload } from '../payload';
 import { Collection, TypeWithID } from '../collections/config/types';
 import { User } from '../auth/types';
-import { FindArgs } from '../database/types';
+import type { FindOneArgs } from '../database/types';
 
 /** Express request with some Payload related context added */
 export declare type PayloadRequest<U = any> = Request & {
@@ -46,6 +46,6 @@ export declare type PayloadRequest<U = any> = Request & {
   payloadUploadSizes?: Record<string, Buffer>;
   /** Cache of documents related to the current request */
   findByID?: {
-    [slug: string]: (q: FindArgs) => Promise<TypeWithID>;
+    [slug: string]: (q: FindOneArgs) => Promise<TypeWithID>;
   };
 };

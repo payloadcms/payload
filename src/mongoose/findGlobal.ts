@@ -1,16 +1,14 @@
 import type { MongooseAdapter } from '.';
-import { FindGlobalArgs } from '../database/types';
+import { combineQueries } from '../database/combineQueries';
+import type { FindGlobal } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
-import { TypeWithID } from '../globals/config/types';
 
-export async function findGlobal<T extends TypeWithID = any>(
-  this: MongooseAdapter,
-  { slug, locale, where }: FindGlobalArgs,
-): Promise<T> {
+export const findGlobal: FindGlobal = async function findGlobal(this: MongooseAdapter,
+  { slug, locale, where }) {
   const Model = this.globals;
 
   const query = await Model.buildQuery({
-    where,
+    where: combineQueries({ globalType: { equals: slug } }, where),
     payload: this.payload,
     locale,
     globalSlug: slug,
@@ -19,8 +17,8 @@ export async function findGlobal<T extends TypeWithID = any>(
   let doc = await Model.findOne(query).lean() as any;
 
   if (!doc) {
-    doc = {};
-  } else if (doc._id) {
+    return null;
+  } if (doc._id) {
     doc.id = doc._id;
     delete doc._id;
   }
@@ -30,4 +28,4 @@ export async function findGlobal<T extends TypeWithID = any>(
 
 
   return doc;
-}
+};

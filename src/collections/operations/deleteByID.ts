@@ -78,14 +78,12 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   // Retrieve document
   // /////////////////////////////////////
 
-  const { docs } = await req.payload.db.find({
+  const docToDelete = await req.payload.db.findOne({
     collection: collectionConfig.slug,
     where: combineQueries({ id: { equals: id } }, accessResults),
     locale: req.locale,
-    limit: 1,
   });
 
-  const [docToDelete] = docs;
 
   if (!docToDelete && !hasWhereAccess) throw new NotFound(t);
   if (!docToDelete && hasWhereAccess) throw new Forbidden(t);
@@ -100,7 +98,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
 
   let result = await req.payload.db.deleteOne({
     collection: collectionConfig.slug,
-    id,
+    where: { id: { equals: id } },
   });
 
 

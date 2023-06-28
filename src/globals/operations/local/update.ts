@@ -56,7 +56,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return update<TSlug>({
-    slug: globalSlug,
+    slug: globalSlug as string,
     data,
     depth,
     globalConfig,

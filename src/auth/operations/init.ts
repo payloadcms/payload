@@ -6,13 +6,11 @@ async function init(args: { req: PayloadRequest, collection: string }): Promise<
     collection: slug,
   } = args;
 
-  const { docs } = await payload.db.find({
+  const doc = await payload.db.findOne({
     collection: slug,
-    limit: 1,
-    pagination: false,
   });
 
-  return docs.length === 1;
+  return !!doc;
 }
 
 export default init;

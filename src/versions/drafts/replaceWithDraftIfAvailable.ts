@@ -1,4 +1,3 @@
-import { Payload } from '../../payload';
 import { docHasTimestamps, PayloadRequest, Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth';
 import { AccessResult } from '../../config/types';
@@ -7,7 +6,7 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
 import { combineQueries } from '../../database/combineQueries';
-import { FindVersionArgs } from '../../database/types';
+import type { FindVersionsArgs } from '../../database/types';
 
 type Arguments<T> = {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
@@ -58,18 +57,18 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   }
 
 
-  const findVersionArgs: FindVersionArgs = {
+  const findVersionsArgs: FindVersionsArgs = {
     locale: req.locale,
     where: combineQueries(queryToBuild, versionAccessResult),
     collection: entity.slug,
     limit: 1,
     sort: [{
       property: 'updatedAt',
-      order: 'desc',
+      direction: 'desc',
     }],
   };
 
-  const { docs: versionDocs } = await req.payload.db.findVersions<T>(findVersionArgs);
+  const { docs: versionDocs } = await req.payload.db.findVersions<T>(findVersionsArgs);
 
   let draft = versionDocs[0];
 
