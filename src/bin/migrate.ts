@@ -15,7 +15,7 @@ export const migrate = async (args: string[]): Promise<void> => {
   }
 
   switch (args[0]) {
-    case 'migrate:migrate':
+    case 'migrate':
       await adapter.migrate(adapter);
       break;
     case 'migrate:status':

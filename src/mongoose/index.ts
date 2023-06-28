@@ -1,6 +1,7 @@
+/* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { ConnectOptions } from 'mongoose';
 import fs from 'fs';
-import type { DatabaseAdapter } from '../database/types';
+import type { DatabaseAdapter, Migration } from '../database/types';
 import { connect } from './connect';
 import { init } from './init';
 import { webpack } from './webpack';
@@ -13,6 +14,7 @@ import { findVersions } from './findVersions';
 import { findGlobalVersions } from './findGlobalVersions';
 import type { Payload } from '../index';
 import { slugify } from '../utilities/slugify';
+import { readMigrationFiles } from '../database/migrations/readMigrationFiles';
 
 export interface Args {
   payload: Payload;
@@ -39,6 +41,8 @@ export type MongooseAdapter = DatabaseAdapter &
 const migrationTemplate = `
 import payload, { Payload } from 'payload';
 
+export const name = '{{NAME}}';
+
 export async function up(payload: Payload): Promise<void> {
   // Migration code
 };
@@ -48,7 +52,11 @@ export async function down(payload: Payload): Promise<void> {
 };
 `;
 
-export function mongooseAdapter({ payload, url, connectOptions }: Args): MongooseAdapter {
+export function mongooseAdapter({
+  payload,
+  url,
+  connectOptions,
+}: Args): MongooseAdapter {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   return {
@@ -60,8 +68,43 @@ export function mongooseAdapter({ payload, url, connectOptions }: Args): Mongoos
     connect,
     init,
     webpack,
-    migrate: async () => null,
-    migrateStatus: async () => null,
+    migrate: async () => {
+      const migrationFiles = await readMigrationFiles({ payload });
+      const migrationQuery = await payload.find({
+        collection: 'payload-migrations',
+      });
+
+      const existingMigrations = migrationQuery.docs;
+      payload.logger.info({ existingMigrations });
+
+      // Execute 'up' function for each migration sequentially
+      for (const migration of migrationFiles) {
+        payload.logger.info({ msg: `Executing migration ${migration.name}...` });
+        await migration.up({ payload });
+        payload.logger.info({ msg: `${migration.name} done.` });
+
+        // Save migration to database
+        await payload.update({
+          collection: 'payload-migrations',
+          id: migration.name,
+          data: {
+            name: migration.name,
+            executed: true,
+          },
+        });
+      }
+    },
+    migrateStatus: async () => {
+      const migrationFiles = await readMigrationFiles({ payload });
+      const migrationQuery = await payload.find({
+        collection: 'payload-migrations',
+      });
+
+      const existingMigrations = migrationQuery.docs;
+      payload.logger.info({ existingMigrations });
+
+      // TODO: Check if migration has been run
+    },
     migrateDown: async () => null,
     migrateRefresh: async () => null,
     migrateReset: async () => null,
@@ -73,10 +116,17 @@ export function mongooseAdapter({ payload, url, connectOptions }: Args): Mongoos
         fs.mkdirSync(migrationDir);
       }
 
-      const timestamp = new Date().toISOString().split('.')[0].replace(/[^\d]/gi, '');
-      const fileName = `${timestamp}-${slugify(migrationName)}.ts`;
+      const timestamp = new Date()
+        .toISOString()
+        .split('.')[0]
+        .replace(/[^\d]/gi, '');
+      const slugifiedName = slugify(migrationName);
+      const fileName = `${timestamp}-${slugifiedName}.ts`;
       const filePath = `${migrationDir}/${fileName}`;
-      fs.writeFileSync(filePath, migrationTemplate);
+      fs.writeFileSync(
+        filePath,
+        migrationTemplate.replace('{{NAME}}', slugifiedName),
+      );
       payload.logger.info({ msg: `Migration created at ${filePath}` });
     },
     transaction: async () => true,

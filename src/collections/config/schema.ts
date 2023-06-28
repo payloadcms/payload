@@ -29,10 +29,15 @@ const collectionSchema = joi.object().keys({
     admin: joi.func(),
   }),
   defaultSort: joi.string(),
-  graphQL: joi.object().keys({
-    singularName: joi.string(),
-    pluralName: joi.string(),
-  }),
+  graphQL: joi.alternatives().try(
+    joi.object().keys(
+      {
+        singularName: joi.string(),
+        pluralName: joi.string(),
+      },
+    ),
+    joi.boolean(),
+  ),
   typescript: joi.object().keys({
     interface: joi.string(),
   }),
