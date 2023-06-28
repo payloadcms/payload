@@ -2,12 +2,10 @@
 import type { ConnectOptions } from 'mongoose';
 import mongoose from 'mongoose';
 
-import { SanitizedConfig } from 'payload/config';
 import type { MongooseAdapter } from '.';
 
 export async function connect(
   this: MongooseAdapter,
-  { config }: { config: SanitizedConfig },
 ): Promise<void> {
   let urlToConnect = this.url;
   let successfulConnectionMessage = 'Connected to MongoDB server successfully!';

@@ -4,7 +4,6 @@ export const migrate = async (args: string[]): Promise<void> => {
   // Barebones instance to access database adapter
   await payload.init({
     secret: '--unused--',
-    mongoURL: false,
     local: true,
   });
 

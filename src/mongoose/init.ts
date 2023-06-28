@@ -2,7 +2,6 @@
 import mongoose from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
-import { SanitizedConfig } from 'payload/config';
 import { buildVersionCollectionFields } from '../versions/buildCollectionFields';
 import getBuildQueryPlugin from './queries/buildQuery';
 import buildCollectionSchema from './models/buildCollectionSchema';
@@ -15,7 +14,6 @@ import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
 
 export async function init(
   this: MongooseAdapter,
-  { config }: { config: SanitizedConfig },
 ): Promise<void> {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     const schema = buildCollectionSchema(collection, this.payload.config);

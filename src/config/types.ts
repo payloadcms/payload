@@ -81,7 +81,7 @@ export type InitOptions = {
   /** Express app for Payload to use */
   express?: Express;
   /** MongoDB connection URL, starts with `mongo` */
-  mongoURL: string | false;
+  mongoURL?: string | false;
   /** Extra configuration options that will be passed to MongoDB */
   mongoOptions?: ConnectOptions & {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */

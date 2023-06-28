@@ -160,7 +160,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       );
     }
 
-    if (options.mongoURL !== false && typeof options.mongoURL !== 'string') {
+    if (!options.local && options.mongoURL !== false && typeof options.mongoURL !== 'string') {
       throw new Error('Error: missing MongoDB connection URL.');
     }
 
@@ -211,8 +211,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     }
 
     this.db = this.config.db;
+    this.db.payload = this;
 
-    if (this.mongoURL) {
+    if (this.mongoURL || this.db.connect) {
       mongoose.set('strictQuery', false);
       if (this.db?.connect) {
         this.mongoMemoryServer = await this.db.connect({ config: this.config });

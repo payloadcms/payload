@@ -4,6 +4,7 @@ import { initHTTP } from './initHTTP';
 import { Payload as LocalPayload, BasePayload } from './payload';
 
 export { DatabaseAdapter } from './database/types';
+export { mongooseAdapter } from './mongoose';
 
 export { getPayload } from './payload';
 
