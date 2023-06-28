@@ -46,6 +46,6 @@
     "nodemon": "^2.0.6",
     "prettier": "^2.7.1",
     "ts-node": "^9.1.1",
-    "typescript": "^5.1.5"
+    "typescript": "^4.8.4"
   }
 }

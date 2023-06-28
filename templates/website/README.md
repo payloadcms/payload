@@ -1,6 +1,6 @@
 # Payload Website Template
 
-A template for [Payload](https://github.com/payloadcms/payload) to power websites from small to enterprise.
+A template for [Payload](https://github.com/payloadcms/payload) to power websites from small to enterprise. This repo may have been created by running `npx create-payload-app` and selecting the "website" template or by cloning this template on [Payload Cloud](https://payloadcms.com/new/clone/blank).
 
 Core features:
 
