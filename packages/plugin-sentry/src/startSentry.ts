@@ -2,18 +2,18 @@
 /* eslint-disable no-console */
 import * as Sentry from '@sentry/node'
 import type { NextFunction, Request, Response } from 'express'
-import express from 'express'
+import type express from 'express'
+import type { Payload } from 'payload/dist/payload'
 
 import type { PluginOptions } from './types'
 
-export const startSentry = (pluginOptions: PluginOptions): void => {
+export const startSentry = (pluginOptions: PluginOptions, payload: Payload): void => {
   const { dsn, options } = pluginOptions
+  const { express: app } = payload
 
-  if (!dsn) return
+  if (!dsn || !app) return
 
   try {
-    const app = express()
-
     Sentry.init({
       ...options?.init,
       dsn: dsn,
