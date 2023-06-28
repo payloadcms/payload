@@ -246,7 +246,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                 rowIndex={i}
                 indexPath={indexPath}
                 labels={labels}
-                rowErrorCount={row.childErrorPaths?.size || 0}
               />
             )}
           </DraggableSortableItem>

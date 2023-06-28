@@ -21,21 +21,12 @@ import wait from '../../../../utilities/wait';
 import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
-import { Fields, Context as FormContextType, FormField, GetDataByPath, Props, SubmitOptions } from './types';
+import { Fields, Context as FormContextType, FormField, GetDataByPath, Props, Row, SubmitOptions } from './types';
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
 import { WatchFormErrors } from './WatchFormErrors';
-
-/**
-  Turns: 'arrayField.0.group123field.arrayField.0.textField'
-
-  Into: ['arrayField', '0', 'group123field.arrayField', '0', 'textField']
-*/
-function splitPathByArrayFields(str) {
-  const regex = /\.(\d+)\./g;
-  return str.split(regex).filter(Boolean);
-}
+import { splitPathByArrayFields } from '../../../../utilities/splitPathByArrayFields';
 
 const baseClass = 'form';
 
@@ -82,53 +73,57 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.fields = fields;
   contextRef.current.dispatchFields = dispatchFields;
 
-  // loops over all flattened field state
-  const calculateNestedErrorPaths = useCallback(() => {
-    const pathErrorCountsMap = new Map();
-    const newArrayFieldsState: { [key: string]: FormField } = {};
+  // Build a current set of child errors for all rows in form state
+  const buildRowErrors = useCallback(() => {
+    const existingFieldRows: { [path: string]: Row[] } = {};
+    const newFieldRows: { [path: string]: Row[] } = {};
 
     Object.entries(fields).forEach(([path, field]) => {
       const pathSegments = splitPathByArrayFields(path);
 
       for (let i = 0; i < pathSegments.length; i += 1) {
         const fieldPath = pathSegments.slice(0, i + 1).join('.');
-        const formField = { ...fields[fieldPath] };
+        const formField = fields?.[fieldPath];
 
-        if (formField && formField?.rows) {
-          // is array field
+        // Is this an array or blocks field?
+        if (Array.isArray(formField?.rows)) {
+          // Keep a reference to the existing row state
+          existingFieldRows[fieldPath] = formField.rows;
+
+          // A new row state will be used to compare
+          // against the old state later,
+          // to see if we need to dispatch an update
+          if (!newFieldRows[fieldPath]) {
+            newFieldRows[fieldPath] = formField.rows.map((existingRow) => ({
+              ...existingRow,
+              childErrorPaths: new Set(),
+            }));
+          }
+
           const rowIndex = pathSegments[i + 1];
           const childFieldPath = pathSegments.slice(i + 1).join('.');
 
-          // copy the array field
-          if (!newArrayFieldsState[fieldPath]) {
-            newArrayFieldsState[fieldPath] = { ...formField };
-          }
-
-          if ('valid' in field && childFieldPath) {
-            const { rowErrorCount } = newArrayFieldsState[fieldPath];
-            const { childErrorPaths } = newArrayFieldsState[fieldPath].rows[rowIndex];
-
-            if (!field.valid && !childErrorPaths.has(path)) {
-              childErrorPaths.add(path);
-              pathErrorCountsMap.set(fieldPath, Math.max(0, (rowErrorCount || 0) + 1));
-            } else if (field.valid && childErrorPaths.has(path)) {
-              childErrorPaths.delete(path);
-              pathErrorCountsMap.set(fieldPath, Math.max(0, (rowErrorCount || 0) - 1));
-            }
+          if (field.valid === false && childFieldPath) {
+            newFieldRows[fieldPath][rowIndex].childErrorPaths.add(childFieldPath);
           }
         }
       }
     });
 
-    // We cannot do this in 1 loop over `fields`
-    // Need to ensure stale paths are removed, i.e. when a row is removed
-    Object.entries(newArrayFieldsState).forEach(([path, newArrayField]) => {
-      if (pathErrorCountsMap.has(path)) {
+    // Now loop over all fields with rows -
+    // if anything changed, dispatch an update for the field
+    // with the new row state
+    Object.entries(newFieldRows).forEach(([path, newRows]) => {
+      const stateMatches = newRows.every((newRow, i) => {
+        const existingRowErrorPaths = existingFieldRows[path][i]?.childErrorPaths;
+        return [...newRow.childErrorPaths].every((newChildErrorPath) => existingRowErrorPaths.has(newChildErrorPath));
+      });
+
+      if (!stateMatches) {
         dispatchFields({
           type: 'UPDATE',
           path,
-          rows: newArrayField.rows,
-          rowErrorCount: pathErrorCountsMap.get(path),
+          rows: newRows,
         });
       }
     });
@@ -203,7 +198,7 @@ const Form: React.FC<Props> = (props) => {
     if (waitForAutocomplete) await wait(100);
 
     const isValid = skipValidation ? true : await contextRef.current.validateForm();
-    contextRef.current.calculateNestedErrorPaths();
+    contextRef.current.buildRowErrors();
 
     if (!skipValidation) setSubmitted(true);
 
@@ -422,7 +417,7 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.formRef = formRef;
   contextRef.current.reset = reset;
   contextRef.current.replaceState = replaceState;
-  contextRef.current.calculateNestedErrorPaths = calculateNestedErrorPaths;
+  contextRef.current.buildRowErrors = buildRowErrors;
 
   useEffect(() => {
     if (initialState) {
@@ -473,7 +468,7 @@ const Form: React.FC<Props> = (props) => {
             <ProcessingContext.Provider value={processing}>
               <ModifiedContext.Provider value={modified}>
                 <FormFieldsContext.Provider value={fieldsReducer}>
-                  <WatchFormErrors calculateNestedErrorPaths={calculateNestedErrorPaths} />
+                  <WatchFormErrors buildRowErrors={buildRowErrors} />
                   {children}
                 </FormFieldsContext.Provider>
               </ModifiedContext.Provider>

@@ -50,7 +50,6 @@ type BlockFieldProps = UseDraggableSortableReturn & Pick<Props, 'path' | 'labels
   readOnly: boolean
   rowCount: number
   blockToRender: Block
-  rowErrorCount: number
 }
 const BlockRow: React.FC<BlockFieldProps> = ({
   path: parentPath,
@@ -73,11 +72,9 @@ const BlockRow: React.FC<BlockFieldProps> = ({
   permissions,
   blocks,
   blockToRender,
-  rowErrorCount = 0,
 }) => {
   const path = `${parentPath}.${rowIndex}`;
   const { i18n } = useTranslation();
-  const [errorCount, setErrorCount] = React.useState(0);
 
   const classNames = [
     `${baseClass}__row`,

@@ -19,7 +19,6 @@ export type FormField = {
   condition?: Condition
   passesCondition?: boolean
   rows?: Row[]
-  rowErrorCount?: number
 }
 
 export type Fields = {
@@ -173,5 +172,5 @@ export type Context = {
   formRef: React.MutableRefObject<HTMLFormElement>
   reset: Reset
   replaceState: (state: Fields) => void
-  calculateNestedErrorPaths: () => void
+  buildRowErrors: () => void
 }

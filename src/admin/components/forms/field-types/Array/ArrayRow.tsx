@@ -28,7 +28,6 @@ type ArrayRowProps = UseDraggableSortableReturn & Pick<Props, 'fields' | 'path' 
   row: Row
   CustomRowLabel?: RowLabelType
   readOnly?: boolean
-  rowErrorCount: number
 }
 export const ArrayRow: React.FC<ArrayRowProps> = ({
   path: parentPath,
@@ -51,21 +50,18 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   permissions,
   CustomRowLabel,
   fields,
-  rowErrorCount = 0,
 }) => {
   const path = `${parentPath}.${rowIndex}`;
   const { i18n } = useTranslation();
 
   const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(2, '0')}`;
 
+  const childErrorPathsCount = row.childErrorPaths?.size;
+
   const classNames = [
     `${baseClass}__row`,
-    rowErrorCount > 0 ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
+    childErrorPathsCount > 0 ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
   ].filter(Boolean).join(' ');
-
-  useEffect(() => {
-    console.log(path, rowErrorCount);
-  });
 
   return (
     <div
@@ -80,7 +76,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         collapsed={row.collapsed}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
         className={classNames}
-        collapsibleStyle={rowErrorCount > 0 ? 'error' : 'default'}
+        collapsibleStyle={childErrorPathsCount > 0 ? 'error' : 'default'}
         dragHandleProps={{
           id: row.id,
           attributes,
@@ -93,13 +89,13 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
               label={CustomRowLabel || fallbackLabel}
               rowNumber={rowIndex + 1}
             />
-            {rowErrorCount > 0 && (
+            {childErrorPathsCount > 0 && (
               <Pill
                 pillStyle="error"
                 rounded
                 className={`${baseClass}__row-error-pill`}
               >
-                {rowErrorCount}
+                {childErrorPathsCount}
               </Pill>
             )}
           </React.Fragment>

@@ -2,12 +2,12 @@ import * as React from 'react';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
 
 type Props = {
-  calculateNestedErrorPaths: () => void;
+  buildRowErrors: () => void;
 };
-export const WatchFormErrors: React.FC<Props> = ({ calculateNestedErrorPaths }) => {
+export const WatchFormErrors: React.FC<Props> = ({ buildRowErrors }) => {
   useThrottledEffect(() => {
-    calculateNestedErrorPaths();
-  }, 250, [calculateNestedErrorPaths]);
+    buildRowErrors();
+  }, 250, [buildRowErrors]);
 
   return null;
 };
