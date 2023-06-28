@@ -49,7 +49,6 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   const {
     depth,
     collection: {
-      Model,
       config: collectionConfig,
     },
     where,
