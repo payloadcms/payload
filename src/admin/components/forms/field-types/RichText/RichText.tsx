@@ -80,12 +80,28 @@ const RichText: React.FC<Props> = (props) => {
     const matchedElement = enabledElements[element.type];
     const Element = matchedElement?.Element;
 
-    const alignment = { textAlign: element.textAlign };
-
     let attr = { ...attributes };
 
+    // this converts text alignment to margin when dealing with void elements
     if (element.textAlign) {
-      attr = { ...attr, style: { textAlign: element.textAlign } };
+      if (element.type === 'relationship' || element.type === 'upload') {
+        switch (element.textAlign) {
+          case 'left':
+            attr = { ...attr, style: { marginRight: 'auto' } };
+            break;
+          case 'right':
+            attr = { ...attr, style: { marginLeft: 'auto' } };
+            break;
+          case 'center':
+            attr = { ...attr, style: { marginLeft: 'auto', marginRight: 'auto' } };
+            break;
+          default:
+            attr = { ...attr, style: { textAlign: element.textAlign } };
+            break;
+        }
+      } else {
+        attr = { ...attr, style: { textAlign: element.textAlign } };
+      }
     }
 
     if (Element) {
@@ -103,13 +119,12 @@ const RichText: React.FC<Props> = (props) => {
 
       return el;
     }
+
     return (
       <div
-        style={alignment}
         {...attr}
       >
         {children}
-
       </div>
     );
   }, [enabledElements, path, props]);
