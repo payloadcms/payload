@@ -11,6 +11,7 @@ import { blocksFieldSeedData } from './collections/Blocks';
 import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
 import { defaultNumber, numberDoc } from './collections/Number';
 import { dateDoc } from './collections/Date';
+import type { PayloadMongoose } from '../../src/mongoose';
 
 let client;
 let serverURL;
@@ -202,8 +203,7 @@ describe('Fields', () => {
     const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
-      indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
-
+      indexes = (payload as PayloadMongoose).db.collections['indexed-fields'].model?.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
       indexes.forEach((index) => {
         const field = Object.keys(index[0])[0];
         definitions[field] = index[0][field];
