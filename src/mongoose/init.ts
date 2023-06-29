@@ -85,8 +85,6 @@ export const init: Init = async function init(this: MongooseAdapter,
   const model = buildGlobalModel(this.payload.config);
   this.globals = model;
 
-  this.payload.globals.Model = model;
-
   this.payload.config.globals.forEach((global) => {
     if (global.versions) {
       const versionModelName = getVersionsModelName(global);

@@ -5,7 +5,6 @@ import { connect } from './connect';
 import { init } from './init';
 import { webpack } from './webpack';
 import { queryDrafts } from './queryDrafts';
-import { GlobalModel } from '../globals/config/types';
 import { find } from './find';
 import { create } from './create';
 import { updateOne } from './updateOne';
@@ -19,7 +18,7 @@ import { createVersion } from './createVersion';
 import { updateVersion } from './updateVersion';
 import { updateGlobal } from './updateGlobal';
 import { createGlobal } from './createGlobal';
-import { CollectionModel, TypeOfIndex } from './types';
+import { CollectionModel, GlobalModel, TypeOfIndex } from './types';
 import { SanitizedConfig } from '../config/types';
 
 export type SanitizedPayloadMongooseConfig = Omit<
