@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import { Props } from './types';
@@ -40,6 +41,8 @@ const CollapsibleField: React.FC<Props> = (props) => {
   const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./gi, '__')}`;
   const [errorCount, setErrorCount] = useState(0);
   const submitted = useFormSubmitted();
+  const { t } = useTranslation();
+
 
   const onToggle = useCallback(async (newCollapsedState: boolean) => {
     const existingPreferences: DocumentPreferences = await getPreference(preferencesKey);
@@ -92,7 +95,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
             rounded
             className={`${baseClass}__error-pill`}
           >
-            {errorCount}
+            {`${errorCount} ${errorCount > 1 ? t('error:plural') : t('error:singular')}`}
           </Pill>
         )}
       </React.Fragment>

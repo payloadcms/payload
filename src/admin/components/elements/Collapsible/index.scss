@@ -124,9 +124,9 @@
 html[data-theme=dark] {
   .collapsible {
     &--style-error {
-      border: 1px solid var(--theme-error-500);
+      border: 1px solid var(--theme-error-400);
       &:hover {
-        border: 1px solid var(--theme-error-300);
+        border: 1px solid var(--theme-error-500);
       }
 
       >.collapsible__toggle-wrap {

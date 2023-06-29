@@ -14,154 +14,21 @@ import Banner from '../../../elements/Banner';
 import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
 import { useOperation } from '../../../utilities/OperationProvider';
-import { Collapsible } from '../../../elements/Collapsible';
-import RenderFields from '../../RenderFields';
-import SectionTitle from './SectionTitle';
 import Pill from '../../../elements/Pill';
 import { scrollToID } from '../../../../utilities/scrollToID';
-import HiddenInput from '../HiddenInput';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { NullifyLocaleField } from '../../NullifyField';
 import { useConfig } from '../../../utilities/Config';
-import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 import DraggableSortable from '../../../elements/DraggableSortable';
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
 import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug';
 import Button from '../../../elements/Button';
-import { RowActions } from './RowActions';
 import { DrawerToggler } from '../../../elements/Drawer';
-import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types';
-import type { Row } from '../../Form/types';
-import type { Block } from '../../../../../fields/config/types';
-import { WatchChildErrors } from '../../WatchChildErrors';
+import { BlockRow } from './BlockRow';
 
 import './index.scss';
 
 const baseClass = 'blocks-field';
-
-type BlockFieldProps = UseDraggableSortableReturn & Pick<Props, 'path' | 'labels' | 'blocks' | 'fieldTypes' | 'indexPath' | 'permissions'> & {
-  addRow: (rowIndex: number, blockType: string) => void
-  duplicateRow: (rowIndex: number) => void
-  removeRow: (rowIndex: number) => void
-  moveRow: (fromIndex: number, toIndex: number) => void
-  setCollapse: (id: string, collapsed: boolean) => void
-  rowIndex: number
-  row: Row
-  readOnly: boolean
-  rowCount: number
-  blockToRender: Block
-}
-const BlockRow: React.FC<BlockFieldProps> = ({
-  path: parentPath,
-  addRow,
-  removeRow,
-  moveRow,
-  duplicateRow,
-  setCollapse,
-  transform,
-  listeners,
-  attributes,
-  setNodeRef,
-  row,
-  rowIndex,
-  rowCount,
-  indexPath,
-  readOnly,
-  labels,
-  fieldTypes,
-  permissions,
-  blocks,
-  blockToRender,
-}) => {
-  const path = `${parentPath}.${rowIndex}`;
-  const { i18n } = useTranslation();
-
-  const childErrorPathsCount = row.childErrorPaths?.size;
-
-  const classNames = [
-    `${baseClass}__row`,
-    childErrorPathsCount > 0 ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
-  ].filter(Boolean).join(' ');
-
-  return (
-    <div
-      key={`${path}-row-${rowIndex}`}
-      id={`${path}-row-${rowIndex}`}
-      ref={setNodeRef}
-      style={{
-        transform,
-      }}
-    >
-      <Collapsible
-        collapsed={row.collapsed}
-        onToggle={(collapsed) => setCollapse(row.id, collapsed)}
-        className={classNames}
-        collapsibleStyle={childErrorPathsCount > 0 ? 'error' : 'default'}
-        key={row.id}
-        dragHandleProps={{
-          id: row.id,
-          attributes,
-          listeners,
-        }}
-        header={(
-          <div className={`${baseClass}__block-header`}>
-            <span className={`${baseClass}__block-number`}>
-              {String(rowIndex + 1).padStart(2, '0')}
-            </span>
-            <Pill
-              pillStyle="white"
-              className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
-            >
-              {getTranslation(blockToRender.labels.singular, i18n)}
-            </Pill>
-            <SectionTitle
-              path={`${path}.blockName`}
-              readOnly={readOnly}
-            />
-            {childErrorPathsCount > 0 && (
-              <Pill
-                pillStyle="error"
-                rounded
-                className={`${baseClass}__error-pill`}
-              >
-                {childErrorPathsCount}
-              </Pill>
-            )}
-          </div>
-        )}
-        actions={!readOnly ? (
-          <RowActions
-            addRow={addRow}
-            removeRow={removeRow}
-            moveRow={moveRow}
-            duplicateRow={duplicateRow}
-            rowCount={rowCount}
-            rowIndex={rowIndex}
-            blockType={row.blockType}
-            blocks={blocks}
-            labels={labels}
-          />
-        ) : undefined}
-      >
-        <HiddenInput
-          name={`${path}.id`}
-          value={row.id}
-        />
-        <RenderFields
-          className={`${baseClass}__fields`}
-          readOnly={readOnly}
-          fieldTypes={fieldTypes}
-          permissions={permissions?.fields}
-          fieldSchema={blockToRender.fields.map((field) => ({
-            ...field,
-            path: createNestedFieldPath(path, field),
-          }))}
-          indexPath={indexPath}
-        />
-      </Collapsible>
-    </div>
-  );
-};
 
 const BlocksField: React.FC<Props> = (props) => {
   const { t, i18n } = useTranslation('fields');
@@ -277,8 +144,7 @@ const BlocksField: React.FC<Props> = (props) => {
   const hasMaxRows = maxRows && rows?.length >= maxRows;
 
   const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0);
-  // TODO: change !submitted to submitted
-  const fieldHasErrors = !submitted && fieldErrorCount + (valid ? 0 : 1) > 0;
+  const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0;
 
   const classes = [
     'field-type',

@@ -13,15 +13,8 @@
     }
   }
 
-
   &__error-pill, &__row-error-pill {
     margin-left: base(.5);
-    font-size: 10px;
-  }
-
-  &__error-count {
-    font-size: 12px;
-    font-weight: bold;
   }
 
   &__heading-with-error {

@@ -1,9 +1,9 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
 import { Field } from '../../../../src/fields/config/types';
 
-export const nestedFieldsSlug = 'posts';
+export const errorFieldsSlug = 'error-fields';
 
-const nestedFields: Field[] = [
+const errorFields: Field[] = [
   {
     type: 'text',
     name: 'tabText',
@@ -151,48 +151,9 @@ const nestedFields: Field[] = [
   },
 ];
 
-export const NestedFieldCollection: CollectionConfig = {
-  slug: nestedFieldsSlug,
+export const ErrorFieldsCollection: CollectionConfig = {
+  slug: errorFieldsSlug,
   fields: [
-    // {
-    //   type: 'array',
-    //   name: 'arrayField',
-    //   fields: [
-    //     {
-    //       type: 'group',
-    //       name: 'group23field',
-    //       fields: [
-    //         {
-    //           type: 'array',
-    //           name: 'arrayField',
-    //           required: true,
-    //           minRows: 2,
-    //           fields: [
-    //             {
-    //               type: 'group',
-    //               name: 'group23field',
-    //               fields: [
-    //                 {
-    //                   type: 'array',
-    //                   name: 'arrayField',
-    //                   required: true,
-    //                   minRows: 2,
-    //                   fields: [
-    //                     {
-    //                       type: 'text',
-    //                       name: 'textField',
-    //                       required: true,
-    //                     },
-    //                   ],
-    //                 },
-    //               ],
-    //             },
-    //           ],
-    //         },
-    //       ],
-    //     },
-    //   ],
-    // },
     {
       type: 'array',
       name: 'parentArray',
@@ -212,29 +173,29 @@ export const NestedFieldCollection: CollectionConfig = {
         },
       ],
     },
-    // {
-    //   type: 'tabs',
-    //   tabs: [
-    //     {
-    //       label: 'Home',
-    //       name: 'home',
-    //       fields: nestedFields,
-    //     },
-    //     {
-    //       label: 'Hero',
-    //       fields: nestedFields,
-    //     },
-    //   ],
-    // },
-    // {
-    //   type: 'blocks',
-    //   name: 'layout',
-    //   blocks: [
-    //     {
-    //       slug: 'block1',
-    //       fields: nestedFields,
-    //     },
-    //   ],
-    // },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Home',
+          name: 'home',
+          fields: errorFields,
+        },
+        {
+          label: 'Hero',
+          fields: errorFields,
+        },
+      ],
+    },
+    {
+      type: 'blocks',
+      name: 'layout',
+      blocks: [
+        {
+          slug: 'block1',
+          fields: errorFields,
+        },
+      ],
+    },
   ],
 };

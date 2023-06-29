@@ -40,7 +40,6 @@
 
   &__error-pill {
     align-self: center;
-    font-size: 10px;
   }
 
   &__header-actions {
@@ -74,6 +73,7 @@
   &__block-pill {
     flex-shrink: 0;
     display: block;
+    line-height: unset;
   }
 
   .section-title {
@@ -107,16 +107,16 @@
 
 html[data-theme="light"] {
   .blocks-field--has-error {
-      .section-title__input, .blocks-field__heading-with-error {
-        color: var(--theme-error-750);
-      }
+    .section-title__input, .blocks-field__heading-with-error {
+      color: var(--theme-error-750);
     }
+  }
 }
 
 html[data-theme="dark"] {
   .blocks-field--has-error {
-      .section-title__input, .blocks-field__heading-with-error {
-        color: var(--theme-error-500);
-      }
+    .section-title__input, .blocks-field__heading-with-error {
+      color: var(--theme-error-500);
+    }
   }
 }

@@ -1,36 +1,34 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Props } from './types';
 import { Collapsible } from '../../../elements/Collapsible';
 import RenderFields from '../../RenderFields';
-import { Props } from './types';
-import { ArrayAction } from '../../../elements/ArrayAction';
+import SectionTitle from './SectionTitle';
+import Pill from '../../../elements/Pill';
 import HiddenInput from '../HiddenInput';
-import { RowLabel } from '../../RowLabel';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
+import { RowActions } from './RowActions';
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types';
 import type { Row } from '../../Form/types';
-import type { RowLabel as RowLabelType } from '../../RowLabel/types';
-import Pill from '../../../elements/Pill';
-
-import './index.scss';
+import type { Block } from '../../../../../fields/config/types';
 import { useFormSubmitted } from '../../Form/context';
 
-const baseClass = 'array-field';
+const baseClass = 'blocks-field';
 
-type ArrayRowProps = UseDraggableSortableReturn & Pick<Props, 'fields' | 'path' | 'indexPath' | 'fieldTypes' | 'permissions' | 'labels'> & {
-  addRow: (rowIndex: number) => void
+type BlockFieldProps = UseDraggableSortableReturn & Pick<Props, 'path' | 'labels' | 'blocks' | 'fieldTypes' | 'indexPath' | 'permissions'> & {
+  addRow: (rowIndex: number, blockType: string) => void
   duplicateRow: (rowIndex: number) => void
   removeRow: (rowIndex: number) => void
   moveRow: (fromIndex: number, toIndex: number) => void
-  setCollapse: (rowID: string, collapsed: boolean) => void
-  rowCount: number
+  setCollapse: (id: string, collapsed: boolean) => void
   rowIndex: number
   row: Row
-  CustomRowLabel?: RowLabelType
-  readOnly?: boolean
+  readOnly: boolean
+  rowCount: number
+  blockToRender: Block
 }
-export const ArrayRow: React.FC<ArrayRowProps> = ({
+export const BlockRow: React.FC<BlockFieldProps> = ({
   path: parentPath,
   addRow,
   removeRow,
@@ -49,14 +47,12 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   labels,
   fieldTypes,
   permissions,
-  CustomRowLabel,
-  fields,
+  blocks,
+  blockToRender,
 }) => {
   const path = `${parentPath}.${rowIndex}`;
   const { t, i18n } = useTranslation();
   const hasSubmitted = useFormSubmitted();
-
-  const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(2, '0')}`;
 
   const childErrorPathsCount = row.childErrorPaths?.size;
   const fieldHasErrors = hasSubmitted && childErrorPathsCount > 0;
@@ -68,7 +64,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
 
   return (
     <div
-      key={`${path}-row-${row.id}`}
+      key={`${path}-row-${rowIndex}`}
       id={`${path}-row-${rowIndex}`}
       ref={setNodeRef}
       style={{
@@ -80,37 +76,49 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
         className={classNames}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
+        key={row.id}
         dragHandleProps={{
           id: row.id,
           attributes,
           listeners,
         }}
         header={(
-          <React.Fragment>
-            <RowLabel
-              path={path}
-              label={CustomRowLabel || fallbackLabel}
-              rowNumber={rowIndex + 1}
+          <div className={`${baseClass}__block-header`}>
+            <span className={`${baseClass}__block-number`}>
+              {String(rowIndex + 1).padStart(2, '0')}
+            </span>
+            <Pill
+              pillStyle="white"
+              className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
+            >
+              {getTranslation(blockToRender.labels.singular, i18n)}
+            </Pill>
+            <SectionTitle
+              path={`${path}.blockName`}
+              readOnly={readOnly}
             />
             {fieldHasErrors && (
               <Pill
                 pillStyle="error"
                 rounded
-                className={`${baseClass}__row-error-pill`}
+                className={`${baseClass}__error-pill`}
               >
                 {`${childErrorPathsCount} ${childErrorPathsCount > 1 ? t('error:plural') : t('error:singular')}`}
               </Pill>
             )}
-          </React.Fragment>
+          </div>
         )}
         actions={!readOnly ? (
-          <ArrayAction
+          <RowActions
             addRow={addRow}
             removeRow={removeRow}
             moveRow={moveRow}
             duplicateRow={duplicateRow}
             rowCount={rowCount}
-            index={rowIndex}
+            rowIndex={rowIndex}
+            blockType={row.blockType}
+            blocks={blocks}
+            labels={labels}
           />
         ) : undefined}
       >
@@ -123,11 +131,11 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           readOnly={readOnly}
           fieldTypes={fieldTypes}
           permissions={permissions?.fields}
-          indexPath={indexPath}
-          fieldSchema={fields.map((field) => ({
+          fieldSchema={blockToRender.fields.map((field) => ({
             ...field,
             path: createNestedFieldPath(path, field),
           }))}
+          indexPath={indexPath}
         />
       </Collapsible>
     </div>

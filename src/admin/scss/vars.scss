@@ -186,12 +186,16 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
   }
 }
 
-@mixin lightInputError () {
+@mixin lightInputError {
   background-color: var(--theme-error-50);
   border: 1px solid var(--theme-error-500);
 }
 
-@mixin darkInputError () {
+@mixin darkInputError {
   background-color: var(--theme-error-100);
-  border: 1px solid var(--theme-error-500);
+  border: 1px solid var(--theme-error-400);
+
+  &:hover {
+    border-color: var(--theme-error-500);
+  }
 }

@@ -1,15 +1,15 @@
 import { buildConfig } from '../buildConfig';
-import { NestedFieldCollection } from './collections/NestedFields';
+import { ErrorFieldsCollection } from './collections/ErrorFields';
 import { devUser } from '../credentials';
 import Uploads from './collections/Upload';
 
 export default buildConfig({
   collections: [
-    NestedFieldCollection,
+    ErrorFieldsCollection,
     Uploads,
   ],
   graphQL: {
-    schemaOutputFile: './test/nested-field-schemas/schema.graphql',
+    schemaOutputFile: './test/field-error-states/schema.graphql',
   },
 
   onInit: async (payload) => {
