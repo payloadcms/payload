@@ -182,7 +182,57 @@ export function mongooseAdapter({
         payload.logger.info({ msg: 'No migrations to reset.' });
       }
     },
-    migrateRefresh: async () => null,
+    migrateRefresh: async () => {
+      const migrationFiles = await readMigrationFiles({ payload });
+      const migrationQuery = await payload.update({
+        collection: 'payload-migrations',
+        data: {
+          executed: false,
+        },
+        where: {}, // All migrations
+      });
+
+      const existingMigrations = migrationQuery.docs as unknown as Migration[];
+      payload.logger.info({ existingMigrations });
+
+      for (const migration of migrationFiles) {
+        // Create or update migration in database
+        const existingMigration = existingMigrations.find((existing) => existing.name === migration.name);
+
+        // Run migration if not found in database
+        payload.logger.info({ msg: `Running migration ${migration.name}...` });
+        if (!existingMigration || !existingMigration?.executed) {
+          try {
+            await migration.up({ payload });
+          } catch (err: unknown) {
+            payload.logger.error({ msg: `Error running migration ${migration.name}`, err });
+            throw err;
+          }
+
+          payload.logger.info({ msg: `${migration.name} done.` });
+
+          if (!existingMigration) {
+            await payload.create({
+              collection: 'payload-migrations',
+              data: {
+                name: migration.name,
+                executed: true,
+              },
+            });
+          } else {
+            await payload.update({
+              collection: 'payload-migrations',
+              id: existingMigration.id,
+              data: {
+                executed: true,
+              },
+            });
+          }
+        } else {
+          payload.logger.info({ msg: `${migration.name} already executed.` });
+        }
+      }
+    },
     migrateReset: async () => {
       const migrationFiles = await readMigrationFiles({ payload });
       const migrationQuery = await payload.find({
