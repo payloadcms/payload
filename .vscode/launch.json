@@ -77,5 +77,22 @@
       },
       "outputCapture": "std",
     },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Migrate CLI - down",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register"
+      ],
+      "args": [
+        "src/bin/migrate.ts",
+        "migrate:down",
+      ],
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
+      },
+      "outputCapture": "std",
+    },
   ]
 }

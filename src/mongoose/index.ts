@@ -143,7 +143,47 @@ export function mongooseAdapter({
       });
       p.printTable();
     },
-    migrateDown: async () => null,
+    migrateDown: async () => {
+      const migrationFiles = await readMigrationFiles({ payload });
+      const migrationQuery = await payload.find({
+        collection: 'payload-migrations',
+        sort: '-name', // Q: Will this always be the most recent by sorting alphabetically?
+      });
+
+      const existingMigrations = migrationQuery.docs as unknown as Migration[];
+
+      if (existingMigrations?.length) {
+        payload.logger.info({ msg: `Most recent migration ${existingMigrations[0].name}` });
+        // TODO: Find migration in migrationFiles and run down function
+        const migration = migrationFiles.find((m) => m.name === existingMigrations[0].name);
+        if (!migration) {
+          throw new Error(`Migration ${existingMigrations[0].name} not found locally.`);
+        }
+
+        try {
+          await migration.down({ payload });
+
+          payload.logger.info({ msg: `${migration.name} down done.` });
+
+          await payload.update({
+            collection: 'payload-migrations',
+            data: {
+              executed: false,
+            },
+            where: {
+              id: {
+                equals: existingMigrations[0].id,
+              },
+            },
+          });
+        } catch (error: unknown) {
+          payload.logger.error({ msg: `Error running migration ${migration.name}`, error });
+          throw error;
+        }
+      } else {
+        payload.logger.info({ msg: 'No migrations to reset.' });
+      }
+    },
     migrateRefresh: async () => null,
     migrateReset: async () => null,
     migrateFresh: async () => null,
