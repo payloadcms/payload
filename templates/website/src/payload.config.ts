@@ -64,6 +64,8 @@ export default buildConfig({
     }),
     nestedDocs({
       collections: ['pages', 'posts', 'categories'],
+      generateLabel: (_, doc) => doc.title as string,
+      generateURL: docs => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
     }),
     redirects({
       collections: ['pages', 'posts'],

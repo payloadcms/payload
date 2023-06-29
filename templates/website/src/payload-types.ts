@@ -25,27 +25,27 @@ export interface User {
   id: string;
   name?: string;
   roles?: ('admin' | 'user')[];
+  updatedAt: string;
+  createdAt: string;
   email?: string;
   resetPasswordToken?: string;
   resetPasswordExpiration?: string;
   loginAttempts?: number;
   lockUntil?: string;
-  createdAt: string;
-  updatedAt: string;
   password?: string;
 }
 export interface Category {
   id: string;
   title?: string;
   parent?: string | Category;
-  breadcrumbs: {
+  breadcrumbs?: {
     doc?: string | Category;
     url?: string;
     label?: string;
     id?: string;
   }[];
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface Page {
   id: string;
@@ -74,143 +74,143 @@ export interface Page {
   };
   layout: (
     | {
-        ctaBackgroundColor?: 'white' | 'black';
+      ctaBackgroundColor?: 'white' | 'black';
+      richText: {
+        [k: string]: unknown;
+      }[];
+      links: {
+        link: {
+          type?: 'reference' | 'custom';
+          newTab?: boolean;
+          reference: {
+            value: string | Page;
+            relationTo: 'pages';
+          };
+          url: string;
+          label: string;
+          appearance?: 'primary' | 'secondary';
+        };
+        id?: string;
+      }[];
+      id?: string;
+      blockName?: string;
+      blockType: 'cta';
+    }
+    | {
+      backgroundColor?: 'white' | 'black';
+      columns: {
+        size?: 'oneThird' | 'half' | 'twoThirds' | 'full';
         richText: {
           [k: string]: unknown;
         }[];
-        links: {
-          link: {
-            type?: 'reference' | 'custom';
-            newTab?: boolean;
-            reference: {
-              value: string | Page;
-              relationTo: 'pages';
-            };
-            url: string;
-            label: string;
-            appearance?: 'primary' | 'secondary';
+        enableLink?: boolean;
+        link?: {
+          type?: 'reference' | 'custom';
+          newTab?: boolean;
+          reference: {
+            value: string | Page;
+            relationTo: 'pages';
           };
-          id?: string;
-        }[];
+          url: string;
+          label: string;
+          appearance?: 'default' | 'primary' | 'secondary';
+        };
         id?: string;
-        blockName?: string;
-        blockType: 'cta';
-      }
+      }[];
+      id?: string;
+      blockName?: string;
+      blockType: 'content';
+    }
     | {
-        backgroundColor?: 'white' | 'black';
-        columns: {
-          size?: 'oneThird' | 'half' | 'twoThirds' | 'full';
-          richText: {
-            [k: string]: unknown;
-          }[];
-          enableLink?: boolean;
-          link: {
-            type?: 'reference' | 'custom';
-            newTab?: boolean;
-            reference: {
-              value: string | Page;
-              relationTo: 'pages';
-            };
-            url: string;
-            label: string;
-            appearance?: 'default' | 'primary' | 'secondary';
-          };
-          id?: string;
-        }[];
-        id?: string;
-        blockName?: string;
-        blockType: 'content';
-      }
+      form: string | Form;
+      enableIntro?: boolean;
+      formIntroContent: {
+        [k: string]: unknown;
+      }[];
+      id?: string;
+      blockName?: string;
+      blockType: 'formBlock';
+    }
     | {
-        form: string | Form;
-        enableIntro?: boolean;
-        introContent: {
-          [k: string]: unknown;
-        }[];
-        id?: string;
-        blockName?: string;
-        blockType: 'formBlock';
-      }
+      mediaBlockBackgroundColor?: 'white' | 'black';
+      position?: 'default' | 'fullscreen';
+      media: string | Media;
+      id?: string;
+      blockName?: string;
+      blockType: 'mediaBlock';
+    }
     | {
-        mediaBlockBackgroundColor?: 'white' | 'black';
-        position?: 'default' | 'fullscreen';
-        media: string | Media;
-        id?: string;
-        blockName?: string;
-        blockType: 'mediaBlock';
-      }
-    | {
-        introContent: {
-          [k: string]: unknown;
-        }[];
-        populateBy?: 'collection' | 'selection';
-        relationTo?: 'pages';
-        categories?: string[] | Category[];
-        limit?: number;
-        selectedDocs?:
-          | (
-              | {
-                  value: string;
-                  relationTo: 'pages';
-                }
-              | {
-                  value: string;
-                  relationTo: 'posts';
-                }
-            )[]
-          | (
-              | {
-                  value: Page;
-                  relationTo: 'pages';
-                }
-              | {
-                  value: Post;
-                  relationTo: 'posts';
-                }
-            )[];
-        populatedDocs?:
-          | (
-              | {
-                  value: string;
-                  relationTo: 'pages';
-                }
-              | {
-                  value: string;
-                  relationTo: 'posts';
-                }
-            )[]
-          | (
-              | {
-                  value: Page;
-                  relationTo: 'pages';
-                }
-              | {
-                  value: Post;
-                  relationTo: 'posts';
-                }
-            )[];
-        populatedDocsTotal?: number;
-        id?: string;
-        blockName?: string;
-        blockType: 'archive';
-      }
+      introContent: {
+        [k: string]: unknown;
+      }[];
+      populateBy?: 'collection' | 'selection';
+      relationTo?: 'pages' | 'posts';
+      categories?: string[] | Category[];
+      limit?: number;
+      selectedDocs?:
+      | (
+        | {
+          value: string;
+          relationTo: 'pages';
+        }
+        | {
+          value: string;
+          relationTo: 'posts';
+        }
+      )[]
+      | (
+        | {
+          value: Page;
+          relationTo: 'pages';
+        }
+        | {
+          value: Post;
+          relationTo: 'posts';
+        }
+      )[];
+      populatedDocs?:
+      | (
+        | {
+          value: string;
+          relationTo: 'pages';
+        }
+        | {
+          value: string;
+          relationTo: 'posts';
+        }
+      )[]
+      | (
+        | {
+          value: Page;
+          relationTo: 'pages';
+        }
+        | {
+          value: Post;
+          relationTo: 'posts';
+        }
+      )[];
+      populatedDocsTotal?: number;
+      id?: string;
+      blockName?: string;
+      blockType: 'archive';
+    }
   )[];
   slug?: string;
   parent?: string | Page;
-  breadcrumbs: {
+  breadcrumbs?: {
     doc?: string | Page;
     url?: string;
     label?: string;
     id?: string;
   }[];
-  meta: {
+  meta?: {
     title?: string;
     description?: string;
     image?: string | Media;
   };
-  _status?: 'draft' | 'published';
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
+  _status?: 'draft' | 'published';
 }
 export interface Media {
   id: string;
@@ -218,135 +218,135 @@ export interface Media {
   caption?: {
     [k: string]: unknown;
   }[];
+  updatedAt: string;
+  createdAt: string;
   url?: string;
   filename?: string;
   mimeType?: string;
   filesize?: number;
   width?: number;
   height?: number;
-  createdAt: string;
-  updatedAt: string;
 }
 export interface Form {
   id: string;
   title: string;
-  fields: (
+  fields?: (
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        defaultValue?: string;
-        required?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'text';
-      }
+      name: string;
+      label?: string;
+      width?: number;
+      defaultValue?: string;
+      required?: boolean;
+      id?: string;
+      blockName?: string;
+      blockType: 'text';
+    }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        defaultValue?: string;
-        required?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'textarea';
-      }
+      name: string;
+      label?: string;
+      width?: number;
+      defaultValue?: string;
+      required?: boolean;
+      id?: string;
+      blockName?: string;
+      blockType: 'textarea';
+    }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        defaultValue?: string;
-        options: {
-          label: string;
-          value: string;
-          id?: string;
-        }[];
-        required?: boolean;
+      name: string;
+      label?: string;
+      width?: number;
+      defaultValue?: string;
+      options: {
+        label: string;
+        value: string;
         id?: string;
-        blockName?: string;
-        blockType: 'select';
-      }
+      }[];
+      required?: boolean;
+      id?: string;
+      blockName?: string;
+      blockType: 'select';
+    }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        required?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'email';
-      }
+      name: string;
+      label?: string;
+      width?: number;
+      required?: boolean;
+      id?: string;
+      blockName?: string;
+      blockType: 'email';
+    }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        required?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'state';
-      }
+      name: string;
+      label?: string;
+      width?: number;
+      required?: boolean;
+      id?: string;
+      blockName?: string;
+      blockType: 'state';
+    }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        required?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'country';
-      }
+      name: string;
+      label?: string;
+      width?: number;
+      required?: boolean;
+      id?: string;
+      blockName?: string;
+      blockType: 'country';
+    }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        defaultValue?: number;
-        required?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'number';
-      }
+      name: string;
+      label?: string;
+      width?: number;
+      defaultValue?: number;
+      required?: boolean;
+      id?: string;
+      blockName?: string;
+      blockType: 'number';
+    }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        required?: boolean;
-        defaultValue?: boolean;
-        id?: string;
-        blockName?: string;
-        blockType: 'checkbox';
-      }
+      name: string;
+      label?: string;
+      width?: number;
+      required?: boolean;
+      defaultValue?: boolean;
+      id?: string;
+      blockName?: string;
+      blockType: 'checkbox';
+    }
     | {
-        message?: {
-          [k: string]: unknown;
-        }[];
-        id?: string;
-        blockName?: string;
-        blockType: 'message';
-      }
+      message?: {
+        [k: string]: unknown;
+      }[];
+      id?: string;
+      blockName?: string;
+      blockType: 'message';
+    }
     | {
-        name: string;
-        label?: string;
-        width?: number;
-        basePrice?: number;
-        priceConditions: {
-          fieldToUse?: string;
-          condition?: 'hasValue' | 'equals' | 'notEquals';
-          valueForCondition?: string;
-          operator?: 'add' | 'subtract' | 'multiply' | 'divide';
-          valueType?: 'static' | 'valueOfField';
-          valueForOperator?: string;
-          id?: string;
-        }[];
-        required?: boolean;
+      name: string;
+      label?: string;
+      width?: number;
+      basePrice?: number;
+      priceConditions?: {
+        fieldToUse?: string;
+        condition?: 'hasValue' | 'equals' | 'notEquals';
+        valueForCondition?: string;
+        operator?: 'add' | 'subtract' | 'multiply' | 'divide';
+        valueType?: 'static' | 'valueOfField';
+        valueForOperator?: string;
         id?: string;
-        blockName?: string;
-        blockType: 'payment';
-      }
+      }[];
+      required?: boolean;
+      id?: string;
+      blockName?: string;
+      blockType: 'payment';
+    }
   )[];
   submitButtonLabel?: string;
   confirmationType?: 'message' | 'redirect';
   confirmationMessage: {
     [k: string]: unknown;
   }[];
-  redirect: {
+  redirect?: {
     url: string;
   };
   emails: {
@@ -361,8 +361,8 @@ export interface Form {
     }[];
     id?: string;
   }[];
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface Post {
   id: string;
@@ -391,143 +391,143 @@ export interface Post {
   };
   layout: (
     | {
-        ctaBackgroundColor?: 'white' | 'black';
+      ctaBackgroundColor?: 'white' | 'black';
+      richText: {
+        [k: string]: unknown;
+      }[];
+      links: {
+        link: {
+          type?: 'reference' | 'custom';
+          newTab?: boolean;
+          reference: {
+            value: string | Page;
+            relationTo: 'pages';
+          };
+          url: string;
+          label: string;
+          appearance?: 'primary' | 'secondary';
+        };
+        id?: string;
+      }[];
+      id?: string;
+      blockName?: string;
+      blockType: 'cta';
+    }
+    | {
+      backgroundColor?: 'white' | 'black';
+      columns: {
+        size?: 'oneThird' | 'half' | 'twoThirds' | 'full';
         richText: {
           [k: string]: unknown;
         }[];
-        links: {
-          link: {
-            type?: 'reference' | 'custom';
-            newTab?: boolean;
-            reference: {
-              value: string | Page;
-              relationTo: 'pages';
-            };
-            url: string;
-            label: string;
-            appearance?: 'primary' | 'secondary';
+        enableLink?: boolean;
+        link?: {
+          type?: 'reference' | 'custom';
+          newTab?: boolean;
+          reference: {
+            value: string | Page;
+            relationTo: 'pages';
           };
-          id?: string;
-        }[];
+          url: string;
+          label: string;
+          appearance?: 'default' | 'primary' | 'secondary';
+        };
         id?: string;
-        blockName?: string;
-        blockType: 'cta';
-      }
+      }[];
+      id?: string;
+      blockName?: string;
+      blockType: 'content';
+    }
     | {
-        backgroundColor?: 'white' | 'black';
-        columns: {
-          size?: 'oneThird' | 'half' | 'twoThirds' | 'full';
-          richText: {
-            [k: string]: unknown;
-          }[];
-          enableLink?: boolean;
-          link: {
-            type?: 'reference' | 'custom';
-            newTab?: boolean;
-            reference: {
-              value: string | Page;
-              relationTo: 'pages';
-            };
-            url: string;
-            label: string;
-            appearance?: 'default' | 'primary' | 'secondary';
-          };
-          id?: string;
-        }[];
-        id?: string;
-        blockName?: string;
-        blockType: 'content';
-      }
+      form: string | Form;
+      enableIntro?: boolean;
+      formIntroContent: {
+        [k: string]: unknown;
+      }[];
+      id?: string;
+      blockName?: string;
+      blockType: 'formBlock';
+    }
     | {
-        form: string | Form;
-        enableIntro?: boolean;
-        introContent: {
-          [k: string]: unknown;
-        }[];
-        id?: string;
-        blockName?: string;
-        blockType: 'formBlock';
-      }
+      mediaBlockBackgroundColor?: 'white' | 'black';
+      position?: 'default' | 'fullscreen';
+      media: string | Media;
+      id?: string;
+      blockName?: string;
+      blockType: 'mediaBlock';
+    }
     | {
-        mediaBlockBackgroundColor?: 'white' | 'black';
-        position?: 'default' | 'fullscreen';
-        media: string | Media;
-        id?: string;
-        blockName?: string;
-        blockType: 'mediaBlock';
-      }
-    | {
-        introContent: {
-          [k: string]: unknown;
-        }[];
-        populateBy?: 'collection' | 'selection';
-        relationTo?: 'pages';
-        categories?: string[] | Category[];
-        limit?: number;
-        selectedDocs?:
-          | (
-              | {
-                  value: string;
-                  relationTo: 'pages';
-                }
-              | {
-                  value: string;
-                  relationTo: 'posts';
-                }
-            )[]
-          | (
-              | {
-                  value: Page;
-                  relationTo: 'pages';
-                }
-              | {
-                  value: Post;
-                  relationTo: 'posts';
-                }
-            )[];
-        populatedDocs?:
-          | (
-              | {
-                  value: string;
-                  relationTo: 'pages';
-                }
-              | {
-                  value: string;
-                  relationTo: 'posts';
-                }
-            )[]
-          | (
-              | {
-                  value: Page;
-                  relationTo: 'pages';
-                }
-              | {
-                  value: Post;
-                  relationTo: 'posts';
-                }
-            )[];
-        populatedDocsTotal?: number;
-        id?: string;
-        blockName?: string;
-        blockType: 'archive';
-      }
+      introContent: {
+        [k: string]: unknown;
+      }[];
+      populateBy?: 'collection' | 'selection';
+      relationTo?: 'pages' | 'posts';
+      categories?: string[] | Category[];
+      limit?: number;
+      selectedDocs?:
+      | (
+        | {
+          value: string;
+          relationTo: 'pages';
+        }
+        | {
+          value: string;
+          relationTo: 'posts';
+        }
+      )[]
+      | (
+        | {
+          value: Page;
+          relationTo: 'pages';
+        }
+        | {
+          value: Post;
+          relationTo: 'posts';
+        }
+      )[];
+      populatedDocs?:
+      | (
+        | {
+          value: string;
+          relationTo: 'pages';
+        }
+        | {
+          value: string;
+          relationTo: 'posts';
+        }
+      )[]
+      | (
+        | {
+          value: Page;
+          relationTo: 'pages';
+        }
+        | {
+          value: Post;
+          relationTo: 'posts';
+        }
+      )[];
+      populatedDocsTotal?: number;
+      id?: string;
+      blockName?: string;
+      blockType: 'archive';
+    }
   )[];
   slug?: string;
   parent?: string | Post;
-  breadcrumbs: {
+  breadcrumbs?: {
     doc?: string | Post;
     url?: string;
     label?: string;
     id?: string;
   }[];
-  meta: {
+  meta?: {
     title?: string;
     description?: string;
     image?: string | Media;
   };
-  _status?: 'draft' | 'published';
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
+  _status?: 'draft' | 'published';
 }
 export interface FormSubmission {
   id: string;
@@ -537,19 +537,19 @@ export interface FormSubmission {
     value: string;
     id?: string;
   }[];
-  payment: {
+  payment?: {
     field?: string;
     status?: string;
     amount?: number;
     paymentProcessor?: string;
-    creditCard: {
+    creditCard?: {
       token?: string;
       brand?: string;
       number?: string;
     };
   };
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface Redirect {
   id: string;
@@ -557,18 +557,18 @@ export interface Redirect {
   to: {
     type?: 'reference' | 'custom';
     reference:
-      | {
-          value: string | Page;
-          relationTo: 'pages';
-        }
-      | {
-          value: string | Post;
-          relationTo: 'posts';
-        };
+    | {
+      value: string | Page;
+      relationTo: 'pages';
+    }
+    | {
+      value: string | Post;
+      relationTo: 'posts';
+    };
     url: string;
   };
-  createdAt: string;
   updatedAt: string;
+  createdAt: string;
 }
 export interface Header {
   id: string;

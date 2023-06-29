@@ -24,11 +24,17 @@ export const FormBlock: Block = {
       type: 'checkbox',
     },
     richText({
-      name: 'introContent',
+      name: 'formIntroContent',
       label: 'Intro Content',
       admin: {
         condition: (_, { enableIntro }) => Boolean(enableIntro),
       },
     }),
+    {
+      name: 'form',
+      type: 'relationship',
+      relationTo: 'forms',
+      required: true,
+    },
   ],
 }

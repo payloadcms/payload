@@ -21,17 +21,21 @@ export const populateArchiveBlock: AfterReadHook = async ({ doc, req: { payload 
             collection: archiveBlock.relationTo,
             limit: archiveBlock.limit || 10,
             where: {
+              // Exclude current document by ID
+              id: {
+                not_equals: doc.id,
+              },
               ...(archiveBlock?.categories?.length > 0
                 ? {
-                    categories: {
-                      in: archiveBlock.categories
-                        .map(cat => {
-                          if (typeof cat === 'string') return cat
-                          return cat.id
-                        })
-                        .join(','),
-                    },
-                  }
+                  categories: {
+                    in: archiveBlock.categories
+                      .map(cat => {
+                        if (typeof cat === 'string') return cat
+                        return cat.id
+                      })
+                      .join(','),
+                  },
+                }
                 : {}),
             },
             sort: '-publishedDate',
