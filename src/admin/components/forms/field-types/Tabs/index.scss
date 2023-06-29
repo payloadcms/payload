@@ -99,12 +99,6 @@
     margin-bottom: $baseline;
   }
 
-  &__error-pill {
-    margin-left: base(.5);
-    align-self: center;
-    font-size: 10px;
-  }
-
   @include small-break {
     &--within-collapsible {
       margin-left: calc(var(--gutter-h) * -1);
