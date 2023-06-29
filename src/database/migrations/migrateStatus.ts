@@ -1,25 +1,34 @@
-import { DatabaseAdapter } from '../types';
+/* eslint-disable no-restricted-syntax, no-await-in-loop */
+import { Table } from 'console-table-printer';
+import { DatabaseAdapter, MigrationData } from '../types';
 import { readMigrationFiles } from './readMigrationFiles';
 
-export async function migrateStatus(this: DatabaseAdapter) {
+export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
   const { payload } = this;
-  const files = readMigrationFiles({ payload });
-
-  const { docs: migrations } = await payload.db.find<{ name: string; batch: number }>({
+  const migrationFiles = await readMigrationFiles({ payload });
+  const migrationQuery = await payload.find({
     collection: 'payload-migrations',
-    limit: 0,
-    pagination: false,
   });
 
-  const result = (await files).map((file) => {
-    const migration = migrations.find((doc) => doc.name === file.name);
+  const existingMigrations = migrationQuery.docs as unknown as MigrationData[];
+
+  // Compare migration files to existing migrations
+  const statuses = migrationFiles.map((migration) => {
+    const existingMigration = existingMigrations.find(
+      (m) => m.name === migration.name,
+    );
     return {
-      ran: !!migration,
-      migration: file.name,
-      batch: migration.batch ?? null,
+      name: migration.name,
+      ran: !!existingMigration?.ran,
     };
   });
 
-  // TODO: log as table format
-  this.payload.logger.info(result);
+  const p = new Table();
+
+  statuses.forEach((s) => {
+    p.addRow(s, {
+      color: s.ran ? 'green' : 'red',
+    });
+  });
+  p.printTable();
 }

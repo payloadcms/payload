@@ -235,13 +235,17 @@ type DeleteManyArgs = {
 
 type DeleteMany = (args: DeleteManyArgs) => Promise<Document>
 
-export type Migration = {
-  id?: string
-  name?: string
+export type Migration = MigrationData & {
   up: ({ payload }: { payload }) => Promise<boolean>
   down: ({ payload }: { payload }) => Promise<boolean>
-  executed: boolean
 };
+
+export type MigrationData = {
+  id: string
+  name: string
+  ran: boolean
+  batch: number
+}
 
 export type BuildSchema<TSchema> = (args: {
   config: SanitizedConfig,

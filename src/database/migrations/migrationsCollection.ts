@@ -12,7 +12,7 @@ export const migrationsCollection: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'executed',
+      name: 'ran',
       type: 'checkbox',
       defaultValue: false,
     },
