@@ -13,10 +13,10 @@ import { Pages } from './collections/Pages'
 import Products from './collections/Products'
 import Users from './collections/Users'
 import BeforeDashboard from './components/BeforeDashboard'
+import { checkout } from './endpoints/checkout'
 import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
 import { Settings } from './globals/Settings'
-import { checkout } from './routes/checkout'
 import { invoiceCreatedOrUpdated } from './stripe/webhooks/invoiceCreatedOrUpdated'
 import { priceUpdated } from './stripe/webhooks/priceUpdated'
 import { productUpdated } from './stripe/webhooks/productUpdated'
@@ -43,7 +43,7 @@ export default buildConfig({
           ...config.resolve?.alias,
           [path.resolve(__dirname, 'collections/Products/hooks/beforeChange')]: mockModulePath,
           [path.resolve(__dirname, 'collections/Users/hooks/createStripeCustomer')]: mockModulePath,
-          [path.resolve(__dirname, 'routes/checkout')]: mockModulePath,
+          [path.resolve(__dirname, 'endpoints/checkout')]: mockModulePath,
           stripe: mockModulePath,
           express: mockModulePath,
         },
@@ -59,8 +59,12 @@ export default buildConfig({
   graphQL: {
     schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
   },
-  cors: ['https://checkout.stripe.com', process.env.PAYLOAD_PUBLIC_SITE_URL].filter(Boolean),
-  csrf: ['https://checkout.stripe.com', process.env.PAYLOAD_PUBLIC_SITE_URL].filter(Boolean),
+  cors: ['https://checkout.stripe.com', process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(
+    Boolean,
+  ),
+  csrf: ['https://checkout.stripe.com', process.env.PAYLOAD_PUBLIC_SERVER_URL || ''].filter(
+    Boolean,
+  ),
   endpoints: [
     {
       path: '/checkout',
@@ -70,7 +74,7 @@ export default buildConfig({
   ],
   plugins: [
     stripePlugin({
-      stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+      stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
       isTestKey: Boolean(process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY),
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
       webhooks: {
