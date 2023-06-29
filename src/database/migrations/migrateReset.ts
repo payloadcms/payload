@@ -18,11 +18,10 @@ export async function migrateReset(this: DatabaseAdapter): Promise<void> {
 
   // Rollback all migrations in order
   for (const migration of migrationFiles) {
-    payload.logger.info({ msg: `Evaluating migration ${migration.name}...` });
-
     // Create or update migration in database
     const existingMigration = existingMigrations.find((existing) => existing.name === migration.name);
-    if (existingMigration?.ran) {
+    if (existingMigration) {
+      payload.logger.info({ msg: `Running migration ${migration.name}...` });
       try {
         await migration.down({ payload });
       } catch (err: unknown) {
@@ -32,11 +31,8 @@ export async function migrateReset(this: DatabaseAdapter): Promise<void> {
 
       payload.logger.info({ msg: `${migration.name} down done.` });
 
-      await payload.update({
+      await payload.delete({
         collection: 'payload-migrations',
-        data: {
-          ran: false,
-        },
         where: {
           id: {
             equals: existingMigration.id,

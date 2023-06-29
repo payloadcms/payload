@@ -19,7 +19,7 @@ export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
     );
     return {
       name: migration.name,
-      ran: !!existingMigration?.ran,
+      ran: !!existingMigration,
     };
   });
 

@@ -12,11 +12,6 @@ export const migrationsCollection: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'ran',
-      type: 'checkbox',
-      defaultValue: false,
-    },
-    {
       name: 'batch',
       type: 'number',
     },

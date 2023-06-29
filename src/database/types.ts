@@ -243,7 +243,6 @@ export type Migration = MigrationData & {
 export type MigrationData = {
   id: string
   name: string
-  ran: boolean
   batch: number
 }
 
