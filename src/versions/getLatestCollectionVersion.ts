@@ -23,10 +23,7 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
     const { docs } = await payload.db.findVersions<T>({
       collection: config.slug,
       where: { parent: { equals: id } },
-      sort: [{
-        property: 'updatedAt',
-        direction: 'desc',
-      }],
+      sort: '-updatedAt',
     });
     [latestVersion] = docs;
   }

@@ -241,6 +241,7 @@
     "uploading": "กำลังอัปโหลด",
     "user": "ผู้ใช้",
     "users": "ผู้ใช้",
+    "value": "ค่า",
     "welcome": "ยินดีต้อนรับ"
   },
   "operators": {
@@ -274,11 +275,11 @@
     "emailAddress": "กรุณาระบุอีเมลที่ถูกต้อง",
     "enterNumber": "กรุณาระบุตัวเลขที่ถูกต้อง",
     "fieldHasNo": "ช่องนี้ไม่มี {{label}}",
-    "greaterThanMax": "\"{{value}}\" มีค่ามากกว่าค่าสูงสุดที่กำหนดคือ {{max}}",
+    "greaterThanMax": "{{value}} มากกว่าค่าสูงสุดที่อนุญาตของ {{label}} ซึ่งคือ {{max}}.",
     "invalidInput": "ข้อมูลไม่ถูกต้อง",
     "invalidSelection": "ค่าที่เลือกไม่ถูกต้อง",
     "invalidSelections": "ค่าที่เลือกไม่ถูกต้องดังนี้:",
-    "lessThanMin": "\"{{value}}\" มีค่าน้อยกว่าค่าต่ำสุดที่กำหนดคือ {{min}}",
+    "lessThanMin": "{{value}} น้อยกว่าค่าต่ำสุดที่อนุญาตของ {{label}} ซึ่งคือ {{min}}.",
     "longerThanMin": "ค่าต้องมีความยาวมากกว่า {{minLength}} ตัวอักษร",
     "notValidDate": "วันที่ \"{{value}}\" ไม่ถูกต้อง",
     "required": "จำเป็นต้องระบุค่า",

@@ -12,6 +12,7 @@ import { tabsSlug } from './collections/Tabs';
 import { collapsibleFieldsSlug } from './collections/Collapsible';
 import wait from '../../src/utilities/wait';
 import { jsonDoc } from './collections/JSON';
+import { numberDoc } from './collections/Number';
 
 const { beforeAll, describe } = test;
 
@@ -64,6 +65,42 @@ describe('fields', () => {
       await page.goto(url.create);
       const description = page.locator('.field-description-i18nText');
       await expect(description).toHaveText('en description');
+    });
+  });
+
+  describe('number', () => {
+    let url: AdminUrlUtil;
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, 'number-fields');
+    });
+
+    test('should display field in list view', async () => {
+      await page.goto(url.list);
+      const textCell = page.locator('.row-1 .cell-number');
+      await expect(textCell)
+        .toHaveText(String(numberDoc.number));
+    });
+
+    test('should create', async () => {
+      const input = 5;
+
+      await page.goto(url.create);
+      const field = page.locator('#field-number');
+      await field.fill(String(input));
+      await saveDocAndAssert(page);
+      await expect(await field.inputValue()).toEqual(String(input));
+    });
+
+    test('should create hasMany', async () => {
+      const input = 5;
+
+      await page.goto(url.create);
+      const field = page.locator('.field-hasMany');
+      await field.click();
+      await page.keyboard.type(String(input));
+      await page.keyboard.press('Enter');
+      await saveDocAndAssert(page);
+      await expect(field.locator('.rs__value-container')).toContainText(String(input));
     });
   });
 
@@ -838,6 +875,36 @@ describe('fields', () => {
       await page.locator('.rs__option:has-text("Seeded text document")').click();
       await saveDocAndAssert(page);
     });
+
+    // Related issue: https://github.com/payloadcms/payload/issues/2815
+    test('should modify fields in relationship drawer', async () => {
+      await page.goto(url.create);
+
+      // Create a new doc for the `relationshipHasMany` field
+      await page.locator('#field-relationshipHasMany button.relationship-add-new__add-button').click();
+      const textField2 = page.locator('[id^=doc-drawer_text-fields_1_] #field-text');
+      const value = 'Hello, world!';
+      await textField2.fill(value);
+
+      // Save and close the drawer
+      await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click();
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+      await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click();
+
+      // Now open the drawer again to edit the `text` field _using the keyboard_
+      await page.locator('#field-relationshipHasMany button.relationship--multi-value-label__drawer-toggler').click();
+      const textField3 = page.locator('[id^=doc-drawer_text-fields_1_] #field-text');
+      await textField3.click();
+      await page.keyboard.down('1');
+      await page.keyboard.down('2');
+      await page.keyboard.down('3');
+      await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click();
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+      // TODO: uncomment this when the drawer is fixed
+      // await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click();
+      // await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toContainText(`${value}123`);
+      await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toContainText(value);
+    });
   });
 
   describe('upload', () => {
@@ -972,10 +1039,34 @@ describe('fields', () => {
       await expect(fieldToToggle).toBeVisible();
     });
 
-    test('should show conditionl field based on user data', async () => {
+    test('should show conditional field based on user data', async () => {
       await page.goto(url.create);
       const userConditional = page.locator('input#field-userConditional');
       await expect(userConditional).toBeVisible();
+    });
+
+    test('should show conditional field based on fields nested within data', async () => {
+      await page.goto(url.create);
+
+      const parentGroupFields = page.locator('div#field-parentGroup > .group-field__wrap > .render-fields');
+      await expect(parentGroupFields).toHaveCount(1);
+
+      const toggle = page.locator('label[for=field-parentGroup__enableParentGroupFields]');
+      await toggle.click();
+
+      const toggledField = page.locator('input#field-parentGroup__siblingField');
+
+      await expect(toggledField).toBeVisible();
+    });
+
+    test('should show conditional field based on fields nested within siblingData', async () => {
+      await page.goto(url.create);
+
+      const toggle = page.locator('label[for=field-parentGroup__enableParentGroupFields]');
+      await toggle.click();
+
+      const fieldRelyingOnSiblingData = page.locator('input#field-reliesOnParentGroup');
+      await expect(fieldRelyingOnSiblingData).toBeVisible();
     });
   });
 });

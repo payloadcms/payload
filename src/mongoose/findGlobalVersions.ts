@@ -2,16 +2,30 @@ import type { MongooseAdapter } from '.';
 import type { FindGlobalVersions } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
+import { buildSortParam } from './queries/buildSortParam';
+import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(this: MongooseAdapter,
-  { global, where, page, limit, sort, locale, pagination, skip }) {
+  { global, where, page, limit, sort: sortArg, locale, pagination, skip }) {
   const Model = this.versions[global];
+  const versionFields = buildVersionGlobalFields(this.payload.globals.config[global]);
 
-  let useEstimatedCount = false;
+  let hasNearConstraint = false;
 
   if (where) {
     const constraints = flattenWhereToOperators(where);
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+  }
+
+  let sort;
+  if (!hasNearConstraint) {
+    sort = buildSortParam({
+      sort: sortArg || '-updatedAt',
+      fields: versionFields,
+      timestamps: true,
+      config: this.payload.config,
+      locale,
+    });
   }
 
   const query = await Model.buildQuery({
@@ -23,16 +37,14 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
 
   const paginationOptions = {
     page,
-    sort: sort ? sort.reduce((acc, cur) => {
-      acc[cur.property] = cur.direction;
-      return acc;
-    }, {}) : undefined,
+    sort,
     limit,
     lean: true,
     leanWithId: true,
     pagination,
     offset: skip,
-    useEstimatedCount,
+    useEstimatedCount: hasNearConstraint,
+    forceCountFn: hasNearConstraint,
     options: {
       // limit must also be set here, it's ignored when pagination is false
       limit,

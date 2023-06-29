@@ -47,6 +47,30 @@ const NumberFields: CollectionConfig = {
       type: 'number',
       defaultValue: defaultNumber,
     },
+    {
+      name: 'hasMany',
+      type: 'number',
+      hasMany: true,
+      min: 5,
+      max: 100,
+    },
+    {
+      name: 'validatesHasMany',
+      type: 'number',
+      hasMany: true,
+      validate: (value: number[]) => {
+        if (value && !Array.isArray(value)) {
+          return 'value should be an array';
+        }
+        return true;
+      },
+    },
+    {
+      name: 'localizedHasMany',
+      type: 'number',
+      hasMany: true,
+      localized: true,
+    },
   ],
 };
 
@@ -58,6 +82,9 @@ export const numberDoc = {
   negativeNumber: -5,
   decimalMin: 1.25,
   decimalMax: 0.25,
+  hasMany: [5, 10, 15],
+  validatesHasMany: [5],
+  localizedHasMany: [10],
 };
 
 export default NumberFields;

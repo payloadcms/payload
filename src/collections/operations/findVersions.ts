@@ -3,7 +3,6 @@ import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection } from '../config/types';
-import { buildSortParam } from '../../mongoose/queries/buildSortParam';
 import { PaginatedDocs } from '../../mongoose/types';
 import { TypeWithVersion } from '../../versions/types';
 import { afterRead } from '../../fields/hooks/afterRead';
@@ -34,6 +33,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     collection: {
       config: collectionConfig,
     },
+    sort,
     req,
     req: {
       locale,
@@ -68,14 +68,6 @@ async function findVersions<T extends TypeWithVersion<T>>(
   // /////////////////////////////////////
   // Find
   // /////////////////////////////////////
-
-  const sort = buildSortParam({
-    sort: args.sort || '-updatedAt',
-    fields: versionFields,
-    timestamps: true,
-    config: payload.config,
-    locale,
-  });
 
   const paginatedDocs = await payload.db.findVersions<T>({
     where: fullWhere,

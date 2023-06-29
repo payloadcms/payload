@@ -68,6 +68,10 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     resetPasswordExpiration?: Date,
   }
 
+  if (!data.email) {
+    throw new APIError('Missing email.');
+  }
+
   let user = await payload.db.findOne<UserDoc>({
     collection: collectionConfig.slug,
     where: { email: { equals: (data.email as string).toLowerCase() } },

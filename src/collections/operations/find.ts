@@ -3,7 +3,6 @@ import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import { Collection, TypeWithID } from '../config/types';
 import { PaginatedDocs } from '../../mongoose/types';
-import { buildSortParam } from '../../mongoose/queries/buildSortParam';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
@@ -56,6 +55,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     collection: {
       config: collectionConfig,
     },
+    sort,
     req,
     req: {
       locale,
@@ -96,14 +96,6 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   // /////////////////////////////////////
   // Find
   // /////////////////////////////////////
-
-  const sort = buildSortParam({
-    sort: args.sort ?? collectionConfig.defaultSort,
-    config: payload.config,
-    fields: collectionConfig.fields,
-    timestamps: collectionConfig.timestamps,
-    locale,
-  });
 
   const usePagination = pagination && limit !== 0;
   const sanitizedLimit = limit ?? (usePagination ? 10 : 0);

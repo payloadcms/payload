@@ -2,6 +2,7 @@ import type { MongooseAdapter } from '.';
 import type { QueryDrafts } from '../database/types';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
+import { buildSortParam } from './queries/buildSortParam';
 
 type AggregateVersion<T> = {
   _id: string
@@ -11,14 +12,33 @@ type AggregateVersion<T> = {
 }
 
 export const queryDrafts: QueryDrafts = async function queryDrafts<T>(this: MongooseAdapter,
-  { collection, where, page, limit, sort, locale, pagination }) {
+  { collection, where, page, limit, sort: sortArg, locale, pagination }) {
   const VersionModel = this.versions[collection];
+  const collectionConfig = this.payload.collections[collection].config;
 
   const versionQuery = await VersionModel.buildQuery({
     where,
     locale,
     payload: this.payload,
   });
+
+  let hasNearConstraint = false;
+
+  if (where) {
+    const constraints = flattenWhereToOperators(where);
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+  }
+
+  let sort;
+  if (!hasNearConstraint) {
+    sort = buildSortParam({
+      sort: sortArg || collectionConfig.defaultSort,
+      fields: collectionConfig.fields,
+      timestamps: true,
+      config: this.payload.config,
+      locale,
+    });
+  }
 
   const aggregate = VersionModel.aggregate<AggregateVersion<T>>([
     // Sort so that newest are first
@@ -61,16 +81,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(this: Mong
       options: {
         limit,
       },
-      sort: sort ? sort.reduce((acc, cur) => {
-        let sanitizedSortProperty = cur.property;
-        const sanitizedSortOrder = cur.direction === 'asc' ? 1 : -1;
-
-        if (!['createdAt', 'updatedAt', '_id'].includes(cur.property)) {
-          sanitizedSortProperty = `version.${cur.property}`;
-        }
-        acc[sanitizedSortProperty] = sanitizedSortOrder;
-        return acc;
-      }, {}) : undefined,
+      sort,
     };
 
     result = await VersionModel.aggregatePaginate(aggregate, aggregatePaginateOptions);

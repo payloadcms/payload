@@ -1,6 +1,6 @@
 {
   "name": "payload-example-auth",
-  "description": "Payload CMS authentication example.",
+  "description": "Payload authentication example.",
   "version": "1.0.0",
   "main": "dist/server.js",
   "license": "MIT",

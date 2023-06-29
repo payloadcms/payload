@@ -62,10 +62,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     where: combineQueries(queryToBuild, versionAccessResult),
     collection: entity.slug,
     limit: 1,
-    sort: [{
-      property: 'updatedAt',
-      direction: 'desc',
-    }],
+    sort: '-updatedAt',
   };
 
   const { docs: versionDocs } = await req.payload.db.findVersions<T>(findVersionsArgs);

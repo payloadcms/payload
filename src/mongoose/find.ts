@@ -3,17 +3,31 @@ import type { MongooseAdapter } from '.';
 import type { Find } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
+import { buildSortParam } from './queries/buildSortParam';
 
-
-export const find: Find = async function find(this: MongooseAdapter,
-  { collection, where, page, limit, sort, locale, pagination }) {
+export const find: Find = async function find(
+  this: MongooseAdapter,
+  { collection, where, page, limit, sort: sortArg, locale, pagination },
+) {
   const Model = this.collections[collection];
+  const collectionConfig = this.payload.collections[collection].config;
 
-  let useEstimatedCount = false;
+  let hasNearConstraint = false;
 
   if (where) {
     const constraints = flattenWhereToOperators(where);
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+  }
+
+  let sort;
+  if (!hasNearConstraint) {
+    sort = buildSortParam({
+      sort: sortArg || collectionConfig.defaultSort,
+      fields: collectionConfig.fields,
+      timestamps: true,
+      config: this.payload.config,
+      locale,
+    });
   }
 
   const query = await Model.buildQuery({
@@ -24,14 +38,12 @@ export const find: Find = async function find(this: MongooseAdapter,
 
   const paginationOptions: PaginateOptions = {
     page,
-    sort: sort ? sort.reduce((acc, cur) => {
-      acc[cur.property] = cur.direction;
-      return acc;
-    }, {}) : undefined,
+    sort,
     limit,
     lean: true,
     leanWithId: true,
-    useEstimatedCount,
+    useEstimatedCount: hasNearConstraint,
+    forceCountFn: hasNearConstraint,
     pagination,
     options: {
       // limit must also be set here, it's ignored when pagination is false

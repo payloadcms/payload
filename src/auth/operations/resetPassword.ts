@@ -7,7 +7,6 @@ import { fieldAffectsData } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
 import { authenticateLocalStrategy } from '../strategies/local/authenticate';
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
 export type Result = {
   token: string

@@ -17,7 +17,7 @@ To enable Authentication on a collection, define an `auth` property and set it t
 | **`useAPIKey`**            | Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection. [More](/docs/authentication/config#api-keys)                                                                       |
 | **`tokenExpiration`**      | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time.                                                                                                                     |
 | **`maxLoginAttempts`**     | Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to `0` to disable.                                                                       |
-| **`lockTime`**             | Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for.                                                                                                            |
+| **`lockTime`**             | Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for.                                                                                          |
 | **`depth`**                | How many levels deep a `user` document should be populated when creating the JWT and binding the `user` to the express `req`. Defaults to `0` and should only be modified if absolutely necessary, as this will affect performance. |
 | **`cookies`**              | Set cookie options, including `secure`, `sameSite`, and `domain`. For advanced users.                                                                                                                                               |
 | **`forgotPassword`**       | Customize the way that the `forgotPassword` operation functions. [More](/docs/authentication/config#forgot-password)                                                                                                                |
@@ -29,10 +29,12 @@ To enable Authentication on a collection, define an `auth` property and set it t
 
 To integrate with third-party APIs or services, you might need the ability to generate API keys that can be used to identify as a certain user within Payload.
 
+In Payload, users are essentially documents within a collection. Just like you can authenticate as a user with an email and password, which is considered as our default local auth strategy, you can also authenticate as a user with an API key. API keys are generated on a user-by-user basis, similar to email and passwords, and are meant to represent a single user.
+
 For example, if you have a third-party service or external app that needs to be able to perform protected actions at its discretion, you have two options:
 
 1. Create a user for the third-party app, and log in each time to receive a token before you attempt to access any protected actions
-1. Enable API key support for the Collection, where you can generate a non-expiring API key per user in the collection
+1. Enable API key support for the Collection, where you can generate a non-expiring API key per user in the collection. This is particularly useful as you can create a "user" that reflects an integration with a specific external service and assign a "role" or specific access only needed by that service/integration. Alternatively, you could create a "super admin" user and assign an API key to that user so that any requests made with that API key are considered as being made by that super user.
 
 Technically, both of these options will work for third-party integrations but the second option with API key is simpler, because it reduces the amount of work that your integrations need to do to be authenticated properly.
 
@@ -45,7 +47,7 @@ To enable API keys on a collection, set the `useAPIKey` auth option to `true`. F
 
 #### Authenticating via API Key
 
-To authenticate REST or GraphQL API requests using an API key, set the `Authorization` header. The header is case-sensitive and needs the slug of the `auth.useAPIKey` enabled collection, then " API-Key ", followed by the `apiKey` that has been assigned. Payload's built-in middleware will then assign the user document to `req.user` and handle requests with the proper access control.
+To authenticate REST or GraphQL API requests using an API key, set the `Authorization` header. The header is case-sensitive and needs the slug of the `auth.useAPIKey` enabled collection, then " API-Key ", followed by the `apiKey` that has been assigned. Payload's built-in middleware will then assign the user document to `req.user` and handle requests with the proper access control. By doing this, Payload recognizes the request being made as a request by the user associated with that API key.
 
 **For example, using Fetch:**
 
@@ -58,6 +60,8 @@ const response = await fetch("http://localhost:3000/api/pages", {
   },
 });
 ```
+
+Payload ensures that the same, uniform access control is used across all authentication strategies. This enables you to utilize your existing access control configurations with both API keys and the standard email/password authentication. This consistency can aid in maintaining granular control over your API keys.
 
 ### Forgot Password
 
