@@ -39,17 +39,18 @@ export const find: Find = async function find(
   const paginationOptions: PaginateOptions = {
     page,
     sort,
-    limit,
     lean: true,
     leanWithId: true,
     useEstimatedCount: hasNearConstraint,
     forceCountFn: hasNearConstraint,
     pagination,
-    options: {
-      // limit must also be set here, it's ignored when pagination is false
-      limit,
-    },
+    options: {},
   };
+  if (limit > 0) {
+    paginationOptions.limit = limit;
+    // limit must also be set here, it's ignored when pagination is false
+    paginationOptions.options.limit = limit;
+  }
 
   const result = await Model.paginate(query, paginationOptions);
   const docs = JSON.parse(JSON.stringify(result.docs));

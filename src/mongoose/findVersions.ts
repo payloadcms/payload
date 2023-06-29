@@ -1,3 +1,4 @@
+import { PaginateOptions } from 'mongoose';
 import type { MongooseAdapter } from '.';
 import type { FindVersions } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
@@ -33,7 +34,7 @@ export const findVersions: FindVersions = async function findVersions(this: Mong
     where,
   });
 
-  const paginationOptions = {
+  const paginationOptions: PaginateOptions = {
     page,
     sort,
     limit,
@@ -49,6 +50,11 @@ export const findVersions: FindVersions = async function findVersions(this: Mong
       skip,
     },
   };
+  if (limit > 0) {
+    paginationOptions.limit = limit;
+    // limit must also be set here, it's ignored when pagination is false
+    paginationOptions.options.limit = limit;
+  }
 
   const result = await Model.paginate(query, paginationOptions);
   const docs = JSON.parse(JSON.stringify(result.docs));
