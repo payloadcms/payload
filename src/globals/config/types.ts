@@ -1,5 +1,4 @@
 import React from 'react';
-import { Document, Model } from 'mongoose';
 import { DeepRequired } from 'ts-essentials';
 import { GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import type { Where } from '../../types';
@@ -48,10 +47,6 @@ export type AfterReadHook = (args: {
   query?: Where
   findMany?: boolean
 }) => any;
-
-export interface GlobalModel extends Model<Document> {
-  buildQuery: (query: unknown, locale?: string) => Promise<Record<string, unknown>>
-}
 
 export type GlobalAdminOptions = {
   /**
@@ -149,7 +144,6 @@ export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 
 }
 
 export type Globals = {
-  Model?: GlobalModel
   config: SanitizedGlobalConfig[]
   graphQL?: {
     [slug: string]: {

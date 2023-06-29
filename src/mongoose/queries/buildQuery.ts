@@ -2,7 +2,7 @@ import { Where } from '../../types';
 import { Field } from '../../fields/config/types';
 import QueryError from '../../errors/QueryError';
 import { parseParams } from './parseParams';
-import { Payload } from '../..';
+import { PayloadMongoose } from '..';
 
 type GetBuildQueryPluginArgs = {
   collectionSlug?: string
@@ -10,7 +10,7 @@ type GetBuildQueryPluginArgs = {
 }
 
 export type BuildQueryArgs = {
-  payload: Payload
+  payload: PayloadMongoose
   locale?: string
   where: Where
   globalSlug?: string
