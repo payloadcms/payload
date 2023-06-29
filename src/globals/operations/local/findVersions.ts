@@ -1,12 +1,12 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Document, Where } from '../../../types';
-import { PaginatedDocs } from '../../../mongoose/types';
 import { Payload } from '../../../payload';
 import { PayloadRequest } from '../../../express/types';
 import findVersions from '../findVersions';
 import { getDataLoader } from '../../../collections/dataloader';
 import { APIError } from '../../../errors';
 import { TypeWithVersion } from '../../../versions/types';
+import { PaginatedDocs } from '../../../database/types';
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   slug: T

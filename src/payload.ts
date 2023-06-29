@@ -10,7 +10,6 @@ import { SendMailOptions } from 'nodemailer';
 import { BulkOperationResult, Collection } from './collections/config/types';
 import { EmailOptions, InitOptions, SanitizedConfig } from './config/types';
 import { TypeWithVersion } from './versions/types';
-import { PaginatedDocs } from './mongoose/types';
 
 import { PayloadAuthenticate } from './express/middleware/authenticate';
 import { Globals } from './globals/config/types';
@@ -63,6 +62,7 @@ import type { DatabaseAdapter } from '.';
 import { PayloadMongoose, mongooseAdapter } from './mongoose';
 
 import { i18nInit } from './translations/init';
+import { PaginatedDocs } from './database/types';
 
 /**
  * @description Payload

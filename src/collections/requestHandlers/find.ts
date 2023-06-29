@@ -2,10 +2,10 @@ import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { TypeWithID } from '../config/types';
-import { PaginatedDocs } from '../../mongoose/types';
 import find from '../operations/find';
 import { Where } from '../../types';
 import { isNumber } from '../../utilities/isNumber';
+import { PaginatedDocs } from '../../database/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default async function findHandler<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {

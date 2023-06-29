@@ -5,7 +5,6 @@ import qs from 'qs';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useConfig } from '../Config';
-import { PaginatedDocs } from '../../../../mongoose/types';
 import { ContextType, DocumentPermissions, Props, Version } from './types';
 import { TypeWithID } from '../../../../globals/config/types';
 import { TypeWithTimestamps } from '../../../../collections/config/types';
@@ -13,6 +12,7 @@ import { Where } from '../../../../types';
 import { DocumentPreferences } from '../../../../preferences/types';
 import { usePreferences } from '../Preferences';
 import { useAuth } from '../Auth';
+import { PaginatedDocs } from '../../../../database/types';
 
 const Context = createContext({} as ContextType);
 

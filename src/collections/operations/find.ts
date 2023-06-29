@@ -2,7 +2,6 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import { Collection, TypeWithID } from '../config/types';
-import { PaginatedDocs } from '../../mongoose/types';
 import { buildSortParam } from '../../mongoose/queries/buildSortParam';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
@@ -10,6 +9,7 @@ import { validateQueryPaths } from '../../database/queryValidation/validateQuery
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
 import { combineQueries } from '../../database/combineQueries';
+import { PaginatedDocs } from '../../database/types';
 
 export type Arguments = {
   collection: Collection

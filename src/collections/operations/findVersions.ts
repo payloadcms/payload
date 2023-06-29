@@ -4,12 +4,12 @@ import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection } from '../config/types';
 import { buildSortParam } from '../../mongoose/queries/buildSortParam';
-import { PaginatedDocs } from '../../mongoose/types';
 import { TypeWithVersion } from '../../versions/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
 import { combineQueries } from '../../database/combineQueries';
+import { PaginatedDocs } from '../../database/types';
 
 export type Arguments = {
   collection: Collection

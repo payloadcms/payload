@@ -2,7 +2,6 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { PaginatedDocs } from '../../mongoose/types';
 import { buildSortParam } from '../../mongoose/queries/buildSortParam';
 import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
@@ -10,6 +9,7 @@ import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
 import { TypeWithVersion } from '../../versions/types';
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
 import { combineQueries } from '../../database/combineQueries';
+import { PaginatedDocs } from '../../database/types';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig

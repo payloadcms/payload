@@ -11,7 +11,6 @@ import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { relationship } from '../../../../../fields/validations';
 import { Where } from '../../../../../types';
-import { PaginatedDocs } from '../../../../../mongoose/types';
 import { useFormProcessing } from '../../Form/context';
 import optionsReducer from './optionsReducer';
 import { FilterOptionsResult, GetResults, Props, Value } from './types';
@@ -27,6 +26,7 @@ import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
 import { useLocale } from '../../../utilities/Locale';
 
 import './index.scss';
+import { PaginatedDocs } from '../../../../../database/types';
 
 const maxResultsPerRequest = 10;
 

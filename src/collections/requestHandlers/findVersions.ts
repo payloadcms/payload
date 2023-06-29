@@ -3,9 +3,9 @@ import httpStatus from 'http-status';
 import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import { TypeWithID } from '../config/types';
-import { PaginatedDocs } from '../../mongoose/types';
 import { isNumber } from '../../utilities/isNumber';
 import findVersions from '../operations/findVersions';
+import { PaginatedDocs } from '../../database/types';
 
 export default async function findVersionsHandler<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
   try {

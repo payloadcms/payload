@@ -1,11 +1,11 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { PaginatedDocs } from '../../../mongoose/types';
 import { Document, Where } from '../../../types';
 import { Payload } from '../../../payload';
 import { PayloadRequest } from '../../../express/types';
 import find from '../find';
 import { getDataLoader } from '../../dataloader';
 import { APIError } from '../../../errors';
+import { PaginatedDocs } from '../../../database/types';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T

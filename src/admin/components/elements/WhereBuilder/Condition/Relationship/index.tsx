@@ -6,9 +6,9 @@ import optionsReducer from './optionsReducer';
 import useDebounce from '../../../../../hooks/useDebounce';
 import ReactSelect from '../../../ReactSelect';
 import { Option } from '../../../ReactSelect/types';
-import { PaginatedDocs } from '../../../../../../mongoose/types';
 
 import './index.scss';
+import { PaginatedDocs } from '../../../../../../database/types';
 
 const baseClass = 'condition-value-relationship';
 

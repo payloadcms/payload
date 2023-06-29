@@ -2,11 +2,11 @@ import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { TypeWithID } from '../../collections/config/types';
-import { PaginatedDocs } from '../../mongoose/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import findVersions from '../operations/findVersions';
 import { Where } from '../../types';
 import { isNumber } from '../../utilities/isNumber';
+import { PaginatedDocs } from '../../database/types';
 
 export default function findVersionsHandler(global: SanitizedGlobalConfig) {
   return async function handler<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {

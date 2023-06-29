@@ -2,10 +2,10 @@
 
 import { Response } from 'express';
 import { Where } from '../../../types';
-import type { PaginatedDocs } from '../../../mongoose/types';
 import { PayloadRequest } from '../../../express/types';
 import { Collection } from '../../config/types';
 import findVersions from '../../operations/findVersions';
+import { PaginatedDocs } from '../../../database/types';
 
 export type Resolver = (
   _: unknown,
