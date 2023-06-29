@@ -21,6 +21,24 @@ const Users: CollectionConfig = {
   ],
 };
 
+// // @ts-expect-error partial
+// const mockAdapter: DatabaseAdapter = {
+//   // payload: undefined,
+//   migrationDir: path.resolve(__dirname, '.migrations'),
+//   migrateStatus: async () => console.log('TODO: migrateStatus not implemented.'),
+//   createMigration: async (): Promise<void> =>
+//     console.log('TODO: createMigration not implemented.'),
+//   migrate: async (): Promise<void> => console.log('TODO: migrate not implemented.'),
+//   migrateDown: async (): Promise<void> =>
+//     console.log('TODO: migrateDown not implemented.'),
+//   migrateRefresh: async (): Promise<void> =>
+//     console.log('TODO: migrateRefresh not implemented.'),
+//   migrateReset: async (): Promise<void> =>
+//     console.log('TODO: migrateReset not implemented.'),
+//   migrateFresh: async (): Promise<void> =>
+//     console.log('TODO: migrateFresh not implemented.'),
+// };
+
 export default buildConfig({
   serverURL: 'http://localhost:3000',
   admin: {

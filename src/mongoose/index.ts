@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import type { ConnectOptions } from 'mongoose';
 import fs from 'fs';
+import { Table } from 'console-table-printer';
 import type { DatabaseAdapter, Migration } from '../database/types';
 import { connect } from './connect';
 import { init } from './init';
@@ -13,8 +14,8 @@ import { create } from './create';
 import { findVersions } from './findVersions';
 import { findGlobalVersions } from './findGlobalVersions';
 import type { Payload } from '../index';
-import { slugify } from '../utilities/slugify';
 import { readMigrationFiles } from '../database/migrations/readMigrationFiles';
+
 
 export interface Args {
   payload: Payload;
@@ -40,8 +41,6 @@ export type MongooseAdapter = DatabaseAdapter &
 
 const migrationTemplate = `
 import payload, { Payload } from 'payload';
-
-export const name = '{{NAME}}';
 
 export async function up(payload: Payload): Promise<void> {
   // Migration code
@@ -74,24 +73,46 @@ export function mongooseAdapter({
         collection: 'payload-migrations',
       });
 
-      const existingMigrations = migrationQuery.docs;
-      payload.logger.info({ existingMigrations });
+      const existingMigrations = migrationQuery.docs as unknown as Migration[];
 
       // Execute 'up' function for each migration sequentially
       for (const migration of migrationFiles) {
-        payload.logger.info({ msg: `Executing migration ${migration.name}...` });
-        await migration.up({ payload });
-        payload.logger.info({ msg: `${migration.name} done.` });
+        payload.logger.info({ msg: `Evaluating migration ${migration.name}...` });
 
-        // Save migration to database
-        await payload.update({
-          collection: 'payload-migrations',
-          id: migration.name,
-          data: {
-            name: migration.name,
-            executed: true,
-          },
-        });
+        // Create or update migration in database
+        const existingMigration = existingMigrations.find((existing) => existing.name === migration.name);
+
+        // Run migration if not found in database
+        if (!existingMigration || !existingMigration?.executed) {
+          try {
+            await migration.up({ payload });
+          } catch (error: unknown) {
+            payload.logger.error({ msg: `Error running migration ${migration.name}`, error });
+            throw error;
+          }
+
+          payload.logger.info({ msg: `${migration.name} done.` });
+
+          if (!existingMigration) {
+            await payload.create({
+              collection: 'payload-migrations',
+              data: {
+                name: migration.name,
+                executed: true,
+              },
+            });
+          } else {
+            await payload.update({
+              collection: 'payload-migrations',
+              id: existingMigration.id,
+              data: {
+                executed: true,
+              },
+            });
+          }
+        } else {
+          payload.logger.info({ msg: `${migration.name} already executed.` });
+        }
       }
     },
     migrateStatus: async () => {
@@ -100,10 +121,27 @@ export function mongooseAdapter({
         collection: 'payload-migrations',
       });
 
-      const existingMigrations = migrationQuery.docs;
-      payload.logger.info({ existingMigrations });
+      const existingMigrations = migrationQuery.docs as unknown as Migration[];
 
-      // TODO: Check if migration has been run
+      // Compare migration files to existing migrations
+      const statuses = migrationFiles.map((migration) => {
+        const existingMigration = existingMigrations.find(
+          (m) => m.name === migration.name,
+        );
+        return {
+          name: migration.name,
+          ran: !!existingMigration?.executed,
+        };
+      });
+
+      const p = new Table();
+
+      statuses.forEach((s) => {
+        p.addRow(s, {
+          color: s.ran ? 'green' : 'red',
+        });
+      });
+      p.printTable();
     },
     migrateDown: async () => null,
     migrateRefresh: async () => null,
@@ -116,16 +154,18 @@ export function mongooseAdapter({
         fs.mkdirSync(migrationDir);
       }
 
-      const timestamp = new Date()
-        .toISOString()
-        .split('.')[0]
-        .replace(/[^\d]/gi, '');
-      const slugifiedName = slugify(migrationName);
-      const fileName = `${timestamp}-${slugifiedName}.ts`;
+      const [yyymmdd, hhmmss] = new Date().toISOString().split('T');
+      const formattedDate = yyymmdd.replace(/\D/g, '');
+      const formattedTime = hhmmss.split('.')[0].replace(/\D/g, '');
+
+      const timestamp = `${formattedDate}_${formattedTime}`;
+
+      const formattedName = migrationName.replace(/\W/g, '_');
+      const fileName = `${timestamp}_${formattedName}.ts`;
       const filePath = `${migrationDir}/${fileName}`;
       fs.writeFileSync(
         filePath,
-        migrationTemplate.replace('{{NAME}}', slugifiedName),
+        migrationTemplate,
       );
       payload.logger.info({ msg: `Migration created at ${filePath}` });
     },

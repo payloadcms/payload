@@ -8,7 +8,7 @@ export const migrationsCollection: CollectionConfig = {
   graphQL: false,
   fields: [
     {
-      name: 'migration',
+      name: 'name',
       type: 'text',
     },
     {
