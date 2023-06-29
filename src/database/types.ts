@@ -27,7 +27,7 @@ import type {
 import type { TypeWithID } from '../collections/config/types';
 import type { TypeWithID as GlobalsTypeWithID } from '../globals/config/types';
 import type { Payload } from '../payload';
-import type { Document, Where } from '../types';
+import type { Document, PayloadRequest, Where } from '../types';
 import type { TypeWithVersion } from '../versions/types';
 
 export interface DatabaseAdapter {
@@ -273,6 +273,7 @@ export type UpdateOneArgs = {
   data: Record<string, unknown>,
   where: Where,
   locale?: string
+  req: PayloadRequest
 }
 
 export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>

@@ -4,7 +4,7 @@ import { ValidationError } from '../errors';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
 export const updateOne: UpdateOne = async function updateOne(this: MongooseAdapter,
-  { collection, data, where, locale }) {
+  { collection, data, where, locale, req }) {
   const Model = this.collections[collection];
 
   const query = await Model.buildQuery({
@@ -26,7 +26,7 @@ export const updateOne: UpdateOne = async function updateOne(this: MongooseAdapt
       ? new ValidationError([{
         message: 'Value must be unique',
         field: Object.keys(error.keyValue)[0],
-      }], this.payload.config.initializedi18n.t)
+      }], req?.t ?? this.payload.config.initializedi18n.t)
       : error;
   }
 

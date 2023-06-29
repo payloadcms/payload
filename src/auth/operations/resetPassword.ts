@@ -76,6 +76,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
     collection: collectionConfig.slug,
     where: { id: { equals: user.id } },
     data: user,
+    req: args.req,
   });
 
 
