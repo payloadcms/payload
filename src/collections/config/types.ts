@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeepRequired } from 'ts-essentials';
-import { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateModel } from 'mongoose';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
 import { Config as GeneratedTypes } from 'payload/generated-types';
@@ -11,7 +10,6 @@ import { PayloadRequest } from '../../express/types';
 import { Auth, IncomingAuthType, User } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
-import { BuildQueryArgs } from '../../mongoose/queries/buildQuery';
 import {
   CustomPreviewButtonProps,
   CustomPublishButtonProps,
@@ -21,22 +19,6 @@ import {
 import type { Props as ListProps } from '../../admin/components/views/collections/List/types';
 import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types';
 
-type Register<T = any> = (doc: T, password: string) => T;
-
-interface PassportLocalModel {
-  register: Register
-  authenticate: any
-}
-
-export interface CollectionModel extends Model<any>, PaginateModel<any>, AggregatePaginateModel<any>, PassportLocalModel {
-  /** buildQuery is used to transform payload's where operator into what can be used by mongoose (e.g. id => _id) */
-  buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>> // TODO: Delete this
-}
-
-export interface AuthCollectionModel extends CollectionModel {
-  resetPasswordToken: string;
-  resetPasswordExpiration: Date;
-}
 
 export type HookOperationType =
   | 'create'
@@ -281,10 +263,6 @@ export type CollectionConfig = {
   }
   fields: Field[];
   /**
-   * Array of database indexes to create, including compound indexes that have multiple fields
-   */
-  indexes?: TypeOfIndex[];
-  /**
    * Collection admin options
    */
   admin?: CollectionAdminOptions;
@@ -361,7 +339,6 @@ export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionC
 }
 
 export type Collection = {
-  Model?: CollectionModel;
   config: SanitizedCollectionConfig;
   graphQL?: {
     type: GraphQLObjectType
@@ -383,7 +360,6 @@ export type BulkOperationResult<TSlug extends keyof GeneratedTypes['collections'
 }
 
 export type AuthCollection = {
-  Model: AuthCollectionModel;
   config: SanitizedCollectionConfig;
 }
 
@@ -396,9 +372,4 @@ export type TypeWithTimestamps = {
   createdAt: string
   updatedAt: string
   [key: string]: unknown
-}
-
-export type TypeOfIndex = {
-  fields: IndexDefinition
-  options?: IndexOptions
 }

@@ -5,7 +5,7 @@ import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
 export const deleteOne: DeleteOne = async function deleteOne(this: MongooseAdapter,
   { collection, where }) {
-  const Model = this.collections[collection];
+  const Model = this.collections[collection].model;
 
   const query = await Model.buildQuery({
     payload: this.payload,

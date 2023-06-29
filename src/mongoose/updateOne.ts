@@ -5,7 +5,7 @@ import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 
 export const updateOne: UpdateOne = async function updateOne(this: MongooseAdapter,
   { collection, data, where, locale, req }) {
-  const Model = this.collections[collection];
+  const Model = this.collections[collection].model;
 
   const query = await Model.buildQuery({
     payload: this.payload,

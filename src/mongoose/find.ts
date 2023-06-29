@@ -7,7 +7,7 @@ import flattenWhereToOperators from '../database/flattenWhereToOperators';
 
 export const find: Find = async function find(this: MongooseAdapter,
   { collection, where, page, limit, sort, locale, pagination }) {
-  const Model = this.collections[collection];
+  const Model = this.collections[collection].model;
 
   let useEstimatedCount = false;
 

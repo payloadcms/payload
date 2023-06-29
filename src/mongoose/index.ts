@@ -1,10 +1,9 @@
 import type { ConnectOptions } from 'mongoose';
 import type { DatabaseAdapter } from '../database/types';
-import type { Payload } from '../index';
+import { Payload } from '../index';
 import { connect } from './connect';
 import { init } from './init';
 import { webpack } from './webpack';
-import { CollectionModel } from '../collections/config/types';
 import { queryDrafts } from './queryDrafts';
 import { GlobalModel } from '../globals/config/types';
 import { find } from './find';
@@ -20,22 +19,54 @@ import { createVersion } from './createVersion';
 import { updateVersion } from './updateVersion';
 import { updateGlobal } from './updateGlobal';
 import { createGlobal } from './createGlobal';
+import { CollectionModel, TypeOfIndex } from './types';
+import { SanitizedConfig } from '../config/types';
+
+export type SanitizedPayloadMongooseConfig = Omit<
+SanitizedConfig,
+'db'
+> & {
+  db: MongooseAdapter;
+}
+
+
+export class PayloadMongoose extends Payload {
+  db: MongooseAdapter;
+
+  config: SanitizedPayloadMongooseConfig;
+}
+
 
 export interface Args {
-  payload: Payload,
+  payload: PayloadMongoose,
   /** The URL to connect to MongoDB */
   url: string
   connectOptions?: ConnectOptions & {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
   }
+  collections?: {
+    [slug: string]: {
+      /**
+       * Array of database indexes to create, including compound indexes that have multiple fields
+       */
+      indexes?: TypeOfIndex[]
+    }
+  },
+
 }
 
 export type MongooseAdapter = DatabaseAdapter &
   Args & {
     mongoMemoryServer: any
     collections: {
-      [slug: string]: CollectionModel
+      [slug: string]: {
+        model?: CollectionModel
+        /**
+         * Array of database indexes to create, including compound indexes that have multiple fields
+         */
+        indexes?: TypeOfIndex[];
+      }
     }
     globals: GlobalModel
     versions: {
@@ -43,14 +74,14 @@ export type MongooseAdapter = DatabaseAdapter &
     }
   }
 
-export function mongooseAdapter({ payload, url, connectOptions }: Args): MongooseAdapter {
+export function mongooseAdapter({ payload, url, connectOptions, collections }: Args): MongooseAdapter {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   return {
     payload,
     url,
     connectOptions: connectOptions || {},
-    collections: {},
+    collections: collections ?? {},
     versions: {},
     connect,
     init,

@@ -1,11 +1,11 @@
 import paginate from 'mongoose-paginate-v2';
 import { Schema } from 'mongoose';
-import { SanitizedConfig } from '../../config/types';
 import getBuildQueryPlugin from '../queries/buildQuery';
 import buildSchema from './buildSchema';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
+import type { SanitizedPayloadMongooseConfig } from '..';
 
-const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: SanitizedConfig, schemaOptions = {}): Schema => {
+const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: SanitizedPayloadMongooseConfig, schemaOptions = {}): Schema => {
   const schema = buildSchema(
     config,
     collection.fields,
@@ -24,10 +24,14 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
     schema.index({ updatedAt: 1 });
     schema.index({ createdAt: 1 });
   }
-  if (collection.indexes) {
-    collection.indexes.forEach((index) => {
-      schema.index(index.fields, index.options);
-    });
+  if (config.db.collections) {
+    const configCollection = config.db.collections[collection.slug];
+
+    if (configCollection.indexes) {
+      configCollection.indexes.forEach((index) => {
+        schema.index(index.fields, index.options);
+      });
+    }
   }
   schema.plugin(paginate, { useEstimatedCount: true })
     .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug }));

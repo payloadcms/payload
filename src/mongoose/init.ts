@@ -6,12 +6,13 @@ import { buildVersionCollectionFields } from '../versions/buildCollectionFields'
 import getBuildQueryPlugin from './queries/buildQuery';
 import buildCollectionSchema from './models/buildCollectionSchema';
 import buildSchema from './models/buildSchema';
-import { CollectionModel, SanitizedCollectionConfig } from '../collections/config/types';
+import { SanitizedCollectionConfig } from '../collections/config/types';
 import { getVersionsModelName } from '../versions/getVersionsModelName';
 import type { MongooseAdapter } from '.';
 import { buildGlobalModel } from './models/buildGlobalModel';
 import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
 import type { Init } from '../database/types';
+import { CollectionModel } from './types';
 
 export const init: Init = async function init(this: MongooseAdapter,
   { config }) {
@@ -36,20 +37,24 @@ export const init: Init = async function init(this: MongooseAdapter,
         },
       );
 
-      if (collection.indexes) {
-        collection.indexes.forEach((index) => {
-          // prefix 'version.' to each field in the index
-          const versionIndex = {
-            fields: {},
-            options: index.options,
-          };
-          Object.entries(index.fields)
-            .forEach(([key, value]) => {
-              versionIndex.fields[`version.${key}`] = value;
-            });
-          versionSchema.index(versionIndex.fields, versionIndex.options);
-        });
+      if (this.collections) {
+        const configCollection = this.collections[collection.slug];
+        if (configCollection.indexes) {
+          configCollection.indexes.forEach((index) => {
+            // prefix 'version.' to each field in the index
+            const versionIndex = {
+              fields: {},
+              options: index.options,
+            };
+            Object.entries(index.fields)
+              .forEach(([key, value]) => {
+                versionIndex.fields[`version.${key}`] = value;
+              });
+            versionSchema.index(versionIndex.fields, versionIndex.options);
+          });
+        }
       }
+
 
       versionSchema.plugin(paginate, { useEstimatedCount: true })
         .plugin(getBuildQueryPlugin({
@@ -67,10 +72,12 @@ export const init: Init = async function init(this: MongooseAdapter,
     }
 
     const model = mongoose.model(collection.slug, schema) as CollectionModel;
-    this.collections[collection.slug] = model;
+    if (!this.collections[collection.slug]) {
+      this.collections[collection.slug] = {};
+    }
+    this.collections[collection.slug].model = model;
 
     this.payload.collections[collection.slug] = {
-      Model: model,
       config: collection,
     };
   });

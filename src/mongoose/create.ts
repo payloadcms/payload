@@ -4,7 +4,7 @@ import { Document } from '../types';
 
 export const create: Create = async function create(this: MongooseAdapter,
   { collection, data }) {
-  const Model = this.collections[collection];
+  const Model = this.collections[collection].model;
 
   const doc = await Model.create(data);
 
