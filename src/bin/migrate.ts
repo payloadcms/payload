@@ -15,25 +15,25 @@ export const migrate = async (args: string[]): Promise<void> => {
 
   switch (args[0]) {
     case 'migrate':
-      await adapter.migrate(adapter);
+      await adapter.migrate();
       break;
     case 'migrate:status':
-      await adapter.migrateStatus(adapter);
+      await adapter.migrateStatus();
       break;
     case 'migrate:down':
-      await adapter.migrateDown(adapter);
+      await adapter.migrateDown();
       break;
     case 'migrate:refresh':
-      await adapter.migrateRefresh(adapter);
+      await adapter.migrateRefresh();
       break;
     case 'migrate:reset':
-      await adapter.migrateReset(adapter);
+      await adapter.migrateReset();
       break;
     case 'migrate:fresh':
-      await adapter.migrateFresh(adapter);
+      await adapter.migrateFresh();
       break;
     case 'migrate:create':
-      await adapter.createMigration(adapter, args[1]);
+      await adapter.createMigration(args[1]);
       break;
 
     default:
@@ -44,6 +44,7 @@ export const migrate = async (args: string[]): Promise<void> => {
 // when launched directly
 if (module.id === require.main.id) {
   const args = process.argv.slice(2);
-  console.log({ args });
-  migrate(args);
+  migrate(args).then(() => {
+    process.exit(0);
+  });
 }

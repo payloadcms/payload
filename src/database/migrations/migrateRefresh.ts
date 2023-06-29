@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import { DatabaseAdapter, Migration } from '../types';
+import { DatabaseAdapter } from '../types';
 import { readMigrationFiles } from './readMigrationFiles';
 
 /**

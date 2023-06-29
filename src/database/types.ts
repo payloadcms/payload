@@ -62,37 +62,37 @@ export interface DatabaseAdapter {
   /**
    * Output a migration file
    */
-  createMigration: (adapter: DatabaseAdapter, migrationName: string) => Promise<void>;
+  createMigration: (migrationName: string) => Promise<void>;
 
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
-  migrate: (adapter: DatabaseAdapter) => Promise<void>;
+  migrate: () => Promise<void>;
 
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
-  migrateStatus: (adapter: DatabaseAdapter) => Promise<void>;
+  migrateStatus: () => Promise<void>;
 
   /**
    * Run any migration down functions that have been performed
    */
-  migrateDown: (adapter: DatabaseAdapter) => Promise<void>;
+  migrateDown: () => Promise<void>;
 
   /**
    * Run all migration down functions before running up
    */
-  migrateRefresh: (adapter: DatabaseAdapter) => Promise<void>;
+  migrateRefresh: () => Promise<void>;
 
   /**
    * Run all migrate down functions
    */
-  migrateReset: (adapter: DatabaseAdapter) => Promise<void>;
+  migrateReset: () => Promise<void>;
 
   /**
    * Drop the current database and run all migrate up functions
    */
-  migrateFresh: (adapter: DatabaseAdapter) => Promise<void>;
+  migrateFresh: () => Promise<void>;
 
   // transactions
   /**
