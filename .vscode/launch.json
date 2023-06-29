@@ -94,5 +94,22 @@
       },
       "outputCapture": "std",
     },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Migrate CLI - reset",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register"
+      ],
+      "args": [
+        "src/bin/migrate.ts",
+        "migrate:reset",
+      ],
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
+      },
+      "outputCapture": "std",
+    },
   ]
 }

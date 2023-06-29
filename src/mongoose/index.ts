@@ -77,18 +77,17 @@ export function mongooseAdapter({
 
       // Execute 'up' function for each migration sequentially
       for (const migration of migrationFiles) {
-        payload.logger.info({ msg: `Evaluating migration ${migration.name}...` });
-
         // Create or update migration in database
         const existingMigration = existingMigrations.find((existing) => existing.name === migration.name);
 
         // Run migration if not found in database
+        payload.logger.info({ msg: `Running migration ${migration.name}...` });
         if (!existingMigration || !existingMigration?.executed) {
           try {
             await migration.up({ payload });
-          } catch (error: unknown) {
-            payload.logger.error({ msg: `Error running migration ${migration.name}`, error });
-            throw error;
+          } catch (err: unknown) {
+            payload.logger.error({ msg: `Error running migration ${migration.name}`, err });
+            throw err;
           }
 
           payload.logger.info({ msg: `${migration.name} done.` });
@@ -154,7 +153,6 @@ export function mongooseAdapter({
 
       if (existingMigrations?.length) {
         payload.logger.info({ msg: `Most recent migration ${existingMigrations[0].name}` });
-        // TODO: Find migration in migrationFiles and run down function
         const migration = migrationFiles.find((m) => m.name === existingMigrations[0].name);
         if (!migration) {
           throw new Error(`Migration ${existingMigrations[0].name} not found locally.`);
@@ -176,16 +174,58 @@ export function mongooseAdapter({
               },
             },
           });
-        } catch (error: unknown) {
-          payload.logger.error({ msg: `Error running migration ${migration.name}`, error });
-          throw error;
+        } catch (err: unknown) {
+          payload.logger.error({ msg: `Error running migration ${migration.name}`, err });
+          throw err;
         }
       } else {
         payload.logger.info({ msg: 'No migrations to reset.' });
       }
     },
     migrateRefresh: async () => null,
-    migrateReset: async () => null,
+    migrateReset: async () => {
+      const migrationFiles = await readMigrationFiles({ payload });
+      const migrationQuery = await payload.find({
+        collection: 'payload-migrations',
+        sort: '-name', // Q: Will this always be the most recent by sorting alphabetically?
+      });
+
+      const existingMigrations = migrationQuery.docs as unknown as Migration[];
+      if (!existingMigrations?.length) {
+        payload.logger.info({ msg: 'No migrations to reset.' });
+        return;
+      }
+
+      // Rollback all migrations in order
+      for (const migration of migrationFiles) {
+        payload.logger.info({ msg: `Evaluating migration ${migration.name}...` });
+
+        // Create or update migration in database
+        const existingMigration = existingMigrations.find((existing) => existing.name === migration.name);
+        if (existingMigration?.executed) {
+          try {
+            await migration.down({ payload });
+          } catch (err: unknown) {
+            payload.logger.error({ msg: `Error running migration ${migration.name}`, err });
+            throw err;
+          }
+
+          payload.logger.info({ msg: `${migration.name} down done.` });
+
+          await payload.update({
+            collection: 'payload-migrations',
+            data: {
+              executed: false,
+            },
+            where: {
+              id: {
+                equals: existingMigration.id,
+              },
+            },
+          });
+        }
+      }
+    },
     migrateFresh: async () => null,
     migrationDir: '.migrations',
     async createMigration(adapter, migrationName) {
