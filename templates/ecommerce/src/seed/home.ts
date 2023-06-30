@@ -23,7 +23,7 @@ export const home: Partial<Page> = {
           {
             type: 'link',
             linkType: 'custom',
-            url: 'https://github.com/payloadcms/template-ecommerce-nextjs',
+            url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
             newTab: true,
             children: [
               {
@@ -57,7 +57,7 @@ export const home: Partial<Page> = {
           appearance: 'secondary',
           reference: null,
           label: 'View on GitHub',
-          url: 'https://github.com/payloadcms/template-ecommerce',
+          url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
           newTab: true,
         },
       },
@@ -234,7 +234,7 @@ export const home: Partial<Page> = {
                 {
                   type: 'link',
                   linkType: 'custom',
-                  url: 'https://github.com/payloadcms/template-ecommerce',
+                  url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
                   newTab: true,
                   children: [
                     {

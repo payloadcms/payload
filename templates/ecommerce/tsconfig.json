@@ -13,9 +13,6 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "incremental": true,
-    // aarrgg, Next.js changes this to "preserve" automatically
-    // And the server is unable to compile it
-    // "jsx": "react",
     "jsx": "preserve",
     "module": "CommonJS",
     "moduleResolution": "node",
