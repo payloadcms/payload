@@ -880,6 +880,19 @@ describe('fields', () => {
     test('should modify fields in relationship drawer', async () => {
       await page.goto(url.create);
 
+      // First fill out the relationship field, as it's required
+      await page.locator('#relationship-add-new .relationship-add-new__add-button').click();
+      await page.locator('#field-relationship .relationship-add-new__relation-button--text-fields').click();
+
+      await page.locator('#field-text').fill('something');
+
+      await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click();
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+      await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click();
+      await page.locator('#action-save').click();
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+
+
       // Create a new doc for the `relationshipHasMany` field
       await page.locator('#field-relationshipHasMany button.relationship-add-new__add-button').click();
       const textField2 = page.locator('[id^=doc-drawer_text-fields_1_] #field-text');
@@ -898,12 +911,17 @@ describe('fields', () => {
       await page.keyboard.down('1');
       await page.keyboard.down('2');
       await page.keyboard.down('3');
+      // save drawer
       await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click();
       await expect(page.locator('.Toastify')).toContainText('successfully');
-      // TODO: uncomment this when the drawer is fixed
-      // await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click();
-      // await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toContainText(`${value}123`);
-      await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toContainText(value);
+      // close drawer
+      await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click();
+      // save document and reload
+      await page.locator('#action-save').click();
+      await expect(page.locator('.Toastify')).toContainText('successfully');
+      await page.reload();
+      // check if the value is saved
+      await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toContainText(`${value}123`);
     });
   });
 
