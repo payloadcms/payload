@@ -1,5 +1,14 @@
 
 
+## [1.10.5](https://github.com/payloadcms/payload/compare/v1.10.4...v1.10.5) (2023-06-30)
+
+
+### Bug Fixes
+
+* fields in drawer cannot be edited ([#2949](https://github.com/payloadcms/payload/issues/2949)) ([0c2e41c](https://github.com/payloadcms/payload/commit/0c2e41c4bef9333c47a9b1db0de807696b3f3872)), closes [#2945](https://github.com/payloadcms/payload/issues/2945)
+* improve versions test suite ([#2941](https://github.com/payloadcms/payload/issues/2941)) ([1d4df99](https://github.com/payloadcms/payload/commit/1d4df99ea78c5f682074ae824dcd8dea18b774e0))
+* incorrect graphql type generation ([#2898](https://github.com/payloadcms/payload/issues/2898)) ([b36deb4](https://github.com/payloadcms/payload/commit/b36deb4640cad4f494a12ab74b4e4d9a918cd94b))
+
 ## [1.10.4](https://github.com/payloadcms/payload/compare/v1.10.3...v1.10.4) (2023-06-30)
 
 
