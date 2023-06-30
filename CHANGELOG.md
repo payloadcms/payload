@@ -1,5 +1,12 @@
 
 
+## [1.10.4](https://github.com/payloadcms/payload/compare/v1.10.3...v1.10.4) (2023-06-30)
+
+
+### Features
+
+* add locale to displayed API URL ([b22d157](https://github.com/payloadcms/payload/commit/b22d157bd2f1c1a857e2d42bdc5b893549e3db9e))
+
 ## [1.10.3](https://github.com/payloadcms/payload/compare/v1.10.2...v1.10.3) (2023-06-30)
 
 
