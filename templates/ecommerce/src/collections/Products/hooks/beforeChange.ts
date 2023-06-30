@@ -2,7 +2,7 @@ import type { BeforeChangeHook } from 'payload/dist/globals/config/types'
 import Stripe from 'stripe'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
-const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-11-15' })
+const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
 
 const logs = false
 

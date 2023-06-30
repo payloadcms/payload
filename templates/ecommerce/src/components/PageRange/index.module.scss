@@ -1,0 +1,20 @@
+@import '../../css/common';
+
+.pagination {
+  display: flex;
+  align-items: center;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  margin: 0 var(--base(0.5));
+}
+
+.divider {
+  margin: 0 2px;
+}
+
+.hyperlink {
+  display: flex;
+}

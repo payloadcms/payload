@@ -4,7 +4,7 @@ import Stripe from 'stripe'
 import type { User } from '../payload-types'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2022-11-15',
+  apiVersion: '2022-08-01',
 })
 
 // This endpoint creates a PaymentIntent with the items in the cart using the "Invoices" API
