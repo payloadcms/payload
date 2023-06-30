@@ -17,15 +17,15 @@ export async function migrateRefresh(this: DatabaseAdapter) {
 
   // Run all migrations
   for (const migration of migrationFiles) {
-    payload.logger.info({ msg: `Running migration ${migration.name}...` });
+    payload.logger.info({ msg: `Migrating: ${migration.name}` });
     try {
+      const start = Date.now();
       await migration.up({ payload });
+      payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` });
     } catch (err: unknown) {
       payload.logger.error({ msg: `Error running migration ${migration.name}`, err });
       throw err;
     }
-
-    payload.logger.info({ msg: `${migration.name} done.` });
 
     await payload.create({
       collection: 'payload-migrations',

@@ -1,16 +1,12 @@
-/* eslint-disable no-restricted-syntax, no-await-in-loop */
 import { Table } from 'console-table-printer';
-import { DatabaseAdapter, MigrationData } from '../types';
+import { DatabaseAdapter } from '../types';
 import { readMigrationFiles } from './readMigrationFiles';
+import { getMigrations } from './getMigrations';
 
 export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
   const { payload } = this;
   const migrationFiles = await readMigrationFiles({ payload });
-  const migrationQuery = await payload.find({
-    collection: 'payload-migrations',
-  });
-
-  const existingMigrations = migrationQuery.docs as unknown as MigrationData[];
+  const { existingMigrations } = await getMigrations({ payload });
 
   // Compare migration files to existing migrations
   const statuses = migrationFiles.map((migration) => {
@@ -18,8 +14,9 @@ export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
       (m) => m.name === migration.name,
     );
     return {
-      name: migration.name,
-      ran: !!existingMigration,
+      Ran: existingMigration ? 'Yes' : 'No',
+      Name: migration.name,
+      Batch: existingMigration?.batch,
     };
   });
 
@@ -27,7 +24,7 @@ export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
 
   statuses.forEach((s) => {
     p.addRow(s, {
-      color: s.ran ? 'green' : 'red',
+      color: s.Ran === 'Yes' ? 'green' : 'red',
     });
   });
   p.printTable();

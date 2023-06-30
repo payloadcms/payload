@@ -26,9 +26,11 @@ export async function migrateDown(this: DatabaseAdapter): Promise<void> {
     }
 
     try {
+      payload.logger.info({ msg: `Migrating: ${migrationFile.name}` });
+      const start = Date.now();
       await migrationFile.down({ payload });
 
-      payload.logger.info({ msg: `${migrationFile.name} down done.` });
+      payload.logger.info({ msg: `Migrated:  ${migrationFile.name} (${Date.now() - start}ms)` });
 
       await payload.delete({
         collection: 'payload-migrations',
