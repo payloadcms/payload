@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               />
               <img
                 className={classes.logo}
-                alt="payload cms logo"
+                alt="Payload Logo"
                 src="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-dark.svg"
               />
             </picture>
