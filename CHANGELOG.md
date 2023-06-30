@@ -1,5 +1,13 @@
 
 
+## [1.10.3](https://github.com/payloadcms/payload/compare/v1.10.2...v1.10.3) (2023-06-30)
+
+
+### Bug Fixes
+
+* [#2937](https://github.com/payloadcms/payload/issues/2937), depth not being respected in graphql rich text fields ([f84b432](https://github.com/payloadcms/payload/commit/f84b4323e2fce57e2e14b181e486ed72cc09ded5))
+* shows updatedAt date when selecting a version to compare from dropdown ([3c9dab3](https://github.com/payloadcms/payload/commit/3c9dab3b9d5302d8bdf5792f0384cd5aeeb13839))
+
 ## [1.10.2](https://github.com/payloadcms/payload/compare/v1.10.1...v1.10.2) (2023-06-26)
 
 
