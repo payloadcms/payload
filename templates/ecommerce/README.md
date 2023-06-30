@@ -12,6 +12,7 @@ Core features:
 - [Paywall](#paywall)
 - [Layout Builder](#layout-builder)
 - [SEO](#seo)
+- [Front-end](#front-end)
 
 For details on how to get this template up and running locally, see the [development](#development) section.
 
@@ -152,6 +153,40 @@ Products and pages can be built using a powerful layout builder. This allows you
 
 This template comes pre-configured with the official [Payload SEO Plugin](https://github.com/payloadcms/plugin-seo) for complete SEO control.
 
+## Front-end
+
+This template includes a fully-working [Next.js](https://nextjs.org) front-end that is served alongside your Payload app in a single Express server. This makes is so that you can deploy both apps simultaneously and host them together. If you prefer a different front-end framework, this pattern works for any framework that supports a custom server. You can easily [Eject](#eject) the front-end out from this template to swap in your own or to use it as a standalone CMS. For more details, see the official [Custom Server Example](https://github.com/payloadcms/payload/tree/master/examples/custom-server).
+
+Core features:
+
+- [Next.js](https://nextjs.org), [GraphQL](https://graphql.org), [TypeScript](https://www.typescriptlang.org)
+- Complete authentication workflow
+- Complete shopping experience
+- Full shopping cart implementation
+- Full checkout workflow
+- Account dashboard
+- Pre-made layout building blocks
+- [Payload Admin Bar](https://github.com/payloadcms/payload-admin-bar)
+- Complete SEO configuration
+- Working Stripe integration
+- Conditionally rendered paywall content
+
+### Eject
+
+If you prefer another front-end framework or would like to use Payload as a standalone CMS, you can easily eject the front-end from this template. To eject, you need to uninstall the following dependencies:
+
+```bash
+yarn remove next react react-dom @apollo/client apollo-link-http @next/eslint-plugin-next
+```
+
+Then you need to remove the following files and directories:
+
+```bash
+rm -rf ./next.config.js ./next-env.d.ts ./src/pages ./src/public ./src/graphql ./src/css ./src/providers
+```
+
+Finally, adjust you `server.ts` file to remove the front-end routes. For full details, see the official [Custom Server Example](https://github.com/payloadcms/payload/tree/master/examples/custom-server).
+
 ##  Development
 
 To spin up the template locally, follow these steps:
@@ -159,7 +194,7 @@ To spin up the template locally, follow these steps:
 1. First clone the repo
 1. Then `cd YOUR_PROJECT_REPO && cp .env.example .env`
 1. Next `yarn && yarn dev` (or `docker-compose up`, see [Docker](#docker))
-1. Now `open http://localhost:8000/admin` to access the admin panel
+1. Now `open http://localhost:3000/admin` to access the admin panel
 1. Create your first admin user using the form on the page
 
 That's it! Changes made in `./src` will be reflected in your app—but your database is blank and your app is not yet connected to Stripe, more details on that [here](#stripe). You can optionally seed the database with a few products and pages, more details on that [here](#seed).
