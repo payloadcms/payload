@@ -185,6 +185,30 @@ describe('Versions', () => {
     });
 
     describe('Restore', () => {
+      it('should versions be in correct order', async () => {
+        const somePost = await payload.create({
+          collection,
+          data: {
+            title: 'first post',
+            description: 'description 1',
+          },
+        });
+
+
+        const updatedPost = await payload.update({
+          collection,
+          id: collectionLocalPostID,
+          data: {
+            title: 'This should be the latest version',
+          },
+        });
+
+        const versions = await payload.findVersions({
+          collection,
+        });
+
+        expect(versions.docs[0].version.title).toBe(updatedPost.title);
+      });
       it('should allow a version to be restored', async () => {
         const title2 = 'Another updated post title in EN';
 
