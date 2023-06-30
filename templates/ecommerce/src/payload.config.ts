@@ -14,6 +14,7 @@ import Products from './collections/Products'
 import Users from './collections/Users'
 import BeforeDashboard from './components/BeforeDashboard'
 import { checkout } from './endpoints/checkout'
+import { seed } from './endpoints/seed'
 import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
 import { Settings } from './globals/Settings'
@@ -70,6 +71,13 @@ export default buildConfig({
       path: '/checkout',
       method: 'post',
       handler: checkout,
+    },
+    // The seed endpoint is used to populate the database with some example data
+    // You should delete this endpoint before deploying your site to production
+    {
+      path: '/seed',
+      method: 'get',
+      handler: seed,
     },
   ],
   plugins: [

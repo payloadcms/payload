@@ -6,6 +6,7 @@ import { Hero } from '../components/Hero'
 import { getApolloClient } from '../graphql'
 import { PAGE, PAGES } from '../graphql/pages'
 import type { Page } from '../payload-types'
+import { staticHome } from '../seed/static-home'
 
 const PageTemplate: React.FC<{
   page: Page
@@ -21,7 +22,7 @@ const PageTemplate: React.FC<{
         <Hero {...hero} />
         <Blocks
           blocks={layout}
-          disableTopPadding={hero.type === 'none' || hero.type === 'lowImpact'}
+          disableTopPadding={hero?.type === 'none' || hero?.type === 'lowImpact'}
         />
       </React.Fragment>
     )
@@ -40,6 +41,21 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       slug,
     },
   })
+
+  // If no `home` page exists, render a static one using dummy content
+  // You should delete this code once you have created a home page in the CMS
+  // This is really only useful for those who are demoing this template
+  if (!data.Pages.docs[0] && slug === 'home') {
+    return {
+      props: {
+        page: staticHome,
+        header: null,
+        footer: null,
+        collection: 'pages',
+        id: null,
+      },
+    }
+  }
 
   if (!data.Pages.docs[0]) {
     return {

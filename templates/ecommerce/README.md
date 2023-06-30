@@ -233,7 +233,7 @@ That's it! The Docker instance will help you get up and running quickly while al
 
 ### Seed
 
-To seed the database with a few products and pages you can run `yarn seed`.
+To seed the database with a few products and pages you can run `yarn seed`. This template also comes with a `/api/seed` endpoint you can use to seed the database from the admin panel.
 
 > NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
 

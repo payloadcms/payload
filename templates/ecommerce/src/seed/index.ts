@@ -11,17 +11,25 @@ import { product2 } from './product-2'
 import { product3 } from './product-3'
 import { shopPage } from './shop-page'
 
+const collections = ['categories', 'media', 'pages', 'products', 'orders']
+const globals = ['header', 'settings', 'footer']
+
 export const seed = async (payload: Payload): Promise<void> => {
-  await payload.create({
-    collection: 'users',
-    data: {
-      email: 'dev@payloadcms.com',
-      name: 'Payload Dev',
-      password: 'test',
-      roles: ['admin'],
-      stripeCustomerID: 'cus_NHipnQo3MDPVkq',
-    },
-  })
+  // clear the database
+  await Promise.all([
+    ...collections.map(async collection =>
+      payload.delete({
+        collection,
+        where: {},
+      }),
+    ), // eslint-disable-line function-paren-newline
+    ...globals.map(async global =>
+      payload.updateGlobal({
+        slug: global,
+        data: {},
+      }),
+    ), // eslint-disable-line function-paren-newline
+  ])
 
   const [image1Doc, image2Doc, image3Doc] = await Promise.all([
     payload.create({
