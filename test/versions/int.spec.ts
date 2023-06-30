@@ -186,7 +186,7 @@ describe('Versions', () => {
 
     describe('Restore', () => {
       it('should allow a version to be restored', async () => {
-        const title2 = 'Here is an updated post title in EN';
+        const title2 = 'Another updated post title in EN';
 
         const updatedPost = await payload.update({
           collection,
@@ -207,6 +207,7 @@ describe('Versions', () => {
           collection,
           id: versions.docs[1].id,
         });
+
 
         expect(restoredVersion.title).toBeDefined();
 
@@ -822,7 +823,7 @@ describe('Versions', () => {
 
     describe('Restore', () => {
       it('should allow a version to be restored', async () => {
-        const title2 = 'Here is an updated title in EN';
+        const title2 = 'Another updated title in EN';
 
         const updatedGlobal = await payload.updateGlobal({
           slug: globalSlug,
@@ -837,7 +838,7 @@ describe('Versions', () => {
           slug: globalSlug,
         });
 
-        globalLocalVersionID = versions.docs[0].id;
+        globalLocalVersionID = versions.docs[1].id;
 
         const restore = await payload.restoreGlobalVersion({
           slug: globalSlug,
