@@ -32,7 +32,7 @@ export const SeedButton: React.FC = () => {
   return (
     <Fragment>
       <a
-        href="https://payloadcms.com/docs/configuration/collections"
+        href="/api/seed"
         target="_blank"
         rel="noopener noreferrer"
         onClick={handleClick}
