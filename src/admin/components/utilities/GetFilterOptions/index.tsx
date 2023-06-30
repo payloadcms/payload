@@ -32,17 +32,20 @@ export const GetFilterOptions = ({
     const data = reduceFieldsToValues(fields, true);
     const siblingData = getSiblingData(fields, path);
 
-    const newFilterOptionsResult = getFilterOptionsQuery(filterOptions, {
-      id,
-      data,
-      relationTo,
-      siblingData,
-      user,
-    });
+    const getFilterOptions = async () => {
+      const newFilterOptionsResult = await getFilterOptionsQuery(filterOptions, {
+        id,
+        data,
+        relationTo,
+        siblingData,
+        user,
+      });
 
-    if (!equal(newFilterOptionsResult, filterOptionsResult)) {
-      setFilterOptionsResult(newFilterOptionsResult);
-    }
+      if (!equal(newFilterOptionsResult, filterOptionsResult)) {
+        setFilterOptionsResult(newFilterOptionsResult);
+      }
+    };
+    getFilterOptions();
   }, [
     fields,
     filterOptions,
