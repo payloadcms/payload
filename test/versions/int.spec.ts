@@ -198,6 +198,14 @@ describe('Versions', () => {
 
         expect(updatedPost.title).toBe(title2);
 
+        // Make sure it was updated correctly
+        const draftFromUpdatedPost = await payload.findByID({
+          collection,
+          id: collectionLocalPostID,
+          draft: true,
+        });
+        expect(draftFromUpdatedPost.title).toBe(title2);
+
         const versions = await payload.findVersions({
           collection,
         });
@@ -833,6 +841,14 @@ describe('Versions', () => {
         });
 
         expect(updatedGlobal.title).toBe(title2);
+
+        // Make sure it was updated correctly
+        const foundUpdatedGlobal = await payload.findGlobal({
+          slug: globalSlug,
+          draft: true,
+        });
+        expect(foundUpdatedGlobal.title).toBe(title2);
+
 
         const versions = await payload.findGlobalVersions({
           slug: globalSlug,
