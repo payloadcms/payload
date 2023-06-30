@@ -18,9 +18,9 @@ const BeforeDashboard: React.FC = () => {
       <ul className={`${baseClass}__instructions`}>
         <li>
           <SeedButton />
-          {' with a few products and pages to jump-start your new project. Then, '}
-          <a href="/">check it out</a>
-          {'!'}
+          {' with a few products and pages to jump-start your new project, then '}
+          <a href="/">visit your website</a>
+          {' to see the results.'}
         </li>
         <li>
           Head over to GitHub and clone the new repository to your local machine (it will be under

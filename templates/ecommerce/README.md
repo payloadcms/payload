@@ -173,19 +173,11 @@ Core features:
 
 ### Eject
 
-If you prefer another front-end framework or would like to use Payload as a standalone CMS, you can easily eject the front-end from this template. To eject, you need to uninstall the following dependencies:
+If you prefer another front-end framework or would like to use Payload as a standalone CMS, you can easily eject the front-end from this template. To eject, simply run `yarn eject`. This will uninstall all Next.js related dependencies and delete all files and folders related to the Next.js front-end. It also removes all custom routing from your `server.ts` file and updates your `eslintrc.js`.
 
-```bash
-yarn remove next react react-dom @apollo/client apollo-link-http @next/eslint-plugin-next
-```
+> Note: Your eject script may not work as expected if you've made significant modifications to your project. If you run into any issues, compare your project's dependencies and file structure with this template, see [./src/eject](./src/eject) for full details.
 
-Then you need to remove the following files and directories:
-
-```bash
-rm -rf ./next.config.js ./next-env.d.ts ./src/pages ./src/public ./src/graphql ./src/css ./src/providers
-```
-
-Finally, adjust you `server.ts` file to remove the front-end routes. For full details, see the official [Custom Server Example](https://github.com/payloadcms/payload/tree/master/examples/custom-server).
+For more details on how setup a custom server, see the official [Custom Server Example](https://github.com/payloadcms/payload/tree/master/examples/custom-server).
 
 ##  Development
 

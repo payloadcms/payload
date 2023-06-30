@@ -31,7 +31,7 @@ export const home: Partial<Page> = {
             ],
           },
           {
-            text: " to begin managing your site's content. The code for this project is completely open-source and can be found ",
+            text: " to begin managing your site's content. The code for this template is completely open-source and can be found ",
           },
           {
             type: 'link',

@@ -1,3 +1,4 @@
+import fs from 'fs'
 import path from 'path'
 import type { Payload } from 'payload'
 
@@ -15,6 +16,12 @@ const collections = ['categories', 'media', 'pages', 'products', 'orders']
 const globals = ['header', 'settings', 'footer']
 
 export const seed = async (payload: Payload): Promise<void> => {
+  // remove the media directory
+  const mediaDir = path.resolve(__dirname, '../../media')
+  if (fs.existsSync(mediaDir)) {
+    fs.rmdirSync(mediaDir, { recursive: true })
+  }
+
   // clear the database
   await Promise.all([
     ...collections.map(async collection =>
