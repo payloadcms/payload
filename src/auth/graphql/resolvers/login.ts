@@ -11,6 +11,7 @@ function loginResolver(collection: Collection) {
       },
       req: context.req,
       res: context.res,
+      depth: 0,
     };
 
     const result = login(options);
