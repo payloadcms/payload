@@ -53,7 +53,6 @@ export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
         onMouseDown: (e) => {
           if (!disableMouseDown) {
             // we need to prevent the dropdown from opening when clicking on the drag handle, but not when a modal is open (i.e. the 'Relationship' field component)
-            e.preventDefault();
             e.stopPropagation();
           }
         },
