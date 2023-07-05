@@ -23,7 +23,7 @@ import docAccessRequestHandler from './requestHandlers/docAccess';
 import deleteByID from './requestHandlers/deleteByID';
 
 const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
-  const { endpoints } = collection;
+  const endpoints = [...collection.endpoints];
 
   if (collection.auth) {
     if (!collection.auth.disableLocalStrategy) {
@@ -111,7 +111,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
     );
   }
 
-  return endpoints.concat([
+  endpoints.push(
     {
       path: '/',
       method: 'get',
@@ -157,7 +157,9 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
       method: 'delete',
       handler: deleteHandler,
     },
-  ]);
+  );
+
+  return endpoints;
 };
 
 export default buildEndpoints;
