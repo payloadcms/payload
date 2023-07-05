@@ -924,9 +924,11 @@ describe('fields', () => {
 
       // Now open the drawer again to edit the `text` field _using the keyboard_
       // Mimic real user behavior by typing into the field with spaces and backspaces
+      // Explicitly use both `down` and `type` to cover edge cases
       await page.locator('#field-relationshipHasMany button.relationship--multi-value-label__drawer-toggler').click();
       await page.locator('[id^=doc-drawer_text-fields_1_] #field-text').click();
-      await page.keyboard.type('123');
+      await page.keyboard.down('1');
+      await page.keyboard.type('23');
       await expect(await page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(`${value}123`);
       await page.keyboard.type('4567');
       await page.keyboard.press('Backspace');
