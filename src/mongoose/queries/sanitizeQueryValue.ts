@@ -57,6 +57,7 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
     }
   }
 
+
   if (['relationship', 'upload'].includes(field.type)) {
     if (val === 'null') {
       formattedValue = null;

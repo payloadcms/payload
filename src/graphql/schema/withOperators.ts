@@ -28,8 +28,7 @@ type DefaultsType = {
 const defaults: DefaultsType = {
   number: {
     type: (field: NumberField): GraphQLType => {
-      const type = field?.name === 'id' ? GraphQLInt : GraphQLFloat;
-      return field?.hasMany === true ? new GraphQLList(type) : type;
+      return field?.name === 'id' ? GraphQLInt : GraphQLFloat;
     },
     operators: [...operators.equality, ...operators.comparison],
   },
