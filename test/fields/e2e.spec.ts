@@ -650,7 +650,7 @@ describe('fields', () => {
 
         // Open the drawer
         await popup.locator('.rich-text-link__link-edit').click();
-        const editLinkModal = page.locator('[id^=drawer_1_rih-text-link-]');
+        const editLinkModal = page.locator('[id^=drawer_1_rich-text-link-]');
         await expect(editLinkModal).toBeVisible();
 
         // Check the drawer values
