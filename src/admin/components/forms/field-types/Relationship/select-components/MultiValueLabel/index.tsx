@@ -70,7 +70,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             </Tooltip>
             <Edit />
           </DocumentDrawerToggler>
-          <DocumentDrawer onSave={onSave} />
+          <DocumentDrawer onSave={/* onSave // TODO: this force-closes the drawer when clicking save, which is not what should happen  */null} />
         </Fragment>
       )}
     </div>

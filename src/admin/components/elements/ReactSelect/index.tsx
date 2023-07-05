@@ -61,6 +61,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         placeholder={getTranslation(placeholder, i18n)}
         captureMenuScroll
         {...props}
+        customProps={selectProps}
         value={value}
         onChange={onChange}
         isDisabled={disabled}
