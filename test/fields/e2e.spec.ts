@@ -911,7 +911,6 @@ describe('fields', () => {
       await page.locator('#action-save').click();
       await expect(page.locator('.Toastify')).toContainText('successfully');
 
-
       // Create a new doc for the `relationshipHasMany` field
       await page.locator('#field-relationshipHasMany button.relationship-add-new__add-button').click();
       const textField2 = page.locator('[id^=doc-drawer_text-fields_1_] #field-text');
@@ -924,12 +923,15 @@ describe('fields', () => {
       await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click();
 
       // Now open the drawer again to edit the `text` field _using the keyboard_
+      // Mimic real user behavior by typing into the field with spaces and backspaces
       await page.locator('#field-relationshipHasMany button.relationship--multi-value-label__drawer-toggler').click();
-      const textField3 = page.locator('[id^=doc-drawer_text-fields_1_] #field-text');
-      await textField3.click();
-      await page.keyboard.down('1');
-      await page.keyboard.down('2');
-      await page.keyboard.down('3');
+      await page.locator('[id^=doc-drawer_text-fields_1_] #field-text').click();
+      await page.keyboard.type('123');
+      await expect(await page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(`${value}123`);
+      await page.keyboard.type('4567');
+      await page.keyboard.press('Backspace');
+      await expect(await page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(`${value}123456`);
+
       // save drawer
       await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click();
       await expect(page.locator('.Toastify')).toContainText('successfully');
@@ -939,8 +941,9 @@ describe('fields', () => {
       await page.locator('#action-save').click();
       await expect(page.locator('.Toastify')).toContainText('successfully');
       await page.reload();
+
       // check if the value is saved
-      await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toContainText(`${value}123`);
+      await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toHaveText(`${value}123456`);
     });
   });
 
