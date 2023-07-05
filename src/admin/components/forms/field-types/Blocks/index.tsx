@@ -212,7 +212,7 @@ const BlocksField: React.FC<Props> = (props) => {
           if (blockToRender) {
             return (
               <DraggableSortableItem
-                key={`${row.id}-row-${i}`}
+                key={row.id ? row.id : i}
                 id={row.id}
                 disabled={readOnly}
               >
