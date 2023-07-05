@@ -1,16 +1,16 @@
 /* eslint-disable max-classes-per-file */
 import httpStatus from 'http-status';
 
-class ExtendableError extends Error {
+class ExtendableError<TData extends object = { [key: string]: unknown }> extends Error {
   status: number;
 
-  data: {[key: string]: unknown};
+  data: TData;
 
   isPublic: boolean;
 
   isOperational: boolean;
 
-  constructor(message: string, status: number, data: { [key: string]: unknown }, isPublic: boolean) {
+  constructor(message: string, status: number, data: TData, isPublic: boolean) {
     super(message);
     this.name = this.constructor.name;
     this.message = message;
@@ -26,7 +26,7 @@ class ExtendableError extends Error {
  * Class representing an API error.
  * @extends ExtendableError
  */
-class APIError extends ExtendableError {
+class APIError<TData extends null | object = null | { [key: string]: unknown }> extends ExtendableError<TData> {
   /**
    * Creates an API error.
    * @param {string} message - Error message.
@@ -34,7 +34,12 @@ class APIError extends ExtendableError {
    * @param {object} data - response data to be returned.
    * @param {boolean} isPublic - Whether the message should be visible to user or not.
    */
-  constructor(message: string, status: number = httpStatus.INTERNAL_SERVER_ERROR, data: any = null, isPublic = false) {
+  constructor(
+    message: string,
+    status: number = httpStatus.INTERNAL_SERVER_ERROR,
+    data: TData = null,
+    isPublic = false,
+  ) {
     super(message, status, data, isPublic);
   }
 }

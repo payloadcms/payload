@@ -273,7 +273,7 @@ const BlocksField: React.FC<Props> = (props) => {
                         className={`${baseClass}__fields`}
                         readOnly={readOnly}
                         fieldTypes={fieldTypes}
-                        permissions={permissions?.fields}
+                        permissions={permissions?.blocks?.[blockType]?.fields}
                         fieldSchema={blockToRender.fields.map((field) => ({
                           ...field,
                           path: createNestedFieldPath(`${path}.${i}`, field),

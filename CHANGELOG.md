@@ -1,5 +1,57 @@
 
 
+# [1.11.0](https://github.com/payloadcms/payload/compare/v1.10.5...v1.11.0) (2023-07-05)
+
+
+### Bug Fixes
+
+* ensures fields within blocks respect field level access control ([#2969](https://github.com/payloadcms/payload/issues/2969)) ([5b79067](https://github.com/payloadcms/payload/commit/5b79067cc14874abbd1e1a5b6e619d41571b187f))
+* ensures rows always have id's ([#2968](https://github.com/payloadcms/payload/issues/2968)) ([04851d0](https://github.com/payloadcms/payload/commit/04851d0dc99e4a3df0a1ac642e9a4b9a3c06d8a1))
+* GraphQL type for number field ([#2954](https://github.com/payloadcms/payload/issues/2954)) ([29d8bf0](https://github.com/payloadcms/payload/commit/29d8bf0927038d2305218e5a6b811e0c4039d617))
+* nested richtext bug and test ([#2966](https://github.com/payloadcms/payload/issues/2966)) ([801f609](https://github.com/payloadcms/payload/commit/801f60939b1bb4e33fbabe1f9a3c4a04a47912db))
+* properly threads custom react-select props through relationship field ([#2973](https://github.com/payloadcms/payload/issues/2973)) ([79393e8](https://github.com/payloadcms/payload/commit/79393e8cf0b79b31fa711536e0bc22b1a251468a))
+
+
+### Features
+
+* improve typing of ExtendableError and APIError ([#2864](https://github.com/payloadcms/payload/issues/2864)) ([7c47e4b](https://github.com/payloadcms/payload/commit/7c47e4b0d3c63f6f7800daaf424935d6067ffcc4))
+* narrow endpoint.method type ([#1880](https://github.com/payloadcms/payload/issues/1880)) ([b734a1c](https://github.com/payloadcms/payload/commit/b734a1c422d200cad1085b7e92f8540df4238e32))
+
+## [1.10.5](https://github.com/payloadcms/payload/compare/v1.10.4...v1.10.5) (2023-06-30)
+
+
+### Bug Fixes
+
+* fields in drawer cannot be edited ([#2949](https://github.com/payloadcms/payload/issues/2949)) ([0c2e41c](https://github.com/payloadcms/payload/commit/0c2e41c4bef9333c47a9b1db0de807696b3f3872)), closes [#2945](https://github.com/payloadcms/payload/issues/2945)
+* improve versions test suite ([#2941](https://github.com/payloadcms/payload/issues/2941)) ([1d4df99](https://github.com/payloadcms/payload/commit/1d4df99ea78c5f682074ae824dcd8dea18b774e0))
+* incorrect graphql type generation ([#2898](https://github.com/payloadcms/payload/issues/2898)) ([b36deb4](https://github.com/payloadcms/payload/commit/b36deb4640cad4f494a12ab74b4e4d9a918cd94b))
+
+## [1.10.4](https://github.com/payloadcms/payload/compare/v1.10.3...v1.10.4) (2023-06-30)
+
+
+### Features
+
+* add locale to displayed API URL ([b22d157](https://github.com/payloadcms/payload/commit/b22d157bd2f1c1a857e2d42bdc5b893549e3db9e))
+
+## [1.10.3](https://github.com/payloadcms/payload/compare/v1.10.2...v1.10.3) (2023-06-30)
+
+
+### Bug Fixes
+
+* [#2937](https://github.com/payloadcms/payload/issues/2937), depth not being respected in graphql rich text fields ([f84b432](https://github.com/payloadcms/payload/commit/f84b4323e2fce57e2e14b181e486ed72cc09ded5))
+* shows updatedAt date when selecting a version to compare from dropdown ([3c9dab3](https://github.com/payloadcms/payload/commit/3c9dab3b9d5302d8bdf5792f0384cd5aeeb13839))
+
+## [1.10.2](https://github.com/payloadcms/payload/compare/v1.10.1...v1.10.2) (2023-06-26)
+
+
+### Bug Fixes
+
+* adjusts swc loader to only exclude non ts/tsx files - [#2888](https://github.com/payloadcms/payload/issues/2888) ([#2907](https://github.com/payloadcms/payload/issues/2907)) ([a2d9ef3](https://github.com/payloadcms/payload/commit/a2d9ef3ca618934df58102a7e02e86dbe0ed63da))
+* autosave on localized fields, adds test ([6893231](https://github.com/payloadcms/payload/commit/6893231f85f702189089a6d78d3f3af63aaa0d82))
+* broken export of entityToJSONSchema ([#2894](https://github.com/payloadcms/payload/issues/2894)) ([837dccc](https://github.com/payloadcms/payload/commit/837dcccefeffe7bb6e674713b4184c4eb92db8dc))
+* correctly scopes data variable within bulk update - [#2901](https://github.com/payloadcms/payload/issues/2901) ([#2904](https://github.com/payloadcms/payload/issues/2904)) ([f627277](https://github.com/payloadcms/payload/commit/f627277479e6a4a847e79f54c545712a7186abb9))
+* safely check for tempFilePath when updating media document ([#2899](https://github.com/payloadcms/payload/issues/2899)) ([8206c0f](https://github.com/payloadcms/payload/commit/8206c0fe8be78a5e0f7c8e64996d73d135b1fcc2))
+
 ## [1.10.1](https://github.com/payloadcms/payload/compare/v1.10.0...v1.10.1) (2023-06-22)
 
 

@@ -1,0 +1,18 @@
+@import '../../css/common';
+
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  @include mid-break {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.price {
+  font-weight: 600;
+  margin: 0;
+  margin-right: calc(var(--base) / 2);
+}

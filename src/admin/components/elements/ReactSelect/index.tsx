@@ -18,7 +18,6 @@ import type { Option } from './types';
 
 import './index.scss';
 
-
 const createOption = (label: string) => ({
   label,
   value: label,
@@ -60,6 +59,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         isLoading={isLoading}
         placeholder={getTranslation(placeholder, i18n)}
         captureMenuScroll
+        customProps={selectProps}
         {...props}
         value={value}
         onChange={onChange}
@@ -120,7 +120,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       placeholder={getTranslation(placeholder, i18n)}
       captureMenuScroll
       {...props}
-      customProps={selectProps}
       value={value}
       onChange={onChange}
       isDisabled={disabled}

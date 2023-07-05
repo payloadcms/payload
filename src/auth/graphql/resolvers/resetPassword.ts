@@ -13,6 +13,7 @@ function resetPasswordResolver(collection: Collection) {
       req: context.req,
       res: context.res,
       api: 'GraphQL',
+      depth: 0,
     };
 
     const result = await resetPassword(options);
