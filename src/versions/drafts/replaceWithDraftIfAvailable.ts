@@ -6,7 +6,7 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
 import { combineQueries } from '../../database/combineQueries';
-import type { FindVersionsArgs } from '../../database/types';
+import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types';
 
 type Arguments<T> = {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
@@ -57,15 +57,21 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   }
 
 
-  const findVersionsArgs: FindVersionsArgs = {
+  const findVersionsArgs: FindVersionsArgs & FindGlobalVersionsArgs = {
     locale: req.locale,
     where: combineQueries(queryToBuild, versionAccessResult),
     collection: entity.slug,
+    global: entity.slug,
     limit: 1,
     sort: '-updatedAt',
   };
 
-  const { docs: versionDocs } = await req.payload.db.findVersions<T>(findVersionsArgs);
+  let versionDocs;
+  if (entityType === 'global') {
+    versionDocs = (await req.payload.db.findGlobalVersions<T>(findVersionsArgs)).docs;
+  } else {
+    versionDocs = (await req.payload.db.findVersions<T>(findVersionsArgs)).docs;
+  }
 
   let draft = versionDocs[0];
 

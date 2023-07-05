@@ -9,7 +9,7 @@ import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(this: MongooseAdapter,
   { global, where, page, limit, sort: sortArg, locale, pagination, skip }) {
   const Model = this.versions[global];
-  const versionFields = buildVersionGlobalFields(this.payload.globals.config[global]);
+  const versionFields = buildVersionGlobalFields(this.payload.globals.config.find(({ slug }) => slug === global));
 
   let hasNearConstraint = false;
 
