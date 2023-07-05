@@ -13,12 +13,13 @@ import { UPDATE } from '../Form/types';
  *
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
-const useField = <T extends unknown>(options: Options): FieldType<T> => {
+const useField = <T, >(options: Options): FieldType<T> => {
   const {
     path,
     validate,
     disableFormData = false,
     condition,
+    hasRows,
   } = options;
 
   const submitted = useFormSubmitted();
@@ -28,6 +29,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const { id } = useDocumentInfo();
   const operation = useOperation();
   const field = useFormFields(([fields]) => fields[path]);
+
   const dispatchField = useFormFields(([_, dispatch]) => dispatch);
   const { t } = useTranslation();
 
@@ -57,7 +59,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       type: 'UPDATE',
       path,
       value: val,
-      disableFormData,
+      disableFormData: disableFormData || (hasRows && val > 0),
     });
   }, [
     setModified,
@@ -65,6 +67,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     path,
     dispatchField,
     disableFormData,
+    hasRows,
   ]);
 
   // Store result from hook as ref
@@ -77,6 +80,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     formProcessing: processing,
     setValue,
     initialValue,
+    rows: field?.rows,
   }), [field, processing, setValue, showError, submitted, value, initialValue]);
 
   // Throttle the validate function
@@ -85,12 +89,13 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       const action: UPDATE = {
         type: 'UPDATE',
         path,
-        disableFormData,
+        disableFormData: disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
         validate,
         condition,
         value,
         valid: false,
         errorMessage: undefined,
+        rows: field?.rows,
       };
 
       const validateOptions = {
@@ -130,6 +135,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     path,
     user,
     validate,
+    field?.rows,
   ]);
 
   return result;

@@ -3,8 +3,8 @@ import React from 'react';
 import { Block, Labels } from '../../../../../fields/config/types';
 import { ArrayAction } from '../../../elements/ArrayAction';
 import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug';
-import { Row } from '../rowReducer';
 import { BlocksDrawer } from './BlocksDrawer';
+import { Row } from '../../Form/types';
 
 export const RowActions: React.FC<{
   addRow: (rowIndex: number, blockType: string) => void

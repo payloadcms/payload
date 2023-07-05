@@ -43,7 +43,7 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
       const type = field.name === 'id' ? GraphQLInt : GraphQLFloat;
       return {
         ...inputObjectTypeConfig,
-        [field.name]: { type: withNullableType(field, type, forceNullable) },
+        [field.name]: { type: withNullableType(field, field.hasMany === true ? new GraphQLList(type) : type, forceNullable) },
       };
     },
     text: (inputObjectTypeConfig: InputObjectTypeConfig, field: TextField) => ({

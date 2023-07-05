@@ -22,6 +22,7 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 import { saveVersion } from '../../versions/saveVersion';
 import { mapAsync } from '../../utilities/mapAsync';
+import { registerLocalStrategy } from '../../auth/strategies/local/register';
 
 const unlinkFile = promisify(fs.unlink);
 
@@ -197,15 +198,12 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex');
     }
 
-    try {
-      doc = await Model.register(resultWithLocales, data.password as string);
-    } catch (error) {
-      // Handle user already exists from passport-local-mongoose
-      if (error.name === 'UserExistsError') {
-        throw new ValidationError([{ message: error.message, field: 'email' }], req.t);
-      }
-      throw error;
-    }
+    doc = await registerLocalStrategy({
+      collection: collectionConfig,
+      doc: resultWithLocales,
+      payload: req.payload,
+      password: data.password as string,
+    })
   } else {
     try {
       doc = await Model.create(resultWithLocales);

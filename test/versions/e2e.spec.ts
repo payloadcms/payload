@@ -29,7 +29,8 @@ import { expect, test } from '@playwright/test';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { login } from '../helpers';
-import { draftSlug } from './shared';
+import { draftSlug, autosaveSlug } from './shared';
+import wait from '../../src/utilities/wait';
 
 const { beforeAll, describe } = test;
 
@@ -112,5 +113,40 @@ describe('versions', () => {
       await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft');
       await expect(page.locator('.row-2 .cell-_status')).toContainText('Draft');
     });
+
+    test('should retain localized data during autosave', async () => {
+      const autosaveURL = new AdminUrlUtil(serverURL, autosaveSlug);
+      const locale = 'en';
+      const spanishLocale = 'es';
+      const title = 'english title';
+      const spanishTitle = 'spanish title';
+      const description = 'description';
+      const newDescription = 'new description';
+
+      await page.goto(autosaveURL.create);
+      await page.locator('#field-title').fill(title);
+      await page.locator('#field-description').fill(description);
+      await wait(500);
+
+      await changeLocale(spanishLocale);
+      await page.locator('#field-title').fill(spanishTitle);
+      await wait(500);
+
+      await changeLocale(locale);
+      await page.locator('#field-description').fill(newDescription);
+      await wait(500);
+
+      await changeLocale(spanishLocale);
+      await wait(500);
+      await page.reload();
+      await expect(page.locator('#field-title')).toHaveValue(spanishTitle);
+      await expect(page.locator('#field-description')).toHaveValue(newDescription);
+    });
   });
+
+  async function changeLocale(newLocale: string) {
+    await page.locator('.localizer >> button').first().click();
+    await page.locator(`.localizer >> a:has-text("${newLocale}")`).click();
+    expect(page.url()).toContain(`locale=${newLocale}`);
+  }
 });

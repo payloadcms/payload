@@ -1,6 +1,6 @@
 {
   "name": "payload-example-preview",
-  "description": "Payload CMS preview example.",
+  "description": "Payload preview example.",
   "version": "1.0.0",
   "main": "dist/server.js",
   "license": "MIT",

@@ -156,6 +156,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         collection={collection}
                         email={data?.email}
                         operation={operation}
+                        readOnly={!hasSavePermission}
                       />
                     )}
 

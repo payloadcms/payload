@@ -7,49 +7,48 @@
 
 export interface Config {
   collections: {
-    pages: Page
-    users: User
-  }
+    pages: Page;
+    users: User;
+  };
   globals: {
-    'main-menu': MainMenu
-  }
+    'main-menu': MainMenu;
+  };
 }
 export interface Page {
-  id: string
-  title: string
-  slug?: string
-  richText: Array<{
-    [k: string]: unknown
-  }>
-  _status?: 'draft' | 'published'
-  createdAt: string
-  updatedAt: string
-  password?: string
+  id: string;
+  title: string;
+  slug?: string;
+  richText: {
+    [k: string]: unknown;
+  }[];
+  updatedAt: string;
+  createdAt: string;
+  _status?: 'draft' | 'published';
 }
 export interface User {
-  id: string
-  email?: string
-  resetPasswordToken?: string
-  resetPasswordExpiration?: string
-  loginAttempts?: number
-  lockUntil?: string
-  createdAt: string
-  updatedAt: string
-  password?: string
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  email?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpiration?: string;
+  loginAttempts?: number;
+  lockUntil?: string;
+  password?: string;
 }
 export interface MainMenu {
-  id: string
-  navItems: Array<{
+  id: string;
+  navItems: {
     link: {
-      type?: 'reference' | 'custom'
-      newTab?: boolean
+      type?: 'reference' | 'custom';
+      newTab?: boolean;
       reference: {
-        value: string | Page
-        relationTo: 'pages'
-      }
-      url: string
-      label: string
-    }
-    id?: string
-  }>
+        value: string | Page;
+        relationTo: 'pages';
+      };
+      url: string;
+      label: string;
+    };
+    id?: string;
+  }[];
 }

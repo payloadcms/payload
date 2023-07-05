@@ -238,6 +238,7 @@
     "uploading": "Nahrávání",
     "user": "Uživatel",
     "users": "Uživatelé",
+    "value": "Hodnota",
     "welcome": "Vítejte"
   },
   "operators": {
@@ -271,11 +272,11 @@
     "emailAddress": "Zadejte prosím platnou e-mailovou adresu.",
     "enterNumber": "Zadejte prosím platné číslo.",
     "fieldHasNo": "Toto pole nemá {{label}}",
-    "greaterThanMax": "\"{{value}}\" je větší než maximální povolená hodnota {{max}}.",
+    "greaterThanMax": "{{value}} je vyšší než maximálně povolená {{label}} {{max}}.",
     "invalidInput": "Toto pole má neplatný vstup.",
     "invalidSelection": "Toto pole má neplatný výběr.",
     "invalidSelections": "Toto pole má následující neplatné výběry:",
-    "lessThanMin": "\"{{value}}\" je menší než minimální povolená hodnota {{min}}.",
+    "lessThanMin": "{{value}} je nižší než minimálně povolená {{label}} {{min}}.",
     "longerThanMin": "Tato hodnota musí být delší než minimální délka {{minLength}} znaků.",
     "notValidDate": "\"{{value}}\" není platné datum.",
     "required": "Toto pole je povinné.",

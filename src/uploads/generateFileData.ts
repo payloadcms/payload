@@ -125,7 +125,12 @@ export const generateFileData = async <T>({
     } else {
       mime = file.mimetype;
       fileData.filesize = file.size;
-      ext = file.name.split('.').pop();
+
+      if (file.name.includes('.')) {
+        ext = file.name.split('.').pop();
+      } else {
+        ext = '';
+      }
     }
 
     // Adust SVG mime type. fromBuffer modifies it.
@@ -133,10 +138,10 @@ export const generateFileData = async <T>({
     fileData.mimeType = mime;
 
     const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
-    fsSafeName = `${baseFilename}.${ext}`;
+    fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`;
 
     if (!overwriteExistingFiles) {
-      fsSafeName = await getSafeFileName(Model, staticPath, `${baseFilename}.${ext}`);
+      fsSafeName = await getSafeFileName(Model, staticPath, fsSafeName);
     }
 
     fileData.filename = fsSafeName;

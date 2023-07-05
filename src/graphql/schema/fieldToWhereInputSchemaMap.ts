@@ -21,7 +21,7 @@ import combineParentName from '../utilities/combineParentName';
 import formatName from '../utilities/formatName';
 import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths';
 
-const fieldToSchemaMap = (parentName: string): any => ({
+const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => ({
   number: (field: NumberField) => ({
     type: withOperators(
       field,
@@ -130,94 +130,11 @@ const fieldToSchemaMap = (parentName: string): any => ({
       parentName,
     ),
   }),
-  array: (field: ArrayField) => recursivelyBuildNestedPaths(parentName, field),
-  group: (field: GroupField) => recursivelyBuildNestedPaths(parentName, field),
-  row: (field: RowField) => field.fields.reduce((rowSchema, subField) => {
-    const getFieldSchema = fieldToSchemaMap(parentName)[subField.type];
-
-    if (getFieldSchema) {
-      const rowFieldSchema = getFieldSchema(subField);
-
-      if (fieldHasSubFields(subField)) {
-        return [
-          ...rowSchema,
-          ...rowFieldSchema,
-        ];
-      }
-
-      if (fieldAffectsData(subField)) {
-        return [
-          ...rowSchema,
-          {
-            key: subField.name,
-            type: rowFieldSchema,
-          },
-        ];
-      }
-    }
-
-
-    return rowSchema;
-  }, []),
-  collapsible: (field: CollapsibleField) => field.fields.reduce((rowSchema, subField) => {
-    const getFieldSchema = fieldToSchemaMap(parentName)[subField.type];
-
-    if (getFieldSchema) {
-      const rowFieldSchema = getFieldSchema(subField);
-
-      if (fieldHasSubFields(subField)) {
-        return [
-          ...rowSchema,
-          ...rowFieldSchema,
-        ];
-      }
-
-      if (fieldAffectsData(subField)) {
-        return [
-          ...rowSchema,
-          {
-            key: subField.name,
-            type: rowFieldSchema,
-          },
-        ];
-      }
-    }
-
-
-    return rowSchema;
-  }, []),
-  tabs: (field: TabsField) => field.tabs.reduce((tabSchema, tab) => {
-    return [
-      ...tabSchema,
-      ...tab.fields.reduce((rowSchema, subField) => {
-        const getFieldSchema = fieldToSchemaMap(parentName)[subField.type];
-
-        if (getFieldSchema) {
-          const rowFieldSchema = getFieldSchema(subField);
-
-          if (fieldHasSubFields(subField)) {
-            return [
-              ...rowSchema,
-              ...rowFieldSchema,
-            ];
-          }
-
-          if (fieldAffectsData(subField)) {
-            return [
-              ...rowSchema,
-              {
-                key: subField.name,
-                type: rowFieldSchema,
-              },
-            ];
-          }
-        }
-
-
-        return rowSchema;
-      }, []),
-    ];
-  }, []),
+  array: (field: ArrayField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
+  group: (field: GroupField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
+  row: (field: RowField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
+  collapsible: (field: CollapsibleField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
+  tabs: (field: TabsField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
 });
 
 export default fieldToSchemaMap;

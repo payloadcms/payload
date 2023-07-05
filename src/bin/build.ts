@@ -2,15 +2,12 @@
 /* eslint-disable global-require */
 import webpack from 'webpack';
 import getWebpackProdConfig from '../webpack/getProdConfig';
-import findConfig from '../config/find';
 import loadConfig from '../config/load';
 
-const rawConfigPath = findConfig();
-
 export const build = async (): Promise<void> => {
-  try {
-    const config = await loadConfig();
+  const config = await loadConfig(); // Will throw its own error if it fails
 
+  try {
     const webpackProdConfig = getWebpackProdConfig(config);
 
     webpack(webpackProdConfig, (err, stats) => { // Stats Object
@@ -29,7 +26,7 @@ export const build = async (): Promise<void> => {
     });
   } catch (err) {
     console.error(err);
-    throw new Error(`Error: can't find the configuration file located at ${rawConfigPath}.`);
+    throw new Error('Error: there was an error building the webpack config.');
   }
 };
 

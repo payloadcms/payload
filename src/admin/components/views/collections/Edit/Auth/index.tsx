@@ -17,7 +17,7 @@ import './index.scss';
 const baseClass = 'auth-fields';
 
 const Auth: React.FC<Props> = (props) => {
-  const { useAPIKey, requirePassword, verify, collection: { slug }, collection, email, operation } = props;
+  const { useAPIKey, requirePassword, verify, collection: { slug }, collection, email, operation, readOnly } = props;
   const [changingPassword, setChangingPassword] = useState(requirePassword);
   const enableAPIKey = useFormFields(([fields]) => fields.enableAPIKey);
   const dispatchFields = useFormFields((reducer) => reducer[1]);
@@ -79,7 +79,7 @@ const Auth: React.FC<Props> = (props) => {
             required
             name="email"
             label={t('general:email')}
-            admin={{ autoComplete: 'email' }}
+            admin={{ autoComplete: 'email', readOnly }}
           />
           {(changingPassword || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
@@ -88,13 +88,15 @@ const Auth: React.FC<Props> = (props) => {
                 required
                 name="password"
                 label={t('newPassword')}
+                disabled={readOnly}
               />
-              <ConfirmPassword />
+              <ConfirmPassword disabled={readOnly} />
               {!requirePassword && (
                 <Button
                   size="small"
                   buttonStyle="secondary"
                   onClick={() => handleChangePassword(false)}
+                  disabled={readOnly}
                 >
                   {t('general:cancel')}
                 </Button>
@@ -107,6 +109,7 @@ const Auth: React.FC<Props> = (props) => {
               size="small"
               buttonStyle="secondary"
               onClick={() => handleChangePassword(true)}
+              disabled={readOnly}
             >
               {t('changePassword')}
             </Button>
@@ -116,6 +119,7 @@ const Auth: React.FC<Props> = (props) => {
               size="small"
               buttonStyle="secondary"
               onClick={() => unlock()}
+              disabled={readOnly}
             >
               {t('forceUnlock')}
             </Button>
@@ -127,9 +131,10 @@ const Auth: React.FC<Props> = (props) => {
           <Checkbox
             label={t('enableAPIKey')}
             name="enableAPIKey"
+            admin={{ readOnly }}
           />
           {enableAPIKey?.value && (
-            <APIKey />
+            <APIKey readOnly={readOnly} />
           )}
         </div>
       )}
@@ -137,6 +142,7 @@ const Auth: React.FC<Props> = (props) => {
         <Checkbox
           label={t('verified')}
           name="_verified"
+          admin={{ readOnly }}
         />
       )}
     </div>
