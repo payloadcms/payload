@@ -736,6 +736,25 @@ describe('fields', () => {
         const textField = await editLinkModal.locator('#field-text');
         await expect(textField).toHaveValue('Hello, I\'m a rich text field.');
       });
+      test('should not take value from previous block', async () => {
+        await navigateToRichTextFields();
+
+        // check first block value
+        const textField = await page.locator('#field-blocks__0__text');
+        await expect(textField).toHaveValue('Regular text');
+
+        // remove the first block
+        const editBlock = await page.locator('#blocks-row-0 .popup-button');
+        await editBlock.click();
+        const removeButton = await page.locator('#blocks-row-0').getByRole('button', { name: 'Remove' });
+        await expect(removeButton).toBeVisible();
+        await removeButton.click();
+
+        // check new first block value
+        const richTextField = await page.locator('#field-blocks__0__text');
+        const richTextValue = await richTextField.innerText();
+        await expect(richTextValue).toContain('Rich text');
+      });
     });
   });
 
