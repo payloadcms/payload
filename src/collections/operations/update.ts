@@ -3,7 +3,6 @@ import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
 import { Where } from '../../types';
 import { BulkOperationResult, Collection } from '../config/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { APIError } from '../../errors';
 import { PayloadRequest } from '../../express/types';

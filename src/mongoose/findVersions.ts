@@ -20,7 +20,7 @@ export const findVersions: FindVersions = async function findVersions(this: Mong
   let sort;
   if (!hasNearConstraint) {
     sort = buildSortParam({
-      sort: sortArg || collectionConfig.defaultSort,
+      sort: sortArg || '-updatedAt',
       fields: collectionConfig.fields,
       timestamps: true,
       config: this.payload.config,
