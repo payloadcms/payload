@@ -16,9 +16,7 @@ export async function migrate(this: DatabaseAdapter): Promise<void> {
 
     // Run migration if not found in database
     if (existingMigration) {
-      payload.logger.info({ msg: `Skipping:  ${migration.name}` });
-      // eslint-disable-next-line no-continue
-      continue;
+      continue; // eslint-disable-line no-continue
     }
 
     payload.logger.info({ msg: `Migrating: ${migration.name}` });
