@@ -14,12 +14,7 @@ export async function getMigrations({
   const existingMigrations = migrationQuery.docs as unknown as MigrationData[];
 
   // Get the highest batch number from existing migrations
-  const latestBatch = existingMigrations.reduce((acc, curr) => {
-    if (curr.batch > acc) {
-      return curr.batch;
-    }
-    return acc;
-  }, 0);
+  const latestBatch = existingMigrations?.[0]?.batch || 0;
 
   return {
     existingMigrations,
