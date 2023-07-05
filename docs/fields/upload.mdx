@@ -7,17 +7,12 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
 ---
 
 <Banner>
-  The Upload field allows for the selection of a Document from a collection
-  supporting Uploads, and formats the selection as a thumbnail in the Admin
-  panel.
+  The Upload field allows for the selection of a Document from a collection supporting Uploads, and formats the selection as a thumbnail in the Admin panel.
 </Banner>
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  <br />
-  To use this field, you need to have a Collection configured to allow Uploads.
-  For more information, [click here](/docs/upload/overview) to read about how to
-  enable Uploads on a collection by collection basis.
+  <strong>Important:</strong><br />
+  To use this field, you need to have a Collection configured to allow Uploads. For more information, [click here](/docs/upload/overview) to read about how to enable Uploads on a collection by collection basis.
 </Banner>
 
 **Example uses:**
@@ -100,11 +95,6 @@ const uploadField = {
 You can learn more about writing queries [here](/docs/queries/overview).
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  <br />
-  When an upload field has both <strong>filterOptions</strong> and a custom{" "}
-  <strong>validate</strong> function, the api will not validate{" "}
-  <strong>filterOptions</strong> unless you call the default upload field
-  validation function imported from <strong>payload/fields/validations</strong>{" "}
-  in your validate function.
+  <strong>Note:</strong><br />
+  When an upload field has both <strong>filterOptions</strong> and a custom <strong>validate</strong> function, the api will not validate <strong>filterOptions</strong> unless you call the default upload field validation function imported from <strong>payload/fields/validations</strong> in your validate function.
 </Banner>
