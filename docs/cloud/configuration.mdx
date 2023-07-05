@@ -10,11 +10,16 @@ keywords: configuration, config, settings, project, cloud, payload cloud, deploy
 
 Once you have created a project, you will need to select your plan. This will determine the resources that are allocated to your project and the features that are available to you.
 
-Note: All Payload Cloud teams that deploy a project require a card on file. This helps us prevent fraud and abuse on our platform. If you select a plan with a free trial, You will not be charged until your trial period is over. We’ll remind you 7 days before your trial ends and you can cancel anytime.
+<Banner type="success">
+  Note: All Payload Cloud teams that deploy a project require a card on file.
+  This helps us prevent fraud and abuse on our platform. If you select a plan
+  with a free trial, You will not be charged until your trial period is over.
+  We’ll remind you 7 days before your trial ends and you can cancel anytime.
+</Banner>
 
 ### Project Details
 
-| Field            | Description                                                                                                                                                                                                                                    |
+| Option           | Description                                                                                                                                                                                                                                    |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Region**       | Select the region closest to your audience. This will ensure the fastest communication between your data and your client.                                                                                                                      |
 | **Project Name** | A name for your project. You can change this at any time.                                                                                                                                                                                      |
@@ -25,7 +30,7 @@ Note: All Payload Cloud teams that deploy a project require a card on file. This
 
 If you are deploying a new project from a template, the following settings will all be automatically configured for you. If you are using your own repository, you will need to make sure your build settings are accurate for your project to deploy correctly.
 
-| Field                | Description                                                                                                                                                       |
+| Option               | Description                                                                                                                                                       |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Root Directory**   | The folder where your `package.json` file lives.                                                                                                                  |
 | **Install Command**  | The command used to install your modules, for example: `yarn install` or `npm install`                                                                            |
@@ -38,11 +43,15 @@ If you are deploying a new project from a template, the following settings will 
 
 Any of the features in Payload Cloud that require environment variables will automatically be provided to your application. If your app requires any custom environment variables, you can set them here.
 
-Note: For security reasons, any variables you wish to provide to the Admin panel must be prefixed with `PAYLOAD_PUBLIC_`. [Learn more](http://local.payloadcms.com:3000/docs/admin/webpack#admin-environment-vars).
+<Banner type="warning">
+  Note: For security reasons, any variables you wish to provide to the Admin
+  panel must be prefixed with `PAYLOAD_PUBLIC_`.  Learn more
+  [here](https://payloadcms.com/docs/admin/webpack#admin-environment-vars).
+</Banner>
 
 ### Payment
 
-Payment methods can be set per project and can be updated any time. You can use team’s default payment method, or add a new one. You can modify your payment methods in your Project settings as well as Team settings.
+Payment methods can be set per project and can be updated any time. You can use team’s default payment method, or add a new one. Modify your payment methods in your Project settings / Team settings.
 
 <Banner type="success">
   <strong>Note:</strong> All Payload Cloud teams that deploy a project require a
