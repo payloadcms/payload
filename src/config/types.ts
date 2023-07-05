@@ -182,8 +182,7 @@ export type Endpoint = {
   | 'patch'
   | 'delete'
   | 'connect'
-  | 'options'
-  | string;
+  | 'options';
   /**
    * Middleware that will be called when the path/method matches
    *
