@@ -1,0 +1,68 @@
+@import '../../css/common';
+
+.row {
+  display: flex;
+  align-items: center;
+
+  @include small-break {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.rowHR {
+  margin: var(--base) 0;
+  background-color: var(--color-base-900);
+}
+
+.rowContent {
+  margin-left: var(--base);
+
+  @include small-break {
+    margin-left: 0;
+  }
+}
+
+.placeholder {
+  background-color: var(--color-base-50);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mediaWrapper {
+  text-decoration: none;
+  display: block;
+  position: relative;
+  aspect-ratio: 5 / 4;
+  width: 100%;
+  max-width: 200px;
+
+  @include small-break {
+    max-width: unset;
+    margin-bottom: calc(var(--base) / 2);
+  }
+}
+
+.image {
+  object-fit: cover;
+}
+
+.title {
+  margin: 0;
+}
+
+.itemsTotal {
+  margin-bottom: var(--base);
+}
+
+.cartTotal {
+  margin-top: var(--base);
+  font-weight: 600;
+}
+
+.checkoutButton {
+  margin-top: var(--base);
+}

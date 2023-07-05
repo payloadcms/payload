@@ -241,6 +241,7 @@
     "uploading": "Wgrywanie",
     "user": "użytkownik",
     "users": "użytkownicy",
+    "value": "Wartość",
     "welcome": "Witaj"
   },
   "operators": {
@@ -274,11 +275,11 @@
     "emailAddress": "Wprowadź poprawny adres email.",
     "enterNumber": "Wprowadź poprawny numer telefonu.",
     "fieldHasNo": "To pole nie posiada {{label}}",
-    "greaterThanMax": "Wartość \"{{value}}\" przekracza maksymalną, dozwoloną liczbę {{max}} znaków.",
+    "greaterThanMax": "{{value}} jest większe niż maksymalnie dozwolony {{label}} wynoszący {{max}}.",
     "invalidInput": "To pole zawiera nieprawidłowe dane.",
     "invalidSelection": "To pole ma nieprawidłowy wybór.",
     "invalidSelections": "To pole zawiera następujące, nieprawidłowe wybory:",
-    "lessThanMin": "Wartość \"{{value}}\" jest mniejsza niż dozwolona, minimalna wartość: {{min}}.",
+    "lessThanMin": "{{value}} jest mniejsze niż minimalnie dozwolony {{label}} wynoszący {{min}}.",
     "longerThanMin": "Ta wartość musi być dłuższa niż minimalna długość znaków: {{minLength}}.",
     "notValidDate": "\"{{value}}\" nie jest prawidłową datą.",
     "required": "To pole jest wymagane.",

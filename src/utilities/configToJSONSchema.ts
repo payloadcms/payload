@@ -32,7 +32,10 @@ function returnOptionEnums(options: Option[]): string[] {
   });
 }
 
-export function generateEntitySchemas(entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[]): JSONSchema4 {
+/**
+ * This is used for generating the TypeScript types (payload-types.ts) with the payload generate:types command.
+ */
+function generateEntitySchemas(entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[]): JSONSchema4 {
   const properties = [...entities].reduce((acc, { slug }) => {
     acc[slug] = {
       $ref: `#/definitions/${slug}`,
@@ -72,7 +75,11 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
         }
 
         case 'number': {
-          fieldSchema = { type: 'number' };
+          if (field.hasMany === true) {
+            fieldSchema = { type: 'array', items: { type: 'number' } };
+          } else {
+            fieldSchema = { type: 'number' };
+          }
           break;
         }
 
@@ -395,7 +402,8 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
   };
 }
 
-function entityToJSONSchema(config: SanitizedConfig, incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig, interfaceNameDefinitions: Map<string, JSONSchema4>): JSONSchema4 {
+// This function is part of the public API and is exported through payload/utilities
+export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig, interfaceNameDefinitions: Map<string, JSONSchema4>): JSONSchema4 {
   const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity);
   const title = entity.typescript?.interface ? entity.typescript.interface : singular(toWords(entity.slug, true));
 

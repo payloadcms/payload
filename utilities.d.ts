@@ -1,1 +1,1 @@
-export * from './dist/utilities/configToJSONSchema';
+export { entityToJSONSchema } from './dist/utilities/configToJSONSchema';

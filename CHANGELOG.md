@@ -1,5 +1,73 @@
 
 
+## [1.10.5](https://github.com/payloadcms/payload/compare/v1.10.4...v1.10.5) (2023-06-30)
+
+
+### Bug Fixes
+
+* fields in drawer cannot be edited ([#2949](https://github.com/payloadcms/payload/issues/2949)) ([0c2e41c](https://github.com/payloadcms/payload/commit/0c2e41c4bef9333c47a9b1db0de807696b3f3872)), closes [#2945](https://github.com/payloadcms/payload/issues/2945)
+* improve versions test suite ([#2941](https://github.com/payloadcms/payload/issues/2941)) ([1d4df99](https://github.com/payloadcms/payload/commit/1d4df99ea78c5f682074ae824dcd8dea18b774e0))
+* incorrect graphql type generation ([#2898](https://github.com/payloadcms/payload/issues/2898)) ([b36deb4](https://github.com/payloadcms/payload/commit/b36deb4640cad4f494a12ab74b4e4d9a918cd94b))
+
+## [1.10.4](https://github.com/payloadcms/payload/compare/v1.10.3...v1.10.4) (2023-06-30)
+
+
+### Features
+
+* add locale to displayed API URL ([b22d157](https://github.com/payloadcms/payload/commit/b22d157bd2f1c1a857e2d42bdc5b893549e3db9e))
+
+## [1.10.3](https://github.com/payloadcms/payload/compare/v1.10.2...v1.10.3) (2023-06-30)
+
+
+### Bug Fixes
+
+* [#2937](https://github.com/payloadcms/payload/issues/2937), depth not being respected in graphql rich text fields ([f84b432](https://github.com/payloadcms/payload/commit/f84b4323e2fce57e2e14b181e486ed72cc09ded5))
+* shows updatedAt date when selecting a version to compare from dropdown ([3c9dab3](https://github.com/payloadcms/payload/commit/3c9dab3b9d5302d8bdf5792f0384cd5aeeb13839))
+
+## [1.10.2](https://github.com/payloadcms/payload/compare/v1.10.1...v1.10.2) (2023-06-26)
+
+
+### Bug Fixes
+
+* adjusts swc loader to only exclude non ts/tsx files - [#2888](https://github.com/payloadcms/payload/issues/2888) ([#2907](https://github.com/payloadcms/payload/issues/2907)) ([a2d9ef3](https://github.com/payloadcms/payload/commit/a2d9ef3ca618934df58102a7e02e86dbe0ed63da))
+* autosave on localized fields, adds test ([6893231](https://github.com/payloadcms/payload/commit/6893231f85f702189089a6d78d3f3af63aaa0d82))
+* broken export of entityToJSONSchema ([#2894](https://github.com/payloadcms/payload/issues/2894)) ([837dccc](https://github.com/payloadcms/payload/commit/837dcccefeffe7bb6e674713b4184c4eb92db8dc))
+* correctly scopes data variable within bulk update - [#2901](https://github.com/payloadcms/payload/issues/2901) ([#2904](https://github.com/payloadcms/payload/issues/2904)) ([f627277](https://github.com/payloadcms/payload/commit/f627277479e6a4a847e79f54c545712a7186abb9))
+* safely check for tempFilePath when updating media document ([#2899](https://github.com/payloadcms/payload/issues/2899)) ([8206c0f](https://github.com/payloadcms/payload/commit/8206c0fe8be78a5e0f7c8e64996d73d135b1fcc2))
+
+## [1.10.1](https://github.com/payloadcms/payload/compare/v1.10.0...v1.10.1) (2023-06-22)
+
+
+### Bug Fixes
+
+* conditional fields perf bug - [#2886](https://github.com/payloadcms/payload/issues/2886) ([#2890](https://github.com/payloadcms/payload/issues/2890)) ([b83d788](https://github.com/payloadcms/payload/commit/b83d788d3cfe12f87dcd63a9df20b939a6f4681e))
+* cutoff tooltips in relationship field ([#2873](https://github.com/payloadcms/payload/issues/2873)) ([09c6cad](https://github.com/payloadcms/payload/commit/09c6cad3e8462dc3d8b1b6424aafd336c1d7828c))
+* Relationship hasMany and filterOptions fails above 10 items ([#2891](https://github.com/payloadcms/payload/issues/2891)) ([8128de6](https://github.com/payloadcms/payload/commit/8128de64dff98fdbcf053faef9de3c3f9a733071))
+
+# [1.10.0](https://github.com/payloadcms/payload/compare/v1.9.5...v1.10.0) (2023-06-20)
+
+
+### Bug Fixes
+
+* [#2831](https://github.com/payloadcms/payload/issues/2831), persists payloadAPI through local operations that accept req ([85d2467](https://github.com/payloadcms/payload/commit/85d2467d73582a372ee34e3ce93403847a1f0689))
+* [#2842](https://github.com/payloadcms/payload/issues/2842), querying number custom ids with in ([116e9ff](https://github.com/payloadcms/payload/commit/116e9ffe81f44c4b40fa578b4a8fe4bb70fd110c))
+* default sort with near operator ([#2862](https://github.com/payloadcms/payload/issues/2862)) ([99f3809](https://github.com/payloadcms/payload/commit/99f38098dd4a386437c469becc975ca86c54601f))
+* deprecate min/max in exchange for minRows and maxRows for relationship field ([#2826](https://github.com/payloadcms/payload/issues/2826)) ([0d8d7f3](https://github.com/payloadcms/payload/commit/0d8d7f358d390184f6f888d77858b4a145e94214))
+* drawer close on backspace ([#2869](https://github.com/payloadcms/payload/issues/2869)) ([a110ba2](https://github.com/payloadcms/payload/commit/a110ba2dc09cd0824a9b1eb8e011604388277bd8))
+* drawer fields are read-only if opened from a hasMany relationship ([#2843](https://github.com/payloadcms/payload/issues/2843)) ([542b536](https://github.com/payloadcms/payload/commit/542b5362d3ec8741aff6b1672fab7d2250e7b854))
+* fields in relationship drawer not usable [#2815](https://github.com/payloadcms/payload/issues/2815) ([#2870](https://github.com/payloadcms/payload/issues/2870)) ([8626dc6](https://github.com/payloadcms/payload/commit/8626dc6b1a926143e7ba505f3edd924432168675))
+* mobile loading overlay width [#2866](https://github.com/payloadcms/payload/issues/2866) ([#2867](https://github.com/payloadcms/payload/issues/2867)) ([ba9d633](https://github.com/payloadcms/payload/commit/ba9d6336acc779cfec0db312c8e2da912ce58cd4))
+* near query sorting by distance and pagination ([#2861](https://github.com/payloadcms/payload/issues/2861)) ([1611896](https://github.com/payloadcms/payload/commit/16118960aa6d63f7a429f168ff4305f336b1b1e6))
+* relationship field query pagination ([#2871](https://github.com/payloadcms/payload/issues/2871)) ([ce84174](https://github.com/payloadcms/payload/commit/ce84174554d9d828cbaaaa9548e5defc0feb4e2b))
+* slow like queries with lots of records ([4dd703a](https://github.com/payloadcms/payload/commit/4dd703a6bff0ab7d06af234baa975553bd62f176))
+
+
+### Features
+
+* automatically redirect a user back to their originally requested URL after login ([#2838](https://github.com/payloadcms/payload/issues/2838)) ([e910688](https://github.com/payloadcms/payload/commit/e9106882f721d43bcc05a1690bda7754b450404e))
+* hasMany for number field ([#2517](https://github.com/payloadcms/payload/issues/2517)) ([8f086e3](https://github.com/payloadcms/payload/commit/8f086e315cb30be9d399fd3022c16952fb81cb2e)), closes [#2812](https://github.com/payloadcms/payload/issues/2812) [#2821](https://github.com/payloadcms/payload/issues/2821) [#2823](https://github.com/payloadcms/payload/issues/2823) [#2824](https://github.com/payloadcms/payload/issues/2824) [#2814](https://github.com/payloadcms/payload/issues/2814) [#2793](https://github.com/payloadcms/payload/issues/2793) [#2835](https://github.com/payloadcms/payload/issues/2835)
+* optimizes conditional logic performance ([967f217](https://github.com/payloadcms/payload/commit/967f21734600de1fec8c1227a354ef5a417e54c5))
+
 ## [1.9.5](https://github.com/payloadcms/payload/compare/v1.9.4...v1.9.5) (2023-06-16)
 
 ## [1.9.4](https://github.com/payloadcms/payload/compare/v1.9.3...v1.9.4) (2023-06-16)
