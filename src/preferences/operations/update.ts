@@ -18,16 +18,18 @@ async function update(args: PreferenceUpdateRequest) {
   const collection = 'payload-preferences';
 
   const filter = {
+    key: { equals: key },
+    'user.value': { equals: user.id },
+    'user.relationTo': { equals: user.collection },
+  };
+
+  const preference = {
     key,
+    value,
     user: {
       value: user.id,
       relationTo: user.collection,
     },
-  };
-
-  const preference = {
-    ...filter,
-    value,
   };
 
   if (!user) {
@@ -38,16 +40,20 @@ async function update(args: PreferenceUpdateRequest) {
     await executeAccess({ req }, defaultAccess);
   }
 
-  const { Model } = payload.collections[collection];
-  const updateResult = await Model.updateOne(filter, preference);
-  if (updateResult.modifiedCount === 0) {
-    // TODO: workaround to prevent race-conditions 500 errors from violating unique constraints
-    try {
-      await Model.create(preference);
-    } catch (err: unknown) {
-      await Model.updateOne(filter, preference);
-    }
+  // TODO: workaround to prevent race-conditions 500 errors from violating unique constraints
+  try {
+    await payload.db.create({
+      collection,
+      data: preference,
+    });
+  } catch (err: unknown) {
+    await payload.db.updateOne({
+      collection,
+      where: filter,
+      data: preference,
+    });
   }
+
   return preference;
 }
 

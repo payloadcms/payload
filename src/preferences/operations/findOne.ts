@@ -23,6 +23,7 @@ async function findOne(args: PreferenceRequest): Promise<GeneratedTypes['collect
     collection: 'payload-preferences',
     where,
     depth: 0,
+    pagination: false,
     user,
   });
 
