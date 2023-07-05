@@ -18,7 +18,7 @@ type ResizeArgs = {
   mimeType: string;
 };
 
-type ResizeResult = {
+type TransformResult = {
   sizeData: FileSizes;
   sizesToSave: FileToSave[];
 };
@@ -82,7 +82,7 @@ const createResult = (
   filesize: FileSize['filesize'] = null,
   mimeType: FileSize['mimeType'] = null,
   sizesToSave: FileToSave[] = [],
-): ResizeResult => ({
+): TransformResult => ({
   sizesToSave,
   sizeData: {
     [name]: {
@@ -134,7 +134,7 @@ const needsResize = (
  * @param resizeConfig - the resize config
  * @returns the result of the resize operation(s)
  */
-export default async function resizeAndSave({
+export default async function transformAndSaveImage({
   req,
   file,
   dimensions,
@@ -142,7 +142,7 @@ export default async function resizeAndSave({
   config,
   savedFilename,
   mimeType,
-}: ResizeArgs): Promise<ResizeResult> {
+}: ResizeArgs): Promise<TransformResult> {
   const { imageSizes } = config.upload;
 
   // Noting to resize here so return as early as possible
@@ -150,8 +150,8 @@ export default async function resizeAndSave({
 
   const sharpBase = sharp(file.tempFilePath || file.data);
 
-  const results: ResizeResult[] = await Promise.all(
-    imageSizes.map(async (imageResizeConfig): Promise<ResizeResult> => {
+  const results: TransformResult[] = await Promise.all(
+    imageSizes.map(async (imageResizeConfig): Promise<TransformResult> => {
       if (!needsResize(imageResizeConfig, dimensions)) {
         return createResult(imageResizeConfig.name);
       }
