@@ -1,9 +1,13 @@
-import type { ConnectOptions } from 'mongoose';
+import type { ClientSession, Connection, ConnectOptions } from 'mongoose';
 import type { DatabaseAdapter } from '../database/types';
 import type { Payload } from '../index';
 import { connect } from './connect';
 import { init } from './init';
 import { webpack } from './webpack';
+import { transaction } from './transactions/transaction';
+import { beginTransaction } from './transactions/beginTransaction';
+import { rollbackTransaction } from './transactions/rollbackTransaction';
+import { commitTransaction } from './transactions/commitTransaction';
 import { CollectionModel } from '../collections/config/types';
 import { queryDrafts } from './queryDrafts';
 import { GlobalModel } from '../globals/config/types';
@@ -41,6 +45,8 @@ export type MongooseAdapter = DatabaseAdapter &
     versions: {
       [slug: string]: CollectionModel
     }
+    session: ClientSession
+    connection: Connection
   }
 
 export function mongooseAdapter({ payload, url, connectOptions }: Args): MongooseAdapter {
@@ -61,10 +67,10 @@ export function mongooseAdapter({ payload, url, connectOptions }: Args): Mongoos
     migrateRefresh: async () => null,
     migrateReset: async () => null,
     migrateFresh: async () => null,
-    transaction: async () => true,
-    beginTransaction: async () => true,
-    rollbackTransaction: async () => true,
-    commitTransaction: async () => true,
+    transaction,
+    beginTransaction,
+    rollbackTransaction,
+    commitTransaction,
     queryDrafts,
     findOne,
     find,

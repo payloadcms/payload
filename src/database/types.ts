@@ -95,22 +95,22 @@ export interface DatabaseAdapter {
   /**
    * Perform many database interactions in a single, all-or-nothing operation.
    */
-  transaction?: () => Promise<boolean>;
+  transaction?: Transaction;
 
   /**
-   * Start a transaction, requiring commit() to be called for any changes to be made.
+   * Start a transaction, requiring commitTransaction() to be called for any changes to be made.
    */
-  beginTransaction?: () => Promise<boolean>;
+  beginTransaction?: BeginTransaction;
 
   /**
-   * Cancel any changes since the beginning of the transaction.
+   * Abort any changes since the start of the transaction.
    */
-  rollbackTransaction?: () => Promise<boolean>;
+  rollbackTransaction?: RollbackTransaction;
 
   /**
-   * Instruct the database to complete the changes made in the transaction.
+   * Persist the changes made since the start of the transaction.
    */
-  commitTransaction?: () => Promise<boolean>;
+  commitTransaction?: CommitTransaction;
 
   queryDrafts: QueryDrafts;
 
@@ -141,6 +141,14 @@ export type Init = ({ config }: { config: SanitizedConfig }) => Promise<void>;
 export type Connect = ({ config }: { config: SanitizedConfig }) => Promise<void>
 
 export type Webpack = (config: Configuration) => Configuration;
+
+export type Transaction = (callback: () => Promise<any>, options?: any) => void
+
+export type BeginTransaction = (options?: any) => Promise<void>
+
+export type RollbackTransaction = () => Promise<void>
+
+export type CommitTransaction = () => Promise<void>
 
 export type QueryDraftsArgs = {
   collection: string
@@ -252,9 +260,9 @@ export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>;
 
 
 export type UpdateVersionArgs<T = TypeWithID> = {
-  collectionSlug: string,
-  where: Where,
-  locale?: string,
+  collectionSlug: string
+  where: Where
+  locale?: string
   versionData: T
 }
 
@@ -269,17 +277,17 @@ export type CreateArgs = {
 export type Create = (args: CreateArgs) => Promise<Document>
 
 export type UpdateOneArgs = {
-  collection: string,
-  data: Record<string, unknown>,
-  where: Where,
+  collection: string
+  data: Record<string, unknown>
+  where: Where
   locale?: string
 }
 
 export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
 export type DeleteOneArgs = {
-  collection: string,
-  where: Where,
+  collection: string
+  where: Where
 }
 
 export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>

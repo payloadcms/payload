@@ -40,7 +40,7 @@ export const connect: Connect = async function connect(this: MongooseAdapter,
   }
 
   try {
-    await mongoose.connect(urlToConnect, connectionOptions);
+    this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection;
 
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
       this.payload.logger.info('---- DROPPING DATABASE ----');
