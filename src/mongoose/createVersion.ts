@@ -6,14 +6,24 @@ export const createVersion: CreateVersion = async function createVersion(this: M
   { collectionSlug, parent, versionData, autosave, createdAt, updatedAt }) {
   const VersionModel = this.versions[collectionSlug];
 
-
-  const doc = await VersionModel.create({
-    parent,
-    version: versionData,
-    autosave,
-    createdAt,
-    updatedAt,
-  });
+  let doc;
+  if (this.session) {
+    [doc] = await VersionModel.create([{
+      parent,
+      version: versionData,
+      autosave,
+      createdAt,
+      updatedAt,
+    }], { session: this.session });
+  } else {
+    doc = await VersionModel.create({
+      parent,
+      version: versionData,
+      autosave,
+      createdAt,
+      updatedAt,
+    });
+  }
 
   const result: Document = JSON.parse(JSON.stringify(doc));
   const verificationToken = doc._verificationToken;

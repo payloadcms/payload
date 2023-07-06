@@ -14,7 +14,12 @@ export const findOne: FindOne = async function findOne(this: MongooseAdapter,
     where,
   });
 
-  const doc = await Model.findOne(query).lean();
+  let doc;
+  if (this.session) {
+    doc = await Model.findOne(query).session(this.session).lean();
+  } else {
+    doc = await Model.findOne(query).lean();
+  }
 
   if (!doc) {
     return null;

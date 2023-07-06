@@ -4,6 +4,7 @@ import type { UpdateVersion } from '../database/types';
 export const updateVersion: UpdateVersion = async function updateVersion(this: MongooseAdapter,
   { collectionSlug, where, locale, versionData }) {
   const VersionModel = this.versions[collectionSlug];
+  const withSession = this.session ? { session: this.session } : {};
 
   const query = await VersionModel.buildQuery({
     payload: this.payload,
@@ -11,11 +12,14 @@ export const updateVersion: UpdateVersion = async function updateVersion(this: M
     where,
   });
 
-
   const doc = await VersionModel.findOneAndUpdate(
     query,
     versionData,
-    { new: true, lean: true },
+    {
+      ...withSession,
+      new: true,
+      lean: true,
+    },
   ).lean();
 
   const result = JSON.parse(JSON.stringify(doc));

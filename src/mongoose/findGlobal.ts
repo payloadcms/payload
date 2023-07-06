@@ -14,7 +14,12 @@ export const findGlobal: FindGlobal = async function findGlobal(this: MongooseAd
     globalSlug: slug,
   });
 
-  let doc = await Model.findOne(query).lean() as any;
+  let doc;
+  if (this.session) {
+    doc = await Model.findOne(query).session(this.session).lean() as any;
+  } else {
+    doc = await Model.findOne(query).lean() as any;
+  }
 
   if (!doc) {
     return null;

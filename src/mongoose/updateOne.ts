@@ -7,6 +7,7 @@ import i18nInit from '../translations/init';
 export const updateOne: UpdateOne = async function updateOne(this: MongooseAdapter,
   { collection, data, where, locale }) {
   const Model = this.collections[collection];
+  const withSession = this.session ? { session: this.session } : {};
 
   const query = await Model.buildQuery({
     payload: this.payload,
@@ -19,7 +20,11 @@ export const updateOne: UpdateOne = async function updateOne(this: MongooseAdapt
     result = await Model.findOneAndUpdate(
       query,
       data,
-      { new: true, lean: true },
+      {
+        ...withSession,
+        new: true,
+        lean: true,
+      },
     ).lean();
   } catch (error) {
     // Handle uniqueness error from MongoDB

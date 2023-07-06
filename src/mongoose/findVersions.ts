@@ -50,6 +50,11 @@ export const findVersions: FindVersions = async function findVersions(this: Mong
       skip,
     },
   };
+
+  if (this.session) {
+    paginationOptions.options.session = this.session;
+  }
+
   if (limit > 0) {
     paginationOptions.limit = limit;
     // limit must also be set here, it's ignored when pagination is false

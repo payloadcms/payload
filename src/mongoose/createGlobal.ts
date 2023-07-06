@@ -5,12 +5,17 @@ import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 export const createGlobal: CreateGlobal = async function createGlobal(this: MongooseAdapter,
   { data, slug }) {
   const Model = this.globals;
-
-
-  let result = await Model.create({
+  const global = {
     globalType: slug,
     ...data,
-  }) as any;
+  };
+
+  let result;
+  if (this.session) {
+    [result] = await Model.create([global], { session: this.session }) as any;
+  } else {
+    result = await Model.create(global) as any;
+  }
 
   result = JSON.parse(JSON.stringify(result));
 

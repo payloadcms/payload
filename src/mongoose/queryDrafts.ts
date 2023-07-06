@@ -1,3 +1,4 @@
+import { PaginateOptions } from 'mongoose';
 import type { MongooseAdapter } from '.';
 import type { QueryDrafts } from '../database/types';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
@@ -40,6 +41,8 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(this: Mong
     });
   }
 
+  const withSession = this.session ? { session: this.session } : {};
+
   const aggregate = VersionModel.aggregate<AggregateVersion<T>>([
     // Sort so that newest are first
     { $sort: { updatedAt: -1 } },
@@ -55,6 +58,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(this: Mong
     // Filter based on incoming query
     { $match: versionQuery },
   ], {
+    ...withSession,
     allowDiskUse: true,
   });
 
@@ -69,7 +73,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(this: Mong
     }
 
 
-    const aggregatePaginateOptions = {
+    const aggregatePaginateOptions: PaginateOptions = {
       page,
       limit,
       lean: true,
@@ -79,6 +83,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(this: Mong
       useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
       useFacet: this.connectOptions.useFacet,
       options: {
+        ...withSession,
         limit,
       },
       sort,

@@ -6,7 +6,12 @@ export const create: Create = async function create(this: MongooseAdapter,
   { collection, data }) {
   const Model = this.collections[collection];
 
-  const doc = await Model.create(data);
+  let doc;
+  if (this.session) {
+    [doc] = await Model.create([data], { session: this.session });
+  } else {
+    doc = await Model.create(data);
+  }
 
   // doc.toJSON does not do stuff like converting ObjectIds to string, or date strings to date objects. That's why we use JSON.parse/stringify here
   const result: Document = JSON.parse(JSON.stringify(doc));

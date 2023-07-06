@@ -12,8 +12,12 @@ export const deleteOne: DeleteOne = async function deleteOne(this: MongooseAdapt
     where,
   });
 
-
-  const doc = await Model.findOneAndDelete(query).lean();
+  let doc;
+  if (this.session) {
+    doc = await Model.findOneAndDelete(query).session(this.session).lean();
+  } else {
+    doc = await Model.findOneAndDelete(query).lean();
+  }
 
   let result: Document = JSON.parse(JSON.stringify(doc));
 
