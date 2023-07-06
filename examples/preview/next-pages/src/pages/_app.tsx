@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import { Header } from '../components/Header'
 import { MainMenu } from '../payload-types'
 
-import '../css/app.scss'
+import './app.scss'
 
 export interface IGlobals {
   mainMenu: MainMenu
