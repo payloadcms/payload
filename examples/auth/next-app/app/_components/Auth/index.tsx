@@ -2,7 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
-import { User } from '../../../payload-types'
+import { User } from '../../payload-types'
 import { gql, USER } from './gql'
 import { rest } from './rest'
 import { AuthContext, Create, ForgotPassword, Login, Logout, ResetPassword } from './types'

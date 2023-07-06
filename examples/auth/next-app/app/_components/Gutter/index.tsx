@@ -16,7 +16,12 @@ export const Gutter: React.FC<Props> = forwardRef<HTMLDivElement, Props>((props,
   return (
     <div
       ref={ref}
-      className={[left && classes.gutterLeft, right && classes.gutterRight, className]
+      className={[
+        classes.gutter,
+        left && classes.gutterLeft,
+        right && classes.gutterRight,
+        className,
+      ]
         .filter(Boolean)
         .join(' ')}
     >

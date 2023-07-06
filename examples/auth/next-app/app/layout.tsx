@@ -3,6 +3,8 @@ import { Header } from './_components/Header'
 
 import './app.scss'
 
+import classes from './index.module.scss'
+
 export const metadata = {
   title: 'Payload Auth + Next.js App Router Example',
   description: 'An example of how to authenticate with Payload from a Next.js app.',
@@ -16,7 +18,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       <body>
         <AuthProvider>
           <Header />
-          {children}
+          <div className={classes.page}>{children}</div>
         </AuthProvider>
       </body>
     </html>

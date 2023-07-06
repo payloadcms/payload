@@ -131,10 +131,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@payloadcms/eslint-config@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@payloadcms/eslint-config/-/eslint-config-0.0.1.tgz#4324702ddef6c773b3f3033795a13e6b50c95a92"
-  integrity sha512-Il59+0C4E/bI6uM2hont3I+oABWkJZbfbItubje5SGMrXkymUq8jT/UZRk0eCt918bB7gihxDXx8guFnR/aNIw==
+"@payloadcms/eslint-config@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@payloadcms/eslint-config/-/eslint-config-0.0.2.tgz#cadb97ccd6476204a38e057b3cf57dc80efb209f"
+  integrity sha512-EcS7qyX4++eBP/MS4QgrFOzzplsVMaPDfEcxWYoH9OLJCUTlGz8UmfMZPWU7DeAuyehJdij+BywSrcprqun9rA==
 
 "@swc/helpers@0.5.1":
   version "0.5.1"

@@ -46,7 +46,7 @@ To spin up this example locally, follow the [Quick Start](#quick-start).
 
 ### Seed
 
-On boot, a seed script is included to create a user with email `demo@payloadcms.com`, password `test`, the role `admin`.
+On boot, a seed script is included to create a user with email `demo@payloadcms.com`, password `demo`, the role `admin`.
 
 > NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
 

@@ -1,5 +1,5 @@
 {
-  "name": "next-auth-frontend",
+  "name": "payload-nextjs-auth-example",
   "version": "1.0.0",
   "scripts": {
     "dev": "next dev -p 3001",
@@ -21,7 +21,7 @@
     "@types/react": "18.0.21",
     "@typescript-eslint/eslint-plugin": "^5.51.0",
     "@typescript-eslint/parser": "^5.51.0",
-    "@payloadcms/eslint-config": "^0.0.1",
+    "@payloadcms/eslint-config": "^0.0.2",
     "eslint": "8.25.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-filenames": "^1.3.2",
