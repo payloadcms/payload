@@ -34,10 +34,7 @@ export const enforceMaxVersions = async ({
         where,
         collection: collection.slug,
         skip: max,
-        sort: [{
-          property: 'updatedAt',
-          direction: 'desc',
-        }],
+        sort: '-updatedAt',
         pagination: false,
       });
 
@@ -47,10 +44,7 @@ export const enforceMaxVersions = async ({
         where,
         global: global.slug,
         skip: max,
-        sort: [{
-          property: 'updatedAt',
-          direction: 'desc',
-        }],
+        sort: '-updatedAt',
       });
 
       [oldestAllowedDoc] = query.docs;

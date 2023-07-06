@@ -24,7 +24,7 @@ export const getLatestGlobalVersion = async ({
     latestVersion = (await payload.db.findGlobalVersions({
       global: slug,
       limit: 1,
-      sort: [{ property: 'updatedAt', direction: 'desc' }],
+      sort: '-updatedAt',
       locale,
     })).docs[0];
   }

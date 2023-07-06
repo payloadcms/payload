@@ -32,6 +32,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     limit,
     depth,
     globalConfig,
+    sort,
     req,
     req: {
       locale,
@@ -62,14 +63,6 @@ async function findVersions<T extends TypeWithVersion<T>>(
   // /////////////////////////////////////
   // Find
   // /////////////////////////////////////
-
-  const sort = buildSortParam({
-    sort: args.sort || '-updatedAt',
-    fields: versionFields,
-    timestamps: true,
-    config: payload.config,
-    locale,
-  });
 
   const paginatedDocs = await payload.db.findGlobalVersions<T>({
     where: fullWhere,

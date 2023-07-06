@@ -7,7 +7,6 @@ import { fieldAffectsData } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
 import { authenticateLocalStrategy } from '../strategies/local/authenticate';
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
 export type Result = {
   token: string
@@ -23,6 +22,7 @@ export type Arguments = {
   req: PayloadRequest
   overrideAccess?: boolean
   res?: Response
+  depth?: number
 }
 
 async function resetPassword(args: Arguments): Promise<Result> {
@@ -44,6 +44,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
     },
     overrideAccess,
     data,
+    depth,
   } = args;
 
   // /////////////////////////////////////
@@ -120,7 +121,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
     args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
   }
 
-  const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess });
+  const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess, depth });
   return { token, user: fullUser };
 }
 

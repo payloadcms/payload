@@ -1,7 +1,7 @@
+import { PaginateOptions } from 'mongoose';
 import { Config } from '../../config/types';
 import { getLocalizedSortProperty } from './getLocalizedSortProperty';
 import { Field } from '../../fields/config/types';
-import type { SortArgs, SortDirection } from '../../database/types';
 
 type Args = {
   sort: string
@@ -11,7 +11,14 @@ type Args = {
   locale: string
 }
 
-export const buildSortParam = ({ sort, config, fields, timestamps, locale }: Args): SortArgs => {
+export type SortArgs = {
+  property: string
+  direction: SortDirection
+}[]
+
+export type SortDirection = 'asc' | 'desc';
+
+export const buildSortParam = ({ sort, config, fields, timestamps, locale }: Args): PaginateOptions['sort'] => {
   let sortProperty: string;
   let sortDirection: SortDirection = 'desc';
 
@@ -39,5 +46,5 @@ export const buildSortParam = ({ sort, config, fields, timestamps, locale }: Arg
     });
   }
 
-  return [{ property: sortProperty, direction: sortDirection }];
+  return { [sortProperty]: sortDirection };
 };

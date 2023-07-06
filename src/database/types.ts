@@ -1,6 +1,6 @@
 import type { SchemaOptions } from 'mongoose';
 import type { Configuration } from 'webpack';
-import type { Config, SanitizedConfig } from '../config/types';
+import type { SanitizedConfig } from '../config/types';
 import type {
   ArrayField,
   BlockField,
@@ -148,7 +148,7 @@ export type QueryDraftsArgs = {
   page?: number
   limit?: number
   pagination?: boolean
-  sort?: SortArgs
+  sort?: string
   locale?: string
 }
 
@@ -172,7 +172,7 @@ export type FindArgs = {
   /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
   limit?: number
   pagination?: boolean
-  sort?: SortArgs
+  sort?: string
   locale?: string
 }
 
@@ -186,7 +186,7 @@ export type FindVersionsArgs = {
   versions?: boolean
   limit?: number
   pagination?: boolean
-  sort?: SortArgs
+  sort?: string
   locale?: string
 }
 
@@ -201,7 +201,7 @@ export type FindGlobalVersionsArgs = {
   versions?: boolean
   limit?: number
   pagination?: boolean
-  sort?: SortArgs
+  sort?: string
   locale?: string
 }
 
@@ -299,16 +299,6 @@ export type BuildSchemaOptions = {
   indexSortableFields?: boolean
 }
 
-export type BuildSortParam = (args: {
-  sort: string
-  config: Config
-  fields: Field[]
-  timestamps: boolean
-  locale: string
-}) => {
-  sort?: SortArgs
-}
-
 export type PaginatedDocs<T = any> = {
   docs: T[]
   totalDocs: number
@@ -380,10 +370,3 @@ export type FieldGenerator<TSchema, TField> = {
   config: SanitizedConfig,
   options: BuildSchemaOptions,
 }
-
-export type SortArgs = {
-  property: string
-  direction: SortDirection
-}[]
-
-export type SortDirection = 'asc' | 'desc';

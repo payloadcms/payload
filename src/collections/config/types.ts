@@ -326,7 +326,7 @@ export type CollectionConfig = {
    * @default true
    */
   timestamps?: boolean
-  /** Extension  point to add your custom data. */
+  /** Extension point to add your custom data. */
   custom?: Record<string, any>;
 };
 

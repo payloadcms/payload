@@ -241,6 +241,7 @@
     "uploading": "Hochladen",
     "user": "Benutzer",
     "users": "Benutzer",
+    "value": "Wert",
     "welcome": "Willkommen"
   },
   "operators": {
@@ -274,11 +275,11 @@
     "emailAddress": "Bitte gib eine korrekte E-Mail-Adresse an.",
     "enterNumber": "Bitte gib eine gültige Nummer an,",
     "fieldHasNo": "Dieses Feld hat kein {{label}}",
-    "greaterThanMax": "\"{{value}}\" ist größer als der maximal erlaubte Wert von {{max}}.",
+    "greaterThanMax": "{{value}} ist größer als der maximal erlaubte {{label}} von {{max}}.",
     "invalidInput": "Dieses Feld hat einen inkorrekten Wert.",
     "invalidSelection": "Dieses Feld hat eine inkorrekte Auswahl.",
     "invalidSelections": "'Dieses Feld enthält die folgenden inkorrekten Auswahlen:'",
-    "lessThanMin": "\"{{value}}\" ist weniger als der minimale erlaubte Wert von {{min}}.",
+    "lessThanMin": "{{value}} ist kleiner als der minimal erlaubte {{label}} von {{min}}.",
     "longerThanMin": "Dieser Wert muss länger als die minimale Länge von {{minLength}} Zeichen sein.",
     "notValidDate": "\"{{value}}\" ist kein gültiges Datum.",
     "required": "Pflichtfeld",

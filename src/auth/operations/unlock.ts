@@ -45,6 +45,10 @@ async function unlock(args: Args): Promise<boolean> {
   // Unlock
   // /////////////////////////////////////
 
+  if (!data.email) {
+    throw new APIError('Missing email.');
+  }
+
   const user = await req.payload.db.findOne({
     collection: collectionConfig.slug,
     where: { email: { equals: data.email.toLowerCase() } },

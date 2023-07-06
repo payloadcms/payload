@@ -56,6 +56,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     collection: {
       config: collectionConfig,
     },
+    sort,
     req,
     req: {
       locale,
@@ -96,14 +97,6 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   // /////////////////////////////////////
   // Find
   // /////////////////////////////////////
-
-  const sort = buildSortParam({
-    sort: args.sort ?? collectionConfig.defaultSort,
-    config: payload.config,
-    fields: collectionConfig.fields,
-    timestamps: collectionConfig.timestamps,
-    locale,
-  });
 
   const usePagination = pagination && limit !== 0;
   const sanitizedLimit = limit ?? (usePagination ? 10 : 0);
