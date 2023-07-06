@@ -5,7 +5,7 @@ import type { FieldHook } from 'payload/types'
 // do not let non-admins change roles
 // eslint-disable-next-line consistent-return
 export const protectRoles: FieldHook<User & { id: string }> = async ({ req, data }) => {
-  const isAdmin = req.user?.roles.includes('admin') || data.email === 'dev@payloadcms.com' // for the seed script
+  const isAdmin = req.user?.roles.includes('admin') || data.email === 'demo@payloadcms.com' // for the seed script
 
   if (!isAdmin) {
     return ['user']
