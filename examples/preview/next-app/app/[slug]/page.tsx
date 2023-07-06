@@ -1,11 +1,10 @@
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
-import { fetchPage, fetchPages } from '../cms'
-
-import { Gutter } from '@/components/Gutter'
-import RichText from '@/components/RichText'
-import { Page } from '@/payload-types'
+import { Page } from '../../payload-types'
+import { Gutter } from '../_components/Gutter'
+import RichText from '../_components/RichText'
+import { fetchDraftPage, fetchPage, fetchPages } from '../cms'
 
 interface PageParams {
   params: { slug: string }
@@ -20,14 +19,10 @@ export const PageTemplate: React.FC<{ page: Page | null | undefined }> = ({ page
   </main>
 )
 
-export default async function Page({ params: { slug } }: PageParams) {
+export default async function Page({ params: { slug = 'home' } }: PageParams) {
   const { isEnabled: isDraftMode } = draftMode()
 
-  if (isDraftMode) {
-    return null
-  }
-
-  const page = await fetchPage(slug || 'home')
+  let page = !isDraftMode ? await fetchPage(slug) : await fetchDraftPage(slug)
 
   if (page === null) {
     return notFound()

@@ -3,7 +3,7 @@ import { draftMode } from 'next/headers'
 
 import { AdminBarClient } from './client'
 
-export async function AdminBar() {
+export function AdminBar() {
   const { isEnabled: isPreviewMode } = draftMode()
 
   return (

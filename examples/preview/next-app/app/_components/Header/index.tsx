@@ -2,7 +2,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { MainMenu } from '../../payload-types'
+import { MainMenu } from '../../../payload-types'
 import { CMSLink } from '../CMSLink'
 import { Gutter } from '../Gutter'
 
@@ -39,3 +39,5 @@ export async function Header() {
     </header>
   )
 }
+
+export default Header

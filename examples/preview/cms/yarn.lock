@@ -2929,11 +2929,6 @@ functions-have-names@^1.2.2:
   resolved "https://registry.yarnpkg.com/functions-have-names/-/functions-have-names-1.2.3.tgz#0404fe4ee2ba2f607f0e0ec3c80bae994133b834"
   integrity sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==
 
-generaterr@^1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/generaterr/-/generaterr-1.5.0.tgz#b0ceb6cc5164df2a061338cc340a8615395c52fc"
-  integrity sha512-JgcGRv2yUKeboLvvNrq9Bm90P4iJBu7/vd5wSLYqMG5GJ6SxZT46LAAkMfNhQ+EK3jzC+cRBm7P8aUWYyphgcQ==
-
 get-caller-file@^2.0.5:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-2.0.5.tgz#4f94412a82db32f36e3b0b9741f8a97feb031f7e"
@@ -4515,15 +4510,6 @@ passport-jwt@^4.0.1:
     jsonwebtoken "^9.0.0"
     passport-strategy "^1.0.0"
 
-passport-local-mongoose@^7.1.2:
-  version "7.1.2"
-  resolved "https://registry.yarnpkg.com/passport-local-mongoose/-/passport-local-mongoose-7.1.2.tgz#0a89876ef8a8e18787e59a39740e61c5653eb25e"
-  integrity sha512-hNLIKi/6IhElr/PhOze8wLDh7T4+ZYhc8GFWYApLgG7FrjI55tuGZELPtsUBqODz77OwlUUf+ngPgHN09zxGLg==
-  dependencies:
-    generaterr "^1.5.0"
-    passport-local "^1.0.0"
-    scmp "^2.1.0"
-
 passport-local@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/passport-local/-/passport-local-1.0.0.tgz#1fe63268c92e75606626437e3b906662c15ba6ee"
@@ -4597,10 +4583,10 @@ pause@0.0.1:
   resolved "https://registry.yarnpkg.com/pause/-/pause-0.0.1.tgz#1d408b3fdb76923b9543d96fb4c9dfd535d9cb5d"
   integrity sha512-KG8UEiEVkR3wGEb4m5yZkVCzigAD+cVEJck2CzYZO37ZGJfctvVptVO192MwrtPhzONn6go8ylnOdMhKqi4nfg==
 
-payload@^1.7.5, payload@^1.8.2:
-  version "1.8.3"
-  resolved "https://registry.yarnpkg.com/payload/-/payload-1.8.3.tgz#28f98d88893d9947ebbc58a74d37aefee6c3d3bf"
-  integrity sha512-umvyt8bt4Od5o55+gbjV3dgqMY1EYMJCHwEU1E6Lqp0bDbd9yNW1SKJcwAuUXHikl8IzAIqmPwJh25ZQduT+kg==
+payload@^1.11.0:
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/payload/-/payload-1.11.0.tgz#9f2a16c343c9733ee8e22f94b343fcf5f222801c"
+  integrity sha512-rs7Cgyg07Aa4/wsA2PG9UFYx4fQSvw1WJz6H9iut32jvEB553RBaZsquKUA0XYPDFlmQFCvjcP5LUYTrjgcnRg==
   dependencies:
     "@date-io/date-fns" "^2.16.0"
     "@dnd-kit/core" "^6.0.7"
@@ -4668,9 +4654,7 @@ payload@^1.7.5, payload@^1.8.2:
     passport-headerapikey "^1.2.2"
     passport-jwt "^4.0.1"
     passport-local "^1.0.0"
-    passport-local-mongoose "^7.1.2"
     path-browserify "^1.0.1"
-    payload "^1.8.2"
     pino "^6.4.1"
     pino-pretty "^9.1.1"
     pluralize "^8.0.0"
@@ -4696,6 +4680,7 @@ payload@^1.7.5, payload@^1.8.2:
     sass "^1.57.1"
     sass-loader "^12.6.0"
     scheduler "^0.23.0"
+    scmp "^2.1.0"
     sharp "^0.31.3"
     slate "^0.91.4"
     slate-history "^0.86.0"

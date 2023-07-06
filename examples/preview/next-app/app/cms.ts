@@ -1,6 +1,6 @@
-import { cookies, draftMode } from 'next/headers'
+import { cookies } from 'next/headers'
 
-import type { Page } from '@/payload-types'
+import type { Page } from '../payload-types'
 
 export const fetchPage = async (slug: string): Promise<Page | undefined | null> => {
   const pageRes: {
@@ -13,14 +13,7 @@ export const fetchPage = async (slug: string): Promise<Page | undefined | null> 
 }
 
 export const fetchDraftPage = async (slug: string): Promise<Page | undefined | null> => {
-  const { isEnabled: isDraftMode } = draftMode()
-
-  if (!isDraftMode) {
-    return fetchPage(slug)
-  }
-
-  const cookieStore = cookies()
-  const payloadToken = cookieStore.get('payload-token')
+  const payloadToken = cookies().get('payload-token')
 
   const pageRes: {
     docs: Page[]
