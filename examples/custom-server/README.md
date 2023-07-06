@@ -84,13 +84,9 @@ Check out the [package.json](./src/package.json) in this repository for a comple
 
 ## Eject
 
-To eject Next.js from this template and replace it with another front-end framework, follow these steps:
+If you prefer another front-end framework or would like to use Payload as a standalone CMS, you can easily eject the front-end from this template. To eject, simply run `yarn eject`. This will uninstall all Next.js related dependencies and delete all files and folders related to the Next.js front-end. It also removes all custom routing from your `server.ts` file and updates your `eslintrc.js`.
 
-1. Remove the `next`, `react`, and `react-dom` dependencies from your `package.json` file
-1. Remove the `next.config.js` and `next-env.d.ts` files from your project root
-1. Remove the `./src/app` directory and all of its contents
-
-Now you can install and setup any other framework you'd like. Follow the [Express](#express) instructions above to make the necessary changes to build and serve your front-end.
+> Note: Your eject script may not work as expected if you've made significant modifications to your project. If you run into any issues, compare your project's dependencies and file structure with this template, see [./src/eject](./src/eject) for full details.
 
 ## Development
 

@@ -1,16 +1,17 @@
 $breakpoint: 1000px;
 
 :root {
-  --max-width: 1100px;
-  --border-radius: 12px;
+  --max-width: 1600px;
   --foreground-rgb: 0, 0, 0;
   --background-rgb: 255, 255, 255;
   --block-spacing: 2rem;
   --gutter-h: 4rem;
+  --base: 1rem;
 
   @media (max-width: $breakpoint) {
     --block-spacing: 1rem;
     --gutter-h: 2rem;
+    --base: 0.75rem;
   }
 }
 
