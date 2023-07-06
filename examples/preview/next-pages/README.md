@@ -2,7 +2,7 @@
 
 This is a [Next.js](https://nextjs.org) app using the [Pages Router](https://nextjs.org/docs/pages). It was made explicitly for Payload's [Preview Example](https://github.com/payloadcms/payload/tree/master/examples/preview/cms).
 
-> This example uses the Pages Router, the legacy API of Next.js. If your app is using the latest [App Router](https://nextjs.org/docs/app), check out the official [App Router Example](https://github.com/payloadcms/payload/tree/master/examples/preview/nextjs).
+> This example uses the Pages Router, the legacy API of Next.js. If your app is using the latest [App Router](https://nextjs.org/docs/app), check out the official [App Router Example](https://github.com/payloadcms/payload/tree/master/examples/preview/next-app).
 
 ## Getting Started
 
