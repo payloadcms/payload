@@ -5,6 +5,8 @@ import { Gutter } from '../Gutter'
 
 import classes from './index.module.scss'
 
+const Title: React.FC = () => <span>Dashboard</span>
+
 export const AdminBar: React.FC<{
   adminBarProps?: PayloadAdminBarProps
   user?: PayloadMeUser
@@ -17,6 +19,7 @@ export const AdminBar: React.FC<{
       <Gutter className={classes.container}>
         <PayloadAdminBar
           {...adminBarProps}
+          logo={<Title />}
           cmsURL={process.env.NEXT_PUBLIC_CMS_URL}
           onAuthChange={setUser}
           className={classes.payloadAdminBar}

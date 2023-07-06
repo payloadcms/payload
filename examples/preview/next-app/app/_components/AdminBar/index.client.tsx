@@ -7,6 +7,8 @@ import { Gutter } from '../Gutter'
 
 import classes from './index.module.scss'
 
+const Title: React.FC = () => <span>Dashboard</span>
+
 export const AdminBarClient: React.FC<PayloadAdminBarProps> = props => {
   const [user, setUser] = useState<PayloadMeUser>()
 
@@ -15,6 +17,7 @@ export const AdminBarClient: React.FC<PayloadAdminBarProps> = props => {
       <Gutter className={classes.container}>
         <PayloadAdminBar
           {...props}
+          logo={<Title />}
           cmsURL={process.env.NEXT_PUBLIC_CMS_URL}
           onPreviewExit={async () => {
             await fetch(`/api/exit-preview`)

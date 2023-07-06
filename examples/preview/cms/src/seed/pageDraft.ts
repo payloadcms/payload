@@ -22,7 +22,7 @@ export const examplePageDraft: Partial<Page> = {
           children: [{ text: 'Log out' }],
         },
         {
-          text: ' or exit Next.js preview mode to see the latest published content.',
+          text: ' or click "exit preview mode" from the Payload Admin Bar to see the latest published content. To make additional changes to the draft, click "save draft" before returning to the preview.',
         },
       ],
     },

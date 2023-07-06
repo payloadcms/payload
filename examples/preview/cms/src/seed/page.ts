@@ -25,7 +25,7 @@ export const examplePage: Partial<Page> = {
           children: [{ text: 'Log in' }],
         },
         {
-          text: ' to the admin panel and click "preview" to return to this page and view the latest draft content in Next.js preview mode.',
+          text: ' to the admin panel and click "preview" to return to this page and view the latest draft content in Next.js preview mode. To make additional changes to the draft, click "save draft" before returning to the preview.',
         },
       ],
     },

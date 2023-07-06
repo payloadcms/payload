@@ -2,27 +2,26 @@ import { cookies } from 'next/headers'
 
 import type { Page } from '../payload-types'
 
-export const fetchPage = async (slug: string): Promise<Page | undefined | null> => {
-  const pageRes: {
-    docs: Page[]
-  } = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/pages?where[slug][equals]=${slug}`).then(
-    res => res.json(),
-  )
-
-  return pageRes?.docs?.[0] ?? null
-}
-
-export const fetchDraftPage = async (slug: string): Promise<Page | undefined | null> => {
+export const fetchPage = async (
+  slug: string,
+  draft?: boolean,
+): Promise<Page | undefined | null> => {
   const payloadToken = cookies().get('payload-token')
 
   const pageRes: {
     docs: Page[]
   } = await fetch(
-    `${process.env.NEXT_PUBLIC_CMS_URL}/api/pages?where[slug][equals]=${slug}&draft=true`,
+    `${process.env.NEXT_PUBLIC_CMS_URL}/api/pages?where[slug][equals]=${slug}${
+      draft && payloadToken ? '&draft=true' : ''
+    }`,
     {
-      headers: {
-        Authorization: `JWT ${payloadToken?.value}`,
-      },
+      ...(draft && payloadToken
+        ? {
+            headers: {
+              Authorization: `JWT ${payloadToken?.value}`,
+            },
+          }
+        : {}),
     },
   ).then(res => res.json())
 
