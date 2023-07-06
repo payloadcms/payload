@@ -49,19 +49,19 @@ export async function getValidTemplates(): Promise<ProjectTemplate[]> {
     {
       name: 'cloud-template-blank',
       type: 'starter',
-      url: 'https://github.com/payloadcms/payload/templates/blank',
+      url: 'https://github.com/payloadcms/template-blank',
       description: 'Blank template for Payload Cloud',
     },
     {
       name: 'cloud-template-website',
       type: 'starter',
-      url: 'https://github.com/payloadcms/payload/templates/website',
+      url: 'https://github.com/payloadcms/template-website',
       description: 'Website template for Payload Cloud',
     },
     {
       name: 'cloud-template-ecommerce',
       type: 'starter',
-      url: 'https://github.com/payloadcms/payload/templates/ecommerce',
+      url: 'https://github.com/payloadcms/template-ecommerce',
       description: 'E-commerce template for Payload Cloud',
     },
   ]
