@@ -17,9 +17,9 @@
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^13.4.8",
-    "@payloadcms/eslint-config": "^0.0.1",
+    "@payloadcms/eslint-config": "^0.0.2",
     "@types/escape-html": "^1.0.2",
-    "@types/node": "20.2.3",
+    "@types/node": "18.11.3",
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.6",
     "@typescript-eslint/eslint-plugin": "^5.51.0",
@@ -34,6 +34,7 @@
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "prettier": "^2.7.1",
     "sass": "^1.62.1",
+    "slate": "^0.82.0",
     "typescript": "^4.8.4"
   }
 }

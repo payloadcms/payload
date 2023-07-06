@@ -1,7 +1,7 @@
 import React from 'react'
 import { draftMode } from 'next/headers'
 
-import { AdminBarClient } from './client'
+import { AdminBarClient } from './index.client'
 
 export function AdminBar() {
   const { isEnabled: isPreviewMode } = draftMode()

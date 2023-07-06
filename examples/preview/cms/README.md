@@ -2,7 +2,7 @@
 
 This example demonstrates how to implement preview in [Payload](https://github.com/payloadcms/payload) using [Versions](https://payloadcms.com/docs/versions/overview) and [Drafts](https://payloadcms.com/docs/versions/drafts). Preview allows you to see draft content on your front-end before it is published.
 
-There is a fully working Next.js app made explicitly for this example which can be found [here](../nextjs). Follow the instructions there to get started. If you are setting up preview for another front-end, please consider contributing to this repo with your own example!
+There is a fully working Next.js app made explicitly for this example which can be found [here](../next-app). Follow the instructions there to get started. If you are setting up preview for another front-end, please consider contributing to this repo with your own example!
 
 ## Quick Start
 
@@ -10,8 +10,8 @@ There is a fully working Next.js app made explicitly for this example which can 
 2. `cd` into this directory and run `yarn` or `npm install`
 3. `cp .env.example .env` to copy the example environment variables
 4. `yarn dev` or `npm run dev` to start the server and seed the database
-5. `open http://localhost:8000/admin` to access the admin panel
-6. Login with email `dev@payloadcms.com` and password `test`
+5. `open http://localhost:3000/admin` to access the admin panel
+6. Login with email `demo@payloadcms.com` and password `demo`
 
 That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details.
 
@@ -79,7 +79,7 @@ To spin up this example locally, follow the [Quick Start](#quick-start).
 
 ### Seed
 
-On boot, a seed script is included to scaffold a basic database for you to use as an example. This is done by setting the `PAYLOAD_DROP_DATABASE` and `PAYLOAD_SEED` environment variables which are included in the `.env.example` by default. You can remove these from your `.env` to prevent this behavior. You can also freshly seed your project at any time by running `yarn seed`. This seed creates a user with email `dev@payloadcms.com` and password `test` along with a home page and an example page with two versions, one published and the other draft.
+On boot, a seed script is included to scaffold a basic database for you to use as an example. This is done by setting the `PAYLOAD_DROP_DATABASE` and `PAYLOAD_SEED` environment variables which are included in the `.env.example` by default. You can remove these from your `.env` to prevent this behavior. You can also freshly seed your project at any time by running `yarn seed`. This seed creates a user with email `demo@payloadcms.com` and password `demo` along with a home page and an example page with two versions, one published and the other draft.
 
 > NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
 
