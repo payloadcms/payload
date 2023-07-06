@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "escape-html": "^1.0.3",
-    "next": "^13.1.6",
+    "next": "^13.4.8",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.34.2"
@@ -18,7 +18,8 @@
   "devDependencies": {
     "@next/eslint-plugin-next": "^13.1.6",
     "@types/node": "18.11.3",
-    "@types/react": "18.0.21",
+    "@types/react": "^18.2.14",
+    "@types/react-dom": "^18.2.6",
     "@typescript-eslint/eslint-plugin": "^5.51.0",
     "@typescript-eslint/parser": "^5.51.0",
     "@payloadcms/eslint-config": "^0.0.2",

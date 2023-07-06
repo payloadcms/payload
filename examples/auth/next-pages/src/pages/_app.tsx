@@ -14,6 +14,11 @@ export default function MyApp({ Component, pageProps }: AppProps) {
     <AuthProvider api="rest">
       <Header />
       <div className={classes.page}>
+        {/* typescript flags this `@ts-expect-error` declaration as unneeded, but types are breaking the build process
+      Remove these comments when the issue is resolved
+      See more here: https://github.com/facebook/react/issues/24304
+      */}
+        {/* @ts-expect-error */}
         <Component {...pageProps} />
       </div>
     </AuthProvider>
