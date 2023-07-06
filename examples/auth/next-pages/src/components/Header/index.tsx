@@ -1,35 +1,26 @@
 import React, { Fragment } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 import { useAuth } from '../Auth'
 import { Gutter } from '../Gutter'
-import { Logo } from '../Logo'
 
 import classes from './index.module.scss'
 
-type HeaderBarProps = {
-  children?: React.ReactNode
-}
-
-export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
-  return (
-    <header className={classes.header}>
-      <Gutter className={classes.wrap}>
-        <Link href="/">
-          <Logo />
-        </Link>
-        {children}
-      </Gutter>
-    </header>
-  )
-}
-
-export const Header = () => {
+export const Header: React.FC = () => {
   const { user } = useAuth()
 
   return (
-    <div>
-      <HeaderBar>
+    <header className={classes.header}>
+      <Gutter className={classes.wrap}>
+        <Link href="/" className={classes.logo}>
+          <Image
+            width={150}
+            height={30}
+            alt="Payload Logo"
+            src="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-dark.svg"
+          />
+        </Link>
         <nav className={classes.nav}>
           {!user && (
             <Fragment>
@@ -44,7 +35,9 @@ export const Header = () => {
             </Fragment>
           )}
         </nav>
-      </HeaderBar>
-    </div>
+      </Gutter>
+    </header>
   )
 }
+
+export default Header

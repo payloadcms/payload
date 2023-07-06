@@ -1,4 +1,4 @@
-import type { User } from '../../payload-types'
+import type { User } from '../../../payload-types'
 
 // eslint-disable-next-line no-unused-vars
 export type ResetPassword = (args: {

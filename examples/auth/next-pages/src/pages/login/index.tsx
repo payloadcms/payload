@@ -16,7 +16,7 @@ type FormData = {
 const Login: React.FC = () => {
   const [error, setError] = useState('')
   const router = useRouter()
-  const { login } = useAuth()
+  const { login, user } = useAuth()
 
   const {
     register,
@@ -42,11 +42,15 @@ const Login: React.FC = () => {
     }
   }, [router])
 
+  if (user) {
+    router.push('/account')
+  }
+
   return (
     <Gutter>
       <h1>Log in</h1>
       <p>
-        To log in, use the email <b>dev@payloadcms.com</b> with the password <b>test</b>.
+        To log in, use the email <b>demo@payloadcms.com</b> with the password <b>demo</b>.
       </p>
       {error && <div className={classes.error}>{error}</div>}
       <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>

@@ -1,8 +1,8 @@
 # Payload Auth Example Front-End
 
-This is a [Next.js](https://nextjs.org) app using the [Pages Router](https://nextjs.org/docs/pages). It was made explicitly for Payload's [Auth Example](https://github.com/payloadcms/payload/tree/master/examples/auth/cms).
+This is a [Next.js](https://nextjs.org) app using the [App Router](https://nextjs.org/docs/app). It was made explicitly for Payload's [Auth Example](https://github.com/payloadcms/payload/tree/master/examples/auth/cms).
 
-> This example uses the Pages Router, the legacy API of Next.js. If your app is using the latest [App Router](https://nextjs.org/docs/pages), check out the official [App Router Example](https://github.com/payloadcms/payload/tree/master/examples/auth/next-app).
+> This example uses the App Router, the latest API of Next.js. If your app is using the legacy [Pages Router](https://nextjs.org/docs/pages), check out the official [Pages Router Example](https://github.com/payloadcms/payload/tree/master/examples/auth/next-pages).
 
 ## Getting Started
 
@@ -22,13 +22,13 @@ Once running you will find a couple seeded pages on your local environment with 
 
 ## Learn More
 
-To learn more about PayloadCMS and Next.js, take a look at the following resources:
+To learn more about Payload and Next.js, take a look at the following resources:
 
 - [Payload Documentation](https://payloadcms.com/docs) - learn about Payload features and API.
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Payload GitHub repository](https://github.com/payloadcms/payload/) as well as [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+You can check out [the Payload GitHub repository](https://github.com/payloadcms/payload) as well as [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
 ## Deployment
 
