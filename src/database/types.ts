@@ -278,7 +278,7 @@ export type CreateArgs = {
 
 export type Create = (args: CreateArgs) => Promise<Document>
 
-type UpdateArgs = {
+export type UpdateArgs = {
   collection: string
   data: Record<string, unknown>
   where: Where
@@ -286,9 +286,9 @@ type UpdateArgs = {
   locale?: string
 }
 
-type Update = (args: UpdateArgs) => Promise<Document>
+export type Update = (args: UpdateArgs) => Promise<Document>
 
-type UpdateOneArgs = {
+export type UpdateOneArgs = {
   collection: string
   data: Record<string, unknown>
   where: Where
@@ -298,15 +298,14 @@ type UpdateOneArgs = {
 
 export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
-type DeleteOneArgs = {
+export type DeleteOneArgs = {
   collection: string
-  data: Record<string, unknown>
   where: Where
 }
 
-type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
+export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
 
-type DeleteManyArgs = {
+export type DeleteManyArgs = {
   collection: string
   where: Where
 }
