@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { NotFound } from '../../errors';
@@ -12,6 +12,7 @@ export type DeleteResult = {
 
 export default async function deleteByIDHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<DeleteResult> | void> {
   try {
+    await req.payload.db.beginTransaction();
     const doc = await deleteByID({
       req,
       collection: req.collection,
@@ -20,11 +21,15 @@ export default async function deleteByIDHandler(req: PayloadRequest, res: Respon
     });
 
     if (!doc) {
-      return res.status(httpStatus.NOT_FOUND).json(new NotFound(req.t));
+      res.status(httpStatus.NOT_FOUND)
+        .json(new NotFound(req.t));
     }
 
-    return res.status(httpStatus.OK).send(doc);
+    await req.payload.db.commitTransaction();
+
+    res.status(httpStatus.OK)
+      .send(doc);
   } catch (error) {
-    return next(error);
+    next(error);
   }
 }

@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import formatSuccessResponse from '../../express/responses/formatSuccess';
@@ -17,6 +17,7 @@ export async function deprecatedUpdate(req: PayloadRequest, res: Response, next:
 
 export default async function updateByIDHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<UpdateResult> | void> {
   try {
+    await req.payload.db.beginTransaction();
     const draft = req.query.draft === 'true';
     const autosave = req.query.autosave === 'true';
 
@@ -35,11 +36,13 @@ export default async function updateByIDHandler(req: PayloadRequest, res: Respon
     if (draft) message = req.t('version:draftSavedSuccessfully');
     if (autosave) message = req.t('version:autosavedSuccessfully');
 
-    return res.status(httpStatus.OK).json({
+    await req.payload.db.commitTransaction();
+
+    res.status(httpStatus.OK).json({
       ...formatSuccessResponse(message, 'message'),
       doc,
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 }

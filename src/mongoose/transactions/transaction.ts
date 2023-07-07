@@ -2,7 +2,7 @@ import { Transaction } from '../../database/types';
 
 
 export const transaction: Transaction = async function transaction(
-  callback: () => Promise<any>,
+  callback: () => Promise<unknown>,
   options,
 ) {
   await this.beginTransaction(options);
