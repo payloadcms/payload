@@ -41,7 +41,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Find Version By ID Operation.`);
   }
 
   req.payloadAPI = req.payloadAPI || 'local';
