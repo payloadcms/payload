@@ -41,6 +41,9 @@ function initCollectionsGraphQL(payload: Payload): void {
         versions,
       },
     } = collection;
+
+    if (!graphQL) return;
+
     const { fields } = config;
 
     let singularName;

@@ -8,6 +8,7 @@ import sanitizeGlobals from '../globals/config/sanitize';
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections';
 import { defaults } from './defaults';
 import getPreferencesCollection from '../preferences/preferencesCollection';
+import { migrationsCollection } from '../database/migrations/migrationsCollection';
 
 const sanitizeConfig = (config: Config): SanitizedConfig => {
   const sanitizedConfig = merge(defaults, config, {
@@ -28,6 +29,8 @@ const sanitizeConfig = (config: Config): SanitizedConfig => {
   }
 
   sanitizedConfig.collections.push(getPreferencesCollection(sanitizedConfig));
+
+  sanitizedConfig.collections.push(migrationsCollection);
 
   sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig, collection));
   checkDuplicateCollections(sanitizedConfig.collections);
