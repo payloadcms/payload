@@ -1,3 +1,5 @@
+import mongoose from 'mongoose';
+import objectID from 'bson-objectid';
 import { Field, fieldAffectsData } from '../../fields/config/types';
 import { operatorMap } from './operatorMap';
 import { getLocalizedPaths } from './getLocalizedPaths';
@@ -63,7 +65,7 @@ export async function buildSearchParam({
       field: {
         name: 'id',
         type: idFieldType,
-      },
+      } as Field,
       complete: true,
       collectionSlug,
     });
@@ -127,7 +129,16 @@ export async function buildSearchParam({
 
           const result = await SubModel.find(subQuery, subQueryOptions);
 
-          const $in = result.map((doc) => doc._id.toString());
+          const $in: unknown[] = [];
+
+          result.forEach((doc) => {
+            const stringID = doc._id.toString();
+            $in.push(stringID);
+
+            if (mongoose.Types.ObjectId.isValid(stringID)) {
+              $in.push(doc._id);
+            }
+          });
 
           if (pathsToQuery.length === 1) {
             return {
@@ -169,6 +180,57 @@ export async function buildSearchParam({
 
     if (operator && validOperators.includes(operator)) {
       const operatorKey = operatorMap[operator];
+
+      if (field.type === 'relationship' || field.type === 'upload') {
+        let hasNumberIDRelation;
+
+        const result = {
+          value: {
+            $or: [
+              { [path]: { [operatorKey]: formattedValue } },
+            ],
+          },
+        };
+
+        if (typeof formattedValue === 'string') {
+          if (mongoose.Types.ObjectId.isValid(formattedValue)) {
+            result.value.$or.push({ [path]: { [operatorKey]: objectID(formattedValue) } });
+          } else {
+            (Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach((relationTo) => {
+              const isRelatedToCustomNumberID = payload.collections[relationTo]?.config?.fields.find((relatedField) => {
+                return fieldAffectsData(relatedField) && relatedField.name === 'id' && relatedField.type === 'number';
+              });
+
+              if (isRelatedToCustomNumberID) {
+                if (isRelatedToCustomNumberID.type === 'number') hasNumberIDRelation = true;
+              }
+            });
+
+            if (hasNumberIDRelation) result.value.$or.push({ [path]: { [operatorKey]: parseFloat(formattedValue) } });
+          }
+        }
+
+        if (result.value.$or.length > 1) {
+          return result;
+        }
+      }
+
+      if (operator === 'like' && typeof formattedValue === 'string') {
+        const words = formattedValue.split(' ');
+
+        const result = {
+          value: {
+            $and: words.map((word) => ({
+              [path]: {
+                $regex: word.replace(/[\\^$*+?\\.()|[\]{}]/g, '\\$&'),
+                $options: 'i',
+              },
+            })),
+          },
+        };
+
+        return result;
+      }
 
       // Some operators like 'near' need to define a full query
       // so if there is no operator key, just return the value

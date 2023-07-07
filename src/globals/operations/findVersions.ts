@@ -3,7 +3,6 @@ import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { PaginatedDocs } from '../../mongoose/types';
-import { buildSortParam } from '../../mongoose/queries/buildSortParam';
 import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
@@ -32,6 +31,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     limit,
     depth,
     globalConfig,
+    sort,
     req,
     req: {
       locale,
@@ -63,20 +63,11 @@ async function findVersions<T extends TypeWithVersion<T>>(
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam({
-    sort: args.sort || '-updatedAt',
-    fields: versionFields,
-    timestamps: true,
-    config: payload.config,
-    locale,
-  });
-
   const paginatedDocs = await payload.db.findGlobalVersions<T>({
     where: fullWhere,
     page: page || 1,
     limit: limit ?? 10,
-    sortProperty,
-    sortOrder,
+    sort,
     global: globalConfig.slug,
     locale,
   });

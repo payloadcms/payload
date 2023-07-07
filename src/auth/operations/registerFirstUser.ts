@@ -40,13 +40,11 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     data,
   } = args;
 
-  const { docs } = await payload.db.find({
+  const doc = await payload.db.findOne({
     collection: config.slug,
-    limit: 1,
-    pagination: false,
   });
 
-  if (docs.length === 1) throw new Forbidden(req.t);
+  if (doc) throw new Forbidden(req.t);
 
   // /////////////////////////////////////
   // Register first user

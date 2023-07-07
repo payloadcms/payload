@@ -7,7 +7,6 @@ import { fieldAffectsData } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
 import { authenticateLocalStrategy } from '../strategies/local/authenticate';
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
 export type Result = {
   token: string
@@ -23,6 +22,7 @@ export type Arguments = {
   req: PayloadRequest
   overrideAccess?: boolean
   res?: Response
+  depth?: number
 }
 
 async function resetPassword(args: Arguments): Promise<Result> {
@@ -44,22 +44,20 @@ async function resetPassword(args: Arguments): Promise<Result> {
     },
     overrideAccess,
     data,
+    depth,
   } = args;
 
   // /////////////////////////////////////
   // Reset Password
   // /////////////////////////////////////
 
-  const { docs } = await payload.db.find<any>({
+  const user = await payload.db.findOne<any>({
     collection: collectionConfig.slug,
-    limit: 1,
     where: {
       resetPasswordToken: { equals: data.token },
       resetPasswordExpiration: { greater_than: Date.now() },
     },
   });
-
-  const [user] = docs;
 
   if (!user) throw new APIError('Token is either invalid or has expired.');
 
@@ -75,15 +73,12 @@ async function resetPassword(args: Arguments): Promise<Result> {
     user._verified = true;
   }
 
-  const { updatedDocs } = await payload.db.update({
+  const doc = await payload.db.updateOne({
     collection: collectionConfig.slug,
-    where: {
-      id: { equals: user.id },
-    },
+    where: { id: { equals: user.id } },
     data: user,
   });
 
-  const doc = sanitizeInternalFields(updatedDocs[0]);
 
   await authenticateLocalStrategy({ password: data.password, doc });
 
@@ -125,7 +120,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
     args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
   }
 
-  const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess });
+  const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess, depth });
   return { token, user: fullUser };
 }
 

@@ -83,6 +83,6 @@ jobs:
             ${{ runner.os }}-npm-${{ env.cache-name }}-
             ${{ runner.os }}-npm-
             ${{ runner.os }}-
-      - run: npm install --legacy-peer-deps
+      - run: npm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

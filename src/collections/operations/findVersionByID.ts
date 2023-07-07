@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
-import { Collection } from '../config/types';
+import { Collection, TypeWithID } from '../config/types';
 import { APIError, Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { TypeWithVersion } from '../../versions/types';
@@ -19,7 +19,7 @@ export type Arguments = {
   depth?: number
 }
 
-async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<T> {
+async function findVersionByID<T extends TypeWithID = any>(args: Arguments): Promise<TypeWithVersion<T>> {
   const {
     depth,
     collection: {

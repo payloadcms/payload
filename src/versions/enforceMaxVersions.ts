@@ -1,12 +1,10 @@
-import { FilterQuery } from 'mongoose';
 import { Payload } from '../payload';
-import { CollectionModel, SanitizedCollectionConfig } from '../collections/config/types';
-import { Where } from '../types';
-import { SanitizedGlobalConfig } from '../globals/config/types';
+import type { SanitizedCollectionConfig } from '../collections/config/types';
+import type { SanitizedGlobalConfig } from '../globals/config/types';
+import type { Where } from '../types';
 
 type Args = {
   payload: Payload
-  Model: CollectionModel
   max: number
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
@@ -15,7 +13,6 @@ type Args = {
 
 export const enforceMaxVersions = async ({
   payload,
-  Model,
   max,
   collection,
   global,
@@ -37,8 +34,7 @@ export const enforceMaxVersions = async ({
         where,
         collection: collection.slug,
         skip: max,
-        sortProperty: 'updatedAt',
-        sortOrder: 'desc',
+        sort: '-updatedAt',
         pagination: false,
       });
 
@@ -48,23 +44,29 @@ export const enforceMaxVersions = async ({
         where,
         global: global.slug,
         skip: max,
-        sortProperty: 'updatedAt',
-        sortOrder: 'desc',
+        sort: '-updatedAt',
       });
 
       [oldestAllowedDoc] = query.docs;
     }
 
     if (oldestAllowedDoc?.updatedAt) {
-      const deleteQuery: FilterQuery<unknown> = {
+      const deleteQuery: Where = {
         updatedAt: {
-          $lte: oldestAllowedDoc.updatedAt,
+          less_than_equal: oldestAllowedDoc.updatedAt,
         },
       };
 
-      if (collection) deleteQuery.parent = id;
+      if (collection) {
+        deleteQuery.parent = {
+          equals: id,
+        };
+      }
 
-      await Model.deleteMany(deleteQuery);
+      await payload.db.deleteVersions({
+        collection: collection?.slug,
+        where: deleteQuery,
+      });
     }
   } catch (err) {
     payload.logger.error(`There was an error cleaning up old versions for the ${entityType} ${slug}`);

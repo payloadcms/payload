@@ -11,12 +11,13 @@ export const deleteCollectionVersions = async ({
   slug,
   id,
 }: Args): Promise<void> => {
-  const VersionsModel = payload.versions[slug];
-
   try {
-    await VersionsModel.deleteMany({
-      parent: {
-        $eq: id,
+    await payload.db.deleteVersions({
+      collection: slug,
+      where: {
+        parent: {
+          equals: id,
+        },
       },
     });
   } catch (err) {

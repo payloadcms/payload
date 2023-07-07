@@ -1,4 +1,3 @@
-import { FilterQuery } from 'mongoose';
 import { Payload } from '../payload';
 import { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
 import { enforceMaxVersions } from './enforceMaxVersions';
@@ -36,9 +35,6 @@ export const saveVersion = async ({
   if (global) {
     entityConfig = global;
   }
-
-  const VersionModel = payload.versions[entityConfig.slug];
-
   const versionData = { ...doc };
   if (draft) versionData._status = 'draft';
   if (versionData._id) delete versionData._id;
@@ -48,12 +44,21 @@ export const saveVersion = async ({
     const now = new Date().toISOString();
 
     if (autosave) {
-      const query: FilterQuery<unknown> = {};
-      if (collection) query.parent = id;
-      const latestVersion = await VersionModel.findOne(query, {}, { sort: { updatedAt: 'desc' } });
+      const { docs } = await payload.db.findVersions({
+        collection: entityConfig.slug,
+        limit: 1,
+        where: {
+          parent: {
+            equals: id,
+          },
+        },
+        sort: '-updatedAt',
+      });
+      const [latestVersion] = docs;
+
 
       // overwrite the latest version if it's set to autosave
-      if (latestVersion?.autosave === true) {
+      if ((latestVersion as any)?.autosave === true) {
         createNewVersion = false;
 
         const data: Record<string, unknown> = {
@@ -62,25 +67,27 @@ export const saveVersion = async ({
           updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
         };
 
-        result = await VersionModel.findByIdAndUpdate(
-          {
-            _id: latestVersion._id,
+        result = await payload.db.updateVersion({
+          collectionSlug: entityConfig.slug,
+          versionData: data,
+          where: {
+            id: {
+              equals: latestVersion.id,
+            },
           },
-          data,
-          { new: true, lean: true },
-        );
+        });
       }
     }
 
     if (createNewVersion) {
-      const data: Record<string, unknown> = {
+      result = await payload.db.createVersion({
+        collectionSlug: entityConfig.slug,
+        parent: collection ? id : undefined,
         autosave: Boolean(autosave),
-        version: versionData,
         createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
         updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
-      };
-      if (collection) data.parent = id;
-      result = await VersionModel.create(data);
+        versionData,
+      });
     }
   } catch (err) {
     let errorMessage: string;
@@ -100,7 +107,6 @@ export const saveVersion = async ({
     await enforceMaxVersions({
       id,
       payload,
-      Model: VersionModel,
       collection,
       global,
       max,

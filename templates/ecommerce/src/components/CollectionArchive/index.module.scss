@@ -1,0 +1,53 @@
+@import '../../css/common';
+
+// this is to make up for the space taken by the fixed header, since the scroll method does not accept an offset parameter
+.scrollRef {
+  position: absolute;
+  left: 0;
+  top: calc(var(--base) * -5);
+  @include mid-break {
+    top:  calc(var(--base) * -2);
+  }
+}
+
+.introContent {
+  position: relative;
+  margin-bottom: calc(var(--base) * 2);
+
+  @include mid-break {
+    margin-bottom: var(--base);
+  }
+}
+
+.resultCountWrapper {
+  display: flex;
+  margin-bottom: calc(var(--base) * 2);
+  @include mid-break {
+    margin-bottom: var(--base);
+  }
+}
+
+.pageRange {
+  margin-bottom: var(--base);
+
+  @include mid-break {
+    margin-bottom: var(--base);
+  }
+}
+
+.list {
+  position: relative;
+}
+
+.grid {
+  width: 100%;
+  row-gap: 40px !important;
+}
+
+.pagination {
+  margin-top: calc(var(--base) * 2);
+
+  @include mid-break {
+    margin-top: var(--base);
+  }
+}

@@ -11,10 +11,10 @@ import { getVersionsModelName } from '../versions/getVersionsModelName';
 import type { MongooseAdapter } from '.';
 import { buildGlobalModel } from './models/buildGlobalModel';
 import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
+import type { Init } from '../database/types';
 
-export async function init(
-  this: MongooseAdapter,
-): Promise<void> {
+export const init: Init = async function init(this: MongooseAdapter,
+  { config }) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     const schema = buildCollectionSchema(collection, this.payload.config);
 
@@ -109,4 +109,4 @@ export async function init(
       this.payload.versions[global.slug] = versionsModel;
     }
   });
-}
+};

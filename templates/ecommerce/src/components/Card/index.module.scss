@@ -1,0 +1,78 @@
+@import '../../css/common';
+
+.title {
+  margin: 0;
+}
+
+.centerAlign {
+  align-items: center;
+}
+
+.body {
+  margin-top: calc(var(--base) / 2);
+
+  @include mid-break {
+    margin-top: 0;
+  }
+}
+
+.price {
+  font-weight: 600;
+  margin: 0;
+  margin-right: calc(var(--base) / 2);
+}
+
+.leader {
+  display: flex;
+  margin-bottom: calc(var(--base) / 4);
+
+  & > *:not(:last-child) {
+    margin-right: var(--base);
+  }
+}
+
+.description {
+  margin: 0;
+  margin-bottom: calc(var(--base) / 2);
+
+  @include mid-break {
+    margin-bottom: 0;
+  }
+}
+
+.hideImageOnMobile {
+  @include mid-break {
+    display: none;
+  }
+}
+
+.mediaWrapper {
+  text-decoration: none;
+  display: block;
+  position: relative;
+  aspect-ratio: 5 / 4;
+  margin-bottom: calc(var(--base) / 2);
+}
+
+.image {
+  object-fit: cover;
+}
+
+.placeholder {
+  background-color: var(--color-base-50);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+
+  @include mid-break {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

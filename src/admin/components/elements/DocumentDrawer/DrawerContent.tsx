@@ -89,7 +89,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   if (isError) return null;
 
   const isEditing = Boolean(id);
-  const apiURL = id ? `${serverURL}${api}/${collectionSlug}/${id}` : null;
+  const apiURL = id ? `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}` : null;
   const action = `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
   const hasSavePermission = (isEditing && docPermissions?.update?.permission) || (!isEditing && (docPermissions as CollectionPermission)?.create?.permission);
   const isLoading = !internalState || !docPermissions || isLoadingDocument;

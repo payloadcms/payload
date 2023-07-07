@@ -24,7 +24,7 @@ async function unlock(args: Args): Promise<boolean> {
     },
     req,
     req: {
-      payload,
+      locale,
     },
     overrideAccess,
   } = args;
@@ -45,13 +45,15 @@ async function unlock(args: Args): Promise<boolean> {
   // Unlock
   // /////////////////////////////////////
 
-  const { docs } = await req.payload.db.find({
+  if (!data.email) {
+    throw new APIError('Missing email.');
+  }
+
+  const user = await req.payload.db.findOne({
     collection: collectionConfig.slug,
     where: { email: { equals: data.email.toLowerCase() } },
-    limit: 1,
+    locale,
   });
-
-  const [user] = docs;
 
   if (!user) return null;
 

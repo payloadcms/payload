@@ -1,5 +1,6 @@
 import type { ConnectOptions } from 'mongoose';
 import { CollectionModel } from '../collections/config/types';
+import { createMigration } from '../database/migrations/createMigration';
 import { migrate } from '../database/migrations/migrate';
 import { migrateDown } from '../database/migrations/migrateDown';
 import { migrateRefresh } from '../database/migrations/migrateRefresh';
@@ -16,8 +17,16 @@ import { findVersions } from './findVersions';
 import { init } from './init';
 import { queryDrafts } from './queryDrafts';
 import { webpack } from './webpack';
-import { createMigration } from '../database/migrations/createMigration';
 
+import { createGlobal } from './createGlobal';
+import { createVersion } from './createVersion';
+import { deleteOne } from './deleteOne';
+import { deleteVersions } from './deleteVersions';
+import { findGlobal } from './findGlobal';
+import { findOne } from './findOne';
+import { updateGlobal } from './updateGlobal';
+import { updateOne } from './updateOne';
+import { updateVersion } from './updateVersion';
 
 export interface Args {
   payload: Payload;
@@ -72,9 +81,18 @@ export function mongooseAdapter({
     rollbackTransaction: async () => true,
     commitTransaction: async () => true,
     queryDrafts,
+    findOne,
     find,
+    create,
+    updateOne,
+    deleteOne,
+    findGlobal,
+    createGlobal,
+    updateGlobal,
     findVersions,
     findGlobalVersions,
-    create,
+    createVersion,
+    updateVersion,
+    deleteVersions,
   };
 }

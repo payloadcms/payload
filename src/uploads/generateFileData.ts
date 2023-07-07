@@ -32,7 +32,6 @@ export const generateFileData = async <T>({
   config,
   collection: {
     config: collectionConfig,
-    Model,
   },
   req,
   data,
@@ -141,7 +140,7 @@ export const generateFileData = async <T>({
     fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`;
 
     if (!overwriteExistingFiles) {
-      fsSafeName = await getSafeFileName(Model, staticPath, fsSafeName);
+      fsSafeName = await getSafeFileName(req.payload, collectionConfig.slug, staticPath, fsSafeName);
     }
 
     fileData.filename = fsSafeName;

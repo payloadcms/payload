@@ -1,21 +1,21 @@
 import type { MongooseAdapter } from '.';
-import { CreateArgs } from '../database/types';
+import type { Create } from '../database/types';
 import { Document } from '../types';
 
-export async function create<T = unknown>(
-  this: MongooseAdapter,
-  { collection, data }: CreateArgs,
-): Promise<T> {
+export const create: Create = async function create(this: MongooseAdapter,
+  { collection, data }) {
   const Model = this.collections[collection];
 
   const doc = await Model.create(data);
 
-  let result: Document = doc.toJSON({ virtuals: true });
+  // doc.toJSON does not do stuff like converting ObjectIds to string, or date strings to date objects. That's why we use JSON.parse/stringify here
+  const result: Document = JSON.parse(JSON.stringify(doc));
   const verificationToken = doc._verificationToken;
 
   // custom id type reset
   result.id = result._id;
-  result = JSON.parse(JSON.stringify(result));
-  result._verificationToken = verificationToken;
+  if (verificationToken) {
+    result._verificationToken = verificationToken;
+  }
   return result;
-}
+};

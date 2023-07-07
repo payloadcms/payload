@@ -3,9 +3,8 @@ import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
 import { Where } from '../../types';
 import { BulkOperationResult, Collection } from '../config/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
-import { APIError, ValidationError } from '../../errors';
+import { APIError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { saveVersion } from '../../versions/saveVersion';
 import { uploadFiles } from '../../uploads/uploadFiles';
@@ -56,7 +55,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     depth,
     collection,
     collection: {
-      Model,
       config: collectionConfig,
     },
     where,
@@ -79,7 +77,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     throw new APIError('Missing \'where\' query of documents to update.', httpStatus.BAD_REQUEST);
   }
 
-  let { data } = args;
+  const { data: bulkUpdateData } = args;
   const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
 
   // /////////////////////////////////////
@@ -147,17 +145,19 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     config,
     collection,
     req,
-    data,
+    data: bulkUpdateData,
     throwOnMissingFile: false,
     overwriteExistingFiles,
   });
-
-  data = newFileData;
 
   const errors = [];
 
   const promises = docs.map(async (doc) => {
     const { id } = doc;
+    let data = {
+      ...newFileData,
+      ...bulkUpdateData,
+    };
 
     try {
       const originalDoc = await afterRead({
@@ -243,26 +243,13 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       // /////////////////////////////////////
 
       if (!shouldSaveDraft) {
-        try {
-          result = await Model.findByIdAndUpdate(
-            { _id: id },
-            result,
-            { new: true },
-          );
-        } catch (error) {
-          // Handle uniqueness error from MongoDB
-          throw error.code === 11000 && error.keyValue
-            ? new ValidationError([{
-              message: 'Value must be unique',
-              field: Object.keys(error.keyValue)[0],
-            }], t)
-            : error;
-        }
+        result = await req.payload.db.updateOne({
+          collection: collectionConfig.slug,
+          locale,
+          where: { id: { equals: id } },
+          data: result,
+        });
       }
-
-      result = JSON.parse(JSON.stringify(result));
-      result.id = result._id as string | number;
-      result = sanitizeInternalFields(result);
 
       // /////////////////////////////////////
       // Create version

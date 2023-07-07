@@ -1,3 +1,4 @@
+import { PaginateOptions } from 'mongoose';
 import { Config } from '../../config/types';
 import { getLocalizedSortProperty } from './getLocalizedSortProperty';
 import { Field } from '../../fields/config/types';
@@ -10,9 +11,16 @@ type Args = {
   locale: string
 }
 
-export const buildSortParam = ({ sort, config, fields, timestamps, locale }: Args): [string, string] => {
+export type SortArgs = {
+  property: string
+  direction: SortDirection
+}[]
+
+export type SortDirection = 'asc' | 'desc';
+
+export const buildSortParam = ({ sort, config, fields, timestamps, locale }: Args): PaginateOptions['sort'] => {
   let sortProperty: string;
-  let sortOrder = 'desc';
+  let sortDirection: SortDirection = 'desc';
 
   if (!sort) {
     if (timestamps) {
@@ -24,7 +32,7 @@ export const buildSortParam = ({ sort, config, fields, timestamps, locale }: Arg
     sortProperty = sort.substring(1);
   } else {
     sortProperty = sort;
-    sortOrder = 'asc';
+    sortDirection = 'asc';
   }
 
   if (sortProperty === 'id') {
@@ -38,5 +46,5 @@ export const buildSortParam = ({ sort, config, fields, timestamps, locale }: Arg
     });
   }
 
-  return [sortProperty, sortOrder];
+  return { [sortProperty]: sortDirection };
 };

@@ -1,15 +1,14 @@
-import { Payload } from '../../payload';
 import { docHasTimestamps, PayloadRequest, Where } from '../../types';
 import { hasWhereAccessResult } from '../../auth';
 import { AccessResult } from '../../config/types';
-import { CollectionModel, SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types';
+import { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
 import { combineQueries } from '../../database/combineQueries';
+import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types';
 
 type Arguments<T> = {
-  payload: Payload
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   entityType: 'collection' | 'global'
   doc: T
@@ -19,15 +18,12 @@ type Arguments<T> = {
 }
 
 const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
-  payload,
   entity,
   entityType,
   doc,
   req,
   accessResult,
 }: Arguments<T>): Promise<T> => {
-  const VersionModel = payload.versions[entity.slug] as CollectionModel;
-
   const queryToBuild: Where = {
     and: [
       {
@@ -60,17 +56,25 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     versionAccessResult = appendVersionToQueryKey(accessResult);
   }
 
-  const query = await VersionModel.buildQuery({
-    where: combineQueries(queryToBuild, versionAccessResult),
-    payload,
-    locale: req.locale,
-    globalSlug: entityType === 'global' ? entity.slug : undefined,
-  });
 
-  let draft = await VersionModel.findOne(query, {}, {
-    lean: true,
-    sort: { updatedAt: 'desc' },
-  });
+  const findVersionsArgs: FindVersionsArgs & FindGlobalVersionsArgs = {
+    locale: req.locale,
+    where: combineQueries(queryToBuild, versionAccessResult),
+    collection: entity.slug,
+    global: entity.slug,
+    limit: 1,
+    sort: '-updatedAt',
+  };
+
+  let versionDocs;
+  if (entityType === 'global') {
+    versionDocs = (await req.payload.db.findGlobalVersions<T>(findVersionsArgs)).docs;
+  } else {
+    versionDocs = (await req.payload.db.findVersions<T>(findVersionsArgs)).docs;
+  }
+
+  let draft = versionDocs[0];
+
 
   if (!draft) {
     return doc;

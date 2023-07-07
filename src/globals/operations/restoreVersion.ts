@@ -1,6 +1,5 @@
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { NotFound } from '../../errors';
@@ -25,11 +24,6 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     req: {
       t,
       payload,
-      payload: {
-        globals: {
-          Model,
-        },
-      },
     },
     overrideAccess,
     showHiddenFields,
@@ -47,17 +41,18 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
   // Retrieve original raw version
   // /////////////////////////////////////
 
-  const VersionModel = payload.versions[globalConfig.slug];
-
-  let rawVersion = await VersionModel.findOne({
-    _id: id,
+  const { docs: versionDocs } = await payload.db.findGlobalVersions<any>({
+    global: globalConfig.slug,
+    where: { id: { equals: id } },
+    limit: 1,
   });
 
-  if (!rawVersion) {
+
+  if (!versionDocs || versionDocs.length === 0) {
     throw new NotFound(t);
   }
 
-  rawVersion = rawVersion.toJSON({ virtuals: true });
+  const rawVersion = versionDocs[0];
 
   // /////////////////////////////////////
   // fetch previousDoc
@@ -72,28 +67,23 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
   // Update global
   // /////////////////////////////////////
 
-  const global = await Model.findOne({ globalType: globalConfig.slug });
+  const global = await payload.db.findGlobal({
+    slug: globalConfig.slug,
+  });
 
   let result = rawVersion.version;
 
   if (global) {
-    result = await Model.findOneAndUpdate(
-      { globalType: globalConfig.slug },
-      result,
-      { new: true },
-    );
+    result = await payload.db.updateGlobal({
+      slug: globalConfig.slug,
+      data: result,
+    });
   } else {
-    result.globalType = globalConfig.slug;
-    result = await Model.create(result);
+    result = await payload.db.createGlobal({
+      slug: globalConfig.slug,
+      data: result,
+    });
   }
-
-  result = result.toJSON({ virtuals: true });
-
-  // custom id type reset
-  result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
-  result = sanitizeInternalFields(result);
 
   // /////////////////////////////////////
   // afterRead - Fields

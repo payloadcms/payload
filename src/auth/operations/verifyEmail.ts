@@ -19,24 +19,19 @@ async function verifyEmail(args: Args): Promise<boolean> {
     throw new APIError('Missing required data.', httpStatus.BAD_REQUEST);
   }
 
-  const { docs } = await req.payload.db.find<any>({
+  const user = await req.payload.db.findOne<any>({
     collection: collection.config.slug,
-    limit: 1,
     where: {
       _verificationToken: { equals: token },
     },
   });
 
-  const [user] = docs;
-
   if (!user) throw new APIError('Verification token is invalid.', httpStatus.BAD_REQUEST);
   if (user && user._verified === true) throw new APIError('This account has already been activated.', httpStatus.ACCEPTED);
 
-  await req.payload.db.update({
+  await req.payload.db.updateOne({
     collection: collection.config.slug,
-    where: {
-      id: user.id,
-    },
+    where: { id: { equals: user.id } },
     data: {
       _verified: true,
       _verificationToken: undefined,

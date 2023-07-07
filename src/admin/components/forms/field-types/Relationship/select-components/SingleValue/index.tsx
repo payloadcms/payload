@@ -18,9 +18,11 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
       label,
     },
     children,
-    customProps: {
-      setDrawerIsOpen,
-      onSave,
+    selectProps: {
+      customProps: {
+        setDrawerIsOpen,
+        onSave,
+      } = {},
     } = {},
   } = props;
 
@@ -35,7 +37,9 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
   });
 
   useEffect(() => {
-    if (typeof setDrawerIsOpen === 'function') setDrawerIsOpen(isDrawerOpen);
+    if (typeof setDrawerIsOpen === 'function') {
+      setDrawerIsOpen(isDrawerOpen);
+    }
   }, [isDrawerOpen, setDrawerIsOpen]);
 
   return (

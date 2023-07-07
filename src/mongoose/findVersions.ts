@@ -1,20 +1,31 @@
+import { PaginateOptions } from 'mongoose';
 import type { MongooseAdapter } from '.';
-import { PaginatedDocs } from './types';
-import { FindVersionArgs } from '../database/types';
+import type { FindVersions } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
+import { buildSortParam } from './queries/buildSortParam';
 
-export async function findVersions<T = unknown>(
-  this: MongooseAdapter,
-  { collection, where, page, limit, sortProperty, sortOrder, locale, pagination, skip }: FindVersionArgs,
-): Promise<PaginatedDocs<T>> {
+export const findVersions: FindVersions = async function findVersions(this: MongooseAdapter,
+  { collection, where, page, limit, sort: sortArg, locale, pagination, skip }) {
   const Model = this.versions[collection];
+  const collectionConfig = this.payload.collections[collection].config;
 
-  let useEstimatedCount = false;
+  let hasNearConstraint = false;
 
   if (where) {
     const constraints = flattenWhereToOperators(where);
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+  }
+
+  let sort;
+  if (!hasNearConstraint) {
+    sort = buildSortParam({
+      sort: sortArg || '-updatedAt',
+      fields: collectionConfig.fields,
+      timestamps: true,
+      config: this.payload.config,
+      locale,
+    });
   }
 
   const query = await Model.buildQuery({
@@ -23,32 +34,37 @@ export async function findVersions<T = unknown>(
     where,
   });
 
-  const paginationOptions = {
+  const paginationOptions: PaginateOptions = {
     page,
-    sort: {
-      [sortProperty]: sortOrder,
-    },
+    sort,
     limit,
     lean: true,
     leanWithId: true,
     pagination,
     offset: skip,
-    useEstimatedCount,
+    useEstimatedCount: hasNearConstraint,
+    forceCountFn: hasNearConstraint,
     options: {
       // limit must also be set here, it's ignored when pagination is false
       limit,
       skip,
     },
   };
+  if (limit > 0) {
+    paginationOptions.limit = limit;
+    // limit must also be set here, it's ignored when pagination is false
+    paginationOptions.options.limit = limit;
+  }
 
   const result = await Model.paginate(query, paginationOptions);
+  const docs = JSON.parse(JSON.stringify(result.docs));
 
   return {
     ...result,
-    docs: result.docs.map((doc) => {
-      const sanitizedDoc = JSON.parse(JSON.stringify(doc));
-      sanitizedDoc.id = sanitizedDoc._id;
-      return sanitizeInternalFields(sanitizedDoc);
+    docs: docs.map((doc) => {
+      // eslint-disable-next-line no-param-reassign
+      doc.id = doc._id;
+      return sanitizeInternalFields(doc);
     }),
   };
-}
+};

@@ -2,6 +2,7 @@ import React from 'react';
 import { Document, Model } from 'mongoose';
 import { DeepRequired } from 'ts-essentials';
 import { GraphQLNonNull, GraphQLObjectType } from 'graphql';
+import type { Where } from '../../types';
 import { User } from '../../auth/types';
 import { PayloadRequest } from '../../express/types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
@@ -44,12 +45,12 @@ export type BeforeReadHook = (args: {
 export type AfterReadHook = (args: {
   doc: any
   req: PayloadRequest
-  query?: { [key: string]: any }
+  query?: Where
   findMany?: boolean
 }) => any;
 
 export interface GlobalModel extends Model<Document> {
-  buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
+  buildQuery: (query: unknown, locale?: string) => Promise<Record<string, unknown>>
 }
 
 export type GlobalAdminOptions = {
@@ -137,7 +138,7 @@ export type GlobalConfig = {
   }
   fields: Field[];
   admin?: GlobalAdminOptions
-  /** Extension  point to add your custom data. */
+  /** Extension point to add your custom data. */
   custom?: Record<string, any>;
 }
 

@@ -1,11 +1,10 @@
+import type { Where } from '../../types';
 import executeAccess from '../../auth/executeAccess';
 import { AccessResult } from '../../config/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { SanitizedGlobalConfig } from '../config/types';
 import { PayloadRequest } from '../../express/types';
-import { combineQueries } from '../../database/combineQueries';
 
 type Args = {
   globalConfig: SanitizedGlobalConfig
@@ -23,7 +22,6 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     globalConfig,
     req,
     req: {
-      payload,
       locale,
     },
     slug,
@@ -32,8 +30,6 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     draft: draftEnabled = false,
     overrideAccess = false,
   } = args;
-
-  const { globals: { Model } } = payload;
 
   // /////////////////////////////////////
   // Retrieve and execute access
@@ -45,30 +41,18 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     accessResult = await executeAccess({ req }, globalConfig.access.read);
   }
 
-  const query = await Model.buildQuery({
-    where: combineQueries({ globalType: { equals: slug } }, accessResult),
-    payload,
-    locale,
-    overrideAccess,
-    globalSlug: slug,
-  });
-
   // /////////////////////////////////////
   // Perform database operation
   // /////////////////////////////////////
 
-  let doc = await Model.findOne(query).lean() as any;
-
+  let doc = await req.payload.db.findGlobal({
+    slug,
+    locale,
+    where: overrideAccess ? undefined : accessResult as Where,
+  });
   if (!doc) {
     doc = {};
-  } else if (doc._id) {
-    doc.id = doc._id;
-    delete doc._id;
   }
-
-  doc = JSON.stringify(doc);
-  doc = JSON.parse(doc);
-  doc = sanitizeInternalFields(doc);
 
   // /////////////////////////////////////
   // Replace document with draft if available
@@ -76,7 +60,6 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
 
   if (globalConfig.versions?.drafts && draftEnabled) {
     doc = await replaceWithDraftIfAvailable({
-      payload,
       entity: globalConfig,
       entityType: 'global',
       doc,
