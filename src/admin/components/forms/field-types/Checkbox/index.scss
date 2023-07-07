@@ -93,3 +93,23 @@
     }
   }
 }
+
+html[data-theme=light] {
+  .checkbox {
+    &.error {
+       .custom-checkbox__input {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .checkbox {
+    &.error {
+      .custom-checkbox__input {
+        @include darkInputError;
+      }
+    }
+  }
+}

@@ -60,6 +60,12 @@ const errorFields: Field[] = [
                 type: 'checkbox',
                 name: 'checkbox',
                 required: true,
+                validate: (value) => {
+                  if (!value) {
+                    return 'This field is required';
+                  }
+                  return true;
+                },
               },
             ],
           },
