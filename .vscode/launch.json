@@ -25,5 +25,108 @@
       "type": "node-terminal",
       "cwd": "${workspaceFolder}"
     },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Migrate CLI - create",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register"
+      ],
+      "args": [
+        "src/bin/migrate.ts",
+        "migrate:create",
+        "second"
+      ],
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
+      },
+      "outputCapture": "std",
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Migrate CLI - migrate",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register"
+      ],
+      "args": [
+        "src/bin/migrate.ts",
+        "migrate",
+      ],
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
+      },
+      "outputCapture": "std",
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Migrate CLI - status",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register"
+      ],
+      "args": [
+        "src/bin/migrate.ts",
+        "migrate:status",
+      ],
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
+      },
+      "outputCapture": "std",
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Migrate CLI - down",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register"
+      ],
+      "args": [
+        "src/bin/migrate.ts",
+        "migrate:down",
+      ],
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
+      },
+      "outputCapture": "std",
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Migrate CLI - reset",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register"
+      ],
+      "args": [
+        "src/bin/migrate.ts",
+        "migrate:reset",
+      ],
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
+      },
+      "outputCapture": "std",
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Migrate CLI - refresh",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register"
+      ],
+      "args": [
+        "src/bin/migrate.ts",
+        "migrate:refresh",
+      ],
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
+      },
+      "outputCapture": "std",
+    },
   ]
 }

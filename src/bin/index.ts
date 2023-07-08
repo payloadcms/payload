@@ -4,6 +4,7 @@ import swcRegister from '@swc/register';
 import { getTsconfig as getTSconfig } from 'get-tsconfig';
 import { generateTypes } from './generateTypes';
 import { generateGraphQLSchema } from './generateGraphQLSchema';
+import { migrate } from './migrate';
 
 const tsConfig = getTSconfig();
 
@@ -41,29 +42,31 @@ const { build } = require('./build');
 
 const args = minimist(process.argv.slice(2));
 
-const scriptIndex = args._.findIndex(
-  (x) => x === 'build',
-);
+const scriptIndex = args._.findIndex((x) => x === 'build');
 
 const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex];
 
-switch (script.toLowerCase()) {
-  case 'build': {
-    build();
-    break;
-  }
+if (script.startsWith('migrate')) {
+  migrate(args._);
+} else {
+  switch (script.toLowerCase()) {
+    case 'build': {
+      build();
+      break;
+    }
 
-  case 'generate:types': {
-    generateTypes();
-    break;
-  }
+    case 'generate:types': {
+      generateTypes();
+      break;
+    }
 
-  case 'generate:graphqlschema': {
-    generateGraphQLSchema();
-    break;
-  }
+    case 'generate:graphqlschema': {
+      generateGraphQLSchema();
+      break;
+    }
 
-  default:
-    console.log(`Unknown script "${script}".`);
-    break;
+    default:
+      console.log(`Unknown script "${script}".`);
+      break;
+  }
 }

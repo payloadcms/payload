@@ -23,6 +23,7 @@ import docAccessRequestHandler from './requestHandlers/docAccess';
 import deleteByID from './requestHandlers/deleteByID';
 
 const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
+  if (!collection.endpoints) return [];
   const endpoints = [...collection.endpoints];
 
   if (collection.auth) {

@@ -57,9 +57,14 @@ export interface DatabaseAdapter {
 
   // migrations
   /**
+   * Path to read and write migration files from
+   */
+  migrationDir: string;
+
+  /**
    * Output a migration file
    */
-  createMigration: () => Promise<void>;
+  createMigration: (migrationName: string) => Promise<void>;
 
   /**
    * Run any migration up functions that have not yet been performed and update the status
@@ -114,8 +119,8 @@ export interface DatabaseAdapter {
 
   queryDrafts: QueryDrafts;
 
-  // operations - collections
-  find: Find;
+  // operations
+  find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>;
   findOne: FindOne;
 
   create: Create;
@@ -242,6 +247,9 @@ export type DeleteVersionsArgs = {
   collection: string
   where: Where
   locale?: string
+  sort?: {
+    [key: string]: string
+  }
 };
 
 export type CreateVersionArgs<T = TypeWithID> = {
@@ -272,14 +280,27 @@ export type UpdateVersion = <T = TypeWithID>(args: UpdateVersionArgs<T>) => Prom
 export type CreateArgs = {
   collection: string
   data: Record<string, unknown>
+  draft?: boolean
+  locale?: string
 }
 
 export type Create = (args: CreateArgs) => Promise<Document>
+
+export type UpdateArgs = {
+  collection: string
+  data: Record<string, unknown>
+  where: Where
+  draft?: boolean
+  locale?: string
+}
+
+export type Update = (args: UpdateArgs) => Promise<Document>
 
 export type UpdateOneArgs = {
   collection: string
   data: Record<string, unknown>
   where: Where
+  draft?: boolean
   locale?: string
 }
 
@@ -291,6 +312,22 @@ export type DeleteOneArgs = {
 }
 
 export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
+
+export type DeleteManyArgs = {
+  collection: string
+  where: Where
+}
+
+export type Migration = MigrationData & {
+  up: ({ payload }: { payload }) => Promise<boolean>
+  down: ({ payload }: { payload }) => Promise<boolean>
+};
+
+export type MigrationData = {
+  id: string
+  name: string
+  batch: number
+}
 
 export type BuildSchema<TSchema> = (args: {
   config: SanitizedConfig,
