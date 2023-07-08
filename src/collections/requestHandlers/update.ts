@@ -13,7 +13,6 @@ export type UpdateResult = {
 
 export default async function updateHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<UpdateResult> | void> {
   try {
-    await req.payload.db.beginTransaction();
     const draft = req.query.draft === 'true';
 
     const result = await update({
@@ -24,7 +23,6 @@ export default async function updateHandler(req: PayloadRequest, res: Response, 
       depth: parseInt(String(req.query.depth), 10),
       draft,
     });
-    await req.payload.db.commitTransaction();
 
     if (result.errors.length === 0) {
       const message = req.t('general:updatedCountSuccessfully', {

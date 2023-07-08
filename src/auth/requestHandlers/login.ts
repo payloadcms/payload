@@ -5,7 +5,6 @@ import login, { Result } from '../operations/login';
 
 export default async function loginHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<Result & { message: string }> | void> {
   try {
-    await req.payload.db.beginTransaction();
     const result = await login({
       req,
       res,
@@ -13,7 +12,6 @@ export default async function loginHandler(req: PayloadRequest, res: Response, n
       data: req.body,
       depth: parseInt(String(req.query.depth), 10),
     });
-    await req.payload.db.commitTransaction();
 
     res.status(httpStatus.OK)
       .json({

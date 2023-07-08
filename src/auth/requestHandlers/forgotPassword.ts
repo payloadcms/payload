@@ -5,7 +5,6 @@ import forgotPassword from '../operations/forgotPassword';
 
 export default async function forgotPasswordHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {
-    await req.payload.db.beginTransaction();
     await forgotPassword({
       req,
       collection: req.collection,
@@ -13,7 +12,6 @@ export default async function forgotPasswordHandler(req: PayloadRequest, res: Re
       disableEmail: req.body.disableEmail,
       expiration: req.body.expiration,
     });
-    await req.payload.db.commitTransaction();
 
     return res.status(httpStatus.OK)
       .json({

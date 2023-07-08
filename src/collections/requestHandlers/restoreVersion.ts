@@ -20,9 +20,7 @@ export default async function restoreVersionHandler(req: PayloadRequest, res: Re
   };
 
   try {
-    await req.payload.db.beginTransaction();
     const doc = await restoreVersion(options);
-    await req.payload.db.commitTransaction();
     res.status(httpStatus.OK)
       .json({
         ...formatSuccessResponse(req.t('version:restoredSuccessfully'), 'message'),

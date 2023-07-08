@@ -12,7 +12,6 @@ export type DeleteResult = {
 
 export default async function deleteByIDHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<DeleteResult> | void> {
   try {
-    await req.payload.db.beginTransaction();
     const doc = await deleteByID({
       req,
       collection: req.collection,
@@ -24,8 +23,6 @@ export default async function deleteByIDHandler(req: PayloadRequest, res: Respon
       res.status(httpStatus.NOT_FOUND)
         .json(new NotFound(req.t));
     }
-
-    await req.payload.db.commitTransaction();
 
     res.status(httpStatus.OK)
       .send(doc);

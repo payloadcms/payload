@@ -11,7 +11,6 @@ export type UpdateGlobalResponse = (req: PayloadRequest, res: Response, next: Ne
 export default function updateHandler(globalConfig: SanitizedGlobalConfig): UpdateGlobalResponse {
   return async function handler(req: PayloadRequest, res: Response, next: NextFunction) {
     try {
-      await req.payload.db.beginTransaction();
       const { slug } = globalConfig;
       const draft = req.query.draft === 'true';
       const autosave = req.query.autosave === 'true';
@@ -30,8 +29,6 @@ export default function updateHandler(globalConfig: SanitizedGlobalConfig): Upda
 
       if (draft) message = req.t('version:draftSavedSuccessfully');
       if (autosave) message = req.t('version:autosavedSuccessfully');
-
-      await req.payload.db.commitTransaction();
 
       res.status(httpStatus.OK).json({ message, result });
     } catch (error) {

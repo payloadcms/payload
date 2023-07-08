@@ -5,13 +5,11 @@ import verifyEmail from '../operations/verifyEmail';
 
 async function verifyEmailHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {
-    await req.payload.db.beginTransaction();
     await verifyEmail({
       req,
       collection: req.collection,
       token: req.params.token,
     });
-    await req.payload.db.commitTransaction();
 
     return res.status(httpStatus.OK)
       .json({

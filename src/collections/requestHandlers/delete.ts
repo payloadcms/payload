@@ -13,14 +13,12 @@ export type DeleteResult = {
 
 export default async function deleteHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<DeleteResult> | void> {
   try {
-    await req.payload.db.beginTransaction();
     const result = await deleteOperation({
       req,
       collection: req.collection,
       where: req.query.where as Where,
       depth: parseInt(String(req.query.depth), 10),
     });
-    await req.payload.db.commitTransaction();
 
     if (result.errors.length === 0) {
       const message = req.t('general:deletedCountSuccessfully', {
