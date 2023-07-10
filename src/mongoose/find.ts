@@ -7,8 +7,9 @@ import { buildSortParam } from './queries/buildSortParam';
 
 
 export const find: Find = async function find(this: MongooseAdapter,
-  { collection, where, page, limit, sort, locale, pagination }) {
+  { collection, where, page, limit, sort: sortArg, locale, pagination }) {
   const Model = this.collections[collection].model;
+  const collectionConfig = this.payload.collections[collection].config;
 
   let hasNearConstraint = false;
 

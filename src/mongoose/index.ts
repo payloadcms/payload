@@ -1,5 +1,4 @@
 import type { ConnectOptions } from 'mongoose';
-import { CollectionModel } from '../collections/config/types';
 import { createMigration } from '../database/migrations/createMigration';
 import { migrate } from '../database/migrations/migrate';
 import { migrateDown } from '../database/migrations/migrateDown';
@@ -7,11 +6,8 @@ import { migrateRefresh } from '../database/migrations/migrateRefresh';
 import { migrateReset } from '../database/migrations/migrateReset';
 import { migrateStatus } from '../database/migrations/migrateStatus';
 import type { DatabaseAdapter } from '../database/types';
-import { GlobalModel } from '../globals/config/types';
-import type { Payload } from '../index';
+import { Payload } from '../index';
 import { connect } from './connect';
-import { create } from './create';
-import { find } from './find';
 import { findGlobalVersions } from './findGlobalVersions';
 import { findVersions } from './findVersions';
 import { init } from './init';
@@ -28,6 +24,8 @@ import { updateGlobal } from './updateGlobal';
 import { createGlobal } from './createGlobal';
 import { CollectionModel, GlobalModel, TypeOfIndex } from './types';
 import { SanitizedConfig } from '../config/types';
+import { createVersion } from './createVersion';
+import { updateVersion } from './updateVersion';
 
 export type SanitizedPayloadMongooseConfig = Omit<
 SanitizedConfig,
