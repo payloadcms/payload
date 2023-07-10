@@ -51,6 +51,7 @@ async function update(args: PreferenceUpdateRequest) {
       collection,
       where: filter,
       data: preference,
+      req,
     });
   }
 
