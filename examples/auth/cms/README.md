@@ -2,7 +2,7 @@
 
 This example demonstrates how to implement [Payload Authentication](https://payloadcms.com/docs/authentication/overview).
 
-There is a fully working Next.js app made explicitly for this example which can be found [here](../nextjs). Follow the instructions there to get started. If you are setting up authentication for another front-end, please consider contributing to this repo with your own example!
+There is a fully working Next.js app made explicitly for this example which can be found [here](../next-app). Follow the instructions there to get started. If you are setting up authentication for another front-end, please consider contributing to this repo with your own example!
 
 ## Quick Start
 
@@ -11,8 +11,8 @@ To spin up this example locally, follow these steps:
 1. First clone the repo
 1. Then `cd YOUR_PROJECT_REPO && cp .env.example .env`
 1. Next `yarn && yarn dev`
-1. Now `open http://localhost:8000/admin` to access the admin panel
-1. Login with email `dev@payloadcms.com` and password `test`
+1. Now `open http://localhost:3000/admin` to access the admin panel
+1. Login with email `demo@payloadcms.com` and password `demo`
 
 That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details.
 
@@ -46,7 +46,7 @@ To spin up this example locally, follow the [Quick Start](#quick-start).
 
 ### Seed
 
-On boot, a seed script is included to create a user with email `dev@payloadcms.com`, password `test`, the role `admin`.
+On boot, a seed script is included to create a user with email `demo@payloadcms.com`, password `demo`, the role `admin`.
 
 > NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
 

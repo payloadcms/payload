@@ -1,5 +1,5 @@
 module.exports = {
   root: true,
-  extends: ['@payloadcms'],
+  extends: ['plugin:@next/next/recommended', '@payloadcms'],
   ignorePatterns: ['**/payload-types.ts'],
 }

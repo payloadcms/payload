@@ -5,7 +5,8 @@
   "main": "dist/server.js",
   "license": "MIT",
   "scripts": {
-    "dev": "cross-env PAYLOAD_SEED=true PAYLOAD_DROP_DATABASE=true PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
+    "dev": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts nodemon",
+    "seed": "rm -rf media && cross-env PAYLOAD_SEED=true PAYLOAD_DROP_DATABASE=true PAYLOAD_CONFIG_PATH=src/payload.config.ts ts-node src/server.ts",
     "build:payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload build",
     "build:server": "tsc",
     "build": "yarn copyfiles && yarn build:payload && yarn build:server",
@@ -19,10 +20,10 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "payload": "^1.7.5"
+    "payload": "^1.11.0"
   },
   "devDependencies": {
-    "@payloadcms/eslint-config": "^0.0.1",
+    "@payloadcms/eslint-config": "^0.0.2",
     "@types/express": "^4.17.9",
     "@types/node": "18.11.3",
     "@types/react": "18.0.21",
