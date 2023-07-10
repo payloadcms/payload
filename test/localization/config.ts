@@ -1,4 +1,4 @@
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 import { ArrayCollection } from './collections/Array';
 import { LocalizedPost, RelationshipLocalized } from './payload-types';
@@ -32,7 +32,7 @@ const openAccess = {
   update: () => true,
 };
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   localization: {
     locales: [defaultLocale, spanishLocale],
     defaultLocale,

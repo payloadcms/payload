@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 
 export interface Relation {
   id: string;
@@ -34,7 +34,7 @@ export const customIdSlug = 'custom-id';
 export const customIdNumberSlug = 'custom-id-number';
 export const errorOnHookSlug = 'error-on-hooks';
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   endpoints: [
     {
       path: '/send-test-email',

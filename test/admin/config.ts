@@ -1,7 +1,7 @@
 import path from 'path';
 import { mapAsync } from '../../src/utilities/mapAsync';
 import { devUser } from '../credentials';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import AfterDashboard from './components/AfterDashboard';
 import CustomMinimalRoute from './components/views/CustomMinimal';
 import CustomDefaultRoute from './components/views/CustomDefault';
@@ -20,7 +20,7 @@ export interface Post {
   updatedAt: Date;
 }
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   admin: {
     css: path.resolve(__dirname, 'styles.scss'),
     components: {

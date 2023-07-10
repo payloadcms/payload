@@ -41,7 +41,7 @@ export class CustomStrategy extends Strategy {
   }
 }
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   admin: {
     user: 'users',
   },
