@@ -19,6 +19,7 @@ import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
 import { PayloadRequest } from '../express/types';
 import { Where } from '../types';
 import { User } from '../auth/types';
+import type { PayloadBundler } from '../bundlers/types';
 
 type Email = {
   fromName: string;
@@ -340,6 +341,8 @@ export type Config = {
     };
     /** Customize the Webpack config that's used to generate the Admin panel. */
     webpack?: (config: Configuration) => Configuration;
+    /** Customize the bundler used to run your admin panel. */
+    bundler?: PayloadBundler;
   };
   /**
    * Manage the datamodel of your application

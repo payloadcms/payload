@@ -1,15 +1,16 @@
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack, { Configuration } from 'webpack';
-import { SanitizedConfig } from '../config/types';
+import type { SanitizedConfig } from '../../config/types';
 
-const mockModulePath = path.resolve(__dirname, './mocks/emptyModule.js');
-const mockDotENVPath = path.resolve(__dirname, './mocks/dotENV.js');
+const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js');
+const mockBundlerPath = path.resolve(__dirname, '../mocks/bundlers.js');
+const mockDotENVPath = path.resolve(__dirname, '../mocks/dotENV.js');
 
 export default (config: SanitizedConfig): Configuration => ({
   entry: {
     main: [
-      path.resolve(__dirname, '../admin'),
+      path.resolve(__dirname, '../../admin'),
     ],
   },
   resolveLoader: {
@@ -57,6 +58,7 @@ export default (config: SanitizedConfig): Configuration => ({
       payload$: mockModulePath,
       'payload-user-css': config.admin.css,
       dotenv: mockDotENVPath,
+      [`${path.resolve(__dirname, './bundler')}`]: mockBundlerPath,
     },
     extensions: ['.ts', '.tsx', '.js', '.json'],
   },

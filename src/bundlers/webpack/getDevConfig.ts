@@ -1,9 +1,9 @@
 import webpack, { Configuration } from 'webpack';
 import md5 from 'md5';
-import { SanitizedConfig } from '../config/types';
+import type { SanitizedConfig } from '../../config/types';
 import getBaseConfig from './getBaseConfig';
 
-export default (payloadConfig: SanitizedConfig): Configuration => {
+export const getWebpackDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
   const baseConfig = getBaseConfig(payloadConfig) as any;
 
   let config: Configuration = {

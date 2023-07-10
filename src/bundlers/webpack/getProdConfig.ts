@@ -2,10 +2,10 @@ import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import { Configuration, WebpackPluginInstance } from 'webpack';
 import { SwcMinifyWebpackPlugin } from 'swc-minify-webpack-plugin';
-import { SanitizedConfig } from '../config/types';
+import { SanitizedConfig } from '../../config/types';
 import getBaseConfig from './getBaseConfig';
 
-export default (payloadConfig: SanitizedConfig): Configuration => {
+export const getWebpackProdConfig = (payloadConfig: SanitizedConfig): Configuration => {
   const baseConfig = getBaseConfig(payloadConfig) as any;
 
   let config: Configuration = {

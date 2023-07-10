@@ -1,12 +1,11 @@
 import express from 'express';
 import compression from 'compression';
 import history from 'connect-history-api-fallback';
-import initWebpack from '../webpack/init';
 import { Payload } from '../payload';
 
 const router = express.Router();
 
-function initAdmin(ctx: Payload): void {
+async function initAdmin(ctx: Payload): Promise<void> {
   if (!ctx.config.admin.disable) {
     router.use(history());
 
@@ -26,7 +25,7 @@ function initAdmin(ctx: Payload): void {
       ctx.express.use(ctx.config.routes.admin, router);
     } else {
       ctx.express.use(ctx.config.routes.admin, history());
-      ctx.express.use(initWebpack(ctx.config));
+      ctx.express.use(await ctx.config.admin.bundler.dev(ctx.config));
     }
   }
 }
