@@ -8,6 +8,7 @@ import findOne from './requestHandlers/findOne';
 import docAccessRequestHandler from './requestHandlers/docAccess';
 
 const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
+  if (!global.endpoints) return [];
   const endpoints = [...global.endpoints];
 
   if (global.versions) {

@@ -5,16 +5,19 @@ const component = joi.alternatives().try(
   joi.func(),
 );
 
-export const endpointsSchema = joi.array().items(joi.object({
-  path: joi.string(),
-  method: joi.string().valid('get', 'head', 'post', 'put', 'patch', 'delete', 'connect', 'options'),
-  root: joi.bool(),
-  handler: joi.alternatives().try(
-    joi.array().items(joi.func()),
-    joi.func(),
-  ),
-  custom: joi.object().pattern(joi.string(), joi.any()),
-}));
+export const endpointsSchema = joi.alternatives().try(
+  joi.array().items(joi.object({
+    path: joi.string(),
+    method: joi.string().valid('get', 'head', 'post', 'put', 'patch', 'delete', 'connect', 'options'),
+    root: joi.bool(),
+    handler: joi.alternatives().try(
+      joi.array().items(joi.func()),
+      joi.func(),
+    ),
+    custom: joi.object().pattern(joi.string(), joi.any()),
+  })),
+  joi.boolean(),
+);
 
 export default joi.object({
   serverURL: joi.string()
@@ -34,6 +37,7 @@ export default joi.object({
       return value;
     }),
   cookiePrefix: joi.string(),
+  db: joi.any(),
   routes: joi.object({
     admin: joi.string(),
     api: joi.string(),

@@ -37,11 +37,13 @@ function initCollectionsGraphQL(payload: Payload): void {
     const {
       config,
       config: {
+        fields,
         graphQL = {} as SanitizedCollectionConfig['graphQL'],
         versions,
       },
     } = collection;
-    const { fields } = config;
+
+    if (!graphQL) return;
 
     let singularName;
     let pluralName;

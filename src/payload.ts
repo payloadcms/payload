@@ -162,7 +162,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       );
     }
 
-    if (options.mongoURL !== false && typeof options.mongoURL !== 'string') {
+    if (!options.local && options.mongoURL !== false && typeof options.mongoURL !== 'string') {
       throw new Error('Error: missing MongoDB connection URL.');
     }
 
@@ -207,27 +207,30 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     // THIS BLOCK IS TEMPORARY UNTIL 2.0.0
     // We automatically add the Mongoose adapter
     // if there is no defined database adapter
-    if (this.mongoURL) {
-      mongoose.set('strictQuery', false);
-
-      if (!this.config.db) {
-        this.config.db = mongooseAdapter({
-          payload: this as unknown as PayloadMongoose,
-          url: this.mongoURL,
-          connectOptions: options.mongoOptions,
-        });
-      }
+    if (!this.config.db) {
+      this.config.db = mongooseAdapter({
+        payload: this as unknown as PayloadMongoose,
+        url: this.mongoURL ? this.mongoURL : '',
+        connectOptions: options.mongoOptions,
+      });
     }
 
     this.db = this.config.db;
-    if (this.db?.connect) {
-      this.mongoMemoryServer = await this.db.connect({ config: this.config });
+    this.db.payload = this;
+
+    if (this.mongoURL || this.db.connect) {
+      mongoose.set('strictQuery', false);
+      if (this.db?.connect) {
+        this.mongoMemoryServer = await this.db.connect({ config: this.config });
+      }
     }
 
     // Configure email service
-    const emailOptions = options.email ? { ...(options.email) } : this.config.email;
+    const emailOptions = options.email ? { ...options.email } : this.config.email;
     if (options.email && this.config.email) {
-      this.logger.warn('Email options provided in both init options and config. Using init options.');
+      this.logger.warn(
+        'Email options provided in both init options and config. Using init options.',
+      );
     }
 
     this.emailOptions = emailOptions ?? emailDefaults;

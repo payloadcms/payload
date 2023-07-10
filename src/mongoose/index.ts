@@ -1,7 +1,19 @@
 import type { ConnectOptions } from 'mongoose';
+import { CollectionModel } from '../collections/config/types';
+import { createMigration } from '../database/migrations/createMigration';
+import { migrate } from '../database/migrations/migrate';
+import { migrateDown } from '../database/migrations/migrateDown';
+import { migrateRefresh } from '../database/migrations/migrateRefresh';
+import { migrateReset } from '../database/migrations/migrateReset';
+import { migrateStatus } from '../database/migrations/migrateStatus';
 import type { DatabaseAdapter } from '../database/types';
-import { Payload } from '../index';
+import { GlobalModel } from '../globals/config/types';
+import type { Payload } from '../index';
 import { connect } from './connect';
+import { create } from './create';
+import { find } from './find';
+import { findGlobalVersions } from './findGlobalVersions';
+import { findVersions } from './findVersions';
 import { init } from './init';
 import { webpack } from './webpack';
 import { queryDrafts } from './queryDrafts';
@@ -9,13 +21,9 @@ import { find } from './find';
 import { create } from './create';
 import { updateOne } from './updateOne';
 import { deleteOne } from './deleteOne';
+import { deleteVersions } from './deleteVersions';
 import { findGlobal } from './findGlobal';
 import { findOne } from './findOne';
-import { findVersions } from './findVersions';
-import { findGlobalVersions } from './findGlobalVersions';
-import { deleteVersions } from './deleteVersions';
-import { createVersion } from './createVersion';
-import { updateVersion } from './updateVersion';
 import { updateGlobal } from './updateGlobal';
 import { createGlobal } from './createGlobal';
 import { CollectionModel, GlobalModel, TypeOfIndex } from './types';
@@ -39,7 +47,8 @@ export class PayloadMongoose extends Payload {
 export interface Args {
   payload: PayloadMongoose,
   /** The URL to connect to MongoDB */
-  url: string
+  url: string;
+  migrationDir?: string;
   connectOptions?: ConnectOptions & {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
@@ -57,7 +66,7 @@ export interface Args {
 
 export type MongooseAdapter = DatabaseAdapter &
   Args & {
-    mongoMemoryServer: any
+    mongoMemoryServer: any;
     collections: {
       [slug: string]: {
         model?: CollectionModel
@@ -69,11 +78,11 @@ export type MongooseAdapter = DatabaseAdapter &
     }
     globals: GlobalModel
     versions: {
-      [slug: string]: CollectionModel
-    }
-  }
+      [slug: string]: CollectionModel;
+    };
+  };
 
-export function mongooseAdapter({ payload, url, connectOptions, collections }: Args): MongooseAdapter {
+export function mongooseAdapter({ payload, url, connectOptions, collections, migrationDir = '.migrations' }: Args): MongooseAdapter {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   return {
@@ -85,12 +94,14 @@ export function mongooseAdapter({ payload, url, connectOptions, collections }: A
     connect,
     init,
     webpack,
-    migrate: async () => null,
-    migrateStatus: async () => null,
-    migrateDown: async () => null,
-    migrateRefresh: async () => null,
-    migrateReset: async () => null,
+    migrate,
+    migrateStatus,
+    migrateDown,
+    migrateRefresh,
+    migrateReset,
     migrateFresh: async () => null,
+    migrationDir,
+    createMigration: async (migrationName) => createMigration({ payload, migrationDir, migrationName }),
     transaction: async () => true,
     beginTransaction: async () => true,
     rollbackTransaction: async () => true,
