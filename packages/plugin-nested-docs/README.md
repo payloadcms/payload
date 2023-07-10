@@ -174,6 +174,10 @@ const examplePageConfig: CollectionConfig = {
 };
 ```
 
+## Localization
+
+This plugin supports localization by default. If the `localization` property is set in your Payload config, the `breadcrumbs` field is automatically localized. For more details on how localization works in Payload, see the [Localization](https://payloadcms.com/docs/localization/overview) docs.
+
 ## TypeScript
 
 All types can be directly imported:
