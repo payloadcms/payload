@@ -20,11 +20,7 @@ const nestedDocs =
         }
 
         if (!pluginConfig.breadcrumbsFieldSlug) {
-          fields.push(
-            createBreadcrumbsField(collection.slug, {
-              localized: Boolean(config.localization),
-            }),
-          )
+          fields.push(createBreadcrumbsField(collection.slug))
         }
 
         return {

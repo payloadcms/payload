@@ -7,6 +7,7 @@ const createBreadcrumbsField = (
 ): Field => ({
   name: 'breadcrumbs',
   type: 'array',
+  localized: true,
   fields: [
     {
       name: 'doc',

@@ -11,7 +11,7 @@ interface DocWithBreadcrumbs {
 
 const resaveSelfAfterCreate =
   (collection: CollectionConfig): CollectionAfterChangeHook =>
-  async ({ req: { payload }, doc, operation }) => {
+  async ({ req: { payload, locale }, doc, operation }) => {
     const { breadcrumbs = [] } = doc as DocWithBreadcrumbs
 
     if (operation === 'create') {
@@ -30,6 +30,7 @@ const resaveSelfAfterCreate =
         await payload.update({
           collection: collection.slug,
           id: doc.id,
+          locale,
           depth: 0,
           draft: updateAsDraft,
           data: {

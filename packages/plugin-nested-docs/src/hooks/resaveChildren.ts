@@ -5,7 +5,7 @@ import populateBreadcrumbs from '../utilities/populateBreadcrumbs'
 
 const resaveChildren =
   (pluginConfig: PluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
-  ({ req: { payload }, req, doc }) => {
+  ({ req: { payload, locale }, req, doc }) => {
     const resaveChildrenAsync = async (): Promise<void> => {
       const children = await payload.find({
         collection: collection.slug,
@@ -15,6 +15,7 @@ const resaveChildren =
           },
         },
         depth: 0,
+        locale,
       })
 
       try {
@@ -33,6 +34,7 @@ const resaveChildren =
               breadcrumbs: populateBreadcrumbs(req, pluginConfig, collection, child),
             },
             depth: 0,
+            locale,
           })
         })
       } catch (err: unknown) {

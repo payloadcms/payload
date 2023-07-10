@@ -1,6 +1,8 @@
 // const payload = require('payload');
 import type { CollectionConfig } from 'payload/types'
 
+import populateFullTitle from './populateFullTitle'
+
 export const Pages: CollectionConfig = {
   slug: 'pages',
   labels: {
@@ -8,7 +10,7 @@ export const Pages: CollectionConfig = {
     plural: 'Pages',
   },
   admin: {
-    useAsTitle: 'title',
+    useAsTitle: 'fullTitle',
   },
   access: {
     read: () => true,
@@ -25,6 +27,19 @@ export const Pages: CollectionConfig = {
       label: 'Slug',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'fullTitle',
+      type: 'text',
+      localized: true,
+      hooks: {
+        beforeChange: [populateFullTitle],
+      },
+      admin: {
+        components: {
+          Field: () => null,
+        },
+      },
     },
   ],
 }

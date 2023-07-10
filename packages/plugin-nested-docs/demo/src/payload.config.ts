@@ -2,7 +2,7 @@ import path from 'path'
 import { buildConfig } from 'payload/config'
 
 // import nestedPages from '../../dist';
-import nestedPages from '../../src'
+import nestedPages from '../../src' // eslint-disable-line import/no-relative-packages
 import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 
@@ -28,15 +28,11 @@ export default buildConfig({
     },
   },
   collections: [Users, Pages],
-  //  localization: {
-  //   locales: [
-  //     'en',
-  //     'es',
-  //     'de',
-  //   ],
-  //   defaultLocale: 'en',
-  //   fallback: true,
-  // },
+  localization: {
+    locales: ['en', 'es', 'de'],
+    defaultLocale: 'en',
+    fallback: true,
+  },
   plugins: [
     nestedPages({
       collections: ['pages'],
