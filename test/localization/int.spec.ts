@@ -308,6 +308,7 @@ describe('Localization', () => {
         expect((result.docs[0].relationshipHasMany as any).en[0].id).toBeDefined();
         expect((result.docs[0].relationMultiRelationTo as any).en.value.id).toBeDefined();
         expect((result.docs[0].relationMultiRelationToHasMany as any).en[0].value.id).toBeDefined();
+        expect(result.docs[0].arrayField.en[0].nestedRelation.id).toBeDefined();
       });
     });
 
