@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import buildSchema from './buildSchema';
-import { SanitizedConfig } from '../../config/types';
 import getBuildQueryPlugin from '../queries/buildQuery';
-import { GlobalModel } from '../../globals/config/types';
+import type { SanitizedConfig } from '../../config/types';
+import type { GlobalModel } from '../types';
 
 export const buildGlobalModel = (config: SanitizedConfig): GlobalModel | null => {
   if (config.globals && config.globals.length > 0) {
