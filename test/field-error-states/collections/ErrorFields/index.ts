@@ -161,6 +161,25 @@ export const ErrorFieldsCollection: CollectionConfig = {
   slug: errorFieldsSlug,
   fields: [
     {
+      type: 'array',
+      name: 'parentArray',
+      fields: [
+        {
+          type: 'array',
+          name: 'childArray',
+          required: true,
+          minRows: 2,
+          fields: [
+            {
+              type: 'text',
+              name: 'childArrayText',
+              required: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
       type: 'tabs',
       tabs: [
         {
