@@ -46,7 +46,9 @@ export const defaults: Config = {
     max: 500,
   },
   express: {
-    json: {},
+    json: {
+      limit: '2mb',
+    },
     compression: {},
     middleware: [],
     preMiddleware: [],

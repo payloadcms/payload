@@ -1,4 +1,5 @@
-import { Express, NextFunction, Response } from 'express';
+import { Express, NextFunction, Response, json } from 'express';
+import type compression from 'compression';
 import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
 import { Options as ExpressFileUploadOptions } from 'express-fileupload';
@@ -25,6 +26,9 @@ type Email = {
   fromAddress: string;
   logMockCredentials?: boolean;
 };
+
+type JsonOptions = Parameters<typeof json>[0];
+type CompressionOptions = Parameters<typeof compression>[0];
 
 // eslint-disable-next-line no-use-before-define
 export type Plugin = (config: Config) => Promise<Config> | Config;
@@ -415,15 +419,10 @@ export type Config = {
    * @see https://payloadcms.com/docs/configuration/express
    */
   express?: {
-    /** Control the way JSON is parsed */
-    json?: {
-      /** Defaults to 2MB  */
-      limit?: number;
-    };
+    /** Control the way JSON is parsed. Payload overrides the default express request body size `limit` of '100kb' and sets it to '2mb'. */
+    json?: JsonOptions;
     /** Control the way responses are compressed */
-    compression?: {
-      [key: string]: unknown;
-    };
+    compression?: CompressionOptions;
     /**
      * @deprecated express.middleware will be removed in a future version. Please migrate to express.postMiddleware.
      */
