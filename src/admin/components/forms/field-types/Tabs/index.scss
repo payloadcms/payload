@@ -61,6 +61,7 @@
     position: relative;
     white-space: nowrap;
     flex-shrink: 0;
+    gap: base(.5);
 
     &:last-child {
       margin: 0;

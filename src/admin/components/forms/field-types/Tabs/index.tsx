@@ -14,7 +14,7 @@ import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 import { WatchChildErrors } from '../../WatchChildErrors';
-import CounterPill from '../../../elements/CounterPill';
+import { ErrorPill } from '../../../elements/ErrorPill';
 import { useFormSubmitted } from '../../Form/context';
 
 import './index.scss';
@@ -56,13 +56,9 @@ const Tab: React.FC<TabProps> = ({ tab, isActive, setIsActive, parentPath }) => 
         onClick={setIsActive}
       >
         {tab.label ? getTranslation(tab.label, i18n) : (hasName && tab.name)}
-        {tabHasErrors
-          && (
-            <CounterPill
-              pillStyle="error"
-              number={errorCount}
-            />
-          )}
+        {tabHasErrors && (
+          <ErrorPill count={errorCount} />
+        )}
       </button>
     </React.Fragment>
   );

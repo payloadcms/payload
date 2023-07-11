@@ -14,7 +14,6 @@ import Banner from '../../../elements/Banner';
 import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
 import { useOperation } from '../../../utilities/OperationProvider';
-import Pill from '../../../elements/Pill';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { NullifyLocaleField } from '../../NullifyField';
@@ -25,6 +24,7 @@ import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug';
 import Button from '../../../elements/Button';
 import { DrawerToggler } from '../../../elements/Drawer';
 import { BlockRow } from './BlockRow';
+import { ErrorPill } from '../../../elements/ErrorPill';
 
 import './index.scss';
 
@@ -174,13 +174,10 @@ const BlocksField: React.FC<Props> = (props) => {
             </h3>
 
             {fieldHasErrors && fieldErrorCount > 0 && (
-              <Pill
-                pillStyle="error"
-                rounded
-                className={`${baseClass}__header-error-pill`}
-              >
-                {`${fieldErrorCount} ${fieldErrorCount > 1 ? t('error:plural') : t('error:singular')}`}
-              </Pill>
+              <ErrorPill
+                count={fieldErrorCount}
+                withMessage
+              />
             )}
           </div>
           <ul className={`${baseClass}__header-actions`}>

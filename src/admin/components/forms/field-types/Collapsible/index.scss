@@ -3,12 +3,11 @@
 .collapsible-field {
   margin: 0 0 base(2);
 
-  &__label {
+  &__row-label-wrap {
     pointer-events: none;
-  }
-
-  &__error-pill {
-    margin-left: base(.5);
+    display: flex;
+    align-items: center;
+    gap: base(.5);
   }
 
   &--has-error {

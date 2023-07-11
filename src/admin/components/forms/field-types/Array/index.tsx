@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
@@ -20,8 +20,8 @@ import { useConfig } from '../../../utilities/Config';
 import { NullifyLocaleField } from '../../NullifyField';
 import DraggableSortable from '../../../elements/DraggableSortable';
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
-import Pill from '../../../elements/Pill';
 import { ArrayRow } from './ArrayRow';
+import { ErrorPill } from '../../../elements/ErrorPill';
 
 import './index.scss';
 
@@ -168,21 +168,18 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       </div>
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
-          <div className={`${baseClass}__heading-with-error`}>
+          <div className={`${baseClass}__header-content`}>
             <h3>
               {getTranslation(label || name, i18n)}
             </h3>
-
             {fieldHasErrors && fieldErrorCount > 0 && (
-              <Pill
-                pillStyle="error"
-                rounded
-                className={`${baseClass}__error-pill`}
-              >
-                {`${fieldErrorCount} ${fieldErrorCount > 1 ? t('error:plural') : t('error:singular')}`}
-              </Pill>
+              <ErrorPill
+                count={fieldErrorCount}
+                withMessage
+              />
             )}
           </div>
+
           <ul className={`${baseClass}__header-actions`}>
             <li>
               <button
@@ -193,6 +190,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                 {t('collapseAll')}
               </button>
             </li>
+
             <li>
               <button
                 type="button"

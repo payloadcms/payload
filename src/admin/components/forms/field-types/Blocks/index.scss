@@ -20,6 +20,7 @@
   &__heading-with-error {
     display: flex;
     align-items: center;
+    gap: base(.5);
   }
 
   &--has-no-error {
@@ -32,10 +33,6 @@
     >.array-field__header {
       color: var(--theme-error-500);
     }
-  }
-
-  &__header-error-pill, &__error-pill {
-    margin-left: base(.5);
   }
 
   &__error-pill {
@@ -63,10 +60,10 @@
     display: inline-flex;
     max-width: 100%;
     overflow: hidden;
+    gap: base(.375);
   }
 
   &__block-number {
-    margin-right: base(.375);
     flex-shrink: 0;
   }
 

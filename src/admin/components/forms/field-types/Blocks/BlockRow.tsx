@@ -13,6 +13,7 @@ import type { UseDraggableSortableReturn } from '../../../elements/DraggableSort
 import type { Row } from '../../Form/types';
 import type { Block } from '../../../../../fields/config/types';
 import { useFormSubmitted } from '../../Form/context';
+import { ErrorPill } from '../../../elements/ErrorPill';
 
 const baseClass = 'blocks-field';
 
@@ -98,13 +99,10 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
               readOnly={readOnly}
             />
             {fieldHasErrors && (
-              <Pill
-                pillStyle="error"
-                rounded
-                className={`${baseClass}__error-pill`}
-              >
-                {`${childErrorPathsCount} ${childErrorPathsCount > 1 ? t('error:plural') : t('error:singular')}`}
-              </Pill>
+              <ErrorPill
+                count={childErrorPathsCount}
+                withMessage
+              />
             )}
           </div>
         )}

@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import { Props } from './types';
@@ -11,9 +10,8 @@ import FieldDescription from '../../FieldDescription';
 import { RowLabel } from '../../RowLabel';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 import { WatchChildErrors } from '../../WatchChildErrors';
-import { RowLabel as RowLabelType } from '../../RowLabel/types';
-import Pill from '../../../elements/Pill';
 import { useFormSubmitted } from '../../Form/context';
+import { ErrorPill } from '../../../elements/ErrorPill';
 
 import './index.scss';
 
@@ -41,8 +39,6 @@ const CollapsibleField: React.FC<Props> = (props) => {
   const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./gi, '__')}`;
   const [errorCount, setErrorCount] = useState(0);
   const submitted = useFormSubmitted();
-  const { t } = useTranslation();
-
 
   const onToggle = useCallback(async (newCollapsedState: boolean) => {
     const existingPreferences: DocumentPreferences = await getPreference(preferencesKey);
@@ -85,23 +81,6 @@ const CollapsibleField: React.FC<Props> = (props) => {
 
   if (typeof collapsedOnMount !== 'boolean') return null;
 
-  const CustomRowLabel: RowLabelType = () => {
-    return (
-      <React.Fragment>
-        {label as string}
-        {errorCount > 0 && (
-          <Pill
-            pillStyle="error"
-            rounded
-            className={`${baseClass}__error-pill`}
-          >
-            {`${errorCount} ${errorCount > 1 ? t('error:plural') : t('error:singular')}`}
-          </Pill>
-        )}
-      </React.Fragment>
-    );
-  };
-
   const fieldHasErrors = submitted && errorCount > 0;
 
   const classes = [
@@ -123,10 +102,18 @@ const CollapsibleField: React.FC<Props> = (props) => {
         className={classes}
         collapsibleStyle={errorCount > 0 ? 'error' : 'default'}
         header={(
-          <RowLabel
-            path={path}
-            label={CustomRowLabel}
-          />
+          <div className={`${baseClass}__row-label-wrap`}>
+            <RowLabel
+              path={path}
+              label={label}
+            />
+            {errorCount > 0 && (
+              <ErrorPill
+                count={errorCount}
+                withMessage
+              />
+            )}
+          </div>
         )}
         onToggle={onToggle}
       >

@@ -203,5 +203,17 @@ export const ErrorFieldsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'group',
+      name: 'group',
+      label: 'Related Things',
+      fields: [
+        {
+          type: 'text',
+          name: 'text',
+          required: true,
+        },
+      ],
+    },
   ],
 };

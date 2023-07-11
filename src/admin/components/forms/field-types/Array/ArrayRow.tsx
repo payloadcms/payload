@@ -11,10 +11,10 @@ import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types';
 import type { Row } from '../../Form/types';
 import type { RowLabel as RowLabelType } from '../../RowLabel/types';
-import Pill from '../../../elements/Pill';
+import { useFormSubmitted } from '../../Form/context';
+import { ErrorPill } from '../../../elements/ErrorPill';
 
 import './index.scss';
-import { useFormSubmitted } from '../../Form/context';
 
 const baseClass = 'array-field';
 
@@ -86,22 +86,19 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           listeners,
         }}
         header={(
-          <React.Fragment>
+          <div className={`${baseClass}__row-header`}>
             <RowLabel
               path={path}
               label={CustomRowLabel || fallbackLabel}
               rowNumber={rowIndex + 1}
             />
             {fieldHasErrors && (
-              <Pill
-                pillStyle="error"
-                rounded
-                className={`${baseClass}__row-error-pill`}
-              >
-                {`${childErrorPathsCount} ${childErrorPathsCount > 1 ? t('error:plural') : t('error:singular')}`}
-              </Pill>
+              <ErrorPill
+                count={childErrorPathsCount}
+                withMessage
+              />
             )}
-          </React.Fragment>
+          </div>
         )}
         actions={!readOnly ? (
           <ArrayAction
