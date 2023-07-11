@@ -206,7 +206,7 @@ export const ErrorFieldsCollection: CollectionConfig = {
     {
       type: 'group',
       name: 'group',
-      label: 'Related Things',
+      label: 'Group Field',
       fields: [
         {
           type: 'text',

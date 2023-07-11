@@ -11,18 +11,15 @@
   font-size: 11px;
   text-align: center;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &--fixed-width {
-    width: base(0.75);
-    height: base(0.75);
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     position: relative;
-
-    .error-pill__content {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
   }
 
   &__count {

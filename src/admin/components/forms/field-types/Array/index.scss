@@ -62,6 +62,7 @@
     display: flex;
     align-items: center;
     gap: base(.5);
+    pointer-events: none;
   }
 
   &__add-button-wrap {
