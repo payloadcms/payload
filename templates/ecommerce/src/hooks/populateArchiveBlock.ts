@@ -18,14 +18,14 @@ export const populateArchiveBlock: AfterReadHook = async ({ doc, req: { payload 
 
         if (archiveBlock.populateBy === 'collection') {
           const res: { totalDocs: number; docs: Product[] } = await payload.find({
-            collection: archiveBlock.relationTo,
+            collection: archiveBlock?.relationTo || 'products',
             limit: archiveBlock.limit || 10,
             where: {
-              ...(archiveBlock?.categories?.length > 0
+              ...((archiveBlock?.categories?.length || 0) > 0
                 ? {
                     categories: {
-                      in: archiveBlock.categories
-                        .map(cat => {
+                      in: archiveBlock?.categories
+                        ?.map(cat => {
                           if (typeof cat === 'string') return cat
                           return cat.id
                         })

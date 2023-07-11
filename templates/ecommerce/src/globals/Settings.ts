@@ -5,9 +5,6 @@ export const Settings: GlobalConfig = {
   typescript: {
     interface: 'Settings',
   },
-  graphQL: {
-    name: 'Settings',
-  },
   access: {
     read: () => true,
   },

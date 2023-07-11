@@ -5,7 +5,12 @@ import { TextField } from 'payload/dist/fields/config/types'
 
 export const CustomerSelect: React.FC<TextField> = props => {
   const { name, label } = props
-  const [options, setOptions] = React.useState([])
+  const [options, setOptions] = React.useState<
+    {
+      label: string
+      value: string
+    }[]
+  >([])
 
   const { value: stripeCustomerID } = useFormFields(([fields]) => fields[name]) || {}
 
@@ -89,7 +94,7 @@ export const CustomerSelect: React.FC<TextField> = props => {
         {'.'}
       </p>
       <Select {...props} label="" options={options} />
-      {stripeCustomerID && (
+      {Boolean(stripeCustomerID) && (
         <div>
           <div>
             <span

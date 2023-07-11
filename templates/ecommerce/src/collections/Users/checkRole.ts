@@ -4,7 +4,7 @@ export const checkRole = (allRoles: User['roles'] = [], user?: User): boolean =>
   if (user) {
     if (
       allRoles.some(role => {
-        return user?.roles.some(individualRole => {
+        return user?.roles?.some(individualRole => {
           return individualRole === role
         })
       })

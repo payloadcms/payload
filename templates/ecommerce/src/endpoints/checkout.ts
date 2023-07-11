@@ -3,7 +3,7 @@ import Stripe from 'stripe'
 
 import type { User } from '../payload-types'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2022-08-01',
 })
 
@@ -54,7 +54,8 @@ export const checkout: PayloadHandler = async (req, res): Promise<void> => {
     // for each item in cart, create an invoice item and send the invoice
     await Promise.all(
       fullUser?.cart?.items?.map(
-        async (item: User['cart']['items'][0]): Promise<Stripe.InvoiceItem> => {
+        // @ts-expect-error
+        async (item: User['cart']['items'][0]): Promise<Stripe.InvoiceItem | null> => {
           const { product } = item
 
           if (typeof product === 'string' || !product.stripeProductID) {
@@ -90,13 +91,13 @@ export const checkout: PayloadHandler = async (req, res): Promise<void> => {
     )
 
     // send the invoice to Stripe
-    const finalInvoice = await stripe.invoices.finalizeInvoice(invoice.id)
+    const finalInvoice = await stripe.invoices.finalizeInvoice(invoice?.id || '')
 
     // retrieve the payment intent from the invoice
     const paymentIntent = await stripe.paymentIntents.retrieve(
-      typeof finalInvoice.payment_intent === 'string'
-        ? finalInvoice.payment_intent
-        : finalInvoice.payment_intent.id,
+      typeof finalInvoice?.payment_intent === 'string'
+        ? finalInvoice?.payment_intent
+        : finalInvoice?.payment_intent?.id || '',
     )
 
     // return the `client_secret` of the payment intent to the client

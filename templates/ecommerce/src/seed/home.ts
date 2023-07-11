@@ -68,6 +68,7 @@ export const home: Partial<Page> = {
         link: {
           type: 'custom',
           appearance: 'secondary',
+          // @ts-expect-error
           reference: null,
           label: 'View on GitHub',
           url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',

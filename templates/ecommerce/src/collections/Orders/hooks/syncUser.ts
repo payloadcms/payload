@@ -11,12 +11,13 @@ export const syncUser: AfterChangeHook<Order> = async ({
 }) => {
   const { payload } = req
   const { orderedBy, items } = doc
-  const { user } = orderedBy
+  const { user } = orderedBy || {}
 
   const orderedByID = typeof user === 'object' ? user.id : user
 
   if (!orderedByID) {
     payload.logger.error('Error in `syncUser` hook: No user ID found on order')
+    return
   }
 
   const fullUser: User = await req.payload.findByID({

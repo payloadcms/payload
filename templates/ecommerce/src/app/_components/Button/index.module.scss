@@ -1,0 +1,58 @@
+@import '../../_css/type.scss';
+
+.button {
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  background-color: transparent;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+
+  svg {
+    margin-right: calc(var(--base) / 2);
+    width: var(--base);
+    height: var(--base);
+  }
+}
+
+.label {
+  @extend %label;
+  text-align: center;
+  display: flex;
+  align-items: center;
+}
+
+.button {
+  text-decoration: none;
+  display: inline-flex;
+  padding: 12px 24px;
+}
+
+.primary--white {
+  background-color: var(--foreground);
+  color: var(--background);
+}
+
+.primary--black {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.secondary--white {
+  background-color: var(--background);
+  box-shadow: inset 0 0 0 1px var(--foreground);
+}
+
+.secondary--black {
+  background-color: var(--foreground);
+  box-shadow: inset 0 0 0 1px var(--background);
+}
+
+.appearance--default {
+  padding: 0;
+}

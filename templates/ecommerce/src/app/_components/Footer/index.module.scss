@@ -1,0 +1,31 @@
+@use '../../_css/queries.scss' as *;
+
+.footer {
+  padding: calc(var(--base) * 4) 0;
+  z-index: var(--header-z-index);
+  background-color: var(--color-base-1000);
+  color: var(--color-base-0);
+}
+
+.wrap {
+  display: flex;
+  justify-content: space-between;
+}
+
+.logo {
+  width: 200px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+
+  > * {
+    text-decoration: none;
+    margin-left: var(--base);
+  }
+
+  @include mid-break {
+    display: none;
+  }
+}

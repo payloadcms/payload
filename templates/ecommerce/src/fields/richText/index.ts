@@ -80,7 +80,7 @@ const richText: RichText = (
         leaves: [...leaves, ...(additions.leaves || [])],
       },
     },
-    overrides,
+    overrides || {},
   )
 
 export default richText

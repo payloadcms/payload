@@ -1,6 +1,15 @@
 import type { Page } from '../payload-types'
 
-export const staticHome: Partial<Page> = {
+export const staticHome: Page = {
+  id: '',
+  title: 'Home',
+  hero: {
+    type: 'none',
+    richText: [],
+    media: '',
+  },
+  createdAt: '',
+  updatedAt: '',
   slug: 'home',
   layout: [
     {

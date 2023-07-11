@@ -32,7 +32,7 @@ export const invoiceCreatedOrUpdated: StripeWebhookHandler<{
   if (logs)
     payload.logger.info(`🪝 An invoice was created or updated in Stripe, syncing to Payload...`)
 
-  let existingOrder: Order
+  let existingOrder: Order | null = null
 
   if (stripeInvoiceID) {
     const {
@@ -71,7 +71,7 @@ export const invoiceCreatedOrUpdated: StripeWebhookHandler<{
             collection: 'products',
             where: {
               stripeProductID: {
-                equals: item.price.product,
+                equals: item?.price?.product,
               },
             },
           })
@@ -79,14 +79,16 @@ export const invoiceCreatedOrUpdated: StripeWebhookHandler<{
           const [product] = productQuery.docs
 
           const stripeProductID =
-            typeof item.price.product === 'string' ? item.price.product : item.price.product?.id
+            typeof item?.price?.product === 'string'
+              ? item?.price?.product
+              : item?.price?.product?.id
 
           return {
             product: product?.id || null,
             title: product?.title || null,
             priceJSON: JSON.stringify(item.price),
             stripeProductID,
-            quantity: item.quantity,
+            quantity: item.quantity || 0,
           }
         }),
       )
@@ -96,8 +98,8 @@ export const invoiceCreatedOrUpdated: StripeWebhookHandler<{
         stripePaymentIntentID,
         orderedBy: {
           user: user?.id || null,
-          name: invoiceCustomerName,
-          email: invoiceCustomerEmail,
+          name: invoiceCustomerName || undefined,
+          email: invoiceCustomerEmail || undefined,
           stripeCustomerID: invoiceCustomerID,
         },
         items,
