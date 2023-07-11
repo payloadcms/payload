@@ -52,7 +52,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   blockToRender,
 }) => {
   const path = `${parentPath}.${rowIndex}`;
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const hasSubmitted = useFormSubmitted();
 
   const childErrorPathsCount = row.childErrorPaths?.size;
@@ -128,7 +128,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
           className={`${baseClass}__fields`}
           readOnly={readOnly}
           fieldTypes={fieldTypes}
-          permissions={permissions?.fields}
+          permissions={permissions?.blocks?.[row.blockType]?.fields}
           fieldSchema={blockToRender.fields.map((field) => ({
             ...field,
             path: createNestedFieldPath(path, field),

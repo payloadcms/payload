@@ -84,9 +84,11 @@ export const addFieldStatePromise = async ({
         const arrayValue = Array.isArray(valueWithDefault) ? valueWithDefault : [];
         const { promises, rowMetadata } = arrayValue.reduce((acc, row, i) => {
           const rowPath = `${path}${field.name}.${i}.`;
+          row.id = row?.id || new ObjectID().toHexString();
+
           state[`${rowPath}id`] = {
             value: row.id,
-            initialValue: row.id || new ObjectID().toHexString(),
+            initialValue: row.id,
             valid: true,
           };
 
@@ -150,9 +152,11 @@ export const addFieldStatePromise = async ({
           const rowPath = `${path}${field.name}.${i}.`;
 
           if (block) {
+            row.id = row?.id || new ObjectID().toHexString();
+
             state[`${rowPath}id`] = {
               value: row.id,
-              initialValue: row.id || new ObjectID().toHexString(),
+              initialValue: row.id,
               valid: true,
             };
 

@@ -10,7 +10,7 @@ export const home: Partial<Page> = {
       {
         children: [
           {
-            text: 'E-Commerce Store with Payload + Next.js',
+            text: 'Payload E-Commerce Store',
           },
         ],
         type: 'h1',
@@ -18,12 +18,25 @@ export const home: Partial<Page> = {
       {
         children: [
           {
-            text: 'The code for this website is completely open-source and can be found ',
+            text: 'Welcome to your store! Visit the ',
           },
           {
             type: 'link',
             linkType: 'custom',
-            url: 'https://github.com/payloadcms/template-ecommerce-nextjs',
+            url: '/admin',
+            children: [
+              {
+                text: 'dashboard',
+              },
+            ],
+          },
+          {
+            text: " to begin managing your site's content. The code for this template is completely open-source and can be found ",
+          },
+          {
+            type: 'link',
+            linkType: 'custom',
+            url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
             newTab: true,
             children: [
               {
@@ -57,7 +70,7 @@ export const home: Partial<Page> = {
           appearance: 'secondary',
           reference: null,
           label: 'View on GitHub',
-          url: 'https://github.com/payloadcms/template-ecommerce',
+          url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
           newTab: true,
         },
       },
@@ -142,7 +155,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Secure in-app checkout powered by Stripe so your customers never leave your site.',
+                  text: 'Secure in-app checkout powered by Stripe so your customers stay on your site.',
                 },
               ],
             },
@@ -171,7 +184,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Custom page builder allows you to create any page or product layout imaginable.',
+                  text: 'Custom page builder allows you to create unique page or product layouts.',
                 },
               ],
             },
@@ -221,7 +234,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'CMS',
+                  text: 'End-to-end',
                 },
               ],
               type: 'h3',
@@ -229,21 +242,32 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Instant setup with ',
-                },
-                {
                   type: 'link',
                   linkType: 'custom',
-                  url: 'https://github.com/payloadcms/template-ecommerce',
+                  url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
                   newTab: true,
                   children: [
                     {
-                      text: 'Payload CMS',
+                      text: 'Payload',
                     },
                   ],
                 },
                 {
-                  text: ' tailored specifically for this front-end.',
+                  text: ' and ',
+                },
+                {
+                  type: 'link',
+                  linkType: 'custom',
+                  url: 'https://nextjs.org',
+                  newTab: true,
+                  children: [
+                    {
+                      text: 'Next.js',
+                    },
+                  ],
+                },
+                {
+                  text: ' are production-ready out of the box.',
                 },
               ],
             },

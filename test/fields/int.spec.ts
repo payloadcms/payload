@@ -1,4 +1,5 @@
 import type { IndexDirection, IndexOptions } from 'mongoose';
+import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
 import configPromise from '../uploads/config';
@@ -11,10 +12,14 @@ import { blocksFieldSeedData } from './collections/Blocks';
 import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
 import { defaultNumber, numberDoc } from './collections/Number';
 import { dateDoc } from './collections/Date';
+import type { PaginatedDocs } from '../../src/mongoose/types';
+import type { RichTextField } from './payload-types';
 
 let client;
+let graphQLClient: GraphQLClient;
 let serverURL;
 let config;
+let token;
 
 describe('Fields', () => {
   beforeAll(async () => {
@@ -22,7 +27,9 @@ describe('Fields', () => {
     config = await configPromise;
 
     client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' });
-    await client.login();
+    const graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`;
+    graphQLClient = new GraphQLClient(graphQLURL);
+    token = await client.login();
   });
 
   describe('text', () => {
@@ -729,6 +736,22 @@ describe('Fields', () => {
       expect(child.doc.relationTo).toEqual('array-fields');
       expect(typeof child.doc.value.id).toBe('string');
       expect(child.doc.value.items).toHaveLength(6);
+    });
+
+    it('should respect rich text depth parameter', async () => {
+      const query = `query {
+        RichTextFields {
+          docs {
+            richText(depth: 2)
+          }
+        }
+      }`;
+      const response = await graphQLClient.request(query, {}, {
+        Authorization: `JWT ${token}`,
+      });
+      const { docs }: PaginatedDocs<RichTextField> = response.RichTextFields;
+      const uploadElement = docs[0].richText.find((el) => el.type === 'upload') as any;
+      expect(uploadElement.value.media.filename).toStrictEqual('payload.png');
     });
   });
 });

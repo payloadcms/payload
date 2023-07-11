@@ -21,7 +21,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
       customProps: {
         setDrawerIsOpen,
         draggableProps,
-        onSave,
+        // onSave,
       } = {},
     } = {},
   } = props;
@@ -70,7 +70,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             </Tooltip>
             <Edit />
           </DocumentDrawerToggler>
-          <DocumentDrawer onSave={onSave} />
+          <DocumentDrawer onSave={/* onSave */null} />
         </Fragment>
       )}
     </div>

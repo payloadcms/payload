@@ -6,13 +6,13 @@ desc: Upload fields will allow a file to be uploaded, only from a collection sup
 keywords: upload, images media, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-<Banner >
+<Banner>
   The Upload field allows for the selection of a Document from a collection supporting Uploads, and formats the selection as a thumbnail in the Admin panel.
 </Banner>
 
 <Banner type="warning">
-  <strong>Important:</strong><br/>
-  To use this field, you need to have a Collection configured to allow Uploads. For more information, <a href="/docs/upload/overview">click here</a> to read about how to enable Uploads on a collection by collection basis.
+  <strong>Important:</strong><br />
+  To use this field, you need to have a Collection configured to allow Uploads. For more information, [click here](/docs/upload/overview) to read about how to enable Uploads on a collection by collection basis.
 </Banner>
 
 **Example uses:**
@@ -23,10 +23,10 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
 
 ### Config
 
-| Option           | Description                                                                                                                                                                                         |
-| ---------------- |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`name`** *         | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
-| **`*relationTo`** *  | Provide a single collection `slug` to allow this field to accept a relation to. <strong>Note: the related collection must be configured to support Uploads.</strong>                                |
+| Option               | Description                                                                                                                                                                                         |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*        | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
+| **`*relationTo`** \* | Provide a single collection `slug` to allow this field to accept a relation to. <strong>Note: the related collection must be configured to support Uploads.</strong>                                |
 | **`filterOptions`**  | A query to filter which options appear in the UI and validate against. [More](#filtering-upload-options).                                                                                           |
 | **`maxDepth`**       | Sets a number limit on iterations of related documents to populate when queried. [Depth](/docs/getting-started/concepts#depth)                                                                      |
 | **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
@@ -41,28 +41,28 @@ keywords: upload, images media, fields, config, configuration, documentation, Co
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
 | **`required`**       | Require this field to have a value.                                                                                                                                                                 |
 | **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                                            |
-| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins)                                                                                                                                           |
 
-*\* An asterisk denotes that a property is required.*
+_\* An asterisk denotes that a property is required._
 
 ### Example
 
 `collections/ExampleCollection.ts`
+
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from "payload/types";
 
 export const ExampleCollection: CollectionConfig = {
-  slug: 'example-collection',
+  slug: "example-collection",
   fields: [
     {
-      name: 'backgroundImage', // required
-      type: 'upload', // required
-      relationTo: 'media', // required
+      name: "backgroundImage", // required
+      type: "upload", // required
+      relationTo: "media", // required
       required: true,
-    }
-  ]
-}
-
+    },
+  ],
+};
 ```
 
 ### Filtering upload options
@@ -71,23 +71,23 @@ Options can be dynamically limited by supplying a [query constraint](/docs/queri
 
 The `filterOptions` property can either be a `Where` query directly, or a function that returns one. When using a function, it will be called with an argument object with the following properties:
 
-| Property      | Description  |
-| ------------- | -------------|
-| `relationTo`       | The `relationTo` to filter against (as defined on the field) |
-| `data`             | An object of the full collection or global document currently being edited |
-| `siblingData`      | An object of the document data limited to fields within the same parent to the field |
-| `id`               | The value of the collection `id`, will be `undefined` on create request |
-| `user`             | The currently authenticated user object |
+| Property      | Description                                                                          |
+| ------------- | ------------------------------------------------------------------------------------ |
+| `relationTo`  | The `relationTo` to filter against (as defined on the field)                         |
+| `data`        | An object of the full collection or global document currently being edited           |
+| `siblingData` | An object of the document data limited to fields within the same parent to the field |
+| `id`          | The value of the collection `id`, will be `undefined` on create request              |
+| `user`        | The currently authenticated user object                                              |
 
 **Example:**
 
 ```ts
 const uploadField = {
-  name: 'image',
-  type: 'upload',
-  relationTo: 'media',
+  name: "image",
+  type: "upload",
+  relationTo: "media",
   filterOptions: {
-    mimeType: { contains: 'image' },
+    mimeType: { contains: "image" },
   },
 };
 ```
@@ -95,6 +95,6 @@ const uploadField = {
 You can learn more about writing queries [here](/docs/queries/overview).
 
 <Banner type="warning">
-  <strong>Note:</strong><br/>
+  <strong>Note:</strong><br />
   When an upload field has both <strong>filterOptions</strong> and a custom <strong>validate</strong> function, the api will not validate <strong>filterOptions</strong> unless you call the default upload field validation function imported from <strong>payload/fields/validations</strong> in your validate function.
 </Banner>

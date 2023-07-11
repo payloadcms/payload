@@ -20,7 +20,14 @@ export type FieldPermissions = {
     permission: boolean
   }
   fields?: {
-    [field: string]: FieldPermissions
+    [fieldName: string]: FieldPermissions
+  }
+  blocks?: {
+    [blockSlug: string]: {
+      fields: {
+        [fieldName: string]: FieldPermissions
+      }
+    }
   }
 }
 
@@ -31,7 +38,7 @@ export type CollectionPermission = {
   delete: Permission
   readVersions?: Permission
   fields: {
-    [field: string]: FieldPermissions
+    [fieldName: string]: FieldPermissions
   }
 }
 
@@ -40,7 +47,7 @@ export type GlobalPermission = {
   update: Permission
   readVersions?: Permission
   fields: {
-    [field: string]: FieldPermissions
+    [fieldName: string]: FieldPermissions
   }
 }
 
