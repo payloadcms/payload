@@ -43,7 +43,7 @@ const initialContextState: Context = {
   formRef: null,
   reset,
   replaceState: () => undefined,
-  calculateNestedErrorPaths: () => undefined,
+  buildRowErrors: () => undefined,
 };
 
 export default initialContextState;
