@@ -65,8 +65,8 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
 
   return (
     <div
-      key={`${path}-row-${rowIndex}`}
-      id={`${path}-row-${rowIndex}`}
+      key={`${parentPath}-row-${rowIndex}`}
+      id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
       ref={setNodeRef}
       style={{
         transform,

@@ -53,7 +53,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   fields,
 }) => {
   const path = `${parentPath}.${rowIndex}`;
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const hasSubmitted = useFormSubmitted();
 
   const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(2, '0')}`;
@@ -68,8 +68,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
 
   return (
     <div
-      key={`${path}-row-${row.id}`}
-      id={`${path}-row-${rowIndex}`}
+      key={`${parentPath}-row-${row.id}`}
+      id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
       ref={setNodeRef}
       style={{
         transform,
