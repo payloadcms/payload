@@ -448,24 +448,36 @@ export const polygon: Validate<unknown, unknown, PolygonField> = (value: Polygon
 
     if (value.type !== 'Polygon') {
       return t('validation:invalidInput');
-    }
 
-    if (value.coordinates.length >= 4) {
+    } else if (value.coordinates.length > 1) {
+      return t('validation:greaterThanMax', { value: value.coordinates.length, max: 1, label: 'polygons' })
 
-      const errors = value.coordinates.reduce((acc, next) => {
-        const isValid = point(next, { t, required })
-        return isValid ? acc : [...acc, isValid]
-      }, [])
-
-      // TODO: review if this is the best way to handle multiple errors
-      return errors[0] || true
+    } else if (value.coordinates.length < 1) {
+      return t('validation:lessThaMin', { value: value.coordinates.length, min: 1, label: 'polygons' });
 
     } else {
-      // TODO: add points to translation files
-      return t('validation:lessThaMin', { value: value.coordinates.length, min: 4, label: 'points' });
+      const coordinates = value.coordinates[0]
 
+      if (coordinates.length < 4) {
+        return t('validation:lessThaMin', { value: coordinates.length, min: 4, label: 'points' });
+
+      } else {
+        const errors = coordinates.reduce((acc, next) => {
+          const isValid = point(next, { t, required })
+          return isValid === true ? acc : [...acc, isValid]
+        }, [])
+
+        // TODO: review if this is the best way to handle multiple errors
+        if (errors.length > 0) {
+          return errors[0]
+
+        } else {
+          const first = coordinates[0];
+          const last = coordinates[coordinates.length - 1];
+          return first[0] === last[0] && first[1] === last[1] ? true : 'Invalid Polygon';
+        }
+      }
     }
-
   }
 
   return required ? t('validation:required') : true;

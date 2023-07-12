@@ -483,7 +483,7 @@ export type PolygonField = FieldBase & {
 
 export type PolygonValue = {
   type: 'Polygon';
-  coordinates: [number | string, number | string][];
+  coordinates: [number | string, number | string][][];
 }
 
 export type Field =
