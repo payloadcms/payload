@@ -1,4 +1,5 @@
 // @ts-nocheck
+
 /**
  * Simple object check.
  * @param item
@@ -18,7 +19,6 @@ export default function deepMerge<T, R>(target: T, source: R): T {
   if (isObject(target) && isObject(source)) {
     Object.keys(source).forEach(key => {
       if (isObject(source[key])) {
-        // @ts-expect-error
         if (!(key in target)) {
           Object.assign(output, { [key]: source[key] })
         } else {

@@ -68,6 +68,7 @@ export const UserFields: CollectionConfig['fields'] = [
         name: 'items',
         label: 'Items',
         type: 'array',
+        interfaceName: 'CartItems',
         fields: [
           {
             name: 'product',

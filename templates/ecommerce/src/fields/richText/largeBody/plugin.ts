@@ -1,13 +1,19 @@
 import type { RichTextCustomElement } from 'payload/types'
+import type { BaseEditor } from 'slate'
 
-// @ts-expect-error
-const withLargeBody: RichTextCustomElement['plugins'][0] = incomingEditor => {
-  const editor = incomingEditor
+type RichTextPlugin = Exclude<RichTextCustomElement['plugins'], undefined>[0]
+
+const withLargeBody: RichTextPlugin = incomingEditor => {
+  const editor: BaseEditor & {
+    shouldBreakOutOnEnter?: (element: any) => boolean
+  } = incomingEditor
 
   const { shouldBreakOutOnEnter } = editor
 
-  editor.shouldBreakOutOnEnter = element =>
-    element.type === 'large-body' ? true : shouldBreakOutOnEnter(element)
+  if (shouldBreakOutOnEnter) {
+    editor.shouldBreakOutOnEnter = element =>
+      element.type === 'large-body' ? true : shouldBreakOutOnEnter(element)
+  }
 
   return editor
 }

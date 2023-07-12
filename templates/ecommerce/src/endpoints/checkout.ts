@@ -1,7 +1,7 @@
 import type { PayloadHandler } from 'payload/config'
 import Stripe from 'stripe'
 
-import type { User } from '../payload-types'
+import type { CartItems } from '../payload-types'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2022-08-01',
@@ -53,41 +53,38 @@ export const checkout: PayloadHandler = async (req, res): Promise<void> => {
 
     // for each item in cart, create an invoice item and send the invoice
     await Promise.all(
-      fullUser?.cart?.items?.map(
-        // @ts-expect-error
-        async (item: User['cart']['items'][0]): Promise<Stripe.InvoiceItem | null> => {
-          const { product } = item
+      fullUser?.cart?.items?.map(async (item: CartItems[0]): Promise<Stripe.InvoiceItem | null> => {
+        const { product } = item
 
-          if (typeof product === 'string' || !product.stripeProductID) {
-            throw new Error('No Stripe Product ID')
-          }
+        if (typeof product === 'string' || !product?.stripeProductID) {
+          throw new Error('No Stripe Product ID')
+        }
 
-          const prices = await stripe.prices.list({
-            product: product.stripeProductID,
-            limit: 100,
-            expand: ['data.product'],
-          })
+        const prices = await stripe.prices.list({
+          product: product.stripeProductID,
+          limit: 100,
+          expand: ['data.product'],
+        })
 
-          if (prices.data.length === 0) {
-            res.status(404).json({ error: 'There are no items in your cart to checkout with' })
-            return null
-          }
-
-          const price = prices.data[0]
-
-          // price.type === 'recurring' is a subscription, which uses the Subscriptions API
-          // that is out of scope for this boilerplate
-          if (price.type === 'one_time') {
-            return stripe.invoiceItems.create({
-              customer: stripeCustomerID,
-              price: price.id,
-              invoice: invoice.id,
-            })
-          }
-
+        if (prices.data.length === 0) {
+          res.status(404).json({ error: 'There are no items in your cart to checkout with' })
           return null
-        },
-      ),
+        }
+
+        const price = prices.data[0]
+
+        // price.type === 'recurring' is a subscription, which uses the Subscriptions API
+        // that is out of scope for this boilerplate
+        if (price.type === 'one_time') {
+          return stripe.invoiceItems.create({
+            customer: stripeCustomerID,
+            price: price.id,
+            invoice: invoice.id,
+          })
+        }
+
+        return null
+      }),
     )
 
     // send the invoice to Stripe

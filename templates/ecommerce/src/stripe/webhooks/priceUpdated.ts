@@ -41,9 +41,9 @@ export const priceUpdated: StripeWebhookHandler<{
           `- Found existing product with Stripe ID: ${stripeProductID}, saving price...`,
         )
     }
-  } catch (error: unknown) {
-    // @ts-expect-error
-    payload.logger.error(`Error finding product ${error?.message}`)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error'
+    payload.logger.error(`Error finding product ${msg}`)
   }
 
   try {

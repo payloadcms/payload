@@ -6,6 +6,12 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+export type CartItems = {
+  product?: string | Product;
+  quantity?: number;
+  id?: string;
+}[];
+
 export interface Config {
   collections: {
     users: User;
@@ -28,11 +34,7 @@ export interface User {
   purchases?: string[] | Product[];
   stripeCustomerID?: string;
   cart?: {
-    items?: {
-      product?: string | Product;
-      quantity?: number;
-      id?: string;
-    }[];
+    items?: CartItems;
   };
   skipSync?: boolean;
   updatedAt: string;

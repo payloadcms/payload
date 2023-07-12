@@ -1,8 +1,8 @@
-import type { Product, User } from '../../../payload-types'
+import type { CartItems, Product, User } from '../../../payload-types'
+
+export type CartItem = CartItems[0]
 
 type CartType = User['cart']
-
-export type CartItem = User['cart']['items'][0]
 
 type CartAction =
   | {
@@ -37,12 +37,12 @@ export const cartReducer = (cart: CartType, action: CartAction): CartType => {
       const syncedItems: CartItem[] = [
         ...(cart?.items || []),
         ...(incomingCart?.items || []),
-      ].reduce((acc, item) => {
+      ].reduce((acc: CartItem[], item) => {
         // remove duplicates
-        const productId = typeof item.product === 'string' ? item.product : item.product.id
+        const productId = typeof item.product === 'string' ? item.product : item?.product?.id
 
         const indexInAcc = acc.findIndex(({ product }) =>
-          typeof product === 'string' ? product === productId : product.id === productId,
+          typeof product === 'string' ? product === productId : product?.id === productId,
         ) // eslint-disable-line function-paren-newline
 
         if (indexInAcc > -1) {
@@ -67,10 +67,10 @@ export const cartReducer = (cart: CartType, action: CartAction): CartType => {
       // if the item is already in the cart, increase the quantity
       const { payload: incomingItem } = action
       const productId =
-        typeof incomingItem.product === 'string' ? incomingItem.product : incomingItem.product.id
+        typeof incomingItem.product === 'string' ? incomingItem.product : incomingItem?.product?.id
 
-      const indexInCart = cart.items.findIndex(({ product }) =>
-        typeof product === 'string' ? product === productId : product.id === productId,
+      const indexInCart = cart?.items?.findIndex(({ product }) =>
+        typeof product === 'string' ? product === productId : product?.id === productId,
       ) // eslint-disable-line function-paren-newline
 
       let withAddedItem = [...(cart?.items || [])]
@@ -79,10 +79,10 @@ export const cartReducer = (cart: CartType, action: CartAction): CartType => {
         withAddedItem.push(incomingItem)
       }
 
-      if (indexInCart > -1) {
+      if (typeof indexInCart === 'number' && indexInCart > -1) {
         withAddedItem[indexInCart] = {
           ...withAddedItem[indexInCart],
-          quantity: incomingItem.quantity > 0 ? incomingItem.quantity : 1,
+          quantity: (incomingItem?.quantity || 0) > 0 ? incomingItem.quantity : 1,
         }
       }
 
@@ -96,13 +96,14 @@ export const cartReducer = (cart: CartType, action: CartAction): CartType => {
       const { payload: incomingProduct } = action
       const withDeletedItem = { ...cart }
 
-      const indexInCart = cart.items.findIndex(({ product }) =>
+      const indexInCart = cart?.items?.findIndex(({ product }) =>
         typeof product === 'string'
           ? product === incomingProduct.id
-          : product.id === incomingProduct.id,
+          : product?.id === incomingProduct.id,
       ) // eslint-disable-line function-paren-newline
 
-      if (indexInCart > -1) withDeletedItem.items.splice(indexInCart, 1)
+      if (typeof indexInCart === 'number' && withDeletedItem.items && indexInCart > -1)
+        withDeletedItem.items.splice(indexInCart, 1)
 
       return withDeletedItem
     }
