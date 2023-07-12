@@ -20,6 +20,7 @@
   --modal-z-index: 90;
   --foreground: var(--color-base-1000);
   --background: var(--color-base-0);
+  --background-light: var(--color-base-100);
 
   @include large-break {
     --gutter-h: 144px;
@@ -36,6 +37,7 @@
   :root {
     --foreground: var(--color-base-0);
     --background: var(--color-base-1000);
+    --background-light: var(--color-base-850);
   }
 }
 /////////////////////////////

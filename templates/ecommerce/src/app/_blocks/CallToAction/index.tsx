@@ -1,9 +1,6 @@
-'use client'
-
 import React from 'react'
-import { Cell, Grid } from '@faceless-ui/css-grid'
 
-import { Page } from '../../../payload-types'
+import { Page } from '../../../payload/payload-types'
 import { BackgroundColor } from '../../_components/BackgroundColor'
 import { Gutter } from '../../_components/Gutter'
 import { CMSLink } from '../../_components/Link'
@@ -18,29 +15,21 @@ export const CallToActionBlock: React.FC<
   Props & {
     id?: string
   }
-> = ({ ctaBackgroundColor, links, richText }) => {
-  const oppositeBackgroundColor = ctaBackgroundColor === 'white' ? 'black' : 'white'
-
+> = ({ links, richText }) => {
   return (
     <Gutter>
-      <BackgroundColor color={oppositeBackgroundColor}>
-        <VerticalPadding className={classes.callToAction}>
-          <Grid>
-            <Cell cols={8} colsL={7} colsM={12}>
-              <div>
-                <RichText className={classes.richText} content={richText} />
-              </div>
-            </Cell>
-            <Cell start={10} cols={3} startL={9} colsL={4} startM={1} colsM={12}>
-              <div className={classes.linkGroup}>
-                {(links || []).map(({ link }, i) => {
-                  return <CMSLink key={i} {...link} />
-                })}
-              </div>
-            </Cell>
-          </Grid>
-        </VerticalPadding>
-      </BackgroundColor>
+      <VerticalPadding className={classes.callToAction}>
+        <div className={classes.wrap}>
+          <div className={classes.content}>
+            <RichText className={classes.richText} content={richText} />
+          </div>
+          <div className={classes.linkGroup}>
+            {(links || []).map(({ link }, i) => {
+              return <CMSLink key={i} {...link} />
+            })}
+          </div>
+        </div>
+      </VerticalPadding>
     </Gutter>
   )
 }

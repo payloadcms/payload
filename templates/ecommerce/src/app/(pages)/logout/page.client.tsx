@@ -3,7 +3,7 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import Link from 'next/link'
 
-import { Settings } from '../../../payload-types'
+import { Settings } from '../../../payload/payload-types'
 import { Gutter } from '../../_components/Gutter'
 import { useAuth } from '../../_providers/Auth'
 

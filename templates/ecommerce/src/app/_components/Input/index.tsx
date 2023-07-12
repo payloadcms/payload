@@ -21,11 +21,11 @@ export const Input: React.FC<Props> = ({
   type = 'text',
 }) => {
   return (
-    <div className={classes.input}>
+    <div className={classes.inputWrap}>
       <label htmlFor="name" className={classes.label}>
         {`${label} ${required ? '*' : ''}`}
       </label>
-      <input {...{ type }} {...register(name, { required })} />
+      <input className={classes.input} {...{ type }} {...register(name, { required })} />
       {error && <div className={classes.error}>This field is required</div>}
     </div>
   )

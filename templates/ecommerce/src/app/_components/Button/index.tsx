@@ -1,7 +1,7 @@
+'use client'
+
 import React, { ElementType } from 'react'
 import Link from 'next/link'
-
-import { useBackgroundColor } from '../BackgroundColor'
 
 import classes from './index.module.scss'
 
@@ -15,6 +15,7 @@ export type Props = {
   className?: string
   type?: 'submit' | 'button'
   disabled?: boolean
+  color?: 'white' | 'black'
 }
 
 export const Button: React.FC<Props> = ({
@@ -27,16 +28,15 @@ export const Button: React.FC<Props> = ({
   onClick,
   type = 'button',
   disabled,
+  color: colorFromProps,
 }) => {
   let el = elFromProps
-  const backgroundColor = useBackgroundColor()
   const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
   const className = [
     classes.button,
     classNameFromProps,
     classes[`appearance--${appearance}`],
-    classes[`${appearance}--${backgroundColor}`],
-    classes.button,
+    classes[`${appearance}--${colorFromProps}`],
   ]
     .filter(Boolean)
     .join(' ')

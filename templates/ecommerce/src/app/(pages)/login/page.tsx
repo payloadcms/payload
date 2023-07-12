@@ -75,7 +75,7 @@ const Login: React.FC = () => {
           register={register}
           error={errors.password}
         />
-        <Button type="submit" appearance="primary" label="Login" />
+        <Button type="submit" appearance="primary" label="Login" className={classes.submit} />
       </form>
       <Link href="/create-account">Create an account</Link>
       <br />

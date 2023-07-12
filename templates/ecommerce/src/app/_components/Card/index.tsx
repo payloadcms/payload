@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import Link from 'next/link'
 
-import { Product } from '../../../payload-types'
+import { Product } from '../../../payload/payload-types'
 import { Media } from '../Media'
 import { Price } from '../Price'
 

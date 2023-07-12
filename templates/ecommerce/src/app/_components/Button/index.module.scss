@@ -33,6 +33,16 @@
   padding: 12px 24px;
 }
 
+.appearance--primary {
+  background-color: var(--foreground);
+  color: var(--background);
+}
+
+.appearance--secondary {
+  background-color: var(--background);
+  box-shadow: inset 0 0 0 1px var(--foreground);
+}
+
 .primary--white {
   background-color: var(--foreground);
   color: var(--background);

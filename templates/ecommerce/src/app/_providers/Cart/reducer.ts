@@ -1,4 +1,4 @@
-import type { CartItems, Product, User } from '../../../payload-types'
+import type { CartItems, Product, User } from '../../../payload/payload-types'
 
 export type CartItem = CartItems[0]
 
@@ -82,7 +82,7 @@ export const cartReducer = (cart: CartType, action: CartAction): CartType => {
       if (typeof indexInCart === 'number' && indexInCart > -1) {
         withAddedItem[indexInCart] = {
           ...withAddedItem[indexInCart],
-          quantity: (incomingItem?.quantity || 0) > 0 ? incomingItem.quantity : 1,
+          quantity: (incomingItem.quantity || 0) > 0 ? incomingItem.quantity : 1,
         }
       }
 

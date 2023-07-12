@@ -1,9 +1,9 @@
 'use client'
 
 import React from 'react'
-import { Modal } from '@faceless-ui/modal'
+import { Modal, ModalToggler } from '@faceless-ui/modal'
 
-import { Header } from '../../../payload-types'
+import { Header } from '../../../payload/payload-types'
 import { Gutter } from '../Gutter'
 import { CMSLink } from '../Link'
 
@@ -23,6 +23,12 @@ export const MobileMenuModal: React.FC<Props> = ({ navItems }) => {
           {navItems?.map(({ link }, i) => {
             return <CMSLink className={classes.menuItem} key={i} {...link} />
           })}
+          <ModalToggler
+            slug={slug}
+            className={[classes.menuItem, classes.close].filter(Boolean).join(' ')}
+          >
+            Close
+          </ModalToggler>
         </div>
       </Gutter>
     </Modal>

@@ -1,6 +1,8 @@
+'use client'
+
 import React, { useEffect, useState } from 'react'
 
-import { Product } from '../../../payload-types'
+import { Product } from '../../../payload/payload-types'
 import { AddToCartButton } from '../AddToCartButton'
 import { RemoveFromCartButton } from '../RemoveFromCartButton'
 

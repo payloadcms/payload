@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter, useSearchParams } from 'next/navigation'
 
+import { Button } from '../../_components/Button'
 import { Gutter } from '../../_components/Gutter'
 import { Input } from '../../_components/Input'
 import { useAuth } from '../../_providers/Auth'
@@ -78,7 +79,7 @@ const ResetPassword: React.FC = () => {
           error={errors.password}
         />
         <input type="hidden" {...register('token')} />
-        <button type="submit">Submit</button>
+        <Button type="submit" appearance="primary" label="Submit" className={classes.submit} />
       </form>
     </Gutter>
   )

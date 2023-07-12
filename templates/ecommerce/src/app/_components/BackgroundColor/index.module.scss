@@ -1,9 +1,9 @@
-.white {
-  color: var(--color-base-1000);
-  background-color: var(--color-base-0);
-}
+.invert {
+  background-color: var(--foreground);
+  color: var(--background);
 
-.black {
-  color: var(--color-base-0);
-  background-color: var(--color-base-1000);
+  @media (prefers-color-scheme: dark) {
+    background-color: var(--background-light);
+    color: var(--foreground);
+  }
 }

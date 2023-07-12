@@ -19,7 +19,6 @@ export const CheckoutForm: React.FC<{}> = () => {
 
       try {
         const {
-          // @ts-expect-error
           error: stripeError,
           // paymentIntent,
         } = await stripe?.confirmPayment({

@@ -1,4 +1,4 @@
-import type { Config, Footer, Header, Settings } from '../payload-types'
+import type { Config, Footer, Header, Settings } from '../payload/payload-types'
 
 export const fetchDoc = async <T>(
   collection: keyof Config['collections'],

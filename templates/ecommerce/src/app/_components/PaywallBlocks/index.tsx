@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react'
 
-import { Page } from '../../../payload-types'
+import { Page } from '../../../payload/payload-types'
 import { useAuth } from '../../_providers/Auth'
 import { Blocks } from '../Blocks'
 

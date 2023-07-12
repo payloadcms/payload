@@ -3,11 +3,12 @@
 import React, { Fragment } from 'react'
 import Link from 'next/link'
 
-import { Page, Settings } from '../../../payload-types'
+import { Page, Settings } from '../../../payload/payload-types'
 import { Blocks } from '../../_components/Blocks'
 import { Button } from '../../_components/Button'
 import { Gutter } from '../../_components/Gutter'
 import { Hero } from '../../_components/Hero'
+import { Input } from '../../_components/Input'
 import { Media } from '../../_components/Media'
 import { Price } from '../../_components/Price'
 import { RemoveFromCartButton } from '../../_components/RemoveFromCartButton'
@@ -95,6 +96,7 @@ export const CartPageClient: React.FC<{
                           Quantity &nbsp;
                           <input
                             type="number"
+                            className={classes.quantity}
                             value={quantity}
                             onChange={e => {
                               addItemToCart({

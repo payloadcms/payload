@@ -1,8 +1,8 @@
 import React from 'react'
 import { notFound } from 'next/navigation'
 
-import { Page } from '../../../payload-types'
-import { staticHome } from '../../../seed/static-home'
+import { Page } from '../../../payload/payload-types'
+import { staticHome } from '../../../payload/seed/static-home'
 import { Blocks } from '../../_components/Blocks'
 import { Hero } from '../../_components/Hero'
 import { fetchDoc, fetchDocs } from '../../cms'

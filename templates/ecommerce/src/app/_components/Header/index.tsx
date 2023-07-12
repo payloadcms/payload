@@ -4,7 +4,7 @@ import React from 'react'
 import { ModalToggler } from '@faceless-ui/modal'
 import Link from 'next/link'
 
-import { Header as HeaderType } from '../../../payload-types'
+import { Header as HeaderType } from '../../../payload/payload-types'
 import { useAuth } from '../../_providers/Auth'
 import { CartLink } from '../CartLink'
 import { Gutter } from '../Gutter'

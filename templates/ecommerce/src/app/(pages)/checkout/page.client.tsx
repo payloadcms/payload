@@ -6,7 +6,7 @@ import { loadStripe } from '@stripe/stripe-js'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { Settings } from '../../../payload-types'
+import { Settings } from '../../../payload/payload-types'
 import { CheckoutForm } from '../../_components/CheckoutForm'
 import { Gutter } from '../../_components/Gutter'
 import { Media } from '../../_components/Media'

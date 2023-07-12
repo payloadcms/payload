@@ -8,6 +8,8 @@
   padding: 0;
   opacity: 1;
   display: none;
+  background-color: var(--background);
+  color: var(--foreground);
 
   @include mid-break {
     display: block;
@@ -23,6 +25,20 @@
   flex-direction: column;
   height: 100%;
   margin-top: 30px;
+}
+
+.close {
+  display: block;
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  line-height: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  text-align: left;
 }
 
 .menuItem {

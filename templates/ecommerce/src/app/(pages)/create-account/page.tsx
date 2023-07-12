@@ -4,7 +4,7 @@ import React, { Fragment, useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Link from 'next/link'
 
-import { User } from '../../../payload-types'
+import { User } from '../../../payload/payload-types'
 import { Button } from '../../_components/Button'
 import { Gutter } from '../../_components/Gutter'
 import { Input } from '../../_components/Input'
@@ -84,8 +84,12 @@ const CreateAccount: React.FC = () => {
               register={register}
               error={errors.passwordConfirm}
             />
-            <Input name="name" label="Name" required register={register} error={errors.name} />
-            <Button type="submit" label="Create account" appearance="primary" />
+            <Button
+              type="submit"
+              label="Create account"
+              appearance="primary"
+              className={classes.submit}
+            />
           </form>
           <Fragment>
             {'Already have an account? '}

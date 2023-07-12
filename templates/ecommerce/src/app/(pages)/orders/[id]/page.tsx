@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { Order as OrderType } from '../../../../payload-types'
+import { Order as OrderType } from '../../../../payload/payload-types'
 import { Button } from '../../../_components/Button'
 import { Gutter } from '../../../_components/Gutter'
 import { Media } from '../../../_components/Media'
@@ -13,7 +13,7 @@ import { fetchDocs } from '../../../cms'
 
 import classes from './index.module.scss'
 
-const Order = async ({ params: { id } }) => {
+const Order = ({ params: { id } }) => {
   const [error] = useState('')
   const [loading, setLoading] = useState(true)
   const { user } = useAuth()

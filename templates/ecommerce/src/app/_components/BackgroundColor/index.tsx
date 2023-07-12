@@ -1,28 +1,20 @@
-'use client'
-
-import React, { createContext, useContext } from 'react'
+import React from 'react'
 
 import classes from './index.module.scss'
 
-export type BackgroundColorType = 'white' | 'black'
-
-export const BackgroundColorContext = createContext<BackgroundColorType>('white')
-
-export const useBackgroundColor = (): BackgroundColorType => useContext(BackgroundColorContext)
-
 type Props = {
-  color?: BackgroundColorType
+  invert?: boolean
   className?: string
   children?: React.ReactNode
   id?: string
 }
 
 export const BackgroundColor: React.FC<Props> = props => {
-  const { id, className, children, color = 'white' } = props
+  const { id, className, children, invert } = props
 
   return (
-    <div id={id} className={[classes[color], className].filter(Boolean).join(' ')}>
-      <BackgroundColorContext.Provider value={color}>{children}</BackgroundColorContext.Provider>
+    <div id={id} className={[invert && classes.invert, className].filter(Boolean).join(' ')}>
+      {children}
     </div>
   )
 }

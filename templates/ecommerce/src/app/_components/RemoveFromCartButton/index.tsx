@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Product } from '../../../payload-types'
+import { Product } from '../../../payload/payload-types'
 import { useCart } from '../../_providers/Cart'
 
 import classes from './index.module.scss'

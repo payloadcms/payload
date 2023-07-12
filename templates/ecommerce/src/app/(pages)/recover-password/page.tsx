@@ -65,7 +65,7 @@ const RecoverPassword: React.FC = () => {
               register={register}
               error={errors.email}
             />
-            <Button type="submit" appearance="primary" label="Submit" />
+            <Button type="submit" appearance="primary" label="Submit" className={classes.submit} />
           </form>
         </React.Fragment>
       )}

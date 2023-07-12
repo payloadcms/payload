@@ -1,7 +1,4 @@
-'use client'
-
 import React from 'react'
-import { Cell, Grid } from '@faceless-ui/css-grid'
 
 import { CollectionArchive } from '../../_components/CollectionArchive'
 import { Gutter } from '../../_components/Gutter'
@@ -30,11 +27,7 @@ export const ArchiveBlock: React.FC<
     <div id={`block-${id}`} className={classes.archiveBlock}>
       {introContent && (
         <Gutter className={classes.introContent}>
-          <Grid>
-            <Cell cols={12} colsM={8}>
-              <RichText content={introContent} />
-            </Cell>
-          </Grid>
+          <RichText content={introContent} />
         </Gutter>
       )}
       <CollectionArchive

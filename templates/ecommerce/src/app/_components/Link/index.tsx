@@ -1,8 +1,8 @@
 import React from 'react'
 import Link from 'next/link'
 
-import { Page } from '../../../payload-types'
-import { Button } from '../Button'
+import { Page } from '../../../payload/payload-types'
+import { Button, Props as ButtonProps } from '../Button'
 
 type CMSLinkType = {
   type?: 'custom' | 'reference'
@@ -16,6 +16,7 @@ type CMSLinkType = {
   appearance?: 'default' | 'primary' | 'secondary'
   children?: React.ReactNode
   className?: string
+  color?: ButtonProps['color']
 }
 
 export const CMSLink: React.FC<CMSLinkType> = ({
@@ -27,6 +28,7 @@ export const CMSLink: React.FC<CMSLinkType> = ({
   appearance,
   children,
   className,
+  color,
 }) => {
   const href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
@@ -55,12 +57,14 @@ export const CMSLink: React.FC<CMSLinkType> = ({
     }
   }
 
-  const buttonProps = {
-    newTab,
-    href,
-    appearance,
-    label,
-  }
-
-  return <Button className={className} {...buttonProps} />
+  return (
+    <Button
+      className={className}
+      newTab={newTab}
+      href={href}
+      appearance={appearance}
+      label={label}
+      color={color}
+    />
+  )
 }

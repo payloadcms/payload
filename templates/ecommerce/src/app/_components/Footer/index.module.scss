@@ -3,8 +3,13 @@
 .footer {
   padding: calc(var(--base) * 4) 0;
   z-index: var(--header-z-index);
-  background-color: var(--color-base-1000);
-  color: var(--color-base-0);
+  background-color: var(--foreground);
+  color: var(--background);
+
+  @media (prefers-color-scheme: dark) {
+    background-color: var(--background-light);
+    color: var(--foreground);
+  }
 }
 
 .wrap {

@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 
-import { Footer as FooterType } from '../../../payload-types'
+import { Footer as FooterType } from '../../../payload/payload-types'
 import { Gutter } from '../Gutter'
 import { CMSLink } from '../Link'
 
@@ -15,14 +15,10 @@ export const Footer: React.FC<{ footer: FooterType }> = ({ footer }) => {
       <Gutter className={classes.wrap}>
         <Link href="/">
           <picture>
-            <source
-              media="(prefers-color-scheme: dark)"
-              srcSet="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-light.svg"
-            />
             <img
               className={classes.logo}
               alt="Payload Logo"
-              src="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-dark.svg"
+              src="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-light.svg"
             />
           </picture>
         </Link>

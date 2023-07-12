@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 
-import { Page } from '../../../payload-types.js'
+import { Page } from '../../../payload/payload-types.js'
 import { ArchiveBlock } from '../../_blocks/ArchiveBlock'
 import { CallToActionBlock } from '../../_blocks/CallToAction'
 import { ContentBlock } from '../../_blocks/Content'
@@ -32,24 +32,23 @@ export const Blocks: React.FC<{
 
           if (blockType && blockType in blockComponents) {
             const Block = blockComponents[blockType]
-            const backgroundColor = 'backgroundColor' in block ? block.backgroundColor : 'white'
+            const blockIsInverted = 'invertBackground' in block ? block.invertBackground : false
             const prevBlock = blocks[index - 1]
             const nextBlock = blocks[index + 1]
 
-            const prevBlockBackground =
-              prevBlock?.[`${prevBlock.blockType}`]?.backgroundColor || 'white'
-            const nextBlockBackground =
-              nextBlock?.[`${nextBlock.blockType}`]?.backgroundColor || 'white'
+            const prevBlockInverted =
+              (prevBlock && 'invertBackground' in prevBlock && prevBlock?.invertBackground) || false
+            const nextBlockInverted =
+              (nextBlock && 'invertBackground' in nextBlock && nextBlock?.invertBackground) || false
+
+            const isPrevSame = Boolean(blockIsInverted === prevBlockInverted)
+            const isNextSame = Boolean(blockIsInverted === nextBlockInverted)
 
             let paddingTop: VerticalPaddingOptions = 'large'
             let paddingBottom: VerticalPaddingOptions = 'large'
 
-            if (backgroundColor && backgroundColor === prevBlockBackground) {
-              paddingTop = 'medium'
-            }
-
-            if (backgroundColor && backgroundColor === nextBlockBackground) {
-              paddingBottom = 'medium'
+            if (prevBlock && isPrevSame) {
+              paddingTop = 'none'
             }
 
             if (index === blocks.length - 1) {
@@ -60,13 +59,9 @@ export const Blocks: React.FC<{
               paddingTop = 'none'
             }
 
-            if (!disableTopPadding && index === 0) {
-              paddingTop = 'large'
-            }
-
             if (Block) {
               return (
-                <BackgroundColor key={index} color={backgroundColor}>
+                <BackgroundColor key={index} invert={blockIsInverted}>
                   <VerticalPadding top={paddingTop} bottom={paddingBottom}>
                     {/* @ts-ignore */}
                     <Block

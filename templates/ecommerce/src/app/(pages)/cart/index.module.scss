@@ -58,6 +58,14 @@
   margin-bottom: var(--base);
 }
 
+.quantity {
+  background-color: var(--background-light);
+  color: var(--foreground);
+  border: none;
+  outline: none;
+  padding: calc(var(--base) * 0.25) calc(var(--base) * 0.25);
+}
+
 .cartTotal {
   margin-top: var(--base);
   font-weight: 600;

@@ -1,11 +1,10 @@
 'use client'
 
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
-import { Cell, Grid } from '@faceless-ui/css-grid'
 import { useSearchParams } from 'next/navigation'
 import qs from 'qs'
 
-import { Product } from '../../../payload-types'
+import { Product } from '../../../payload/payload-types'
 import type { ArchiveBlockProps } from '../../_blocks/ArchiveBlock/types'
 import { Card } from '../Card'
 import { Gutter } from '../Gutter'
@@ -169,30 +168,26 @@ export const CollectionArchive: React.FC<Props> = props => {
         <Fragment>
           {showPageRange !== false && (
             <Gutter>
-              <Grid>
-                <Cell cols={6} colsM={4}>
-                  <div className={classes.pageRange}>
-                    <PageRange
-                      totalDocs={results.totalDocs}
-                      currentPage={results.page}
-                      collection={relationTo}
-                      limit={limit}
-                    />
-                  </div>
-                </Cell>
-              </Grid>
+              <div className={classes.pageRange}>
+                <PageRange
+                  totalDocs={results.totalDocs}
+                  currentPage={results.page}
+                  collection={relationTo}
+                  limit={limit}
+                />
+              </div>
             </Gutter>
           )}
           <Gutter>
-            <Grid className={classes.grid}>
+            <div className={classes.grid}>
               {results.docs?.map((result, index) => {
                 return (
-                  <Cell key={index} className={classes.row} cols={4} colsM={8}>
+                  <div key={index} className={classes.column}>
                     <Card relationTo="products" doc={result} showCategories />
-                  </Cell>
+                  </div>
                 )
               })}
-            </Grid>
+            </div>
           </Gutter>
         </Fragment>
       )}

@@ -10,7 +10,7 @@ import React, {
   useState,
 } from 'react'
 
-import { Product, User } from '../../../payload-types'
+import { Product, User } from '../../../payload/payload-types'
 import { useAuth } from '../Auth'
 import { CartItem, cartReducer } from './reducer'
 // import { useNotifications } from '../Notifications';
