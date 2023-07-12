@@ -15,6 +15,7 @@ import checkbox from './Checkbox';
 import richText from './RichText';
 import radio from './RadioGroup';
 import point from './Point';
+import polygon from './Polygon';
 
 import blocks from './Blocks';
 import group from './Group';
@@ -69,7 +70,7 @@ const fieldTypes: FieldTypes = {
   checkbox,
   richText,
   point,
-  polygon: json,
+  polygon,
   radio,
   blocks,
   group,
