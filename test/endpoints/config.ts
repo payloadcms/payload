@@ -124,4 +124,4 @@ const MyConfig: Config = {
   },
 };
 
-export default buildConfig(MyConfig);
+export default buildConfigWithDefaults(MyConfig);

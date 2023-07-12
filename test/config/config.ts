@@ -62,4 +62,4 @@ const config: Config = {
   custom: { name: 'Customer portal' },
 };
 
-export default buildConfig(config);
+export default buildConfigWithDefaults(config);
