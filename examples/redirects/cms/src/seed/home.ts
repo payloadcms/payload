@@ -33,7 +33,7 @@ export const home: Partial<Page> = {
           ],
         },
         {
-          text: '. This example demonstrates how to implement http redirects into Payload CMS using the official ',
+          text: '. This example demonstrates how to implement http redirects into Payload using the official ',
         },
         {
           type: 'link',

@@ -11,6 +11,8 @@ import { User } from '../types';
 import { Collection } from '../../collections/config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import unlock from './unlock';
+import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts';
+import { authenticateLocalStrategy } from '../strategies/local/authenticate';
 
 export type Result = {
   user?: User,
@@ -77,7 +79,9 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore Improper typing in library, additional args should be optional
-  const userDoc = await Model.findByUsername(email);
+  const userDoc = await Model.findOne({ email }).lean();
+
+  let user = JSON.parse(JSON.stringify(userDoc));
 
   if (!userDoc || (args.collection.config.auth.verify && userDoc._verified === false)) {
     throw new AuthenticationError(req.t);
@@ -87,12 +91,21 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     throw new LockedAuth(req.t);
   }
 
-  const authResult = await userDoc.authenticate(password);
+  const authResult = await authenticateLocalStrategy({ password, doc: user });
+
+  user = sanitizeInternalFields(user);
 
   const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0;
 
-  if (!authResult.user) {
-    if (maxLoginAttemptsEnabled) await userDoc.incLoginAttempts();
+  if (!authResult) {
+    if (maxLoginAttemptsEnabled) {
+      await incrementLoginAttempts({
+        payload: req.payload,
+        doc: user,
+        collection: collectionConfig,
+      });
+    }
+
     throw new AuthenticationError(req.t);
   }
 
@@ -107,10 +120,6 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       overrideAccess: true,
     });
   }
-
-  let user = userDoc.toJSON({ virtuals: true });
-  user = JSON.parse(JSON.stringify(user));
-  user = sanitizeInternalFields(user);
 
   const fieldsToSign = collectionConfig.fields.reduce((signedFields, field: Field) => {
     const result = {

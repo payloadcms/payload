@@ -4,7 +4,7 @@ This is a [Next.js](https://nextjs.org/) app made explicitly for Payload's [Redi
 
 ## Getting Started
 
-### Payload CMS
+### Payload
 
 First you'll need a running CMS. If you have not done so already, open up the `cms` folder alongside this example and follow the setup instructions. Take note of your server URL, you'll need this in the next step.
 
@@ -22,14 +22,14 @@ Once running you will find a couple seeded pages on your local environment with 
 
 To learn more about PayloadCMS and Next.js, take a look at the following resources:
 
-- [Payload CMS Documentation](https://payloadcms.com/docs) - learn about Payload CMS features and API.
+- [Payload Documentation](https://payloadcms.com/docs) - learn about Payload features and API.
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Payload CMS GitHub repository](https://github.com/payloadcms/payload/) as well as [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+You can check out [the Payload GitHub repository](https://github.com/payloadcms/payload/) as well as [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Payload CMS deployment documentaton](https://payloadcms.com/docs/production/deployment) or the [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Check out our [Payload deployment documentation](https://payloadcms.com/docs/production/deployment) or the [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.

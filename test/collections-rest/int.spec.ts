@@ -48,6 +48,36 @@ describe('collections-rest', () => {
       expect(result.docs).toEqual(expect.arrayContaining(expectedDocs));
     });
 
+    it('should find where id', async () => {
+      const post1 = await createPost();
+      await createPost();
+      const { status, result } = await client.find<Post>({
+        query: {
+          id: { equals: post1.id },
+        },
+      });
+
+      expect(status).toEqual(200);
+      expect(result.totalDocs).toEqual(1);
+      expect(result.docs[0].id).toEqual(post1.id);
+    });
+
+    it('should find with pagination false', async () => {
+      const post1 = await createPost();
+      const post2 = await createPost();
+
+      const { docs, totalDocs } = await payload.find({
+        collection: slug,
+        pagination: false,
+      });
+
+      const expectedDocs = [post1, post2];
+      expect(docs).toHaveLength(expectedDocs.length);
+      expect(docs).toEqual(expect.arrayContaining(expectedDocs));
+
+      expect(totalDocs).toEqual(2);
+    });
+
     it('should update existing', async () => {
       const {
         id,
@@ -260,6 +290,14 @@ describe('collections-rest', () => {
           expect(foundDoc.id).toEqual(doc.id);
         });
 
+        it('should query', async () => {
+          const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`;
+          const { doc } = await client.create({ slug: customIdSlug, data: { id: customId, name: 'custom-id-name' } });
+          const { result } = await client.find({ slug: customIdSlug, query: { id: { like: 'custom' } } });
+
+          expect(result.docs.map(({ id }) => id)).toContain(doc.id);
+        });
+
         it('should update', async () => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`;
           const { doc } = await client.create({ slug: customIdSlug, data: { id: customId, data: { name: 'custom-id-name' } } });
@@ -287,6 +325,22 @@ describe('collections-rest', () => {
           const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, name: 'custom-id-number-name' } });
           const { doc: updatedDoc } = await client.update({ slug: customIdNumberSlug, id: doc.id, data: { name: 'updated' } });
           expect(updatedDoc.name).toEqual('updated');
+        });
+
+        it('should allow querying by in', async () => {
+          const id = 98234698237;
+          await client.create({ slug: customIdNumberSlug, data: { id, name: 'query using in operator' } });
+
+          const { result: { docs } } = await client.find({
+            slug: customIdNumberSlug,
+            query: {
+              id: {
+                in: `${id}, ${2349856723948764}`,
+              },
+            },
+          });
+
+          expect(docs).toHaveLength(1);
         });
       });
     });
@@ -469,6 +523,24 @@ describe('collections-rest', () => {
       });
     });
 
+    describe('Edge cases', () => {
+      it('should query a localized field without localization configured', async () => {
+        const test = 'test';
+        await createPost({ fakeLocalization: test });
+
+        const { status, result } = await client.find({
+          query: {
+            fakeLocalization: {
+              equals: test,
+            },
+          },
+        });
+
+        expect(status).toEqual(200);
+        expect(result.docs).toHaveLength(1);
+      });
+    });
+
     describe('Operators', () => {
       it('equals', async () => {
         const valueToQuery = 'valueToQuery';
@@ -583,6 +655,22 @@ describe('collections-rest', () => {
           query: {
             title: {
               like: 'Тест',
+            },
+          },
+        });
+
+        expect(status).toEqual(200);
+        expect(result.docs).toEqual([post1]);
+        expect(result.totalDocs).toEqual(1);
+      });
+
+      it('like - cyrillic characters in multiple words', async () => {
+        const post1 = await createPost({ title: 'привет, это тест полезной нагрузки' });
+
+        const { status, result } = await client.find<Post>({
+          query: {
+            title: {
+              like: 'привет нагрузки',
             },
           },
         });
@@ -741,6 +829,38 @@ describe('collections-rest', () => {
           expect(status).toEqual(200);
           expect(result.docs).toHaveLength(0);
         });
+
+        it('should sort find results by nearest distance', async () => {
+          // creating twice as many records as we are querying to get a random sample
+          await mapAsync([...Array(10)], async () => {
+            // setTimeout used to randomize the creation timestamp
+            setTimeout(async () => {
+              await payload.create({
+                collection: pointSlug,
+                data: {
+                  // only randomize longitude to make distance comparison easy
+                  point: [Math.random(), 0],
+                },
+              });
+            }, Math.random());
+          });
+
+          const { result } = await client.find({
+            slug: pointSlug,
+            query: {
+              // querying large enough range to include all docs
+              point: { near: '0, 0, 100000, 0' },
+            },
+            limit: 5,
+          });
+          const { docs } = result;
+          let previous = 0;
+          docs.forEach((({ point: coordinates }) => {
+            // the next document point should always be greater than the one before
+            expect(previous).toBeLessThanOrEqual(coordinates[0]);
+            [previous] = coordinates;
+          }));
+        });
       });
 
       it('or', async () => {
@@ -858,6 +978,21 @@ describe('collections-rest', () => {
           expect(status).toEqual(200);
           expect(result.totalDocs).toEqual(50);
         });
+      });
+
+      it('can query deeply nested fields within rows, tabs, collapsibles', async () => {
+        const withDeeplyNestedField = await createPost({ D1: { D2: { D3: { D4: 'nested message' } } } });
+
+        const { result } = await client.find<Post>({
+          query: {
+            'D1.D2.D3.D4': {
+              equals: 'nested message',
+            },
+          },
+        });
+
+        expect(result.totalDocs).toEqual(1);
+        expect(result.docs).toEqual([withDeeplyNestedField]);
       });
     });
   });

@@ -5,7 +5,7 @@ import { useConfig } from '../../utilities/Config';
 import Eyebrow from '../../elements/Eyebrow';
 import Form from '../../forms/Form';
 import PreviewButton from '../../elements/PreviewButton';
-import FormSubmit from '../../forms/Submit';
+import { Save } from '../../elements/Save';
 import RenderFields from '../../forms/RenderFields';
 import CopyToClipboard from '../../elements/CopyToClipboard';
 import fieldTypes from '../../forms/field-types';
@@ -106,6 +106,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
                       collection={collection}
                       email={data?.email}
                       operation="update"
+                      readOnly={!hasSavePermission}
                     />
                     <RenderFields
                       permissions={permissions.fields}
@@ -147,10 +148,13 @@ const DefaultAccount: React.FC<Props> = (props) => {
                       {(preview && (!collection.versions?.drafts || collection.versions?.drafts?.autosave)) && (
                         <PreviewButton
                           generatePreviewURL={preview}
+                          CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
                         />
                       )}
                       {hasSavePermission && (
-                        <FormSubmit buttonId="action-save">{t('general:save')}</FormSubmit>
+                        <Save
+                          CustomComponent={collection?.admin?.components?.edit?.SaveButton}
+                        />
                       )}
                     </div>
                     <div className={`${baseClass}__sidebar-fields`}>

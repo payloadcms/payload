@@ -75,6 +75,12 @@ export default buildConfig({
           name: 'number',
           type: 'number',
         },
+        {
+          name: 'fakeLocalization',
+          type: 'text',
+          // field is localized even though the config localization is not on
+          localized: true,
+        },
         // Relationship
         {
           name: 'relationField',
@@ -107,6 +113,65 @@ export default buildConfig({
           access: {
             read: () => false,
           },
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Tab1',
+              name: 'D1',
+              fields: [
+                {
+                  name: 'D2',
+                  type: 'group',
+                  fields: [
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          type: 'collapsible',
+                          label: 'Collapsible2',
+                          fields: [
+                            {
+                              type: 'tabs',
+                              tabs: [
+                                {
+                                  label: 'Tab1',
+                                  fields: [
+                                    {
+                                      name: 'D3',
+                                      type: 'group',
+                                      fields: [
+                                        {
+                                          type: 'row',
+                                          fields: [
+                                            {
+                                              type: 'collapsible',
+                                              label: 'Collapsible2',
+                                              fields: [
+                                                {
+                                                  type: 'text',
+                                                  name: 'D4',
+                                                },
+                                              ],
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     },

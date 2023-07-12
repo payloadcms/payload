@@ -2,10 +2,10 @@ import { Where } from '../../types';
 
 export const appendVersionToQueryKey = (query: Where): Where => {
   return Object.entries(query).reduce((res, [key, val]) => {
-    if (['and', 'or'].includes(key) && Array.isArray(val)) {
+    if (['and', 'or', 'AND', 'OR'].includes(key) && Array.isArray(val)) {
       return {
         ...res,
-        [key]: val.map((subQuery) => appendVersionToQueryKey(subQuery)),
+        [key.toLowerCase()]: val.map((subQuery) => appendVersionToQueryKey(subQuery)),
       };
     }
 
@@ -16,6 +16,9 @@ export const appendVersionToQueryKey = (query: Where): Where => {
       };
     }
 
-    return res;
+    return {
+      ...res,
+      _id: val,
+    };
   }, {});
 };

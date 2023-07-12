@@ -56,7 +56,7 @@ export default async function resizeAndSave({
   const sizesToSave: FileToSave[] = [];
   const sizeData = {};
 
-  const sharpInstance = sharp(file.tempFilePath || file.data);
+  const sharpBase = sharp(file.tempFilePath || file.data);
 
   const promises = imageSizes
     .map(async (desiredSize) => {
@@ -71,10 +71,14 @@ export default async function resizeAndSave({
         };
         return;
       }
-      let resized = sharpInstance.resize(desiredSize);
+      let resized = sharpBase.clone().resize(desiredSize);
 
       if (desiredSize.formatOptions) {
         resized = resized.toFormat(desiredSize.formatOptions.format, desiredSize.formatOptions.options);
+      }
+
+      if (desiredSize.trimOptions) {
+        resized = resized.trim(desiredSize.trimOptions);
       }
 
       const bufferObject = await resized.toBuffer({
@@ -124,5 +128,6 @@ function createImageName(
 
 function needsResize(desiredSize: ImageSize, dimensions: Dimensions): boolean {
   return (typeof desiredSize.width === 'number' && desiredSize.width <= dimensions.width)
-    || (typeof desiredSize.height === 'number' && desiredSize.height <= dimensions.height);
+    || (typeof desiredSize.height === 'number' && desiredSize.height <= dimensions.height)
+    || (!desiredSize.height && !desiredSize.width);
 }

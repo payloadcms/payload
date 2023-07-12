@@ -1,6 +1,6 @@
-# Contributing to Payload CMS
+# Contributing to Payload
 
-Below you'll find a set of guidelines for how to contribute to Payload CMS.
+Below you'll find a set of guidelines for how to contribute to Payload.
 
 ## Opening issues
 
@@ -22,7 +22,7 @@ If you're an incredibly awesome person and want to help us make Payload even bet
 
 ### Before Starting
 
-To help us work on new features, you can create a new feature request post in [GitHub Discussion](https://github.com/payloadcms/payload/discussions) or discuss it in our [Discord](https://discord.com/invite/r6sCXqVk3v). New functionality often has large implications across the entire Payload repo, so it is best to discuss the architecture and approach before starting work on a pull request.
+To help us work on new features, you can create a new feature request post in [GitHub Discussion](https://github.com/payloadcms/payload/discussions) or discuss it in our [Discord](https://discord.com/invite/payload). New functionality often has large implications across the entire Payload repo, so it is best to discuss the architecture and approach before starting work on a pull request.
 
 ### Code
 
@@ -48,6 +48,12 @@ A typical directory with `test/` will be structured like this:
 The directory split up in this way specifically to reduce friction when creating tests and to add the ability to boot up Payload with that specific config.
 
 The following command will start Payload with your config: `yarn dev my-test-dir`. This command will start up Payload using your config and refresh a test database on every restart.
+
+If you wish to use to your own Mongo database for the `test` directory instead of using the in memory database, all you need to do is add the following env vars to the `test/dev.ts` file:
+
+- `process.env.NODE_ENV`
+- `process.env.PAYLOAD_TEST_MONGO_URL`
+- Simply set `process.env.NODE_ENV` to `test` and set `process.env.PAYLOAD_TEST_MONGO_URL` to your mongo url e.g. `mongodb://127.0.0.1/your-test-db`.
 
 NOTE: It is recommended to add the test credentials (located in `test/credentials.ts`) to your autofill for `localhost:3000/admin` as this will be required on every nodemon restart. The default credentials are `dev@payloadcms.com` as E-Mail and `test` as password.
 

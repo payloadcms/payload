@@ -26,6 +26,12 @@ const globalSchema = joi.object().keys({
       views: joi.object({
         Edit: componentSchema,
       }),
+      elements: joi.object({
+        SaveButton: componentSchema,
+        PublishButton: componentSchema,
+        SaveDraftButton: componentSchema,
+        PreviewButton: componentSchema,
+      }),
     }),
     preview: joi.func(),
   }),

@@ -237,6 +237,7 @@
     "uploading": "завантаження",
     "user": "Користувач",
     "users": "Користувачі",
+    "value": "Значення",
     "welcome": "Вітаю"
   },
   "operators": {
@@ -270,11 +271,11 @@
     "emailAddress": "Будь ласка, введіть валідну email адресу.",
     "enterNumber": "Будь ласка, введіть валідний номер.",
     "fieldHasNo": "В цього поля немає {{label}}",
-    "greaterThanMax": "\"{{value}}\" більше максимального значення {{max}}.",
+    "greaterThanMax": "{{value}} більше, ніж дозволено максимуму {{label}} в {{max}}.",
     "invalidInput": "У цьому полі введено некоректне значення.",
     "invalidSelection": "Це поле має некоректний вибір.",
     "invalidSelections": "Це поле має наступні невірні варіанти вибору:",
-    "lessThanMin": "\"{{value}}\" менше мінімально допустимого значення {{min}}.",
+    "lessThanMin": "{{value}} менше, ніж дозволено мінімуму {{label}} в {{min}}.",
     "longerThanMin": "Це значення має бути більше, ніж мінімальна довжина {{minLength}} characters.",
     "notValidDate": "\"{{value}}\" - некоректна дата.",
     "required": "Це поле є обов'язковим.",

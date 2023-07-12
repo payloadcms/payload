@@ -7,8 +7,9 @@ export type Props = {
   icon?: React.ReactNode,
   alignIcon?: 'left' | 'right',
   onClick?: () => void,
-  pillStyle?: 'white' | 'light' | 'dark' | 'light-gray' | 'warning' | 'success',
+  pillStyle?: 'white' | 'light' | 'dark' | 'light-gray' | 'warning' | 'success' | 'error',
   draggable?: boolean,
+  rounded?: boolean
   id?: string
   elementProps?: HTMLAttributes<HTMLElement> & {
     ref: React.RefCallback<HTMLElement>

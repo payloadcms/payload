@@ -1,6 +1,3 @@
-import payload from '../../src';
-import { LocalizedPost } from './payload-types';
-
 export const englishTitle = 'english';
 export const spanishTitle = 'spanish';
 export const relationEnglishTitle = 'english-relation';

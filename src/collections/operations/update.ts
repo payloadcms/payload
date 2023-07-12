@@ -7,7 +7,6 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { APIError, ValidationError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
-import { hasWhereAccessResult } from '../../auth/types';
 import { saveVersion } from '../../versions/saveVersion';
 import { uploadFiles } from '../../uploads/uploadFiles';
 import { beforeChange } from '../../fields/hooks/beforeChange';
@@ -61,7 +60,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     req,
     req: {
       t,
-      locale,
       payload,
       payload: {
         config,
@@ -77,43 +75,22 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     throw new APIError('Missing \'where\' query of documents to update.', httpStatus.BAD_REQUEST);
   }
 
-  let { data } = args;
+  const { data: bulkUpdateData } = args;
   const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
 
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////
 
-  let queryToBuild: Where = {
-    and: [],
-  };
-
-  if (where) {
-    queryToBuild = {
-      and: [],
-      ...where,
-    };
-
-    if (Array.isArray(where.AND)) {
-      queryToBuild.and = [
-        ...queryToBuild.and,
-        ...where.AND,
-      ];
-    }
-  }
-
   let accessResult: AccessResult;
 
   if (!overrideAccess) {
     accessResult = await executeAccess({ req }, collectionConfig.access.update);
-
-    if (hasWhereAccessResult(accessResult)) {
-      queryToBuild.and.push(accessResult);
-    }
   }
 
   const query = await Model.buildQuery({
-    where: queryToBuild,
+    where,
+    access: accessResult,
     req,
     overrideAccess,
   });
@@ -147,16 +124,18 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     config,
     collection,
     req,
-    data,
+    data: bulkUpdateData,
     throwOnMissingFile: false,
     overwriteExistingFiles,
   });
 
-  data = newFileData;
-
   const errors = [];
 
   const promises = docs.map(async (doc) => {
+    let data = {
+      ...newFileData,
+      ...bulkUpdateData,
+    };
     let docWithLocales: Document = JSON.stringify(doc);
     docWithLocales = JSON.parse(docWithLocales);
 

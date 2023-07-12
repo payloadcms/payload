@@ -3,7 +3,6 @@ import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection, CollectionModel } from '../config/types';
-import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { PaginatedDocs } from '../../mongoose/types';
@@ -49,45 +48,23 @@ async function findVersions<T extends TypeWithVersion<T>>(
   // Access
   // /////////////////////////////////////
 
-  let queryToBuild: Where = {};
-  let useEstimatedCount = false;
+  let hasNearConstraint = false;
 
   if (where) {
-    let and = [];
+    const constraints = flattenWhereConstraints(where);
 
-    if (Array.isArray(where.and)) and = where.and;
-    if (Array.isArray(where.AND)) and = where.AND;
-
-    queryToBuild = {
-      ...where,
-      and: [
-        ...and,
-      ],
-    };
-
-    const constraints = flattenWhereConstraints(queryToBuild);
-
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 
-  if (!overrideAccess) {
-    const accessResults = await executeAccess({ req }, collectionConfig.access.readVersions);
+  let accessResults;
 
-    if (hasWhereAccessResult(accessResults)) {
-      if (!where) {
-        queryToBuild = {
-          and: [
-            accessResults,
-          ],
-        };
-      } else {
-        queryToBuild.and.push(accessResults);
-      }
-    }
+  if (!overrideAccess) {
+    accessResults = await executeAccess({ req }, collectionConfig.access.readVersions);
   }
 
   const query = await VersionsModel.buildQuery({
-    where: queryToBuild,
+    where,
+    access: accessResults,
     req,
     overrideAccess,
   });
@@ -96,23 +73,28 @@ async function findVersions<T extends TypeWithVersion<T>>(
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam({
-    sort: args.sort || '-updatedAt',
-    fields: buildVersionCollectionFields(collectionConfig),
-    timestamps: true,
-    config: payload.config,
-    locale,
-  });
+  let sort;
+  if (!hasNearConstraint) {
+    const [sortProperty, sortOrder] = buildSortParam({
+      sort: args.sort || '-updatedAt',
+      fields: buildVersionCollectionFields(collectionConfig),
+      timestamps: true,
+      config: payload.config,
+      locale,
+    });
+    sort = {
+      [sortProperty]: sortOrder,
+    };
+  }
 
   const paginatedDocs = await VersionsModel.paginate(query, {
     page: page || 1,
     limit: limit ?? 10,
-    sort: {
-      [sortProperty]: sortOrder,
-    },
+    sort,
     lean: true,
     leanWithId: true,
-    useEstimatedCount,
+    useEstimatedCount: hasNearConstraint,
+    forceCountFn: hasNearConstraint,
   });
 
   // /////////////////////////////////////

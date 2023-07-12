@@ -4,7 +4,6 @@ import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection, TypeWithID } from '../config/types';
 import { PaginatedDocs } from '../../mongoose/types';
-import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { AccessResult } from '../../config/types';
@@ -72,28 +71,11 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   // Access
   // /////////////////////////////////////
 
-  let queryToBuild: Where = {
-    and: [],
-  };
-
-  let useEstimatedCount = false;
+  let hasNearConstraint = false;
 
   if (where) {
-    queryToBuild = {
-      and: [],
-      ...where,
-    };
-
-    if (Array.isArray(where.AND)) {
-      queryToBuild.and = [
-        ...queryToBuild.and,
-        ...where.AND,
-      ];
-    }
-
-    const constraints = flattenWhereConstraints(queryToBuild);
-
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+    const constraints = flattenWhereConstraints(where);
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 
   let accessResult: AccessResult;
@@ -116,29 +98,32 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         limit,
       };
     }
-
-    if (hasWhereAccessResult(accessResult)) {
-      queryToBuild.and.push(accessResult);
-    }
   }
 
   const query = await Model.buildQuery({
     req,
-    where: queryToBuild,
+    where,
     overrideAccess,
+    access: accessResult,
   });
 
   // /////////////////////////////////////
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam({
-    sort: args.sort ?? collectionConfig.defaultSort,
-    config: payload.config,
-    fields: collectionConfig.fields,
-    timestamps: collectionConfig.timestamps,
-    locale,
-  });
+  let sort;
+  if (!hasNearConstraint) {
+    const [sortProperty, sortOrder] = buildSortParam({
+      sort: args.sort ?? collectionConfig.defaultSort,
+      config: payload.config,
+      fields: collectionConfig.fields,
+      timestamps: collectionConfig.timestamps,
+      locale,
+    });
+    sort = {
+      [sortProperty]: sortOrder,
+    };
+  }
 
   const usePagination = pagination && limit !== 0;
   const limitToUse = limit ?? (usePagination ? 10 : 0);
@@ -147,15 +132,13 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
   const paginationOptions = {
     page: page || 1,
-    sort: {
-      [sortProperty]: sortOrder,
-    },
+    sort,
     limit: limitToUse,
     lean: true,
     leanWithId: true,
-    useEstimatedCount,
     pagination: usePagination,
-    useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
+    useEstimatedCount: hasNearConstraint,
+    forceCountFn: hasNearConstraint,
     options: {
       // limit must also be set here, it's ignored when pagination is false
       limit: limitToUse,

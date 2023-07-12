@@ -1,10 +1,7 @@
 import type { TFunction } from 'i18next';
 import { User } from '../../../../../auth';
-import {
-  Field as FieldSchema,
-  fieldIsPresentationalOnly,
-} from '../../../../../fields/config/types';
-import { Fields, Data } from '../types';
+import { Field as FieldSchema, fieldIsPresentationalOnly } from '../../../../../fields/config/types';
+import { Data, Fields } from '../types';
 import { addFieldStatePromise } from './addFieldStatePromise';
 
 type Args = {
@@ -19,6 +16,9 @@ type Args = {
   id: string | number
   operation: 'create' | 'update'
   t: TFunction
+  preferences: {
+    [key: string]: unknown
+  }
 }
 
 export const iterateFields = async ({
@@ -33,12 +33,13 @@ export const iterateFields = async ({
   id,
   state,
   t,
+  preferences,
 }: Args): Promise<void> => {
   const promises = [];
   fields.forEach((field) => {
     const initialData = data;
     if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
-      const passesCondition = Boolean((field?.admin?.condition ? field.admin.condition(fullData || {}, initialData || {}) : true) && parentPassesCondition);
+      const passesCondition = Boolean((field?.admin?.condition ? field.admin.condition(fullData || {}, initialData || {}, { user }) : true) && parentPassesCondition);
 
       promises.push(addFieldStatePromise({
         fullData,
@@ -52,6 +53,7 @@ export const iterateFields = async ({
         passesCondition,
         data,
         t,
+        preferences,
       }));
     }
   });

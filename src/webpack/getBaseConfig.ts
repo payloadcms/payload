@@ -19,7 +19,7 @@ export default (config: SanitizedConfig): Configuration => ({
     rules: [
       {
         test: /\.(t|j)sx?$/,
-        exclude: /node_modules/,
+        exclude: /\/node_modules\/(?!.+\.tsx?$).*$/,
         use: [
           {
             loader: require.resolve('swc-loader'),
@@ -62,7 +62,7 @@ export default (config: SanitizedConfig): Configuration => ({
   },
   plugins: [
     new webpack.ProvidePlugin(
-      { process: 'process/browser' },
+      { process: require.resolve('process/browser') },
     ),
     new webpack.DefinePlugin(
       Object.entries(process.env).reduce(

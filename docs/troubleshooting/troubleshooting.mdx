@@ -1,0 +1,25 @@
+---
+title: Troubleshooting
+label: Troubleshooting
+order: 10
+desc: Troubleshooting Common Issues in Payload
+keywords: admin, components, custom, customize, documentation, Content Management System, cms, headless, javascript, node, react, express, troubleshooting
+---
+
+## Common Issues
+
+### "Unauthorized, you must be logged in to make this request" when attempting to log in
+
+This means that your auth cookie is not being set or accepted correctly upon logging in. To resolve heck the following settings in your Payload config:
+
+- CORS - If you are using the '*', try to explicitly only allow certain domains instead including the one you have specified.
+- CSRF - Do you have this set? if so, make sure your domain is whitelisted within the csrf domains. If not, probably not the issue, but probably can't hurt to whitelist it anyway.
+- Cookie settings. If these are completely undefined, then that's fine. but if you have cookie domain set, or anything similar, make sure you don't have the domain misconfigured
+
+This error likely means that the auth cookie that Payload sets after logging in successfully is being rejected because of misconfiguration.
+
+To further investigate the issue:
+
+- Go to the login screen. Open your inspector. Go to the Network tab.
+- Log in and then find the login request that should appear in your network panel. Click the login request.
+- The login request should have a Set-Cookie header on the response, and the cookie should be getting set successfully. If it is not, most browsers generally have a little yellow ⚠️ symbol that you can hover over to see why the cookie was rejected.

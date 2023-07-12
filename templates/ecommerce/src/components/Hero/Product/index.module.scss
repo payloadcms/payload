@@ -1,0 +1,70 @@
+@use '../../../css/common.scss' as *;
+
+.contentWrapper {
+  display: flex;
+}
+
+.content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+
+  @include mid-break {
+    margin-bottom: var(--base);
+  }
+}
+
+.categories {
+  margin-bottom: calc(var(--base) / 2);
+}
+
+.title {
+  margin: 0;
+  margin-bottom: var(--base);
+
+  @include mid-break {
+    margin-bottom: calc(var(--base) / 2);
+  }
+}
+
+.description {
+  margin: 0;
+  margin-bottom: var(--base);
+
+  @include mid-break {
+    margin-bottom: calc(var(--base) / 2);
+  }
+}
+
+.mediaWrapper {
+  text-decoration: none;
+  display: block;
+  position: relative;
+  aspect-ratio: 5 / 4;
+  margin-bottom: calc(var(--base) / 2);
+  width: calc(100% + calc(var(--gutter-h) / 2));
+
+  @include mid-break {
+    margin-left: calc(var(--gutter-h) * -1);
+    width: calc(100% + var(--gutter-h) * 2);
+  }
+}
+
+.image {
+  object-fit: cover;
+}
+
+.placeholder {
+  background-color: var(--color-base-50);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addToCartButton {
+  margin-top: var(--base);
+}

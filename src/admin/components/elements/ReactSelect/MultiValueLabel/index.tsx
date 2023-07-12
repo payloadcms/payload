@@ -1,6 +1,6 @@
 import React from 'react';
 import { components as SelectComponents, MultiValueProps } from 'react-select';
-import { Option } from '../../../forms/field-types/Relationship/types';
+import type { Option } from '../types';
 import './index.scss';
 
 const baseClass = 'multi-value-label';
@@ -8,8 +8,10 @@ const baseClass = 'multi-value-label';
 export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   const {
     selectProps: {
-      draggableProps,
-    },
+      customProps: {
+        draggableProps,
+      } = {},
+    } = {},
   } = props;
 
   return (

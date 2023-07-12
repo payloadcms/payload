@@ -1,31 +1,24 @@
 import mongoose from 'mongoose';
 import { createArrayFromCommaDelineated } from './createArrayFromCommaDelineated';
-import wordBoundariesRegex from '../utilities/wordBoundariesRegex';
 import { Field, TabAsField } from '../fields/config/types';
-import { ParamParser } from './buildQuery';
 
 type SanitizeQueryValueArgs = {
-  ctx: ParamParser,
-  field: Field | TabAsField,
-  path: string,
+  field: Field | TabAsField
+  path: string
   operator: string,
   val: any
   hasCustomID: boolean
 }
 
-export const sanitizeQueryValue = ({ ctx, field, path, operator, val, hasCustomID }: SanitizeQueryValueArgs): unknown => {
+export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: SanitizeQueryValueArgs): unknown => {
   let formattedValue = val;
 
   // Disregard invalid _ids
-
   if (path === '_id' && typeof val === 'string' && val.split(',').length === 1) {
     if (!hasCustomID) {
       const isValid = mongoose.Types.ObjectId.isValid(val);
 
-      formattedValue = new mongoose.Types.ObjectId(val);
-
       if (!isValid) {
-        ctx.errors.push({ path });
         return undefined;
       }
     }
@@ -34,22 +27,36 @@ export const sanitizeQueryValue = ({ ctx, field, path, operator, val, hasCustomI
       const parsedNumber = parseFloat(val);
 
       if (Number.isNaN(parsedNumber)) {
-        ctx.errors.push({ path });
         return undefined;
       }
     }
   }
 
   // Cast incoming values as proper searchable types
-
   if (field.type === 'checkbox' && typeof val === 'string') {
     if (val.toLowerCase() === 'true') formattedValue = true;
     if (val.toLowerCase() === 'false') formattedValue = false;
   }
 
-  if (field.type === 'number' && typeof val === 'string') {
+  if (['all', 'not_in', 'in'].includes(operator) && typeof formattedValue === 'string') {
+    formattedValue = createArrayFromCommaDelineated(formattedValue);
+
+    if (field.type === 'number') {
+      formattedValue = formattedValue.map((arrayVal) => parseFloat(arrayVal));
+    }
+  }
+
+  if (field.type === 'number' && typeof formattedValue === 'string') {
     formattedValue = Number(val);
   }
+
+  if (field.type === 'date' && typeof val === 'string') {
+    formattedValue = new Date(val);
+    if (Number.isNaN(Date.parse(formattedValue))) {
+      return undefined;
+    }
+  }
+
 
   if (['relationship', 'upload'].includes(field.type)) {
     if (val === 'null') {
@@ -100,18 +107,9 @@ export const sanitizeQueryValue = ({ ctx, field, path, operator, val, hasCustomI
     }
   }
 
-  if (['all', 'not_in', 'in'].includes(operator) && typeof formattedValue === 'string') {
-    formattedValue = createArrayFromCommaDelineated(formattedValue);
-  }
-
-  if (path !== '_id') {
+  if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
     if (operator === 'contains') {
       formattedValue = { $regex: formattedValue, $options: 'i' };
-    }
-
-    if (operator === 'like' && typeof formattedValue === 'string') {
-      const $regex = wordBoundariesRegex(formattedValue);
-      formattedValue = { $regex };
     }
   }
 

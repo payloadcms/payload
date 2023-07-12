@@ -18,10 +18,12 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
       label,
     },
     selectProps: {
-      setDrawerIsOpen,
-      draggableProps,
-      onSave,
-    },
+      customProps: {
+        setDrawerIsOpen,
+        draggableProps,
+        // onSave,
+      } = {},
+    } = {},
   } = props;
 
   const { permissions } = useAuth();
@@ -54,6 +56,8 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
           <DocumentDrawerToggler
             className={`${baseClass}__drawer-toggler`}
             aria-label={`Edit ${label}`}
+            onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
+            onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
             onClick={() => setShowTooltip(false)}
@@ -66,7 +70,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             </Tooltip>
             <Edit />
           </DocumentDrawerToggler>
-          <DocumentDrawer onSave={onSave} />
+          <DocumentDrawer onSave={/* onSave */null} />
         </Fragment>
       )}
     </div>

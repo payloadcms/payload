@@ -1,5 +1,9 @@
 @import '../../../scss/styles.scss';
 
+a.btn {
+  display: inline-block;
+}
+
 .btn {
   background: transparent;
   line-height: base(1);

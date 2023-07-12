@@ -1,4 +1,5 @@
 {
+  "verbose": true,
   "git": {
     "requireCleanWorkingDir": false,
     "commit": false,
@@ -6,7 +7,7 @@
     "tag": false
   },
   "github": {
-    "release": false
+    "release": true
   },
   "npm": {
     "skipChecks": true,

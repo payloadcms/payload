@@ -33,13 +33,8 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
   const fieldPromises = [];
   const populationPromises = [];
 
-  let depth = 0;
-
-  if (req.payloadAPI === 'REST' || req.payloadAPI === 'local') {
-    depth = (incomingDepth || incomingDepth === 0) ? parseInt(String(incomingDepth), 10) : req.payload.config.defaultDepth;
-
-    if (depth > req.payload.config.maxDepth) depth = req.payload.config.maxDepth;
-  }
+  let depth = (incomingDepth || incomingDepth === 0) ? parseInt(String(incomingDepth), 10) : req.payload.config.defaultDepth;
+  if (depth > req.payload.config.maxDepth) depth = req.payload.config.maxDepth;
 
   const currentDepth = incomingCurrentDepth || 1;
 

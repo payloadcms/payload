@@ -45,7 +45,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Find Versions Operation.`);
   }
 
   const i18n = i18nInit(payload.config.i18n);

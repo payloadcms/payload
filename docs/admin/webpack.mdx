@@ -56,7 +56,7 @@ You may rely on server-only packages such as the above to perform logic in acces
 import { CollectionConfig } from 'payload/types';
 import createStripeSubscription from './hooks/createStripeSubscription';
 
-const Subscription: CollectionConfig = {
+export const Subscription: CollectionConfig = {
 	slug: 'subscriptions',
 	hooks: {
 		beforeChange: [
@@ -71,8 +71,6 @@ const Subscription: CollectionConfig = {
 		}
 	]
 };
-
-export default Subscription;
 ```
 
 The collection above features a `beforeChange` hook that creates a Stripe subscription whenever a Subscription document is created in Payload.

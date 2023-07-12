@@ -1,4 +1,5 @@
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload/types'
+
 import richText from '../../fields/richText'
 import { loggedIn } from './access/loggedIn'
 import { publishedOrLoggedIn } from './access/publishedOrLoggedIn'
@@ -10,8 +11,13 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'updatedAt'],
-    preview: doc =>
-      `${process.env.PAYLOAD_PUBLIC_SITE_URL}/api/preview?url=${formatAppURL({ doc })}`,
+    preview: doc => {
+      return `${process.env.PAYLOAD_PUBLIC_SITE_URL}/api/preview?url=${encodeURIComponent(
+        formatAppURL({
+          doc,
+        }),
+      )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
+    },
   },
   versions: {
     drafts: true,
