@@ -24,7 +24,7 @@ async function initAdmin(ctx: Payload): Promise<void> {
 
       ctx.express.use(ctx.config.routes.admin, router);
     } else {
-      ctx.express.use(ctx.config.routes.admin, history());
+      // ctx.express.use(ctx.config.routes.admin, history());
       ctx.express.use(await ctx.config.admin.bundler.dev(ctx.config));
     }
   }

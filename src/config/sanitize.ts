@@ -7,8 +7,8 @@ import { InvalidConfiguration } from '../errors';
 import sanitizeGlobals from '../globals/config/sanitize';
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections';
 import { defaults } from './defaults';
-import { getWebpackBundler } from '../bundlers/webpack/bundler';
-// import { getViteBundler } from '../bundlers/vite/bundler';
+// import { getWebpackBundler } from '../bundlers/webpack/bundler';
+import { getViteBundler } from '../bundlers/vite/bundler';
 
 const sanitizeAdmin = (config: SanitizedConfig): SanitizedConfig['admin'] => {
   const adminConfig = config.admin;
@@ -31,8 +31,8 @@ const sanitizeAdmin = (config: SanitizedConfig): SanitizedConfig['admin'] => {
 
   // add default bundler if none provided
   if (!adminConfig.bundler) {
-    adminConfig.bundler = getWebpackBundler();
-    // adminConfig.bundler = getViteBundler();
+    // adminConfig.bundler = getWebpackBundler();
+    adminConfig.bundler = getViteBundler();
   }
 
   return adminConfig;

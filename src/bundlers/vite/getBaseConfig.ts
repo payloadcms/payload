@@ -1,18 +1,21 @@
 import react from '@vitejs/plugin-react';
-import path from 'path';
-import { InlineConfig } from 'vite';
+import { resolve } from 'path';
+import type { InlineConfig } from 'vite';
 import type { SanitizedConfig } from '../../config/types';
 
-const mockBundlerPath = path.resolve(__dirname, '../mocks/bundlers.js');
+const mockBundlerPath = resolve(__dirname, '../mocks/bundlers.js');
 
 export const getBaseConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
   const rootPath = payloadConfig.routes.admin;
 
   return {
+    configFile: false,
     server: {
       middlewareMode: true,
     },
     appType: 'spa',
+    optimizeDeps: { exclude: ['fsevents'] },
+    mode: 'development',
     plugins: [
       typeof react === 'function' && react(),
       {
@@ -32,16 +35,17 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
         // Alternative is to remove ~ from the import
         '~payload-user-css': payloadConfig.admin.css,
         '~react-toastify': 'react-toastify',
-        // [`${path.resolve(__dirname, './bundler')}`]: mockBundlerPath,
+        [`${resolve(__dirname, './bundler')}`]: mockBundlerPath,
+        // path: resolve(__dirname, '../mocks/path.js'),
       },
     },
 
     define: {
       __dirname: '""',
       'module.hot': 'undefined',
-      process: '({argv:[],env:{},cwd:()=>""})',
+      // process: '({argv:[],env:{},cwd:()=>""})',
     },
     base: rootPath,
-    root: path.resolve(__dirname, '../../admin'),
+    root: resolve(__dirname, '../../admin'),
   };
 };
