@@ -10,6 +10,8 @@ import {
   JSONField,
   NumberField,
   PointField,
+  PolygonField,
+  PolygonValue,
   RadioField,
   RelationshipField,
   RelationshipValue,
@@ -441,6 +443,34 @@ export const point: Validate<unknown, unknown, PointField> = (value: [number | s
   return true;
 };
 
+export const polygon: Validate<unknown, unknown, PolygonField> = (value: PolygonValue, { t, required }) => {
+  if (value) {
+
+    if (value.type !== 'Polygon') {
+      return t('validation:invalidInput');
+    }
+
+    if (value.coordinates.length >= 4) {
+
+      const errors = value.coordinates.reduce((acc, next) => {
+        const isValid = point(next, { t, required })
+        return isValid ? acc : [...acc, isValid]
+      }, [])
+
+      // TODO: review if this is the best way to handle multiple errors
+      return errors[0] || true
+
+    } else {
+      // TODO: add points to translation files
+      return t('validation:lessThaMin', { value: value.coordinates.length, min: 4, label: 'points' });
+
+    }
+
+  }
+
+  return required ? t('validation:required') : true;
+};
+
 export default {
   number,
   text,
@@ -458,6 +488,6 @@ export default {
   radio,
   blocks,
   point,
-  polygon: json,
+  polygon,
   json,
 };

@@ -481,6 +481,11 @@ export type PolygonField = FieldBase & {
   type: 'polygon',
 }
 
+export type PolygonValue = {
+  type: 'Polygon';
+  coordinates: [number | string, number | string][];
+}
+
 export type Field =
   TextField
   | NumberField
