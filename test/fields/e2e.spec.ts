@@ -319,7 +319,7 @@ describe('fields', () => {
       await firstBlockSelector.click();
 
       // ensure the block was appended to the rows
-      const addedRow = await page.locator('#field-blocks #blocks-row-3');
+      const addedRow = await page.locator('#field-blocks .blocks-field__row').last();
       await expect(addedRow).toBeVisible();
       await expect(addedRow.locator('.blocks-field__block-pill-text')).toContainText('Text');
     });
@@ -366,7 +366,7 @@ describe('fields', () => {
       await firstBlockSelector.click();
 
       // ensure the block was appended to the rows
-      const firstRow = page.locator('#i18nBlocks-row-0');
+      const firstRow = page.locator('#field-i18nBlocks .blocks-field__row').first();
       await expect(firstRow).toBeVisible();
       await expect(firstRow.locator('.blocks-field__block-pill-text')).toContainText('Text en');
     });

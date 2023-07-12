@@ -9,7 +9,7 @@ import {
   tabHasName,
 } from '../../../../../fields/config/types';
 import getValueWithDefault from '../../../../../fields/getDefaultValue';
-import { Fields, Field, Data } from '../types';
+import { Fields, FormField, Data } from '../types';
 import { iterateFields } from './iterateFields';
 
 type Args = {
@@ -44,7 +44,7 @@ export const addFieldStatePromise = async ({
   preferences,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
-    const fieldState: Field = {
+    const fieldState: FormField = {
       valid: true,
       value: undefined,
       initialValue: undefined,
@@ -112,6 +112,7 @@ export const addFieldStatePromise = async ({
           acc.rowMetadata.push({
             id: row.id,
             collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
+            childErrorPaths: new Set(),
           });
 
           return acc;
@@ -192,6 +193,7 @@ export const addFieldStatePromise = async ({
               id: row.id,
               collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
               blockType: row.blockType,
+              childErrorPaths: new Set(),
             });
           }
 

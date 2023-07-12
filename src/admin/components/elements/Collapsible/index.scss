@@ -4,12 +4,7 @@
   --toggle-pad-h: #{base(.75)};
   --toggle-pad-v: #{base(.5)};
 
-  border: 1px solid var(--theme-elevation-200);
   border-radius: $style-radius-m;
-
-  &:hover {
-    border: 1px solid var(--theme-elevation-300);
-  }
 
   &__toggle-wrap {
     position: relative;
@@ -17,16 +12,6 @@
 
   &--nested {
     margin-bottom: $baseline !important;
-  }
-
-  &--hovered {
-    >.collapsible__toggle-wrap>.collapsible__drag {
-      opacity: 1;
-    }
-
-    >.collapsible__toggle-wrap>.collapsible__toggle {
-      background: var(--theme-elevation-100);
-    }
   }
 
   &__drag {
@@ -42,7 +27,6 @@
     @extend %body;
     text-align: left;
     cursor: pointer;
-    background: var(--theme-elevation-50);
     border-top-right-radius: $style-radius-s;
     border-top-left-radius: $style-radius-s;
     width: 100%;
@@ -50,6 +34,27 @@
 
     span {
       user-select: none;
+    }
+  }
+
+  &--style-default {
+    border: 1px solid var(--theme-elevation-200);
+    &:hover {
+      border: 1px solid var(--theme-elevation-300);
+    }
+
+    >.collapsible__toggle-wrap {
+      .row-label {
+        color: var(--theme-text);
+      }
+      .collapsible__toggle {
+        background: var(--theme-elevation-50);
+      }
+    }
+    &.collapsible--hovered {
+      >.collapsible__toggle-wrap .collapsible__toggle {
+        background: var(--theme-elevation-100);
+      }
     }
   }
 
@@ -112,6 +117,61 @@
   @include small-break {
     &__content {
       padding: var(--gutter-h);
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .collapsible {
+    &--style-error {
+      border: 1px solid var(--theme-error-400);
+      &:hover {
+        border: 1px solid var(--theme-error-500);
+      }
+
+      >.collapsible__toggle-wrap {
+        .row-label {
+          color: var(--theme-error-500);
+        }
+        .collapsible__toggle {
+          background: var(--theme-error-100);
+        }
+      }
+      &.collapsible--hovered {
+        >.collapsible__toggle-wrap .collapsible__toggle {
+          background: var(--theme-error-150);
+        }
+      }
+    }
+  }
+}
+
+html[data-theme=light] {
+  .collapsible {
+    &--style-error {
+      border: 1px solid var(--theme-error-500);
+      &:hover {
+        border: 1px solid var(--theme-error-600);
+      }
+
+      >.collapsible__toggle-wrap {
+        .row-label {
+          color: var(--theme-error-750);
+        }
+        .collapsible__toggle {
+          background: var(--theme-error-50);
+        }
+      }
+      &.collapsible--hovered {
+        >.collapsible__toggle-wrap .collapsible__toggle {
+          background: var(--theme-error-100);
+        }
+      }
+      &.error {
+        & input {
+          border-color: var(--theme-error-500);
+        }
+      }
     }
   }
 }
