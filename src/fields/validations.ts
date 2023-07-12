@@ -458,5 +458,6 @@ export default {
   radio,
   blocks,
   point,
+  polygon: json,
   json,
 };

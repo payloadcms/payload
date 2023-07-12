@@ -33,6 +33,7 @@ import {
   JSONField,
   DateField,
   PointField,
+  PolygonField,
   CheckboxField,
   BlockField,
   RowField,
@@ -49,6 +50,7 @@ import formatOptions from '../utilities/formatOptions';
 import { Payload } from '../../payload';
 import buildWhereInputType from './buildWhereInputType';
 import isFieldNullable from './isFieldNullable';
+import { PolygonResolver } from './scalars';
 
 type LocaleInputType = {
   locale: {
@@ -118,6 +120,10 @@ function buildObjectType({
     point: (objectTypeConfig: ObjectTypeConfig, field: PointField) => ({
       ...objectTypeConfig,
       [field.name]: { type: withNullableType(field, new GraphQLList(new GraphQLNonNull(GraphQLFloat)), forceNullable) },
+    }),
+    polygon: (objectTypeConfig: ObjectTypeConfig, field: PolygonField) => ({
+      ...objectTypeConfig,
+      [field.name]: { type: withNullableType(field, PolygonResolver, forceNullable) },
     }),
     richText: (objectTypeConfig: ObjectTypeConfig, field: RichTextField) => ({
       ...objectTypeConfig,

@@ -320,6 +320,17 @@ export const point = baseField.keys({
   ),
 });
 
+export const polygon = baseField.keys({
+  type: joi.string().valid('polygon').required(),
+  name: joi.string().required(),
+  defaultValue: joi.alternatives().try(
+    joi.array().items(
+      joi.array().items(joi.number()).max(2).min(2)
+    ).min(4),
+    joi.func(),
+  ),
+});
+
 export const relationship = baseField.keys({
   type: joi.string().valid('relationship').required(),
   hasMany: joi.boolean().default(false),
@@ -505,6 +516,7 @@ const fieldSchema = joi.alternatives()
     blocks,
     date,
     point,
+    polygon,
     ui,
   )
   .id('field');

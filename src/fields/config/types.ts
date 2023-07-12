@@ -477,6 +477,10 @@ export type PointField = FieldBase & {
   type: 'point',
 }
 
+export type PolygonField = FieldBase & {
+  type: 'polygon',
+}
+
 export type Field =
   TextField
   | NumberField
@@ -495,6 +499,7 @@ export type Field =
   | CodeField
   | JSONField
   | PointField
+  | PolygonField
   | RowField
   | CollapsibleField
   | TabsField
@@ -518,6 +523,7 @@ export type FieldAffectingData =
   | CodeField
   | JSONField
   | PointField
+  | PolygonField
   | TabAsField
 
 export type NonPresentationalField =
@@ -538,6 +544,7 @@ export type NonPresentationalField =
   | CodeField
   | JSONField
   | PointField
+  | PolygonField
   | RowField
   | TabsField
   | CollapsibleField;

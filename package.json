@@ -113,6 +113,7 @@
     "fs-extra": "^10.1.0",
     "get-tsconfig": "^4.4.0",
     "graphql": "^16.6.0",
+    "graphql-geojson-scalar-types": "^0.1.0",
     "graphql-http": "^1.17.1",
     "graphql-playground-middleware-express": "^1.7.23",
     "graphql-query-complexity": "^0.12.0",
