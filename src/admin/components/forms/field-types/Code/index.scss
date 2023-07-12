@@ -8,5 +8,28 @@
     textarea {
       border: 1px solid var(--theme-error-500) !important;
     }
+    .code-editor {
+      border-color: var(--theme-error-500);
+    }
+  }
+}
+
+html[data-theme=light] {
+  .code-field{
+    &.error {
+      .monaco-editor-background, .margin {
+        background-color: var(--theme-error-50);
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .code-field {
+    &.error {
+      .monaco-editor-background, .margin {
+        background-color: var(--theme-error-100);
+      }
+    }
   }
 }

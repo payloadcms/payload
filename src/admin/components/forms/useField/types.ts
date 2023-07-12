@@ -18,4 +18,5 @@ export type FieldType<T> = {
   setValue: (val: unknown, modifyForm?: boolean) => void
   initialValue?: T
   rows?: Row[]
+  valid?: boolean
 }

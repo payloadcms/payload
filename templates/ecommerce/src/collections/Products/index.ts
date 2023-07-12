@@ -1,10 +1,10 @@
 import type { CollectionConfig } from 'payload/types'
 
 import { admins } from '../../access/admins'
-import { Archive } from '../../blocks/Archive'
+import { Archive } from '../../blocks/ArchiveBlock'
 import { CallToAction } from '../../blocks/CallToAction'
 import { Content } from '../../blocks/Content'
-import { MediaBlock } from '../../blocks/Media'
+import { MediaBlock } from '../../blocks/MediaBlock'
 import { slugField } from '../../fields/slug'
 import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
 import { populatePublishedDate } from '../../hooks/populatePublishedDate'

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2019",
     "lib": [
       "dom",
       "dom.iterable",
@@ -14,10 +14,15 @@
     "rootDir": "./src",
     "jsx": "react",
     "sourceMap": true,
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "payload/generated-types": ["./src/payload-types.ts"],
-      "node_modules/*": ["./node_modules/*"]
+      "payload/generated-types": [
+        "./src/payload-types.ts"
+      ],
+      "node_modules/*": [
+        "./node_modules/*"
+      ]
     },
   },
   "include": [

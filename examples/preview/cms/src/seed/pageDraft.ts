@@ -17,12 +17,12 @@ export const examplePageDraft: Partial<Page> = {
         {
           type: 'link',
           linkType: 'custom',
-          url: 'http://localhost:8000/admin/logout',
+          url: 'http://localhost:3000/admin/logout',
           newTab: true,
           children: [{ text: 'Log out' }],
         },
         {
-          text: ' or exit Next.js preview mode to see the latest published content.',
+          text: ' or click "exit preview mode" from the Payload Admin Bar to see the latest published content. To make additional changes to the draft, click "save draft" before returning to the preview.',
         },
       ],
     },

@@ -54,7 +54,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Find Operation.`);
   }
 
   req.payloadAPI = req.payloadAPI || 'local';
