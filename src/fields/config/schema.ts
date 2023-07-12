@@ -324,10 +324,8 @@ export const polygon = baseField.keys({
   type: joi.string().valid('polygon').required(),
   name: joi.string().required(),
   defaultValue: joi.alternatives().try(
-    joi.array().items(
-      joi.array().items(joi.number()).max(2).min(2)
-    ).min(4),
-    joi.func(),
+    joi.array(),
+    joi.object(),
   ),
 });
 
