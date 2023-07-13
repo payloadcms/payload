@@ -107,6 +107,12 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
     }
   }
 
+  if (operator === 'within' || operator === 'intersects') {
+    formattedValue = {
+      $geometry: formattedValue,
+    }
+  }
+
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
     if (operator === 'contains') {
       formattedValue = { $regex: formattedValue, $options: 'i' };

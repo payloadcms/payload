@@ -17,6 +17,8 @@ export type Operator =
   | 'less_than'
   | 'less_than_equal'
   | 'like'
+  | 'within'
+  | 'intersects'
   | 'near';
 
 export type WhereField = {
