@@ -446,7 +446,10 @@ export const point: Validate<unknown, unknown, PointField> = (value: [number | s
 export const polygon: Validate<unknown, unknown, PolygonField> = (value: PolygonValue, { t, required }) => {
   if (value) {
 
-    if (value.type !== 'Polygon') {
+    if (!value.type) {
+      return t('error:missingRequiredData', { label: 'type' });
+
+    } else if (value.type !== 'Polygon') {
       return t('validation:invalidInput');
 
     } else if (value.coordinates.length > 1) {
