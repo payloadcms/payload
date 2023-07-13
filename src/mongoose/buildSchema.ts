@@ -23,6 +23,7 @@ import {
   NonPresentationalField,
   NumberField,
   PointField,
+  PolygonField,
   RadioField,
   RelationshipField,
   RichTextField,
@@ -171,6 +172,41 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       coordinates: {
         type: [Number],
         required: false,
+        default: field.defaultValue || undefined,
+      },
+    };
+    if (buildSchemaOptions.disableUnique && field.unique && field.localized) {
+      baseSchema.coordinates.sparse = true;
+    }
+
+    schema.add({
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
+    });
+
+    if (field.index === true || field.index === undefined) {
+      const indexOptions: IndexOptions = {};
+      if (!buildSchemaOptions.disableUnique && field.unique) {
+        indexOptions.sparse = true;
+        indexOptions.unique = true;
+      }
+      if (field.localized && config.localization) {
+        config.localization.locales.forEach((locale) => {
+          schema.index({ [`${field.name}.${locale}`]: '2dsphere' }, indexOptions);
+        });
+      } else {
+        schema.index({ [field.name]: '2dsphere' }, indexOptions);
+      }
+    }
+  },
+  polygon: (field: PolygonField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
+    const baseSchema: SchemaTypeOptions<unknown> = {
+      type: {
+        type: String,
+        enum: ['Polygon'],
+      },
+      coordinates: {
+        type: [[[Number]]],
+        required: true,
         default: field.defaultValue || undefined,
       },
     };
