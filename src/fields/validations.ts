@@ -472,7 +472,7 @@ export const polygon: Validate<unknown, unknown, PolygonField> = (value: Polygon
 
       } else {
         const errors = coordinates.reduce((acc, next) => {
-          const isValid = point(next, { t, required })
+          const isValid = point(next, { t, required: true })
           return isValid === true ? acc : [...acc, isValid]
         }, [])
 
