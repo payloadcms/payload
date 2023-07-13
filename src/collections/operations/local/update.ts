@@ -66,13 +66,12 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
   } = options;
 
   const collection = payload.collections[collectionSlug];
+  const i18n = i18nInit(payload.config.i18n);
+  const defaultLocale = payload.config.localization ? payload.config.localization?.defaultLocale : null;
 
   if (!collection) {
     throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
   }
-
-  const i18n = i18nInit(payload.config.i18n);
-  const defaultLocale = payload.config.localization ? payload.config.localization?.defaultLocale : null;
 
   req.payloadAPI = req.payloadAPI || 'local';
   req.locale = locale ?? req?.locale ?? defaultLocale;

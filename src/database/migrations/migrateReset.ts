@@ -2,6 +2,7 @@
 import { DatabaseAdapter } from '../types';
 import { getMigrations } from './getMigrations';
 import { readMigrationFiles } from './readMigrationFiles';
+import { PayloadRequest } from '../../express/types';
 
 export async function migrateReset(this: DatabaseAdapter): Promise<void> {
   const { payload } = this;
@@ -14,6 +15,8 @@ export async function migrateReset(this: DatabaseAdapter): Promise<void> {
     return;
   }
 
+  let transactionID;
+
   // Rollback all migrations in order
   for (const migration of migrationFiles) {
     // Create or update migration in database
@@ -22,21 +25,24 @@ export async function migrateReset(this: DatabaseAdapter): Promise<void> {
       payload.logger.info({ msg: `Migrating: ${migration.name}` });
       try {
         const start = Date.now();
+        transactionID = await this.beginTransaction();
         await migration.down({ payload });
+        await payload.delete({
+          collection: 'payload-migrations',
+          where: {
+            id: {
+              equals: existingMigration.id,
+            },
+          },
+          req: { transactionID } as PayloadRequest,
+        });
+        await this.commitTransaction(transactionID);
         payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` });
       } catch (err: unknown) {
+        await this.rollbackTransaction(transactionID);
         payload.logger.error({ msg: `Error running migration ${migration.name}`, err });
         throw err;
       }
-
-      await payload.delete({
-        collection: 'payload-migrations',
-        where: {
-          id: {
-            equals: existingMigration.id,
-          },
-        },
-      });
     }
   }
 }
