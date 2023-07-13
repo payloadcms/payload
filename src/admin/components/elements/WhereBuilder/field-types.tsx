@@ -57,6 +57,16 @@ const geo = [
   },
 ];
 
+const within = {
+  label: 'within',
+  value: 'within',
+};
+
+const intersects = {
+  label: 'intersects',
+  value: 'intersects',
+};
+
 const like = {
   label: 'isLike',
   value: 'like',
@@ -102,7 +112,7 @@ const fieldTypeConditions = {
   },
   point: {
     component: 'Point',
-    operators: [...geo],
+    operators: [...geo, within, intersects],
   },
   polygon: {
     component: 'Polygon',
