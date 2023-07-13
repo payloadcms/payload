@@ -36,6 +36,8 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     showHiddenFields,
   } = args;
 
+  const { transactionID } = req;
+
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////
@@ -52,6 +54,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     where: combineQueries({ id: { equals: id } }, accessResults),
     locale,
     limit: 1,
+    transactionID,
   };
 
   // /////////////////////////////////////

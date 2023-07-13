@@ -1,29 +1,31 @@
 import type { MongooseAdapter } from '.';
 import type { UpdateGlobal } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
+import { withSession } from './withSession';
 
-export const updateGlobal: UpdateGlobal = async function updateGlobal(this: MongooseAdapter,
-  { slug, data }) {
+export const updateGlobal: UpdateGlobal = async function updateGlobal(
+  this: MongooseAdapter,
+  { slug, data, transactionID },
+) {
   const Model = this.globals;
-  const withSession = this.session ? { session: this.session } : {};
+  const options = {
+    ...withSession(this, transactionID),
+    new: true,
+    lean: true,
+  };
 
   let result;
   result = await Model.findOneAndUpdate(
     { globalType: slug },
     data,
-    {
-      ...withSession,
-      new: true,
-      lean: true,
-    },
-  ).lean();
+    options,
+  );
 
   result = JSON.parse(JSON.stringify(result));
 
   // custom id type reset
   result.id = result._id;
   result = sanitizeInternalFields(result);
-
 
   return result;
 };

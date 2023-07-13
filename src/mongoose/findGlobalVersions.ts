@@ -5,11 +5,31 @@ import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
 import { buildSortParam } from './queries/buildSortParam';
 import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
+import { withSession } from './withSession';
 
-export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(this: MongooseAdapter,
-  { global, where, page, limit, sort: sortArg, locale, pagination, skip }) {
+export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
+  this: MongooseAdapter,
+  {
+    global,
+    where,
+    page,
+    limit,
+    sort: sortArg,
+    locale,
+    pagination,
+    skip,
+    transactionID,
+  },
+) {
   const Model = this.versions[global];
-  const versionFields = buildVersionGlobalFields(this.payload.globals.config.find(({ slug }) => slug === global));
+  const versionFields = buildVersionGlobalFields(
+    this.payload.globals.config.find(({ slug }) => slug === global),
+  );
+  const options = {
+    ...withSession(this, transactionID),
+    skip,
+    limit,
+  };
 
   let hasNearConstraint = false;
 
@@ -45,14 +65,8 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     offset: skip,
     useEstimatedCount: hasNearConstraint,
     forceCountFn: hasNearConstraint,
-    options: {
-      skip,
-    },
+    options,
   };
-
-  if (this.session) {
-    paginationOptions.options.session = this.session;
-  }
 
   if (limit > 0) {
     paginationOptions.limit = limit;

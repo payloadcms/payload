@@ -1,10 +1,5 @@
 import type { ClientSession, Connection, ConnectOptions } from 'mongoose';
 import { createMigration } from '../database/migrations/createMigration';
-import { migrate } from '../database/migrations/migrate';
-import { migrateDown } from '../database/migrations/migrateDown';
-import { migrateRefresh } from '../database/migrations/migrateRefresh';
-import { migrateReset } from '../database/migrations/migrateReset';
-import { migrateStatus } from '../database/migrations/migrateStatus';
 import { CollectionModel } from '../collections/config/types';
 import type { DatabaseAdapter } from '../database/types';
 import type { Payload } from '../index';
@@ -14,7 +9,6 @@ import { webpack } from './webpack';
 
 import { createGlobal } from './createGlobal';
 import { createVersion } from './createVersion';
-import { transaction } from './transactions/transaction';
 import { beginTransaction } from './transactions/beginTransaction';
 import { rollbackTransaction } from './transactions/rollbackTransaction';
 import { commitTransaction } from './transactions/commitTransaction';
@@ -31,6 +25,7 @@ import { findOne } from './findOne';
 import { updateGlobal } from './updateGlobal';
 import { updateOne } from './updateOne';
 import { updateVersion } from './updateVersion';
+import { baseDatabaseAdapter } from '../database/baseDatabaseAdapter';
 
 export interface Args {
   payload: Payload;
@@ -53,7 +48,7 @@ export type MongooseAdapter = DatabaseAdapter &
     versions: {
       [slug: string]: CollectionModel
     }
-    session: ClientSession
+    sessions: Record<string | number, ClientSession>
     connection: Connection
   }
 
@@ -61,11 +56,18 @@ export function mongooseAdapter({
   payload,
   url,
   connectOptions,
-  migrationDir = '.migrations',
+  migrationDir,
 }: Args): MongooseAdapter {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  const adapter = baseDatabaseAdapter({
+    payload,
+    migrationDir,
+  });
   return {
+    ...adapter,
+    connection: undefined,
+    globals: undefined,
+    mongoMemoryServer: undefined,
+    sessions: { },
     payload,
     url,
     connectOptions: connectOptions || {},
@@ -74,15 +76,7 @@ export function mongooseAdapter({
     connect,
     init,
     webpack,
-    migrate,
-    migrateStatus,
-    migrateDown,
-    migrateRefresh,
-    migrateReset,
-    migrateFresh: async () => null,
-    migrationDir,
     createMigration: async (migrationName) => createMigration({ payload, migrationDir, migrationName }),
-    transaction,
     beginTransaction,
     rollbackTransaction,
     commitTransaction,

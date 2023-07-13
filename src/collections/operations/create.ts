@@ -23,6 +23,8 @@ import { generateFileData } from '../../uploads/generateFileData';
 import { saveVersion } from '../../versions/saveVersion';
 import { mapAsync } from '../../utilities/mapAsync';
 import { registerLocalStrategy } from '../../auth/strategies/local/register';
+import { initTransaction } from '../../utilities/initTransaction';
+import { killTransaction } from '../../utilities/killTransaction';
 
 const unlinkFile = promisify(fs.unlink);
 
@@ -43,20 +45,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs;
-
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-    await priorHook;
-
-    args = (await hook({
-      args,
-      operation: 'create',
-    })) || args;
-  }, Promise.resolve());
-
   const {
     collection,
     collection: {
@@ -79,250 +67,276 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     autosave = false,
   } = args;
 
-  let { data } = args;
+  try {
+    const shouldCommit = await initTransaction(req);
+    const { transactionID } = req;
 
-  const shouldSaveDraft = Boolean(draft && collectionConfig.versions.drafts);
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
 
-  // /////////////////////////////////////
-  // Access
-  // /////////////////////////////////////
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+      await priorHook;
 
-  if (!overrideAccess) {
-    await executeAccess({ req, data }, collectionConfig.access.create);
-  }
+      args = (await hook({
+        args,
+        operation: 'create',
+      })) || args;
+    }, Promise.resolve());
 
-  // /////////////////////////////////////
-  // Custom id
-  // /////////////////////////////////////
 
-  const hasIdField = collectionConfig.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') > -1;
-  if (hasIdField) {
-    data = {
-      _id: data.id,
-      ...data,
-    };
-  }
+    let { data } = args;
 
-  // /////////////////////////////////////
-  // Generate data for all files and sizes
-  // /////////////////////////////////////
+    const shouldSaveDraft = Boolean(draft && collectionConfig.versions.drafts);
 
-  const { data: newFileData, files: filesToUpload } = await generateFileData({
-    config,
-    collection,
-    req,
-    data,
-    throwOnMissingFile: !shouldSaveDraft,
-    overwriteExistingFiles,
-  });
+    // /////////////////////////////////////
+    // Access
+    // /////////////////////////////////////
 
-  data = newFileData;
-
-  // /////////////////////////////////////
-  // beforeValidate - Fields
-  // /////////////////////////////////////
-
-  data = await beforeValidate({
-    data,
-    doc: {},
-    entityConfig: collectionConfig,
-    operation: 'create',
-    overrideAccess,
-    req,
-  });
-
-  // /////////////////////////////////////
-  // beforeValidate - Collections
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook: BeforeValidateHook | Promise<void>, hook: BeforeValidateHook) => {
-    await priorHook;
-
-    data = (await hook({
-      data,
-      req,
-      operation: 'create',
-    })) || data;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // Write files to local storage
-  // /////////////////////////////////////
-
-  if (!collectionConfig.upload.disableLocalStorage) {
-    await uploadFiles(payload, filesToUpload, req.t);
-  }
-
-  // /////////////////////////////////////
-  // beforeChange - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    data = (await hook({
-      data,
-      req,
-      operation: 'create',
-    })) || data;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // beforeChange - Fields
-  // /////////////////////////////////////
-
-  const resultWithLocales = await beforeChange<Record<string, unknown>>({
-    data,
-    doc: {},
-    docWithLocales: {},
-    entityConfig: collectionConfig,
-    operation: 'create',
-    req,
-    skipValidation: shouldSaveDraft,
-  });
-
-  // /////////////////////////////////////
-  // Create
-  // /////////////////////////////////////
-
-  let doc;
-
-  if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
-    if (data.email) {
-      resultWithLocales.email = (data.email as string).toLowerCase();
+    if (!overrideAccess) {
+      await executeAccess({ req, data }, collectionConfig.access.create);
     }
 
-    if (collectionConfig.auth.verify) {
-      resultWithLocales._verified = Boolean(resultWithLocales._verified) || false;
-      resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex');
+    // /////////////////////////////////////
+    // Custom id
+    // /////////////////////////////////////
+
+    const hasIdField = collectionConfig.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') > -1;
+    if (hasIdField) {
+      data = {
+        _id: data.id,
+        ...data,
+      };
     }
 
-    doc = await registerLocalStrategy({
-      collection: collectionConfig,
-      doc: resultWithLocales,
-      payload: req.payload,
-      password: data.password as string,
+    // /////////////////////////////////////
+    // Generate data for all files and sizes
+    // /////////////////////////////////////
+
+    const { data: newFileData, files: filesToUpload } = await generateFileData({
+      config,
+      collection,
+      req,
+      data,
+      throwOnMissingFile: !shouldSaveDraft,
+      overwriteExistingFiles,
     });
-  } else {
-    try {
-      doc = await payload.db.create({
-        collection: collectionConfig.slug,
-        data: resultWithLocales,
+
+    data = newFileData;
+
+    // /////////////////////////////////////
+    // beforeValidate - Fields
+    // /////////////////////////////////////
+
+    data = await beforeValidate({
+      data,
+      doc: {},
+      entityConfig: collectionConfig,
+      operation: 'create',
+      overrideAccess,
+      req,
+    });
+
+    // /////////////////////////////////////
+    // beforeValidate - Collections
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.beforeValidate.reduce(async (priorHook: BeforeValidateHook | Promise<void>, hook: BeforeValidateHook) => {
+      await priorHook;
+
+      data = (await hook({
+        data,
+        req,
+        operation: 'create',
+      })) || data;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // Write files to local storage
+    // /////////////////////////////////////
+
+    if (!collectionConfig.upload.disableLocalStorage) {
+      await uploadFiles(payload, filesToUpload, req.t);
+    }
+
+    // /////////////////////////////////////
+    // beforeChange - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      data = (await hook({
+        data,
+        req,
+        operation: 'create',
+      })) || data;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // beforeChange - Fields
+    // /////////////////////////////////////
+
+    const resultWithLocales = await beforeChange<Record<string, unknown>>({
+      data,
+      doc: {},
+      docWithLocales: {},
+      entityConfig: collectionConfig,
+      operation: 'create',
+      req,
+      skipValidation: shouldSaveDraft,
+    });
+
+    // /////////////////////////////////////
+    // Create
+    // /////////////////////////////////////
+
+    let doc;
+
+    if (collectionConfig.auth && !collectionConfig.auth.disableLocalStrategy) {
+      if (data.email) {
+        resultWithLocales.email = (data.email as string).toLowerCase();
+      }
+
+      if (collectionConfig.auth.verify) {
+        resultWithLocales._verified = Boolean(resultWithLocales._verified) || false;
+        resultWithLocales._verificationToken = crypto.randomBytes(20).toString('hex');
+      }
+
+      doc = await registerLocalStrategy({
+        collection: collectionConfig,
+        doc: resultWithLocales,
+        payload: req.payload,
+        password: data.password as string,
       });
-    } catch (error) {
+    } else {
+      try {
+        doc = await payload.db.create({
+          collection: collectionConfig.slug,
+          data: resultWithLocales,
+          transactionID,
+        });
+      } catch (error) {
       // Handle uniqueness error from MongoDB
-      throw error.code === 11000 && error.keyValue
-        ? new ValidationError([{ message: req.t('error:valueMustBeUnique'), field: Object.keys(error.keyValue)[0] }], req.t)
-        : error;
+        throw error.code === 11000 && error.keyValue
+          ? new ValidationError([{ message: req.t('error:valueMustBeUnique'), field: Object.keys(error.keyValue)[0] }], req.t)
+          : error;
+      }
     }
-  }
 
-  const verificationToken = doc._verificationToken;
-  let result: Document = sanitizeInternalFields(doc);
+    const verificationToken = doc._verificationToken;
+    let result: Document = sanitizeInternalFields(doc);
 
-  // /////////////////////////////////////
-  // Create version
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // Create version
+    // /////////////////////////////////////
 
-  if (collectionConfig.versions) {
-    await saveVersion({
-      payload,
-      collection: collectionConfig,
-      req,
-      id: result.id,
-      docWithLocales: result,
-      autosave,
-    });
-  }
+    if (collectionConfig.versions) {
+      await saveVersion({
+        payload,
+        collection: collectionConfig,
+        req,
+        id: result.id,
+        docWithLocales: result,
+        autosave,
+        transactionID,
+      });
+    }
 
-  // /////////////////////////////////////
-  // Send verification email if applicable
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // Send verification email if applicable
+    // /////////////////////////////////////
 
-  if (collectionConfig.auth && collectionConfig.auth.verify) {
-    sendVerificationEmail({
-      emailOptions,
-      config: payload.config,
-      sendEmail: payload.sendEmail,
-      collection: { config: collectionConfig },
-      user: result,
-      token: verificationToken,
-      req,
-      disableEmail: disableVerificationEmail,
-    });
-  }
+    if (collectionConfig.auth && collectionConfig.auth.verify) {
+      sendVerificationEmail({
+        emailOptions,
+        config: payload.config,
+        sendEmail: payload.sendEmail,
+        collection: { config: collectionConfig },
+        user: result,
+        token: verificationToken,
+        req,
+        disableEmail: disableVerificationEmail,
+      });
+    }
 
-  // /////////////////////////////////////
-  // afterRead - Fields
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // afterRead - Fields
+    // /////////////////////////////////////
 
-  result = await afterRead({
-    depth,
-    doc: result,
-    entityConfig: collectionConfig,
-    overrideAccess,
-    req,
-    showHiddenFields,
-  });
-
-  // /////////////////////////////////////
-  // afterRead - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result = await hook({
-      req,
+    result = await afterRead({
+      depth,
       doc: result,
-    }) || result;
-  }, Promise.resolve());
+      entityConfig: collectionConfig,
+      overrideAccess,
+      req,
+      showHiddenFields,
+    });
 
-  // /////////////////////////////////////
-  // afterChange - Fields
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // afterRead - Collection
+    // /////////////////////////////////////
 
-  result = await afterChange({
-    data,
-    doc: result,
-    previousDoc: {},
-    entityConfig: collectionConfig,
-    operation: 'create',
-    req,
-  });
+    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await priorHook;
 
-  // /////////////////////////////////////
-  // afterChange - Collection
-  // /////////////////////////////////////
+      result = await hook({
+        req,
+        doc: result,
+      }) || result;
+    }, Promise.resolve());
 
-  await collectionConfig.hooks.afterChange.reduce(async (priorHook: AfterChangeHook | Promise<void>, hook: AfterChangeHook) => {
-    await priorHook;
+    // /////////////////////////////////////
+    // afterChange - Fields
+    // /////////////////////////////////////
 
-    result = await hook({
+    result = await afterChange({
+      data,
       doc: result,
       previousDoc: {},
-      req: args.req,
+      entityConfig: collectionConfig,
       operation: 'create',
-    }) || result;
-  }, Promise.resolve());
-
-  // Remove temp files if enabled, as express-fileupload does not do this automatically
-  if (config.upload?.useTempFiles && collectionConfig.upload) {
-    const { files } = req;
-    const fileArray = Array.isArray(files) ? files : [files];
-    await mapAsync(fileArray, async ({ file }) => {
-      // Still need this check because this will not be populated if using local API
-      if (file.tempFilePath) {
-        await unlinkFile(file.tempFilePath);
-      }
+      req,
     });
+
+    // /////////////////////////////////////
+    // afterChange - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.afterChange.reduce(async (priorHook: AfterChangeHook | Promise<void>, hook: AfterChangeHook) => {
+      await priorHook;
+
+      result = await hook({
+        doc: result,
+        previousDoc: {},
+        req: args.req,
+        operation: 'create',
+      }) || result;
+    }, Promise.resolve());
+
+    // Remove temp files if enabled, as express-fileupload does not do this automatically
+    if (config.upload?.useTempFiles && collectionConfig.upload) {
+      const { files } = req;
+      const fileArray = Array.isArray(files) ? files : [files];
+      await mapAsync(fileArray, async ({ file }) => {
+      // Still need this check because this will not be populated if using local API
+        if (file.tempFilePath) {
+          await unlinkFile(file.tempFilePath);
+        }
+      });
+    }
+
+    // /////////////////////////////////////
+    // Return results
+    // /////////////////////////////////////
+
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return result;
+  } catch (error: unknown) {
+    await killTransaction(req);
+    throw error;
   }
-
-  // /////////////////////////////////////
-  // Return results
-  // /////////////////////////////////////
-
-  return result;
 }
 
 export default create;

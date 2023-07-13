@@ -8,6 +8,7 @@ type Args = {
   slug: string
   config: SanitizedGlobalConfig
   locale?: string
+  transactionID?: string | number
 }
 
 export const getLatestGlobalVersion = async ({
@@ -16,6 +17,7 @@ export const getLatestGlobalVersion = async ({
   slug,
   where,
   locale,
+  transactionID,
 }: Args): Promise<{global: Document, globalExists: boolean}> => {
   let latestVersion;
 
@@ -26,6 +28,7 @@ export const getLatestGlobalVersion = async ({
       limit: 1,
       sort: '-updatedAt',
       locale,
+      transactionID,
     })).docs[0];
   }
 
@@ -33,6 +36,7 @@ export const getLatestGlobalVersion = async ({
     slug,
     where,
     locale,
+    transactionID,
   });
   const globalExists = Boolean(global);
 

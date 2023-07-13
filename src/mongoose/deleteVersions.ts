@@ -1,10 +1,14 @@
 import type { MongooseAdapter } from '.';
 import type { DeleteVersions } from '../database/types';
+import { withSession } from './withSession';
 
 export const deleteVersions: DeleteVersions = async function deleteVersions(this: MongooseAdapter,
-  { collection, where, locale }) {
+  { collection, where, locale, transactionID }) {
   const VersionsModel = this.versions[collection];
-
+  const options = {
+    ...withSession(this, transactionID),
+    lean: true,
+  };
 
   const query = await VersionsModel.buildQuery({
     payload: this.payload,
@@ -12,9 +16,5 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(this
     where,
   });
 
-  if (this.session) {
-    await VersionsModel.deleteMany(query, { session: this.session }).lean();
-  } else {
-    await VersionsModel.deleteMany(query).lean();
-  }
+  await VersionsModel.deleteMany(query, options);
 };

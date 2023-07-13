@@ -1,10 +1,17 @@
 import type { MongooseAdapter } from '.';
 import type { UpdateVersion } from '../database/types';
+import { withSession } from './withSession';
 
-export const updateVersion: UpdateVersion = async function updateVersion(this: MongooseAdapter,
-  { collectionSlug, where, locale, versionData }) {
+export const updateVersion: UpdateVersion = async function updateVersion(
+  this: MongooseAdapter,
+  { collectionSlug, where, locale, versionData, transactionID },
+) {
   const VersionModel = this.versions[collectionSlug];
-  const withSession = this.session ? { session: this.session } : {};
+  const options = {
+    ...withSession(this, transactionID),
+    new: true,
+    lean: true,
+  };
 
   const query = await VersionModel.buildQuery({
     payload: this.payload,
@@ -12,15 +19,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(this: M
     where,
   });
 
-  const doc = await VersionModel.findOneAndUpdate(
-    query,
-    versionData,
-    {
-      ...withSession,
-      new: true,
-      lean: true,
-    },
-  ).lean();
+  const doc = await VersionModel.findOneAndUpdate(query, versionData, options);
 
   const result = JSON.parse(JSON.stringify(doc));
 

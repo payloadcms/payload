@@ -1,29 +1,35 @@
 import type { MongooseAdapter } from '.';
 import type { CreateVersion } from '../database/types';
 import type { Document } from '../types';
+import { withSession } from './withSession';
 
-export const createVersion: CreateVersion = async function createVersion(this: MongooseAdapter,
-  { collectionSlug, parent, versionData, autosave, createdAt, updatedAt }) {
+export const createVersion: CreateVersion = async function createVersion(
+  this: MongooseAdapter,
+  {
+    collectionSlug,
+    parent,
+    versionData,
+    autosave,
+    createdAt,
+    updatedAt,
+    transactionID,
+  },
+) {
   const VersionModel = this.versions[collectionSlug];
+  const options = withSession(this, transactionID);
 
-  let doc;
-  if (this.session) {
-    [doc] = await VersionModel.create([{
-      parent,
-      version: versionData,
-      autosave,
-      createdAt,
-      updatedAt,
-    }], { session: this.session });
-  } else {
-    doc = await VersionModel.create({
-      parent,
-      version: versionData,
-      autosave,
-      createdAt,
-      updatedAt,
-    });
-  }
+  const [doc] = await VersionModel.create(
+    [
+      {
+        parent,
+        version: versionData,
+        autosave,
+        createdAt,
+        updatedAt,
+      },
+    ],
+    options,
+  );
 
   const result: Document = JSON.parse(JSON.stringify(doc));
   const verificationToken = doc._verificationToken;

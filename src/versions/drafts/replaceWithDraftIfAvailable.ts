@@ -24,6 +24,11 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   req,
   accessResult,
 }: Arguments<T>): Promise<T> => {
+  const {
+    locale,
+    transactionID,
+  } = req;
+
   const queryToBuild: Where = {
     and: [
       {
@@ -58,12 +63,13 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
 
 
   const findVersionsArgs: FindVersionsArgs & FindGlobalVersionsArgs = {
-    locale: req.locale,
+    locale,
     where: combineQueries(queryToBuild, versionAccessResult),
     collection: entity.slug,
     global: entity.slug,
     limit: 1,
     sort: '-updatedAt',
+    transactionID,
   };
 
   let versionDocs;

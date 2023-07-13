@@ -4,13 +4,24 @@ import type { Find } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
 import { buildSortParam } from './queries/buildSortParam';
+import { withSession } from './withSession';
 
 export const find: Find = async function find(
   this: MongooseAdapter,
-  { collection, where, page, limit, sort: sortArg, locale, pagination },
+  {
+    collection,
+    where,
+    page,
+    limit,
+    sort: sortArg,
+    locale,
+    pagination,
+    transactionID,
+  },
 ) {
   const Model = this.collections[collection];
   const collectionConfig = this.payload.collections[collection].config;
+  const options = withSession(this, transactionID);
 
   let hasNearConstraint = false;
 
@@ -44,12 +55,8 @@ export const find: Find = async function find(
     useEstimatedCount: hasNearConstraint,
     forceCountFn: hasNearConstraint,
     pagination,
-    options: {},
+    options,
   };
-
-  if (this.session) {
-    paginationOptions.options.session = this.session;
-  }
 
   if (limit > 0) {
     paginationOptions.limit = limit;

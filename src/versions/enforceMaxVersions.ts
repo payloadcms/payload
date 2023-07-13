@@ -9,6 +9,7 @@ type Args = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
   id?: string | number
+  transactionID?: string | number
 }
 
 export const enforceMaxVersions = async ({
@@ -17,6 +18,7 @@ export const enforceMaxVersions = async ({
   collection,
   global,
   id,
+  transactionID,
 }: Args): Promise<void> => {
   const entityType = collection ? 'collection' : 'global';
   const slug = collection ? collection.slug : global?.slug;
@@ -36,6 +38,7 @@ export const enforceMaxVersions = async ({
         skip: max,
         sort: '-updatedAt',
         pagination: false,
+        transactionID,
       });
 
       [oldestAllowedDoc] = query.docs;
@@ -45,6 +48,7 @@ export const enforceMaxVersions = async ({
         global: global.slug,
         skip: max,
         sort: '-updatedAt',
+        transactionID,
       });
 
       [oldestAllowedDoc] = query.docs;
@@ -66,6 +70,7 @@ export const enforceMaxVersions = async ({
       await payload.db.deleteVersions({
         collection: collection?.slug,
         where: deleteQuery,
+        transactionID,
       });
     }
   } catch (err) {

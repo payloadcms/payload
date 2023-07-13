@@ -5,17 +5,19 @@ import { TypeWithVersion } from './types';
 import type { FindOneArgs } from '../database/types';
 
 type Args = {
-  payload: Payload
-  query: FindOneArgs
-  id: string | number
-  config: SanitizedCollectionConfig
-}
+  payload: Payload;
+  query: FindOneArgs;
+  id: string | number;
+  config: SanitizedCollectionConfig;
+  transactionID?: string | number;
+};
 
 export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   payload,
   config,
   query,
   id,
+  transactionID,
 }: Args): Promise<T> => {
   let latestVersion: TypeWithVersion<T>;
 
@@ -24,14 +26,17 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
       collection: config.slug,
       where: { parent: { equals: id } },
       sort: '-updatedAt',
+      transactionID,
     });
     [latestVersion] = docs;
   }
 
-  const doc = await payload.db.findOne<T>(query);
+  const doc = await payload.db.findOne<T>({ ...query, transactionID });
 
-
-  if (!latestVersion || (docHasTimestamps(doc) && latestVersion.updatedAt < doc.updatedAt)) {
+  if (
+    !latestVersion
+    || (docHasTimestamps(doc) && latestVersion.updatedAt < doc.updatedAt)
+  ) {
     return doc;
   }
 

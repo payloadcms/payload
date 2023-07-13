@@ -1,14 +1,15 @@
 import { CommitTransaction } from '../../database/types';
 
 
-export const commitTransaction: CommitTransaction = async function commitTransaction() {
+export const commitTransaction: CommitTransaction = async function commitTransaction(id) {
   if (!this.connection.get('replicaSet')) {
     return;
   }
-  if (!this.session?.inTransaction()) {
+  if (!this.session[id]?.inTransaction()) {
     this.payload.logger.warn('commitTransaction called when no transaction exists');
     return;
   }
-  await this.session.commitTransaction();
-  this.session = await this.session.endSession();
+  await this.session[id].commitTransaction();
+  await this.session[id].endSession();
+  delete this.session[id];
 };

@@ -1,5 +1,6 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
+import { UploadedFile } from 'express-fileupload';
 import { Payload } from '../../../payload';
 import { Document, Where } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
@@ -13,6 +14,7 @@ import updateByID from '../updateByID';
 import { BulkOperationResult } from '../../config/types';
 
 export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
+  req?: PayloadRequest,
   collection: TSlug
   data: DeepPartial<GeneratedTypes['collections'][TSlug]>
   depth?: number
@@ -60,6 +62,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     autosave,
     id,
     where,
+    req = {} as PayloadRequest,
   } = options;
 
   const collection = payload.collections[collectionSlug];
@@ -71,17 +74,15 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
   const i18n = i18nInit(payload.config.i18n);
   const defaultLocale = payload.config.localization ? payload.config.localization?.defaultLocale : null;
 
-  const req = {
-    user,
-    payloadAPI: 'local',
-    locale: locale ?? defaultLocale,
-    fallbackLocale: fallbackLocale ?? defaultLocale,
-    payload,
-    i18n,
-    files: {
-      file: file ?? await getFileByPath(filePath),
-    },
-  } as PayloadRequest;
+  req.payloadAPI = req.payloadAPI || 'local';
+  req.locale = locale ?? req?.locale ?? defaultLocale;
+  req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
+  req.payload = payload;
+  req.user = user;
+  req.i18n = i18n;
+  req.files = {
+    file: (file ?? (await getFileByPath(filePath))) as UploadedFile,
+  };
 
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

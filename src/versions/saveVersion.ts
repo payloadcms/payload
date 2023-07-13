@@ -14,6 +14,7 @@ type Args = {
   id?: string | number
   autosave?: boolean
   draft?: boolean
+  transactionID?: string | number
 }
 
 export const saveVersion = async ({
@@ -24,6 +25,7 @@ export const saveVersion = async ({
   docWithLocales: doc,
   autosave,
   draft,
+  transactionID,
 }: Args): Promise<TypeWithID> => {
   let result;
   let entityConfig;
@@ -53,6 +55,7 @@ export const saveVersion = async ({
           },
         },
         sort: '-updatedAt',
+        transactionID,
       });
       const [latestVersion] = docs;
 
@@ -87,6 +90,7 @@ export const saveVersion = async ({
         createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
         updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
         versionData,
+        transactionID,
       });
     }
   } catch (err) {
@@ -110,6 +114,7 @@ export const saveVersion = async ({
       collection,
       global,
       max,
+      transactionID,
     });
   }
 

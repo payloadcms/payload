@@ -41,6 +41,8 @@ async function findVersions<T extends TypeWithVersion<T>>(
     showHiddenFields,
   } = args;
 
+  const { transactionID } = req;
+
   const versionFields = buildVersionGlobalFields(globalConfig);
 
   // /////////////////////////////////////
@@ -70,6 +72,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     sort,
     global: globalConfig.slug,
     locale,
+    transactionID,
   });
 
   // /////////////////////////////////////

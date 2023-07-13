@@ -10,6 +10,8 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 import { combineQueries } from '../../database/combineQueries';
 import type { FindOneArgs } from '../../database/types';
+import { initTransaction } from '../../utilities/initTransaction';
+import { killTransaction } from '../../utilities/killTransaction';
 
 export type Arguments = {
   collection: Collection
@@ -39,146 +41,160 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     req,
   } = args;
 
-  if (!id) {
-    throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST);
-  }
+  try {
+    const shouldCommit = await initTransaction(req);
+    const { transactionID } = req;
 
-  // /////////////////////////////////////
-  // Retrieve original raw version
-  // /////////////////////////////////////
+    if (!id) {
+      throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST);
+    }
 
-  const { docs: versionDocs } = await req.payload.db.findVersions({
-    collection: collectionConfig.slug,
-    where: { id: { equals: id } },
-    locale,
-    limit: 1,
-  });
+    // /////////////////////////////////////
+    // Retrieve original raw version
+    // /////////////////////////////////////
 
-  const [rawVersion] = versionDocs;
+    const { docs: versionDocs } = await req.payload.db.findVersions({
+      collection: collectionConfig.slug,
+      where: { id: { equals: id } },
+      locale,
+      limit: 1,
+      transactionID,
+    });
 
-  if (!rawVersion) {
-    throw new NotFound(t);
-  }
+    const [rawVersion] = versionDocs;
 
-  const parentDocID = rawVersion.parent;
+    if (!rawVersion) {
+      throw new NotFound(t);
+    }
 
-  // /////////////////////////////////////
-  // Access
-  // /////////////////////////////////////
+    const parentDocID = rawVersion.parent;
 
-  const accessResults = !overrideAccess ? await executeAccess({ req, id: parentDocID }, collectionConfig.access.update) : true;
-  const hasWherePolicy = hasWhereAccessResult(accessResults);
+    // /////////////////////////////////////
+    // Access
+    // /////////////////////////////////////
 
-  // /////////////////////////////////////
-  // Retrieve document
-  // /////////////////////////////////////
+    const accessResults = !overrideAccess ? await executeAccess({ req, id: parentDocID }, collectionConfig.access.update) : true;
+    const hasWherePolicy = hasWhereAccessResult(accessResults);
 
-  const findOneArgs: FindOneArgs = {
-    collection: collectionConfig.slug,
-    where: combineQueries({ id: { equals: parentDocID } }, accessResults),
-    locale,
-  };
+    // /////////////////////////////////////
+    // Retrieve document
+    // /////////////////////////////////////
 
-  const doc = await req.payload.db.findOne(findOneArgs);
+    const findOneArgs: FindOneArgs = {
+      collection: collectionConfig.slug,
+      where: combineQueries({ id: { equals: parentDocID } }, accessResults),
+      locale,
+      transactionID,
+    };
+
+    const doc = await req.payload.db.findOne(findOneArgs);
 
 
-  if (!doc && !hasWherePolicy) throw new NotFound(t);
-  if (!doc && hasWherePolicy) throw new Forbidden(t);
+    if (!doc && !hasWherePolicy) throw new NotFound(t);
+    if (!doc && hasWherePolicy) throw new Forbidden(t);
 
-  // /////////////////////////////////////
-  // fetch previousDoc
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // fetch previousDoc
+    // /////////////////////////////////////
 
-  const prevDocWithLocales = await getLatestCollectionVersion({
-    payload,
-    id: parentDocID,
-    query: findOneArgs,
-    config: collectionConfig,
-  });
+    const prevDocWithLocales = await getLatestCollectionVersion({
+      payload,
+      id: parentDocID,
+      query: findOneArgs,
+      config: collectionConfig,
+      transactionID,
+    });
 
-  // /////////////////////////////////////
-  // Update
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // Update
+    // /////////////////////////////////////
 
-  let result = await req.payload.db.updateOne({
-    collection: collectionConfig.slug,
-    where: { id: { equals: parentDocID } },
-    data: rawVersion.version,
+    let result = await req.payload.db.updateOne({
+      collection: collectionConfig.slug,
+      where: { id: { equals: parentDocID } },
+      data: rawVersion.version,
+      transactionID,
+    });
 
-  });
+    // /////////////////////////////////////
+    // Save `previousDoc` as a version after restoring
+    // /////////////////////////////////////
 
-  // /////////////////////////////////////
-  // Save `previousDoc` as a version after restoring
-  // /////////////////////////////////////
+    const prevVersion = { ...prevDocWithLocales };
 
-  const prevVersion = { ...prevDocWithLocales };
+    delete prevVersion.id;
 
-  delete prevVersion.id;
+    await payload.db.createVersion({
+      collectionSlug: collectionConfig.slug,
+      parent: parentDocID,
+      versionData: rawVersion.version,
+      autosave: false,
+      createdAt: prevVersion.createdAt,
+      updatedAt: new Date().toISOString(),
+      transactionID,
+    });
 
-  await payload.db.createVersion({
-    collectionSlug: collectionConfig.slug,
-    parent: parentDocID,
-    versionData: rawVersion.version,
-    autosave: false,
-    createdAt: prevVersion.createdAt,
-    updatedAt: new Date().toISOString(),
-  });
+    // /////////////////////////////////////
+    // afterRead - Fields
+    // /////////////////////////////////////
 
-  // /////////////////////////////////////
-  // afterRead - Fields
-  // /////////////////////////////////////
-
-  result = await afterRead({
-    depth,
-    doc: result,
-    entityConfig: collectionConfig,
-    req,
-    overrideAccess,
-    showHiddenFields,
-  });
-
-  // /////////////////////////////////////
-  // afterRead - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result = await hook({
-      req,
+    result = await afterRead({
+      depth,
       doc: result,
-    }) || result;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // afterChange - Fields
-  // /////////////////////////////////////
-
-  result = await afterChange({
-    data: result,
-    doc: result,
-    previousDoc: prevDocWithLocales,
-    entityConfig: collectionConfig,
-    operation: 'update',
-    req,
-  });
-
-  // /////////////////////////////////////
-  // afterChange - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result = await hook({
-      doc: result,
+      entityConfig: collectionConfig,
       req,
+      overrideAccess,
+      showHiddenFields,
+    });
+
+    // /////////////////////////////////////
+    // afterRead - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      result = await hook({
+        req,
+        doc: result,
+      }) || result;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // afterChange - Fields
+    // /////////////////////////////////////
+
+    result = await afterChange({
+      data: result,
+      doc: result,
       previousDoc: prevDocWithLocales,
+      entityConfig: collectionConfig,
       operation: 'update',
-    }) || result;
-  }, Promise.resolve());
+      req,
+    });
 
-  return result;
+    // /////////////////////////////////////
+    // afterChange - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      result = await hook({
+        doc: result,
+        req,
+        previousDoc: prevDocWithLocales,
+        operation: 'update',
+      }) || result;
+    }, Promise.resolve());
+
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return result;
+  } catch (error: unknown) {
+    await killTransaction(req);
+    throw error;
+  }
 }
 
 export default restoreVersion;

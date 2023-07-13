@@ -19,6 +19,8 @@ import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
 import { combineQueries } from '../../database/combineQueries';
 import type { FindOneArgs } from '../../database/types';
+import { initTransaction } from '../../utilities/initTransaction';
+import { killTransaction } from '../../utilities/killTransaction';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -38,20 +40,6 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs;
-
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    args = (await hook({
-      args,
-      operation: 'update',
-    })) || args;
-  }, Promise.resolve());
-
   const {
     depth,
     collection,
@@ -75,252 +63,278 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     autosave = false,
   } = args;
 
-  if (!id) {
-    throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST);
-  }
+  try {
+    const shouldCommit = await initTransaction(req);
+    const { transactionID } = req;
 
-  let { data } = args;
-  const { password } = data;
-  const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
-  const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft);
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
 
-  // /////////////////////////////////////
-  // Access
-  // /////////////////////////////////////
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook;
 
-  const accessResults = !overrideAccess ? await executeAccess({ req, id, data }, collectionConfig.access.update) : true;
-  const hasWherePolicy = hasWhereAccessResult(accessResults);
+      args = (await hook({
+        args,
+        operation: 'update',
+      })) || args;
+    }, Promise.resolve());
 
-  // /////////////////////////////////////
-  // Retrieve document
-  // /////////////////////////////////////
+    if (!id) {
+      throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST);
+    }
+
+    let { data } = args;
+    const { password } = data;
+    const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
+    const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft);
+
+    // /////////////////////////////////////
+    // Access
+    // /////////////////////////////////////
+
+    const accessResults = !overrideAccess ? await executeAccess({ req, id, data }, collectionConfig.access.update) : true;
+    const hasWherePolicy = hasWhereAccessResult(accessResults);
+
+    // /////////////////////////////////////
+    // Retrieve document
+    // /////////////////////////////////////
 
 
-  const findOneArgs: FindOneArgs = {
-    collection: collectionConfig.slug,
-    where: combineQueries({ id: { equals: id } }, accessResults),
-    locale,
-  };
-
-  const docWithLocales = await getLatestCollectionVersion({
-    payload,
-    config: collectionConfig,
-    id,
-    query: findOneArgs,
-  });
-
-  if (!docWithLocales && !hasWherePolicy) throw new NotFound(t);
-  if (!docWithLocales && hasWherePolicy) throw new Forbidden(t);
-
-
-  const originalDoc = await afterRead({
-    depth: 0,
-    doc: docWithLocales,
-    entityConfig: collectionConfig,
-    req,
-    overrideAccess: true,
-    showHiddenFields: true,
-  });
-
-  // /////////////////////////////////////
-  // Generate data for all files and sizes
-  // /////////////////////////////////////
-
-  const { data: newFileData, files: filesToUpload } = await generateFileData({
-    config,
-    collection,
-    req,
-    data,
-    throwOnMissingFile: false,
-    overwriteExistingFiles,
-  });
-
-  data = newFileData;
-
-  // /////////////////////////////////////
-  // Delete any associated files
-  // /////////////////////////////////////
-
-  await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc: docWithLocales, t, overrideDelete: false });
-
-  // /////////////////////////////////////
-  // beforeValidate - Fields
-  // /////////////////////////////////////
-
-  data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
-    data,
-    doc: originalDoc,
-    entityConfig: collectionConfig,
-    id,
-    operation: 'update',
-    overrideAccess,
-    req,
-  });
-
-  // /////////////////////////////////////
-  // beforeValidate - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    data = (await hook({
-      data,
-      req,
-      operation: 'update',
-      originalDoc,
-    })) || data;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // Write files to local storage
-  // /////////////////////////////////////
-
-  if (!collectionConfig.upload.disableLocalStorage) {
-    await uploadFiles(payload, filesToUpload, t);
-  }
-
-  // /////////////////////////////////////
-  // beforeChange - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    data = (await hook({
-      data,
-      req,
-      originalDoc,
-      operation: 'update',
-    })) || data;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // beforeChange - Fields
-  // /////////////////////////////////////
-
-  let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
-    data,
-    doc: originalDoc,
-    docWithLocales,
-    entityConfig: collectionConfig,
-    id,
-    operation: 'update',
-    req,
-    skipValidation: shouldSaveDraft || data._status === 'draft',
-  });
-
-  // /////////////////////////////////////
-  // Handle potential password update
-  // /////////////////////////////////////
-
-  const dataToUpdate: Record<string, unknown> = { ...result };
-
-  if (shouldSavePassword && typeof password === 'string') {
-    const { hash, salt } = await generatePasswordSaltHash({ password });
-    dataToUpdate.salt = salt;
-    dataToUpdate.hash = hash;
-    delete data.password;
-    delete result.password;
-  }
-
-  // /////////////////////////////////////
-  // Update
-  // /////////////////////////////////////
-
-  if (!shouldSaveDraft) {
-    result = await req.payload.db.updateOne({
+    const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
+      where: combineQueries({ id: { equals: id } }, accessResults),
       locale,
-      where: { id: { equals: id } },
-      data: dataToUpdate,
-    });
-  }
+    };
 
-  // /////////////////////////////////////
-  // Create version
-  // /////////////////////////////////////
-
-  if (collectionConfig.versions) {
-    result = await saveVersion({
+    const docWithLocales = await getLatestCollectionVersion({
       payload,
-      collection: collectionConfig,
-      req,
-      docWithLocales: {
-        ...result,
-        createdAt: docWithLocales.createdAt,
-      },
+      config: collectionConfig,
       id,
-      autosave,
-      draft: shouldSaveDraft,
+      query: findOneArgs,
+      transactionID,
     });
-  }
 
-  // /////////////////////////////////////
-  // afterRead - Fields
-  // /////////////////////////////////////
+    if (!docWithLocales && !hasWherePolicy) throw new NotFound(t);
+    if (!docWithLocales && hasWherePolicy) throw new Forbidden(t);
 
-  result = await afterRead({
-    depth,
-    doc: result,
-    entityConfig: collectionConfig,
-    req,
-    overrideAccess,
-    showHiddenFields,
-  });
 
-  // /////////////////////////////////////
-  // afterRead - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result = await hook({
+    const originalDoc = await afterRead({
+      depth: 0,
+      doc: docWithLocales,
+      entityConfig: collectionConfig,
       req,
+      overrideAccess: true,
+      showHiddenFields: true,
+    });
+
+    // /////////////////////////////////////
+    // Generate data for all files and sizes
+    // /////////////////////////////////////
+
+    const { data: newFileData, files: filesToUpload } = await generateFileData({
+      config,
+      collection,
+      req,
+      data,
+      throwOnMissingFile: false,
+      overwriteExistingFiles,
+    });
+
+    data = newFileData;
+
+    // /////////////////////////////////////
+    // Delete any associated files
+    // /////////////////////////////////////
+
+    await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc: docWithLocales, t, overrideDelete: false });
+
+    // /////////////////////////////////////
+    // beforeValidate - Fields
+    // /////////////////////////////////////
+
+    data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+      data,
+      doc: originalDoc,
+      entityConfig: collectionConfig,
+      id,
+      operation: 'update',
+      overrideAccess,
+      req,
+    });
+
+    // /////////////////////////////////////
+    // beforeValidate - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      data = (await hook({
+        data,
+        req,
+        operation: 'update',
+        originalDoc,
+      })) || data;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // Write files to local storage
+    // /////////////////////////////////////
+
+    if (!collectionConfig.upload.disableLocalStorage) {
+      await uploadFiles(payload, filesToUpload, t);
+    }
+
+    // /////////////////////////////////////
+    // beforeChange - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      data = (await hook({
+        data,
+        req,
+        originalDoc,
+        operation: 'update',
+      })) || data;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // beforeChange - Fields
+    // /////////////////////////////////////
+
+    let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+      data,
+      doc: originalDoc,
+      docWithLocales,
+      entityConfig: collectionConfig,
+      id,
+      operation: 'update',
+      req,
+      skipValidation: shouldSaveDraft || data._status === 'draft',
+    });
+
+    // /////////////////////////////////////
+    // Handle potential password update
+    // /////////////////////////////////////
+
+    const dataToUpdate: Record<string, unknown> = { ...result };
+
+    if (shouldSavePassword && typeof password === 'string') {
+      const { hash, salt } = await generatePasswordSaltHash({ password });
+      dataToUpdate.salt = salt;
+      dataToUpdate.hash = hash;
+      delete data.password;
+      delete result.password;
+    }
+
+    // /////////////////////////////////////
+    // Update
+    // /////////////////////////////////////
+
+    if (!shouldSaveDraft) {
+      result = await req.payload.db.updateOne({
+        collection: collectionConfig.slug,
+        locale,
+        where: { id: { equals: id } },
+        data: dataToUpdate,
+        transactionID,
+      });
+    }
+
+    // /////////////////////////////////////
+    // Create version
+    // /////////////////////////////////////
+
+    if (collectionConfig.versions) {
+      result = await saveVersion({
+        payload,
+        collection: collectionConfig,
+        req,
+        docWithLocales: {
+          ...result,
+          createdAt: docWithLocales.createdAt,
+        },
+        id,
+        autosave,
+        draft: shouldSaveDraft,
+        transactionID,
+      });
+    }
+
+    // /////////////////////////////////////
+    // afterRead - Fields
+    // /////////////////////////////////////
+
+    result = await afterRead({
+      depth,
       doc: result,
-    }) || result;
-  }, Promise.resolve());
+      entityConfig: collectionConfig,
+      req,
+      overrideAccess,
+      showHiddenFields,
+    });
 
-  // /////////////////////////////////////
-  // afterChange - Fields
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // afterRead - Collection
+    // /////////////////////////////////////
 
-  result = await afterChange<GeneratedTypes['collections'][TSlug]>({
-    data,
-    doc: result,
-    previousDoc: originalDoc,
-    entityConfig: collectionConfig,
-    operation: 'update',
-    req,
-  });
+    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await priorHook;
 
-  // /////////////////////////////////////
-  // afterChange - Collection
-  // /////////////////////////////////////
+      result = await hook({
+        req,
+        doc: result,
+      }) || result;
+    }, Promise.resolve());
 
-  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-    await priorHook;
+    // /////////////////////////////////////
+    // afterChange - Fields
+    // /////////////////////////////////////
 
-    result = await hook({
+    result = await afterChange<GeneratedTypes['collections'][TSlug]>({
+      data,
       doc: result,
       previousDoc: originalDoc,
-      req,
+      entityConfig: collectionConfig,
       operation: 'update',
-    }) || result;
-  }, Promise.resolve());
+      req,
+    });
 
-  await unlinkTempFiles({
-    req,
-    config,
-    collectionConfig,
-  });
+    // /////////////////////////////////////
+    // afterChange - Collection
+    // /////////////////////////////////////
 
-  // /////////////////////////////////////
-  // Return results
-  // /////////////////////////////////////
+    await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+      await priorHook;
 
-  return result;
+      result = await hook({
+        doc: result,
+        previousDoc: originalDoc,
+        req,
+        operation: 'update',
+      }) || result;
+    }, Promise.resolve());
+
+    await unlinkTempFiles({
+      req,
+      config,
+      collectionConfig,
+    });
+
+    // /////////////////////////////////////
+    // Return results
+    // /////////////////////////////////////
+
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return result;
+  } catch (error: unknown) {
+    await killTransaction(req);
+    throw error;
+  }
 }
 
 export default updateByID;
