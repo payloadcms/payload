@@ -456,13 +456,13 @@ export const polygon: Validate<unknown, unknown, PolygonField> = (value: Polygon
       return t('validation:greaterThanMax', { value: value.coordinates.length, max: 1, label: 'coordinates' })
 
     } else if (value.coordinates.length < 1) {
-      return t('validation:lessThaMin', { value: value.coordinates.length, min: 1, label: 'polygons' });
+      return t('validation:lessThanMin', { value: value.coordinates.length, min: 1, label: 'coordinates' });
 
     } else {
       const coordinates = value.coordinates[0]
 
       if (coordinates.length < 4) {
-        return t('validation:lessThaMin', { value: coordinates.length, min: 4, label: 'points' });
+        return t('validation:lessThanMin', { value: coordinates.length, min: 4, label: 'coordinates[0]' });
 
       } else {
         const errors = coordinates.reduce((acc, next) => {
