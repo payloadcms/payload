@@ -453,7 +453,7 @@ export const polygon: Validate<unknown, unknown, PolygonField> = (value: Polygon
       return t('validation:invalidInput');
 
     } else if (value.coordinates.length > 1) {
-      return t('validation:greaterThanMax', { value: value.coordinates.length, max: 1, label: 'polygons' })
+      return t('validation:greaterThanMax', { value: value.coordinates.length, max: 1, label: 'coordinates' })
 
     } else if (value.coordinates.length < 1) {
       return t('validation:lessThaMin', { value: value.coordinates.length, min: 1, label: 'polygons' });
