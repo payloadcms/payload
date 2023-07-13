@@ -159,7 +159,7 @@ This template includes a fully-working [Next.js](https://nextjs.org) front-end t
 
 Core features:
 
-- [Next.js](https://nextjs.org), [GraphQL](https://graphql.org), [TypeScript](https://www.typescriptlang.org)
+- [Next.js](https://nextjs.org) and [TypeScript](https://www.typescriptlang.org)
 - Complete authentication workflow
 - Complete shopping experience
 - Full shopping cart implementation

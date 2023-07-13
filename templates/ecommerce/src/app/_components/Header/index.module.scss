@@ -8,36 +8,25 @@
 .wrap {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: calc(var(--base) / 2) var(--base);
 }
 
 .logo {
   width: 200px;
+
+  @include mid-break {
+    width: 150px;
+  }
 }
 
 .nav {
   display: flex;
+  gap: calc(var(--base) / 2) var(--base);
   align-items: center;
+  flex-wrap: wrap;
 
   > * {
     text-decoration: none;
-    margin-left: var(--base);
-  }
-
-  @include mid-break {
-    display: none;
-  }
-}
-
-.mobileMenuToggler {
-  all: unset;
-  cursor: pointer;
-  display: none;
-
-  &[aria-expanded="true"] {
-    transform: rotate(-25deg);
-  }
-
-  @include mid-break {
-    display: block;
   }
 }

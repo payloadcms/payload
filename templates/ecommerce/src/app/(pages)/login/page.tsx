@@ -55,9 +55,6 @@ const Login: React.FC = () => {
   return (
     <Gutter className={classes.login}>
       <h1>Log in</h1>
-      <p>
-        To log in, use the email <b>demo@payloadcms.com</b> with the password <b>demo</b>.
-      </p>
       {error && <div className={classes.error}>{error}</div>}
       <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
         <Input

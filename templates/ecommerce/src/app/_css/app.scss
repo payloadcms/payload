@@ -19,6 +19,7 @@
   --header-z-index: 100;
   --modal-z-index: 90;
   --foreground: var(--color-base-1000);
+  --foreground-light: var(--color-base-850);
   --background: var(--color-base-0);
   --background-light: var(--color-base-100);
 
@@ -36,6 +37,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground: var(--color-base-0);
+    --foreground-light: var(--color-base-100);
     --background: var(--color-base-1000);
     --background-light: var(--color-base-850);
   }

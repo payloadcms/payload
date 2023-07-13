@@ -18,7 +18,7 @@ export const home: Partial<Page> = {
       {
         children: [
           {
-            text: 'Welcome to your store! Visit the ',
+            text: 'Welcome to your store! ',
           },
           {
             type: 'link',
@@ -26,12 +26,12 @@ export const home: Partial<Page> = {
             url: '/admin',
             children: [
               {
-                text: 'dashboard',
+                text: 'Visit the dashboard',
               },
             ],
           },
           {
-            text: " to begin managing your site's content. The code for this template is completely open-source and can be found ",
+            text: " to begin managing this site's content. The code for this template is completely open-source and can be found ",
           },
           {
             type: 'link',
@@ -83,6 +83,68 @@ export const home: Partial<Page> = {
       blockType: 'content',
       columns: [
         {
+          size: 'full',
+          richText: [
+            {
+              children: [
+                {
+                  text: 'Core features',
+                },
+              ],
+              type: 'h2',
+            },
+            {
+              children: [
+                {
+                  text: '',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          size: 'oneThird',
+          richText: [
+            {
+              children: [
+                {
+                  text: 'Dashboard',
+                },
+              ],
+              type: 'h3',
+            },
+            {
+              children: [
+                {
+                  text: "Manage this site's content, orders, customers, and more from the ",
+                },
+                {
+                  type: 'link',
+                  linkType: 'custom',
+                  url: '/admin',
+                  children: [
+                    {
+                      text: 'admin dashboard',
+                    },
+                  ],
+                },
+                {
+                  text: '.',
+                },
+              ],
+            },
+          ],
+          enableLink: false,
+          link: {
+            reference: {
+              value: '',
+              relationTo: 'pages',
+            },
+            url: '',
+            label: '',
+          },
+        },
+        {
           size: 'oneThird',
           richText: [
             {
@@ -96,7 +158,118 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Customers can create an account and login to view their order history and more.',
+                  text: 'Complete user ',
+                },
+                {
+                  type: 'link',
+                  linkType: 'custom',
+                  url: '/login',
+                  children: [
+                    {
+                      text: 'login',
+                    },
+                  ],
+                },
+                {
+                  text: ' and ',
+                },
+                {
+                  type: 'link',
+                  linkType: 'custom',
+                  url: '/create-account',
+                  children: [
+                    {
+                      text: 'create account',
+                    },
+                  ],
+                },
+                {
+                  text: ' flows with email verification and password reset.',
+                },
+              ],
+            },
+          ],
+          enableLink: false,
+          link: {
+            reference: {
+              value: '',
+              relationTo: 'pages',
+            },
+            url: '',
+            label: '',
+          },
+        },
+        {
+          size: 'oneThird',
+          richText: [
+            {
+              children: [
+                {
+                  text: 'Customer Accounts',
+                },
+              ],
+              type: 'h3',
+            },
+            {
+              children: [
+                {
+                  text: 'Customers can ',
+                },
+                {
+                  type: 'link',
+                  linkType: 'custom',
+                  url: '/account',
+                  children: [
+                    {
+                      text: 'manage their account',
+                    },
+                  ],
+                },
+                {
+                  text: ', ',
+                },
+                {
+                  type: 'link',
+                  linkType: 'custom',
+                  url: '/orders',
+                  children: [
+                    {
+                      text: 'view their order history',
+                    },
+                  ],
+                },
+                {
+                  text: ', and more without leaving the site.',
+                },
+              ],
+            },
+          ],
+          enableLink: false,
+          link: {
+            reference: {
+              value: '',
+              relationTo: 'pages',
+            },
+            url: '',
+            label: '',
+          },
+        },
+
+        {
+          size: 'oneThird',
+          richText: [
+            {
+              children: [
+                {
+                  text: 'Gated Content',
+                },
+              ],
+              type: 'h3',
+            },
+            {
+              children: [
+                {
+                  text: 'Easily gate digital content behind a paywall or require users to be logged in to access it.',
                 },
               ],
             },
@@ -125,7 +298,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Shopping carts persist between sessions and can be accessed from any device.',
+                  text: 'Shopping carts persist between sessions, can saved for later, and accessed from any device.',
                 },
               ],
             },
@@ -154,7 +327,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Secure in-app checkout powered by Stripe so your customers stay on your site.',
+                  text: 'Secure in-app checkout powered by Stripe so your customers never have to leave your site.',
                 },
               ],
             },
@@ -183,7 +356,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Custom page builder allows you to create unique page or product layouts.',
+                  text: 'Custom page builder allows you to create unique page and product layouts for any type of content.',
                 },
               ],
             },
@@ -212,7 +385,20 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Editors have complete control over SEO data directly from the CMS.',
+                  text: 'Editors have complete control over SEO data and site content directly from the ',
+                },
+                {
+                  type: 'link',
+                  linkType: 'custom',
+                  url: '/admin',
+                  children: [
+                    {
+                      text: 'admin dashboard',
+                    },
+                  ],
+                },
+                {
+                  text: '.',
                 },
               ],
             },
@@ -241,7 +427,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Users will experience the site in their preferred color scheme.',
+                  text: 'Users will experience this site in their preferred color scheme and each block can be inverted.',
                 },
               ],
             },
@@ -277,7 +463,20 @@ export const home: Partial<Page> = {
         {
           children: [
             {
-              text: 'This is a custom layout building block configurable in the CMS.',
+              text: 'This is a custom layout building block ',
+            },
+            {
+              type: 'link',
+              linkType: 'custom',
+              url: '/admin',
+              children: [
+                {
+                  text: 'configured in the admin dashboard',
+                },
+              ],
+            },
+            {
+              text: '.',
             },
           ],
         },

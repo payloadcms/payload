@@ -71,15 +71,15 @@ export const CollectionArchive: React.FC<Props> = props => {
   const scrollToRef = useCallback(() => {
     const { current } = scrollRef
     if (current) {
-      current.scrollIntoView({
-        behavior: 'smooth',
-      })
+      // current.scrollIntoView({
+      //   behavior: 'smooth',
+      // })
     }
   }, [])
 
   useEffect(() => {
     if (typeof page !== 'undefined') {
-      scrollToRef()
+      // scrollToRef()
     }
   }, [isLoading, scrollToRef, page])
 

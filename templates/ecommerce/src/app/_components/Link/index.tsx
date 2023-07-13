@@ -16,7 +16,7 @@ type CMSLinkType = {
   appearance?: 'default' | 'primary' | 'secondary'
   children?: React.ReactNode
   className?: string
-  color?: ButtonProps['color']
+  invert?: ButtonProps['invert']
 }
 
 export const CMSLink: React.FC<CMSLinkType> = ({
@@ -28,7 +28,7 @@ export const CMSLink: React.FC<CMSLinkType> = ({
   appearance,
   children,
   className,
-  color,
+  invert,
 }) => {
   const href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
@@ -64,7 +64,7 @@ export const CMSLink: React.FC<CMSLinkType> = ({
       href={href}
       appearance={appearance}
       label={label}
-      color={color}
+      invert={invert}
     />
   )
 }

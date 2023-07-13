@@ -1,16 +1,13 @@
 'use client'
 
 import React from 'react'
-import { ModalToggler } from '@faceless-ui/modal'
 import Link from 'next/link'
 
 import { Header as HeaderType } from '../../../payload/payload-types'
 import { useAuth } from '../../_providers/Auth'
 import { CartLink } from '../CartLink'
 import { Gutter } from '../Gutter'
-import { MenuIcon } from '../icons/Menu'
 import { CMSLink } from '../Link'
-import { MobileMenuModal, slug as menuModalSlug } from './MobileMenuModal'
 
 import classes from './index.module.scss'
 
@@ -48,12 +45,8 @@ export const Header: React.FC<{ header: HeaderType }> = ({ header }) => {
             )}
             <CartLink />
           </nav>
-          <ModalToggler slug={menuModalSlug} className={classes.mobileMenuToggler}>
-            <MenuIcon />
-          </ModalToggler>
         </Gutter>
       </header>
-      <MobileMenuModal navItems={navItems} />
     </>
   )
 }

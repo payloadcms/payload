@@ -4,8 +4,58 @@ export const staticHome: Page = {
   id: '',
   title: 'Home',
   hero: {
-    type: 'none',
-    richText: [],
+    type: 'lowImpact',
+    richText: [
+      {
+        children: [
+          {
+            text: 'Payload E-commerce Template',
+          },
+        ],
+        type: 'h1',
+      },
+      {
+        children: [
+          {
+            text: 'Welcome to your e-commerce store! ',
+          },
+          {
+            text: 'Your database is currently empty.',
+            bold: true,
+          },
+          {
+            text: ' To seed your database with a few products and pages, ',
+          },
+          {
+            type: 'link',
+            linkType: 'custom',
+            url: '/admin',
+            children: [
+              {
+                text: 'log in to your dashboard',
+              },
+            ],
+          },
+          {
+            text: ' and click "seed your database". You may need to hard refresh this page to clear the request cache. The code for this template is completely open-source and can be found ',
+          },
+          {
+            type: 'link',
+            linkType: 'custom',
+            url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
+            newTab: true,
+            children: [
+              {
+                text: 'here',
+              },
+            ],
+          },
+          {
+            text: '.',
+          },
+        ],
+      },
+    ],
     media: '',
   },
   createdAt: '',
@@ -13,66 +63,49 @@ export const staticHome: Page = {
   slug: 'home',
   layout: [
     {
-      blockName: 'Content Block',
-      blockType: 'content',
-      columns: [
+      richText: [
         {
-          size: 'full',
-          richText: [
+          children: [
             {
-              children: [
-                {
-                  text: 'Payload E-commerce Store',
-                },
-              ],
-              type: 'h1',
-            },
-            {
-              children: [
-                {
-                  text: 'Your database is currently empty. To seed your database with a few products and pages, ',
-                },
-                {
-                  type: 'link',
-                  linkType: 'custom',
-                  url: '/admin',
-                  children: [
-                    {
-                      text: 'log in',
-                    },
-                  ],
-                },
-                {
-                  text: ' and click "seed your database". The code for this template is completely open-source and can be found ',
-                },
-                {
-                  type: 'link',
-                  linkType: 'custom',
-                  url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
-                  newTab: true,
-                  children: [
-                    {
-                      text: 'here',
-                    },
-                  ],
-                },
-                {
-                  text: '.',
-                },
-              ],
+              text: 'Seed your database',
             },
           ],
-          enableLink: false,
-          link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
+          type: 'h4',
+        },
+        {
+          children: [
+            {
+              text: 'Your database is currently empty. To seed your database, ',
             },
-            url: '',
-            label: '',
+            {
+              type: 'link',
+              linkType: 'custom',
+              url: '/admin',
+              children: [
+                {
+                  text: 'log in to your dashboard',
+                },
+              ],
+            },
+            {
+              text: ' and click "seed your database".',
+            },
+          ],
+        },
+      ],
+      links: [
+        {
+          link: {
+            type: 'custom',
+            url: '/admin',
+            label: 'Go to dashboard',
+            appearance: 'primary',
+            reference: null,
           },
         },
       ],
+      blockName: 'CTA',
+      blockType: 'cta',
     },
   ],
 }

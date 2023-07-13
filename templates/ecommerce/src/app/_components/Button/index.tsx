@@ -15,7 +15,7 @@ export type Props = {
   className?: string
   type?: 'submit' | 'button'
   disabled?: boolean
-  color?: 'white' | 'black'
+  invert?: boolean
 }
 
 export const Button: React.FC<Props> = ({
@@ -28,7 +28,7 @@ export const Button: React.FC<Props> = ({
   onClick,
   type = 'button',
   disabled,
-  color: colorFromProps,
+  invert,
 }) => {
   let el = elFromProps
   const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
@@ -36,7 +36,7 @@ export const Button: React.FC<Props> = ({
     classes.button,
     classNameFromProps,
     classes[`appearance--${appearance}`],
-    classes[`${appearance}--${colorFromProps}`],
+    invert && classes[`${appearance}--invert`],
   ]
     .filter(Boolean)
     .join(' ')

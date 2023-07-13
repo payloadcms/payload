@@ -26,7 +26,7 @@ const PageTemplate = async ({ params: { slug = 'home' } }) => {
       <Hero {...hero} />
       <Blocks
         blocks={layout}
-        disableTopPadding={hero?.type === 'none' || hero?.type === 'lowImpact'}
+        disableTopPadding={!hero || hero?.type === 'none' || hero?.type === 'lowImpact'}
       />
     </React.Fragment>
   )

@@ -85,7 +85,7 @@ const serialize = (children?: Children): React.ReactNode[] =>
           <a
             href={escapeHTML(node.url)}
             key={i}
-            {...(node.newTab
+            {...(node?.newTab
               ? {
                   target: '_blank',
                   rel: 'noopener noreferrer',
