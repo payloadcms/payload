@@ -450,6 +450,7 @@ export const polygon: Validate<unknown, unknown, PolygonField> = (value: Polygon
       return t('error:missingRequiredData', { label: 'type' });
 
     } else if (value.type !== 'Polygon') {
+      // TODO: include field, value, and expected value in error message
       return t('validation:invalidInput');
 
     } else if (!Array.isArray(value.coordinates)) {
