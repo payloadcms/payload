@@ -452,6 +452,9 @@ export const polygon: Validate<unknown, unknown, PolygonField> = (value: Polygon
     } else if (value.type !== 'Polygon') {
       return t('validation:invalidInput');
 
+    } else if (!Array.isArray(value.coordinates)) {
+      return t('error:missingRequiredData', { label: 'coordinates' });
+
     } else if (value.coordinates.length > 1) {
       return t('validation:greaterThanMax', { value: value.coordinates.length, max: 1, label: 'coordinates' })
 
@@ -461,7 +464,10 @@ export const polygon: Validate<unknown, unknown, PolygonField> = (value: Polygon
     } else {
       const coordinates = value.coordinates[0]
 
-      if (coordinates.length < 4) {
+      if (!Array.isArray(coordinates)) {
+        return t('error:missingRequiredData', { label: 'coordinates[0]' });
+
+      } else if (coordinates.length < 4) {
         return t('validation:lessThanMin', { value: coordinates.length, min: 4, label: 'coordinates[0]' });
 
       } else {
