@@ -116,7 +116,7 @@ const fieldTypeConditions = {
   },
   polygon: {
     component: 'Polygon',
-    operators: [...base, like, contains],
+    operators: [...base, like, contains, within, intersects],
   },
   upload: {
     component: 'Text',
