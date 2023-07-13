@@ -1,15 +1,13 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import fs from 'fs';
 import { migrationTemplate } from './migrationTemplate';
-import { Payload } from '../..';
+import { CreateMigration } from '../types';
 
-type CreateMigrationArgs = {
-  payload: Payload
-  migrationDir: string
-  migrationName: string
-}
-
-export async function createMigration({ payload, migrationDir, migrationName }: CreateMigrationArgs) {
+export const createMigration: CreateMigration = async function createMigration({
+  payload,
+  migrationDir,
+  migrationName,
+}) {
   const dir = migrationDir || '.migrations'; // TODO: Verify path after linking
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
@@ -24,9 +22,6 @@ export async function createMigration({ payload, migrationDir, migrationName }: 
   const formattedName = migrationName.replace(/\W/g, '_');
   const fileName = `${timestamp}_${formattedName}.ts`;
   const filePath = `${dir}/${fileName}`;
-  fs.writeFileSync(
-    filePath,
-    migrationTemplate,
-  );
+  fs.writeFileSync(filePath, migrationTemplate);
   payload.logger.info({ msg: `Migration created at ${filePath}` });
-}
+};

@@ -64,7 +64,7 @@ export interface DatabaseAdapter {
   /**
    * Output a migration file
    */
-  createMigration: (migrationName: string) => Promise<void>;
+  createMigration: (CreateMigrationArgs) => Promise<void>;
 
   /**
    * Run any migration up functions that have not yet been performed and update the status
@@ -153,7 +153,15 @@ export type Connect = ({ config }: { config: SanitizedConfig }) => Promise<void>
 
 export type Webpack = (config: Configuration) => Configuration;
 
-export type Transaction = (callback: () => Promise<any>, options?: any) => Promise<void>
+export type CreateMigrationArgs = {
+  payload: Payload
+  migrationDir: string
+  migrationName: string
+}
+
+export type CreateMigration = (args: CreateMigrationArgs) => Promise<void>
+
+export type Transaction = (callback: () => Promise<void>, options?: Record<string, unknown>) => Promise<void>
 
 export type BeginTransaction = (options?: Record<string, unknown>) => Promise<number | string | null>
 

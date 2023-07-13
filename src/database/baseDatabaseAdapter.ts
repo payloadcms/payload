@@ -6,11 +6,13 @@ import { migrateRefresh } from './migrations/migrateRefresh';
 import { migrateReset } from './migrations/migrateReset';
 import { DatabaseAdapter } from './types';
 import type { Payload } from '../index';
+import { createMigration } from './migrations/createMigration';
 
 
 type BaseDatabaseAdapter = Pick<DatabaseAdapter, 'payload'
   | 'transaction'
   | 'migrate'
+  | 'createMigration'
   | 'migrateStatus'
   | 'migrateDown'
   | 'migrateRefresh'
@@ -31,6 +33,7 @@ export function baseDatabaseAdapter({
     payload,
     transaction,
     migrate,
+    createMigration,
     migrateStatus,
     migrateDown,
     migrateRefresh,
