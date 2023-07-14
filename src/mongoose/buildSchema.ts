@@ -207,7 +207,6 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       coordinates: {
         type: [[[Number]]],
         required: true,
-        default: field.defaultValue || undefined,
       },
     };
     if (buildSchemaOptions.disableUnique && field.unique && field.localized) {
