@@ -50,7 +50,7 @@ const defaults: DefaultsType = {
   },
   json: {
     type: GraphQLJSON,
-    operators: [...operators.equality, ...operators.partial],
+    operators: [...operators.equality, ...operators.partial, 'within', 'intersects'],
   },
   code: {
     type: GraphQLString,
