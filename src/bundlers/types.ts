@@ -1,7 +1,8 @@
 import type { PayloadHandler, SanitizedConfig } from 'payload/config';
+import type { Payload } from '../payload';
 
 export interface PayloadBundler {
-  dev: (config: SanitizedConfig) => Promise<PayloadHandler>, // this would be a typical Express middleware handler
-  build: (config: SanitizedConfig) => Promise<void> // used in `payload build`
-  serve: (config: SanitizedConfig) => Promise<PayloadHandler> // serve built files in production
+  dev: (payload: Payload) => Promise<PayloadHandler>, // this would be a typical Express middleware handler
+  build: (payloadConfig: SanitizedConfig) => Promise<void> // used in `payload build`
+  preview: (payload: Payload) => Promise<PayloadHandler> // serve built files in production
 }

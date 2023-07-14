@@ -260,7 +260,11 @@ export type Config = {
        */
       favicon?: string;
     };
-    /** Specify an absolute path for where to store the built Admin panel bundle used in production. */
+    /**
+     * Specify an absolute path for where to store the built Admin panel bundle used in production.
+     *
+     * @default "/build"
+     * */
     buildPath?: string
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean;
@@ -396,13 +400,13 @@ export type Config = {
   cors?: string[] | '*';
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
-    /** Defaults to /api  */
+    /** @default "/api"  */
     api?: string;
-    /** Defaults to /admin */
+    /** @default "/admin" */
     admin?: string;
-    /** Defaults to /graphql  */
+    /** @default "/graphql"  */
     graphQL?: string;
-    /** Defaults to /playground */
+    /** @default "/playground" */
     graphQLPlayground?: string;
   };
   /** Control how typescript interfaces are generated from your collections. */

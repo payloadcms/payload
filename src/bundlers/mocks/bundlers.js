@@ -1,2 +1,0 @@
-exports.getWebpackBundler = () => { };
-exports.getViteBundler = () => { };

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable global-require */
 import loadConfig from '../config/load';
 
 export const build = async (): Promise<void> => {

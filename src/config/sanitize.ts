@@ -7,8 +7,7 @@ import { InvalidConfiguration } from '../errors';
 import sanitizeGlobals from '../globals/config/sanitize';
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections';
 import { defaults } from './defaults';
-// import { getWebpackBundler } from '../bundlers/webpack/bundler';
-import { getViteBundler } from '../bundlers/vite/bundler';
+import getDefaultBundler from '../bundlers/webpack/bundler';
 
 const sanitizeAdmin = (config: SanitizedConfig): SanitizedConfig['admin'] => {
   const adminConfig = config.admin;
@@ -31,14 +30,13 @@ const sanitizeAdmin = (config: SanitizedConfig): SanitizedConfig['admin'] => {
 
   // add default bundler if none provided
   if (!adminConfig.bundler) {
-    // adminConfig.bundler = getWebpackBundler();
-    adminConfig.bundler = getViteBundler();
+    adminConfig.bundler = getDefaultBundler();
   }
 
   return adminConfig;
 };
 
-const sanitizeConfig = (config: Config): SanitizedConfig => {
+export const sanitizeConfig = (config: Config): SanitizedConfig => {
   const sanitizedConfig: Config = merge(defaults, config, {
     isMergeableObject: isPlainObject,
   }) as Config;
@@ -62,5 +60,3 @@ const sanitizeConfig = (config: Config): SanitizedConfig => {
 
   return sanitizedConfig as SanitizedConfig;
 };
-
-export default sanitizeConfig;

@@ -1,14 +1,14 @@
+import { Configuration, WebpackPluginInstance } from 'webpack';
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
-import { Configuration, WebpackPluginInstance } from 'webpack';
 import { SwcMinifyWebpackPlugin } from 'swc-minify-webpack-plugin';
-import { SanitizedConfig } from '../../config/types';
-import getBaseConfig from './getBaseConfig';
+import { getBaseConfig } from './base';
+import { SanitizedConfig } from '../../../config/types';
 
-export const getWebpackProdConfig = (payloadConfig: SanitizedConfig): Configuration => {
+export const getProdConfig = (payloadConfig: SanitizedConfig): Configuration => {
   const baseConfig = getBaseConfig(payloadConfig) as any;
 
-  let config: Configuration = {
+  let webpackConfig: Configuration = {
     ...baseConfig,
     output: {
       publicPath: `${payloadConfig.routes.admin}/`,
@@ -40,7 +40,7 @@ export const getWebpackProdConfig = (payloadConfig: SanitizedConfig): Configurat
     ],
   };
 
-  config.module.rules.push({
+  webpackConfig.module.rules.push({
     test: /\.(scss|css)$/,
     sideEffects: true,
     use: [
@@ -64,12 +64,12 @@ export const getWebpackProdConfig = (payloadConfig: SanitizedConfig): Configurat
   });
 
   if (process.env.PAYLOAD_ANALYZE_BUNDLE) {
-    config.plugins.push(new BundleAnalyzerPlugin() as unknown as WebpackPluginInstance);
+    webpackConfig.plugins.push(new BundleAnalyzerPlugin() as unknown as WebpackPluginInstance);
   }
 
   if (payloadConfig.admin.webpack && typeof payloadConfig.admin.webpack === 'function') {
-    config = payloadConfig.admin.webpack(config);
+    webpackConfig = payloadConfig.admin.webpack(webpackConfig);
   }
 
-  return config;
+  return webpackConfig;
 };

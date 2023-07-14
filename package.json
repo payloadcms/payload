@@ -33,7 +33,7 @@
   "scripts": {
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
     "build:tsc": "tsc",
-    "build:components": "webpack --config dist/webpack/components.config.js",
+    "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
     "build": "yarn copyfiles && yarn build:tsc && yarn build:components",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"yarn build:tsc\"",
     "dev": "nodemon",
