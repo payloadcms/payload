@@ -8,7 +8,7 @@ import getFileByPath from '../../../uploads/getFileByPath';
 import create from '../create';
 import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
-import i18n from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
@@ -60,7 +60,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
   req.locale = locale ?? req?.locale ?? defaultLocale;
   req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
   req.payload = payload;
-  req.i18n = i18n(payload.config.i18n);
+  req.i18n = i18nInit(payload.config.i18n);
   req.files = {
     file: (file ?? (await getFileByPath(filePath))) as UploadedFile,
   };

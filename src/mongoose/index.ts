@@ -1,5 +1,4 @@
 import type { ConnectOptions } from 'mongoose';
-import { CollectionModel } from '../collections/config/types';
 import { createMigration } from '../database/migrations/createMigration';
 import { migrate } from '../database/migrations/migrate';
 import { migrateDown } from '../database/migrations/migrateDown';
@@ -7,8 +6,8 @@ import { migrateRefresh } from '../database/migrations/migrateRefresh';
 import { migrateReset } from '../database/migrations/migrateReset';
 import { migrateStatus } from '../database/migrations/migrateStatus';
 import type { DatabaseAdapter } from '../database/types';
-import { GlobalModel } from '../globals/config/types';
-import type { Payload } from '../index';
+import { Payload } from '../index';
+import type { SanitizedConfig } from '../config/types';
 import { connect } from './connect';
 import { create } from './create';
 import { find } from './find';
@@ -27,9 +26,11 @@ import { findOne } from './findOne';
 import { updateGlobal } from './updateGlobal';
 import { updateOne } from './updateOne';
 import { updateVersion } from './updateVersion';
+import type { CollectionModel, GlobalModel } from './types';
+import { deleteMany } from './deleteMany';
 
 export interface Args {
-  payload: Payload;
+  payload: PayloadMongoose;
   /** The URL to connect to MongoDB */
   url: string;
   migrationDir?: string;
@@ -38,6 +39,20 @@ export interface Args {
     useFacet?: boolean;
   };
 }
+export type SanitizedPayloadMongooseConfig = Omit<
+SanitizedConfig,
+'db'
+> & {
+  db: MongooseAdapter;
+}
+
+
+export class PayloadMongoose extends Payload {
+  db: MongooseAdapter;
+
+  config: SanitizedPayloadMongooseConfig;
+}
+
 
 export type MongooseAdapter = DatabaseAdapter &
   Args & {
@@ -57,14 +72,14 @@ export function mongooseAdapter({
   connectOptions,
   migrationDir = '.migrations',
 }: Args): MongooseAdapter {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   return {
     payload,
     url,
     connectOptions: connectOptions || {},
     collections: {},
     versions: {},
+    globals: undefined,
+    mongoMemoryServer: undefined,
     connect,
     init,
     webpack,
@@ -86,6 +101,7 @@ export function mongooseAdapter({
     create,
     updateOne,
     deleteOne,
+    deleteMany,
     findGlobal,
     createGlobal,
     updateGlobal,

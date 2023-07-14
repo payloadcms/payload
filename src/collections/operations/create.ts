@@ -202,12 +202,14 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       doc: resultWithLocales,
       payload: req.payload,
       password: data.password as string,
+      req,
     });
   } else {
     try {
       doc = await payload.db.create({
         collection: collectionConfig.slug,
         data: resultWithLocales,
+        req,
       });
     } catch (error) {
       // Handle uniqueness error from MongoDB

@@ -139,6 +139,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
             equals: id,
           },
         },
+        req,
       });
 
       // /////////////////////////////////////
@@ -217,6 +218,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     payload,
     collectionConfig,
     ids: docs.map(({ id }) => id),
+    req,
   });
 
   return {

@@ -7,10 +7,9 @@ import mongoose from 'mongoose';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler';
 import { SendMailOptions } from 'nodemailer';
-import { BulkOperationResult, Collection, CollectionModel } from './collections/config/types';
+import { BulkOperationResult, Collection } from './collections/config/types';
 import { EmailOptions, InitOptions, SanitizedConfig } from './config/types';
 import { TypeWithVersion } from './versions/types';
-import { PaginatedDocs } from './mongoose/types';
 
 import { PayloadAuthenticate } from './express/middleware/authenticate';
 import { Globals } from './globals/config/types';
@@ -60,7 +59,8 @@ import findConfig from './config/find';
 
 import { defaults as emailDefaults } from './email/defaults';
 import type { DatabaseAdapter } from '.';
-import { mongooseAdapter } from './mongoose';
+import { PayloadMongoose, mongooseAdapter } from './mongoose';
+import type { PaginatedDocs } from './database/types';
 
 /**
  * @description Payload
@@ -75,7 +75,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   } = {};
 
   versions: {
-    [slug: string]: CollectionModel;
+    [slug: string]: any; // TODO: Type this
   } = {};
 
   globals: Globals;
@@ -204,7 +204,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     // if there is no defined database adapter
     if (!this.config.db) {
       this.config.db = mongooseAdapter({
-        payload: this,
+        payload: this as unknown as PayloadMongoose,
         url: this.mongoURL ? this.mongoURL : '',
         connectOptions: options.mongoOptions,
       });

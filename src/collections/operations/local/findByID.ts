@@ -4,7 +4,7 @@ import { Document } from '../../../types';
 import findByID from '../findByID';
 import { Payload } from '../../../payload';
 import { getDataLoader } from '../../dataloader';
-import i18n from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
@@ -51,7 +51,7 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
   req.payloadAPI = req.payloadAPI || 'local';
   req.locale = locale ?? req?.locale ?? defaultLocale;
   req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
-  req.i18n = i18n(payload.config.i18n);
+  req.i18n = i18nInit(payload.config.i18n);
   req.payload = payload;
 
   if (typeof user !== 'undefined') req.user = user;

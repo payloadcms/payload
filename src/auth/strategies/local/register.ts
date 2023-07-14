@@ -2,12 +2,14 @@ import { ValidationError } from '../../../errors';
 import { Payload } from '../../..';
 import { SanitizedCollectionConfig } from '../../../collections/config/types';
 import { generatePasswordSaltHash } from './generatePasswordSaltHash';
+import { PayloadRequest } from '../../../express/types';
 
 type Args = {
   collection: SanitizedCollectionConfig
   doc: Record<string, unknown>
   password: string
   payload: Payload
+  req: PayloadRequest
 }
 
 export const registerLocalStrategy = async ({
@@ -15,6 +17,7 @@ export const registerLocalStrategy = async ({
   doc,
   password,
   payload,
+  req,
 }: Args): Promise<Record<string, unknown>> => {
   const existingUser = await payload.find({
     collection: collection.slug,
@@ -39,5 +42,6 @@ export const registerLocalStrategy = async ({
       salt,
       hash,
     },
+    req,
   });
 };

@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { TypeWithID } from '../config/types';
-import { PaginatedDocs } from '../../mongoose/types';
+import type { PaginatedDocs } from '../../database/types';
 import find from '../operations/find';
 import { Where } from '../../types';
 import { isNumber } from '../../utilities/isNumber';

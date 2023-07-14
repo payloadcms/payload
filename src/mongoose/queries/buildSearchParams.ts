@@ -5,7 +5,7 @@ import { operatorMap } from './operatorMap';
 import { getLocalizedPaths } from './getLocalizedPaths';
 import { sanitizeQueryValue } from './sanitizeQueryValue';
 import { PathToQuery, validOperators } from '../../database/queryValidation/types';
-import { Payload } from '../..';
+import { PayloadMongoose } from '..';
 
 type SearchParam = {
   path?: string,
@@ -36,7 +36,7 @@ export async function buildSearchParam({
   operator: string
   collectionSlug?: string,
   globalSlug?: string,
-  payload: Payload,
+  payload: PayloadMongoose,
   locale?: string
 }): Promise<SearchParam> {
   // Replace GraphQL nested field double underscore formatting
@@ -112,7 +112,7 @@ export async function buildSearchParam({
       }, i) => {
         const priorQueryResult = await priorQuery;
 
-        const SubModel = payload.collections[slug].Model;
+        const SubModel = payload.db.collections[slug];
 
         // On the "deepest" collection,
         // Search on the value passed through the query

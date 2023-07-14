@@ -104,7 +104,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     collection: collectionConfig.slug,
     where: { id: { equals: parentDocID } },
     data: rawVersion.version,
-
+    req,
   });
 
   // /////////////////////////////////////

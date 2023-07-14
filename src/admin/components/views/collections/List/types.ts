@@ -1,6 +1,6 @@
 import { Where } from '../../../../../types';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import { PaginatedDocs } from '../../../../../mongoose/types';
+import type { PaginatedDocs } from '../../../../../database/types';
 import { Props as ListControlsProps } from '../../../elements/ListControls/types';
 import { Props as PerPageProps } from '../../../elements/PerPage';
 import { Props as PaginatorProps } from '../../../elements/Paginator/types';

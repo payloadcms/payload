@@ -27,7 +27,7 @@ import type {
 import type { TypeWithID } from '../collections/config/types';
 import type { TypeWithID as GlobalsTypeWithID } from '../globals/config/types';
 import type { Payload } from '../payload';
-import type { Document, Where } from '../types';
+import type { Document, PayloadRequest, Where } from '../types';
 import type { TypeWithVersion } from '../versions/types';
 
 export interface DatabaseAdapter {
@@ -126,6 +126,7 @@ export interface DatabaseAdapter {
   create: Create;
   updateOne: UpdateOne;
   deleteOne: DeleteOne;
+  deleteMany: DeleteMany;
 
   // operations - globals
   findGlobal: FindGlobal;
@@ -274,6 +275,7 @@ export type CreateArgs = {
   data: Record<string, unknown>
   draft?: boolean
   locale?: string
+  req: PayloadRequest
 }
 
 export type Create = (args: CreateArgs) => Promise<Document>
@@ -284,6 +286,7 @@ export type UpdateArgs = {
   where: Where
   draft?: boolean
   locale?: string
+  req: PayloadRequest
 }
 
 export type Update = (args: UpdateArgs) => Promise<Document>
@@ -294,6 +297,7 @@ export type UpdateOneArgs = {
   where: Where
   draft?: boolean
   locale?: string
+  req: PayloadRequest
 }
 
 export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
@@ -301,6 +305,7 @@ export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 export type DeleteOneArgs = {
   collection: string
   where: Where
+  req: PayloadRequest
 }
 
 export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
@@ -308,7 +313,11 @@ export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
 export type DeleteManyArgs = {
   collection: string
   where: Where
+  req: PayloadRequest | null
 }
+
+export type DeleteMany = (args: DeleteManyArgs) => Promise<void>
+
 
 export type Migration = MigrationData & {
   up: ({ payload }: { payload }) => Promise<boolean>

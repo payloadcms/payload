@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import { Props } from './types';
 import ReactSelect from '../../../elements/ReactSelect';
-import { PaginatedDocs } from '../../../../../mongoose/types';
+import type { PaginatedDocs } from '../../../../../database/types';
 import { Where } from '../../../../../types';
 import { mostRecentVersionOption, publishedVersionOption } from '../shared';
 import { formatDate } from '../../../../utilities/formatDate';
