@@ -1,0 +1,43 @@
+@import '../../../scss/styles.scss';
+
+.error-pill {
+  align-self: center;
+  align-items: center;
+  border: 0;
+  padding: 0 base(.25);
+  flex-shrink: 0;
+  border-radius: var(--style-radius-l);
+  line-height: 18px;
+  font-size: 11px;
+  text-align: center;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &--fixed-width {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    position: relative;
+  }
+
+  &__count {
+    letter-spacing: .5px;
+    margin-left: .5px;
+  }
+}
+
+html[data-theme=light] {
+  .error-pill {
+    background: var(--theme-error-250);
+    color: var(--theme-error-750)
+  }
+}
+
+html[data-theme=dark] {
+  .error-pill {
+    background: var(--theme-error-500);
+    color: var(--color-base-1000)
+  }
+}

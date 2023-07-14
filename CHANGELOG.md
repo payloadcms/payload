@@ -1,5 +1,20 @@
 
 
+## [1.11.2](https://github.com/payloadcms/payload/compare/v1.11.1...v1.11.2) (2023-07-14)
+
+
+### Features
+
+* adds array, collapsible, tab and group error states ([4925f90](https://github.com/payloadcms/payload/commit/4925f90b5f5c8fb8092bf4e8d88d5e0c1846b094))
+
+## [1.11.1](https://github.com/payloadcms/payload/compare/v1.11.0...v1.11.1) (2023-07-11)
+
+
+### Bug Fixes
+
+* [#2980](https://github.com/payloadcms/payload/issues/2980), locale=all was not iterating through arrays / blocks ([d6bfba7](https://github.com/payloadcms/payload/commit/d6bfba72a6b1a84bc5bb9dd14c7ce31d7afcbc1c))
+* anchor Button component respect margins ([#2648](https://github.com/payloadcms/payload/issues/2648)) ([1877d22](https://github.com/payloadcms/payload/commit/1877d2247c89ca5c8e1f0e1f989154d54768fed8))
+
 # [1.11.0](https://github.com/payloadcms/payload/compare/v1.10.5...v1.11.0) (2023-07-05)
 
 

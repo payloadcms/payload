@@ -14,3 +14,24 @@
     }
   }
 }
+
+
+html[data-theme=light] {
+  .field-type.email{
+    &.error {
+      input {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .field-type.email {
+    &.error {
+      input {
+        @include darkInputError;
+      }
+    }
+  }
+}
