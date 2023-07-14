@@ -50,7 +50,7 @@ import formatOptions from '../utilities/formatOptions';
 import { Payload } from '../../payload';
 import buildWhereInputType from './buildWhereInputType';
 import isFieldNullable from './isFieldNullable';
-import { Polygon as PolygonResolver } from './scalars';
+import { Polygon as PolygonResolver } from './types';
 
 type LocaleInputType = {
   locale: {

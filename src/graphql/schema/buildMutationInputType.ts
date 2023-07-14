@@ -21,7 +21,7 @@ import { toWords } from '../../utilities/formatLabels';
 import { Payload } from '../../payload';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { groupOrTabHasRequiredSubfield } from '../../utilities/groupOrTabHasRequiredSubfield';
-import { PolygonInput as PolygonResolver } from './scalars'
+import { PolygonInput as PolygonResolver } from './types'
 
 export const getCollectionIDType = (config: SanitizedCollectionConfig): GraphQLScalarType => {
   const idField = config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');

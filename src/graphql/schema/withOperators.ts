@@ -6,7 +6,7 @@ import { FieldAffectingData, NumberField, RadioField, SelectField, optionIsObjec
 import combineParentName from '../utilities/combineParentName';
 import formatName from '../utilities/formatName';
 import operators from './operators';
-import { PolygonInput as PolygonResolver } from './scalars';
+import { PolygonInput as PolygonResolver } from './types';
 
 type staticTypes = 'number' | 'text' | 'email' | 'textarea' | 'richText' | 'json' | 'code' | 'checkbox' | 'date' | 'upload' | 'point' | 'relationship' | 'polygon'
 
