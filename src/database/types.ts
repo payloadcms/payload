@@ -48,7 +48,7 @@ export interface DatabaseAdapter {
   /**
    * Terminate the connection with the database
    */
-  destroy?: () => Promise<void>;
+  destroy?: Destroy;
 
   /**
    * Used to alias server only modules or make other changes to webpack configuration
@@ -150,6 +150,8 @@ export interface DatabaseAdapter {
 export type Init = (payload: Payload) => Promise<void>;
 
 export type Connect = (payload: Payload) => Promise<void>
+
+export type Destroy = (payload: Payload) => Promise<void>
 
 export type Webpack = (config: Configuration) => Configuration;
 

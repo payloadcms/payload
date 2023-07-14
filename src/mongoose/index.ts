@@ -26,6 +26,7 @@ import { updateGlobal } from './updateGlobal';
 import { updateOne } from './updateOne';
 import { updateVersion } from './updateVersion';
 import { baseDatabaseAdapter } from '../database/baseDatabaseAdapter';
+import { destroy } from './destroy';
 
 export interface Args {
   payload: Payload;
@@ -75,6 +76,7 @@ export function mongooseAdapter({
     collections: {},
     versions: {},
     connect,
+    destroy,
     init,
     webpack,
     createMigration: async (migrationName) => createMigration({ payload, migrationDir, migrationName }),

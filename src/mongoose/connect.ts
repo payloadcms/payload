@@ -10,7 +10,7 @@ export const connect: Connect = async function connect(
   payload,
 ) {
   if (this.url === false) {
-    return null;
+    return;
   }
   let urlToConnect = this.url;
   let successfulConnectionMessage = 'Connected to MongoDB server successfully!';
@@ -21,8 +21,6 @@ export const connect: Connect = async function connect(
     useFacet: undefined,
   };
 
-  let mongoMemoryServer;
-
   if (process.env.NODE_ENV === 'test') {
     if (process.env.PAYLOAD_TEST_MONGO_URL) {
       urlToConnect = process.env.PAYLOAD_TEST_MONGO_URL;
@@ -32,14 +30,14 @@ export const connect: Connect = async function connect(
       const getPort = require('get-port');
 
       const port = await getPort();
-      mongoMemoryServer = await MongoMemoryServer.create({
+      this.mongoMemoryServer = await MongoMemoryServer.create({
         instance: {
           dbName: 'payloadmemory',
           port,
         },
       });
 
-      urlToConnect = mongoMemoryServer.getUri();
+      urlToConnect = this.mongoMemoryServer.getUri();
       successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!';
     }
   }
@@ -62,8 +60,4 @@ export const connect: Connect = async function connect(
     );
     process.exit(1);
   }
-
-  this.mongoMemoryServer = mongoMemoryServer;
-
-  return mongoMemoryServer;
 };
