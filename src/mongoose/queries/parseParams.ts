@@ -8,7 +8,7 @@ import { combineMerge } from '../../utilities/combineMerge';
 import { buildAndOrConditions } from './buildAndOrConditions';
 import { Field } from '../../fields/config/types';
 import { validOperators } from '../../database/queryValidation/types';
-import { PayloadMongoose } from '..';
+import { Payload } from '../..';
 
 export async function parseParams({
   where,
@@ -21,7 +21,7 @@ export async function parseParams({
   where: Where,
   collectionSlug?: string,
   globalSlug?: string,
-  payload: PayloadMongoose,
+  payload: Payload,
   locale: string,
   fields: Field[],
 }): Promise<Record<string, unknown>> {

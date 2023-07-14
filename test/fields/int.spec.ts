@@ -14,7 +14,7 @@ import { defaultNumber, numberDoc } from './collections/Number';
 import { dateDoc } from './collections/Date';
 import type { RichTextField } from './payload-types';
 import type { PaginatedDocs } from '../../src/database/types';
-import type { PayloadMongoose } from '../../src/mongoose';
+import type { MongooseAdapter } from '../../src/mongoose';
 
 let client;
 let graphQLClient: GraphQLClient;
@@ -229,7 +229,7 @@ describe('Fields', () => {
     const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
-      indexes = (payload as PayloadMongoose).db.collections['indexed-fields'].schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
+      indexes = (payload.db as MongooseAdapter).collections['indexed-fields'].schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
 
       indexes.forEach((index) => {
         const field = Object.keys(index[0])[0];

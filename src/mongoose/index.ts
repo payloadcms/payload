@@ -30,7 +30,7 @@ import type { CollectionModel, GlobalModel } from './types';
 import { deleteMany } from './deleteMany';
 
 export interface Args {
-  payload: PayloadMongoose;
+  payload: Payload;
   /** The URL to connect to MongoDB */
   url: string;
   migrationDir?: string;
@@ -39,20 +39,6 @@ export interface Args {
     useFacet?: boolean;
   };
 }
-export type SanitizedPayloadMongooseConfig = Omit<
-SanitizedConfig,
-'db'
-> & {
-  db: MongooseAdapter;
-}
-
-
-export class PayloadMongoose extends Payload {
-  db: MongooseAdapter;
-
-  config: SanitizedPayloadMongooseConfig;
-}
-
 
 export type MongooseAdapter = DatabaseAdapter &
   Args & {

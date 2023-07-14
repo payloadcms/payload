@@ -59,7 +59,7 @@ import findConfig from './config/find';
 
 import { defaults as emailDefaults } from './email/defaults';
 import type { DatabaseAdapter } from '.';
-import { PayloadMongoose, mongooseAdapter } from './mongoose';
+import { mongooseAdapter } from './mongoose';
 import type { PaginatedDocs } from './database/types';
 
 /**
@@ -204,7 +204,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     // if there is no defined database adapter
     if (!this.config.db) {
       this.config.db = mongooseAdapter({
-        payload: this as unknown as PayloadMongoose,
+        payload: this,
         url: this.mongoURL ? this.mongoURL : '',
         connectOptions: options.mongoOptions,
       });

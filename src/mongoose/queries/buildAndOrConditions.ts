@@ -1,7 +1,7 @@
 import { Where } from '../../types';
 import { parseParams } from './parseParams';
 import { Field } from '../../fields/config/types';
-import { PayloadMongoose } from '..';
+import { Payload } from '../..';
 
 export async function buildAndOrConditions({
   where,
@@ -14,7 +14,7 @@ export async function buildAndOrConditions({
   where: Where[],
   collectionSlug?: string,
   globalSlug?: string,
-  payload: PayloadMongoose,
+  payload: Payload,
   locale?: string,
   fields: Field[],
 }): Promise<Record<string, unknown>[]> {
