@@ -96,7 +96,7 @@ const fieldTypeConditions = {
   },
   json: {
     component: 'Text',
-    operators: [...base, like, contains],
+    operators: [...base, like, contains, within, intersects],
   },
   richText: {
     component: 'Text',
@@ -112,7 +112,7 @@ const fieldTypeConditions = {
   },
   point: {
     component: 'Point',
-    operators: [...geo, within, intersects],
+    operators: [...geo],
   },
   upload: {
     component: 'Text',
