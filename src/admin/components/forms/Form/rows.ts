@@ -14,7 +14,7 @@ export const separateRows = (path: string, fields: Fields): Result => {
     if (fieldPath.indexOf(`${path}.`) === 0) {
       const index = Number(fieldPath.replace(`${path}.`, '').split('.')[0]);
       if (!newRows[index]) newRows[index] = {};
-      newRows[index][fieldPath.replace(`${path}.${String(index)}.`, '')] = field;
+      newRows[index][fieldPath.replace(`${path}.${String(index)}.`, '')] = { ...field };
     } else {
       remainingFields[fieldPath] = field;
     }
@@ -34,7 +34,7 @@ export const flattenRows = (path: string, rows: Fields[]): Fields => {
     ...Object.entries(row).reduce((subFields, [subPath, subField]) => {
       return {
         ...subFields,
-        [`${path}.${i}.${subPath}`]: subField,
+        [`${path}.${i}.${subPath}`]: { ...subField },
       };
     }, {}),
   }), {});

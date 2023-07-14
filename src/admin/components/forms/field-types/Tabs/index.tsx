@@ -4,6 +4,7 @@ import RenderFields from '../../RenderFields';
 import withCondition from '../../withCondition';
 import { Props } from './types';
 import { tabHasName } from '../../../../../fields/config/types';
+import type { Tab } from '../../../../../fields/config/types';
 import FieldDescription from '../../FieldDescription';
 import toKebabCase from '../../../../../utilities/toKebabCase';
 import { useCollapsible } from '../../../elements/Collapsible/provider';
@@ -13,10 +14,56 @@ import { usePreferences } from '../../../utilities/Preferences';
 import { DocumentPreferences } from '../../../../../preferences/types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
+import { WatchChildErrors } from '../../WatchChildErrors';
+import { ErrorPill } from '../../../elements/ErrorPill';
+import { useFormSubmitted } from '../../Form/context';
 
 import './index.scss';
 
 const baseClass = 'tabs-field';
+
+type TabProps = {
+  isActive?: boolean;
+  setIsActive: () => void;
+  tab: Tab;
+  parentPath: string
+}
+const Tab: React.FC<TabProps> = ({ tab, isActive, setIsActive, parentPath }) => {
+  const { i18n } = useTranslation();
+  const [errorCount, setErrorCount] = useState(undefined);
+  const hasName = tabHasName(tab);
+  const submitted = useFormSubmitted();
+
+  const pathSegments = [];
+  if (parentPath) pathSegments.push(parentPath);
+  if (hasName) pathSegments.push(tab.name);
+  const path = pathSegments.join('.');
+  const tabHasErrors = submitted && errorCount > 0;
+
+  return (
+    <React.Fragment>
+      <WatchChildErrors
+        setErrorCount={setErrorCount}
+        path={path}
+        fieldSchema={hasName ? undefined : tab.fields}
+      />
+      <button
+        type="button"
+        className={[
+          `${baseClass}__tab-button`,
+          tabHasErrors && `${baseClass}__tab-button--has-error`,
+          isActive && `${baseClass}__tab-button--active`,
+        ].filter(Boolean).join(' ')}
+        onClick={setIsActive}
+      >
+        {tab.label ? getTranslation(tab.label, i18n) : (hasName && tab.name)}
+        {tabHasErrors && (
+          <ErrorPill count={errorCount} />
+        )}
+      </button>
+    </React.Fragment>
+  );
+};
 
 const TabsField: React.FC<Props> = (props) => {
   const {
@@ -89,55 +136,51 @@ const TabsField: React.FC<Props> = (props) => {
           <div className={`${baseClass}__tabs`}>
             {tabs.map((tab, tabIndex) => {
               return (
-                <button
+                <Tab
                   key={tabIndex}
-                  type="button"
-                  className={[
-                    `${baseClass}__tab-button`,
-                    activeTabIndex === tabIndex && `${baseClass}__tab-button--active`,
-                  ].filter(Boolean).join(' ')}
-                  onClick={() => {
-                    handleTabChange(tabIndex);
-                  }}
-                >
-                  {tab.label ? getTranslation(tab.label, i18n) : (tabHasName(tab) && tab.name)}
-                </button>
+                  setIsActive={() => handleTabChange(tabIndex)}
+                  isActive={activeTabIndex === tabIndex}
+                  parentPath={path}
+                  tab={tab}
+                />
               );
             })}
           </div>
         </div>
         <div className={`${baseClass}__content-wrap`}>
           {activeTabConfig && (
-            <div
-              className={[
-                `${baseClass}__tab`,
-                activeTabConfig.label && `${baseClass}__tab-${toKebabCase(getTranslation(activeTabConfig.label, i18n))}`,
-              ].filter(Boolean).join(' ')}
-            >
-              <FieldDescription
-                className={`${baseClass}__description`}
-                description={activeTabConfig.description}
-              />
-              <RenderFields
-                key={String(activeTabConfig.label)}
-                forceRender
-                readOnly={readOnly}
-                permissions={tabHasName(activeTabConfig) ? permissions[activeTabConfig.name].fields : permissions}
-                fieldTypes={fieldTypes}
-                fieldSchema={activeTabConfig.fields.map((field) => {
-                  const pathSegments = [];
+            <React.Fragment>
+              <div
+                className={[
+                  `${baseClass}__tab`,
+                  activeTabConfig.label && `${baseClass}__tab-${toKebabCase(getTranslation(activeTabConfig.label, i18n))}`,
+                ].filter(Boolean).join(' ')}
+              >
+                <FieldDescription
+                  className={`${baseClass}__description`}
+                  description={activeTabConfig.description}
+                />
+                <RenderFields
+                  key={String(activeTabConfig.label)}
+                  forceRender
+                  readOnly={readOnly}
+                  permissions={tabHasName(activeTabConfig) ? permissions[activeTabConfig.name].fields : permissions}
+                  fieldTypes={fieldTypes}
+                  fieldSchema={activeTabConfig.fields.map((field) => {
+                    const pathSegments = [];
 
-                  if (path) pathSegments.push(path);
-                  if (tabHasName(activeTabConfig)) pathSegments.push(activeTabConfig.name);
+                    if (path) pathSegments.push(path);
+                    if (tabHasName(activeTabConfig)) pathSegments.push(activeTabConfig.name);
 
-                  return {
-                    ...field,
-                    path: createNestedFieldPath(pathSegments.join('.'), field),
-                  };
-                })}
-                indexPath={indexPath}
-              />
-            </div>
+                    return {
+                      ...field,
+                      path: createNestedFieldPath(pathSegments.join('.'), field),
+                    };
+                  })}
+                  indexPath={indexPath}
+                />
+              </div>
+            </React.Fragment>
           )}
         </div>
       </TabsProvider>

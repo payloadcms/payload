@@ -168,6 +168,20 @@ export default buildConfig({
           hasMany: true,
           localized: true,
         },
+        {
+          name: 'arrayField',
+          label: 'Array Field',
+          type: 'array',
+          localized: true,
+          fields: [
+            {
+              type: 'relationship',
+              name: 'nestedRelation',
+              label: 'Nested Relation',
+              relationTo: localizedPostsSlug,
+            },
+          ],
+        },
       ],
     },
     {
@@ -287,6 +301,11 @@ export default buildConfig({
         relationMultiRelationToHasMany: [
           { relationTo: localizedPostsSlug, value: localizedRelation.id },
           { relationTo: localizedPostsSlug, value: localizedRelation2.id },
+        ],
+        arrayField: [
+          {
+            nestedRelation: localizedRelation.id,
+          },
         ],
       },
     });

@@ -10,8 +10,7 @@ export const protectRoles: FieldHook<User & { id: string }> = async ({ req, data
     return ['user']
   }
 
-  const userRoles = new Set(...(data?.roles || []))
+  const userRoles = new Set(data?.roles || [])
   userRoles.add('user')
-
   return [...userRoles]
 }
