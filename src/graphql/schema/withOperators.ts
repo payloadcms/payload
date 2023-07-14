@@ -6,7 +6,6 @@ import { FieldAffectingData, NumberField, RadioField, SelectField, optionIsObjec
 import combineParentName from '../utilities/combineParentName';
 import formatName from '../utilities/formatName';
 import operators from './operators';
-import { PolygonInput as PolygonResolver } from './types';
 
 type staticTypes = 'number' | 'text' | 'email' | 'textarea' | 'richText' | 'json' | 'code' | 'checkbox' | 'date' | 'upload' | 'point' | 'relationship' | 'polygon'
 
@@ -89,7 +88,7 @@ const defaults: DefaultsType = {
     operators: [...operators.equality, ...operators.comparison, ...operators.geo],
   },
   polygon: {
-    type: PolygonResolver,
+    type: GraphQLJSON,
     operators: [...operators.equality, ...operators.partial],
   },
   relationship: {
