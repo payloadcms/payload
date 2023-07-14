@@ -21,7 +21,7 @@ import { toWords } from '../../utilities/formatLabels';
 import { Payload } from '../../payload';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { groupOrTabHasRequiredSubfield } from '../../utilities/groupOrTabHasRequiredSubfield';
-import { PolygonInput as PolygonResolver } from './types'
+import { PolygonInput as PolygonInputType } from './types'
 
 export const getCollectionIDType = (config: SanitizedCollectionConfig): GraphQLScalarType => {
   const idField = config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
@@ -89,7 +89,7 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
     }),
     polygon: (inputObjectTypeConfig: InputObjectTypeConfig, field: PolygonField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: { type: withNullableType(field, PolygonResolver, forceNullable) },
+      [field.name]: { type: withNullableType(field, PolygonInputType, forceNullable) },
     }),
     checkbox: (inputObjectTypeConfig: InputObjectTypeConfig, field: CheckboxField) => ({
       ...inputObjectTypeConfig,

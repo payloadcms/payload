@@ -50,7 +50,7 @@ import formatOptions from '../utilities/formatOptions';
 import { Payload } from '../../payload';
 import buildWhereInputType from './buildWhereInputType';
 import isFieldNullable from './isFieldNullable';
-import { Polygon as PolygonResolver } from './types';
+import { Polygon as PolygonType } from './types';
 
 type LocaleInputType = {
   locale: {
@@ -123,7 +123,7 @@ function buildObjectType({
     }),
     polygon: (objectTypeConfig: ObjectTypeConfig, field: PolygonField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, PolygonResolver, forceNullable) },
+      [field.name]: { type: withNullableType(field, PolygonType, forceNullable) },
     }),
     richText: (objectTypeConfig: ObjectTypeConfig, field: RichTextField) => ({
       ...objectTypeConfig,
