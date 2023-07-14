@@ -59,7 +59,7 @@ export interface DatabaseAdapter {
   /**
    * Path to read and write migration files from
    */
-  migrationDir: string;
+  migrationDir?: string;
 
   /**
    * Output a migration file
@@ -147,9 +147,9 @@ export interface DatabaseAdapter {
   deleteVersions: DeleteVersions;
 }
 
-export type Init = ({ config }: { config: SanitizedConfig }) => Promise<void>;
+export type Init = (payload: Payload) => Promise<void>;
 
-export type Connect = ({ config }: { config: SanitizedConfig }) => Promise<void>
+export type Connect = (payload: Payload) => Promise<void>
 
 export type Webpack = (config: Configuration) => Configuration;
 

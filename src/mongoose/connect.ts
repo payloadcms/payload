@@ -5,8 +5,13 @@ import mongoose from 'mongoose';
 import type { MongooseAdapter } from '.';
 import type { Connect } from '../database/types';
 
-export const connect: Connect = async function connect(this: MongooseAdapter,
-  { config }) {
+export const connect: Connect = async function connect(
+  this: MongooseAdapter,
+  payload,
+) {
+  if (this.url === false) {
+    return null;
+  }
   let urlToConnect = this.url;
   let successfulConnectionMessage = 'Connected to MongoDB server successfully!';
 
@@ -40,7 +45,9 @@ export const connect: Connect = async function connect(this: MongooseAdapter,
   }
 
   try {
-    this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection;
+    this.connection = (
+      await mongoose.connect(urlToConnect, connectionOptions)
+    ).connection;
 
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
       this.payload.logger.info('---- DROPPING DATABASE ----');

@@ -48,5 +48,5 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
-  db: mongooseAdapter({ payload, url: 'mongodb://localhost:27017/migrations-cli-test' }),
+  db: mongooseAdapter({ payload, url: 'mongodb://127.0.0.1:27017/migrations-cli-test' }),
 });

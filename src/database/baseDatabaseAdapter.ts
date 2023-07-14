@@ -23,7 +23,7 @@ type BaseDatabaseAdapter = Pick<DatabaseAdapter, 'payload'
 
 type Args = {
   payload: Payload,
-  migrationDir: string,
+  migrationDir?: string,
 }
 export function baseDatabaseAdapter({
   payload,

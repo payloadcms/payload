@@ -29,9 +29,10 @@ import { baseDatabaseAdapter } from '../database/baseDatabaseAdapter';
 
 export interface Args {
   payload: Payload;
-  /** The URL to connect to MongoDB */
-  url: string;
+  /** The URL to connect to MongoDB or false to start payload and prevent connecting */
+  url: string | false;
   migrationDir?: string;
+  /** Extra configuration options */
   connectOptions?: ConnectOptions & {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean;

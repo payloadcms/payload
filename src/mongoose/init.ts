@@ -13,67 +13,74 @@ import { buildGlobalModel } from './models/buildGlobalModel';
 import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
 import type { Init } from '../database/types';
 
-export const init: Init = async function init(this: MongooseAdapter,
-  { config }) {
-  this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const schema = buildCollectionSchema(collection, this.payload.config);
+export const init: Init = async function init(
+  this: MongooseAdapter,
+  payload,
+) {
+  this.payload.config.collections.forEach(
+    (collection: SanitizedCollectionConfig) => {
+      const schema = buildCollectionSchema(collection, this.payload.config);
 
-    if (collection.versions) {
-      const versionModelName = getVersionsModelName(collection);
+      if (collection.versions) {
+        const versionModelName = getVersionsModelName(collection);
 
-      const versionCollectionFields = buildVersionCollectionFields(collection);
+        const versionCollectionFields = buildVersionCollectionFields(collection);
 
-      const versionSchema = buildSchema(
-        this.payload.config,
-        versionCollectionFields,
-        {
-          disableUnique: true,
-          draftsEnabled: true,
-          options: {
-            timestamps: false,
-            minimize: false,
+        const versionSchema = buildSchema(
+          this.payload.config,
+          versionCollectionFields,
+          {
+            disableUnique: true,
+            draftsEnabled: true,
+            options: {
+              timestamps: false,
+              minimize: false,
+            },
           },
-        },
-      );
+        );
 
-      if (collection.indexes) {
-        collection.indexes.forEach((index) => {
-          // prefix 'version.' to each field in the index
-          const versionIndex = {
-            fields: {},
-            options: index.options,
-          };
-          Object.entries(index.fields)
-            .forEach(([key, value]) => {
+        if (collection.indexes) {
+          collection.indexes.forEach((index) => {
+            // prefix 'version.' to each field in the index
+            const versionIndex = {
+              fields: {},
+              options: index.options,
+            };
+            Object.entries(index.fields).forEach(([key, value]) => {
               versionIndex.fields[`version.${key}`] = value;
             });
-          versionSchema.index(versionIndex.fields, versionIndex.options);
-        });
+            versionSchema.index(versionIndex.fields, versionIndex.options);
+          });
+        }
+
+        versionSchema.plugin(paginate, { useEstimatedCount: true }).plugin(
+          getBuildQueryPlugin({
+            collectionSlug: collection.slug,
+            versionsFields: versionCollectionFields,
+          }),
+        );
+
+        if (collection.versions?.drafts) {
+          versionSchema.plugin(mongooseAggregatePaginate);
+        }
+
+        const model = mongoose.model(
+          versionModelName,
+          versionSchema,
+        ) as CollectionModel;
+        this.payload.versions[collection.slug] = model;
+        this.versions[collection.slug] = model;
       }
 
-      versionSchema.plugin(paginate, { useEstimatedCount: true })
-        .plugin(getBuildQueryPlugin({
-          collectionSlug: collection.slug,
-          versionsFields: versionCollectionFields,
-        }));
+      const model = mongoose.model(collection.slug, schema) as CollectionModel;
+      this.collections[collection.slug] = model;
 
-      if (collection.versions?.drafts) {
-        versionSchema.plugin(mongooseAggregatePaginate);
-      }
-
-      const model = mongoose.model(versionModelName, versionSchema) as CollectionModel;
-      this.payload.versions[collection.slug] = model;
-      this.versions[collection.slug] = model;
-    }
-
-    const model = mongoose.model(collection.slug, schema) as CollectionModel;
-    this.collections[collection.slug] = model;
-
-    this.payload.collections[collection.slug] = {
-      Model: model,
-      config: collection,
-    };
-  });
+      this.payload.collections[collection.slug] = {
+        Model: model,
+        config: collection,
+      };
+    },
+  );
 
   const model = buildGlobalModel(this.payload.config);
   this.globals = model;
@@ -100,10 +107,14 @@ export const init: Init = async function init(this: MongooseAdapter,
         },
       );
 
-      versionSchema.plugin(paginate, { useEstimatedCount: true })
+      versionSchema
+        .plugin(paginate, { useEstimatedCount: true })
         .plugin(getBuildQueryPlugin({ versionsFields: versionGlobalFields }));
 
-      const versionsModel = mongoose.model(versionModelName, versionSchema) as CollectionModel;
+      const versionsModel = mongoose.model(
+        versionModelName,
+        versionSchema,
+      ) as CollectionModel;
       this.versions[global.slug] = versionsModel;
 
       this.payload.versions[global.slug] = versionsModel;
