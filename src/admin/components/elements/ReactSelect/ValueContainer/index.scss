@@ -2,6 +2,7 @@
 
 .value-container {
   flex-grow: 1;
+  min-width: 0;
 
   .rs__value-container {
     padding: base(.25) 0;

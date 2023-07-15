@@ -35,6 +35,17 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
           throw new InvalidFieldRelationship(field, relationship);
         }
       });
+
+      if (field.type === 'relationship') {
+        if (field.min && !field.minRows) {
+          console.warn(`(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`);
+        }
+        if (field.max && !field.maxRows) {
+          console.warn(`(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`);
+        }
+        field.minRows = field.minRows || field.min;
+        field.maxRows = field.maxRows || field.max;
+      }
     }
 
     if (field.type === 'blocks' && field.blocks) {

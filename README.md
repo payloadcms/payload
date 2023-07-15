@@ -2,7 +2,7 @@
   <a href="https://payloadcms.com">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-light.svg">
-      <img width="350" alt="payload cms logo" src="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-dark.svg">
+      <img width="350" alt="Payload Logo" src="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-dark.svg">
     </picture>
   </a>
 </p>
@@ -41,7 +41,7 @@
   </a>
   &nbsp;
   <a href="https://twitter.com/payloadcms">
-    <img src="https://img.shields.io/badge/follow-payloadcms-1DA1F2?logo=twitter&style=flat-square" alt="Payload CMS Twitter" />
+    <img src="https://img.shields.io/badge/follow-payloadcms-1DA1F2?logo=twitter&style=flat-square" alt="Payload Twitter" />
   </a>
 </p>
 

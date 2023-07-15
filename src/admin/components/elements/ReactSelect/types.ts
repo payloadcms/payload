@@ -33,6 +33,8 @@ declare module 'react-select/dist/declarations/src' {
 export type Option = {
   [key: string]: unknown
   value: unknown
+  //* The ID is used to identify the option in the UI. If it doesn't exist and value cannot be transformed into a string, sorting won't work */
+  id?: string
 }
 
 export type OptionGroup = {
@@ -48,7 +50,10 @@ export type Props = {
   disabled?: boolean,
   showError?: boolean,
   options: Option[] | OptionGroup[]
+  /** Allows you to specify multiple values instead of just one */
   isMulti?: boolean,
+  /** Allows you to create own values in the UI despite them not being pre-specified */
+  isCreatable?: boolean,
   isLoading?: boolean
   isOptionSelected?: any
   isSortable?: boolean,
@@ -61,8 +66,14 @@ export type Props = {
   filterOption?:
   | (({ label, value, data }: { label: string, value: string, data: Option }, search: string) => boolean)
   | undefined,
+  numberOnly?: boolean,
   components?: {
     [key: string]: React.FC<any>
   }
+  customProps?: CustomSelectProps
+  /**
+  * @deprecated Since version 1.0. Will be deleted in version 2.0. Use customProps instead.
+  */
   selectProps?: CustomSelectProps
+  backspaceRemovesValue?: boolean
 }

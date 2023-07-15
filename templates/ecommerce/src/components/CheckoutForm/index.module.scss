@@ -1,0 +1,9 @@
+@import "../../css/common";
+
+.checkoutButton {
+  margin-top: var(--base);
+}
+
+.error {
+  margin-top: calc(var(--block-padding) - var(--base));
+}

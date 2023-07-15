@@ -1,12 +1,14 @@
+import dotenv from 'dotenv'
 import path from 'path'
-import express from 'express'
-import payload from 'payload'
-import { seed } from './seed'
 
-// eslint-disable-next-line
-require('dotenv').config({
+dotenv.config({
   path: path.resolve(__dirname, '../.env'),
 })
+
+import express from 'express'
+import payload from 'payload'
+
+import { seed } from './seed'
 
 const app = express()
 
@@ -29,7 +31,7 @@ const start = async (): Promise<void> => {
     await seed(payload)
   }
 
-  app.listen(8000)
+  app.listen(3000)
 }
 
 start()

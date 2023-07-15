@@ -16,6 +16,7 @@ import { useAuth } from '../../../../../../utilities/Auth';
 import { Fields } from '../../../../../Form/types';
 import { useLocale } from '../../../../../../utilities/Locale';
 import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
+import { useDocumentInfo } from '../../../../../../utilities/DocumentInfo';
 
 /**
  * This function is called when an new link is created - not when an existing link is edited.
@@ -76,6 +77,7 @@ export const LinkButton: React.FC<{
 
   const { openModal, closeModal } = useModal();
   const drawerSlug = useDrawerSlug('rich-text-link');
+  const { getDocPreferences } = useDocumentInfo();
 
   return (
     <Fragment>
@@ -96,7 +98,8 @@ export const LinkButton: React.FC<{
                 text: editor.selection ? Editor.string(editor, editor.selection) : '',
               };
 
-              const state = await buildStateFromSchema({ fieldSchema, data, user, operation: 'create', locale, t });
+              const preferences = await getDocPreferences();
+              const state = await buildStateFromSchema({ fieldSchema, preferences, data, user, operation: 'create', locale, t });
               setInitialState(state);
             }
           }

@@ -1,0 +1,17 @@
+.form {
+  margin-bottom: 30px;
+}
+
+.success,
+.error,
+.message {
+  margin-bottom: 30px;
+}
+
+.success {
+  color: green;
+}
+
+.error {
+  color: red;
+}

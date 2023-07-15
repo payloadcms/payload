@@ -25,7 +25,7 @@ export const unlinkTempFiles: (args: Args) => Promise<void> = async ({
     const fileArray = Array.isArray(files) ? files : [files];
     await mapAsync(fileArray, async ({ file }) => {
       // Still need this check because this will not be populated if using local API
-      if (file.tempFilePath) {
+      if (file?.tempFilePath) {
         await unlinkFile(file.tempFilePath);
       }
     });

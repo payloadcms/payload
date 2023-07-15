@@ -181,8 +181,7 @@ export type Endpoint = {
   | 'patch'
   | 'delete'
   | 'connect'
-  | 'options'
-  | string;
+  | 'options';
   /**
    * Middleware that will be called when the path/method matches
    *
@@ -194,7 +193,7 @@ export type Endpoint = {
    * @default false
    */
   root?: boolean;
-  /** Extension  point to add your custom data. */
+  /** Extension point to add your custom data. */
   custom?: Record<string, any>;
 };
 
@@ -528,7 +527,7 @@ export type Config = {
   telemetry?: boolean;
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void;
-  /** Extension  point to add your custom data. */
+  /** Extension point to add your custom data. */
   custom?: Record<string, any>;
 };
 

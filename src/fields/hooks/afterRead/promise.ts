@@ -258,6 +258,27 @@ export const promise = async ({
             context,
           });
         });
+      } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
+        Object.values(rows).forEach((localeRows) => {
+          if (Array.isArray(localeRows)) {
+            localeRows.forEach((row) => {
+              traverseFields({
+                currentDepth,
+                depth,
+                doc,
+                fields: field.fields,
+                fieldPromises,
+                findMany,
+                flattenLocales,
+                overrideAccess,
+                populationPromises,
+                req,
+                siblingDoc: row || {},
+                showHiddenFields,
+              });
+            });
+          }
+        });
       }
       break;
     }
@@ -284,6 +305,31 @@ export const promise = async ({
               siblingDoc: row || {},
               showHiddenFields,
               context,
+            });
+          }
+        });
+      } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
+        Object.values(rows).forEach((localeRows) => {
+          if (Array.isArray(localeRows)) {
+            localeRows.forEach((row) => {
+              const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
+
+              if (block) {
+                traverseFields({
+                  currentDepth,
+                  depth,
+                  doc,
+                  fields: block.fields,
+                  fieldPromises,
+                  findMany,
+                  flattenLocales,
+                  overrideAccess,
+                  populationPromises,
+                  req,
+                  siblingDoc: row || {},
+                  showHiddenFields,
+                });
+              }
             });
           }
         });
