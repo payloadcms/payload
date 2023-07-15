@@ -39,6 +39,32 @@ payloadCloud({
 })
 ```
 
+### Accessing File Storage from Local Environment
+
+This plugin works off of a specific set of environment variables in order to access your file resources. Here is this list with some prefilled.
+
+```txt
+PORT=3000
+MONGODB_URI=
+PAYLOAD_CLOUD=true
+PAYLOAD_CLOUD_ENVIRONMENT=prod
+PAYLOAD_CLOUD_BUCKET=
+PAYLOAD_CLOUD_COGNITO_IDENTITY_POOL_ID=
+PAYLOAD_CLOUD_COGNITO_USER_POOL_CLIENT_ID=
+PAYLOAD_CLOUD_COGNITO_USER_POOL_ID=
+PAYLOAD_CLOUD_PROJECT_ID=
+PAYLOAD_CLOUD_COGNITO_PASSWORD=
+PAYLOAD_CLOUD_BUCKET_REGION=
+
+PAYLOAD_SECRET=
+```
+
+- `MONGODB_URI` is on the the Database tab.
+- `PAYLOAD_CLOUD_PROJECT_ID` is from Settings -> Billing.
+- `PAYLOAD_SECRET` is from Settings -> Environment Variables
+
+The remaining values can be seen on your project's File Storage tab. You'll have to match up the values appropriately. We plan on adding the ability to easily copy these values in the near future.
+
 ## Future enhancements
 
 ### API CDN
