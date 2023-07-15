@@ -1,7 +1,7 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Payload } from '../../../payload';
 import { Document } from '../../../types';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { TypeWithVersion } from '../../../versions/types';
 import findVersionByID from '../findVersionByID';
 import { getDataLoader } from '../../dataloader';
@@ -24,7 +24,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
-  context?: PayloadRequestContext,
+  context?: RequestContext,
 }
 
 export default async function findVersionByIDLocal<T extends keyof GeneratedTypes['collections']>(

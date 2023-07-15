@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
 import { traverseFields } from './traverseFields';
 
@@ -13,7 +13,7 @@ type Args = {
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
-  context: PayloadRequestContext
+  context: RequestContext
 }
 
 // This function is responsible for the following actions, in order:

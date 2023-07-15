@@ -1,6 +1,6 @@
 import { SanitizedCollectionConfig } from '../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../globals/config/types';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import deepCopyObject from '../../../utilities/deepCopyObject';
 
@@ -12,7 +12,7 @@ type Args<T> = {
   operation: 'create' | 'update'
   overrideAccess: boolean
   req: PayloadRequest
-  context: PayloadRequestContext
+  context: RequestContext
 }
 
 export const beforeValidate = async <T extends Record<string, unknown>>({

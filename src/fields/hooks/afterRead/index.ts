@@ -1,6 +1,6 @@
 import { SanitizedCollectionConfig } from '../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../globals/config/types';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import deepCopyObject from '../../../utilities/deepCopyObject';
 
@@ -14,7 +14,7 @@ type Args = {
   req: PayloadRequest
   overrideAccess: boolean
   showHiddenFields: boolean
-  context: PayloadRequestContext
+  context: RequestContext
 }
 
 export async function afterRead<T = any>(args: Args): Promise<T> {

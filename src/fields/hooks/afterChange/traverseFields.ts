@@ -1,6 +1,6 @@
 import { Field, TabAsField } from '../../config/types';
 import { promise } from './promise';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 
 type Args = {
   data: Record<string, unknown>
@@ -12,7 +12,7 @@ type Args = {
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
-  context: PayloadRequestContext
+  context: RequestContext
 }
 
 export const traverseFields = async ({

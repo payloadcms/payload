@@ -1,6 +1,6 @@
 import { Config as GeneratedTypes } from '../../../generated-types';
 import { Document, Where } from '../../../types';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { Payload } from '../../../payload';
 import deleteOperation from '../delete';
 import deleteByID from '../deleteByID';
@@ -21,7 +21,7 @@ export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
-  context?: PayloadRequestContext
+  context?: RequestContext
 }
 
 export type ByIDOptions<T extends keyof GeneratedTypes['collections']> = BaseOptions<T> & {

@@ -121,11 +121,11 @@ By default, context is untyped. However - especially for plugin development when
 We can do this using "type augmentation" - a TypeScript feature which allows us to add types to existing objects. Simply put this in any .ts or .d.ts file:
 
 ```ts
-import { PayloadRequestContext as OriginalPayloadRequestContext } from 'payload';
+import { RequestContext as OriginalRequestContext } from 'payload';
 
 declare module 'payload' {
   // Create a new interface that merges your additional fields with the original one
-  export interface PayloadRequestContext extends OriginalPayloadRequestContext {
+  export interface RequestContext extends OriginalRequestContext {
     myobject?: string;
     // ...
   }

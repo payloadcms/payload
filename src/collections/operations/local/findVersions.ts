@@ -3,7 +3,7 @@ import { Payload } from '../../../payload';
 import { Document, Where } from '../../../types';
 import { PaginatedDocs } from '../../../mongoose/types';
 import { TypeWithVersion } from '../../../versions/types';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import findVersions from '../findVersions';
 import { getDataLoader } from '../../dataloader';
 import i18nInit from '../../../translations/init';
@@ -26,7 +26,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
-  context?: PayloadRequestContext,
+  context?: RequestContext,
 }
 
 export default async function findVersionsLocal<T extends keyof GeneratedTypes['collections']>(

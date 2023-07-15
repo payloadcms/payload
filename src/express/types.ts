@@ -32,7 +32,7 @@ export declare type PayloadRequest<U = any> = Request & {
    * This is useful for, for example, passing data from a beforeChange hook to an afterChange hook.
    * payoadContext can also be fully typed using declare module (more info in the docs)
    */
-  context: PayloadRequestContext;
+  context: RequestContext;
   /** Uploaded files */
   files?: {
     /**
@@ -55,6 +55,6 @@ export declare type PayloadRequest<U = any> = Request & {
   };
 };
 
-export interface PayloadRequestContext {
+export interface RequestContext {
   [key: string]: unknown;
 }

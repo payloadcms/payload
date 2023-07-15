@@ -1,5 +1,5 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { Document } from '../../../types';
 import findByID from '../findByID';
 import { Payload } from '../../../payload';
@@ -24,7 +24,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
-  context?: PayloadRequestContext,
+  context?: RequestContext,
 }
 
 export default async function findByIDLocal<T extends keyof GeneratedTypes['collections']>(

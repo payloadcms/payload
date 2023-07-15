@@ -1,6 +1,6 @@
 import { SanitizedCollectionConfig } from '../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../globals/config/types';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import deepCopyObject from '../../../utilities/deepCopyObject';
 
@@ -11,7 +11,7 @@ type Args<T> = {
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
   operation: 'create' | 'update'
   req: PayloadRequest
-  context: PayloadRequestContext
+  context: RequestContext
 }
 
 export const afterChange = async <T extends Record<string, unknown>>({

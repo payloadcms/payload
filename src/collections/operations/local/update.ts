@@ -4,7 +4,7 @@ import { Payload } from '../../../payload';
 import { Document, Where } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import update from '../update';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18nInit from '../../../translations/init';
@@ -30,7 +30,7 @@ export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
-  context?: PayloadRequestContext
+  context?: RequestContext
 }
 
 export type ByIDOptions<TSlug extends keyof GeneratedTypes['collections']> = BaseOptions<TSlug> & {

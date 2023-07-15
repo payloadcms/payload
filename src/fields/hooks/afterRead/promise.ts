@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise';
 import relationshipPopulationPromise from './relationshipPopulationPromise';
@@ -18,7 +18,7 @@ type Args = {
   overrideAccess: boolean
   siblingDoc: Record<string, unknown>
   showHiddenFields: boolean
-  context: PayloadRequestContext
+  context: RequestContext
 }
 
 // This function is responsible for the following actions, in order:

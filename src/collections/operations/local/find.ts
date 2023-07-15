@@ -2,7 +2,7 @@ import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PaginatedDocs } from '../../../mongoose/types';
 import { Document, Where } from '../../../types';
 import { Payload } from '../../../payload';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import find from '../find';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
@@ -29,7 +29,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
-  context?: PayloadRequestContext
+  context?: RequestContext
 }
 
 export default async function findLocal<T extends keyof GeneratedTypes['collections']>(

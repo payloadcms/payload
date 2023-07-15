@@ -2,7 +2,7 @@ import { Config as GeneratedTypes } from 'payload/generated-types';
 import { UploadedFile } from 'express-fileupload';
 import { MarkOptional } from 'ts-essentials';
 import { Payload } from '../../../payload';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import create from '../create';
@@ -30,7 +30,7 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
-  context?: PayloadRequestContext
+  context?: RequestContext
 }
 
 export default async function createLocal<TSlug extends keyof GeneratedTypes['collections']>(

@@ -2,7 +2,7 @@
 import merge from 'deepmerge';
 import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
 import { Operation } from '../../../types';
-import { PayloadRequest, PayloadRequestContext } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import getValueWithDefault from '../../getDefaultValue';
 import { traverseFields } from './traverseFields';
 import { getExistingRowDoc } from './getExistingRowDoc';
@@ -23,7 +23,7 @@ type Args = {
   siblingDoc: Record<string, unknown>
   siblingDocWithLocales?: Record<string, unknown>
   skipValidation: boolean
-  context: PayloadRequestContext
+  context: RequestContext
 }
 
 // This function is responsible for the following actions, in order:
