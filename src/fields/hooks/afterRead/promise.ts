@@ -275,6 +275,7 @@ export const promise = async ({
                 req,
                 siblingDoc: row || {},
                 showHiddenFields,
+                context,
               });
             });
           }
@@ -328,6 +329,7 @@ export const promise = async ({
                   req,
                   siblingDoc: row || {},
                   showHiddenFields,
+                  context,
                 });
               }
             });
