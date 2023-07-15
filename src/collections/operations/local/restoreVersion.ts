@@ -6,7 +6,7 @@ import { getDataLoader } from '../../dataloader';
 import restoreVersion from '../restoreVersion';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
-import { populateDefaultRequest } from '../../../express/defaultRequest';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -56,7 +56,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
     i18n,
     t: i18n.t,
   } as PayloadRequest;
-  populateDefaultRequest(req, context);
+  setRequestContext(req, context);
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 

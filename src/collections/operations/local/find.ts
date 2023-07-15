@@ -7,7 +7,7 @@ import find from '../find';
 import { getDataLoader } from '../../dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
-import { populateDefaultRequest } from '../../../express/defaultRequest';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -55,7 +55,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     req = {} as PayloadRequest,
     context,
   } = options;
-  populateDefaultRequest(options.req, context);
+  setRequestContext(options.req, context);
 
   const collection = payload.collections[collectionSlug];
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;

@@ -6,7 +6,7 @@ import { Document } from '../../../types';
 import findOne from '../findOne';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
-import { populateDefaultRequest } from '../../../express/defaultRequest';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   slug: T
@@ -51,7 +51,7 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
     i18n,
     t: i18n.t,
   } as PayloadRequest;
-  populateDefaultRequest(req);
+  setRequestContext(req);
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 

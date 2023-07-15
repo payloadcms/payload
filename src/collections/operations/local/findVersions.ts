@@ -8,7 +8,7 @@ import findVersions from '../findVersions';
 import { getDataLoader } from '../../dataloader';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
-import { populateDefaultRequest } from '../../../express/defaultRequest';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -64,7 +64,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     payload,
     i18n,
   } as PayloadRequest;
-  populateDefaultRequest(req, context);
+  setRequestContext(req, context);
 
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

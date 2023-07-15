@@ -6,7 +6,7 @@ import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
-import { populateDefaultRequest } from '../../../express/defaultRequest';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
@@ -38,7 +38,7 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess = true,
     showHiddenFields,
   } = options;
-  populateDefaultRequest(options.req);
+  setRequestContext(options.req);
 
 
   const collection = payload.collections[collectionSlug];
