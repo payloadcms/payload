@@ -41,7 +41,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     args = (await hook({
       args,
       operation: 'delete',
-      context: req.payloadContext,
+      context: req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -117,7 +117,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         return hook({
           req,
           id,
-          context: req.payloadContext,
+          context: req.context,
         });
       }, Promise.resolve());
 
@@ -152,7 +152,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         overrideAccess,
         req,
         showHiddenFields,
-        context: req.payloadContext,
+        context: req.context,
       });
 
       // /////////////////////////////////////
@@ -165,7 +165,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         result = await hook({
           req,
           doc: result || doc,
-          context: req.payloadContext,
+          context: req.context,
         }) || result;
       }, Promise.resolve());
 
@@ -180,7 +180,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           req,
           id,
           doc: result,
-          context: req.payloadContext,
+          context: req.context,
         }) || result;
       }, Promise.resolve());
 

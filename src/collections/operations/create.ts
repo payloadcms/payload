@@ -54,7 +54,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'create',
-      context: req.payloadContext,
+      context: req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -131,7 +131,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     operation: 'create',
     overrideAccess,
     req,
-    context: req.payloadContext,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -145,7 +145,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       data,
       req,
       operation: 'create',
-      context: req.payloadContext,
+      context: req.context,
     })) || data;
   }, Promise.resolve());
 
@@ -168,7 +168,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       data,
       req,
       operation: 'create',
-      context: req.payloadContext,
+      context: req.context,
     })) || data;
   }, Promise.resolve());
 
@@ -184,7 +184,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     operation: 'create',
     req,
     skipValidation: shouldSaveDraft,
-    context: req.payloadContext,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -271,7 +271,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess,
     req,
     showHiddenFields,
-    context: req.payloadContext,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -284,7 +284,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     result = await hook({
       req,
       doc: result,
-      context: req.payloadContext,
+      context: req.context,
     }) || result;
   }, Promise.resolve());
 
@@ -299,7 +299,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     entityConfig: collectionConfig,
     operation: 'create',
     req,
-    context: req.payloadContext,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -314,7 +314,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       previousDoc: {},
       req: args.req,
       operation: 'create',
-      context: req.payloadContext,
+      context: req.context,
     }) || result;
   }, Promise.resolve());
 

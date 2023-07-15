@@ -28,7 +28,7 @@ export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
   draft?: boolean
   autosave?: boolean
   /**
-   * context, which will then be passed to req.payloadContext, which can be read by hooks
+   * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: PayloadRequestContext
 }

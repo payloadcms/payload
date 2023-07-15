@@ -60,7 +60,7 @@ async function me({
     response = await hook({
       req,
       response,
-      context: req.payloadContext,
+      context: req.context,
     }) || response;
   }, Promise.resolve());
 

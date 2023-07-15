@@ -19,7 +19,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   showHiddenFields?: boolean
   draft?: boolean
   /**
-   * context, which will then be passed to req.payloadContext, which can be read by hooks
+   * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: PayloadRequestContext,
 }

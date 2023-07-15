@@ -28,7 +28,7 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   req?: PayloadRequest
   draft?: boolean
   /**
-   * context, which will then be passed to req.payloadContext, which can be read by hooks
+   * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: PayloadRequestContext
 }

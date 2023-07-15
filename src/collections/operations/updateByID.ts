@@ -49,7 +49,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'update',
-      context: req.payloadContext,
+      context: req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -131,7 +131,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     req,
     overrideAccess: true,
     showHiddenFields: true,
-    context: req.payloadContext,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -167,7 +167,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     operation: 'update',
     overrideAccess,
     req,
-    context: req.payloadContext,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -182,7 +182,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       req,
       operation: 'update',
       originalDoc,
-      context: req.payloadContext,
+      context: req.context,
     })) || data;
   }, Promise.resolve());
 
@@ -206,7 +206,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       req,
       originalDoc,
       operation: 'update',
-      context: req.payloadContext,
+      context: req.context,
     })) || data;
   }, Promise.resolve());
 
@@ -223,7 +223,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     operation: 'update',
     req,
     skipValidation: shouldSaveDraft || data._status === 'draft',
-    context: req.payloadContext,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -293,7 +293,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     req,
     overrideAccess,
     showHiddenFields,
-    context: req.payloadContext,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -306,7 +306,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     result = await hook({
       req,
       doc: result,
-      context: req.payloadContext,
+      context: req.context,
     }) || result;
   }, Promise.resolve());
 
@@ -321,7 +321,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     entityConfig: collectionConfig,
     operation: 'update',
     req,
-    context: req.payloadContext,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -336,7 +336,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       previousDoc: originalDoc,
       req,
       operation: 'update',
-      context: req.payloadContext,
+      context: req.context,
     }) || result;
   }, Promise.resolve());
 

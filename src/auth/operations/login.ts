@@ -48,7 +48,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'login',
-      context: req.payloadContext,
+      context: req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -152,7 +152,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     user = (await hook({
       user,
       req: args.req,
-      context: req.payloadContext,
+      context: req.context,
     })) || user;
   }, Promise.resolve());
 
@@ -192,7 +192,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       user,
       req: args.req,
       token,
-      context: req.payloadContext,
+      context: req.context,
     }) || user;
   }, Promise.resolve());
 
@@ -207,7 +207,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess,
     req,
     showHiddenFields,
-    context: req.payloadContext,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -220,7 +220,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     user = await hook({
       req,
       doc: user,
-      context: req.payloadContext,
+      context: req.context,
     }) || user;
   }, Promise.resolve());
 
