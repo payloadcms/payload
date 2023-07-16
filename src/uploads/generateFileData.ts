@@ -9,7 +9,7 @@ import { FileUploadError, MissingFile } from '../errors';
 import { PayloadRequest } from '../express/types';
 import getImageSize from './getImageSize';
 import getSafeFileName from './getSafeFilename';
-import transformAndSaveImage from './imageResizer';
+import resizeAndTransformImageSizes from './imageResizer';
 import { FileData, FileToSave, ProbedImageSize } from './types';
 import canResizeImage from './canResizeImage';
 import isImage from './isImage';
@@ -155,7 +155,7 @@ export const generateFileData = async <T>({
     if (Array.isArray(imageSizes) && fileSupportsResize) {
       req.payloadUploadSizes = {};
 
-      const { sizeData, sizesToSave } = await transformAndSaveImage({
+      const { sizeData, sizesToSave } = await resizeAndTransformImageSizes({
         req,
         file,
         dimensions,

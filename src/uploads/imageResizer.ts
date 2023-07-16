@@ -18,7 +18,8 @@ type ResizeArgs = {
   mimeType: string;
 };
 
-type TransformResult = {
+/** Result from resizing and transforming the requested image sizes */
+type ImageSizesResult = {
   sizeData: FileSizes;
   sizesToSave: FileToSave[];
 };
@@ -82,7 +83,7 @@ const createResult = (
   filesize: FileSize['filesize'] = null,
   mimeType: FileSize['mimeType'] = null,
   sizesToSave: FileToSave[] = [],
-): TransformResult => ({
+): ImageSizesResult => ({
   sizesToSave,
   sizeData: {
     [name]: {
@@ -97,44 +98,59 @@ const createResult = (
 
 /**
  * Check if the image needs to be resized according to the requested dimensions
- * and the original image size. If the resize options are provided, the image
- * will be resized regardless of the requested dimensions, given that the
+ * and the original image size. If the resize options withoutEnlargement or withoutReduction are provided,
+ * the image will be resized regardless of the requested dimensions, given that the
  * width or height to be resized is provided.
  *
- * @param requestedDimensions - the requested dimensions
+ * @param resizeConfig - object containing the requested dimensions and resize options
  * @param original - the original image size
- * @param resizeOptions - the resize options
  * @returns true if the image needs to be resized, false otherwise
  */
 const needsResize = (
-  { width, height, withoutEnlargement, withoutReduction }: ImageSize,
+  { width: desiredWidth, height: desiredHeigth, withoutEnlargement, withoutReduction }: ImageSize,
   original: ProbedImageSize,
 ): boolean => {
   // allow enlargement or prevent reduction (our default is to prevent
   // enlargement and allow reduction)
-  if (withoutEnlargement === false || withoutReduction) {
-    return true;
+  if (withoutEnlargement !== undefined || withoutReduction !== undefined) {
+    return true; // needs resize
   }
 
-  const isWidthOrHeightDefined = !!height || !!width;
-  const hasInsufficientWidth = !!width && width <= original.width;
-  const hasInsufficientHeight = !!height && height <= original.height;
+  const isWidthOrHeightNotDefined = !desiredHeigth || !desiredWidth;
+  if (isWidthOrHeightNotDefined) {
+    // If with and height are not defined, it means there is a format conversion
+    // and the image needs to be "resized" (transformed).
+    return true; // needs resize
+  }
 
-  // If with and height are not defined, it means there is a format conversion
-  // and the image needs to be "resized" (transformed).
-  return !isWidthOrHeightDefined || hasInsufficientWidth || hasInsufficientHeight;
+  const hasInsufficientWidth = original.width <= desiredWidth;
+  if (hasInsufficientWidth) {
+    return false; // doesn't need resize - prevent enlargement
+  }
+
+  const hasInsufficientHeight = original.height <= desiredHeigth;
+  if (hasInsufficientHeight) {
+    return false; // doesn't need resize - prevent enlargement
+  }
+
+  return true; // needs resize
 };
 
 /**
- * Resize the image and provide the resize buffer. The image will be resized
- * according to the provided resize config. If no image sizes are requested,
- * the resolved data will be empty. For every image that dos not need to be
- * resized, an result object with `null` parameters will be returned.
+ * For the provided image sizes, handle the resizing and the transforms
+ * (format, trim, etc.) of each requested image size and return the result object.
+ * This only handles the image sizes. The transforms of the original image
+ * are handled in {@link ./generateFileData.ts}.
+ *
+ * The image will be resized according to the provided
+ * resize config. If no image sizes are requested, the resolved data will be empty.
+ * For every image that dos not need to be resized, an result object with `null`
+ * parameters will be returned.
  *
  * @param resizeConfig - the resize config
  * @returns the result of the resize operation(s)
  */
-export default async function transformAndSaveImage({
+export default async function resizeAndTransformImageSizes({
   req,
   file,
   dimensions,
@@ -142,7 +158,7 @@ export default async function transformAndSaveImage({
   config,
   savedFilename,
   mimeType,
-}: ResizeArgs): Promise<TransformResult> {
+}: ResizeArgs): Promise<ImageSizesResult> {
   const { imageSizes } = config.upload;
 
   // Noting to resize here so return as early as possible
@@ -150,8 +166,11 @@ export default async function transformAndSaveImage({
 
   const sharpBase = sharp(file.tempFilePath || file.data);
 
-  const results: TransformResult[] = await Promise.all(
-    imageSizes.map(async (imageResizeConfig): Promise<TransformResult> => {
+  const results: ImageSizesResult[] = await Promise.all(
+    imageSizes.map(async (imageResizeConfig): Promise<ImageSizesResult> => {
+      // This checks if a resize should happen. If not, the resized image will be
+      // skipped COMPLETELY and thus will not be included in the resulting images.
+      // All further format/trim options will thus be skipped as well.
       if (!needsResize(imageResizeConfig, dimensions)) {
         return createResult(imageResizeConfig.name);
       }
