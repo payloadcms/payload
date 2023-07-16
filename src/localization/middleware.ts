@@ -1,16 +1,16 @@
-import unifiedLocaleConfig from '../utilities/unifiedLocaleConfig';
+import type { SanitizedLocalizationConfig } from '../config/types';
+
 /**
  * sets request locale
  *
  * @param localization
  * @returns {Function}
  */
-export default function localizationMiddleware(localization_) {
-  const localization = unifiedLocaleConfig(localization_);
+export default function localizationMiddleware(localization: false | SanitizedLocalizationConfig) {
   const middleware = (req, res, next) => {
     if (localization) {
-      const validLocales = [...localization.locales, 'all'];
-      const validFallbackLocales = [...localization.locales, 'null'];
+      const validLocales = [...localization.localesSimple, 'all'];
+      const validFallbackLocales = [...localization.localesSimple, 'null'];
 
       let requestedLocale = req.query.locale || localization.defaultLocale;
       let requestedFallbackLocale = req.query['fallback-locale'] || localization.defaultLocale;

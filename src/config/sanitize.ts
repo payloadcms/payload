@@ -1,6 +1,6 @@
 import merge from 'deepmerge';
 import { isPlainObject } from 'is-plain-object';
-import { Config, SanitizedConfig } from './types';
+import type { Config, LocalizationConfigWithNoLabels, SanitizedConfig, SanitizedLocalizationConfig } from './types';
 import defaultUser from '../auth/defaultUser';
 import sanitizeCollection from '../collections/config/sanitize';
 import { InvalidConfiguration } from '../errors';
@@ -24,6 +24,28 @@ const sanitizeConfig = (config: Config): SanitizedConfig => {
     }
   } else if (!sanitizedConfig.collections.find((c) => c.slug === sanitizedConfig.admin.user)) {
     throw new InvalidConfiguration(`${sanitizedConfig.admin.user} is not a valid admin user collection`);
+  }
+
+  if (sanitizedConfig.localization && sanitizedConfig.localization.locales?.length > 0) {
+    // clone localization config so to not break everything
+    const firstLocale = sanitizedConfig.localization.locales[0];
+    if (typeof firstLocale === 'string') {
+      (sanitizedConfig.localization as SanitizedLocalizationConfig).localesSimple = [...(sanitizedConfig.localization as LocalizationConfigWithNoLabels).locales];
+
+      // is string[], so convert to LabeledLocale[]
+      (sanitizedConfig.localization as SanitizedLocalizationConfig).locales = (sanitizedConfig.localization as LocalizationConfigWithNoLabels).locales.map((locale) => ({
+        label: locale,
+        value: locale,
+        rtl: false,
+        toString: () => locale,
+      }));
+    } else {
+      // is LabeledLocale[], so convert to string[] for localesSimple
+      (sanitizedConfig.localization as SanitizedLocalizationConfig).localesSimple = (sanitizedConfig.localization as SanitizedLocalizationConfig).locales.reduce((locales, locale) => {
+        locales.push(locale.value);
+        return locales;
+      }, [] as string[]);
+    }
   }
 
   sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig, collection));

@@ -1,10 +1,10 @@
-import { Config } from '../config/types';
+import type { SanitizedConfig } from '../config/types';
 import { getLocalizedSortProperty } from './getLocalizedSortProperty';
 import { Field } from '../fields/config/types';
 
 type Args = {
   sort: string
-  config: Config
+  config: SanitizedConfig
   fields: Field[]
   timestamps: boolean
   locale: string

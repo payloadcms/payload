@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
 import { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose';
-import { SanitizedConfig } from '../config/types';
+import { SanitizedConfig, SanitizedLocalizationConfig } from '../config/types';
 import {
   ArrayField,
   Block,
@@ -36,7 +36,6 @@ import {
   UnnamedTab,
   UploadField,
 } from '../fields/config/types';
-import unifiedLocaleConfig from '../utilities/unifiedLocaleConfig';
 
 export type BuildSchemaOptions = {
   options?: SchemaOptions
@@ -67,10 +66,10 @@ const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSc
   return schema;
 };
 
-const localizeSchema = (entity: NonPresentationalField | Tab, schema, localization) => {
+const localizeSchema = (entity: NonPresentationalField | Tab, schema, localization: false | SanitizedLocalizationConfig) => {
   if (fieldIsLocalized(entity) && localization && Array.isArray(localization.locales)) {
     return {
-      type: localization.locales.reduce((localeSchema, locale) => ({
+      type: localization.localesSimple.reduce((localeSchema, locale) => ({
         ...localeSchema,
         [locale]: schema,
       }), {
@@ -242,9 +241,8 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     let schemaToReturn: { [key: string]: any } = {};
 
     if (field.localized && config.localization) {
-      const localization = unifiedLocaleConfig(config.localization);
       schemaToReturn = {
-        type: localization.locales.reduce((locales, locale) => {
+        type: config.localization.localesSimple.reduce((locales, locale) => {
           let localeSchema: { [key: string]: any } = {};
 
           if (hasManyRelations) {

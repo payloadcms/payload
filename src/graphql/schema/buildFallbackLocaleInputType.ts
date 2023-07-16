@@ -1,15 +1,13 @@
 import { GraphQLEnumType } from 'graphql';
-import { LocalizationConfig } from '../../config/types';
+import { SanitizedLocalizationConfig } from '../../config/types';
 import formatName from '../utilities/formatName';
-import unifiedLocaleConfig from '../../utilities/unifiedLocaleConfig';
 
 const buildFallbackLocaleInputType = (
-  localization_: LocalizationConfig,
+  localization: SanitizedLocalizationConfig,
 ): GraphQLEnumType => {
-  const localization = unifiedLocaleConfig(localization_);
   return new GraphQLEnumType({
     name: 'FallbackLocaleInputType',
-    values: [...localization.locales, 'none'].reduce(
+    values: [...localization.localesSimple, 'none'].reduce(
       (values, locale) => ({
         ...values,
         [formatName(locale)]: {

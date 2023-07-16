@@ -6,7 +6,6 @@ import { useConfig } from '../../utilities/Config';
 import { useLocale } from '../../utilities/Locale';
 import { useSearchParams } from '../../utilities/SearchParams';
 import Popup from '../Popup';
-import unifiedLocaleConfig from '../../../../utilities/unifiedLocaleConfig';
 
 
 import './index.scss';
@@ -15,15 +14,14 @@ const baseClass = 'localizer';
 
 const Localizer: React.FC = () => {
   const config = useConfig();
-  const localization = config.localization ? unifiedLocaleConfig(config.localization) : undefined;
-
+  const { localization } = config;
 
   const locale = useLocale();
   const searchParams = useSearchParams();
   const { t } = useTranslation('general');
 
   if (localization) {
-    const { locales } = localization;
+    const { localesSimple } = localization;
 
     return (
       <div className={baseClass}>
@@ -35,7 +33,7 @@ const Localizer: React.FC = () => {
             <div>
               <span>{t('locales')}</span>
               <ul>
-                {locales.map((localeOption) => {
+                {localesSimple.map((localeOption) => {
                   const baseLocaleClass = `${baseClass}__locale`;
 
                   const localeClasses = [

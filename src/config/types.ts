@@ -267,6 +267,16 @@ export type LocalizationConfigWithLabels = Prettify<
   }
 >;
 
+export type SanitizedLocalizationConfig = Prettify<
+LocalizationConfigWithLabels & {
+  /**
+   * List of supported locales
+   * @example `["en", "es", "fr", "nl", "de", "jp"]`
+   */
+  localesSimple: string[];
+}
+>;
+
 /**
  * @see https://payloadcms.com/docs/configuration/localization#localization
  */
@@ -578,7 +588,7 @@ export type Config = {
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'globals' | 'endpoint'
+  'collections' | 'globals' | 'endpoint' | 'localization'
 > & {
   collections: SanitizedCollectionConfig[];
   globals: SanitizedGlobalConfig[];
@@ -588,6 +598,7 @@ export type SanitizedConfig = Omit<
     config: string;
     rawConfig: string;
   };
+  localization: false | SanitizedLocalizationConfig;
 };
 
 export type EntityDescription =

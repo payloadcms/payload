@@ -4,7 +4,6 @@ import { useConfig } from '../Config';
 import { useAuth } from '../Auth';
 import { usePreferences } from '../Preferences';
 import { useSearchParams } from '../SearchParams';
-import unifiedLocaleConfig from '../../../../utilities/unifiedLocaleConfig';
 import extractLabeledLocale from '../../../../utilities/extractLabeledLocale';
 
 const LocaleContext = createContext('');
@@ -14,8 +13,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({
   children,
 }) => {
   const { localization } = useConfig();
-  // localization but extracts locales into string[] when an object is provided
-  const unifiedLocalization = localization ? unifiedLocaleConfig(localization) : undefined;
+
   const { user } = useAuth();
   const defaultLocale = (localization && localization.defaultLocale)
     ? localization.defaultLocale
@@ -38,7 +36,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({
     // set locale from search param
     if (
       localeFromParams
-      && unifiedLocalization.locales.indexOf(localeFromParams as string) > -1
+      && localization.localesSimple.indexOf(localeFromParams as string) > -1
     ) {
       setLocale(localeFromParams as string);
       setLabeledLocale(
@@ -55,7 +53,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({
       if (user) {
         preferenceLocale = await getPreference<string>('locale');
         isPreferenceInConfig = preferenceLocale
-          && unifiedLocalization.locales.indexOf(preferenceLocale) > -1;
+          && localization.localesSimple.indexOf(preferenceLocale) > -1;
         if (isPreferenceInConfig) {
           setLocale(preferenceLocale);
           setLabeledLocale(
@@ -72,7 +70,6 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({
     defaultLocale,
     getPreference,
     localeFromParams,
-    unifiedLocalization,
     setPreference,
     user,
     localization,

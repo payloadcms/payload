@@ -147,18 +147,15 @@ export default joi.object({
     }),
   localization: joi.alternatives().try(
     joi.object().keys({
-      locales: joi.array().items(joi.string()),
-      defaultLocale: joi.string(),
-      fallback: joi.boolean(),
-    }),
-    joi.object().keys({
       locales: joi.array().items(
         joi.object().keys({
           label: joi.string(),
           value: joi.string(),
           rtl: joi.boolean(),
+          toString: joi.func(),
         }),
       ),
+      localesSimple: joi.array().items(joi.string()),
       defaultLocale: joi.string(),
       fallback: joi.boolean(),
     }),
