@@ -55,7 +55,7 @@ const AccountView: React.FC = () => {
 
   const hasSavePermission = docPermissions?.update?.permission;
   const dataToRender = locationState?.data || data;
-  const apiURL = `${serverURL}${api}/${slug}/${data?.id}`;
+  const apiURL = `${serverURL}${api}/${slug}/${data?.id}?locale=${locale}`;
 
   const action = `${serverURL}${api}/${slug}/${data?.id}?locale=${locale}&depth=0`;
 

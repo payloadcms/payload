@@ -4,7 +4,7 @@ import { useAuth } from '../../../utilities/Auth';
 import { useLocale } from '../../../utilities/Locale';
 import withCondition from '../../withCondition';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
-import { useForm } from '../../Form/context';
+import { useForm, useFormSubmitted } from '../../Form/context';
 import buildStateFromSchema from '../../Form/buildStateFromSchema';
 import Error from '../../Error';
 import useField from '../../useField';
@@ -14,22 +14,17 @@ import Banner from '../../../elements/Banner';
 import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
 import { useOperation } from '../../../utilities/OperationProvider';
-import { Collapsible } from '../../../elements/Collapsible';
-import RenderFields from '../../RenderFields';
-import SectionTitle from './SectionTitle';
-import Pill from '../../../elements/Pill';
 import { scrollToID } from '../../../../utilities/scrollToID';
-import HiddenInput from '../HiddenInput';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { NullifyLocaleField } from '../../NullifyField';
 import { useConfig } from '../../../utilities/Config';
-import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
 import DraggableSortable from '../../../elements/DraggableSortable';
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
 import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug';
 import Button from '../../../elements/Button';
-import { RowActions } from './RowActions';
 import { DrawerToggler } from '../../../elements/Drawer';
+import { BlockRow } from './BlockRow';
+import { ErrorPill } from '../../../elements/ErrorPill';
 
 import './index.scss';
 
@@ -63,13 +58,13 @@ const BlocksField: React.FC<Props> = (props) => {
   const path = pathFromProps || name;
 
   const { id, setDocFieldPreferences, getDocPreferences } = useDocumentInfo();
-  const formContext = useForm();
+  const { dispatchFields, setModified } = useForm();
   const { user } = useAuth();
   const locale = useLocale();
   const operation = useOperation();
-  const { dispatchFields, setModified } = formContext;
   const { localization } = useConfig();
   const drawerSlug = useDrawerSlug('blocks-drawer');
+  const submitted = useFormSubmitted();
 
   const labels = {
     singular: t('block'),
@@ -77,25 +72,29 @@ const BlocksField: React.FC<Props> = (props) => {
     ...labelsFromProps,
   };
 
-  const checkSkipValidation = useCallback((value) => {
-    const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';
-    const isEditingDefaultLocale = locale === defaultLocale;
-    const fallbackEnabled = (localization && localization.fallback);
+  const editingDefaultLocale = (() => {
+    if (localization && localization.fallback) {
+      const defaultLocale = localization.defaultLocale || 'en';
+      return locale === defaultLocale;
+    }
 
-    if (value === null && !isEditingDefaultLocale && fallbackEnabled) return true;
-    return false;
-  }, [locale, localization]);
-
+    return true;
+  })();
   const memoizedValidate = useCallback((value, options) => {
-    if (checkSkipValidation(value)) return true;
+    // alternative locales can be null
+    if (!editingDefaultLocale && value === null) {
+      return true;
+    }
     return validate(value, { ...options, minRows, maxRows, required });
-  }, [maxRows, minRows, required, validate, checkSkipValidation]);
+  }, [maxRows, minRows, required, validate, editingDefaultLocale]);
+
 
   const {
     showError,
     errorMessage,
     value,
     rows,
+    valid,
   } = useField<number>({
     path,
     validate: memoizedValidate,
@@ -134,20 +133,24 @@ const BlocksField: React.FC<Props> = (props) => {
     setModified(true);
   }, [dispatchFields, path, setModified]);
 
-  const setCollapse = useCallback(async (rowID: string, collapsed: boolean) => {
-    dispatchFields({ type: 'SET_ROW_COLLAPSED', path, collapsed, rowID, setDocFieldPreferences });
-  }, [dispatchFields, path, setDocFieldPreferences]);
-
   const toggleCollapseAll = useCallback(async (collapsed: boolean) => {
     dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, collapsed, setDocFieldPreferences });
   }, [dispatchFields, path, setDocFieldPreferences]);
 
+  const setCollapse = useCallback(async (rowID: string, collapsed: boolean) => {
+    dispatchFields({ type: 'SET_ROW_COLLAPSED', path, collapsed, rowID, setDocFieldPreferences });
+  }, [dispatchFields, path, setDocFieldPreferences]);
+
   const hasMaxRows = maxRows && rows?.length >= maxRows;
+
+  const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0);
+  const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0;
 
   const classes = [
     'field-type',
     baseClass,
     className,
+    fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
   ].filter(Boolean).join(' ');
 
   if (!rows) return null;
@@ -165,7 +168,18 @@ const BlocksField: React.FC<Props> = (props) => {
       </div>
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
-          <h3>{getTranslation(label || name, i18n)}</h3>
+          <div className={`${baseClass}__heading-with-error`}>
+            <h3>
+              {getTranslation(label || name, i18n)}
+            </h3>
+
+            {fieldHasErrors && fieldErrorCount > 0 && (
+              <ErrorPill
+                count={fieldErrorCount}
+                withMessage
+              />
+            )}
+          </div>
           <ul className={`${baseClass}__header-actions`}>
             <li>
               <button
@@ -207,8 +221,6 @@ const BlocksField: React.FC<Props> = (props) => {
           const { blockType } = row;
           const blockToRender = blocks.find((block) => block.slug === blockType);
 
-          const rowNumber = i + 1;
-
           if (blockToRender) {
             return (
               <DraggableSortableItem
@@ -216,73 +228,26 @@ const BlocksField: React.FC<Props> = (props) => {
                 id={row.id}
                 disabled={readOnly}
               >
-                {({ setNodeRef, transform, attributes, listeners }) => (
-                  <div
-                    id={`${path}-row-${i}`}
-                    ref={setNodeRef}
-                    style={{
-                      transform,
-                    }}
-                  >
-                    <Collapsible
-                      collapsed={row.collapsed}
-                      onToggle={(collapsed) => setCollapse(row.id, collapsed)}
-                      className={`${baseClass}__row`}
-                      key={row.id}
-                      dragHandleProps={{
-                        id: row.id,
-                        attributes,
-                        listeners,
-                      }}
-                      header={(
-                        <div className={`${baseClass}__block-header`}>
-                          <span className={`${baseClass}__block-number`}>
-                            {rowNumber >= 10 ? rowNumber : `0${rowNumber}`}
-                          </span>
-                          <Pill
-                            pillStyle="white"
-                            className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
-                          >
-                            {getTranslation(blockToRender.labels.singular, i18n)}
-                          </Pill>
-                          <SectionTitle
-                            path={`${path}.${i}.blockName`}
-                            readOnly={readOnly}
-                          />
-                        </div>
-                      )}
-                      actions={!readOnly ? (
-                        <RowActions
-                          addRow={addRow}
-                          removeRow={removeRow}
-                          duplicateRow={duplicateRow}
-                          moveRow={moveRow}
-                          rows={rows}
-                          blockType={blockType}
-                          blocks={blocks}
-                          labels={labels}
-                          rowIndex={i}
-                        />
-                      ) : undefined}
-                    >
-                      <HiddenInput
-                        name={`${path}.${i}.id`}
-                        value={row.id}
-                      />
-                      <RenderFields
-                        className={`${baseClass}__fields`}
-                        readOnly={readOnly}
-                        fieldTypes={fieldTypes}
-                        permissions={permissions?.fields}
-                        fieldSchema={blockToRender.fields.map((field) => ({
-                          ...field,
-                          path: createNestedFieldPath(`${path}.${i}`, field),
-                        }))}
-                        indexPath={indexPath}
-                      />
-
-                    </Collapsible>
-                  </div>
+                {(draggableSortableItemProps) => (
+                  <BlockRow
+                    {...draggableSortableItemProps}
+                    row={row}
+                    rowIndex={i}
+                    indexPath={indexPath}
+                    addRow={addRow}
+                    duplicateRow={duplicateRow}
+                    removeRow={removeRow}
+                    moveRow={moveRow}
+                    setCollapse={setCollapse}
+                    blockToRender={blockToRender}
+                    blocks={blocks}
+                    fieldTypes={fieldTypes}
+                    permissions={permissions}
+                    readOnly={readOnly}
+                    rowCount={rows.length}
+                    labels={labels}
+                    path={path}
+                  />
                 )}
               </DraggableSortableItem>
             );
@@ -290,7 +255,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
           return null;
         })}
-        {!checkSkipValidation(value) && (
+        {!editingDefaultLocale && (
           <React.Fragment>
             {(rows.length < minRows || (required && rows.length === 0)) && (
               <Banner type="error">
@@ -318,8 +283,8 @@ const BlocksField: React.FC<Props> = (props) => {
               el="span"
               icon="plus"
               buttonStyle="icon-label"
-              iconPosition="left"
               iconStyle="with-border"
+              iconPosition="left"
             >
               {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
             </Button>

@@ -1,0 +1,89 @@
+@import '../../../css/common';
+
+.orders {
+  margin-bottom: var(--block-padding);
+}
+
+.form {
+  margin-bottom: var(--base);
+}
+
+.success,
+.error {
+  margin-bottom: 15px;
+}
+
+.success {
+  color: green;
+}
+
+.error {
+  color: red;
+}
+
+.order {
+  border-top: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  margin: calc(var(--base) * 2) 0;
+  padding: calc(var(--base) * 2) 0;
+}
+
+.orderTitle {
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+
+  @include small-break {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.rowHR {
+  margin: var(--base) 0;
+  background-color: var(--color-base-900);
+}
+
+.rowContent {
+  margin-left: var(--base);
+
+  @include small-break {
+    margin-left: 0;
+  }
+}
+
+.mediaWrapper {
+  text-decoration: none;
+  display: block;
+  position: relative;
+  aspect-ratio: 5 / 4;
+  width: 100%;
+  max-width: 200px;
+
+  @include small-break {
+    max-width: unset;
+    margin-bottom: calc(var(--base) / 2);
+  }
+}
+
+.title {
+  margin: 0;
+}
+
+.image {
+  object-fit: cover;
+}
+
+.itemsList {
+  padding: 0;
+  list-style: none;
+  margin: 0;
+  margin-top: var(--base);
+}
+
+.item {
+  margin-bottom: calc(var(--base) / 2);
+}

@@ -44,6 +44,7 @@ const StaticPill: React.FC<Props> = (props) => {
     draggable,
     children,
     elementProps,
+    rounded,
   } = props;
 
   const classes = [
@@ -55,6 +56,7 @@ const StaticPill: React.FC<Props> = (props) => {
     icon && `${baseClass}--has-icon`,
     icon && `${baseClass}--align-icon-${alignIcon}`,
     draggable && `${baseClass}--draggable`,
+    rounded && `${baseClass}--rounded`,
   ].filter(Boolean).join(' ');
 
   let Element: ElementType | React.FC<RenderedTypeProps> = 'div';

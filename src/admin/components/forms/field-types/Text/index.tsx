@@ -32,18 +32,16 @@ const Text: React.FC<Props> = (props) => {
     return validate(value, { ...options, minLength, maxLength, required });
   }, [validate, minLength, maxLength, required]);
 
-  const field = useField<string>({
-    path,
-    validate: memoizedValidate,
-    condition,
-  });
-
   const {
     value,
     showError,
     setValue,
     errorMessage,
-  } = field;
+  } = useField<string>({
+    path,
+    validate: memoizedValidate,
+    condition,
+  });
 
   return (
     <TextInput

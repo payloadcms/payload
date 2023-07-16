@@ -23,6 +23,7 @@ export type Arguments = {
   req: PayloadRequest
   overrideAccess?: boolean
   res?: Response
+  depth?: number
 }
 
 async function resetPassword(args: Arguments): Promise<Result> {
@@ -45,6 +46,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
     },
     overrideAccess,
     data,
+    depth,
   } = args;
 
   // /////////////////////////////////////
@@ -57,7 +59,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
   }).lean();
 
   user = JSON.parse(JSON.stringify(user));
-  user = sanitizeInternalFields(user);
+  user = user ? sanitizeInternalFields(user) : null;
 
   if (!user) throw new APIError('Token is either invalid or has expired.');
 
@@ -119,7 +121,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
     args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
   }
 
-  const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess });
+  const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess, depth });
   return { token, user: fullUser };
 }
 

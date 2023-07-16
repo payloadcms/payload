@@ -19,7 +19,7 @@ export default (config: SanitizedConfig): Configuration => ({
     rules: [
       {
         test: /\.(t|j)sx?$/,
-        exclude: /node_modules/,
+        exclude: /\/node_modules\/(?!.+\.tsx?$).*$/,
         use: [
           {
             loader: require.resolve('swc-loader'),

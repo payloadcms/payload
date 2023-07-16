@@ -2,9 +2,14 @@ import equal from 'deep-equal';
 import ObjectID from 'bson-objectid';
 import getSiblingData from './getSiblingData';
 import reduceFieldsToValues from './reduceFieldsToValues';
-import { Field, FieldAction, Fields } from './types';
+import { FormField, FieldAction, Fields } from './types';
 import deepCopyObject from '../../../../utilities/deepCopyObject';
 import { flattenRows, separateRows } from './rows';
+
+function splitPathByArrayFields(str) {
+  const regex = /\.(\d+)\./g;
+  return str.split(regex).filter(Boolean);
+}
 
 export function fieldReducer(state: Fields, action: FieldAction): Fields {
   switch (action.type) {
@@ -49,7 +54,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           // Besides those who still fail their own conditions
 
           if (passesCondition && field.condition) {
-            passesCondition = field.condition(reduceFieldsToValues(state), getSiblingData(state, path), { user });
+            passesCondition = field.condition(reduceFieldsToValues(state, true), getSiblingData(state, path), { user });
           }
 
           return {
@@ -72,7 +77,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
 
     case 'UPDATE': {
       const newField = Object.entries(action).reduce((field, [key, value]) => {
-        if (['value', 'valid', 'errorMessage', 'disableFormData', 'initialValue', 'validate', 'condition', 'passesCondition'].includes(key)) {
+        if (['value', 'valid', 'errorMessage', 'disableFormData', 'initialValue', 'validate', 'condition', 'passesCondition', 'rows'].includes(key)) {
           return {
             ...field,
             [key]: value,
@@ -80,7 +85,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         }
 
         return field;
-      }, state[action.path] || {} as Field);
+      }, state[action.path] || {} as FormField);
 
       return {
         ...state,
@@ -91,11 +96,10 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     case 'REMOVE_ROW': {
       const { rowIndex, path } = action;
       const { remainingFields, rows } = separateRows(path, state);
-      const rowsMetadata = state[path]?.rows || [];
+      const rowsMetadata = [...state[path]?.rows || []];
 
       rows.splice(rowIndex, 1);
       rowsMetadata.splice(rowIndex, 1);
-
 
       const newState: Fields = {
         ...remainingFields,
@@ -123,6 +127,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           id: new ObjectID().toHexString(),
           collapsed: false,
           blockType: blockType || undefined,
+          childErrorPaths: new Set(),
         },
       );
 
@@ -159,10 +164,10 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       const rowsMetadata = state[path]?.rows || [];
 
       const duplicateRowMetadata = deepCopyObject(rowsMetadata[rowIndex]);
-      if (duplicateRowMetadata.id) delete duplicateRowMetadata.id;
+      if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectID().toHexString();
 
       const duplicateRowState = deepCopyObject(rows[rowIndex]);
-      if (duplicateRowState.id) delete duplicateRowState.id;
+      if (duplicateRowState.id) duplicateRowState.id = new ObjectID().toHexString();
 
       // If there are subfields
       if (Object.keys(duplicateRowState).length > 0) {

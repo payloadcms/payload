@@ -136,12 +136,35 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
 
         if (field.fields) {
           if (!mutablePolicies[field.name].fields) mutablePolicies[field.name].fields = {};
+
           await executeFieldPolicies({
             policiesObj: mutablePolicies[field.name],
             fields: field.fields,
             operation,
             entityPermission,
           });
+        }
+
+        if (field?.blocks) {
+          if (!mutablePolicies[field.name]?.blocks) mutablePolicies[field.name].blocks = {};
+
+          await Promise.all(field.blocks.map(async (block) => {
+            if (!mutablePolicies[field.name].blocks?.[block.slug]) {
+              mutablePolicies[field.name].blocks[block.slug] = {
+                fields: {},
+                [operation]: { permission: entityPermission },
+              };
+            } else if (!mutablePolicies[field.name].blocks[block.slug][operation]) {
+              mutablePolicies[field.name].blocks[block.slug][operation] = { permission: entityPermission };
+            }
+
+            await executeFieldPolicies({
+              policiesObj: mutablePolicies[field.name].blocks[block.slug],
+              fields: block.fields,
+              operation,
+              entityPermission,
+            });
+          }));
         }
       } else if (field.fields) {
         await executeFieldPolicies({
@@ -158,6 +181,8 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
                 fields: {},
                 [operation]: { permission: entityPermission },
               };
+            } else if (!mutablePolicies[tab.name][operation]) {
+              mutablePolicies[tab.name][operation] = { permission: entityPermission };
             }
             await executeFieldPolicies({
               policiesObj: mutablePolicies[tab.name],

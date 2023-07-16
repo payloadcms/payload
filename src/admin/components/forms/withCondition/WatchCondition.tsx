@@ -10,12 +10,14 @@ type Props = {
   path?: string
   name: string
   condition: Condition
+  setShowField: (isVisible: boolean) => void
 }
 
 export const WatchCondition: React.FC<Props> = ({
   path: pathFromProps,
   name,
   condition,
+  setShowField,
 }) => {
   const path = typeof pathFromProps === 'string' ? pathFromProps : name;
 
@@ -30,21 +32,26 @@ export const WatchCondition: React.FC<Props> = ({
   data.id = id;
 
   const hasCondition = Boolean(condition);
-  const currentlyPassesCondition = hasCondition ? condition(data, siblingData, { user }) : true;
+  const isPassingCondition = hasCondition ? condition(data, siblingData, { user }) : true;
   const field = fields[path];
-  const existingConditionPasses = field?.passesCondition;
+
+  const wasPassingCondition = field?.passesCondition;
 
   useEffect(() => {
     if (hasCondition) {
-      if (!existingConditionPasses && currentlyPassesCondition) {
+      if (isPassingCondition && !wasPassingCondition) {
         dispatchFields({ type: 'MODIFY_CONDITION', path, result: true, user });
       }
 
-      if (!currentlyPassesCondition && (existingConditionPasses || typeof existingConditionPasses === 'undefined')) {
+      if (!isPassingCondition && (wasPassingCondition || typeof wasPassingCondition === 'undefined')) {
         dispatchFields({ type: 'MODIFY_CONDITION', path, result: false, user });
       }
     }
-  }, [currentlyPassesCondition, existingConditionPasses, dispatchFields, path, hasCondition, user, fields]);
+  }, [isPassingCondition, wasPassingCondition, dispatchFields, path, hasCondition, user, setShowField]);
+
+  useEffect(() => {
+    setShowField(isPassingCondition);
+  }, [setShowField, isPassingCondition]);
 
   return null;
 };

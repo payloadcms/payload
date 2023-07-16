@@ -1,0 +1,31 @@
+@import '../../css/common';
+
+.orders {
+  margin-bottom: var(--block-padding);
+}
+
+.form {
+  margin-bottom: var(--base);
+}
+
+.success,
+.error {
+  margin-bottom: 15px;
+}
+
+.success {
+  color: green;
+}
+
+.error {
+  color: red;
+}
+
+.ordersList {
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  margin-bottom: calc(var(--base) / 2);
+}
