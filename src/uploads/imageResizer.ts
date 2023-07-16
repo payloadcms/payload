@@ -49,10 +49,9 @@ const getSanitizedImageData = (sourceImage: string): SanitizedImageData => {
  * size with `width AND height` and one with only `height OR width`. Because
  * space is expensive, we will reuse the same image for both sizes.
  *
- * @param sanitizedImage - the sanitized image name
+ * @param outputImageName - the sanitized image name
  * @param bufferInfo - the buffer info
  * @param extension - the extension to use
- * @param takenOutputNames - the taken output names
  * @returns the new image name that is not taken
  */
 const createImageName = (
