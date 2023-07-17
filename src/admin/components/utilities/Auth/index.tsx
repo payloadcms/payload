@@ -145,7 +145,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else if (json?.token) {
             setToken(json.token);
           } else if (autoLogin) {
-            // auto log-in with username dev@payloadcms.com and password test
+            // auto log-in with the provided autoLogin credentials. This is used in dev mode
+            // so you don't have to log in over and over again
             const autoLoginResult = await requests.post(`${serverURL}${api}/${userSlug}/login`, {
               body: JSON.stringify({
                 email: autoLogin.email,
@@ -175,7 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     fetchMe();
-  }, [i18n, setToken, api, serverURL, userSlug]);
+  }, [i18n, setToken, api, serverURL, userSlug, autoLogin]);
 
   // When location changes, refresh cookie
   useEffect(() => {
