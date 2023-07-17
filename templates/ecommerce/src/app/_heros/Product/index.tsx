@@ -46,7 +46,7 @@ export const ProductHero: React.FC<{
           )}
         </div>
         {metaImage && typeof metaImage !== 'string' && metaImage?.caption && (
-          <RichText content={metaImage.caption} />
+          <RichText content={metaImage.caption} className={classes.caption} />
         )}
       </div>
     </Gutter>

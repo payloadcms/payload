@@ -10,7 +10,11 @@ import { CartPage } from './CartPage'
 
 const Cart = async () => {
   const { settings } = await fetchGlobals()
-  const page = await fetchDoc<Page>('pages', 'cart')
+
+  const page = await fetchDoc<Page>({
+    collection: 'pages',
+    slug: 'cart',
+  })
 
   return (
     <Fragment>

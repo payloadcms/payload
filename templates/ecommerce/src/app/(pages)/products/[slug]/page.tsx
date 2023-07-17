@@ -9,7 +9,10 @@ import { PaywallBlocks } from '../../../_components/PaywallBlocks'
 import { ProductHero } from '../../../_heros/Product'
 
 const Product = async ({ params: { slug } }) => {
-  const product = await fetchDoc<Product>('products', slug)
+  const product = await fetchDoc<Product>({
+    collection: 'products',
+    slug,
+  })
 
   if (!product) return notFound()
 

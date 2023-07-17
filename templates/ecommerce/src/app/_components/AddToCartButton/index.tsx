@@ -16,15 +16,13 @@ export const AddToCartButton: React.FC<{
 }> = props => {
   const { product, quantity = 1, className, appearance = 'primary' } = props
 
-  const { cart, addItemToCart, isProductInCart } = useCart()
+  const { cart, addItemToCart, isProductInCart, isLoading } = useCart()
 
   const [isInCart, setIsInCart] = useState<boolean>()
 
   useEffect(() => {
     setIsInCart(isProductInCart(product))
   }, [isProductInCart, product, cart])
-
-  const loading = cart.items === null
 
   return (
     <Button
@@ -37,7 +35,7 @@ export const AddToCartButton: React.FC<{
         className,
         classes.addToCartButton,
         appearance === 'default' && isInCart && classes.green,
-        loading && classes.loading,
+        isLoading && classes.hidden,
       ]
         .filter(Boolean)
         .join(' ')}

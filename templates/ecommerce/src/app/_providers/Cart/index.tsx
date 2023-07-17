@@ -26,6 +26,7 @@ export type CartContext = {
     formatted: string
     raw: number
   }
+  isLoading: boolean
 }
 
 const Context = createContext({} as CartContext)
@@ -47,7 +48,7 @@ export const CartProvider = props => {
   const { user, status: authStatus } = useAuth()
 
   const [cart, dispatchCart] = useReducer(cartReducer, {
-    items: null,
+    items: undefined,
   })
 
   const [total, setTotal] = useState<{
@@ -66,11 +67,13 @@ export const CartProvider = props => {
   useEffect(() => {
     if (!hasInitialized.current) {
       hasInitialized.current = true
+
       const syncCartFromLocalStorage = async () => {
         const localCart = localStorage.getItem('cart')
 
         if (localCart) {
           const parsedCart = JSON.parse(localCart)
+
           if (parsedCart.items && parsedCart.items.length > 0) {
             const initialCart = await Promise.all(
               parsedCart.items.map(async ({ product, quantity }) => {
@@ -93,7 +96,15 @@ export const CartProvider = props => {
             })
           }
         }
+
+        dispatchCart({
+          type: 'SET_CART',
+          payload: {
+            items: [],
+          },
+        })
       }
+
       syncCartFromLocalStorage()
     }
   }, [])
@@ -238,6 +249,7 @@ export const CartProvider = props => {
         clearCart,
         isProductInCart,
         cartTotal: total,
+        isLoading: cart?.items === undefined,
       }}
     >
       {children && children}

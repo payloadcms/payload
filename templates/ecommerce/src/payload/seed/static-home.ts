@@ -83,7 +83,7 @@ export const staticHome: Page = {
               url: '/admin',
               children: [
                 {
-                  text: 'log in to your dashboard',
+                  text: 'log in to the admin dashboard',
                 },
               ],
             },

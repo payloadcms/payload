@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { Order as OrderType } from '../../../../payload/payload-types'
-import { fetchDocs } from '../../../_api/fetchDocs'
+import { fetchDoc } from '../../../_api/fetchDoc'
 import { Button } from '../../../_components/Button'
 import { Gutter } from '../../../_components/Gutter'
 import { HR } from '../../../_components/HR'
@@ -17,15 +17,13 @@ const Order = async ({ params: { id } }) => {
     nullUserRedirect: `/login?unauthorized=order`,
   })
 
-  const orderReq = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders/${id}`, {
-    headers: {
-      Authorization: `JWT ${token}`,
-    },
+  const order = await fetchDoc<OrderType>({
+    collection: 'orders',
+    id,
+    token,
   })
 
-  const order = await orderReq.json()
-
-  if (!orderReq.ok || !order) {
+  if (!order) {
     notFound()
   }
 
@@ -84,12 +82,6 @@ const Order = async ({ params: { id } }) => {
       <Button href="/account" appearance="secondary" label="Go to account" />
     </Gutter>
   )
-}
-
-export async function generateStaticParams() {
-  const orders = await fetchDocs<OrderType>('orders')
-
-  return orders?.map(({ id }) => id)
 }
 
 export default Order

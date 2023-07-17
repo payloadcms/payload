@@ -12,7 +12,7 @@ Core features:
 - [Paywall](#paywall)
 - [Layout Builder](#layout-builder)
 - [SEO](#seo)
-- [Front-end](#front-end)
+- [Complete Front-end](#front-end)
 
 For details on how to get this template up and running locally, see the [development](#development) section.
 
@@ -159,12 +159,15 @@ This template includes a fully-working [Next.js](https://nextjs.org) front-end t
 
 Core features:
 
-- [Next.js](https://nextjs.org) and [TypeScript](https://www.typescriptlang.org)
+- [Next.js](https://nextjs.org) App Router
+- [GraphQL](https://graphql.org)
+- [TypeScript](https://www.typescriptlang.org)
+- [React Hook Form](https://react-hook-form.com)
 - Complete authentication workflow
 - Complete shopping experience
 - Full shopping cart implementation
 - Full checkout workflow
-- Account dashboard
+- Customer dashboards
 - Pre-made layout building blocks
 - [Payload Admin Bar](https://github.com/payloadcms/payload-admin-bar)
 - Complete SEO configuration

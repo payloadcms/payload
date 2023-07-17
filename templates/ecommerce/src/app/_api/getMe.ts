@@ -2,6 +2,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 import type { User } from '../../payload/payload-types'
+import { ME_QUERY } from '../_graphql/me'
 
 export const getMe = async (args?: {
   nullUserRedirect?: string
@@ -14,10 +15,15 @@ export const getMe = async (args?: {
   const cookieStore = cookies()
   const token = cookieStore.get('payload-token')?.value
 
-  const meUserReq = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/me`, {
+  const meUserReq = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/graphql`, {
+    method: 'POST',
     headers: {
       Authorization: `JWT ${token}`,
+      'Content-Type': 'application/json',
     },
+    body: JSON.stringify({
+      query: ME_QUERY,
+    }),
   })
 
   const {

@@ -9,7 +9,10 @@ import { Blocks } from '../../_components/Blocks'
 import { Hero } from '../../_components/Hero'
 
 const PageTemplate = async ({ params: { slug = 'home' } }) => {
-  let page = await fetchDoc<Page>('pages', slug)
+  let page = await fetchDoc<Page>({
+    collection: 'pages',
+    slug,
+  })
 
   // If no `home` page exists, render a static one using dummy content
   // You should delete this code once you have created a home page in the CMS

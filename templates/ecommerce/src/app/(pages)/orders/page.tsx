@@ -1,7 +1,8 @@
 import React from 'react'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 
+import { Order } from '../../../payload/payload-types'
+import { fetchDocs } from '../../_api/fetchDocs'
 import { Button } from '../../_components/Button'
 import { Gutter } from '../../_components/Gutter'
 import { RenderParams } from '../../_components/RenderParams'
@@ -10,23 +11,11 @@ import { getMeUser } from '../../_utilities/getMeUser'
 import classes from './index.module.scss'
 
 const Orders = async () => {
-  const { token } = await getMeUser({
+  await getMeUser({
     nullUserRedirect: `/login?unauthorized=orders`,
   })
 
-  const ordersReq = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders`, {
-    headers: {
-      Authorization: `JWT ${token}`,
-    },
-  })
-
-  const ordersRes = await ordersReq.json()
-
-  if (!ordersReq.ok) {
-    notFound()
-  }
-
-  const orders = ordersRes?.docs
+  const orders = await fetchDocs<Order>('orders')
 
   return (
     <Gutter className={classes.orders}>
