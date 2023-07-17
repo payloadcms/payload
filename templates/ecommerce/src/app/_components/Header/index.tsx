@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 
-import { fetchGlobals } from '../../_cms/fetchGlobals'
+import { fetchGlobals } from '../../_api/fetchGlobals'
 import { Gutter } from '../Gutter'
 import { HeaderNav } from './Nav'
 

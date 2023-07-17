@@ -1,8 +1,8 @@
 import React from 'react'
 
-import { fetchGlobals } from '../../_cms/fetchGlobals'
+import { fetchGlobals } from '../../_api/fetchGlobals'
 import { Gutter } from '../../_components/Gutter'
-import { LogoutClient } from './Client'
+import { LogoutPage } from './LogoutPage'
 
 import classes from './index.module.scss'
 
@@ -11,7 +11,7 @@ const Logout = async () => {
 
   return (
     <Gutter className={classes.logout}>
-      <LogoutClient settings={settings} />
+      <LogoutPage settings={settings} />
     </Gutter>
   )
 }

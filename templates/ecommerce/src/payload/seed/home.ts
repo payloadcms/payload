@@ -26,7 +26,7 @@ export const home: Partial<Page> = {
             url: '/admin',
             children: [
               {
-                text: 'Visit the dashboard',
+                text: 'Visit the admin dashboard',
               },
             ],
           },
@@ -108,7 +108,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Dashboard',
+                  text: 'Admin Dashboard',
                 },
               ],
               type: 'h3',

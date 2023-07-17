@@ -2,6 +2,7 @@
 
 import React, { useCallback, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Button } from '../../../_components/Button'
@@ -19,6 +20,7 @@ type FormData = {
 
 const CreateAccountForm: React.FC = () => {
   const searchParams = useSearchParams()
+  const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
   const { login } = useAuth()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -90,6 +92,10 @@ const CreateAccountForm: React.FC = () => {
         appearance="primary"
         className={classes.submit}
       />
+      <div>
+        {'Already have an account? '}
+        <Link href={`/login${allParams}`}>Login</Link>
+      </div>
     </form>
   )
 }

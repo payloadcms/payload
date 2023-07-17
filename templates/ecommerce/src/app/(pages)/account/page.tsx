@@ -3,9 +3,10 @@ import Link from 'next/link'
 
 import { Button } from '../../_components/Button'
 import { Gutter } from '../../_components/Gutter'
+import { HR } from '../../_components/HR'
 import { RenderParams } from '../../_components/RenderParams'
 import { getMeUser } from '../../_utilities/getMeUser'
-import AccountForm from './Form'
+import AccountForm from './AccountForm'
 
 import classes from './index.module.scss'
 
@@ -21,7 +22,7 @@ const Account = async () => {
       <RenderParams className={classes.params} />
       <h1>Account</h1>
       <AccountForm />
-      <hr className={classes.hr} />
+      <HR />
       <h2>Purchased Products</h2>
       <div>
         {user?.purchases?.length || 0 > 0 ? (
@@ -43,7 +44,7 @@ const Account = async () => {
           <div>You have no purchases.</div>
         )}
       </div>
-      <hr className={classes.hr} />
+      <HR />
       <h2>Orders</h2>
       <Button
         className={classes.ordersButton}
@@ -51,7 +52,7 @@ const Account = async () => {
         appearance="primary"
         label="View orders"
       />
-      <hr className={classes.hr} />
+      <HR />
       <Button href="/logout" appearance="secondary" label="Log out" />
     </Gutter>
   )

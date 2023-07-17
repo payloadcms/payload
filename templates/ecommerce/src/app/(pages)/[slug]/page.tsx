@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation'
 
 import { Page } from '../../../payload/payload-types'
 import { staticHome } from '../../../payload/seed/static-home'
-import { fetchDoc } from '../../_cms/fetchDoc'
-import { fetchDocs } from '../../_cms/fetchDocs'
+import { fetchDoc } from '../../_api/fetchDoc'
+import { fetchDocs } from '../../_api/fetchDocs'
 import { Blocks } from '../../_components/Blocks'
 import { Hero } from '../../_components/Hero'
 

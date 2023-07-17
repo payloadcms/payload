@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useRef } from 'react'
 import { useForm } from 'react-hook-form'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Button } from '../../../_components/Button'
@@ -18,6 +19,8 @@ type FormData = {
 
 const LoginForm: React.FC = () => {
   const searchParams = useSearchParams()
+  const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
+  const redirect = useRef(searchParams.get('redirect'))
   const { login } = useAuth()
   const router = useRouter()
   const [error, setError] = React.useState<string | null>(null)
@@ -30,17 +33,15 @@ const LoginForm: React.FC = () => {
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      const redirect = searchParams.get('redirect')
-
       try {
         await login(data)
-        if (redirect) router.push(redirect as string)
+        if (redirect?.current) router.push(redirect.current as string)
         else router.push('/account')
       } catch (_) {
         setError('There was an error with the credentials provided. Please try again.')
       }
     },
-    [login, router, searchParams],
+    [login, router],
   )
 
   return (
@@ -69,6 +70,11 @@ const LoginForm: React.FC = () => {
         disabled={isLoading}
         className={classes.submit}
       />
+      <div>
+        <Link href={`/create-account${allParams}`}>Create an account</Link>
+        <br />
+        <Link href={`/recover-password${allParams}`}>Recover your password</Link>
+      </div>
     </form>
   )
 }

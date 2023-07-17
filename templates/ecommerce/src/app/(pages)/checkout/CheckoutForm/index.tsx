@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 
-import { Button } from '../Button'
+import { Button } from '../../../_components/Button'
 
 import classes from './index.module.scss'
 

@@ -2,6 +2,8 @@
 
 import { useSearchParams } from 'next/navigation'
 
+import { Message } from '../Message'
+
 export const RenderParams: React.FC<{
   params?: string[]
   message?: string
@@ -14,7 +16,7 @@ export const RenderParams: React.FC<{
     return (
       <div className={className}>
         {paramValues.map(paramValue => (
-          <div key={paramValue}>{(message || 'PARAM')?.replace('PARAM', paramValue)}</div>
+          <Message key={paramValue} message={(message || 'PARAM')?.replace('PARAM', paramValue)} />
         ))}
       </div>
     )

@@ -1,15 +1,26 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import { Page } from '../../../payload/payload-types'
-import { fetchDoc } from '../../_cms/fetchDoc'
-import { fetchGlobals } from '../../_cms/fetchGlobals'
-import { CartPageClient } from './page.client'
+import { fetchDoc } from '../../_api/fetchDoc'
+import { fetchGlobals } from '../../_api/fetchGlobals'
+import { Blocks } from '../../_components/Blocks'
+import { Gutter } from '../../_components/Gutter'
+import { Hero } from '../../_components/Hero'
+import { CartPage } from './CartPage'
 
-const CartPage = async () => {
+const Cart = async () => {
   const { settings } = await fetchGlobals()
   const page = await fetchDoc<Page>('pages', 'cart')
 
-  return <CartPageClient settings={settings} page={page} />
+  return (
+    <Fragment>
+      <Hero {...page?.hero} />
+      <Gutter>
+        <CartPage settings={settings} page={page} />
+      </Gutter>
+      <Blocks blocks={page?.layout} />
+    </Fragment>
+  )
 }
 
-export default CartPage
+export default Cart

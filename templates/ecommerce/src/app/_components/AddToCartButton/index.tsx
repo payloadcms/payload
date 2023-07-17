@@ -18,36 +18,39 @@ export const AddToCartButton: React.FC<{
 
   const { cart, addItemToCart, isProductInCart } = useCart()
 
-  const [showInCart, setShowInCart] = useState<boolean>()
+  const [isInCart, setIsInCart] = useState<boolean>()
 
   useEffect(() => {
-    setShowInCart(isProductInCart(product))
+    setIsInCart(isProductInCart(product))
   }, [isProductInCart, product, cart])
 
-  if (showInCart) {
-    return (
-      <Button
-        href="/cart"
-        label="View in cart"
-        el="link"
-        appearance={appearance}
-        className={[className, classes.addToCartButton].filter(Boolean).join(' ')}
-      />
-    )
-  }
+  const loading = cart.items === null
 
   return (
     <Button
-      type="button"
+      href={isInCart ? '/cart' : undefined}
+      type={!isInCart ? 'button' : undefined}
+      label={isInCart ? `✓ View in cart` : `Add to cart`}
+      el={isInCart ? 'link' : undefined}
       appearance={appearance}
-      onClick={() => {
-        addItemToCart({
-          product,
-          quantity,
-        })
-      }}
-      className={[className, classes.addToCartButton].filter(Boolean).join(' ')}
-      label="Add to cart"
+      className={[
+        className,
+        classes.addToCartButton,
+        appearance === 'default' && isInCart && classes.green,
+        loading && classes.loading,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      onClick={
+        !isInCart
+          ? () => {
+              addItemToCart({
+                product,
+                quantity,
+              })
+            }
+          : undefined
+      }
     />
   )
 }

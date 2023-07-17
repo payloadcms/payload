@@ -1,4 +1,4 @@
-@import '../../_css/common';
+@import '../../../_css/common';
 
 .row {
   display: flex;
@@ -8,11 +8,6 @@
     flex-direction: column;
     align-items: flex-start;
   }
-}
-
-.rowHR {
-  margin: var(--base) 0;
-  background-color: var(--color-base-900);
 }
 
 .rowContent {
@@ -56,6 +51,7 @@
 
 .itemsTotal {
   margin-bottom: var(--base);
+  font-weight: 700;
 }
 
 .quantity {

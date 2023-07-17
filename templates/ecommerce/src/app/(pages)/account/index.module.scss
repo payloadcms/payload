@@ -2,17 +2,6 @@
   margin-bottom: var(--block-padding);
 }
 
-.hr {
-  margin: calc(var(--block-padding) / 2) 0;
-  border: none;
-  background-color: var(--color-base-150);
-  height: 1px;
-
-  @media (prefers-color-scheme: dark) {
-    background-color: var(--color-base-500);
-  }
-}
-
 .params {
   margin-top: var(--base);
 }

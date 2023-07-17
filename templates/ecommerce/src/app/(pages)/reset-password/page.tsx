@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { Gutter } from '../../_components/Gutter'
-import { ResetPasswordForm } from './Form'
+import { ResetPasswordForm } from './ResetPasswordForm'
 
 import classes from './index.module.scss'
 

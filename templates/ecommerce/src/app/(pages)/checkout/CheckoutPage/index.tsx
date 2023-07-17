@@ -6,13 +6,13 @@ import { loadStripe } from '@stripe/stripe-js'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { Settings } from '../../../payload/payload-types'
-import { CheckoutForm } from '../../_components/CheckoutForm'
-import { Gutter } from '../../_components/Gutter'
-import { Media } from '../../_components/Media'
-import { Price } from '../../_components/Price'
-import { useAuth } from '../../_providers/Auth'
-import { useCart } from '../../_providers/Cart'
+import { Settings } from '../../../../payload/payload-types'
+import { HR } from '../../../_components/HR'
+import { Media } from '../../../_components/Media'
+import { Price } from '../../../_components/Price'
+import { useAuth } from '../../../_providers/Auth'
+import { useCart } from '../../../_providers/Cart'
+import { CheckoutForm } from '../CheckoutForm'
 
 import classes from './index.module.scss'
 
@@ -33,12 +33,6 @@ const CheckoutPageClient: React.FC<{
   const hasMadePaymentIntent = React.useRef(false)
 
   const { cart, cartIsEmpty, cartTotal } = useCart()
-
-  useEffect(() => {
-    if (user === null) {
-      router.push('/account/login?unauthorized=account')
-    }
-  }, [router, user])
 
   useEffect(() => {
     if (user !== null && cartIsEmpty) {
@@ -77,7 +71,7 @@ const CheckoutPageClient: React.FC<{
   if (!user || !stripe) return null
 
   return (
-    <Gutter className={classes.checkoutPage}>
+    <Fragment>
       {!clientSecret && !error && <div className={classes.loading}>Loading...</div>}
       {!clientSecret && error && (
         <div className={classes.error}>
@@ -141,7 +135,7 @@ const CheckoutPageClient: React.FC<{
                           <Price product={product} button={false} />
                         </div>
                       </div>
-                      {!isLast && <hr className={classes.rowHR} />}
+                      {!isLast && <HR />}
                     </Fragment>
                   )
                 }
@@ -153,7 +147,7 @@ const CheckoutPageClient: React.FC<{
           <CheckoutForm />
         </Elements>
       )}
-    </Gutter>
+    </Fragment>
   )
 }
 

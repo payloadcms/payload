@@ -1,5 +1,4 @@
-import React, { Fragment } from 'react'
-import Link from 'next/link'
+import React from 'react'
 
 import { Gutter } from '../../_components/Gutter'
 import { RenderParams } from '../../_components/RenderParams'
@@ -10,7 +9,7 @@ import classes from './index.module.scss'
 
 const CreateAccount = async () => {
   await getMeUser({
-    userRedirect: `/account?message=${encodeURIComponent(
+    validUserRedirect: `/account?message=${encodeURIComponent(
       'Cannot create a new account while logged in, please log out and try again.',
     )}`,
   })
@@ -20,10 +19,6 @@ const CreateAccount = async () => {
       <h1>Create Account</h1>
       <RenderParams />
       <CreateAccountForm />
-      <Fragment>
-        {'Already have an account? '}
-        <Link href="/login">Login</Link>
-      </Fragment>
     </Gutter>
   )
 }

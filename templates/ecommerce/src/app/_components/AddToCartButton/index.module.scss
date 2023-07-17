@@ -1,10 +1,14 @@
 .addToCartButton {
-  // cursor: pointer;
-  // background-color: transparent;
-  // padding: 0;
-  // border: none;
-  // font-size: inherit;
-  // line-height: inherit;
-  // text-decoration: underline;
-  // white-space: nowrap;
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 100ms linear;
+}
+
+.green {
+  color: var(--color-success-700);
+}
+
+.loading {
+  visibility: hidden;
+  opacity: 0;
 }

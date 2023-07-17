@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 
-import { fetchGlobals } from '../../_cms/fetchGlobals'
+import { fetchGlobals } from '../../_api/fetchGlobals'
 import { Gutter } from '../Gutter'
 import { CMSLink } from '../Link'
 
@@ -27,9 +27,9 @@ export async function Footer() {
           {navItems.map(({ link }, i) => {
             return <CMSLink key={i} {...link} />
           })}
-          <Link href="/admin">Dashboard</Link>
+          <Link href="/admin">Admin</Link>
           <Link href="https://github.com/payloadcms/payload/tree/master/templates/ecommerce">
-            Source code
+            Source Code
           </Link>
           <Link href="https://github.com/payloadcms/payload">Payload</Link>
         </nav>

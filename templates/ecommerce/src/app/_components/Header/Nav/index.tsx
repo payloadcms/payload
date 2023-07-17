@@ -25,9 +25,6 @@ export const HeaderNav: React.FC<{ header: HeaderType }> = ({ header }) => {
         .filter(Boolean)
         .join(' ')}
     >
-      {navItems.map(({ link }, i) => {
-        return <CMSLink key={i} {...link} />
-      })}
       {user && <Link href="/account">Account</Link>}
       {!user && (
         <React.Fragment>
@@ -35,6 +32,9 @@ export const HeaderNav: React.FC<{ header: HeaderType }> = ({ header }) => {
           <Link href="/create-account">Create Account</Link>
         </React.Fragment>
       )}
+      {navItems.map(({ link }, i) => {
+        return <CMSLink key={i} {...link} />
+      })}
       <CartLink />
     </nav>
   )
