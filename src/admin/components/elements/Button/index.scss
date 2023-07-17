@@ -89,6 +89,7 @@ a.btn {
     box-shadow: $base-box-shadow;
     color: var(--theme-elevation-800);
     background: none;
+    backdrop-filter: blur(5px);
 
     &:hover {
       background: var(--theme-elevation-100);
