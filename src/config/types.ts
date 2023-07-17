@@ -116,7 +116,7 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions;
-  config?: Promise<SanitizedConfig>
+  config?: Promise<SanitizedConfig>;
 };
 
 /**
@@ -275,6 +275,13 @@ export type Config = {
     logoutRoute?: string;
     /** The route the user will be redirected to after being inactive for too long. */
     inactivityRoute?: string;
+    /** Automatically log in as a user when visiting the admin dashboard. */
+    autoLogin?: false | {
+      /** The email address of the user to login as */
+      email: string;
+      /** The password of the user to login as */
+      password: string;
+    }
     /**
      * Add extra and/or replace built-in components with custom components
      *

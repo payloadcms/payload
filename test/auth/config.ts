@@ -8,6 +8,7 @@ export const slug = 'users';
 export default buildConfig({
   admin: {
     user: 'users',
+    autoLogin: false,
   },
   collections: [
     {
