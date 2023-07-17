@@ -16,9 +16,9 @@ This plugin seamlessly integrates [Sentry](https://sentry.io/) with [Payload](ht
 
 1. Import `sentry` from `'@payloadcms/plugin-sentry'`
 2. Add it to the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview)
-3. Pass in your Data Source Name (DSN) 
+3. Pass in your Data Source Name (DSN)
 4. Pass [additional options](#additional-options) - *not required*
-   
+
 ```js
 import { buildConfig } from 'payload/config';
 import sentry from '@payloadcms/plugin-sentry';
@@ -40,13 +40,17 @@ export default config;
 
 ### Data Source Name (DSN) and where to find it
 
-- `dsn` : string[] | required
+- `dsn` : string | required
 
   Sentry automatically assigns a DSN when you create a project, the unique DSN informs Sentry where to send events so they are associated with the correct project.
 
   #### :rotating_light: You can find the DSN in your project settings by navigating to [Project] > Settings > Client Keys (DSN) in [sentry.io](sentry.io).
 
 ### Additional Options
+
+- `enabled`: boolean | optional
+
+  Set to false to disable the plugin. Defaults to true.
 
 - `init` : ClientOptions | optional
 

@@ -29,10 +29,10 @@ export const sentry =
       },
     }
 
-    startSentry({
-      dsn: pluginOptions.dsn,
-      options: pluginOptions.options || {},
-    })
+    config.onInit = async payload => {
+      if (incomingConfig.onInit) await incomingConfig.onInit(payload)
+      startSentry(pluginOptions, payload)
+    }
 
     return config
   }
