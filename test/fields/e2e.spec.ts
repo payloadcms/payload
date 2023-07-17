@@ -496,7 +496,8 @@ describe('fields', () => {
         await wait(200);
         await editLinkModal.locator('button[type="submit"]').click();
         const errorField = await page.locator('[id^=drawer_1_rich-text-link-] .render-fields > :nth-child(3)');
-        await expect(errorField).toHaveClass('error');
+        const hasErrorClass = await errorField.evaluate(el => el.classList.contains('error'));
+        expect(hasErrorClass).toBe(true);
       });
 
       test('should create new url custom link', async () => {
