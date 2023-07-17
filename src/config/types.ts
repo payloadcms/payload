@@ -116,6 +116,12 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions;
+
+  /**
+   * Sometimes, with the local API, you might need to pass a config file directly, for example, serverless on Vercel
+   * The passed config should match the config file, and if it doesn't, there could be mismatches between the admin UI
+   * and the backend functionality
+   */
   config?: Promise<SanitizedConfig>;
 };
 
