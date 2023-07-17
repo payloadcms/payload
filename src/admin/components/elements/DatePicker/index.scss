@@ -195,6 +195,13 @@ $cal-icon-width: 18px;
       }
     }
 
+    &__month-select, &__year-select {
+      border: none;
+      background: none;
+      outline: none;
+      cursor: pointer;
+    }
+
 
     &__day-names {
       background-color: var(--theme-elevation-100);
