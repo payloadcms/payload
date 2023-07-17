@@ -24,7 +24,7 @@ export type TextInputProps = Omit<TextField, 'type'> & {
   className?: string;
   width?: string;
   inputRef?: React.MutableRefObject<HTMLInputElement>;
-  rtl?:boolean;
+  rtl?: boolean;
 };
 
 const TextInput: React.FC<TextInputProps> = (props) => {
