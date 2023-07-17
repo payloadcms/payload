@@ -4,14 +4,6 @@ $cal-icon-width: 18px;
 
 .date-time-picker {
 
-  .react-datepicker__current-month {
-    display: none;
-  }
-
-  .react-datepicker__header__dropdown, .react-datepicker-year-header {
-    padding: 10px 0!important;
-  }
-
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box,
   .react-datepicker__time-container {
     width: 120px;
@@ -177,8 +169,12 @@ $cal-icon-width: 18px;
     }
 
     &__current-month {
+      display: none;
+    }
+
+    &__header__dropdown, &-year-header {
       padding: 10px 0;
-      font-weight: 600;
+      font-weight: bold;
     }
 
     &__month-container {
@@ -191,6 +187,12 @@ $cal-icon-width: 18px;
 
     &__time-container {
       border-left: none;
+    }
+    
+    &__month-text {
+      &:hover {
+        background: var(--theme-elevation-100);
+      }
     }
 
 
