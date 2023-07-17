@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import qs from 'qs';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
-import { useLocale } from '../../utilities/Locale';
+import { useLabeledLocale } from '../../utilities/Locale';
 import { useSearchParams } from '../../utilities/SearchParams';
 import Popup from '../Popup';
 
@@ -16,49 +16,49 @@ const Localizer: React.FC = () => {
   const config = useConfig();
   const { localization } = config;
 
-  const locale = useLocale();
+  const locale = useLabeledLocale();
   const searchParams = useSearchParams();
   const { t } = useTranslation('general');
 
   if (localization) {
-    const { localesSimple } = localization;
+    const { locales } = localization;
 
     return (
       <div className={baseClass}>
         <Popup
           showScrollbar
           horizontalAlign="left"
-          button={locale}
+          button={locale.label}
           render={({ close }) => (
             <div>
               <span>{t('locales')}</span>
               <ul>
-                {localesSimple.map((localeOption) => {
+                {locales.map((localeOption) => {
                   const baseLocaleClass = `${baseClass}__locale`;
 
                   const localeClasses = [
                     baseLocaleClass,
-                    locale === localeOption && `${baseLocaleClass}--active`,
+                    locale.value === localeOption.value && `${baseLocaleClass}--active`,
                   ].filter(Boolean).join('');
 
                   const newParams = {
                     ...searchParams,
-                    locale: localeOption,
+                    locale: localeOption.value,
                   };
 
                   const search = qs.stringify(newParams);
 
-                  if (localeOption !== locale) {
+                  if (localeOption.value !== locale.value) {
                     return (
                       <li
-                        key={localeOption}
+                        key={localeOption.value}
                         className={localeClasses}
                       >
                         <Link
                           to={{ search }}
                           onClick={close}
                         >
-                          {localeOption}
+                          {localeOption.label}
                         </Link>
                       </li>
                     );
