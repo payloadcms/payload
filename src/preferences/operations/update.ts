@@ -45,12 +45,14 @@ async function update(args: PreferenceUpdateRequest) {
     await payload.db.create({
       collection,
       data: preference,
+      req,
     });
   } catch (err: unknown) {
     await payload.db.updateOne({
       collection,
       where: filter,
       data: preference,
+      req,
     });
   }
 

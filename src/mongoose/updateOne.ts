@@ -2,10 +2,10 @@ import type { MongooseAdapter } from '.';
 import type { UpdateOne } from '../database/types';
 import { ValidationError } from '../errors';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
-import i18nInit from '../translations/init';
+import { i18nInit } from '../translations/init';
 
 export const updateOne: UpdateOne = async function updateOne(this: MongooseAdapter,
-  { collection, data, where, locale }) {
+  { collection, data, where, locale, req }) {
   const Model = this.collections[collection];
 
   const query = await Model.buildQuery({
@@ -27,7 +27,7 @@ export const updateOne: UpdateOne = async function updateOne(this: MongooseAdapt
       ? new ValidationError([{
         message: 'Value must be unique',
         field: Object.keys(error.keyValue)[0],
-      }], i18nInit(this.payload.config.i18n).t)
+      }], req?.t ?? i18nInit(this.payload.config.i18n).t)
       : error;
   }
 

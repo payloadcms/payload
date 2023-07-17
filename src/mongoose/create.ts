@@ -1,6 +1,6 @@
 import type { MongooseAdapter } from '.';
 import type { Create } from '../database/types';
-import { Document } from '../types';
+import type { Document } from '../types';
 
 export const create: Create = async function create(this: MongooseAdapter,
   { collection, data }) {

@@ -3,7 +3,7 @@ import { PayloadRequest } from '../../../express/types';
 import forgotPassword, { Result } from '../forgotPassword';
 import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
-import i18n from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
@@ -36,7 +36,7 @@ async function localForgotPassword<T extends keyof GeneratedTypes['collections']
 
   req.payloadAPI = req.payloadAPI || 'local';
   req.payload = payload;
-  req.i18n = i18n(payload.config.i18n);
+  req.i18n = i18nInit(payload.config.i18n);
 
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

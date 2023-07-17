@@ -12,8 +12,9 @@ import { blocksFieldSeedData } from './collections/Blocks';
 import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
 import { defaultNumber, numberDoc } from './collections/Number';
 import { dateDoc } from './collections/Date';
-import type { PaginatedDocs } from '../../src/mongoose/types';
 import type { RichTextField } from './payload-types';
+import type { PaginatedDocs } from '../../src/database/types';
+import type { MongooseAdapter } from '../../src/mongoose';
 
 let client;
 let graphQLClient: GraphQLClient;
@@ -228,7 +229,7 @@ describe('Fields', () => {
     const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
-      indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
+      indexes = (payload.db as MongooseAdapter).collections['indexed-fields'].schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
 
       indexes.forEach((index) => {
         const field = Object.keys(index[0])[0];

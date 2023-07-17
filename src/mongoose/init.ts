@@ -6,12 +6,13 @@ import { buildVersionCollectionFields } from '../versions/buildCollectionFields'
 import getBuildQueryPlugin from './queries/buildQuery';
 import buildCollectionSchema from './models/buildCollectionSchema';
 import buildSchema from './models/buildSchema';
-import { CollectionModel, SanitizedCollectionConfig } from '../collections/config/types';
+import { SanitizedCollectionConfig } from '../collections/config/types';
 import { getVersionsModelName } from '../versions/getVersionsModelName';
 import type { MongooseAdapter } from '.';
 import { buildGlobalModel } from './models/buildGlobalModel';
 import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
 import type { Init } from '../database/types';
+import { CollectionModel } from './types';
 
 export const init: Init = async function init(this: MongooseAdapter,
   { config }) {
@@ -70,15 +71,12 @@ export const init: Init = async function init(this: MongooseAdapter,
     this.collections[collection.slug] = model;
 
     this.payload.collections[collection.slug] = {
-      Model: model,
       config: collection,
     };
   });
 
   const model = buildGlobalModel(this.payload.config);
   this.globals = model;
-
-  this.payload.globals.Model = model;
 
   this.payload.config.globals.forEach((global) => {
     if (global.versions) {

@@ -5,7 +5,7 @@ import { Document } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import update from '../update';
 import { getDataLoader } from '../../../collections/dataloader';
-import i18nInit from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 
 export type Options<TSlug extends keyof GeneratedTypes['globals']> = {

@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 import { RelationshipField } from '../../../../../../fields/config/types';
 import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
-import { PaginatedDocs } from '../../../../../../mongoose/types';
+import type { PaginatedDocs } from '../../../../../../database/types';
 
 export type Props = {
   onChange: (val: unknown) => void,

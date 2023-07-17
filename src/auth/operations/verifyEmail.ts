@@ -36,6 +36,7 @@ async function verifyEmail(args: Args): Promise<boolean> {
       _verified: true,
       _verificationToken: undefined,
     },
+    req,
   });
 
   return true;

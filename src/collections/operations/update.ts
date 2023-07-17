@@ -248,6 +248,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           locale,
           where: { id: { equals: id } },
           data: result,
+          req,
         });
       }
 

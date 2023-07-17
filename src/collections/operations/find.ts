@@ -2,7 +2,7 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import { Collection, TypeWithID } from '../config/types';
-import { PaginatedDocs } from '../../mongoose/types';
+import type { PaginatedDocs } from '../../database/types';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';

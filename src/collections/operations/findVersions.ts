@@ -3,7 +3,7 @@ import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection } from '../config/types';
-import { PaginatedDocs } from '../../mongoose/types';
+import type { PaginatedDocs } from '../../database/types';
 import { TypeWithVersion } from '../../versions/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
