@@ -11,8 +11,11 @@ export function buildConfig(config?: Partial<Config>): Promise<SanitizedConfig> 
     },
     ...config,
   };
-
   baseConfig.admin = {
+    autoLogin: process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true' ? false : {
+      email: 'dev@payloadcms.com',
+      password: 'test',
+    },
     ...(baseConfig.admin || {}),
     webpack: (webpackConfig) => {
       const existingConfig = typeof config?.admin?.webpack === 'function'

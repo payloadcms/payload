@@ -1,5 +1,4 @@
 import { expect, Page, test } from '@playwright/test';
-import { login } from '../helpers';
 import { initPayloadE2E } from '../helpers/configHelpers';
 
 const { beforeAll, describe } = test;
@@ -12,7 +11,6 @@ describe('refresh-permissions', () => {
     ({ serverURL } = await initPayloadE2E(__dirname));
     const context = await browser.newContext();
     page = await context.newPage();
-    await login({ page, serverURL });
   });
 
   test('should show test global immediately after allowing access', async () => {

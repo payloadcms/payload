@@ -26,6 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     admin: {
       user: userSlug,
       inactivityRoute: logoutInactivityRoute,
+      autoLogin,
     },
     serverURL,
     routes: {
@@ -143,6 +144,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(json.user);
           } else if (json?.token) {
             setToken(json.token);
+          } else if (autoLogin) {
+            // auto log-in with the provided autoLogin credentials. This is used in dev mode
+            // so you don't have to log in over and over again
+            const autoLoginResult = await requests.post(`${serverURL}${api}/${userSlug}/login`, {
+              body: JSON.stringify({
+                email: autoLogin.email,
+                password: autoLogin.password,
+              }),
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
+              },
+            });
+            if (autoLoginResult.status === 200) {
+              const autoLoginJson = await autoLoginResult.json();
+              setUser(autoLoginJson.user);
+              if (autoLoginJson?.token) {
+                setToken(autoLoginJson.token);
+              }
+            } else {
+              setUser(null);
+            }
           } else {
             setUser(null);
           }
@@ -153,7 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     fetchMe();
-  }, [i18n, setToken, api, serverURL, userSlug]);
+  }, [i18n, setToken, api, serverURL, userSlug, autoLogin]);
 
   // When location changes, refresh cookie
   useEffect(() => {

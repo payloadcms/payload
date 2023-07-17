@@ -4,7 +4,7 @@ import path from 'path';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { login, saveDocAndAssert } from '../helpers';
+import { saveDocAndAssert } from '../helpers';
 import { textDoc } from './collections/Text';
 import { arrayFieldsSlug } from './collections/Array';
 import { pointFieldsSlug } from './collections/Point';
@@ -26,8 +26,6 @@ describe('fields', () => {
 
     const context = await browser.newContext();
     page = await context.newPage();
-
-    await login({ page, serverURL });
   });
 
   describe('text', () => {
