@@ -122,13 +122,9 @@ const needsResize = (
     return true; // needs resize
   }
 
-  const hasInsufficientWidth = original.width <= desiredWidth;
-  if (hasInsufficientWidth) {
-    return false; // doesn't need resize - prevent enlargement
-  }
-
-  const hasInsufficientHeight = original.height <= desiredHeigth;
-  if (hasInsufficientHeight) {
+  const hasInsufficientWidth = original.width < desiredWidth;
+  const hasInsufficientHeight = original.height < desiredHeigth;
+  if (hasInsufficientWidth && hasInsufficientHeight) {
     return false; // doesn't need resize - prevent enlargement
   }
 

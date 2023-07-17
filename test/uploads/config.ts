@@ -200,6 +200,12 @@ export default buildConfig({
             width: 180,
             height: 50,
           },
+          {
+            name: 'widthLowerHeightLarger',
+            width: 300,
+            height: 300,
+            fit: 'contain',
+          },
         ],
       },
       fields: [],

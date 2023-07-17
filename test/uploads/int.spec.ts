@@ -191,6 +191,39 @@ describe('Collections - Uploads', () => {
 
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png');
       expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png');
+
+      await payload.delete({
+        collection: enlargeSlug,
+        id: result.id,
+      });
+    });
+
+    // This test makes sure that the image resizing is not prevented if only one dimension is larger (due to payload preventing enlargement by default)
+    it('should resize images if one desired dimension is smaller and the other is larger', async () => {
+      const small = await getFileByPath(path.resolve(__dirname, './small.png'));
+
+      const result = await payload.create({
+        collection: enlargeSlug,
+        data: {},
+        file: small,
+      });
+
+      expect(result).toBeTruthy();
+
+      const { sizes } = result;
+      const expectedPath = path.join(__dirname, './media/enlarge');
+
+      // Check for files
+      expect(await fileExists(path.join(expectedPath, sizes.widthLowerHeightLarger.filename))).toBe(
+        true,
+      );
+      // Check api response
+      expect(sizes.widthLowerHeightLarger.mimeType).toBe('image/png');
+      expect(sizes.widthLowerHeightLarger.filename).toBe('small-300x300.png');
+      await payload.delete({
+        collection: enlargeSlug,
+        id: result.id,
+      });
     });
 
     it('should not reduce images if resize options `withoutReduction` is set to true', async () => {
