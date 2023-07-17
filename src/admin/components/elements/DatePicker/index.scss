@@ -8,8 +8,8 @@ $cal-icon-width: 18px;
     display: none;
   }
 
-  .react-datepicker__header__dropdown {
-    padding: 10px 0;
+  .react-datepicker__header__dropdown, .react-datepicker-year-header {
+    padding: 10px 0!important;
   }
 
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box,
