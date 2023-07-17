@@ -5,9 +5,9 @@ import type { SanitizedLocalizationConfig, LabeledLocale } from '../config/types
 export const extractLabeledLocale = (
   localizationConfig: SanitizedLocalizationConfig,
   locale: string,
-): LabeledLocale | undefined => {
+): LabeledLocale | null => {
   if (!localizationConfig?.locales || localizationConfig.locales.length === 0) {
-    return undefined;
+    return null;
   }
 
   return localizationConfig.locales.find(
