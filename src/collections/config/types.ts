@@ -1,14 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeepRequired } from 'ts-essentials';
-import { Model, PaginateModel, AggregatePaginateModel } from 'mongoose';
+import { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateModel } from 'mongoose';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
-import { Access, GeneratePreviewURL, EntityDescription, Endpoint } from '../../config/types';
+import { Config as GeneratedTypes } from 'payload/generated-types';
+import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
-import { IncomingAuthType, Auth } from '../../auth/types';
+import { Auth, IncomingAuthType, User } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
+import { BuildQueryArgs } from '../../mongoose/buildQuery';
+import { CustomPreviewButtonProps, CustomPublishButtonProps, CustomSaveButtonProps, CustomSaveDraftButtonProps } from '../../admin/components/elements/types';
+import type { Props as ListProps } from '../../admin/components/views/collections/List/types';
+import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types';
 
 type Register<T = any> = (doc: T, password: string) => T;
 
@@ -18,7 +23,7 @@ interface PassportLocalModel {
 }
 
 export interface CollectionModel extends Model<any>, PaginateModel<any>, AggregatePaginateModel<any>, PassportLocalModel {
-  buildQuery: (query: unknown, locale: string, queryHiddenFields?: boolean) => Record<string, unknown>
+  buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>>
 }
 
 export interface AuthCollectionModel extends CollectionModel {
@@ -101,13 +106,13 @@ export type AfterReadHook<T extends TypeWithID = any> = (args: {
 
 export type BeforeDeleteHook = (args: {
   req: PayloadRequest;
-  id: string;
+  id: string | number;
 }) => any;
 
 export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
-  id: string;
+  id: string | number;
 }) => any;
 
 export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
@@ -153,6 +158,10 @@ export type BeforeDuplicate<T = any> = (args: BeforeDuplicateArgs<T>) => T | Pro
 
 export type CollectionAdminOptions = {
   /**
+   * Exclude the collection from the admin nav and routes
+   */
+  hidden?: ((args: { user: User }) => boolean) | boolean;
+  /**
    * Field to use as title in Edit view and first column in List view
    */
   useAsTitle?: string;
@@ -187,15 +196,45 @@ export type CollectionAdminOptions = {
    * Custom admin components
    */
   components?: {
+    /**
+       * Components within the edit view
+       */
+    edit?: {
+      /**
+       * Replaces the "Save" button
+       * + drafts must be disabled
+       */
+      SaveButton?: CustomSaveButtonProps
+      /**
+       * Replaces the "Publish" button
+       * + drafts must be enabled
+       */
+      PublishButton?: CustomPublishButtonProps
+      /**
+       * Replaces the "Save Draft" button
+       * + drafts must be enabled
+       * + autosave must be disabled
+       */
+      SaveDraftButton?: CustomSaveDraftButtonProps
+      /**
+       * Replaces the "Preview" button
+       */
+      PreviewButton?: CustomPreviewButtonProps
+    },
     views?: {
-      Edit?: React.ComponentType<any>
-      List?: React.ComponentType<any>
-    }
+      Edit?: React.ComponentType<EditProps>
+      List?: React.ComponentType<ListProps>
+    },
+    BeforeList?: React.ComponentType<ListProps>[],
+    BeforeListTable?: React.ComponentType<ListProps>[],
+    AfterListTable?: React.ComponentType<ListProps>[],
+    AfterList?: React.ComponentType<ListProps>[],
   };
   pagination?: {
     defaultLimit?: number
     limits?: number[]
   }
+  enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
    * Function to generate custom preview URL
@@ -214,6 +253,10 @@ export type CollectionConfig = {
     plural?: Record<string, string> | string;
   };
   /**
+   * Default field to sort by in collection list view
+   */
+  defaultSort?: string;
+  /**
    * GraphQL configuration
    */
   graphQL?: {
@@ -230,6 +273,10 @@ export type CollectionConfig = {
     interface?: string
   }
   fields: Field[];
+  /**
+   * Array of database indexes to create, including compound indexes that have multiple fields
+   */
+  indexes?: TypeOfIndex[];
   /**
    * Collection admin options
    */
@@ -294,13 +341,16 @@ export type CollectionConfig = {
    * @default true
    */
   timestamps?: boolean
+  /** Extension point to add your custom data. */
+  custom?: Record<string, any>;
 };
 
-export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions'> {
+export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionConfig>, 'auth' | 'upload' | 'fields' | 'versions' | 'endpoints'> {
   auth: Auth;
   upload: Upload;
   fields: Field[];
-  versions: SanitizedCollectionVersions
+  versions: SanitizedCollectionVersions;
+  endpoints: Omit<Endpoint, 'root'>[];
 }
 
 export type Collection = {
@@ -308,6 +358,7 @@ export type Collection = {
   config: SanitizedCollectionConfig;
   graphQL?: {
     type: GraphQLObjectType
+    paginatedType: GraphQLObjectType
     JWT: GraphQLObjectType
     versionType: GraphQLObjectType
     whereInputType: GraphQLInputObjectType
@@ -315,6 +366,14 @@ export type Collection = {
     updateMutationInputType: GraphQLNonNull<any>
   }
 };
+
+export type BulkOperationResult<TSlug extends keyof GeneratedTypes['collections']> = {
+  docs: GeneratedTypes['collections'][TSlug][],
+  errors: {
+    message: string
+    id: GeneratedTypes['collections'][TSlug]['id']
+  }[]
+}
 
 export type AuthCollection = {
   Model: AuthCollectionModel;
@@ -330,4 +389,9 @@ export type TypeWithTimestamps = {
   createdAt: string
   updatedAt: string
   [key: string]: unknown
+}
+
+export type TypeOfIndex = {
+  fields: IndexDefinition
+  options?: IndexOptions
 }

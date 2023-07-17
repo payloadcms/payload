@@ -2,6 +2,7 @@
 
 .value-container {
   flex-grow: 1;
+  min-width: 0;
 
   .rs__value-container {
     padding: base(.25) 0;
@@ -12,6 +13,7 @@
       margin: 0;
       padding-top: 0;
       padding-bottom: 0;
+      color: currentColor;
     }
 
     &--is-multi {

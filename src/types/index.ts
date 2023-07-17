@@ -9,6 +9,7 @@ export type Operator =
   | 'contains'
   | 'not_equals'
   | 'in'
+  | 'all'
   | 'not_in'
   | 'exists'
   | 'greater_than'

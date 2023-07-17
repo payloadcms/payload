@@ -1,4 +1,5 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
+import { DeepPartial } from 'ts-essentials';
 import { Payload } from '../../../payload';
 import { Document } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
@@ -12,7 +13,7 @@ export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
   depth?: number
   locale?: string
   fallbackLocale?: string
-  data: Omit<GeneratedTypes['globals'][TSlug], 'id'>
+  data: DeepPartial<Omit<GeneratedTypes['globals'][TSlug], 'id'>>
   user?: Document
   overrideAccess?: boolean
   showHiddenFields?: boolean

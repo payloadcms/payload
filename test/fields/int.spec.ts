@@ -1,19 +1,25 @@
 import type { IndexDirection, IndexOptions } from 'mongoose';
+import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
 import configPromise from '../uploads/config';
 import payload from '../../src';
 import { pointDoc } from './collections/Point';
-import { arrayFieldsSlug, arrayDefaultValue, arrayDoc } from './collections/Array';
-import { groupFieldsSlug, groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group';
+import { arrayDefaultValue, arrayDoc, arrayFieldsSlug } from './collections/Array';
+import { groupDefaultChild, groupDefaultValue, groupDoc, groupFieldsSlug } from './collections/Group';
 import { defaultText } from './collections/Text';
 import { blocksFieldSeedData } from './collections/Blocks';
 import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
 import { defaultNumber, numberDoc } from './collections/Number';
+import { dateDoc } from './collections/Date';
+import type { PaginatedDocs } from '../../src/mongoose/types';
+import type { RichTextField } from './payload-types';
 
 let client;
+let graphQLClient: GraphQLClient;
 let serverURL;
 let config;
+let token;
 
 describe('Fields', () => {
   beforeAll(async () => {
@@ -21,7 +27,9 @@ describe('Fields', () => {
     config = await configPromise;
 
     client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' });
-    await client.login();
+    const graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`;
+    graphQLClient = new GraphQLClient(graphQLURL);
+    token = await client.login();
   });
 
   describe('text', () => {
@@ -38,6 +46,45 @@ describe('Fields', () => {
       expect(doc.text).toEqual(text);
       expect(doc.defaultFunction).toEqual(defaultText);
       expect(doc.defaultAsync).toEqual(defaultText);
+    });
+  });
+
+  describe('timestamps', () => {
+    const tenMinutesAgo = new Date(Date.now() - 1000 * 60 * 10);
+    let doc;
+    beforeAll(async () => {
+      doc = await payload.create({
+        collection: 'date-fields',
+        data: dateDoc,
+      });
+    });
+
+    it('should query updatedAt', async () => {
+      const { docs } = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          updatedAt: {
+            greater_than_equal: tenMinutesAgo,
+          },
+        },
+      });
+
+      expect(docs.map(({ id }) => id)).toContain(doc.id);
+    });
+
+    it('should query createdAt', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            greater_than_equal: tenMinutesAgo,
+          },
+        },
+      });
+
+      expect(result.docs[0].id).toEqual(doc.id);
     });
   });
 
@@ -60,6 +107,26 @@ describe('Fields', () => {
 
     it('creates with hasMany localized', () => {
       expect(doc.selectHasManyLocalized.en).toEqual(['one', 'two']);
+    });
+
+    it('retains hasMany updates', async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'two'],
+        },
+      });
+
+      const updatedDoc = await payload.update({
+        collection: 'select-fields',
+        id,
+        data: {
+          select: 'one',
+        },
+      });
+
+      expect(Array.isArray(updatedDoc.selectHasMany)).toBe(true);
+      expect(updatedDoc.selectHasMany).toEqual(['one', 'two']);
     });
   });
 
@@ -134,6 +201,25 @@ describe('Fields', () => {
         },
       })).rejects.toThrow('The following field is invalid: decimalMax');
     });
+    it('should localize an array of numbers using hasMany', async () => {
+      const localizedHasMany = [5, 10];
+      const { id } = await payload.create({
+        collection: 'number-fields',
+        locale: 'en',
+        data: {
+          localizedHasMany,
+        },
+      });
+      const localizedDoc = await payload.findByID({
+        collection: 'number-fields',
+        locale: 'all',
+        id,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany);
+    });
   });
 
   describe('indexes', () => {
@@ -142,9 +228,6 @@ describe('Fields', () => {
     const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
-      // mongoose model schema indexes do not always create indexes in the actual database
-      // see: https://github.com/payloadcms/payload/issues/571
-
       indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
 
       indexes.forEach((index) => {
@@ -180,7 +263,10 @@ describe('Fields', () => {
       expect(definitions.collapsibleTextUnique).toEqual(1);
       expect(options.collapsibleTextUnique).toMatchObject({ unique: true });
     });
-
+    it('should have unique compound indexes', () => {
+      expect(definitions.partOne).toEqual(1);
+      expect(options.partOne).toMatchObject({ unique: true, name: 'compound-index', sparse: true });
+    });
     it('should throw validation error saving on unique fields', async () => {
       const data = {
         text: 'a',
@@ -197,6 +283,56 @@ describe('Fields', () => {
         });
         return result.error;
       }).toBeDefined();
+    });
+    it('should throw validation error saving on unique combined fields', async () => {
+      await payload.delete({ collection: 'indexed-fields', where: {} });
+      const data1 = {
+        text: 'a',
+        uniqueText: 'a',
+        partOne: 'u',
+        partTwo: 'u',
+      };
+      const data2 = {
+        text: 'b',
+        uniqueText: 'b',
+        partOne: 'u',
+        partTwo: 'u',
+      };
+      await payload.create({
+        collection: 'indexed-fields',
+        data: data1,
+      });
+      expect(async () => {
+        const result = await payload.create({
+          collection: 'indexed-fields',
+          data: data2,
+        });
+        return result.error;
+      }).toBeDefined();
+    });
+  });
+
+  describe('version indexes', () => {
+    let indexes;
+    const definitions: Record<string, IndexDirection> = {};
+    const options: Record<string, IndexOptions> = {};
+
+    beforeAll(() => {
+      indexes = payload.versions['indexed-fields'].schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
+      indexes.forEach((index) => {
+        const field = Object.keys(index[0])[0];
+        definitions[field] = index[0][field];
+        // eslint-disable-next-line prefer-destructuring
+        options[field] = index[1];
+      });
+    });
+
+    it('should have versions indexes', () => {
+      expect(definitions['version.text']).toEqual(1);
+    });
+    it('should have version indexes from collection indexes', () => {
+      expect(definitions['version.partOne']).toEqual(1);
+      expect(options['version.partOne']).toMatchObject({ unique: true, name: 'compound-index', sparse: true });
     });
   });
 
@@ -600,6 +736,22 @@ describe('Fields', () => {
       expect(child.doc.relationTo).toEqual('array-fields');
       expect(typeof child.doc.value.id).toBe('string');
       expect(child.doc.value.items).toHaveLength(6);
+    });
+
+    it('should respect rich text depth parameter', async () => {
+      const query = `query {
+        RichTextFields {
+          docs {
+            richText(depth: 2)
+          }
+        }
+      }`;
+      const response = await graphQLClient.request(query, {}, {
+        Authorization: `JWT ${token}`,
+      });
+      const { docs }: PaginatedDocs<RichTextField> = response.RichTextFields;
+      const uploadElement = docs[0].richText.find((el) => el.type === 'upload') as any;
+      expect(uploadElement.value.media.filename).toStrictEqual('payload.png');
     });
   });
 });

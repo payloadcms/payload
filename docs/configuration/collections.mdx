@@ -12,21 +12,25 @@ It's often best practice to write your Collections in separate files and then im
 
 ## Options
 
-| Option           | Description                                                                                                                                                                                                              |
-|------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`slug`** *     | Unique, URL-friendly string that will act as an identifier for this Collection.                                                                                                                                          |
-| **`fields`** *   | Array of field types that will determine the structure and functionality of the data stored within this Collection. [Click here](/docs/fields/overview) for a full list of field types as well as how to configure them. |
-| **`labels`**     | Singular and plural labels for use in identifying this Collection throughout Payload. Auto-generated from slug if not defined.                                                                                           |
-| **`admin`**      | Admin-specific configuration. See below for [more detail](#admin-options).                                                                                                                                               |
-| **`hooks`**      | Entry points to "tie in" to Collection actions at specific points. [More](/docs/hooks/overview#collection-hooks)                                                                                                         |
-| **`access`**     | Provide access control functions to define exactly who should be able to do what with Documents in this Collection. [More](/docs/access-control/overview/#collections)                                                   |
-| **`auth`**       | Specify options if you would like this Collection to feature authentication. For more, consult the [Authentication](/docs/authentication/config) documentation.                                                          |
-| **`upload`**     | Specify options if you would like this Collection to support file uploads. For more, consult the [Uploads](/docs/upload/overview) documentation.                                                                         |
-| **`timestamps`** | Set to false to disable documents' automatically generated `createdAt` and `updatedAt` timestamps.                                                                                                                       |
-| **`versions`**   | Set to true to enable default options, or configure with object properties. [More](/docs/versions/overview#collection-config)                                                                                            |
-| **`endpoints`**  | Add custom routes to the REST API. [More](/docs/rest-api/overview#custom-endpoints)                                                                                                                                      |
-| **`graphQL`**    | An object with `singularName` and `pluralName` strings used in schema generation. Auto-generated from slug if not defined.                                                                                               |
-| **`typescript`** | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                      |
+| Option             | Description                                                                                                                                                                                                              |
+|--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`slug`** *       | Unique, URL-friendly string that will act as an identifier for this Collection.                                                                                                                                          |
+| **`fields`** *     | Array of field types that will determine the structure and functionality of the data stored within this Collection. [Click here](/docs/fields/overview) for a full list of field types as well as how to configure them. |
+| **`indexes`** *    | Array of database indexes to create, including compound indexes that have multiple fields.                                                                                                                               |
+| **`labels`**       | Singular and plural labels for use in identifying this Collection throughout Payload. Auto-generated from slug if not defined.                                                                                           |
+| **`admin`**        | Admin-specific configuration. See below for [more detail](#admin-options).                                                                                                                                               |
+| **`hooks`**        | Entry points to "tie in" to Collection actions at specific points. [More](/docs/hooks/overview#collection-hooks)                                                                                                         |
+| **`access`**       | Provide access control functions to define exactly who should be able to do what with Documents in this Collection. [More](/docs/access-control/overview/#collections)                                                   |
+| **`auth`**         | Specify options if you would like this Collection to feature authentication. For more, consult the [Authentication](/docs/authentication/config) documentation.                                                          |
+| **`upload`**       | Specify options if you would like this Collection to support file uploads. For more, consult the [Uploads](/docs/upload/overview) documentation.                                                                         |
+| **`timestamps`**   | Set to false to disable documents' automatically generated `createdAt` and `updatedAt` timestamps.                                                                                                                       |
+| **`versions`**     | Set to true to enable default options, or configure with object properties. [More](/docs/versions/overview#collection-config)                                                                                            |
+| **`endpoints`**    | Add custom routes to the REST API. [More](/docs/rest-api/overview#custom-endpoints)                                                                                                                                      |
+| **`graphQL`**      | An object with `singularName` and `pluralName` strings used in schema generation. Auto-generated from slug if not defined.                                                                                               |
+| **`typescript`**   | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                      |
+| **`defaultSort`**  | Pass a top-level field to sort by default in the collection List view. Prefix the name of the field with a minus symbol ("-") to sort in descending order.                                                               |
+| **`pagination`**   | Set pagination-specific options for this collection. [More](#pagination)                                                                                                                                                 |
+| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -35,7 +39,7 @@ It's often best practice to write your Collections in separate files and then im
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Orders: CollectionConfig = {
+export const Orders: CollectionConfig = {
 	slug: 'orders',
 	fields: [
 		{
@@ -49,7 +53,7 @@ const Orders: CollectionConfig = {
 			relationTo: 'customers',
 			required: true,
 		}
-	]
+	],
 };
 ```
 
@@ -61,18 +65,21 @@ You can find an assortment of [example collection configs](https://github.com/pa
 
 You can customize the way that the Admin panel behaves on a collection-by-collection basis by defining the `admin` property on a collection's config.
 
-| Option                      | Description  |
-| --------------------------- | -------------|
-| `group`                     | Text used as a label for grouping collection links together in the navigation. |
-| `hooks`                     | Admin-specific hooks for this collection. [More](#admin-hooks) |
-| `useAsTitle`                | Specify a top-level field to use for a document title throughout the Admin panel. If no field is defined, the ID of the document is used as the title. |
-| `description`               | Text or React component to display below the Collection label in the List view to give editors more information. |
-| `defaultColumns`            | Array of field names that correspond to which columns to show by default in this collection's List view. |
-| `disableDuplicate `         | Disables the "Duplicate" button while editing documents within this collection. |
+| Option                       | Description                                                                                                                                                                                           |
+|------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `group`                      | Text used as a label for grouping collection and global links together in the navigation.                                                                                                             |
+| `hidden`                     | Set to true or a function, called with the current user, returning true to exclude this collection from navigation and admin routing.                                                                 |
+| `hooks`                      | Admin-specific hooks for this collection. [More](#admin-hooks)                                                                                                                                        |
+| `useAsTitle`                 | Specify a top-level field to use for a document title throughout the Admin panel. If no field is defined, the ID of the document is used as the title.                                                |
+| `description`                | Text or React component to display below the Collection label in the List view to give editors more information.                                                                                      |
+| `defaultColumns`             | Array of field names that correspond to which columns to show by default in this collection's List view.                                                                                              |
+| `disableDuplicate `          | Disables the "Duplicate" button while editing documents within this collection.                                                                                                                       |
+| `hideAPIURL`                 | Hides the "API URL" meta field while editing documents within this collection.                                                                                                                        |
+| `enableRichTextLink`         | The [Rich Text](/docs/fields/rich-text) field features a `Link` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.         |
 | `enableRichTextRelationship` | The [Rich Text](/docs/fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default. |
-| `preview`                   | Function to generate preview URLS within the Admin panel that can point to your app. [More](#preview). |
-| `components`                | Swap in your own React components to be used within this collection. [More](/docs/admin/components#collections) |
-| `listSearchableFields`      | Specify which fields should be searched in the List search view. [More](#list-searchable-fields) |
+| `preview`                    | Function to generate preview URLS within the Admin panel that can point to your app. [More](#preview).                                                                                                |
+| `components`                 | Swap in your own React components to be used within this collection. [More](/docs/admin/components#collections)                                                                                       |
+| `listSearchableFields`       | Specify which fields should be searched in the List search view. [More](#list-searchable-fields)                                                                                                      |
 
 ### Preview
 
@@ -90,7 +97,7 @@ If the function is specified, a Preview button will automatically appear in the 
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const Posts: CollectionConfig = {
+export const Posts: CollectionConfig = {
 	slug: 'posts',
 	fields: [
 		{
@@ -110,6 +117,15 @@ const Posts: CollectionConfig = {
 	},
 };
 ```
+
+### Pagination
+
+Here are a few options that you can specify options for pagination on a collection-by-collection basis:
+
+| Option                      | Description  |
+| --------------------------- | -------------|
+| `defaultLimit`              | Integer that specifies the default per-page limit that should be used. Defaults to 10. |
+| `limits`                    | Provide an array of integers to use as per-page options for admins to choose from in the List view. |
 
 ### Access control
 

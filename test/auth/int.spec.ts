@@ -290,7 +290,7 @@ describe('Auth', () => {
           const { loginAttempts, lockUntil } = userResult;
 
           expect(loginAttempts).toBe(0);
-          expect(lockUntil).toBeUndefined();
+          expect(lockUntil).toBeNull();
         });
       });
     });
@@ -310,6 +310,27 @@ describe('Auth', () => {
       // expect(mailSpy).toHaveBeenCalled();
 
       expect(response.status).toBe(200);
+    });
+
+    it('should allow reset password', async () => {
+      const token = await payload.forgotPassword({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+        },
+        disableEmail: true,
+      });
+
+      const result = await payload.resetPassword({
+        collection: 'users',
+        data: {
+          password: devUser.password,
+          token,
+        },
+        overrideAccess: true,
+      }).catch((e) => console.error(e));
+
+      expect(result).toBeTruthy();
     });
   });
 

@@ -27,6 +27,7 @@ keywords: radio, fields, config, configuration, documentation, Content Managemen
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -49,7 +50,7 @@ The `layout` property allows for the radio group to be styled as a horizonally o
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
@@ -72,5 +73,4 @@ const ExampleCollection: CollectionConfig = {
     }
   ]
 }
-
 ```

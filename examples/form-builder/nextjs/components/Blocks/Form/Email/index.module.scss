@@ -1,0 +1,15 @@
+@use "../shared.scss";
+
+.wrap {
+  position: relative;
+  margin-bottom: var(--base);
+}
+
+.input {
+  @include shared.formInput;
+}
+
+.label {
+  margin-bottom: 10px;
+  display: block;
+}

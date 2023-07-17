@@ -25,7 +25,7 @@ _Screenshot of the Admin panel while editing a document from an example `AllFiel
 All options for the Admin panel are defined in your base Payload config file.
 
 | Option                | Description                                                                                                                                                                                                                                                  |
-| --------------------- | -------------------------------------------------------------------------------------------------- |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `user`                | The `slug` of a Collection that you want be used to log in to the Admin dashboard. [More](/docs/admin/overview#the-admin-user-collection)                                                                                                                    |
 | `buildPath`           | Specify an absolute path for where to store the built Admin panel bundle used in production. Defaults to `path.resolve(process.cwd(), 'build')`.                                                                                                             |
 | `meta`                | Base meta data to use for the Admin panel. Included properties are `titleSuffix`, `ogImage`, and `favicon`.                                                                                                                                                  |
@@ -36,7 +36,7 @@ All options for the Admin panel are defined in your base Payload config file.
 | `dateFormat`          | Global date format that will be used for all dates in the Admin panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                                                                                                               |
 | `avatar`              | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                                                                                                                                     |
 | `components`          | Component overrides that affect the entirety of the Admin panel. [More](/docs/admin/components)                                                                                                                                                              |
-| `webpack`             | Customize the Webpack config that's used to generate the Admin panel. [More](/docs/admin/webpack)                                                                                                                                                            |     |
+| `webpack`             | Customize the Webpack config that's used to generate the Admin panel. [More](/docs/admin/webpack)                                                                                                                                                            |
 | **`logoutRoute`**     | The route for the `logout` page.                                                                                                                                                                                                                             |
 | **`inactivityRoute`** | The route for the `logout` inactivity page.                                                                                                                                                                                                                  |
 
@@ -45,8 +45,8 @@ All options for the Admin panel are defined in your base Payload config file.
 <Banner type="warning">
   <strong>Important:</strong>
   <br />
-  The Payload Admin panel can only be used by one Collection that supports{" "}
-  <a href="/docs/authentication/overview">Authentication</a>.
+  The Payload Admin panel can only be used by one Collection that supports
+  [Authentication](/docs/authentication/overview).
 </Banner>
 
 To specify which Collection to use to log in to the Admin panel, pass the `admin` options a `user` key equal to the slug of the Collection that you'd like to use.

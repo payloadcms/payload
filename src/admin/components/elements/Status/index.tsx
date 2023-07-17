@@ -3,7 +3,6 @@ import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
-import { Props } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import Button from '../Button';
 import { MinimalTemplate } from '../..';
@@ -16,7 +15,7 @@ import './index.scss';
 
 const baseClass = 'status';
 
-const Status: React.FC<Props> = () => {
+const Status: React.FC = () => {
   const {
     publishedDoc,
     unpublishedVersions,
@@ -24,6 +23,7 @@ const Status: React.FC<Props> = () => {
     global,
     id,
     getVersions,
+    docPermissions,
   } = useDocumentInfo();
   const { toggleModal } = useModal();
   const {
@@ -114,12 +114,14 @@ const Status: React.FC<Props> = () => {
     }
   }, [collection, global, publishedDoc, serverURL, api, id, i18n, locale, resetForm, getVersions, t, toggleModal, revertModalSlug, unPublishModalSlug]);
 
+  const canUpdate = docPermissions?.update?.permission;
+
   if (statusToRender) {
     return (
       <div className={baseClass}>
         <div className={`${baseClass}__value-wrap`}>
           <span className={`${baseClass}__value`}>{t(statusToRender)}</span>
-          {statusToRender === 'published' && (
+          {canUpdate && statusToRender === 'published' && (
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
@@ -152,7 +154,7 @@ const Status: React.FC<Props> = () => {
               </Modal>
             </React.Fragment>
           )}
-          {statusToRender === 'changed' && (
+          {canUpdate && statusToRender === 'changed' && (
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button

@@ -1,4 +1,3 @@
-import merge from 'deepmerge';
 import { toWords } from '../../utilities/formatLabels';
 import { CollectionConfig } from '../../collections/config/types';
 import sanitizeFields from '../../fields/config/sanitize';
@@ -6,7 +5,8 @@ import { GlobalConfig, SanitizedGlobalConfig } from './types';
 import defaultAccess from '../../auth/defaultAccess';
 import baseVersionFields from '../../versions/baseFields';
 import mergeBaseFields from '../../fields/mergeBaseFields';
-import { versionGlobalDefaults } from '../../versions/defaults';
+import translations from '../../translations';
+import { fieldAffectsData } from '../../fields/config/types';
 
 const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[]): SanitizedGlobalConfig[] => {
   const sanitizedGlobals = globals.map((global) => {
@@ -42,17 +42,52 @@ const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[
           };
         }
 
-        if (sanitizedGlobal.versions.drafts.autosave === true) sanitizedGlobal.versions.drafts.autosave = {};
+        if (sanitizedGlobal.versions.drafts.autosave === true) {
+          sanitizedGlobal.versions.drafts.autosave = {
+            interval: 2000,
+          };
+        }
 
         sanitizedGlobal.fields = mergeBaseFields(sanitizedGlobal.fields, baseVersionFields);
       }
-
-      sanitizedGlobal.versions = merge(versionGlobalDefaults, sanitizedGlobal.versions);
     }
+
+    if (!sanitizedGlobal.custom) sanitizedGlobal.custom = {};
 
     // /////////////////////////////////
     // Sanitize fields
     // /////////////////////////////////
+    let hasUpdatedAt = null;
+    let hasCreatedAt = null;
+    sanitizedGlobal.fields.some((field) => {
+      if (fieldAffectsData(field)) {
+        if (field.name === 'updatedAt') hasUpdatedAt = true;
+        if (field.name === 'createdAt') hasCreatedAt = true;
+      }
+      return hasCreatedAt && hasUpdatedAt;
+    });
+    if (!hasUpdatedAt) {
+      sanitizedGlobal.fields.push({
+        name: 'updatedAt',
+        label: translations['general:updatedAt'],
+        type: 'date',
+        admin: {
+          hidden: true,
+          disableBulkEdit: true,
+        },
+      });
+    }
+    if (!hasCreatedAt) {
+      sanitizedGlobal.fields.push({
+        name: 'createdAt',
+        label: translations['general:createdAt'],
+        type: 'date',
+        admin: {
+          hidden: true,
+          disableBulkEdit: true,
+        },
+      });
+    }
 
     const validRelationships = collections.map((c) => c.slug);
     sanitizedGlobal.fields = sanitizeFields(sanitizedGlobal.fields, validRelationships);

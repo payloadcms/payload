@@ -8,7 +8,7 @@
     display: none;
   }
 
-  .tooltip {
+  .tooltip:not([aria-hidden="true"]) {
     right: auto;
     position: relative;
     margin-bottom: .2em;
@@ -89,6 +89,26 @@
         svg {
           opacity: 1;
         }
+      }
+    }
+  }
+}
+
+html[data-theme=light] {
+  .checkbox {
+    &.error {
+       .custom-checkbox__input {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .checkbox {
+    &.error {
+      .custom-checkbox__input {
+        @include darkInputError;
       }
     }
   }

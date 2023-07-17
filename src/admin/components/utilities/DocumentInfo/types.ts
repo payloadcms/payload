@@ -9,13 +9,9 @@ export type Version = TypeWithVersion<any>
 
 export type DocumentPermissions = null | GlobalPermission | CollectionPermission
 
-export type EntityType = 'global' | 'collection'
-
 export type ContextType = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
-  type: EntityType
-  /** Slug of the collection or global */
   slug?: string
   id?: string | number
   preferencesKey?: string
@@ -25,11 +21,14 @@ export type ContextType = {
   getVersions: () => Promise<void>
   docPermissions: DocumentPermissions
   getDocPermissions: () => Promise<void>
+  setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
+  getDocPreferences: () => Promise<{ [key: string]: unknown }>
 }
 
 export type Props = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
   id?: string | number
+  idFromParams?: boolean
   children?: React.ReactNode
 }

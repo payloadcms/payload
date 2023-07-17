@@ -8,12 +8,14 @@ const baseClass = 'value-container';
 
 export const ValueContainer: React.FC<ValueContainerProps<Option, any>> = (props) => {
   const {
-    selectProps,
+    selectProps: {
+      customProps,
+    } = {},
   } = props;
 
   return (
     <div
-      ref={selectProps.selectProps.droppableRef}
+      ref={customProps?.droppableRef}
       className={baseClass}
     >
       <SelectComponents.ValueContainer {...props} />

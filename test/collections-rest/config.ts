@@ -32,8 +32,32 @@ export const relationSlug = 'relation';
 export const pointSlug = 'point';
 export const customIdSlug = 'custom-id';
 export const customIdNumberSlug = 'custom-id-number';
+export const errorOnHookSlug = 'error-on-hooks';
 
 export default buildConfig({
+  endpoints: [
+    {
+      path: '/send-test-email',
+      method: 'get',
+      handler: async (req, res) => {
+        await req.payload.sendEmail({
+          from: 'dev@payloadcms.com',
+          to: devUser.email,
+          subject: 'Test Email',
+          html: 'This is a test email.',
+          // to recreate a failing email transport, add the following credentials
+          // to the `email` property of `payload.init()` in `../dev.ts`
+          // the app should fail to send the email, but the error should be handled without crashing the app
+          // transportOptions: {
+          //   host: 'smtp.ethereal.email',
+          //   port: 587,
+          // },
+        });
+
+        res.status(200).send('Email sent');
+      },
+    },
+  ],
   collections: [
     {
       slug,
@@ -50,6 +74,12 @@ export default buildConfig({
         {
           name: 'number',
           type: 'number',
+        },
+        {
+          name: 'fakeLocalization',
+          type: 'text',
+          // field is localized even though the config localization is not on
+          localized: true,
         },
         // Relationship
         {
@@ -77,6 +107,72 @@ export default buildConfig({
           relationTo: [relationSlug, 'dummy'],
           hasMany: true,
         },
+        {
+          name: 'restrictedField',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Tab1',
+              name: 'D1',
+              fields: [
+                {
+                  name: 'D2',
+                  type: 'group',
+                  fields: [
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          type: 'collapsible',
+                          label: 'Collapsible2',
+                          fields: [
+                            {
+                              type: 'tabs',
+                              tabs: [
+                                {
+                                  label: 'Tab1',
+                                  fields: [
+                                    {
+                                      name: 'D3',
+                                      type: 'group',
+                                      fields: [
+                                        {
+                                          type: 'row',
+                                          fields: [
+                                            {
+                                              type: 'collapsible',
+                                              label: 'Collapsible2',
+                                              fields: [
+                                                {
+                                                  type: 'text',
+                                                  name: 'D4',
+                                                },
+                                              ],
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -90,7 +186,23 @@ export default buildConfig({
       ],
     },
     collectionWithName(relationSlug),
-    collectionWithName('dummy'),
+    {
+      slug: 'dummy',
+      access: openAccess,
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+        {
+          type: 'text',
+          name: 'name',
+          access: {
+            read: () => false,
+          },
+        },
+      ],
+    },
     {
       slug: customIdSlug,
       access: openAccess,
@@ -121,6 +233,36 @@ export default buildConfig({
         {
           name: 'name',
           type: 'text',
+        },
+      ],
+    },
+    {
+      slug: errorOnHookSlug,
+      access: openAccess,
+      hooks: {
+        beforeChange: [({ originalDoc }) => {
+          if (originalDoc?.errorBeforeChange) {
+            throw new Error('Error Before Change Thrown');
+          }
+        }],
+        afterDelete: [({ doc }) => {
+          if (doc?.errorAfterDelete) {
+            throw new Error('Error After Delete Thrown');
+          }
+        }],
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'errorBeforeChange',
+          type: 'checkbox',
+        },
+        {
+          name: 'errorAfterDelete',
+          type: 'checkbox',
         },
       ],
     },

@@ -2,7 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import express from 'express';
 import { v4 as uuid } from 'uuid';
+import * as dotenv from 'dotenv';
 import payload from '../src';
+
+dotenv.config();
 
 const [testSuiteDir] = process.argv.slice(2);
 
@@ -27,7 +30,7 @@ const expressApp = express();
 const startDev = async () => {
   await payload.init({
     secret: uuid(),
-    mongoURL: process.env.MONGO_URL || 'mongodb://127.0.0.1/payload',
+    mongoURL: 'mongodb://127.0.0.1/payload',
     express: expressApp,
     email: {
       logMockCredentials: true,
@@ -49,8 +52,8 @@ const startDev = async () => {
   externalRouter.use(payload.authenticate);
 
   expressApp.listen(3000, async () => {
-    payload.logger.info(`Admin URL on ${payload.getAdminURL()}`);
-    payload.logger.info(`API URL on ${payload.getAPIURL()}`);
+    payload.logger.info(`Admin URL on http://localhost:3000${payload.getAdminURL()}`);
+    payload.logger.info(`API URL on http://localhost:3000${payload.getAPIURL()}`);
   });
 };
 

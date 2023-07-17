@@ -1,5 +1,5 @@
 import React from 'react';
-import { DiffMethod } from 'react-diff-viewer';
+import { DiffMethod } from 'react-diff-viewer-continued';
 import { Props } from './types';
 import { fieldAffectsData, fieldHasSubFields } from '../../../../../fields/config/types';
 import Nested from './fields/Nested';

@@ -65,10 +65,10 @@ describe('uploads', () => {
 
   test('should show upload filename in upload collection list', async () => {
     await page.goto(mediaURL.list);
-    const audioUpload = page.locator('.thumbnail-card__label').nth(0);
+    const audioUpload = page.locator('tr.row-1 .cell-filename');
     await expect(audioUpload).toHaveText('audio.mp3');
 
-    const imageUpload = page.locator('.thumbnail-card__label').nth(1);
+    const imageUpload = page.locator('tr.row-2 .cell-filename');
     await expect(imageUpload).toHaveText('image.png');
   });
 
@@ -79,7 +79,7 @@ describe('uploads', () => {
 
     const filename = page.locator('.file-field__filename');
 
-    await expect(filename).toContainText('.png');
+    await expect(filename).toHaveValue('image.png');
 
     await saveDocAndAssert(page);
   });
@@ -99,13 +99,20 @@ describe('uploads', () => {
     const differentFormatFromMainImageMeta = page.locator('.file-details__sizes .file-meta').nth(1);
     await expect(differentFormatFromMainImageMeta).toContainText('image/jpeg');
 
-    const tabletMeta = page.locator('.file-details__sizes .file-meta').nth(2);
+    const maintainedImageSizeMeta = page.locator('.file-details__sizes .file-meta').nth(2);
+    await expect(maintainedImageSizeMeta).toContainText('1600x1600');
+
+    const maintainedImageSizeWithNewFormatMeta = page.locator('.file-details__sizes .file-meta').nth(3);
+    await expect(maintainedImageSizeWithNewFormatMeta).toContainText('image/jpeg');
+    await expect(maintainedImageSizeWithNewFormatMeta).toContainText('1600x1600');
+
+    const tabletMeta = page.locator('.file-details__sizes .file-meta').nth(4);
     await expect(tabletMeta).toContainText('640x480');
 
-    const mobileMeta = page.locator('.file-details__sizes .file-meta').nth(3);
+    const mobileMeta = page.locator('.file-details__sizes .file-meta').nth(5);
     await expect(mobileMeta).toContainText('320x240');
 
-    const iconMeta = page.locator('.file-details__sizes .file-meta').nth(4);
+    const iconMeta = page.locator('.file-details__sizes .file-meta').nth(6);
     await expect(iconMeta).toContainText('16x16');
   });
 
@@ -118,13 +125,13 @@ describe('uploads', () => {
     await page.locator('.upload__toggler.list-drawer__toggler').click();
     const listDrawer = await page.locator('[id^=list-drawer_1_]');
     await expect(listDrawer).toBeVisible();
-    await wait(200); // cards are loading
+    await wait(200); // list is loading
 
     // ensure the only card is the audio file
-    const cards = await listDrawer.locator('.upload-gallery .thumbnail-card');
-    expect(await cards.count()).toEqual(1);
-    const card = cards.nth(0);
-    await expect(card).toHaveText('audio.mp3');
+    const rows = await listDrawer.locator('table tbody tr');
+    expect(await rows.count()).toEqual(1);
+    const filename = rows.locator('.cell-filename');
+    await expect(filename).toHaveText('audio.mp3');
 
     // upload an image and try to select it
     await listDrawer.locator('button.list-drawer__create-new-button.doc-drawer__toggler').click();

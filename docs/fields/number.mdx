@@ -18,6 +18,9 @@ keywords: number, fields, config, configuration, documentation, Content Manageme
 | **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language. |
 | **`min`**            | Minimum value accepted. Used in the default `validation` function. |
 | **`max`**            | Maximum value accepted. Used in the default `validation` function. |
+| **`hasMany`**        | Makes this field an ordered array of numbers instead of just a single number. |
+| **`minRows`**        | Minimum number of numbers in the numbers array, if `hasMany` is set to true. |
+| **`maxRows`**        | Maximum number of numbers in the numbers array, if `hasMany` is set to true. |
 | **`unique`**         | Enforce that each entry in the Collection has a unique value for this field. |
 | **`index`**          | Build a [MongoDB index](https://docs.mongodb.com/manual/indexes/) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
 | **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
@@ -29,6 +32,7 @@ keywords: number, fields, config, configuration, documentation, Content Manageme
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -54,7 +58,7 @@ Set this property to a string that will be used for browser autocomplete.
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {

@@ -14,6 +14,13 @@
   border: 0;
   padding: 0 base(.25);
   align-items: center;
+  flex-shrink: 0;
+
+  &--rounded {
+    border-radius: var(--style-radius-l);
+    line-height: 18px;
+    font-size: 12px;
+  }
 
   &:active,
   &:focus {
@@ -99,6 +106,25 @@
       &:active {
         background: var(--theme-elevation-700);
       }
+    }
+  }
+}
+
+
+html[data-theme=dark] {
+  .pill {
+    &--style-error {
+      background: var(--theme-error-500);
+      color: var(--color-base-1000)
+    }
+  }
+}
+
+html[data-theme=light] {
+  .pill {
+    &--style-error {
+      background: var(--theme-error-250);
+      color: var(--theme-error-750)
     }
   }
 }

@@ -1,11 +1,13 @@
 import React from 'react';
-import { Model, Document } from 'mongoose';
+import { Document, Model } from 'mongoose';
 import { DeepRequired } from 'ts-essentials';
 import { GraphQLNonNull, GraphQLObjectType } from 'graphql';
+import { User } from '../../auth/types';
 import { PayloadRequest } from '../../express/types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types';
+import { CustomSaveButtonProps, CustomSaveDraftButtonProps, CustomPublishButtonProps, CustomPreviewButtonProps } from '../../admin/components/elements/types';
 
 export type TypeWithID = {
   id: string | number
@@ -47,6 +49,10 @@ export interface GlobalModel extends Model<Document> {
 
 export type GlobalAdminOptions = {
   /**
+   * Exclude the global from the admin nav and routes
+   */
+  hidden?: ((args: { user: User }) => boolean) | boolean;
+  /**
    * Place globals into a navigational group
    * */
   group?: Record<string, string> | string;
@@ -65,6 +71,28 @@ export type GlobalAdminOptions = {
     views?: {
       Edit?: React.ComponentType<any>
     }
+    elements?: {
+      /**
+       * Replaces the "Save" button
+       * + drafts must be disabled
+       */
+      SaveButton?: CustomSaveButtonProps
+      /**
+       * Replaces the "Publish" button
+       * + drafts must be enabled
+       */
+      PublishButton?: CustomPublishButtonProps
+      /**
+       * Replaces the "Save Draft" button
+       * + drafts must be enabled
+       * + autosave must be disabled
+       */
+      SaveDraftButton?: CustomSaveDraftButtonProps
+      /**
+       * Replaces the "Preview" button
+       */
+      PreviewButton?: CustomPreviewButtonProps
+    },
   };
   /**
    * Function to generate custom preview URL
@@ -104,10 +132,13 @@ export type GlobalConfig = {
   }
   fields: Field[];
   admin?: GlobalAdminOptions
+  /** Extension point to add your custom data. */
+  custom?: Record<string, any>;
 }
 
-export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'versions'> {
+export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'versions' | 'endpoints'> {
   fields: Field[]
+  endpoints: Omit<Endpoint, 'root'>[],
   versions: SanitizedGlobalVersions
 }
 

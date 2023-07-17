@@ -9,7 +9,7 @@ import {
   tabHasName,
 } from '../../../../../fields/config/types';
 import getValueWithDefault from '../../../../../fields/getDefaultValue';
-import { Fields, Field, Data } from '../types';
+import { Fields, FormField, Data } from '../types';
 import { iterateFields } from './iterateFields';
 
 type Args = {
@@ -24,6 +24,9 @@ type Args = {
   data: Data
   fullData: Data
   t: TFunction
+  preferences: {
+    [key: string]: unknown
+  }
 }
 
 export const addFieldStatePromise = async ({
@@ -38,9 +41,10 @@ export const addFieldStatePromise = async ({
   id,
   operation,
   t,
+  preferences,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
-    const fieldState: Field = {
+    const fieldState: FormField = {
       valid: true,
       value: undefined,
       initialValue: undefined,
@@ -78,16 +82,17 @@ export const addFieldStatePromise = async ({
     switch (field.type) {
       case 'array': {
         const arrayValue = Array.isArray(valueWithDefault) ? valueWithDefault : [];
-
-        const promises = arrayValue.map((row, i) => {
+        const { promises, rowMetadata } = arrayValue.reduce((acc, row, i) => {
           const rowPath = `${path}${field.name}.${i}.`;
+          row.id = row?.id || new ObjectID().toHexString();
+
           state[`${rowPath}id`] = {
             value: row.id,
-            initialValue: row.id || new ObjectID().toHexString(),
+            initialValue: row.id,
             valid: true,
           };
 
-          return iterateFields({
+          acc.promises.push(iterateFields({
             state,
             fields: field.fields,
             data: row,
@@ -99,7 +104,21 @@ export const addFieldStatePromise = async ({
             locale,
             operation,
             t,
+            preferences,
+          }));
+
+          const collapsedRowIDs = preferences?.fields?.[`${path}${field.name}`]?.collapsed;
+
+          acc.rowMetadata.push({
+            id: row.id,
+            collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
+            childErrorPaths: new Set(),
           });
+
+          return acc;
+        }, {
+          promises: [],
+          rowMetadata: [],
         });
 
         await Promise.all(promises);
@@ -117,6 +136,8 @@ export const addFieldStatePromise = async ({
           }
         }
 
+        fieldState.rows = rowMetadata;
+
         // Add field to state
         state[`${path}${field.name}`] = fieldState;
 
@@ -126,15 +147,16 @@ export const addFieldStatePromise = async ({
       case 'blocks': {
         const blocksValue = Array.isArray(valueWithDefault) ? valueWithDefault : [];
 
-        const promises = [];
-        blocksValue.forEach((row, i) => {
+        const { promises, rowMetadata } = blocksValue.reduce((acc, row, i) => {
           const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
           const rowPath = `${path}${field.name}.${i}.`;
 
           if (block) {
+            row.id = row?.id || new ObjectID().toHexString();
+
             state[`${rowPath}id`] = {
               value: row.id,
-              initialValue: row.id || new ObjectID().toHexString(),
+              initialValue: row.id,
               valid: true,
             };
 
@@ -150,7 +172,7 @@ export const addFieldStatePromise = async ({
               valid: true,
             };
 
-            promises.push(iterateFields({
+            acc.promises.push(iterateFields({
               state,
               fields: block.fields,
               data: row,
@@ -162,10 +184,27 @@ export const addFieldStatePromise = async ({
               operation,
               id,
               t,
+              preferences,
             }));
+
+            const collapsedRowIDs = preferences?.fields?.[`${path}${field.name}`]?.collapsed;
+
+            acc.rowMetadata.push({
+              id: row.id,
+              collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
+              blockType: row.blockType,
+              childErrorPaths: new Set(),
+            });
           }
+
+          return acc;
+        }, {
+          promises: [],
+          rowMetadata: [],
         });
+
         await Promise.all(promises);
+
         // Add values to field state
         if (valueWithDefault === null) {
           fieldState.value = null;
@@ -178,6 +217,8 @@ export const addFieldStatePromise = async ({
             fieldState.disableFormData = true;
           }
         }
+
+        fieldState.rows = rowMetadata;
 
         // Add field to state
         state[`${path}${field.name}`] = fieldState;
@@ -198,6 +239,7 @@ export const addFieldStatePromise = async ({
           locale,
           user,
           t,
+          preferences,
         });
 
         break;
@@ -227,6 +269,7 @@ export const addFieldStatePromise = async ({
       locale,
       operation,
       t,
+      preferences,
     });
   } else if (field.type === 'tabs') {
     const promises = field.tabs.map((tab) => iterateFields({
@@ -241,6 +284,7 @@ export const addFieldStatePromise = async ({
       locale,
       operation,
       t,
+      preferences,
     }));
 
     await Promise.all(promises);

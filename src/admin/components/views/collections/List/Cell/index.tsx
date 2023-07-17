@@ -6,14 +6,17 @@ import RenderCustomComponent from '../../../../utilities/RenderCustomComponent';
 import cellComponents from './field-types';
 import { Props } from './types';
 import { getTranslation } from '../../../../../../utilities/getTranslation';
+import { fieldAffectsData } from '../../../../../../fields/config/types';
 
 const DefaultCell: React.FC<Props> = (props) => {
   const {
     field,
+    collection,
     collection: {
       slug,
     },
     cellData,
+    rowData,
     rowData: {
       id,
     } = {},
@@ -49,17 +52,21 @@ const DefaultCell: React.FC<Props> = (props) => {
     };
   }
 
-  const CellComponent = cellData && cellComponents[field.type];
+  let CellComponent = cellData && cellComponents[field.type];
 
   if (!CellComponent) {
-    return (
-      <WrapElement {...wrapElementProps}>
-        {((cellData === '' || typeof cellData === 'undefined') && 'label' in field) && t('noLabel', { label: getTranslation(typeof field.label === 'function' ? 'data' : field.label || 'data', i18n) })}
-        {typeof cellData === 'string' && cellData}
-        {typeof cellData === 'number' && cellData}
-        {typeof cellData === 'object' && JSON.stringify(cellData)}
-      </WrapElement>
-    );
+    if (collection.upload && fieldAffectsData(field) && field.name === 'filename') {
+      CellComponent = cellComponents.File;
+    } else {
+      return (
+        <WrapElement {...wrapElementProps}>
+          {((cellData === '' || typeof cellData === 'undefined') && 'label' in field) && t('noLabel', { label: getTranslation(typeof field.label === 'function' ? 'data' : field.label || 'data', i18n) })}
+          {typeof cellData === 'string' && cellData}
+          {typeof cellData === 'number' && cellData}
+          {typeof cellData === 'object' && JSON.stringify(cellData)}
+        </WrapElement>
+      );
+    }
   }
 
   return (
@@ -67,6 +74,8 @@ const DefaultCell: React.FC<Props> = (props) => {
       <CellComponent
         field={field}
         data={cellData}
+        collection={collection}
+        rowData={rowData}
       />
     </WrapElement>
   );

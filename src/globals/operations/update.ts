@@ -1,8 +1,7 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Where } from '../../types';
+import { DeepPartial } from 'ts-essentials';
 import { SanitizedGlobalConfig } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
-import { hasWhereAccessResult } from '../../auth';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
@@ -21,7 +20,7 @@ type Args<T extends { [field: string | number | symbol]: unknown }> = {
   showHiddenFields?: boolean
   draft?: boolean
   autosave?: boolean
-  data: Omit<T, 'id'>
+  data: DeepPartial<Omit<T, 'id'>>
 }
 
 async function update<TSlug extends keyof GeneratedTypes['globals']>(
@@ -32,7 +31,6 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     slug,
     req,
     req: {
-      locale,
       payload,
       payload: {
         globals: {
@@ -61,23 +59,17 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: { where: Where } = {
+  const query = await Model.buildQuery({
     where: {
-      and: [
-        {
-          globalType: {
-            equals: slug,
-          },
-        },
-      ],
+      globalType: {
+        equals: slug,
+      },
     },
-  };
-
-  if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
-  }
-
-  const query = await Model.buildQuery(queryToBuild, locale);
+    access: accessResults,
+    req,
+    overrideAccess,
+    globalSlug: slug,
+  });
 
   // /////////////////////////////////////
   // 2. Retrieve document
@@ -102,7 +94,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   }
 
   const originalDoc = await afterRead({
-    depth,
+    depth: 0,
     doc: globalJSON,
     entityConfig: globalConfig,
     req,

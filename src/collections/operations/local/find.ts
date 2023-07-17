@@ -20,7 +20,6 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   overrideAccess?: boolean
   disableErrors?: boolean
   showHiddenFields?: boolean
-  queryHiddenFields?: boolean
   pagination?: boolean
   sort?: string
   where?: Where
@@ -45,7 +44,6 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     overrideAccess = true,
     disableErrors,
     showHiddenFields,
-    queryHiddenFields,
     sort,
     draft = false,
     pagination = true,
@@ -56,10 +54,10 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Find Operation.`);
   }
 
-  req.payloadAPI = 'local';
+  req.payloadAPI = req.payloadAPI || 'local';
   req.locale = locale ?? req?.locale ?? defaultLocale;
   req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
   req.i18n = i18n(payload.config.i18n);
@@ -81,7 +79,6 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
     overrideAccess,
     disableErrors,
     showHiddenFields,
-    queryHiddenFields,
     draft,
     pagination,
     req,

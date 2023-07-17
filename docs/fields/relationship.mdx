@@ -20,13 +20,13 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 ### Config
 
 | Option              | Description                                                                                                                                                                                         |
-|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`name`** \*       | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
 | **`relationTo`** \* | Provide one or many collection `slug`s to be able to assign relationships to.                                                                                                                       |
 | **`filterOptions`** | A query to filter which options appear in the UI and validate against. [More](#filtering-relationship-options).                                                                                     |
 | **`hasMany`**       | Boolean when, if set to `true`, allows this field to have many relations instead of only one.                                                                                                       |
-| **`min`**           | A number for the fewest allowed items during validation when a value is present. Used with `hasMany`.                                                                                               |
-| **`max`**           | A number for the most allowed items during validation when a value is present. Used with `hasMany`.                                                                                        |
+| **`minRows`**       | A number for the fewest allowed items during validation when a value is present. Used with `hasMany`.                                                                                               |
+| **`maxRows`**       | A number for the most allowed items during validation when a value is present. Used with `hasMany`.                                                                                                 |
 | **`maxDepth`**      | Sets a number limit on iterations of related documents to populate when queried. [Depth](/docs/getting-started/concepts#depth)                                                                      |
 | **`label`**         | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
 | **`unique`**        | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                        |
@@ -40,14 +40,15 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 | **`localized`**     | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
 | **`required`**      | Require this field to have a value.                                                                                                                                                                 |
 | **`admin`**         | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details.                                                                            |
+| **`custom`**        | Extension point for adding custom data (e.g. for plugins)                                                                                                                                           |
 
 _\* An asterisk denotes that a property is required._
 
 <Banner type="success">
   <strong>Tip:</strong>
   <br />
-  The <a href="/docs/getting-started/concepts#depth">Depth</a> parameter can be
-  used to automatically populate related documents that are returned by the API.
+  The [Depth](/docs/getting-started/concepts#depth) parameter can be used to
+  automatically populate related documents that are returned by the API.
 </Banner>
 
 ### Admin config
@@ -76,27 +77,34 @@ The `filterOptions` property can either be a `Where` query directly, or a functi
 | `id`          | The value of the collection `id`, will be `undefined` on create request              |
 | `user`        | The currently authenticated user object                                              |
 
-**Example:**
+### Example
 
 ```ts
-const relationshipField = {
-  name: "purchase",
-  type: "relationship",
-  relationTo: ["products", "services"],
-  filterOptions: ({ relationTo, siblingData }) => {
-    // returns a Where query dynamically by the type of relationship
-    if (relationTo === "products") {
-      return {
-        stock: { greater_than: siblingData.quantity },
-      };
-    }
+import { CollectionConfig } from "payload/types";
 
-    if (relationTo === "services") {
-      return {
-        isAvailable: { equals: true },
-      };
-    }
-  },
+export const ExampleCollection: CollectionConfig = {
+  slug: "example-collection",
+  fields: [
+    {
+      name: "purchase",
+      type: "relationship",
+      relationTo: ["products", "services"],
+      filterOptions: ({ relationTo, siblingData }) => {
+        // returns a Where query dynamically by the type of relationship
+        if (relationTo === "products") {
+          return {
+            stock: { greater_than: siblingData.quantity },
+          };
+        }
+
+        if (relationTo === "services") {
+          return {
+            isAvailable: { equals: true },
+          };
+        }
+      },
+    },
+  ],
 };
 ```
 
@@ -138,7 +146,7 @@ The shape of the data to save for a document with the field configured this way 
 
 ```json
 {
-  // Mongo ObjectID of the related user
+  // MongoDB ObjectID of the related user
   "owner": "6031ac9e1289176380734024"
 }
 ```

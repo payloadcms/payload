@@ -3,7 +3,6 @@ import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection, CollectionModel } from '../config/types';
-import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
 import { PaginatedDocs } from '../../mongoose/types';
@@ -49,66 +48,53 @@ async function findVersions<T extends TypeWithVersion<T>>(
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where } = {};
-  let useEstimatedCount = false;
+  let hasNearConstraint = false;
 
   if (where) {
-    let and = [];
+    const constraints = flattenWhereConstraints(where);
 
-    if (Array.isArray(where.and)) and = where.and;
-    if (Array.isArray(where.AND)) and = where.AND;
-
-    queryToBuild.where = {
-      ...where,
-      and: [
-        ...and,
-      ],
-    };
-
-    const constraints = flattenWhereConstraints(queryToBuild);
-
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
+
+  let accessResults;
 
   if (!overrideAccess) {
-    const accessResults = await executeAccess({ req }, collectionConfig.access.readVersions);
-
-    if (hasWhereAccessResult(accessResults)) {
-      if (!where) {
-        queryToBuild.where = {
-          and: [
-            accessResults,
-          ],
-        };
-      } else {
-        (queryToBuild.where.and as Where[]).push(accessResults);
-      }
-    }
+    accessResults = await executeAccess({ req }, collectionConfig.access.readVersions);
   }
 
-  const query = await VersionsModel.buildQuery(queryToBuild, locale);
+  const query = await VersionsModel.buildQuery({
+    where,
+    access: accessResults,
+    req,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam({
-    sort: args.sort || '-updatedAt',
-    fields: buildVersionCollectionFields(collectionConfig),
-    timestamps: true,
-    config: payload.config,
-    locale,
-  });
+  let sort;
+  if (!hasNearConstraint) {
+    const [sortProperty, sortOrder] = buildSortParam({
+      sort: args.sort || '-updatedAt',
+      fields: buildVersionCollectionFields(collectionConfig),
+      timestamps: true,
+      config: payload.config,
+      locale,
+    });
+    sort = {
+      [sortProperty]: sortOrder,
+    };
+  }
 
   const paginatedDocs = await VersionsModel.paginate(query, {
     page: page || 1,
     limit: limit ?? 10,
-    sort: {
-      [sortProperty]: sortOrder,
-    },
+    sort,
     lean: true,
     leanWithId: true,
-    useEstimatedCount,
+    useEstimatedCount: hasNearConstraint,
+    forceCountFn: hasNearConstraint,
   });
 
   // /////////////////////////////////////

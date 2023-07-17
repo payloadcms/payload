@@ -28,12 +28,14 @@ const ButtonContents = ({ children, icon, tooltip, showTooltip }) => {
 
   return (
     <Fragment>
-      <Tooltip
-        className={`${baseClass}__tooltip`}
-        show={showTooltip}
-      >
-        {tooltip}
-      </Tooltip>
+      {tooltip && (
+        <Tooltip
+          className={`${baseClass}__tooltip`}
+          show={showTooltip}
+        >
+          {tooltip}
+        </Tooltip>
+      )}
       <span className={`${baseClass}__content`}>
         {children && (
           <span className={`${baseClass}__label`}>

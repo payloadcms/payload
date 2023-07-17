@@ -37,7 +37,7 @@ type GeneratePreviewURLOptions = {
 export type GeneratePreviewURL = (
   doc: Record<string, unknown>,
   options: GeneratePreviewURLOptions
-) => Promise<string> | string;
+) => Promise<string | null> | string | null;
 
 export type EmailTransport = Email & {
   transport: Transporter;
@@ -71,12 +71,17 @@ export function hasTransportOptions(
   return (emailConfig as EmailTransportOptions).transportOptions !== undefined;
 }
 
+export type GraphQLExtension = (
+  graphQL: typeof GraphQL,
+  payload: Payload
+) => Record<string, unknown>;
+
 export type InitOptions = {
   /** Express app for Payload to use */
   express?: Express;
-  /** Mongo connection URL, starts with `mongo` */
+  /** MongoDB connection URL, starts with `mongo` */
   mongoURL: string | false;
-  /** Extra configuration options that will be passed to Mongo */
+  /** Extra configuration options that will be passed to MongoDB */
   mongoOptions?: ConnectOptions & {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean
@@ -119,7 +124,7 @@ export type InitOptions = {
  * and then sent to the client allowing the dashboard to show accessible data and actions.
  *
  * If the result is `true`, the user has access.
- * If the result is an object, it is interpreted as a Mongo query.
+ * If the result is an object, it is interpreted as a MongoDB query.
  *
  * @example `{ createdBy: { equals: id } }`
  *
@@ -129,7 +134,7 @@ export type InitOptions = {
  */
 export type AccessResult = boolean | Where;
 
-type AccessArgs<T = any, U = any> = {
+export type AccessArgs<T = any, U = any> = {
   /** The original request that requires an access check */
   req: PayloadRequest<U>;
   /** ID of the resource being accessed */
@@ -176,8 +181,7 @@ export type Endpoint = {
   | 'patch'
   | 'delete'
   | 'connect'
-  | 'options'
-  | string;
+  | 'options';
   /**
    * Middleware that will be called when the path/method matches
    *
@@ -189,6 +193,8 @@ export type Endpoint = {
    * @default false
    */
   root?: boolean;
+  /** Extension point to add your custom data. */
+  custom?: Record<string, any>;
 };
 
 export type AdminView = React.ComponentType<{
@@ -346,6 +352,14 @@ export type Config = {
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
   globals?: GlobalConfig[];
+
+  /**
+   * Email configuration options. This value is overridden by `email` in Payload.init if passed.
+   *
+   * @see https://payloadcms.com/docs/email/overview
+   */
+  email?: EmailOptions;
+
   /**
    * Control the behaviour of the admin internationalisation.
    *
@@ -479,19 +493,13 @@ export type Config = {
      *
      * @see https://payloadcms.com/docs/access-control/overview
      */
-    mutations?: (
-      graphQL: typeof GraphQL,
-      payload: Payload
-    ) => Record<string, unknown>;
+    mutations?: GraphQLExtension;
     /**
-    * Function that returns an object containing keys to custom GraphQL queries
-    *
-    * @see https://payloadcms.com/docs/access-control/overview
-    */
-    queries?: (
-      graphQL: typeof GraphQL,
-      payload: Payload
-    ) => Record<string, unknown>;
+     * Function that returns an object containing keys to custom GraphQL queries
+     *
+     * @see https://payloadcms.com/docs/access-control/overview
+     */
+    queries?: GraphQLExtension;
     maxComplexity?: number;
     disablePlaygroundInProduction?: boolean;
     disable?: boolean;
@@ -519,14 +527,17 @@ export type Config = {
   telemetry?: boolean;
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void;
+  /** Extension point to add your custom data. */
+  custom?: Record<string, any>;
 };
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'globals'
+  'collections' | 'globals' | 'endpoint'
 > & {
   collections: SanitizedCollectionConfig[];
   globals: SanitizedGlobalConfig[];
+  endpoints: Endpoint[];
   paths: {
     configDir: string
     config: string

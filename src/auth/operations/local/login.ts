@@ -41,10 +41,10 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
   const collection = payload.collections[collectionSlug];
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Login Operation.`);
   }
 
-  req.payloadAPI = 'local';
+  req.payloadAPI = req.payloadAPI || 'local';
   req.payload = payload;
   req.i18n = i18n(payload.config.i18n);
   req.locale = undefined;

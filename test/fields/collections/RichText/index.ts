@@ -96,6 +96,50 @@ const RichTextFields: CollectionConfig = {
       },
     },
     {
+      name: 'richTextCustomFields',
+      type: 'richText',
+      admin: {
+        elements: [
+          'h1',
+          'h2',
+          'h3',
+          'h4',
+          'h5',
+          'h6',
+          'ul',
+          'ol',
+          'indent',
+          'link',
+          'relationship',
+          'upload',
+        ],
+        link: {
+          fields: ({ defaultFields }) => {
+            return [
+              ...defaultFields,
+              {
+                label: 'Custom',
+                name: 'customLinkField',
+                type: 'text',
+              },
+            ];
+          },
+        },
+        upload: {
+          collections: {
+            uploads: {
+              fields: [
+                {
+                  name: 'caption',
+                  type: 'richText',
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
+    {
       name: 'richTextReadOnly',
       type: 'richText',
       admin: {
@@ -143,6 +187,30 @@ const RichTextFields: CollectionConfig = {
           },
         },
       },
+    },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'textBlock',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'richTextBlock',
+          fields: [
+            {
+              name: 'text',
+              type: 'richText',
+            },
+          ],
+        },
+      ],
     },
   ],
 };
@@ -396,11 +464,32 @@ export const richTextBulletsDoc = {
   ],
 };
 
+export const richTextBlocks = [
+  {
+    blockType: 'textBlock',
+    text: 'Regular text',
+  },
+  {
+    blockType: 'richTextBlock',
+    text: [
+      {
+        children: [
+          {
+            text: 'Rich text',
+          },
+        ],
+        type: 'h1',
+      },
+    ],
+  },
+];
 export const richTextDoc = {
   title: 'Rich Text',
   selectHasMany: ['one', 'five'],
   richText: generateRichText(),
   richTextReadOnly: generateRichText(),
+  richTextCustomFields: generateRichText(),
+  blocks: richTextBlocks,
 };
 
 export default RichTextFields;

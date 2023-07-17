@@ -1,6 +1,6 @@
 import {
   Fields,
-  Field,
+  FormField,
   Data,
   DispatchFields,
   Submit,
@@ -27,7 +27,7 @@ const reset: Reset = () => undefined;
 
 const initialContextState: Context = {
   getFields: (): Fields => ({}),
-  getField: (): Field => undefined,
+  getField: (): FormField => undefined,
   getData: (): Data => undefined,
   getSiblingData,
   getDataByPath: () => undefined,
@@ -42,6 +42,8 @@ const initialContextState: Context = {
   disabled: false,
   formRef: null,
   reset,
+  replaceState: () => undefined,
+  buildRowErrors: () => undefined,
 };
 
 export default initialContextState;
