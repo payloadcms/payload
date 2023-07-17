@@ -479,6 +479,26 @@ describe('fields', () => {
     }
 
     describe('toolbar', () => {
+      test('should run url validation', async () => {
+        await navigateToRichTextFields();
+
+        // Open link drawer
+        await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
+
+        // find the drawer
+        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
+        await expect(editLinkModal).toBeVisible();
+
+        // Fill values and click Confirm
+        await editLinkModal.locator('#field-text').fill('link text');
+        await editLinkModal.locator('label[for="field-linkType-custom"]').click();
+        await editLinkModal.locator('#field-url').fill('');
+        await wait(200);
+        await editLinkModal.locator('button[type="submit"]').click();
+        const errorField = await page.locator('[id^=drawer_1_rich-text-link-] .render-fields > :nth-child(3)');
+        await expect(errorField).toHaveClass('error');
+      });
+
       test('should create new url custom link', async () => {
         await navigateToRichTextFields();
 
