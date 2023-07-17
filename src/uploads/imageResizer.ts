@@ -125,7 +125,10 @@ const needsResize = (
   const hasInsufficientWidth = original.width < desiredWidth;
   const hasInsufficientHeight = original.height < desiredHeigth;
   if (hasInsufficientWidth && hasInsufficientHeight) {
-    return false; // doesn't need resize - prevent enlargement
+    // doesn't need resize - prevent enlargement. This should only happen if both width and height are insufficient.
+    // if only one dimension is insufficient and the other is sufficient, resizing needs to happen, as the image
+    // should be resized to the sufficient dimension.
+    return false;
   }
 
   return true; // needs resize
