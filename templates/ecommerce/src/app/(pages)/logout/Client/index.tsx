@@ -3,13 +3,10 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import Link from 'next/link'
 
-import { Settings } from '../../../payload/payload-types'
-import { Gutter } from '../../_components/Gutter'
-import { useAuth } from '../../_providers/Auth'
+import { Settings } from '../../../../payload/payload-types'
+import { useAuth } from '../../../_providers/Auth'
 
-import classes from './index.module.scss'
-
-export const LogoutPageClient: React.FC<{
+export const LogoutClient: React.FC<{
   settings: Settings
 }> = props => {
   const {
@@ -33,7 +30,8 @@ export const LogoutPageClient: React.FC<{
   }, [logout])
 
   return (
-    <Gutter className={classes.logout}>
+    <Fragment>
+      {error && <h1>{error}</h1>}
       {success && (
         <div>
           <h1>{success}</h1>
@@ -54,7 +52,6 @@ export const LogoutPageClient: React.FC<{
           </p>
         </div>
       )}
-      {error && <div className={classes.error}>{error}</div>}
-    </Gutter>
+    </Fragment>
   )
 }

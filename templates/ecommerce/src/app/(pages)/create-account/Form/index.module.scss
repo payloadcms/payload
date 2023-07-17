@@ -1,6 +1,4 @@
-.createAccount {
-  margin-bottom: var(--block-padding);
-}
+@import "../../../_css/common";
 
 .form {
   margin-bottom: var(--base);
@@ -8,12 +6,17 @@
   flex-direction: column;
   gap: calc(var(--base) / 2);
   align-items: flex-start;
+  width: 50%;
+
+  @include mid-break {
+    width: 100%;
+  }
 }
 
 .submit {
   margin-top: calc(var(--base) / 2);
 }
 
-.error {
-  color: red;
+.message {
+  margin-bottom: var(--base);
 }

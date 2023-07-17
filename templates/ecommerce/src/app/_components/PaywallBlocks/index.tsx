@@ -35,8 +35,8 @@ export const PaywallBlocks: React.FC<{
         },
       )
 
-      const { data } = await res.json()
-      const paywall = data.Products?.docs?.[0]?.paywall
+      const { docs } = await res.json()
+      const paywall = docs?.[0]?.paywall
 
       if (paywall) {
         setBlocks(paywall)

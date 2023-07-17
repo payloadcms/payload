@@ -1,3 +1,5 @@
+@import '../../_css/common';
+
 .inputWrap {
   width: 100%;
 }
@@ -7,13 +9,19 @@
   font-family: system-ui;
   border-radius: 0;
   box-shadow: none;
-  border: 1px solid var(--background-light);
+  border: 1px solid;
+  border-color: var(--background-light);
   background: none;
   background-color: var(--background-light);
   color: var(--foreground);
   height: calc(var(--base) * 2);
   line-height: calc(var(--base) * 2);
   padding: 0 calc(var(--base) / 2);
+
+  &:focus {
+    border: none;
+    outline: none;
+  }
 
   &:-webkit-autofill,
   &:-webkit-autofill:hover,
@@ -24,6 +32,11 @@
   }
 }
 
+.error {
+  background-color: var(--color-error-150);
+  border-color: var(--color-error-150);
+}
+
 .label {
   margin-bottom: 0;
   display: block;
@@ -31,7 +44,9 @@
   margin-bottom: calc(var(--base) / 2);
 }
 
-.error {
-  margin-top: 5px;
+.errorMessage {
+  font-size: small;
+  line-height: 1.25;
+  margin-top: 4px;
   color: red;
 }

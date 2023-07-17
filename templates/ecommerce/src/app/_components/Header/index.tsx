@@ -1,19 +1,14 @@
-'use client'
-
 import React from 'react'
 import Link from 'next/link'
 
-import { Header as HeaderType } from '../../../payload/payload-types'
-import { useAuth } from '../../_providers/Auth'
-import { CartLink } from '../CartLink'
+import { fetchGlobals } from '../../_cms/fetchGlobals'
 import { Gutter } from '../Gutter'
-import { CMSLink } from '../Link'
+import { HeaderNav } from './Nav'
 
 import classes from './index.module.scss'
 
-export const Header: React.FC<{ header: HeaderType }> = ({ header }) => {
-  const navItems = header?.navItems || []
-  const { user } = useAuth()
+export async function Header() {
+  const { header } = await fetchGlobals()
 
   return (
     <>
@@ -32,19 +27,7 @@ export const Header: React.FC<{ header: HeaderType }> = ({ header }) => {
               />
             </picture>
           </Link>
-          <nav className={classes.nav}>
-            {navItems.map(({ link }, i) => {
-              return <CMSLink key={i} {...link} />
-            })}
-            {user && <Link href="/account">Account</Link>}
-            {!user && (
-              <React.Fragment>
-                <Link href="/login">Login</Link>
-                <Link href="/create-account">Create Account</Link>
-              </React.Fragment>
-            )}
-            <CartLink />
-          </nav>
+          <HeaderNav header={header} />
         </Gutter>
       </header>
     </>

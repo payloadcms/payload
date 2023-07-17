@@ -1,20 +1,9 @@
+@import "../../_css/common";
+
 .login {
   margin-bottom: var(--block-padding);
 }
 
-.form {
-  margin-bottom: var(--base);
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--base) / 2);
-  align-items: flex-start;
-}
-
-.submit {
-  margin-top: calc(var(--base) / 2);
-}
-
-.error {
-  color: red;
-  margin-bottom: var(--base);
+.params {
+  margin-top: var(--base);
 }

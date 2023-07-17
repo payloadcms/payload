@@ -298,7 +298,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Shopping carts persist between sessions, can saved for later, and accessed from any device.',
+                  text: 'Shopping carts persist between sessions, can saved for later and accessed from any device.',
                 },
               ],
             },

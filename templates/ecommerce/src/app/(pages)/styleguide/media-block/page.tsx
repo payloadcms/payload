@@ -4,6 +4,7 @@ import Link from 'next/link'
 import staticImage from '../../../../../public/static-image.jpg'
 import { MediaBlock } from '../../../_blocks/MediaBlock'
 import { Gutter } from '../../../_components/Gutter'
+import { VerticalPadding } from '../../../_components/VerticalPadding'
 
 export default async function MediaBlockPage() {
   return (
@@ -16,8 +17,9 @@ export default async function MediaBlockPage() {
         </p>
         <h1>Media Block</h1>
       </Gutter>
-      <div>
+      <VerticalPadding bottom="large" top="none">
         <MediaBlock position="default" blockType="mediaBlock" media="" staticImage={staticImage} />
+        <br />
         <br />
         <MediaBlock
           position="fullscreen"
@@ -25,7 +27,7 @@ export default async function MediaBlockPage() {
           media=""
           staticImage={staticImage}
         />
-      </div>
+      </VerticalPadding>
     </Fragment>
   )
 }

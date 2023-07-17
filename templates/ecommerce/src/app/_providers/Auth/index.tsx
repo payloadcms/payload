@@ -38,10 +38,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // used to track the single event of logging in or logging out
   // useful for `useEffect` hooks that should only run once
   const [status, setStatus] = useState<undefined | 'loggedOut' | 'loggedIn'>()
-
   const create = useCallback<Create>(async args => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/create`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -69,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback<Login>(async args => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/login`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -82,11 +81,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
 
       if (res.ok) {
-        const { data, errors } = await res.json()
+        const { user, errors } = await res.json()
         if (errors) throw new Error(errors[0].message)
-        setUser(data)
+        setUser(user)
         setStatus('loggedIn')
-        return data
+        return user
       }
 
       throw new Error('Invalid login')
@@ -128,9 +127,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         })
 
         if (res.ok) {
-          const { data } = await res.json()
-          setUser(data?.meUser?.user || null)
-          setStatus(data?.meUser?.user ? 'loggedIn' : undefined)
+          const { user: meUser } = await res.json()
+          setUser(meUser || null)
+          setStatus(meUser ? 'loggedIn' : undefined)
         } else {
           throw new Error('An error occurred while fetching your account.')
         }

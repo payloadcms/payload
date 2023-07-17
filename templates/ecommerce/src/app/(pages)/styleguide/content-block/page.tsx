@@ -1,9 +1,9 @@
 import React, { Fragment } from 'react'
 import Link from 'next/link'
 
-import staticImage from '../../../../../public/static-image.jpg'
 import { ContentBlock } from '../../../_blocks/Content'
 import { Gutter } from '../../../_components/Gutter'
+import { VerticalPadding } from '../../../_components/VerticalPadding'
 
 export default async function ContentBlockPage() {
   return (
@@ -16,7 +16,7 @@ export default async function ContentBlockPage() {
         </p>
         <h1>Content Block</h1>
       </Gutter>
-      <div>
+      <VerticalPadding bottom="large" top="none">
         <ContentBlock
           blockType="content"
           columns={[
@@ -30,7 +30,7 @@ export default async function ContentBlockPage() {
             },
           ]}
         />
-      </div>
+      </VerticalPadding>
     </Fragment>
   )
 }

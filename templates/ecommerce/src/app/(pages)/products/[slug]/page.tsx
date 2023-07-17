@@ -2,10 +2,11 @@ import React from 'react'
 import { notFound } from 'next/navigation'
 
 import { Product, Product as ProductType } from '../../../../payload/payload-types'
+import { fetchDoc } from '../../../_cms/fetchDoc'
+import { fetchDocs } from '../../../_cms/fetchDocs'
 import { Blocks } from '../../../_components/Blocks'
 import { PaywallBlocks } from '../../../_components/PaywallBlocks'
 import { ProductHero } from '../../../_heros/Product'
-import { fetchDoc, fetchDocs } from '../../../cms'
 
 const Product = async ({ params: { slug } }) => {
   const product = await fetchDoc<Product>('products', slug)

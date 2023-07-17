@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { fetchGlobals } from '../../cms'
+import { fetchGlobals } from '../../_cms/fetchGlobals'
 import CheckoutPageClient from './page.client'
 
 export default async function CheckoutPage() {

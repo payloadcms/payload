@@ -1,7 +1,8 @@
 import React from 'react'
 
 import { Page } from '../../../payload/payload-types'
-import { fetchDoc, fetchGlobals } from '../../cms'
+import { fetchDoc } from '../../_cms/fetchDoc'
+import { fetchGlobals } from '../../_cms/fetchGlobals'
 import { CartPageClient } from './page.client'
 
 const CartPage = async () => {

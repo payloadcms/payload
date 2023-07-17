@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react'
 import escapeHTML from 'escape-html'
+import Link from 'next/link'
 import { Text } from 'slate'
 
 import { Label } from '../Label'
@@ -82,7 +83,7 @@ const serialize = (children?: Children): React.ReactNode[] =>
         return <li key={i}>{serialize(node.children)}</li>
       case 'link':
         return (
-          <a
+          <Link
             href={escapeHTML(node.url)}
             key={i}
             {...(node?.newTab
@@ -93,7 +94,7 @@ const serialize = (children?: Children): React.ReactNode[] =>
               : {})}
           >
             {serialize(node?.children)}
-          </a>
+          </Link>
         )
 
       case 'label':

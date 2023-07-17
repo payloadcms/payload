@@ -1,0 +1,23 @@
+@import '../../_css/common';
+
+.message {
+  background-color: var(--background-light);
+  padding: calc(var(--base) / 2) calc(var(--base) / 2);
+  line-height: 1.25;
+  width: 100%;
+}
+
+.warning {
+  background-color: var(--color-warning-500);
+  color: var(--color-warning-900);
+}
+
+.error {
+  background-color: var(--color-error-700);
+  color: var(--color-error-100);
+}
+
+.success {
+  background-color: var(--color-success-700);
+  color: var(--color-success-100);
+}

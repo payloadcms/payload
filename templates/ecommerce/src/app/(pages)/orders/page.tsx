@@ -1,61 +1,38 @@
-'use client'
-
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { notFound } from 'next/navigation'
 
-import { Order } from '../../../payload/payload-types'
 import { Button } from '../../_components/Button'
 import { Gutter } from '../../_components/Gutter'
-import { useAuth } from '../../_providers/Auth'
+import { RenderParams } from '../../_components/RenderParams'
+import { getMeUser } from '../../_utilities/getMeUser'
 
 import classes from './index.module.scss'
 
-const Orders: React.FC = () => {
-  const [error] = useState('')
-  const [success, setSuccess] = useState('')
-  const { user } = useAuth()
+const Orders = async () => {
+  const { token } = await getMeUser({
+    nullUserRedirect: `/login?unauthorized=orders`,
+  })
 
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [orders, setOrders] = useState<Order[]>()
+  const ordersReq = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders`, {
+    headers: {
+      Authorization: `JWT ${token}`,
+    },
+  })
 
-  useEffect(() => {
-    if (user) {
-      // no need to add a 'where' query here, the access control is handled by the API
-      const fetchOrders = async () => {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders`, {
-          credentials: 'include',
-        })
+  const ordersRes = await ordersReq.json()
 
-        if (response.ok) {
-          const json = await response.json()
-          setOrders(json.docs)
-        }
-      }
-      fetchOrders()
-    }
-  }, [user])
+  if (!ordersReq.ok) {
+    notFound()
+  }
 
-  useEffect(() => {
-    if (user === null) {
-      router.push(`/login?unauthorized=account`)
-    }
-  }, [user, router])
-
-  useEffect(() => {
-    const success = searchParams.get('success')
-    if (success) {
-      setSuccess(success)
-    }
-  }, [router, searchParams])
+  const orders = ordersRes?.docs
 
   return (
     <Gutter className={classes.orders}>
       <h1>Orders</h1>
-      {error && <div className={classes.error}>{error}</div>}
-      {success && <div className={classes.success}>{success}</div>}
-      {!orders || (orders.length === 0 && <p>You have no orders.</p>)}
+      {!orders || (orders?.length === 0 && <p>You have no orders.</p>)}
+      <RenderParams />
       {orders && orders.length > 0 && (
         <ul className={classes.ordersList}>
           {orders.map(order => (

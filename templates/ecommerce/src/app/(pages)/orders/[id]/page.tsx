@@ -1,59 +1,37 @@
-'use client'
-
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { notFound } from 'next/navigation'
 
 import { Order as OrderType } from '../../../../payload/payload-types'
+import { fetchDocs } from '../../../_cms/fetchDocs'
 import { Button } from '../../../_components/Button'
 import { Gutter } from '../../../_components/Gutter'
 import { Media } from '../../../_components/Media'
-import { useAuth } from '../../../_providers/Auth'
-import { fetchDocs } from '../../../cms'
+import { getMeUser } from '../../../_utilities/getMeUser'
 
 import classes from './index.module.scss'
 
-const Order = ({ params: { id } }) => {
-  const [error] = useState('')
-  const [loading, setLoading] = useState(true)
-  const { user } = useAuth()
-  const router = useRouter()
+const Order = async ({ params: { id } }) => {
+  const { token } = await getMeUser({
+    nullUserRedirect: `/login?unauthorized=order`,
+  })
 
-  const [order, setOrder] = useState<OrderType>()
+  const orderReq = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders/${id}`, {
+    headers: {
+      Authorization: `JWT ${token}`,
+    },
+  })
 
-  useEffect(() => {
-    setLoading(true)
+  const order = await orderReq.json()
 
-    if (user && id) {
-      // no real need to add a 'where' query here since the access control is handled by the API
-      const fetchOrder = async () => {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders/${id}`, {
-          credentials: 'include',
-        })
-
-        if (response.ok) {
-          const json = await response.json()
-          setOrder(json)
-        }
-
-        setLoading(false)
-      }
-      fetchOrder()
-    }
-  }, [user, id])
-
-  useEffect(() => {
-    if (user === null) {
-      router.push(`/login?unauthorized=account`)
-    }
-  }, [user, router])
+  if (!orderReq.ok || !order) {
+    notFound()
+  }
 
   return (
     <Gutter className={classes.orders}>
       <h1>Order</h1>
       <p>{`Order ID: ${id}`}</p>
-      {error && <div className={classes.error}>{error}</div>}
-      {loading && <div className={classes.loading}>{`Loading order ${id}...`}</div>}
       {order && (
         <div className={classes.order}>
           <h4 className={classes.orderTitle}>Items</h4>

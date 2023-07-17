@@ -21,7 +21,7 @@ export const cartPage: Partial<Page> = {
         type: 'p',
         children: [
           {
-            text: 'This cart saves to local storage so you can continue shopping later, then when you authenticate with Payload, it syncs to your user profile so you can continue shopping from any device. This hero and the content below the cart are completely dynamic and configured in the CMS.',
+            text: 'This cart saves to local storage so you can continue shopping later. Once you authenticate with Payload, your cart will sync to your user profile so you can continue shopping from any device. This hero and the content below the cart are completely dynamic and configured in the CMS.',
           },
         ],
       },
@@ -67,7 +67,20 @@ export const cartPage: Partial<Page> = {
         {
           children: [
             {
-              text: 'This is a custom layout building block configurable in the CMS.',
+              text: 'This is a custom layout building block ',
+            },
+            {
+              type: 'link',
+              linkType: 'custom',
+              url: '/admin',
+              children: [
+                {
+                  text: 'configured in the admin dashboard',
+                },
+              ],
+            },
+            {
+              text: '.',
             },
           ],
         },

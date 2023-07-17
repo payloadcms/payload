@@ -1,13 +1,14 @@
 import React from 'react'
 import Link from 'next/link'
 
-import { Footer as FooterType } from '../../../payload/payload-types'
+import { fetchGlobals } from '../../_cms/fetchGlobals'
 import { Gutter } from '../Gutter'
 import { CMSLink } from '../Link'
 
 import classes from './index.module.scss'
 
-export const Footer: React.FC<{ footer: FooterType }> = ({ footer }) => {
+export async function Footer() {
+  const { footer } = await fetchGlobals()
   const navItems = footer?.navItems || []
 
   return (
@@ -26,6 +27,7 @@ export const Footer: React.FC<{ footer: FooterType }> = ({ footer }) => {
           {navItems.map(({ link }, i) => {
             return <CMSLink key={i} {...link} />
           })}
+          <Link href="/admin">Dashboard</Link>
           <Link href="https://github.com/payloadcms/payload/tree/master/templates/ecommerce">
             Source code
           </Link>

@@ -1,10 +1,8 @@
 import React from 'react'
 
-import { AdminBar } from './_components/AdminBar'
 import { Footer } from './_components/Footer'
 import { Header } from './_components/Header'
 import { Providers } from './_providers'
-import { fetchGlobals } from './cms'
 
 import './_css/app.scss'
 
@@ -14,8 +12,6 @@ export const metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { header, footer } = await fetchGlobals()
-
   return (
     <html lang="en">
       <body>
@@ -28,9 +24,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               onPreviewExit,
             }}
           /> */}
-          <Header header={header} />
+          {/* @ts-expect-error */}
+          <Header />
           {children}
-          <Footer footer={footer} />
+          {/* @ts-expect-error */}
+          <Footer />
         </Providers>
       </body>
     </html>
