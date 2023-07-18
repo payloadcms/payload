@@ -1,5 +1,13 @@
 .selectContainer {
   position: relative;
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 50ms linear;
+}
+
+.hidden {
+  opacity: 0;
+  visibility: hidden;
 }
 
 .select {

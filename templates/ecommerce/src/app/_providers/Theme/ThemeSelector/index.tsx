@@ -12,11 +12,11 @@ import classes from './index.module.scss'
 export const ThemeSelector: React.FC = () => {
   const selectRef = React.useRef<HTMLSelectElement>(null)
   const { setTheme } = useTheme()
+  const [show, setShow] = React.useState(false)
 
   const onThemeChange = (themeToSet: Theme & 'auto') => {
     if (themeToSet === 'auto') {
-      const implicitPreference = getImplicitPreference() ?? 'light'
-      setTheme(implicitPreference)
+      setTheme(null)
       if (selectRef.current) selectRef.current.value = 'auto'
     } else {
       setTheme(themeToSet)
@@ -27,11 +27,12 @@ export const ThemeSelector: React.FC = () => {
     const preference = window.localStorage.getItem(themeLocalStorageKey)
     if (selectRef.current) {
       selectRef.current.value = preference ?? 'auto'
+      setShow(true)
     }
   }, [])
 
   return (
-    <div className={classes.selectContainer}>
+    <div className={[classes.selectContainer, !show && classes.hidden].filter(Boolean).join(' ')}>
       <label htmlFor="theme">
         <select
           id="theme"
