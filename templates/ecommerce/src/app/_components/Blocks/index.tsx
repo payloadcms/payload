@@ -34,15 +34,11 @@ export const Blocks: React.FC<{
             const Block = blockComponents[blockType]
             const blockIsInverted = 'invertBackground' in block ? block.invertBackground : false
             const prevBlock = blocks[index - 1]
-            const nextBlock = blocks[index + 1]
 
             const prevBlockInverted =
-              (prevBlock && 'invertBackground' in prevBlock && prevBlock?.invertBackground) || false
-            const nextBlockInverted =
-              (nextBlock && 'invertBackground' in nextBlock && nextBlock?.invertBackground) || false
+              prevBlock && 'invertBackground' in prevBlock && prevBlock?.invertBackground
 
-            const isPrevSame = Boolean(blockIsInverted === prevBlockInverted)
-            const isNextSame = Boolean(blockIsInverted === nextBlockInverted)
+            const isPrevSame = Boolean(blockIsInverted) === Boolean(prevBlockInverted)
 
             let paddingTop: VerticalPaddingOptions = 'large'
             let paddingBottom: VerticalPaddingOptions = 'large'
@@ -63,9 +59,8 @@ export const Blocks: React.FC<{
               return (
                 <BackgroundColor key={index} invert={blockIsInverted}>
                   <VerticalPadding top={paddingTop} bottom={paddingBottom}>
-                    {/* @ts-ignore */}
                     <Block
-                      // @ts-ignore
+                      // @ts-expect-error
                       id={toKebabCase(blockName)}
                       {...block}
                     />

@@ -2,6 +2,7 @@
 
 import React from 'react'
 
+import { Chevron } from '../../../_components/Chevron'
 import { useTheme } from '..'
 import { getImplicitPreference } from '../shared'
 import { Theme, themeLocalStorageKey } from './types'
@@ -42,7 +43,10 @@ export const ThemeSelector: React.FC = () => {
           <option value="light">Light</option>
           <option value="dark">Dark</option>
         </select>
-        <span className={classes.selectIcon}>▾</span>
+        <div className={classes.selectIcon}>
+          <Chevron className={classes.iconUp} />
+          <Chevron className={classes.iconDown} />
+        </div>
       </label>
     </div>
   )

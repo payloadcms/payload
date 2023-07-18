@@ -46,6 +46,7 @@
   gap: var(--base) 40px;
 
   @include mid-break {
+    grid-template-columns: repeat(6, 1fr);
     gap: calc(var(--base) / 2) var(--base);
   }
 }
@@ -58,7 +59,7 @@
   }
 
   @include small-break {
-    grid-column-end: span 12;
+    grid-column-end: span 6;
   }
 }
 

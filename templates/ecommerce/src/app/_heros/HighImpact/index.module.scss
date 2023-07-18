@@ -42,6 +42,7 @@
   margin-top: var(--base);
   color: var(--color-base-500);
   left: calc(var(--gutter-h) / 2);
+  width: calc(100% - var(--gutter-h));
   position: relative;
 
   @include mid-break {
