@@ -4,6 +4,11 @@ export const cartPage: Partial<Page> = {
   title: 'Cart',
   slug: 'cart',
   _status: 'published',
+  meta: {
+    title: 'Cart',
+    description:
+      'Your cart will sync to your user profile so you can continue shopping from any device.',
+  },
   hero: {
     type: 'lowImpact',
     links: [],
@@ -103,8 +108,4 @@ export const cartPage: Partial<Page> = {
       blockType: 'cta',
     },
   ],
-  meta: {
-    title: 'Cart',
-    description: 'Your cart',
-  },
 }

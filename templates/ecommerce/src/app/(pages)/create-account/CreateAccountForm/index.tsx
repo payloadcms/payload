@@ -38,6 +38,20 @@ const CreateAccountForm: React.FC = () => {
 
   const onSubmit = useCallback(
     async (data: FormData) => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        const message = response.statusText || 'There was an error creating the account.'
+        setError(message)
+        return
+      }
+
       const redirect = searchParams.get('redirect')
 
       const timer = setTimeout(() => {
@@ -48,7 +62,7 @@ const CreateAccountForm: React.FC = () => {
         await login(data)
         clearTimeout(timer)
         if (redirect) router.push(redirect as string)
-        else router.push('/account')
+        else router.push(`/account?success=${encodeURIComponent('Account created successfully')}`)
       } catch (_) {
         clearTimeout(timer)
         setError('There was an error with the credentials provided. Please try again.')

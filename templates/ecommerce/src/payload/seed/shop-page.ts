@@ -1,5 +1,11 @@
 export const shopPage = {
   title: 'Shop',
+  slug: 'shop',
+  _status: 'published',
+  meta: {
+    title: 'Shop',
+    description: 'Shop everything from goods and services to digital assets and gated content.',
+  },
   hero: {
     type: 'lowImpact',
     richText: [
@@ -49,10 +55,4 @@ export const shopPage = {
       categories: [],
     },
   ],
-  meta: {
-    title: 'Shop',
-    description: 'Shop page',
-  },
-  slug: 'shop',
-  _status: 'published',
 }

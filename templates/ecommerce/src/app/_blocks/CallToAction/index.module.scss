@@ -31,7 +31,7 @@ $spacer-h: calc(var(--block-padding) / 2);
 
 .wrap {
   display: flex;
-  gap: var(--base);
+  gap: $spacer-h;
   align-items: center;
 
   @include mid-break {

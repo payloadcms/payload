@@ -28,8 +28,9 @@ export const CartPage: React.FC<{
 
   return (
     <Fragment>
+      <br />
       {cartIsEmpty && (
-        <div>
+        <div className={classes.empty}>
           Your cart is empty.
           {typeof shopPage === 'object' && shopPage?.slug && (
             <Fragment>

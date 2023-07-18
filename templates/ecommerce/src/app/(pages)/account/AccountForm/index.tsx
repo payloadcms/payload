@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 
@@ -22,6 +22,7 @@ const AccountForm: React.FC = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const { user, setUser } = useAuth()
+  const [changePassword, setChangePassword] = useState(false)
 
   const {
     register,
@@ -54,7 +55,10 @@ const AccountForm: React.FC = () => {
           setUser(json.doc)
           setSuccess('Successfully updated account.')
           setError('')
+          setChangePassword(false)
           reset({
+            email: json.doc.email,
+            name: json.doc.name,
             password: '',
             passwordConfirm: '',
           })
@@ -76,39 +80,70 @@ const AccountForm: React.FC = () => {
       reset({
         email: user.email,
         name: user.name,
+        password: '',
+        passwordConfirm: '',
       })
     }
-  }, [user, router, reset])
+  }, [user, router, reset, changePassword])
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
       <Message error={error} success={success} className={classes.message} />
-      <Input
-        name="email"
-        label="Email Address"
-        required
-        register={register}
-        error={errors.email}
-        type="email"
-      />
-      <Input name="name" label="Name" required register={register} error={errors.name} />
-      <Input
-        name="password"
-        type="password"
-        label="Password"
-        required
-        register={register}
-        error={errors.password}
-      />
-      <Input
-        name="passwordConfirm"
-        type="password"
-        label="Confirm Password"
-        required
-        register={register}
-        validate={value => value === password.current || 'The passwords do not match'}
-        error={errors.passwordConfirm}
-      />
+      {!changePassword ? (
+        <Fragment>
+          <p>
+            {'To change your password, '}
+            <button
+              type="button"
+              className={classes.changePassword}
+              onClick={() => setChangePassword(!changePassword)}
+            >
+              click here
+            </button>
+            .
+          </p>
+          <Input
+            name="email"
+            label="Email Address"
+            required
+            register={register}
+            error={errors.email}
+            type="email"
+          />
+          <Input name="name" label="Name" register={register} error={errors.name} />
+        </Fragment>
+      ) : (
+        <Fragment>
+          <p>
+            {'Change your password below, or '}
+            <button
+              type="button"
+              className={classes.changePassword}
+              onClick={() => setChangePassword(!changePassword)}
+            >
+              cancel
+            </button>
+            .
+          </p>
+          <Input
+            name="password"
+            type="password"
+            label="Password"
+            required
+            register={register}
+            error={errors.password}
+          />
+          <Input
+            name="passwordConfirm"
+            type="password"
+            label="Confirm Password"
+            required
+            register={register}
+            validate={value => value === password.current || 'The passwords do not match'}
+            error={errors.passwordConfirm}
+          />
+        </Fragment>
+      )}
       <Button
         type="submit"
         label={isLoading ? 'Processing' : 'Update Account'}

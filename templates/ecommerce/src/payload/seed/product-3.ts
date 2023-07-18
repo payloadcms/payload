@@ -5,6 +5,11 @@ export const product3: Partial<Product> = {
   stripeProductID: 'prod_NGzgr62LTu1M6T',
   slug: 'Online Course',
   _status: 'published',
+  meta: {
+    title: 'Online Course',
+    description: 'Make a one-time purchase to gain access this content',
+    image: '{{PRODUCT_IMAGE}}',
+  },
   layout: [
     {
       blockType: 'content',
@@ -70,9 +75,4 @@ export const product3: Partial<Product> = {
       ],
     },
   ],
-  meta: {
-    title: 'Online Course',
-    description: 'One-time purchase for gated content',
-    image: '{{PRODUCT_IMAGE}}',
-  },
 }

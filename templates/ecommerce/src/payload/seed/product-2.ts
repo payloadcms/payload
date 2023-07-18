@@ -5,6 +5,11 @@ export const product2: Partial<Product> = {
   slug: 'ebook',
   _status: 'published',
   title: 'E-Book',
+  meta: {
+    title: 'E-Book',
+    description: 'Make a one-time purchase for this digital asset.',
+    image: '{{PRODUCT_IMAGE}}',
+  },
   layout: [
     {
       blockType: 'content',
@@ -70,9 +75,4 @@ export const product2: Partial<Product> = {
       ],
     },
   ],
-  meta: {
-    title: 'E-Book',
-    description: 'One-time purchase for a digital asset',
-    image: '{{PRODUCT_IMAGE}}',
-  },
 }

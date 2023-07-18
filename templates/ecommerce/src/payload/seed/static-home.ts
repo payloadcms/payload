@@ -3,6 +3,10 @@ import type { Page } from '../payload-types'
 export const staticHome: Page = {
   id: '',
   title: 'Home',
+  meta: {
+    title: 'Payload E-Commerce Template',
+    description: 'An open-source e-commerce store built with Payload and Next.js.',
+  },
   hero: {
     type: 'lowImpact',
     richText: [
@@ -37,7 +41,7 @@ export const staticHome: Page = {
             ],
           },
           {
-            text: ' and click "seed your database". You may need to hard refresh this page to clear the request cache. The code for this template is completely open-source and can be found ',
+            text: ' and click "seed your database". You may need to hard refresh this page to clear the cached request. The code for this template is completely open-source and can be found ',
           },
           {
             type: 'link',
