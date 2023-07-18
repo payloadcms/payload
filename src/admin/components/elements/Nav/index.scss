@@ -71,6 +71,10 @@
     >* {
       margin-top: base(1);
     }
+
+    a:focus-visible {
+      outline: var(--accessibility-outline);
+    }
   }
 
   &__log-out {
