@@ -17,7 +17,7 @@ const DateTime: React.FC<Props> = (props) => {
     value,
     onChange,
     displayFormat,
-    pickerAppearance,
+    pickerAppearance = "dayOnly",
     minDate,
     maxDate,
     monthsToShow = 1,
