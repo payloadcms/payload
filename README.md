@@ -1,35 +1,14 @@
-<p style="border: none; margin-bottom:0; padding-bottom: 0;" align="center">
+<p style="border: none; margin-bottom:0; padding-bottom: 0;" align="left">
   <a href="https://payloadcms.com">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-light.svg">
-      <img width="350" alt="Payload Logo" src="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-dark.svg">
+      <img width="250" alt="Payload Logo" src="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-dark.svg">
     </picture>
   </a>
 </p>
-
-<h3 align="center">The most powerful TypeScript CMS</h3>
-<p align="center">Code-first Headless CMS that bridges the gap between CMS and application framework</p>
-
-<h3 align="center">
-  <a target="_blank" href="https://payloadcms.com/docs/getting-started/what-is-payload" rel="dofollow"><strong>Explore the docs</strong></a>
-  ·
-  <a target="_blank" href="https://demo.payloadcms.com/" rel="dofollow"><strong>Try Live Demo</strong></a>
-  <br />
-</h3>
-
-<br />
-
-<p align="center">
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" />
-  </a>
-  &nbsp;
+<p align="left">
   <a href="https://github.com/payloadcms/payload/actions">
     <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/payloadcms/payload/tests.yml?style=flat-square">
-  </a>
-  &nbsp;
-  <a href="https://github.com/payloadcms/payload/commits">
-    <img src="https://img.shields.io/github/commit-activity/m/payloadcms/payload?style=flat-square" alt="git commit activity"/>
   </a>
   &nbsp;
   <a href="https://discord.gg/payload">
@@ -44,14 +23,44 @@
     <img src="https://img.shields.io/badge/follow-payloadcms-1DA1F2?logo=twitter&style=flat-square" alt="Payload Twitter" />
   </a>
 </p>
-
+<h1>Define your schema in code and get a full TypeScript backend + CMS-grade admin UI instantly.</h1>
 <br />
 
 <a href="https://payloadcms.com">
-  <img src="https://cms.payloadcms.com/media/payload-github-header.jpg" alt="Payload headless CMS Admin panel built with React" />
+  <img width="100%" src="src/admin/assets/images/github-banner.jpg" alt="Payload headless CMS Admin panel built with React" />
 </a>
-
 <br />
+<h3>
+<a target="_blank" href="https://payloadcms.com/docs/getting-started/what-is-payload" rel="dofollow"><strong>Explore the Docs</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://payloadcms.com/community-help" rel="dofollow"><strong>Community Help</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://demo.payloadcms.com/" rel="dofollow"><strong>Try Live Demo</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://github.com/payloadcms/payload/discussions/1539" rel="dofollow"><strong>Roadmap</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://www.g2.com/products/payload-cms/reviews#reviews" rel="dofollow"><strong>View G2 Reviews</strong></a>
+</h3>
+<h2>Benefits over a regular CMS</h2>
+<ul>
+  <li>Don’t hit their API, hit yours</li>
+  <li>Use your own database and own your data</li>
+  <li>Avoid vendor lock-in</li>
+  <li>Never touch ancient WP code again</li>
+  <li>Build faster, never hit a roadblock</li>
+  <li>Both admin and backend are 100% extensible</li>
+</ul>
+<br />
+<a href="https://payloadcms.com/new">
+  <img width="100%" src="src/admin/assets/images/cloud-cta.jpg" alt="Payload headless CMS Admin panel built with React" />
+</a>
+<br />
+
+## ☁️ Benefits of using Payload Cloud
+Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Best of all, you can extend it as much as you need. Building SaaS platform? You can use Payload for that too. We give you a full web backend immediately, with subscriptions by stripe and a NextJS frontend.
+
+[Get started with Payload Cloud](https://payloadcms.com/new)
+## 🚀 Get started by self-hosting
+
+Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/getting-started/installation).
+
+```text
+npx create-payload-app
+```
+
+Alternatively, it only takes about five minutes to [create an app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
 
 ## ⭐ Why Payload?
 
@@ -85,18 +94,6 @@ Payload is a CMS that has been designed for developers from the ground up to del
 - Highly secure thanks to HTTP-only cookies, CSRF protection, and more
 
 <a target="_blank" href="https://github.com/payloadcms/payload/discussions"><strong>Request Feature</strong></a>
-
-## 🚀 Quick Start
-
-Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/getting-started/installation).
-
-From there, the easiest way to get started with Payload is to use the `create-payload-app` package:
-
-```text
-npx create-payload-app
-```
-
-Alternatively, it only takes about five minutes to [create an app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
 
 ## 🗒️ Documentation
 
