@@ -5,8 +5,10 @@
   z-index: var(--header-z-index);
   background-color: var(--foreground);
   color: var(--background);
+}
 
-  @media (prefers-color-scheme: dark) {
+:global([data-theme="dark"]) {
+  .footer {
     background-color: var(--background-light);
     color: var(--foreground);
   }
@@ -18,11 +20,7 @@
 }
 
 .logo {
-  width: 200px;
-
-  @include mid-break {
-    width: 150px;
-  }
+  width: 150px;
 }
 
 .nav {

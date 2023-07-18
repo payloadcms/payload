@@ -13,9 +13,5 @@
 }
 
 .logo {
-  width: 200px;
-
-  @include mid-break {
-    width: 150px;
-  }
+  width: 150px;
 }

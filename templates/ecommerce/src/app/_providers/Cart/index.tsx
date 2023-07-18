@@ -71,38 +71,36 @@ export const CartProvider = props => {
       const syncCartFromLocalStorage = async () => {
         const localCart = localStorage.getItem('cart')
 
-        if (localCart) {
-          const parsedCart = JSON.parse(localCart)
+        const parsedCart = JSON.parse(localCart || '{}')
 
-          if (parsedCart.items && parsedCart.items.length > 0) {
-            const initialCart = await Promise.all(
-              parsedCart.items.map(async ({ product, quantity }) => {
-                const res = await fetch(
-                  `${process.env.NEXT_PUBLIC_SERVER_URL}/api/products/${product}`,
-                )
-                const data = await res.json()
-                return {
-                  product: data,
-                  quantity,
-                }
-              }),
-            )
+        if (parsedCart?.items && parsedCart?.items?.length > 0) {
+          const initialCart = await Promise.all(
+            parsedCart.items.map(async ({ product, quantity }) => {
+              const res = await fetch(
+                `${process.env.NEXT_PUBLIC_SERVER_URL}/api/products/${product}`,
+              )
+              const data = await res.json()
+              return {
+                product: data,
+                quantity,
+              }
+            }),
+          )
 
-            dispatchCart({
-              type: 'SET_CART',
-              payload: {
-                items: initialCart,
-              },
-            })
-          }
+          dispatchCart({
+            type: 'SET_CART',
+            payload: {
+              items: initialCart,
+            },
+          })
+        } else {
+          dispatchCart({
+            type: 'SET_CART',
+            payload: {
+              items: [],
+            },
+          })
         }
-
-        dispatchCart({
-          type: 'SET_CART',
-          payload: {
-            items: [],
-          },
-        })
       }
 
       syncCartFromLocalStorage()

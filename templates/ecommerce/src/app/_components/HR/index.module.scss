@@ -5,8 +5,10 @@
   border: none;
   background-color: var(--color-base-150);
   height: 1px;
+}
 
-  @media (prefers-color-scheme: dark) {
+:global([data-theme="dark"]) {
+  .hr {
     background-color: var(--color-base-500);
   }
 }

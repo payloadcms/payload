@@ -76,16 +76,18 @@ export const CartPage: React.FC<{
               return (
                 <Fragment key={index}>
                   <div className={classes.row}>
-                    <div className={classes.mediaWrapper}>
+                    <Link href={`/products/${product.slug}`} className={classes.mediaWrapper}>
                       {!metaImage && <span className={classes.placeholder}>No image</span>}
                       {metaImage && typeof metaImage !== 'string' && (
                         <Media imgClassName={classes.image} resource={metaImage} fill />
                       )}
-                    </div>
+                    </Link>
                     <div className={classes.rowContent}>
-                      <Link href={`/products/${product.slug}`}>
-                        <h6 className={classes.title}>{title}</h6>
-                      </Link>
+                      <h6 className={classes.title}>
+                        <Link href={`/products/${product.slug}`} className={classes.titleLink}>
+                          {title}
+                        </Link>
+                      </h6>
                       <label>
                         Quantity &nbsp;
                         <input

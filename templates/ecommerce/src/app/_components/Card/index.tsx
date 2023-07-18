@@ -72,39 +72,43 @@ export const Card: React.FC<{
           <Media imgClassName={classes.image} resource={metaImage} fill />
         )}
       </Link>
-      {showCategories && hasCategories && (
-        <div className={classes.leader}>
-          {showCategories && hasCategories && (
-            <div>
-              {categories?.map((category, index) => {
-                const { title: titleFromCategory } = category
+      <div className={classes.content}>
+        {showCategories && hasCategories && (
+          <div className={classes.leader}>
+            {showCategories && hasCategories && (
+              <div>
+                {categories?.map((category, index) => {
+                  const { title: titleFromCategory } = category
 
-                const categoryTitle = titleFromCategory || 'Untitled category'
+                  const categoryTitle = titleFromCategory || 'Untitled category'
 
-                const isLast = index === categories.length - 1
+                  const isLast = index === categories.length - 1
 
-                return (
-                  <Fragment key={index}>
-                    {categoryTitle}
-                    {!isLast && <Fragment>, &nbsp;</Fragment>}
-                  </Fragment>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      )}
-      {titleToUse && (
-        <h4 className={classes.title}>
-          <Link href={href}>{titleToUse}</Link>
-        </h4>
-      )}
-      {description && (
-        <div className={classes.body}>
-          {description && <p className={classes.description}>{sanitizedDescription}</p>}
-        </div>
-      )}
-      {doc && <Price product={doc} />}
+                  return (
+                    <Fragment key={index}>
+                      {categoryTitle}
+                      {!isLast && <Fragment>, &nbsp;</Fragment>}
+                    </Fragment>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+        {titleToUse && (
+          <h4 className={classes.title}>
+            <Link href={href} className={classes.titleLink}>
+              {titleToUse}
+            </Link>
+          </h4>
+        )}
+        {description && (
+          <div className={classes.body}>
+            {description && <p className={classes.description}>{sanitizedDescription}</p>}
+          </div>
+        )}
+        {doc && <Price product={doc} />}
+      </div>
     </div>
   )
 }

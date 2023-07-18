@@ -34,14 +34,6 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground: var(--color-base-0);
-    --foreground-light: var(--color-base-100);
-    --background: var(--color-base-1000);
-    --background-light: var(--color-base-850);
-  }
-}
 /////////////////////////////
 // GLOBAL STYLES
 /////////////////////////////
@@ -53,6 +45,22 @@
 html {
   @extend %body;
   -webkit-font-smoothing: antialiased;
+  color: var(--foreground);
+  background: var(--background);
+  opacity: 0;
+
+  &[data-theme=dark],
+  &[data-theme=light] {
+    opacity: initial;
+  }
+
+  &[data-theme=dark] {
+    --foreground: var(--color-base-0);
+    --foreground-light: var(--color-base-100);
+    --background: var(--color-base-1000);
+    --background-light: var(--color-base-850);
+    color-scheme: dark;
+  }
 }
 
 html,
@@ -63,19 +71,7 @@ body,
 
 body {
   font-family: var(--font-body);
-  color: var(--foreground);
-  background: var(--background);
   margin: 0;
-}
-
-::selection {
-  background: var(--color-success-500);
-  color: var(--color-base-800);
-}
-
-::-moz-selection {
-  background: var(--color-success-500);
-  color: var(--color-base-800);
 }
 
 img {

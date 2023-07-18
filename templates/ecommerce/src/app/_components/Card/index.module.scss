@@ -1,7 +1,24 @@
 @import '../../_css/common';
 
+.card  {
+  border: 1px var(--color-base-700) solid;
+  border-radius: 4px;
+}
+
+.content {
+  padding: var(--base);
+
+  @include small-break {
+    padding: calc(var(--base) / 2);
+  }
+}
+
 .title {
   margin: 0;
+}
+
+.titleLink {
+  text-decoration: none;
 }
 
 .centerAlign {
@@ -51,7 +68,6 @@
   display: block;
   position: relative;
   aspect-ratio: 5 / 4;
-  margin-bottom: calc(var(--base) / 2);
 }
 
 .image {

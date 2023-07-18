@@ -49,9 +49,13 @@
   margin: 0;
 }
 
+.titleLink {
+  text-decoration: none;
+}
+
 .itemsTotal {
   margin-bottom: var(--base);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .quantity {

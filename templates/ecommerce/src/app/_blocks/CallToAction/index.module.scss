@@ -8,8 +8,10 @@ $spacer-h: calc(var(--block-padding) / 2);
   position: relative;
   background-color: var(--foreground);
   color: var(--background);
+}
 
-  @media (prefers-color-scheme: dark) {
+:global([data-theme="dark"]) {
+  .callToAction {
     background-color: var(--background-light);
     color: var(--foreground);
   }
@@ -18,8 +20,10 @@ $spacer-h: calc(var(--block-padding) / 2);
 .invert {
   background-color: var(--foreground-light);
   color: var(--background);
+}
 
-  @media (prefers-color-scheme: dark) {
+:global([data-theme="dark"]) {
+  .invert {
     background-color: var(--background);
     color: var(--foreground);
   }

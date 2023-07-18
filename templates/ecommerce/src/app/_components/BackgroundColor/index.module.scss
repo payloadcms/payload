@@ -1,8 +1,10 @@
 .invert {
   background-color: var(--foreground);
   color: var(--background);
+}
 
-  @media (prefers-color-scheme: dark) {
+:global([data-theme="dark"]) {
+  .invert {
     background-color: var(--background-light);
     color: var(--foreground);
   }

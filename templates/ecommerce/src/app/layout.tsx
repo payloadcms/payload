@@ -3,6 +3,7 @@ import React from 'react'
 import { Footer } from './_components/Footer'
 import { Header } from './_components/Header'
 import { Providers } from './_providers'
+import { InitTheme } from './_providers/Theme/InitTheme'
 
 import './_css/app.scss'
 
@@ -13,7 +14,10 @@ export const metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <InitTheme />
+      </head>
       <body>
         <Providers>
           {/* <AdminBar
