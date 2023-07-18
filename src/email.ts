@@ -49,7 +49,7 @@ export const payloadCloudEmail = (args: PayloadCloudEmailOptions): EmailTranspor
 
   const fromName = config.email?.fromName || 'Payload CMS'
   const fromAddress =
-    config.email?.fromAddress || `cms${customDomains.length ? customDomains[0] : defaultDomain}`
+    config.email?.fromAddress || `cms@${customDomains.length ? customDomains[0] : defaultDomain}`
 
   const existingTransport = config.email && 'transport' in config.email && config.email?.transport
 
