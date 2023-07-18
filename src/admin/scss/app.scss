@@ -149,7 +149,9 @@ a {
   color: currentColor;
 
   &:focus {
-    opacity: .8;
+    &:not(:focus-visible) {
+      opacity: .8;
+    }
     outline: none;
   }
 
