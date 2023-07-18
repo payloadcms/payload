@@ -9,6 +9,7 @@ const Orders: CollectionConfig = {
   admin: {
     useAsTitle: 'createdAt',
     defaultColumns: ['createdAt'],
+    preview: doc => `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/orders/${doc.id}`,
   },
   access: {
     read: adminsAndOrderedBy,
