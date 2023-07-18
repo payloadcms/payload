@@ -29,6 +29,8 @@
   --z-modal: 30;
   --z-status: 40;
 
+  --accessibility-outline: 2px solid var(--theme-text);
+
   --gutter-h: #{base(5)};
 
   @include large-break {
