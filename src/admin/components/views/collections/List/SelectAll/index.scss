@@ -17,10 +17,6 @@
         opacity: .2;
       }
     }
-
-    &:focus-visible {
-      outline-offset: var(--accessibility-outline-offset);
-    }
   }
 
   &__input {
