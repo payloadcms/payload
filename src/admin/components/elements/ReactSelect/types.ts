@@ -70,6 +70,10 @@ export type Props = {
   components?: {
     [key: string]: React.FC<any>
   }
+  customProps?: CustomSelectProps
+  /**
+  * @deprecated Since version 1.0. Will be deleted in version 2.0. Use customProps instead.
+  */
   selectProps?: CustomSelectProps
   backspaceRemovesValue?: boolean
 }

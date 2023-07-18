@@ -1,0 +1,25 @@
+.account {
+  margin-bottom: var(--block-padding);
+}
+
+.form {
+  margin-bottom: var(--base);
+}
+
+.success,
+.error {
+  margin-bottom: 15px;
+}
+
+.success {
+  color: green;
+}
+
+.error {
+  color: red;
+}
+
+.hr {
+  margin: calc(var(--block-padding) / 2) 0;
+  background-color: var(--color-base-900);
+}

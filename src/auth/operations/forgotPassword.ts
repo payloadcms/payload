@@ -68,6 +68,10 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     resetPasswordExpiration?: number | Date,
   }
 
+  if (!data.email) {
+    throw new APIError('Missing email.');
+  }
+
   const user: UserDoc = await Model.findOne({ email: (data.email as string).toLowerCase() });
 
   if (!user) return null;

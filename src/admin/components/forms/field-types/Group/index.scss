@@ -13,6 +13,7 @@
     &:first-child {
       border-top: 0;
       padding-top: 0;
+      margin-top: 0;
     }
 
     &:last-child {
@@ -54,6 +55,9 @@
 
   &__header {
     margin-bottom: base(.75);
+    display: flex;
+    align-items: center;
+    gap: base(.5);
   }
 
   &__title {
@@ -94,4 +98,26 @@
 
 .group-field--within-tab+.group-field--within-row {
   padding-top: 0;
+}
+
+html[data-theme=light] {
+  .group-field {
+    &--has-error {
+      color: var(--theme-error-750);
+      &:after {
+        background: var(--theme-error-500);
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .group-field {
+    &--has-error {
+      color: var(--theme-error-500);
+      &:after {
+        background: var(--theme-error-500);
+      }
+    }
+  }
 }

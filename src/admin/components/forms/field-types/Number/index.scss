@@ -9,10 +9,24 @@
       @include formInput;
     }
   }
+}
 
-  &.error {
-    input {
-      background-color: var(--theme-error-200);
+html[data-theme=light] {
+  .field-type.number {
+    &.error {
+      input {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .field-type.number {
+    &.error {
+      input {
+        @include darkInputError;
+      }
     }
   }
 }

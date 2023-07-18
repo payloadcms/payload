@@ -6,10 +6,24 @@
   &__error-wrap {
     position: relative;
   }
+}
 
-  &--has-error {
-    .react-datepicker__input-container input {
-      background-color: var(--theme-error-200);
+html[data-theme=light] {
+  .date-time-field{
+    &--has-error {
+      .react-datepicker__input-container input {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .date-time-field {
+    &--has-error {
+      .react-datepicker__input-container input {
+        @include darkInputError;
+      }
     }
   }
 }
