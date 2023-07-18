@@ -1,4 +1,5 @@
 import React from 'react'
+import { Metadata } from 'next'
 import Link from 'next/link'
 
 import { Order } from '../../../payload/payload-types'
@@ -7,10 +8,11 @@ import { Button } from '../../_components/Button'
 import { Gutter } from '../../_components/Gutter'
 import { RenderParams } from '../../_components/RenderParams'
 import { getMeUser } from '../../_utilities/getMeUser'
+import { mergeOpenGraph } from '../../_utilities/mergeOpenGraph'
 
 import classes from './index.module.scss'
 
-const Orders = async () => {
+export default async function Orders() {
   await getMeUser({
     nullUserRedirect: `/login?unauthorized=orders`,
   })
@@ -36,4 +38,11 @@ const Orders = async () => {
   )
 }
 
-export default Orders
+export const metadata: Metadata = {
+  title: 'Orders',
+  description: 'Your orders.',
+  openGraph: mergeOpenGraph({
+    title: 'Orders',
+    url: '/orders',
+  }),
+}

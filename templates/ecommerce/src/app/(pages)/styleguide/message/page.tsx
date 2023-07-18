@@ -1,9 +1,11 @@
 import React, { Fragment } from 'react'
+import { Metadata } from 'next'
 import Link from 'next/link'
 
 import { Gutter } from '../../../_components/Gutter'
 import { Message } from '../../../_components/Message'
 import { VerticalPadding } from '../../../_components/VerticalPadding'
+import { mergeOpenGraph } from '../../../_utilities/mergeOpenGraph'
 
 export default async function MessageComponentPage() {
   return (
@@ -29,4 +31,13 @@ export default async function MessageComponentPage() {
       </Gutter>
     </Fragment>
   )
+}
+
+export const metadata: Metadata = {
+  title: 'Message Component',
+  description: 'Styleguide for message component.',
+  openGraph: mergeOpenGraph({
+    title: 'Message Component',
+    url: '/styleguide/message',
+  }),
 }

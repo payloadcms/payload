@@ -1,4 +1,5 @@
 import React from 'react'
+import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { Page } from '../../../payload/payload-types'
@@ -7,8 +8,9 @@ import { fetchDoc } from '../../_api/fetchDoc'
 import { fetchDocs } from '../../_api/fetchDocs'
 import { Blocks } from '../../_components/Blocks'
 import { Hero } from '../../_components/Hero'
+import { generateMeta } from '../../_utilities/generateMeta'
 
-const PageTemplate = async ({ params: { slug = 'home' } }) => {
+export default async function Page({ params: { slug = 'home' } }) {
   let page = await fetchDoc<Page>({
     collection: 'pages',
     slug,
@@ -42,4 +44,15 @@ export async function generateStaticParams() {
   return pages?.map(({ slug }) => slug)
 }
 
-export default PageTemplate
+export async function generateMetadata({ params: { slug = 'home' } }): Promise<Metadata> {
+  let page = await fetchDoc<Page>({
+    collection: 'pages',
+    slug,
+  })
+
+  if (!page && slug === 'home') {
+    page = staticHome
+  }
+
+  return generateMeta({ doc: page })
+}

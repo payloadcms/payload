@@ -1,4 +1,5 @@
 import React from 'react'
+import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { Product, Product as ProductType } from '../../../../payload/payload-types'
@@ -7,8 +8,9 @@ import { fetchDocs } from '../../../_api/fetchDocs'
 import { Blocks } from '../../../_components/Blocks'
 import { PaywallBlocks } from '../../../_components/PaywallBlocks'
 import { ProductHero } from '../../../_heros/Product'
+import { generateMeta } from '../../../_utilities/generateMeta'
 
-const Product = async ({ params: { slug } }) => {
+export default async function Product({ params: { slug } }) {
   const product = await fetchDoc<Product>({
     collection: 'products',
     slug,
@@ -33,4 +35,11 @@ export async function generateStaticParams() {
   return products?.map(({ slug }) => slug)
 }
 
-export default Product
+export async function generateMetadata({ params: { slug } }): Promise<Metadata> {
+  const product = await fetchDoc<Product>({
+    collection: 'products',
+    slug,
+  })
+
+  return generateMeta({ doc: product })
+}

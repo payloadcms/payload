@@ -1,10 +1,12 @@
 import React, { Fragment } from 'react'
+import { Metadata } from 'next'
 import Link from 'next/link'
 
 import staticImage from '../../../../../public/static-image.jpg'
 import { MediaBlock } from '../../../_blocks/MediaBlock'
 import { Gutter } from '../../../_components/Gutter'
 import { VerticalPadding } from '../../../_components/VerticalPadding'
+import { mergeOpenGraph } from '../../../_utilities/mergeOpenGraph'
 
 export default async function MediaBlockPage() {
   return (
@@ -30,4 +32,13 @@ export default async function MediaBlockPage() {
       </VerticalPadding>
     </Fragment>
   )
+}
+
+export const metadata: Metadata = {
+  title: 'Media Block',
+  description: 'Styleguide for media block.',
+  openGraph: mergeOpenGraph({
+    title: 'Media Block',
+    url: '/styleguide/media-block',
+  }),
 }

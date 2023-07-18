@@ -1,4 +1,5 @@
 import React from 'react'
+import { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -9,10 +10,11 @@ import { Gutter } from '../../../_components/Gutter'
 import { HR } from '../../../_components/HR'
 import { Media } from '../../../_components/Media'
 import { getMeUser } from '../../../_utilities/getMeUser'
+import { mergeOpenGraph } from '../../../_utilities/mergeOpenGraph'
 
 import classes from './index.module.scss'
 
-const Order = async ({ params: { id } }) => {
+export default async function Order({ params: { id } }) {
   const { token } = await getMeUser({
     nullUserRedirect: `/login?unauthorized=order`,
   })
@@ -84,4 +86,13 @@ const Order = async ({ params: { id } }) => {
   )
 }
 
-export default Order
+export async function generateMetadata({ params: { id } }): Promise<Metadata> {
+  return {
+    title: `Order ${id}`,
+    description: `Order details for order ${id}.`,
+    openGraph: mergeOpenGraph({
+      title: `Order ${id}`,
+      url: `/orders/${id}`,
+    }),
+  }
+}
