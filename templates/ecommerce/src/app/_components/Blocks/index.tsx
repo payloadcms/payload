@@ -32,7 +32,10 @@ export const Blocks: React.FC<{
 
           if (blockType && blockType in blockComponents) {
             const Block = blockComponents[blockType]
-            const blockIsInverted = 'invertBackground' in block ? block.invertBackground : false
+
+            // the cta block is containerized, so we don't consider it to be inverted at the block-level
+            const blockIsInverted =
+              'invertBackground' in block && blockType !== 'cta' ? block.invertBackground : false
             const prevBlock = blocks[index - 1]
 
             const prevBlockInverted =

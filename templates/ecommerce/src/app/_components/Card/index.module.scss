@@ -1,7 +1,7 @@
 @import '../../_css/common';
 
 .card  {
-  border: 1px var(--color-base-700) solid;
+  border: 1px var(--theme-elevation-200) solid;
   border-radius: 4px;
   height: 100%;
   display: flex;
@@ -82,7 +82,7 @@
 }
 
 .placeholder {
-  background-color: var(--color-base-50);
+  background-color: var(--theme-elevation-50);
   width: 100%;
   height: 100%;
   display: flex;

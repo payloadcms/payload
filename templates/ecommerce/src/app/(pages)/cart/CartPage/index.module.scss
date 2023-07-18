@@ -23,7 +23,7 @@
 }
 
 .placeholder {
-  background-color: var(--color-base-50);
+  background-color: var(--theme-elevation-50);
   width: 100%;
   height: 100%;
   display: flex;
@@ -63,11 +63,17 @@
 }
 
 .quantity {
-  background-color: var(--background-light);
-  color: var(--foreground);
+  color: var(--theme-elevation-1000);
+  background-color: var(--theme-elevation-100);
   border: none;
   outline: none;
   padding: calc(var(--base) * 0.25) calc(var(--base) * 0.25);
+}
+
+:global([data-theme="dark"]) {
+  .quantity {
+    background-color: var(--theme-elevation-150);
+  }
 }
 
 .cartTotal {

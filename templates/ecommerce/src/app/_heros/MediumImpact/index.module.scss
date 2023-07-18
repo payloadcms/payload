@@ -18,7 +18,7 @@
     width: 100vw;
     left: calc(var(--gutter-h) * -1);
     height: 200px;
-    background: linear-gradient(to bottom, var(--color-base-100), transparent);
+    background: linear-gradient(to bottom, var(--theme-elevation-100), transparent);
     top: calc(100% + (var(--base) * 2));
     right: 0;
 

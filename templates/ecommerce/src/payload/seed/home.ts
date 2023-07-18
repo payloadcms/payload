@@ -450,12 +450,14 @@ export const home: Partial<Page> = {
       ],
     },
     {
+      blockType: 'mediaBlock',
+      blockName: 'Media Block',
       position: 'default',
       media: '{{PRODUCT2_IMAGE}}',
-      blockName: 'Media Block',
-      blockType: 'mediaBlock',
     },
     {
+      blockType: 'cta',
+      blockName: 'CTA',
       richText: [
         {
           children: [
@@ -500,8 +502,6 @@ export const home: Partial<Page> = {
           },
         },
       ],
-      blockName: 'CTA',
-      blockType: 'cta',
     },
   ],
 }

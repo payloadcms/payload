@@ -1,11 +1,11 @@
 .invert {
-  background-color: var(--foreground);
-  color: var(--background);
+  background-color: var(--theme-text);
+  color: var(--theme-bg);
 }
 
 :global([data-theme="dark"]) {
   .invert {
-    background-color: var(--background-light);
-    color: var(--foreground);
+    background-color: var(--theme-elevation-100);
+    color: var(--theme-text);
   }
 }

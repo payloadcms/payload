@@ -1,7 +1,6 @@
 import React from 'react'
 
 import { Page } from '../../../payload/payload-types'
-import { BackgroundColor } from '../../_components/BackgroundColor'
 import { Gutter } from '../../_components/Gutter'
 import { CMSLink } from '../../_components/Link'
 import RichText from '../../_components/RichText'
@@ -29,7 +28,7 @@ export const CallToActionBlock: React.FC<
           </div>
           <div className={classes.linkGroup}>
             {(links || []).map(({ link }, i) => {
-              return <CMSLink key={i} {...link} invert={!invertBackground} />
+              return <CMSLink key={i} {...link} invert={invertBackground} />
             })}
           </div>
         </div>

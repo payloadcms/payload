@@ -39,7 +39,7 @@ export default async function ContentBlockPage() {
 
 export const metadata: Metadata = {
   title: 'Content Block',
-  description: 'Styleguide for content block.',
+  description: 'Styleguide for the Content Block',
   openGraph: mergeOpenGraph({
     title: 'Content Block',
     url: '/styleguide/content-block',

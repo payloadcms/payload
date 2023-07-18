@@ -1,6 +1,7 @@
 @use './queries.scss' as *;
 @use './colors.scss' as *;
 @use './type.scss' as *;
+@import "./theme.scss";
 
 :root {
   --breakpoint-xs-width : #{$breakpoint-xs-width};
@@ -15,13 +16,6 @@
 
   --gutter-h: 180px;
   --block-padding: 120px;
-
-  --header-z-index: 100;
-  --modal-z-index: 90;
-  --foreground: var(--color-base-1000);
-  --foreground-light: var(--color-base-850);
-  --background: var(--color-base-0);
-  --background-light: var(--color-base-100);
 
   @include large-break {
     --gutter-h: 144px;
@@ -44,9 +38,8 @@
 
 html {
   @extend %body;
+  background: var(--theme-bg);
   -webkit-font-smoothing: antialiased;
-  color: var(--foreground);
-  background: var(--background);
   opacity: 0;
 
   &[data-theme=dark],
@@ -55,10 +48,7 @@ html {
   }
 
   &[data-theme=dark] {
-    --foreground: var(--color-base-0);
-    --foreground-light: var(--color-base-100);
-    --background: var(--color-base-1000);
-    --background-light: var(--color-base-850);
+    background: var(--color-base-900);
     color-scheme: dark;
   }
 }
@@ -72,6 +62,17 @@ body,
 body {
   font-family: var(--font-body);
   margin: 0;
+  color: var(--theme-text);
+}
+
+::selection {
+  background: var(--theme-success-500);
+  color: var(--theme-base-800);
+}
+
+::-moz-selection {
+  background: var(--theme-success-500);
+  color: var(--theme-base-800);
 }
 
 img {

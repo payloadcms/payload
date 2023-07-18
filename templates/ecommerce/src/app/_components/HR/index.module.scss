@@ -3,12 +3,6 @@
 .hr {
   margin: calc(var(--block-padding) / 2) 0;
   border: none;
-  background-color: var(--color-base-150);
+  background-color: var(--theme-elevation-200);
   height: 1px;
-}
-
-:global([data-theme="dark"]) {
-  .hr {
-    background-color: var(--color-base-500);
-  }
 }

@@ -9,11 +9,10 @@
   font-family: system-ui;
   border-radius: 0;
   box-shadow: none;
-  border: 1px solid;
-  border-color: var(--background-light);
+  border: none;
   background: none;
-  background-color: var(--background-light);
-  color: var(--foreground);
+  background-color: var(--theme-elevation-100);
+  color: var(--theme-elevation-1000);
   height: calc(var(--base) * 2);
   line-height: calc(var(--base) * 2);
   padding: 0 calc(var(--base) / 2);
@@ -26,15 +25,20 @@
   &:-webkit-autofill,
   &:-webkit-autofill:hover,
   &:-webkit-autofill:focus {
-    -webkit-text-fill-color: var(--foreground);
-    -webkit-box-shadow: 0 0 0px 1000px var(--background-light) inset;
+    -webkit-text-fill-color: var(--theme-text);
+    -webkit-box-shadow: 0 0 0px 1000px var(--theme-elevation-150) inset;
     transition: background-color 5000s ease-in-out 0s;
   }
 }
 
+:global([data-theme="dark"]) {
+  .input {
+    background-color: var(--theme-elevation-150);
+  }
+}
+
 .error {
-  background-color: var(--color-error-150);
-  border-color: var(--color-error-150);
+  background-color: var(--theme-error-150);
 }
 
 .label {
