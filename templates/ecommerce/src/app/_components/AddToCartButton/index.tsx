@@ -16,7 +16,7 @@ export const AddToCartButton: React.FC<{
 }> = props => {
   const { product, quantity = 1, className, appearance = 'primary' } = props
 
-  const { cart, addItemToCart, isProductInCart, isLoading } = useCart()
+  const { cart, addItemToCart, isProductInCart, hasInitializedCart } = useCart()
 
   const [isInCart, setIsInCart] = useState<boolean>()
 
@@ -35,7 +35,7 @@ export const AddToCartButton: React.FC<{
         className,
         classes.addToCartButton,
         appearance === 'default' && isInCart && classes.green,
-        isLoading && classes.hidden,
+        hasInitializedCart && classes.hidden,
       ]
         .filter(Boolean)
         .join(' ')}

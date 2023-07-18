@@ -88,7 +88,7 @@ export default buildConfig({
     stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
       isTestKey: Boolean(process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY),
-      stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_ENDPOINT_SECRET,
+      stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET,
       webhooks: {
         'invoice.created': invoiceCreatedOrUpdated,
         'invoice.updated': invoiceCreatedOrUpdated,

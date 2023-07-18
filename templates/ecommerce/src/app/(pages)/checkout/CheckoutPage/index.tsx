@@ -72,6 +72,57 @@ const CheckoutPageClient: React.FC<{
 
   return (
     <Fragment>
+      {cartIsEmpty && (
+        <div>
+          {'Your '}
+          <Link href="/cart">cart</Link>
+          {' is empty.'}
+          {typeof shopPage === 'object' && shopPage?.slug && (
+            <Fragment>
+              {' '}
+              <Link href={`/${shopPage.slug}`}>Continue shopping?</Link>
+            </Fragment>
+          )}
+        </div>
+      )}
+      {!cartIsEmpty && (
+        <div className={classes.items}>
+          {cart?.items?.map((item, index) => {
+            if (typeof item.product === 'object') {
+              const {
+                quantity,
+                product,
+                product: { title, meta },
+              } = item
+
+              const isLast = index === (cart?.items?.length || 0) - 1
+
+              const metaImage = meta?.image
+
+              return (
+                <Fragment key={index}>
+                  <div className={classes.row}>
+                    <div className={classes.mediaWrapper}>
+                      {!metaImage && <span className={classes.placeholder}>No image</span>}
+                      {metaImage && typeof metaImage !== 'string' && (
+                        <Media imgClassName={classes.image} resource={metaImage} fill />
+                      )}
+                    </div>
+                    <div className={classes.rowContent}>
+                      <h6 className={classes.title}>{title}</h6>
+                      {`Quantity: ${quantity}`}
+                      <Price product={product} button={false} />
+                    </div>
+                  </div>
+                  {!isLast && <HR />}
+                </Fragment>
+              )
+            }
+            return null
+          })}
+          <div className={classes.orderTotal}>{`Order total: ${cartTotal.formatted}`}</div>
+        </div>
+      )}
       {!clientSecret && !error && <div className={classes.loading}>Loading...</div>}
       {!clientSecret && error && (
         <div className={classes.error}>
@@ -79,6 +130,7 @@ const CheckoutPageClient: React.FC<{
           {error}
         </div>
       )}
+      {error && <p>{error}</p>}
       {clientSecret && (
         <Elements
           stripe={stripe}
@@ -86,64 +138,6 @@ const CheckoutPageClient: React.FC<{
             clientSecret,
           }}
         >
-          <h1>Checkout</h1>
-          <p>
-            This is a self-hosted, secure checkout using Stripe&apos;s Payment Element component.
-            Use credit card number <b>4242 4242 4242 4242</b> with any future date and CVC to create
-            a mock purchase. An order will be generated in the CMS and will appear in your account.
-          </p>
-          {error && <p>{error}</p>}
-          {cartIsEmpty && (
-            <div>
-              {'Your '}
-              <Link href="/cart">cart</Link>
-              {' is empty.'}
-              {typeof shopPage === 'object' && shopPage?.slug && (
-                <Fragment>
-                  {' '}
-                  <Link href={`/${shopPage.slug}`}>Continue shopping?</Link>
-                </Fragment>
-              )}
-            </div>
-          )}
-          {!cartIsEmpty && (
-            <div className={classes.items}>
-              {cart?.items?.map((item, index) => {
-                if (typeof item.product === 'object') {
-                  const {
-                    quantity,
-                    product,
-                    product: { title, meta },
-                  } = item
-
-                  const isLast = index === (cart?.items?.length || 0) - 1
-
-                  const metaImage = meta?.image
-
-                  return (
-                    <Fragment key={index}>
-                      <div className={classes.row}>
-                        <div className={classes.mediaWrapper}>
-                          {!metaImage && <span className={classes.placeholder}>No image</span>}
-                          {metaImage && typeof metaImage !== 'string' && (
-                            <Media imgClassName={classes.image} resource={metaImage} fill />
-                          )}
-                        </div>
-                        <div className={classes.rowContent}>
-                          <h6 className={classes.title}>{title}</h6>
-                          {`Quantity: ${quantity}`}
-                          <Price product={product} button={false} />
-                        </div>
-                      </div>
-                      {!isLast && <HR />}
-                    </Fragment>
-                  )
-                }
-                return null
-              })}
-              <div className={classes.orderTotal}>{`Order total: ${cartTotal.formatted}`}</div>
-            </div>
-          )}
           <CheckoutForm />
         </Elements>
       )}

@@ -54,9 +54,9 @@ const OrderConfirmationPage: React.FC = () => {
 
   return (
     <p>
-      {`Status: ${message}`}
+      {`Status: ${message || 'Loading...'}`}
       <br />
-      {`Stripe Payment ID: ${paymentIntent}`}
+      {`Stripe Payment ID: ${paymentIntent || 'Loading...'}`}
     </p>
   )
 }

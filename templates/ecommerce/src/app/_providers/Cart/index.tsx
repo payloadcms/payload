@@ -13,7 +13,6 @@ import React, {
 import { Product, User } from '../../../payload/payload-types'
 import { useAuth } from '../Auth'
 import { CartItem, cartReducer } from './reducer'
-// import { useNotifications } from '../Notifications';
 
 export type CartContext = {
   cart: User['cart']
@@ -26,7 +25,7 @@ export type CartContext = {
     formatted: string
     raw: number
   }
-  isLoading: boolean
+  hasInitializedCart: boolean
 }
 
 const Context = createContext({} as CartContext)
@@ -48,7 +47,7 @@ export const CartProvider = props => {
   const { user, status: authStatus } = useAuth()
 
   const [cart, dispatchCart] = useReducer(cartReducer, {
-    items: undefined,
+    items: [],
   })
 
   const [total, setTotal] = useState<{
@@ -59,8 +58,8 @@ export const CartProvider = props => {
     raw: 0,
   })
 
-  const [cartIsEmpty, setCartIsEmpty] = useState<boolean>()
   const hasInitialized = useRef(false)
+  const [hasInitializedCart, setHasInitialized] = useState(false)
 
   // Check local storage for a cart
   // If there is a cart, fetch the products and hydrate the cart
@@ -161,6 +160,8 @@ export const CartProvider = props => {
           if (req.ok) {
             localStorage.setItem('cart', '[]')
           }
+
+          setHasInitialized(true)
         }
 
         syncCartToPayload()
@@ -214,8 +215,6 @@ export const CartProvider = props => {
   // calculate the new cart total whenever the cart changes
   useEffect(() => {
     if (!hasInitialized) return
-    const isEmpty = !arrayHasItems(cart?.items)
-    setCartIsEmpty(isEmpty)
 
     const newTotal =
       cart?.items?.reduce((acc, item) => {
@@ -243,11 +242,11 @@ export const CartProvider = props => {
         cart,
         addItemToCart,
         deleteItemFromCart,
-        cartIsEmpty,
+        cartIsEmpty: hasInitializedCart && !arrayHasItems(cart?.items),
         clearCart,
         isProductInCart,
         cartTotal: total,
-        isLoading: cart?.items === undefined,
+        hasInitializedCart,
       }}
     >
       {children && children}

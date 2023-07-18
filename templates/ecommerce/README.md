@@ -210,7 +210,7 @@ To integrate with Stripe, follow these steps:
    ```
 1. Paste the given webhook signing secret into your `env`:
    ```bash
-   STRIPE_WEBHOOKS_ENDPOINT_SECRET=
+   STRIPE_WEBHOOKS_SIGNING_SECRET=
    ```
 1. Reboot Payload to ensure that Stripe connects and the webhooks are registered.
 

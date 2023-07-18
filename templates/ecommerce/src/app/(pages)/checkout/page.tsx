@@ -18,6 +18,12 @@ export default async function Checkout() {
 
   return (
     <Gutter className={classes.checkoutPage}>
+      <h1>Checkout</h1>
+      <p>
+        This is a self-hosted, secure checkout using Stripe&apos;s Payment Element component. Use
+        credit card number <b>4242 4242 4242 4242</b> with any future date and CVC to create a mock
+        purchase. An order will be generated in the CMS and will appear in your account.
+      </p>
       <CheckoutPageClient settings={settings} />
     </Gutter>
   )
