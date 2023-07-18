@@ -1,4 +1,4 @@
-> This repo is currently under active development.
+🚧 WAIT! This repo is in the process of being built and **not been tested for production use** yet. ⚠️
 
 # Sentry Plugin for Payload
 
