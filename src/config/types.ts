@@ -116,7 +116,7 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions;
-  destinationStream?: DestinationStream;
+  loggerDestination?: DestinationStream;
 
   /**
    * Sometimes, with the local API, you might need to pass a config file directly, for example, serverless on Vercel
