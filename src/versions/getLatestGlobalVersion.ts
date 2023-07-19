@@ -1,5 +1,5 @@
 import { Payload } from '../payload';
-import { docHasTimestamps, Document, Where } from '../types';
+import { docHasTimestamps, Document, PayloadRequest, Where } from '../types';
 import { SanitizedGlobalConfig } from '../globals/config/types';
 
 type Args = {
@@ -8,7 +8,7 @@ type Args = {
   slug: string
   config: SanitizedGlobalConfig
   locale?: string
-  transactionID?: string | number
+  req?: PayloadRequest
 }
 
 export const getLatestGlobalVersion = async ({
@@ -17,7 +17,7 @@ export const getLatestGlobalVersion = async ({
   slug,
   where,
   locale,
-  transactionID,
+  req,
 }: Args): Promise<{global: Document, globalExists: boolean}> => {
   let latestVersion;
 
@@ -28,7 +28,7 @@ export const getLatestGlobalVersion = async ({
       limit: 1,
       sort: '-updatedAt',
       locale,
-      transactionID,
+      req,
     })).docs[0];
   }
 
@@ -36,7 +36,7 @@ export const getLatestGlobalVersion = async ({
     slug,
     where,
     locale,
-    transactionID,
+    req,
   });
   const globalExists = Boolean(global);
 

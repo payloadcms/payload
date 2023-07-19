@@ -69,7 +69,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
   try {
     const shouldCommit = await initTransaction(req);
-    const { transactionID } = req;
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -208,13 +207,14 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
         doc: resultWithLocales,
         payload: req.payload,
         password: data.password as string,
+        req,
       });
     } else {
       try {
         doc = await payload.db.create({
           collection: collectionConfig.slug,
           data: resultWithLocales,
-          transactionID,
+          req,
         });
       } catch (error) {
       // Handle uniqueness error from MongoDB
@@ -239,7 +239,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
         id: result.id,
         docWithLocales: result,
         autosave,
-        transactionID,
       });
     }
 

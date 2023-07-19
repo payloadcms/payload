@@ -6,6 +6,7 @@ import flattenWhereToOperators from '../database/flattenWhereToOperators';
 import { buildSortParam } from './queries/buildSortParam';
 import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
 import { withSession } from './withSession';
+import { PayloadRequest } from '../express/types';
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: MongooseAdapter,
@@ -18,7 +19,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     locale,
     pagination,
     skip,
-    transactionID,
+    req = {} as PayloadRequest,
   },
 ) {
   const Model = this.versions[global];
@@ -26,7 +27,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     this.payload.globals.config.find(({ slug }) => slug === global),
   );
   const options = {
-    ...withSession(this, transactionID),
+    ...withSession(this, req.transactionID),
     skip,
     limit,
   };

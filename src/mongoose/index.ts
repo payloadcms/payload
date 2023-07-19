@@ -1,19 +1,16 @@
 import type { ClientSession, Connection, ConnectOptions } from 'mongoose';
 import { createMigration } from '../database/migrations/createMigration';
-import { CollectionModel } from '../collections/config/types';
-import type { DatabaseAdapter } from '../database/types';
 import type { Payload } from '../index';
+import type { DatabaseAdapter } from '../database/types';
 import { connect } from './connect';
 import { init } from './init';
 import { webpack } from './webpack';
-
 import { createGlobal } from './createGlobal';
 import { createVersion } from './createVersion';
 import { beginTransaction } from './transactions/beginTransaction';
 import { rollbackTransaction } from './transactions/rollbackTransaction';
 import { commitTransaction } from './transactions/commitTransaction';
 import { queryDrafts } from './queryDrafts';
-import { GlobalModel } from '../globals/config/types';
 import { find } from './find';
 import { findGlobalVersions } from './findGlobalVersions';
 import { findVersions } from './findVersions';
@@ -25,8 +22,10 @@ import { findOne } from './findOne';
 import { updateGlobal } from './updateGlobal';
 import { updateOne } from './updateOne';
 import { updateVersion } from './updateVersion';
+import { deleteMany } from './deleteMany';
 import { baseDatabaseAdapter } from '../database/baseDatabaseAdapter';
 import { destroy } from './destroy';
+import type { CollectionModel, GlobalModel } from './types';
 
 export interface Args {
   payload: Payload;
@@ -67,12 +66,12 @@ export function mongooseAdapter({
   return {
     ...adapter,
     connection: undefined,
-    globals: undefined,
     mongoMemoryServer: undefined,
-    sessions: { },
+    sessions: {},
     payload,
     url,
     connectOptions: connectOptions || {},
+    globals: undefined,
     collections: {},
     versions: {},
     connect,
@@ -89,6 +88,7 @@ export function mongooseAdapter({
     create,
     updateOne,
     deleteOne,
+    deleteMany,
     findGlobal,
     createGlobal,
     updateGlobal,

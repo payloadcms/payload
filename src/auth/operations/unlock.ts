@@ -34,7 +34,6 @@ async function unlock(args: Args): Promise<boolean> {
 
   try {
     const shouldCommit = await initTransaction(req);
-    const { transactionID } = req;
 
     // /////////////////////////////////////
     // Access
@@ -60,7 +59,7 @@ async function unlock(args: Args): Promise<boolean> {
       collection: collectionConfig.slug,
       where: { email: { equals: data.email.toLowerCase() } },
       locale,
-      transactionID,
+      req,
     });
 
     let result;

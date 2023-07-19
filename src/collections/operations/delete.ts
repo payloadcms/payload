@@ -55,7 +55,6 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
   try {
     const shouldCommit = await initTransaction(req);
-    const { transactionID } = req;
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -101,7 +100,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
       locale,
       where: fullWhere,
       collection: collectionConfig.slug,
-      transactionID,
+      req,
     });
 
     const errors = [];
@@ -145,7 +144,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
               equals: id,
             },
           },
-          transactionID,
+          req,
         });
 
         // /////////////////////////////////////
@@ -157,7 +156,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
             payload,
             id,
             slug: collectionConfig.slug,
-            transactionID,
+            req,
           });
         }
 
@@ -225,8 +224,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
       payload,
       collectionConfig,
       ids: docs.map(({ id }) => id),
-      // TODO: add transactionID to deleteUserPreferences
-      // transactionID,
+      req,
     });
 
     if (shouldCommit) await payload.db.commitTransaction(req.transactionID);

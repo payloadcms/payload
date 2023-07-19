@@ -46,7 +46,6 @@ async function findVersionByID<T extends TypeWithID = any>(args: Arguments): Pro
 
   try {
     const shouldCommit = await initTransaction(req);
-    const { transactionID } = req;
 
     // /////////////////////////////////////
     // Access
@@ -71,7 +70,7 @@ async function findVersionByID<T extends TypeWithID = any>(args: Arguments): Pro
       limit: 1,
       pagination: false,
       where: fullWhere,
-      transactionID,
+      req,
     });
 
     const result = versionsQuery.docs[0];

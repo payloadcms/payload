@@ -1,14 +1,15 @@
 import type { MongooseAdapter } from '.';
 import type { UpdateVersion } from '../database/types';
 import { withSession } from './withSession';
+import { PayloadRequest } from '../express/types';
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: MongooseAdapter,
-  { collectionSlug, where, locale, versionData, transactionID },
+  { collectionSlug, where, locale, versionData, req = {} as PayloadRequest },
 ) {
   const VersionModel = this.versions[collectionSlug];
   const options = {
-    ...withSession(this, transactionID),
+    ...withSession(this, req.transactionID),
     new: true,
     lean: true,
   };

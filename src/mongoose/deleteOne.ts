@@ -1,15 +1,16 @@
 import type { MongooseAdapter } from '.';
 import type { DeleteOne } from '../database/types';
 import type { Document } from '../types';
+import { PayloadRequest } from '../types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import { withSession } from './withSession';
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: MongooseAdapter,
-  { collection, where, transactionID },
+  { collection, where, req = {} as PayloadRequest },
 ) {
   const Model = this.collections[collection];
-  const options = withSession(this, transactionID);
+  const options = withSession(this, req.transactionID);
 
   const query = await Model.buildQuery({
     payload: this.payload,

@@ -52,7 +52,6 @@ async function resetPassword(args: Arguments): Promise<Result> {
 
   try {
     const shouldCommit = await initTransaction(req);
-    const { transactionID } = req;
 
     // /////////////////////////////////////
     // Reset Password
@@ -64,7 +63,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
         resetPasswordToken: { equals: data.token },
         resetPasswordExpiration: { greater_than: Date.now() },
       },
-      transactionID,
+      req,
     });
 
     if (!user) throw new APIError('Token is either invalid or has expired.');
@@ -85,7 +84,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
       collection: collectionConfig.slug,
       where: { id: { equals: user.id } },
       data: user,
-      transactionID,
+      req,
     });
 
 

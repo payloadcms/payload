@@ -65,7 +65,6 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
   try {
     const shouldCommit = await initTransaction(req);
-    const { transactionID } = req;
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -112,7 +111,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       config: collectionConfig,
       id,
       query: findOneArgs,
-      transactionID,
+      req,
     });
 
     if (!docWithLocales && !hasWherePolicy) throw new NotFound(t);
@@ -240,7 +239,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
         locale,
         where: { id: { equals: id } },
         data: dataToUpdate,
-        transactionID,
+        req,
       });
     }
 
@@ -260,7 +259,6 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
         id,
         autosave,
         draft: shouldSaveDraft,
-        transactionID,
       });
     }
 

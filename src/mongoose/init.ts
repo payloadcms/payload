@@ -6,16 +6,16 @@ import { buildVersionCollectionFields } from '../versions/buildCollectionFields'
 import getBuildQueryPlugin from './queries/buildQuery';
 import buildCollectionSchema from './models/buildCollectionSchema';
 import buildSchema from './models/buildSchema';
-import { CollectionModel, SanitizedCollectionConfig } from '../collections/config/types';
+import { SanitizedCollectionConfig } from '../collections/config/types';
 import { getVersionsModelName } from '../versions/getVersionsModelName';
 import type { MongooseAdapter } from '.';
 import { buildGlobalModel } from './models/buildGlobalModel';
 import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
 import type { Init } from '../database/types';
+import { CollectionModel } from './types';
 
 export const init: Init = async function init(
   this: MongooseAdapter,
-  payload,
 ) {
   this.payload.config.collections.forEach(
     (collection: SanitizedCollectionConfig) => {
@@ -46,19 +46,21 @@ export const init: Init = async function init(
               fields: {},
               options: index.options,
             };
-            Object.entries(index.fields).forEach(([key, value]) => {
-              versionIndex.fields[`version.${key}`] = value;
-            });
+            Object.entries(index.fields)
+              .forEach(([key, value]) => {
+                versionIndex.fields[`version.${key}`] = value;
+              });
             versionSchema.index(versionIndex.fields, versionIndex.options);
           });
         }
 
-        versionSchema.plugin(paginate, { useEstimatedCount: true }).plugin(
-          getBuildQueryPlugin({
-            collectionSlug: collection.slug,
-            versionsFields: versionCollectionFields,
-          }),
-        );
+        versionSchema.plugin(paginate, { useEstimatedCount: true })
+          .plugin(
+            getBuildQueryPlugin({
+              collectionSlug: collection.slug,
+              versionsFields: versionCollectionFields,
+            }),
+          );
 
         if (collection.versions?.drafts) {
           versionSchema.plugin(mongooseAggregatePaginate);
@@ -76,7 +78,6 @@ export const init: Init = async function init(
       this.collections[collection.slug] = model;
 
       this.payload.collections[collection.slug] = {
-        Model: model,
         config: collection,
       };
     },
@@ -84,8 +85,6 @@ export const init: Init = async function init(
 
   const model = buildGlobalModel(this.payload.config);
   this.globals = model;
-
-  this.payload.globals.Model = model;
 
   this.payload.config.globals.forEach((global) => {
     if (global.versions) {

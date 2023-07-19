@@ -1,16 +1,18 @@
+import type { MongooseQueryOptions } from 'mongoose';
 import type { MongooseAdapter } from '.';
 import type { FindOne } from '../database/types';
 import type { Document } from '../types';
+import { PayloadRequest } from '../types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import { withSession } from './withSession';
 
 export const findOne: FindOne = async function findOne(
   this: MongooseAdapter,
-  { collection, where, locale, transactionID },
+  { collection, where, locale, req = {} as PayloadRequest },
 ) {
   const Model = this.collections[collection];
-  const options = {
-    ...withSession(this, transactionID),
+  const options: MongooseQueryOptions = {
+    ...withSession(this, req.transactionID),
     lean: true,
   };
 

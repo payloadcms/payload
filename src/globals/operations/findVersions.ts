@@ -2,7 +2,7 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { PaginatedDocs } from '../../mongoose/types';
+import type { PaginatedDocs } from '../../database/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
@@ -41,8 +41,6 @@ async function findVersions<T extends TypeWithVersion<T>>(
     showHiddenFields,
   } = args;
 
-  const { transactionID } = req;
-
   const versionFields = buildVersionGlobalFields(globalConfig);
 
   // /////////////////////////////////////
@@ -72,7 +70,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     sort,
     global: globalConfig.slug,
     locale,
-    transactionID,
+    req,
   });
 
   // /////////////////////////////////////

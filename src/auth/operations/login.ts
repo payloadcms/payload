@@ -59,7 +59,6 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
   try {
     const shouldCommit = await initTransaction(req);
-    const { transactionID } = req;
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -85,7 +84,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     let user = await payload.db.findOne<any>({
       collection: collectionConfig.slug,
       where: { email: { equals: email.toLowerCase() } },
-      transactionID,
+      req,
     });
 
     if (!user || (args.collection.config.auth.verify && user._verified === false)) {

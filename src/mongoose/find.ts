@@ -5,6 +5,7 @@ import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
 import { buildSortParam } from './queries/buildSortParam';
 import { withSession } from './withSession';
+import { PayloadRequest } from '../express/types';
 
 export const find: Find = async function find(
   this: MongooseAdapter,
@@ -16,12 +17,12 @@ export const find: Find = async function find(
     sort: sortArg,
     locale,
     pagination,
-    transactionID,
+    req = {} as PayloadRequest,
   },
 ) {
   const Model = this.collections[collection];
   const collectionConfig = this.payload.collections[collection].config;
-  const options = withSession(this, transactionID);
+  const options = withSession(this, req.transactionID);
 
   let hasNearConstraint = false;
 

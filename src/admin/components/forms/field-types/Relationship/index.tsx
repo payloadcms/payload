@@ -11,7 +11,7 @@ import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { relationship } from '../../../../../fields/validations';
 import { Where } from '../../../../../types';
-import { PaginatedDocs } from '../../../../../mongoose/types';
+import type { PaginatedDocs } from '../../../../../database/types';
 import { useFormProcessing } from '../../Form/context';
 import optionsReducer from './optionsReducer';
 import { FilterOptionsResult, GetResults, Props, Value } from './types';

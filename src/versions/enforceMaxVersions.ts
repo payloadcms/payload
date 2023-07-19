@@ -2,6 +2,7 @@ import { Payload } from '../payload';
 import type { SanitizedCollectionConfig } from '../collections/config/types';
 import type { SanitizedGlobalConfig } from '../globals/config/types';
 import type { Where } from '../types';
+import { PayloadRequest } from '../types';
 
 type Args = {
   payload: Payload
@@ -9,7 +10,7 @@ type Args = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
   id?: string | number
-  transactionID?: string | number
+  req?: PayloadRequest
 }
 
 export const enforceMaxVersions = async ({
@@ -18,7 +19,7 @@ export const enforceMaxVersions = async ({
   collection,
   global,
   id,
-  transactionID,
+  req,
 }: Args): Promise<void> => {
   const entityType = collection ? 'collection' : 'global';
   const slug = collection ? collection.slug : global?.slug;
@@ -38,7 +39,7 @@ export const enforceMaxVersions = async ({
         skip: max,
         sort: '-updatedAt',
         pagination: false,
-        transactionID,
+        req,
       });
 
       [oldestAllowedDoc] = query.docs;
@@ -48,7 +49,7 @@ export const enforceMaxVersions = async ({
         global: global.slug,
         skip: max,
         sort: '-updatedAt',
-        transactionID,
+        req,
       });
 
       [oldestAllowedDoc] = query.docs;
@@ -70,7 +71,7 @@ export const enforceMaxVersions = async ({
       await payload.db.deleteVersions({
         collection: collection?.slug,
         where: deleteQuery,
-        transactionID,
+        req,
       });
     }
   } catch (err) {

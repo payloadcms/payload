@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { PayloadRequest } from '../../../express/types';
-import type { PaginatedDocs } from '../../../mongoose/types';
+import type { PaginatedDocs } from '../../../database/types';
 import { Where } from '../../../types';
 import { Collection } from '../../config/types';
 import find from '../../operations/find';

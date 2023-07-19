@@ -4,7 +4,7 @@ import login, { Result } from '../login';
 import { PayloadRequest } from '../../../express/types';
 import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
-import i18n from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
@@ -46,7 +46,7 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
 
   req.payloadAPI = req.payloadAPI || 'local';
   req.payload = payload;
-  req.i18n = i18n(payload.config.i18n);
+  req.i18n = i18nInit(payload.config.i18n);
   req.locale = undefined;
   req.fallbackLocale = undefined;
 

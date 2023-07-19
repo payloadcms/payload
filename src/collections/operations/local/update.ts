@@ -8,7 +8,7 @@ import update from '../update';
 import { PayloadRequest } from '../../../express/types';
 import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
-import i18nInit from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 import updateByID from '../updateByID';
 import { BulkOperationResult } from '../../config/types';

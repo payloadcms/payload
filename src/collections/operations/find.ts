@@ -2,7 +2,7 @@ import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import { Collection, TypeWithID } from '../config/types';
-import { PaginatedDocs } from '../../mongoose/types';
+import type { PaginatedDocs } from '../../database/types';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
@@ -57,7 +57,6 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
   try {
     const shouldCommit = await initTransaction(req);
-    const { transactionID } = req;
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -129,7 +128,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         sort,
         pagination: usePagination,
         locale,
-        transactionID,
+        req,
       });
     } else {
       await validateQueryPaths({
@@ -147,7 +146,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         sort,
         locale,
         pagination,
-        transactionID,
+        req,
       });
     }
 

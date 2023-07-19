@@ -44,7 +44,6 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
 
   try {
     const shouldCommit = await initTransaction(req);
-    const { transactionID } = req;
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -87,7 +86,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
       collection: collectionConfig.slug,
       where: combineQueries({ id: { equals: id } }, accessResults),
       locale: req.locale,
-      transactionID,
+      req,
     });
 
 
@@ -105,7 +104,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     let result = await req.payload.db.deleteOne({
       collection: collectionConfig.slug,
       where: { id: { equals: id } },
-      transactionID,
+      req,
     });
 
 
@@ -117,8 +116,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
       payload,
       collectionConfig,
       ids: [id],
-      // TODO: add transactionID to deleteUserPreferences
-      // transactionID,
+      req,
     });
 
     // /////////////////////////////////////
@@ -130,7 +128,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
         payload,
         id,
         slug: collectionConfig.slug,
-        transactionID,
+        req,
       });
     }
 

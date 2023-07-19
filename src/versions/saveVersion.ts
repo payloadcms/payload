@@ -9,12 +9,11 @@ type Args = {
   payload: Payload
   global?: SanitizedGlobalConfig
   collection?: SanitizedCollectionConfig
-  req: PayloadRequest
   docWithLocales: any
   id?: string | number
   autosave?: boolean
   draft?: boolean
-  transactionID?: string | number
+  req?: PayloadRequest
 }
 
 export const saveVersion = async ({
@@ -25,7 +24,7 @@ export const saveVersion = async ({
   docWithLocales: doc,
   autosave,
   draft,
-  transactionID,
+  req,
 }: Args): Promise<TypeWithID> => {
   let result;
   let entityConfig;
@@ -55,7 +54,7 @@ export const saveVersion = async ({
           },
         },
         sort: '-updatedAt',
-        transactionID,
+        req,
       });
       const [latestVersion] = docs;
 
@@ -78,6 +77,7 @@ export const saveVersion = async ({
               equals: latestVersion.id,
             },
           },
+          req,
         });
       }
     }
@@ -90,7 +90,7 @@ export const saveVersion = async ({
         createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
         updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
         versionData,
-        transactionID,
+        req,
       });
     }
   } catch (err) {
@@ -114,7 +114,7 @@ export const saveVersion = async ({
       collection,
       global,
       max,
-      transactionID,
+      req,
     });
   }
 

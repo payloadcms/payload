@@ -78,7 +78,9 @@ async function findByID<T extends TypeWithID>(
       collection: collectionConfig.slug,
       where: combineQueries({ id: { equals: id } }, accessResult),
       locale,
-      transactionID,
+      req: {
+        transactionID: req.transactionID,
+      } as PayloadRequest,
     };
 
     // /////////////////////////////////////

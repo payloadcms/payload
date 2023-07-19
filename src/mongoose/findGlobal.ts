@@ -3,14 +3,15 @@ import { combineQueries } from '../database/combineQueries';
 import type { FindGlobal } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import { withSession } from './withSession';
+import { PayloadRequest } from '../express/types';
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: MongooseAdapter,
-  { slug, locale, where, transactionID },
+  { slug, locale, where, req = {} as PayloadRequest },
 ) {
   const Model = this.globals;
   const options = {
-    ...withSession(this, transactionID),
+    ...withSession(this, req.transactionID),
     lean: true,
   };
 

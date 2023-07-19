@@ -4,7 +4,6 @@ import { MongooseAdapter } from './index';
 
 export const destroy: Destroy = async function destroy(
   this: MongooseAdapter,
-  payload,
 ) {
   if (this.mongoMemoryServer) {
     await mongoose.connection.dropDatabase();

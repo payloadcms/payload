@@ -1,6 +1,7 @@
 import type { MongooseAdapter } from '.';
 import type { CreateVersion } from '../database/types';
 import type { Document } from '../types';
+import { PayloadRequest } from '../types';
 import { withSession } from './withSession';
 
 export const createVersion: CreateVersion = async function createVersion(
@@ -12,11 +13,11 @@ export const createVersion: CreateVersion = async function createVersion(
     autosave,
     createdAt,
     updatedAt,
-    transactionID,
+    req = {} as PayloadRequest,
   },
 ) {
   const VersionModel = this.versions[collectionSlug];
-  const options = withSession(this, transactionID);
+  const options = withSession(this, req.transactionID);
 
   const [doc] = await VersionModel.create(
     [
@@ -29,6 +30,7 @@ export const createVersion: CreateVersion = async function createVersion(
       },
     ],
     options,
+    req,
   );
 
   const result: Document = JSON.parse(JSON.stringify(doc));

@@ -2,16 +2,17 @@ import type { MongooseAdapter } from '.';
 import type { UpdateOne } from '../database/types';
 import { ValidationError } from '../errors';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
-import i18nInit from '../translations/init';
+import { i18nInit } from '../translations/init';
 import { withSession } from './withSession';
+import { PayloadRequest } from '../express/types';
 
 export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,
-  { collection, data, where, locale, transactionID },
+  { collection, data, where, locale, req = {} as PayloadRequest },
 ) {
   const Model = this.collections[collection];
   const options = {
-    ...withSession(this, transactionID),
+    ...withSession(this, req.transactionID),
     new: true,
     lean: true,
   };
@@ -35,7 +36,7 @@ export const updateOne: UpdateOne = async function updateOne(
             field: Object.keys(error.keyValue)[0],
           },
         ],
-        i18nInit(this.payload.config.i18n).t,
+        req?.t ?? i18nInit(this.payload.config.i18n).t,
       )
       : error;
   }

@@ -5,6 +5,7 @@ import flattenWhereToOperators from '../database/flattenWhereToOperators';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import { buildSortParam } from './queries/buildSortParam';
 import { withSession } from './withSession';
+import { PayloadRequest } from '../express/types';
 
 type AggregateVersion<T> = {
   _id: string;
@@ -23,12 +24,12 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
     sort: sortArg,
     locale,
     pagination,
-    transactionID,
+    req = {} as PayloadRequest,
   },
 ) {
   const VersionModel = this.versions[collection];
   const collectionConfig = this.payload.collections[collection].config;
-  const options = withSession(this, transactionID);
+  const options = withSession(this, req.transactionID);
 
   const versionQuery = await VersionModel.buildQuery({
     where,

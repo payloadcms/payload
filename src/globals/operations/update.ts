@@ -45,7 +45,6 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 
   try {
     const shouldCommit = await initTransaction(req);
-    const { transactionID } = req;
 
     let { data } = args;
 
@@ -78,7 +77,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
       slug,
       where: query,
       locale,
-      transactionID,
+      req,
     });
 
     let globalJSON: Record<string, unknown> = {};
@@ -164,13 +163,13 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
         result = await payload.db.updateGlobal({
           slug,
           data: result,
-          transactionID,
+          req,
         });
       } else {
         result = await payload.db.createGlobal({
           slug,
           data: result,
-          transactionID,
+          req,
         });
       }
     }
@@ -191,7 +190,6 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
         },
         autosave,
         draft: shouldSaveDraft,
-        transactionID,
       });
     }
 

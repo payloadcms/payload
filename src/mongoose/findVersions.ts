@@ -5,6 +5,7 @@ import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
 import { buildSortParam } from './queries/buildSortParam';
 import { withSession } from './withSession';
+import { PayloadRequest } from '../express/types';
 
 export const findVersions: FindVersions = async function findVersions(
   this: MongooseAdapter,
@@ -17,13 +18,13 @@ export const findVersions: FindVersions = async function findVersions(
     locale,
     pagination,
     skip,
-    transactionID,
+    req = {} as PayloadRequest,
   },
 ) {
   const Model = this.versions[collection];
   const collectionConfig = this.payload.collections[collection].config;
   const options = {
-    ...withSession(this, transactionID),
+    ...withSession(this, req.transactionID),
     skip,
     limit,
   };

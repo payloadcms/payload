@@ -63,7 +63,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
   try {
     const shouldCommit = await initTransaction(req);
-    const { transactionID } = req;
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -124,7 +123,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         collection: collectionConfig.slug,
         where: versionsWhere,
         locale,
-        transactionID,
+        req,
       });
 
       docs = query.docs;
@@ -135,7 +134,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         where: fullWhere,
         pagination: false,
         limit: 0,
-        transactionID,
+        req,
       });
 
       docs = query.docs;
@@ -255,7 +254,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
             locale,
             where: { id: { equals: id } },
             data: result,
-            transactionID,
+            req,
           });
         }
 

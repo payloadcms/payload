@@ -44,11 +44,10 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
 
   try {
     const shouldCommit = await initTransaction(req);
-    const { transactionID } = req;
 
     const doc = await payload.db.findOne({
       collection: config.slug,
-      transactionID,
+      req,
     });
 
     if (doc) throw new Forbidden(req.t);

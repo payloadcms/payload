@@ -12,6 +12,9 @@ export const readMigrationFiles = async ({
   payload: Payload;
 }): Promise<Migration[]> => {
   const { config } = payload;
+
+  if (!fs.existsSync(config.db.migrationDir)) return [];
+
   const files = fs
     .readdirSync(config.db.migrationDir)
     .sort()

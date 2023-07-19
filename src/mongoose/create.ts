@@ -1,14 +1,15 @@
 import type { MongooseAdapter } from '.';
 import type { Create } from '../database/types';
-import { Document } from '../types';
+import type { Document } from '../types';
+import { PayloadRequest } from '../types';
 import { withSession } from './withSession';
 
 export const create: Create = async function create(
   this: MongooseAdapter,
-  { collection, data, transactionID },
+  { collection, data, req = {} as PayloadRequest },
 ) {
   const Model = this.collections[collection];
-  const options = withSession(this, transactionID);
+  const options = withSession(this, req.transactionID);
 
   const [doc] = await Model.create([data], options);
 

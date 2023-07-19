@@ -43,7 +43,6 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
 
   try {
     const shouldCommit = await initTransaction(req);
-    const { transactionID } = req;
 
     if (!id) {
       throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST);
@@ -58,7 +57,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       where: { id: { equals: id } },
       locale,
       limit: 1,
-      transactionID,
+      req,
     });
 
     const [rawVersion] = versionDocs;
@@ -84,7 +83,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       collection: collectionConfig.slug,
       where: combineQueries({ id: { equals: parentDocID } }, accessResults),
       locale,
-      transactionID,
+      req,
     };
 
     const doc = await req.payload.db.findOne(findOneArgs);
@@ -102,7 +101,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       id: parentDocID,
       query: findOneArgs,
       config: collectionConfig,
-      transactionID,
+      req,
     });
 
     // /////////////////////////////////////
@@ -113,7 +112,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       collection: collectionConfig.slug,
       where: { id: { equals: parentDocID } },
       data: rawVersion.version,
-      transactionID,
+      req,
     });
 
     // /////////////////////////////////////
@@ -131,7 +130,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       autosave: false,
       createdAt: prevVersion.createdAt,
       updatedAt: new Date().toISOString(),
-      transactionID,
+      req,
     });
 
     // /////////////////////////////////////

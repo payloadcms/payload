@@ -5,7 +5,7 @@ import { Payload } from '../../../payload';
 import deleteOperation from '../delete';
 import deleteByID from '../deleteByID';
 import { getDataLoader } from '../../dataloader';
-import i18nInit from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { BulkOperationResult } from '../../config/types';
 
@@ -50,7 +50,6 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
   } = options;
 
   const collection = payload.collections[collectionSlug];
-  const i18n = i18nInit(payload.config.i18n);
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   if (!collection) {
@@ -61,8 +60,9 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
   req.locale = locale ?? req?.locale ?? defaultLocale;
   req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
   req.payload = payload;
-  req.user = user;
-  req.i18n = i18n;
+  req.i18n = i18nInit(payload.config.i18n);
+
+  if (typeof user !== 'undefined') req.user = user;
 
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

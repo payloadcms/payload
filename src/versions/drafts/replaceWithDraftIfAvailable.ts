@@ -26,7 +26,6 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
 }: Arguments<T>): Promise<T> => {
   const {
     locale,
-    transactionID,
   } = req;
 
   const queryToBuild: Where = {
@@ -69,7 +68,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     global: entity.slug,
     limit: 1,
     sort: '-updatedAt',
-    transactionID,
+    req,
   };
 
   let versionDocs;

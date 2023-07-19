@@ -33,7 +33,6 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
   try {
     const shouldCommit = await initTransaction(req);
-    const { transactionID } = req;
 
     // /////////////////////////////////////
     // Access
@@ -51,7 +50,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
       global: globalConfig.slug,
       where: { id: { equals: id } },
       limit: 1,
-      transactionID,
+      req,
     });
 
 
@@ -68,6 +67,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     const previousDoc = await payload.findGlobal({
       slug: globalConfig.slug,
       depth,
+      req,
     });
 
     // /////////////////////////////////////

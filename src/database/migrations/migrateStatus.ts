@@ -8,6 +8,11 @@ export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
   const migrationFiles = await readMigrationFiles({ payload });
   const { existingMigrations } = await getMigrations({ payload });
 
+  if (!migrationFiles.length) {
+    payload.logger.info({ msg: 'No migrations found.' });
+    return;
+  }
+
   // Compare migration files to existing migrations
   const statuses = migrationFiles.map((migration) => {
     const existingMigration = existingMigrations.find(

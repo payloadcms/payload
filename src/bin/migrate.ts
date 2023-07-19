@@ -33,6 +33,9 @@ export const migrate = async (args: string[]): Promise<void> => {
       await adapter.migrateFresh();
       break;
     case 'migrate:create':
+      if (!args[1]) {
+        throw new Error('Please provide a migration name.');
+      }
       await adapter.createMigration(args[1]);
       break;
 

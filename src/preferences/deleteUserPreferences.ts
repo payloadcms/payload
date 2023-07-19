@@ -1,5 +1,6 @@
 import type { Payload } from '../index';
 import type { SanitizedCollectionConfig } from '../collections/config/types';
+import { PayloadRequest } from '../express/types';
 
 type Args = {
   payload: Payload
@@ -8,13 +9,26 @@ type Args = {
    */
   ids: (string|number)[]
   collectionConfig: SanitizedCollectionConfig
+  req: PayloadRequest
 }
-export const deleteUserPreferences = ({ payload, ids, collectionConfig }: Args) => {
+export const deleteUserPreferences = ({ payload, ids, collectionConfig, req }: Args) => {
   if (collectionConfig.auth) {
-    payload.collections['payload-preferences'].Model.deleteMany({
-      user: { in: ids },
-      userCollection: collectionConfig.slug,
+    payload.db.deleteMany({
+      collection: 'payload-preferences',
+      where: {
+        user: { in: ids },
+        userCollection: {
+          equals: 'collectionConfig.slug,',
+        },
+      },
+      req,
     });
   }
-  payload.collections['payload-preferences'].Model.deleteMany({ key: { in: ids.map((id) => `collection-${collectionConfig.slug}-${id}`) } });
+  payload.db.deleteMany({
+    collection: 'payload-preferences',
+    where: {
+      key: { in: ids.map((id) => `collection-${collectionConfig.slug}-${id}`) },
+    },
+    req,
+  });
 };
