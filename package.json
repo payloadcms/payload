@@ -139,7 +139,7 @@
     "monaco-editor": "^0.38.0",
     "mongoose": "6.5.0",
     "mongoose-aggregate-paginate-v2": "^1.0.6",
-    "mongoose-paginate-v2": "^1.6.1",
+    "mongoose-paginate-v2": "1.7.1",
     "nodemailer": "^6.9.0",
     "object-to-formdata": "^4.4.2",
     "passport": "^0.6.0",
