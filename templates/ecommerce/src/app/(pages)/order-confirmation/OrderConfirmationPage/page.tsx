@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { Fragment, useEffect, useRef, useState } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { useSearchParams } from 'next/navigation'
 
+import { LoadingShimmer } from '../../../_components/LoadingShimmer'
 import { useCart } from '../../../_providers/Cart'
 
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
@@ -58,12 +59,15 @@ const OrderConfirmationPage: React.FC = () => {
   return (
     <div>
       {!message ? (
-        <p>Loading...</p>
+        <Fragment>
+          <LoadingShimmer />
+          <br />
+        </Fragment>
       ) : (
         <p>
-          {`Status: ${message || 'Loading...'}`}
+          {`Status: ${message}`}
           <br />
-          {`Stripe Payment ID: ${paymentIntent || 'Loading...'}`}
+          {`Stripe Payment ID: ${paymentIntent}`}
         </p>
       )}
     </div>

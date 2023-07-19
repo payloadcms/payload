@@ -12,7 +12,7 @@ import { product2 } from './product-2'
 import { product3 } from './product-3'
 import { shopPage } from './shop-page'
 
-const collections = ['categories', 'media', 'pages', 'products', 'orders']
+const collections = ['categories', 'media', 'pages', 'products']
 const globals = ['header', 'settings', 'footer']
 
 export const seed = async (payload: Payload): Promise<void> => {

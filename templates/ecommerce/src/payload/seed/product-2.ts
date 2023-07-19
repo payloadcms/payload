@@ -44,6 +44,7 @@ export const product2: Partial<Product> = {
       ],
     },
   ],
+  enablePaywall: true,
   paywall: [
     {
       blockType: 'content',
@@ -58,7 +59,7 @@ export const product2: Partial<Product> = {
                   bold: true,
                 },
                 {
-                  text: ' This can be anything from additional content and videos to download links and more. It is only available to users who have purchased this product. If you are seeing this, you have purchased this product.',
+                  text: ' It is only available to admins and users who have purchased this product. This content can be anything from additional video and text and content, to download links and more. These are simply layout building blocks configured in the CMS.',
                 },
               ],
             },

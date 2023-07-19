@@ -86,6 +86,11 @@ const Products: CollectionConfig = {
               },
             },
             {
+              name: 'enablePaywall',
+              label: 'Enable Paywall',
+              type: 'checkbox',
+            },
+            {
               name: 'paywall',
               label: 'Paywall',
               type: 'blocks',

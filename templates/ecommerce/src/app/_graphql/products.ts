@@ -25,14 +25,24 @@ export const PRODUCT = `
           ${MEDIA_BLOCK}
           ${ARCHIVE_BLOCK}
         }
+        priceJSON
+        ${META}
+        enablePaywall
+      }
+    }
+  }
+`
+
+export const PRODUCT_PAYWALL = `
+  query Product($slug: String ) {
+    Products(where: { slug: { equals: $slug}}) {
+      docs {
         paywall {
           ${CALL_TO_ACTION}
           ${CONTENT}
           ${MEDIA_BLOCK}
           ${ARCHIVE_BLOCK}
         }
-        priceJSON
-        ${META}
       }
     }
   }

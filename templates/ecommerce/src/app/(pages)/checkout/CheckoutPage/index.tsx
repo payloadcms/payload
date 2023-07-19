@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 
 import { Settings } from '../../../../payload/payload-types'
 import { HR } from '../../../_components/HR'
+import { LoadingShimmer } from '../../../_components/LoadingShimmer'
 import { Media } from '../../../_components/Media'
 import { Price } from '../../../_components/Price'
 import { useAuth } from '../../../_providers/Auth'
@@ -126,7 +127,11 @@ const CheckoutPageClient: React.FC<{
           <div className={classes.orderTotal}>{`Order total: ${cartTotal.formatted}`}</div>
         </div>
       )}
-      {!clientSecret && !error && <div className={classes.loading}>Loading...</div>}
+      {!clientSecret && !error && (
+        <div className={classes.loading}>
+          <LoadingShimmer number={3} />
+        </div>
+      )}
       {!clientSecret && error && (
         <div className={classes.error}>
           <p>Error:</p>

@@ -121,7 +121,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: "Manage this site's content, orders, customers, and more from the ",
+                  text: 'Manage this users, pages, products, and more from the ',
                 },
                 {
                   type: 'link',

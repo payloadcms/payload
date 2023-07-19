@@ -142,6 +142,7 @@ export interface Product {
   )[];
   stripeProductID?: string;
   priceJSON?: string;
+  enablePaywall?: boolean;
   paywall?: (
     | {
         invertBackground?: boolean;
