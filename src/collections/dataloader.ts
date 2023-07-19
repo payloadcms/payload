@@ -74,7 +74,7 @@ const batchAndLoadDocs = (req: PayloadRequest): BatchLoadFn<string, TypeWithID> 
   // Run find requests in parallel
 
   const results = Object.entries(batchByFindArgs).map(async ([batchKey, ids]) => {
-    const [transactionID, collection, depth, currentDepth, locale, fallbackLocale, overrideAccess, showHiddenFields] = JSON.parse(batchKey);
+    const [/* transactionID */, collection, depth, currentDepth, locale, fallbackLocale, overrideAccess, showHiddenFields] = JSON.parse(batchKey);
 
     const result = await payload.find({
       collection,

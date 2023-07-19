@@ -351,7 +351,7 @@ function buildObjectType({
               }
 
               const result = await context.req.payloadDataLoader.load(JSON.stringify([
-                args.transactionID,
+                context.req.transactionID,
                 collectionSlug,
                 id,
                 0,
