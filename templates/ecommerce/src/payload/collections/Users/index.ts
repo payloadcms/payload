@@ -6,6 +6,7 @@ import adminsAndUser from './access/adminsAndUser'
 import { checkRole } from './checkRole'
 import { getUserOrder } from './endpoints/order'
 import { getUserOrders } from './endpoints/orders'
+import { addPurchases } from './endpoints/purchases'
 import { createStripeCustomer } from './hooks/createStripeCustomer'
 import { ensureFirstUserIsAdmin } from './hooks/ensureFirstUserIsAdmin'
 import { loginAfterCreate } from './hooks/loginAfterCreate'
@@ -39,6 +40,11 @@ const Users: CollectionConfig = {
       path: '/orders',
       method: 'get',
       handler: getUserOrders,
+    },
+    {
+      path: '/purchases',
+      method: 'post',
+      handler: addPurchases,
     },
   ],
   fields: [

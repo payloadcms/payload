@@ -34,6 +34,12 @@ export const getUserOrders: PayloadHandler = async (req, res): Promise<void> => 
     const orders = await stripe.invoices.list({
       customer: stripeCustomerID,
       limit: 100,
+      // only paid, active invoices
+      // this is because we technically create a _potential_ invoice for every order
+      // these invoices are not paid until the user completes the  checkout process
+      // they remain in the Stripe logs until they expire
+      // TODO: find a way to avoid this
+      status: 'paid',
     })
 
     if (!orders || orders.data.length === 0) {

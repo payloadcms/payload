@@ -39,20 +39,21 @@ export default async function Account() {
       </p>
       <div>
         {user?.purchases?.length || 0 > 0 ? (
-          user?.purchases?.map(purchase => {
-            if (typeof purchase === 'string') {
+          <ul className={classes.purchases}>
+            {user?.purchases?.map((purchase, index) => {
               return (
-                <div key={purchase}>
-                  <h4>{purchase}</h4>
-                </div>
+                <li key={index} className={classes.purchase}>
+                  {typeof purchase === 'string' ? (
+                    <p>{purchase}</p>
+                  ) : (
+                    <h4>
+                      <Link href={`/products/${purchase.slug}`}>{purchase.title}</Link>
+                    </h4>
+                  )}
+                </li>
               )
-            }
-            return (
-              <Link key={purchase.id} href={`/products/${purchase.slug}`}>
-                <h4>{purchase.title}</h4>
-              </Link>
-            )
-          })
+            })}
+          </ul>
         ) : (
           <div>You have no purchases.</div>
         )}
