@@ -1,11 +1,11 @@
 import React from 'react'
 import { Metadata } from 'next'
 import Link from 'next/link'
+import Stripe from 'stripe'
 
-import { Order } from '../../../payload/payload-types'
-import { fetchDocs } from '../../_api/fetchDocs'
 import { Button } from '../../_components/Button'
 import { Gutter } from '../../_components/Gutter'
+import { HR } from '../../_components/HR'
 import { RenderParams } from '../../_components/RenderParams'
 import { getMeUser } from '../../_utilities/getMeUser'
 import { mergeOpenGraph } from '../../_utilities/mergeOpenGraph'
@@ -13,11 +13,21 @@ import { mergeOpenGraph } from '../../_utilities/mergeOpenGraph'
 import classes from './index.module.scss'
 
 export default async function Orders() {
-  await getMeUser({
-    nullUserRedirect: `/login?unauthorized=orders`,
+  const { token } = await getMeUser({
+    nullUserRedirect: `/login?error=${encodeURIComponent(
+      'You must be logged in to view your orders.',
+    )}&redirect=${encodeURIComponent('/orders')}`,
   })
 
-  const orders = await fetchDocs<Order>('orders')
+  const orders: Stripe.Invoice[] = await fetch(
+    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/orders`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `JWT ${token}`,
+      },
+    },
+  )?.then(res => res.json())
 
   return (
     <Gutter className={classes.orders}>
@@ -26,9 +36,31 @@ export default async function Orders() {
       <RenderParams />
       {orders && orders.length > 0 && (
         <ul className={classes.ordersList}>
-          {orders.map(order => (
+          {orders.map((order, index) => (
             <li key={order.id} className={classes.item}>
-              <Link href={`/orders/${order.id}`}>{order.id}</Link>
+              <div className={classes.itemContent}>
+                <h4 className={classes.itemTitle}>
+                  <Link href={`/orders/${order.id}`}>{`Order ${order.id}`}</Link>
+                </h4>
+                <div className={classes.itemMeta}>
+                  <p>
+                    {'Status: '}
+                    {order.status}
+                  </p>
+                  <p>
+                    {'Created: '}
+                    {new Date(order.created * 1000).toLocaleDateString()}
+                  </p>
+                  <p>
+                    {'Total: '}
+                    {new Intl.NumberFormat('en-US', {
+                      style: 'currency',
+                      currency: order.currency.toUpperCase(),
+                    }).format(order.amount_due / 100)}
+                  </p>
+                </div>
+                {index !== orders.length - 1 && <HR />}
+              </div>
             </li>
           ))}
         </ul>

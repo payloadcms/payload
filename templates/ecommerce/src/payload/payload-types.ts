@@ -17,7 +17,6 @@ export interface Config {
     users: User;
     products: Product;
     categories: Category;
-    orders: Order;
     pages: Page;
     media: Media;
   };
@@ -393,27 +392,6 @@ export interface Category {
     label?: string;
     id?: string;
   }[];
-  updatedAt: string;
-  createdAt: string;
-}
-export interface Order {
-  id: string;
-  orderedBy?: {
-    user?: string | User;
-    name?: string;
-    email?: string;
-    stripeCustomerID?: string;
-  };
-  items?: {
-    product?: string | Product;
-    title?: string;
-    priceJSON?: string;
-    stripeProductID?: string;
-    quantity?: number;
-    id?: string;
-  }[];
-  stripeInvoiceID?: string;
-  stripePaymentIntentID?: string;
   updatedAt: string;
   createdAt: string;
 }

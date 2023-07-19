@@ -13,7 +13,7 @@ export default async function OrderConfirmation() {
     <Gutter className={classes.confirmationPage}>
       <h1>Order confirmed</h1>
       <OrderConfirmationPage />
-      <Button href="/orders" appearance="primary" label="View orders" />
+      <Button href="/orders" appearance="primary" label="View all orders" />
     </Gutter>
   )
 }

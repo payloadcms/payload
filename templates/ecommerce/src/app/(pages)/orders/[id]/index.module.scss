@@ -21,13 +21,6 @@
   color: red;
 }
 
-.order {
-  border-top: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
-  margin: calc(var(--base) * 2) 0;
-  padding: calc(var(--base) * 2) 0;
-}
-
 .orderTitle {
   margin: 0;
 }
@@ -81,4 +74,14 @@
 
 .item {
   margin-bottom: calc(var(--base) / 2);
+}
+
+.itemMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  & > * {
+    margin: 0;
+  }
 }

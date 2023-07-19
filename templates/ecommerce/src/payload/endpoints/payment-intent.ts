@@ -7,12 +7,17 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2022-08-01',
 })
 
-// This endpoint creates a PaymentIntent with the items in the cart using the "Invoices" API
+// This endpoint creates a `PaymentIntent` with the items in the cart using the `Invoices API`
 // This is required in order to associate each line item with its respective product in Stripe
 // To do this, we loop through the items in the cart and create a line-item in the invoice for each cart item
-// Once completed, we pass the `client_secret` of the PaymentIntent back to the client which can process the payment
-export const checkout: PayloadHandler = async (req, res): Promise<void> => {
+// Once completed, we pass the `client_secret` of the `PaymentIntent` back to the client which can process the payment
+export const createPaymentIntent: PayloadHandler = async (req, res): Promise<void> => {
   const { user, payload } = req
+
+  if (!user) {
+    res.status(401).send('Unauthorized')
+    return
+  }
 
   const fullUser = await payload.findByID({
     collection: 'users',
@@ -38,7 +43,7 @@ export const checkout: PayloadHandler = async (req, res): Promise<void> => {
 
     // initialize an empty invoice for the customer
     // the invoice will be charged automatically when it is sent
-    // because the customer  has a payment method on record
+    // because the customer has a payment method on record
     const invoice = await stripe.invoices.create({
       customer: stripeCustomerID,
       collection_method: 'send_invoice',
@@ -80,6 +85,9 @@ export const checkout: PayloadHandler = async (req, res): Promise<void> => {
             customer: stripeCustomerID,
             price: price.id,
             invoice: invoice.id,
+            metadata: {
+              payload_product_id: product.id,
+            },
           })
         }
 

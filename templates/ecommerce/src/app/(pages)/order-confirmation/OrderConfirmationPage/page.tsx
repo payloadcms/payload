@@ -9,6 +9,9 @@ import { useCart } from '../../../_providers/Cart'
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
 const stripePromise = loadStripe(apiKey)
 
+// Stripe redirects to this page after a successful payment
+// The URL contains a `payment_intent_client_secret` query param
+// We use this to retrieve the payment intent using the Stripe API and display the status
 const OrderConfirmationPage: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null)
   const searchParams = useSearchParams()
@@ -53,11 +56,17 @@ const OrderConfirmationPage: React.FC = () => {
   }, [clearCart])
 
   return (
-    <p>
-      {`Status: ${message || 'Loading...'}`}
-      <br />
-      {`Stripe Payment ID: ${paymentIntent || 'Loading...'}`}
-    </p>
+    <div>
+      {!message ? (
+        <p>Loading...</p>
+      ) : (
+        <p>
+          {`Status: ${message || 'Loading...'}`}
+          <br />
+          {`Stripe Payment ID: ${paymentIntent || 'Loading...'}`}
+        </p>
+      )}
+    </div>
   )
 }
 

@@ -67,12 +67,12 @@ body {
 
 ::selection {
   background: var(--theme-success-500);
-  color: var(--theme-base-800);
+  color: var(--color-base-800);
 }
 
 ::-moz-selection {
   background: var(--theme-success-500);
-  color: var(--theme-base-800);
+  color: var(--color-base-800);
 }
 
 img {

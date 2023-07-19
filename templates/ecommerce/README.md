@@ -36,7 +36,12 @@ See the [collections documentation](https://payloadcms.com/docs/configuration/co
 
 - #### Orders
 
-  When an order is placed in Stripe, a webhook is fired that Payload listens for. This webhook creates a new order in Payload with the same data as the invoice. See the [Stripe section](#stripe) for more details.
+  When an order is placed, an invoice is created in Stripe. To easily query orders from Stripe, two custom endpoints are opened which proxy the Stripe API. This allows you to safely query Stripe from your front-end without exposing your Stripe API key.
+
+  - `/api/users/orders` - Returns all orders for the current user
+  - `/api/users/orders/:id` - Returns a single order by ID
+
+  For more details on how to extend this functionality, see the [Custom Endpoints](https://payloadcms.com/docs/rest-api/overview#custom-endpoints) docs.
 
 - #### Pages
 
@@ -72,7 +77,6 @@ Basic role-based access control is setup to determine what users can and cannot 
 This applies to each collection in the following ways:
 
 - `users`: Only admins and the user themselves can access their profile. Anyone can create a user but only admins can delete users.
-- `orders`: Only admins and the user who placed the order can access it. Once placed, orders cannot be edited or deleted.
 - `products`: Everyone can access products, but only admins can create, update, or delete them. Paywall-enabled products may also have content that is only accessible by users who have purchased the product. See [Paywall](#paywall) for more details.
 
 For more details on how to extend this functionality, see the [Payload Access Control](https://payloadcms.com/docs/access-control/overview#access-control) docs.
@@ -105,9 +109,6 @@ Logged-in users can have their shopping carts saved to their profiles as they sh
 Payload itself handles no currency exchange. All payments are processed and billed using [Stripe](https://stripe.com). This means you must have access to a Stripe account via an API key, see [Connect Stripe](#connect-stripe) for how to get one. When you create a product in Payload that wish to sell, it must be connected to a Stripe product by selecting one from the field in the product's sidebar. This field fetches all available products in the background and displays them as options, see [Products](#products) for more details. Once set, data is automatically synced between the two platforms in the following ways:
 
 1. Stripe to Payload using [Stripe Webhooks](https://stripe.com/docs/webhooks):
-
-   - `invoice.created`
-   - `invoice.updated`
    - `product.created`
    - `product.updated`
    - `price.updated`
@@ -119,7 +120,7 @@ For more details on how to extend this functionality, see the the official [Payl
 
 ## Checkout
 
-A custom endpoint is opened at `/api/checkout` which initiates the checkout process. This endpoint creates a [`PaymentIntent`](https://stripe.com/docs/payments/payment-intents) with the items in the cart using the Stripe's [Invoices API](https://stripe.com/docs/api/invoices). First, an invoice is drafted, then each item in your cart is appended as a line-item to the invoice. The total price is recalculated on the server to ensure accuracy and security, and once completed, passes the `client_secret` back in the response for your front-end to finalize the payment.
+A custom endpoint is opened at `/api/payment-intent` which initiates the checkout process. This endpoint creates a [`PaymentIntent`](https://stripe.com/docs/payments/payment-intents) with the items in the cart using the Stripe's [Invoices API](https://stripe.com/docs/api/invoices). First, an invoice is drafted, then each item in your cart is appended as a line-item to the invoice. The total price is recalculated on the server to ensure accuracy and security, and once completed, passes the `client_secret` back in the response for your front-end to finalize the payment.
 
 ## Paywall
 
@@ -159,19 +160,20 @@ This template includes a fully-working [Next.js](https://nextjs.org) front-end t
 
 Core features:
 
-- [Next.js](https://nextjs.org) App Router
+- [Next.js App Router](https://nextjs.org)
 - [GraphQL](https://graphql.org)
 - [TypeScript](https://www.typescriptlang.org)
 - [React Hook Form](https://react-hook-form.com)
 - Complete authentication workflow
 - Complete shopping experience
-- Full shopping cart implementation
+- Shopping cart
 - Full checkout workflow
 - Customer dashboards
+- Dark mode
 - Pre-made layout building blocks
 - [Payload Admin Bar](https://github.com/payloadcms/payload-admin-bar)
 - Complete SEO configuration
-- Working Stripe integration
+- Complete Stripe integration
 - Conditionally rendered paywall content
 
 ### Eject

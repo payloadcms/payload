@@ -46,12 +46,15 @@ const CheckoutPageClient: React.FC<{
 
       const makeIntent = async () => {
         try {
-          const req = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/checkout`, {
-            method: 'POST',
-            credentials: 'include',
-          })
+          const paymentReq = await fetch(
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/api/payment-intent`,
+            {
+              method: 'POST',
+              credentials: 'include',
+            },
+          )
 
-          const res = await req.json()
+          const res = await paymentReq.json()
 
           if (res.error) {
             setError(res.error)

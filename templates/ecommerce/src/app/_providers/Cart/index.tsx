@@ -160,8 +160,6 @@ export const CartProvider = props => {
           if (req.ok) {
             localStorage.setItem('cart', '[]')
           }
-
-          setHasInitialized(true)
         }
 
         syncCartToPayload()
@@ -171,6 +169,8 @@ export const CartProvider = props => {
     } else {
       localStorage.setItem('cart', JSON.stringify(flattenedCart))
     }
+
+    setHasInitialized(true)
   }, [user, cart])
 
   const isProductInCart = useCallback(

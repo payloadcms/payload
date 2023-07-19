@@ -26,6 +26,23 @@
   list-style: none;
 }
 
-.item {
-  margin-bottom: calc(var(--base) / 2);
+.itemContent {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) / 2);
+}
+
+.itemTitle {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.itemMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  & > * {
+    margin: 0;
+  }
 }
