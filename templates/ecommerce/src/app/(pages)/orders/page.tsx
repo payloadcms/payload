@@ -59,12 +59,13 @@ export default async function Orders() {
                     }).format(order.amount_due / 100)}
                   </p>
                 </div>
-                {index !== orders.length - 1 && <HR />}
               </div>
+              {index !== orders.length - 1 && <HR />}
             </li>
           ))}
         </ul>
       )}
+      <HR />
       <Button href="/account" appearance="primary" label="Go to account" />
     </Gutter>
   )

@@ -7,10 +7,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2022-08-01',
 })
 
-// This endpoint creates a `PaymentIntent` with the items in the cart using the `Invoices API`
-// This is required in order to associate each line item with its respective product in Stripe
-// To do this, we loop through the items in the cart and create a line-item in the invoice for each cart item
-// Once completed, we pass the `client_secret` of the `PaymentIntent` back to the client which can process the payment
+// this endpoint creates a `PaymentIntent` with the items in the cart using the `Invoices API`
+// this is required in order to associate each line item with its respective product in Stripe
+// to do this, we loop through the items in the cart and create a line-item in the invoice for each cart item
+// once completed, we pass the `client_secret` of the `PaymentIntent` back to the client which can process the payment
 export const createPaymentIntent: PayloadHandler = async (req, res): Promise<void> => {
   const { user, payload } = req
 
@@ -41,13 +41,15 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
       stripeCustomerID = customer.id
     }
 
-    // initialize an empty invoice for the customer
-    // the invoice will be charged automatically when it is sent
-    // because the customer has a payment method on record
+    // initialize an draft invoice for the customer, then add items to it
+    // set `auto_advance` to false so that Stripe doesn't attempt to charge the customer
+    // this will prevent Stripe setting to "open" after 1 hour and sending emails to the customer
+    // the invoice will get finalized when upon payment via the `payment_intent` attached to the invoice below
     const invoice = await stripe.invoices.create({
       customer: stripeCustomerID,
       collection_method: 'send_invoice',
       days_until_due: 30,
+      auto_advance: false,
     })
 
     const hasItems = fullUser?.cart?.items?.length > 0
@@ -77,6 +79,7 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
         }
 
         const price = prices.data[0]
+        invoice.total += price.unit_amount
 
         // price.type === 'recurring' is a subscription, which uses the Subscriptions API
         // that is out of scope for this boilerplate
@@ -95,17 +98,21 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
       }),
     )
 
-    // send the invoice to Stripe
-    const finalInvoice = await stripe.invoices.finalizeInvoice(invoice?.id || '')
+    // need to create a `PaymentIntent` manually using the `Invoice` total
+    // this is because the invoice is not set to `auto-advance` and we're not finalizing the invoice ourselves
+    // instead, attach the `payment_intent` to the invoice and let Stripe finalize it when the payment is processed
+    const paymentIntent = await stripe.paymentIntents.create({
+      customer: stripeCustomerID,
+      amount: invoice.total,
+      currency: 'usd',
+      payment_method_types: ['card'],
+      metadata: {
+        invoice_id: invoice.id,
+      },
+    })
 
-    // retrieve the payment intent from the invoice
-    const paymentIntent = await stripe.paymentIntents.retrieve(
-      typeof finalInvoice?.payment_intent === 'string'
-        ? finalInvoice?.payment_intent
-        : finalInvoice?.payment_intent?.id || '',
-    )
+    invoice.payment_intent = paymentIntent.id
 
-    // return the `client_secret` of the payment intent to the client
     res.send({ client_secret: paymentIntent.client_secret })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error'
