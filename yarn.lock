@@ -11257,9 +11257,9 @@ swc-loader@^0.2.3:
   integrity sha512-D1p6XXURfSPleZZA/Lipb3A8pZ17fP4NObZvFCDjK/OKljroqDpPmsBdTraWhVBqUNpcWBQY1imWdoPScRlQ7A==
 
 swc-minify-webpack-plugin@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/swc-minify-webpack-plugin/-/swc-minify-webpack-plugin-2.1.0.tgz#35f975595d2e090064f34cb57f4ac4fd98a67eaa"
-  integrity sha512-v4B+Wcr84q58w2uALmjdTmOKyoF0pWY1xoGzy5vMibuQXQ0dHXlTmhodfu1NCiOISkqMf3T10nFmFQutBLw/vA==
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/swc-minify-webpack-plugin/-/swc-minify-webpack-plugin-2.1.1.tgz#2c63fe592d49541733d7557b3af8f97c7ffa78b9"
+  integrity sha512-/9ud/libNWUC5p71vXWhW/O2Nc0essW8D9pY4P4ol0ceM8OcFbNr41R9YFqTkmktqUL2t0WwXau+FkR4T1+PJA==
 
 symbol-tree@^3.2.4:
   version "3.2.4"
