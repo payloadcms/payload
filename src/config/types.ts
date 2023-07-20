@@ -288,6 +288,12 @@ export type Config = {
       email: string;
       /** The password of the user to login as */
       password: string;
+      /**
+       * If set to true, the login credentials will be prefilled but the user will still need to click the login button.
+       *
+       * @default false
+      */
+      prefillOnly?: boolean;
     }
     /**
      * Add extra and/or replace built-in components with custom components

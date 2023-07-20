@@ -71,6 +71,7 @@ export default joi.object({
         joi.object().keys({
           email: joi.string(),
           password: joi.string(),
+          prefillOnly: joi.boolean(),
         }),
         joi.boolean(),
       ),
