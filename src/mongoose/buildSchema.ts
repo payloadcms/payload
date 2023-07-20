@@ -23,7 +23,7 @@ import {
   NonPresentationalField,
   NumberField,
   PointField,
-  PolygonField,
+  GeoJSONField,
   RadioField,
   RelationshipField,
   RichTextField,
@@ -198,14 +198,14 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       }
     }
   },
-  polygon: (field: PolygonField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
+  geojson: (field: GeoJSONField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema: SchemaTypeOptions<unknown> = {
       type: {
         type: String,
-        enum: ['Polygon'],
+        enum: ['Polygon', 'Point'],
       },
       coordinates: {
-        type: [[[Number]]],
+        type: Array,
         required: true,
       },
     };

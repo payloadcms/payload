@@ -10,7 +10,7 @@ import {
   EmailField, fieldAffectsData, fieldHasSubFields, GroupField,
   JSONField,
   NumberField, PointField,
-  PolygonField,
+  GeoJSONField,
   RadioField, RelationshipField,
   RichTextField, RowField, SelectField,
   TabsField,
@@ -83,7 +83,7 @@ const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => 
       parentName,
     ),
   }),
-  polygon: (field: PolygonField) => ({
+  geojson: (field: GeoJSONField) => ({
     type: withOperators(
       field,
       parentName,

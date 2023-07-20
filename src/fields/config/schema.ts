@@ -320,8 +320,8 @@ export const point = baseField.keys({
   ),
 });
 
-export const polygon = baseField.keys({
-  type: joi.string().valid('polygon').required(),
+export const geojson = baseField.keys({
+  type: joi.string().valid('geojson').required(),
   name: joi.string().required(),
   defaultValue: joi.alternatives().try(
     joi.object().keys({
@@ -331,6 +331,10 @@ export const polygon = baseField.keys({
           joi.array().items(joi.number()).length(2).required(),
         ).min(4).required()
       ).length(1).required(),
+    }),
+    joi.object().keys({
+      type: joi.string().valid('Point').required(),
+      coordinates: joi.array().items(joi.number()).length(2).required(),
     }),
     joi.func(),
   ),
@@ -521,7 +525,7 @@ const fieldSchema = joi.alternatives()
     blocks,
     date,
     point,
-    polygon,
+    geojson,
     ui,
   )
   .id('field');

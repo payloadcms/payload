@@ -104,8 +104,8 @@ const fieldTypeConditions = {
     component: 'Point',
     operators: [...geo],
   },
-  polygon: {
-    component: 'Polygon',
+  geojson: {
+    component: 'GeoJSON',
     operators: [...base, like, contains],
   },
   upload: {

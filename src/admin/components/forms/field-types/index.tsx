@@ -15,7 +15,7 @@ import checkbox from './Checkbox';
 import richText from './RichText';
 import radio from './RadioGroup';
 import point from './Point';
-import polygon from './Polygon';
+import geojson from './GeoJSON';
 
 import blocks from './Blocks';
 import group from './Group';
@@ -40,7 +40,7 @@ export type FieldTypes = {
   select: React.ComponentType<any>
   number: React.ComponentType<any>
   point: React.ComponentType<any>
-  polygon: React.ComponentType<any>
+  geojson: React.ComponentType<any>
   checkbox: React.ComponentType<any>
   richText: React.ComponentType<any>
   radio: React.ComponentType<any>
@@ -70,7 +70,7 @@ const fieldTypes: FieldTypes = {
   checkbox,
   richText,
   point,
-  polygon,
+  geojson,
   radio,
   blocks,
   group,

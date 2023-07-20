@@ -6,9 +6,9 @@ import { FieldAffectingData, NumberField, RadioField, SelectField, optionIsObjec
 import combineParentName from '../utilities/combineParentName';
 import formatName from '../utilities/formatName';
 import operators from './operators';
-import { PolygonInput as PolygonResolver } from './types';
+import { GeoJSONInput as GeoJSONResolver } from './types';
 
-type staticTypes = 'number' | 'text' | 'email' | 'textarea' | 'richText' | 'json' | 'code' | 'checkbox' | 'date' | 'upload' | 'point' | 'relationship' | 'polygon'
+type staticTypes = 'number' | 'text' | 'email' | 'textarea' | 'richText' | 'json' | 'code' | 'checkbox' | 'date' | 'upload' | 'point' | 'relationship' | 'geojson'
 
 type DefaultsType = {
   [key in staticTypes]: {
@@ -88,8 +88,8 @@ const defaults: DefaultsType = {
     type: new GraphQLList(GraphQLFloat),
     operators: [...operators.equality, ...operators.comparison, ...operators.geo],
   },
-  polygon: {
-    type: PolygonResolver,
+  geojson: {
+    type: GeoJSONResolver,
     operators: [...operators.equality, ...operators.partial],
   },
   relationship: {

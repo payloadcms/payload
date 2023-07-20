@@ -10,8 +10,8 @@ import {
   JSONField,
   NumberField,
   PointField,
-  PolygonField,
-  PolygonValue,
+  GeoJSONField,
+  GeoJSONValue,
   RadioField,
   RelationshipField,
   RelationshipValue,
@@ -443,11 +443,14 @@ export const point: Validate<unknown, unknown, PointField> = (value: [number | s
   return true;
 };
 
-export const polygon: Validate<unknown, unknown, PolygonField> = (value: PolygonValue, { t, required }) => {
+export const geojson: Validate<unknown, unknown, GeoJSONField> = (value: GeoJSONValue, { t, required }) => {
   if (value) {
 
     if (!value.type) {
       return t('error:missingRequiredData', { label: 'type' });
+
+    } else if (value.type === 'Point') {
+      return point(value.coordinates, { t, required: true })
 
     } else if (value.type !== 'Polygon') {
       // TODO: include field, value, and expected value in error message
@@ -510,6 +513,6 @@ export default {
   radio,
   blocks,
   point,
-  polygon,
+  geojson,
   json,
 };

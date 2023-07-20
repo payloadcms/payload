@@ -33,7 +33,7 @@ import {
   JSONField,
   DateField,
   PointField,
-  PolygonField,
+  GeoJSONField,
   CheckboxField,
   BlockField,
   RowField,
@@ -50,7 +50,7 @@ import formatOptions from '../utilities/formatOptions';
 import { Payload } from '../../payload';
 import buildWhereInputType from './buildWhereInputType';
 import isFieldNullable from './isFieldNullable';
-import { Polygon as PolygonType } from './types';
+import { GeoJSON as GeoJSONType } from './types';
 
 type LocaleInputType = {
   locale: {
@@ -121,9 +121,9 @@ function buildObjectType({
       ...objectTypeConfig,
       [field.name]: { type: withNullableType(field, new GraphQLList(new GraphQLNonNull(GraphQLFloat)), forceNullable) },
     }),
-    polygon: (objectTypeConfig: ObjectTypeConfig, field: PolygonField) => ({
+    geojson: (objectTypeConfig: ObjectTypeConfig, field: GeoJSONField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, PolygonType, forceNullable) },
+      [field.name]: { type: withNullableType(field, GeoJSONType, forceNullable) },
     }),
     richText: (objectTypeConfig: ObjectTypeConfig, field: RichTextField) => ({
       ...objectTypeConfig,
