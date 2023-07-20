@@ -24,20 +24,20 @@ export async function helpMessage(): Promise<string> {
 
   {bold OPTIONS}
 
-      -n     {underline my-payload-app}       Set project name
-      -t     {underline template_name}        Choose specific template
+      -n     {underline my-payload-app}         Set project name
+      -t     {underline template_name}          Choose specific template
 
         {dim Available templates: ${formatTemplates(validTemplates)}}
 
-      --use-npm                          Use npm to install dependencies
-      --no-deps                          Do not install any dependencies
-      -h                                 Show help
+      --use-npm                     Use npm to install dependencies
+      --no-deps                     Do not install any dependencies
+      -h                            Show help
 `
 }
 
 function formatTemplates(templates: ProjectTemplate[]) {
   return `\n\n${spacer}${templates
-    .map(t => `${t.name}${' '.repeat(18 - t.name.length)}${t.description}`)
+    .map(t => `${t.name}${' '.repeat(28 - t.name.length)}${t.description}`)
     .join(`\n${spacer}`)}`
 }
 
