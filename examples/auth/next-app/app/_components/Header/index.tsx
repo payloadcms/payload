@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { Gutter } from '../Gutter'
-import { HeaderClient } from './index.client'
+import { HeaderNav } from './Nav'
 
 import classes from './index.module.scss'
 
@@ -25,7 +25,7 @@ export function Header() {
             />
           </picture>
         </Link>
-        <HeaderClient />
+        <HeaderNav />
       </Gutter>
     </header>
   )
