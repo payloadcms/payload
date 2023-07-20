@@ -51,7 +51,7 @@ const defaults: DefaultsType = {
   },
   json: {
     type: GraphQLJSON,
-    operators: [...operators.equality, ...operators.partial, ...operators.geojson],
+    operators: [...operators.equality, ...operators.partial],
   },
   code: {
     type: GraphQLString,
@@ -90,7 +90,7 @@ const defaults: DefaultsType = {
   },
   geojson: {
     type: GeoJSONResolver,
-    operators: [...operators.equality, ...operators.partial],
+    operators: [...operators.equality, ...operators.partial, ...operators.geojson],
   },
   relationship: {
     type: GraphQLString,
