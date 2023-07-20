@@ -57,15 +57,16 @@ const geo = [
   },
 ];
 
-const within = {
-  label: 'within',
-  value: 'within',
-};
-
-const intersects = {
-  label: 'intersects',
-  value: 'intersects',
-};
+const geojson = [
+  {
+    label: 'within',
+    value: 'within',
+  },
+  {
+    label: 'intersects',
+    value: 'intersects',
+  },
+]
 
 const like = {
   label: 'isLike',
@@ -116,7 +117,7 @@ const fieldTypeConditions = {
   },
   geojson: {
     component: 'Text',
-    operators: [...base, like, contains, within, intersects],
+    operators: [...base, like, contains, ...geojson],
   },
   upload: {
     component: 'Text',
