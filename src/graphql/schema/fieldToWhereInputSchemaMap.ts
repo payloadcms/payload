@@ -10,6 +10,7 @@ import {
   EmailField, fieldAffectsData, fieldHasSubFields, GroupField,
   JSONField,
   NumberField, PointField,
+  GeoJSONField,
   RadioField, RelationshipField,
   RichTextField, RowField, SelectField,
   TabsField,
@@ -77,6 +78,12 @@ const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => 
     ),
   }),
   point: (field: PointField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
+  geojson: (field: GeoJSONField) => ({
     type: withOperators(
       field,
       parentName,

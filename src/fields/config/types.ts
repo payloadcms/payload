@@ -477,6 +477,15 @@ export type PointField = FieldBase & {
   type: 'point',
 }
 
+export type GeoJSONField = FieldBase & {
+  type: 'geojson',
+}
+
+export type GeoJSONValue = {
+  type: 'Polygon' | 'Point';
+  coordinates: [[[number, number]]] | [number, number];
+}
+
 export type Field =
   TextField
   | NumberField
@@ -495,6 +504,7 @@ export type Field =
   | CodeField
   | JSONField
   | PointField
+  | GeoJSONField
   | RowField
   | CollapsibleField
   | TabsField
@@ -518,6 +528,7 @@ export type FieldAffectingData =
   | CodeField
   | JSONField
   | PointField
+  | GeoJSONField
   | TabAsField
 
 export type NonPresentationalField =
@@ -538,6 +549,7 @@ export type NonPresentationalField =
   | CodeField
   | JSONField
   | PointField
+  | GeoJSONField
   | RowField
   | TabsField
   | CollapsibleField;

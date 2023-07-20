@@ -10,6 +10,8 @@ import {
   JSONField,
   NumberField,
   PointField,
+  GeoJSONField,
+  GeoJSONValue,
   RadioField,
   RelationshipField,
   RelationshipValue,
@@ -441,6 +443,59 @@ export const point: Validate<unknown, unknown, PointField> = (value: [number | s
   return true;
 };
 
+export const geojson: Validate<unknown, unknown, GeoJSONField> = (value: GeoJSONValue, { t, required }) => {
+  if (value) {
+
+    if (!value.type) {
+      return t('error:missingRequiredData', { label: 'type' });
+
+    } else if (value.type === 'Point') {
+      return point(value.coordinates, { t, required: true })
+
+    } else if (value.type !== 'Polygon') {
+      // TODO: include field, value, and expected value in error message
+      return t('validation:invalidInput');
+
+    } else if (!Array.isArray(value.coordinates)) {
+      return t('error:missingRequiredData', { label: 'coordinates' });
+
+    } else if (value.coordinates.length > 1) {
+      return t('validation:greaterThanMax', { value: value.coordinates.length, max: 1, label: 'coordinates' })
+
+    } else if (value.coordinates.length < 1) {
+      return t('validation:lessThanMin', { value: value.coordinates.length, min: 1, label: 'coordinates' });
+
+    } else {
+      const coordinates = value.coordinates[0]
+
+      if (!Array.isArray(coordinates)) {
+        return t('error:missingRequiredData', { label: 'coordinates[0]' });
+
+      } else if (coordinates.length < 4) {
+        return t('validation:lessThanMin', { value: coordinates.length, min: 4, label: 'coordinates[0]' });
+
+      } else {
+        const errors = coordinates.reduce((acc, next) => {
+          const isValid = point(next, { t, required: true })
+          return isValid === true ? acc : [...acc, isValid]
+        }, [])
+
+        // TODO: review if this is the best way to handle multiple errors
+        if (errors.length > 0) {
+          return errors[0]
+
+        } else {
+          const first = coordinates[0];
+          const last = coordinates[coordinates.length - 1];
+          return first[0] === last[0] && first[1] === last[1] ? true : 'Invalid Polygon';
+        }
+      }
+    }
+  }
+
+  return required ? t('validation:required') : true;
+};
+
 export default {
   number,
   text,
@@ -458,5 +513,6 @@ export default {
   radio,
   blocks,
   point,
+  geojson,
   json,
 };

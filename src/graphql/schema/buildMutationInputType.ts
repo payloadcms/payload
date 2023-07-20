@@ -16,11 +16,12 @@ import { GraphQLJSON } from 'graphql-type-json';
 import withNullableType from './withNullableType';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
-import { ArrayField, CodeField, JSONField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, CollapsibleField, TabsField, CheckboxField, BlockField, tabHasName } from '../../fields/config/types';
+import { ArrayField, CodeField, JSONField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, GeoJSONField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, CollapsibleField, TabsField, CheckboxField, BlockField, tabHasName } from '../../fields/config/types';
 import { toWords } from '../../utilities/formatLabels';
 import { Payload } from '../../payload';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { groupOrTabHasRequiredSubfield } from '../../utilities/groupOrTabHasRequiredSubfield';
+import { GeoJSONInput as GeoJSONInputType } from './types'
 
 export const getCollectionIDType = (config: SanitizedCollectionConfig): GraphQLScalarType => {
   const idField = config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
@@ -85,6 +86,10 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
     point: (inputObjectTypeConfig: InputObjectTypeConfig, field: PointField) => ({
       ...inputObjectTypeConfig,
       [field.name]: { type: withNullableType(field, new GraphQLList(GraphQLFloat), forceNullable) },
+    }),
+    geojson: (inputObjectTypeConfig: InputObjectTypeConfig, field: GeoJSONField) => ({
+      ...inputObjectTypeConfig,
+      [field.name]: { type: withNullableType(field, GeoJSONInputType, forceNullable) },
     }),
     checkbox: (inputObjectTypeConfig: InputObjectTypeConfig, field: CheckboxField) => ({
       ...inputObjectTypeConfig,
