@@ -11,6 +11,16 @@ type staticTypes = 'number' | 'text' | 'email' | 'textarea' | 'richText' | 'json
 
 type dynamicTypes = 'radio' | 'select'
 
+const Polygon = new GraphQLInputObjectType({
+  name: 'Polygon',
+  fields: {
+    type: { type: GraphQLString },
+    coordinates: {
+      type: new GraphQLList(new GraphQLList(new GraphQLList(GraphQLFloat))),
+    },
+  },
+});
+
 type DefaultsType = {
   [key in staticTypes]: {
     operators: {
@@ -129,7 +139,19 @@ const defaults: DefaultsType = {
       })),
       ...operators.geojson.map((operator) => ({
         operator,
-        type: GraphQLJSON,
+        /**
+         * @example:
+         * within: {
+         *  type: "Polygon",
+         *  coordinates: [[
+         *   [0.0, 0.0],
+         *   [1.0, 1.0],
+         *   [1.0, 0.0],
+         *   [0.0, 0.0],
+         *  ]],
+         * }
+         */
+        type: Polygon,
       })),
     ],
   },
