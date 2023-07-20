@@ -63,6 +63,22 @@ const response = await fetch("http://localhost:3000/api/pages", {
 
 Payload ensures that the same, uniform access control is used across all authentication strategies. This enables you to utilize your existing access control configurations with both API keys and the standard email/password authentication. This consistency can aid in maintaining granular control over your API keys.
 
+#### API Key *Only* Authentication
+
+If you want to use API keys as the only authentication method for a collection, you can disable the default local strategy by setting `disableLocalStrategy` to `true` on the collection's `auth` property. This will disable the ability to authenticate with email and password, and will only allow for authentication via API key.
+
+```ts
+import { CollectionConfig } from 'payload/types';
+
+export const Customers: CollectionConfig = {
+  slug: 'customers',
+  auth: {
+    useAPIKey: true,
+    disableLocalStrategy: true,
+  }
+};
+```
+
 ### Forgot Password
 
 You can customize how the Forgot Password workflow operates with the following options on the `auth.forgotPassword` property:

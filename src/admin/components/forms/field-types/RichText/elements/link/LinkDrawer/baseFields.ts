@@ -46,9 +46,7 @@ export const getBaseFields = (config: Config): Field[] => [
     type: 'text',
     required: true,
     admin: {
-      condition: ({ linkType, url }) => {
-        return (typeof linkType === 'undefined' && url) || linkType === 'custom';
-      },
+      condition: ({ linkType }) => linkType !== 'internal',
     },
   },
   {
