@@ -9,122 +9,226 @@ import operators from './operators';
 
 type staticTypes = 'number' | 'text' | 'email' | 'textarea' | 'richText' | 'json' | 'code' | 'checkbox' | 'date' | 'upload' | 'point' | 'relationship'
 
+type dynamicTypes = 'radio' | 'select'
+
 type DefaultsType = {
   [key in staticTypes]: {
-    type: GraphQLType | ((field: FieldAffectingData, parentName: string) => GraphQLType);
-    operators: string[];
+    operators: {
+      operator: string;
+      type: GraphQLType | ((field: FieldAffectingData, parentName: string) => GraphQLType);
+    }[];
   }
 } & {
-  radio: {
-    type: (field: FieldAffectingData, parentName: string) => GraphQLType;
-    operators: string[];
-  }
-  select: {
-    type: (field: FieldAffectingData, parentName: string) => GraphQLType;
-    operators: string[];
+  [key in dynamicTypes]: {
+    operators: {
+      operator: string;
+      type: ((field: FieldAffectingData, parentName: string) => GraphQLType);
+    }[];
   }
 }
 
 const defaults: DefaultsType = {
   number: {
-    type: (field: NumberField): GraphQLType => {
-      return field?.name === 'id' ? GraphQLInt : GraphQLFloat;
-    },
-    operators: [...operators.equality, ...operators.comparison],
+    operators: [
+      ...operators.equality.map((operator) => ({
+        operator,
+        type: (field: NumberField): GraphQLType => {
+          return field?.name === 'id' ? GraphQLInt : GraphQLFloat;
+        },
+      })),
+      ...operators.comparison.map((operator) => ({
+        operator,
+        type: (field: NumberField): GraphQLType => {
+          return field?.name === 'id' ? GraphQLInt : GraphQLFloat;
+        },
+      })),
+    ],
   },
   text: {
-    type: GraphQLString,
-    operators: [...operators.equality, ...operators.partial, ...operators.contains],
+    operators: [
+      ...operators.equality.map((operator) => ({
+        operator,
+        type: GraphQLString,
+      })),
+      ...operators.partial.map((operator) => ({
+        operator,
+        type: GraphQLString,
+      })),
+      ...operators.contains.map((operator) => ({
+        operator,
+        type: GraphQLString,
+      })),
+    ],
   },
   email: {
-    type: EmailAddressResolver,
-    operators: [...operators.equality, ...operators.partial, ...operators.contains],
+    operators: [
+      ...operators.equality.map((operator) => ({
+        operator,
+        type: EmailAddressResolver,
+      })),
+      ...operators.partial.map((operator) => ({
+        operator,
+        type: EmailAddressResolver,
+      })),
+      ...operators.contains.map((operator) => ({
+        operator,
+        type: EmailAddressResolver,
+      })),
+    ],
   },
   textarea: {
-    type: GraphQLString,
-    operators: [...operators.equality, ...operators.partial],
+    operators: [
+      ...operators.equality.map((operator) => ({
+        operator,
+        type: GraphQLString,
+      })),
+      ...operators.partial.map((operator) => ({
+        operator,
+        type: GraphQLString,
+      })),
+    ],
   },
   richText: {
-    type: GraphQLJSON,
-    operators: [...operators.equality, ...operators.partial],
+    operators: [
+      ...operators.equality.map((operator) => ({
+        operator,
+        type: GraphQLJSON,
+      })),
+      ...operators.partial.map((operator) => ({
+        operator,
+        type: GraphQLJSON,
+      })),
+    ],
   },
   json: {
-    type: GraphQLJSON,
-    operators: [...operators.equality, ...operators.partial, ...operators.geojson],
+    operators: [
+      ...operators.equality.map((operator) => ({
+        operator,
+        type: GraphQLJSON,
+      })),
+      ...operators.partial.map((operator) => ({
+        operator,
+        type: GraphQLJSON,
+      })),
+      ...operators.geojson.map((operator) => ({
+        operator,
+        type: GraphQLJSON,
+      })),
+    ],
   },
   code: {
-    type: GraphQLString,
-    operators: [...operators.equality, ...operators.partial],
+    operators: [
+      ...operators.equality.map((operator) => ({
+        operator,
+        type: GraphQLString,
+      })),
+      ...operators.partial.map((operator) => ({
+        operator,
+        type: GraphQLString,
+      })),
+    ],
   },
   radio: {
-    type: (field: RadioField, parentName): GraphQLType => new GraphQLEnumType({
-      name: `${combineParentName(parentName, field.name)}_Input`,
-      values: field.options.reduce((values, option) => {
-        if (optionIsObject(option)) {
-          return {
-            ...values,
-            [formatName(option.value)]: {
-              value: option.value,
-            },
-          };
-        }
+    operators: [
+      ...[...operators.equality, ...operators.partial].map((operator) => ({
+        operator,
+        type: (field: RadioField, parentName): GraphQLType => new GraphQLEnumType({
+          name: `${combineParentName(parentName, field.name)}_Input`,
+          values: field.options.reduce((values, option) => {
+            if (optionIsObject(option)) {
+              return {
+                ...values,
+                [formatName(option.value)]: {
+                  value: option.value,
+                },
+              };
+            }
 
-        return {
-          ...values,
-          [formatName(option)]: {
-            value: option,
-          },
-        };
-      }, {}),
-    }),
-    operators: [...operators.equality, ...operators.contains],
+            return {
+              ...values,
+              [formatName(option)]: {
+                value: option,
+              },
+            };
+          }, {}),
+        }),
+      })),
+    ],
   },
   date: {
-    type: DateTimeResolver,
-    operators: [...operators.equality, ...operators.comparison, 'like'],
+    operators: [
+      ...[...operators.equality, ...operators.comparison, 'like'].map((operator) => ({
+        operator,
+        type: DateTimeResolver,
+      })),
+    ],
   },
   point: {
-    type: new GraphQLList(GraphQLFloat),
-    operators: [...operators.equality, ...operators.comparison, ...operators.geo],
+    operators: [
+      ...[...operators.equality, ...operators.comparison, ...operators.geo].map((operator) => ({
+        operator,
+        type: new GraphQLList(GraphQLFloat),
+      })),
+      ...operators.geojson.map((operator) => ({
+        operator,
+        type: GraphQLJSON,
+      })),
+    ],
   },
   relationship: {
-    type: GraphQLString,
-    operators: [...operators.equality, ...operators.contains],
+    operators: [
+      ...[...operators.equality, ...operators.contains].map((operator) => ({
+        operator,
+        type: GraphQLString,
+      })),
+    ],
   },
   upload: {
-    type: GraphQLString,
-    operators: [...operators.equality],
+    operators: [
+      ...operators.equality.map((operator) => ({
+        operator,
+        type: GraphQLString,
+      })),
+    ],
   },
   checkbox: {
-    type: GraphQLBoolean,
-    operators: [...operators.equality],
+    operators: [
+      ...operators.equality.map((operator) => ({
+        operator,
+        type: GraphQLBoolean,
+      })),
+    ],
   },
   select: {
-    type: (field: SelectField, parentName): GraphQLType => new GraphQLEnumType({
-      name: `${combineParentName(parentName, field.name)}_Input`,
-      values: field.options.reduce((values, option) => {
-        if (typeof option === 'object' && option.value) {
-          return {
-            ...values,
-            [formatName(option.value)]: {
-              value: option.value,
-            },
-          };
-        }
+    operators: [
+      ...[...operators.equality, ...operators.contains].map((operator) => ({
+        operator,
+        type: (field: SelectField, parentName): GraphQLType => new GraphQLEnumType({
+          name: `${combineParentName(parentName, field.name)}_Input`,
+          values: field.options.reduce((values, option) => {
+            if (typeof option === 'object' && option.value) {
+              return {
+                ...values,
+                [formatName(option.value)]: {
+                  value: option.value,
+                },
+              };
+            }
 
-        if (typeof option === 'string') {
-          return {
-            ...values,
-            [option]: {
-              value: option,
-            },
-          };
-        }
+            if (typeof option === 'string') {
+              return {
+                ...values,
+                [option]: {
+                  value: option,
+                },
+              };
+            }
 
-        return values;
-      }, {}),
-    }),
-    operators: [...operators.equality, ...operators.contains],
+            return values;
+          }, {}),
+        }),
+      })),
+    ],
   },
   // array: n/a
   // group: n/a
@@ -141,26 +245,31 @@ export const withOperators = (field: FieldAffectingData, parentName: string): Gr
   const name = `${combineParentName(parentName, field.name)}_operator`;
 
   const fieldOperators = [...defaults[field.type].operators];
-  if (!('required' in field) || !field.required) fieldOperators.push('exists');
 
-  const initialGqlType: GraphQLType = typeof defaults[field.type].type === 'function'
-    ? defaults[field.type].type(field, parentName)
-    : defaults?.[field.type].type;
+  if (!('required' in field) || !field.required) {
+    fieldOperators.push({
+      operator: 'exists',
+      type: fieldOperators[0].type,
+    });
+  }
+
 
   return new GraphQLInputObjectType({
     name,
     fields: fieldOperators.reduce((objectTypeFields, operator) => {
-      let gqlType = initialGqlType;
+      let gqlType: GraphQLType = typeof operator.type === 'function'
+        ? operator.type(field, parentName)
+        : operator.type;
 
-      if (listOperators.includes(operator)) {
+      if (listOperators.includes(operator.operator)) {
         gqlType = new GraphQLList(gqlType);
-      } else if (operator === 'exists') {
+      } else if (operator.operator === 'exists') {
         gqlType = GraphQLBoolean;
       }
 
       return {
         ...objectTypeFields,
-        [operator]: {
+        [operator.operator]: {
           type: gqlType,
         },
       };
