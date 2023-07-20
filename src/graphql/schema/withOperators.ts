@@ -11,12 +11,12 @@ type staticTypes = 'number' | 'text' | 'email' | 'textarea' | 'richText' | 'json
 
 type dynamicTypes = 'radio' | 'select'
 
-const Polygon = new GraphQLInputObjectType({
-  name: 'Polygon',
+const GeoJSONObject = new GraphQLInputObjectType({
+  name: 'GeoJSONObject',
   fields: {
     type: { type: GraphQLString },
     coordinates: {
-      type: new GraphQLList(new GraphQLList(new GraphQLList(GraphQLFloat))),
+      type: GraphQLJSON,
     },
   },
 });
@@ -150,8 +150,13 @@ const defaults: DefaultsType = {
          *   [0.0, 0.0],
          *  ]],
          * }
+         * @example
+         * intersects: {
+         *  type: "Point",
+         *  coordinates: [ 0.5, 0.5 ]
+         * }
          */
-        type: Polygon,
+        type: GeoJSONObject,
       })),
     ],
   },
