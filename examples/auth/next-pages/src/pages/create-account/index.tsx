@@ -1,88 +1,125 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
-import { useAuth } from '../../components/Auth'
+import { Button } from '../../components/Button'
 import { Gutter } from '../../components/Gutter'
 import { Input } from '../../components/Input'
-import classes from './index.module.css'
+import { Message } from '../../components/Message'
+import { RenderParams } from '../../components/RenderParams'
+import { useAuth } from '../../providers/Auth'
+
+import classes from './index.module.scss'
 
 type FormData = {
   email: string
   password: string
-  firstName: string
-  lastName: string
+  passwordConfirm: string
 }
 
 const CreateAccount: React.FC = () => {
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
-  const { login, create, user } = useAuth()
+  const router = useRouter()
+  const searchParams = useMemo(() => new URLSearchParams(router.query as any), [router.query])
+  const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
+  const { login } = useAuth()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<FormData>()
+
+  const password = useRef({})
+  password.current = watch('password', '')
 
   const onSubmit = useCallback(
     async (data: FormData) => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        const message = response.statusText || 'There was an error creating the account.'
+        setError(message)
+        return
+      }
+
+      const redirect = searchParams.get('redirect')
+
+      const timer = setTimeout(() => {
+        setLoading(true)
+      }, 1000)
+
       try {
-        await create(data as Parameters<typeof create>[0])
-        // Automatically log the user in after creating their account
-        await login({ email: data.email, password: data.password })
-        setSuccess(true)
-      } catch (err) {
-        setError(err?.message || 'An error occurred while attempting to create your account.')
+        await login(data)
+        clearTimeout(timer)
+        if (redirect) router.push(redirect as string)
+        else router.push(`/account?success=${encodeURIComponent('Account created successfully')}`)
+      } catch (_) {
+        clearTimeout(timer)
+        setError('There was an error with the credentials provided. Please try again.')
       }
     },
-    [login, create],
+    [login, router, searchParams],
   )
 
   return (
-    <Gutter>
-      {!success && (
-        <React.Fragment>
-          <h1>Create Account</h1>
-          {error && <div className={classes.error}>{error}</div>}
-          <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
-            <Input
-              name="email"
-              label="Email Address"
-              required
-              register={register}
-              error={errors.email}
-            />
-            <Input
-              name="password"
-              type="password"
-              label="Password"
-              required
-              register={register}
-              error={errors.password}
-            />
-            <Input
-              name="firstName"
-              label="First Name"
-              register={register}
-              error={errors.firstName}
-            />
-            <Input name="lastName" label="Last Name" register={register} error={errors.lastName} />
-            <button type="submit">Create account</button>
-          </form>
-          <p>
-            {'Already have an account? '}
-            <Link href="/login">Login</Link>
-          </p>
-        </React.Fragment>
-      )}
-      {success && (
-        <React.Fragment>
-          <h1>Account created successfully</h1>
-          <p>You are now logged in.</p>
-          <Link href="/account">Go to your account</Link>
-        </React.Fragment>
-      )}
+    <Gutter className={classes.createAccount}>
+      <h1>Create Account</h1>
+      <RenderParams />
+      <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
+        <p>
+          {`This is where new customers can signup and create a new account. To manage all users, `}
+          <Link href={`${process.env.NEXT_PUBLIC_CMS_URL}/admin/collections/users`}>
+            login to the admin dashboard
+          </Link>
+          {'.'}
+        </p>
+        <Message error={error} className={classes.message} />
+        <Input
+          name="email"
+          label="Email Address"
+          required
+          register={register}
+          error={errors.email}
+          type="email"
+        />
+        <Input
+          name="password"
+          type="password"
+          label="Password"
+          required
+          register={register}
+          error={errors.password}
+        />
+        <Input
+          name="passwordConfirm"
+          type="password"
+          label="Confirm Password"
+          required
+          register={register}
+          validate={value => value === password.current || 'The passwords do not match'}
+          error={errors.passwordConfirm}
+        />
+        <Button
+          type="submit"
+          className={classes.submit}
+          label={loading ? 'Processing' : 'Create Account'}
+          appearance="primary"
+        />
+        <div>
+          {'Already have an account? '}
+          <Link href={`/login${allParams}`}>Login</Link>
+        </div>
+      </form>
     </Gutter>
   )
 }
