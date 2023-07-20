@@ -1,6 +1,12 @@
 # Payload E-Commerce Template
 
-A template for [Payload](https://github.com/payloadcms/payload) to power e-commerce businesses. This repo may have been created by running `npx create-payload-app` and selecting the "e-commerce" template or by cloning this template on [Payload Cloud](https://payloadcms.com/new/clone/blank).
+A template for [Payload](https://github.com/payloadcms/payload) to power e-commerce businesses and online stores. This repo can be cloned by running `npx create-payload-app` and selecting the e-commerce template or by [cloning this template on Payload Cloud](https://payloadcms.com/new/clone/ecommerce).
+
+This template is right for you if you are selling:
+
+- Physical products like clothing or merchandise
+- Digital assets like ebooks or videos
+- Access to content like courses or premium articles
 
 Core features:
 
@@ -12,13 +18,13 @@ Core features:
 - [Paywall](#paywall)
 - [Layout Builder](#layout-builder)
 - [SEO](#seo)
-- [Complete Front-end](#front-end)
+- [Website](#website)
 
 For details on how to get this template up and running locally, see the [development](#development) section.
 
 ## How it works
 
-The Payload config is tailored specifically to the needs of an e-commerce business. It is pre-configured in the following ways:
+The Payload config is tailored specifically to the needs of most e-commerce businesses. It is pre-configured in the following ways:
 
 ### Collections
 
@@ -32,16 +38,11 @@ See the [collections documentation](https://payloadcms.com/docs/configuration/co
 
 - #### Products
 
-  Each product is linked to Stripe via a select field that is dynamically populated in the sidebar. This field fetches all available products in the background and displays them as options. Once a product has been selected, prices get automatically synced between Stripe and Payload. All products are layout-builder enabled so you can generate unique pages for each product using layout-building blocks, see [Layout Builder](#layout-builder) for more details. Products can also gate their content or digital assets behind a paywall, see [Paywall](#paywall) for more details.
+  Each product is linked to Stripe via a custom select field that is dynamically populated in the sidebar. This field fetches all available products in the background and displays them as options. Once a product has been selected, prices get automatically synced between Stripe and Payload through webhooks. See [Stripe](#stripe) for more details.
 
-- #### Orders
+  All products are layout-builder enabled so you can generate unique pages for each product using layout-building blocks, see [Layout Builder](#layout-builder) for more details.
 
-  When an order is placed, an invoice is created in Stripe. To easily query orders from Stripe, two custom endpoints are opened which proxy the Stripe API. This allows you to safely query Stripe from your front-end without exposing your Stripe API key.
-
-  - `/api/users/orders` - Returns all orders for the current user
-  - `/api/users/orders/:id` - Returns a single order by ID
-
-  For more details on how to extend this functionality, see the [Custom Endpoints](https://payloadcms.com/docs/rest-api/overview#custom-endpoints) docs.
+  Products can also gate their content or digital assets behind a paywall, see [Paywall](#paywall) for more details.
 
 - #### Pages
 
@@ -120,11 +121,39 @@ For more details on how to extend this functionality, see the the official [Payl
 
 ## Checkout
 
-A custom endpoint is opened at `/api/payment-intent` which initiates the checkout process. This endpoint creates a [`PaymentIntent`](https://stripe.com/docs/payments/payment-intents) with the items in the cart using the Stripe's [Invoices API](https://stripe.com/docs/api/invoices). First, an invoice is drafted, then each item in your cart is appended as a line-item to the invoice. The total price is recalculated on the server to ensure accuracy and security, and once completed, passes the `client_secret` back in the response for your front-end to finalize the payment.
+A custom endpoint is opened at `/api/payment-intent` which initiates the checkout process. This endpoint creates a [`PaymentIntent`](https://stripe.com/docs/payments/payment-intents) with the items in the cart using the Stripe's [Invoices API](https://stripe.com/docs/api/invoices). First, an invoice is drafted, then each item in your cart is appended as a line-item to the invoice. The total price is recalculated on the server to ensure accuracy and security, and once completed, passes the `client_secret` back in the response for your front-end to finalize the payment. Once the payment has succeeded, the draft invoice will be set to paid, each purchased product will be recorded to the user's profile, and the user's cart will be cleared.
+
+## Orders
+
+  When an order is placed, an invoice is created in Stripe. To easily query orders from Stripe, two custom endpoints are opened which proxy the Stripe API for these invoices. This allows you to safely query Stripe from your front-end without exposing your sensitive Stripe API key.
+
+  - `/api/users/orders` - Returns all orders for the current user
+  - `/api/users/orders/:id` - Returns a single order by ID
+
+  For more details on how to extend this functionality, see the [Custom Endpoints](https://payloadcms.com/docs/rest-api/overview#custom-endpoints) docs.
 
 ## Paywall
 
-Products can optionally gate content or digital assets behind a paywall. This will require the product to be purchased before it's resources are accessible. To do this, we add a `paywall` field to the `product` collection with `read` access control to check for associated purchases on each request. A `purchases` field is maintained on each user to determine their access which can be manually adjusted as needed.
+Products can optionally restrict access to content or digital assets behind a paywall. This will require the product to be purchased before it's resources are accessible. To do this, a `purchases` field is maintained on each user to determine their access:
+
+```ts
+{
+  name: 'purchases',
+  label: 'Purchases',
+  type: 'array',
+  fields: [
+    {
+      name: 'product',
+      label: 'Product',
+      type: 'relationship',
+      relationTo: 'products',
+    },
+    // other metadata like `createdOn`, etc
+  ]
+}
+```
+
+Then, a `paywall` field can be added to the `product` with `read` access control set to check for associated purchases. Every time a user requests a product, this will only return data to those who have purchased it:
 
 ```ts
 {
@@ -142,7 +171,7 @@ Products can optionally gate content or digital assets behind a paywall. This wi
 
 ## Layout builder
 
-Products and pages can be built using a powerful layout builder. This allows you to create unique layouts for each product or page. This template comes pre-configured with the following layout building blocks:
+Create unique product and page layouts for any type fo content using a powerful layout builder. This template comes pre-configured with the following layout building blocks:
 
 - Hero
 - Content
@@ -154,7 +183,7 @@ Products and pages can be built using a powerful layout builder. This allows you
 
 This template comes pre-configured with the official [Payload SEO Plugin](https://github.com/payloadcms/plugin-seo) for complete SEO control.
 
-## Front-end
+## Website
 
 This template includes a fully-working [Next.js](https://nextjs.org) front-end that is served alongside your Payload app in a single Express server. This makes is so that you can deploy both apps simultaneously and host them together. If you prefer a different front-end framework, this pattern works for any framework that supports a custom server. You can easily [Eject](#eject) the front-end out from this template to swap in your own or to use it as a standalone CMS. For more details, see the official [Custom Server Example](https://github.com/payloadcms/payload/tree/master/examples/custom-server).
 
