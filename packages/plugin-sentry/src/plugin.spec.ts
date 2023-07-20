@@ -2,19 +2,8 @@ import type { Config } from 'payload/config'
 import { defaults } from 'payload/dist/config/defaults'
 
 import { sentry } from './plugin'
-import * as startSentryFuncs from './startSentry'
-
-let startSentrySpy: jest.SpyInstance
 
 describe('plugin', () => {
-  beforeEach(() => {
-    startSentrySpy = jest.spyOn(startSentryFuncs, 'startSentry').mockImplementation(() => {})
-  })
-
-  afterEach(() => {
-    startSentrySpy.mockRestore()
-  })
-
   it('should run the plugin', () => {
     const plugin = sentry({ enabled: true, dsn: 'asdf' })
     const config = plugin(createConfig())
@@ -47,13 +36,13 @@ describe('plugin', () => {
 function assertPluginRan(config: Config) {
   expect(config.admin?.webpack).toBeDefined()
   expect(config.hooks?.afterError).toBeDefined()
-  expect(startSentrySpy).toHaveBeenCalled()
+  expect(config.onInit).toBeDefined()
 }
 
 function assertPluginDidNotRun(config: Config) {
   expect(config.admin?.webpack).toBeDefined()
   expect(config.hooks?.afterError).toBeUndefined()
-  expect(startSentrySpy).not.toHaveBeenCalled()
+  expect(config.onInit).toBeUndefined()
 }
 
 function createConfig(overrides?: Partial<Config>): Config {
