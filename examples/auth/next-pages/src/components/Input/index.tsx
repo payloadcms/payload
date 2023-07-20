@@ -1,7 +1,7 @@
 import React from 'react'
-import { FieldValues, UseFormRegister } from 'react-hook-form'
+import { FieldValues, UseFormRegister, Validate } from 'react-hook-form'
 
-import classes from './index.module.css'
+import classes from './index.module.scss'
 
 type Props = {
   name: string
@@ -9,7 +9,8 @@ type Props = {
   register: UseFormRegister<FieldValues & any>
   required?: boolean
   error: any
-  type?: 'text' | 'number' | 'password'
+  type?: 'text' | 'number' | 'password' | 'email'
+  validate?: (value: string) => boolean | string
 }
 
 export const Input: React.FC<Props> = ({
@@ -19,14 +20,36 @@ export const Input: React.FC<Props> = ({
   register,
   error,
   type = 'text',
+  validate,
 }) => {
   return (
-    <div className={classes.input}>
+    <div className={classes.inputWrap}>
       <label htmlFor="name" className={classes.label}>
-        {label}
+        {`${label} ${required ? '*' : ''}`}
       </label>
-      <input {...{ type }} {...register(name, { required })} />
-      {error && <div className={classes.error}>This field is required</div>}
+      <input
+        className={[classes.input, error && classes.error].filter(Boolean).join(' ')}
+        {...{ type }}
+        {...register(name, {
+          required,
+          validate,
+          ...(type === 'email'
+            ? {
+                pattern: {
+                  value: /\S+@\S+\.\S+/,
+                  message: 'Please enter a valid email',
+                },
+              }
+            : {}),
+        })}
+      />
+      {error && (
+        <div className={classes.errorMessage}>
+          {!error?.message && error?.type === 'required'
+            ? 'This field is required'
+            : error?.message}
+        </div>
+      )}
     </div>
   )
 }

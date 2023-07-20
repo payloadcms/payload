@@ -18,11 +18,12 @@ type FormData = {
   passwordConfirm: string
 }
 
-const AccountForm: React.FC = () => {
+export const AccountForm: React.FC = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const { user, setUser } = useAuth()
   const [changePassword, setChangePassword] = useState(false)
+  const router = useRouter()
 
   const {
     register,
@@ -34,8 +35,6 @@ const AccountForm: React.FC = () => {
 
   const password = useRef({})
   password.current = watch('password', '')
-
-  const router = useRouter()
 
   const onSubmit = useCallback(
     async (data: FormData) => {
@@ -151,5 +150,3 @@ const AccountForm: React.FC = () => {
     </form>
   )
 }
-
-export default AccountForm

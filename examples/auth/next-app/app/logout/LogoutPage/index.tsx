@@ -25,14 +25,13 @@ export const LogoutPage: React.FC = props => {
 
   return (
     <Fragment>
-      {error && <h1>{error}</h1>}
-      {success && (
+      {(error || success) && (
         <div>
-          <h1>{success}</h1>
+          <h1>{error || success}</h1>
           <p>
             {'What would you like to do next? '}
             <Link href="/">Click here</Link>
-            {` to go home. To log back in, `}
+            {` to go to the home page. To log back in, `}
             <Link href="login">click here</Link>
             {'.'}
           </p>

@@ -3,7 +3,7 @@ import React from 'react'
 import { Gutter } from '../_components/Gutter'
 import { RenderParams } from '../_components/RenderParams'
 import { getMeUser } from '../_utilities/getMeUser'
-import CreateAccountForm from './CreateAccountForm'
+import { CreateAccountForm } from './CreateAccountForm'
 
 import classes from './index.module.scss'
 

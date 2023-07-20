@@ -18,7 +18,7 @@ type FormData = {
   passwordConfirm: string
 }
 
-const CreateAccountForm: React.FC = () => {
+export const CreateAccountForm: React.FC = () => {
   const searchParams = useSearchParams()
   const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
   const { login } = useAuth()
@@ -119,5 +119,3 @@ const CreateAccountForm: React.FC = () => {
     </form>
   )
 }
-
-export default CreateAccountForm

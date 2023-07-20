@@ -1,14 +1,14 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import type { User } from '../../payload/payload-types'
+import type { User } from '../payload-types'
 
 export const getMeUser = async (args?: {
   nullUserRedirect?: string
   validUserRedirect?: string
 }): Promise<{
   user: User
-  token: string
+  token: string | undefined
 }> => {
   const { nullUserRedirect, validUserRedirect } = args || {}
   const cookieStore = cookies()

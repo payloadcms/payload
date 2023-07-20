@@ -5,7 +5,7 @@ import { Button } from '../_components/Button'
 import { Gutter } from '../_components/Gutter'
 import { RenderParams } from '../_components/RenderParams'
 import { getMeUser } from '../_utilities/getMeUser'
-import AccountForm from './AccountForm'
+import { AccountForm } from './AccountForm'
 
 import classes from './index.module.scss'
 
