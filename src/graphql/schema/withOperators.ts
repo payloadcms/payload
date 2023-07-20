@@ -30,13 +30,7 @@ type DefaultsType = {
 const defaults: DefaultsType = {
   number: {
     operators: [
-      ...operators.equality.map((operator) => ({
-        operator,
-        type: (field: NumberField): GraphQLType => {
-          return field?.name === 'id' ? GraphQLInt : GraphQLFloat;
-        },
-      })),
-      ...operators.comparison.map((operator) => ({
+      ...[...operators.equality, ...operators.comparison].map((operator) => ({
         operator,
         type: (field: NumberField): GraphQLType => {
           return field?.name === 'id' ? GraphQLInt : GraphQLFloat;
@@ -46,15 +40,7 @@ const defaults: DefaultsType = {
   },
   text: {
     operators: [
-      ...operators.equality.map((operator) => ({
-        operator,
-        type: GraphQLString,
-      })),
-      ...operators.partial.map((operator) => ({
-        operator,
-        type: GraphQLString,
-      })),
-      ...operators.contains.map((operator) => ({
+      ...[...operators.equality, ...operators.partial, ...operators.contains].map((operator) => ({
         operator,
         type: GraphQLString,
       })),
@@ -62,15 +48,7 @@ const defaults: DefaultsType = {
   },
   email: {
     operators: [
-      ...operators.equality.map((operator) => ({
-        operator,
-        type: EmailAddressResolver,
-      })),
-      ...operators.partial.map((operator) => ({
-        operator,
-        type: EmailAddressResolver,
-      })),
-      ...operators.contains.map((operator) => ({
+      ...[...operators.equality, ...operators.partial, ...operators.contains].map((operator) => ({
         operator,
         type: EmailAddressResolver,
       })),
@@ -78,11 +56,7 @@ const defaults: DefaultsType = {
   },
   textarea: {
     operators: [
-      ...operators.equality.map((operator) => ({
-        operator,
-        type: GraphQLString,
-      })),
-      ...operators.partial.map((operator) => ({
+      ...[...operators.equality, ...operators.partial].map((operator) => ({
         operator,
         type: GraphQLString,
       })),
@@ -90,11 +64,7 @@ const defaults: DefaultsType = {
   },
   richText: {
     operators: [
-      ...operators.equality.map((operator) => ({
-        operator,
-        type: GraphQLJSON,
-      })),
-      ...operators.partial.map((operator) => ({
+      ...[...operators.equality, ...operators.partial].map((operator) => ({
         operator,
         type: GraphQLJSON,
       })),
@@ -102,15 +72,7 @@ const defaults: DefaultsType = {
   },
   json: {
     operators: [
-      ...operators.equality.map((operator) => ({
-        operator,
-        type: GraphQLJSON,
-      })),
-      ...operators.partial.map((operator) => ({
-        operator,
-        type: GraphQLJSON,
-      })),
-      ...operators.geojson.map((operator) => ({
+      ...[...operators.equality, ...operators.partial, ...operators.geojson].map((operator) => ({
         operator,
         type: GraphQLJSON,
       })),
@@ -118,11 +80,7 @@ const defaults: DefaultsType = {
   },
   code: {
     operators: [
-      ...operators.equality.map((operator) => ({
-        operator,
-        type: GraphQLString,
-      })),
-      ...operators.partial.map((operator) => ({
+      ...[...operators.equality, ...operators.partial].map((operator) => ({
         operator,
         type: GraphQLString,
       })),
