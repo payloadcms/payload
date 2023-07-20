@@ -6,7 +6,7 @@ import type { Media } from './payload-types';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { login, saveDocAndAssert } from '../helpers';
+import { saveDocAndAssert } from '../helpers';
 import wait from '../../src/utilities/wait';
 
 const { beforeAll, describe } = test;
@@ -50,8 +50,6 @@ describe('uploads', () => {
     });
 
     audioDoc = findAudio.docs[0] as Media;
-
-    await login({ page, serverURL });
   });
 
   test('should see upload filename in relation list', async () => {

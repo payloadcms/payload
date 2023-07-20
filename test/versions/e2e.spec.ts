@@ -28,7 +28,6 @@ import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
-import { login } from '../helpers';
 import { draftSlug, autosaveSlug } from './shared';
 import wait from '../../src/utilities/wait';
 
@@ -44,8 +43,6 @@ describe('versions', () => {
 
     const context = await browser.newContext();
     page = await context.newPage();
-
-    await login({ page, serverURL });
   });
 
   describe('draft collections', () => {

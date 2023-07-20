@@ -51,7 +51,6 @@ export default buildConfig({
           name: 'canViewConditionalField',
           type: 'checkbox',
           defaultValue: true,
-          saveToJWT: true,
         },
       ],
     },
