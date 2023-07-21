@@ -1,1 +1,1 @@
-// export { baseDatabaseAdapter } from '../dist/database/baseAdapter';
+export { baseDatabaseAdapter } from '../dist/database/baseDatabaseAdapter';
