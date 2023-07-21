@@ -190,6 +190,7 @@
     "url-loader": "^4.1.1",
     "use-context-selector": "^1.4.1",
     "uuid": "^8.3.2",
+    "vite": "^4.4.6",
     "webpack": "^5.78.0",
     "webpack-bundle-analyzer": "^4.8.0",
     "webpack-cli": "^4.10.0",
