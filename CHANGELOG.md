@@ -1,5 +1,12 @@
 
 
+## [1.11.2](https://github.com/payloadcms/payload/compare/v1.11.1...v1.11.2) (2023-07-14)
+
+
+### Features
+
+* adds array, collapsible, tab and group error states ([4925f90](https://github.com/payloadcms/payload/commit/4925f90b5f5c8fb8092bf4e8d88d5e0c1846b094))
+
 ## [1.11.1](https://github.com/payloadcms/payload/compare/v1.11.0...v1.11.1) (2023-07-11)
 
 

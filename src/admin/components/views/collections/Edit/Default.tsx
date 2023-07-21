@@ -29,6 +29,7 @@ import { getTranslation } from '../../../../../utilities/getTranslation';
 import { SetStepNav } from './SetStepNav';
 import { FormLoadingOverlayToggle } from '../../../elements/Loading';
 import { formatDate } from '../../../../utilities/formatDate';
+import { useAuth } from '../../../utilities/Auth';
 
 import './index.scss';
 
@@ -38,6 +39,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
   const { admin: { dateFormat }, routes: { admin } } = useConfig();
   const { publishedDoc } = useDocumentInfo();
   const { t, i18n } = useTranslation('general');
+  const { user, refreshCookieAsync } = useAuth();
 
   const {
     collection,
@@ -78,14 +80,18 @@ const DefaultEditView: React.FC<Props> = (props) => {
     isEditing && `${baseClass}--is-editing`,
   ].filter(Boolean).join(' ');
 
-  const onSave = useCallback((json) => {
+  const onSave = useCallback(async (json) => {
+    if (auth && id === user.id) {
+      await refreshCookieAsync();
+    }
+
     if (typeof onSaveFromProps === 'function') {
       onSaveFromProps({
         ...json,
         operation: id ? 'update' : 'create',
       });
     }
-  }, [id, onSaveFromProps]);
+  }, [id, onSaveFromProps, auth, user, refreshCookieAsync]);
 
   const operation = isEditing ? 'update' : 'create';
 

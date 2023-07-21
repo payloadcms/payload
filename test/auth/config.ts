@@ -2,12 +2,14 @@ import { v4 as uuid } from 'uuid';
 import { mapAsync } from '../../src/utilities/mapAsync';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
+import { AuthDebug } from './AuthDebug';
 
 export const slug = 'users';
 
 export default buildConfigWithDefaults({
   admin: {
     user: 'users',
+    autoLogin: false,
   },
   collections: [
     {
@@ -35,6 +37,21 @@ export default buildConfigWithDefaults({
           required: true,
           saveToJWT: true,
           hasMany: true,
+        },
+        {
+          name: 'custom',
+          label: 'Custom',
+          type: 'text',
+        },
+        {
+          name: 'authDebug',
+          label: 'Auth Debug',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: AuthDebug,
+            },
+          },
         },
       ],
     },
@@ -65,6 +82,7 @@ export default buildConfigWithDefaults({
       data: {
         email: devUser.email,
         password: devUser.password,
+        custom: 'Hello, world!',
       },
     });
 

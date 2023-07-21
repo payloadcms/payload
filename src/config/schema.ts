@@ -66,6 +66,14 @@ export default joi.object({
       ),
     logoutRoute: joi.string(),
     inactivityRoute: joi.string(),
+    autoLogin: joi.alternatives()
+      .try(
+        joi.object().keys({
+          email: joi.string(),
+          password: joi.string(),
+        }),
+        joi.boolean(),
+      ),
     components: joi.object()
       .keys({
         routes: joi.array()
