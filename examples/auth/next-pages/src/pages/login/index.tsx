@@ -1,12 +1,16 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useMemo, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
-import { useAuth } from '../../components/Auth'
+import { Button } from '../../components/Button'
 import { Gutter } from '../../components/Gutter'
 import { Input } from '../../components/Input'
-import classes from './index.module.css'
+import { Message } from '../../components/Message'
+import { RenderParams } from '../../components/RenderParams'
+import { useAuth } from '../../providers/Auth'
+
+import classes from './index.module.scss'
 
 type FormData = {
   email: string
@@ -14,52 +18,61 @@ type FormData = {
 }
 
 const Login: React.FC = () => {
-  const [error, setError] = useState('')
   const router = useRouter()
-  const { login, user } = useAuth()
+  const searchParams = useMemo(() => new URLSearchParams(router.query as any), [router.query])
+  const allParams = searchParams.toString() ? `?${searchParams.toString()}` : ''
+  const redirect = useRef(searchParams.get('redirect'))
+  const { login } = useAuth()
+  const [error, setError] = React.useState<string | null>(null)
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>()
+    formState: { errors, isLoading },
+  } = useForm<FormData>({
+    defaultValues: {
+      email: 'demo@payloadcms.com',
+      password: 'demo',
+    },
+  })
 
   const onSubmit = useCallback(
     async (data: FormData) => {
       try {
         await login(data)
-        router.push('/account')
-      } catch (err) {
-        setError(err?.message || 'An error occurred while attempting to login.')
+        if (redirect?.current) router.push(redirect.current as string)
+        else router.push('/account')
+      } catch (_) {
+        setError('There was an error with the credentials provided. Please try again.')
       }
     },
     [login, router],
   )
 
-  useEffect(() => {
-    if (router.query.unauthorized) {
-      setError(`To visit the ${router.query.unauthorized} page, you need to be logged in.`)
-    }
-  }, [router])
-
-  if (user) {
-    router.push('/account')
-  }
-
   return (
-    <Gutter>
+    <Gutter className={classes.login}>
+      <RenderParams className={classes.params} />
       <h1>Log in</h1>
-      <p>
-        To log in, use the email <b>demo@payloadcms.com</b> with the password <b>demo</b>.
-      </p>
-      {error && <div className={classes.error}>{error}</div>}
       <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
+        <p>
+          {'To log in, use the email '}
+          <b>demo@payloadcms.com</b>
+          {' with the password '}
+          <b>demo</b>
+          {'. To manage your users, '}
+          <Link href={`${process.env.NEXT_PUBLIC_CMS_URL}/admin/collections/users`}>
+            login to the admin dashboard
+          </Link>
+          .
+        </p>
+        <Message error={error} className={classes.message} />
         <Input
           name="email"
           label="Email Address"
           required
           register={register}
           error={errors.email}
+          type="email"
         />
         <Input
           name="password"
@@ -69,11 +82,19 @@ const Login: React.FC = () => {
           register={register}
           error={errors.password}
         />
-        <input type="submit" />
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className={classes.submit}
+          label={isLoading ? 'Processing' : 'Login'}
+          appearance="primary"
+        />
+        <div>
+          <Link href={`/create-account${allParams}`}>Create an account</Link>
+          <br />
+          <Link href={`/recover-password${allParams}`}>Recover your password</Link>
+        </div>
       </form>
-      <Link href="/create-account">Create an account</Link>
-      <br />
-      <Link href="/recover-password">Recover your password</Link>
     </Gutter>
   )
 }
