@@ -71,7 +71,7 @@ export const RecoverPasswordForm: React.FC = () => {
               <Button
                 type="submit"
                 appearance="primary"
-                label="Submit"
+                label="Recover Password"
                 className={classes.submit}
               />
             </form>

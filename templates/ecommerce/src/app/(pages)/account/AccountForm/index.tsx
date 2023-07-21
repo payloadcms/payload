@@ -72,7 +72,11 @@ const AccountForm: React.FC = () => {
 
   useEffect(() => {
     if (user === null) {
-      router.push(`/login?unauthorized=account`)
+      router.push(
+        `/login?error=${encodeURIComponent(
+          'You must be logged in to view this page.',
+        )}&redirect=${encodeURIComponent('/account')}`,
+      )
     }
 
     // Once user is loaded, reset form to have default values
@@ -92,7 +96,7 @@ const AccountForm: React.FC = () => {
       {!changePassword ? (
         <Fragment>
           <p>
-            {'To change your password, '}
+            {'Change your account details below, or '}
             <button
               type="button"
               className={classes.changePassword}
@@ -100,7 +104,7 @@ const AccountForm: React.FC = () => {
             >
               click here
             </button>
-            .
+            {' to change your password.'}
           </p>
           <Input
             name="email"
@@ -146,7 +150,7 @@ const AccountForm: React.FC = () => {
       )}
       <Button
         type="submit"
-        label={isLoading ? 'Processing' : 'Update Account'}
+        label={isLoading ? 'Processing' : changePassword ? 'Change Password' : 'Update Account'}
         disabled={isLoading}
         appearance="primary"
         className={classes.submit}

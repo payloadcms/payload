@@ -31,12 +31,11 @@ export const LogoutPage: React.FC<{
 
   return (
     <Fragment>
-      {error && <h1>{error}</h1>}
-      {success && (
+      {(error || success) && (
         <div>
-          <h1>{success}</h1>
+          <h1>{error || success}</h1>
           <p>
-            {'What would you like to do next? '}
+            {'What would you like to do next?'}
             {typeof shopPage === 'object' && shopPage?.slug && (
               <Fragment>
                 {' '}
@@ -44,11 +43,9 @@ export const LogoutPage: React.FC<{
                 {` to shop.`}
               </Fragment>
             )}
-            <Fragment>
-              {' To log back in, '}
-              <Link href={`/login?redirect=%2Fcart`}>click here</Link>
-              {'.'}
-            </Fragment>
+            {` To log back in, `}
+            <Link href="/login">click here</Link>
+            {'.'}
           </p>
         </div>
       )}

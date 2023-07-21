@@ -31,7 +31,9 @@ export const Button: React.FC<Props> = ({
   invert,
 }) => {
   let el = elFromProps
+
   const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
+
   const className = [
     classes.button,
     classNameFromProps,
@@ -43,7 +45,6 @@ export const Button: React.FC<Props> = ({
 
   const content = (
     <div className={classes.content}>
-      {/* <Chevron /> */}
       <span className={classes.label}>{label}</span>
     </div>
   )

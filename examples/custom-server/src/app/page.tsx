@@ -26,7 +26,6 @@ export default async function Home() {
             <RichText content={home.richText} />
           </div>
         </Gutter>
-        what
       </main>
     </Fragment>
   )

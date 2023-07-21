@@ -3,10 +3,6 @@ $breakpoint-s-width: 768px;
 $breakpoint-m-width: 1024px;
 $breakpoint-l-width: 1440px;
 
-////////////////////////////
-// MEDIA QUERIES
-/////////////////////////////
-
 @mixin extra-small-break {
   @media (max-width: #{$breakpoint-xs-width}) {
     @content;

@@ -6,6 +6,9 @@
   display: inline-flex;
   justify-content: center;
   background-color: transparent;
+  text-decoration: none;
+  display: inline-flex;
+  padding: 12px 24px;
 }
 
 .content {
@@ -25,12 +28,6 @@
   text-align: center;
   display: flex;
   align-items: center;
-}
-
-.button {
-  text-decoration: none;
-  display: inline-flex;
-  padding: 12px 24px;
 }
 
 .appearance--primary {

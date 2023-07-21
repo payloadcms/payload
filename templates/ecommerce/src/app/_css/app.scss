@@ -4,12 +4,6 @@
 @import "./theme.scss";
 
 :root {
-  --breakpoint-xs-width : #{$breakpoint-xs-width};
-  --breakpoint-s-width : #{$breakpoint-s-width};
-  --breakpoint-m-width : #{$breakpoint-m-width};
-  --breakpoint-l-width : #{$breakpoint-l-width};
-  --scrollbar-width: 17px;
-
   --base: 24px;
   --font-body: system-ui;
   --font-mono: 'Roboto Mono', monospace;
@@ -28,10 +22,6 @@
   }
 }
 
-/////////////////////////////
-// GLOBAL STYLES
-/////////////////////////////
-
 * {
   box-sizing: border-box;
 }
@@ -45,11 +35,6 @@ html {
   &[data-theme=dark],
   &[data-theme=light] {
     opacity: initial;
-  }
-
-  &[data-theme=dark] {
-    background: var(--color-base-900);
-    color-scheme: dark;
   }
 }
 

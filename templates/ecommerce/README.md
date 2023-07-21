@@ -1,6 +1,6 @@
 # Payload E-Commerce Template
 
-This is a [Payload](https://github.com/payloadcms/payload) template to power e-commerce businesses and online stores. This repo includes a fully-working backend, enterprise-grade admin panel, and a beautifully designed, production-ready website.
+This is the official [Payload E-Commerce Template](https://github.com/payloadcms/payload). Use it to power e-commerce businesses and online stores of all sizes. This repo includes a fully-working backend, enterprise-grade admin panel, and a beautifully designed, production-ready website.
 
 This template is right for you if you are selling:
 
@@ -42,7 +42,7 @@ If you have not done so already, you need to have standalone copy of this repo o
 
   Use the `git` CLI to clone this template directly to your machine:
 
-    git clone -n --depth=1 --filter=tree:0 https://github.com/payloadcms/payload my-project && cd my-project && git sparse-checkout set --no-cone templates/ecommerce && git checkout && rm -rf .git && git init && git add . && git mv -f templates/ecommerce/{.,}* . && rm -rf templates && git add . && git commit -m "Initial commit"
+    git clone -n --depth=1 --filter=tree:0 https://github.com/payloadcms/payload my-project && cd my-project && git sparse-checkout set --no-cone templates/ecommerce && git checkout && rm -rf .git && git init && git add . && git mv -f templates/ecommerce/{.,}* . && git add . && git commit -m "Initial commit"
 
 ### Development
 
@@ -51,7 +51,7 @@ If you have not done so already, you need to have standalone copy of this repo o
 1. `yarn && yarn dev` to install dependencies and start the dev server
 1. `open http://localhost:3000` to access the admin panel
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. See [Production](#production) for how to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. To begin accepting payment, follow the [Stripe](#stripe) guide. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
 
 ## How it works
 
@@ -65,7 +65,7 @@ See the [collections documentation](https://payloadcms.com/docs/configuration/co
 
   Users are auth-enabled and encompass both admins and customers based on the value of their `roles` field. Only `admin` users can access your admin panel to manage your store whereas `customer` can authenticate on your front-end to create [shopping carts](#shopping-cart) and place [orders](#orders) but have limited access to the platform. See [Access Control](#access-control) for more details.
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/master/examples/auth/cms#readme) or the [authentication docs](https://payloadcms.com/docs/authentication/overview#authentication-overview).
+  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/master/examples/auth) or the [authentication docs](https://payloadcms.com/docs/authentication/overview#authentication-overview).
 
 - #### Products
 
@@ -253,11 +253,12 @@ To spin up this example locally, follow the [Quick Start](#quick-start).
 To integrate with Stripe, follow these steps:
 
 1. You will first need to create a [Stripe](https://stripe.com) account if you do not already have one.
-1. Retrieve your Stripe Secret Key from the Stripe admin panel and paste it into your `env`:
+1. Retrieve your [Stripe API keys](https://dashboard.stripe.com/test/apikeys) and paste them into your `env`:
    ```bash
    STRIPE_SECRET_KEY=
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
    ```
-1. In another terminal, listen for webhooks:
+1. In another terminal, listen for webhooks (optional):
    ```bash
    stripe login # follow the prompts
    yarn stripe:webhooks
@@ -268,7 +269,7 @@ To integrate with Stripe, follow these steps:
    ```
 1. Reboot Payload to ensure that Stripe connects and the webhooks are registered.
 
-See the official [Payload Stripe Plugin](https://github.com/payloadcms/plugin-stripe) for more details.
+See the [Stripe](#stripe) section for more details.
 
 ### Docker
 
@@ -290,8 +291,9 @@ To seed the database with a few products and pages you can run `yarn seed`. This
 
 To run Payload in production, you need to build and serve the Admin panel. To do so, follow these steps:
 
-1. First invoke the `payload build` script by running `yarn build` or `npm run build` in your project root. This creates a `./build` directory with a production-ready admin bundle.
-1. Then run `yarn serve` or `npm run serve` to run Node in production and serve Payload from the `./build` directory.
+1. Switch [your Stripe account to live mode](https://stripe.com/docs/test-mode) and update your [Stripe API keys](https://dashboard.stripe.com/test/apikeys). See [Connect Stripe](#connect-stripe) for more details.
+1. Then invoke the `payload build` script by running `yarn build` or `npm run build` in your project root. This creates a `./build` directory with a production-ready admin bundle.
+1. Finally run `yarn serve` or `npm run serve` to run Node in production and serve Payload from the `./build` directory.
 
 ### Deployment
 

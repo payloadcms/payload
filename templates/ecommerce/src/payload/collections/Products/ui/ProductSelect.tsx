@@ -36,7 +36,7 @@ export const ProductSelect: React.FC<TextField> = props => {
 
       const { data } = res
 
-      if ('data' in data) {
+      if (data && 'data' in data) {
         const fetchedProducts = data.data.reduce(
           (acc, item) => {
             acc.push({
@@ -101,7 +101,7 @@ export const ProductSelect: React.FC<TextField> = props => {
               }}
             >
               {`Manage "${
-                options.find(option => option.value === stripeProductID)?.label
+                options.find(option => option.value === stripeProductID)?.label || 'Unknown'
               }" in Stripe`}
             </span>
             <CopyToClipboard value={href} />

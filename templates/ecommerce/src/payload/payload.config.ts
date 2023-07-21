@@ -13,6 +13,7 @@ import Products from './collections/Products'
 import Users from './collections/Users'
 import BeforeDashboard from './components/BeforeDashboard'
 import BeforeLogin from './components/BeforeLogin'
+import LinkToOrders from './components/LinkToOrders'
 import { createPaymentIntent } from './endpoints/payment-intent'
 import { seed } from './endpoints/seed'
 import { Footer } from './globals/Footer'
@@ -31,6 +32,7 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     components: {
+      afterNavLinks: [LinkToOrders],
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
       beforeLogin: [BeforeLogin],
