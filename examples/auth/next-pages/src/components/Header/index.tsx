@@ -1,15 +1,13 @@
-import React, { Fragment } from 'react'
+import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { useAuth } from '../Auth'
 import { Gutter } from '../Gutter'
+import { HeaderNav } from './Nav'
 
 import classes from './index.module.scss'
 
 export const Header: React.FC = () => {
-  const { user } = useAuth()
-
   return (
     <header className={classes.header}>
       <Gutter className={classes.wrap}>
@@ -27,20 +25,7 @@ export const Header: React.FC = () => {
             />
           </picture>
         </Link>
-        <nav className={classes.nav}>
-          {!user && (
-            <Fragment>
-              <Link href="/login">Login</Link>
-              <Link href="/create-account">Create Account</Link>
-            </Fragment>
-          )}
-          {user && (
-            <Fragment>
-              <Link href="/account">Account</Link>
-              <Link href="/logout">Logout</Link>
-            </Fragment>
-          )}
-        </nav>
+        <HeaderNav />
       </Gutter>
     </header>
   )

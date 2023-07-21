@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { Strategy } from 'passport-strategy';
 import { Payload } from '../../../src/payload';
-import { buildConfig } from '../../buildConfig';
+import { buildConfigWithDefaults } from '../../buildConfigWithDefaults';
 
 export const slug = 'users';
 export const strategyName = 'test-local';

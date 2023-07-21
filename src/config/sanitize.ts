@@ -41,6 +41,8 @@ export const sanitizeConfig = (config: Config): SanitizedConfig => {
     isMergeableObject: isPlainObject,
   }) as Config;
 
+  sanitizedConfig.admin = sanitizeAdmin(sanitizedConfig as SanitizedConfig);
+
   sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig, collection));
   checkDuplicateCollections(sanitizedConfig.collections);
 
@@ -55,8 +57,6 @@ export const sanitizeConfig = (config: Config): SanitizedConfig => {
   if (sanitizedConfig.serverURL !== '') {
     sanitizedConfig.csrf.push(sanitizedConfig.serverURL);
   }
-
-  sanitizedConfig.admin = sanitizeAdmin(sanitizedConfig as SanitizedConfig);
 
   return sanitizedConfig as SanitizedConfig;
 };

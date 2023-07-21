@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { PaginateOptions } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
 import { buildVersionCollectionFields } from '../versions/buildCollectionFields';
@@ -44,7 +44,7 @@ export default function initCollectionsLocal(ctx: Payload): void {
         });
       }
 
-      versionSchema.plugin(paginate, { useEstimatedCount: true })
+      versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true })
         .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug, versionsFields: versionCollectionFields }));
 
       if (collection.versions?.drafts) {
