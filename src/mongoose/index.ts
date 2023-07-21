@@ -1,4 +1,5 @@
 import type { ClientSession, Connection, ConnectOptions } from 'mongoose';
+import mongoose from 'mongoose';
 import { createMigration } from '../database/migrations/createMigration';
 import type { Payload } from '../index';
 import type { DatabaseAdapter } from '../database/types';
@@ -63,6 +64,7 @@ export function mongooseAdapter({
     payload,
     migrationDir,
   });
+  mongoose.set('strictQuery', false);
   return {
     ...adapter,
     connection: undefined,
