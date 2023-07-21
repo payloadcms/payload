@@ -2,7 +2,7 @@ import { Express, NextFunction, Response } from 'express';
 import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
 import { Options as ExpressFileUploadOptions } from 'express-fileupload';
-import { Configuration } from 'webpack';
+import type { Configuration } from 'webpack';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
 import { ConnectOptions } from 'mongoose';
