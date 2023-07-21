@@ -5,13 +5,13 @@ import OptimizeCSSAssetsPlugin from 'css-minimizer-webpack-plugin';
 
 export default {
   entry: {
-    main: [path.resolve(__dirname, '../admin/components/index.js')],
+    main: [path.resolve(__dirname, '../../admin/components/index.js')],
   },
   externals: {
     react: 'react',
   },
   output: {
-    path: path.resolve(__dirname, '../../components'),
+    path: path.resolve(__dirname, '../../../components'),
     publicPath: '/',
     filename: 'index.js',
     libraryTarget: 'commonjs2',
@@ -82,8 +82,8 @@ export default {
   ],
   resolve: {
     alias: {
-      'payload-scss-overrides': path.resolve(__dirname, '../admin/scss/overrides.scss'),
+      'payload-scss-overrides': path.resolve(__dirname, '../../admin/scss/overrides.scss'),
     },
-    modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
+    modules: ['node_modules', path.resolve(__dirname, '../../../node_modules')],
   },
 };

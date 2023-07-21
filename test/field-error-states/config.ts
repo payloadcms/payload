@@ -1,9 +1,9 @@
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { ErrorFieldsCollection } from './collections/ErrorFields';
 import { devUser } from '../credentials';
 import Uploads from './collections/Upload';
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   collections: [
     ErrorFieldsCollection,
     Uploads,

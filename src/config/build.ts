@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-nested-ternary */
 import { Config, SanitizedConfig } from './types';
-import sanitize from './sanitize';
+import { sanitizeConfig } from './sanitize';
 
 /**
  * @description Builds and validates Payload configuration
@@ -18,10 +18,10 @@ export async function buildConfig(config: Config): Promise<SanitizedConfig> {
       Promise.resolve(config),
     );
 
-    const sanitizedConfig = sanitize(configAfterPlugins);
+    const sanitizedConfig = sanitizeConfig(configAfterPlugins);
 
     return sanitizedConfig;
   }
 
-  return sanitize(config);
+  return sanitizeConfig(config);
 }

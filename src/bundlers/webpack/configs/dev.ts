@@ -1,12 +1,12 @@
 import webpack, { Configuration } from 'webpack';
 import md5 from 'md5';
-import { SanitizedConfig } from '../config/types';
-import getBaseConfig from './getBaseConfig';
+import { getBaseConfig } from './base';
+import { SanitizedConfig } from '../../../config/types';
 
-export default (payloadConfig: SanitizedConfig): Configuration => {
+export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
   const baseConfig = getBaseConfig(payloadConfig) as any;
 
-  let config: Configuration = {
+  let webpackConfig: Configuration = {
     ...baseConfig,
     cache: {
       type: 'filesystem',
@@ -37,7 +37,7 @@ export default (payloadConfig: SanitizedConfig): Configuration => {
     ],
   };
 
-  config.module.rules.push({
+  webpackConfig.module.rules.push({
     test: /\.(scss|css)$/,
     sideEffects: true,
     use: [
@@ -61,8 +61,8 @@ export default (payloadConfig: SanitizedConfig): Configuration => {
   });
 
   if (payloadConfig.admin.webpack && typeof payloadConfig.admin.webpack === 'function') {
-    config = payloadConfig.admin.webpack(config);
+    webpackConfig = payloadConfig.admin.webpack(webpackConfig);
   }
 
-  return config;
+  return webpackConfig;
 };

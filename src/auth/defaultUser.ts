@@ -3,7 +3,7 @@ import { extractTranslations } from '../translations/extractTranslations';
 
 const labels = extractTranslations(['general:user', 'general:users']);
 
-const defaultUser: CollectionConfig = {
+export const defaultUserCollection: CollectionConfig = {
   slug: 'users',
   labels: {
     singular: labels['general:user'],
@@ -17,5 +17,3 @@ const defaultUser: CollectionConfig = {
   },
   fields: [],
 };
-
-export default defaultUser;

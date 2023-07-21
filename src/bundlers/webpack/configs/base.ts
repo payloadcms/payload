@@ -1,19 +1,23 @@
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack, { Configuration } from 'webpack';
-import { SanitizedConfig } from '../config/types';
+import type { SanitizedConfig } from '../../../config/types';
 
-const mockModulePath = path.resolve(__dirname, './mocks/emptyModule.js');
-const mockDotENVPath = path.resolve(__dirname, './mocks/dotENV.js');
+const mockModulePath = path.resolve(__dirname, '../../mocks/emptyModule.js');
+const mockDotENVPath = path.resolve(__dirname, '../../mocks/dotENV.js');
 
-export default (config: SanitizedConfig): Configuration => ({
+const nodeModulesPath = path.resolve(__dirname, '../../../../node_modules');
+const adminFolderPath = path.resolve(__dirname, '../../../admin');
+const bundlerPath = path.resolve(__dirname, '../bundler');
+
+export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => ({
   entry: {
     main: [
-      path.resolve(__dirname, '../admin'),
+      adminFolderPath,
     ],
   },
   resolveLoader: {
-    modules: ['node_modules', path.join(__dirname, '../../node_modules')],
+    modules: ['node_modules', path.join(__dirname, nodeModulesPath)],
   },
   module: {
     rules: [
@@ -51,12 +55,13 @@ export default (config: SanitizedConfig): Configuration => ({
       https: false,
       http: false,
     },
-    modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
+    modules: ['node_modules', path.resolve(__dirname, nodeModulesPath)],
     alias: {
-      'payload-config': config.paths.rawConfig,
+      'payload-config': payloadConfig.paths.rawConfig,
       payload$: mockModulePath,
-      'payload-user-css': config.admin.css,
+      'payload-user-css': payloadConfig.admin.css,
       dotenv: mockDotENVPath,
+      [bundlerPath]: mockModulePath,
     },
     extensions: ['.ts', '.tsx', '.js', '.json'],
   },
@@ -80,7 +85,7 @@ export default (config: SanitizedConfig): Configuration => ({
       ),
     ),
     new HtmlWebpackPlugin({
-      template: config.admin.indexHTML,
+      template: payloadConfig.admin.indexHTML,
       filename: path.normalize('./index.html'),
     }),
     new webpack.HotModuleReplacementPlugin(),
