@@ -110,7 +110,7 @@ export default joi.object({
     bundler: {
       dev: joi.func(),
       build: joi.func(),
-      preview: joi.func(),
+      serve: joi.func(),
     },
   }),
   email: joi.object(),
