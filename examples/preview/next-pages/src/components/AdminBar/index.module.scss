@@ -1,0 +1,46 @@
+.adminBar {
+  z-index: 10;
+  width: 100%;
+  background-color: rgb(var(--foreground-rgb));
+  padding: calc(var(--base) * 0.5) 0;
+  display: none;
+}
+
+.payloadAdminBar {
+  color: rgb(var(--background-rgb)) !important;
+}
+
+.show {
+  display: block;
+}
+
+.controls {
+  & > *:not(:last-child) {
+    margin-right: calc(var(--base) * 0.5) !important;
+  }
+}
+
+.user {
+  margin-right: calc(var(--base) * 0.5) !important;
+}
+
+.logo {
+  margin-right: calc(var(--base) * 0.5) !important;
+}
+
+.innerLogo {
+  width: 100%;
+}
+
+.container {
+  position: relative;
+}
+
+.hr {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: rbg(var(--background-rgb));
+  height: 2px;
+}

@@ -24,3 +24,35 @@
     color: var(--theme-elevation-0);
   }
 }
+
+html[data-theme=light] {
+  .relationship {
+    &.error {
+      >.relationship__wrap {
+        .rs__control {
+          @include lightInputError;
+        }
+      }
+
+      button {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .relationship  {
+    &.error {
+      >.relationship__wrap {
+        .rs__control {
+          @include darkInputError;
+        }
+      }
+
+      button {
+        @include darkInputError;
+      }
+    }
+  }
+}

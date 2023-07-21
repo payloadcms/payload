@@ -148,7 +148,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    */
   async init(options: InitOptions): Promise<Payload> {
-    this.logger = Logger('payload', options.loggerOptions);
+    this.logger = Logger('payload', options.loggerOptions, options.loggerDestination);
     this.mongoURL = options.mongoURL;
     this.mongoOptions = options.mongoOptions;
 

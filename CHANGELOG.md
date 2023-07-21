@@ -1,5 +1,35 @@
 
 
+## [1.11.3](https://github.com/payloadcms/payload/compare/v1.11.2...v1.11.3) (2023-07-19)
+
+
+### Bug Fixes
+
+* adds backdrop blur to button ([#3006](https://github.com/payloadcms/payload/issues/3006)) ([4233426](https://github.com/payloadcms/payload/commit/42334263bbc6219be92c5728f1a4ac6c8d2d1306))
+* rich text link element not validating on create ([#3014](https://github.com/payloadcms/payload/issues/3014)) ([60fca40](https://github.com/payloadcms/payload/commit/60fca40780d4ddd8e684a455de55c566ec91e223))
+
+
+### Features
+
+* auto-login in config capability ([#3009](https://github.com/payloadcms/payload/issues/3009)) ([733fc0b](https://github.com/payloadcms/payload/commit/733fc0b2d0cf0f2d58c8a28e84776f883774b0e0))
+* returns queried user alongside refreshed token ([#2813](https://github.com/payloadcms/payload/issues/2813)) ([2fc03f1](https://github.com/payloadcms/payload/commit/2fc03f196e4e5fa0ad3369ec976c0b6889ebda88))
+* support logger destination ([#2896](https://github.com/payloadcms/payload/issues/2896)) ([cd0bf68](https://github.com/payloadcms/payload/commit/cd0bf68a6150b1adbdb9ee318ac0a06c4476aa4d))
+
+## [1.11.2](https://github.com/payloadcms/payload/compare/v1.11.1...v1.11.2) (2023-07-14)
+
+
+### Features
+
+* adds array, collapsible, tab and group error states ([4925f90](https://github.com/payloadcms/payload/commit/4925f90b5f5c8fb8092bf4e8d88d5e0c1846b094))
+
+## [1.11.1](https://github.com/payloadcms/payload/compare/v1.11.0...v1.11.1) (2023-07-11)
+
+
+### Bug Fixes
+
+* [#2980](https://github.com/payloadcms/payload/issues/2980), locale=all was not iterating through arrays / blocks ([d6bfba7](https://github.com/payloadcms/payload/commit/d6bfba72a6b1a84bc5bb9dd14c7ce31d7afcbc1c))
+* anchor Button component respect margins ([#2648](https://github.com/payloadcms/payload/issues/2648)) ([1877d22](https://github.com/payloadcms/payload/commit/1877d2247c89ca5c8e1f0e1f989154d54768fed8))
+
 # [1.11.0](https://github.com/payloadcms/payload/compare/v1.10.5...v1.11.0) (2023-07-05)
 
 

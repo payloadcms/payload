@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { expect, test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
@@ -41,6 +41,20 @@ describe('auth', () => {
       await page.locator('#field-confirm-password').fill('password');
 
       await saveDocAndAssert(page);
+    });
+
+    test('should have up-to-date user in `useAuth` hook', async () => {
+      await page.goto(url.account);
+
+      await expect(await page.locator('#users-api-result')).toHaveText('Hello, world!');
+      await expect(await page.locator('#use-auth-result')).toHaveText('Hello, world!');
+
+      const field = await page.locator('#field-custom');
+      await field.fill('Goodbye, world!');
+      await saveDocAndAssert(page);
+
+      await expect(await page.locator('#users-api-result')).toHaveText('Goodbye, world!');
+      await expect(await page.locator('#use-auth-result')).toHaveText('Goodbye, world!');
     });
   });
 });

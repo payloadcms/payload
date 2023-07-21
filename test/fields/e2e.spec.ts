@@ -4,7 +4,7 @@ import path from 'path';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { login, saveDocAndAssert } from '../helpers';
+import { saveDocAndAssert } from '../helpers';
 import { textDoc } from './collections/Text';
 import { arrayFieldsSlug } from './collections/Array';
 import { pointFieldsSlug } from './collections/Point';
@@ -26,8 +26,6 @@ describe('fields', () => {
 
     const context = await browser.newContext();
     page = await context.newPage();
-
-    await login({ page, serverURL });
   });
 
   describe('text', () => {
@@ -319,7 +317,7 @@ describe('fields', () => {
       await firstBlockSelector.click();
 
       // ensure the block was appended to the rows
-      const addedRow = await page.locator('#field-blocks #blocks-row-3');
+      const addedRow = await page.locator('#field-blocks .blocks-field__row').last();
       await expect(addedRow).toBeVisible();
       await expect(addedRow.locator('.blocks-field__block-pill-text')).toContainText('Text');
     });
@@ -366,7 +364,7 @@ describe('fields', () => {
       await firstBlockSelector.click();
 
       // ensure the block was appended to the rows
-      const firstRow = page.locator('#i18nBlocks-row-0');
+      const firstRow = page.locator('#field-i18nBlocks .blocks-field__row').first();
       await expect(firstRow).toBeVisible();
       await expect(firstRow.locator('.blocks-field__block-pill-text')).toContainText('Text en');
     });
@@ -479,6 +477,27 @@ describe('fields', () => {
     }
 
     describe('toolbar', () => {
+      test('should run url validation', async () => {
+        await navigateToRichTextFields();
+
+        // Open link drawer
+        await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
+
+        // find the drawer
+        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
+        await expect(editLinkModal).toBeVisible();
+
+        // Fill values and click Confirm
+        await editLinkModal.locator('#field-text').fill('link text');
+        await editLinkModal.locator('label[for="field-linkType-custom"]').click();
+        await editLinkModal.locator('#field-url').fill('');
+        await wait(200);
+        await editLinkModal.locator('button[type="submit"]').click();
+        const errorField = await page.locator('[id^=drawer_1_rich-text-link-] .render-fields > :nth-child(3)');
+        const hasErrorClass = await errorField.evaluate(el => el.classList.contains('error'));
+        expect(hasErrorClass).toBe(true);
+      });
+
       test('should create new url custom link', async () => {
         await navigateToRichTextFields();
 

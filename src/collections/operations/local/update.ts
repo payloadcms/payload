@@ -70,7 +70,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
   const defaultLocale = payload.config.localization ? payload.config.localization?.defaultLocale : null;
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Update Operation.`);
   }
 
   req.payloadAPI = req.payloadAPI || 'local';

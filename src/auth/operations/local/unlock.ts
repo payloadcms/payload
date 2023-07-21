@@ -29,7 +29,7 @@ async function localUnlock<T extends keyof GeneratedTypes['collections']>(
   const collection = payload.collections[collectionSlug];
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Unlock Operation.`);
   }
 
   req.payload = payload;

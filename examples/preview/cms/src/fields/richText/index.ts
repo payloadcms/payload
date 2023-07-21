@@ -1,8 +1,9 @@
 import type { RichTextElement, RichTextField, RichTextLeaf } from 'payload/dist/fields/config/types'
+
 import deepMerge from '../../utilities/deepMerge'
+import link from '../link'
 import elements from './elements'
 import leaves from './leaves'
-import link from '../link'
 
 type RichText = (
   overrides?: Partial<RichTextField>,

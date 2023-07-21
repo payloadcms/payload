@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import mongoose from 'mongoose';
+import mongoose, { PaginateOptions } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
 import { buildVersionCollectionFields } from '../versions/buildCollectionFields';
@@ -54,7 +54,7 @@ export const init: Init = async function init(
           });
         }
 
-        versionSchema.plugin(paginate, { useEstimatedCount: true })
+        versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true })
           .plugin(
             getBuildQueryPlugin({
               collectionSlug: collection.slug,
@@ -107,7 +107,7 @@ export const init: Init = async function init(
       );
 
       versionSchema
-        .plugin(paginate, { useEstimatedCount: true })
+        .plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true })
         .plugin(getBuildQueryPlugin({ versionsFields: versionGlobalFields }));
 
       const versionsModel = mongoose.model(
