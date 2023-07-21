@@ -37,11 +37,7 @@ export const CustomerSelect: React.FC<TextField> = props => {
 
         const { data } = res
 
-        if (!data) {
-          throw new Error('No data returned from Stripe')
-        }
-
-        if ('data' in data) {
+        if (data && 'data' in data) {
           const fetchedCustomers = data.data.reduce(
             (acc, item) => {
               acc.push({
@@ -104,7 +100,7 @@ export const CustomerSelect: React.FC<TextField> = props => {
               }}
             >
               {`Manage "${
-                options.find(option => option.value === stripeCustomerID)?.label
+                options.find(option => option.value === stripeCustomerID)?.label || 'Unknown'
               }" in Stripe`}
             </span>
             <CopyToClipboard value={href} />
