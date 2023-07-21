@@ -7,7 +7,7 @@ import { InvalidConfiguration } from '../errors';
 import sanitizeGlobals from '../globals/config/sanitize';
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections';
 import { defaults } from './defaults';
-import getDefaultBundler from '../bundlers/webpack/bundler';
+import getDefaultBundler from '../bundlers/vite/bundler';
 
 const sanitizeAdmin = (config: SanitizedConfig): SanitizedConfig['admin'] => {
   const adminConfig = config.admin;
