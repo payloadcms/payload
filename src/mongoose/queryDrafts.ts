@@ -1,20 +1,35 @@
+import { PaginateOptions } from 'mongoose';
 import type { MongooseAdapter } from '.';
 import type { QueryDrafts } from '../database/types';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import { buildSortParam } from './queries/buildSortParam';
+import { withSession } from './withSession';
+import { PayloadRequest } from '../express/types';
 
 type AggregateVersion<T> = {
-  _id: string
-  version: T
-  updatedAt: string
-  createdAt: string
-}
+  _id: string;
+  version: T;
+  updatedAt: string;
+  createdAt: string;
+};
 
-export const queryDrafts: QueryDrafts = async function queryDrafts<T>(this: MongooseAdapter,
-  { collection, where, page, limit, sort: sortArg, locale, pagination }) {
+export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
+  this: MongooseAdapter,
+  {
+    collection,
+    where,
+    page,
+    limit,
+    sort: sortArg,
+    locale,
+    pagination,
+    req = {} as PayloadRequest,
+  },
+) {
   const VersionModel = this.versions[collection];
   const collectionConfig = this.payload.collections[collection].config;
+  const options = withSession(this, req.transactionID);
 
   const versionQuery = await VersionModel.buildQuery({
     where,
@@ -40,23 +55,27 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(this: Mong
     });
   }
 
-  const aggregate = VersionModel.aggregate<AggregateVersion<T>>([
-    // Sort so that newest are first
-    { $sort: { updatedAt: -1 } },
-    // Group by parent ID, and take the first of each
-    {
-      $group: {
-        _id: '$parent',
-        version: { $first: '$version' },
-        updatedAt: { $first: '$updatedAt' },
-        createdAt: { $first: '$createdAt' },
+  const aggregate = VersionModel.aggregate<AggregateVersion<T>>(
+    [
+      // Sort so that newest are first
+      { $sort: { updatedAt: -1 } },
+      // Group by parent ID, and take the first of each
+      {
+        $group: {
+          _id: '$parent',
+          version: { $first: '$version' },
+          updatedAt: { $first: '$updatedAt' },
+          createdAt: { $first: '$createdAt' },
+        },
       },
+      // Filter based on incoming query
+      { $match: versionQuery },
+    ],
+    {
+      ...options,
+      allowDiskUse: true,
     },
-    // Filter based on incoming query
-    { $match: versionQuery },
-  ], {
-    allowDiskUse: true,
-  });
+  );
 
   let result;
 
@@ -68,8 +87,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(this: Mong
       useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
     }
 
-
-    const aggregatePaginateOptions = {
+    const aggregatePaginateOptions: PaginateOptions = {
       page,
       limit,
       lean: true,
@@ -79,12 +97,16 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(this: Mong
       useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
       useFacet: this.connectOptions.useFacet,
       options: {
+        ...options,
         limit,
       },
       sort,
     };
 
-    result = await VersionModel.aggregatePaginate(aggregate, aggregatePaginateOptions);
+    result = await VersionModel.aggregatePaginate(
+      aggregate,
+      aggregatePaginateOptions,
+    );
   } else {
     result = aggregate.exec();
   }

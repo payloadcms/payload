@@ -7,7 +7,7 @@ import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
 import { ConnectOptions } from 'mongoose';
 import React from 'react';
-import { LoggerOptions } from 'pino';
+import { DestinationStream, LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
 import { Payload } from '../payload';
 import {
@@ -117,7 +117,14 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions;
-  config?: Promise<SanitizedConfig>
+  loggerDestination?: DestinationStream;
+
+  /**
+   * Sometimes, with the local API, you might need to pass a config file directly, for example, serverless on Vercel
+   * The passed config should match the config file, and if it doesn't, there could be mismatches between the admin UI
+   * and the backend functionality
+   */
+  config?: Promise<SanitizedConfig>;
 };
 
 /**
@@ -276,6 +283,13 @@ export type Config = {
     logoutRoute?: string;
     /** The route the user will be redirected to after being inactive for too long. */
     inactivityRoute?: string;
+    /** Automatically log in as a user when visiting the admin dashboard. */
+    autoLogin?: false | {
+      /** The email address of the user to login as */
+      email: string;
+      /** The password of the user to login as */
+      password: string;
+    }
     /**
      * Add extra and/or replace built-in components with custom components
      *

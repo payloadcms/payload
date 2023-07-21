@@ -28,6 +28,10 @@ export declare type PayloadRequest<U = any> = Request & {
   collection?: Collection;
   /** What triggered this request */
   payloadAPI?: 'REST' | 'local' | 'GraphQL';
+  /**
+   * Identifier for the database transaction for interactions in a single, all-or-nothing operation.
+   */
+  transactionID?: string | number;
   /** Uploaded files */
   files?: {
     /**
@@ -46,6 +50,8 @@ export declare type PayloadRequest<U = any> = Request & {
   payloadUploadSizes?: Record<string, Buffer>;
   /** Cache of documents related to the current request */
   findByID?: {
-    [slug: string]: (q: FindOneArgs) => Promise<TypeWithID>;
+    [transactionID: string]: {
+      [slug: string]: (q: FindOneArgs) => Promise<TypeWithID>;
+    }
   };
 };

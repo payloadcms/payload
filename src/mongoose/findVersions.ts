@@ -4,11 +4,30 @@ import type { FindVersions } from '../database/types';
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
 import { buildSortParam } from './queries/buildSortParam';
+import { withSession } from './withSession';
+import { PayloadRequest } from '../express/types';
 
-export const findVersions: FindVersions = async function findVersions(this: MongooseAdapter,
-  { collection, where, page, limit, sort: sortArg, locale, pagination, skip }) {
+export const findVersions: FindVersions = async function findVersions(
+  this: MongooseAdapter,
+  {
+    collection,
+    where,
+    page,
+    limit,
+    sort: sortArg,
+    locale,
+    pagination,
+    skip,
+    req = {} as PayloadRequest,
+  },
+) {
   const Model = this.versions[collection];
   const collectionConfig = this.payload.collections[collection].config;
+  const options = {
+    ...withSession(this, req.transactionID),
+    skip,
+    limit,
+  };
 
   let hasNearConstraint = false;
 
@@ -44,12 +63,9 @@ export const findVersions: FindVersions = async function findVersions(this: Mong
     offset: skip,
     useEstimatedCount: hasNearConstraint,
     forceCountFn: hasNearConstraint,
-    options: {
-      // limit must also be set here, it's ignored when pagination is false
-      limit,
-      skip,
-    },
+    options,
   };
+
   if (limit > 0) {
     paginationOptions.limit = limit;
     // limit must also be set here, it's ignored when pagination is false

@@ -20,6 +20,8 @@ import { validateQueryPaths } from '../../database/queryValidation/validateQuery
 import { combineQueries } from '../../database/combineQueries';
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
+import { initTransaction } from '../../utilities/initTransaction';
+import { killTransaction } from '../../utilities/killTransaction';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -37,20 +39,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<BulkOperationResult<TSlug>> {
   let args = incomingArgs;
-
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    args = (await hook({
-      args,
-      operation: 'update',
-    })) || args;
-  }, Promise.resolve());
-
   const {
     depth,
     collection,
@@ -73,283 +61,307 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     draft: draftArg = false,
   } = args;
 
-  if (!where) {
-    throw new APIError('Missing \'where\' query of documents to update.', httpStatus.BAD_REQUEST);
-  }
+  try {
+    const shouldCommit = await initTransaction(req);
 
-  const { data: bulkUpdateData } = args;
-  const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
 
-  // /////////////////////////////////////
-  // Access
-  // /////////////////////////////////////
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook;
 
-  let accessResult: AccessResult;
-  if (!overrideAccess) {
-    accessResult = await executeAccess({ req }, collectionConfig.access.update);
-  }
+      args = (await hook({
+        args,
+        operation: 'update',
+      })) || args;
+    }, Promise.resolve());
 
-  await validateQueryPaths({
-    collectionConfig,
-    where,
-    req,
-    overrideAccess,
-  });
+    if (!where) {
+      throw new APIError('Missing \'where\' query of documents to update.', httpStatus.BAD_REQUEST);
+    }
 
-  // /////////////////////////////////////
-  // Retrieve documents
-  // /////////////////////////////////////
+    const { data: bulkUpdateData } = args;
+    const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
 
-  const fullWhere = combineQueries(where, accessResult);
+    // /////////////////////////////////////
+    // Access
+    // /////////////////////////////////////
 
-  let docs;
-
-  if (collectionConfig.versions?.drafts && shouldSaveDraft) {
-    const versionsWhere = appendVersionToQueryKey(fullWhere);
+    let accessResult: AccessResult;
+    if (!overrideAccess) {
+      accessResult = await executeAccess({ req }, collectionConfig.access.update);
+    }
 
     await validateQueryPaths({
-      collectionConfig: collection.config,
-      where: versionsWhere,
+      collectionConfig,
+      where,
       req,
       overrideAccess,
-      versionFields: buildVersionCollectionFields(collection.config),
     });
 
-    const query = await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>({
-      collection: collectionConfig.slug,
-      where: versionsWhere,
-      locale,
-    });
+    // /////////////////////////////////////
+    // Retrieve documents
+    // /////////////////////////////////////
 
-    docs = query.docs;
-  } else {
-    const query = await payload.db.find({
-      locale,
-      collection: collectionConfig.slug,
-      where: fullWhere,
-      pagination: false,
-      limit: 0,
-    });
+    const fullWhere = combineQueries(where, accessResult);
 
-    docs = query.docs;
-  }
+    let docs;
 
-  // /////////////////////////////////////
-  // Generate data for all files and sizes
-  // /////////////////////////////////////
+    if (collectionConfig.versions?.drafts && shouldSaveDraft) {
+      const versionsWhere = appendVersionToQueryKey(fullWhere);
 
-  const {
-    data: newFileData,
-    files: filesToUpload,
-  } = await generateFileData({
-    config,
-    collection,
-    req,
-    data: bulkUpdateData,
-    throwOnMissingFile: false,
-    overwriteExistingFiles,
-  });
-
-  const errors = [];
-
-  const promises = docs.map(async (doc) => {
-    const { id } = doc;
-    let data = {
-      ...newFileData,
-      ...bulkUpdateData,
-    };
-
-    try {
-      const originalDoc = await afterRead({
-        depth: 0,
-        doc,
-        entityConfig: collectionConfig,
+      await validateQueryPaths({
+        collectionConfig: collection.config,
+        where: versionsWhere,
         req,
-        overrideAccess: true,
-        showHiddenFields: true,
-      });
-
-      await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc, t, overrideDelete: false });
-
-      // /////////////////////////////////////
-      // beforeValidate - Fields
-      // /////////////////////////////////////
-
-      data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
-        data,
-        doc: originalDoc,
-        entityConfig: collectionConfig,
-        id,
-        operation: 'update',
         overrideAccess,
+        versionFields: buildVersionCollectionFields(collection.config),
+      });
+
+      const query = await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>({
+        collection: collectionConfig.slug,
+        where: versionsWhere,
+        locale,
         req,
       });
 
-      // /////////////////////////////////////
-      // beforeValidate - Collection
-      // /////////////////////////////////////
-
-      await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-        await priorHook;
-
-        data = (await hook({
-          data,
-          req,
-          operation: 'update',
-          originalDoc,
-        })) || data;
-      }, Promise.resolve());
-
-      // /////////////////////////////////////
-      // Write files to local storage
-      // /////////////////////////////////////
-
-      if (!collectionConfig.upload.disableLocalStorage) {
-        await uploadFiles(payload, filesToUpload, t);
-      }
-
-      // /////////////////////////////////////
-      // beforeChange - Collection
-      // /////////////////////////////////////
-
-      await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-        await priorHook;
-
-        data = (await hook({
-          data,
-          req,
-          originalDoc,
-          operation: 'update',
-        })) || data;
-      }, Promise.resolve());
-
-      // /////////////////////////////////////
-      // beforeChange - Fields
-      // /////////////////////////////////////
-
-      let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
-        data,
-        doc: originalDoc,
-        docWithLocales: doc,
-        entityConfig: collectionConfig,
-        id,
-        operation: 'update',
+      docs = query.docs;
+    } else {
+      const query = await payload.db.find({
+        locale,
+        collection: collectionConfig.slug,
+        where: fullWhere,
+        pagination: false,
+        limit: 0,
         req,
-        skipValidation: shouldSaveDraft || data._status === 'draft',
       });
 
-      // /////////////////////////////////////
-      // Update
-      // /////////////////////////////////////
+      docs = query.docs;
+    }
 
-      if (!shouldSaveDraft) {
-        result = await req.payload.db.updateOne({
-          collection: collectionConfig.slug,
-          locale,
-          where: { id: { equals: id } },
-          data: result,
+    // /////////////////////////////////////
+    // Generate data for all files and sizes
+    // /////////////////////////////////////
+
+    const {
+      data: newFileData,
+      files: filesToUpload,
+    } = await generateFileData({
+      config,
+      collection,
+      req,
+      data: bulkUpdateData,
+      throwOnMissingFile: false,
+      overwriteExistingFiles,
+    });
+
+    const errors = [];
+
+    const promises = docs.map(async (doc) => {
+      const { id } = doc;
+      let data = {
+        ...newFileData,
+        ...bulkUpdateData,
+      };
+
+      try {
+        const originalDoc = await afterRead({
+          depth: 0,
+          doc,
+          entityConfig: collectionConfig,
           req,
+          overrideAccess: true,
+          showHiddenFields: true,
         });
-      }
 
-      // /////////////////////////////////////
-      // Create version
-      // /////////////////////////////////////
+        await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc, t, overrideDelete: false });
 
-      if (collectionConfig.versions) {
-        result = await saveVersion({
-          payload,
-          collection: collectionConfig,
-          req,
-          docWithLocales: {
-            ...result,
-            createdAt: doc.createdAt,
-          },
+        // /////////////////////////////////////
+        // beforeValidate - Fields
+        // /////////////////////////////////////
+
+        data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+          data,
+          doc: originalDoc,
+          entityConfig: collectionConfig,
           id,
-          draft: shouldSaveDraft,
-        });
-      }
-
-      // /////////////////////////////////////
-      // afterRead - Fields
-      // /////////////////////////////////////
-
-      result = await afterRead({
-        depth,
-        doc: result,
-        entityConfig: collectionConfig,
-        req,
-        overrideAccess,
-        showHiddenFields,
-      });
-
-      // /////////////////////////////////////
-      // afterRead - Collection
-      // /////////////////////////////////////
-
-      await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-        await priorHook;
-
-        result = await hook({
+          operation: 'update',
+          overrideAccess,
           req,
+        });
+
+        // /////////////////////////////////////
+        // beforeValidate - Collection
+        // /////////////////////////////////////
+
+        await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
+          await priorHook;
+
+          data = (await hook({
+            data,
+            req,
+            operation: 'update',
+            originalDoc,
+          })) || data;
+        }, Promise.resolve());
+
+        // /////////////////////////////////////
+        // Write files to local storage
+        // /////////////////////////////////////
+
+        if (!collectionConfig.upload.disableLocalStorage) {
+          await uploadFiles(payload, filesToUpload, t);
+        }
+
+        // /////////////////////////////////////
+        // beforeChange - Collection
+        // /////////////////////////////////////
+
+        await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
+          await priorHook;
+
+          data = (await hook({
+            data,
+            req,
+            originalDoc,
+            operation: 'update',
+          })) || data;
+        }, Promise.resolve());
+
+        // /////////////////////////////////////
+        // beforeChange - Fields
+        // /////////////////////////////////////
+
+        let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+          data,
+          doc: originalDoc,
+          docWithLocales: doc,
+          entityConfig: collectionConfig,
+          id,
+          operation: 'update',
+          req,
+          skipValidation: shouldSaveDraft || data._status === 'draft',
+        });
+
+        // /////////////////////////////////////
+        // Update
+        // /////////////////////////////////////
+
+        if (!shouldSaveDraft) {
+          result = await req.payload.db.updateOne({
+            collection: collectionConfig.slug,
+            locale,
+            where: { id: { equals: id } },
+            data: result,
+            req,
+          });
+        }
+
+        // /////////////////////////////////////
+        // Create version
+        // /////////////////////////////////////
+
+        if (collectionConfig.versions) {
+          result = await saveVersion({
+            payload,
+            collection: collectionConfig,
+            req,
+            docWithLocales: {
+              ...result,
+              createdAt: doc.createdAt,
+            },
+            id,
+            draft: shouldSaveDraft,
+          });
+        }
+
+        // /////////////////////////////////////
+        // afterRead - Fields
+        // /////////////////////////////////////
+
+        result = await afterRead({
+          depth,
           doc: result,
-        }) || result;
-      }, Promise.resolve());
+          entityConfig: collectionConfig,
+          req,
+          overrideAccess,
+          showHiddenFields,
+        });
 
-      // /////////////////////////////////////
-      // afterChange - Fields
-      // /////////////////////////////////////
+        // /////////////////////////////////////
+        // afterRead - Collection
+        // /////////////////////////////////////
 
-      result = await afterChange<GeneratedTypes['collections'][TSlug]>({
-        data,
-        doc: result,
-        previousDoc: originalDoc,
-        entityConfig: collectionConfig,
-        operation: 'update',
-        req,
-      });
+        await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+          await priorHook;
 
-      // /////////////////////////////////////
-      // afterChange - Collection
-      // /////////////////////////////////////
+          result = await hook({
+            req,
+            doc: result,
+          }) || result;
+        }, Promise.resolve());
 
-      await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-        await priorHook;
+        // /////////////////////////////////////
+        // afterChange - Fields
+        // /////////////////////////////////////
 
-        result = await hook({
+        result = await afterChange<GeneratedTypes['collections'][TSlug]>({
+          data,
           doc: result,
           previousDoc: originalDoc,
-          req,
+          entityConfig: collectionConfig,
           operation: 'update',
-        }) || result;
-      }, Promise.resolve());
+          req,
+        });
 
-      await unlinkTempFiles({
-        req,
-        config,
-        collectionConfig,
-      });
+        // /////////////////////////////////////
+        // afterChange - Collection
+        // /////////////////////////////////////
 
-      // /////////////////////////////////////
-      // Return results
-      // /////////////////////////////////////
+        await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+          await priorHook;
 
-      return result;
-    } catch (error) {
-      errors.push({
-        message: error.message,
-        id,
-      });
-    }
-    return null;
-  });
+          result = await hook({
+            doc: result,
+            previousDoc: originalDoc,
+            req,
+            operation: 'update',
+          }) || result;
+        }, Promise.resolve());
 
-  const awaitedDocs = await Promise.all(promises);
+        await unlinkTempFiles({
+          req,
+          config,
+          collectionConfig,
+        });
 
-  return {
-    docs: awaitedDocs.filter(Boolean),
-    errors,
-  };
+        // /////////////////////////////////////
+        // Return results
+        // /////////////////////////////////////
+
+        return result;
+      } catch (error) {
+        errors.push({
+          message: error.message,
+          id,
+        });
+      }
+      return null;
+    });
+
+    const awaitedDocs = await Promise.all(promises);
+
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return {
+      docs: awaitedDocs.filter(Boolean),
+      errors,
+    };
+  } catch (error: unknown) {
+    await killTransaction(req);
+    throw error;
+  }
 }
 
 export default update;

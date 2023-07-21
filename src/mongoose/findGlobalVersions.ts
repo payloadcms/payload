@@ -5,11 +5,32 @@ import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
 import flattenWhereToOperators from '../database/flattenWhereToOperators';
 import { buildSortParam } from './queries/buildSortParam';
 import { buildVersionGlobalFields } from '../versions/buildGlobalFields';
+import { withSession } from './withSession';
+import { PayloadRequest } from '../express/types';
 
-export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(this: MongooseAdapter,
-  { global, where, page, limit, sort: sortArg, locale, pagination, skip }) {
+export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
+  this: MongooseAdapter,
+  {
+    global,
+    where,
+    page,
+    limit,
+    sort: sortArg,
+    locale,
+    pagination,
+    skip,
+    req = {} as PayloadRequest,
+  },
+) {
   const Model = this.versions[global];
-  const versionFields = buildVersionGlobalFields(this.payload.globals.config.find(({ slug }) => slug === global));
+  const versionFields = buildVersionGlobalFields(
+    this.payload.globals.config.find(({ slug }) => slug === global),
+  );
+  const options = {
+    ...withSession(this, req.transactionID),
+    skip,
+    limit,
+  };
 
   let hasNearConstraint = false;
 
@@ -45,10 +66,9 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     offset: skip,
     useEstimatedCount: hasNearConstraint,
     forceCountFn: hasNearConstraint,
-    options: {
-      skip,
-    },
+    options,
   };
+
   if (limit > 0) {
     paginationOptions.limit = limit;
     // limit must also be set here, it's ignored when pagination is false

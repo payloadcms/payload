@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
 import configPromise, { slug } from './config';
@@ -18,9 +17,7 @@ describe('collections-graphql', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await payload.mongoMemoryServer.stop();
+    await payload.db.destroy(payload);
   });
 
   describe('CRUD', () => {
@@ -97,7 +94,7 @@ describe('collections-graphql', () => {
               }
             }
           }
-        }      
+        }
       `;
 
       const response = await client.request(query);

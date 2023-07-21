@@ -5,8 +5,13 @@ import mongoose from 'mongoose';
 import type { MongooseAdapter } from '.';
 import type { Connect } from '../database/types';
 
-export const connect: Connect = async function connect(this: MongooseAdapter,
-  { config }) {
+export const connect: Connect = async function connect(
+  this: MongooseAdapter,
+  payload,
+) {
+  if (this.url === false) {
+    return;
+  }
   let urlToConnect = this.url;
   let successfulConnectionMessage = 'Connected to MongoDB server successfully!';
 
@@ -15,8 +20,6 @@ export const connect: Connect = async function connect(this: MongooseAdapter,
     ...this.connectOptions,
     useFacet: undefined,
   };
-
-  let mongoMemoryServer;
 
   if (process.env.NODE_ENV === 'test') {
     if (process.env.PAYLOAD_TEST_MONGO_URL) {
@@ -27,20 +30,22 @@ export const connect: Connect = async function connect(this: MongooseAdapter,
       const getPort = require('get-port');
 
       const port = await getPort();
-      mongoMemoryServer = await MongoMemoryServer.create({
+      this.mongoMemoryServer = await MongoMemoryServer.create({
         instance: {
           dbName: 'payloadmemory',
           port,
         },
       });
 
-      urlToConnect = mongoMemoryServer.getUri();
+      urlToConnect = this.mongoMemoryServer.getUri();
       successfulConnectionMessage = 'Connected to in-memory MongoDB server successfully!';
     }
   }
 
   try {
-    await mongoose.connect(urlToConnect, connectionOptions);
+    this.connection = (
+      await mongoose.connect(urlToConnect, connectionOptions)
+    ).connection;
 
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
       this.payload.logger.info('---- DROPPING DATABASE ----');
@@ -55,8 +60,4 @@ export const connect: Connect = async function connect(this: MongooseAdapter,
     );
     process.exit(1);
   }
-
-  this.mongoMemoryServer = mongoMemoryServer;
-
-  return mongoMemoryServer;
 };

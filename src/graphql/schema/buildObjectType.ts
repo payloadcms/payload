@@ -4,7 +4,8 @@
 /* eslint-disable no-use-before-define */
 import { GraphQLJSON } from 'graphql-type-json';
 import {
-  GraphQLBoolean, GraphQLEnumType,
+  GraphQLBoolean,
+  GraphQLEnumType,
   GraphQLFieldConfig,
   GraphQLFloat,
   GraphQLInt,
@@ -17,28 +18,28 @@ import {
 } from 'graphql';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
 import {
+  ArrayField,
+  BlockField,
+  CheckboxField,
+  CodeField,
+  CollapsibleField,
+  DateField,
+  EmailField,
   Field,
+  GroupField,
+  JSONField,
+  NumberField,
+  PointField,
   RadioField,
   RelationshipField,
-  SelectField,
-  UploadField,
-  ArrayField,
-  GroupField,
   RichTextField,
-  NumberField,
-  TextField,
-  EmailField,
-  TextareaField,
-  CodeField,
-  JSONField,
-  DateField,
-  PointField,
-  CheckboxField,
-  BlockField,
   RowField,
-  CollapsibleField,
-  TabsField,
+  SelectField,
   tabHasName,
+  TabsField,
+  TextareaField,
+  TextField,
+  UploadField,
 } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
@@ -188,6 +189,7 @@ function buildObjectType({
 
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(JSON.stringify([
+              context.req.transactionID,
               relatedCollectionSlug,
               id,
               0,
@@ -349,6 +351,7 @@ function buildObjectType({
               }
 
               const result = await context.req.payloadDataLoader.load(JSON.stringify([
+                context.req.transactionID,
                 collectionSlug,
                 id,
                 0,
@@ -392,6 +395,7 @@ function buildObjectType({
 
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(JSON.stringify([
+              context.req.transactionID,
               relatedCollectionSlug,
               id,
               0,

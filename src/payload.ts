@@ -3,7 +3,6 @@ import type { Express, Router } from 'express';
 import { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql';
 import crypto from 'crypto';
 import path from 'path';
-import mongoose from 'mongoose';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler';
 import { SendMailOptions } from 'nodemailer';
@@ -149,7 +148,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    */
   async init(options: InitOptions): Promise<Payload> {
-    this.logger = Logger('payload', options.loggerOptions);
+    this.logger = Logger('payload', options.loggerOptions, options.loggerDestination);
     this.mongoURL = options.mongoURL;
     this.mongoOptions = options.mongoOptions;
 
@@ -205,7 +204,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     if (!this.config.db) {
       this.config.db = mongooseAdapter({
         payload: this,
-        url: this.mongoURL ? this.mongoURL : '',
+        url: this.mongoURL ? this.mongoURL : false,
         connectOptions: options.mongoOptions,
       });
     }
@@ -213,11 +212,8 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.db = this.config.db;
     this.db.payload = this;
 
-    if (this.mongoURL || this.db.connect) {
-      mongoose.set('strictQuery', false);
-      if (this.db?.connect) {
-        this.mongoMemoryServer = await this.db.connect({ config: this.config });
-      }
+    if (this.db?.connect) {
+      await this.db.connect(this);
     }
 
     // Configure email service
@@ -237,7 +233,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     }
 
     if (this.db?.init) {
-      await this.db?.init({ config: this.config });
+      await this.db.init(this);
     }
 
     serverInitTelemetry(this);

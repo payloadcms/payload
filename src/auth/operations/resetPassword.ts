@@ -7,6 +7,8 @@ import { fieldAffectsData } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
 import { authenticateLocalStrategy } from '../strategies/local/authenticate';
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash';
+import { initTransaction } from '../../utilities/initTransaction';
+import { killTransaction } from '../../utilities/killTransaction';
 
 export type Result = {
   token: string
@@ -35,6 +37,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
     collection: {
       config: collectionConfig,
     },
+    req,
     req: {
       payload: {
         config,
@@ -47,82 +50,92 @@ async function resetPassword(args: Arguments): Promise<Result> {
     depth,
   } = args;
 
-  // /////////////////////////////////////
-  // Reset Password
-  // /////////////////////////////////////
+  try {
+    const shouldCommit = await initTransaction(req);
 
-  const user = await payload.db.findOne<any>({
-    collection: collectionConfig.slug,
-    where: {
-      resetPasswordToken: { equals: data.token },
-      resetPasswordExpiration: { greater_than: Date.now() },
-    },
-  });
+    // /////////////////////////////////////
+    // Reset Password
+    // /////////////////////////////////////
 
-  if (!user) throw new APIError('Token is either invalid or has expired.');
+    const user = await payload.db.findOne<any>({
+      collection: collectionConfig.slug,
+      where: {
+        resetPasswordToken: { equals: data.token },
+        resetPasswordExpiration: { greater_than: Date.now() },
+      },
+      req,
+    });
 
-  // TODO: replace this method
-  const { salt, hash } = await generatePasswordSaltHash({ password: data.password });
+    if (!user) throw new APIError('Token is either invalid or has expired.');
 
-  user.salt = salt;
-  user.hash = hash;
+    // TODO: replace this method
+    const { salt, hash } = await generatePasswordSaltHash({ password: data.password });
 
-  user.resetPasswordExpiration = Date.now();
+    user.salt = salt;
+    user.hash = hash;
 
-  if (collectionConfig.auth.verify) {
-    user._verified = true;
-  }
+    user.resetPasswordExpiration = Date.now();
 
-  const doc = await payload.db.updateOne({
-    collection: collectionConfig.slug,
-    where: { id: { equals: user.id } },
-    data: user,
-    req: args.req,
-  });
-
-
-  await authenticateLocalStrategy({ password: data.password, doc });
-
-  const fieldsToSign = collectionConfig.fields.reduce((signedFields, field) => {
-    if (fieldAffectsData(field) && field.saveToJWT) {
-      return {
-        ...signedFields,
-        [field.name]: user[field.name],
-      };
+    if (collectionConfig.auth.verify) {
+      user._verified = true;
     }
-    return signedFields;
-  }, {
-    email: user.email,
-    id: user.id,
-    collection: collectionConfig.slug,
-  });
 
-  const token = jwt.sign(
-    fieldsToSign,
-    secret,
-    {
-      expiresIn: collectionConfig.auth.tokenExpiration,
-    },
-  );
-
-  if (args.res) {
-    const cookieOptions = {
-      path: '/',
-      httpOnly: true,
-      expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-      secure: collectionConfig.auth.cookies.secure,
-      sameSite: collectionConfig.auth.cookies.sameSite,
-      domain: undefined,
-    };
+    const doc = await payload.db.updateOne({
+      collection: collectionConfig.slug,
+      where: { id: { equals: user.id } },
+      data: user,
+      req,
+    });
 
 
-    if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
+    await authenticateLocalStrategy({ password: data.password, doc });
 
-    args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
+    const fieldsToSign = collectionConfig.fields.reduce((signedFields, field) => {
+      if (fieldAffectsData(field) && field.saveToJWT) {
+        return {
+          ...signedFields,
+          [field.name]: user[field.name],
+        };
+      }
+      return signedFields;
+    }, {
+      email: user.email,
+      id: user.id,
+      collection: collectionConfig.slug,
+    });
+
+    const token = jwt.sign(
+      fieldsToSign,
+      secret,
+      {
+        expiresIn: collectionConfig.auth.tokenExpiration,
+      },
+    );
+
+    if (args.res) {
+      const cookieOptions = {
+        path: '/',
+        httpOnly: true,
+        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
+        secure: collectionConfig.auth.cookies.secure,
+        sameSite: collectionConfig.auth.cookies.sameSite,
+        domain: undefined,
+      };
+
+
+      if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
+
+      args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
+    }
+
+    const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess, depth, req });
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return { token, user: fullUser };
+  } catch (error: unknown) {
+    await killTransaction(req);
+    throw error;
   }
-
-  const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess, depth });
-  return { token, user: fullUser };
 }
 
 export default resetPassword;

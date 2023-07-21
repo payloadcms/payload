@@ -5,6 +5,8 @@ import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftI
 import { afterRead } from '../../fields/hooks/afterRead';
 import { SanitizedGlobalConfig } from '../config/types';
 import { PayloadRequest } from '../../express/types';
+import { initTransaction } from '../../utilities/initTransaction';
+import { killTransaction } from '../../utilities/killTransaction';
 
 type Args = {
   globalConfig: SanitizedGlobalConfig
@@ -22,6 +24,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     globalConfig,
     req,
     req: {
+      payload,
       locale,
     },
     slug,
@@ -31,88 +34,98 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     overrideAccess = false,
   } = args;
 
-  // /////////////////////////////////////
-  // Retrieve and execute access
-  // /////////////////////////////////////
+  try {
+    const shouldCommit = await initTransaction(req);
 
-  let accessResult: AccessResult;
+    // /////////////////////////////////////
+    // Retrieve and execute access
+    // /////////////////////////////////////
 
-  if (!overrideAccess) {
-    accessResult = await executeAccess({ req }, globalConfig.access.read);
-  }
+    let accessResult: AccessResult;
 
-  // /////////////////////////////////////
-  // Perform database operation
-  // /////////////////////////////////////
+    if (!overrideAccess) {
+      accessResult = await executeAccess({ req }, globalConfig.access.read);
+    }
 
-  let doc = await req.payload.db.findGlobal({
-    slug,
-    locale,
-    where: overrideAccess ? undefined : accessResult as Where,
-  });
-  if (!doc) {
-    doc = {};
-  }
+    // /////////////////////////////////////
+    // Perform database operation
+    // /////////////////////////////////////
 
-  // /////////////////////////////////////
-  // Replace document with draft if available
-  // /////////////////////////////////////
+    let doc = await req.payload.db.findGlobal({
+      slug,
+      locale,
+      where: overrideAccess ? undefined : accessResult as Where,
+      req,
+    });
+    if (!doc) {
+      doc = {};
+    }
 
-  if (globalConfig.versions?.drafts && draftEnabled) {
-    doc = await replaceWithDraftIfAvailable({
-      entity: globalConfig,
-      entityType: 'global',
+    // /////////////////////////////////////
+    // Replace document with draft if available
+    // /////////////////////////////////////
+
+    if (globalConfig.versions?.drafts && draftEnabled) {
+      doc = await replaceWithDraftIfAvailable({
+        entity: globalConfig,
+        entityType: 'global',
+        doc,
+        req,
+        overrideAccess,
+        accessResult,
+      });
+    }
+
+    // /////////////////////////////////////
+    // Execute before global hook
+    // /////////////////////////////////////
+
+    await globalConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      doc = await hook({
+        req,
+        doc,
+      }) || doc;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // Execute field-level hooks and access
+    // /////////////////////////////////////
+
+    doc = await afterRead({
+      depth,
       doc,
+      entityConfig: globalConfig,
       req,
       overrideAccess,
-      accessResult,
+      showHiddenFields,
     });
+
+    // /////////////////////////////////////
+    // Execute after global hook
+    // /////////////////////////////////////
+
+    await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      doc = await hook({
+        req,
+        doc,
+      }) || doc;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // Return results
+    // /////////////////////////////////////
+
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return doc;
+  } catch (error: unknown) {
+    await killTransaction(req);
+    throw error;
   }
-
-  // /////////////////////////////////////
-  // Execute before global hook
-  // /////////////////////////////////////
-
-  await globalConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    doc = await hook({
-      req,
-      doc,
-    }) || doc;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // Execute field-level hooks and access
-  // /////////////////////////////////////
-
-  doc = await afterRead({
-    depth,
-    doc,
-    entityConfig: globalConfig,
-    req,
-    overrideAccess,
-    showHiddenFields,
-  });
-
-  // /////////////////////////////////////
-  // Execute after global hook
-  // /////////////////////////////////////
-
-  await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    doc = await hook({
-      req,
-      doc,
-    }) || doc;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // Return results
-  // /////////////////////////////////////
-
-  return doc;
 }
 
 export default findOne;

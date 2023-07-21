@@ -1,0 +1,12 @@
+import { RollbackTransaction } from '../../database/types';
+
+
+export const rollbackTransaction: RollbackTransaction = async function rollbackTransaction(id = '') {
+  if (!this.session[id]?.inTransaction()) {
+    this.payload.logger.warn('rollbackTransaction called when no transaction exists');
+    return;
+  }
+  await this.session[id].abortTransaction();
+  await this.session[id].endSession();
+  delete this.session[id];
+};

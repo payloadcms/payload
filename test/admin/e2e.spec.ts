@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { login, saveDocAndAssert } from '../helpers';
+import { saveDocAndAssert } from '../helpers';
 import type { Post } from './config';
 import { globalSlug, slug } from './shared';
 import { mapAsync } from '../../src/utilities/mapAsync';
@@ -26,8 +26,6 @@ describe('admin', () => {
 
     const context = await browser.newContext();
     page = await context.newPage();
-
-    await login({ page, serverURL });
   });
 
   afterEach(async () => {

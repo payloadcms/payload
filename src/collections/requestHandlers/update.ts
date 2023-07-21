@@ -1,6 +1,6 @@
-import { Response, NextFunction } from 'express';
+import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
-import { Where, Document } from '../../types';
+import { Document, Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import formatSuccessResponse from '../../express/responses/formatSuccess';
 import update from '../operations/update';
@@ -30,10 +30,12 @@ export default async function updateHandler(req: PayloadRequest, res: Response, 
         label: getTranslation(req.collection.config.labels[result.docs.length > 1 ? 'plural' : 'singular'], req.i18n),
       });
 
-      return res.status(httpStatus.OK).json({
-        ...formatSuccessResponse(message, 'message'),
-        ...result,
-      });
+      res.status(httpStatus.OK)
+        .json({
+          ...formatSuccessResponse(message, 'message'),
+          ...result,
+        });
+      return;
     }
 
     const total = result.docs.length + result.errors.length;
@@ -43,11 +45,13 @@ export default async function updateHandler(req: PayloadRequest, res: Response, 
       label: getTranslation(req.collection.config.labels[total > 1 ? 'plural' : 'singular'], req.i18n),
     });
 
-    return res.status(httpStatus.BAD_REQUEST).json({
-      ...formatSuccessResponse(message, 'message'),
-      ...result,
-    });
+
+    res.status(httpStatus.BAD_REQUEST)
+      .json({
+        ...formatSuccessResponse(message, 'message'),
+        ...result,
+      });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 }

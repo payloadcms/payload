@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+import { NextFunction, Response } from 'express';
 import { PayloadRequest } from '../../express/types';
 import registerFirstUser from '../operations/registerFirstUser';
 

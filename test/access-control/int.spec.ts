@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import payload from '../../src';
 import { Forbidden } from '../../src/errors';
 import type { PayloadRequest } from '../../src/types';
@@ -37,9 +36,7 @@ describe('Access Control', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await payload.mongoMemoryServer.stop();
+    await payload.db.destroy(payload);
   });
 
   it('should not affect hidden fields when patching data', async () => {

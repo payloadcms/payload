@@ -1,12 +1,17 @@
 import type { MongooseAdapter } from '.';
 import type { Create } from '../database/types';
 import type { Document } from '../types';
+import { PayloadRequest } from '../types';
+import { withSession } from './withSession';
 
-export const create: Create = async function create(this: MongooseAdapter,
-  { collection, data }) {
+export const create: Create = async function create(
+  this: MongooseAdapter,
+  { collection, data, req = {} as PayloadRequest },
+) {
   const Model = this.collections[collection];
+  const options = withSession(this, req.transactionID);
 
-  const doc = await Model.create(data);
+  const [doc] = await Model.create([data], options);
 
   // doc.toJSON does not do stuff like converting ObjectIds to string, or date strings to date objects. That's why we use JSON.parse/stringify here
   const result: Document = JSON.parse(JSON.stringify(doc));

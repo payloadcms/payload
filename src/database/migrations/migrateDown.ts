@@ -2,12 +2,16 @@
 import { DatabaseAdapter } from '../types';
 import { getMigrations } from './getMigrations';
 import { readMigrationFiles } from './readMigrationFiles';
+import { PayloadRequest } from '../../express/types';
 
 export async function migrateDown(this: DatabaseAdapter): Promise<void> {
   const { payload } = this;
   const migrationFiles = await readMigrationFiles({ payload });
 
-  const { existingMigrations, latestBatch } = await getMigrations({
+  const {
+    existingMigrations,
+    latestBatch,
+  } = await getMigrations({
     payload,
   });
 
@@ -25,19 +29,28 @@ export async function migrateDown(this: DatabaseAdapter): Promise<void> {
       throw new Error(`Migration ${migration.name} not found locally.`);
     }
 
+    const start = Date.now();
+    let transactionID;
+
     try {
       payload.logger.info({ msg: `Migrating: ${migrationFile.name}` });
-      const start = Date.now();
+      transactionID = await this.beginTransaction();
       await migrationFile.down({ payload });
-
       payload.logger.info({ msg: `Migrated:  ${migrationFile.name} (${Date.now() - start}ms)` });
-
       await payload.delete({
         collection: 'payload-migrations',
         id: migration.id,
+        req: {
+          transactionID,
+        } as PayloadRequest,
       });
+      await this.commitTransaction(transactionID);
     } catch (err: unknown) {
-      payload.logger.error({ msg: `Error running migration ${migrationFile.name}`, err });
+      await this.rollbackTransaction(transactionID);
+      payload.logger.error({
+        msg: `Error running migration ${migrationFile.name}`,
+        err,
+      });
       throw err;
     }
   }

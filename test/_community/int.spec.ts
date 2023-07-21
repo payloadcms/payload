@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import payload from '../../src';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { devUser } from '../credentials';
@@ -35,9 +34,7 @@ describe('_Community Tests', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await payload.mongoMemoryServer.stop();
+    await payload.db.destroy(payload);
   });
 
   // --__--__--__--__--__--__--__--__--__

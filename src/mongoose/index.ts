@@ -1,24 +1,21 @@
-import type { ConnectOptions } from 'mongoose';
+import type { ClientSession, Connection, ConnectOptions } from 'mongoose';
+import mongoose from 'mongoose';
 import { createMigration } from '../database/migrations/createMigration';
-import { migrate } from '../database/migrations/migrate';
-import { migrateDown } from '../database/migrations/migrateDown';
-import { migrateRefresh } from '../database/migrations/migrateRefresh';
-import { migrateReset } from '../database/migrations/migrateReset';
-import { migrateStatus } from '../database/migrations/migrateStatus';
+import type { Payload } from '../index';
 import type { DatabaseAdapter } from '../database/types';
-import { Payload } from '../index';
-import type { SanitizedConfig } from '../config/types';
 import { connect } from './connect';
-import { create } from './create';
+import { init } from './init';
+import { webpack } from './webpack';
+import { createGlobal } from './createGlobal';
+import { createVersion } from './createVersion';
+import { beginTransaction } from './transactions/beginTransaction';
+import { rollbackTransaction } from './transactions/rollbackTransaction';
+import { commitTransaction } from './transactions/commitTransaction';
+import { queryDrafts } from './queryDrafts';
 import { find } from './find';
 import { findGlobalVersions } from './findGlobalVersions';
 import { findVersions } from './findVersions';
-import { init } from './init';
-import { queryDrafts } from './queryDrafts';
-import { webpack } from './webpack';
-
-import { createGlobal } from './createGlobal';
-import { createVersion } from './createVersion';
+import { create } from './create';
 import { deleteOne } from './deleteOne';
 import { deleteVersions } from './deleteVersions';
 import { findGlobal } from './findGlobal';
@@ -26,14 +23,17 @@ import { findOne } from './findOne';
 import { updateGlobal } from './updateGlobal';
 import { updateOne } from './updateOne';
 import { updateVersion } from './updateVersion';
-import type { CollectionModel, GlobalModel } from './types';
 import { deleteMany } from './deleteMany';
+import { baseDatabaseAdapter } from '../database/baseDatabaseAdapter';
+import { destroy } from './destroy';
+import type { CollectionModel, GlobalModel } from './types';
 
 export interface Args {
   payload: Payload;
-  /** The URL to connect to MongoDB */
-  url: string;
+  /** The URL to connect to MongoDB or false to start payload and prevent connecting */
+  url: string | false;
   migrationDir?: string;
+  /** Extra configuration options */
   connectOptions?: ConnectOptions & {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean;
@@ -48,39 +48,42 @@ export type MongooseAdapter = DatabaseAdapter &
     };
     globals: GlobalModel;
     versions: {
-      [slug: string]: CollectionModel;
-    };
-  };
+      [slug: string]: CollectionModel
+    }
+    sessions: Record<string | number, ClientSession>
+    connection: Connection
+  }
 
 export function mongooseAdapter({
   payload,
   url,
   connectOptions,
-  migrationDir = '.migrations',
+  migrationDir,
 }: Args): MongooseAdapter {
+  const adapter = baseDatabaseAdapter({
+    payload,
+    migrationDir,
+  });
+  mongoose.set('strictQuery', false);
   return {
+    ...adapter,
+    connection: undefined,
+    mongoMemoryServer: undefined,
+    sessions: {},
     payload,
     url,
     connectOptions: connectOptions || {},
+    globals: undefined,
     collections: {},
     versions: {},
-    globals: undefined,
-    mongoMemoryServer: undefined,
     connect,
+    destroy,
     init,
     webpack,
-    migrate,
-    migrateStatus,
-    migrateDown,
-    migrateRefresh,
-    migrateReset,
-    migrateFresh: async () => null,
-    migrationDir,
     createMigration: async (migrationName) => createMigration({ payload, migrationDir, migrationName }),
-    transaction: async () => true,
-    beginTransaction: async () => true,
-    rollbackTransaction: async () => true,
-    commitTransaction: async () => true,
+    beginTransaction,
+    rollbackTransaction,
+    commitTransaction,
     queryDrafts,
     findOne,
     find,

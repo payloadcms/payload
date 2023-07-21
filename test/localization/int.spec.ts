@@ -1,12 +1,13 @@
-import mongoose from 'mongoose';
 import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
 import payload from '../../src';
-import type {
-  LocalizedPost,
-  WithLocalizedRelationship,
-} from './payload-types';
-import configPromise, { relationshipLocalizedSlug, localizedPostsSlug, withLocalizedRelSlug, withRequiredLocalizedFields } from './config';
+import type { LocalizedPost, WithLocalizedRelationship } from './payload-types';
+import configPromise, {
+  localizedPostsSlug,
+  relationshipLocalizedSlug,
+  withLocalizedRelSlug,
+  withRequiredLocalizedFields,
+} from './config';
 import {
   defaultLocale,
   englishTitle,
@@ -59,9 +60,7 @@ describe('Localization', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await payload.mongoMemoryServer.stop();
+    await payload.db.destroy(payload);
   });
 
   describe('localized text', () => {
@@ -308,6 +307,7 @@ describe('Localization', () => {
         expect((result.docs[0].relationshipHasMany as any).en[0].id).toBeDefined();
         expect((result.docs[0].relationMultiRelationTo as any).en.value.id).toBeDefined();
         expect((result.docs[0].relationMultiRelationToHasMany as any).en[0].value.id).toBeDefined();
+        expect(result.docs[0].arrayField.en[0].nestedRelation.id).toBeDefined();
       });
     });
 

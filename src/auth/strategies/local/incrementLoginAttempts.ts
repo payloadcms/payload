@@ -1,13 +1,16 @@
-import { Payload } from "../../.."
-import { SanitizedCollectionConfig, TypeWithID } from "../../../collections/config/types"
+import { Payload } from '../../..';
+import { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types';
+import { PayloadRequest } from '../../../express/types';
 
 type Args = {
+  req: PayloadRequest,
   payload: Payload
   doc: TypeWithID & Record<string, unknown>
   collection: SanitizedCollectionConfig
 }
 
 export const incrementLoginAttempts = async ({
+  req,
   payload,
   doc,
   collection,
@@ -16,35 +19,36 @@ export const incrementLoginAttempts = async ({
     auth: {
       maxLoginAttempts,
       lockTime,
-    }
-  } = collection
+    },
+  } = collection;
 
   if ('lockUntil' in doc && typeof doc.lockUntil === 'string') {
-    const lockUntil = Math.floor(new Date(doc.lockUntil).getTime() / 1000)
+    const lockUntil = Math.floor(new Date(doc.lockUntil).getTime() / 1000);
 
     // Expired lock, restart count at 1
     if (lockUntil < Date.now()) {
       await payload.update({
+        req,
         collection: collection.slug,
         id: doc.id,
         data: {
           loginAttempts: 1,
           lockUntil: null,
-        }
-      })
+        },
+      });
     }
 
-    return
+    return;
   }
 
   const data: Record<string, unknown> = {
     loginAttempts: Number(doc.loginAttempts) + 1,
-  }
+  };
 
   // Lock the account if at max attempts and not already locked
   if (typeof doc.loginAttempts === 'number' && doc.loginAttempts + 1 >= maxLoginAttempts) {
-    const lockUntil = new Date((Date.now() + lockTime))
-    data.lockUntil = lockUntil
+    const lockUntil = new Date((Date.now() + lockTime));
+    data.lockUntil = lockUntil;
   }
 
 
@@ -52,5 +56,5 @@ export const incrementLoginAttempts = async ({
     collection: collection.slug,
     id: doc.id,
     data,
-  })
-}
+  });
+};
