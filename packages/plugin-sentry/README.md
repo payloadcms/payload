@@ -1,5 +1,3 @@
-🚧 **WAIT! This repo is in the process of being built and not been tested for production use yet.** 
-
 # Sentry Plugin for Payload
 
 This plugin seamlessly integrates [Sentry](https://sentry.io/) with [Payload](https://github.com/payloadcms/payload) for performance monitoring and error tracking.
