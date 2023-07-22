@@ -219,7 +219,7 @@ This template comes pre-configured with the official [Payload SEO Plugin](https:
 
 ## Website
 
-This template includes a fully-working [Next.js App Router](https://nextjs.org) front-end that is served alongside your Payload app in a single Express server. This makes is so that you can deploy both apps simultaneously and host them together. If you prefer a different front-end framework, this pattern works for any framework that supports a custom server. If you prefer to host your website separately from Payload, you can easily [Eject](#eject) the front-end out from this template to swap in your own, or to use it as a standalone CMS. For more details, see the official [Custom Server Example](https://github.com/payloadcms/payload/tree/master/examples/custom-server).
+This template includes a beautifully designed, production-ready front-end built with the [Next.js App Router](https://nextjs.org), served right alongside your Payload app in a single Express server. This makes is so that you can deploy both apps simultaneously and host them together. If you prefer a different front-end framework, this pattern works for any framework that supports a custom server. If you prefer to host your website separately from Payload, you can easily [Eject](#eject) the front-end out from this template to swap in your own, or to use it as a standalone CMS. For more details, see the official [Custom Server Example](https://github.com/payloadcms/payload/tree/master/examples/custom-server).
 
 Core features:
 
@@ -229,9 +229,9 @@ Core features:
 - [TypeScript](https://www.typescriptlang.org)
 - [React Hook Form](https://react-hook-form.com)
 - [Payload Admin Bar](https://github.com/payloadcms/payload-admin-bar)
-- Complete authentication workflow
+- Complete authentication flow
 - Fully built shopping cart
-- Full checkout workflow
+- Complete checkout flow
 - Customer accounts
 - Dark mode
 - Pre-made layout building blocks
@@ -294,7 +294,7 @@ To seed the database with a few products and pages you can run `yarn seed`. This
 
 To run Payload in production, you need to build and serve the Admin panel. To do so, follow these steps:
 
-1. Then invoke the `payload build` script by running `yarn build` or `npm run build` in your project root. This creates a `./build` directory with a production-ready admin bundle.
+1. Invoke the `payload build` script by running `yarn build` or `npm run build` in your project root. This creates a `./build` directory with a production-ready admin bundle.
 1. Finally run `yarn serve` or `npm run serve` to run Node in production and serve Payload from the `./build` directory.
 1. When you're ready to go live, see [Deployment](#deployment) for more details.
 

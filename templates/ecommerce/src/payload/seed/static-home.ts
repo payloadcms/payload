@@ -41,7 +41,18 @@ export const staticHome: Page = {
             ],
           },
           {
-            text: ' and click "seed your database". You may need to hard refresh this page to clear the cached request. The code for this template is completely open-source and can be found ',
+            text: ' and click "seed your database". If you have already seeded your database, ',
+          },
+          {
+            text: 'you may need to hard refresh this page to clear the cached request.',
+            bold: true,
+          },
+        ],
+      },
+      {
+        children: [
+          {
+            text: 'The code for this template is completely open-source and can be found ',
           },
           {
             type: 'link',
