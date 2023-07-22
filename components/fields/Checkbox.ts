@@ -1,2 +1,1 @@
-// eslint-disable-next-line import/named
-export { Props } from '../../dist/admin/components/forms/field-types/Checkbox/types';
+export type { Props } from '../../dist/admin/components/forms/field-types/Checkbox/types';

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import format from 'date-fns/format';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
 import Eyebrow from '../../elements/Eyebrow';
-import Loading from '../../elements/Loading';
 import { useStepNav } from '../../elements/StepNav';
 import { StepNavItem } from '../../elements/StepNav/types';
 import Meta from '../../utilities/Meta';
@@ -16,11 +16,12 @@ import Restore from './Restore';
 import SelectLocales from './SelectLocales';
 import RenderFieldsToDiff from './RenderFieldsToDiff';
 import fieldComponents from './RenderFieldsToDiff/fields';
-
+import { getTranslation } from '../../../../utilities/getTranslation';
 import { Field, FieldAffectingData, fieldAffectsData } from '../../../../fields/config/types';
 import { FieldPermissions } from '../../../../auth';
 import { useLocale } from '../../utilities/Locale';
 import { Gutter } from '../../elements/Gutter';
+import { formatDate } from '../../../utilities/formatDate';
 
 import './index.scss';
 
@@ -35,6 +36,8 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const [locales, setLocales] = useState<LocaleOption[]>(localeOptions);
   const { permissions } = useAuth();
   const locale = useLocale();
+  const { t, i18n } = useTranslation('version');
+  const { docPermissions } = useDocumentInfo();
 
   let originalDocFetchURL: string;
   let versionFetchURL: string;
@@ -50,7 +53,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     originalDocFetchURL = `${serverURL}${api}/${slug}/${id}`;
     versionFetchURL = `${serverURL}${api}/${slug}/versions/${versionID}`;
     compareBaseURL = `${serverURL}${api}/${slug}/versions`;
-    entityLabel = collection.labels.singular;
+    entityLabel = getTranslation(collection.labels.singular, i18n);
     parentID = id;
     fields = collection.fields;
     fieldPermissions = permissions.collections[collection.slug].fields;
@@ -61,14 +64,14 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     originalDocFetchURL = `${serverURL}${api}/globals/${slug}`;
     versionFetchURL = `${serverURL}${api}/globals/${slug}/versions/${versionID}`;
     compareBaseURL = `${serverURL}${api}/globals/${slug}/versions`;
-    entityLabel = global.label;
+    entityLabel = getTranslation(global.label, i18n);
     fields = global.fields;
     fieldPermissions = permissions.globals[global.slug].fields;
   }
 
   const compareFetchURL = compareValue?.value === 'mostRecent' || compareValue?.value === 'published' ? originalDocFetchURL : `${compareBaseURL}/${compareValue.value}`;
 
-  const [{ data: doc, isLoading }] = usePayloadAPI(versionFetchURL, { initialParams: { locale: '*', depth: 1 } });
+  const [{ data: doc, isLoading: isLoadingData }] = usePayloadAPI(versionFetchURL, { initialParams: { locale: '*', depth: 1 } });
   const [{ data: publishedDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { locale: '*', depth: 1 } });
   const [{ data: mostRecentDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { locale: '*', depth: 1, draft: true } });
   const [{ data: compareDoc }] = usePayloadAPI(compareFetchURL, { initialParams: { locale: '*', depth: 1, draft: 'true' } });
@@ -92,7 +95,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
               docLabel = mostRecentDoc[useAsTitle];
             }
           } else {
-            docLabel = '[Untitled]';
+            docLabel = `[${t('general:untitled')}]`;
           }
         } else {
           docLabel = mostRecentDoc.id;
@@ -102,7 +105,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
       nav = [
         {
           url: `${admin}/collections/${collection.slug}`,
-          label: collection.labels.plural,
+          label: getTranslation(collection.labels.plural, i18n),
         },
         {
           label: docLabel,
@@ -113,7 +116,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
           url: `${admin}/collections/${collection.slug}/${id}/versions`,
         },
         {
-          label: doc?.createdAt ? format(new Date(doc.createdAt), dateFormat) : '',
+          label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '',
         },
       ];
     }
@@ -129,27 +132,27 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
           url: `${admin}/globals/${global.slug}/versions`,
         },
         {
-          label: doc?.createdAt ? format(new Date(doc.createdAt), dateFormat) : '',
+          label: doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '',
         },
       ];
     }
 
     setStepNav(nav);
-  }, [setStepNav, collection, global, dateFormat, doc, mostRecentDoc, admin, id, locale]);
+  }, [setStepNav, collection, global, dateFormat, doc, mostRecentDoc, admin, id, locale, t, i18n]);
 
   let metaTitle: string;
   let metaDesc: string;
-  const formattedCreatedAt = doc?.createdAt ? format(new Date(doc.createdAt), dateFormat) : '';
+  const formattedCreatedAt = doc?.createdAt ? formatDate(doc.createdAt, dateFormat, i18n?.language) : '';
 
   if (collection) {
     const useAsTitle = collection?.admin?.useAsTitle || 'id';
-    metaTitle = `Version - ${formattedCreatedAt} - ${doc[useAsTitle]} - ${entityLabel}`;
-    metaDesc = `Viewing version for the ${entityLabel} ${doc[useAsTitle]}`;
+    metaTitle = `${t('version')} - ${formattedCreatedAt} - ${doc[useAsTitle]} - ${entityLabel}`;
+    metaDesc = t('viewingVersion', { documentTitle: doc[useAsTitle], entityLabel });
   }
 
   if (global) {
-    metaTitle = `Version - ${formattedCreatedAt} - ${entityLabel}`;
-    metaDesc = `Viewing version for the global ${entityLabel}`;
+    metaTitle = `${t('version')} - ${formattedCreatedAt} - ${entityLabel}`;
+    metaDesc = t('viewingVersionGlobal', { entityLabel });
   }
 
   let comparison = compareDoc?.version;
@@ -162,64 +165,66 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     comparison = publishedDoc;
   }
 
+  const canUpdate = docPermissions?.update?.permission;
+
   return (
-    <div className={baseClass}>
-      <Meta
-        title={metaTitle}
-        description={metaDesc}
-      />
-      <Eyebrow />
-      <Gutter className={`${baseClass}__wrap`}>
-        <div className={`${baseClass}__intro`}>
-          {doc?.autosave ? 'Autosaved version ' : 'Version'}
-          {' '}
-          created on:
-        </div>
-        <header className={`${baseClass}__header`}>
-          <h2>
-            {formattedCreatedAt}
-          </h2>
-          <Restore
-            className={`${baseClass}__restore`}
-            collection={collection}
-            global={global}
-            originalDocID={id}
-            versionID={versionID}
-            versionDate={formattedCreatedAt}
-          />
-        </header>
-        <div className={`${baseClass}__controls`}>
-          <CompareVersion
-            publishedDoc={publishedDoc}
-            versionID={versionID}
-            baseURL={compareBaseURL}
-            parentID={parentID}
-            value={compareValue}
-            onChange={setCompareValue}
-          />
-          {localization && (
-            <SelectLocales
-              onChange={setLocales}
-              options={localeOptions}
-              value={locales}
+    <React.Fragment>
+      <div className={baseClass}>
+        <Meta
+          title={metaTitle}
+          description={metaDesc}
+        />
+        <Eyebrow />
+        <Gutter className={`${baseClass}__wrap`}>
+          <div className={`${baseClass}__intro`}>
+            {t('versionCreatedOn', { version: t(doc?.autosave ? 'autosavedVersion' : 'version') })}
+          </div>
+          <header className={`${baseClass}__header`}>
+            <h2>
+              {formattedCreatedAt}
+            </h2>
+            {canUpdate && (
+              <Restore
+                className={`${baseClass}__restore`}
+                collection={collection}
+                global={global}
+                originalDocID={id}
+                versionID={versionID}
+                versionDate={formattedCreatedAt}
+              />
+            )}
+          </header>
+          <div className={`${baseClass}__controls`}>
+            <CompareVersion
+              publishedDoc={publishedDoc}
+              versionID={versionID}
+              baseURL={compareBaseURL}
+              parentID={parentID}
+              value={compareValue}
+              onChange={setCompareValue}
+            />
+            {localization && (
+              <SelectLocales
+                onChange={setLocales}
+                options={localeOptions}
+                value={locales}
+              />
+            )}
+          </div>
+
+          {doc?.version && (
+            <RenderFieldsToDiff
+              locales={locales ? locales.map(({ value }) => value) : []}
+              fields={fields}
+              fieldComponents={fieldComponents}
+              fieldPermissions={fieldPermissions}
+              version={doc?.version}
+              comparison={comparison}
             />
           )}
-        </div>
-        {isLoading && (
-          <Loading />
-        )}
-        {doc?.version && (
-          <RenderFieldsToDiff
-            locales={locales ? locales.map(({ value }) => value) : []}
-            fields={fields}
-            fieldComponents={fieldComponents}
-            fieldPermissions={fieldPermissions}
-            version={doc?.version}
-            comparison={comparison}
-          />
-        )}
-      </Gutter>
-    </div>
+        </Gutter>
+      </div>
+    </React.Fragment>
   );
 };
 

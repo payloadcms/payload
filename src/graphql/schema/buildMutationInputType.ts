@@ -16,9 +16,9 @@ import { GraphQLJSON } from 'graphql-type-json';
 import withNullableType from './withNullableType';
 import formatName from '../utilities/formatName';
 import combineParentName from '../utilities/combineParentName';
-import { ArrayField, CodeField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, CollapsibleField, TabsField, CheckboxField, BlockField, tabHasName } from '../../fields/config/types';
+import { ArrayField, CodeField, JSONField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, CollapsibleField, TabsField, CheckboxField, BlockField, tabHasName } from '../../fields/config/types';
 import { toWords } from '../../utilities/formatLabels';
-import { Payload } from '../../index';
+import { Payload } from '../../payload';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { groupOrTabHasRequiredSubfield } from '../../utilities/groupOrTabHasRequiredSubfield';
 
@@ -43,7 +43,7 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
       const type = field.name === 'id' ? GraphQLInt : GraphQLFloat;
       return {
         ...inputObjectTypeConfig,
-        [field.name]: { type: withNullableType(field, type, forceNullable) },
+        [field.name]: { type: withNullableType(field, field.hasMany === true ? new GraphQLList(type) : type, forceNullable) },
       };
     },
     text: (inputObjectTypeConfig: InputObjectTypeConfig, field: TextField) => ({
@@ -66,6 +66,10 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
       ...inputObjectTypeConfig,
       [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
     }),
+    json: (inputObjectTypeConfig: InputObjectTypeConfig, field: JSONField) => ({
+      ...inputObjectTypeConfig,
+      [field.name]: { type: withNullableType(field, GraphQLJSON, forceNullable) },
+    }),
     date: (inputObjectTypeConfig: InputObjectTypeConfig, field: DateField) => ({
       ...inputObjectTypeConfig,
       [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
@@ -80,7 +84,7 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
     }),
     point: (inputObjectTypeConfig: InputObjectTypeConfig, field: PointField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLList(GraphQLFloat), forceNullable) },
+      [field.name]: { type: withNullableType(field, new GraphQLList(GraphQLFloat), forceNullable) },
     }),
     checkbox: (inputObjectTypeConfig: InputObjectTypeConfig, field: CheckboxField) => ({
       ...inputObjectTypeConfig,
@@ -127,7 +131,7 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
       let type: PayloadGraphQLRelationshipType;
 
       if (Array.isArray(relationTo)) {
-        const fullName = `${combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label)}RelationshipInput`;
+        const fullName = `${combineParentName(parentName, toWords(field.name, true))}RelationshipInput`;
         type = new GraphQLInputObjectType({
           name: fullName,
           fields: {
@@ -155,7 +159,7 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
       };
     },
     array: (inputObjectTypeConfig: InputObjectTypeConfig, field: ArrayField) => {
-      const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
+      const fullName = combineParentName(parentName, toWords(field.name, true));
       let type: GraphQLType | GraphQLList<GraphQLType> = buildMutationInputType(payload, fullName, field.fields, fullName);
       type = new GraphQLList(withNullableType(field, type, forceNullable));
       return {
@@ -165,7 +169,7 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
     },
     group: (inputObjectTypeConfig: InputObjectTypeConfig, field: GroupField) => {
       const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(field);
-      const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
+      const fullName = combineParentName(parentName, toWords(field.name, true));
       let type: GraphQLType = buildMutationInputType(payload, fullName, field.fields, fullName);
       if (requiresAtLeastOneField) type = new GraphQLNonNull(type);
       return {

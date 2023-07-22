@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../../utilities/Config';
 import useIntersect from '../../../../../../../hooks/useIntersect';
 import { useListRelationships } from '../../../RelationshipProvider';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation';
+import { formatUseAsTitle } from '../../../../../../../hooks/useTitle';
+import { Props as DefaultCellProps } from '../../types';
 
 import './index.scss';
 
@@ -9,13 +13,18 @@ type Value = { relationTo: string, value: number | string };
 const baseClass = 'relationship-cell';
 const totalToShow = 3;
 
-const RelationshipCell = (props) => {
+const RelationshipCell: React.FC<{
+  field: DefaultCellProps['field']
+  data: DefaultCellProps['cellData']
+}> = (props) => {
   const { field, data: cellData } = props;
-  const { collections, routes } = useConfig();
+  const config = useConfig();
+  const { collections, routes } = config;
   const [intersectionRef, entry] = useIntersect();
   const [values, setValues] = useState<Value[]>([]);
   const { getRelationships, documents } = useListRelationships();
   const [hasRequested, setHasRequested] = useState(false);
+  const { t, i18n } = useTranslation('general');
 
   const isAboveViewport = entry?.boundingClientRect?.top < window.innerHeight;
 
@@ -28,7 +37,7 @@ const RelationshipCell = (props) => {
         if (typeof cell === 'object' && 'relationTo' in cell && 'value' in cell) {
           formattedValues.push(cell);
         }
-        if ((typeof cell === 'number' || typeof cell === 'string') && typeof field.relationTo === 'string') {
+        if ((typeof cell === 'number' || typeof cell === 'string') && 'relationTo' in field && typeof field.relationTo === 'string') {
           formattedValues.push({
             value: cell,
             relationTo: field.relationTo,
@@ -49,19 +58,28 @@ const RelationshipCell = (props) => {
       {values.map(({ relationTo, value }, i) => {
         const document = documents[relationTo][value];
         const relatedCollection = collections.find(({ slug }) => slug === relationTo);
+
+        const label = formatUseAsTitle({
+          doc: document === false ? null : document,
+          collection: relatedCollection,
+          i18n,
+          config,
+        });
+
         return (
           <React.Fragment key={i}>
-            { document === false && `Untitled - ID: ${value}`}
-            { document === null && 'Loading...'}
-            { document && (
-              document[relatedCollection.admin.useAsTitle] ? document[relatedCollection.admin.useAsTitle] : `Untitled - ID: ${value}`
-            )}
+            {document === false && `${t('untitled')} - ID: ${value}`}
+            {document === null && `${t('loading')}...`}
+            {document && (label || `${t('untitled')} - ID: ${value}`)}
             {values.length > i + 1 && ', '}
           </React.Fragment>
         );
       })}
-      { Array.isArray(cellData) && cellData.length > totalToShow && ` and ${cellData.length - totalToShow} more` }
-      { values.length === 0 && `No <${field.label}>`}
+      {
+        Array.isArray(cellData) && cellData.length > totalToShow
+        && t('fields:itemsAndMore', { items: '', count: cellData.length - totalToShow })
+      }
+      {values.length === 0 && t('noLabel', { label: getTranslation(field?.label || '', i18n) })}
     </div>
   );
 };

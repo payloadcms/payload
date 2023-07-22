@@ -70,15 +70,18 @@
   }
 
   &__document-actions {
-    @include blur-bg;
     padding-right: $baseline;
     position: sticky;
     top: 0;
     z-index: var(--z-nav);
 
-    >* {
+    > * {
       position: relative;
       z-index: 1;
+    }
+
+    @include mid-break {
+      @include blur-bg;
     }
   }
 
@@ -108,7 +111,6 @@
 
   &__api-url {
     margin-bottom: base(1.5);
-    padding-right: base(1.5);
 
     a {
       display: block;
@@ -119,21 +121,35 @@
 
   &__sidebar-fields {
     padding-right: $baseline;
+    display: flex;
+    flex-direction: column;
+    gap: $baseline;
 
     .preview-btn {
       display: inline-block;
-      margin-top: 0;
+      margin: 0;
       width: calc(50% - #{base(.5)});
+    }
+
+    .render-fields {
+      & > *:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 
   &__meta {
     margin: auto 0 $baseline 0;
     padding-top: $baseline;
+    padding-right: $baseline;
     list-style: none;
 
     li {
       margin-bottom: base(.5);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 
@@ -174,6 +190,11 @@
       height: initial;
     }
 
+    &__meta {
+      border-top: 1px solid var(--theme-elevation-100);
+      padding-right: var(--gutter-h);
+    }
+
     &__form {
       display: block;
     }
@@ -196,9 +217,18 @@
     &__meta,
     &__sidebar-fields {
       padding-left: var(--gutter-h);
+      padding-right: var(--gutter-h);
+    }
+
+    &__sidebar-wrap {
+      border-left: 0;
     }
 
     &__sidebar-fields {
+      padding-top: 0;
+      padding-right: var(--gutter-h);
+      gap: base(0.5);
+
       .preview-btn {
         width: 100%;
       }
@@ -206,7 +236,7 @@
 
     &__collection-actions {
       border-top: 1px solid var(--theme-elevation-100);
-      padding: base(1) 0 0 base(1);
+      padding: base(1) 0 0 var(--gutter-h);
       order: 1;
 
       li {
@@ -215,7 +245,8 @@
     }
 
     &__sidebar {
-      padding-bottom: base(4);
+      padding-bottom: base(3.5);
+      overflow: visible;
     }
   }
 }

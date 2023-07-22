@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "payload/generated-types": [
+        "./payload-types.ts"
+      ]
+    }
+  }
+}

@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import ObjectID from 'bson-objectid';
+import type { TFunction } from 'i18next';
 import { User } from '../../../../../auth';
 import {
   NonPresentationalField,
@@ -8,7 +9,7 @@ import {
   tabHasName,
 } from '../../../../../fields/config/types';
 import getValueWithDefault from '../../../../../fields/getDefaultValue';
-import { Fields, Field, Data } from '../types';
+import { Fields, FormField, Data } from '../types';
 import { iterateFields } from './iterateFields';
 
 type Args = {
@@ -18,11 +19,14 @@ type Args = {
   state: Fields
   path: string
   passesCondition: boolean
-  fieldPromises: Promise<void>[]
   id: string | number
   operation: 'create' | 'update'
   data: Data
   fullData: Data
+  t: TFunction
+  preferences: {
+    [key: string]: unknown
+  }
 }
 
 export const addFieldStatePromise = async ({
@@ -34,12 +38,13 @@ export const addFieldStatePromise = async ({
   passesCondition,
   fullData,
   data,
-  fieldPromises,
   id,
   operation,
+  t,
+  preferences,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
-    const fieldState: Field = {
+    const fieldState: FormField = {
       valid: true,
       value: undefined,
       initialValue: undefined,
@@ -63,6 +68,7 @@ export const addFieldStatePromise = async ({
         siblingData: data,
         id,
         operation,
+        t,
       });
     }
 
@@ -76,37 +82,61 @@ export const addFieldStatePromise = async ({
     switch (field.type) {
       case 'array': {
         const arrayValue = Array.isArray(valueWithDefault) ? valueWithDefault : [];
-
-        arrayValue.forEach((row, i) => {
+        const { promises, rowMetadata } = arrayValue.reduce((acc, row, i) => {
           const rowPath = `${path}${field.name}.${i}.`;
+          row.id = row?.id || new ObjectID().toHexString();
+
           state[`${rowPath}id`] = {
             value: row.id,
-            initialValue: row.id || new ObjectID().toHexString(),
+            initialValue: row.id,
             valid: true,
           };
 
-          iterateFields({
+          acc.promises.push(iterateFields({
             state,
             fields: field.fields,
             data: row,
             parentPassesCondition: passesCondition,
             path: rowPath,
             user,
-            fieldPromises,
             fullData,
             id,
             locale,
             operation,
+            t,
+            preferences,
+          }));
+
+          const collapsedRowIDs = preferences?.fields?.[`${path}${field.name}`]?.collapsed;
+
+          acc.rowMetadata.push({
+            id: row.id,
+            collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
+            childErrorPaths: new Set(),
           });
+
+          return acc;
+        }, {
+          promises: [],
+          rowMetadata: [],
         });
 
-        // Add values to field state
-        fieldState.value = arrayValue.length;
-        fieldState.initialValue = arrayValue.length;
+        await Promise.all(promises);
 
-        if (arrayValue.length > 0) {
-          fieldState.disableFormData = true;
+        // Add values to field state
+        if (valueWithDefault === null) {
+          fieldState.value = null;
+          fieldState.initialValue = null;
+        } else {
+          fieldState.value = arrayValue.length;
+          fieldState.initialValue = arrayValue.length;
+
+          if (arrayValue.length > 0) {
+            fieldState.disableFormData = true;
+          }
         }
+
+        fieldState.rows = rowMetadata;
 
         // Add field to state
         state[`${path}${field.name}`] = fieldState;
@@ -117,14 +147,16 @@ export const addFieldStatePromise = async ({
       case 'blocks': {
         const blocksValue = Array.isArray(valueWithDefault) ? valueWithDefault : [];
 
-        blocksValue.forEach((row, i) => {
+        const { promises, rowMetadata } = blocksValue.reduce((acc, row, i) => {
           const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
           const rowPath = `${path}${field.name}.${i}.`;
 
           if (block) {
+            row.id = row?.id || new ObjectID().toHexString();
+
             state[`${rowPath}id`] = {
               value: row.id,
-              initialValue: row.id || new ObjectID().toHexString(),
+              initialValue: row.id,
               valid: true,
             };
 
@@ -140,7 +172,7 @@ export const addFieldStatePromise = async ({
               valid: true,
             };
 
-            iterateFields({
+            acc.promises.push(iterateFields({
               state,
               fields: block.fields,
               data: row,
@@ -150,19 +182,43 @@ export const addFieldStatePromise = async ({
               user,
               locale,
               operation,
-              fieldPromises,
               id,
+              t,
+              preferences,
+            }));
+
+            const collapsedRowIDs = preferences?.fields?.[`${path}${field.name}`]?.collapsed;
+
+            acc.rowMetadata.push({
+              id: row.id,
+              collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
+              blockType: row.blockType,
+              childErrorPaths: new Set(),
             });
           }
+
+          return acc;
+        }, {
+          promises: [],
+          rowMetadata: [],
         });
 
-        // Add values to field state
-        fieldState.value = blocksValue.length;
-        fieldState.initialValue = blocksValue.length;
+        await Promise.all(promises);
 
-        if (blocksValue.length > 0) {
-          fieldState.disableFormData = true;
+        // Add values to field state
+        if (valueWithDefault === null) {
+          fieldState.value = null;
+          fieldState.initialValue = null;
+        } else {
+          fieldState.value = blocksValue.length;
+          fieldState.initialValue = blocksValue.length;
+
+          if (blocksValue.length > 0) {
+            fieldState.disableFormData = true;
+          }
         }
+
+        fieldState.rows = rowMetadata;
 
         // Add field to state
         state[`${path}${field.name}`] = fieldState;
@@ -171,18 +227,19 @@ export const addFieldStatePromise = async ({
       }
 
       case 'group': {
-        iterateFields({
+        await iterateFields({
           state,
           id,
           operation,
-          fieldPromises,
           fields: field.fields,
-          data: data?.[field.name],
+          data: data?.[field.name] || {},
           fullData,
           parentPassesCondition: passesCondition,
           path: `${path}${field.name}.`,
           locale,
           user,
+          t,
+          preferences,
         });
 
         break;
@@ -200,34 +257,36 @@ export const addFieldStatePromise = async ({
     }
   } else if (fieldHasSubFields(field)) {
     // Handle field types that do not use names (row, etc)
-    iterateFields({
+    await iterateFields({
       state,
       fields: field.fields,
       data,
       parentPassesCondition: passesCondition,
       path,
       user,
-      fieldPromises,
       fullData,
       id,
       locale,
       operation,
+      t,
+      preferences,
     });
   } else if (field.type === 'tabs') {
-    field.tabs.forEach((tab) => {
-      iterateFields({
-        state,
-        fields: tab.fields,
-        data: tabHasName(tab) ? data?.[tab.name] : data,
-        parentPassesCondition: passesCondition,
-        path: tabHasName(tab) ? `${path}${tab.name}.` : path,
-        user,
-        fieldPromises,
-        fullData,
-        id,
-        locale,
-        operation,
-      });
-    });
+    const promises = field.tabs.map((tab) => iterateFields({
+      state,
+      fields: tab.fields,
+      data: tabHasName(tab) ? data?.[tab.name] : data,
+      parentPassesCondition: passesCondition,
+      path: tabHasName(tab) ? `${path}${tab.name}.` : path,
+      user,
+      fullData,
+      id,
+      locale,
+      operation,
+      t,
+      preferences,
+    }));
+
+    await Promise.all(promises);
   }
 };

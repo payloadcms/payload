@@ -1,4 +1,4 @@
-import { Payload } from '..';
+import { Payload } from '../payload';
 import { PayloadRequest } from '../express/types';
 import { SanitizedConfig, EmailOptions } from '../config/types';
 import { Collection } from '../collections/config/types';
@@ -32,12 +32,9 @@ async function sendVerificationEmail(args: Args): Promise<void> {
   } = args;
 
   if (!disableEmail) {
-    const defaultVerificationURL = `${config.serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`;
+    const verificationURL = `${config.serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`;
 
-    let html = `A new account has just been created for you to access <a href="${config.serverURL}">${config.serverURL}</a>.
-    Please click on the following link or paste the URL below into your browser to verify your email:
-    <a href="${defaultVerificationURL}">${defaultVerificationURL}</a><br>
-    After verifying your email, you will be able to log in successfully.`;
+    let html = `${req.t('authentication:newAccountCreated', { interpolation: { escapeValue: false }, serverURL: config.serverURL, verificationURL })}`;
 
     const verify = collectionConfig.auth.verify as VerifyConfig;
 
@@ -50,7 +47,7 @@ async function sendVerificationEmail(args: Args): Promise<void> {
       });
     }
 
-    let subject = 'Verify your email';
+    let subject = req.t('authentication:verifyYourEmail');
 
     // Allow config to override email subject
     if (typeof verify.generateEmailSubject === 'function') {

@@ -1,67 +1,50 @@
-import React, { MouseEventHandler, useCallback } from 'react';
-import Select, {
-  components,
-  MultiValueProps,
-  Props as SelectProps,
-} from 'react-select';
-import {
-  SortableContainer,
-  SortableContainerProps,
-  SortableElement,
-  SortStartHandler,
-  SortEndHandler,
-  SortableHandle,
-} from 'react-sortable-hoc';
-import { arrayMove } from '../../../../utilities/arrayMove';
-import { Props, Value } from './types';
+import React, { KeyboardEventHandler } from 'react';
+import Select from 'react-select';
+import CreatableSelect from 'react-select/creatable';
+import { useTranslation } from 'react-i18next';
+import { arrayMove } from '@dnd-kit/sortable';
+import { Props as ReactSelectAdapterProps } from './types';
 import Chevron from '../../icons/Chevron';
+import { getTranslation } from '../../../../utilities/getTranslation';
+import { SingleValue } from './SingleValue';
+import { MultiValueLabel } from './MultiValueLabel';
+import { MultiValue } from './MultiValue';
+import { ValueContainer } from './ValueContainer';
+import { ClearIndicator } from './ClearIndicator';
+import { MultiValueRemove } from './MultiValueRemove';
+import { Control } from './Control';
+import DraggableSortable from '../DraggableSortable';
+import type { Option } from './types';
 
 import './index.scss';
 
-const SortableMultiValue = SortableElement(
-  (props: MultiValueProps<Value>) => {
-    // this prevents the menu from being opened/closed when the user clicks
-    // on a value to begin dragging it. ideally, detecting a click (instead of
-    // a drag) would still focus the control and toggle the menu, but that
-    // requires some magic with refs that are out of scope for this example
-    const onMouseDown: MouseEventHandler<HTMLDivElement> = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    };
-    const classes = [
-      props.className,
-      !props.isDisabled && 'draggable',
-    ].filter(Boolean).join(' ');
-
-    return (
-      <components.MultiValue
-        {...props}
-        className={classes}
-        innerProps={{ ...props.innerProps, onMouseDown }}
-      />
-    );
-  },
-);
+const createOption = (label: string) => ({
+  label,
+  value: label,
+});
 
 
-const SortableMultiValueLabel = SortableHandle((props) => <components.MultiValueLabel {...props} />);
+const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
+  const { t, i18n } = useTranslation();
+  const [inputValue, setInputValue] = React.useState(''); // for creatable select
 
-const SortableSelect = SortableContainer(Select) as React.ComponentClass<SelectProps<Value, true> & SortableContainerProps>;
-
-const ReactSelect: React.FC<Props> = (props) => {
   const {
     className,
-    showError = false,
+    showError,
     options,
     onChange,
     value,
     disabled = false,
-    placeholder,
+    placeholder = t('general:selectValue'),
     isSearchable = true,
-    isClearable,
-    isMulti,
-    isSortable,
+    isClearable = true,
     filterOption = undefined,
+    numberOnly = false,
+    isLoading,
+    onMenuOpen,
+    components,
+    isCreatable,
+    selectProps,
   } = props;
 
   const classes = [
@@ -70,65 +53,144 @@ const ReactSelect: React.FC<Props> = (props) => {
     showError && 'react-select--error',
   ].filter(Boolean).join(' ');
 
-  const onSortStart: SortStartHandler = useCallback(({ helper }) => {
-    const portalNode = helper;
-    if (portalNode && portalNode.style) {
-      portalNode.style.cssText += 'pointer-events: auto; cursor: grabbing;';
-    }
-  }, []);
-
-  const onSortEnd: SortEndHandler = useCallback(({ oldIndex, newIndex }) => {
-    onChange(arrayMove(value as Value[], oldIndex, newIndex));
-  }, [onChange, value]);
-
-  if (isMulti && isSortable) {
+  if (!isCreatable) {
     return (
-      <SortableSelect
-        useDragHandle
-        // react-sortable-hoc props:
-        axis="xy"
-        onSortStart={onSortStart}
-        onSortEnd={onSortEnd}
-        // small fix for https://github.com/clauderic/react-sortable-hoc/pull/352:
-        getHelperDimensions={({ node }) => node.getBoundingClientRect()}
-        // react-select props:
-        placeholder={placeholder}
+      <Select
+        isLoading={isLoading}
+        placeholder={getTranslation(placeholder, i18n)}
+        captureMenuScroll
+        customProps={selectProps}
         {...props}
-        value={value as Value[]}
+        value={value}
         onChange={onChange}
-        disabled={disabled ? 'disabled' : undefined}
+        isDisabled={disabled}
         className={classes}
         classNamePrefix="rs"
         options={options}
         isSearchable={isSearchable}
         isClearable={isClearable}
-        components={{
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore We're failing to provide a required index prop to SortableElement
-          MultiValue: SortableMultiValue,
-          MultiValueLabel: SortableMultiValueLabel,
-          DropdownIndicator: Chevron,
-        }}
         filterOption={filterOption}
+        onMenuOpen={onMenuOpen}
+        menuPlacement="auto"
+        components={{
+          ValueContainer,
+          SingleValue,
+          MultiValue,
+          MultiValueLabel,
+          MultiValueRemove,
+          DropdownIndicator: Chevron,
+          ClearIndicator,
+          Control,
+          ...components,
+        }}
       />
     );
   }
+  const handleKeyDown: KeyboardEventHandler = (event) => {
+    // eslint-disable-next-line no-restricted-globals
+    if (numberOnly === true) {
+      const acceptableKeys = ['Tab', 'Escape', 'Backspace', 'Enter', 'ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'];
+      const isNumber = !/[^0-9]/.test(event.key);
+      const isActionKey = acceptableKeys.includes(event.key);
+      if (!isNumber && !isActionKey) {
+        event.preventDefault();
+        return;
+      }
+    }
+    if (!value || !inputValue || inputValue.trim() === '') return;
+    if (filterOption && !filterOption(null, inputValue)) {
+      return;
+    }
+    switch (event.key) {
+      case 'Enter':
+      case 'Tab':
+        onChange([...value as Option[], createOption(inputValue)]);
+        setInputValue('');
+        event.preventDefault();
+        break;
+      default:
+        break;
+    }
+  };
+
 
   return (
-    <Select
-      placeholder={placeholder}
+    <CreatableSelect
+      isLoading={isLoading}
+      placeholder={getTranslation(placeholder, i18n)}
+      captureMenuScroll
       {...props}
       value={value}
       onChange={onChange}
-      disabled={disabled ? 'disabled' : undefined}
-      components={{ DropdownIndicator: Chevron }}
+      isDisabled={disabled}
       className={classes}
       classNamePrefix="rs"
       options={options}
       isSearchable={isSearchable}
       isClearable={isClearable}
       filterOption={filterOption}
+      onMenuOpen={onMenuOpen}
+      menuPlacement="auto"
+      inputValue={inputValue}
+      onInputChange={(newValue) => setInputValue(newValue)}
+      onKeyDown={handleKeyDown}
+      components={{
+        ValueContainer,
+        SingleValue,
+        MultiValue,
+        MultiValueLabel,
+        MultiValueRemove,
+        DropdownIndicator: Chevron,
+        ClearIndicator,
+        Control,
+        ...components,
+      }}
     />
+  );
+};
+
+const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
+  const {
+    onChange,
+    value,
+  } = props;
+
+
+  let ids: string[] = [];
+  if (value) ids = Array.isArray(value) ? value.map((item) => item?.id ?? `${item?.value}` as string) : [value?.id || `${value?.value}` as string];
+
+
+  return (
+    <DraggableSortable
+      ids={ids}
+      className="react-select-container"
+      onDragEnd={({ moveFromIndex, moveToIndex }) => {
+        let sorted = value;
+        if (value && Array.isArray(value)) {
+          sorted = arrayMove(value, moveFromIndex, moveToIndex);
+        }
+        onChange(sorted);
+      }}
+    >
+      <SelectAdapter {...props} />
+    </DraggableSortable>
+  );
+};
+
+const ReactSelect: React.FC<ReactSelectAdapterProps> = (props) => {
+  const {
+    isMulti,
+    isSortable,
+  } = props;
+
+  if (isMulti && isSortable) {
+    return (
+      <SortableSelect {...props} />
+    );
+  }
+
+  return (
+    <SelectAdapter {...props} />
   );
 };
 

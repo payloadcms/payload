@@ -4,7 +4,7 @@ export type DescriptionFunction = (value?: unknown) => string
 
 export type DescriptionComponent = React.ComponentType<{ value: unknown }>
 
-export type Description = string | DescriptionFunction | DescriptionComponent
+export type Description = Record<string, string> | string | DescriptionFunction | DescriptionComponent
 
 export type Props = {
   description?: Description

@@ -1,6 +1,7 @@
 import React from 'react';
 import qs from 'qs';
 import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from '../../utilities/SearchParams';
 import Popup from '../Popup';
 import Chevron from '../../icons/Chevron';
@@ -12,16 +13,18 @@ const baseClass = 'per-page';
 
 const defaultLimits = defaults.admin.pagination.limits;
 
-type Props = {
+export type Props = {
   limits: number[]
   limit: number
   handleChange?: (limit: number) => void
   modifySearchParams?: boolean
+  resetPage?: boolean
 }
 
-const PerPage: React.FC<Props> = ({ limits = defaultLimits, limit, handleChange, modifySearchParams = true }) => {
+const PerPage: React.FC<Props> = ({ limits = defaultLimits, limit, handleChange, modifySearchParams = true, resetPage = false }) => {
   const params = useSearchParams();
   const history = useHistory();
+  const { t } = useTranslation('general');
 
   return (
     <div className={baseClass}>
@@ -29,9 +32,7 @@ const PerPage: React.FC<Props> = ({ limits = defaultLimits, limit, handleChange,
         horizontalAlign="right"
         button={(
           <strong>
-            Per Page:
-            {' '}
-            {limit}
+            {t('perPage', { limit })}
             <Chevron />
           </strong>
         )}
@@ -56,6 +57,7 @@ const PerPage: React.FC<Props> = ({ limits = defaultLimits, limit, handleChange,
                         history.replace({
                           search: qs.stringify({
                             ...params,
+                            page: resetPage ? 1 : params.page,
                             limit: limitNumber,
                           }, { addQueryPrefix: true }),
                         });

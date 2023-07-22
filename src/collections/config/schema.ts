@@ -10,8 +10,14 @@ const strategyBaseSchema = joi.object().keys({
 const collectionSchema = joi.object().keys({
   slug: joi.string().required(),
   labels: joi.object({
-    singular: joi.string(),
-    plural: joi.string(),
+    singular: joi.alternatives().try(
+      joi.string(),
+      joi.object().pattern(joi.string(), [joi.string()]),
+    ),
+    plural: joi.alternatives().try(
+      joi.string(),
+      joi.object().pattern(joi.string(), [joi.string()]),
+    ),
   }),
   access: joi.object({
     create: joi.func(),
@@ -22,12 +28,27 @@ const collectionSchema = joi.object().keys({
     unlock: joi.func(),
     admin: joi.func(),
   }),
+  defaultSort: joi.string(),
+  graphQL: joi.object().keys({
+    singularName: joi.string(),
+    pluralName: joi.string(),
+  }),
+  typescript: joi.object().keys({
+    interface: joi.string(),
+  }),
   timestamps: joi.boolean(),
   admin: joi.object({
+    hidden: joi.alternatives().try(
+      joi.boolean(),
+      joi.func(),
+    ),
     useAsTitle: joi.string(),
     defaultColumns: joi.array().items(joi.string()),
     listSearchableFields: joi.array().items(joi.string()),
-    group: joi.string(),
+    group: joi.alternatives().try(
+      joi.string(),
+      joi.object().pattern(joi.string(), [joi.string()]),
+    ),
     description: joi.alternatives().try(
       joi.string(),
       componentSchema,
@@ -35,12 +56,23 @@ const collectionSchema = joi.object().keys({
     hooks: joi.object({
       beforeDuplicate: joi.func(),
     }),
+    enableRichTextLink: joi.boolean(),
     enableRichTextRelationship: joi.boolean(),
     components: joi.object({
       views: joi.object({
         List: componentSchema,
         Edit: componentSchema,
       }),
+      edit: joi.object({
+        SaveButton: componentSchema,
+        PublishButton: componentSchema,
+        SaveDraftButton: componentSchema,
+        PreviewButton: componentSchema,
+      }),
+      BeforeList: joi.array().items(componentSchema),
+      BeforeListTable: joi.array().items(componentSchema),
+      AfterListTable: joi.array().items(componentSchema),
+      AfterList: joi.array().items(componentSchema),
     }),
     pagination: joi.object({
       defaultLimit: joi.number(),
@@ -51,6 +83,12 @@ const collectionSchema = joi.object().keys({
     hideAPIURL: joi.bool(),
   }),
   fields: joi.array(),
+  indexes: joi.array().items(
+    joi.object().keys({
+      fields: joi.object().required(),
+      options: joi.object(),
+    }),
+  ),
   hooks: joi.object({
     beforeOperation: joi.array().items(joi.func()),
     beforeValidate: joi.array().items(joi.func()),
@@ -110,7 +148,6 @@ const collectionSchema = joi.object().keys({
   versions: joi.alternatives().try(
     joi.object({
       maxPerDoc: joi.number(),
-      retainDeleted: joi.boolean(),
       drafts: joi.alternatives().try(
         joi.object({
           autosave: joi.alternatives().try(
@@ -130,6 +167,8 @@ const collectionSchema = joi.object().keys({
       staticURL: joi.string(),
       staticDir: joi.string(),
       disableLocalStorage: joi.bool(),
+      useTempFiles: joi.bool(),
+      tempFileDir: joi.string(),
       adminThumbnail: joi.alternatives().try(
         joi.string(),
         joi.func(),
@@ -137,8 +176,8 @@ const collectionSchema = joi.object().keys({
       imageSizes: joi.array().items(
         joi.object().keys({
           name: joi.string(),
-          width: joi.number().allow(null),
-          height: joi.number().allow(null),
+          width: joi.number().integer().allow(null),
+          height: joi.number().integer().allow(null),
           crop: joi.string(), // TODO: add further specificity with joi.xor
         }).unknown(),
       ),
@@ -162,9 +201,18 @@ const collectionSchema = joi.object().keys({
         format: joi.string(),
         options: joi.object(),
       }),
+      trimOptions: joi.alternatives().try(
+        joi.object().keys({
+          format: joi.string(),
+          options: joi.object(),
+        }),
+        joi.string(),
+        joi.number(),
+      ),
     }),
     joi.boolean(),
   ),
+  custom: joi.object().pattern(joi.string(), joi.any()),
 });
 
 export default collectionSchema;

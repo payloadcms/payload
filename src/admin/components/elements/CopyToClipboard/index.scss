@@ -14,22 +14,8 @@
     width: 0px;
   }
 
-  .tooltip {
-    pointer-events: none;
-    opacity: 0;
-    visibility: hidden;
-  }
-
   &:focus,
   &:active {
     outline: none;
-  }
-
-  &:hover {
-    .tooltip {
-      opacity: 1;
-      visibility: visible;
-
-    }
   }
 }

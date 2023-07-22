@@ -37,6 +37,12 @@
     table {
       width: 100%;
       overflow: auto;
+
+      #heading-_select,
+      .cell-_select {
+        min-width: unset;
+        width: auto;
+      }
     }
   }
 
@@ -53,6 +59,43 @@
   &__page-info {
     margin-right: base(1);
     margin-left: auto;
+  }
+
+  &__list-selection {
+    position: fixed;
+    bottom: 0;
+    z-index: 10;
+    padding: base(.75) 0;
+    width: 100%;
+    background-color: var(--theme-bg);
+
+    .btn {
+      margin: 0 0 0 base(.5);
+    }
+
+    .btn {
+      background-color: var(--theme-elevation-100);
+      cursor: pointer;
+      padding: 0 base(.25);
+      border-radius: $style-radius-s;
+
+      &:hover {
+        background-color: var(--theme-elevation-200);
+      }
+    }
+  }
+
+  &__list-selection-actions {
+    display: flex;
+    gap: base(.25);
+  }
+
+  &__shimmer {
+    margin-top: base(1.75);
+    width: 100%;
+    >div {
+      margin-top: 8px;
+    }
   }
 
   @include mid-break {
@@ -83,5 +126,9 @@
       width: 100%;
       margin-bottom: $baseline;
     }
+  }
+
+  @include small-break {
+    margin-bottom: base(3);
   }
 }

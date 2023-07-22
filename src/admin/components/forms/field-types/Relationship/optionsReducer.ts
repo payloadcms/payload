@@ -1,4 +1,6 @@
-import { Option, Action } from './types';
+import { Option, Action, OptionGroup } from './types';
+import { getTranslation } from '../../../../../utilities/getTranslation';
+import { formatUseAsTitle } from '../../../../hooks/useTitle';
 
 const reduceToIDs = (options) => options.reduce((ids, option) => {
   if (option.options) {
@@ -22,50 +24,39 @@ const sortOptions = (options: Option[]): Option[] => options.sort((a: Option, b:
   return 0;
 });
 
-const optionsReducer = (state: Option[], action: Action): Option[] => {
+const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => {
   switch (action.type) {
     case 'CLEAR': {
       return [];
     }
 
-    case 'ADD': {
-      const { hasMultipleRelations, collection, docs, sort, ids = [] } = action;
+    case 'UPDATE': {
+      const { collection, doc, i18n, config } = action;
       const relation = collection.slug;
+      const newOptions = [...state];
 
-      const labelKey = collection.admin.useAsTitle || 'id';
+      const docTitle = formatUseAsTitle({
+        doc,
+        collection,
+        i18n,
+        config,
+      });
 
-      const loadedIDs = reduceToIDs(state);
+      const foundOptionGroup = newOptions.find((optionGroup) => optionGroup.label === collection.labels.plural);
+      const foundOption = foundOptionGroup?.options?.find((option) => option.value === doc.id);
 
-      if (!hasMultipleRelations) {
-        const options = [
-          ...state,
-          ...docs.reduce((docOptions, doc) => {
-            if (loadedIDs.indexOf(doc.id) === -1) {
-              loadedIDs.push(doc.id);
-              return [
-                ...docOptions,
-                {
-                  label: doc[labelKey] || `Untitled - ID: ${doc.id}`,
-                  value: doc.id,
-                },
-              ];
-            }
-            return docOptions;
-          }, []),
-        ];
-
-        ids.forEach((id) => {
-          if (!loadedIDs.includes(id)) {
-            options.push({
-              label: labelKey === 'id' ? id : `Untitled - ID: ${id}`,
-              value: id,
-            });
-          }
-        });
-
-        return sort ? sortOptions(options) : options;
+      if (foundOption) {
+        foundOption.label = docTitle || `${i18n.t('general:untitled')} - ID: ${doc.id}`;
+        foundOption.relationTo = relation;
       }
 
+      return newOptions;
+    }
+
+    case 'ADD': {
+      const { collection, docs, sort, ids = [], i18n, config } = action;
+      const relation = collection.slug;
+      const loadedIDs = reduceToIDs(state);
       const newOptions = [...state];
       const optionsToAddTo = newOptions.find((optionGroup) => optionGroup.label === collection.labels.plural);
 
@@ -73,10 +64,17 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
         if (loadedIDs.indexOf(doc.id) === -1) {
           loadedIDs.push(doc.id);
 
+          const docTitle = formatUseAsTitle({
+            doc,
+            collection,
+            i18n,
+            config,
+          });
+
           return [
             ...docSubOptions,
             {
-              label: doc[labelKey] || `Untitled - ID: ${doc.id}`,
+              label: docTitle || `${i18n.t('general:untitled')} - ID: ${doc.id}`,
               relationTo: relation,
               value: doc.id,
             },
@@ -89,7 +87,8 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
       ids.forEach((id) => {
         if (!loadedIDs.includes(id)) {
           newSubOptions.push({
-            label: labelKey === 'id' ? id : `Untitled - ID: ${id}`,
+            relationTo: relation,
+            label: `${i18n.t('general:untitled')} - ID: ${id}`,
             value: id,
           });
         }
@@ -104,9 +103,8 @@ const optionsReducer = (state: Option[], action: Action): Option[] => {
         optionsToAddTo.options = sort ? sortOptions(subOptions) : subOptions;
       } else {
         newOptions.push({
-          label: collection.labels.plural,
+          label: getTranslation(collection.labels.plural, i18n),
           options: sort ? sortOptions(newSubOptions) : newSubOptions,
-          value: undefined,
         });
       }
 

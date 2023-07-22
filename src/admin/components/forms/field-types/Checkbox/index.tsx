@@ -1,11 +1,13 @@
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
 import Error from '../../Error';
 import { checkbox } from '../../../../../fields/validations';
-import Check from '../../../icons/Check';
 import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
+import { getTranslation } from '../../../../../utilities/getTranslation';
+import { CheckboxInput } from './Input';
 
 import './index.scss';
 
@@ -30,6 +32,8 @@ const Checkbox: React.FC<Props> = (props) => {
     } = {},
   } = props;
 
+  const { i18n } = useTranslation();
+
   const path = pathFromProps || name;
 
   const memoizedValidate = useCallback((value, options) => {
@@ -47,6 +51,15 @@ const Checkbox: React.FC<Props> = (props) => {
     disableFormData,
     condition,
   });
+
+  const onToggle = useCallback(() => {
+    if (!readOnly) {
+      setValue(!value);
+      if (typeof onChange === 'function') onChange(!value);
+    }
+  }, [onChange, readOnly, setValue, value]);
+
+  const fieldID = `field-${path.replace(/\./gi, '__')}`;
 
   return (
     <div
@@ -69,27 +82,13 @@ const Checkbox: React.FC<Props> = (props) => {
           message={errorMessage}
         />
       </div>
-      <input
-        id={`field-${path.replace(/\./gi, '__')}`}
-        type="checkbox"
+      <CheckboxInput
+        onToggle={onToggle}
+        id={fieldID}
+        label={getTranslation(label || name, i18n)}
         name={path}
         checked={Boolean(value)}
-        readOnly
       />
-      <button
-        type="button"
-        onClick={readOnly ? undefined : () => {
-          setValue(!value);
-          if (typeof onChange === 'function') onChange(!value);
-        }}
-      >
-        <span className={`${baseClass}__input`}>
-          <Check />
-        </span>
-        <span className={`${baseClass}__label`}>
-          {label}
-        </span>
-      </button>
       <FieldDescription
         value={value}
         description={description}

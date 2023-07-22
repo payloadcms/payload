@@ -5,11 +5,11 @@ import Logger from '../utilities/logger';
 import loadConfig from '../config/load';
 import payload from '..';
 
-export function generateGraphQLSchema(): void {
+export async function generateGraphQLSchema(): Promise<void> {
   const logger = Logger();
-  const config = loadConfig();
+  const config = await loadConfig();
 
-  payload.init({
+  await payload.init({
     secret: '--unused--',
     mongoURL: false,
     local: true,

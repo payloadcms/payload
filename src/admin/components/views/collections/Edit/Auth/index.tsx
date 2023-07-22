@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../utilities/Config';
 import Email from '../../../../forms/field-types/Email';
 import Password from '../../../../forms/field-types/Password';
@@ -16,11 +17,12 @@ import './index.scss';
 const baseClass = 'auth-fields';
 
 const Auth: React.FC<Props> = (props) => {
-  const { useAPIKey, requirePassword, verify, collection: { slug }, collection, email, operation } = props;
+  const { useAPIKey, requirePassword, verify, collection: { slug }, collection, email, operation, readOnly } = props;
   const [changingPassword, setChangingPassword] = useState(requirePassword);
   const enableAPIKey = useFormFields(([fields]) => fields.enableAPIKey);
   const dispatchFields = useFormFields((reducer) => reducer[1]);
   const modified = useFormModified();
+  const { t, i18n } = useTranslation('authentication');
 
   const {
     serverURL,
@@ -44,6 +46,7 @@ const Auth: React.FC<Props> = (props) => {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        'Accept-Language': i18n.language,
       },
       body: JSON.stringify({
         email,
@@ -52,11 +55,11 @@ const Auth: React.FC<Props> = (props) => {
     });
 
     if (response.status === 200) {
-      toast.success('Successfully unlocked', { autoClose: 3000 });
+      toast.success(t('successfullyUnlocked'), { autoClose: 3000 });
     } else {
-      toast.error('Successfully unlocked');
+      toast.error(t('failedToUnlock'));
     }
-  }, [serverURL, api, slug, email]);
+  }, [i18n, serverURL, api, slug, email, t]);
 
   useEffect(() => {
     if (!modified) {
@@ -64,71 +67,82 @@ const Auth: React.FC<Props> = (props) => {
     }
   }, [modified]);
 
-  if (collection.auth.disableLocalStrategy) {
+  if (collection.auth.disableLocalStrategy && !collection.auth.useAPIKey) {
     return null;
   }
 
   return (
     <div className={baseClass}>
-      <Email
-        required
-        name="email"
-        label="Email"
-        admin={{ autoComplete: 'email' }}
-      />
-      {(changingPassword || requirePassword) && (
-        <div className={`${baseClass}__changing-password`}>
-          <Password
-            autoComplete="off"
+      {!collection.auth.disableLocalStrategy && (
+        <React.Fragment>
+          <Email
             required
-            name="password"
-            label="New Password"
+            name="email"
+            label={t('general:email')}
+            admin={{ autoComplete: 'email', readOnly }}
           />
-          <ConfirmPassword />
-          {!requirePassword && (
+          {(changingPassword || requirePassword) && (
+            <div className={`${baseClass}__changing-password`}>
+              <Password
+                autoComplete="off"
+                required
+                name="password"
+                label={t('newPassword')}
+                disabled={readOnly}
+              />
+              <ConfirmPassword disabled={readOnly} />
+              {!requirePassword && (
+                <Button
+                  size="small"
+                  buttonStyle="secondary"
+                  onClick={() => handleChangePassword(false)}
+                  disabled={readOnly}
+                >
+                  {t('general:cancel')}
+                </Button>
+              )}
+            </div>
+          )}
+          {(!changingPassword && !requirePassword) && (
+            <Button
+              id="change-password"
+              size="small"
+              buttonStyle="secondary"
+              onClick={() => handleChangePassword(true)}
+              disabled={readOnly}
+            >
+              {t('changePassword')}
+            </Button>
+          )}
+          {operation === 'update' && (
             <Button
               size="small"
               buttonStyle="secondary"
-              onClick={() => handleChangePassword(false)}
+              onClick={() => unlock()}
+              disabled={readOnly}
             >
-              Cancel
+              {t('forceUnlock')}
             </Button>
           )}
-        </div>
-      )}
-      {(!changingPassword && !requirePassword) && (
-        <Button
-          size="small"
-          buttonStyle="secondary"
-          onClick={() => handleChangePassword(true)}
-        >
-          Change Password
-        </Button>
-      )}
-      {operation === 'update' && (
-        <Button
-          size="small"
-          buttonStyle="secondary"
-          onClick={() => unlock()}
-        >
-          Force Unlock
-        </Button>
+        </React.Fragment>
       )}
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
           <Checkbox
-            label="Enable API Key"
+            label={t('enableAPIKey')}
             name="enableAPIKey"
+            admin={{ readOnly }}
           />
           {enableAPIKey?.value && (
-            <APIKey />
+            <APIKey readOnly={readOnly} />
           )}
         </div>
       )}
       {verify && (
         <Checkbox
-          label="Verified"
+          label={t('verified')}
           name="_verified"
+          admin={{ readOnly }}
         />
       )}
     </div>

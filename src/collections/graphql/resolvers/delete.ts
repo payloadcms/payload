@@ -1,10 +1,11 @@
 /* eslint-disable no-param-reassign */
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Response } from 'express';
 import { PayloadRequest } from '../../../express/types';
 import { Collection } from '../../config/types';
-import deleteOperation from '../../operations/delete';
+import deleteByID from '../../operations/deleteByID';
 
-export type Resolver = (
+export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   _: unknown,
   args: {
     locale?: string
@@ -14,9 +15,11 @@ export type Resolver = (
     req: PayloadRequest,
     res: Response
   }
-) => Promise<Document>
+) => Promise<GeneratedTypes['collections'][TSlug]>
 
-export default function getDeleteResolver(collection: Collection): Resolver {
+export default function getDeleteResolver<TSlug extends keyof GeneratedTypes['collections']>(
+  collection: Collection,
+): Resolver<TSlug> {
   async function resolver(_, args, context) {
     if (args.locale) context.req.locale = args.locale;
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
@@ -28,7 +31,7 @@ export default function getDeleteResolver(collection: Collection): Resolver {
       depth: 0,
     };
 
-    const result = await deleteOperation(options);
+    const result = await deleteByID(options);
 
     return result;
   }

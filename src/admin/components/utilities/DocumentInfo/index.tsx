@@ -2,43 +2,55 @@ import React, {
   createContext, useCallback, useContext, useEffect, useState,
 } from 'react';
 import qs from 'qs';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import { useConfig } from '../Config';
 import { PaginatedDocs } from '../../../../mongoose/types';
-import { ContextType, Props, Version } from './types';
+import { ContextType, DocumentPermissions, Props, Version } from './types';
 import { TypeWithID } from '../../../../globals/config/types';
 import { TypeWithTimestamps } from '../../../../collections/config/types';
 import { Where } from '../../../../types';
 import { DocumentPreferences } from '../../../../preferences/types';
 import { usePreferences } from '../Preferences';
+import { useAuth } from '../Auth';
 
 const Context = createContext({} as ContextType);
+
+export const useDocumentInfo = (): ContextType => useContext(Context);
 
 export const DocumentInfoProvider: React.FC<Props> = ({
   children,
   global,
   collection,
-  id,
+  id: idFromProps,
+  idFromParams: getIDFromParams,
 }) => {
+  const { id: idFromParams } = useParams<{id: string}>();
+  const id = idFromProps || (getIDFromParams ? idFromParams : null);
+
   const { serverURL, routes: { api } } = useConfig();
-  const { getPreference } = usePreferences();
+  const { getPreference, setPreference } = usePreferences();
+  const { i18n } = useTranslation();
+  const { permissions } = useAuth();
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null);
   const [versions, setVersions] = useState<PaginatedDocs<Version>>(null);
   const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version>>(null);
+  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null);
 
   const baseURL = `${serverURL}${api}`;
-  let slug;
-  let type;
-  let preferencesKey;
+  let slug: string;
+  let pluralType: 'globals' | 'collections';
+  let preferencesKey: string;
 
   if (global) {
     slug = global.slug;
-    type = 'global';
+    pluralType = 'globals';
     preferencesKey = `global-${slug}`;
   }
 
   if (collection) {
     slug = collection.slug;
-    type = 'collection';
+    pluralType = 'collections';
 
     if (id) {
       preferencesKey = `collection-${slug}-${id}`;
@@ -48,6 +60,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const getVersions = useCallback(async () => {
     let versionFetchURL;
     let publishedFetchURL;
+    let draftsEnabled = false;
     let shouldFetchVersions = false;
     let unpublishedVersionJSON = null;
     let versionJSON = null;
@@ -83,12 +96,14 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     };
 
     if (global) {
+      draftsEnabled = Boolean(global?.versions?.drafts);
       shouldFetchVersions = Boolean(global?.versions);
       versionFetchURL = `${baseURL}/globals/${global.slug}/versions`;
       publishedFetchURL = `${baseURL}/globals/${global.slug}?${qs.stringify(publishedVersionParams)}`;
     }
 
     if (collection) {
+      draftsEnabled = Boolean(collection?.versions?.drafts);
       shouldFetchVersions = Boolean(collection?.versions);
       versionFetchURL = `${baseURL}/${collection.slug}/versions`;
 
@@ -112,14 +127,28 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
 
     if (shouldFetch) {
-      let publishedJSON = await fetch(publishedFetchURL, { credentials: 'include' }).then((res) => res.json());
+      let publishedJSON;
 
-      if (collection) {
-        publishedJSON = publishedJSON?.docs?.[0];
+      if (draftsEnabled) {
+        publishedJSON = await fetch(publishedFetchURL, {
+          credentials: 'include',
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        }).then((res) => res.json());
+
+        if (collection) {
+          publishedJSON = publishedJSON?.docs?.[0];
+        }
       }
 
       if (shouldFetchVersions) {
-        versionJSON = await fetch(`${versionFetchURL}?${qs.stringify(versionParams)}`, { credentials: 'include' }).then((res) => res.json());
+        versionJSON = await fetch(`${versionFetchURL}?${qs.stringify(versionParams)}`, {
+          credentials: 'include',
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        }).then((res) => res.json());
 
         if (publishedJSON?.updatedAt) {
           const newerVersionParams = {
@@ -138,7 +167,12 @@ export const DocumentInfoProvider: React.FC<Props> = ({
           };
 
           // Get any newer versions available
-          const newerVersionRes = await fetch(`${versionFetchURL}?${qs.stringify(newerVersionParams)}`, { credentials: 'include' });
+          const newerVersionRes = await fetch(`${versionFetchURL}?${qs.stringify(newerVersionParams)}`, {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+          });
 
           if (newerVersionRes.status === 200) {
             unpublishedVersionJSON = await newerVersionRes.json();
@@ -150,23 +184,63 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       setVersions(versionJSON);
       setUnpublishedVersions(unpublishedVersionJSON);
     }
-  }, [global, collection, id, baseURL]);
+  }, [i18n, global, collection, id, baseURL]);
+
+  const getDocPermissions = React.useCallback(async () => {
+    let docAccessURL: string;
+    if (pluralType === 'globals') {
+      docAccessURL = `/globals/${slug}/access`;
+    } else if (pluralType === 'collections' && id) {
+      docAccessURL = `/${slug}/access/${id}`;
+    }
+
+    if (docAccessURL) {
+      const res = await fetch(`${serverURL}${api}${docAccessURL}`, {
+        credentials: 'include',
+        headers: {
+          'Accept-Language': i18n.language,
+        },
+      });
+      const json = await res.json();
+      setDocPermissions(json);
+    } else {
+      // fallback to permissions from the entity type
+      // (i.e. create has no id)
+      setDocPermissions(permissions[pluralType][slug]);
+    }
+  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language]);
+
+  const getDocPreferences = useCallback(async () => {
+    return getPreference<DocumentPreferences>(preferencesKey);
+  }, [getPreference, preferencesKey]);
+
+  const setDocFieldPreferences = useCallback<ContextType['setDocFieldPreferences']>(async (path, fieldPreferences) => {
+    const allPreferences = await getDocPreferences();
+
+    if (preferencesKey) {
+      setPreference(preferencesKey, {
+        ...allPreferences,
+        fields: {
+          ...(allPreferences?.fields || {}),
+          [path]: {
+            ...allPreferences?.fields?.[path],
+            ...fieldPreferences,
+          },
+        },
+      });
+    }
+  }, [setPreference, preferencesKey, getDocPreferences]);
 
   useEffect(() => {
     getVersions();
   }, [getVersions]);
 
   useEffect(() => {
-    const getDocPreferences = async () => {
-      await getPreference<DocumentPreferences>(preferencesKey);
-    };
+    getDocPermissions();
+  }, [getDocPermissions]);
 
-    getDocPreferences();
-  }, [getPreference, preferencesKey]);
-
-  const value = {
+  const value: ContextType = {
     slug,
-    type,
     preferencesKey,
     global,
     collection,
@@ -175,6 +249,10 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     getVersions,
     publishedDoc,
     id,
+    getDocPermissions,
+    docPermissions,
+    setDocFieldPreferences,
+    getDocPreferences,
   };
 
   return (
@@ -183,7 +261,3 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     </Context.Provider>
   );
 };
-
-export const useDocumentInfo = (): ContextType => useContext(Context);
-
-export default Context;

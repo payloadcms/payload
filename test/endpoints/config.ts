@@ -1,6 +1,6 @@
 import express, { Response } from 'express';
 import { devUser } from '../credentials';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { openAccess } from '../helpers/configHelpers';
 import { PayloadRequest } from '../../src/express/types';
 import { Config } from '../../src/config/types';
@@ -87,6 +87,13 @@ const MyConfig: Config = {
       },
     },
     {
+      path: `/${applicationEndpoint}/i18n`,
+      method: 'get',
+      handler: (req: PayloadRequest, res: Response): void => {
+        res.json({ message: req.t('general:backToDashboard') });
+      },
+    },
+    {
       path: `/${rootEndpoint}`,
       method: 'get',
       root: true,
@@ -102,7 +109,7 @@ const MyConfig: Config = {
         express.json({ type: 'application/json' }),
         (req: PayloadRequest, res: Response): void => {
           res.json(req.body);
-        }
+        },
       ],
     },
   ],
@@ -115,6 +122,6 @@ const MyConfig: Config = {
       },
     });
   },
-}
+};
 
-export default buildConfig(MyConfig);
+export default buildConfigWithDefaults(MyConfig);

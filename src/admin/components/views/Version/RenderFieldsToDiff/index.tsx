@@ -1,5 +1,5 @@
 import React from 'react';
-import { DiffMethod } from 'react-diff-viewer';
+import { DiffMethod } from 'react-diff-viewer-continued';
 import { Props } from './types';
 import { fieldAffectsData, fieldHasSubFields } from '../../../../../fields/config/types';
 import Nested from './fields/Nested';
@@ -26,8 +26,9 @@ const RenderFieldsToDiff: React.FC<Props> = ({
 
       if (Component) {
         if (fieldAffectsData(field)) {
-          const versionValue = version?.[field.name];
-          const comparisonValue = comparison?.[field.name];
+          const valueIsObject = field.type === 'code' || field.type === 'json';
+          const versionValue = valueIsObject ? JSON.stringify(version?.[field.name]) : version?.[field.name];
+          const comparisonValue = valueIsObject ? JSON.stringify(comparison?.[field.name]) : comparison?.[field.name];
           const hasPermission = fieldPermissions?.[field.name]?.read?.permission;
           const subFieldPermissions = fieldPermissions?.[field.name]?.fields;
 

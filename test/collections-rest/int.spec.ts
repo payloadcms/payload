@@ -2,10 +2,10 @@ import mongoose from 'mongoose';
 import { randomBytes } from 'crypto';
 import { initPayloadTest } from '../helpers/configHelpers';
 import type { Relation } from './config';
-import config, { customIdNumberSlug, customIdSlug, slug, relationSlug, pointSlug } from './config';
+import config, { customIdNumberSlug, customIdSlug, errorOnHookSlug, pointSlug, relationSlug, slug } from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
-import type { Post } from './payload-types';
+import type { ErrorOnHook, Post } from './payload-types';
 import { mapAsync } from '../../src/utilities/mapAsync';
 
 let client: RESTClient;
@@ -13,7 +13,7 @@ let client: RESTClient;
 describe('collections-rest', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
-    client = new RESTClient(config, { serverURL, defaultSlug: slug });
+    client = new RESTClient(await config, { serverURL, defaultSlug: slug });
   });
 
   afterAll(async () => {
@@ -48,11 +48,47 @@ describe('collections-rest', () => {
       expect(result.docs).toEqual(expect.arrayContaining(expectedDocs));
     });
 
+    it('should find where id', async () => {
+      const post1 = await createPost();
+      await createPost();
+      const { status, result } = await client.find<Post>({
+        query: {
+          id: { equals: post1.id },
+        },
+      });
+
+      expect(status).toEqual(200);
+      expect(result.totalDocs).toEqual(1);
+      expect(result.docs[0].id).toEqual(post1.id);
+    });
+
+    it('should find with pagination false', async () => {
+      const post1 = await createPost();
+      const post2 = await createPost();
+
+      const { docs, totalDocs } = await payload.find({
+        collection: slug,
+        pagination: false,
+      });
+
+      const expectedDocs = [post1, post2];
+      expect(docs).toHaveLength(expectedDocs.length);
+      expect(docs).toEqual(expect.arrayContaining(expectedDocs));
+
+      expect(totalDocs).toEqual(2);
+    });
+
     it('should update existing', async () => {
-      const { id, description } = await createPost({ description: 'desc' });
+      const {
+        id,
+        description,
+      } = await createPost({ description: 'desc' });
       const updatedTitle = 'updated-title';
 
-      const { status, doc: updated } = await client.update<Post>({
+      const {
+        status,
+        doc: updated,
+      } = await client.update<Post>({
         id,
         data: { title: updatedTitle },
       });
@@ -60,6 +96,180 @@ describe('collections-rest', () => {
       expect(status).toEqual(200);
       expect(updated.title).toEqual(updatedTitle);
       expect(updated.description).toEqual(description); // Check was not modified
+    });
+
+    describe('Bulk operations', () => {
+      it('should bulk update', async () => {
+        await mapAsync([...Array(11)], async (_, i) => {
+          await createPost({ description: `desc ${i}` });
+        });
+
+        const description = 'updated';
+        const {
+          status,
+          docs,
+        } = await client.updateMany<Post>({
+          where: { title: { equals: 'title' } },
+          data: { description },
+        });
+
+        expect(status).toEqual(200);
+        expect(docs[0].title).toEqual('title'); // Check was not modified
+        expect(docs[0].description).toEqual(description);
+        expect(docs.pop().description).toEqual(description);
+      });
+
+      it('should not bulk update with a bad query', async () => {
+        await mapAsync([...Array(2)], async (_, i) => {
+          await createPost({ description: `desc ${i}` });
+        });
+
+        const description = 'updated';
+
+        const { status, docs: noDocs, errors } = await client.updateMany<Post>({
+          where: { missing: { equals: 'title' } },
+          data: { description },
+        });
+
+        expect(status).toEqual(400);
+        expect(noDocs).toBeUndefined();
+        expect(errors).toHaveLength(1);
+
+        const { docs } = await payload.find({
+          collection: slug,
+        });
+
+        expect(docs[0].description).not.toEqual(description);
+        expect(docs.pop().description).not.toEqual(description);
+      });
+
+      it('should not bulk update with a bad relationship query', async () => {
+        await mapAsync([...Array(2)], async (_, i) => {
+          await createPost({ description: `desc ${i}` });
+        });
+
+        const description = 'updated';
+        const { status: relationFieldStatus, docs: relationFieldDocs, errors: relationFieldErrors } = await client.updateMany<Post>({
+          where: { 'relationField.missing': { equals: 'title' } },
+          data: { description },
+        });
+
+        const { status: relationMultiRelationToStatus } = await client.updateMany<Post>({
+          where: { 'relationMultiRelationTo.missing': { equals: 'title' } },
+          data: { description },
+        });
+
+        const { docs } = await payload.find({
+          collection: slug,
+        });
+
+        expect(relationFieldStatus).toEqual(400);
+        expect(relationMultiRelationToStatus).toEqual(400);
+        expect(docs[0].description).not.toEqual(description);
+        expect(docs.pop().description).not.toEqual(description);
+      });
+
+      it('should not bulk update with a read restricted field query', async () => {
+        const { id } = await payload.create({
+          collection: slug,
+          data: {
+            restrictedField: 'restricted',
+          },
+        });
+
+        const description = 'description';
+        const result = await client.updateMany({
+          where: { restrictedField: { equals: 'restricted' } },
+          data: { description },
+        });
+
+        const doc = await payload.findByID({
+          collection: slug,
+          id,
+        });
+
+        expect(result.status).toEqual(400);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].message).toEqual('The following path cannot be queried: restrictedField');
+        expect(doc.description).toBeUndefined();
+      });
+
+      it('should return formatted errors for bulk updates', async () => {
+        const text = 'bulk-update-test-errors';
+        const errorDoc = await payload.create({
+          collection: errorOnHookSlug,
+          data: {
+            text,
+            errorBeforeChange: true,
+          },
+        });
+        const successDoc = await payload.create({
+          collection: errorOnHookSlug,
+          data: {
+            text,
+            errorBeforeChange: false,
+          },
+        });
+
+        const update = 'update';
+
+        const result = await client.updateMany<ErrorOnHook>({
+          slug: errorOnHookSlug,
+          where: { text: { equals: text } },
+          data: { text: update },
+        });
+
+        expect(result.status).toEqual(400);
+        expect(result.docs).toHaveLength(1);
+        expect(result.docs[0].id).toEqual(successDoc.id);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].message).toBeDefined();
+        expect(result.errors[0].id).toEqual(errorDoc.id);
+        expect(result.docs[0].text).toEqual(update);
+      });
+
+      it('should bulk delete', async () => {
+        const count = 11;
+        await mapAsync([...Array(count)], async (_, i) => {
+          await createPost({ description: `desc ${i}` });
+        });
+
+        const { status, docs } = await client.deleteMany<Post>({
+          where: { title: { eq: 'title' } },
+        });
+
+        expect(status).toEqual(200);
+        expect(docs[0].title).toEqual('title'); // Check was not modified
+        expect(docs).toHaveLength(count);
+      });
+
+      it('should return formatted errors for bulk deletes', async () => {
+        await payload.create({
+          collection: errorOnHookSlug,
+          data: {
+            text: 'test',
+            errorAfterDelete: true,
+          },
+        });
+        await payload.create({
+          collection: errorOnHookSlug,
+          data: {
+            text: 'test',
+            errorAfterDelete: false,
+          },
+        });
+
+        const result = await client.deleteMany({
+          slug: errorOnHookSlug,
+          where: { text: { equals: 'test' } },
+        });
+
+        expect(result.status).toEqual(400);
+        expect(result.docs).toHaveLength(1);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0].message).toBeDefined();
+        expect(result.errors[0].id).toBeDefined();
+      });
     });
 
     describe('Custom ID', () => {
@@ -78,6 +288,14 @@ describe('collections-rest', () => {
           const { doc: foundDoc } = await client.findByID({ slug: customIdSlug, id: customId });
 
           expect(foundDoc.id).toEqual(doc.id);
+        });
+
+        it('should query', async () => {
+          const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`;
+          const { doc } = await client.create({ slug: customIdSlug, data: { id: customId, name: 'custom-id-name' } });
+          const { result } = await client.find({ slug: customIdSlug, query: { id: { like: 'custom' } } });
+
+          expect(result.docs.map(({ id }) => id)).toContain(doc.id);
         });
 
         it('should update', async () => {
@@ -107,6 +325,22 @@ describe('collections-rest', () => {
           const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, name: 'custom-id-number-name' } });
           const { doc: updatedDoc } = await client.update({ slug: customIdNumberSlug, id: doc.id, data: { name: 'updated' } });
           expect(updatedDoc.name).toEqual('updated');
+        });
+
+        it('should allow querying by in', async () => {
+          const id = 98234698237;
+          await client.create({ slug: customIdNumberSlug, data: { id, name: 'query using in operator' } });
+
+          const { result: { docs } } = await client.find({
+            slug: customIdNumberSlug,
+            query: {
+              id: {
+                in: `${id}, ${2349856723948764}`,
+              },
+            },
+          });
+
+          expect(docs).toHaveLength(1);
         });
       });
     });
@@ -247,8 +481,6 @@ describe('collections-rest', () => {
           expect(result.docs).toEqual([post1]);
           expect(result.totalDocs).toEqual(1);
         });
-
-        it.todo('nested by property value');
       });
 
       describe('relationTo multi hasMany', () => {
@@ -288,6 +520,24 @@ describe('collections-rest', () => {
         });
 
         it.todo('nested by property value');
+      });
+    });
+
+    describe('Edge cases', () => {
+      it('should query a localized field without localization configured', async () => {
+        const test = 'test';
+        await createPost({ fakeLocalization: test });
+
+        const { status, result } = await client.find({
+          query: {
+            fakeLocalization: {
+              equals: test,
+            },
+          },
+        });
+
+        expect(status).toEqual(200);
+        expect(result.docs).toHaveLength(1);
       });
     });
 
@@ -373,6 +623,31 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1);
       });
 
+
+      describe('like - special characters', () => {
+        const specialCharacters = '~!@#$%^&*()_+-+[]{}|;:"<>,.?/})';
+
+        it.each(specialCharacters.split(''))('like - special characters - %s', async (character) => {
+          const post1 = await createPost({
+            title: specialCharacters,
+          });
+
+          const query = {
+            query: {
+              title: {
+                like: character,
+              },
+            },
+          };
+
+          const { status, result } = await client.find<Post>(query);
+
+          expect(status).toEqual(200);
+          expect(result.docs).toEqual([post1]);
+          expect(result.totalDocs).toEqual(1);
+        });
+      });
+
       it('like - cyrillic characters', async () => {
         const post1 = await createPost({ title: 'Тест' });
 
@@ -380,6 +655,22 @@ describe('collections-rest', () => {
           query: {
             title: {
               like: 'Тест',
+            },
+          },
+        });
+
+        expect(status).toEqual(200);
+        expect(result.docs).toEqual([post1]);
+        expect(result.totalDocs).toEqual(1);
+      });
+
+      it('like - cyrillic characters in multiple words', async () => {
+        const post1 = await createPost({ title: 'привет, это тест полезной нагрузки' });
+
+        const { status, result } = await client.find<Post>({
+          query: {
+            title: {
+              like: 'привет нагрузки',
             },
           },
         });
@@ -538,6 +829,38 @@ describe('collections-rest', () => {
           expect(status).toEqual(200);
           expect(result.docs).toHaveLength(0);
         });
+
+        it('should sort find results by nearest distance', async () => {
+          // creating twice as many records as we are querying to get a random sample
+          await mapAsync([...Array(10)], async () => {
+            // setTimeout used to randomize the creation timestamp
+            setTimeout(async () => {
+              await payload.create({
+                collection: pointSlug,
+                data: {
+                  // only randomize longitude to make distance comparison easy
+                  point: [Math.random(), 0],
+                },
+              });
+            }, Math.random());
+          });
+
+          const { result } = await client.find({
+            slug: pointSlug,
+            query: {
+              // querying large enough range to include all docs
+              point: { near: '0, 0, 100000, 0' },
+            },
+            limit: 5,
+          });
+          const { docs } = result;
+          let previous = 0;
+          docs.forEach((({ point: coordinates }) => {
+            // the next document point should always be greater than the one before
+            expect(previous).toBeLessThanOrEqual(coordinates[0]);
+            [previous] = coordinates;
+          }));
+        });
       });
 
       it('or', async () => {
@@ -622,6 +945,55 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1);
         expect(result.docs).toEqual([post1]);
       });
+
+      describe('limit', () => {
+        beforeEach(async () => {
+          await mapAsync([...Array(50)], async (_, i) => createPost({ title: 'limit-test', number: i }));
+        });
+
+        it('should query a limited set of docs', async () => {
+          const { status, result } = await client.find<Post>({
+            limit: 15,
+            query: {
+              title: {
+                equals: 'limit-test',
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toHaveLength(15);
+        });
+
+        it('should query all docs when limit=0', async () => {
+          const { status, result } = await client.find<Post>({
+            limit: 0,
+            query: {
+              title: {
+                equals: 'limit-test',
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.totalDocs).toEqual(50);
+        });
+      });
+
+      it('can query deeply nested fields within rows, tabs, collapsibles', async () => {
+        const withDeeplyNestedField = await createPost({ D1: { D2: { D3: { D4: 'nested message' } } } });
+
+        const { result } = await client.find<Post>({
+          query: {
+            'D1.D2.D3.D4': {
+              equals: 'nested message',
+            },
+          },
+        });
+
+        expect(result.totalDocs).toEqual(1);
+        expect(result.docs).toEqual([withDeeplyNestedField]);
+      });
     });
   });
 });
@@ -638,7 +1010,7 @@ async function createPosts(count: number) {
 }
 
 async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find<Post>({ collection: slug, limit: 100 });
+  const allDocs = await payload.find({ collection: slug, limit: 100 });
   const ids = allDocs.docs.map((doc) => doc.id);
   await mapAsync(ids, async (id) => {
     await payload.delete({ collection: slug, id });

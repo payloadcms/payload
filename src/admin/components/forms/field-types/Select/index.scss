@@ -4,3 +4,23 @@
   position: relative;
   margin-bottom: $baseline;
 }
+
+html[data-theme=light] {
+  .field-type.select{
+    &.error {
+      .rs__control {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .field-type.select {
+    &.error {
+      .rs__control {
+        @include darkInputError;
+      }
+    }
+  }
+}

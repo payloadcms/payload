@@ -1,13 +1,16 @@
 import path from 'path';
 import { mapAsync } from '../../src/utilities/mapAsync';
 import { devUser } from '../credentials';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import AfterDashboard from './components/AfterDashboard';
 import CustomMinimalRoute from './components/views/CustomMinimal';
 import CustomDefaultRoute from './components/views/CustomDefault';
 import BeforeLogin from './components/BeforeLogin';
 import AfterNavLinks from './components/AfterNavLinks';
-import { slug, globalSlug } from './shared';
+import { globalSlug, slug } from './shared';
+import Logout from './components/Logout';
+import DemoUIFieldField from './components/DemoUIField/Field';
+import DemoUIFieldCell from './components/DemoUIField/Cell';
 
 export interface Post {
   id: string;
@@ -17,7 +20,7 @@ export interface Post {
   updatedAt: Date;
 }
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   admin: {
     css: path.resolve(__dirname, 'styles.scss'),
     components: {
@@ -38,12 +41,24 @@ export default buildConfig({
       beforeLogin: [
         BeforeLogin,
       ],
+      logout: {
+        Button: Logout,
+      },
       afterNavLinks: [
         AfterNavLinks,
       ],
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
+      },
+    },
+  },
+  i18n: {
+    resources: {
+      en: {
+        general: {
+          dashboard: 'Home',
+        },
       },
     },
   },
@@ -54,14 +69,43 @@ export default buildConfig({
       fields: [],
     },
     {
-      slug,
+      slug: 'hidden-collection',
       admin: {
-        listSearchableFields: ['title', 'description', 'number'],
-        group: 'One',
+        hidden: () => true,
       },
       fields: [
         {
           name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug,
+      labels: {
+        singular: {
+          en: 'Post en',
+          es: 'Post es',
+        },
+        plural: {
+          en: 'Posts en',
+          es: 'Posts es',
+        },
+      },
+      admin: {
+        description: { en: 'Description en', es: 'Description es' },
+        listSearchableFields: ['title', 'description', 'number'],
+        group: { en: 'One', es: 'Una' },
+        useAsTitle: 'title',
+        defaultColumns: ['id', 'number', 'title', 'description', 'demoUIField'],
+      },
+      fields: [
+        {
+          name: 'title',
+          label: {
+            en: 'Title en',
+            es: 'Title es',
+          },
           type: 'text',
         },
         {
@@ -72,12 +116,32 @@ export default buildConfig({
           name: 'number',
           type: 'number',
         },
+        {
+          name: 'richText',
+          type: 'richText',
+          admin: {
+            elements: [
+              'relationship',
+            ],
+          },
+        },
+        {
+          type: 'ui',
+          name: 'demoUIField',
+          label: { en: 'Demo UI Field', de: 'Demo UI Field de' },
+          admin: {
+            components: {
+              Field: DemoUIFieldField,
+              Cell: DemoUIFieldCell,
+            },
+          },
+        },
       ],
     },
     {
       slug: 'group-one-collection-ones',
       admin: {
-        group: 'One',
+        group: { en: 'One', es: 'Una' },
       },
       fields: [
         {
@@ -89,7 +153,7 @@ export default buildConfig({
     {
       slug: 'group-one-collection-twos',
       admin: {
-        group: 'One',
+        group: { en: 'One', es: 'Una' },
       },
       fields: [
         {
@@ -125,7 +189,23 @@ export default buildConfig({
   ],
   globals: [
     {
+      slug: 'hidden-global',
+      admin: {
+        hidden: () => true,
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
       slug: globalSlug,
+      label: {
+        en: 'Global en',
+        es: 'Global es',
+      },
       admin: {
         group: 'Group',
       },

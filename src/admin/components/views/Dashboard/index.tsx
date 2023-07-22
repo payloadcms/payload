@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import { useStepNav } from '../../elements/StepNav';
@@ -6,7 +6,7 @@ import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultDashboard from './Default';
 
 const Dashboard: React.FC = () => {
-  const { permissions } = useAuth();
+  const { permissions, user } = useAuth();
   const { setStepNav } = useStepNav();
   const [filteredGlobals, setFilteredGlobals] = useState([]);
 
@@ -42,6 +42,7 @@ const Dashboard: React.FC = () => {
         globals: filteredGlobals,
         collections: collections.filter((collection) => permissions?.collections?.[collection.slug]?.read?.permission),
         permissions,
+        user,
       }}
     />
   );

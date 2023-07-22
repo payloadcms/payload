@@ -11,11 +11,15 @@ const beforeDuplicate: BeforeDuplicate<IndexedField> = ({ data }) => {
     },
     collapsibleTextUnique: data.collapsibleTextUnique ? `${data.collapsibleTextUnique}-copy` : '',
     collapsibleLocalizedUnique: data.collapsibleLocalizedUnique ? `${data.collapsibleLocalizedUnique}-copy` : '',
+    partOne: data.partOne ? `${data.partOne}-copy` : '',
+    partTwo: data.partTwo ? `${data.partTwo}-copy` : '',
   };
 };
 
 const IndexedFields: CollectionConfig = {
   slug: 'indexed-fields',
+  // used to assert that versions also get indexes
+  versions: true,
   admin: {
     hooks: {
       beforeDuplicate,
@@ -70,6 +74,20 @@ const IndexedFields: CollectionConfig = {
           unique: true,
         },
       ],
+    },
+    {
+      name: 'partOne',
+      type: 'text',
+    },
+    {
+      name: 'partTwo',
+      type: 'text',
+    },
+  ],
+  indexes: [
+    {
+      fields: { partOne: 1, partTwo: 1 },
+      options: { unique: true, name: 'compound-index', sparse: true },
     },
   ],
 };

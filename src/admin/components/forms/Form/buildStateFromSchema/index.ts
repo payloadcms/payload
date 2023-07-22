@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next';
 import { User } from '../../../../../auth';
 import { Field as FieldSchema } from '../../../../../fields/config/types';
 import { Fields, Data } from '../types';
@@ -11,6 +12,10 @@ type Args = {
   id?: string | number,
   operation?: 'create' | 'update'
   locale: string
+  t: TFunction
+  preferences: {
+    [key: string]: unknown
+  }
 }
 
 const buildStateFromSchema = async (args: Args): Promise<Fields> => {
@@ -21,13 +26,14 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
     id,
     operation,
     locale,
+    t,
+    preferences,
   } = args;
 
   if (fieldSchema) {
-    const fieldPromises = [];
     const state: Fields = {};
 
-    iterateFields({
+    await iterateFields({
       state,
       fields: fieldSchema,
       id,
@@ -35,13 +41,12 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
       operation,
       path: '',
       user,
-      fieldPromises,
       data: fullData,
       fullData,
       parentPassesCondition: true,
+      t,
+      preferences,
     });
-
-    await Promise.all(fieldPromises);
 
     return state;
   }

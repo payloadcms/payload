@@ -13,6 +13,7 @@ export const defaults: Config = {
   csrf: [],
   cors: [],
   admin: {
+    buildPath: path.resolve(process.cwd(), './build'),
     meta: {
       titleSuffix: '- Payload',
     },
@@ -20,6 +21,8 @@ export const defaults: Config = {
     indexHTML: path.resolve(__dirname, '../admin/index.html'),
     avatar: 'default',
     components: {},
+    logoutRoute: '/logout',
+    inactivityRoute: '/logout-inactivity',
     css: path.resolve(__dirname, '../admin/scss/custom.css'),
     dateFormat: 'MMMM do yyyy, h:mm a',
   },
@@ -52,4 +55,5 @@ export const defaults: Config = {
   hooks: {},
   localization: false,
   telemetry: true,
+  custom: {},
 };

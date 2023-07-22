@@ -4,6 +4,7 @@ import { PayloadRequest } from '../../express/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { Document } from '../../types';
 import findOne from '../operations/findOne';
+import { isNumber } from '../../utilities/isNumber';
 
 export type FindOneGlobalResult = Promise<Response<Document> | void>;
 export type FindOneGlobalResponse = (req: PayloadRequest, res: Response, next: NextFunction) => FindOneGlobalResult;
@@ -17,7 +18,7 @@ export default function findOneHandler(globalConfig: SanitizedGlobalConfig): Fin
         req,
         globalConfig,
         slug,
-        depth: Number(req.query.depth),
+        depth: isNumber(req.query?.depth) ? Number(req.query.depth) : undefined,
         draft: req.query.draft === 'true',
       });
 

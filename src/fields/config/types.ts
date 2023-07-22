@@ -1,13 +1,17 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
+import type { TFunction, i18n as Ii18n } from 'i18next';
+import type { EditorProps } from '@monaco-editor/react';
 import { Operation, Where } from '../../types';
+import { SanitizedConfig } from '../../config/types';
 import { TypeWithID } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 import { User } from '../../auth';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
+import { RowLabel } from '../../admin/components/forms/RowLabel/types';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
@@ -41,17 +45,17 @@ export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
   doc?: T
 }) => Promise<boolean> | boolean;
 
-export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>) => boolean;
+export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>, { user }: { user: User }) => boolean;
 
-export type FilterOptionsProps = {
+export type FilterOptionsProps<T = any> = {
   id: string | number,
   user: Partial<User>,
-  data: unknown,
+  data: T,
   siblingData: unknown,
-  relationTo: string | string[],
+  relationTo: string,
 }
 
-export type FilterOptions = Where | ((options: FilterOptionsProps) => Where);
+export type FilterOptions<T = any> = Where | ((options: FilterOptionsProps<T>) => Where);
 
 type Admin = {
   position?: 'sidebar';
@@ -67,27 +71,29 @@ type Admin = {
     Cell?: React.ComponentType<any>;
     Field?: React.ComponentType<any>;
   }
+  disableBulkEdit?: boolean
   hidden?: boolean
 }
 
 export type Labels = {
-  singular: string;
-  plural: string;
+  singular: Record<string, string> | string;
+  plural: Record<string, string> | string;
 };
 
-export type ValidateOptions<T, S, F> = {
-  data: Partial<T>
-  siblingData: Partial<S>
+export type ValidateOptions<TData, TSiblingData, TFieldConfig> = {
+  data: Partial<TData>
+  siblingData: Partial<TSiblingData>
   id?: string | number
   user?: Partial<User>
   operation?: Operation
   payload?: Payload
-} & F;
+  t: TFunction
+} & TFieldConfig;
 
-export type Validate<T = any, S = any, F = any> = (value?: T, options?: ValidateOptions<F, S, Partial<F>>) => string | true | Promise<string | true>;
+export type Validate<TValue = any, TData = any, TSiblingData = any, TFieldConfig = any> = (value: TValue, options: ValidateOptions<TData, TSiblingData, TFieldConfig>) => string | true | Promise<string | true>;
 
 export type OptionObject = {
-  label: string
+  label: Record<string, string> | string
   value: string
 }
 
@@ -95,7 +101,7 @@ export type Option = OptionObject | string
 
 export interface FieldBase {
   name: string;
-  label?: string | false;
+  label?: Record<string, string> | string | false;
   required?: boolean;
   unique?: boolean;
   index?: boolean;
@@ -116,25 +122,47 @@ export interface FieldBase {
     read?: FieldAccess;
     update?: FieldAccess;
   };
+  /** Extension point to add your custom data. */
+  custom?: Record<string, any>;
 }
 
 export type NumberField = FieldBase & {
   type: 'number';
   admin?: Admin & {
+    /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
-    placeholder?: string
+    /** Set this property to define a placeholder string for the field. */
+    placeholder?: Record<string, string> | string
+    /** Set a value for the number field to increment / decrement using browser controls. */
     step?: number
   }
+  /** Minimum value accepted. Used in the default `validation` function. */
   min?: number
+  /** Maximum value accepted. Used in the default `validation` function. */
   max?: number
-}
+} & ({
+  /** Makes this field an ordered array of numbers instead of just a single number. */
+  hasMany: true
+  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+  minRows?: number
+  /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
+  maxRows?: number
+} | {
+  /** Makes this field an ordered array of numbers instead of just a single number. */
+  hasMany?: false | undefined
+  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+  minRows?: undefined
+  /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
+  maxRows?: undefined
+})
+
 
 export type TextField = FieldBase & {
   type: 'text';
   maxLength?: number
   minLength?: number
   admin?: Admin & {
-    placeholder?: string
+    placeholder?: Record<string, string> | string
     autoComplete?: string
   }
 }
@@ -142,7 +170,7 @@ export type TextField = FieldBase & {
 export type EmailField = FieldBase & {
   type: 'email';
   admin?: Admin & {
-    placeholder?: string
+    placeholder?: Record<string, string> | string
     autoComplete?: string
   }
 }
@@ -152,7 +180,7 @@ export type TextareaField = FieldBase & {
   maxLength?: number
   minLength?: number
   admin?: Admin & {
-    placeholder?: string
+    placeholder?: Record<string, string> | string
     rows?: number
   }
 }
@@ -164,30 +192,37 @@ export type CheckboxField = FieldBase & {
 export type DateField = FieldBase & {
   type: 'date';
   admin?: Admin & {
-    placeholder?: string
+    placeholder?: Record<string, string> | string
     date?: ConditionalDateProps
   }
 }
 
-export type GroupField = FieldBase & {
+export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
   type: 'group';
   fields: Field[];
   admin?: Admin & {
     hideGutter?: boolean
   }
+  /** Customize generated GraphQL and Typescript schema names.
+   * By default it is bound to the collection.
+   *
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
+   */
+  interfaceName?: string
 }
 
 export type RowAdmin = Omit<Admin, 'description'>;
 
-export type RowField = Omit<FieldBase, 'admin' | 'name'> & {
+export type RowField = Omit<FieldBase, 'admin' | 'name' | 'label'> & {
   admin?: RowAdmin;
   type: 'row';
   fields: Field[];
 }
 
-export type CollapsibleField = Omit<FieldBase, 'name'> & {
+export type CollapsibleField = Omit<FieldBase, 'name' | 'label'> & {
   type: 'collapsible';
-  label: string
+  label: RowLabel
   fields: Field[];
   admin?: Admin & {
     initCollapsed?: boolean | false;
@@ -196,16 +231,26 @@ export type CollapsibleField = Omit<FieldBase, 'name'> & {
 
 export type TabsAdmin = Omit<Admin, 'description'>;
 
-type TabBase = {
+type TabBase = Omit<FieldBase, 'required' | 'validation'> & {
   fields: Field[]
   description?: Description
+  interfaceName?: string
 }
 
-export type NamedTab = TabBase & FieldBase
+export type NamedTab = TabBase & {
+  /** Customize generated GraphQL and Typescript schema names.
+   * The slug is used by default.
+   *
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
+   */
+  interfaceName?: string
+}
 
-export type UnnamedTab = TabBase & Omit<FieldBase, 'name'> & {
-  label: string
+export type UnnamedTab = Omit<TabBase, 'name'> & {
+  label: Record<string, string> | string
   localized?: never
+  interfaceName?: never
 }
 
 export type Tab = NamedTab | UnnamedTab
@@ -223,11 +268,12 @@ export type TabAsField = Tab & {
 
 export type UIField = {
   name: string
-  label?: string
+  label?: Record<string, string> | string
   admin: {
     position?: string
     width?: string
     condition?: Condition
+    disableBulkEdit?: boolean
     components?: {
       Filter?: React.ComponentType<any>;
       Cell?: React.ComponentType<any>;
@@ -235,6 +281,8 @@ export type UIField = {
     }
   }
   type: 'ui';
+  /** Extension point to add your custom data. */
+  custom?: Record<string, any>;
 }
 
 export type UploadField = FieldBase & {
@@ -246,6 +294,7 @@ export type UploadField = FieldBase & {
 
 type CodeAdmin = Admin & {
   language?: string;
+  editorOptions?: EditorProps['options'];
 }
 
 export type CodeField = Omit<FieldBase, 'admin'> & {
@@ -253,6 +302,15 @@ export type CodeField = Omit<FieldBase, 'admin'> & {
   minLength?: number
   maxLength?: number
   type: 'code';
+}
+
+type JSONAdmin = Admin & {
+  editorOptions?: EditorProps['options'];
+}
+
+export type JSONField = Omit<FieldBase, 'admin'> & {
+  admin?: JSONAdmin
+  type: 'json';
 }
 
 export type SelectField = FieldBase & {
@@ -273,8 +331,33 @@ export type RelationshipField = FieldBase & {
   filterOptions?: FilterOptions;
   admin?: Admin & {
     isSortable?: boolean;
-  }
-}
+    allowCreate?: boolean;
+  },
+} & ({
+  hasMany: true
+  /**
+   * @deprecated Use 'minRows' instead
+   */
+  min?: number
+  /**
+   * @deprecated Use 'maxRows' instead
+   */
+  max?: number
+  minRows?: number
+  maxRows?: number
+} | {
+  hasMany?: false | undefined
+  /**
+   * @deprecated Use 'minRows' instead
+   */
+  min?: undefined
+  /**
+   * @deprecated Use 'maxRows' instead
+   */
+  max?: undefined
+  minRows?: undefined
+  maxRows?: undefined
+})
 
 export type ValueWithRelation = {
   relationTo: string
@@ -282,7 +365,7 @@ export type ValueWithRelation = {
 }
 
 export function valueIsValueWithRelation(value: unknown): value is ValueWithRelation {
-  return typeof value === 'object' && 'relationTo' in value && 'value' in value;
+  return value !== null && typeof value === 'object' && 'relationTo' in value && 'value' in value;
 }
 
 export type RelationshipValue = (string | number)
@@ -312,7 +395,7 @@ export type RichTextLeaf = 'bold' | 'italic' | 'underline' | 'strikethrough' | '
 export type RichTextField = FieldBase & {
   type: 'richText';
   admin?: Admin & {
-    placeholder?: string
+    placeholder?: Record<string, string> | string
     elements?: RichTextElement[];
     leaves?: RichTextLeaf[];
     hideGutter?: boolean
@@ -324,7 +407,7 @@ export type RichTextField = FieldBase & {
       }
     }
     link?: {
-      fields?: Field[];
+      fields?: Field[] | ((args: { defaultFields: Field[], config: SanitizedConfig, i18n: Ii18n }) => Field[]);
     }
   }
 }
@@ -337,8 +420,18 @@ export type ArrayField = FieldBase & {
   fields: Field[];
   admin?: Admin & {
     initCollapsed?: boolean | false;
-  }
-}
+    components?: {
+      RowLabel?: RowLabel
+    } & Admin['components']
+  };
+  /** Customize generated GraphQL and Typescript schema names.
+   * By default it is bound to the collection.
+   *
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
+   */
+  interfaceName?: string
+};
 
 export type RadioField = FieldBase & {
   type: 'radio';
@@ -354,6 +447,17 @@ export type Block = {
   fields: Field[];
   imageURL?: string;
   imageAltText?: string;
+  /** @deprecated - please migrate to the interfaceName property instead. */
+  graphQL?: {
+    singularName?: string
+  }
+  /** Customize generated GraphQL and Typescript schema names.
+   * The slug is used by default.
+   *
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
+   */
+  interfaceName?: string
 }
 
 export type BlockField = FieldBase & {
@@ -389,6 +493,7 @@ export type Field =
   | SelectField
   | UploadField
   | CodeField
+  | JSONField
   | PointField
   | RowField
   | CollapsibleField
@@ -411,6 +516,7 @@ export type FieldAffectingData =
   | SelectField
   | UploadField
   | CodeField
+  | JSONField
   | PointField
   | TabAsField
 
@@ -430,6 +536,7 @@ export type NonPresentationalField =
   | SelectField
   | UploadField
   | CodeField
+  | JSONField
   | PointField
   | RowField
   | TabsField

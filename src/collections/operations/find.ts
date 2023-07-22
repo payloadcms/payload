@@ -4,12 +4,11 @@ import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Collection, TypeWithID } from '../config/types';
 import { PaginatedDocs } from '../../mongoose/types';
-import { hasWhereAccessResult } from '../../auth/types';
 import flattenWhereConstraints from '../../utilities/flattenWhereConstraints';
 import { buildSortParam } from '../../mongoose/buildSortParam';
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { queryDrafts } from '../../versions/drafts/queryDrafts';
 
 export type Arguments = {
   collection: Collection
@@ -27,8 +26,9 @@ export type Arguments = {
   draft?: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promise<PaginatedDocs<T>> {
+async function find<T extends TypeWithID & Record<string, unknown>>(
+  incomingArgs: Arguments,
+): Promise<PaginatedDocs<T>> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -51,6 +51,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
     depth,
     currentDepth,
     draft: draftsEnabled,
+    collection,
     collection: {
       Model,
       config: collectionConfig,
@@ -70,30 +71,11 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where } = {
-    where: {
-      and: [],
-    },
-  };
-
-  let useEstimatedCount = false;
+  let hasNearConstraint = false;
 
   if (where) {
-    queryToBuild.where = {
-      and: [],
-      ...where,
-    };
-
-    if (Array.isArray(where.AND)) {
-      queryToBuild.where.and = [
-        ...queryToBuild.where.and,
-        ...where.AND,
-      ];
-    }
-
-    const constraints = flattenWhereConstraints(queryToBuild);
-
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+    const constraints = flattenWhereConstraints(where);
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 
   let accessResult: AccessResult;
@@ -116,67 +98,75 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
         limit,
       };
     }
-
-    if (hasWhereAccessResult(accessResult)) {
-      queryToBuild.where.and.push(accessResult);
-    }
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery({
+    req,
+    where,
+    overrideAccess,
+    access: accessResult,
+  });
 
   // /////////////////////////////////////
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam({
-    sort: args.sort,
-    config: payload.config,
-    fields: collectionConfig.fields,
-    timestamps: collectionConfig.timestamps,
-    locale,
-  });
-
-  const optionsToExecute = {
-    page: page || 1,
-    limit: limit || 10,
-    sort: {
+  let sort;
+  if (!hasNearConstraint) {
+    const [sortProperty, sortOrder] = buildSortParam({
+      sort: args.sort ?? collectionConfig.defaultSort,
+      config: payload.config,
+      fields: collectionConfig.fields,
+      timestamps: collectionConfig.timestamps,
+      locale,
+    });
+    sort = {
       [sortProperty]: sortOrder,
-    },
+    };
+  }
+
+  const usePagination = pagination && limit !== 0;
+  const limitToUse = limit ?? (usePagination ? 10 : 0);
+
+  let result: PaginatedDocs<T>;
+
+  const paginationOptions = {
+    page: page || 1,
+    sort,
+    limit: limitToUse,
     lean: true,
     leanWithId: true,
-    useEstimatedCount,
-    pagination,
-    useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
+    pagination: usePagination,
+    useEstimatedCount: hasNearConstraint,
+    forceCountFn: hasNearConstraint,
+    options: {
+      // limit must also be set here, it's ignored when pagination is false
+      limit: limitToUse,
+    },
   };
 
-  const paginatedDocs = await Model.paginate(query, optionsToExecute);
+  if (collectionConfig.versions?.drafts && draftsEnabled) {
+    result = await queryDrafts<T>({
+      accessResult,
+      collection,
+      req,
+      overrideAccess,
+      paginationOptions,
+      payload,
+      where,
+    });
+  } else {
+    result = await Model.paginate(query, paginationOptions);
+  }
 
-  let result = {
-    ...paginatedDocs,
-    docs: paginatedDocs.docs.map((doc) => {
+  result = {
+    ...result,
+    docs: result.docs.map((doc) => {
       const sanitizedDoc = JSON.parse(JSON.stringify(doc));
       sanitizedDoc.id = sanitizedDoc._id;
       return sanitizeInternalFields(sanitizedDoc);
     }),
-  } as PaginatedDocs<T>;
-
-  // /////////////////////////////////////
-  // Replace documents with drafts if available
-  // /////////////////////////////////////
-
-  if (collectionConfig.versions?.drafts && draftsEnabled) {
-    result = {
-      ...result,
-      docs: await Promise.all(result.docs.map(async (doc) => replaceWithDraftIfAvailable({
-        accessResult,
-        payload,
-        entity: collectionConfig,
-        entityType: 'collection',
-        doc,
-        locale,
-      }))),
-    };
-  }
+  };
 
   // /////////////////////////////////////
   // beforeRead - Collection
@@ -227,7 +217,7 @@ async function find<T extends TypeWithID = any>(incomingArgs: Arguments): Promis
       await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef = await hook({ req, query, doc, findMany: true }) || doc;
+        docRef = await hook({ req, query, doc: docRef, findMany: true }) || doc;
       }, Promise.resolve());
 
       return docRef;

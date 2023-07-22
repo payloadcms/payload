@@ -1,26 +1,35 @@
 import type { IndexDirection, IndexOptions } from 'mongoose';
+import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
-import config from '../uploads/config';
+import configPromise from '../uploads/config';
 import payload from '../../src';
 import { pointDoc } from './collections/Point';
-import type { ArrayField, GroupField, TabsField } from './payload-types';
-import { arrayFieldsSlug, arrayDefaultValue, arrayDoc } from './collections/Array';
-import { groupFieldsSlug, groupDefaultChild, groupDefaultValue, groupDoc } from './collections/Group';
+import { arrayDefaultValue, arrayDoc, arrayFieldsSlug } from './collections/Array';
+import { groupDefaultChild, groupDefaultValue, groupDoc, groupFieldsSlug } from './collections/Group';
 import { defaultText } from './collections/Text';
 import { blocksFieldSeedData } from './collections/Blocks';
 import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
 import { defaultNumber, numberDoc } from './collections/Number';
+import { dateDoc } from './collections/Date';
+import type { PaginatedDocs } from '../../src/mongoose/types';
+import type { RichTextField } from './payload-types';
 
 let client;
+let graphQLClient: GraphQLClient;
+let serverURL;
+let config;
+let token;
 
 describe('Fields', () => {
-  beforeAll(async (done) => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
-    client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' });
-    await client.login();
+  beforeAll(async () => {
+    ({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }));
+    config = await configPromise;
 
-    done();
+    client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' });
+    const graphQLURL = `${serverURL}${config.routes.api}${config.routes.graphQL}`;
+    graphQLClient = new GraphQLClient(graphQLURL);
+    token = await client.login();
   });
 
   describe('text', () => {
@@ -37,6 +46,87 @@ describe('Fields', () => {
       expect(doc.text).toEqual(text);
       expect(doc.defaultFunction).toEqual(defaultText);
       expect(doc.defaultAsync).toEqual(defaultText);
+    });
+  });
+
+  describe('timestamps', () => {
+    const tenMinutesAgo = new Date(Date.now() - 1000 * 60 * 10);
+    let doc;
+    beforeAll(async () => {
+      doc = await payload.create({
+        collection: 'date-fields',
+        data: dateDoc,
+      });
+    });
+
+    it('should query updatedAt', async () => {
+      const { docs } = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          updatedAt: {
+            greater_than_equal: tenMinutesAgo,
+          },
+        },
+      });
+
+      expect(docs.map(({ id }) => id)).toContain(doc.id);
+    });
+
+    it('should query createdAt', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            greater_than_equal: tenMinutesAgo,
+          },
+        },
+      });
+
+      expect(result.docs[0].id).toEqual(doc.id);
+    });
+  });
+
+  describe('select', () => {
+    let doc;
+    beforeAll(async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        locale: 'en',
+        data: {
+          selectHasManyLocalized: ['one', 'two'],
+        },
+      });
+      doc = await payload.findByID({
+        collection: 'select-fields',
+        locale: 'all',
+        id,
+      });
+    });
+
+    it('creates with hasMany localized', () => {
+      expect(doc.selectHasManyLocalized.en).toEqual(['one', 'two']);
+    });
+
+    it('retains hasMany updates', async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'two'],
+        },
+      });
+
+      const updatedDoc = await payload.update({
+        collection: 'select-fields',
+        id,
+        data: {
+          select: 'one',
+        },
+      });
+
+      expect(Array.isArray(updatedDoc.selectHasMany)).toBe(true);
+      expect(updatedDoc.selectHasMany).toEqual(['one', 'two']);
     });
   });
 
@@ -111,6 +201,25 @@ describe('Fields', () => {
         },
       })).rejects.toThrow('The following field is invalid: decimalMax');
     });
+    it('should localize an array of numbers using hasMany', async () => {
+      const localizedHasMany = [5, 10];
+      const { id } = await payload.create({
+        collection: 'number-fields',
+        locale: 'en',
+        data: {
+          localizedHasMany,
+        },
+      });
+      const localizedDoc = await payload.findByID({
+        collection: 'number-fields',
+        locale: 'all',
+        id,
+      });
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany);
+    });
   });
 
   describe('indexes', () => {
@@ -119,9 +228,6 @@ describe('Fields', () => {
     const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
-      // mongoose model schema indexes do not always create indexes in the actual database
-      // see: https://github.com/payloadcms/payload/issues/571
-
       indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
 
       indexes.forEach((index) => {
@@ -156,6 +262,77 @@ describe('Fields', () => {
       expect(options['collapsibleLocalizedUnique.en']).toMatchObject({ unique: true, sparse: true });
       expect(definitions.collapsibleTextUnique).toEqual(1);
       expect(options.collapsibleTextUnique).toMatchObject({ unique: true });
+    });
+    it('should have unique compound indexes', () => {
+      expect(definitions.partOne).toEqual(1);
+      expect(options.partOne).toMatchObject({ unique: true, name: 'compound-index', sparse: true });
+    });
+    it('should throw validation error saving on unique fields', async () => {
+      const data = {
+        text: 'a',
+        uniqueText: 'a',
+      };
+      await payload.create({
+        collection: 'indexed-fields',
+        data,
+      });
+      expect(async () => {
+        const result = await payload.create({
+          collection: 'indexed-fields',
+          data,
+        });
+        return result.error;
+      }).toBeDefined();
+    });
+    it('should throw validation error saving on unique combined fields', async () => {
+      await payload.delete({ collection: 'indexed-fields', where: {} });
+      const data1 = {
+        text: 'a',
+        uniqueText: 'a',
+        partOne: 'u',
+        partTwo: 'u',
+      };
+      const data2 = {
+        text: 'b',
+        uniqueText: 'b',
+        partOne: 'u',
+        partTwo: 'u',
+      };
+      await payload.create({
+        collection: 'indexed-fields',
+        data: data1,
+      });
+      expect(async () => {
+        const result = await payload.create({
+          collection: 'indexed-fields',
+          data: data2,
+        });
+        return result.error;
+      }).toBeDefined();
+    });
+  });
+
+  describe('version indexes', () => {
+    let indexes;
+    const definitions: Record<string, IndexDirection> = {};
+    const options: Record<string, IndexOptions> = {};
+
+    beforeAll(() => {
+      indexes = payload.versions['indexed-fields'].schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
+      indexes.forEach((index) => {
+        const field = Object.keys(index[0])[0];
+        definitions[field] = index[0][field];
+        // eslint-disable-next-line prefer-destructuring
+        options[field] = index[1];
+      });
+    });
+
+    it('should have versions indexes', () => {
+      expect(definitions['version.text']).toEqual(1);
+    });
+    it('should have version indexes from collection indexes', () => {
+      expect(definitions['version.partOne']).toEqual(1);
+      expect(options['version.partOne']).toMatchObject({ unique: true, name: 'compound-index', sparse: true });
     });
   });
 
@@ -230,23 +407,23 @@ describe('Fields', () => {
     const collection = arrayFieldsSlug;
 
     beforeAll(async () => {
-      doc = await payload.create<ArrayField>({
+      doc = await payload.create({
         collection,
         data: {},
       });
     });
 
-    it('should return empty array for arrays when no data present', async () => {
-      const document = await payload.create<ArrayField>({
+    it('should return undefined arrays when no data present', async () => {
+      const document = await payload.create({
         collection: arrayFieldsSlug,
         data: arrayDoc,
       });
 
-      expect(document.potentiallyEmptyArray).toEqual([]);
+      expect(document.potentiallyEmptyArray).toBeUndefined();
     });
 
     it('should create with ids and nested ids', async () => {
-      const docWithIDs = await payload.create<GroupField>({
+      const docWithIDs = await payload.create({
         collection: groupFieldsSlug,
         data: groupDoc,
       });
@@ -262,14 +439,14 @@ describe('Fields', () => {
       const localized = [{ text: 'unique' }];
       const enText = 'english';
       const esText = 'spanish';
-      const { id } = await payload.create<ArrayField>({
+      const { id } = await payload.create({
         collection,
         data: {
           localized,
         },
       });
 
-      const enDoc = await payload.update<ArrayField>({
+      const enDoc = await payload.update({
         collection,
         id,
         locale: 'en',
@@ -278,7 +455,7 @@ describe('Fields', () => {
         },
       });
 
-      const esDoc = await payload.update<ArrayField>({
+      const esDoc = await payload.update({
         collection,
         id,
         locale: 'es',
@@ -304,7 +481,7 @@ describe('Fields', () => {
     let document;
 
     beforeAll(async () => {
-      document = await payload.create<GroupField>({
+      document = await payload.create({
         collection: groupFieldsSlug,
         data: {},
       });
@@ -320,7 +497,7 @@ describe('Fields', () => {
     let document;
 
     beforeAll(async () => {
-      document = await payload.create<TabsField>({
+      document = await payload.create({
         collection: tabsSlug,
         data: tabsDoc,
       });
@@ -357,7 +534,7 @@ describe('Fields', () => {
     });
 
     it('should allow hooks on a named tab', async () => {
-      const newDocument = await payload.create<TabsField>({
+      const newDocument = await payload.create({
         collection: tabsSlug,
         data: tabsDoc,
       });
@@ -368,7 +545,7 @@ describe('Fields', () => {
     });
 
     it('should return empty object for groups when no data present', async () => {
-      const doc = await payload.create<GroupField>({
+      const doc = await payload.create({
         collection: groupFieldsSlug,
         data: groupDoc,
       });
@@ -465,6 +642,54 @@ describe('Fields', () => {
     });
   });
 
+  describe('json', () => {
+    it('should save json data', async () => {
+      const json = { foo: 'bar' };
+      const doc = await payload.create({
+        collection: 'json-fields',
+        data: {
+          json,
+        },
+      });
+
+      expect(doc.json).toStrictEqual({ foo: 'bar' });
+    });
+
+    it('should validate json', async () => {
+      await expect(async () => payload.create({
+        collection: 'json-fields',
+        data: {
+          json: '{ bad input: true }',
+        },
+      })).rejects.toThrow('The following field is invalid: json');
+    });
+
+    it('should save empty json objects', async () => {
+      const jsonFieldsDoc = await payload.create({
+        collection: 'json-fields',
+        data: {
+          json: {
+            state: {},
+          },
+        },
+      });
+
+      expect(jsonFieldsDoc.json.state).toEqual({});
+
+      const updatedJsonFieldsDoc = await payload.update({
+        collection: 'json-fields',
+        id: jsonFieldsDoc.id,
+        data: {
+          json: {
+            state: {},
+          },
+        },
+      });
+
+      expect(updatedJsonFieldsDoc.json.state).toEqual({});
+    });
+  });
+
   describe('richText', () => {
     it('should allow querying on rich text content', async () => {
       const emptyRichTextQuery = await payload.find({
@@ -511,6 +736,22 @@ describe('Fields', () => {
       expect(child.doc.relationTo).toEqual('array-fields');
       expect(typeof child.doc.value.id).toBe('string');
       expect(child.doc.value.items).toHaveLength(6);
+    });
+
+    it('should respect rich text depth parameter', async () => {
+      const query = `query {
+        RichTextFields {
+          docs {
+            richText(depth: 2)
+          }
+        }
+      }`;
+      const response = await graphQLClient.request(query, {}, {
+        Authorization: `JWT ${token}`,
+      });
+      const { docs }: PaginatedDocs<RichTextField> = response.RichTextFields;
+      const uploadElement = docs[0].richText.find((el) => el.type === 'upload') as any;
+      expect(uploadElement.value.media.filename).toStrictEqual('payload.png');
     });
   });
 });

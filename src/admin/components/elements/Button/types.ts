@@ -1,10 +1,10 @@
-import React, { MouseEvent } from 'react';
+import React, { ElementType, MouseEvent } from 'react';
 
 export type Props = {
   className?: string,
   id?: string,
   type?: 'submit' | 'button',
-  el?: 'link' | 'anchor' | undefined,
+  el?: 'link' | 'anchor' | ElementType,
   to?: string,
   url?: string,
   children?: React.ReactNode,

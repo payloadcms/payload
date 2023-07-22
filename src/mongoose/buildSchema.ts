@@ -15,9 +15,11 @@ import {
   EmailField,
   Field,
   FieldAffectingData,
-  fieldAffectsData, fieldIsLocalized,
+  fieldAffectsData,
+  fieldIsLocalized,
   fieldIsPresentationalOnly,
   GroupField,
+  JSONField,
   NonPresentationalField,
   NumberField,
   PointField,
@@ -30,7 +32,8 @@ import {
   tabHasName,
   TabsField,
   TextareaField,
-  TextField, UnnamedTab,
+  TextField,
+  UnnamedTab,
   UploadField,
 } from '../fields/config/types';
 
@@ -39,7 +42,6 @@ export type BuildSchemaOptions = {
   allowIDField?: boolean
   disableUnique?: boolean
   draftsEnabled?: boolean
-  global?: boolean
   indexSortableFields?: boolean
 }
 
@@ -55,6 +57,10 @@ const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSc
 
   if ((schema.unique && (field.localized || draftsEnabled))) {
     schema.sparse = true;
+  }
+
+  if (field.hidden) {
+    schema.hidden = true;
   }
 
   return schema;
@@ -108,7 +114,7 @@ const buildSchema = (config: SanitizedConfig, configFields: Field[], buildSchema
 
 const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   number: (field: NumberField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
-    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Number };
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: field.hasMany ? [Number] : Number };
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
@@ -144,6 +150,13 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   },
   code: (field: CodeField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: String };
+
+    schema.add({
+      [field.name]: localizeSchema(field, baseSchema, config.localization),
+    });
+  },
+  json: (field: JSONField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
+    const baseSchema = { ...formatBaseSchema(field, buildSchemaOptions), type: Schema.Types.Mixed };
 
     schema.add({
       [field.name]: localizeSchema(field, baseSchema, config.localization),
@@ -233,12 +246,16 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
           let localeSchema: { [key: string]: any } = {};
 
           if (hasManyRelations) {
-            localeSchema._id = false;
-            localeSchema.value = {
+            localeSchema = {
+              ...formatBaseSchema(field, buildSchemaOptions),
               type: Schema.Types.Mixed,
-              refPath: `${field.name}.${locale}.relationTo`,
+              _id: false,
+              value: {
+                type: Schema.Types.Mixed,
+                refPath: `${field.name}.${locale}.relationTo`,
+              },
+              relationTo: { type: String, enum: field.relationTo },
             };
-            localeSchema.relationTo = { type: String, enum: field.relationTo };
           } else {
             localeSchema = {
               ...formatBaseSchema(field, buildSchemaOptions),
@@ -249,20 +266,29 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
 
           return {
             ...locales,
-            [locale]: field.hasMany ? [localeSchema] : localeSchema,
+            [locale]: field.hasMany ? { type: [localeSchema], default: undefined } : localeSchema,
           };
         }, {}),
         localized: true,
       };
     } else if (hasManyRelations) {
-      schemaToReturn._id = false;
-      schemaToReturn.value = {
+      schemaToReturn = {
+        ...formatBaseSchema(field, buildSchemaOptions),
         type: Schema.Types.Mixed,
-        refPath: `${field.name}.relationTo`,
+        _id: false,
+        value: {
+          type: Schema.Types.Mixed,
+          refPath: `${field.name}.relationTo`,
+        },
+        relationTo: { type: String, enum: field.relationTo },
       };
-      schemaToReturn.relationTo = { type: String, enum: field.relationTo };
 
-      if (field.hasMany) schemaToReturn = [schemaToReturn];
+      if (field.hasMany) {
+        schemaToReturn = {
+          type: [schemaToReturn],
+          default: undefined,
+        };
+      }
     } else {
       schemaToReturn = {
         ...formatBaseSchema(field, buildSchemaOptions),
@@ -270,7 +296,12 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         ref: field.relationTo,
       };
 
-      if (field.hasMany) schemaToReturn = [schemaToReturn];
+      if (field.hasMany) {
+        schemaToReturn = {
+          type: [schemaToReturn],
+          default: undefined,
+        };
+      }
     }
 
     schema.add({
@@ -306,8 +337,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
               options: {
                 _id: false,
                 id: false,
+                minimize: false,
               },
               disableUnique: buildSchemaOptions.disableUnique,
+              draftsEnabled: buildSchemaOptions.draftsEnabled,
             },
           ),
         };
@@ -329,13 +362,19 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   array: (field: ArrayField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions) => {
     const baseSchema = {
       ...formatBaseSchema(field, buildSchemaOptions),
+      default: undefined,
       type: [buildSchema(
         config,
         field.fields,
         {
-          options: { _id: false, id: false },
+          options: {
+            _id: false,
+            id: false,
+            minimize: false,
+          },
           allowIDField: true,
           disableUnique: buildSchemaOptions.disableUnique,
+          draftsEnabled: buildSchemaOptions.draftsEnabled,
         },
       )],
     };
@@ -347,6 +386,9 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
   group: (field: GroupField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
     const formattedBaseSchema = formatBaseSchema(field, buildSchemaOptions);
 
+    // carry indexSortableFields through to versions if drafts enabled
+    const indexSortableFields = (buildSchemaOptions.indexSortableFields && field.name === 'version' && buildSchemaOptions.draftsEnabled);
+
     const baseSchema = {
       ...formattedBaseSchema,
       type: buildSchema(
@@ -356,8 +398,11 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
           options: {
             _id: false,
             id: false,
+            minimize: false,
           },
+          indexSortableFields,
           disableUnique: buildSchemaOptions.disableUnique,
+          draftsEnabled: buildSchemaOptions.draftsEnabled,
         },
       ),
     };
@@ -375,14 +420,24 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         return option;
       }),
     };
-    const schemaToReturn = localizeSchema(field, baseSchema, config.localization);
+
+    if (buildSchemaOptions.draftsEnabled || !field.required) {
+      baseSchema.enum.push(null);
+    }
 
     schema.add({
-      [field.name]: field.hasMany ? [schemaToReturn] : schemaToReturn,
+      [field.name]: localizeSchema(
+        field,
+        field.hasMany ? [baseSchema] : baseSchema,
+        config.localization,
+      ),
     });
   },
   blocks: (field: BlockField, schema: Schema, config: SanitizedConfig, buildSchemaOptions: BuildSchemaOptions): void => {
-    const fieldSchema = [new Schema({}, { _id: false, discriminatorKey: 'blockType' })];
+    const fieldSchema = {
+      default: undefined,
+      type: [new Schema({}, { _id: false, discriminatorKey: 'blockType' })],
+    };
 
     schema.add({
       [field.name]: localizeSchema(field, fieldSchema, config.localization),

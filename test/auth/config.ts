@@ -1,10 +1,15 @@
-import { buildConfig } from '../buildConfig';
+import { v4 as uuid } from 'uuid';
+import { mapAsync } from '../../src/utilities/mapAsync';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import { devUser } from '../credentials';
+import { AuthDebug } from './AuthDebug';
 
 export const slug = 'users';
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   admin: {
     user: 'users',
+    autoLogin: false,
   },
   collections: [
     {
@@ -33,8 +38,62 @@ export default buildConfig({
           saveToJWT: true,
           hasMany: true,
         },
-
+        {
+          name: 'custom',
+          label: 'Custom',
+          type: 'text',
+        },
+        {
+          name: 'authDebug',
+          label: 'Auth Debug',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: AuthDebug,
+            },
+          },
+        },
       ],
     },
+    {
+      slug: 'api-keys',
+      access: {
+        read: ({ req: { user } }) => {
+          if (user.collection === 'api-keys') {
+            return {
+              id: {
+                equals: user.id,
+              },
+            };
+          }
+          return true;
+        },
+      },
+      auth: {
+        disableLocalStrategy: true,
+        useAPIKey: true,
+      },
+      fields: [],
+    },
   ],
+  onInit: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+        custom: 'Hello, world!',
+      },
+    });
+
+    await mapAsync([...Array(2)], async () => {
+      await payload.create({
+        collection: 'api-keys',
+        data: {
+          apiKey: uuid(),
+          enableAPIKey: true,
+        },
+      });
+    });
+  },
 });

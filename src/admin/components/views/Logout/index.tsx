@@ -1,4 +1,6 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import Minimal from '../../templates/Minimal';
@@ -14,6 +16,11 @@ const Logout: React.FC<{inactivity?: boolean}> = (props) => {
 
   const { logOut } = useAuth();
   const { routes: { admin } } = useConfig();
+  const { t } = useTranslation('authentication');
+
+  // Fetch 'redirect' from the query string which denotes the URL the user originally tried to visit. This is set in the Routes.tsx file when a user tries to access a protected route and is redirected to the login screen.
+  const query = new URLSearchParams(useLocation().search);
+  const redirect = query.get('redirect');
 
   useEffect(() => {
     logOut();
@@ -22,24 +29,24 @@ const Logout: React.FC<{inactivity?: boolean}> = (props) => {
   return (
     <Minimal className={baseClass}>
       <Meta
-        title="Logout"
-        description="Logout user"
-        keywords="Logout, Payload, CMS"
+        title={t('logout')}
+        description={t('logoutUser')}
+        keywords={t('logout')}
       />
       <div className={`${baseClass}__wrap`}>
         {inactivity && (
-          <h2>You have been logged out due to inactivity.</h2>
+          <h2>{t('loggedOutInactivity')}</h2>
         )}
         {!inactivity && (
-          <h2>You have been logged out successfully.</h2>
+          <h2>{t('loggedOutSuccessfully')}</h2>
         )}
         <br />
         <Button
           el="anchor"
           buttonStyle="secondary"
-          url={`${admin}/login`}
+          url={`${admin}/login${redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}
         >
-          Log back in
+          {t('logBackIn')}
         </Button>
       </div>
     </Minimal>

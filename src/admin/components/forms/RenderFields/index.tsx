@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import useIntersect from '../../../hooks/useIntersect';
 import { Props } from './types';
 import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../fields/config/types';
 import { useOperation } from '../../utilities/OperationProvider';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 const baseClass = 'render-fields';
 
@@ -20,8 +22,10 @@ const RenderFields: React.FC<Props> = (props) => {
     readOnly: readOnlyOverride,
     className,
     forceRender,
+    indexPath: incomingIndexPath,
   } = props;
 
+  const { t, i18n } = useTranslation('general');
   const [hasRendered, setHasRendered] = useState(Boolean(forceRender));
   const [intersectionRef, entry] = useIntersect(intersectionObserverOptions);
   const operation = useOperation();
@@ -48,7 +52,7 @@ const RenderFields: React.FC<Props> = (props) => {
         className={classes}
       >
         {hasRendered && (
-          fieldSchema.map((field, i) => {
+          fieldSchema.map((field, fieldIndex) => {
             const fieldIsPresentational = fieldIsPresentationalOnly(field);
             let FieldComponent = fieldTypes[field.type];
 
@@ -58,7 +62,7 @@ const RenderFields: React.FC<Props> = (props) => {
                   return (
                     <FieldComponent
                       {...field}
-                      key={i}
+                      key={fieldIndex}
                     />
                   );
                 }
@@ -83,13 +87,14 @@ const RenderFields: React.FC<Props> = (props) => {
                   if (FieldComponent) {
                     return (
                       <RenderCustomComponent
-                        key={i}
+                        key={fieldIndex}
                         CustomComponent={field?.admin?.components?.Field}
                         DefaultComponent={FieldComponent}
                         componentProps={{
                           ...field,
                           path: field.path || (isFieldAffectingData ? field.name : ''),
                           fieldTypes,
+                          indexPath: incomingIndexPath ? `${incomingIndexPath}.${fieldIndex}` : `${fieldIndex}`,
                           admin: {
                             ...(field.admin || {}),
                             readOnly,
@@ -103,13 +108,9 @@ const RenderFields: React.FC<Props> = (props) => {
                   return (
                     <div
                       className="missing-field"
-                      key={i}
+                      key={fieldIndex}
                     >
-                      No matched field found for
-                      {' '}
-                      &quot;
-                      {field.label}
-                      &quot;
+                      {t('error:noMatchedField', { label: fieldAffectsData(field) ? getTranslation(field.label || field.name, i18n) : field.path })}
                     </div>
                   );
                 }

@@ -6,12 +6,13 @@ import isDeepEqual from 'deep-equal';
 import { serialize } from 'object-to-formdata';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../utilities/Auth';
 import { useLocale } from '../../utilities/Locale';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { requests } from '../../../api';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
-import fieldReducer from './fieldReducer';
+import { fieldReducer } from './fieldReducer';
 import initContextState from './initContextState';
 import reduceFieldsToValues from './reduceFieldsToValues';
 import getSiblingDataFunc from './getSiblingData';
@@ -20,10 +21,13 @@ import wait from '../../../../utilities/wait';
 import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
-import { Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types';
+import { Fields, Context as FormContextType, GetDataByPath, Props, Row, SubmitOptions } from './types';
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
+import { WatchFormErrors } from './WatchFormErrors';
+import { splitPathByArrayFields } from '../../../../utilities/splitPathByArrayFields';
+import { setsAreEqual } from '../../../../utilities/setsAreEqual';
 
 const baseClass = 'form';
 
@@ -46,8 +50,9 @@ const Form: React.FC<Props> = (props) => {
 
   const history = useHistory();
   const locale = useLocale();
+  const { t, i18n } = useTranslation('general');
   const { refreshCookie, user } = useAuth();
-  const { id } = useDocumentInfo();
+  const { id, getDocPreferences } = useDocumentInfo();
   const operation = useOperation();
 
   const [modified, setModified] = useState(false);
@@ -68,6 +73,62 @@ const Form: React.FC<Props> = (props) => {
 
   contextRef.current.fields = fields;
   contextRef.current.dispatchFields = dispatchFields;
+
+  // Build a current set of child errors for all rows in form state
+  const buildRowErrors = useCallback(() => {
+    const existingFieldRows: { [path: string]: Row[] } = {};
+    const newFieldRows: { [path: string]: Row[] } = {};
+
+    Object.entries(fields).forEach(([path, field]) => {
+      const pathSegments = splitPathByArrayFields(path);
+
+      for (let i = 0; i < pathSegments.length; i += 1) {
+        const fieldPath = pathSegments.slice(0, i + 1).join('.');
+        const formField = fields?.[fieldPath];
+
+        // Is this an array or blocks field?
+        if (Array.isArray(formField?.rows)) {
+          // Keep a reference to the existing row state
+          existingFieldRows[fieldPath] = formField.rows;
+
+          // A new row state will be used to compare
+          // against the old state later,
+          // to see if we need to dispatch an update
+          if (!newFieldRows[fieldPath]) {
+            newFieldRows[fieldPath] = formField.rows.map((existingRow) => ({
+              ...existingRow,
+              childErrorPaths: new Set(),
+            }));
+          }
+
+          const rowIndex = pathSegments[i + 1];
+          const childFieldPath = pathSegments.slice(i + 1).join('.');
+
+          if (field.valid === false && childFieldPath) {
+            newFieldRows[fieldPath][rowIndex].childErrorPaths.add(`${fieldPath}.${childFieldPath}`);
+          }
+        }
+      }
+    });
+
+    // Now loop over all fields with rows -
+    // if anything changed, dispatch an update for the field
+    // with the new row state
+    Object.entries(newFieldRows).forEach(([path, newRows]) => {
+      const stateMatches = newRows.every((newRow, i) => {
+        const existingRowErrorPaths = existingFieldRows[path][i]?.childErrorPaths;
+        return setsAreEqual(newRow.childErrorPaths, existingRowErrorPaths);
+      });
+
+      if (!stateMatches) {
+        dispatchFields({
+          type: 'UPDATE',
+          path,
+          rows: newRows,
+        });
+      }
+    });
+  }, [fields, dispatchFields]);
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {};
@@ -90,6 +151,7 @@ const Form: React.FC<Props> = (props) => {
             user,
             id,
             operation,
+            t,
           });
         }
 
@@ -110,7 +172,7 @@ const Form: React.FC<Props> = (props) => {
     }
 
     return isValid;
-  }, [contextRef, id, user, operation, dispatchFields]);
+  }, [contextRef, id, user, operation, t, dispatchFields]);
 
   const submit = useCallback(async (options: SubmitOptions = {}, e): Promise<void> => {
     const {
@@ -137,12 +199,13 @@ const Form: React.FC<Props> = (props) => {
     if (waitForAutocomplete) await wait(100);
 
     const isValid = skipValidation ? true : await contextRef.current.validateForm();
+    contextRef.current.buildRowErrors();
 
-    setSubmitted(true);
+    if (!skipValidation) setSubmitted(true);
 
     // If not valid, prevent submission
     if (!isValid) {
-      toast.error('Please correct invalid fields.');
+      toast.error(t('error:correctInvalidFields'));
       setProcessing(false);
 
       return;
@@ -151,12 +214,11 @@ const Form: React.FC<Props> = (props) => {
     // If submit handler comes through via props, run that
     if (onSubmit) {
       const data = {
-        ...reduceFieldsToValues(fields),
+        ...reduceFieldsToValues(fields, true),
         ...overrides,
       };
 
       onSubmit(fields, data);
-      return;
     }
 
     const formData = contextRef.current.createFormData(overrides);
@@ -164,6 +226,9 @@ const Form: React.FC<Props> = (props) => {
     try {
       const res = await requests[methodToUse.toLowerCase()](actionToUse, {
         body: formData,
+        headers: {
+          'Accept-Language': i18n.language,
+        },
       });
 
       setModified(false);
@@ -206,7 +271,7 @@ const Form: React.FC<Props> = (props) => {
 
           history.push(destination);
         } else if (!disableSuccessStatus) {
-          toast.success(json.message || 'Submission successful.', { autoClose: 3000 });
+          toast.success(json.message || t('submissionSuccessful'), { autoClose: 3000 });
         }
       } else {
         contextRef.current = { ...contextRef.current }; // triggers rerender of all components that subscribe to form
@@ -262,18 +327,16 @@ const Form: React.FC<Props> = (props) => {
           });
 
           nonFieldErrors.forEach((err) => {
-            toast.error(err.message || 'An unknown error occurred.');
+            toast.error(err.message || t('error:unknown'));
           });
 
           return;
         }
 
-        const message = errorMessages[res.status] || 'An unknown error occurrred.';
+        const message = errorMessages[res.status] || t('error:unknown');
 
         toast.error(message);
       }
-
-      return;
     } catch (err) {
       setProcessing(false);
 
@@ -291,6 +354,8 @@ const Form: React.FC<Props> = (props) => {
     onSubmit,
     onSuccess,
     redirect,
+    t,
+    i18n,
     waitForAutocomplete,
   ]);
 
@@ -325,10 +390,18 @@ const Form: React.FC<Props> = (props) => {
   }, [contextRef]);
 
   const reset = useCallback(async (fieldSchema: Field[], data: unknown) => {
-    const state = await buildStateFromSchema({ fieldSchema, data, user, id, operation, locale });
+    const preferences = await getDocPreferences();
+    const state = await buildStateFromSchema({ fieldSchema, preferences, data, user, id, operation, locale, t });
     contextRef.current = { ...initContextState } as FormContextType;
+    setModified(false);
     dispatchFields({ type: 'REPLACE_STATE', state });
-  }, [id, user, operation, locale, dispatchFields]);
+  }, [id, user, operation, locale, t, dispatchFields, getDocPreferences]);
+
+  const replaceState = useCallback((state: Fields) => {
+    contextRef.current = { ...initContextState } as FormContextType;
+    setModified(false);
+    dispatchFields({ type: 'REPLACE_STATE', state });
+  }, [dispatchFields]);
 
   contextRef.current.submit = submit;
   contextRef.current.getFields = getFields;
@@ -344,6 +417,8 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.disabled = disabled;
   contextRef.current.formRef = formRef;
   contextRef.current.reset = reset;
+  contextRef.current.replaceState = replaceState;
+  contextRef.current.buildRowErrors = buildRowErrors;
 
   useEffect(() => {
     if (initialState) {
@@ -364,14 +439,6 @@ const Form: React.FC<Props> = (props) => {
   useThrottledEffect(() => {
     refreshCookie();
   }, 15000, [fields]);
-
-  // Re-run form validation every second
-  // as fields change, because field validations can
-  // potentially rely on OTHER field values to determine
-  // if they are valid or not (siblingData, data)
-  useThrottledEffect(() => {
-    validateForm();
-  }, 1000, [validateForm, fields]);
 
   useEffect(() => {
     contextRef.current = { ...contextRef.current }; // triggers rerender of all components that subscribe to form
@@ -402,6 +469,7 @@ const Form: React.FC<Props> = (props) => {
             <ProcessingContext.Provider value={processing}>
               <ModifiedContext.Provider value={modified}>
                 <FormFieldsContext.Provider value={fieldsReducer}>
+                  <WatchFormErrors buildRowErrors={buildRowErrors} />
                   {children}
                 </FormFieldsContext.Provider>
               </ModifiedContext.Provider>

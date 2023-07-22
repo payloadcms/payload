@@ -1,15 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
+import { useTranslation } from 'react-i18next';
 import Thumbnail from '../Thumbnail';
 import Button from '../Button';
 import Meta from './Meta';
-import { Props } from './types';
-
 import Chevron from '../../icons/Chevron';
+import { Props } from './types';
+import { FileSizes, Upload } from '../../../../uploads/types';
 
 import './index.scss';
 
 const baseClass = 'file-details';
+
+// sort to the same as imageSizes
+const sortSizes = (sizes: FileSizes, imageSizes: Upload['imageSizes']) => {
+  if (!imageSizes || imageSizes.length === 0) return sizes;
+
+  const orderedSizes: FileSizes = {};
+
+  imageSizes.forEach(({ name }) => {
+    if (sizes[name]) {
+      orderedSizes[name] = sizes[name];
+    }
+  });
+
+  return orderedSizes;
+};
 
 const FileDetails: React.FC<Props> = (props) => {
   const {
@@ -21,6 +37,7 @@ const FileDetails: React.FC<Props> = (props) => {
   const {
     upload: {
       staticURL,
+      imageSizes,
     },
   } = collection;
 
@@ -34,7 +51,14 @@ const FileDetails: React.FC<Props> = (props) => {
     url,
   } = doc;
 
+  const [orderedSizes, setOrderedSizes] = useState<FileSizes>(() => sortSizes(sizes, imageSizes));
+
+  useEffect(() => {
+    setOrderedSizes(sortSizes(sizes, imageSizes));
+  }, [sizes, imageSizes]);
+
   const [moreInfoOpen, setMoreInfoOpen] = useState(false);
+  const { t } = useTranslation('upload');
 
   const hasSizes = sizes && Object.keys(sizes)?.length > 0;
 
@@ -63,13 +87,13 @@ const FileDetails: React.FC<Props> = (props) => {
             >
               {!moreInfoOpen && (
                 <React.Fragment>
-                  More info
+                  {t('moreInfo')}
                   <Chevron />
                 </React.Fragment>
               )}
               {moreInfoOpen && (
                 <React.Fragment>
-                  Less info
+                  {t('lessInfo')}
                   <Chevron />
                 </React.Fragment>
               )}
@@ -93,7 +117,7 @@ const FileDetails: React.FC<Props> = (props) => {
           height={moreInfoOpen ? 'auto' : 0}
         >
           <ul className={`${baseClass}__sizes`}>
-            {Object.entries(sizes).map(([key, val]) => {
+            {Object.entries(orderedSizes).map(([key, val]) => {
               if (val?.filename) {
                 return (
                   <li key={key}>

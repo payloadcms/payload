@@ -7,7 +7,7 @@ const incrementName = (name: string) => {
   const extension = name.split('.').pop();
   const baseFilename = sanitize(name.substring(0, name.lastIndexOf('.')) || name);
   let incrementedName = baseFilename;
-  const regex = /(.*)-(\d)$/;
+  const regex = /(.*)-(\d+)$/;
   const found = baseFilename.match(regex);
   if (found === null) {
     incrementedName += '-1';

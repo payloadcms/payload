@@ -12,22 +12,20 @@ export type SanitizedDrafts = {
 
 export type IncomingCollectionVersions = {
   maxPerDoc?: number
-  retainDeleted?: boolean
   drafts?: boolean | IncomingDrafts
 }
 
 export interface SanitizedCollectionVersions extends Omit<IncomingCollectionVersions, 'drafts'> {
   maxPerDoc?: number
-  retainDeleted: boolean
   drafts: SanitizedDrafts | false
 }
 
-export type IncomingGlobalVersions= {
+export type IncomingGlobalVersions = {
   max?: number
   drafts?: boolean | IncomingDrafts
 }
 
-export type SanitizedGlobalVersions= {
+export type SanitizedGlobalVersions = {
   max: number
   drafts: SanitizedDrafts | false
 }

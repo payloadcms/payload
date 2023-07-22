@@ -1,16 +1,13 @@
-import { text, textarea, password, select, point, number } from './validations';
+import { text, textarea, password, select, point, number, relationship } from './validations';
 import { ValidateOptions } from './config/types';
 
-const minLengthMessage = (length: number) => `This value must be longer than the minimum length of ${length} characters.`;
-const maxLengthMessage = (length: number) => `This value must be shorter than the max length of ${length} characters.`;
-const minValueMessage = (value: number, min: number) => `"${value}" is less than the min allowed value of ${min}.`;
-const maxValueMessage = (value: number, max: number) => `"${value}" is greater than the max allowed value of ${max}.`;
-const requiredMessage = 'This field is required.';
-const validNumberMessage = 'Please enter a valid number.';
+const t = jest.fn((string) => string);
+
 let options: ValidateOptions<any, any, any> = {
   operation: 'create',
   data: undefined,
   siblingData: undefined,
+  t,
 };
 
 describe('Field Validations', () => {
@@ -23,7 +20,7 @@ describe('Field Validations', () => {
     it('should show required message', () => {
       const val = undefined;
       const result = text(val, { ...options, required: true });
-      expect(result).toBe(requiredMessage);
+      expect(result).toBe('validation:required');
     });
     it('should handle undefined', () => {
       const val = undefined;
@@ -33,12 +30,12 @@ describe('Field Validations', () => {
     it('should validate maxLength', () => {
       const val = 'toolong';
       const result = text(val, { ...options, maxLength: 5 });
-      expect(result).toBe(maxLengthMessage(5));
+      expect(result).toBe('validation:shorterThanMax');
     });
     it('should validate minLength', () => {
       const val = 'short';
       const result = text(val, { ...options, minLength: 10 });
-      expect(result).toBe(minLengthMessage(10));
+      expect(result).toBe('validation:longerThanMin');
     });
     it('should validate maxLength with no value', () => {
       const val = undefined;
@@ -62,7 +59,7 @@ describe('Field Validations', () => {
     it('should show required message', () => {
       const val = undefined;
       const result = textarea(val, { ...options, required: true });
-      expect(result).toBe(requiredMessage);
+      expect(result).toBe('validation:required');
     });
 
     it('should handle undefined', () => {
@@ -73,13 +70,13 @@ describe('Field Validations', () => {
     it('should validate maxLength', () => {
       const val = 'toolong';
       const result = textarea(val, { ...options, maxLength: 5 });
-      expect(result).toBe(maxLengthMessage(5));
+      expect(result).toBe('validation:shorterThanMax');
     });
 
     it('should validate minLength', () => {
       const val = 'short';
       const result = textarea(val, { ...options, minLength: 10 });
-      expect(result).toBe(minLengthMessage(10));
+      expect(result).toBe('validation:longerThanMin');
     });
     it('should validate maxLength with no value', () => {
       const val = undefined;
@@ -94,105 +91,174 @@ describe('Field Validations', () => {
   });
 
   describe('password', () => {
-    options.type = 'password';
-    options.name = 'test';
+    const passwordOptions = {
+      ...options,
+      type: 'password',
+      name: 'test',
+    };
     it('should validate', () => {
       const val = 'test';
-      const result = password(val, options);
+      const result = password(val, passwordOptions);
       expect(result).toBe(true);
     });
     it('should show required message', () => {
       const val = undefined;
-      const result = password(val, { ...options, required: true });
-      expect(result).toBe(requiredMessage);
+      const result = password(val, { ...passwordOptions, required: true });
+      expect(result).toBe('validation:required');
     });
     it('should handle undefined', () => {
       const val = undefined;
-      const result = password(val, options);
+      const result = password(val, passwordOptions);
       expect(result).toBe(true);
     });
     it('should validate maxLength', () => {
       const val = 'toolong';
-      const result = password(val, { ...options, maxLength: 5 });
-      expect(result).toBe(maxLengthMessage(5));
+      const result = password(val, { ...passwordOptions, maxLength: 5 });
+      expect(result).toBe('validation:shorterThanMax');
     });
     it('should validate minLength', () => {
       const val = 'short';
-      const result = password(val, { ...options, minLength: 10 });
-      expect(result).toBe(minLengthMessage(10));
+      const result = password(val, { ...passwordOptions, minLength: 10 });
+      expect(result).toBe('validation:longerThanMin');
     });
     it('should validate maxLength with no value', () => {
       const val = undefined;
-      const result = password(val, { ...options, maxLength: 5 });
+      const result = password(val, { ...passwordOptions, maxLength: 5 });
       expect(result).toBe(true);
     });
     it('should validate minLength with no value', () => {
       const val = undefined;
-      const result = password(val, { ...options, minLength: 10 });
+      const result = password(val, { ...passwordOptions, minLength: 10 });
       expect(result).toBe(true);
     });
   });
 
   describe('point', () => {
-    options.type = 'point';
-    options.name = 'point';
+    const pointOptions = {
+      ...options,
+      type: 'point',
+      name: 'point',
+    };
     it('should validate numbers', () => {
       const val = ['0.1', '0.2'];
-      const result = point(val, options);
+      const result = point(val, pointOptions);
       expect(result).toBe(true);
     });
     it('should validate strings that could be numbers', () => {
       const val = ['0.1', '0.2'];
-      const result = point(val, options);
+      const result = point(val, pointOptions);
       expect(result).toBe(true);
     });
     it('should show required message when undefined', () => {
       const val = undefined;
-      const result = point(val, { ...options, required: true });
+      const result = point(val, { ...pointOptions, required: true });
       expect(result).not.toBe(true);
     });
     it('should show required message when array', () => {
       const val = [];
-      const result = point(val, { ...options, required: true });
+      const result = point(val, { ...pointOptions, required: true });
       expect(result).not.toBe(true);
     });
     it('should show required message when array of undefined', () => {
       const val = [undefined, undefined];
-      const result = point(val, { ...options, required: true });
+      const result = point(val, { ...pointOptions, required: true });
       expect(result).not.toBe(true);
     });
     it('should handle undefined not required', () => {
       const val = undefined;
-      const result = password(val, options);
+      const result = password(val, pointOptions);
       expect(result).toBe(true);
     });
     it('should handle empty array not required', () => {
       const val = [];
-      const result = point(val, options);
+      const result = point(val, pointOptions);
       expect(result).toBe(true);
     });
     it('should handle array of undefined not required', () => {
       const val = [undefined, undefined];
-      const result = point(val, options);
+      const result = point(val, pointOptions);
       expect(result).toBe(true);
     });
     it('should prevent text input', () => {
       const val = ['bad', 'input'];
-      const result = point(val, options);
+      const result = point(val, pointOptions);
       expect(result).not.toBe(true);
     });
     it('should prevent missing value', () => {
       const val = [0.1];
-      const result = point(val, options);
+      const result = point(val, pointOptions);
       expect(result).not.toBe(true);
     });
   });
 
-  describe('select', () => {
-    options.type = 'select';
-    options.options = ['one', 'two', 'three'];
-    const optionsRequired = {
+  describe('relationship', () => {
+    const relationshipOptions = {
       ...options,
+      relationTo: 'relation',
+      payload: {
+        collections: {
+          relation: {
+            config: {
+              slug: 'relation',
+              fields: [{
+                name: 'id',
+                type: 'text',
+              }],
+            },
+          },
+        },
+      },
+    };
+    it('should handle required', async () => {
+      const val = undefined;
+      const result = await relationship(val, { ...relationshipOptions, required: true });
+      expect(result).not.toBe(true);
+    });
+    it('should handle required with hasMany', async () => {
+      const val = [];
+      const result = await relationship(val, { ...relationshipOptions, required: true, hasMany: true });
+      expect(result).not.toBe(true);
+    });
+    it('should enforce hasMany min', async () => {
+      const minOptions = {
+        ...relationshipOptions,
+        hasMany: true,
+        minRows: 2,
+      };
+
+      const val = ['a'];
+
+      const result = await relationship(val, minOptions);
+      expect(result).not.toBe(true);
+
+      const allowed = await relationship(['a', 'b'], minOptions);
+      expect(allowed).toStrictEqual(true);
+    });
+    it('should enforce hasMany max', async () => {
+      const maxOptions = {
+        ...relationshipOptions,
+        maxRows: 2,
+        hasMany: true,
+      };
+      let val = ['a', 'b', 'c'];
+
+      const result = await relationship(val, maxOptions);
+      expect(result).not.toBe(true);
+
+      val = ['a'];
+      const allowed = await relationship(val, maxOptions);
+      expect(allowed).toStrictEqual(true);
+    });
+  });
+
+  describe('select', () => {
+    const selectOptions = {
+      ...options,
+      type: 'select',
+      options: ['one', 'two', 'three'],
+    };
+    const optionsRequired = {
+      ...selectOptions,
       required: true,
       options: [{
         value: 'one',
@@ -206,7 +272,7 @@ describe('Field Validations', () => {
       }],
     };
     const optionsWithEmptyString = {
-      ...options,
+      ...selectOptions,
       options: [{
         value: '',
         label: 'None',
@@ -217,27 +283,27 @@ describe('Field Validations', () => {
     };
     it('should allow valid input', () => {
       const val = 'one';
-      const result = select(val, options);
+      const result = select(val, selectOptions);
       expect(result).toStrictEqual(true);
     });
     it('should prevent invalid input', () => {
       const val = 'bad';
-      const result = select(val, options);
+      const result = select(val, selectOptions);
       expect(result).not.toStrictEqual(true);
     });
     it('should allow null input', () => {
       const val = null;
-      const result = select(val, options);
+      const result = select(val, selectOptions);
       expect(result).toStrictEqual(true);
     });
     it('should allow undefined input', () => {
       let val;
-      const result = select(val, options);
+      const result = select(val, selectOptions);
       expect(result).toStrictEqual(true);
     });
     it('should prevent empty string input', () => {
       const val = '';
-      const result = select(val, options);
+      const result = select(val, selectOptions);
       expect(result).not.toStrictEqual(true);
     });
     it('should prevent undefined input with required', () => {
@@ -296,12 +362,12 @@ describe('Field Validations', () => {
     });
     it('should allow valid input with hasMany', () => {
       const val = ['one', 'two'];
-      const result = select(val, options);
+      const result = select(val, selectOptions);
       expect(result).toStrictEqual(true);
     });
     it('should prevent invalid input with hasMany', () => {
       const val = ['one', 'bad'];
-      const result = select(val, options);
+      const result = select(val, selectOptions);
       expect(result).not.toStrictEqual(true);
     });
     it('should allow valid input with hasMany option objects', () => {
@@ -318,42 +384,70 @@ describe('Field Validations', () => {
     });
   });
   describe('number', () => {
-    options.type = 'number';
-    options.name = 'test';
+    const numberOptions = {
+      ...options,
+      type: 'number',
+      name: 'test',
+    };
     it('should validate', () => {
       const val = 1;
-      const result = number(val, options);
+      const result = number(val, numberOptions);
       expect(result).toBe(true);
     });
     it('should validate 2', () => {
       const val = 1.5;
-      const result = number(val, options);
+      const result = number(val, numberOptions);
       expect(result).toBe(true);
     });
     it('should show invalid number message', () => {
       const val = 'test';
-      const result = number(val, { ...options });
-      expect(result).toBe(validNumberMessage);
+      const result = number(val, { ...numberOptions });
+      expect(result).toBe('validation:enterNumber');
     });
     it('should handle empty value', () => {
       const val = '';
-      const result = number(val, { ...options });
+      const result = number(val, { ...numberOptions });
       expect(result).toBe(true);
     });
     it('should handle required value', () => {
       const val = '';
-      const result = number(val, { ...options, required: true });
-      expect(result).toBe(validNumberMessage);
+      const result = number(val, { ...numberOptions, required: true });
+      expect(result).toBe('validation:enterNumber');
     });
     it('should validate minValue', () => {
       const val = 2.4;
-      const result = number(val, { ...options, min: 2.5 });
-      expect(result).toBe(minValueMessage(val, 2.5));
+      const result = number(val, { ...numberOptions, min: 2.5 });
+      expect(result).toBe('validation:lessThanMin');
     });
     it('should validate maxValue', () => {
       const val = 1.25;
-      const result = number(val, { ...options, max: 1 });
-      expect(result).toBe(maxValueMessage(val, 1));
+      const result = number(val, { ...numberOptions, max: 1 });
+      expect(result).toBe('validation:greaterThanMax');
+    });
+    it('should validate an array of numbers', async () => {
+      const val = [1.25, 2.5];
+      const result = number(val, { ...numberOptions, hasMany: true });
+      expect(result).toBe(true);
+    });
+    it('should validate an array of numbers using min', async () => {
+      const val = [1.25, 2.5];
+      const result = number(val, { ...numberOptions, hasMany: true, min: 3 });
+      expect(result).toBe('validation:lessThanMin');
+    });
+    it('should validate an array of numbers using max', async () => {
+      const val = [1.25, 2.5];
+      const result = number(val, { ...numberOptions, hasMany: true, max: 1 });
+      expect(result).toBe('validation:greaterThanMax');
+    });
+    it('should validate an array of numbers using minRows', async () => {
+      const val = [1.25, 2.5];
+      const result = number(val, { ...numberOptions, hasMany: true, minRows: 4 });
+      expect(result).toBe('validation:lessThanMin');
+    });
+    it('should validate an array of numbers using maxRows', async () => {
+      const val = [1.25, 2.5, 3.5];
+      const result = number(val, { ...numberOptions, hasMany: true, maxRows: 2 });
+      expect(result).toBe('validation:greaterThanMax');
     });
   });
 });

@@ -8,10 +8,6 @@ const checkDuplicateCollections = (collections: CollectionConfig[]): void => {
   if (duplicateSlugs.length > 0) {
     throw new DuplicateCollection('slug', duplicateSlugs);
   }
-  const duplicateLabels = getDuplicates(collections.map((c) => c.labels.singular));
-  if (duplicateLabels.length > 0) {
-    throw new DuplicateCollection('label', duplicateLabels);
-  }
 };
 
 export default checkDuplicateCollections;

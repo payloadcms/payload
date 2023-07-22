@@ -3,6 +3,9 @@ import { Config } from '../config/types';
 import { CollectionConfig } from '../collections/config/types';
 import { mimeTypeValidator } from './mimeTypeValidator';
 import { IncomingUploadType } from './types';
+import { extractTranslations } from '../translations/extractTranslations';
+
+const labels = extractTranslations(['upload:width', 'upload:height', 'upload:fileSize', 'upload:fileName', 'upload:sizes']);
 
 type Options = {
   config: Config
@@ -18,7 +21,7 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     type: 'text',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
@@ -28,49 +31,50 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     type: 'text',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
   const width: Field = {
     name: 'width',
-    label: 'Width',
+    label: labels['upload:width'],
     type: 'number',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
   const height: Field = {
     name: 'height',
-    label: 'Height',
+    label: labels['upload:height'],
     type: 'number',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
   const filesize: Field = {
     name: 'filesize',
-    label: 'File Size',
+    label: labels['upload:fileSize'],
     type: 'number',
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
     },
   };
 
   const filename: Field = {
     name: 'filename',
-    label: 'File Name',
+    label: labels['upload:fileName'],
     type: 'text',
     index: true,
     unique: true,
     admin: {
       readOnly: true,
-      disabled: true,
+      hidden: true,
+      disableBulkEdit: true,
     },
   };
 
@@ -81,7 +85,10 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
         afterRead: [
           ({ data }) => {
             if (data?.filename) {
-              return `${config.serverURL}${uploadOptions.staticURL}/${data.filename}`;
+              if (uploadOptions.staticURL.startsWith('/')) {
+                return `${config.serverURL}${uploadOptions.staticURL}/${data.filename}`;
+              }
+              return `${uploadOptions.staticURL}/${data.filename}`;
             }
 
             return undefined;
@@ -104,17 +111,17 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     uploadFields = uploadFields.concat([
       {
         name: 'sizes',
-        label: 'Sizes',
+        label: labels['upload:Sizes'],
         type: 'group',
         admin: {
-          disabled: true,
+          hidden: true,
         },
         fields: uploadOptions.imageSizes.map((size) => ({
           label: size.name,
           name: size.name,
           type: 'group',
           admin: {
-            disabled: true,
+            hidden: true,
           },
           fields: [
             {
@@ -125,7 +132,10 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
                     const sizeFilename = data?.sizes?.[size.name]?.filename;
 
                     if (sizeFilename) {
-                      return `${config.serverURL}${uploadOptions.staticURL}/${sizeFilename}`;
+                      if (uploadOptions.staticURL.startsWith('/')) {
+                        return `${config.serverURL}${uploadOptions.staticURL}/${sizeFilename}`;
+                      }
+                      return `${uploadOptions.staticURL}/${sizeFilename}`;
                     }
 
                     return undefined;

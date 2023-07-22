@@ -5,42 +5,18 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Jest Tests",
-      "type": "node",
+      "command": "yarn run dev _community",
+      "name": "Run Dev Community",
       "request": "launch",
-      "runtimeArgs": [
-        "--inspect-brk",
-        "${workspaceRoot}/node_modules/.bin/jest",
-        "--runInBand"
-      ],
-      "env": {
-        "PAYLOAD_CONFIG_PATH": "demo/payload.config.ts"
-      },
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/babel-node",
-      "port": 9229,
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}"
     },
     {
-      "type": "node",
+      "command": "yarn run dev fields",
+      "name": "Run Dev Fields",
       "request": "launch",
-      "name": "Launch Program",
-      "env": {
-        "BABEL_ENV": "development"
-      },
-      "program": "${workspaceFolder}/test/dev.js",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "runtimeArgs": [
-        "--nolazy"
-      ],
-      "args": [
-        "fields"
-      ]
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}"
     },
   ]
 }

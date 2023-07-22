@@ -1,4 +1,5 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
+import { ArrayRowLabel } from './LabelComponent';
 
 export const arrayDefaultValue = [
   { text: 'row one' },
@@ -9,6 +10,9 @@ export const arrayFieldsSlug = 'array-fields';
 
 const ArrayFields: CollectionConfig = {
   slug: arrayFieldsSlug,
+  admin: {
+    enableRichTextLink: false,
+  },
   fields: [
     {
       name: 'items',
@@ -81,6 +85,38 @@ const ArrayFields: CollectionConfig = {
           name: 'text',
         },
       ],
+    },
+    {
+      type: 'array',
+      name: 'rowLabelAsFunction',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      admin: {
+        description: 'Row labels rendered from a function.',
+        components: {
+          RowLabel: ({ data }) => data.title,
+        },
+      },
+    },
+    {
+      type: 'array',
+      name: 'rowLabelAsComponent',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+      admin: {
+        description: 'Row labels rendered as react components.',
+        components: {
+          RowLabel: ArrayRowLabel,
+        },
+      },
     },
   ],
 };

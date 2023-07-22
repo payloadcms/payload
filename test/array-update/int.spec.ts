@@ -1,13 +1,14 @@
 import mongoose from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers';
 import payload from '../../src';
-import config from './config';
-import type { Array as ArrayCollection } from './payload-types';
+import configPromise from './config';
 
-const collection = config.collections[0]?.slug;
+let collection: string;
 
 describe('array-update', () => {
   beforeAll(async () => {
+    const config = await configPromise;
+    collection = config.collections[0]?.slug;
     await initPayloadTest({ __dirname });
   });
 
@@ -23,7 +24,7 @@ describe('array-update', () => {
     const doc = await payload.create({
       collection,
       data: {
-        array: [
+        arrayOfFields: [
           {
             required: 'a required field here',
             optional: originalText,
@@ -36,7 +37,7 @@ describe('array-update', () => {
       },
     });
 
-    const arrayWithExistingValues = [...doc.array];
+    const arrayWithExistingValues = [...doc.arrayOfFields];
 
     const updatedText = 'this is some new text for the first item in array';
 
@@ -45,15 +46,15 @@ describe('array-update', () => {
       required: updatedText,
     };
 
-    const updatedDoc = await payload.update<ArrayCollection>({
+    const updatedDoc = await payload.update({
       id: doc.id,
       collection,
       data: {
-        array: arrayWithExistingValues,
+        arrayOfFields: arrayWithExistingValues,
       },
     });
 
-    expect(updatedDoc.array?.[0]).toMatchObject({
+    expect(updatedDoc.arrayOfFields?.[0]).toMatchObject({
       required: updatedText,
       optional: originalText,
     });
@@ -67,10 +68,10 @@ describe('array-update', () => {
       optional: 'optional test',
     };
 
-    const doc = await payload.create<ArrayCollection>({
+    const doc = await payload.create({
       collection,
       data: {
-        array: [
+        arrayOfFields: [
           {
             required: 'a required field here',
             optional: 'some optional text',
@@ -80,17 +81,17 @@ describe('array-update', () => {
       },
     });
 
-    const updatedDoc = await payload.update<ArrayCollection>({
+    const updatedDoc = await payload.update({
       id: doc.id,
       collection,
       data: {
-        array: [
+        arrayOfFields: [
           {
             required: updatedText,
           },
           {
-            id: doc.array?.[1].id,
-            required: doc.array?.[1].required as string,
+            id: doc.arrayOfFields?.[1].id,
+            required: doc.arrayOfFields?.[1].required as string,
             // NOTE - not passing optional field. It should persist
             // because we're passing ID
           },
@@ -98,9 +99,9 @@ describe('array-update', () => {
       },
     });
 
-    expect(updatedDoc.array?.[0].required).toStrictEqual(updatedText);
-    expect(updatedDoc.array?.[0].optional).toBeUndefined();
+    expect(updatedDoc.arrayOfFields?.[0].required).toStrictEqual(updatedText);
+    expect(updatedDoc.arrayOfFields?.[0].optional).toBeUndefined();
 
-    expect(updatedDoc.array?.[1]).toMatchObject(secondArrayItem);
+    expect(updatedDoc.arrayOfFields?.[1]).toMatchObject(secondArrayItem);
   });
 });

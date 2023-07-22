@@ -102,7 +102,8 @@
 
   &--read-only {
     .rich-text__editor {
-      background-color: var(--theme-elevation-150);
+      background: var(--theme-elevation-200);
+      color: var(--theme-elevation-450);
       padding: base(.5);
 
       .popup button {
@@ -122,7 +123,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: var(--theme-elevation-150);
+        background-color: var(--theme-elevation-200);
         opacity: .85;
         z-index: 2;
         backdrop-filter: unset;
@@ -150,13 +151,41 @@
     }
   }
 
+  &__drawerIsOpen {
+    top: base(1);
+  }
+
   @include mid-break {
     &__toolbar {
       top: base(3);
+    }
+
+    &__drawerIsOpen {
+      top: base(1);
     }
   }
 }
 
 [data-slate-node=element] {
   margin-bottom: base(0.25);
+}
+
+html[data-theme=light] {
+  .rich-text {
+    &.error {
+      .rich-text__editor, .rich-text__toolbar {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .rich-text {
+    &.error {
+      .rich-text__editor, .rich-text__toolbar {
+        @include darkInputError;
+      }
+    }
+  }
 }

@@ -3,14 +3,14 @@ import passport from 'passport';
 import path from 'path';
 import getExecuteStaticAccess from '../auth/getExecuteStaticAccess';
 import authenticate from './middleware/authenticate';
-import { Payload } from '../index';
+import { Payload } from '../payload';
 import corsHeaders from './middleware/corsHeaders';
 
 function initStatic(ctx: Payload): void {
   Object.entries(ctx.collections).forEach(([_, collection]) => {
     const { config } = collection;
 
-    if (config.upload) {
+    if (config.upload && config.upload.staticURL.startsWith('/')) {
       const router = express.Router();
 
       router.use(corsHeaders(ctx.config));

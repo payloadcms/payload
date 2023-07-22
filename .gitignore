@@ -2,6 +2,7 @@ coverage
 package-lock.json
 dist
 .idea
+test-results
 
 # Created by https://www.gitignore.io/api/node,macos,windows,webstorm,sublimetext,visualstudiocode
 
@@ -163,7 +164,7 @@ GitHub.sublime-settings
 # CMake
 cmake-build-debug/
 
-# Mongo Explorer plugin:
+# MongoDB Explorer plugin:
 .idea/**/mongoSettings.xml
 
 ## File-based project format:

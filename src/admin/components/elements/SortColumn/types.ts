@@ -1,5 +1,5 @@
 export type Props = {
-  label: string,
+  label: Record<string, string> | string,
   name: string,
   disable?: boolean,
 }

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2019",
+    "sourceMap": true,
     "module": "commonjs",
     "allowJs": true, /* Allow javascript files to be compiled. */
     "checkJs": false, /* Report errors in .js files. */
@@ -14,6 +15,9 @@
     "strict": true, /* Enable all strict type-checking options. */
     "moduleResolution": "node", /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
     "paths": {
+      "payload/generated-types": [
+        "./src/generated-types.ts",
+      ],
       "payload/config": [
         "./src/config/types.ts"
       ],
@@ -21,13 +25,16 @@
         "./src/auth/types.ts"
       ],
       "payload/types": [
-        "./src/types/index.ts"
-      ]
+        "./src/types/index.ts",
+      ],
     },
     "esModuleInterop": true, /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
     "resolveJsonModule": true,
     "skipLibCheck": true, /* Skip type checking of declaration files. */
     "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
+  },
+  "ts-node": {
+    "swc": true,
   },
   "include": [
     "src/"

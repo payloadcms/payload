@@ -3,13 +3,15 @@ import { Response } from 'express';
 import { Collection } from '../../collections/config/types';
 import { APIError } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
-import { UserDocument } from '../types';
 import { fieldAffectsData } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
+import { authenticateLocalStrategy } from '../strategies/local/authenticate';
+import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 
 export type Result = {
   token: string
-  user: UserDocument
+  user: Record<string, unknown>
 }
 
 export type Arguments = {
@@ -21,6 +23,7 @@ export type Arguments = {
   req: PayloadRequest
   overrideAccess?: boolean
   res?: Response
+  depth?: number
 }
 
 async function resetPassword(args: Arguments): Promise<Result> {
@@ -43,26 +46,42 @@ async function resetPassword(args: Arguments): Promise<Result> {
     },
     overrideAccess,
     data,
+    depth,
   } = args;
 
   // /////////////////////////////////////
   // Reset Password
   // /////////////////////////////////////
 
-  const user = await Model.findOne({
+  let user = await Model.findOne({
     resetPasswordToken: data.token,
     resetPasswordExpiration: { $gt: Date.now() },
-  }) as UserDocument;
+  }).lean();
+
+  user = JSON.parse(JSON.stringify(user));
+  user = user ? sanitizeInternalFields(user) : null;
 
   if (!user) throw new APIError('Token is either invalid or has expired.');
 
-  await user.setPassword(data.password);
+  // TODO: replace this method
+  const { salt, hash } = await generatePasswordSaltHash({ password: data.password });
+
+  user.salt = salt;
+  user.hash = hash;
 
   user.resetPasswordExpiration = Date.now();
 
-  await user.save();
+  if (collectionConfig.auth.verify) {
+    user._verified = true;
+  }
 
-  await user.authenticate(data.password);
+
+  let doc = await Model.findByIdAndUpdate({ _id: user.id }, user, { new: true }).lean();
+
+  doc = JSON.parse(JSON.stringify(doc));
+  doc = sanitizeInternalFields(doc);
+
+  await authenticateLocalStrategy({ password: data.password, doc });
 
   const fieldsToSign = collectionConfig.fields.reduce((signedFields, field) => {
     if (fieldAffectsData(field) && field.saveToJWT) {
@@ -102,7 +121,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
     args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
   }
 
-  const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess });
+  const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess, depth });
   return { token, user: fullUser };
 }
 

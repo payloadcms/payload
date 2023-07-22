@@ -3,6 +3,7 @@ import payload from '../../src';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { slug } from './config';
 import { devUser } from '../credentials';
+import type { User } from '../../src/auth';
 
 require('isomorphic-fetch');
 
@@ -11,6 +12,7 @@ let apiUrl;
 const headers = {
   'Content-Type': 'application/json',
 };
+
 const { email, password } = devUser;
 
 describe('Auth', () => {
@@ -68,6 +70,8 @@ describe('Auth', () => {
 
     describe('logged in', () => {
       let token: string | undefined;
+      let loggedInUser: User | undefined;
+
       beforeAll(async () => {
         const response = await fetch(`${apiUrl}/${slug}/login`, {
           body: JSON.stringify({
@@ -80,6 +84,7 @@ describe('Auth', () => {
 
         const data = await response.json();
         token = data.token;
+        loggedInUser = data.user;
       });
 
       it('should return a logged in user from /me', async () => {
@@ -96,6 +101,33 @@ describe('Auth', () => {
         expect(data.user.email).toBeDefined();
       });
 
+
+      it('should allow authentication with an API key with useAPIKey', async () => {
+        const apiKey = '0123456789ABCDEFGH';
+
+        const user = await payload.create({
+          collection: slug,
+          data: {
+            email: 'dev@example.com',
+            password: 'test',
+            apiKey,
+          },
+        });
+
+        const response = await fetch(`${apiUrl}/${slug}/me`, {
+          headers: {
+            ...headers,
+            Authorization: `${slug} API-Key ${user?.apiKey}`,
+          },
+        });
+
+        const data = await response.json();
+
+        expect(response.status).toBe(200);
+        expect(data.user.email).toBeDefined();
+        expect(data.user.apiKey).toStrictEqual(apiKey);
+      });
+
       it('should refresh a token and reset its expiration', async () => {
         const response = await fetch(`${apiUrl}/${slug}/refresh-token`, {
           method: 'post',
@@ -108,6 +140,30 @@ describe('Auth', () => {
 
         expect(response.status).toBe(200);
         expect(data.refreshedToken).toBeDefined();
+      });
+
+      it('should refresh a token and receive an up-to-date user', async () => {
+        expect(loggedInUser?.custom).toBe('Hello, world!');
+
+        await payload.update({
+          collection: slug,
+          id: loggedInUser?.id || '',
+          data: {
+            custom: 'Goodbye, world!',
+          },
+        });
+
+        const response = await fetch(`${apiUrl}/${slug}/refresh-token`, {
+          method: 'post',
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        expect(response.status).toBe(200);
+        expect(data.user.custom).toBe('Goodbye, world!');
       });
 
       it('should allow a user to be created', async () => {
@@ -176,6 +232,7 @@ describe('Auth', () => {
         expect(verificationResponse.status).toBe(200);
 
         const afterVerifyResult = await db.collection('public-users').findOne({ email: emailToVerify });
+        // @ts-expect-error trust
         const { _verified: afterVerified, _verificationToken: afterToken } = afterVerifyResult;
         expect(afterVerified).toBe(true);
         expect(afterToken).toBeUndefined();
@@ -265,7 +322,7 @@ describe('Auth', () => {
           const { loginAttempts, lockUntil } = userResult;
 
           expect(loginAttempts).toBe(0);
-          expect(lockUntil).toBeUndefined();
+          expect(lockUntil).toBeNull();
         });
       });
     });
@@ -285,6 +342,55 @@ describe('Auth', () => {
       // expect(mailSpy).toHaveBeenCalled();
 
       expect(response.status).toBe(200);
+    });
+
+    it('should allow reset password', async () => {
+      const token = await payload.forgotPassword({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+        },
+        disableEmail: true,
+      });
+
+      const result = await payload.resetPassword({
+        collection: 'users',
+        data: {
+          password: devUser.password,
+          token,
+        },
+        overrideAccess: true,
+      }).catch((e) => console.error(e));
+
+      expect(result).toBeTruthy();
+    });
+  });
+
+  describe('API Key', () => {
+    it('should authenticate via the correct API key user', async () => {
+      const usersQuery = await payload.find({
+        collection: 'api-keys',
+      });
+
+      const [user1, user2] = usersQuery.docs;
+
+      const success = await fetch(`${apiUrl}/api-keys/${user2.id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `api-keys API-Key ${user2.apiKey}`,
+        },
+      }).then((res) => res.json());
+
+      expect(success.apiKey).toStrictEqual(user2.apiKey);
+
+      const fail = await fetch(`${apiUrl}/api-keys/${user1.id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `api-keys API-Key ${user2.apiKey}`,
+        },
+      });
+
+      expect(fail.status).toStrictEqual(404);
     });
   });
 });

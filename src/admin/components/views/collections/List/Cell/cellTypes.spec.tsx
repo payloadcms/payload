@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { SelectField } from '../../../../../../fields/config/types';
+import { BlockField, DateField, SelectField } from '../../../../../../fields/config/types';
 import BlocksCell from './field-types/Blocks';
 import DateCell from './field-types/Date';
 import Checkbox from './field-types/Checkbox';
@@ -11,9 +11,13 @@ jest.mock('../../../../utilities/Config', () => ({
   useConfig: () => ({ admin: { dateFormat: 'MMMM do yyyy, h:mm a' } }),
 }));
 
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (string) => string }),
+}));
+
 describe('Cell Types', () => {
   describe('Blocks', () => {
-    const field = {
+    const field: BlockField = {
       label: 'Blocks Content',
       name: 'blocks',
       labels: {
@@ -25,8 +29,10 @@ describe('Cell Types', () => {
         {
           slug: 'number',
           labels: {
+            plural: 'Numbers',
             singular: 'Number',
           },
+          fields: [],
         },
       ],
     };
@@ -69,15 +75,28 @@ describe('Cell Types', () => {
         field={field}
       />);
       const el = container.querySelector('span');
-      expect(el).toHaveTextContent('6 Blocks Content - Number, Number, Number, Number, Number and 1 more');
+      expect(el).toHaveTextContent('fields:itemsAndMore');
     });
   });
 
 
   describe('Date', () => {
+    const field: DateField = {
+      name: 'dayOnly',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayOnly',
+        },
+      },
+    };
+
     it('renders date', () => {
       const timeStamp = '2020-10-06T14:07:39.033Z';
-      const { container } = render(<DateCell data={timeStamp} />);
+      const { container } = render(<DateCell
+        data={timeStamp}
+        field={field}
+      />);
       const dateMatch = /October\s6th\s2020,\s[\d]{1,2}:07\s[A|P]M/; // Had to account for timezones in CI
       const el = container.querySelector('span');
       expect(el.textContent).toMatch(dateMatch);
@@ -85,7 +104,10 @@ describe('Cell Types', () => {
 
     it('handles undefined', () => {
       const timeStamp = undefined;
-      const { container } = render(<DateCell data={timeStamp} />);
+      const { container } = render(<DateCell
+        data={timeStamp}
+        field={field}
+      />);
       const el = container.querySelector('span');
       expect(el.textContent).toBe('');
     });

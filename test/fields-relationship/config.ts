@@ -1,14 +1,10 @@
 import type { CollectionConfig } from '../../src/collections/config/types';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 import { mapAsync } from '../../src/utilities/mapAsync';
-
-export const slug = 'fields-relationship';
-
-export const relationOneSlug = 'relation-one';
-export const relationTwoSlug = 'relation-two';
-export const relationRestrictedSlug = 'relation-restricted';
-export const relationWithTitleSlug = 'relation-with-title';
+import { FilterOptionsProps } from '../../src/fields/config/types';
+import { PrePopulateFieldUI } from './PrePopulateFieldUI';
+import { relationOneSlug, relationTwoSlug, relationRestrictedSlug, relationWithTitleSlug, relationUpdatedExternallySlug, collection1Slug, collection2Slug, slug } from './collectionSlugs';
 
 export interface FieldsRelationship {
   id: string;
@@ -37,7 +33,7 @@ const baseRelationshipFields: CollectionConfig['fields'] = [
   },
 ];
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   collections: [
     {
       slug,
@@ -83,6 +79,45 @@ export default buildConfig({
           name: 'relationshipWithTitle',
           relationTo: relationWithTitleSlug,
         },
+        {
+          type: 'relationship',
+          name: 'relationshipFiltered',
+          relationTo: relationOneSlug,
+          filterOptions: (args: FilterOptionsProps<FieldsRelationship>) => {
+            return ({
+              id: {
+                equals: args.data.relationship,
+              },
+            });
+          },
+        },
+        {
+          type: 'relationship',
+          name: 'relationshipManyFiltered',
+          relationTo: [relationWithTitleSlug, relationOneSlug],
+          hasMany: true,
+          filterOptions: ({ relationTo, siblingData }: any) => {
+            if (relationTo === relationOneSlug) {
+              return { name: { equals: 'include' } };
+            }
+            if (siblingData.filter) {
+              return { name: { contains: siblingData.filter } };
+            }
+            return { and: [] };
+          },
+        },
+        {
+          type: 'text',
+          name: 'filter',
+        },
+        {
+          name: 'relationshipReadOnly',
+          type: 'relationship',
+          relationTo: relationOneSlug,
+          admin: {
+            readOnly: true,
+          },
+        },
       ],
     },
     {
@@ -101,14 +136,125 @@ export default buildConfig({
       fields: baseRelationshipFields,
       access: {
         read: () => false,
+        create: () => false,
       },
     },
     {
       slug: relationWithTitleSlug,
       admin: {
+        useAsTitle: 'meta.title',
+      },
+      fields: [
+        ...baseRelationshipFields,
+        {
+          name: 'meta',
+          type: 'group',
+          fields: [
+            {
+              name: 'title',
+              label: 'Meta Title',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: relationUpdatedExternallySlug,
+      admin: {
         useAsTitle: 'name',
       },
-      fields: baseRelationshipFields,
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'relationPrePopulate',
+              type: 'relationship',
+              relationTo: collection1Slug,
+              admin: {
+                width: '75%',
+              },
+            },
+            {
+              type: 'ui',
+              name: 'prePopulate',
+              admin: {
+                width: '25%',
+                components: {
+                  Field: () => PrePopulateFieldUI({ path: 'relationPrePopulate', hasMany: false }),
+                },
+              },
+            },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'relationHasMany',
+              type: 'relationship',
+              relationTo: collection1Slug,
+              hasMany: true,
+              admin: {
+                width: '75%',
+              },
+            },
+            {
+              type: 'ui',
+              name: 'prePopulateRelationHasMany',
+              admin: {
+                width: '25%',
+                components: {
+                  Field: () => PrePopulateFieldUI({ path: 'relationHasMany', hasMultipleRelations: false }),
+                },
+              },
+            },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'relationToManyHasMany',
+              type: 'relationship',
+              relationTo: [collection1Slug, collection2Slug],
+              hasMany: true,
+              admin: {
+                width: '75%',
+              },
+            },
+            {
+              type: 'ui',
+              name: 'prePopulateToMany',
+              admin: {
+                width: '25%',
+                components: {
+                  Field: () => PrePopulateFieldUI({ path: 'relationToManyHasMany', hasMultipleRelations: true }),
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: collection1Slug,
+      fields: [
+        {
+          type: 'text',
+          name: 'name',
+        },
+      ],
+    },
+    {
+      slug: collection2Slug,
+      fields: [
+        {
+          type: 'text',
+          name: 'name',
+        },
+      ],
     },
   ],
   onInit: async (payload) => {
@@ -120,16 +266,16 @@ export default buildConfig({
       },
     });
     // Create docs to relate to
-    const { id: relationOneDocId } = await payload.create<RelationOne>({
+    const { id: relationOneDocId } = await payload.create({
       collection: relationOneSlug,
       data: {
         name: relationOneSlug,
       },
     });
 
-    const relationOneIDs = [];
+    const relationOneIDs: string[] = [];
     await mapAsync([...Array(11)], async () => {
-      const doc = await payload.create<RelationOne>({
+      const doc = await payload.create({
         collection: relationOneSlug,
         data: {
           name: relationOneSlug,
@@ -138,9 +284,9 @@ export default buildConfig({
       relationOneIDs.push(doc.id);
     });
 
-    const relationTwoIDs = [];
+    const relationTwoIDs: string[] = [];
     await mapAsync([...Array(11)], async () => {
-      const doc = await payload.create<RelationTwo>({
+      const doc = await payload.create({
         collection: relationTwoSlug,
         data: {
           name: relationTwoSlug,
@@ -150,23 +296,29 @@ export default buildConfig({
     });
 
     // Existing relationships
-    const { id: restrictedDocId } = await payload.create<RelationRestricted>({
+    const { id: restrictedDocId } = await payload.create({
       collection: relationRestrictedSlug,
       data: {
         name: 'relation-restricted',
       },
     });
-    const relationsWithTitle = [];
+
+    const relationsWithTitle: string[] = [];
+
     await mapAsync(['relation-title', 'word boundary search'], async (title) => {
-      const { id } = await payload.create<RelationWithTitle>({
+      const { id } = await payload.create({
         collection: relationWithTitleSlug,
         data: {
           name: title,
+          meta: {
+            title,
+          },
         },
       });
       relationsWithTitle.push(id);
     });
-    await payload.create<FieldsRelationship>({
+
+    await payload.create({
       collection: slug,
       data: {
         relationship: relationOneDocId,
@@ -175,7 +327,7 @@ export default buildConfig({
       },
     });
     await mapAsync([...Array(11)], async () => {
-      await payload.create<FieldsRelationship>({
+      await payload.create({
         collection: slug,
         data: {
           relationship: relationOneDocId,
@@ -187,16 +339,33 @@ export default buildConfig({
         },
       });
     });
+
     await mapAsync([...Array(15)], async () => {
       const relationOneID = relationOneIDs[Math.floor(Math.random() * 10)];
       const relationTwoID = relationTwoIDs[Math.floor(Math.random() * 10)];
-      await payload.create<FieldsRelationship>({
+      await payload.create({
         collection: slug,
         data: {
           relationship: relationOneDocId,
           relationshipRestricted: restrictedDocId,
           relationshipHasMany: [relationOneID],
           relationshipHasManyMultiple: [{ relationTo: relationTwoSlug, value: relationTwoID }],
+          relationshipReadOnly: relationOneID,
+        },
+      });
+    });
+
+    [...Array(15)].forEach((_, i) => {
+      payload.create({
+        collection: collection1Slug,
+        data: {
+          name: `relationship-test ${i}`,
+        },
+      });
+      payload.create({
+        collection: collection2Slug,
+        data: {
+          name: `relationship-test ${i}`,
         },
       });
     });

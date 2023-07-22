@@ -1,15 +1,21 @@
 import type { CollectionConfig } from '../../../src/collections/config/types';
+import { CustomPublishButton } from '../elements/CustomSaveButton';
+import { draftSlug } from '../shared';
 
 const DraftPosts: CollectionConfig = {
-  slug: 'draft-posts',
+  slug: draftSlug,
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'description', 'createdAt'],
+    defaultColumns: ['title', 'description', 'createdAt', '_status'],
     preview: () => 'https://payloadcms.com',
+    components: {
+      edit: {
+        PublishButton: CustomPublishButton,
+      },
+    },
   },
   versions: {
     maxPerDoc: 35,
-    retainDeleted: false,
     drafts: true,
   },
   access: {
@@ -49,6 +55,31 @@ const DraftPosts: CollectionConfig = {
       label: 'Description',
       type: 'textarea',
       required: true,
+    },
+    {
+      name: 'radio',
+      type: 'radio',
+      options: [
+        {
+          value: 'test',
+          label: { en: 'Test en', es: 'Test es' },
+        },
+      ],
+    },
+    {
+      name: 'select',
+      type: 'select',
+      hasMany: true,
+      options: [
+        {
+          value: 'test1',
+          label: { en: 'Test1 en', es: 'Test1 es' },
+        },
+        {
+          value: 'test2',
+          label: { en: 'Test2 en', es: 'Test2 es' },
+        },
+      ],
     },
   ],
 };

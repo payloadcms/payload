@@ -1,7 +1,10 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
+import { CollapsibleLabelComponent } from './LabelComponent';
+
+export const collapsibleFieldsSlug = 'collapsible-fields';
 
 const CollapsibleFields: CollectionConfig = {
-  slug: 'collapsible-fields',
+  slug: collapsibleFieldsSlug,
   versions: true,
   fields: [
     {
@@ -52,6 +55,7 @@ const CollapsibleFields: CollectionConfig = {
           type: 'text',
         },
         {
+          // TODO: change group name, to not be a duplicate of the above collapsible
           name: 'group',
           type: 'group',
           fields: [
@@ -73,6 +77,59 @@ const CollapsibleFields: CollectionConfig = {
         },
       ],
     },
+    {
+      label: ({ data }) => data.functionTitleField || 'Custom Collapsible Label',
+      type: 'collapsible',
+      admin: {
+        description: 'Collapsible label rendered from a function.',
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          name: 'functionTitleField',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      label: ({ data }) => data?.componentTitleField || 'Untitled',
+      type: 'collapsible',
+      admin: {
+        description: 'Collapsible label rendered as a react component.',
+      },
+      fields: [
+        {
+          name: 'componentTitleField',
+          type: 'text',
+        },
+        {
+          type: 'collapsible',
+          label: ({ data }) => data?.nestedTitle || 'Nested Collapsible',
+          fields: [
+            {
+              type: 'text',
+              name: 'nestedTitle',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'arrayWithCollapsibles',
+      type: 'array',
+      fields: [
+        {
+          label: CollapsibleLabelComponent,
+          type: 'collapsible',
+          fields: [
+            {
+              name: 'innerCollapsible',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
   ],
 };
 
@@ -84,6 +141,11 @@ export const collapsibleDoc = {
       textWithinSubGroup: 'hello, get out',
     },
   },
+  arrayWithCollapsibles: [
+    {
+      innerCollapsible: '',
+    },
+  ],
 };
 
 export default CollapsibleFields;

@@ -1,14 +1,14 @@
 import PassportAPIKey from 'passport-headerapikey';
 import crypto from 'crypto';
 import { PayloadRequest } from '../../express/types';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import find from '../../collections/operations/find';
 
 export default (payload: Payload, { Model, config }): PassportAPIKey => {
   const { secret } = payload;
   const opts = {
     header: 'Authorization',
-    prefix: `${config.labels.singular} API-Key `,
+    prefix: `${config.slug} API-Key `,
   };
 
   return new PassportAPIKey(opts, true, async (apiKey, done, req) => {

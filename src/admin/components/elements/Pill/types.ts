@@ -1,3 +1,5 @@
+import { HTMLAttributes } from 'react';
+
 export type Props = {
   children?: React.ReactNode,
   className?: string,
@@ -5,7 +7,13 @@ export type Props = {
   icon?: React.ReactNode,
   alignIcon?: 'left' | 'right',
   onClick?: () => void,
-  pillStyle?: 'white' | 'light' | 'dark' | 'light-gray' | 'warning' | 'success',
+  pillStyle?: 'white' | 'light' | 'dark' | 'light-gray' | 'warning' | 'success' | 'error',
+  draggable?: boolean,
+  rounded?: boolean
+  id?: string
+  elementProps?: HTMLAttributes<HTMLElement> & {
+    ref: React.RefCallback<HTMLElement>
+  }
 }
 
 export type RenderedTypeProps = {

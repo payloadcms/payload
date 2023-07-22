@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import queryString from 'qs';
 import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Props } from './types';
 import ReactSelect from '../ReactSelect';
 import sortableFieldTypes from '../../../../fields/sortableFieldTypes';
 import { useSearchParams } from '../../utilities/SearchParams';
-import { fieldAffectsData } from '../../../../fields/config/types';
+import { fieldAffectsData, OptionObject } from '../../../../fields/config/types';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
 const baseClass = 'sort-complex';
-
-const sortOptions = [{ label: 'Ascending', value: '' }, { label: 'Descending', value: '-' }];
 
 const SortComplex: React.FC<Props> = (props) => {
   const {
@@ -22,19 +22,22 @@ const SortComplex: React.FC<Props> = (props) => {
 
   const history = useHistory();
   const params = useSearchParams();
+  const { t, i18n } = useTranslation('general');
+  const [sortOptions, setSortOptions] = useState<OptionObject[]>();
 
   const [sortFields] = useState(() => collection.fields.reduce((fields, field) => {
     if (fieldAffectsData(field) && sortableFieldTypes.indexOf(field.type) > -1) {
       return [
         ...fields,
-        { label: field.label, value: field.name },
+        { label: getTranslation(field.label || field.name, i18n), value: field.name },
       ];
     }
     return fields;
   }, []));
 
   const [sortField, setSortField] = useState(sortFields[0]);
-  const [sortOrder, setSortOrder] = useState({ label: 'Descending', value: '-' });
+  const [initialSort] = useState(() => ({ label: t('descending'), value: '-' }));
+  const [sortOrder, setSortOrder] = useState(initialSort);
 
   useEffect(() => {
     if (sortField?.value) {
@@ -53,13 +56,17 @@ const SortComplex: React.FC<Props> = (props) => {
     }
   }, [history, params, sortField, sortOrder, modifySearchQuery, handleChange]);
 
+  useEffect(() => {
+    setSortOptions([{ label: t('ascending'), value: '' }, { label: t('descending'), value: '-' }]);
+  }, [i18n, t]);
+
   return (
     <div className={baseClass}>
       <React.Fragment>
         <div className={`${baseClass}__wrap`}>
           <div className={`${baseClass}__select`}>
             <div className={`${baseClass}__label`}>
-              Column to Sort
+              {t('columnToSort')}
             </div>
             <ReactSelect
               value={sortField}
@@ -69,12 +76,14 @@ const SortComplex: React.FC<Props> = (props) => {
           </div>
           <div className={`${baseClass}__select`}>
             <div className={`${baseClass}__label`}>
-              Order
+              {t('order')}
             </div>
             <ReactSelect
               value={sortOrder}
               options={sortOptions}
-              onChange={setSortOrder}
+              onChange={(incomingSort) => {
+                setSortOrder(incomingSort || initialSort);
+              }}
             />
           </div>
         </div>

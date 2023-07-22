@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../utilities/Auth';
 import { useFormProcessing, useFormSubmitted, useFormModified, useForm, useFormFields } from '../Form/context';
 import { Options, FieldType } from './types';
@@ -7,12 +8,18 @@ import { useOperation } from '../../utilities/OperationProvider';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import { UPDATE } from '../Form/types';
 
-const useField = <T extends unknown>(options: Options): FieldType<T> => {
+/**
+ * Get and set the value of a form field.
+ *
+ * @see https://payloadcms.com/docs/admin/hooks#usefield
+ */
+const useField = <T, >(options: Options): FieldType<T> => {
   const {
     path,
     validate,
     disableFormData = false,
     condition,
+    hasRows,
   } = options;
 
   const submitted = useFormSubmitted();
@@ -22,13 +29,13 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const { id } = useDocumentInfo();
   const operation = useOperation();
   const field = useFormFields(([fields]) => fields[path]);
+  const { t } = useTranslation();
   const dispatchField = useFormFields(([_, dispatch]) => dispatch);
 
   const { getData, getSiblingData, setModified } = useForm();
 
   const value = field?.value as T;
   const initialValue = field?.initialValue as T;
-  const fieldDisableFormData = field?.disableFormData;
   const valid = typeof field?.valid === 'boolean' ? field.valid : true;
   const showError = valid === false && submitted;
 
@@ -39,7 +46,11 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
 
     if (!modified && !disableModifyingForm) {
       if (typeof setModified === 'function') {
-        setModified(true);
+        // Update modified state after field value comes back
+        // to avoid cursor jump caused by state value / DOM mismatch
+        setTimeout(() => {
+          setModified(true);
+        }, 10);
       }
     }
 
@@ -47,7 +58,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       type: 'UPDATE',
       path,
       value: val,
-      disableFormData,
+      disableFormData: disableFormData || (hasRows && val > 0),
     });
   }, [
     setModified,
@@ -55,11 +66,12 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     path,
     dispatchField,
     disableFormData,
+    hasRows,
   ]);
 
   // Store result from hook as ref
   // to prevent unnecessary rerenders
-  const result = useMemo(() => ({
+  const result: FieldType<T> = useMemo(() => ({
     showError,
     errorMessage: field?.errorMessage,
     value,
@@ -67,7 +79,19 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     formProcessing: processing,
     setValue,
     initialValue,
-  }), [field, processing, setValue, showError, submitted, value, initialValue]);
+    rows: field?.rows,
+    valid: field?.valid,
+  }), [
+    field?.errorMessage,
+    field?.rows,
+    field?.valid,
+    processing,
+    setValue,
+    showError,
+    submitted,
+    value,
+    initialValue,
+  ]);
 
   // Throttle the validate function
   useThrottledEffect(() => {
@@ -75,12 +99,13 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       const action: UPDATE = {
         type: 'UPDATE',
         path,
-        disableFormData,
+        disableFormData: disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
         validate,
         condition,
         value,
         valid: false,
         errorMessage: undefined,
+        rows: field?.rows,
       };
 
       const validateOptions = {
@@ -89,6 +114,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
         data: getData(),
         siblingData: getSiblingData(path),
         operation,
+        t,
       };
 
       const validationResult = typeof validate === 'function' ? await validate(value, validateOptions) : true;
@@ -101,7 +127,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
         action.errorMessage = undefined;
       }
 
-      if (action.valid !== valid && typeof dispatchField === 'function') {
+      if (typeof dispatchField === 'function') {
         dispatchField(action);
       }
     };
@@ -119,18 +145,8 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     path,
     user,
     validate,
-    valid,
+    field?.rows,
   ]);
-
-  useEffect(() => {
-    if (fieldDisableFormData !== disableFormData) {
-      dispatchField({
-        type: 'UPDATE',
-        path,
-        disableFormData,
-      });
-    }
-  }, [disableFormData, fieldDisableFormData, path, dispatchField]);
 
   return result;
 };

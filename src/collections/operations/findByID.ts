@@ -5,14 +5,12 @@ import { Collection, TypeWithID } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
-import { Where } from '../../types';
-import { hasWhereAccessResult } from '../../auth/types';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
 
 export type Arguments = {
   collection: Collection
-  id: string
+  id: string | number
   req: PayloadRequest
   disableErrors?: boolean
   currentDepth?: number
@@ -22,8 +20,9 @@ export type Arguments = {
   draft?: boolean
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Promise<T> {
+async function findByID<T extends TypeWithID>(
+  incomingArgs: Arguments,
+): Promise<T> {
   let args = incomingArgs;
 
   // /////////////////////////////////////
@@ -48,7 +47,7 @@ async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Pr
     id,
     req,
     req: {
-      locale,
+      t,
       payload,
     },
     disableErrors,
@@ -67,29 +66,22 @@ async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Pr
   // If errors are disabled, and access returns false, return null
   if (accessResult === false) return null;
 
-  const queryToBuild: { where: Where } = {
+  const query = await Model.buildQuery({
     where: {
-      and: [
-        {
-          _id: {
-            equals: id,
-          },
-        },
-      ],
+      _id: {
+        equals: id,
+      },
     },
-  };
-
-  if (hasWhereAccessResult(accessResult)) {
-    queryToBuild.where.and.push(accessResult);
-  }
-
-  const query = await Model.buildQuery(queryToBuild, locale);
+    access: accessResult,
+    req,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
   // Find by ID
   // /////////////////////////////////////
 
-  if (!query.$and[0]._id) throw new NotFound();
+  if (!query.$and[0]._id) throw new NotFound(t);
 
   if (!req.findByID) req.findByID = {};
 
@@ -108,7 +100,7 @@ async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Pr
 
   if (!result) {
     if (!disableErrors) {
-      throw new NotFound();
+      throw new NotFound(t);
     }
 
     return null;
@@ -130,7 +122,8 @@ async function findByID<T extends TypeWithID = any>(incomingArgs: Arguments): Pr
       entityType: 'collection',
       doc: result,
       accessResult,
-      locale,
+      req,
+      overrideAccess,
     });
   }
 

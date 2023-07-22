@@ -80,6 +80,48 @@ const SelectFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'selectHasManyLocalized',
+      type: 'select',
+      hasMany: true,
+      localized: true,
+      options: [
+        {
+          label: 'Value One',
+          value: 'one',
+        },
+        {
+          label: 'Value Two',
+          value: 'two',
+        },
+      ],
+    },
+    {
+      name: 'selectI18n',
+      type: 'select',
+      admin: {
+        isClearable: true,
+      },
+      options: [
+        {
+          value: 'one',
+          label: { en: 'One', es: 'Uno' },
+        },
+        {
+          value: 'two',
+          label: { en: 'Two', es: 'Dos' },
+        },
+        {
+          value: 'three',
+          label: { en: 'Three', es: 'Tres' },
+        },
+      ],
+    },
+    {
+      name: 'simple',
+      type: 'select',
+      options: ['One', 'Two', 'Three'],
+    },
   ],
 };
 

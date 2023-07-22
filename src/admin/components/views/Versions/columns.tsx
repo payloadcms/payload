@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link, useRouteMatch } from 'react-router-dom';
-import format from 'date-fns/format';
+import { TFunction, useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { Column } from '../../elements/Table/types';
 import SortColumn from '../../elements/SortColumn';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 import { Pill } from '../..';
+import { formatDate } from '../../../utilities/formatDate';
 
 type CreatedAtCellProps = {
   id: string
@@ -19,6 +20,8 @@ const CreatedAtCell: React.FC<CreatedAtCellProps> = ({ collection, global, id, d
   const { routes: { admin }, admin: { dateFormat } } = useConfig();
   const { params: { id: docID } } = useRouteMatch<{ id: string }>();
 
+  const { i18n } = useTranslation();
+
   let to: string;
 
   if (collection) to = `${admin}/collections/${collection.slug}/${docID}/versions/${id}`;
@@ -26,7 +29,7 @@ const CreatedAtCell: React.FC<CreatedAtCellProps> = ({ collection, global, id, d
 
   return (
     <Link to={to}>
-      {date && format(new Date(date), dateFormat)}
+      {date && formatDate(date, dateFormat, i18n?.language)}
     </Link>
   );
 };
@@ -37,13 +40,20 @@ const TextCell: React.FC<{children?: React.ReactNode}> = ({ children }) => (
   </span>
 );
 
-export const getColumns = (collection: SanitizedCollectionConfig, global: SanitizedGlobalConfig): Column[] => [
+export const buildVersionColumns = (
+  collection: SanitizedCollectionConfig,
+  global: SanitizedGlobalConfig,
+  t: TFunction,
+): Column[] => [
   {
     accessor: 'updatedAt',
+    active: true,
+    label: '',
+    name: '',
     components: {
       Heading: (
         <SortColumn
-          label="Updated At"
+          label={t('general:updatedAt')}
           name="updatedAt"
         />
       ),
@@ -59,10 +69,13 @@ export const getColumns = (collection: SanitizedCollectionConfig, global: Saniti
   },
   {
     accessor: 'id',
+    active: true,
+    label: '',
+    name: '',
     components: {
       Heading: (
         <SortColumn
-          label="Version ID"
+          label={t('versionID')}
           disable
           name="id"
         />
@@ -72,10 +85,13 @@ export const getColumns = (collection: SanitizedCollectionConfig, global: Saniti
   },
   {
     accessor: 'autosave',
+    active: true,
+    label: '',
+    name: '',
     components: {
       Heading: (
         <SortColumn
-          label="Type"
+          label={t('type')}
           name="autosave"
           disable
         />
@@ -85,7 +101,7 @@ export const getColumns = (collection: SanitizedCollectionConfig, global: Saniti
           {row?.autosave && (
             <React.Fragment>
               <Pill>
-                Autosave
+                {t('autosave')}
               </Pill>
               &nbsp;&nbsp;
             </React.Fragment>
@@ -93,14 +109,14 @@ export const getColumns = (collection: SanitizedCollectionConfig, global: Saniti
           {row?.version._status === 'published' && (
             <React.Fragment>
               <Pill pillStyle="success">
-                Published
+                {t('published')}
               </Pill>
               &nbsp;&nbsp;
             </React.Fragment>
           )}
           {row?.version._status === 'draft' && (
             <Pill>
-              Draft
+              {t('draft')}
             </Pill>
           )}
         </TextCell>

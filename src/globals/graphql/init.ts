@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { GraphQLNonNull, GraphQLBoolean, GraphQLInt, GraphQLString } from 'graphql';
+import { singular } from 'pluralize';
 import formatName from '../../graphql/utilities/formatName';
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
 import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
@@ -8,45 +9,49 @@ import updateResolver from './resolvers/update';
 import findVersionByIDResolver from './resolvers/findVersionByID';
 import findVersionsResolver from './resolvers/findVersions';
 import restoreVersionResolver from './resolvers/restoreVersion';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import buildObjectType from '../../graphql/schema/buildObjectType';
 import buildMutationInputType from '../../graphql/schema/buildMutationInputType';
 import buildWhereInputType from '../../graphql/schema/buildWhereInputType';
 import { Field } from '../../fields/config/types';
+import { toWords } from '../../utilities/formatLabels';
+import { SanitizedGlobalConfig } from '../config/types';
+import { buildPolicyType } from '../../graphql/schema/buildPoliciesType';
+import { docAccessResolver } from './resolvers/docAccess';
 
 function initGlobalsGraphQL(payload: Payload): void {
   if (payload.config.globals) {
     Object.keys(payload.globals.config).forEach((slug) => {
-      const global = payload.globals.config[slug];
+      const global: SanitizedGlobalConfig = payload.globals.config[slug];
       const {
-        label,
         fields,
         versions,
       } = global;
 
-      const formattedLabel = formatName(label);
-
-      global.graphQL = {};
+      const formattedName = global.graphQL?.name ? global.graphQL.name : singular(toWords(global.slug, true));
 
       const forceNullableObjectType = Boolean(versions?.drafts);
 
-      global.graphQL.type = buildObjectType({
-        payload,
-        name: formattedLabel,
-        parentName: formattedLabel,
-        fields,
-        forceNullable: forceNullableObjectType,
-      });
+      if (!payload.globals.graphQL) payload.globals.graphQL = {};
 
-      global.graphQL.mutationInputType = new GraphQLNonNull(buildMutationInputType(
-        payload,
-        formattedLabel,
-        fields,
-        formattedLabel,
-      ));
+      payload.globals.graphQL[slug] = {
+        type: buildObjectType({
+          payload,
+          name: formattedName,
+          parentName: formattedName,
+          fields,
+          forceNullable: forceNullableObjectType,
+        }),
+        mutationInputType: new GraphQLNonNull(buildMutationInputType(
+          payload,
+          formattedName,
+          fields,
+          formattedName,
+        )),
+      };
 
-      payload.Query.fields[formattedLabel] = {
-        type: global.graphQL.type,
+      payload.Query.fields[formattedName] = {
+        type: payload.globals.graphQL[slug].type,
         args: {
           draft: { type: GraphQLBoolean },
           ...(payload.config.localization ? {
@@ -57,16 +62,26 @@ function initGlobalsGraphQL(payload: Payload): void {
         resolve: findOneResolver(global),
       };
 
-      payload.Mutation.fields[`update${formattedLabel}`] = {
-        type: global.graphQL.type,
+      payload.Mutation.fields[`update${formattedName}`] = {
+        type: payload.globals.graphQL[slug].type,
         args: {
-          data: { type: global.graphQL.mutationInputType },
+          data: { type: payload.globals.graphQL[slug].mutationInputType },
           draft: { type: GraphQLBoolean },
           ...(payload.config.localization ? {
             locale: { type: payload.types.localeInputType },
           } : {}),
         },
         resolve: updateResolver(global),
+      };
+
+      payload.Query.fields[`docAccess${formattedName}`] = {
+        type: buildPolicyType({
+          typeSuffix: 'DocAccess',
+          entity: global,
+          type: 'global',
+          scope: 'docAccess',
+        }),
+        resolve: docAccessResolver(global),
       };
 
       if (global.versions) {
@@ -88,16 +103,16 @@ function initGlobalsGraphQL(payload: Payload): void {
           },
         ];
 
-        global.graphQL.versionType = buildObjectType({
+        payload.globals.graphQL[slug].versionType = buildObjectType({
           payload,
-          name: `${formattedLabel}Version`,
-          parentName: `${formattedLabel}Version`,
+          name: `${formattedName}Version`,
+          parentName: `${formattedName}Version`,
           fields: versionGlobalFields,
           forceNullable: forceNullableObjectType,
         });
 
-        payload.Query.fields[`version${formatName(formattedLabel)}`] = {
-          type: global.graphQL.versionType,
+        payload.Query.fields[`version${formatName(formattedName)}`] = {
+          type: payload.globals.graphQL[slug].versionType,
           args: {
             id: { type: GraphQLString },
             ...(payload.config.localization ? {
@@ -107,14 +122,14 @@ function initGlobalsGraphQL(payload: Payload): void {
           },
           resolve: findVersionByIDResolver(global),
         };
-        payload.Query.fields[`versions${formattedLabel}`] = {
-          type: buildPaginatedListType(`versions${formatName(formattedLabel)}`, global.graphQL.versionType),
+        payload.Query.fields[`versions${formattedName}`] = {
+          type: buildPaginatedListType(`versions${formatName(formattedName)}`, payload.globals.graphQL[slug].versionType),
           args: {
             where: {
               type: buildWhereInputType(
-                `versions${formattedLabel}`,
+                `versions${formattedName}`,
                 versionGlobalFields,
-                `versions${formattedLabel}`,
+                `versions${formattedName}`,
               ),
             },
             ...(payload.config.localization ? {
@@ -127,8 +142,8 @@ function initGlobalsGraphQL(payload: Payload): void {
           },
           resolve: findVersionsResolver(global),
         };
-        payload.Mutation.fields[`restoreVersion${formatName(formattedLabel)}`] = {
-          type: global.graphQL.type,
+        payload.Mutation.fields[`restoreVersion${formatName(formattedName)}`] = {
+          type: payload.globals.graphQL[slug].type,
           args: {
             id: { type: GraphQLString },
           },

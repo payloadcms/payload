@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
+import { isNumber } from '../../utilities/isNumber';
 import { SanitizedGlobalConfig } from '../config/types';
 import findVersionByID from '../operations/findVersionByID';
 
@@ -10,7 +11,7 @@ export default function findVersionByIDHandler(globalConfig: SanitizedGlobalConf
       req,
       globalConfig,
       id: req.params.id,
-      depth: Number(req.query.depth),
+      depth: isNumber(req.query?.depth) ? Number(req.query.depth) : undefined,
     };
 
     try {

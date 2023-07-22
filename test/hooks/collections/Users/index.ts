@@ -1,12 +1,12 @@
-import { Payload } from '../../../../src';
+import { Payload } from '../../../../src/payload';
 import { BeforeLoginHook, CollectionConfig } from '../../../../src/collections/config/types';
 import { AuthenticationError } from '../../../../src/errors';
 import { devUser, regularUser } from '../../../credentials';
 
-const beforeLoginHook: BeforeLoginHook = ({ user }) => {
+const beforeLoginHook: BeforeLoginHook = ({ user, req }) => {
   const isAdmin = user.roles.includes('admin') ? user : undefined;
   if (!isAdmin) {
-    throw new AuthenticationError();
+    throw new AuthenticationError(req.t);
   }
   return user;
 };

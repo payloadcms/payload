@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
+import { useTranslation } from 'react-i18next';
 import { Props } from './types';
 import { CollapsibleProvider, useCollapsible } from './provider';
 import Chevron from '../../icons/Chevron';
@@ -18,10 +19,12 @@ export const Collapsible: React.FC<Props> = ({
   initCollapsed,
   dragHandleProps,
   actions,
+  collapsibleStyle = 'default',
 }) => {
   const [collapsedLocal, setCollapsedLocal] = useState(Boolean(initCollapsed));
-  const [hovered, setHovered] = useState(false);
+  const [hoveringToggle, setHoveringToggle] = useState(false);
   const isNested = useCollapsible();
+  const { t } = useTranslation('fields');
 
   const collapsed = typeof collapsedFromProps === 'boolean' ? collapsedFromProps : collapsedLocal;
 
@@ -32,19 +35,21 @@ export const Collapsible: React.FC<Props> = ({
       dragHandleProps && `${baseClass}--has-drag-handle`,
       collapsed && `${baseClass}--collapsed`,
       isNested && `${baseClass}--nested`,
-      hovered && `${baseClass}--hovered`,
+      hoveringToggle && `${baseClass}--hovered`,
+      `${baseClass}--style-${collapsibleStyle}`,
     ].filter(Boolean).join(' ')}
     >
       <CollapsibleProvider>
         <div
           className={`${baseClass}__toggle-wrap`}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
+          onMouseEnter={() => setHoveringToggle(true)}
+          onMouseLeave={() => setHoveringToggle(false)}
         >
           {dragHandleProps && (
             <div
               className={`${baseClass}__drag`}
-              {...dragHandleProps}
+              {...dragHandleProps.attributes}
+              {...dragHandleProps.listeners}
             >
               <DragHandle />
             </div>
@@ -61,7 +66,7 @@ export const Collapsible: React.FC<Props> = ({
             }}
           >
             <span>
-              Toggle block
+              {t('toggleBlock')}
             </span>
           </button>
           {header && (

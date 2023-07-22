@@ -1,11 +1,15 @@
 import React, {
   useState, useRef, useEffect, useCallback,
 } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useDocumentInfo } from '../../../../utilities/DocumentInfo';
 import useField from '../../../../forms/useField';
 import Button from '../../../../elements/Button';
 import FileDetails from '../../../../elements/FileDetails';
 import Error from '../../../../forms/Error';
-import { Props, Data } from './types';
+import { Props } from './types';
+import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues';
+import Label from '../../../../forms/Label';
 
 import './index.scss';
 
@@ -25,19 +29,20 @@ const validate = (value) => {
 };
 
 const Upload: React.FC<Props> = (props) => {
+  const {
+    collection,
+    internalState,
+  } = props;
+
   const inputRef = useRef(null);
   const dropRef = useRef(null);
   const [selectingFile, setSelectingFile] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
   const [replacingFile, setReplacingFile] = useState(false);
-
-  const {
-    data = {} as Data,
-    collection,
-  } = props;
-
-  const { filename } = data;
+  const { t } = useTranslation(['upload', 'general']);
+  const [doc, setDoc] = useState(reduceFieldsToValues(internalState || {}, true));
+  const { docPermissions } = useDocumentInfo();
 
   const {
     value,
@@ -82,6 +87,16 @@ const Upload: React.FC<Props> = (props) => {
     }
   }, [setValue]);
 
+  const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const updatedFileName = e.target.value;
+    if (value) {
+      const fileValue = value as File;
+      // Creating a new File object with updated properties
+      const newFile = new File([fileValue], updatedFileName, { type: fileValue.type });
+      setValue(newFile); // Updating the state with the new File object
+    }
+  };
+
   // Only called when input is interacted with directly
   // Not called when drag + drop is used
   // Or when input is cleared
@@ -96,6 +111,11 @@ const Upload: React.FC<Props> = (props) => {
       setSelectingFile(false);
     }
   }, [selectingFile, inputRef, setSelectingFile]);
+
+  useEffect(() => {
+    setDoc(reduceFieldsToValues(internalState || {}, true));
+    setReplacingFile(false);
+  }, [internalState]);
 
   useEffect(() => {
     const div = dropRef.current;
@@ -116,15 +136,13 @@ const Upload: React.FC<Props> = (props) => {
     return () => null;
   }, [handleDragIn, handleDragOut, handleDrop, value]);
 
-  useEffect(() => {
-    setReplacingFile(false);
-  }, [data]);
-
   const classes = [
     baseClass,
     dragging && `${baseClass}--dragging`,
     'field-type',
   ].filter(Boolean).join(' ');
+
+  const canRemoveUpload = docPermissions?.update?.permission && 'delete' in docPermissions && docPermissions?.delete?.permission;
 
   return (
     <div className={classes}>
@@ -132,34 +150,41 @@ const Upload: React.FC<Props> = (props) => {
         showError={showError}
         message={errorMessage}
       />
-      {(filename && !replacingFile) && (
+      {(doc.filename && !replacingFile) && (
         <FileDetails
-          doc={data}
+          doc={doc}
           collection={collection}
-          handleRemove={() => {
+          handleRemove={canRemoveUpload ? () => {
             setReplacingFile(true);
             setValue(null);
-          }}
+          } : undefined}
         />
       )}
-      {(!filename || replacingFile) && (
+      {(!doc.filename || replacingFile) && (
         <div className={`${baseClass}__upload`}>
           {value && (
             <div className={`${baseClass}__file-selected`}>
-              <span
-                className={`${baseClass}__filename`}
-              >
-                {value.name}
-              </span>
-              <Button
-                icon="x"
-                round
-                buttonStyle="icon-label"
-                iconStyle="with-border"
-                onClick={() => {
-                  setValue(null);
-                }}
+              <Label
+                label={t('fileName')}
+                required
               />
+              <div className={`${baseClass}__file-upload`}>
+                <input
+                  type="text"
+                  className={`${baseClass}__filename`}
+                  value={value.name}
+                  onChange={handleFileNameChange}
+                />
+                <Button
+                  icon="x"
+                  buttonStyle="none"
+                  tooltip={t('general:cancel')}
+                  onClick={() => {
+                    setValue(null);
+                    inputRef.current.value = null;
+                  }}
+                />
+              </div>
             </div>
           )}
           {!value && (
@@ -167,15 +192,26 @@ const Upload: React.FC<Props> = (props) => {
               <div
                 className={`${baseClass}__drop-zone`}
                 ref={dropRef}
+                onPaste={(e) => {
+                  if (e?.clipboardData?.files.length) {
+                    const fileObject = e.clipboardData.files[0];
+                    if (fileObject) setValue(fileObject);
+                  }
+                }}
               >
                 <Button
                   size="small"
                   buttonStyle="secondary"
                   onClick={() => setSelectingFile(true)}
+                  className={`${baseClass}__file-button`}
                 >
-                  Select a file
+                  {t('selectFile')}
                 </Button>
-                <span className={`${baseClass}__drag-label`}>or drag and drop a file here</span>
+                <p className={`${baseClass}__drag-label`}>
+                  {t('general:or')}
+                  {' '}
+                  {t('dragAndDrop')}
+                </p>
               </div>
             </React.Fragment>
           )}

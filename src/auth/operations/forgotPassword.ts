@@ -46,6 +46,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     disableEmail,
     expiration,
     req: {
+      t,
       payload: {
         config,
         sendEmail: email,
@@ -66,6 +67,11 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     resetPasswordToken?: string,
     resetPasswordExpiration?: number | Date,
   }
+
+  if (!data.email) {
+    throw new APIError('Missing email.');
+  }
+
   const user: UserDoc = await Model.findOne({ email: (data.email as string).toLowerCase() });
 
   if (!user) return null;
@@ -78,12 +84,11 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
   const userJSON = user.toJSON({ virtuals: true });
 
   if (!disableEmail) {
-    let html = `You are receiving this because you (or someone else) have requested the reset of the password for your account.
-    Please click on the following link, or paste this into your browser to complete the process:
+    let html = `${t('authentication:youAreReceivingResetPassword')}
     <a href="${config.serverURL}${config.routes.admin}/reset/${token}">
      ${config.serverURL}${config.routes.admin}/reset/${token}
     </a>
-    If you did not request this, please ignore this email and your password will remain unchanged.`;
+    ${t('authentication:youDidNotRequestPassword')}`;
 
     if (typeof collectionConfig.auth.forgotPassword.generateEmailHTML === 'function') {
       html = await collectionConfig.auth.forgotPassword.generateEmailHTML({
@@ -93,7 +98,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
       });
     }
 
-    let subject = 'Reset your password';
+    let subject = t('authentication:resetYourPassword');
 
     if (typeof collectionConfig.auth.forgotPassword.generateEmailSubject === 'function') {
       subject = await collectionConfig.auth.forgotPassword.generateEmailSubject({

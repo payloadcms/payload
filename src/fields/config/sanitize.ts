@@ -15,12 +15,12 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
     if (!field.type) throw new MissingFieldType(field);
 
     // assert that field names do not contain forbidden characters
-    if ('name' in field && field.name && field.name.includes('.')) {
+    if (fieldAffectsData(field) && field.name.includes('.')) {
       throw new InvalidFieldName(field, field.name);
     }
 
     // Auto-label
-    if ('name' in field && field.name && typeof field.label !== 'string' && field.label !== false) {
+    if ('name' in field && field.name && typeof field.label !== 'object' && typeof field.label !== 'string' && field.label !== false) {
       field.label = toWords(field.name);
     }
 
@@ -35,6 +35,17 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
           throw new InvalidFieldRelationship(field, relationship);
         }
       });
+
+      if (field.type === 'relationship') {
+        if (field.min && !field.minRows) {
+          console.warn(`(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`);
+        }
+        if (field.max && !field.maxRows) {
+          console.warn(`(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`);
+        }
+        field.minRows = field.minRows || field.min;
+        field.maxRows = field.maxRows || field.max;
+      }
     }
 
     if (field.type === 'blocks' && field.blocks) {
@@ -45,7 +56,7 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
       field.fields.push(baseIDField);
     }
 
-    if ((field.type === 'blocks' || field.type === 'array') && field.label !== false) {
+    if ((field.type === 'blocks' || field.type === 'array') && field.label) {
       field.labels = field.labels || formatLabels(field.name);
     }
 

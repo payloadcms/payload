@@ -1,6 +1,7 @@
 import React from 'react';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
+import { Trans, useTranslation } from 'react-i18next';
 import Button from '../Button';
 import MinimalTemplate from '../../templates/Minimal';
 import { Props } from './types';
@@ -18,13 +19,14 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
 
   const { id } = useDocumentInfo();
   const { toggleModal } = useModal();
+  const { t } = useTranslation('authentication');
 
   const modalSlug = `generate-confirmation-${id}`;
 
   const handleGenerate = () => {
     setKey();
     toggleModal(modalSlug);
-    toast.success('New API Key Generated.', { autoClose: 3000 });
+    toast.success(t('newAPIKeyGenerated'), { autoClose: 3000 });
     highlightField(true);
   };
 
@@ -37,22 +39,22 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
           toggleModal(modalSlug);
         }}
       >
-        Generate new API key
+        {t('generateNewAPIKey')}
       </Button>
       <Modal
         slug={modalSlug}
         className={baseClass}
       >
         <MinimalTemplate className={`${baseClass}__template`}>
-          <h1>Confirm Generation</h1>
+          <h1>{t('confirmGeneration')}</h1>
           <p>
-            Generating a new API key will
-            {' '}
-            <strong>invalidate</strong>
-            {' '}
-            the previous key.
-            {' '}
-            Are you sure you wish to continue?
+            <Trans
+              i18nKey="generatingNewAPIKeyWillInvalidate"
+              t={t}
+            >
+              generatingNewAPIKeyWillInvalidate
+              <strong>invalidate</strong>
+            </Trans>
           </p>
 
           <Button
@@ -62,12 +64,12 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
               toggleModal(modalSlug);
             }}
           >
-            Cancel
+            {t('general:cancel')}
           </Button>
           <Button
             onClick={handleGenerate}
           >
-            Generate
+            {t('generate')}
           </Button>
         </MinimalTemplate>
       </Modal>

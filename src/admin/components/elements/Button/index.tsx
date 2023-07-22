@@ -1,4 +1,4 @@
-import React, { isValidElement } from 'react';
+import React, { Fragment, isValidElement } from 'react';
 import { Link } from 'react-router-dom';
 import { Props } from './types';
 
@@ -7,6 +7,7 @@ import x from '../../icons/X';
 import chevron from '../../icons/Chevron';
 import edit from '../../icons/Edit';
 import swap from '../../icons/Swap';
+import linkIcon from '../../icons/Link';
 import Tooltip from '../Tooltip';
 
 import './index.scss';
@@ -17,34 +18,38 @@ const icons = {
   chevron,
   edit,
   swap,
+  link: linkIcon,
 };
 
 const baseClass = 'btn';
 
-const ButtonContents = ({ children, icon, tooltip }) => {
+const ButtonContents = ({ children, icon, tooltip, showTooltip }) => {
   const BuiltInIcon = icons[icon];
 
   return (
-    <span
-      className={`${baseClass}__content`}
-    >
+    <Fragment>
       {tooltip && (
-        <Tooltip className={`${baseClass}__tooltip`}>
+        <Tooltip
+          className={`${baseClass}__tooltip`}
+          show={showTooltip}
+        >
           {tooltip}
         </Tooltip>
       )}
-      {children && (
-        <span className={`${baseClass}__label`}>
-          {children}
-        </span>
-      )}
-      {icon && (
-        <span className={`${baseClass}__icon`}>
-          {isValidElement(icon) && icon}
-          {BuiltInIcon && <BuiltInIcon />}
-        </span>
-      )}
-    </span>
+      <span className={`${baseClass}__content`}>
+        {children && (
+          <span className={`${baseClass}__label`}>
+            {children}
+          </span>
+        )}
+        {icon && (
+          <span className={`${baseClass}__icon`}>
+            {isValidElement(icon) && icon}
+            {BuiltInIcon && <BuiltInIcon />}
+          </span>
+        )}
+      </span>
+    </Fragment>
   );
 };
 
@@ -53,7 +58,7 @@ const Button: React.FC<Props> = (props) => {
     className,
     id,
     type = 'button',
-    el,
+    el = 'button',
     to,
     url,
     children,
@@ -68,6 +73,8 @@ const Button: React.FC<Props> = (props) => {
     newTab,
     tooltip,
   } = props;
+
+  const [showTooltip, setShowTooltip] = React.useState(false);
 
   const classes = [
     baseClass,
@@ -84,6 +91,7 @@ const Button: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   function handleClick(event) {
+    setShowTooltip(false);
     if (type !== 'submit' && onClick) event.preventDefault();
     if (onClick) onClick(event);
   }
@@ -93,6 +101,8 @@ const Button: React.FC<Props> = (props) => {
     type,
     className: classes,
     disabled,
+    onMouseEnter: tooltip ? () => setShowTooltip(true) : undefined,
+    onMouseLeave: tooltip ? () => setShowTooltip(false) : undefined,
     onClick: !disabled ? handleClick : undefined,
     rel: newTab ? 'noopener noreferrer' : undefined,
     target: newTab ? '_blank' : undefined,
@@ -108,6 +118,7 @@ const Button: React.FC<Props> = (props) => {
           <ButtonContents
             icon={icon}
             tooltip={tooltip}
+            showTooltip={showTooltip}
           >
             {children}
           </ButtonContents>
@@ -123,6 +134,7 @@ const Button: React.FC<Props> = (props) => {
           <ButtonContents
             icon={icon}
             tooltip={tooltip}
+            showTooltip={showTooltip}
           >
             {children}
           </ButtonContents>
@@ -130,18 +142,21 @@ const Button: React.FC<Props> = (props) => {
       );
 
     default:
+      const Tag = el; // eslint-disable-line no-case-declarations
+
       return (
-        <button
+        <Tag
           type="submit"
           {...buttonProps}
         >
           <ButtonContents
             icon={icon}
             tooltip={tooltip}
+            showTooltip={showTooltip}
           >
             {children}
           </ButtonContents>
-        </button>
+        </Tag>
       );
   }
 };

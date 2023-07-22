@@ -1,20 +1,21 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import qs from 'qs';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useLocale } from '../../utilities/Locale';
 import { useSearchParams } from '../../utilities/SearchParams';
 import Popup from '../Popup';
-import { Props } from './types';
 
 import './index.scss';
 
 const baseClass = 'localizer';
 
-const Localizer: React.FC<Props> = () => {
+const Localizer: React.FC = () => {
   const { localization } = useConfig();
   const locale = useLocale();
   const searchParams = useSearchParams();
+  const { t } = useTranslation('general');
 
   if (localization) {
     const { locales } = localization;
@@ -22,11 +23,12 @@ const Localizer: React.FC<Props> = () => {
     return (
       <div className={baseClass}>
         <Popup
+          showScrollbar
           horizontalAlign="left"
           button={locale}
           render={({ close }) => (
             <div>
-              <span>Locales</span>
+              <span>{t('locales')}</span>
               <ul>
                 {locales.map((localeOption) => {
                   const baseLocaleClass = `${baseClass}__locale`;
@@ -34,7 +36,7 @@ const Localizer: React.FC<Props> = () => {
                   const localeClasses = [
                     baseLocaleClass,
                     locale === localeOption && `${baseLocaleClass}--active`,
-                  ];
+                  ].filter(Boolean).join('');
 
                   const newParams = {
                     ...searchParams,
@@ -47,7 +49,7 @@ const Localizer: React.FC<Props> = () => {
                     return (
                       <li
                         key={localeOption}
-                        className={localeClasses.join(' ')}
+                        className={localeClasses}
                       >
                         <Link
                           to={{ search }}

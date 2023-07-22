@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 
 import Eyebrow from '../../elements/Eyebrow';
@@ -7,7 +8,8 @@ import Card from '../../elements/Card';
 import Button from '../../elements/Button';
 import { Props } from './types';
 import { Gutter } from '../../elements/Gutter';
-import { groupNavItems, Group, EntityToGroup, EntityType } from '../../../utilities/groupNavItems';
+import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilities/groupNavItems';
+import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
 
@@ -18,9 +20,11 @@ const Dashboard: React.FC<Props> = (props) => {
     collections,
     globals,
     permissions,
+    user,
   } = props;
 
   const { push } = useHistory();
+  const { i18n } = useTranslation('general');
 
   const {
     routes: {
@@ -38,24 +42,28 @@ const Dashboard: React.FC<Props> = (props) => {
 
   useEffect(() => {
     setGroups(groupNavItems([
-      ...collections.map((collection) => {
-        const entityToGroup: EntityToGroup = {
-          type: EntityType.collection,
-          entity: collection,
-        };
+      ...collections
+        .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
+        .map((collection) => {
+          const entityToGroup: EntityToGroup = {
+            type: EntityType.collection,
+            entity: collection,
+          };
 
-        return entityToGroup;
-      }),
-      ...globals.map((global) => {
-        const entityToGroup: EntityToGroup = {
-          type: EntityType.global,
-          entity: global,
-        };
+          return entityToGroup;
+        }),
+      ...globals
+        .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
+        .map((global) => {
+          const entityToGroup: EntityToGroup = {
+            type: EntityType.global,
+            entity: global,
+          };
 
-        return entityToGroup;
-      }),
-    ], permissions));
-  }, [collections, globals, permissions]);
+          return entityToGroup;
+        }),
+    ], permissions, i18n));
+  }, [collections, globals, i18n, permissions, user]);
 
   return (
     <div className={baseClass}>
@@ -74,14 +82,14 @@ const Dashboard: React.FC<Props> = (props) => {
                   let hasCreatePermission: boolean;
 
                   if (type === EntityType.collection) {
-                    title = entity.labels.plural;
+                    title = getTranslation(entity.labels.plural, i18n);
                     onClick = () => push({ pathname: `${admin}/collections/${entity.slug}` });
                     createHREF = `${admin}/collections/${entity.slug}/create`;
                     hasCreatePermission = permissions?.collections?.[entity.slug]?.create?.permission;
                   }
 
                   if (type === EntityType.global) {
-                    title = entity.label;
+                    title = getTranslation(entity.label, i18n);
                     onClick = () => push({ pathname: `${admin}/globals/${entity.slug}` });
                   }
 

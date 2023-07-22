@@ -3,18 +3,24 @@
 .pill {
   font-size: 1rem;
   line-height: base(1);
-  border: 0;
   display: inline-flex;
-  vertical-align: middle;
   background: var(--theme-elevation-150);
   color: var(--theme-elevation-800);
   border-radius: $style-radius-s;
-  padding: 0 base(.25);
-  padding-left: base(.0875 + .25);
   cursor: default;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  border: 0;
+  padding: 0 base(.25);
+  align-items: center;
+  flex-shrink: 0;
+
+  &--rounded {
+    border-radius: var(--style-radius-l);
+    line-height: 18px;
+    font-size: 12px;
+  }
 
   &:active,
   &:focus {
@@ -26,6 +32,10 @@
     text-decoration: none;
   }
 
+  &--is-dragging {
+    cursor: grabbing;
+  }
+
   &--has-icon {
     svg {
       display: block;
@@ -33,11 +43,11 @@
   }
 
   &--align-icon-left {
-    padding-left: base(.125);
+    padding-left: 0;
   }
 
   &--align-icon-right {
-    padding-right: base(.125);
+    padding-right: 0;
   }
 
   &--style-white {
@@ -96,6 +106,25 @@
       &:active {
         background: var(--theme-elevation-700);
       }
+    }
+  }
+}
+
+
+html[data-theme=dark] {
+  .pill {
+    &--style-error {
+      background: var(--theme-error-500);
+      color: var(--color-base-1000)
+    }
+  }
+}
+
+html[data-theme=light] {
+  .pill {
+    &--style-error {
+      background: var(--theme-error-250);
+      color: var(--theme-error-750)
     }
   }
 }

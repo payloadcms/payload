@@ -30,6 +30,7 @@ import {
   EmailField,
   TextareaField,
   CodeField,
+  JSONField,
   DateField,
   PointField,
   CheckboxField,
@@ -45,9 +46,8 @@ import withNullableType from './withNullableType';
 import { toWords } from '../../utilities/formatLabels';
 import createRichTextRelationshipPromise from '../../fields/richText/richTextRelationshipPromise';
 import formatOptions from '../utilities/formatOptions';
-import { Payload } from '../..';
+import { Payload } from '../../payload';
 import buildWhereInputType from './buildWhereInputType';
-import buildBlockType from './buildBlockType';
 import isFieldNullable from './isFieldNullable';
 
 type LocaleInputType = {
@@ -84,10 +84,13 @@ function buildObjectType({
   forceNullable,
 }: Args): GraphQLObjectType {
   const fieldToSchemaMap = {
-    number: (objectTypeConfig: ObjectTypeConfig, field: NumberField) => ({
-      ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLFloat, forceNullable) },
-    }),
+    number: (objectTypeConfig: ObjectTypeConfig, field: NumberField) => {
+      const type = field?.name === 'id' ? GraphQLInt : GraphQLFloat;
+      return ({
+        ...objectTypeConfig,
+        [field.name]: { type: withNullableType(field, field?.hasMany === true ? new GraphQLList(type) : type, forceNullable) },
+      });
+    },
     text: (objectTypeConfig: ObjectTypeConfig, field: TextField) => ({
       ...objectTypeConfig,
       [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
@@ -103,6 +106,10 @@ function buildObjectType({
     code: (objectTypeConfig: ObjectTypeConfig, field: CodeField) => ({
       ...objectTypeConfig,
       [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
+    }),
+    json: (objectTypeConfig: ObjectTypeConfig, field: JSONField) => ({
+      ...objectTypeConfig,
+      [field.name]: { type: withNullableType(field, GraphQLJSON, forceNullable) },
     }),
     date: (objectTypeConfig: ObjectTypeConfig, field: DateField) => ({
       ...objectTypeConfig,
@@ -140,16 +147,20 @@ function buildObjectType({
       },
     }),
     upload: (objectTypeConfig: ObjectTypeConfig, field: UploadField) => {
-      const { relationTo, label } = field;
+      const { relationTo } = field;
 
-      const uploadName = combineParentName(parentName, label === false ? toWords(field.name, true) : label);
+      const uploadName = combineParentName(parentName, toWords(field.name, true));
 
       // If the relationshipType is undefined at this point,
       // it can be assumed that this blockType can have a relationship
       // to itself. Therefore, we set the relationshipType equal to the blockType
       // that is currently being created.
 
-      const type = payload.collections[relationTo].graphQL.type || newlyCreatedBlockType;
+      const type = withNullableType(
+        field,
+        payload.collections[relationTo].graphQL.type || newlyCreatedBlockType,
+        forceNullable,
+      );
 
       const uploadArgs = {} as LocaleInputType;
 
@@ -243,10 +254,10 @@ function buildObjectType({
       };
     },
     relationship: (objectTypeConfig: ObjectTypeConfig, field: RelationshipField) => {
-      const { relationTo, label } = field;
+      const { relationTo } = field;
       const isRelatedToManyCollections = Array.isArray(relationTo);
       const hasManyValues = field.hasMany;
-      const relationshipName = combineParentName(parentName, label === false ? toWords(field.name, true) : label);
+      const relationshipName = combineParentName(parentName, toWords(field.name, true));
 
       let type;
       let relationToType = null;
@@ -312,7 +323,11 @@ function buildObjectType({
 
       const relationship = {
         args: relationshipArgs,
-        type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
+        type: withNullableType(
+          field,
+          hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
+          forceNullable,
+        ),
         extensions: { complexity: 10 },
         async resolve(parent, args, context) {
           const value = parent[field.name];
@@ -376,8 +391,6 @@ function buildObjectType({
           }
 
           if (id) {
-            id = id.toString();
-
             const relatedDocument = await context.req.payloadDataLoader.load(JSON.stringify([
               relatedCollectionSlug,
               id,
@@ -416,17 +429,20 @@ function buildObjectType({
       };
     },
     array: (objectTypeConfig: ObjectTypeConfig, field: ArrayField) => {
-      const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
+      const interfaceName = field?.interfaceName || combineParentName(parentName, toWords(field.name, true));
 
-      const type = buildObjectType({
-        payload,
-        name: fullName,
-        fields: field.fields,
-        parentName: fullName,
-        forceNullable: isFieldNullable(field, forceNullable),
-      });
+      if (!payload.types.arrayTypes[interfaceName]) {
+        // eslint-disable-next-line no-param-reassign
+        payload.types.arrayTypes[interfaceName] = buildObjectType({
+          payload,
+          name: interfaceName,
+          parentName: interfaceName,
+          fields: field.fields,
+          forceNullable: isFieldNullable(field, forceNullable),
+        });
+      }
 
-      const arrayType = new GraphQLList(new GraphQLNonNull(type));
+      const arrayType = new GraphQLList(new GraphQLNonNull(payload.types.arrayTypes[interfaceName]));
 
       return {
         ...objectTypeConfig,
@@ -434,31 +450,48 @@ function buildObjectType({
       };
     },
     group: (objectTypeConfig: ObjectTypeConfig, field: GroupField) => {
-      const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
-      const type = buildObjectType({
-        payload,
-        name: fullName,
-        parentName: fullName,
-        fields: field.fields,
-        forceNullable: isFieldNullable(field, forceNullable),
-      });
+      const interfaceName = field?.interfaceName || combineParentName(parentName, toWords(field.name, true));
+
+      if (!payload.types.groupTypes[interfaceName]) {
+        // eslint-disable-next-line no-param-reassign
+        payload.types.groupTypes[interfaceName] = buildObjectType({
+          payload,
+          name: interfaceName,
+          parentName: interfaceName,
+          fields: field.fields,
+          forceNullable: isFieldNullable(field, forceNullable),
+        });
+      }
 
       return {
         ...objectTypeConfig,
-        [field.name]: { type },
+        [field.name]: { type: payload.types.groupTypes[interfaceName] },
       };
     },
     blocks: (objectTypeConfig: ObjectTypeConfig, field: BlockField) => {
       const blockTypes = field.blocks.map((block) => {
-        buildBlockType({
-          payload,
-          block,
-          forceNullable: isFieldNullable(field, forceNullable),
-        });
+        if (!payload.types.blockTypes[block.slug]) {
+          const interfaceName = block?.interfaceName || block?.graphQL?.singularName || toWords(block.slug, true);
+          // eslint-disable-next-line no-param-reassign
+          payload.types.blockTypes[block.slug] = buildObjectType({
+            payload,
+            name: interfaceName,
+            parentName: interfaceName,
+            fields: [
+              ...block.fields,
+              {
+                name: 'blockType',
+                type: 'text',
+              },
+            ],
+            forceNullable,
+          });
+        }
+
         return payload.types.blockTypes[block.slug];
       });
 
-      const fullName = combineParentName(parentName, field.label === false ? toWords(field.name, true) : field.label);
+      const fullName = combineParentName(parentName, toWords(field.name, true));
 
       const type = new GraphQLList(new GraphQLNonNull(new GraphQLUnionType({
         name: fullName,
@@ -483,18 +516,22 @@ function buildObjectType({
     }, objectTypeConfig),
     tabs: (objectTypeConfig: ObjectTypeConfig, field: TabsField) => field.tabs.reduce((tabSchema, tab) => {
       if (tabHasName(tab)) {
-        const fullName = combineParentName(parentName, toWords(tab.name, true));
-        const type = buildObjectType({
-          payload,
-          name: fullName,
-          parentName: fullName,
-          fields: tab.fields,
-          forceNullable,
-        });
+        const interfaceName = tab?.interfaceName || combineParentName(parentName, toWords(tab.name, true));
+
+        if (!payload.types.tabTypes[interfaceName]) {
+          // eslint-disable-next-line no-param-reassign
+          payload.types.tabTypes[interfaceName] = buildObjectType({
+            payload,
+            name: interfaceName,
+            parentName: interfaceName,
+            fields: tab.fields,
+            forceNullable,
+          });
+        }
 
         return {
           ...tabSchema,
-          [tab.name]: { type },
+          [tab.name]: { type: payload.types.tabTypes[interfaceName] },
         };
       }
 

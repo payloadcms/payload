@@ -6,7 +6,9 @@ export const blocksFieldSeedData = [
     blockName: 'First block',
     blockType: 'text',
     text: 'first block',
-    richText: [],
+    richText: [{
+      children: [{ text: '' }],
+    }],
   },
   {
     blockName: 'Second block',
@@ -28,6 +30,11 @@ export const blocksFieldSeedData = [
         text: 'second sub block',
       },
     ],
+  },
+  {
+    blockName: 'I18n Block',
+    blockType: 'i18n-text',
+    text: 'first block',
   },
 ] as const;
 
@@ -153,6 +160,48 @@ const BlockFields: CollectionConfig = {
       ...blocksField,
       name: 'localizedBlocks',
       localized: true,
+    },
+    {
+      type: 'blocks',
+      name: 'i18nBlocks',
+      label: {
+        en: 'Block en',
+        es: 'Block es',
+      },
+      labels: {
+        singular: {
+          en: 'Block en',
+          es: 'Block es',
+        },
+        plural: {
+          en: 'Blocks en',
+          es: 'Blocks es',
+        },
+      },
+      blocks: [
+        {
+          slug: 'text',
+          graphQL: {
+            singularName: 'I18nText',
+          },
+          labels: {
+            singular: {
+              en: 'Text en',
+              es: 'Text es',
+            },
+            plural: {
+              en: 'Texts en',
+              es: 'Texts es',
+            },
+          },
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+      ],
     },
   ],
 };

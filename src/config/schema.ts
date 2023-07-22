@@ -13,6 +13,7 @@ export const endpointsSchema = joi.array().items(joi.object({
     joi.array().items(joi.func()),
     joi.func(),
   ),
+  custom: joi.object().pattern(joi.string(), joi.any()),
 }));
 
 export default joi.object({
@@ -47,6 +48,7 @@ export default joi.object({
   globals: joi.array(),
   admin: joi.object({
     user: joi.string(),
+    buildPath: joi.string(),
     meta: joi.object()
       .keys({
         titleSuffix: joi.string(),
@@ -61,6 +63,16 @@ export default joi.object({
       .try(
         joi.string(),
         component,
+      ),
+    logoutRoute: joi.string(),
+    inactivityRoute: joi.string(),
+    autoLogin: joi.alternatives()
+      .try(
+        joi.object().keys({
+          email: joi.string(),
+          password: joi.string(),
+        }),
+        joi.boolean(),
       ),
     components: joi.object()
       .keys({
@@ -82,6 +94,9 @@ export default joi.object({
         beforeNavLinks: joi.array().items(component),
         afterNavLinks: joi.array().items(component),
         Nav: component,
+        logout: joi.object({
+          Button: component,
+        }),
         views: joi.object({
           Dashboard: component,
           Account: component,
@@ -92,7 +107,14 @@ export default joi.object({
         }),
       }),
     webpack: joi.func(),
+    bundler: {
+      dev: joi.func(),
+      build: joi.func(),
+      serve: joi.func(),
+    },
   }),
+  email: joi.object(),
+  i18n: joi.object(),
   defaultDepth: joi.number()
     .min(0)
     .max(30),
@@ -154,4 +176,5 @@ export default joi.object({
   ),
   onInit: joi.func(),
   debug: joi.boolean(),
+  custom: joi.object().pattern(joi.string(), joi.any()),
 });

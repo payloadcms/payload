@@ -6,6 +6,7 @@ import { PayloadRequest } from '../../../express/types';
 import getValueWithDefault from '../../getDefaultValue';
 import { traverseFields } from './traverseFields';
 import { getExistingRowDoc } from './getExistingRowDoc';
+import { cloneDataFromOriginalDoc } from './cloneDataFromOriginalDoc';
 
 type Args = {
   data: Record<string, unknown>
@@ -49,17 +50,20 @@ export const promise = async ({
   siblingDocWithLocales,
   skipValidation,
 }: Args): Promise<void> => {
-  const passesCondition = (field.admin?.condition) ? field.admin.condition(data, siblingData) : true;
-  const skipValidationFromHere = skipValidation || !passesCondition;
+  const passesCondition = (field.admin?.condition) ? field.admin.condition(data, siblingData, { user: req.user }) : true;
+  let skipValidationFromHere = skipValidation || !passesCondition;
+
+  const defaultLocale = req.payload.config?.localization ? req.payload.config.localization?.defaultLocale : 'en';
+  const operationLocale = req.locale || defaultLocale;
 
   if (fieldAffectsData(field)) {
     if (typeof siblingData[field.name] === 'undefined') {
       // If no incoming data, but existing document data is found, merge it in
       if (typeof siblingDoc[field.name] !== 'undefined') {
         if (field.localized && typeof siblingDocWithLocales[field.name] === 'object' && siblingDocWithLocales[field.name] !== null) {
-          siblingData[field.name] = siblingDocWithLocales[field.name][req.locale];
+          siblingData[field.name] = cloneDataFromOriginalDoc(siblingDocWithLocales[field.name][req.locale]);
         } else {
-          siblingData[field.name] = siblingDoc[field.name];
+          siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name]);
         }
 
         // Otherwise compute default value
@@ -70,6 +74,13 @@ export const promise = async ({
           locale: req.locale,
           user: req.user,
         });
+      }
+    }
+
+    // skip validation if the field is localized and the incoming data is null
+    if (field.localized && operationLocale !== defaultLocale) {
+      if (['array', 'blocks'].includes(field.type) && siblingData[field.name] === null) {
+        skipValidationFromHere = true;
       }
     }
 
@@ -95,23 +106,33 @@ export const promise = async ({
 
     // Validate
     if (!skipValidationFromHere && field.validate) {
-      let valueToValidate;
+      let valueToValidate = siblingData[field.name];
+      let jsonError;
 
       if (['array', 'blocks'].includes(field.type)) {
         const rows = siblingData[field.name];
         valueToValidate = Array.isArray(rows) ? rows.length : 0;
-      } else {
-        valueToValidate = siblingData[field.name];
+      }
+
+
+      if (field.type === 'json' && typeof siblingData[field.name] === 'string') {
+        try {
+          JSON.parse(siblingData[field.name] as string);
+        } catch (e) {
+          jsonError = e;
+        }
       }
 
       const validationResult = await field.validate(valueToValidate, {
         ...field,
+        jsonError,
         data: merge(doc, data, { arrayMerge: (_, source) => source }),
         siblingData: merge(siblingDoc, siblingData, { arrayMerge: (_, source) => source }),
         id,
         operation,
         user: req.user,
         payload: req.payload,
+        t: req.t,
       });
 
       if (typeof validationResult === 'string') {
@@ -126,21 +147,20 @@ export const promise = async ({
     if (field.localized) {
       mergeLocaleActions.push(() => {
         if (req.payload.config.localization) {
-          const localeData = req.payload.config.localization.locales.reduce((locales, localeID) => {
-            let valueToSet = siblingData[field.name];
+          const localeData = req.payload.config.localization.locales.reduce((localizedValues, locale) => {
+            const fieldValue = locale === req.locale
+              ? siblingData[field.name]
+              : siblingDocWithLocales?.[field.name]?.[locale];
 
-            if (localeID !== req.locale) {
-              valueToSet = siblingDocWithLocales?.[field.name]?.[localeID];
-            }
-
-            if (typeof valueToSet !== 'undefined') {
+            // update locale value if it's not undefined
+            if (typeof fieldValue !== 'undefined') {
               return {
-                ...locales,
-                [localeID]: valueToSet,
+                ...localizedValues,
+                [locale]: fieldValue,
               };
             }
 
-            return locales;
+            return localizedValues;
           }, {});
 
           // If there are locales with data, set the data
@@ -211,15 +231,14 @@ export const promise = async ({
             path: `${path}${field.name}.${i}.`,
             req,
             siblingData: row,
-            siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]?.[i]),
-            siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]?.[i]),
+            siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
+            siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
             skipValidation: skipValidationFromHere,
           }));
         });
 
         await Promise.all(promises);
       }
-
 
       break;
     }
@@ -245,8 +264,8 @@ export const promise = async ({
               path: `${path}${field.name}.${i}.`,
               req,
               siblingData: row,
-              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]?.[i]),
-              siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]?.[i]),
+              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
+              siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
               skipValidation: skipValidationFromHere,
             }));
           }
@@ -254,7 +273,6 @@ export const promise = async ({
 
         await Promise.all(promises);
       }
-
 
       break;
     }
