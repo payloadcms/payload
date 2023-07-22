@@ -9,6 +9,10 @@
   }
 }
 
+.message {
+  margin-bottom: calc(var(--base) * 1.5);
+}
+
 .content {
   flex-grow: 1;
   display: flex;
