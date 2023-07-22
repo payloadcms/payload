@@ -224,6 +224,7 @@
     "selectAll": "Select all {{count}} {{label}}",
     "selectValue": "Select a value",
     "selectedCount": "{{count}} {{label}} selected",
+    "showAllLabel": "Show all {{label}}",
     "sorryNotFound": "Sorry—there is nothing to correspond with your request.",
     "sort": "Sort",
     "stayOnThisPage": "Stay on this page",

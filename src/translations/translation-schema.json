@@ -816,6 +816,9 @@
         "selectedCount": {
           "type": "string"
         },
+        "showAllLabel": {
+          "type": "string"
+        },
         "sorryNotFound": {
           "type": "string"
         },
