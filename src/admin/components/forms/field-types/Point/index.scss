@@ -21,10 +21,24 @@
   input {
     @include formInput;
   }
+}
 
-  &.error {
-    input {
-      background-color: var(--theme-error-200);
+html[data-theme=light] {
+  .point{
+    &.error {
+      input {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .point {
+    &.error {
+      input {
+        @include darkInputError;
+      }
     }
   }
 }

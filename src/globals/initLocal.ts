@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { PaginateOptions } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 import getBuildQueryPlugin from '../mongoose/buildQuery';
 import buildModel from './buildModel';
@@ -35,7 +35,7 @@ export default function initGlobalsLocal(ctx: Payload): void {
           },
         );
 
-        versionSchema.plugin(paginate, { useEstimatedCount: true })
+        versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true })
           .plugin(getBuildQueryPlugin({ versionsFields: versionGlobalFields }));
 
         ctx.versions[global.slug] = mongoose.model(versionModelName, versionSchema) as CollectionModel;

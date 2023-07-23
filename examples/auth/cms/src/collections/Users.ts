@@ -43,6 +43,7 @@ export const Users: CollectionConfig = {
       name: 'roles',
       type: 'select',
       hasMany: true,
+      saveToJWT: true,
       hooks: {
         beforeChange: [protectRoles],
       },

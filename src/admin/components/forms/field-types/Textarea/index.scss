@@ -22,12 +22,6 @@
     }
   }
 
-  &.error {
-    .textarea-outer {
-      background: var(--theme-error-200);
-    }
-  }
-
   &.read-only {
     .textarea-outer {
       background: var(--theme-elevation-200);
@@ -98,5 +92,25 @@
 
   @include mid-break {
     padding: 0;
+  }
+}
+
+html[data-theme=light] {
+  .field-type.textarea {
+    &.error {
+      .textarea-outer {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .field-type.textarea {
+    &.error {
+      .textarea-outer {
+        @include darkInputError;
+      }
+    }
   }
 }

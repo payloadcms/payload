@@ -439,7 +439,7 @@ const Relationship: React.FC<Props> = (props) => {
               SingleValue,
               MultiValueLabel,
             }}
-            selectProps={{
+            customProps={{
               disableMouseDown: drawerIsOpen,
               disableKeyDown: drawerIsOpen,
               setDrawerIsOpen,
