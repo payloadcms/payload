@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   verbose: true,
   testTimeout: 15000,
   testEnvironment: 'jsdom',
