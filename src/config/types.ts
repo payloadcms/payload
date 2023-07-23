@@ -2,12 +2,12 @@ import { Express, NextFunction, Response } from 'express';
 import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
 import { Options as ExpressFileUploadOptions } from 'express-fileupload';
-import { Configuration } from 'webpack';
+import type { Configuration } from 'webpack';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
 import { ConnectOptions } from 'mongoose';
 import React from 'react';
-import { LoggerOptions } from 'pino';
+import { DestinationStream, LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
 import { Payload } from '../payload';
 import {
@@ -19,6 +19,7 @@ import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
 import { PayloadRequest } from '../express/types';
 import { Where } from '../types';
 import { User } from '../auth/types';
+import type { PayloadBundler } from '../bundlers/types';
 
 type Email = {
   fromName: string;
@@ -116,6 +117,7 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions;
+  loggerDestination?: DestinationStream;
 
   /**
    * Sometimes, with the local API, you might need to pass a config file directly, for example, serverless on Vercel
@@ -265,7 +267,11 @@ export type Config = {
        */
       favicon?: string;
     };
-    /** Specify an absolute path for where to store the built Admin panel bundle used in production. */
+    /**
+     * Specify an absolute path for where to store the built Admin panel bundle used in production.
+     *
+     * @default "/build"
+     * */
     buildPath?: string
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean;
@@ -352,6 +358,8 @@ export type Config = {
     };
     /** Customize the Webpack config that's used to generate the Admin panel. */
     webpack?: (config: Configuration) => Configuration;
+    /** Customize the bundler used to run your admin panel. */
+    bundler?: PayloadBundler;
   };
   /**
    * Manage the datamodel of your application
@@ -406,13 +414,13 @@ export type Config = {
   cors?: string[] | '*';
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
-    /** Defaults to /api  */
+    /** @default "/api"  */
     api?: string;
-    /** Defaults to /admin */
+    /** @default "/admin" */
     admin?: string;
-    /** Defaults to /graphql  */
+    /** @default "/graphql"  */
     graphQL?: string;
-    /** Defaults to /playground */
+    /** @default "/playground" */
     graphQLPlayground?: string;
   };
   /** Control how typescript interfaces are generated from your collections. */

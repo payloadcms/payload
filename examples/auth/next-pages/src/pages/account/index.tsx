@@ -1,31 +1,41 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
-import { useAuth } from '../../components/Auth'
+import { Button } from '../../components/Button'
 import { Gutter } from '../../components/Gutter'
 import { Input } from '../../components/Input'
-import classes from './index.module.css'
+import { Message } from '../../components/Message'
+import { RenderParams } from '../../components/RenderParams'
+import { useAuth } from '../../providers/Auth'
+
+import classes from './index.module.scss'
 
 type FormData = {
   email: string
-  firstName: string
-  lastName: string
+  name: string
+  password: string
+  passwordConfirm: string
 }
 
 const Account: React.FC = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const { user, setUser } = useAuth()
+  const [changePassword, setChangePassword] = useState(false)
   const router = useRouter()
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isLoading },
     reset,
+    watch,
   } = useForm<FormData>()
+
+  const password = useRef({})
+  password.current = watch('password', '')
 
   const onSubmit = useCallback(
     async (data: FormData) => {
@@ -42,21 +52,22 @@ const Account: React.FC = () => {
 
         if (response.ok) {
           const json = await response.json()
-
-          // Update the user in auth state with new values
           setUser(json.doc)
-
-          // Set success message for user
           setSuccess('Successfully updated account.')
-
-          // Clear any existing errors
           setError('')
+          setChangePassword(false)
+          reset({
+            email: json.doc.email,
+            name: json.doc.name,
+            password: '',
+            passwordConfirm: '',
+          })
         } else {
           setError('There was a problem updating your account.')
         }
       }
     },
-    [user, setUser],
+    [user, setUser, reset],
   )
 
   useEffect(() => {
@@ -68,37 +79,87 @@ const Account: React.FC = () => {
     if (user) {
       reset({
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        password: '',
+        passwordConfirm: '',
       })
     }
-  }, [user, reset, router])
-
-  useEffect(() => {
-    if (typeof router.query.success === 'string') {
-      setSuccess(router.query.success)
-    }
-  }, [router])
+  }, [user, router, reset, changePassword])
 
   return (
-    <Gutter>
+    <Gutter className={classes.account}>
+      <RenderParams className={classes.params} />
       <h1>Account</h1>
-      {router.query.message && <div className={classes.message}>{router.query.message}</div>}
-      {error && <div className={classes.error}>{error}</div>}
-      {success && <div className={classes.success}>{success}</div>}
+      <p>
+        {`This is your account dashboard. Here you can update your account information and more. To manage all users, `}
+        <Link href={`${process.env.NEXT_PUBLIC_CMS_URL}/admin/collections/users`}>
+          login to the admin dashboard
+        </Link>
+        {'.'}
+      </p>
       <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
-        <Input
-          name="email"
-          label="Email Address"
-          required
-          register={register}
-          error={errors.email}
+        <Message error={error} success={success} className={classes.message} />
+        {!changePassword ? (
+          <Fragment>
+            <p>
+              {'Change your account details below, or '}
+              <button
+                type="button"
+                className={classes.changePassword}
+                onClick={() => setChangePassword(!changePassword)}
+              >
+                click here
+              </button>
+              {' to change your password.'}
+            </p>
+            <Input
+              name="email"
+              label="Email Address"
+              required
+              register={register}
+              error={errors.email}
+              type="email"
+            />
+          </Fragment>
+        ) : (
+          <Fragment>
+            <p>
+              {'Change your password below, or '}
+              <button
+                type="button"
+                className={classes.changePassword}
+                onClick={() => setChangePassword(!changePassword)}
+              >
+                cancel
+              </button>
+              .
+            </p>
+            <Input
+              name="password"
+              type="password"
+              label="Password"
+              required
+              register={register}
+              error={errors.password}
+            />
+            <Input
+              name="passwordConfirm"
+              type="password"
+              label="Confirm Password"
+              required
+              register={register}
+              validate={value => value === password.current || 'The passwords do not match'}
+              error={errors.passwordConfirm}
+            />
+          </Fragment>
+        )}
+        <Button
+          type="submit"
+          className={classes.submit}
+          label={isLoading ? 'Processing' : changePassword ? 'Change password' : 'Update account'}
+          appearance="primary"
         />
-        <Input name="firstName" label="First Name" register={register} error={errors.firstName} />
-        <Input name="lastName" label="Last Name" register={register} error={errors.lastName} />
-        <button type="submit">Update account</button>
       </form>
-      <Link href="/logout">Log out</Link>
+      <Button href="/logout" appearance="secondary" label="Log out" />
     </Gutter>
   )
 }

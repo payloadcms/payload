@@ -1,7 +1,7 @@
 import path from 'path';
 import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 
 export interface Relation {
   id: string;
@@ -30,7 +30,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 
 export const slug = 'posts';
 export const relationSlug = 'relation';
-export default buildConfig({
+export default buildConfigWithDefaults({
   graphQL: {
     schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),
   },
