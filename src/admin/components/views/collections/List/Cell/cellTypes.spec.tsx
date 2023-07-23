@@ -97,9 +97,24 @@ describe('Cell Types', () => {
         data={timeStamp}
         field={field}
       />);
-      const dateMatch = /October\s[6|7]th\s2020,\s[\d]{1,2}:07\s[A|P]M/; // Had to account for timezones in CI, also 7 is an option due to AUS timezone
+      
+      const date = new Date(timeStamp);
+      const year = date.getFullYear();
+      const month = date.toLocaleString('en-US', { month: 'long' });
+      const day = `${date.getDate()}th`;
+      
+      const timeOptions: Intl.DateTimeFormatOptions = {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+      };      
+      
+      const datePart = `${month} ${day} ${year},`;
+      const timePart = date.toLocaleString('en-US', timeOptions);      
+
+      const dateMatch = `${datePart} ${timePart}`.replace(/\s/g," ");
       const el = container.querySelector('span');
-      expect(el.textContent).toMatch(dateMatch);
+      expect(el.textContent.replace(/\s/g," ")).toEqual(dateMatch);
     });
 
     it('handles undefined', () => {
