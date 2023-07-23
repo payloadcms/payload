@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { GraphQLNonNull, GraphQLBoolean, GraphQLInt, GraphQLString } from 'graphql';
-import { singular } from 'pluralize';
+import pluralize from 'pluralize-esm';
 import formatName from '../../graphql/utilities/formatName';
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
 import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
@@ -18,6 +18,8 @@ import { toWords } from '../../utilities/formatLabels';
 import { SanitizedGlobalConfig } from '../config/types';
 import { buildPolicyType } from '../../graphql/schema/buildPoliciesType';
 import { docAccessResolver } from './resolvers/docAccess';
+
+const { singular } = pluralize;
 
 function initGlobalsGraphQL(payload: Payload): void {
   if (payload.config.globals) {

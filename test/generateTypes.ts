@@ -1,6 +1,10 @@
-import path from 'path';
+import path, { dirname } from 'path';
 import fs from 'fs';
 import { generateTypes } from '../src/bin/generateTypes';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const [testConfigDir] = process.argv.slice(2);
 

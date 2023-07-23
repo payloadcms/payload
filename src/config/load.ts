@@ -8,6 +8,9 @@ import { SanitizedConfig } from './types';
 import findConfig from './find';
 import validate from './validate';
 import { clientFiles } from './clientFiles';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 const loadConfig = async (logger?: pino.Logger): Promise<SanitizedConfig> => {
   const localLogger = logger ?? Logger();
@@ -19,7 +22,7 @@ const loadConfig = async (logger?: pino.Logger): Promise<SanitizedConfig> => {
   });
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const configPromise = require(configPath);
+  const configPromise = await import(configPath);
 
   let config = await configPromise;
 

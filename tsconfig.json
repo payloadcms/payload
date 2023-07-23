@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es2022",
     "sourceMap": true,
-    "module": "ES2022",
+    "module": "ESNext",
     "allowJs": true, /* Allow javascript files to be compiled. */
     "checkJs": false, /* Report errors in .js files. */
     "jsx": "react", /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */

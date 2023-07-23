@@ -1,4 +1,4 @@
-import { singular } from 'pluralize';
+import pluralize from 'pluralize-esm';
 import type { JSONSchema4 } from 'json-schema';
 import { Field, FieldAffectingData, fieldAffectsData, Option, tabHasName } from '../fields/config/types';
 import { SanitizedCollectionConfig } from '../collections/config/types';
@@ -6,6 +6,8 @@ import { SanitizedGlobalConfig } from '../globals/config/types';
 import deepCopyObject from './deepCopyObject';
 import { toWords } from './formatLabels';
 import { SanitizedConfig } from '../config/types';
+
+const { singular } = pluralize;
 
 const propertyIsRequired = (field: Field) => {
   if (fieldAffectsData(field) && (('required' in field && field.required === true))) return true;

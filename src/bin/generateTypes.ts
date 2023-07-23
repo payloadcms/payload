@@ -4,6 +4,7 @@ import { compile } from 'json-schema-to-typescript';
 import Logger from '../utilities/logger';
 import loadConfig from '../config/load';
 import { configToJSONSchema } from '../utilities/configToJSONSchema';
+import * as url from 'node:url';
 
 export async function generateTypes(): Promise<void> {
   const logger = Logger();
@@ -26,6 +27,10 @@ export async function generateTypes(): Promise<void> {
 }
 
 // when generateTypes.js is launched directly
-if (module.id === require.main.id) {
-  generateTypes();
+// This is an ESM translation from Rich Harris https://2ality.com/2022/07/nodejs-esm-main.html
+if (import.meta.url.startsWith('file:')) { // (A)
+  const modulePath = url.fileURLToPath(import.meta.url);
+  if (process.argv[1] === modulePath) { // (B)
+    generateTypes();
+  }
 }
