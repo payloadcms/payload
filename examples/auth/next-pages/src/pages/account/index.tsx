@@ -72,11 +72,7 @@ const Account: React.FC = () => {
 
   useEffect(() => {
     if (user === null) {
-      router.push(
-        `/login?message=${encodeURIComponent(
-          'You must be logged in to view this page.',
-        )}&redirect=${encodeURIComponent('/account')}`,
-      )
+      router.push(`/login?unauthorized=account`)
     }
 
     // Once user is loaded, reset form to have default values

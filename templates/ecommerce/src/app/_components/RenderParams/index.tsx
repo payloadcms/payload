@@ -1,14 +1,21 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 import { Message } from '../Message'
 
-export const RenderParams: React.FC<{
+type Props = {
   params?: string[]
   message?: string
   className?: string
-}> = ({ params = ['error', 'message', 'success'], message, className }) => {
+}
+
+const RenderParamsComponent: React.FC<Props> = ({
+  params = ['error', 'message', 'success'],
+  message,
+  className,
+}) => {
   const searchParams = useSearchParams()
   const paramValues = params.map(param => searchParams.get(param)).filter(Boolean)
 
@@ -23,4 +30,12 @@ export const RenderParams: React.FC<{
   }
 
   return null
+}
+
+export const RenderParams: React.FC<Props> = props => {
+  return (
+    <Suspense fallback={null}>
+      <RenderParamsComponent {...props} />
+    </Suspense>
+  )
 }
