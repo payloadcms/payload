@@ -1,4 +1,7 @@
+'use client'
+
 import React from 'react'
+import { useSelectedLayoutSegments } from 'next/navigation'
 import { PayloadAdminBar, PayloadAdminBarProps } from 'payload-admin-bar'
 
 import { useAuth } from '../../_providers/Auth'
@@ -9,9 +12,11 @@ import classes from './index.module.scss'
 const Title: React.FC = () => <span>Dashboard</span>
 
 export const AdminBar: React.FC<{
-  adminBarProps: PayloadAdminBarProps
+  adminBarProps?: PayloadAdminBarProps
 }> = props => {
-  const { adminBarProps } = props
+  const { adminBarProps } = props || {}
+  const segments = useSelectedLayoutSegments()
+  const collection = segments?.[1] === 'products' ? 'products' : 'pages'
 
   const { user } = useAuth()
 
@@ -24,6 +29,11 @@ export const AdminBar: React.FC<{
       <Gutter className={classes.blockContainer}>
         <PayloadAdminBar
           {...adminBarProps}
+          collection={collection}
+          collectionLabels={{
+            singular: collection === 'products' ? 'Product' : 'Page',
+            plural: collection === 'products' ? 'Products' : 'Pages',
+          }}
           key={user?.id} // use key to get the admin bar to re-run its `me` request
           cmsURL={process.env.NEXT_PUBLIC_SERVER_URL}
           className={classes.payloadAdminBar}
