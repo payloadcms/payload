@@ -3,6 +3,7 @@
   "version": "1.10.1",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
+  "type": "module",
   "engines": {
     "node": ">=14",
     "yarn": ">=1.22 <2"

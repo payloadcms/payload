@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es2019",
+    "target": "es2022",
     "sourceMap": true,
-    "module": "commonjs",
+    "module": "ES2022",
     "allowJs": true, /* Allow javascript files to be compiled. */
     "checkJs": false, /* Report errors in .js files. */
     "jsx": "react", /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */

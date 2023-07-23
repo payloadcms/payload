@@ -1,7 +1,13 @@
-import path from 'path';
+import path, { dirname } from 'path';
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
 import TerserJSPlugin from 'terser-webpack-plugin';
 import OptimizeCSSAssetsPlugin from 'css-minimizer-webpack-plugin';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'node:module';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const require = createRequire(import.meta.url);
 
 export default {
   entry: {
@@ -28,6 +34,9 @@ export default {
       {
         test: /\.(t|j)sx?$/,
         exclude: /node_modules/,
+        resolve: {
+          fullySpecified: false
+        },
         use: [
           {
             loader: require.resolve('swc-loader'),
@@ -81,6 +90,7 @@ export default {
     }),
   ],
   resolve: {
+    mainFiles: ['index'],
     alias: {
       'payload-scss-overrides': path.resolve(__dirname, '../admin/scss/overrides.scss'),
     },
