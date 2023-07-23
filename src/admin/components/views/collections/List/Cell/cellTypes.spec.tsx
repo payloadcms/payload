@@ -97,7 +97,7 @@ describe('Cell Types', () => {
         data={timeStamp}
         field={field}
       />);
-      const dateMatch = /October\s6th\s2020,\s[\d]{1,2}:07\s[A|P]M/; // Had to account for timezones in CI
+      const dateMatch = /October\s[6|7]th\s2020,\s[\d]{1,2}:07\s[A|P]M/; // Had to account for timezones in CI, also 7 is an option due to AUS timezone
       const el = container.querySelector('span');
       expect(el.textContent).toMatch(dateMatch);
     });
