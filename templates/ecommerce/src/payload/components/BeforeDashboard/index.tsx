@@ -32,14 +32,21 @@ const BeforeDashboard: React.FC = () => {
             {'Stripe to obtain your API Keys'}
           </a>
           {
-            '. Create a new account if needed, then copy them into your environment variables and restart your server. See the README for more details.'
+            '. Create a new account if needed, then copy them into your environment variables and restart your server. See the '
           }
+          <a
+            href="https://github.com/payloadcms/payload/blob/master/templates/ecommerce/README.md#stripe"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {'README'}
+          </a>
+          {' for more details.'}
         </li>
         <li>
           <Link to="/admin/collections/products">Link each of your products</Link>
-          {
-            ' to Stripe by selecting the corresponding product using the using the dropdown under "Product Details".'
-          }
+          {' to Stripe by selecting the corresponding product using the using the dropdown under '}
+          <i>Product Details</i>.
         </li>
         <li>
           If you created this repo using Payload Cloud, head over to GitHub and clone it to your

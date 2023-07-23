@@ -20,7 +20,7 @@ import classes from './index.module.scss'
 const apiKey = `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`
 const stripe = loadStripe(apiKey)
 
-const CheckoutPageClient: React.FC<{
+export const CheckoutPage: React.FC<{
   settings: Settings
 }> = props => {
   const {
@@ -96,7 +96,7 @@ const CheckoutPageClient: React.FC<{
               const {
                 quantity,
                 product,
-                product: { title, meta },
+                product: { id, stripeProductID, title, meta },
               } = item
 
               const isLast = index === (cart?.items?.length || 0) - 1
@@ -109,10 +109,26 @@ const CheckoutPageClient: React.FC<{
                     <div className={classes.mediaWrapper}>
                       {!metaImage && <span className={classes.placeholder}>No image</span>}
                       {metaImage && typeof metaImage !== 'string' && (
-                        <Media imgClassName={classes.image} resource={metaImage} fill />
+                        <Media
+                          className={classes.media}
+                          imgClassName={classes.image}
+                          resource={metaImage}
+                          fill
+                        />
                       )}
                     </div>
                     <div className={classes.rowContent}>
+                      {!stripeProductID && (
+                        <p className={classes.warning}>
+                          {'This product is not yet connected to Stripe. To link this product, '}
+                          <Link
+                            href={`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/collections/products/${id}`}
+                          >
+                            navigate to the admin dashboard
+                          </Link>
+                          {'.'}
+                        </p>
+                      )}
                       <h6 className={classes.title}>{title}</h6>
                       {`Quantity: ${quantity}`}
                       <Price product={product} button={false} />
@@ -129,28 +145,27 @@ const CheckoutPageClient: React.FC<{
       )}
       {!clientSecret && !error && (
         <div className={classes.loading}>
-          <LoadingShimmer number={3} />
+          <LoadingShimmer />
         </div>
       )}
       {!clientSecret && error && (
         <div className={classes.error}>
-          <p>Error:</p>
-          {error}
+          <p>{`Error: ${error}`}</p>
         </div>
       )}
-      {error && <p>{error}</p>}
       {clientSecret && (
-        <Elements
-          stripe={stripe}
-          options={{
-            clientSecret,
-          }}
-        >
-          <CheckoutForm />
-        </Elements>
+        <Fragment>
+          {error && <p>{error}</p>}
+          <Elements
+            stripe={stripe}
+            options={{
+              clientSecret,
+            }}
+          >
+            <CheckoutForm />
+          </Elements>
+        </Fragment>
       )}
     </Fragment>
   )
 }
-
-export default CheckoutPageClient

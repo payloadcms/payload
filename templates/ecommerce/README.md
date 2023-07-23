@@ -1,6 +1,6 @@
 # Payload E-Commerce Template
 
-This is the official [Payload E-Commerce Template](https://github.com/payloadcms/payload). Use it to power e-commerce businesses and online stores of all sizes. This repo includes a fully-working backend, enterprise-grade admin panel, and a beautifully designed, production-ready website.
+This is the official [Payload E-Commerce Template](https://github.com/payloadcms/payload/blob/master/templates/ecommerce). Use it to power e-commerce businesses and online stores of all sizes. This repo includes a fully-working backend, enterprise-grade admin panel, and a beautifully designed, production-ready website.
 
 This template is right for you if you are selling:
 
@@ -150,6 +150,27 @@ Payload itself handles no currency exchange. All payments are processed and bill
 
 For more details on how to extend this functionality, see the the official [Payload Stripe Plugin](https://github.com/payloadcms/plugin-stripe).
 
+### Connect Stripe
+
+To integrate with Stripe, follow these steps:
+
+1. You will first need to create a [Stripe](https://stripe.com) account if you do not already have one.
+1. Retrieve your [Stripe API keys](https://dashboard.stripe.com/test/apikeys) and paste them into your `env`:
+   ```bash
+   STRIPE_SECRET_KEY=
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+   ```
+1. In another terminal, listen for webhooks (optional):
+   ```bash
+   stripe login # follow the prompts
+   yarn stripe:webhooks
+   ```
+1. Paste the given webhook signing secret into your `env`:
+   ```bash
+   STRIPE_WEBHOOKS_SIGNING_SECRET=
+   ```
+1. Reboot Payload to ensure that Stripe connects and the webhooks are registered.
+
 ## Checkout
 
 A custom endpoint is opened at `POST /api/payment-intent` which initiates the checkout process. This endpoint creates a [Stripe Payment Intent](https://stripe.com/docs/payments/payment-intents) with the items in the cart using the Stripe's [Invoices API](https://stripe.com/docs/api/invoices). First, an invoice is drafted, then each item in your cart is appended as a line-item to the invoice. The total price is recalculated on the server to ensure accuracy and security, and once completed, passes the `client_secret` back in the response for your front-end to finalize the payment. Once the payment has succeeded, the draft invoice will be set to paid, each purchased product will be recorded to the user's profile, and the user's cart will be cleared.
@@ -249,30 +270,7 @@ For more details on how setup a custom server, see the official [Custom Server E
 
 ##  Development
 
-To spin up this example locally, follow the [Quick Start](#quick-start).
-
-### Connect Stripe
-
-To integrate with Stripe, follow these steps:
-
-1. You will first need to create a [Stripe](https://stripe.com) account if you do not already have one.
-1. Retrieve your [Stripe API keys](https://dashboard.stripe.com/test/apikeys) and paste them into your `env`:
-   ```bash
-   STRIPE_SECRET_KEY=
-   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
-   ```
-1. In another terminal, listen for webhooks (optional):
-   ```bash
-   stripe login # follow the prompts
-   yarn stripe:webhooks
-   ```
-1. Paste the given webhook signing secret into your `env`:
-   ```bash
-   STRIPE_WEBHOOKS_SIGNING_SECRET=
-   ```
-1. Reboot Payload to ensure that Stripe connects and the webhooks are registered.
-
-See the [Stripe](#stripe) section for more details.
+To spin up this example locally, follow the [Quick Start](#quick-start). Then [Connect Stripe](#connect-stripe) to enable payments, and [Seed](#seed) the database with a few products and pages.
 
 ### Docker
 

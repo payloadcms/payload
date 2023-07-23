@@ -86,7 +86,12 @@ export const CartPage: React.FC<{
                         <Link href={`/products/${product.slug}`} className={classes.mediaWrapper}>
                           {!metaImage && <span className={classes.placeholder}>No image</span>}
                           {metaImage && typeof metaImage !== 'string' && (
-                            <Media imgClassName={classes.image} resource={metaImage} fill />
+                            <Media
+                              className={classes.media}
+                              imgClassName={classes.image}
+                              resource={metaImage}
+                              fill
+                            />
                           )}
                         </Link>
                         <div className={classes.rowContent}>
