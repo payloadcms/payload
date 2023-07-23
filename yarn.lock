@@ -801,6 +801,25 @@
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/@csstools/css-color-parser/-/css-color-parser-1.2.2.tgz#730e69eb72efdcfd644f8b14fcdb816b69a4c290"
   integrity sha512-okEA/PWwtUn/7Koy0QoDs85jGOO0293kDyYdVoLgpwt2QmMJECYZotxVjRZ5SdReVGPwecUyeHeViw1uLewcpA==
+"@csstools/cascade-layer-name-parser@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@csstools/cascade-layer-name-parser/-/cascade-layer-name-parser-1.0.3.tgz#7f049a670c1e071102243ab6c392174844ca6cd7"
+  integrity sha512-ks9ysPP8012j90EQCCFtDsQIXOTCOpTQFIyyoRku06y8CXtUQ+8bXI8KVm9Q9ovwDUVthWuWKZWJD3u1rwnEfw==
+
+"@csstools/color-helpers@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@csstools/color-helpers/-/color-helpers-3.0.0.tgz#b64a9d86663b6d843b169f5da300f78c0242efc2"
+  integrity sha512-rBODd1rY01QcenD34QxbQxLc1g+Uh7z1X/uzTHNQzJUnFCT9/EZYI7KWq+j0YfWMXJsRJ8lVkqBcB0R/qLr+yg==
+
+"@csstools/css-calc@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@csstools/css-calc/-/css-calc-1.1.2.tgz#bf2c376bbb9a43de4851a7efcde1818d18e0fe7d"
+  integrity sha512-qzBPhzWz4tUNk2tM1fk6tOSGaWlrhmH66w6WyUDoB+2Pj7pxvu6mlvXVwOGODGJBIF158aPWPheVQgcoBTszkg==
+
+"@csstools/css-color-parser@^1.2.0", "@csstools/css-color-parser@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@csstools/css-color-parser/-/css-color-parser-1.2.2.tgz#730e69eb72efdcfd644f8b14fcdb816b69a4c290"
+  integrity sha512-okEA/PWwtUn/7Koy0QoDs85jGOO0293kDyYdVoLgpwt2QmMJECYZotxVjRZ5SdReVGPwecUyeHeViw1uLewcpA==
   dependencies:
     "@csstools/color-helpers" "^3.0.0"
     "@csstools/css-calc" "^1.1.2"
