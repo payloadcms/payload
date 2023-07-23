@@ -18,6 +18,7 @@ export const PRODUCT = `
       docs {
         id
         title
+        stripeProductID
         ${CATEGORIES}
         layout {
           ${CALL_TO_ACTION}
