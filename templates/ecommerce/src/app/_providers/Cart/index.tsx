@@ -133,13 +133,23 @@ export const CartProvider = props => {
     // wait until we have attempted authentication (the user is either an object or `null`)
     if (!hasInitialized.current || user === undefined) return
 
+    // ensure that cart items are fully populated, filter out any items that are not
+    // this will prevent discontinued products from appearing in the cart
     const flattenedCart = {
       ...cart,
-      items: cart?.items?.map(item => ({
-        ...item,
-        // flatten relationship to product
-        product: typeof item.product === 'string' ? item.product : item?.product?.id,
-      })),
+      items: cart?.items
+        ?.map(item => {
+          if (!item?.product || typeof item?.product !== 'object') {
+            return null
+          }
+
+          return {
+            ...item,
+            // flatten relationship to product
+            product: item?.product?.id,
+          }
+        })
+        .filter(Boolean) as CartItem[],
     }
 
     if (user) {
