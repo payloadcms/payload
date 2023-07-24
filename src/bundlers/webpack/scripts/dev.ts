@@ -14,7 +14,7 @@ export const devAdmin: DevAdminType = async ({ payload }) => {
   payload.express.use(payload.config.routes.admin, history());
 
   try {
-    const webpackConfig = getDevConfig({ ...payload.config });
+    const webpackConfig = getDevConfig(payload.config);
     const compiler = webpack(webpackConfig);
 
     router.use(webpackDevMiddleware(compiler, {
