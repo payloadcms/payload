@@ -22,19 +22,21 @@ const useThumbnail = (collection: SanitizedCollectionConfig, doc: Record<string,
 
   const { serverURL } = useConfig();
 
+  if (typeof adminThumbnail === 'function') {
+    const thumbnailURL = adminThumbnail({ doc });
+
+    if (!thumbnailURL) return false;
+
+    if (absoluteURLPattern.test(thumbnailURL) || base64Pattern.test(thumbnailURL)) {
+      return thumbnailURL;
+    }
+
+    return `${serverURL}${thumbnailURL}`;
+  }
+
   if (isImage(mimeType as string)) {
     if (typeof adminThumbnail === 'undefined' && url) {
       return url as string;
-    }
-
-    if (typeof adminThumbnail === 'function') {
-      const thumbnailURL = adminThumbnail({ doc });
-
-      if (absoluteURLPattern.test(thumbnailURL) || base64Pattern.test(thumbnailURL)) {
-        return thumbnailURL;
-      }
-
-      return `${serverURL}${thumbnailURL}`;
     }
 
     if (sizes?.[adminThumbnail]?.url) {
