@@ -19,6 +19,7 @@ export const ArrayAction: React.FC<Props> = ({
   addRow,
   duplicateRow,
   removeRow,
+  hasMaxRows,
 }) => {
   const { t } = useTranslation('general');
   return (
@@ -56,28 +57,32 @@ export const ArrayAction: React.FC<Props> = ({
                 {t('moveDown')}
               </button>
             )}
-            <button
-              className={`${baseClass}__action ${baseClass}__add`}
-              type="button"
-              onClick={() => {
-                addRow(index);
-                close();
-              }}
-            >
-              <Plus />
-              {t('addBelow')}
-            </button>
-            <button
-              className={`${baseClass}__action ${baseClass}__duplicate`}
-              type="button"
-              onClick={() => {
-                duplicateRow(index);
-                close();
-              }}
-            >
-              <Copy />
-              {t('duplicate')}
-            </button>
+            {!hasMaxRows && (
+              <React.Fragment>
+                <button
+                  className={`${baseClass}__action ${baseClass}__add`}
+                  type="button"
+                  onClick={() => {
+                    addRow(index);
+                    close();
+                  }}
+                  >
+                  <Plus />
+                  {t('addBelow')}
+                </button>
+                <button
+                  className={`${baseClass}__action ${baseClass}__duplicate`}
+                  type="button"
+                  onClick={() => {
+                    duplicateRow(index);
+                    close();
+                  }}
+                  >
+                  <Copy />
+                  {t('duplicate')}
+                </button>
+              </React.Fragment>
+            )}
             <button
               className={`${baseClass}__action ${baseClass}__remove`}
               type="button"

@@ -247,6 +247,7 @@ const BlocksField: React.FC<Props> = (props) => {
                     rowCount={rows.length}
                     labels={labels}
                     path={path}
+                    hasMaxRows={hasMaxRows}
                   />
                 )}
               </DraggableSortableItem>
