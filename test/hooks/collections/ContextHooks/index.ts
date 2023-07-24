@@ -23,9 +23,10 @@ const ContextHooks: CollectionConfig = {
 
       Object.keys(req.query).forEach((key) => {
         if (key.startsWith('context_')) {
-          // Strip 'context_' from key and add it to context object
+          // Strip 'context_' from key, add it to context object and remove it from query params
           const newKey = key.substring('context_'.length);
           context[newKey] = req.query[key];
+          delete req.query[key];
         }
       });
 

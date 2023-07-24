@@ -115,6 +115,51 @@ const MyCollection: CollectionConfig = {
 
 That's it! Now the afterChange hook will only run once, and not trigger itself again and again. Previously, we'd have to use a hidden checkbox field to do that - context makes it much easier.
 
+## Passing context from the Rest API
+
+Now, as you have seen in the example above, payload's local API has a `context` property which you can use to pass in context. But what about the Rest API?
+
+In order to pass context, through the Rest API, you can use query parameters which you then parse in a `beforeOperation` hook. Here's how the hook could look like:
+
+```ts
+beforeOperation: [async ({ context, args }) => {
+  const req: PayloadRequest = args.req;
+
+  if (!req.query || !Object.keys(req.query).length) {
+    return args;
+  }
+
+  Object.keys(req.query).forEach((key) => {
+    if (key.startsWith('context_')) {
+      // Strip 'context_' from key, add it to context object and remove it from query params
+      const newKey = key.substring('context_'.length);
+      context[newKey] = req.query[key];
+      delete req.query[key];
+    }
+  });
+
+  return args;
+}],
+```
+
+Simply add this hook to your collection! In this implementation, the beforeOperation hooks moves every query parameter that starts with `context_` to the context object. So if you have a query parameter `context_secretValue`, it will be moved to context as `secretValue` and removed from the query parameters.
+
+This is how you would then pass context through the Rest API:
+
+```ts
+const params = new URLSearchParams({
+  context_secretValue: 'data from rest API',
+});
+
+// send context as query params. It will be parsed by the beforeOperation hook
+const response = await fetch(`$http://localhost:3000/api/[collection-slug]?${params.toString()}`, {
+  body: JSON.stringify({
+    // ...
+  }),
+  method: 'post',
+});
+```
+
 ## Typing context
 
 By default, context is untyped. However - especially for plugin development when a plugin adds context data to the context object - it's useful to have it typed.
