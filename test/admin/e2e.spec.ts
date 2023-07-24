@@ -134,7 +134,6 @@ describe('admin', () => {
       await page.goto(url.create);
       await page.locator('#field-title').fill(title);
       await page.locator('#field-description').fill(description);
-      await page.click('#action-save', { delay: 100 });
 
       await saveDocAndAssert(page);
 
