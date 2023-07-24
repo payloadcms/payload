@@ -38,7 +38,7 @@ export const getUserOrder: PayloadHandler = async (req, res): Promise<void> => {
 
     const order = await stripe.invoices.retrieve(req.params.id)
 
-    if (!order || order.status === 'draft') {
+    if (!order) {
       res.status(404).json({ error: 'No order found' })
       return
     }

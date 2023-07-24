@@ -20,7 +20,7 @@ export default async function Order({ params: { id } }) {
     )}&redirect=${encodeURIComponent(`/order/${id}`)}`,
   })
 
-  const order: Stripe.Invoice = await fetch(
+  const order: void | Stripe.Invoice = await fetch(
     `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/order/${id}`,
     {
       headers: {
@@ -28,7 +28,13 @@ export default async function Order({ params: { id } }) {
         Authorization: `JWT ${token}`,
       },
     },
-  )?.then(res => res.json())
+  )?.then(res => {
+    const json = res.json()
+    if ('error' in json && json.error) {
+      throw new Error(`Error: ${json.error}`)
+    }
+    return json
+  })
 
   if (!order) {
     notFound()
@@ -54,11 +60,13 @@ export default async function Order({ params: { id } }) {
             currency: order.currency.toUpperCase(),
           }).format(order.amount_due / 100)}
         </p>
-        <p>
-          <Link href={order.hosted_invoice_url} rel="noopener noreferrer" target="_blank">
-            View invoice
-          </Link>
-        </p>
+        {order?.hosted_invoice_url && (
+          <p>
+            <Link href={order?.hosted_invoice_url} rel="noopener noreferrer" target="_blank">
+              View invoice
+            </Link>
+          </p>
+        )}
       </div>
       <HR />
       <div className={classes.order}>

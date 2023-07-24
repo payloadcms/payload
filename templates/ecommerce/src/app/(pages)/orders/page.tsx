@@ -19,7 +19,7 @@ export default async function Orders() {
     )}&redirect=${encodeURIComponent('/orders')}`,
   })
 
-  const orders: Stripe.Invoice[] = await fetch(
+  const orders: void | Stripe.Invoice[] = await fetch(
     `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/orders`,
     {
       headers: {
@@ -27,7 +27,13 @@ export default async function Orders() {
         Authorization: `JWT ${token}`,
       },
     },
-  )?.then(res => res.json())
+  )?.then(res => {
+    const json = res.json()
+    if ('error' in json && json.error) {
+      throw new Error(`Error: ${json.error}`)
+    }
+    return json
+  })
 
   return (
     <Gutter className={classes.orders}>
@@ -57,7 +63,7 @@ export default async function Orders() {
                     {'Total: '}
                     {new Intl.NumberFormat('en-US', {
                       style: 'currency',
-                      currency: order.currency.toUpperCase(),
+                      currency: order?.currency?.toUpperCase(),
                     }).format(order.amount_due / 100)}
                   </p>
                 </div>

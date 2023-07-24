@@ -38,7 +38,16 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
         email: fullUser?.email,
         name: fullUser?.name,
       })
+
       stripeCustomerID = customer.id
+
+      await payload.update({
+        collection: 'users',
+        id: user?.id,
+        data: {
+          stripeCustomerID,
+        },
+      })
     }
 
     // initialize an draft invoice for the customer, then add items to it
