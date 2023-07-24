@@ -99,6 +99,19 @@ const RichText: React.FC<Props> = (props) => {
             attr = { ...attr, style: { textAlign: element.textAlign } };
             break;
         }
+      } else if (element.type === 'li') {
+        switch (element.textAlign) {
+          case 'right':
+            attr = { ...attr, style: { textAlign: 'right', listStylePosition: 'inside' } };
+            break;
+          case 'center':
+            attr = { ...attr, style: { textAlign: 'center', listStylePosition: 'inside' } };
+            break;
+          case 'left':
+          default:
+            attr = { ...attr, style: { textAlign: 'left', listStylePosition: 'outside' } };
+            break;
+        }
       } else {
         attr = { ...attr, style: { textAlign: element.textAlign } };
       }
