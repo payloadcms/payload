@@ -241,7 +241,7 @@ import { User } from '../payload-types.ts';
 
 const Greeting: React.FC = () => {
   // highlight-start
-  const { user } = useConfig<User>();
+  const { user } = useAuth<User>();
   // highlight-end
 
   return (

@@ -1,8 +1,8 @@
-import { GraphQLBoolean, GraphQLInputObjectType, GraphQLString, GraphQLList, GraphQLFloat, GraphQLEnumType } from 'graphql';
+import { GraphQLBoolean, GraphQLInputObjectType, GraphQLString, GraphQLList, GraphQLFloat, GraphQLEnumType, GraphQLInt } from 'graphql';
 import type { GraphQLType } from 'graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { FieldAffectingData, RadioField, SelectField, optionIsObject } from '../../fields/config/types';
+import { FieldAffectingData, NumberField, RadioField, SelectField, optionIsObject } from '../../fields/config/types';
 import combineParentName from '../utilities/combineParentName';
 import formatName from '../utilities/formatName';
 import operators from './operators';
@@ -27,7 +27,9 @@ type DefaultsType = {
 
 const defaults: DefaultsType = {
   number: {
-    type: GraphQLFloat,
+    type: (field: NumberField): GraphQLType => {
+      return field?.name === 'id' ? GraphQLInt : GraphQLFloat;
+    },
     operators: [...operators.equality, ...operators.comparison],
   },
   text: {
@@ -141,13 +143,15 @@ export const withOperators = (field: FieldAffectingData, parentName: string): Gr
   const fieldOperators = [...defaults[field.type].operators];
   if (!('required' in field) || !field.required) fieldOperators.push('exists');
 
-  let gqlType: GraphQLType = typeof defaults[field.type].type === 'function'
+  const initialGqlType: GraphQLType = typeof defaults[field.type].type === 'function'
     ? defaults[field.type].type(field, parentName)
     : defaults?.[field.type].type;
 
   return new GraphQLInputObjectType({
     name,
     fields: fieldOperators.reduce((objectTypeFields, operator) => {
+      let gqlType = initialGqlType;
+
       if (listOperators.includes(operator)) {
         gqlType = new GraphQLList(gqlType);
       } else if (operator === 'exists') {

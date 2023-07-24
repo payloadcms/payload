@@ -32,6 +32,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
   const debouncedFields = useDebounce(fields, interval);
   const fieldRef = useRef(fields);
   const modifiedRef = useRef(modified);
+  const localeRef = useRef(locale);
 
   // Store fields in ref so the autosave func
   // can always retrieve the most to date copies
@@ -85,12 +86,12 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
         let method: string;
 
         if (collection && id) {
-          url = `${serverURL}${api}/${collection.slug}/${id}?draft=true&autosave=true&locale=${locale}`;
+          url = `${serverURL}${api}/${collection.slug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`;
           method = 'PATCH';
         }
 
         if (global) {
-          url = `${serverURL}${api}/globals/${global.slug}?draft=true&autosave=true&locale=${locale}`;
+          url = `${serverURL}${api}/globals/${global.slug}?draft=true&autosave=true&locale=${localeRef.current}`;
           method = 'POST';
         }
 
@@ -125,7 +126,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
     };
 
     autosave();
-  }, [i18n, debouncedFields, modified, serverURL, api, collection, global, id, getVersions, locale, modifiedRef]);
+  }, [i18n, debouncedFields, modified, serverURL, api, collection, global, id, getVersions, localeRef, modifiedRef]);
 
   useEffect(() => {
     if (versions?.docs?.[0]) {

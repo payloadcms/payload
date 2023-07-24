@@ -16,6 +16,9 @@ type Args = {
   id: string | number
   operation: 'create' | 'update'
   t: TFunction
+  preferences: {
+    [key: string]: unknown
+  }
 }
 
 export const iterateFields = async ({
@@ -30,6 +33,7 @@ export const iterateFields = async ({
   id,
   state,
   t,
+  preferences,
 }: Args): Promise<void> => {
   const promises = [];
   fields.forEach((field) => {
@@ -49,6 +53,7 @@ export const iterateFields = async ({
         passesCondition,
         data,
         t,
+        preferences,
       }));
     }
   });

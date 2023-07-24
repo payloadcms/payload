@@ -90,7 +90,9 @@
     "unspecific": "An error has occurred.",
     "userLocked": "This user is locked due to having too many failed login attempts.",
     "valueMustBeUnique": "Value must be unique",
-    "verificationTokenInvalid": "Verification token is invalid."
+    "verificationTokenInvalid": "Verification token is invalid.",
+    "singular": "Error",
+    "plural": "Errors"
   },
   "fields": {
     "addLabel": "Add {{label}}",
@@ -241,6 +243,7 @@
     "uploading": "Uploading",
     "user": "User",
     "users": "Users",
+    "value": "Value",
     "welcome": "Welcome"
   },
   "operators": {
@@ -274,11 +277,11 @@
     "emailAddress": "Please enter a valid email address.",
     "enterNumber": "Please enter a valid number.",
     "fieldHasNo": "This field has no {{label}}",
-    "greaterThanMax": "\"{{value}}\" is greater than the max allowed value of {{max}}.",
+    "greaterThanMax": "{{value}} is greater than the max allowed {{label}} of {{max}}.",
     "invalidInput": "This field has an invalid input.",
     "invalidSelection": "This field has an invalid selection.",
     "invalidSelections": "This field has the following invalid selections:",
-    "lessThanMin": "\"{{value}}\" is less than the min allowed value of {{min}}.",
+    "lessThanMin": "{{value}} is less than the min allowed {{label}} of {{min}}.",
     "longerThanMin": "This value must be longer than the minimum length of {{minLength}} characters.",
     "notValidDate": "\"{{value}}\" is not a valid date.",
     "required": "This field is required.",

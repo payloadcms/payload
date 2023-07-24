@@ -60,7 +60,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     req,
     req: {
       t,
-      locale,
       payload,
       payload: {
         config,
@@ -76,7 +75,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     throw new APIError('Missing \'where\' query of documents to update.', httpStatus.BAD_REQUEST);
   }
 
-  let { data } = args;
+  const { data: bulkUpdateData } = args;
   const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
 
   // /////////////////////////////////////
@@ -125,16 +124,18 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     config,
     collection,
     req,
-    data,
+    data: bulkUpdateData,
     throwOnMissingFile: false,
     overwriteExistingFiles,
   });
 
-  data = newFileData;
-
   const errors = [];
 
   const promises = docs.map(async (doc) => {
+    let data = {
+      ...newFileData,
+      ...bulkUpdateData,
+    };
     let docWithLocales: Document = JSON.stringify(doc);
     docWithLocales = JSON.parse(docWithLocales);
 

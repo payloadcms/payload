@@ -4,13 +4,29 @@
   position: relative;
   margin-bottom: $baseline;
 
-  input {
-    @include formInput;
-  }
-
-  &.error {
+  &:not(.has-many) {
     input {
-      background-color: var(--theme-error-200);
+      @include formInput;
+    }
+  }
+}
+
+html[data-theme=light] {
+  .field-type.number {
+    &.error {
+      input {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .field-type.number {
+    &.error {
+      input {
+        @include darkInputError;
+      }
     }
   }
 }

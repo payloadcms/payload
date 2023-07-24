@@ -241,6 +241,7 @@
     "uploading": "Téléchargement",
     "user": "Utilisateur",
     "users": "Utilisateurs",
+    "value": "Valeur",
     "welcome": "Bienvenu(e)"
   },
   "operators": {
@@ -274,11 +275,11 @@
     "emailAddress": "S'il vous plaît, veuillez entrer une adresse e-mail valide.",
     "enterNumber": "S'il vous plait, veuillez entrer un nombre valide.",
     "fieldHasNo": "Ce champ n'a pas de {{label}}",
-    "greaterThanMax": "\"{{value}}\" est supérieur à la valeur maximale autorisée de {{max}}.",
+    "greaterThanMax": "{{value}} est supérieur au max autorisé {{label}} de {{max}}.",
     "invalidInput": "Ce champ a une entrée invalide.",
     "invalidSelection": "Ce champ a une sélection invalide.",
     "invalidSelections": "Ce champ contient des sélections invalides suivantes :",
-    "lessThanMin": "\"{{value}}\" est inférieur à la valeur minimale autorisée de {{min}}.",
+    "lessThanMin": "{{value}} est inférieur au min autorisé {{label}} de {{min}}.",
     "longerThanMin": "Cette valeur doit être supérieure à la longueur minimale de {{minLength}} caractères.",
     "notValidDate": "\"{{value}}\" n'est pas une date valide.",
     "required": "Ce champ est requis.",

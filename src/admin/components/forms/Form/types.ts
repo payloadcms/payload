@@ -2,7 +2,14 @@ import React, { Dispatch } from 'react';
 import { Condition, Field as FieldConfig, Validate } from '../../../../fields/config/types';
 import { User } from '../../../../auth/types';
 
-export type Field = {
+export type Row = {
+  id: string
+  collapsed?: boolean
+  blockType?: string
+  childErrorPaths?: Set<string>
+}
+
+export type FormField = {
   value: unknown
   initialValue: unknown
   errorMessage?: string
@@ -11,10 +18,11 @@ export type Field = {
   disableFormData?: boolean
   condition?: Condition
   passesCondition?: boolean
+  rows?: Row[]
 }
 
 export type Fields = {
-  [path: string]: Field
+  [path: string]: FormField
 }
 
 export type Data = {
@@ -55,7 +63,7 @@ export type Submit = (options?: SubmitOptions, e?: React.FormEvent<HTMLFormEleme
 export type ValidateForm = () => Promise<boolean>;
 export type CreateFormData = (overrides?: any) => FormData;
 export type GetFields = () => Fields;
-export type GetField = (path: string) => Field;
+export type GetField = (path: string) => FormField;
 export type GetData = () => Data;
 export type GetSiblingData = (path: string) => Data;
 export type GetDataByPath = <T = unknown>(path: string) => T;
@@ -74,6 +82,18 @@ export type REMOVE = {
   type: 'REMOVE'
   path: string
 }
+
+export type MODIFY_CONDITION = {
+  type: 'MODIFY_CONDITION'
+  path: string
+  result: boolean
+  user: User
+}
+
+export type UPDATE = {
+  type: 'UPDATE'
+  path: string
+} & Partial<FormField>
 
 export type REMOVE_ROW = {
   type: 'REMOVE_ROW'
@@ -102,27 +122,32 @@ export type MOVE_ROW = {
   path: string
 }
 
-export type MODIFY_CONDITION = {
-  type: 'MODIFY_CONDITION'
+export type SET_ROW_COLLAPSED = {
+  type: 'SET_ROW_COLLAPSED'
   path: string
-  result: boolean
-  user: User
+  rowID: string
+  collapsed: boolean
+  setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
 }
 
-export type UPDATE = {
-  type: 'UPDATE'
+export type SET_ALL_ROWS_COLLAPSED = {
+  type: 'SET_ALL_ROWS_COLLAPSED'
   path: string
-} & Partial<Field>
+  collapsed: boolean
+  setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
+}
 
 export type FieldAction =
   | REPLACE_STATE
   | REMOVE
+  | MODIFY_CONDITION
+  | UPDATE
   | REMOVE_ROW
   | ADD_ROW
   | DUPLICATE_ROW
   | MOVE_ROW
-  | MODIFY_CONDITION
-  | UPDATE
+  | SET_ROW_COLLAPSED
+  | SET_ALL_ROWS_COLLAPSED
 
 export type FormFieldsContext = [Fields, Dispatch<FieldAction>]
 
@@ -147,4 +172,5 @@ export type Context = {
   formRef: React.MutableRefObject<HTMLFormElement>
   reset: Reset
   replaceState: (state: Fields) => void
+  buildRowErrors: () => void
 }

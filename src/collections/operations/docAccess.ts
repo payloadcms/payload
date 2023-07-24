@@ -31,15 +31,11 @@ export async function docAccess(args: Arguments): Promise<CollectionPermission> 
     collectionOperations.push('readVersions');
   }
 
-  const [policy, promises] = getEntityPolicies({
+  return getEntityPolicies({
     type: 'collection',
     req,
     entity: config,
     operations: collectionOperations,
     id,
   });
-
-  await Promise.all(promises);
-
-  return policy;
 }

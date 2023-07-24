@@ -1,5 +1,5 @@
 import path from 'path';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 import getFileByPath from '../../src/uploads/getFileByPath';
 import removeFiles from '../helpers/removeFiles';
@@ -14,7 +14,7 @@ export const audioSlug = 'audio';
 
 const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js');
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   admin: {
     webpack: (config) => ({
       ...config,

@@ -240,6 +240,7 @@
     "uploading": "Đang tải lên",
     "user": "Người dùng",
     "users": "Người dùng",
+    "value": "Giá trị",
     "welcome": "Xin chào"
   },
   "operators": {
@@ -273,11 +274,11 @@
     "emailAddress": "Địa chỉ email không hợp lệ.",
     "enterNumber": "Vui lòng nhập số.",
     "fieldHasNo": "Field này không có: {{label}}",
-    "greaterThanMax": "\"{{value}}\" đã vượt quá giá trị tối đa: {{max}}.",
+    "greaterThanMax": "{{value}} lớn hơn giá trị tối đa cho phép của {{label}} là {{max}}.",
     "invalidInput": "Dữ liệu nhập vào không hợp lệ.",
     "invalidSelection": "Lựa chọn ở field này không hợp lệ.",
     "invalidSelections": "'Field này có những lựa chọn không hợp lệ sau:'",
-    "lessThanMin": "\"{{value}}\" đang thấp hơn giá trị tối thiểu: {{min}}.",
+    "lessThanMin": "{{value}} nhỏ hơn giá trị tối thiểu cho phép của {{label}} là {{min}}.",
     "longerThanMin": "Giá trị này cần có độ dài tối thiểu {{minLength}} ký tự.",
     "notValidDate": "\"{{value}}\" không phải là một ngày (date) hợp lệ.",
     "required": "Field này cần được diền.",

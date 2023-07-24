@@ -278,7 +278,7 @@ const RichText: React.FC<Props> = (props) => {
       const parsedJSON = JSON.parse(valueToRender);
       valueToRender = parsedJSON;
     } catch (err) {
-      // do nothing
+      valueToRender = null;
     }
   }
 

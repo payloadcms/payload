@@ -13,12 +13,13 @@ import { UPDATE } from '../Form/types';
  *
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
-const useField = <T extends unknown>(options: Options): FieldType<T> => {
+const useField = <T, >(options: Options): FieldType<T> => {
   const {
     path,
     validate,
     disableFormData = false,
     condition,
+    hasRows,
   } = options;
 
   const submitted = useFormSubmitted();
@@ -28,8 +29,8 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const { id } = useDocumentInfo();
   const operation = useOperation();
   const field = useFormFields(([fields]) => fields[path]);
-  const dispatchField = useFormFields(([_, dispatch]) => dispatch);
   const { t } = useTranslation();
+  const dispatchField = useFormFields(([_, dispatch]) => dispatch);
 
   const { getData, getSiblingData, setModified } = useForm();
 
@@ -57,7 +58,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       type: 'UPDATE',
       path,
       value: val,
-      disableFormData,
+      disableFormData: disableFormData || (hasRows && val > 0),
     });
   }, [
     setModified,
@@ -65,11 +66,12 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     path,
     dispatchField,
     disableFormData,
+    hasRows,
   ]);
 
   // Store result from hook as ref
   // to prevent unnecessary rerenders
-  const result = useMemo(() => ({
+  const result: FieldType<T> = useMemo(() => ({
     showError,
     errorMessage: field?.errorMessage,
     value,
@@ -77,7 +79,19 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     formProcessing: processing,
     setValue,
     initialValue,
-  }), [field, processing, setValue, showError, submitted, value, initialValue]);
+    rows: field?.rows,
+    valid: field?.valid,
+  }), [
+    field?.errorMessage,
+    field?.rows,
+    field?.valid,
+    processing,
+    setValue,
+    showError,
+    submitted,
+    value,
+    initialValue,
+  ]);
 
   // Throttle the validate function
   useThrottledEffect(() => {
@@ -85,12 +99,13 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       const action: UPDATE = {
         type: 'UPDATE',
         path,
-        disableFormData,
+        disableFormData: disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
         validate,
         condition,
         value,
         valid: false,
         errorMessage: undefined,
+        rows: field?.rows,
       };
 
       const validateOptions = {
@@ -130,6 +145,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     path,
     user,
     validate,
+    field?.rows,
   ]);
 
   return result;

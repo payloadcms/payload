@@ -99,9 +99,9 @@ $cal-icon-width: 18px;
 
   .react-datepicker {
     @include shadow-lg;
+    border: 1px solid var(--theme-elevation-100);
     background: var(--theme-input-bg);
     display: inline-flex;
-    border: none;
     font-family: var(--font-body);
     font-weight: 100;
     border-radius: 0;
@@ -169,8 +169,12 @@ $cal-icon-width: 18px;
     }
 
     &__current-month {
+      display: none;
+    }
+
+    &__header__dropdown, &-year-header {
       padding: 10px 0;
-      font-weight: 600;
+      font-weight: bold;
     }
 
     &__month-container {
@@ -185,6 +189,20 @@ $cal-icon-width: 18px;
       border-left: none;
     }
 
+    &__month-text {
+      &:hover {
+        background: var(--theme-elevation-100);
+      }
+    }
+
+    &__month-select,
+    &__year-select {
+      min-width: 70px;
+      border: none;
+      background: none;
+      outline: none;
+      cursor: pointer;
+    }
 
     &__day-names {
       background-color: var(--theme-elevation-100);
@@ -239,6 +257,10 @@ $cal-icon-width: 18px;
     border: none;
   }
 
+  .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list {
+    max-height: 100%;
+  }
+
   .react-datepicker__day--keyboard-selected,
   .react-datepicker__month-text--keyboard-selected,
   .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
@@ -281,7 +303,40 @@ $cal-icon-width: 18px;
     font-size: base(.5);
   }
 
+  &__appearance--dayOnly,
+  &__appearance--monthOnly {
+    .react-datepicker {
+      &__month-container {
+        border-right: none;
+      }
+    }
+  }
+
   @include small-break {
+    .react-datepicker {
+      flex-direction: column;
+    }
+    .react-datepicker__month-container {
+      border-right: 0;
+    }
+    .react-datepicker__time-container {
+      width: auto;
+    }
+    .react-datepicker__header--time {
+      background-color: var(--theme-elevation-100);
+      padding: 8px 0;
+      border-bottom: none;
+    }
+    .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
+      height: 120px;
+      width: unset;
+      > ul {
+        height: 120px;
+      }
+    }
+    .react-datepicker__navigation--next--with-time:not(.react-datepicker__navigation--next--with-today-button) {
+      right: 0px;
+    }
     &__input-wrapper {
       .icon {
         top: calc(50% - #{base(.25)});

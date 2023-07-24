@@ -4,13 +4,14 @@ import { extractTranslations } from '../../translations/extractTranslations';
 
 const labels = extractTranslations(['general:email']);
 
-export default [
+const baseAuthFields: Field[] = [
   {
     name: 'email',
     label: labels['general:email'],
     type: 'email',
     validate: email,
     unique: true,
+    required: true,
     admin: {
       components: {
         Field: () => null,
@@ -27,4 +28,16 @@ export default [
     type: 'date',
     hidden: true,
   },
-] as Field[];
+  {
+    name: 'salt',
+    type: 'text',
+    hidden: true,
+  },
+  {
+    name: 'hash',
+    type: 'text',
+    hidden: true,
+  },
+];
+
+export default baseAuthFields;

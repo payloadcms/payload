@@ -71,11 +71,11 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   // Access
   // /////////////////////////////////////
 
-  let useEstimatedCount = false;
+  let hasNearConstraint = false;
 
   if (where) {
     const constraints = flattenWhereConstraints(where);
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 
   let accessResult: AccessResult;
@@ -111,13 +111,19 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam({
-    sort: args.sort ?? collectionConfig.defaultSort,
-    config: payload.config,
-    fields: collectionConfig.fields,
-    timestamps: collectionConfig.timestamps,
-    locale,
-  });
+  let sort;
+  if (!hasNearConstraint) {
+    const [sortProperty, sortOrder] = buildSortParam({
+      sort: args.sort ?? collectionConfig.defaultSort,
+      config: payload.config,
+      fields: collectionConfig.fields,
+      timestamps: collectionConfig.timestamps,
+      locale,
+    });
+    sort = {
+      [sortProperty]: sortOrder,
+    };
+  }
 
   const usePagination = pagination && limit !== 0;
   const limitToUse = limit ?? (usePagination ? 10 : 0);
@@ -126,15 +132,13 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
   const paginationOptions = {
     page: page || 1,
-    sort: {
-      [sortProperty]: sortOrder,
-    },
+    sort,
     limit: limitToUse,
     lean: true,
     leanWithId: true,
-    useEstimatedCount,
     pagination: usePagination,
-    useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
+    useEstimatedCount: hasNearConstraint,
+    forceCountFn: hasNearConstraint,
     options: {
       // limit must also be set here, it's ignored when pagination is false
       limit: limitToUse,
