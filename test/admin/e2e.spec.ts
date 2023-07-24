@@ -382,24 +382,7 @@ describe('admin', () => {
       test('should drag to reorder columns and save to preferences', async () => {
         await createPost();
 
-        // open the column controls
-        await page.locator('.list-controls__toggle-columns').click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
-
-        const numberBoundingBox = await page.locator('.column-selector >> text=Number').boundingBox();
-        const idBoundingBox = await page.locator('.column-selector >> text=ID').boundingBox();
-
-        if (!numberBoundingBox || !idBoundingBox) return;
-
-        // drag the "number" column to the left of the "ID" column
-        await page.mouse.move(numberBoundingBox.x + 2, numberBoundingBox.y + 2, { steps: 10 });
-        await page.mouse.down();
-        await wait(200);
-        await page.mouse.move(idBoundingBox.x - 2, idBoundingBox.y - 2, { steps: 10 });
-        await page.mouse.up();
-
-        // wait for the new preferences to save and internal state to update and re-render
-        await wait(400);
+        reorderColumns(page);
 
         // ensure the "number" column is now first
         await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
@@ -413,6 +396,12 @@ describe('admin', () => {
       });
 
       test('should render drawer columns in order', async () => {
+        // Re-order columns like done in the previous test
+        await createPost();
+        reorderColumns(page);
+        await page.reload();
+
+
         await createPost();
         await page.goto(url.create);
 
@@ -654,4 +643,26 @@ async function clearDocs(): Promise<void> {
   await mapAsync(ids, async (id) => {
     await payload.delete({ collection: slug, id });
   });
+}
+
+
+async function reorderColumns(page: Page) {
+  // open the column controls
+  await page.locator('.list-controls__toggle-columns').click();
+  await wait(500);
+
+  const numberBoundingBox = await page.locator('.column-selector >> text=Number').boundingBox();
+  const idBoundingBox = await page.locator('.column-selector >> text=ID').boundingBox();
+
+  if (!numberBoundingBox || !idBoundingBox) return;
+
+  // drag the "number" column to the left of the "ID" column
+  await page.mouse.move(numberBoundingBox.x + 2, numberBoundingBox.y + 2, { steps: 10 });
+  await page.mouse.down();
+  await wait(200);
+  await page.mouse.move(idBoundingBox.x - 2, idBoundingBox.y - 2, { steps: 10 });
+  await page.mouse.up();
+
+  // wait for the new preferences to save and internal state to update and re-render
+  await wait(400);
 }
