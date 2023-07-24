@@ -1,0 +1,5 @@
+@use '../../_css/common.scss' as *;
+
+.message {
+  margin-bottom: calc(var(--base) * 1.5);
+}
