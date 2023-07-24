@@ -145,6 +145,10 @@ ol {
   margin: 0 0 $baseline;
 }
 
+:focus-visible {
+  outline: var(--accessibility-outline);
+}
+
 a {
   color: currentColor;
 
