@@ -60,11 +60,12 @@ npx create-payload-app
 Alternatively, it only takes about five minutes to [create an app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
 
 ## 🖱️ One-click templates
-There are number of templates to help get you going very quickly.
-- [E-Commerce](https://github.com/payloadcms/template-ecommerce) - Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Best of all, you can extend it as much as you need.
-- [SaaS](https://github.com/payloadcms/template-saas) - Building SaaS platform? You can use Payload for that too. We give you a full web backend immediately, with subscriptions by stripe and a NextJS frontend.
-- [All Official Templates](https://github.com/orgs/payloadcms/repositories?q=topic%3Apayload-template)
-- [Community Templates](https://github.com/topics/payload-template)
+### 🛒 [E-Commerce](https://github.com/payloadcms/template-ecommerce)
+Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Best of all, you can extend it as much as you need.
+### 💱 [SaaS](https://github.com/payloadcms/template-saas)
+Building SaaS platform? You can use Payload for that too. We give you a full web backend immediately, with subscriptions by stripe and a NextJS frontend.
+
+[All Official Templates](https://github.com/orgs/payloadcms/repositories?q=topic%3Apayload-template)&nbsp;·&nbsp;[Community Templates](https://github.com/topics/payload-template)
 
 **If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.**
 
