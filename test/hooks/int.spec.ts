@@ -198,7 +198,6 @@ describe('Hooks', () => {
       const response = await fetch(`${apiUrl}/${contextHooksSlug}?${params.toString()}`, {
         body: JSON.stringify({
           value: 'wrongvalue',
-          context: 'data from rest API',
         }),
         method: 'post',
       });
