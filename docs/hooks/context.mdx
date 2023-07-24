@@ -2,7 +2,7 @@
 title: Context
 label: Context
 order: 50
-desc: Context allows you to pass in extra data which can be shared between hooks
+desc: Context allows you to pass in extra data that can be shared between hooks
 keywords: hooks, context, payload context, payloadcontext, data, extra data, shared data, shared, extra
 ---
 
@@ -14,9 +14,9 @@ Say you have a beforeChange and an afterChange hook. What if you wanted to make 
 
 Of course, you could create a hidden field in your collection and store the data there, but that's not very elegant. Context makes it much easier to pass data between hooks.
 
-Simply write or read data into the `context` object which is available to every hook. This data will persist throughout the entire lifecycle. You can also find the context in every request object: `req.context`.
+Simply write or read data into the `context` object that is available to every hook. This data will persist throughout the entire lifecycle. You can also find the context in every request object: `req.context`.
 
-Let's see some examples which show why this is so useful.
+Here are some examples of common usages on how to use context:
 
 ## Example 1: Passing data between hooks
 
@@ -47,13 +47,14 @@ const MyCollection: CollectionConfig = {
 };
 ```
 
-In this example, we calculate two values in the beforeChange hook - value1 and value2. We set the document's field 'value' to the first value, and now we want to pass the second value (value2) to the afterChange hook, as it needs it for some expensive operation which needs value2 + the document ID (which is not available in the beforeChange hook).
+In this example, we calculate two values in the beforeChange hook - `value1` `and value2`. We set the document's field 'value' to `value1`, and now we want to pass `value2` to the afterChange hook.
+That's because the afterChange hook needs `value2` + the document ID (which is not available in the beforeChange hook) for some expensive operation.
 
-As value2 is not saved in the document, we can't access it in the afterChange hook. But we can save it in the `context` object, which is available to every hook. We can then access it in the afterChange hook and use it for our operation.
+Since `value2` is not saved in the document, we aren't able to access it in the afterChange hook. But we can save it in the `context` object, which every hook has access to. We can then access it in the afterChange hook and use it for our operation.
 
 ## Example 2: Preventing infinite loops
 
-Let's say you have an `afterChange` hook, in which you do some calculation (as the document ID is available in the afterChange hook, but not in the beforeChange hook) and then want to update the document again:
+Let's say you have an `afterChange` hook, and you want to do a calculation inside the hook (as the document ID needed for the calclulation is available in the afterChange hook, but not in the beforeChange hook). Once that's done, you want to update the document with the result of the calculation.
 
 ```ts
 const MyCollection: CollectionConfig = {
@@ -132,4 +133,4 @@ declare module 'payload' {
 }
 ```
 
-this will add a fully-typed myobject of type string to every context object. Make sure to follow this example correctly, as type augmentation can mess up your types if you do it wrong.
+This will add a fully-typed `myobject` of type string to every context object. Make sure to follow this example correctly, as type augmentation can mess up your types if you do it wrong.
