@@ -72,7 +72,7 @@ const Button: React.FC<Props> = (props) => {
     iconPosition = 'right',
     newTab,
     tooltip,
-    ariaLabel,
+    'aria-label': ariaLabel,
   } = props;
 
   const [showTooltip, setShowTooltip] = React.useState(false);

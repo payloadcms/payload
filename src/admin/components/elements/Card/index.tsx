@@ -32,7 +32,7 @@ const Card: React.FC<Props> = (props) => {
       )}
       {onClick && (
         <Button
-          ariaLabel={buttonAriaLabel}
+          aria-label={buttonAriaLabel}
           className={`${baseClass}__click`}
           buttonStyle="none"
           onClick={onClick}

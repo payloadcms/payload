@@ -19,5 +19,5 @@ export type Props = {
   iconPosition?: 'left' | 'right',
   newTab?: boolean
   tooltip?: string
-  ariaLabel?: string
+  'aria-label'?: string
 }

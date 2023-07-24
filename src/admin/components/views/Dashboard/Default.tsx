@@ -112,7 +112,7 @@ const Dashboard: React.FC<Props> = (props) => {
                             round
                             buttonStyle="icon-label"
                             iconStyle="with-border"
-                            ariaLabel={t('createNewLabel', { label: getTranslation(entity.labels.singular, i18n) })}
+                            aria-label={t('createNewLabel', { label: getTranslation(entity.labels.singular, i18n) })}
                           />
                         ) : undefined}
                       />
