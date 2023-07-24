@@ -44,22 +44,24 @@ const useField = <T, >(options: Options): FieldType<T> => {
   const setValue = useCallback((e, disableModifyingForm = false) => {
     const val = (e && e.target) ? e.target.value : e;
 
-    if (!modified && !disableModifyingForm) {
-      if (typeof setModified === 'function') {
-        // Update modified state after field value comes back
-        // to avoid cursor jump caused by state value / DOM mismatch
-        setTimeout(() => {
-          setModified(true);
-        }, 10);
+    if (!disableModifyingForm) {
+      if (!modified) {
+        if (typeof setModified === 'function') {
+          // Update modified state after field value comes back
+          // to avoid cursor jump caused by state value / DOM mismatch
+          setTimeout(() => {
+            setModified(true);
+          }, 10);
+        }
       }
-    }
 
-    dispatchField({
-      type: 'UPDATE',
-      path,
-      value: val,
-      disableFormData: disableFormData || (hasRows && val > 0),
-    });
+      dispatchField({
+        type: 'UPDATE',
+        path,
+        value: val,
+        disableFormData: disableFormData || (hasRows && val > 0),
+      });
+    }
   }, [
     setModified,
     modified,
@@ -96,6 +98,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
   // Throttle the validate function
   useThrottledEffect(() => {
     const validateField = async () => {
+      console.log('throttle me');
       const action: UPDATE = {
         type: 'UPDATE',
         path,
