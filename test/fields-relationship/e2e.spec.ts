@@ -4,7 +4,7 @@ import payload from '../../src';
 import { mapAsync } from '../../src/utilities/mapAsync';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { login, saveDocAndAssert } from '../helpers';
+import { saveDocAndAssert } from '../helpers';
 import type {
   FieldsRelationship as CollectionWithRelationships,
   RelationOne,
@@ -37,8 +37,6 @@ describe('fields - relationship', () => {
 
     const context = await browser.newContext();
     page = await context.newPage();
-
-    await login({ page, serverURL });
   });
 
   beforeEach(async () => {

@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "1.11.1",
+  "version": "1.11.3",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "engines": {
@@ -33,7 +33,7 @@
   "scripts": {
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
     "build:tsc": "tsc",
-    "build:components": "webpack --config dist/webpack/components.config.js",
+    "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
     "build": "yarn copyfiles && yarn build:tsc && yarn build:components",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"yarn build:tsc\"",
     "dev": "nodemon",
@@ -137,9 +137,9 @@
     "minimist": "^1.2.7",
     "mkdirp": "^1.0.4",
     "monaco-editor": "^0.38.0",
-    "mongoose": "6.5.0",
+    "mongoose": "6.11.4",
     "mongoose-aggregate-paginate-v2": "^1.0.6",
-    "mongoose-paginate-v2": "^1.6.1",
+    "mongoose-paginate-v2": "1.7.22",
     "nodemailer": "^6.9.0",
     "object-to-formdata": "^4.4.2",
     "passport": "^0.6.0",
@@ -153,7 +153,7 @@
     "pluralize": "^8.0.0",
     "postcss": "^8.4.21",
     "postcss-loader": "^6.2.1",
-    "postcss-preset-env": "^7.8.3",
+    "postcss-preset-env": "^9.0.0",
     "probe-image-size": "^6.0.0",
     "process": "^0.11.10",
     "qs": "^6.11.0",

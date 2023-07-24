@@ -48,7 +48,7 @@ export const initHTTP = async (options: InitOptions): Promise<Payload> => {
       payload.express.set('trust proxy', 1);
     }
 
-    initAdmin(payload);
+    await initAdmin(payload);
     initPreferences(payload);
 
     payload.router.get('/access', access);

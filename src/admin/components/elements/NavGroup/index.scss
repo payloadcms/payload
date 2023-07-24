@@ -22,12 +22,16 @@
       margin-top: base(-.2);
     }
 
-    &:hover {
+    &:hover, &:focus-visible {
       color: var(--theme-elevation-1000);
 
       .stroke {
         stroke: var(--theme-elevation-1000);
       }
+    }
+
+    &:focus-visible {
+      outline: none;
     }
   }
 

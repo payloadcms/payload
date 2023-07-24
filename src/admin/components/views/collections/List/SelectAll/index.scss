@@ -7,7 +7,7 @@
     align-items: center;
     cursor: pointer;
 
-    &:focus,
+    &:focus:not(:focus-visible),
     &:active {
       outline: none;
     }
@@ -16,6 +16,10 @@
       svg {
         opacity: .2;
       }
+    }
+
+    &:focus-visible {
+      outline-offset: var(--accessibility-outline-offset);
     }
   }
 
