@@ -4,7 +4,7 @@ import path from 'path';
 import { SanitizedConfig } from '../../../config/types';
 import { getBaseConfig } from './base';
 
-const mockModulePath = path.resolve(__dirname, '../../mocks/emptyModule.js');
+const mockModulePath = path.resolve(__dirname, '../../mocks/all.js');
 
 export const getDevConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
   const baseConfig = getBaseConfig(payloadConfig);
@@ -21,10 +21,18 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
     resolve: {
       ...(baseConfig?.resolve || {}),
       alias: {
-        ...(baseConfig?.resolve?.alias || {}),
-        vite: mockModulePath,
+        '@rollup/plugin-commonjs': mockModulePath,
+        '@rollup/plugin-image': mockModulePath,
         '@vitejs/plugin-react': mockModulePath,
+        'html-webpack-plugin': mockModulePath,
+        'mini-css-extract-plugin': mockModulePath,
+        'rollup-plugin-scss': mockModulePath,
+        'swc-minify-webpack-plugin': mockModulePath,
+        'webpack-bundle-analyzer': mockModulePath,
         express: mockModulePath,
+        vite: mockModulePath,
+        webpack: mockModulePath,
+        ...(baseConfig?.resolve?.alias || {}),
       },
     },
     define: {
