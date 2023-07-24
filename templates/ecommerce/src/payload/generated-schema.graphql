@@ -1065,11 +1065,11 @@ enum User_roles_Input {
 }
 
 input User_purchases_operator {
-  equals: String
-  not_equals: String
-  in: [String]
-  not_in: [String]
-  all: [String]
+  equals: [String]
+  not_equals: [String]
+  in: [[String]]
+  not_in: [[String]]
+  all: [[String]]
   exists: Boolean
 }
 
@@ -1667,11 +1667,11 @@ input Product_enablePaywall_operator {
 }
 
 input Product_categories_operator {
-  equals: String
-  not_equals: String
-  in: [String]
-  not_in: [String]
-  all: [String]
+  equals: [String]
+  not_equals: [String]
+  in: [[String]]
+  not_in: [[String]]
+  all: [[String]]
   exists: Boolean
 }
 
@@ -2588,11 +2588,11 @@ input versionsProduct_version__enablePaywall_operator {
 }
 
 input versionsProduct_version__categories_operator {
-  equals: String
-  not_equals: String
-  in: [String]
-  not_in: [String]
-  all: [String]
+  equals: [String]
+  not_equals: [String]
+  in: [[String]]
+  not_in: [[String]]
+  all: [[String]]
   exists: Boolean
 }
 
@@ -5289,7 +5289,7 @@ type MediaDeleteDocAccess {
 }
 
 type Settings {
-  shopPage: Page
+  productsPage: Page
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -5301,31 +5301,31 @@ type settingsDocAccess {
 }
 
 type SettingsDocAccessFields {
-  shopPage: SettingsDocAccessFields_shopPage
+  productsPage: SettingsDocAccessFields_productsPage
   updatedAt: SettingsDocAccessFields_updatedAt
   createdAt: SettingsDocAccessFields_createdAt
 }
 
-type SettingsDocAccessFields_shopPage {
-  create: SettingsDocAccessFields_shopPage_Create
-  read: SettingsDocAccessFields_shopPage_Read
-  update: SettingsDocAccessFields_shopPage_Update
-  delete: SettingsDocAccessFields_shopPage_Delete
+type SettingsDocAccessFields_productsPage {
+  create: SettingsDocAccessFields_productsPage_Create
+  read: SettingsDocAccessFields_productsPage_Read
+  update: SettingsDocAccessFields_productsPage_Update
+  delete: SettingsDocAccessFields_productsPage_Delete
 }
 
-type SettingsDocAccessFields_shopPage_Create {
+type SettingsDocAccessFields_productsPage_Create {
   permission: Boolean!
 }
 
-type SettingsDocAccessFields_shopPage_Read {
+type SettingsDocAccessFields_productsPage_Read {
   permission: Boolean!
 }
 
-type SettingsDocAccessFields_shopPage_Update {
+type SettingsDocAccessFields_productsPage_Update {
   permission: Boolean!
 }
 
-type SettingsDocAccessFields_shopPage_Delete {
+type SettingsDocAccessFields_productsPage_Delete {
   permission: Boolean!
 }
 
@@ -8092,31 +8092,31 @@ type settingsAccess {
 }
 
 type SettingsFields {
-  shopPage: SettingsFields_shopPage
+  productsPage: SettingsFields_productsPage
   updatedAt: SettingsFields_updatedAt
   createdAt: SettingsFields_createdAt
 }
 
-type SettingsFields_shopPage {
-  create: SettingsFields_shopPage_Create
-  read: SettingsFields_shopPage_Read
-  update: SettingsFields_shopPage_Update
-  delete: SettingsFields_shopPage_Delete
+type SettingsFields_productsPage {
+  create: SettingsFields_productsPage_Create
+  read: SettingsFields_productsPage_Read
+  update: SettingsFields_productsPage_Update
+  delete: SettingsFields_productsPage_Delete
 }
 
-type SettingsFields_shopPage_Create {
+type SettingsFields_productsPage_Create {
   permission: Boolean!
 }
 
-type SettingsFields_shopPage_Read {
+type SettingsFields_productsPage_Read {
   permission: Boolean!
 }
 
-type SettingsFields_shopPage_Update {
+type SettingsFields_productsPage_Update {
   permission: Boolean!
 }
 
-type SettingsFields_shopPage_Delete {
+type SettingsFields_productsPage_Delete {
   permission: Boolean!
 }
 
@@ -9077,7 +9077,7 @@ input mutationMediaUpdateInput {
 }
 
 input mutationSettingsInput {
-  shopPage: String
+  productsPage: String
   updatedAt: String
   createdAt: String
 }

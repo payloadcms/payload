@@ -26,7 +26,7 @@ export const CheckoutPage: React.FC<{
   settings: Settings
 }> = props => {
   const {
-    settings: { shopPage },
+    settings: { productsPage },
   } = props
 
   const { user } = useAuth()
@@ -84,10 +84,10 @@ export const CheckoutPage: React.FC<{
           {'Your '}
           <Link href="/cart">cart</Link>
           {' is empty.'}
-          {typeof shopPage === 'object' && shopPage?.slug && (
+          {typeof productsPage === 'object' && productsPage?.slug && (
             <Fragment>
               {' '}
-              <Link href={`/${shopPage.slug}`}>Continue shopping?</Link>
+              <Link href={`/${productsPage.slug}`}>Continue shopping?</Link>
             </Fragment>
           )}
         </div>

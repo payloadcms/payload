@@ -30,7 +30,7 @@ query Header {
 
 export const SETTINGS = `
   Settings {
-    shopPage {
+    productsPage {
       slug
     }
   }

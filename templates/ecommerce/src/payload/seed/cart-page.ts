@@ -107,7 +107,7 @@ export const cartPage: Partial<Page> = {
             url: '',
             reference: {
               relationTo: 'pages',
-              value: '{{SHOP_PAGE_ID}}',
+              value: '{{PRODUCTS_PAGE_ID}}',
             },
             label: 'Continue shopping',
             appearance: 'primary',

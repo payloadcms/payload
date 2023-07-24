@@ -398,7 +398,7 @@ export interface Category {
 }
 export interface Settings {
   id: string;
-  shopPage?: string | Page;
+  productsPage?: string | Page;
   updatedAt?: string;
   createdAt?: string;
 }
