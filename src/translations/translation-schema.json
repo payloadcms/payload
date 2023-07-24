@@ -825,6 +825,9 @@
         "sort": {
           "type": "string"
         },
+        "sortByLabelDirection": {
+          "type": "string"
+        },
         "stayOnThisPage": {
           "type": "string"
         },

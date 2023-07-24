@@ -227,6 +227,7 @@
     "showAllLabel": "Show all {{label}}",
     "sorryNotFound": "Sorry—there is nothing to correspond with your request.",
     "sort": "Sort",
+    "sortByLabelDirection": "Sort by {{label}} {{direction}}",
     "stayOnThisPage": "Stay on this page",
     "submissionSuccessful": "Submission Successful.",
     "submit": "Submit",
