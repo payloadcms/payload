@@ -168,6 +168,25 @@ describe('Hooks', () => {
 
       expect(retrievedDoc.value).toEqual('secret');
     });
+
+    it('should pass context from local API to hooks', async () => {
+      const document = await payload.create({
+        collection: contextHooksSlug,
+        data: {
+          value: 'wrongvalue',
+        },
+        context: {
+          secretValue: 'data from local API',
+        },
+      });
+
+      const retrievedDoc = await payload.findByID({
+        collection: contextHooksSlug,
+        id: document.id,
+      });
+
+      expect(retrievedDoc.value).toEqual('data from local API');
+    });
   });
 
   describe('auth collection hooks', () => {

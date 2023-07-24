@@ -13,7 +13,9 @@ const ContextHooks: CollectionConfig = {
   },
   hooks: {
     beforeChange: [({ context, data, req }) => {
-      context.secretValue = 'secret';
+      if (!context.secretValue) {
+        context.secretValue = 'secret';
+      }
       if (req.context !== context) {
         throw new Error('req.context !== context');
       }
