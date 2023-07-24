@@ -228,9 +228,8 @@ describe('admin', () => {
       await page.goto(url.global(globalSlug));
 
       await page.locator('#field-title').fill(title);
-      await page.click('#action-save', { delay: 100 });
+      await saveDocAndAssert(page);
 
-      await expect(page.locator('.Toastify__toast--success')).toHaveCount(1);
       await expect(page.locator('#field-title')).toHaveValue(title);
     });
   });
@@ -241,15 +240,15 @@ describe('admin', () => {
 
       const field = page.locator('.account__language .react-select');
 
-      await field.click({ delay: 100 });
+      await field.click();
       const options = page.locator('.rs__option');
       await options.locator('text=Español').click();
 
       await expect(page.locator('.step-nav')).toContainText('Tablero');
 
-      await field.click({ delay: 100 });
+      await field.click();
       await options.locator('text=English').click();
-      await field.click({ delay: 100 });
+      await field.click();
       await expect(page.locator('.form-submit .btn')).toContainText('Save');
     });
 
