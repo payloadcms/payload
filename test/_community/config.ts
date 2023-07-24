@@ -1,13 +1,19 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import { PostsCollection, postsSlug } from './collections/Posts';
+import { MenuGlobal } from './globals/Menu';
 import { devUser } from '../credentials';
-import { Arrays } from './collections/Arrays';
-import { Blocks } from './collections/Blocks';
+import { MediaCollection } from './collections/Media';
 
 export default buildConfigWithDefaults({
   // ...extend config here
   collections: [
-    Arrays,
-    Blocks,
+    PostsCollection,
+    MediaCollection,
+    // ...add more collections here
+  ],
+  globals: [
+    MenuGlobal,
+    // ...add more globals here
   ],
   graphQL: {
     schemaOutputFile: './test/_community/schema.graphql',
@@ -19,6 +25,13 @@ export default buildConfigWithDefaults({
       data: {
         email: devUser.email,
         password: devUser.password,
+      },
+    });
+
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        text: 'example post',
       },
     });
   },
