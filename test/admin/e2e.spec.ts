@@ -255,6 +255,7 @@ describe('admin', () => {
     });
 
     test('should allow custom translation', async () => {
+      await page.goto(url.account);
       await expect(page.locator('.step-nav')).toContainText('Home');
     });
   });
