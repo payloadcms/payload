@@ -99,6 +99,8 @@ export const CheckoutPage: React.FC<{
                 product: { id, stripeProductID, title, meta },
               } = item
 
+              if (quantity === 0) return null
+
               const isLast = index === (cart?.items?.length || 0) - 1
 
               const metaImage = meta?.image
@@ -130,7 +132,7 @@ export const CheckoutPage: React.FC<{
                         </p>
                       )}
                       <h6 className={classes.title}>{title}</h6>
-                      {`Quantity: ${quantity}`}
+                      {`Quantity: ${typeof quantity === 'number' ? quantity : 0}`}
                       <Price product={product} button={false} />
                     </div>
                   </div>

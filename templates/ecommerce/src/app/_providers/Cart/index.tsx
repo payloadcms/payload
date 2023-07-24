@@ -147,6 +147,7 @@ export const CartProvider = props => {
             ...item,
             // flatten relationship to product
             product: item?.product?.id,
+            quantity: typeof item?.quantity === 'number' ? item?.quantity : 0,
           }
         })
         .filter(Boolean) as CartItem[],

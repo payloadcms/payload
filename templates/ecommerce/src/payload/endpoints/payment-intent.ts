@@ -61,7 +61,11 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
     // for each item in cart, create an invoice item and send the invoice
     await Promise.all(
       fullUser?.cart?.items?.map(async (item: CartItems[0]): Promise<Stripe.InvoiceItem | null> => {
-        const { product } = item
+        const { product, quantity } = item
+
+        if (!quantity) {
+          return null
+        }
 
         if (typeof product === 'string' || !product?.stripeProductID) {
           throw new Error('No Stripe Product ID')
@@ -79,7 +83,7 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
         }
 
         const price = prices.data[0]
-        invoice.total += price.unit_amount
+        invoice.total += price.unit_amount * quantity
 
         // price.type === 'recurring' is a subscription, which uses the Subscriptions API
         // that is out of scope for this boilerplate

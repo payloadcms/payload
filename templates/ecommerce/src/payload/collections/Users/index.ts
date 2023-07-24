@@ -116,7 +116,7 @@ const Users: CollectionConfig = {
             {
               name: 'quantity',
               type: 'number',
-              min: 1,
+              min: 0,
               admin: {
                 step: 1,
               },

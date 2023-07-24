@@ -118,7 +118,9 @@ export const CartPage: React.FC<{
                             <input
                               type="number"
                               className={classes.quantity}
-                              value={quantity}
+                              // fallback to empty string to avoid uncontrolled input error
+                              // this allows the user to user their backspace key to clear the input
+                              value={typeof quantity === 'number' ? quantity : ''}
                               onChange={e => {
                                 addItemToCart({
                                   product,
