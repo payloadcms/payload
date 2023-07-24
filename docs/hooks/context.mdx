@@ -119,7 +119,7 @@ That's it! Now the afterChange hook will only run once, and not trigger itself a
 
 Now, as you have seen in the example above, payload's local API has a `context` property which you can use to pass in context. But what about the Rest API?
 
-In order to pass context, through the Rest API, you can use query parameters which you then parse in a `beforeOperation` hook. Here's how the hook could look like:
+In order to pass context through the Rest API, you can use query parameters which you then parse in a `beforeOperation` hook. Here's how the hook could look like:
 
 ```ts
 beforeOperation: [async ({ context, args }) => {
