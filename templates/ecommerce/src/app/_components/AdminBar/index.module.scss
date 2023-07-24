@@ -3,8 +3,11 @@
   width: 100%;
   padding: 5px 0;
   font-size: calc(#{var(--html-font-size)} * 1px);
-  display: none;
+  display: block;
+  visibility: hidden;
+  opacity: 0;
   background-color: var(--theme-elevation-100);
+  transition: opacity 150ms linear;
 }
 
 :global([data-theme="dark"]) {
@@ -18,7 +21,8 @@
 }
 
 .show {
-  display: block;
+  visibility: visible;
+  opacity: 1;
 }
 
 .controls {

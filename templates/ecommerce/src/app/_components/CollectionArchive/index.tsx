@@ -9,7 +9,6 @@ import { Card } from '../Card'
 import { Gutter } from '../Gutter'
 import { PageRange } from '../PageRange'
 import { Pagination } from '../Pagination'
-import { RenderParams } from '../RenderParams'
 
 import classes from './index.module.scss'
 
@@ -65,10 +64,7 @@ export const CollectionArchive: React.FC<Props> = props => {
   const [error, setError] = useState<string | undefined>(undefined)
   const scrollRef = useRef<HTMLDivElement>(null)
   const hasHydrated = useRef(false)
-
-  // [page, categories] from query params
-  // see the `RenderParams` component for more info
-  const [params, setParams] = useState<(string | string[])[]>([])
+  const [page, setPage] = useState(1)
 
   const scrollToRef = useCallback(() => {
     const { current } = scrollRef
@@ -80,11 +76,10 @@ export const CollectionArchive: React.FC<Props> = props => {
   }, [])
 
   useEffect(() => {
-    const page = params[0]
-    if (typeof page !== 'undefined') {
+    if (!isLoading && typeof results.page !== 'undefined') {
       // scrollToRef()
     }
-  }, [isLoading, scrollToRef, params])
+  }, [isLoading, scrollToRef, results])
 
   useEffect(() => {
     // hydrate the block with fresh content after first render
@@ -95,8 +90,6 @@ export const CollectionArchive: React.FC<Props> = props => {
         setIsLoading(true)
       }
     }, 500)
-
-    const [page, catsFromQuery] = params
 
     const searchQuery = qs.stringify(
       {
@@ -109,16 +102,6 @@ export const CollectionArchive: React.FC<Props> = props => {
                     typeof catsFromProps === 'string'
                       ? [catsFromProps]
                       : catsFromProps.map(cat => cat.id).join(','),
-                },
-              }
-            : {}),
-          ...(catsFromQuery?.length > 0
-            ? {
-                categories: {
-                  in:
-                    typeof catsFromQuery === 'string'
-                      ? [catsFromQuery]
-                      : catsFromQuery.map(cat => cat).join(','),
                 },
               }
             : {}),
@@ -160,11 +143,10 @@ export const CollectionArchive: React.FC<Props> = props => {
     return () => {
       if (timer) clearTimeout(timer)
     }
-  }, [params, catsFromProps, relationTo, onResultChange, sort, limit])
+  }, [page, catsFromProps, relationTo, onResultChange, sort, limit])
 
   return (
     <div className={[classes.collectionArchive, className].filter(Boolean).join(' ')}>
-      {/* <RenderParams onParams={setParams} show={false} params={['page', 'categories']} /> */}
       <div ref={scrollRef} className={classes.scrollRef} />
       {!isLoading && error && <Gutter>{error}</Gutter>}
       <Fragment>
@@ -195,9 +177,7 @@ export const CollectionArchive: React.FC<Props> = props => {
               className={classes.pagination}
               page={results.page}
               totalPages={results.totalPages}
-              onClick={page => {
-                setParams([page.toString(), params[1]])
-              }}
+              onClick={setPage}
             />
           )}
         </Gutter>

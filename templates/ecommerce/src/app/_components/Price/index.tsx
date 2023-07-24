@@ -8,13 +8,13 @@ import { RemoveFromCartButton } from '../RemoveFromCartButton'
 
 import classes from './index.module.scss'
 
-export const priceFromJSON = (priceJSON): string => {
+export const priceFromJSON = (priceJSON: string, quantity: number = 1): string => {
   let price = ''
 
   if (priceJSON) {
     try {
       const parsed = JSON.parse(priceJSON)?.data[0]
-      const priceValue = parsed.unit_amount
+      const priceValue = parsed.unit_amount * quantity
       const priceType = parsed.type
 
       price = (priceValue / 100).toLocaleString('en-US', {
@@ -42,17 +42,33 @@ export const Price: React.FC<{
   quantity?: number
   button?: 'addToCart' | 'removeFromCart' | false
 }> = props => {
-  const { product, product: { priceJSON } = {}, button = 'addToCart' } = props
+  const { product, product: { priceJSON } = {}, button = 'addToCart', quantity } = props
 
-  const [price, setPrice] = useState(() => priceFromJSON(priceJSON))
+  const [price, setPrice] = useState<{
+    actualPrice: string
+    withQuantity: string
+  }>(() => ({
+    actualPrice: priceFromJSON(priceJSON),
+    withQuantity: priceFromJSON(priceJSON, quantity),
+  }))
 
   useEffect(() => {
-    setPrice(priceFromJSON(priceJSON))
-  }, [priceJSON])
+    setPrice({
+      actualPrice: priceFromJSON(priceJSON),
+      withQuantity: priceFromJSON(priceJSON, quantity),
+    })
+  }, [priceJSON, quantity])
 
   return (
     <div className={classes.actions}>
-      {typeof price !== 'undefined' && price !== '' && <p className={classes.price}>{price}</p>}
+      {typeof price?.actualPrice !== 'undefined' && price?.withQuantity !== '' && (
+        <div className={classes.price}>
+          <p>{price?.withQuantity}</p>
+          {quantity > 1 && (
+            <small className={classes.priceBreakdown}>{`${price.actualPrice} x ${quantity}`}</small>
+          )}
+        </div>
+      )}
       {button && button === 'addToCart' && (
         <AddToCartButton product={product} appearance="default" />
       )}

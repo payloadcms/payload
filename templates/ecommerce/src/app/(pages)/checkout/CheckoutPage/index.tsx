@@ -132,8 +132,7 @@ export const CheckoutPage: React.FC<{
                         </p>
                       )}
                       <h6 className={classes.title}>{title}</h6>
-                      {`Quantity: ${typeof quantity === 'number' ? quantity : 0}`}
-                      <Price product={product} button={false} />
+                      <Price product={product} button={false} quantity={quantity} />
                     </div>
                   </div>
                   {!isLast && <HR />}

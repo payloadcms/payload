@@ -4,6 +4,7 @@ import { Metadata } from 'next'
 import { fetchGlobals } from '../../_api/fetchGlobals'
 import { Gutter } from '../../_components/Gutter'
 import { Message } from '../../_components/Message'
+import { LowImpactHero } from '../../_heros/LowImpact'
 import { getMeUser } from '../../_utilities/getMeUser'
 import { mergeOpenGraph } from '../../_utilities/mergeOpenGraph'
 import { CheckoutPage } from './CheckoutPage'
@@ -49,13 +50,36 @@ export default async function Checkout() {
           />
         </Gutter>
       )}
+      <LowImpactHero
+        type="lowImpact"
+        media={null}
+        richText={[
+          {
+            type: 'h1',
+            children: [
+              {
+                text: 'Checkout',
+              },
+            ],
+          },
+          {
+            type: 'paragraph',
+            children: [
+              {
+                text: `This is a self-hosted, secure checkout using Stripe's Payment Element component. Use credit card number `,
+              },
+              {
+                text: '4242 4242 4242 4242',
+                bold: true,
+              },
+              {
+                text: ' with any future date and CVC to create a mock purchase. An order will be generated in the CMS and will appear in your account.',
+              },
+            ],
+          },
+        ]}
+      />
       <Gutter className={classes.checkoutPage}>
-        <h1>Checkout</h1>
-        <p>
-          This is a self-hosted, secure checkout using Stripe&apos;s Payment Element component. Use
-          credit card number <b>4242 4242 4242 4242</b> with any future date and CVC to create a
-          mock purchase. An order will be generated in the CMS and will appear in your account.
-        </p>
         <CheckoutPage settings={settings} />
       </Gutter>
     </Fragment>

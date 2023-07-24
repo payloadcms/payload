@@ -113,26 +113,26 @@ export const CartPage: React.FC<{
                               {title}
                             </Link>
                           </h6>
-                          <label>
-                            Quantity &nbsp;
-                            <input
-                              type="number"
-                              className={classes.quantity}
-                              // fallback to empty string to avoid uncontrolled input error
-                              // this allows the user to user their backspace key to clear the input
-                              value={typeof quantity === 'number' ? quantity : ''}
-                              onChange={e => {
-                                addItemToCart({
-                                  product,
-                                  quantity: Number(e.target.value),
-                                })
-                              }}
-                            />
-                          </label>
-                          <Price product={product} button={false} />
-                          <div>
+                          <div className={classes.actions}>
+                            <label>
+                              Quantity &nbsp;
+                              <input
+                                type="number"
+                                className={classes.quantity}
+                                // fallback to empty string to avoid uncontrolled input error
+                                // this allows the user to user their backspace key to clear the input
+                                value={typeof quantity === 'number' ? quantity : ''}
+                                onChange={e => {
+                                  addItemToCart({
+                                    product,
+                                    quantity: Number(e.target.value),
+                                  })
+                                }}
+                              />
+                            </label>
                             <RemoveFromCartButton product={product} />
                           </div>
+                          <Price product={product} button={false} quantity={quantity} />
                         </div>
                       </div>
                       {!isLast && <HR />}

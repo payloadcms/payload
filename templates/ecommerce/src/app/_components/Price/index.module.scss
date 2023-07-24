@@ -4,6 +4,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  gap: calc(var(--base) / 2);
 
   @include mid-break {
     flex-direction: column;
@@ -13,6 +14,16 @@
 
 .price {
   font-weight: 600;
-  margin: 0;
-  margin-right: calc(var(--base) / 2);
+  line-height: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  > * {
+    margin: 0;
+  }
+}
+
+.priceBreakdown {
+  color: var(--theme-elevation-500);
 }

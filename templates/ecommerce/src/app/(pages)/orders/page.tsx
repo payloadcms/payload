@@ -32,11 +32,13 @@ export default async function Orders() {
   return (
     <Gutter className={classes.orders}>
       <h1>Orders</h1>
-      {!orders || (orders?.length === 0 && <p>You have no orders.</p>)}
+      {(!orders || !Array.isArray(orders) || orders?.length === 0) && (
+        <p className={classes.noOrders}>You have no orders.</p>
+      )}
       <RenderParams />
       {orders && orders.length > 0 && (
         <ul className={classes.ordersList}>
-          {orders.map((order, index) => (
+          {orders?.map((order, index) => (
             <li key={order.id} className={classes.item}>
               <div className={classes.itemContent}>
                 <h4 className={classes.itemTitle}>

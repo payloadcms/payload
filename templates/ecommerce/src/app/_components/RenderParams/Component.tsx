@@ -10,7 +10,6 @@ export type Props = {
   message?: string
   className?: string
   onParams?: (paramValues: (string | string[])[]) => void
-  show?: boolean
 }
 
 export const RenderParamsComponent: React.FC<Props> = ({
@@ -18,7 +17,6 @@ export const RenderParamsComponent: React.FC<Props> = ({
   message,
   className,
   onParams,
-  show,
 }) => {
   const searchParams = useSearchParams()
   const paramValues = params.map(param => searchParams.get(param)).filter(Boolean)
@@ -29,7 +27,7 @@ export const RenderParamsComponent: React.FC<Props> = ({
     }
   }, [paramValues, onParams])
 
-  if (paramValues.length && show) {
+  if (paramValues.length) {
     return (
       <div className={className}>
         {paramValues.map(paramValue => (

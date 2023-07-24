@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useSelectedLayoutSegments } from 'next/navigation'
 import { PayloadAdminBar, PayloadAdminBarProps } from 'payload-admin-bar'
 
@@ -17,15 +17,22 @@ export const AdminBar: React.FC<{
   const { adminBarProps } = props || {}
   const segments = useSelectedLayoutSegments()
   const collection = segments?.[1] === 'products' ? 'products' : 'pages'
+  const [show, setShow] = React.useState(false)
 
   const { user } = useAuth()
+
+  useEffect(() => {
+    if (user) {
+      setShow(true)
+    }
+  }, [user])
 
   const isAdmin = user?.roles?.includes('admin')
 
   if (!isAdmin) return null
 
   return (
-    <div className={[classes.adminBar, user && classes.show].filter(Boolean).join(' ')}>
+    <div className={[classes.adminBar, show && classes.show].filter(Boolean).join(' ')}>
       <Gutter className={classes.blockContainer}>
         <PayloadAdminBar
           {...adminBarProps}

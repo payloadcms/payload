@@ -27,7 +27,7 @@ export const RemoveFromCartButton: React.FC<{
       }}
       className={[className, classes.removeFromCartButton].filter(Boolean).join(' ')}
     >
-      Remove from cart
+      Remove
     </button>
   )
 }
