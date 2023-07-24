@@ -191,7 +191,6 @@ describe('Hooks', () => {
     });
 
     it('should pass context from rest API to hooks', async () => {
-      // query params builder: ?secretValue=data from rest API
       const params = new URLSearchParams({
         context_secretValue: 'data from rest API',
       });
