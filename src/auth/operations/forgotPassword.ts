@@ -34,7 +34,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     args = (await hook({
       args,
       operation: 'forgotPassword',
-      context: req.context,
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 

@@ -32,7 +32,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     args = (await hook({
       args,
       operation: 'delete',
-      context: req.context,
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 

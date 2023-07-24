@@ -54,7 +54,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'create',
-      context: req.context,
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 

@@ -41,7 +41,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     args = (await hook({
       args,
       operation: 'read',
-      context: req.context,
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 

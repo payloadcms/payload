@@ -46,7 +46,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'update',
-      context: req.context,
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
