@@ -19,7 +19,6 @@
     }
 
     &:focus-visible {
-      outline: var(--accessibility-outline);
       outline-offset: var(--accessibility-outline-offset);
     }
   }
