@@ -15,11 +15,13 @@ import { AuthenticationError } from '../../src/errors';
 import { contextHooksSlug } from './collections/ContextHooks';
 
 let client: RESTClient;
+let apiUrl;
 
 describe('Hooks', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
     client = new RESTClient(config, { serverURL, defaultSlug: transformSlug });
+    apiUrl = `${serverURL}/api`;
   });
 
   afterAll(async () => {
@@ -186,6 +188,30 @@ describe('Hooks', () => {
       });
 
       expect(retrievedDoc.value).toEqual('data from local API');
+    });
+
+    it('should pass context from rest API to hooks', async () => {
+      // query params builder: ?secretValue=data from rest API
+      const params = new URLSearchParams({
+        context_secretValue: 'data from rest API',
+      });
+      // send context as query params. It will be parsed by the beforeOperation hook
+      const response = await fetch(`${apiUrl}/${contextHooksSlug}?${params.toString()}`, {
+        body: JSON.stringify({
+          value: 'wrongvalue',
+          context: 'data from rest API',
+        }),
+        method: 'post',
+      });
+
+      const document = (await response.json()).doc;
+
+      const retrievedDoc = await payload.findByID({
+        collection: contextHooksSlug,
+        id: document.id,
+      });
+
+      expect(retrievedDoc.value).toEqual('data from rest API');
     });
   });
 

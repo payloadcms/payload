@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import payload from '../../../../src';
 import { CollectionConfig } from '../../../../src/collections/config/types';
+import type { PayloadRequest } from '../../../../src/types';
 
 export const contextHooksSlug = 'context-hooks';
 const ContextHooks: CollectionConfig = {
@@ -12,6 +13,24 @@ const ContextHooks: CollectionConfig = {
     update: () => true,
   },
   hooks: {
+    beforeOperation: [async ({ context, args }) => {
+      // eslint-disable-next-line prefer-destructuring
+      const req: PayloadRequest = args.req;
+
+      if (!req.query || !Object.keys(req.query).length) {
+        return args;
+      }
+
+      Object.keys(req.query).forEach((key) => {
+        if (key.startsWith('context_')) {
+          // Strip 'context_' from key and add it to context object
+          const newKey = key.substring('context_'.length);
+          context[newKey] = req.query[key];
+        }
+      });
+
+      return args;
+    }],
     beforeChange: [({ context, data, req }) => {
       if (!context.secretValue) {
         context.secretValue = 'secret';
