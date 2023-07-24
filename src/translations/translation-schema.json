@@ -663,6 +663,9 @@
         "descending": {
           "type": "string"
         },
+        "deselectAllRows": {
+          "type": "string"
+        },
         "duplicate": {
           "type": "string"
         },
@@ -808,6 +811,9 @@
           "type": "string"
         },
         "selectAll": {
+          "type": "string"
+        },
+        "selectAllRows": {
           "type": "string"
         },
         "selectValue": {
