@@ -102,6 +102,10 @@ export const createPaymentIntent: PayloadHandler = async (req, res): Promise<voi
       }),
     )
 
+    if (invoice.total === 0) {
+      throw new Error('There is nothing to pay for, add some items to your cart and try again.')
+    }
+
     // need to create a `PaymentIntent` manually using the `Invoice` total
     // this is because the invoice is not set to `auto-advance` and we're not finalizing the invoice ourselves
     // instead, attach the `payment_intent` to the invoice and let Stripe finalize it when the payment is processed

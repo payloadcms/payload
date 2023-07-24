@@ -102,7 +102,7 @@ export const CheckoutPage: React.FC<{
                 product: { id, stripeProductID, title, meta },
               } = item
 
-              if (quantity === 0) return null
+              if (!quantity) return null
 
               const isLast = index === (cart?.items?.length || 0) - 1
 

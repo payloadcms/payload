@@ -50,10 +50,6 @@
 
 .description {
   margin: 0;
-
-  @include mid-break {
-    margin-bottom: calc(var(--base) / 2);
-  }
 }
 
 .media {
@@ -96,5 +92,5 @@
 }
 
 .addToCartButton {
-  margin-top: var(--base);
+  margin-top: calc(var(--base) / 2);
 }
