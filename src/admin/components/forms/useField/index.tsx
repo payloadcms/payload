@@ -44,7 +44,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
   const setValue = useCallback((e, disableModifyingForm = false) => {
     const val = (e && e.target) ? e.target.value : e;
 
-    if (!disableModifyingForm && !modified) {
+    if (!modified && !disableModifyingForm) {
       if (typeof setModified === 'function') {
         // Update modified state after field value comes back
         // to avoid cursor jump caused by state value / DOM mismatch
