@@ -1,9 +1,13 @@
 @import "../../../_css/common";
 
-.checkoutButton {
-  margin-top: var(--base);
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--base);
 }
 
-.error {
-  margin-top: calc(var(--block-padding) - var(--base));
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--base);
 }

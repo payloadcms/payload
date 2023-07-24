@@ -13,6 +13,8 @@ import { Media } from '../../../_components/Media'
 import { Price } from '../../../_components/Price'
 import { useAuth } from '../../../_providers/Auth'
 import { useCart } from '../../../_providers/Cart'
+import { useTheme } from '../../../_providers/Theme'
+import cssVariables from '../../../cssVariables'
 import { CheckoutForm } from '../CheckoutForm'
 
 import classes from './index.module.scss'
@@ -32,6 +34,7 @@ export const CheckoutPage: React.FC<{
   const [error, setError] = React.useState<string | null>(null)
   const [clientSecret, setClientSecret] = React.useState()
   const hasMadePaymentIntent = React.useRef(false)
+  const { theme } = useTheme()
 
   const { cart, cartIsEmpty, cartTotal } = useCart()
 
@@ -146,7 +149,7 @@ export const CheckoutPage: React.FC<{
       )}
       {!clientSecret && !error && (
         <div className={classes.loading}>
-          <LoadingShimmer />
+          <LoadingShimmer number={2} />
         </div>
       )}
       {!clientSecret && error && (
@@ -156,11 +159,30 @@ export const CheckoutPage: React.FC<{
       )}
       {clientSecret && (
         <Fragment>
-          {error && <p>{error}</p>}
+          {error && <p>{`Error: ${error}`}</p>}
           <Elements
             stripe={stripe}
             options={{
               clientSecret,
+              appearance: {
+                theme: 'stripe',
+                variables: {
+                  colorText:
+                    theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
+                  fontSizeBase: '16px',
+                  fontWeightNormal: '500',
+                  fontWeightBold: '600',
+                  colorBackground:
+                    theme === 'dark' ? cssVariables.colors.base850 : cssVariables.colors.base0,
+                  fontFamily: 'Inter, sans-serif',
+                  colorTextPlaceholder: cssVariables.colors.base500,
+                  colorIcon:
+                    theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
+                  borderRadius: '0px',
+                  colorDanger: cssVariables.colors.error500,
+                  colorDangerText: cssVariables.colors.error500,
+                },
+              },
             }}
           >
             <CheckoutForm />
