@@ -13,8 +13,6 @@ export default async function Typography() {
         <h1>Styleguide</h1>
         <Link href="/styleguide/typography">Typography</Link>
         <br />
-        <Link href="/styleguide/buttons">Buttons</Link>
-        <br />
         <h2>Blocks</h2>
         <Link href="/styleguide/content-block">Content Block</Link>
         <br />
@@ -23,6 +21,8 @@ export default async function Typography() {
         <Link href="/styleguide/call-to-action">Call To Action Block</Link>
         <br />
         <h2>Components</h2>
+        <Link href="/styleguide/buttons">Buttons</Link>
+        <br />
         <Link href="/styleguide/message">Message</Link>
       </VerticalPadding>
     </Gutter>

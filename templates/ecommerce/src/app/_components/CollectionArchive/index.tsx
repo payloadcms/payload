@@ -1,7 +1,6 @@
 'use client'
 
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 import qs from 'qs'
 
 import { Product } from '../../../payload/payload-types'
@@ -9,6 +8,8 @@ import type { ArchiveBlockProps } from '../../_blocks/ArchiveBlock/types'
 import { Card } from '../Card'
 import { Gutter } from '../Gutter'
 import { PageRange } from '../PageRange'
+import { Pagination } from '../Pagination'
+import { RenderParams } from '../RenderParams'
 
 import classes from './index.module.scss'
 
@@ -60,13 +61,14 @@ export const CollectionArchive: React.FC<Props> = props => {
     nextPage: 1,
   })
 
-  const searchParams = useSearchParams()
-  const page = searchParams.get('page')
-
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const scrollRef = useRef<HTMLDivElement>(null)
   const hasHydrated = useRef(false)
+
+  // [page, categories] from query params
+  // see the `RenderParams` component for more info
+  const [params, setParams] = useState<(string | string[])[]>([])
 
   const scrollToRef = useCallback(() => {
     const { current } = scrollRef
@@ -78,10 +80,11 @@ export const CollectionArchive: React.FC<Props> = props => {
   }, [])
 
   useEffect(() => {
+    const page = params[0]
     if (typeof page !== 'undefined') {
       // scrollToRef()
     }
-  }, [isLoading, scrollToRef, page])
+  }, [isLoading, scrollToRef, params])
 
   useEffect(() => {
     // hydrate the block with fresh content after first render
@@ -93,7 +96,7 @@ export const CollectionArchive: React.FC<Props> = props => {
       }
     }, 500)
 
-    const catsFromQuery = searchParams.getAll('categories')
+    const [page, catsFromQuery] = params
 
     const searchQuery = qs.stringify(
       {
@@ -157,40 +160,48 @@ export const CollectionArchive: React.FC<Props> = props => {
     return () => {
       if (timer) clearTimeout(timer)
     }
-  }, [page, catsFromProps, searchParams, relationTo, onResultChange, sort, limit])
+  }, [params, catsFromProps, relationTo, onResultChange, sort, limit])
 
   return (
     <div className={[classes.collectionArchive, className].filter(Boolean).join(' ')}>
+      {/* <RenderParams onParams={setParams} show={false} params={['page', 'categories']} /> */}
       <div ref={scrollRef} className={classes.scrollRef} />
-      {isLoading && <Gutter>Loading, please wait...</Gutter>}
       {!isLoading && error && <Gutter>{error}</Gutter>}
-      {!isLoading && (
-        <Fragment>
-          {showPageRange !== false && (
-            <Gutter>
-              <div className={classes.pageRange}>
-                <PageRange
-                  totalDocs={results.totalDocs}
-                  currentPage={results.page}
-                  collection={relationTo}
-                  limit={limit}
-                />
-              </div>
-            </Gutter>
-          )}
+      <Fragment>
+        {showPageRange !== false && (
           <Gutter>
-            <div className={classes.grid}>
-              {results.docs?.map((result, index) => {
-                return (
-                  <div key={index} className={classes.column}>
-                    <Card relationTo="products" doc={result} showCategories />
-                  </div>
-                )
-              })}
+            <div className={classes.pageRange}>
+              <PageRange
+                totalDocs={results.totalDocs}
+                currentPage={results.page}
+                collection={relationTo}
+                limit={limit}
+              />
             </div>
           </Gutter>
-        </Fragment>
-      )}
+        )}
+        <Gutter>
+          <div className={classes.grid}>
+            {results.docs?.map((result, index) => {
+              return (
+                <div key={index} className={classes.column}>
+                  <Card relationTo="products" doc={result} showCategories />
+                </div>
+              )
+            })}
+          </div>
+          {results.totalPages > 1 && (
+            <Pagination
+              className={classes.pagination}
+              page={results.page}
+              totalPages={results.totalPages}
+              onClick={page => {
+                setParams([page.toString(), params[1]])
+              }}
+            />
+          )}
+        </Gutter>
+      </Fragment>
     </div>
   )
 }

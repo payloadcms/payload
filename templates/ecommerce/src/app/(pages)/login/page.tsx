@@ -11,7 +11,7 @@ import classes from './index.module.scss'
 
 export default async function Login() {
   await getMeUser({
-    validUserRedirect: `/account?message=${encodeURIComponent('You are already logged in.')}`,
+    validUserRedirect: `/account?warning=${encodeURIComponent('You are already logged in.')}`,
   })
 
   return (

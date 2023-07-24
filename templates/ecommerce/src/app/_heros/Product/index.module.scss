@@ -27,6 +27,7 @@
 }
 
 .categories {
+  @extend %label;
   margin-bottom: calc(var(--base) / 2);
 }
 

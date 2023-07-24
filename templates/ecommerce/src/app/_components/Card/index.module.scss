@@ -47,6 +47,7 @@
 }
 
 .leader {
+  @extend %label;
   display: flex;
   margin-bottom: calc(var(--base) / 4);
 

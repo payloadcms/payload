@@ -11,7 +11,7 @@ import classes from './index.module.scss'
 
 export default async function CreateAccount() {
   await getMeUser({
-    validUserRedirect: `/account?message=${encodeURIComponent(
+    validUserRedirect: `/account?warning=${encodeURIComponent(
       'Cannot create a new account while logged in, please log out and try again.',
     )}`,
   })

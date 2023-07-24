@@ -1,36 +1,11 @@
-'use client'
-
 import { Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
 
-import { Message } from '../Message'
+import { Props, RenderParamsComponent } from './Component'
 
-type Props = {
-  params?: string[]
-  message?: string
-  className?: string
-}
-
-const RenderParamsComponent: React.FC<Props> = ({
-  params = ['error', 'message', 'success'],
-  message,
-  className,
-}) => {
-  const searchParams = useSearchParams()
-  const paramValues = params.map(param => searchParams.get(param)).filter(Boolean)
-
-  if (paramValues.length) {
-    return (
-      <div className={className}>
-        {paramValues.map(paramValue => (
-          <Message key={paramValue} message={(message || 'PARAM')?.replace('PARAM', paramValue)} />
-        ))}
-      </div>
-    )
-  }
-
-  return null
-}
+// Using `useSearchParams` from `next/navigation` causes the entire route to de-optimize into client-side rendering
+// To fix this, we wrap the component in a `Suspense` component
+// Then, we lift the `useSearchParams` hook into the parent component's state
+// See https://nextjs.org/docs/messages/deopted-into-client-rendering for more info
 
 export const RenderParams: React.FC<Props> = props => {
   return (
