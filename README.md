@@ -44,14 +44,11 @@
 </ul>
 <br />
 <a href="https://payloadcms.com/new">
-  <img width="100%" src="src/admin/assets/images/cloud-cta.jpg" alt="Payload headless CMS Admin panel built with React" />
+  <img width="100%" src="src/admin/assets/images/cloud-cta-small.jpg" alt="Payload headless CMS Admin panel built with React" />
 </a>
 <br />
 
-## ☁️ Benefits of using Payload Cloud
-Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Best of all, you can extend it as much as you need. Building SaaS platform? You can use Payload for that too. We give you a full web backend immediately, with subscriptions by stripe and a NextJS frontend.
 
-[Get started with Payload Cloud](https://payloadcms.com/new)
 ## 🚀 Get started by self-hosting
 
 Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/getting-started/installation).
@@ -61,6 +58,15 @@ npx create-payload-app
 ```
 
 Alternatively, it only takes about five minutes to [create an app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
+
+## 🖱️ One-click templates
+There are number of templates to help get you going very quickly.
+- [E-Commerce](https://github.com/payloadcms/template-ecommerce) - Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Best of all, you can extend it as much as you need.
+- [SaaS](https://github.com/payloadcms/template-saas) - Building SaaS platform? You can use Payload for that too. We give you a full web backend immediately, with subscriptions by stripe and a NextJS frontend.
+- [All Official Templates](https://github.com/orgs/payloadcms/repositories?q=topic%3Apayload-template)
+- [Community Templates](https://github.com/topics/payload-template)
+
+**If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.**
 
 ## ⭐ Why Payload?
 
@@ -103,13 +109,11 @@ Check out the [Payload website](https://payloadcms.com/docs/getting-started/what
 
 If you want to add contributions to this repository, please follow the instructions in [contributing.md](./contributing.md).
 
-## 📚 Examples and Templates
+## 📚 Examples
 
-The examples directory is a great resource for learning how to setup Payload in a variety of different ways. There are also a number of templates to help get you going very quickly. If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.
+The examples directory is a great resource for learning how to setup Payload in a variety of different ways.
 
-- [Examples Directory](./examples)
-- [Official Templates](https://github.com/orgs/payloadcms/repositories?q=topic%3Apayload-template)
-- [Community Templates](https://github.com/topics/payload-template)
+[Examples Directory](./examples)
 
 ## 🔌 Plugins
 
