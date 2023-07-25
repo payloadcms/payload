@@ -1,6 +1,8 @@
 import type { AfterDeleteHook } from 'payload/dist/collections/config/types'
 
-export const deleteProductFromCarts: AfterDeleteHook = async ({ req, id }) => {
+import type { Product } from '../../../payload-types'
+
+export const deleteProductFromCarts: AfterDeleteHook<Product> = async ({ req, id }) => {
   const usersWithProductInCart = await req.payload.find({
     collection: 'users',
     overrideAccess: true,

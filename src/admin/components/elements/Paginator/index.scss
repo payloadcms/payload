@@ -35,8 +35,14 @@
     color: var(--theme-elevation-800);
     line-height: base(1);
 
-    &:hover:not(.clickable-arrow--is-disabled) {
-      background: var(--theme-elevation-100);
+    &:not(.clickable-arrow--is-disabled) {
+      &:hover, &:focus-visible {
+        background: var(--theme-elevation-100);
+      }
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
     }
   }
 

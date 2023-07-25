@@ -1,5 +1,26 @@
 
 
+## [1.11.5](https://github.com/payloadcms/payload/compare/v1.11.4...v1.11.5) (2023-07-25)
+
+
+### Bug Fixes
+
+* admin route not mounting on production serve ([#3071](https://github.com/payloadcms/payload/issues/3071)) ([e718668](https://github.com/payloadcms/payload/commit/e71866856fffefcfb61dd3d29135cccb66939a62))
+
+## [1.11.4](https://github.com/payloadcms/payload/compare/v1.11.3...v1.11.4) (2023-07-25)
+
+
+### Bug Fixes
+
+* if arrayFieldType rows are undefined, page would crash ([#3049](https://github.com/payloadcms/payload/issues/3049)) ([08377cc](https://github.com/payloadcms/payload/commit/08377cc5a7ea9d02350177e2e1d69390ee97af78))
+
+
+### Features
+
+* bump mongoose and mongoose-paginate versions ([#3025](https://github.com/payloadcms/payload/issues/3025)) ([41d3eee](https://github.com/payloadcms/payload/commit/41d3eee35f3855798a5c3372f8ad7c742a7810f7))
+* improve keyboard focus styles ([#3011](https://github.com/payloadcms/payload/issues/3011)) ([080e619](https://github.com/payloadcms/payload/commit/080e6195ef39ec858fbb115e8f554a8dfc436438))
+* solidifies bundler adapter pattern ([#3044](https://github.com/payloadcms/payload/issues/3044)) ([641c765](https://github.com/payloadcms/payload/commit/641c765fb921e162c98f09218929348037dd0f88))
+
 ## [1.11.3](https://github.com/payloadcms/payload/compare/v1.11.2...v1.11.3) (2023-07-19)
 
 

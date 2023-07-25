@@ -13,9 +13,11 @@
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  gap: calc(var(--base) / 2);
 
   @include small-break {
     padding: calc(var(--base) / 2);
+    gap: calc(var(--base) / 4);
   }
 }
 
@@ -32,12 +34,7 @@
 }
 
 .body {
-  margin-top: calc(var(--base) / 2);
   flex-grow: 1;
-
-  @include mid-break {
-    margin-top: 0;
-  }
 }
 
 .priceActions {
@@ -52,20 +49,11 @@
 .leader {
   @extend %label;
   display: flex;
-  margin-bottom: calc(var(--base) / 4);
-
-  & > *:not(:last-child) {
-    margin-right: var(--base);
-  }
+  gap: var(--base);
 }
 
 .description {
   margin: 0;
-  margin-bottom: calc(var(--base) / 2);
-
-  @include mid-break {
-    margin-bottom: 0;
-  }
 }
 
 .hideImageOnMobile {

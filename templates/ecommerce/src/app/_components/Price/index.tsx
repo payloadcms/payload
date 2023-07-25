@@ -8,7 +8,7 @@ import { RemoveFromCartButton } from '../RemoveFromCartButton'
 
 import classes from './index.module.scss'
 
-export const priceFromJSON = (priceJSON: string, quantity: number = 1): string => {
+export const priceFromJSON = (priceJSON: string, quantity: number = 1, raw?: boolean): string => {
   let price = ''
 
   if (priceJSON) {
@@ -16,6 +16,8 @@ export const priceFromJSON = (priceJSON: string, quantity: number = 1): string =
       const parsed = JSON.parse(priceJSON)?.data[0]
       const priceValue = parsed.unit_amount * quantity
       const priceType = parsed.type
+
+      if (raw) return priceValue.toString()
 
       price = (priceValue / 100).toLocaleString('en-US', {
         style: 'currency',

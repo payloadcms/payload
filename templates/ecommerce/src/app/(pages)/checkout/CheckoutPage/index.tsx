@@ -7,12 +7,15 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { Settings } from '../../../../payload/payload-types'
+import { Button } from '../../../_components/Button'
 import { HR } from '../../../_components/HR'
 import { LoadingShimmer } from '../../../_components/LoadingShimmer'
 import { Media } from '../../../_components/Media'
 import { Price } from '../../../_components/Price'
 import { useAuth } from '../../../_providers/Auth'
 import { useCart } from '../../../_providers/Cart'
+import { useTheme } from '../../../_providers/Theme'
+import cssVariables from '../../../cssVariables'
 import { CheckoutForm } from '../CheckoutForm'
 
 import classes from './index.module.scss'
@@ -24,7 +27,7 @@ export const CheckoutPage: React.FC<{
   settings: Settings
 }> = props => {
   const {
-    settings: { shopPage },
+    settings: { productsPage },
   } = props
 
   const { user } = useAuth()
@@ -32,6 +35,7 @@ export const CheckoutPage: React.FC<{
   const [error, setError] = React.useState<string | null>(null)
   const [clientSecret, setClientSecret] = React.useState()
   const hasMadePaymentIntent = React.useRef(false)
+  const { theme } = useTheme()
 
   const { cart, cartIsEmpty, cartTotal } = useCart()
 
@@ -48,7 +52,7 @@ export const CheckoutPage: React.FC<{
       const makeIntent = async () => {
         try {
           const paymentReq = await fetch(
-            `${process.env.NEXT_PUBLIC_SERVER_URL}/api/payment-intent`,
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/api/create-payment-intent`,
             {
               method: 'POST',
               credentials: 'include',
@@ -81,10 +85,10 @@ export const CheckoutPage: React.FC<{
           {'Your '}
           <Link href="/cart">cart</Link>
           {' is empty.'}
-          {typeof shopPage === 'object' && shopPage?.slug && (
+          {typeof productsPage === 'object' && productsPage?.slug && (
             <Fragment>
               {' '}
-              <Link href={`/${shopPage.slug}`}>Continue shopping?</Link>
+              <Link href={`/${productsPage.slug}`}>Continue shopping?</Link>
             </Fragment>
           )}
         </div>
@@ -99,7 +103,7 @@ export const CheckoutPage: React.FC<{
                 product: { id, stripeProductID, title, meta },
               } = item
 
-              if (quantity === 0) return null
+              if (!quantity) return null
 
               const isLast = index === (cart?.items?.length || 0) - 1
 
@@ -146,21 +150,41 @@ export const CheckoutPage: React.FC<{
       )}
       {!clientSecret && !error && (
         <div className={classes.loading}>
-          <LoadingShimmer />
+          <LoadingShimmer number={2} />
         </div>
       )}
       {!clientSecret && error && (
         <div className={classes.error}>
           <p>{`Error: ${error}`}</p>
+          <Button label="Back to cart" href="/cart" appearance="secondary" />
         </div>
       )}
       {clientSecret && (
         <Fragment>
-          {error && <p>{error}</p>}
+          {error && <p>{`Error: ${error}`}</p>}
           <Elements
             stripe={stripe}
             options={{
               clientSecret,
+              appearance: {
+                theme: 'stripe',
+                variables: {
+                  colorText:
+                    theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
+                  fontSizeBase: '16px',
+                  fontWeightNormal: '500',
+                  fontWeightBold: '600',
+                  colorBackground:
+                    theme === 'dark' ? cssVariables.colors.base850 : cssVariables.colors.base0,
+                  fontFamily: 'Inter, sans-serif',
+                  colorTextPlaceholder: cssVariables.colors.base500,
+                  colorIcon:
+                    theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
+                  borderRadius: '0px',
+                  colorDanger: cssVariables.colors.error500,
+                  colorDangerText: cssVariables.colors.error500,
+                },
+              },
             }}
           >
             <CheckoutForm />

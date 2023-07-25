@@ -10,7 +10,7 @@ export const LogoutPage: React.FC<{
   settings: Settings
 }> = props => {
   const {
-    settings: { shopPage },
+    settings: { productsPage },
   } = props
   const { logout } = useAuth()
   const [success, setSuccess] = useState('')
@@ -36,10 +36,10 @@ export const LogoutPage: React.FC<{
           <h1>{error || success}</h1>
           <p>
             {'What would you like to do next?'}
-            {typeof shopPage === 'object' && shopPage?.slug && (
+            {typeof productsPage === 'object' && productsPage?.slug && (
               <Fragment>
                 {' '}
-                <Link href={`/${shopPage.slug}`}>Click here</Link>
+                <Link href={`/${productsPage.slug}`}>Click here</Link>
                 {` to shop.`}
               </Fragment>
             )}
