@@ -63,7 +63,7 @@ export const home: Partial<Page> = {
           appearance: 'primary',
           reference: {
             relationTo: 'pages',
-            value: '{{SHOP_PAGE_ID}}',
+            value: '{{PRODUCTS_PAGE_ID}}',
           },
           label: 'Shop now',
           url: '',
@@ -496,7 +496,7 @@ export const home: Partial<Page> = {
             label: 'Shop now',
             appearance: 'primary',
             reference: {
-              value: '{{SHOP_PAGE_ID}}',
+              value: '{{PRODUCTS_PAGE_ID}}',
               relationTo: 'pages',
             },
           },

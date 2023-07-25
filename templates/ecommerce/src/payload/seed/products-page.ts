@@ -1,9 +1,9 @@
-export const shopPage = {
-  title: 'Shop',
-  slug: 'shop',
+export const productsPage = {
+  title: 'Products',
+  slug: 'products',
   _status: 'published',
   meta: {
-    title: 'Shop',
+    title: 'Shop all products',
     description: 'Shop everything from goods and services to digital assets and gated content.',
   },
   hero: {
@@ -13,7 +13,7 @@ export const shopPage = {
         type: 'h1',
         children: [
           {
-            text: 'Shop',
+            text: 'All products',
           },
         ],
       },

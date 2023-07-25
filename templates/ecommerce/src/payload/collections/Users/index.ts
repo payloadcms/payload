@@ -4,12 +4,10 @@ import { admins } from '../../access/admins'
 import { anyone } from '../../access/anyone'
 import adminsAndUser from './access/adminsAndUser'
 import { checkRole } from './checkRole'
-import { getUserOrder } from './endpoints/order'
-import { getUserOrders } from './endpoints/orders'
-import { addPurchases } from './endpoints/purchases'
 import { createStripeCustomer } from './hooks/createStripeCustomer'
 import { ensureFirstUserIsAdmin } from './hooks/ensureFirstUserIsAdmin'
 import { loginAfterCreate } from './hooks/loginAfterCreate'
+import { resolveDuplicatePurchases } from './hooks/resolveDuplicatePurchases'
 import { CustomerSelect } from './ui/CustomerSelect'
 
 const Users: CollectionConfig = {
@@ -30,23 +28,6 @@ const Users: CollectionConfig = {
     afterChange: [loginAfterCreate],
   },
   auth: true,
-  endpoints: [
-    {
-      path: '/order/:id',
-      method: 'get',
-      handler: getUserOrder,
-    },
-    {
-      path: '/orders',
-      method: 'get',
-      handler: getUserOrders,
-    },
-    {
-      path: '/purchases',
-      method: 'post',
-      handler: addPurchases,
-    },
-  ],
   fields: [
     {
       name: 'name',
@@ -82,6 +63,9 @@ const Users: CollectionConfig = {
       type: 'relationship',
       relationTo: 'products',
       hasMany: true,
+      hooks: {
+        beforeChange: [resolveDuplicatePurchases],
+      },
     },
     {
       name: 'stripeCustomerID',

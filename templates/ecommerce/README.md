@@ -75,6 +75,10 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections)  do
 
   Products can also restrict access to content or digital assets behind a paywall (gated content), see [Paywall](#paywall) for more details.
 
+- #### Orders
+
+  Orders are created when a user successfully completes a checkout. They contain all the data about the order including the products purchased, the total price, and the user who placed the order. See [Checkout](#checkout) for more details.
+
 - #### Pages
 
   All pages are layout builder enabled so you can generate unique layouts for each page using layout-building blocks, see [Layout Builder](#layout-builder) for more details.
@@ -173,17 +177,7 @@ To integrate with Stripe, follow these steps:
 
 ## Checkout
 
-A custom endpoint is opened at `POST /api/payment-intent` which initiates the checkout process. This endpoint creates a [Stripe Payment Intent](https://stripe.com/docs/payments/payment-intents) with the items in the cart using the Stripe's [Invoices API](https://stripe.com/docs/api/invoices). First, an invoice is drafted, then each item in your cart is appended as a line-item to the invoice. The total price is recalculated on the server to ensure accuracy and security, and once completed, passes the `client_secret` back in the response for your front-end to finalize the payment. Once the payment has succeeded, the draft invoice will be set to paid, each purchased product will be recorded to the user's profile, and the user's cart will be cleared.
-
-## Orders
-
-  When an order is placed, an invoice is created in Stripe. To easily query orders from Stripe, two custom endpoints are opened which proxy the Stripe API for these invoices. This allows you to safely query Stripe from your front-end without exposing your sensitive Stripe API key.
-
-  - `GET /api/users/orders` - Returns all orders for the current user
-  - `GET /api/users/orders/:id` - Returns a single order by ID
-  - `POST /api/users/purchases` - Adds new purchases to the user's profile
-
-  For more details on how to extend this functionality, see the [Custom Endpoints](https://payloadcms.com/docs/rest-api/overview#custom-endpoints) docs.
+A custom endpoint is opened at `POST /api/create-payment-intent` which initiates the checkout process. This endpoint totals your cart and creates a [Stripe Payment Intent](https://stripe.com/docs/payments/payment-intents). The total price is recalculated on the server to ensure accuracy and security, and once completed, passes the `client_secret` back in the response for your front-end to finalize the payment. Once the payment has succeeded, an [Order](#orders) will be created in Payload with a `stripePaymentIntentID`. Each purchased product will be recorded to the user's profile, and the user's cart will be automatically cleared.
 
 ## Paywall
 

@@ -20,7 +20,7 @@ export const CartPage: React.FC<{
   page: Page
 }> = props => {
   const {
-    settings: { shopPage },
+    settings: { productsPage },
   } = props
 
   const { user } = useAuth()
@@ -39,10 +39,10 @@ export const CartPage: React.FC<{
           {cartIsEmpty ? (
             <div className={classes.empty}>
               Your cart is empty.
-              {typeof shopPage === 'object' && shopPage?.slug && (
+              {typeof productsPage === 'object' && productsPage?.slug && (
                 <Fragment>
                   {' '}
-                  <Link href={`/${shopPage.slug}`}>Click here</Link>
+                  <Link href={`/${productsPage.slug}`}>Click here</Link>
                   {` to shop.`}
                 </Fragment>
               )}
@@ -108,11 +108,11 @@ export const CartPage: React.FC<{
                               {'.'}
                             </p>
                           )}
-                          <h6 className={classes.title}>
+                          <h5 className={classes.title}>
                             <Link href={`/products/${product.slug}`} className={classes.titleLink}>
                               {title}
                             </Link>
-                          </h6>
+                          </h5>
                           <div className={classes.actions}>
                             <label>
                               Quantity &nbsp;
@@ -141,7 +141,8 @@ export const CartPage: React.FC<{
                 }
                 return null
               })}
-              <div className={classes.cartTotal}>{`Cart total: ${cartTotal.formatted}`}</div>
+              <HR />
+              <h5 className={classes.cartTotal}>{`Total: ${cartTotal.formatted}`}</h5>
               <Button
                 className={classes.checkoutButton}
                 href={user ? '/checkout' : '/login?redirect=%2Fcheckout'}

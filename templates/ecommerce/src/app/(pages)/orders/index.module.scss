@@ -30,10 +30,19 @@
   list-style: none;
 }
 
+.item {
+  display: flex;
+  flex-wrap: 1;
+  align-items: center;
+  gap: calc(var(--base) / 2);
+  text-decoration: none;
+}
+
 .itemContent {
   display: flex;
   flex-direction: column;
   gap: calc(var(--base) / 2);
+  flex-grow: 1;
 }
 
 .itemTitle {
@@ -49,4 +58,8 @@
   & > * {
     margin: 0;
   }
+}
+
+.button {
+  flex-shrink: 0;
 }
