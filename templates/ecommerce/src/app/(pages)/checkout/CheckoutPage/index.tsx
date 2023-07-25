@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { Settings } from '../../../../payload/payload-types'
+import { Button } from '../../../_components/Button'
 import { HR } from '../../../_components/HR'
 import { LoadingShimmer } from '../../../_components/LoadingShimmer'
 import { Media } from '../../../_components/Media'
@@ -51,7 +52,7 @@ export const CheckoutPage: React.FC<{
       const makeIntent = async () => {
         try {
           const paymentReq = await fetch(
-            `${process.env.NEXT_PUBLIC_SERVER_URL}/api/payment-intent`,
+            `${process.env.NEXT_PUBLIC_SERVER_URL}/api/create-payment-intent`,
             {
               method: 'POST',
               credentials: 'include',
@@ -155,6 +156,7 @@ export const CheckoutPage: React.FC<{
       {!clientSecret && error && (
         <div className={classes.error}>
           <p>{`Error: ${error}`}</p>
+          <Button label="Back to cart" href="/cart" appearance="secondary" />
         </div>
       )}
       {clientSecret && (

@@ -1,12 +1,14 @@
 import React from 'react'
 import { Metadata } from 'next'
 import Link from 'next/link'
-import Stripe from 'stripe'
+import { notFound } from 'next/navigation'
 
+import { Order } from '../../../payload/payload-types'
 import { Button } from '../../_components/Button'
 import { Gutter } from '../../_components/Gutter'
 import { HR } from '../../_components/HR'
 import { RenderParams } from '../../_components/RenderParams'
+import { formatDateTime } from '../../_utilities/formatDateTime'
 import { getMeUser } from '../../_utilities/getMeUser'
 import { mergeOpenGraph } from '../../_utilities/mergeOpenGraph'
 
@@ -19,21 +21,20 @@ export default async function Orders() {
     )}&redirect=${encodeURIComponent('/orders')}`,
   })
 
-  const orders: void | Stripe.Invoice[] = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/orders`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `JWT ${token}`,
-      },
+  const orders: Order[] = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `JWT ${token}`,
     },
-  )?.then(res => {
-    const json = res.json()
-    if ('error' in json && json.error) {
-      throw new Error(`Error: ${json.error}`)
-    }
-    return json
+    cache: 'no-store',
   })
+    ?.then(async res => {
+      const json = await res.json()
+      if ('error' in json && json.error) notFound()
+      if ('errors' in json && json.errors) notFound()
+      return json
+    })
+    ?.then(json => json.docs)
 
   return (
     <Gutter className={classes.orders}>
@@ -45,29 +46,28 @@ export default async function Orders() {
       {orders && orders.length > 0 && (
         <ul className={classes.ordersList}>
           {orders?.map((order, index) => (
-            <li key={order.id} className={classes.item}>
-              <div className={classes.itemContent}>
-                <h4 className={classes.itemTitle}>
-                  <Link href={`/orders/${order.id}`}>{`Order ${order.id}`}</Link>
-                </h4>
-                <div className={classes.itemMeta}>
-                  <p>
-                    {'Status: '}
-                    {order.status}
-                  </p>
-                  <p>
-                    {'Created: '}
-                    {new Date(order.created * 1000).toLocaleDateString()}
-                  </p>
-                  <p>
-                    {'Total: '}
-                    {new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: order?.currency?.toUpperCase(),
-                    }).format(order.amount_due / 100)}
-                  </p>
+            <li key={order.id} className={classes.listItem}>
+              <Link className={classes.item} href={`/orders/${order.id}`}>
+                <div className={classes.itemContent}>
+                  <h4 className={classes.itemTitle}>{`Order ${order.id}`}</h4>
+                  <div className={classes.itemMeta}>
+                    <p>{`Ordered On: ${formatDateTime(order.createdAt)}`}</p>
+                    <p>
+                      {'Total: '}
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'usd',
+                      }).format(order.total / 100)}
+                    </p>
+                  </div>
                 </div>
-              </div>
+                <Button
+                  appearance="secondary"
+                  label="View Order"
+                  className={classes.button}
+                  el="button"
+                />
+              </Link>
               {index !== orders.length - 1 && <HR />}
             </li>
           ))}
