@@ -10,7 +10,7 @@ import getBaseUploadFields from '../../uploads/getBaseFields';
 import { formatLabels } from '../../utilities/formatLabels';
 import { authDefaults, defaults } from './defaults';
 import { Config } from '../../config/types';
-import baseVersionFields from '../../versions/baseFields';
+import getBaseVersionFields from '../../versions/baseFields';
 import TimestampsRequired from '../../errors/TimestampsRequired';
 import mergeBaseFields from '../../fields/mergeBaseFields';
 import { extractTranslations } from '../../translations/extractTranslations';
@@ -87,7 +87,7 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
         };
       }
 
-      sanitized.fields = mergeBaseFields(sanitized.fields, baseVersionFields);
+      sanitized.fields = mergeBaseFields(sanitized.fields, getBaseVersionFields(config));
     }
   }
 

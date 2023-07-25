@@ -1,14 +1,15 @@
 import { toWords } from '../../utilities/formatLabels';
 import { CollectionConfig } from '../../collections/config/types';
+import { Config } from '../../config/types';
 import sanitizeFields from '../../fields/config/sanitize';
 import { GlobalConfig, SanitizedGlobalConfig } from './types';
 import defaultAccess from '../../auth/defaultAccess';
-import baseVersionFields from '../../versions/baseFields';
+import getBaseVersionFields from '../../versions/baseFields';
 import mergeBaseFields from '../../fields/mergeBaseFields';
 import translations from '../../translations';
 import { fieldAffectsData } from '../../fields/config/types';
 
-const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[]): SanitizedGlobalConfig[] => {
+const sanitizeGlobals = (config: Config, collections: CollectionConfig[], globals: GlobalConfig[]): SanitizedGlobalConfig[] => {
   const sanitizedGlobals = globals.map((global) => {
     const sanitizedGlobal = { ...global };
 
@@ -48,7 +49,7 @@ const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[
           };
         }
 
-        sanitizedGlobal.fields = mergeBaseFields(sanitizedGlobal.fields, baseVersionFields);
+        sanitizedGlobal.fields = mergeBaseFields(sanitizedGlobal.fields, getBaseVersionFields(config));
       }
     }
 
