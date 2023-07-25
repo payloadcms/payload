@@ -1,8 +1,8 @@
 <p style="border: none; margin-bottom:0; padding-bottom: 0;" align="left">
   <a href="https://payloadcms.com">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-light.svg">
-      <img width="250" alt="Payload Logo" src="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-dark.svg">
+      <source media="(prefers-color-scheme: dark)" srcset="src/admin/assets/images/payload-logo-light.svg">
+      <img width="250" alt="Payload Logo" src="src/admin/assets/images/payload-logo-dark.svg">
     </picture>
   </a>
 </p>
@@ -37,19 +37,20 @@
 <ul>
   <li>Don’t hit their API, hit yours</li>
   <li>Use your own database and own your data</li>
-  <li>Avoid vendor lock-in</li>
+  <li>No vendor lock-in</li>
+  <li>Avoid microservices hell</li>
   <li>Never touch ancient WP code again</li>
   <li>Build faster, never hit a roadblock</li>
   <li>Both admin and backend are 100% extensible</li>
 </ul>
 <br />
 <a href="https://payloadcms.com/new">
-  <img width="100%" src="src/admin/assets/images/cloud-cta-small.jpg" alt="Payload headless CMS Admin panel built with React" />
+  <img width="100%" src="src/admin/assets/images/cloud-cta-inline.jpg" alt="Payload headless CMS Admin panel built with React" />
 </a>
 <br />
 
 
-## 🚀 Get started by self-hosting
+## 🚀 Get started by self-hosting completely free, forever.
 
 Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/getting-started/installation).
 
@@ -60,10 +61,8 @@ npx create-payload-app
 Alternatively, it only takes about five minutes to [create an app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
 
 ## 🖱️ One-click templates
-### 🛒 [E-Commerce](https://github.com/payloadcms/template-ecommerce)
+### 🛒 [E-Commerce](https://github.com/payloadcms/payload/tree/master/templates/ecommerce)
 Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Best of all, you can extend it as much as you need.
-### 💱 [SaaS](https://github.com/payloadcms/template-saas)
-Building SaaS platform? You can use Payload for that too. We give you a full web backend immediately, with subscriptions by stripe and a NextJS frontend.
 
 [All Official Templates](https://github.com/orgs/payloadcms/repositories?q=topic%3Apayload-template)&nbsp;·&nbsp;[Community Templates](https://github.com/topics/payload-template)
 
