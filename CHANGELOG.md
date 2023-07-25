@@ -1,5 +1,12 @@
 
 
+## [1.11.5](https://github.com/payloadcms/payload/compare/v1.11.4...v1.11.5) (2023-07-25)
+
+
+### Bug Fixes
+
+* admin route not mounting on production serve ([#3071](https://github.com/payloadcms/payload/issues/3071)) ([e718668](https://github.com/payloadcms/payload/commit/e71866856fffefcfb61dd3d29135cccb66939a62))
+
 ## [1.11.4](https://github.com/payloadcms/payload/compare/v1.11.3...v1.11.4) (2023-07-25)
 
 
