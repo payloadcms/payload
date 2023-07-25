@@ -11,14 +11,14 @@ const router = express.Router();
 
 type DevAdminType = (options: { payload: Payload }) => Promise<PayloadHandler>;
 export const devAdmin: DevAdminType = async ({ payload }) => {
-  payload.express.use(payload.config.routes.admin, history());
+  router.use(history());
 
   try {
     const webpackConfig = getDevConfig(payload.config);
     const compiler = webpack(webpackConfig);
 
     router.use(webpackDevMiddleware(compiler, {
-      publicPath: webpackConfig.output.publicPath as string,
+      publicPath: '/',
     }));
 
     router.use(webpackHotMiddleware(compiler));
