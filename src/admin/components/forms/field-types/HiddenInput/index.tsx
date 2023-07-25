@@ -1,35 +1,33 @@
 import React, { useEffect } from 'react';
+import useField from '../../useField';
 import withCondition from '../../withCondition';
 import { Props } from './types';
-import { useFormFields } from '../../Form/context';
 
 const HiddenInput: React.FC<Props> = (props) => {
   const {
     name,
     path: pathFromProps,
     value: valueFromProps,
+    disableModifyingForm = true,
   } = props;
 
   const path = pathFromProps || name;
 
-  const field = useFormFields(([fields]) => fields[path]);
-  const dispatchField = useFormFields(([, dispatch]) => dispatch);
+  const { value, setValue } = useField({
+    path,
+  });
 
   useEffect(() => {
-    if (valueFromProps !== undefined) {
-      dispatchField({
-        type: 'UPDATE',
-        path,
-        value: valueFromProps,
-      });
+    if (valueFromProps !== undefined && value !== valueFromProps) {
+      setValue(valueFromProps, disableModifyingForm);
     }
-  }, [valueFromProps, dispatchField, path]);
+  }, [valueFromProps, setValue, value, disableModifyingForm]);
 
   return (
     <input
       id={`field-${path.replace(/\./gi, '__')}`}
       type="hidden"
-      value={field?.value as string || ''}
+      value={value as string || ''}
       name={path}
     />
   );
