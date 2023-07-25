@@ -1,5 +1,13 @@
 
 
+## [1.11.6](https://github.com/payloadcms/payload/compare/v1.11.5...v1.11.6) (2023-07-25)
+
+
+### Bug Fixes
+
+* **collections:admin:** Enable adminThumbnail fn execution on all types ([2c74e93](https://github.com/payloadcms/payload/commit/2c74e9396a216a033e2bacdf189b7f28a0f97505))
+* threads hasMaxRows into ArrayAction components within blocks and arrays ([#3066](https://github.com/payloadcms/payload/issues/3066)) ([d43c83d](https://github.com/payloadcms/payload/commit/d43c83dad1bab5b05f4fcbae7d41de369905797c))
+
 ## [1.11.5](https://github.com/payloadcms/payload/compare/v1.11.4...v1.11.5) (2023-07-25)
 
 
