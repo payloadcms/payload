@@ -6,19 +6,25 @@ desc: Context allows you to pass in extra data that can be shared between hooks
 keywords: hooks, context, payload context, payloadcontext, data, extra data, shared data, shared, extra
 ---
 
-<Banner type="info">
-	Context is a useful way to pass extra data between hooks
-</Banner>
+The `context` object in hooks provides a way to share data across different hooks. It's an alternative to using a hidden field in your collection to store data temporarily, making your code more efficient and clean.
 
-Say you have a beforeChange and an afterChange hook. What if you wanted to make variables from the beforeChange hook available in the afterChange hook?
+The `context` object persists throughout the entire lifecycle of a request and is available within every hook. You can also find the context in every request object as `req.context`.
 
-Of course, you could create a hidden field in your collection and store the data there, but that's not very elegant. Context makes it much easier to pass data between hooks.
+## When to use Context
 
-Simply write or read data into the `context` object that is available to every hook. This data will persist throughout the entire lifecycle. You can also find the context in every request object: `req.context`.
+There are various scenarios where you might need to use context:
 
-Here are some examples of common usages on how to use context:
+1. **Passing data between hooks**: If you calculate or generate some data in a beforeChange hook and need to use this data in the afterChange hook, you can use the context object to pass this data.
 
-## Example 1: Passing data between hooks
+2. **Preventing infinite loops**: In a scenario where you need to update a document from an afterChange hook, it can create an infinite loop as the hook triggers itself over and over. To prevent this, you can use context to control the flow and avoid the loop.
+
+3. **Simply passing extra data to a collection**: If you need to pass extra data to a collection (e.g when creating a new document through the local API) which you don't want to save in the document, you can use context to pass this data. It's then available to the collection's hooks.
+
+## How to Use Context
+
+Let's see examples on how context can be used in the first two scenarios mentioned above:
+
+### Example 1: Passing data between hooks
 
 ```ts
 const MyCollection: CollectionConfig = {
@@ -52,7 +58,7 @@ That's because the afterChange hook needs `value2` + the document ID (which is n
 
 Since `value2` is not saved in the document, we aren't able to access it in the afterChange hook. But we can save it in the `context` object, which every hook has access to. We can then access it in the afterChange hook and use it for our operation.
 
-## Example 2: Preventing infinite loops
+### Example 2: Preventing infinite loops
 
 Let's say you have an `afterChange` hook, and you want to do a calculation inside the hook (as the document ID needed for the calclulation is available in the afterChange hook, but not in the beforeChange hook). Once that's done, you want to update the document with the result of the calculation.
 
@@ -115,50 +121,11 @@ const MyCollection: CollectionConfig = {
 
 That's it! Now the afterChange hook will only run once, and not trigger itself again and again. Previously, we'd have to use a hidden checkbox field to do that - context makes it much easier.
 
-## Passing context from the Rest API
+<Banner type="info">
+  ## Passing context from the Rest API
 
-Now, as you have seen in the example above, payload's local API has a `context` property which you can use to pass in context. But what about the Rest API?
-
-In order to pass context through the Rest API, you can use query parameters which you then parse in a `beforeOperation` hook. Here's how the hook could look like:
-
-```ts
-beforeOperation: [async ({ context, args }) => {
-  const req: PayloadRequest = args.req;
-
-  if (!req.query || !Object.keys(req.query).length) {
-    return args;
-  }
-
-  Object.keys(req.query).forEach((key) => {
-    if (key.startsWith('context_')) {
-      // Strip 'context_' from key, add it to context object and remove it from query params
-      const newKey = key.substring('context_'.length);
-      context[newKey] = req.query[key];
-      delete req.query[key];
-    }
-  });
-
-  return args;
-}],
-```
-
-Simply add this hook to your collection! In this implementation, the beforeOperation hooks moves every query parameter that starts with `context_` to the context object. So if you have a query parameter `context_secretValue`, it will be moved to context as `secretValue` and removed from the query parameters.
-
-This is how you would then pass context through the Rest API:
-
-```ts
-const params = new URLSearchParams({
-  context_secretValue: 'data from rest API',
-});
-
-// send context as query params. It will be parsed by the beforeOperation hook
-const response = await fetch(`$http://localhost:3000/api/[collection-slug]?${params.toString()}`, {
-  body: JSON.stringify({
-    // ...
-  }),
-  method: 'post',
-});
-```
+  The Rest API doesn't have access to the context object. Instead, you can pass context through query parameters and use those, or parse them in a `beforeOperation` hook and add them to the context object. You can find an implementation of that in the ['should pass context from rest API to hooks' test](https://github.com/payloadcms/payload/blob/master/test/hooks/int.spec.ts#L193).
+</Banner>
 
 ## Typing context
 
