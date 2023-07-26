@@ -295,7 +295,8 @@ describe('admin', () => {
         await page.locator('.list-controls__toggle-columns').click();
 
         // wait until the column toggle UI is visible and fully expanded
-        await page.locator('.list-controls__columns.rah-static--height-auto').waitFor();
+        await expect(await page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible();
+
 
         const numberOfColumns = await page.locator(columnCountLocator).count();
         await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID');
@@ -312,7 +313,7 @@ describe('admin', () => {
 
         // Add back ID column
         await idButton.click();
-        await page.locator('.cell-id').waitFor();
+        await expect(await page.locator('.cell-id')).toBeVisible();
 
         await expect(await page.locator(columnCountLocator)).toHaveCount(numberOfColumns);
         await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID');
@@ -326,7 +327,7 @@ describe('admin', () => {
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click();
         // wait until the column toggle UI is visible and fully expanded
-        await page.locator('.list-controls__columns.rah-static--height-auto').waitFor();
+        await expect(await page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible();
 
         // toggle off the ID column
         page.locator('.column-selector >> text=ID').click();
@@ -344,21 +345,22 @@ describe('admin', () => {
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click();
         // wait until the column toggle UI is visible and fully expanded
-        await page.locator('.list-controls__columns.rah-static--height-auto').waitFor();
+        await expect(await page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible();
+
 
         // ensure the ID column is active
         const idButton = await page.locator('.column-selector >> text=ID');
         const buttonClasses = await idButton.getAttribute('class');
         if (buttonClasses && !buttonClasses.includes('column-selector__column--active')) {
           await idButton.click();
-          await page.locator(tableRowLocator).first().locator('.cell-id').waitFor();
+          await expect(await page.locator(tableRowLocator).first().locator('.cell-id')).toBeVisible();
         }
 
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
 
         await page.locator('.list-controls__toggle-where').click();
         // wait until the filter UI is visible and fully expanded
-        await page.locator('.list-controls__where.rah-static--height-auto').waitFor();
+        await expect(await page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible();
 
         await page.locator('.where-builder__add-first-filter').click();
 
@@ -387,7 +389,7 @@ describe('admin', () => {
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click();
         // wait until the column toggle UI is visible and fully expanded
-        await page.locator('.list-controls__columns.rah-static--height-auto').waitFor();
+        await expect(await page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible();
 
         const numberBoundingBox = await page.locator('.column-selector >> text=Number').boundingBox();
         const idBoundingBox = await page.locator('.column-selector >> text=ID').boundingBox();
@@ -447,7 +449,7 @@ describe('admin', () => {
         const columnSelector = await page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns');
         await columnSelector.click();
         // wait until the column toggle UI is visible and fully expanded
-        await page.locator('.list-controls__columns.rah-static--height-auto').waitFor();
+        await expect(await page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible();
 
         // ensure that the columns are in the correct order
         await expect(await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
@@ -467,7 +469,7 @@ describe('admin', () => {
         // open the column controls
         await columnSelector.click();
         // wait until the column toggle UI is visible and fully expanded
-        await page.locator('.list-controls__columns.rah-static--height-auto').waitFor();
+        await expect(await page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible();
 
         // deselect the "id" column
         await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column >> text=ID').click();
