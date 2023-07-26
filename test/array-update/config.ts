@@ -1,9 +1,12 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import { devUser } from '../credentials';
+
+export const slug = 'arrays';
 
 export default buildConfigWithDefaults({
   collections: [
     {
-      slug: 'arrays',
+      slug,
       fields: [
         {
           name: 'arrayOfFields',
@@ -41,4 +44,14 @@ export default buildConfigWithDefaults({
       ],
     },
   ],
+  onInit: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+        custom: 'Hello, world!',
+      },
+    });
+  },
 });
