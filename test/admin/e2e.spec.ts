@@ -30,6 +30,8 @@ describe('admin', () => {
 
   afterEach(async () => {
     await clearDocs();
+    // clear preferences
+    await payload.preferences.Model.deleteMany();
   });
 
   describe('Nav', () => {
@@ -349,7 +351,7 @@ describe('admin', () => {
         const buttonClasses = await idButton.getAttribute('class');
         if (buttonClasses && !buttonClasses.includes('column-selector__column--active')) {
           await idButton.click();
-          await page.locator('.cell-id').waitFor();
+          await page.locator(tableRowLocator).first().locator('.cell-id').waitFor();
         }
 
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
