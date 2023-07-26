@@ -1,12 +1,10 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 
-export const slug = 'arrays';
-
 export default buildConfigWithDefaults({
   collections: [
     {
-      slug,
+      slug: 'arrays',
       fields: [
         {
           name: 'arrayOfFields',
