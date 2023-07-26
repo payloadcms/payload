@@ -42,7 +42,7 @@ export const sanitizeConfig = (config: Config): SanitizedConfig => {
   }) as Config;
 
   sanitizedConfig.admin = sanitizeAdmin(sanitizedConfig as SanitizedConfig);
-  
+
   if (sanitizedConfig.localization && sanitizedConfig.localization.locales?.length > 0) {
     // clone localization config so to not break everything
     const firstLocale = sanitizedConfig.localization.locales[0];
