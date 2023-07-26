@@ -50,13 +50,13 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
   },
   resolve: {
     fallback: {
-      path: require.resolve('path-browserify'),
       crypto: false,
       https: false,
       http: false,
     },
     modules: ['node_modules', path.resolve(__dirname, nodeModulesPath)],
     alias: {
+      path: require.resolve('path-browserify'),
       'payload-config': payloadConfig.paths.rawConfig,
       payload$: mockModulePath,
       'payload-user-css': payloadConfig.admin.css,

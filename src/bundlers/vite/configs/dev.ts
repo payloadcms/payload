@@ -1,13 +1,14 @@
 import { InlineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+import { getDevConfig as getDevWebpackConfig } from '../../webpack/configs/dev';
 import { SanitizedConfig } from '../../../config/types';
 import { getBaseConfig } from './base';
 
-const mockModulePath = path.resolve(__dirname, '../../mocks/emptyModule.js');
-
 export const getDevConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
   const baseConfig = getBaseConfig(payloadConfig);
+
+  const webpackConfig = getDevWebpackConfig(payloadConfig);
+  const webpackAliases = webpackConfig?.resolve?.alias || {} as any;
 
   const viteConfig: InlineConfig = {
     ...baseConfig,
@@ -15,16 +16,24 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
       middlewareMode: true,
     },
     plugins: [
-      ...(baseConfig?.plugins || []),
+      {
+        name: 'init-admin-panel',
+        transformIndexHtml(html) {
+          if (html.includes('/index.tsx')) return html;
+          return html.replace(
+            '</body>',
+            `<script> var exports = {}; </script></script><script type="module" src="${payloadConfig.routes.admin}/index.tsx"></script></body>`,
+          );
+        },
+      },
       typeof react === 'function' && react(),
+      ...(baseConfig?.plugins || []),
     ],
     resolve: {
       ...(baseConfig?.resolve || {}),
       alias: {
+        ...(webpackAliases || {}),
         ...(baseConfig?.resolve?.alias || {}),
-        vite: mockModulePath,
-        '@vitejs/plugin-react': mockModulePath,
-        express: mockModulePath,
       },
     },
     define: {

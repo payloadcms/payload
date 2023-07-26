@@ -18,6 +18,16 @@ export const getProdConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
     ...baseConfig,
     plugins: [
       ...(baseConfig?.plugins || []),
+      {
+        name: 'init-admin-panel',
+        transformIndexHtml(html) {
+          if (html.includes('/index.js')) return html;
+          return html.replace(
+            '</body>',
+            `<script type="module" src="${payloadConfig.routes.admin}/index.js"></script></body>`,
+          );
+        },
+      },
     ],
     resolve: {
       ...(baseConfig?.resolve || {}),
@@ -40,28 +50,6 @@ export const getProdConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
             outputStyle: 'compressed',
             include: [`${relativeAdminPath}/**/*.scss`],
           }),
-        ],
-        external: [
-          'vm',
-          'stream',
-          'fs',
-          'path',
-          'crypto',
-          'util',
-          'assert',
-          'os',
-          'zlib',
-          'http',
-          'https',
-          'url',
-          'async_hooks',
-          'querystring',
-          'net',
-          'tls',
-          'dns',
-          'child_process',
-          'module',
-          'constants',
         ],
         treeshake: true,
         input: {

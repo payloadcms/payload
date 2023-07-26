@@ -18,7 +18,7 @@ export const devAdmin: DevAdminType = async ({ payload, viteConfig: viteConfigAr
     const viteConfig = getDevConfig(payload.config);
     const viteServer = await vite.createServer(viteConfig);
 
-    router.use(payload.config.routes.admin, viteServer.middlewares);
+    router.use(viteServer.middlewares);
   } catch (err) {
     console.error(err);
     throw new Error('Error: there was an error creating the vite dev server.');
