@@ -43,6 +43,10 @@ const reduceFields = (fields, i18n) => flattenTopLevelFields(fields).reduce((red
   return reduced;
 }, []);
 
+/**
+ * The WhereBuilder component is used to render the filter controls for a collection's list view.
+ * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
+ */
 const WhereBuilder: React.FC<Props> = (props) => {
   const {
     collection,
