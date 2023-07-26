@@ -63,6 +63,9 @@ const WhereBuilder: React.FC<Props> = (props) => {
   const params = useSearchParams();
   const { t, i18n } = useTranslation('general');
 
+  // This handles initializing the where conditions from the search query (URL). That way, if you pass in
+  // query params to the URL, the where conditions will be initialized from those and displayed in the UI.
+  // Example: /admin/collections/posts?where[or][0][and][0][text][equals]=example%20post
   const [conditions, dispatchConditions] = useReducer(reducer, params.where, (whereFromSearch) => {
     if (modifySearchQuery && validateWhereQuery(whereFromSearch)) {
       return whereFromSearch.or;
@@ -73,6 +76,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
 
   const [reducedFields] = useState(() => reduceFields(collection.fields, i18n));
 
+  // This handles updating the search query (URL) when the where conditions change
   useThrottledEffect(() => {
     const currentParams = queryString.parse(history.location.search, { ignoreQueryPrefix: true, depth: 10 }) as { where: Where };
 
