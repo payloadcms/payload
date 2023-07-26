@@ -269,7 +269,6 @@ describe('admin', () => {
       test('search by id', async () => {
         const { id } = await createPost();
         await page.locator('.search-filter__input').fill(id);
-        await wait(250);
         const tableItems = page.locator(tableRowLocator);
         await expect(tableItems).toHaveCount(1);
       });
@@ -281,11 +280,9 @@ describe('admin', () => {
         });
 
         await page.locator('.search-filter__input').fill('find me');
-        await wait(250);
         await expect(page.locator(tableRowLocator)).toHaveCount(1);
 
         await page.locator('.search-filter__input').fill('this is fun');
-        await wait(250);
         await expect(page.locator(tableRowLocator)).toHaveCount(1);
       });
 
@@ -294,7 +291,9 @@ describe('admin', () => {
         await createPost();
 
         await page.locator('.list-controls__toggle-columns').click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector
+
+        // wait until the column toggle UI is visible and fully expanded
+        await page.locator('.list-controls__columns.rah-static--height-auto').waitFor();
 
         const numberOfColumns = await page.locator(columnCountLocator).count();
         await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID');
@@ -303,13 +302,16 @@ describe('admin', () => {
 
         // Remove ID column
         await idButton.click();
-        await wait(100);
+        // wait until .cell-id is not present on the page:
+        await page.locator('.cell-id').waitFor({ state: 'detached' });
+
         await expect(await page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1);
         await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('Number');
 
         // Add back ID column
         await idButton.click();
-        await wait(100);
+        await page.locator('.cell-id').waitFor();
+
         await expect(await page.locator(columnCountLocator)).toHaveCount(numberOfColumns);
         await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID');
       });
@@ -321,11 +323,13 @@ describe('admin', () => {
 
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+        // wait until the column toggle UI is visible and fully expanded
+        await page.locator('.list-controls__columns.rah-static--height-auto').waitFor();
 
         // toggle off the ID column
         page.locator('.column-selector >> text=ID').click();
-        await wait(200);
+        // wait until .cell-id is not present on the page:
+        await page.locator('.cell-id').waitFor({ state: 'detached' });
 
         // recheck that the 2nd cell is still a link
         await expect(linkCell).toHaveAttribute('href', `/admin/collections/posts/${id}`);
@@ -337,20 +341,22 @@ describe('admin', () => {
 
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+        // wait until the column toggle UI is visible and fully expanded
+        await page.locator('.list-controls__columns.rah-static--height-auto').waitFor();
 
         // ensure the ID column is active
         const idButton = await page.locator('.column-selector >> text=ID');
         const buttonClasses = await idButton.getAttribute('class');
         if (buttonClasses && !buttonClasses.includes('column-selector__column--active')) {
           await idButton.click();
-          await wait(200);
+          await page.locator('.cell-id').waitFor();
         }
 
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
 
         await page.locator('.list-controls__toggle-where').click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+        // wait until the filter UI is visible and fully expanded
+        await page.locator('.list-controls__where.rah-static--height-auto').waitFor();
 
         await page.locator('.where-builder__add-first-filter').click();
 
@@ -363,7 +369,6 @@ describe('admin', () => {
         await dropdownOptions.locator('text=equals').click();
 
         await valueField.fill(id);
-        await wait(1000);
 
         await expect(page.locator(tableRowLocator)).toHaveCount(1);
         const firstId = await page.locator(tableRowLocator).first().locator('.cell-id').innerText();
@@ -371,7 +376,6 @@ describe('admin', () => {
 
         // Remove filter
         await page.locator('.condition__actions-remove').click();
-        await wait(1000);
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
       });
     });
@@ -380,7 +384,8 @@ describe('admin', () => {
       const reorderColumns = async () => {
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click();
-        await wait(500);
+        // wait until the column toggle UI is visible and fully expanded
+        await page.locator('.list-controls__columns.rah-static--height-auto').waitFor();
 
         const numberBoundingBox = await page.locator('.column-selector >> text=Number').boundingBox();
         const idBoundingBox = await page.locator('.column-selector >> text=ID').boundingBox();
@@ -390,23 +395,23 @@ describe('admin', () => {
         // drag the "number" column to the left of the "ID" column
         await page.mouse.move(numberBoundingBox.x + 2, numberBoundingBox.y + 2, { steps: 10 });
         await page.mouse.down();
-        await wait(200);
+        await wait(300);
+
         await page.mouse.move(idBoundingBox.x - 2, idBoundingBox.y - 2, { steps: 10 });
         await page.mouse.up();
 
-        // wait for the new preferences to save and internal state to update and re-render
-        await wait(400);
+        // ensure the "number" column is now first
+        await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
+        await expect(await page.locator('table thead tr th').nth(1)).toHaveText('Number');
+
+        // TODO: This wait makes sure the preferences are actually saved. Just waiting for the UI to update is not enough. We should replace this wait
+        await wait(1000);
       };
 
       test('should drag to reorder columns and save to preferences', async () => {
         await createPost();
 
-        reorderColumns();
-
-        // ensure the "number" column is now first
-        await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
-        await expect(await page.locator('table thead tr th').nth(1)).toHaveText('Number');
-        // await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');
+        await reorderColumns();
 
         // reload to ensure the preferred order was stored in the database
         await page.reload();
@@ -417,7 +422,8 @@ describe('admin', () => {
       test('should render drawer columns in order', async () => {
         // Re-order columns like done in the previous test
         await createPost();
-        reorderColumns();
+        await reorderColumns();
+
         await page.reload();
 
 
@@ -438,7 +444,8 @@ describe('admin', () => {
         // open the column controls
         const columnSelector = await page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns');
         await columnSelector.click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+        // wait until the column toggle UI is visible and fully expanded
+        await page.locator('.list-controls__columns.rah-static--height-auto').waitFor();
 
         // ensure that the columns are in the correct order
         await expect(await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
@@ -457,7 +464,8 @@ describe('admin', () => {
 
         // open the column controls
         await columnSelector.click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+        // wait until the column toggle UI is visible and fully expanded
+        await page.locator('.list-controls__columns.rah-static--height-auto').waitFor();
 
         // deselect the "id" column
         await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column >> text=ID').click();
