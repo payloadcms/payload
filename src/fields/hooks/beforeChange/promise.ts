@@ -2,7 +2,7 @@
 import merge from 'deepmerge';
 import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
 import { Operation } from '../../../types';
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import getValueWithDefault from '../../getDefaultValue';
 import { traverseFields } from './traverseFields';
 import { getExistingRowDoc } from './getExistingRowDoc';
@@ -23,6 +23,7 @@ type Args = {
   siblingDoc: Record<string, unknown>
   siblingDocWithLocales?: Record<string, unknown>
   skipValidation: boolean
+  context: RequestContext
 }
 
 // This function is responsible for the following actions, in order:
@@ -49,6 +50,7 @@ export const promise = async ({
   siblingDoc,
   siblingDocWithLocales,
   skipValidation,
+  context,
 }: Args): Promise<void> => {
   const passesCondition = (field.admin?.condition) ? field.admin.condition(data, siblingData, { user: req.user }) : true;
   let skipValidationFromHere = skipValidation || !passesCondition;
@@ -96,6 +98,7 @@ export const promise = async ({
           siblingData,
           operation,
           req,
+          context,
         });
 
         if (hookedValue !== undefined) {
@@ -209,6 +212,7 @@ export const promise = async ({
         siblingDoc: siblingDoc[field.name] as Record<string, unknown>,
         siblingDocWithLocales: siblingDocWithLocales[field.name] as Record<string, unknown>,
         skipValidation: skipValidationFromHere,
+        context,
       });
 
       break;
@@ -235,6 +239,7 @@ export const promise = async ({
             siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
             siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
             skipValidation: skipValidationFromHere,
+            context,
           }));
         });
 
@@ -268,6 +273,7 @@ export const promise = async ({
               siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
               siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
               skipValidation: skipValidationFromHere,
+              context,
             }));
           }
         });
@@ -295,6 +301,7 @@ export const promise = async ({
         siblingDoc,
         siblingDocWithLocales,
         skipValidation: skipValidationFromHere,
+        context,
       });
 
       break;
@@ -332,6 +339,7 @@ export const promise = async ({
         siblingDoc: tabSiblingDoc,
         siblingDocWithLocales: tabSiblingDocWithLocales,
         skipValidation: skipValidationFromHere,
+        context,
       });
 
       break;
@@ -353,6 +361,7 @@ export const promise = async ({
         siblingDoc,
         siblingDocWithLocales,
         skipValidation: skipValidationFromHere,
+        context,
       });
 
       break;

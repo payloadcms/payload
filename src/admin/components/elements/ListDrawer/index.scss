@@ -39,8 +39,8 @@
     cursor: pointer;
     color: inherit;
 
-    &:focus,
-    &:focus-within {
+    &:focus:not(:focus-visible),
+    &:focus-within:not(:focus-visible) {
       outline: none;
     }
 

@@ -1,13 +1,15 @@
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import TransformHooks from './collections/Transform';
 import Hooks, { hooksSlug } from './collections/Hook';
 import NestedAfterReadHooks from './collections/NestedAfterReadHooks';
 import ChainingHooks from './collections/ChainingHooks';
 import Relations from './collections/Relations';
 import Users, { seedHooksUsers } from './collections/Users';
+import ContextHooks from './collections/ContextHooks';
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   collections: [
+    ContextHooks,
     TransformHooks,
     Hooks,
     NestedAfterReadHooks,

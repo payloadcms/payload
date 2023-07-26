@@ -23,6 +23,7 @@ const ClickableArrow: React.FC<Props> = (props) => {
   return (
     <button
       className={classes}
+      disabled={isDisabled}
       onClick={!isDisabled ? updatePage : undefined}
       type="button"
     >

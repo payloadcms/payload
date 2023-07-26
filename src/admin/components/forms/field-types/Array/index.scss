@@ -46,7 +46,7 @@
     cursor: pointer;
     margin-left: base(.5);
 
-    &:hover {
+    &:hover, &:focus-visible {
       text-decoration: underline;
     }
   }

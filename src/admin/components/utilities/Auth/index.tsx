@@ -3,6 +3,7 @@ import jwtDecode from 'jwt-decode';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
 import { Permissions, User } from '../../../../auth/types';
 import { useConfig } from '../Config';
 import { requests } from '../../../api';
@@ -25,6 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     admin: {
       user: userSlug,
       inactivityRoute: logoutInactivityRoute,
+      autoLogin,
     },
     serverURL,
     routes: {
@@ -44,28 +46,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const id = user?.id;
 
-  const refreshCookie = useCallback(() => {
+  const refreshCookie = useCallback((forceRefresh?: boolean) => {
     const now = Math.round((new Date()).getTime() / 1000);
     const remainingTime = (exp as number || 0) - now;
 
-    if (exp && remainingTime < 120) {
+    if (forceRefresh || (exp && remainingTime < 120)) {
       setTimeout(async () => {
-        const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`, {
-          headers: {
-            'Accept-Language': i18n.language,
-          },
-        });
+        try {
+          const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`, {
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+          });
 
-        if (request.status === 200) {
-          const json = await request.json();
-          setUser(json.user);
-        } else {
-          setUser(null);
-          push(`${admin}${logoutInactivityRoute}?redirect=${encodeURIComponent(window.location.pathname)}`);
+          if (request.status === 200) {
+            const json = await request.json();
+            setUser(json.user);
+          } else {
+            setUser(null);
+            push(`${admin}${logoutInactivityRoute}?redirect=${encodeURIComponent(window.location.pathname)}`);
+          }
+        } catch (e) {
+          toast.error(e.message);
         }
       }, 1000);
     }
   }, [exp, serverURL, api, userSlug, push, admin, logoutInactivityRoute, i18n]);
+
+  const refreshCookieAsync = useCallback(async (skipSetUser?: boolean): Promise<User> => {
+    try {
+      const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`, {
+        headers: {
+          'Accept-Language': i18n.language,
+        },
+      });
+
+      if (request.status === 200) {
+        const json = await request.json();
+        if (!skipSetUser) setUser(json.user);
+        return json.user;
+      }
+
+      setUser(null);
+      push(`${admin}${logoutInactivityRoute}`);
+      return null;
+    } catch (e) {
+      toast.error(`Refreshing token failed: ${e.message}`);
+      return null;
+    }
+  }, [serverURL, api, userSlug, push, admin, logoutInactivityRoute, i18n]);
 
   const setToken = useCallback((token: string) => {
     const decoded = jwtDecode<User>(token);
@@ -80,42 +109,74 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [serverURL, api, userSlug]);
 
   const refreshPermissions = useCallback(async () => {
-    const request = await requests.get(`${serverURL}${api}/access`, {
-      headers: {
-        'Accept-Language': i18n.language,
-      },
-    });
-
-    if (request.status === 200) {
-      const json: Permissions = await request.json();
-      setPermissions(json);
-    } else {
-      throw new Error(`Fetching permissions failed with status code ${request.status}`);
-    }
-  }, [serverURL, api, i18n]);
-
-  // On mount, get user and set
-  useEffect(() => {
-    const fetchMe = async () => {
-      const request = await requests.get(`${serverURL}${api}/${userSlug}/me`, {
+    try {
+      const request = await requests.get(`${serverURL}${api}/access`, {
         headers: {
           'Accept-Language': i18n.language,
         },
       });
 
       if (request.status === 200) {
-        const json = await request.json();
+        const json: Permissions = await request.json();
+        setPermissions(json);
+      } else {
+        throw new Error(`Fetching permissions failed with status code ${request.status}`);
+      }
+    } catch (e) {
+      toast.error(`Refreshing permissions failed: ${e.message}`);
+    }
+  }, [serverURL, api, i18n]);
 
-        setUser(json?.user || null);
+  // On mount, get user and set
+  useEffect(() => {
+    const fetchMe = async () => {
+      try {
+        const request = await requests.get(`${serverURL}${api}/${userSlug}/me`, {
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        });
 
-        if (json?.token) {
-          setToken(json.token);
+        if (request.status === 200) {
+          const json = await request.json();
+
+          if (json?.user) {
+            setUser(json.user);
+          } else if (json?.token) {
+            setToken(json.token);
+          } else if (autoLogin) {
+            // auto log-in with the provided autoLogin credentials. This is used in dev mode
+            // so you don't have to log in over and over again
+            const autoLoginResult = await requests.post(`${serverURL}${api}/${userSlug}/login`, {
+              body: JSON.stringify({
+                email: autoLogin.email,
+                password: autoLogin.password,
+              }),
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
+              },
+            });
+            if (autoLoginResult.status === 200) {
+              const autoLoginJson = await autoLoginResult.json();
+              setUser(autoLoginJson.user);
+              if (autoLoginJson?.token) {
+                setToken(autoLoginJson.token);
+              }
+            } else {
+              setUser(null);
+            }
+          } else {
+            setUser(null);
+          }
         }
+      } catch (e) {
+        toast.error(`Fetching user failed: ${e.message}`);
       }
     };
 
     fetchMe();
-  }, [i18n, setToken, api, serverURL, userSlug]);
+  }, [i18n, setToken, api, serverURL, userSlug, autoLogin]);
 
   // When location changes, refresh cookie
   useEffect(() => {
@@ -172,8 +233,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <Context.Provider value={{
       user,
+      setUser,
       logOut,
       refreshCookie,
+      refreshCookieAsync,
       refreshPermissions,
       permissions,
       setToken,

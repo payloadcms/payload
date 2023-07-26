@@ -1,9 +1,10 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-import { useAuth } from '../../components/Auth'
 import { Gutter } from '../../components/Gutter'
-import classes from './index.module.css'
+import { useAuth } from '../../providers/Auth'
+
+import classes from './index.module.scss'
 
 const Logout: React.FC = () => {
   const { logout } = useAuth()
@@ -15,8 +16,8 @@ const Logout: React.FC = () => {
       try {
         await logout()
         setSuccess('Logged out successfully.')
-      } catch (err) {
-        setError(err?.message || 'An error occurred while attempting to logout.')
+      } catch (_) {
+        setError('You are already logged out.')
       }
     }
 
@@ -24,17 +25,19 @@ const Logout: React.FC = () => {
   }, [logout])
 
   return (
-    <Gutter>
-      {success && <h1>{success}</h1>}
-      {error && <div className={classes.error}>{error}</div>}
-      <p>
-        {'What would you like to do next? '}
-        <Fragment>
-          {' To log back in, '}
-          <Link href={`/login`}>click here</Link>
-          {'.'}
-        </Fragment>
-      </p>
+    <Gutter className={classes.logout}>
+      {(error || success) && (
+        <div>
+          <h1>{error || success}</h1>
+          <p>
+            {'What would you like to do next? '}
+            <Link href="/">Click here</Link>
+            {` to go to the home page. To log back in, `}
+            <Link href="login">click here</Link>
+            {'.'}
+          </p>
+        </div>
+      )}
     </Gutter>
   )
 }

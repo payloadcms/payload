@@ -7,7 +7,7 @@ import path from 'path'
 // See `./README.md#eject` for more information
 
 const files = ['./next.config.js', './next-env.d.ts']
-const directories = ['./src/pages', './src/public', './src/graphql', './src/css', './src/providers']
+const directories = ['./src/app']
 
 const eject = async (): Promise<void> => {
   files.forEach(file => {
@@ -17,30 +17,6 @@ const eject = async (): Promise<void> => {
   directories.forEach(directory => {
     fs.rm(path.join(__dirname, directory), { recursive: true }, err => {
       if (err) throw err
-    })
-  })
-
-  // remove all components EXCEPT any Payload ones
-  const payloadComponents = ['BeforeDashboard']
-  const components = fs.readdirSync(path.join(__dirname, './src/components'))
-  components.forEach(component => {
-    if (!payloadComponents.includes(component)) {
-      fs.rm(path.join(__dirname, `./src/components/${component}`), { recursive: true }, err => {
-        if (err) throw err
-      })
-    }
-  })
-
-  // remove all blocks EXCEPT the associated Payload configs (`index.ts`)
-  const blocks = fs.readdirSync(path.join(__dirname, './src/blocks'))
-  blocks.forEach(block => {
-    const blockFiles = fs.readdirSync(path.join(__dirname, `./src/blocks/${block}`))
-    blockFiles.forEach(file => {
-      if (file !== 'index.ts') {
-        fs.rm(path.join(__dirname, `./src/blocks/${block}/${file}`), err => {
-          if (err) throw err
-        })
-      }
     })
   })
 

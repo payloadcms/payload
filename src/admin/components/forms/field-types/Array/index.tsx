@@ -143,7 +143,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   }, [dispatchFields, path, setDocFieldPreferences]);
 
   const hasMaxRows = maxRows && rows?.length >= maxRows;
-  const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0) + (valid ? 0 : 1);
+  const fieldErrorCount = (rows || []).reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0) + (valid ? 0 : 1);
   const fieldHasErrors = submitted && fieldErrorCount > 0;
 
   const classes = [
@@ -244,6 +244,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                 rowIndex={i}
                 indexPath={indexPath}
                 labels={labels}
+                hasMaxRows={hasMaxRows}
               />
             )}
           </DraggableSortableItem>
