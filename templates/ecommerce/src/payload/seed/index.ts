@@ -10,7 +10,7 @@ import { image3 } from './image-3'
 import { product1 } from './product-1'
 import { product2 } from './product-2'
 import { product3 } from './product-3'
-import { shopPage } from './shop-page'
+import { productsPage } from './products-page'
 
 const collections = ['categories', 'media', 'pages', 'products']
 const globals = ['header', 'settings', 'footer']
@@ -107,9 +107,9 @@ export const seed = async (payload: Payload): Promise<void> => {
     }),
   ])
 
-  const { id: shopPageID } = await payload.create({
+  const { id: productsPageID } = await payload.create({
     collection: 'pages',
-    data: shopPage,
+    data: productsPage,
   })
 
   await payload.create({
@@ -118,19 +118,19 @@ export const seed = async (payload: Payload): Promise<void> => {
       JSON.stringify(home)
         .replace(/{{PRODUCT1_IMAGE}}/g, image1Doc.id)
         .replace(/{{PRODUCT2_IMAGE}}/g, image2Doc.id)
-        .replace(/{{SHOP_PAGE_ID}}/g, shopPageID),
+        .replace(/{{PRODUCTS_PAGE_ID}}/g, productsPageID),
     ),
   })
 
   await payload.create({
     collection: 'pages',
-    data: JSON.parse(JSON.stringify(cartPage).replace(/{{SHOP_PAGE_ID}}/g, shopPageID)),
+    data: JSON.parse(JSON.stringify(cartPage).replace(/{{PRODUCTS_PAGE_ID}}/g, productsPageID)),
   })
 
   await payload.updateGlobal({
     slug: 'settings',
     data: {
-      shopPage: shopPageID,
+      productsPage: productsPageID,
     },
   })
 
@@ -143,7 +143,7 @@ export const seed = async (payload: Payload): Promise<void> => {
             type: 'reference',
             reference: {
               relationTo: 'pages',
-              value: shopPageID,
+              value: productsPageID,
             },
             label: 'Shop',
           },

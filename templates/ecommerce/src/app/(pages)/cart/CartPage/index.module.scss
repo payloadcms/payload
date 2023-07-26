@@ -20,6 +20,10 @@
   display: flex;
   flex-direction: column;
   gap: calc(var(--base) / 2);
+
+  & > * {
+    margin: 0;
+  }
 }
 
 .warning {
@@ -100,8 +104,7 @@
 }
 
 .cartTotal {
-  margin-top: var(--base);
-  font-weight: 600;
+  margin: 0;
 }
 
 .checkoutButton {

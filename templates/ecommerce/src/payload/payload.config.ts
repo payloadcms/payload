@@ -8,13 +8,13 @@ import { buildConfig } from 'payload/config'
 
 import Categories from './collections/Categories'
 import { Media } from './collections/Media'
+import { Orders } from './collections/Orders'
 import { Pages } from './collections/Pages'
 import Products from './collections/Products'
 import Users from './collections/Users'
 import BeforeDashboard from './components/BeforeDashboard'
 import BeforeLogin from './components/BeforeLogin'
-import LinkToOrders from './components/LinkToOrders'
-import { createPaymentIntent } from './endpoints/payment-intent'
+import { createPaymentIntent } from './endpoints/create-payment-intent'
 import { seed } from './endpoints/seed'
 import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
@@ -32,7 +32,6 @@ export default buildConfig({
   admin: {
     user: Users.slug,
     components: {
-      afterNavLinks: [LinkToOrders],
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
       beforeLogin: [BeforeLogin],
@@ -50,7 +49,7 @@ export default buildConfig({
           [path.resolve(__dirname, 'collections/Users/hooks/createStripeCustomer')]: mockModulePath,
           [path.resolve(__dirname, 'collections/Users/endpoints/order')]: mockModulePath,
           [path.resolve(__dirname, 'collections/Users/endpoints/orders')]: mockModulePath,
-          [path.resolve(__dirname, 'endpoints/payment-intent')]: mockModulePath,
+          [path.resolve(__dirname, 'endpoints/create-payment-intent')]: mockModulePath,
           stripe: mockModulePath,
           express: mockModulePath,
         },
@@ -58,7 +57,7 @@ export default buildConfig({
     }),
   },
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
-  collections: [Users, Products, Categories, Pages, Media],
+  collections: [Pages, Products, Orders, Media, Categories, Users],
   globals: [Settings, Header, Footer],
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
@@ -74,7 +73,7 @@ export default buildConfig({
   ),
   endpoints: [
     {
-      path: '/payment-intent',
+      path: '/create-payment-intent',
       method: 'post',
       handler: createPaymentIntent,
     },
