@@ -1,19 +1,19 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../utilities/Auth';
-import { useFormProcessing, useFormSubmitted, useFormModified, useForm, useFormFields, useWatchForm } from '../Form/context';
+import { useFormProcessing, useFormSubmitted, useForm, useFormFields } from '../Form/context';
 import { Options, FieldType } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useOperation } from '../../utilities/OperationProvider';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
-import { UPDATE } from '../Form/types';
+import type { UPDATE } from '../Form/types';
 
 /**
  * Get and set the value of a form field.
  *
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
-const useField = <T,>(options: Options): FieldType<T> => {
+const useField = <T, >(options: Options): FieldType<T> => {
   const {
     path,
     validate,
@@ -30,7 +30,6 @@ const useField = <T,>(options: Options): FieldType<T> => {
   const field = useFormFields(([fields]) => fields[path]);
   const { t } = useTranslation();
   const dispatchField = useFormFields(([_, dispatch]) => dispatch);
-  const { fields } = useWatchForm();
 
   const { getData, getSiblingData, setModified } = useForm();
 
@@ -146,10 +145,6 @@ const useField = <T,>(options: Options): FieldType<T> => {
     validate,
     field?.rows,
   ]);
-
-  if (path === 'items') {
-    console.log({ fieldRows: field.rows, fieldRowsFromState: fields.items.rows });
-  }
 
   return result;
 };
