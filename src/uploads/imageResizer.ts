@@ -56,7 +56,7 @@ export default async function resizeAndSave({
   const sizesToSave: FileToSave[] = [];
   const sizeData = {};
 
-  const sharpBase = sharp(file.tempFilePath || file.data).rotate();
+  const sharpBase = sharp(file.tempFilePath || file.data).rotate(); // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
 
   const promises = imageSizes
     .map(async (desiredSize) => {
