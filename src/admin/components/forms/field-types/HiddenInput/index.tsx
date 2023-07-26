@@ -18,17 +18,16 @@ const HiddenInput: React.FC<Props> = (props) => {
   });
 
   useEffect(() => {
-    if (valueFromProps !== undefined) {
+    if (valueFromProps !== undefined && value !== valueFromProps) {
       setValue(valueFromProps, disableModifyingForm);
     }
-  }, [valueFromProps, setValue, disableModifyingForm]);
+  }, [valueFromProps, setValue, value, disableModifyingForm]);
 
   return (
     <input
       id={`field-${path.replace(/\./gi, '__')}`}
       type="hidden"
       value={value as string || ''}
-      onChange={setValue}
       name={path}
     />
   );

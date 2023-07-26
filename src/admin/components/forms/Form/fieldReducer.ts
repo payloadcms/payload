@@ -6,11 +6,6 @@ import { FormField, FieldAction, Fields } from './types';
 import deepCopyObject from '../../../../utilities/deepCopyObject';
 import { flattenRows, separateRows } from './rows';
 
-function splitPathByArrayFields(str) {
-  const regex = /\.(\d+)\./g;
-  return str.split(regex).filter(Boolean);
-}
-
 export function fieldReducer(state: Fields, action: FieldAction): Fields {
   switch (action.type) {
     case 'REPLACE_STATE': {
