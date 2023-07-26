@@ -10,6 +10,10 @@ Payload Cloud gives you S3 file storage backed by Cloudflare as a CDN, and this 
 
 Payload Cloud provides an email delivery service out-of-the-box for all Payload Cloud customers. Powered by [Resend](https://resend.com).
 
+## Upload caching
+
+Payload Cloud provides a caching for all upload collections by default through Cloudflare's CDN.
+
 ## How to use
 
 Add the plugin to your Payload config
@@ -36,6 +40,25 @@ If you wish to opt-out of any Payload cloud features, the plugin also accepts op
 payloadCloud({
   storage: false, // Disable file storage
   email: false,   // Disable email delivery
+  uploadCaching: false // Disable upload caching
+})
+```
+
+#### Upload Caching Configuration
+
+If you wish to configure upload caching on a per-collection basis, you can do so by passing in a keyed object of collection names. By default, all collections will be cached for 24 hours (86400 seconds). The cache is invalidated when an item is updated or deleted.
+
+```ts
+payloadCloud({
+  uploadCaching: {
+    maxAge: 604800, // Override default maxAge for all collections
+    collection1Slug: {
+      maxAge: 10 // Collection-specific maxAge, takes precedence over others
+    },
+    collection2Slug: {
+      enabled: false // Disable caching for this collection
+    }
+  }
 })
 ```
 

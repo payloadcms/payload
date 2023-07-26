@@ -5,6 +5,7 @@ import { getAfterDeleteHook } from './hooks/afterDelete'
 import { getStaticHandler } from './staticHandler'
 import { payloadCloudEmail } from './email'
 import type { PluginOptions } from './types'
+import { getCacheUploadsAfterChangeHook, getCacheUploadsAfterDeleteHook } from './hooks/uploadCache'
 
 export const payloadCloud =
   (pluginOptions?: PluginOptions) =>
@@ -20,6 +21,11 @@ export const payloadCloud =
     if (process.env.PAYLOAD_CLOUD !== 'true') {
       return config // only modified webpack
     }
+
+    const cachingEnabled =
+      pluginOptions?.uploadCaching !== false && !!process.env.PAYLOAD_CLOUD_CACHE_KEY
+
+    const apiEndpoint = pluginOptions?.endpoint || 'https://cloud-api.payloadcms.com'
 
     // Configure cloud storage
     if (pluginOptions?.storage !== false) {
@@ -40,7 +46,10 @@ export const payloadCloud =
                   Array.isArray(collection.upload.handlers)
                     ? collection.upload.handlers
                     : []),
-                  getStaticHandler({ collection }),
+                  getStaticHandler({
+                    collection,
+                    cachingOptions: pluginOptions?.uploadCaching,
+                  }),
                 ],
                 disableLocalStorage: true,
               },
@@ -50,9 +59,18 @@ export const payloadCloud =
                   ...(collection.hooks?.beforeChange || []),
                   getBeforeChangeHook({ collection }),
                 ],
+                afterChange: [
+                  ...(collection.hooks?.afterChange || []),
+                  ...(cachingEnabled
+                    ? [getCacheUploadsAfterChangeHook({ endpoint: apiEndpoint })]
+                    : []),
+                ],
                 afterDelete: [
                   ...(collection.hooks?.afterDelete || []),
                   getAfterDeleteHook({ collection }),
+                  ...(cachingEnabled
+                    ? [getCacheUploadsAfterDeleteHook({ endpoint: apiEndpoint })]
+                    : []),
                 ],
               },
             }
