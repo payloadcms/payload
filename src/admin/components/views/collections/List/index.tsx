@@ -85,8 +85,6 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     if (where) params.where = where;
     params.invoke = uuid();
 
-    console.log('params', params);
-
     setParams(params);
   }, [limit, page, setParams, sort, where]);
 
