@@ -25,6 +25,8 @@ process.env.PAYLOAD_CONFIG_PATH = configPath;
 
 process.env.PAYLOAD_DROP_DATABASE = 'true';
 
+process.env.PAYLOAD_DEV_MODE = 'true';
+
 if (process.argv.includes('--no-auto-login') && process.env.NODE_ENV !== 'production') {
   process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN = 'true';
 }

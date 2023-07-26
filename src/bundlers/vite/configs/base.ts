@@ -1,11 +1,13 @@
 import path from 'path';
 import { InlineConfig } from 'vite';
+import commonJS from 'vite-plugin-commonjs';
 import type { SanitizedConfig } from '../../../config/types';
 
 const bundlerPath = path.resolve(__dirname, '../bundler');
 export const getBaseConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
   return {
     root: path.resolve(__dirname, '../../../admin'),
+    // Bug with base path: https://github.com/vitejs/vite/pull/13712
     base: payloadConfig.routes.admin,
     plugins: [
       {
@@ -17,6 +19,7 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
           return code;
         },
       },
+      commonJS(),
     ],
     resolve: {
       alias: {

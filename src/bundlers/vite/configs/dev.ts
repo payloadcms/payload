@@ -10,6 +10,8 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
   const webpackConfig = getDevWebpackConfig(payloadConfig);
   const webpackAliases = webpackConfig?.resolve?.alias || {} as any;
 
+  const indexFile = process.env.PAYLOAD_DEV_MODE === 'true' ? 'index.tsx' : 'index.js';
+
   const viteConfig: InlineConfig = {
     ...baseConfig,
     server: {
@@ -19,10 +21,10 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
       {
         name: 'init-admin-panel',
         transformIndexHtml(html) {
-          if (html.includes('/index.tsx')) return html;
+          if (html.includes(`/${indexFile}`)) return html;
           return html.replace(
             '</body>',
-            `<script> var exports = {}; </script></script><script type="module" src="${payloadConfig.routes.admin}/index.tsx"></script></body>`,
+            `<script> var exports = {}; </script></script><script type="module" src="${payloadConfig.routes.admin}/${indexFile}"></script></body>`,
           );
         },
       },
