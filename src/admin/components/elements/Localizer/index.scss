@@ -13,7 +13,7 @@
     font-weight: 600;
     cursor: pointer;
 
-    &:hover {
+    &:hover, &:focus-visible {
       text-decoration: underline;
     }
 
@@ -38,7 +38,7 @@
       cursor: pointer;
       padding-right: 0;
 
-      &:hover {
+      &:hover, &:focus-visible {
         text-decoration: underline;
       }
     }

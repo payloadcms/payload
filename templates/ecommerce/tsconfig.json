@@ -25,12 +25,8 @@
     ]
   },
   "include": [
-    "next-env.d.ts",
-    "server.ts",
-    "payload.config.ts",
     "**/*.ts",
     "**/*.tsx",
-    "next.config.js",
     ".next/types/**/*.ts"
   ],
   "exclude": [

@@ -41,6 +41,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     args = (await hook({
       args,
       operation: 'read',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -180,7 +181,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef = await hook({ req, query, doc: docRef }) || docRef;
+        docRef = await hook({ req, query, doc: docRef, context: req.context }) || docRef;
       }, Promise.resolve());
 
       return docRef;
@@ -202,6 +203,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       req,
       showHiddenFields,
       findMany: true,
+      context: req.context,
     }))),
   };
 
@@ -217,7 +219,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef = await hook({ req, query, doc: docRef, findMany: true }) || doc;
+        docRef = await hook({ req, query, doc: docRef, findMany: true, context: req.context }) || doc;
       }, Promise.resolve());
 
       return docRef;

@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../utilities/Auth';
-import { useFormProcessing, useFormSubmitted, useFormModified, useForm, useFormFields } from '../Form/context';
+import { useFormProcessing, useFormSubmitted, useFormModified, useForm, useFormFields, useWatchForm } from '../Form/context';
 import { Options, FieldType } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useOperation } from '../../utilities/OperationProvider';
@@ -13,7 +13,7 @@ import { UPDATE } from '../Form/types';
  *
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
-const useField = <T, >(options: Options): FieldType<T> => {
+const useField = <T,>(options: Options): FieldType<T> => {
   const {
     path,
     validate,
@@ -24,13 +24,13 @@ const useField = <T, >(options: Options): FieldType<T> => {
 
   const submitted = useFormSubmitted();
   const processing = useFormProcessing();
-  const modified = useFormModified();
   const { user } = useAuth();
   const { id } = useDocumentInfo();
   const operation = useOperation();
   const field = useFormFields(([fields]) => fields[path]);
   const { t } = useTranslation();
   const dispatchField = useFormFields(([_, dispatch]) => dispatch);
+  const { fields } = useWatchForm();
 
   const { getData, getSiblingData, setModified } = useForm();
 
@@ -44,7 +44,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
   const setValue = useCallback((e, disableModifyingForm = false) => {
     const val = (e && e.target) ? e.target.value : e;
 
-    if (!modified && !disableModifyingForm) {
+    if (!disableModifyingForm) {
       if (typeof setModified === 'function') {
         // Update modified state after field value comes back
         // to avoid cursor jump caused by state value / DOM mismatch
@@ -62,7 +62,6 @@ const useField = <T, >(options: Options): FieldType<T> => {
     });
   }, [
     setModified,
-    modified,
     path,
     dispatchField,
     disableFormData,
@@ -147,6 +146,10 @@ const useField = <T, >(options: Options): FieldType<T> => {
     validate,
     field?.rows,
   ]);
+
+  if (path === 'items') {
+    console.log({ fieldRows: field.rows, fieldRowsFromState: fields.items.rows });
+  }
 
   return result;
 };

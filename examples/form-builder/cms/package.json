@@ -1,5 +1,5 @@
 {
-  "name": "form-builder-example-cms",
+  "name": "payload-example-form-builder-cms",
   "description": "The CMS that utilizes Payload's form builder plugin.",
   "version": "1.0.0",
   "main": "dist/server.js",
@@ -20,7 +20,7 @@
     "@payloadcms/plugin-seo": "^1.0.8",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "payload": "^1.7.5"
+    "payload": "latest"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",

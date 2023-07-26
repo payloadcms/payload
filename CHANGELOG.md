@@ -1,5 +1,56 @@
 
 
+## [1.11.6](https://github.com/payloadcms/payload/compare/v1.11.5...v1.11.6) (2023-07-25)
+
+
+### Bug Fixes
+
+* **collections:admin:** Enable adminThumbnail fn execution on all types ([2c74e93](https://github.com/payloadcms/payload/commit/2c74e9396a216a033e2bacdf189b7f28a0f97505))
+* threads hasMaxRows into ArrayAction components within blocks and arrays ([#3066](https://github.com/payloadcms/payload/issues/3066)) ([d43c83d](https://github.com/payloadcms/payload/commit/d43c83dad1bab5b05f4fcbae7d41de369905797c))
+
+## [1.11.5](https://github.com/payloadcms/payload/compare/v1.11.4...v1.11.5) (2023-07-25)
+
+
+### Bug Fixes
+
+* admin route not mounting on production serve ([#3071](https://github.com/payloadcms/payload/issues/3071)) ([e718668](https://github.com/payloadcms/payload/commit/e71866856fffefcfb61dd3d29135cccb66939a62))
+
+## [1.11.4](https://github.com/payloadcms/payload/compare/v1.11.3...v1.11.4) (2023-07-25)
+
+
+### Bug Fixes
+
+* if arrayFieldType rows are undefined, page would crash ([#3049](https://github.com/payloadcms/payload/issues/3049)) ([08377cc](https://github.com/payloadcms/payload/commit/08377cc5a7ea9d02350177e2e1d69390ee97af78))
+
+
+### Features
+
+* bump mongoose and mongoose-paginate versions ([#3025](https://github.com/payloadcms/payload/issues/3025)) ([41d3eee](https://github.com/payloadcms/payload/commit/41d3eee35f3855798a5c3372f8ad7c742a7810f7))
+* improve keyboard focus styles ([#3011](https://github.com/payloadcms/payload/issues/3011)) ([080e619](https://github.com/payloadcms/payload/commit/080e6195ef39ec858fbb115e8f554a8dfc436438))
+* solidifies bundler adapter pattern ([#3044](https://github.com/payloadcms/payload/issues/3044)) ([641c765](https://github.com/payloadcms/payload/commit/641c765fb921e162c98f09218929348037dd0f88))
+
+## [1.11.3](https://github.com/payloadcms/payload/compare/v1.11.2...v1.11.3) (2023-07-19)
+
+
+### Bug Fixes
+
+* adds backdrop blur to button ([#3006](https://github.com/payloadcms/payload/issues/3006)) ([4233426](https://github.com/payloadcms/payload/commit/42334263bbc6219be92c5728f1a4ac6c8d2d1306))
+* rich text link element not validating on create ([#3014](https://github.com/payloadcms/payload/issues/3014)) ([60fca40](https://github.com/payloadcms/payload/commit/60fca40780d4ddd8e684a455de55c566ec91e223))
+
+
+### Features
+
+* auto-login in config capability ([#3009](https://github.com/payloadcms/payload/issues/3009)) ([733fc0b](https://github.com/payloadcms/payload/commit/733fc0b2d0cf0f2d58c8a28e84776f883774b0e0))
+* returns queried user alongside refreshed token ([#2813](https://github.com/payloadcms/payload/issues/2813)) ([2fc03f1](https://github.com/payloadcms/payload/commit/2fc03f196e4e5fa0ad3369ec976c0b6889ebda88))
+* support logger destination ([#2896](https://github.com/payloadcms/payload/issues/2896)) ([cd0bf68](https://github.com/payloadcms/payload/commit/cd0bf68a6150b1adbdb9ee318ac0a06c4476aa4d))
+
+## [1.11.2](https://github.com/payloadcms/payload/compare/v1.11.1...v1.11.2) (2023-07-14)
+
+
+### Features
+
+* adds array, collapsible, tab and group error states ([4925f90](https://github.com/payloadcms/payload/commit/4925f90b5f5c8fb8092bf4e8d88d5e0c1846b094))
+
 ## [1.11.1](https://github.com/payloadcms/payload/compare/v1.11.0...v1.11.1) (2023-07-11)
 
 

@@ -1,8 +1,11 @@
 # Payload Auth Example
 
-This example demonstrates how to implement [Payload Authentication](https://payloadcms.com/docs/authentication/overview).
+This example demonstrates how to implement [Payload Authentication](https://payloadcms.com/docs/authentication/overview). Follow the [Quick Start](#quick-start) to get up and running quickly. There are various fully working front-ends made explicitly for this example, including:
 
-There is a fully working Next.js app made explicitly for this example which can be found [here](../next-app). Follow the instructions there to get started. If you are setting up authentication for another front-end, please consider contributing to this repo with your own example!
+- [Next.js App Router](../next-app)
+- [Next.js Pages Router](../next-pages)
+
+Follow the instructions in each respective README to get started. If you are setting up authentication for another front-end, please consider contributing to this repo with your own example!
 
 ## Quick Start
 

@@ -1,19 +1,21 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import path from 'path';
-import { relationSlug, mediaSlug, audioSlug } from './config';
+import { relationSlug, mediaSlug, audioSlug, adminThumbnailSlug } from './config';
 import type { Media } from './payload-types';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { login, saveDocAndAssert } from '../helpers';
+import { saveDocAndAssert } from '../helpers';
 import wait from '../../src/utilities/wait';
+import { adminThumbnailSrc } from './collections/admin-thumbnail';
 
 const { beforeAll, describe } = test;
 
 let mediaURL: AdminUrlUtil;
 let audioURL: AdminUrlUtil;
 let relationURL: AdminUrlUtil;
+let adminThumbnailURL: AdminUrlUtil;
 
 describe('uploads', () => {
   let page: Page;
@@ -26,6 +28,7 @@ describe('uploads', () => {
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug);
     audioURL = new AdminUrlUtil(serverURL, audioSlug);
     relationURL = new AdminUrlUtil(serverURL, relationSlug);
+    adminThumbnailURL = new AdminUrlUtil(serverURL, adminThumbnailSlug);
 
     const context = await browser.newContext();
     page = await context.newPage();
@@ -50,8 +53,6 @@ describe('uploads', () => {
     });
 
     audioDoc = findAudio.docs[0] as Media;
-
-    await login({ page, serverURL });
   });
 
   test('should see upload filename in relation list', async () => {
@@ -148,5 +149,18 @@ describe('uploads', () => {
     await page.locator('button#action-save').click();
     await wait(200);
     await expect(page.locator('.Toastify')).toContainText('The following field is invalid: audio');
+  });
+
+  test('Should execute adminThumbnail and provide thumbnail when set', async () => {
+    await page.goto(adminThumbnailURL.list);
+    await wait(200);
+
+    // Ensure sure false or null shows generic file svg
+    const genericUploadImage = page.locator('tr.row-1 .thumbnail svg');
+    await expect(genericUploadImage).toBeVisible();
+
+    // Ensure adminThumbnail fn returns correct value based on audio/mp3 mime
+    const audioUploadImage = page.locator('tr.row-2 .thumbnail img');
+    expect(await audioUploadImage.getAttribute('src')).toContain(adminThumbnailSrc);
   });
 });
