@@ -15,6 +15,7 @@ import { Where } from '../../../../types';
 import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
+import { transformWhereQuery } from './transformWhereQuery';
 
 const baseClass = 'where-builder';
 
@@ -67,10 +68,18 @@ const WhereBuilder: React.FC<Props> = (props) => {
   // query params to the URL, the where conditions will be initialized from those and displayed in the UI.
   // Example: /admin/collections/posts?where[or][0][and][0][text][equals]=example%20post
   const [conditions, dispatchConditions] = useReducer(reducer, params.where, (whereFromSearch) => {
-    if (modifySearchQuery && validateWhereQuery(whereFromSearch)) {
-      return whereFromSearch.or;
-    }
+    if (modifySearchQuery && whereFromSearch) {
+      if (validateWhereQuery(whereFromSearch)) {
+        return whereFromSearch.or;
+      }
+      // attempt to fix invalid where query. Could be something simple like [text][equals]=example%20post
+      const transformedWhere = transformWhereQuery(whereFromSearch);
+      if (validateWhereQuery(transformedWhere)) {
+        return transformedWhere.or;
+      }
 
+      console.warn('Invalid where query in URL. Ignoring.');
+    }
     return [];
   });
 
