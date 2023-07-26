@@ -30,11 +30,12 @@
   <img width="100%" src="src/admin/assets/images/github-banner.jpg" alt="Payload headless CMS Admin panel built with React" />
 </a>
 <br />
+<h2>Benefits over a regular CMS</h2>
+<img width="100%" src="src/admin/assets/images/benefits-banner.jpg" alt="Payload Benefits over a regular CMS" />
+<br />
 <h3>
 <a target="_blank" href="https://payloadcms.com/docs/getting-started/what-is-payload" rel="dofollow"><strong>Explore the Docs</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://payloadcms.com/community-help" rel="dofollow"><strong>Community Help</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://demo.payloadcms.com/" rel="dofollow"><strong>Try Live Demo</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://github.com/payloadcms/payload/discussions/1539" rel="dofollow"><strong>Roadmap</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://www.g2.com/products/payload-cms/reviews#reviews" rel="dofollow"><strong>View G2 Reviews</strong></a>
 </h3>
-<h2>Benefits over a regular CMS</h2>
-<h3>With Payload, the possibilities are endless. Rather than hitting someone else's API you hit yours. Which means you can avoid vendor lock-in, use your own database, and truly own your data. With an extremely extensible Admin UI + backend you can build faster, and never hit a roadblock. You'll avoid microservices hell, and never touch ancient WP code ever again.</h3>
 <br />
 <a href="https://payloadcms.com/new">
   <img width="100%" src="src/admin/assets/images/cloud-cta-inline.jpg" alt="Payload headless CMS Admin panel built with React" />
