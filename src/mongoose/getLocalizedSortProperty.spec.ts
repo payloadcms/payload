@@ -1,4 +1,4 @@
-import sanitizeConfig from '../config/sanitize';
+import { sanitizeConfig } from '../config/sanitize';
 import { Config } from '../config/types';
 import { getLocalizedSortProperty } from './getLocalizedSortProperty';
 
