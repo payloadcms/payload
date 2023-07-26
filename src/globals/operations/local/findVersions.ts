@@ -8,6 +8,7 @@ import { getDataLoader } from '../../../collections/dataloader';
 import i18nInit from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { TypeWithVersion } from '../../../versions/types';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   slug: T
@@ -57,6 +58,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     i18n,
     t: i18n.t,
   } as PayloadRequest;
+  setRequestContext(req);
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
