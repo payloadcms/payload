@@ -6,9 +6,10 @@ export type Row = {
   id: string
   collapsed?: boolean
   blockType?: string
+  childErrorPaths?: Set<string>
 }
 
-export type Field = {
+export type FormField = {
   value: unknown
   initialValue: unknown
   errorMessage?: string
@@ -21,7 +22,7 @@ export type Field = {
 }
 
 export type Fields = {
-  [path: string]: Field
+  [path: string]: FormField
 }
 
 export type Data = {
@@ -62,7 +63,7 @@ export type Submit = (options?: SubmitOptions, e?: React.FormEvent<HTMLFormEleme
 export type ValidateForm = () => Promise<boolean>;
 export type CreateFormData = (overrides?: any) => FormData;
 export type GetFields = () => Fields;
-export type GetField = (path: string) => Field;
+export type GetField = (path: string) => FormField;
 export type GetData = () => Data;
 export type GetSiblingData = (path: string) => Data;
 export type GetDataByPath = <T = unknown>(path: string) => T;
@@ -92,7 +93,7 @@ export type MODIFY_CONDITION = {
 export type UPDATE = {
   type: 'UPDATE'
   path: string
-} & Partial<Field>
+} & Partial<FormField>
 
 export type REMOVE_ROW = {
   type: 'REMOVE_ROW'
@@ -171,4 +172,5 @@ export type Context = {
   formRef: React.MutableRefObject<HTMLFormElement>
   reset: Reset
   replaceState: (state: Fields) => void
+  buildRowErrors: () => void
 }

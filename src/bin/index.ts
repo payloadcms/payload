@@ -26,10 +26,10 @@ const swcOptions = {
 };
 
 if (tsConfig?.config?.compilerOptions?.paths) {
-  swcOptions.jsc.paths = tsConfig?.config?.compilerOptions?.paths;
+  swcOptions.jsc.paths = tsConfig.config.compilerOptions.paths;
 
   if (tsConfig?.config?.compilerOptions?.baseUrl) {
-    swcOptions.jsc.baseUrl = tsConfig?.config?.compilerOptions?.baseUrl;
+    swcOptions.jsc.baseUrl = tsConfig.config.compilerOptions.baseUrl;
   }
 }
 

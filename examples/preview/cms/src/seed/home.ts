@@ -45,18 +45,10 @@ export const home: Partial<Page> = {
     { children: [{ text: '' }] },
     {
       children: [
-        { text: 'Visit the ' },
         {
           type: 'link',
           linkType: 'custom',
-          url: 'http://localhost:3000/example-page',
-          children: [{ text: 'example page' }],
-        },
-        { text: ' to see how access to draft content is controlled. ' },
-        {
-          type: 'link',
-          linkType: 'custom',
-          url: 'http://localhost:8000/admin',
+          url: 'http://localhost:3000/admin',
           newTab: true,
           children: [{ text: 'Log in' }],
         },
@@ -69,8 +61,15 @@ export const home: Partial<Page> = {
           children: [{ text: 'Payload Admin Bar' }],
         },
         {
-          text: ' appear at the top of the viewport so you can seamlessly navigate between the two apps.',
+          text: ' appear at the top of the viewport. This will allow you to seamlessly navigate between the two apps. Then, navigate to the ',
         },
+        {
+          type: 'link',
+          linkType: 'custom',
+          url: 'http://localhost:3001/example-page',
+          children: [{ text: 'example page' }],
+        },
+        { text: ' to see how access to draft content is controlled. ' },
       ],
     },
   ],

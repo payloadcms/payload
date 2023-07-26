@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadTest } from '../helpers/configHelpers';
-import { login, saveDocAndAssert } from '../helpers';
+import { saveDocAndAssert } from '../helpers';
 import type { LocalizedPost } from './payload-types';
 import { localizedPostsSlug } from './config';
 import { englishTitle, spanishLocale } from './shared';
@@ -39,8 +39,6 @@ describe('Localization', () => {
 
     const context = await browser.newContext();
     page = await context.newPage();
-
-    await login({ page, serverURL });
   });
 
   describe('localized text', () => {

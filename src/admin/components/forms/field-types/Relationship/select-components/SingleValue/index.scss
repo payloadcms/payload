@@ -2,6 +2,11 @@
 
 
 .relationship--single-value {
+  &.rs__single-value {
+    overflow: visible;
+    min-width: 0;
+  }
+
   &__label-text {
     max-width: unset;
     display: flex;

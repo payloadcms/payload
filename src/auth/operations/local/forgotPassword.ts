@@ -5,6 +5,7 @@ import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -27,14 +28,15 @@ async function localForgotPassword<T extends keyof GeneratedTypes['collections']
     disableEmail,
     req = {} as PayloadRequest,
   } = options;
+  setRequestContext(options.req);
 
   const collection = payload.collections[collectionSlug];
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Forgot Password Operation.`);
   }
 
-  req.payloadAPI = 'local';
+  req.payloadAPI = req.payloadAPI || 'local';
   req.payload = payload;
   req.i18n = i18n(payload.config.i18n);
 

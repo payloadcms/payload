@@ -11,7 +11,8 @@
     width: 100%;
 
     div.react-select {
-      flex-grow: 1;
+      width: 100%;
+      min-width: 0;
     }
   }
 
@@ -21,5 +22,37 @@
     padding: base(.5) base(.75);
     background-color: var(--theme-error-500);
     color: var(--theme-elevation-0);
+  }
+}
+
+html[data-theme=light] {
+  .relationship {
+    &.error {
+      >.relationship__wrap {
+        .rs__control {
+          @include lightInputError;
+        }
+      }
+
+      button {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .relationship  {
+    &.error {
+      >.relationship__wrap {
+        .rs__control {
+          @include darkInputError;
+        }
+      }
+
+      button {
+        @include darkInputError;
+      }
+    }
   }
 }

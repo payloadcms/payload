@@ -1,6 +1,10 @@
 const deepCopyObject = (inObject) => {
   if (inObject instanceof Date) return inObject;
 
+  if (inObject instanceof Set) return new Set(inObject);
+
+  if (inObject instanceof Map) return new Map(inObject);
+
   if (typeof inObject !== 'object' || inObject === null) {
     return inObject; // Return the value if inObject is not an object
   }

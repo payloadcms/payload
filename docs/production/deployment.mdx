@@ -43,6 +43,7 @@ Because _**you**_ are in complete control of who can do what with your data, you
 Before running in Production, you need to have built a production-ready copy of the Payload Admin panel. To do this, Payload provides the `build` NPM script. You can use it by adding a `script` to your `package.json` file like this:
 
 `package.json`:
+
 ```json
 {
   "name": "project-name-here",
@@ -51,7 +52,8 @@ Before running in Production, you need to have built a production-ready copy of 
   },
   "dependencies": {
     // your dependencies
-  },
+  }
+}
 ```
 
 Then, to build Payload, you would run `npm run build` in your project folder. A production-ready Admin bundle will be created in the `build` directory.
@@ -81,16 +83,16 @@ If you are using a [persistent filesystem-based cloud host](#persistent-vs-ephem
 Alternatively, you can rely on a third-party MongoDB host such as [MongoDB Atlas](https://www.mongodb.com/). With Atlas or a similar cloud provider, you can trust them to take care of your database's availability, security, redundancy, and backups.
 
 <Banner type="warning">
-  <strong>Note:</strong>
-  <br />
-  If versions are enabled and a collection has many documents you may need a minimum of an m10 mongoDB atlas cluster if you reach a sorting `exceeded memory limit` error to view a collection list in the admin UI. The limitations of the m2 and m5 tier clusters are here:
-  <a href="https://www.mongodb.com/docs/atlas/reference/free-shared-limitations/?_ga=2.176267877.1329169847.1677683154-860992573.1647438381#operational-limitations">Atlas M0 (Free Cluster), M2, and M5 Limitations</a>
+  <strong>Note:</strong><br />
+  If versions are enabled and a collection has many documents you may need a minimum of an m10 mongoDB atlas cluster if you reach a sorting `exceeded memory limit` error to view a collection list in the admin UI. The limitations of the m2 and m5 tier clusters are here: [Atlas M0 (Free Cluster), M2, and M5 Limitations](https://www.mongodb.com/docs/atlas/reference/free-shared-limitations/?_ga=2.176267877.1329169847.1677683154-860992573.1647438381#operational-limitations).
 </Banner>
 
 ##### DocumentDB
+
 When using AWS DocumentDB, you will need to configure connection options for authentication in the `mongoOptions` passed to `payload.init`. You also need to set `mongoOptions.useFacet` to `false` to disable use of the unsupported `$facet` aggregation.
 
 ##### CosmosDB
+
 When using Azure Cosmos DB, an index is needed for any field you may want to sort on. To add the sort index for all fields that may be sorted in the admin UI use the <a href="/docs/configuration/overview">indexSortableFields</a> configuration option.
 
 ## File storage
@@ -116,7 +118,7 @@ Alternatively, persistent filesystems will never delete your files and can be tr
 - Many other more traditional web hosts
 
 <Banner type="error">
-  <strong>Warning:</strong><br/>
+  <strong>Warning:</strong><br />
   If you rely on Payload's <strong>Upload</strong> functionality, make sure you either use a host with a persistent filesystem or have an integration with a third-party file host like Amazon S3.
 </Banner>
 
@@ -124,7 +126,7 @@ Alternatively, persistent filesystems will never delete your files and can be tr
 
 If you don't use Payload's `upload` functionality, you can go ahead and use Heroku or similar platform easily. Everything will work exactly as you want it to.
 
-But, if you do, and you still want to use an ephemeral filesystem provider, you can write a hook-based solution to *copy* the files your users upload to a more permanent storage solution like Amazon S3 or DigitalOcean Spaces.
+But, if you do, and you still want to use an ephemeral filesystem provider, you can write a hook-based solution to _copy_ the files your users upload to a more permanent storage solution like Amazon S3 or DigitalOcean Spaces.
 
 **To automatically send uploaded files to S3 or similar, you could:**
 
@@ -182,10 +184,9 @@ CMD ["node", "dist/server.js"]
 Here is an example of a docker-compose.yml file that can be used for development
 
 ```yml
-version: '3'
+version: "3"
 
 services:
-
   payload:
     image: node:18-alpine
     ports:

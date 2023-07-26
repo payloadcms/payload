@@ -241,6 +241,7 @@
     "uploading": "Fazendo upload",
     "user": "usuário",
     "users": "usuários",
+    "value": "Valor",
     "welcome": "Boas vindas"
   },
   "operators": {
@@ -274,11 +275,11 @@
     "emailAddress": "Por favor, insira um endereço de email válido.",
     "enterNumber": "Por favor, insira um número válido.",
     "fieldHasNo": "Esse campo não contém {{label}}",
-    "greaterThanMax": "\"{{value}}\" é maior do que o valor máximo permitido de {{max}}.",
+    "greaterThanMax": "{{value}} é maior que o máximo permitido de {{label}} que é {{max}}.",
     "invalidInput": "Esse campo tem um conteúdo inválido.",
     "invalidSelection": "Esse campo tem uma seleção inválida.",
     "invalidSelections": "'Esse campo tem as seguintes seleções inválidas:'",
-    "lessThanMin": "\"{{value}}\" é menor do que o valor mínimo permitido de {{min}}.",
+    "lessThanMin": "{{value}} é menor que o mínimo permitido de {{label}} que é {{min}}.",
     "longerThanMin": "Esse valor deve ser maior do que o mínimo de {{minLength}} characters.",
     "notValidDate": "\"{{value}}\" não é uma data válida.",
     "required": "Esse campo é obrigatório.",

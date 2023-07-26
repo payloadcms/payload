@@ -1,6 +1,6 @@
-# Contributing to Payload CMS
+# Contributing to Payload
 
-Below you'll find a set of guidelines for how to contribute to Payload CMS.
+Below you'll find a set of guidelines for how to contribute to Payload.
 
 ## Opening issues
 
@@ -48,6 +48,8 @@ A typical directory with `test/` will be structured like this:
 The directory split up in this way specifically to reduce friction when creating tests and to add the ability to boot up Payload with that specific config.
 
 The following command will start Payload with your config: `yarn dev my-test-dir`. This command will start up Payload using your config and refresh a test database on every restart.
+
+By default, it will automatically log you in with the default credentials. To disable that, you can either pass in the --no-auto-login flag (example: `yarn dev my-test-dir --no-auto-login`) or set the `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN` environment variable to `false`.
 
 If you wish to use to your own Mongo database for the `test` directory instead of using the in memory database, all you need to do is add the following env vars to the `test/dev.ts` file:
 

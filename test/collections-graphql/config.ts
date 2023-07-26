@@ -1,7 +1,7 @@
 import path from 'path';
 import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 
 export interface Relation {
   id: string;
@@ -30,7 +30,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 
 export const slug = 'posts';
 export const relationSlug = 'relation';
-export default buildConfig({
+export default buildConfigWithDefaults({
   graphQL: {
     schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),
   },
@@ -242,6 +242,45 @@ export default buildConfig({
     },
     collectionWithName(relationSlug),
     collectionWithName('dummy'),
+    {
+      slug: 'payload-api-test-ones',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'payloadAPI',
+          type: 'text',
+          hooks: {
+            afterRead: [
+              ({ req }) => req.payloadAPI,
+            ],
+          },
+        },
+      ],
+    },
+    {
+      slug: 'payload-api-test-twos',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'payloadAPI',
+          type: 'text',
+          hooks: {
+            afterRead: [
+              ({ req }) => req.payloadAPI,
+            ],
+          },
+        },
+        {
+          name: 'relation',
+          type: 'relationship',
+          relationTo: 'payload-api-test-ones',
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -361,6 +400,18 @@ export default buildConfig({
             value: rel2.id,
           },
         ],
+      },
+    });
+
+    const payloadAPITest1 = await payload.create({
+      collection: 'payload-api-test-ones',
+      data: {},
+    });
+
+    await payload.create({
+      collection: 'payload-api-test-twos',
+      data: {
+        relation: payloadAPITest1.id,
       },
     });
   },
