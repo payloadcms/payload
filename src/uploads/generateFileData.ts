@@ -87,9 +87,9 @@ export const generateFileData = async <T>({
 
     if (fileSupportsResize && (resizeOptions || formatOptions || trimOptions)) {
       if (file.tempFilePath) {
-        sharpFile = sharp(file.tempFilePath, sharpOptions);
+        sharpFile = sharp(file.tempFilePath, sharpOptions).rotate();
       } else {
-        sharpFile = sharp(file.data, sharpOptions);
+        sharpFile = sharp(file.data, sharpOptions).rotate();
       }
 
       if (resizeOptions) {
