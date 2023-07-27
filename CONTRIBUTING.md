@@ -70,10 +70,10 @@ We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) fo
 
 Here's a breakdown of the format. At the top-level, we use the following types to categorize our commits:
 
-- `feat:` new feature that adds functionality. These are automatically added to the changelog when creating new releases.
-- `fix:` a fix to an existing feature. These are automatically added to the changelog when creating new releases.
-- `docs:` changes to [docs](./docs) only. These do not appear in the changelog.
-- `chore:` changes to code that is neither a fix nor a feature (e.g. refactoring, adding tests, etc.). These do not appear in the changelog.
+- `feat`: new feature that adds functionality. These are automatically added to the changelog when creating new releases.
+- `fix`: a fix to an existing feature. These are automatically added to the changelog when creating new releases.
+- `docs`: changes to [docs](./docs) only. These do not appear in the changelog.
+- `chore`: changes to code that is neither a fix nor a feature (e.g. refactoring, adding tests, etc.). These do not appear in the changelog.
 
 If you are committing to [templates](./templates) or [examples](./examples), use the `chore` type with the proper scope, like this:
 
