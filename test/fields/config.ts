@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import path from 'path';
 import fs from 'fs';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
@@ -25,6 +24,11 @@ import RadioFields, { radiosDoc } from './collections/Radio';
 import Uploads2 from './collections/Upload2';
 import Uploads3 from './collections/Uploads3';
 import RowFields from './collections/Row';
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const _dirname = dirname(__filename);
 
 export default buildConfigWithDefaults({
   admin: {
@@ -34,7 +38,7 @@ export default buildConfigWithDefaults({
         ...config.resolve,
         alias: {
           ...config?.resolve?.alias,
-          fs: path.resolve(__dirname, './mocks/emptyModule.js'),
+          fs: path.resolve(_dirname, './mocks/emptyModule.js'),
         },
       },
     }),
@@ -104,15 +108,15 @@ export default buildConfigWithDefaults({
 
     const createdTextDoc = await payload.create({ collection: textFieldsSlug, data: textDoc });
 
-    const uploadsDir = path.resolve(__dirname, './collections/Upload/uploads');
+    const uploadsDir = path.resolve(_dirname, './collections/Upload/uploads');
 
     if (fs.existsSync(uploadsDir)) fs.readdirSync(uploadsDir).forEach((f) => fs.rmSync(`${uploadsDir}/${f}`));
 
-    const pngPath = path.resolve(__dirname, './uploads/payload.png');
+    const pngPath = path.resolve(_dirname, './uploads/payload.png');
     const pngFile = await getFileByPath(pngPath);
     const createdPNGDoc = await payload.create({ collection: 'uploads', data: {}, file: pngFile });
 
-    const jpgPath = path.resolve(__dirname, './collections/Upload/payload.jpg');
+    const jpgPath = path.resolve(_dirname, './collections/Upload/payload.jpg');
     const jpgFile = await getFileByPath(jpgPath);
     const createdJPGDoc = await payload.create({
       collection: 'uploads',
