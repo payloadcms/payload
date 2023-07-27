@@ -2,8 +2,10 @@ import mongoose from 'mongoose';
 import payload from '../../../src';
 import { initPayloadTest } from '../../helpers/configHelpers';
 import { slug } from './config';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 import 'isomorphic-fetch';
+import path from 'path';
 
 let apiUrl;
 
