@@ -103,7 +103,7 @@ export type REMOVE_ROW = {
 
 export type ADD_ROW = {
   type: 'ADD_ROW'
-  rowIndex: number
+  rowIndex?: number
   path: string
   subFieldState?: Fields
   blockType?: string
@@ -113,7 +113,7 @@ export type REPLACE_ROW = {
   type: 'REPLACE_ROW'
   rowIndex: number
   path: string
-  fieldState?: Fields
+  subFieldState?: Fields
   blockType?: string
 }
 
@@ -182,7 +182,7 @@ export type Context = {
   reset: Reset
   replaceState: (state: Fields) => void
   buildRowErrors: () => void
-  addFieldRow: ({ path, rowIndex, blockType }: { path: string, rowIndex: number, blockType?: string }) => Promise<void>
+  addFieldRow: ({ path, rowIndex, blockType, data }: { path: string, rowIndex?: number, data?: Data, blockType?: string }) => Promise<void>
   removeFieldRow: ({ path, rowIndex }: { path: string, rowIndex: number }) => Promise<void>
-  replaceFieldRow: ({ path, rowIndex, fieldState, blockType }: { path: string, rowIndex: number, fieldState?: Fields, blockType?: string }) => Promise<void>
+  replaceFieldRow: ({ path, rowIndex, data, blockType }: { path: string, rowIndex: number, data?: Data, blockType?: string }) => Promise<void>
 }

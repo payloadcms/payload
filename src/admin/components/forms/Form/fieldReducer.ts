@@ -111,7 +111,9 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'ADD_ROW': {
-      const { rowIndex, path, subFieldState, blockType } = action;
+      const { rowIndex: rowIndexArg, path, subFieldState, blockType } = action;
+      const defaultRowIndex = state[path]?.rows?.length ? state[path].rows.length - 1 : 0;
+      const rowIndex = Math.max(0, Math.min(rowIndexArg ?? defaultRowIndex, state[path]?.rows?.length - 1 || 0));
 
       const rowsMetadata = [...state[path]?.rows || []];
       rowsMetadata.splice(
@@ -154,23 +156,20 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'REPLACE_ROW': {
-      const { rowIndex, path, blockType, fieldState } = action;
+      const { rowIndex: rowIndexArg, path, blockType, subFieldState } = action;
       const { remainingFields, rows } = separateRows(path, state);
+      const rowIndex = Math.max(0, Math.min(rowIndexArg, rows?.length - 1 || 0));
+
       const rowsMetadata = [...state[path]?.rows || []];
-      rowsMetadata.splice(
-        rowIndex,
-        0,
-        // replace row metadata
-        {
-          id: new ObjectID().toHexString(),
-          collapsed: false,
-          blockType: blockType || undefined,
-          childErrorPaths: new Set(),
-        },
-      );
+      rowsMetadata[rowIndex] = {
+        id: new ObjectID().toHexString(),
+        collapsed: false,
+        blockType: blockType || undefined,
+        childErrorPaths: new Set(),
+      };
 
       if (blockType) {
-        fieldState.blockType = {
+        subFieldState.blockType = {
           value: blockType,
           initialValue: blockType,
           valid: true,
@@ -178,7 +177,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       }
 
       // replace form field state
-      rows.splice(rowIndex, 0, fieldState);
+      rows[rowIndex] = subFieldState;
 
       const newState: Fields = {
         ...remainingFields,

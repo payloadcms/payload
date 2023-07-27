@@ -21,7 +21,7 @@ import wait from '../../../../utilities/wait';
 import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
-import { Fields, Context as FormContextType, GetDataByPath, Props, Row, SubmitOptions } from './types';
+import { Context, Fields, Context as FormContextType, GetDataByPath, Props, Row, SubmitOptions } from './types';
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
@@ -363,24 +363,33 @@ const Form: React.FC<Props> = (props) => {
   ]);
 
   // Array/Block row manipulation
-  const addFieldRow = useCallback(async ({ path, rowIndex, blockType }: { path: string, rowIndex: number, blockType?: string }) => {
-    const nonIndexedPath = path.split('.').filter((segment) => !isNumber(segment)).join('.');
+  const addFieldRow: Context['addFieldRow'] = useCallback(async ({ path, rowIndex, blockType, data }) => {
     const preferences = await getDocPreferences();
-    const rowFieldSchema = collectionFieldSchemaMap.get(blockType ? `${nonIndexedPath}.${blockType}` : nonIndexedPath);
+    const nonIndexedPath = path.split('.').filter((segment) => !isNumber(segment)).join('.');
+    const schemaKey = blockType ? `${nonIndexedPath}.${blockType}` : nonIndexedPath;
+    const rowFieldSchema = collectionFieldSchemaMap.get(schemaKey);
 
     if (rowFieldSchema) {
-      const subFieldState = await buildStateFromSchema({ fieldSchema: rowFieldSchema, preferences, operation, id, user, locale, t });
-      dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
+      const subFieldState = await buildStateFromSchema({ fieldSchema: rowFieldSchema, data, preferences, operation, id, user, locale, t });
+      dispatchFields({ type: 'ADD_ROW', rowIndex, path, blockType, subFieldState });
     }
   }, [dispatchFields, collectionFieldSchemaMap, getDocPreferences, id, user, operation, locale, t]);
 
-  const removeFieldRow = useCallback(async ({ path, rowIndex }: { path: string, rowIndex: number }) => {
+  const removeFieldRow: Context['removeFieldRow'] = useCallback(async ({ path, rowIndex }) => {
     dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
   }, [dispatchFields]);
 
-  const replaceFieldRow = useCallback(async ({ path, rowIndex, blockType, fieldState }: { path: string, rowIndex: number, blockType?: string, fieldState: Fields }) => {
-    dispatchFields({ type: 'REPLACE_ROW', rowIndex, path, blockType, fieldState });
-  }, [dispatchFields]);
+  const replaceFieldRow: Context['replaceFieldRow'] = useCallback(async ({ path, rowIndex, blockType, data }) => {
+    const preferences = await getDocPreferences();
+    const nonIndexedPath = path.split('.').filter((segment) => !isNumber(segment)).join('.');
+    const schemaKey = blockType ? `${nonIndexedPath}.${blockType}` : nonIndexedPath;
+    const rowFieldSchema = collectionFieldSchemaMap.get(schemaKey);
+
+    if (rowFieldSchema) {
+      const subFieldState = await buildStateFromSchema({ fieldSchema: rowFieldSchema, data, preferences, operation, id, user, locale, t });
+      dispatchFields({ type: 'REPLACE_ROW', rowIndex, path, blockType, subFieldState });
+    }
+  }, [dispatchFields, collectionFieldSchemaMap, getDocPreferences, id, user, operation, locale, t]);
 
   const getFields = useCallback(() => contextRef.current.fields, [contextRef]);
   const getField = useCallback((path: string) => contextRef.current.fields[path], [contextRef]);
@@ -449,7 +458,9 @@ const Form: React.FC<Props> = (props) => {
   useEffect(() => {
     const entityFields = collection?.fields || global?.fields || [];
     if (entityFields.length === 0) return;
-    setCollectionFieldSchemaMap(buildFieldSchemaMap(entityFields));
+    const fieldSchemaMap = buildFieldSchemaMap(entityFields);
+    console.log(fieldSchemaMap);
+    setCollectionFieldSchemaMap(fieldSchemaMap);
   }, [collection?.fields, global?.fields]);
 
   useEffect(() => {
