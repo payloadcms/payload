@@ -75,6 +75,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
     return true;
   })();
+
   const memoizedValidate = useCallback((value, options) => {
     // alternative locales can be null
     if (!editingDefaultLocale && value === null) {
@@ -83,12 +84,11 @@ const BlocksField: React.FC<Props> = (props) => {
     return validate(value, { ...options, minRows, maxRows, required });
   }, [maxRows, minRows, required, validate, editingDefaultLocale]);
 
-
   const {
     showError,
     errorMessage,
     value,
-    rows,
+    rows = [],
     valid,
   } = useField<number>({
     path,
@@ -133,7 +133,7 @@ const BlocksField: React.FC<Props> = (props) => {
     dispatchFields({ type: 'SET_ROW_COLLAPSED', path, collapsed, rowID, setDocFieldPreferences });
   }, [dispatchFields, path, setDocFieldPreferences]);
 
-  const hasMaxRows = maxRows && rows?.length >= maxRows;
+  const hasMaxRows = maxRows && rows.length >= maxRows;
 
   const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0);
   const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0;
@@ -144,8 +144,6 @@ const BlocksField: React.FC<Props> = (props) => {
     className,
     fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
   ].filter(Boolean).join(' ');
-
-  if (!rows) return null;
 
   return (
     <div

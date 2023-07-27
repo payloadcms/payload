@@ -58,7 +58,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const submitted = useFormSubmitted();
   const locale = useLocale();
   const { t, i18n } = useTranslation('fields');
-  const { localization } = useConfig();
+  const { localization, collections } = useConfig();
 
   const editingDefaultLocale = (() => {
     if (localization && localization.fallback) {
@@ -90,7 +90,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     showError,
     errorMessage,
     value,
-    rows,
+    rows = [],
     valid,
   } = useField<number>({
     path,
@@ -135,8 +135,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     dispatchFields({ type: 'SET_ROW_COLLAPSED', path, collapsed, rowID, setDocFieldPreferences });
   }, [dispatchFields, path, setDocFieldPreferences]);
 
-  const hasMaxRows = maxRows && rows?.length >= maxRows;
-  const fieldErrorCount = (rows || []).reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0) + (valid ? 0 : 1);
+  const hasMaxRows = maxRows && rows.length >= maxRows;
+  const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0) + (valid ? 0 : 1);
   const fieldHasErrors = submitted && fieldErrorCount > 0;
 
   const classes = [
@@ -209,6 +209,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       <DraggableSortable
         ids={rows.map((row) => row.id)}
         onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
+        className={`${baseClass}__draggable-rows`}
       >
         {rows.length > 0 && rows.map((row, i) => (
           <DraggableSortableItem

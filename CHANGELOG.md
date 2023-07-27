@@ -1,5 +1,19 @@
 
 
+## [1.11.7](https://github.com/payloadcms/payload/compare/v1.11.6...v1.11.7) (2023-07-27)
+
+
+### Bug Fixes
+
+* [#3062](https://github.com/payloadcms/payload/issues/3062) ([0280953](https://github.com/payloadcms/payload/commit/02809532b484d9018c6528cfbbbb43abfd55a540))
+* array row deletion ([#3062](https://github.com/payloadcms/payload/issues/3062)) ([cf9795b](https://github.com/payloadcms/payload/commit/cf9795b8d8b53c48335ff4c32c6c51b3de4f7bc9))
+* incorrect image rotation after being processed by sharp ([#3081](https://github.com/payloadcms/payload/issues/3081)) ([0a91950](https://github.com/payloadcms/payload/commit/0a91950f052ce40427801e6561a0f676354a2ca4))
+
+
+### Features
+
+* ability to add context to payload's request object ([#2796](https://github.com/payloadcms/payload/issues/2796)) ([67ba131](https://github.com/payloadcms/payload/commit/67ba131cc61f3d3b30ef9ef7fc150344ca82da2f))
+
 ## [1.11.6](https://github.com/payloadcms/payload/compare/v1.11.5...v1.11.6) (2023-07-25)
 
 
