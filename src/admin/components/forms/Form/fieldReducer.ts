@@ -153,6 +153,47 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       return newState;
     }
 
+    case 'REPLACE_ROW': {
+      const { rowIndex, path, blockType, fieldState } = action;
+      const { remainingFields, rows } = separateRows(path, state);
+      const rowsMetadata = [...state[path]?.rows || []];
+      rowsMetadata.splice(
+        rowIndex,
+        0,
+        // replace row metadata
+        {
+          id: new ObjectID().toHexString(),
+          collapsed: false,
+          blockType: blockType || undefined,
+          childErrorPaths: new Set(),
+        },
+      );
+
+      if (blockType) {
+        fieldState.blockType = {
+          value: blockType,
+          initialValue: blockType,
+          valid: true,
+        };
+      }
+
+      // replace form field state
+      rows.splice(rowIndex, 0, fieldState);
+
+      const newState: Fields = {
+        ...remainingFields,
+        ...flattenRows(path, rows),
+        [path]: {
+          ...state[path],
+          value: rows.length,
+          disableFormData: true,
+          rows: rowsMetadata,
+        },
+      };
+
+      return newState;
+    }
+
     case 'DUPLICATE_ROW': {
       const { rowIndex, path } = action;
       const { remainingFields, rows } = separateRows(path, state);

@@ -14,7 +14,7 @@ import { Field } from '../fields/config/types';
 export const buildFieldSchemaMap = (entityFields: Field[]): Map<string, Field[]> => {
   const fieldMap = new Map<string, Field[]>();
 
-  const buildUpMap = (fields: Field[], builtUpPath?: string) => {
+  const buildUpMap = (fields: Field[], builtUpPath = '') => {
     fields.forEach((field) => {
       let nextPath = builtUpPath;
 
@@ -58,7 +58,7 @@ export const buildFieldSchemaMap = (entityFields: Field[]): Map<string, Field[]>
     });
   };
 
-  buildUpMap(entityFields, '');
+  buildUpMap(entityFields);
 
   return fieldMap;
 };

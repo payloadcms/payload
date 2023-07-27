@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import { devUser } from '../credentials';
 
 // fields with fields
 // - array -> fields
@@ -86,61 +87,14 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-    {
-      slug: 'blocks-collection',
-      fields: [
-        {
-          name: 'layout',
-          type: 'blocks',
-          blocks: [
-            {
-              slug: 'content',
-              fields: [
-                {
-                  name: 'richText',
-                  type: 'richText',
-                },
-                {
-                  name: 'field1',
-                  type: 'text',
-                },
-                {
-                  name: 'field2',
-                  type: 'text',
-                },
-                {
-                  name: 'field3',
-                  type: 'text',
-                },
-                {
-                  name: 'field4',
-                  type: 'text',
-                },
-                {
-                  name: 'field5',
-                  type: 'text',
-                },
-                {
-                  name: 'field6',
-                  type: 'text',
-                },
-                {
-                  name: 'field7',
-                  type: 'text',
-                },
-                {
-                  name: 'field8',
-                  type: 'text',
-                },
-                {
-                  name: 'field9',
-                  type: 'text',
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
   ],
+  onInit: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    });
+  },
 });

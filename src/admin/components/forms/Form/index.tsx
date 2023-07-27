@@ -63,12 +63,6 @@ const Form: React.FC<Props> = (props) => {
   const [formattedInitialData, setFormattedInitialData] = useState(buildInitialState(initialData));
   const [collectionFieldSchemaMap, setCollectionFieldSchemaMap] = useState(new Map<string, Field[]>());
 
-  React.useEffect(() => {
-    const entityFields = collection?.fields || global?.fields || [];
-    if (entityFields.length === 0) return;
-    setCollectionFieldSchemaMap(buildFieldSchemaMap(entityFields));
-  }, [collection?.fields, global?.fields]);
-
   const formRef = useRef<HTMLFormElement>(null);
   const contextRef = useRef({} as FormContextType);
 
@@ -384,6 +378,10 @@ const Form: React.FC<Props> = (props) => {
     dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
   }, [dispatchFields]);
 
+  const replaceFieldRow = useCallback(async ({ path, rowIndex, blockType, fieldState }: { path: string, rowIndex: number, blockType?: string, fieldState: Fields }) => {
+    dispatchFields({ type: 'REPLACE_ROW', rowIndex, path, blockType, fieldState });
+  }, [dispatchFields]);
+
   const getFields = useCallback(() => contextRef.current.fields, [contextRef]);
   const getField = useCallback((path: string) => contextRef.current.fields[path], [contextRef]);
   const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [contextRef]);
@@ -446,7 +444,13 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.buildRowErrors = buildRowErrors;
   contextRef.current.addFieldRow = addFieldRow;
   contextRef.current.removeFieldRow = removeFieldRow;
+  contextRef.current.replaceFieldRow = replaceFieldRow;
 
+  useEffect(() => {
+    const entityFields = collection?.fields || global?.fields || [];
+    if (entityFields.length === 0) return;
+    setCollectionFieldSchemaMap(buildFieldSchemaMap(entityFields));
+  }, [collection?.fields, global?.fields]);
 
   useEffect(() => {
     if (initialState) {
