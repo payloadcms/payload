@@ -3,9 +3,7 @@ export default {
   testEnvironment: 'node',
   testMatch: [
     '**/src/**/*.spec.ts',
-    '**/src/**/*.spec.tsx',
     '**/test/**/*int.spec.ts',
-    '**/test/**/*int.spec.tsx',
   ],
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
