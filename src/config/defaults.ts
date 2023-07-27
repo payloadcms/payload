@@ -1,5 +1,5 @@
-import path from 'path';
 import { Config } from './types';
+import path from 'path';
 
 export const defaults: Config = {
   serverURL: '',
@@ -18,12 +18,12 @@ export const defaults: Config = {
       titleSuffix: '- Payload',
     },
     disable: false,
-    indexHTML: path.resolve(__dirname, '../admin/index.html'),
+    indexHTML: path.resolve(path.dirname(new URL(import.meta.url).pathname), '../admin/index.html'),
     avatar: 'default',
     components: {},
     logoutRoute: '/logout',
     inactivityRoute: '/logout-inactivity',
-    css: path.resolve(__dirname, '../admin/scss/custom.css'),
+    css: path.resolve(path.dirname(new URL(import.meta.url).pathname), '../admin/scss/custom.css'),
     dateFormat: 'MMMM do yyyy, h:mm a',
   },
   typescript: {

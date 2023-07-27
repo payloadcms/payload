@@ -4,6 +4,7 @@ import swcRegister from '@swc/register';
 import { getTsconfig as getTSconfig } from 'get-tsconfig';
 import { generateTypes } from './generateTypes';
 import { generateGraphQLSchema } from './generateGraphQLSchema';
+import { build } from "./build";
 
 const tsConfig = getTSconfig();
 
@@ -18,7 +19,7 @@ const swcOptions = {
     baseUrl: undefined,
   },
   module: {
-    type: 'commonjs',
+    type: 'es6',
   },
   ignore: [
     /.*\/node_modules\/.*/, // parse everything besides files within node_modules
@@ -36,8 +37,6 @@ if (tsConfig?.config?.compilerOptions?.paths) {
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - bad @swc/register types
 swcRegister(swcOptions);
-
-const { build } = require('./build');
 
 const args = minimist(process.argv.slice(2));
 

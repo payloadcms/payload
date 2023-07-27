@@ -2,6 +2,12 @@ import webpack, { Configuration } from 'webpack';
 import md5 from 'md5';
 import { getBaseConfig } from './base';
 import { SanitizedConfig } from '../../../config/types';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'node:module';
+
+const __filename = fileURLToPath(import.meta.url);
+
+const require = createRequire(import.meta.url);
 
 export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
   const baseConfig = getBaseConfig(payloadConfig) as any;

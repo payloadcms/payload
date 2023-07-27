@@ -7,10 +7,7 @@
     "src/**/*.spec.ts",
     "test/**/payload-types.ts"
   ],
-  "watch": [
-    "src/**/*.ts",
-    "test/"
-  ],
+  "watch": ["src/**/*.ts", "test/"],
   "ext": "ts,js,json",
-  "exec": "ts-node ./test/dev.ts"
+  "exec": "node --no-warnings=ExperimentalWarning --loader ts-node/esm ./test/dev.ts"
 }

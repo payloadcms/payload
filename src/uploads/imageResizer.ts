@@ -1,5 +1,6 @@
 import { UploadedFile } from 'express-fileupload';
-import { fromBuffer } from 'file-type';
+import filetype from 'file-type';
+const { fromBuffer } = filetype;
 import fs from 'fs';
 import sanitize from 'sanitize-filename';
 import sharp from 'sharp';

@@ -1,5 +1,6 @@
 import fs from 'fs';
-import { fromFile } from 'file-type';
+import filetype from 'file-type';
+const { fromFile } = filetype;
 import path from 'path';
 import { File } from './types';
 

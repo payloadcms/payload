@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import jwtDecode from 'jwt-decode';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useModal } from '@faceless-ui/modal';
+import * as facelessui from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import { Permissions, User } from '../../../../auth/types';
@@ -38,6 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const exp = user?.exp;
 
   const [permissions, setPermissions] = useState<Permissions>();
+  const { useModal } = facelessui;
 
   const { i18n } = useTranslation();
   const { openModal, closeAllModals } = useModal();

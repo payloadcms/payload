@@ -2,7 +2,7 @@ import { Document as MongooseDocument } from 'mongoose';
 import { TypeWithTimestamps } from '../collections/config/types';
 import { FileData } from '../uploads/types';
 
-export { PayloadRequest } from '../express/types';
+export type { PayloadRequest } from '../express/types';
 
 export type Operator =
   | 'equals'
@@ -46,3 +46,4 @@ export type AllOperations = Operation | VersionOperations | AuthOperations;
 export function docHasTimestamps(doc: any): doc is TypeWithTimestamps {
   return doc?.createdAt && doc?.updatedAt;
 }
+

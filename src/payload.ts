@@ -188,7 +188,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       };
     } else {
       // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
-      const loadConfig = require('./config/load').default;
+      const loadConfig = (await import('./config/load')).default;
       this.config = await loadConfig(this.logger);
     }
 

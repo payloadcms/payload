@@ -6,18 +6,18 @@ import { fileURLToPath } from 'url';
 import { createRequire } from 'node:module';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const _dirname = dirname(__filename);
 const require = createRequire(import.meta.url);
 
 export default {
   entry: {
-    main: [path.resolve(__dirname, '../../admin/components/index.js')],
+    main: [path.resolve(_dirname, '../../admin/components/index.js')],
   },
   externals: {
     react: 'react',
   },
   output: {
-    path: path.resolve(__dirname, '../../../components'),
+    path: path.resolve(_dirname, '../../../components'),
     publicPath: '/',
     filename: 'index.js',
     libraryTarget: 'commonjs2',
@@ -92,8 +92,8 @@ export default {
   resolve: {
     mainFiles: ['index'],
     alias: {
-      'payload-scss-overrides': path.resolve(__dirname, '../../admin/scss/overrides.scss'),
+      'payload-scss-overrides': path.resolve(_dirname, '../../admin/scss/overrides.scss'),
     },
-    modules: ['node_modules', path.resolve(__dirname, '../../../node_modules')],
+    modules: ['node_modules', path.resolve(_dirname, '../../../node_modules')],
   },
 };

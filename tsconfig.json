@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2022",
+    "target": "ESNext",
     "sourceMap": true,
     "module": "ESNext",
     "allowJs": true, /* Allow javascript files to be compiled. */
@@ -35,6 +35,8 @@
   },
   "ts-node": {
     "swc": true,
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
   },
   "include": [
     "src/"
@@ -47,5 +49,5 @@
     "**/*.spec.ts",
     "node_modules",
     ".eslintrc.js"
-  ]
+  ],
 }
