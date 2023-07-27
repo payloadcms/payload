@@ -28,6 +28,8 @@ import { useOperation } from '../../utilities/OperationProvider';
 import { WatchFormErrors } from './WatchFormErrors';
 import { splitPathByArrayFields } from '../../../../utilities/splitPathByArrayFields';
 import { setsAreEqual } from '../../../../utilities/setsAreEqual';
+import { buildFieldSchemaMap } from '../../../../utilities/buildFieldSchemaMap';
+import { isNumber } from '../../../../utilities/isNumber';
 
 const baseClass = 'form';
 
@@ -52,13 +54,20 @@ const Form: React.FC<Props> = (props) => {
   const locale = useLocale();
   const { t, i18n } = useTranslation('general');
   const { refreshCookie, user } = useAuth();
-  const { id, getDocPreferences } = useDocumentInfo();
+  const { id, getDocPreferences, collection, global } = useDocumentInfo();
   const operation = useOperation();
 
   const [modified, setModified] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formattedInitialData, setFormattedInitialData] = useState(buildInitialState(initialData));
+  const [collectionFieldSchemaMap, setCollectionFieldSchemaMap] = useState(new Map<string, Field[]>());
+
+  React.useEffect(() => {
+    const entityFields = collection?.fields || global?.fields || [];
+    if (entityFields.length === 0) return;
+    setCollectionFieldSchemaMap(buildFieldSchemaMap(entityFields));
+  }, [collection?.fields, global?.fields]);
 
   const formRef = useRef<HTMLFormElement>(null);
   const contextRef = useRef({} as FormContextType);
@@ -359,6 +368,22 @@ const Form: React.FC<Props> = (props) => {
     waitForAutocomplete,
   ]);
 
+  // Array/Block row manipulation
+  const addFieldRow = useCallback(async ({ path, rowIndex, blockType }: { path: string, rowIndex: number, blockType?: string }) => {
+    const nonIndexedPath = path.split('.').filter((segment) => !isNumber(segment)).join('.');
+    const preferences = await getDocPreferences();
+    const rowFieldSchema = collectionFieldSchemaMap.get(blockType ? `${nonIndexedPath}.${blockType}` : nonIndexedPath);
+
+    if (rowFieldSchema) {
+      const subFieldState = await buildStateFromSchema({ fieldSchema: rowFieldSchema, preferences, operation, id, user, locale, t });
+      dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
+    }
+  }, [dispatchFields, collectionFieldSchemaMap, getDocPreferences, id, user, operation, locale, t]);
+
+  const removeFieldRow = useCallback(async ({ path, rowIndex }: { path: string, rowIndex: number }) => {
+    dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
+  }, [dispatchFields]);
+
   const getFields = useCallback(() => contextRef.current.fields, [contextRef]);
   const getField = useCallback((path: string) => contextRef.current.fields[path], [contextRef]);
   const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [contextRef]);
@@ -419,6 +444,9 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.reset = reset;
   contextRef.current.replaceState = replaceState;
   contextRef.current.buildRowErrors = buildRowErrors;
+  contextRef.current.addFieldRow = addFieldRow;
+  contextRef.current.removeFieldRow = removeFieldRow;
+
 
   useEffect(() => {
     if (initialState) {

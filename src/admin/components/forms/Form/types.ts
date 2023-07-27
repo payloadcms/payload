@@ -173,4 +173,6 @@ export type Context = {
   reset: Reset
   replaceState: (state: Fields) => void
   buildRowErrors: () => void
+  addFieldRow: ({ path, rowIndex, blockType }: { path: string, rowIndex: number, blockType?: string }) => Promise<void>
+  removeFieldRow: ({ path, rowIndex }: { path: string, rowIndex: number }) => Promise<void>
 }
