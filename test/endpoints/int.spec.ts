@@ -1,8 +1,10 @@
+import path from 'path';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
 import { applicationEndpoint, collectionSlug, globalEndpoint, globalSlug, rootEndpoint } from './config';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
-require('isomorphic-fetch');
+import 'isomorphic-fetch';
 
 let client: RESTClient;
 

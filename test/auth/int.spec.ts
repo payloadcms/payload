@@ -4,8 +4,10 @@ import { initPayloadTest } from '../helpers/configHelpers';
 import { slug } from './config';
 import { devUser } from '../credentials';
 import type { User } from '../../src/auth';
+import path from 'path';
 
-require('isomorphic-fetch');
+import 'isomorphic-fetch';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 let apiUrl;
 

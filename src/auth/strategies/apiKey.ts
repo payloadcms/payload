@@ -11,7 +11,8 @@ export default (payload: Payload, { Model, config }): PassportAPIKey => {
     prefix: `${config.slug} API-Key `,
   };
 
-  return new PassportAPIKey(opts, true, async (apiKey, done, req) => {
+  // @ts-ignore
+  return new (PassportAPIKey.default || PassportAPIKey)(opts, true, async (apiKey, done, req) => {
     const apiKeyIndex = crypto.createHmac('sha1', secret)
       .update(apiKey)
       .digest('hex');

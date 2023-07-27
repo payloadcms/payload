@@ -4,6 +4,8 @@ import { initPayloadTest } from '../helpers/configHelpers';
 import configPromise, { slug } from './config';
 import payload from '../../src';
 import type { Post } from './payload-types';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const title = 'title';
 

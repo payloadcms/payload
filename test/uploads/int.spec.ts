@@ -7,10 +7,11 @@ import { RESTClient } from '../helpers/rest';
 import configPromise, { mediaSlug, relationSlug } from './config';
 import payload from '../../src';
 import getFileByPath from '../../src/uploads/getFileByPath';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const stat = promisify(fs.stat);
 
-require('isomorphic-fetch');
+import 'isomorphic-fetch'
 
 let client;
 

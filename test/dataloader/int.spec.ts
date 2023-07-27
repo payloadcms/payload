@@ -3,6 +3,8 @@ import payload from '../../src';
 import { devUser } from '../credentials';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { postDoc } from './config';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 describe('dataloader', () => {
   let serverURL;

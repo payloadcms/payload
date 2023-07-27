@@ -13,6 +13,8 @@ import { hooksUsersSlug } from './collections/Users';
 import { devUser, regularUser } from '../credentials';
 import { AuthenticationError } from '../../src/errors';
 import { contextHooksSlug } from './collections/ContextHooks';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 let client: RESTClient;
 let apiUrl;

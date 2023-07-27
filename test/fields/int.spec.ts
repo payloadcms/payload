@@ -14,6 +14,8 @@ import { defaultNumber, numberDoc } from './collections/Number';
 import { dateDoc } from './collections/Date';
 import type { PaginatedDocs } from '../../src/mongoose/types';
 import type { RichTextField } from './payload-types';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 let client;
 let graphQLClient: GraphQLClient;

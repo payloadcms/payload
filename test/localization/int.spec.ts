@@ -20,6 +20,8 @@ import {
 import type { Where } from '../../src/types';
 import { arrayCollectionSlug } from './collections/Array';
 import type { Config } from '../../src/config/types';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const collection = localizedPostsSlug;
 let config: Config;

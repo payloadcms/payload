@@ -3,7 +3,7 @@ import payload from '../../../src';
 import { initPayloadTest } from '../../helpers/configHelpers';
 import { slug } from './config';
 
-require('isomorphic-fetch');
+import 'isomorphic-fetch';
 
 let apiUrl;
 
