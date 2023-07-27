@@ -411,6 +411,88 @@ describe('fields', () => {
       const customRowLabel = await page.locator('#rowLabelAsComponent-row-0 >> .row-label :text("custom row label")');
       await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase');
     });
+
+    describe('row manipulation', () => {
+      test('should add 2 new rows', async () => {
+        await page.goto(url.create);
+
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1');
+        await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2');
+
+        await saveDocAndAssert(page);
+      });
+
+      test('should remove 2 new rows', async () => {
+        await page.goto(url.create);
+
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1');
+        await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2');
+
+        await page.locator('#potentiallyEmptyArray-row-1 .array-actions__button').click();
+        await page.locator('#potentiallyEmptyArray-row-1 .popup__scroll .array-actions__remove').click();
+        await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click();
+        await page.locator('#potentiallyEmptyArray-row-0 .popup__scroll .array-actions__remove').click();
+
+        const rowsContainer = await page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
+        const directChildDivCount = await rowsContainer.evaluate((element) => {
+          const childDivCount = element.querySelectorAll(':scope > div');
+          return childDivCount.length;
+        });
+
+        expect(directChildDivCount).toBe(0);
+      });
+
+      test('should remove existing row', async () => {
+        await page.goto(url.create);
+
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1');
+
+        await saveDocAndAssert(page);
+
+        await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click();
+        await page.locator('#potentiallyEmptyArray-row-0 .popup__scroll .array-actions__action.array-actions__remove').click();
+
+        const rowsContainer = await page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
+        const directChildDivCount = await rowsContainer.evaluate((element) => {
+          const childDivCount = element.querySelectorAll(':scope > div');
+          return childDivCount.length;
+        });
+
+        expect(directChildDivCount).toBe(0);
+      });
+
+      test('should add row after removing existing row', async () => {
+        await page.goto(url.create);
+
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1');
+        await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2');
+
+        await saveDocAndAssert(page);
+
+        await page.locator('#potentiallyEmptyArray-row-1 .array-actions__button').click();
+        await page.locator('#potentiallyEmptyArray-row-1 .popup__scroll .array-actions__action.array-actions__remove').click();
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+
+        await page.locator('#field-potentiallyEmptyArray__1__text').fill('updated array row 2');
+
+        await saveDocAndAssert(page);
+
+        const rowsContainer = await page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
+        const directChildDivCount = await rowsContainer.evaluate((element) => {
+          const childDivCount = element.querySelectorAll(':scope > div');
+          return childDivCount.length;
+        });
+
+        expect(directChildDivCount).toBe(2);
+      });
+    });
   });
 
   describe('tabs', () => {
@@ -494,7 +576,7 @@ describe('fields', () => {
         await wait(200);
         await editLinkModal.locator('button[type="submit"]').click();
         const errorField = await page.locator('[id^=drawer_1_rich-text-link-] .render-fields > :nth-child(3)');
-        const hasErrorClass = await errorField.evaluate(el => el.classList.contains('error'));
+        const hasErrorClass = await errorField.evaluate((el) => el.classList.contains('error'));
         expect(hasErrorClass).toBe(true);
       });
 

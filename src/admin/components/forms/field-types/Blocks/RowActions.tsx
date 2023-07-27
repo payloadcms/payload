@@ -15,6 +15,7 @@ export const RowActions: React.FC<{
   rowIndex: number
   rowCount: number
   blockType: string
+  hasMaxRows?: boolean
 }> = (props) => {
   const {
     addRow,
@@ -26,6 +27,7 @@ export const RowActions: React.FC<{
     rowIndex,
     rowCount,
     blockType,
+    hasMaxRows,
   } = props;
 
   const { openModal, closeModal } = useModal();
@@ -54,6 +56,7 @@ export const RowActions: React.FC<{
         moveRow={moveRow}
         removeRow={removeRow}
         index={rowIndex}
+        hasMaxRows={hasMaxRows}
       />
     </React.Fragment>
   );

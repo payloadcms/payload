@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "1.11.3",
+  "version": "1.11.6",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "type": "module",
@@ -154,7 +154,7 @@
     "pluralize-esm": "^9.0.5",
     "postcss": "^8.4.21",
     "postcss-loader": "^6.2.1",
-    "postcss-preset-env": "^7.8.3",
+    "postcss-preset-env": "^9.0.0",
     "probe-image-size": "^6.0.0",
     "process": "^0.11.10",
     "qs": "^6.11.0",

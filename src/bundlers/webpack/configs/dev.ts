@@ -25,12 +25,12 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
     entry: {
       ...baseConfig.entry,
       main: [
-        require.resolve('webpack-hot-middleware/client'),
+        `webpack-hot-middleware/client?path=${payloadConfig.routes.admin}/__webpack_hmr`,
         ...(baseConfig.entry.main as string[]),
       ],
     },
     output: {
-      publicPath: payloadConfig.routes.admin,
+      publicPath: `${payloadConfig.routes.admin}/`,
       path: '/',
       filename: '[name].js',
     },
@@ -46,6 +46,13 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
   webpackConfig.module.rules.push({
     test: /\.(scss|css)$/,
     sideEffects: true,
+    /*
+     * The loaders here are run in reverse order. Here is how your loaders are being processed:
+     * 1. sass-loader: This loader compiles your SCSS into CSS.
+     * 2. postcss-loader: This loader applies postcss transformations (with preset-env plugin in your case).
+     * 3. css-loader: This loader interprets @import and url() like import/require() and will resolve them.
+     * 4. style-loader: This loader injects CSS into the DOM.
+     */
     use: [
       require.resolve('style-loader'),
       {

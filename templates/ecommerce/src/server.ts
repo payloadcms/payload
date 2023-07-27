@@ -10,7 +10,7 @@ dotenv.config({
 import express from 'express'
 import payload from 'payload'
 
-import { seed } from './seed'
+import { seed } from './payload/seed'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -50,7 +50,7 @@ const start = async (): Promise<void> => {
   app.get('*', (req, res) => nextHandler(req, res))
 
   nextApp.prepare().then(() => {
-    payload.logger.info('Next.js started')
+    payload.logger.info('Starting Next.js...')
 
     app.listen(PORT, async () => {
       payload.logger.info(`Next.js App URL: ${process.env.PAYLOAD_PUBLIC_SERVER_URL}`)

@@ -28,6 +28,11 @@
     }
   }
 
+  a:focus-visible {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--accessibility-outline-offset);
+  }
+
   @include mid-break {
 
     th,

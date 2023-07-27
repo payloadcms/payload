@@ -28,6 +28,7 @@ type BlockFieldProps = UseDraggableSortableReturn & Pick<Props, 'path' | 'labels
   readOnly: boolean
   rowCount: number
   blockToRender: Block
+  hasMaxRows?: boolean
 }
 export const BlockRow: React.FC<BlockFieldProps> = ({
   path: parentPath,
@@ -50,6 +51,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   permissions,
   blocks,
   blockToRender,
+  hasMaxRows,
 }) => {
   const path = `${parentPath}.${rowIndex}`;
   const { i18n } = useTranslation();
@@ -117,6 +119,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             blockType={row.blockType}
             blocks={blocks}
             labels={labels}
+            hasMaxRows={hasMaxRows}
           />
         ) : undefined}
       >

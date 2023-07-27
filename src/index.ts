@@ -4,6 +4,8 @@ import { initHTTP } from './initHTTP';
 import { Payload as LocalPayload, BasePayload } from './payload';
 import 'isomorphic-fetch'
 
+export type { RequestContext } from './express/types';
+
 export { getPayload } from './payload';
 
 

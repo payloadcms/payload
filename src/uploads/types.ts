@@ -57,7 +57,7 @@ export type ImageSize = ResizeOptions & {
   crop?: string // comes from sharp package
 };
 
-export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => string
+export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => string | null | false
 
 export type IncomingUploadType = {
   imageSizes?: ImageSize[]
