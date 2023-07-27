@@ -1,11 +1,8 @@
-<p style="border: none; margin-bottom:0; padding-bottom: 0;" align="left">
-  <a href="https://payloadcms.com">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="src/admin/assets/images/payload-logo-light.svg">
-      <img width="250" alt="Payload Logo" src="src/admin/assets/images/payload-logo-dark.svg">
-    </picture>
-  </a>
-</p>
+<a href="https://payloadcms.com">
+  <img width="100%" src="src/admin/assets/images/github-banner-alt.jpg" alt="Payload headless CMS Admin panel built with React" />
+</a>
+<br />
+<br />
 <p align="left">
   <a href="https://github.com/payloadcms/payload/actions">
     <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/payloadcms/payload/tests.yml?style=flat-square">
@@ -23,16 +20,13 @@
     <img src="https://img.shields.io/badge/follow-payloadcms-1DA1F2?logo=twitter&style=flat-square" alt="Payload Twitter" />
   </a>
 </p>
-<h1>Define your schema in code and get a full TypeScript backend + CMS-grade admin UI instantly.</h1>
-<br />
-
-<a href="https://payloadcms.com">
-  <img width="100%" src="src/admin/assets/images/github-banner.jpg" alt="Payload headless CMS Admin panel built with React" />
-</a>
-<h3>
+<hr/>
+<h4>
 <a target="_blank" href="https://payloadcms.com/docs/getting-started/what-is-payload" rel="dofollow"><strong>Explore the Docs</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://payloadcms.com/community-help" rel="dofollow"><strong>Community Help</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://demo.payloadcms.com/" rel="dofollow"><strong>Try Live Demo</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://github.com/payloadcms/payload/discussions/1539" rel="dofollow"><strong>Roadmap</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://www.g2.com/products/payload-cms/reviews#reviews" rel="dofollow"><strong>View G2 Reviews</strong></a>
-</h3>
-<h2>Benefits over a regular CMS</h2>
+</h4>
+<hr/>
+<br />
+<p style="font-size: 20px; font-weight: bold;">Benefits over a regular CMS</p>
 <ul>
   <li>Don’t hit their API, hit yours</li>
   <li>Use your own database and own your data</li>
@@ -43,11 +37,9 @@
   <li>Both admin and backend are 100% extensible</li>
 </ul>
 <br />
-<a href="https://payloadcms.com/new">
-  <img width="100%" src="src/admin/assets/images/cloud-cta-inline.jpg" alt="Payload headless CMS Admin panel built with React" />
-</a>
-<br />
 
+## ☁️ Deploy your entire stack in one place with Payload Cloud.
+Create a cloud account, connect your GitHub, and [deploy in minutes](https://payloadcms.com/new).
 
 ## 🚀 Get started by self-hosting completely free, forever.
 
