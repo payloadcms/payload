@@ -227,7 +227,7 @@ const tab = baseField.keys({
   label: joi.alternatives().try(
     joi.string(),
     joi.object().pattern(joi.string(), [joi.string()]),
-  ).required(),
+  ).when('name', { not: joi.exist(), then: joi.required() }),
   fields: joi.array().items(joi.link('#field')).required(),
   description: joi.alternatives().try(
     joi.string(),
