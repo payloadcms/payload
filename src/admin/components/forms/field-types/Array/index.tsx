@@ -58,7 +58,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const submitted = useFormSubmitted();
   const locale = useLocale();
   const { t, i18n } = useTranslation('fields');
-  const { localization, collections } = useConfig();
+  const { localization } = useConfig();
 
   const editingDefaultLocale = (() => {
     if (localization && localization.fallback) {
