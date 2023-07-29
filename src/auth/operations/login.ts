@@ -6,7 +6,6 @@ import { PayloadRequest } from '../../express/types';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import isLocked from '../isLocked';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Field, fieldAffectsData, fieldHasSubFields } from '../../fields/config/types';
 import { User } from '../types';
 import { Collection } from '../../collections/config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
@@ -40,6 +39,21 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments,
 ): Promise<Result & { user: GeneratedTypes['collections'][TSlug] }> {
   let args = incomingArgs;
+
+  // /////////////////////////////////////
+  // beforeOperation - Collection
+  // /////////////////////////////////////
+
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    args = (await hook({
+      args,
+      operation: 'login',
+      context: args.req.context,
+    })) || args;
+  }, Promise.resolve());
+
   const {
     collection: {
       config: collectionConfig,
@@ -71,6 +85,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       args = (await hook({
         args,
         operation: 'login',
+        context: args.req.context,
       })) || args;
     }, Promise.resolve());
 
@@ -126,9 +141,9 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       });
     }
 
-    const fieldsToSign = getFieldsToSign( {
-          collectionConfig,
-            user,
+    const fieldsToSign = getFieldsToSign({
+      collectionConfig,
+      user,
       email,
 
     });
@@ -139,6 +154,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       user = (await hook({
         user,
         req: args.req,
+        context: args.req.context,
       })) || user;
     }, Promise.resolve());
 
@@ -178,6 +194,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
         user,
         req: args.req,
         token,
+        context: args.req.context,
       }) || user;
     }, Promise.resolve());
 
@@ -192,6 +209,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       overrideAccess,
       req,
       showHiddenFields,
+      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -204,6 +222,21 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       user = await hook({
         req,
         doc: user,
+        context: req.context,
+      }) || user;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // afterRead - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      user = await hook({
+        req,
+        doc: user,
+        context: req.context,
       }) || user;
     }, Promise.resolve());
 

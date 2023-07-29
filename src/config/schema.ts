@@ -111,6 +111,11 @@ export default joi.object({
         }),
       }),
     webpack: joi.func(),
+    bundler: {
+      dev: joi.func(),
+      build: joi.func(),
+      serve: joi.func(),
+    },
   }),
   email: joi.object(),
   i18n: joi.object(),

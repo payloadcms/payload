@@ -45,6 +45,21 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs;
+
+  // /////////////////////////////////////
+  // beforeOperation - Collection
+  // /////////////////////////////////////
+
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+    await priorHook;
+
+    args = (await hook({
+      args,
+      operation: 'create',
+      context: args.req.context,
+    })) || args;
+  }, Promise.resolve());
+
   const {
     collection,
     collection: {
@@ -80,6 +95,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       args = (await hook({
         args,
         operation: 'create',
+        context: req.context,
       })) || args;
     }, Promise.resolve());
 
@@ -134,6 +150,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       operation: 'create',
       overrideAccess,
       req,
+      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -147,6 +164,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
         data,
         req,
         operation: 'create',
+        context: req.context,
       })) || data;
     }, Promise.resolve());
 
@@ -169,6 +187,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
         data,
         req,
         operation: 'create',
+        context: req.context,
       })) || data;
     }, Promise.resolve());
 
@@ -184,6 +203,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       operation: 'create',
       req,
       skipValidation: shouldSaveDraft,
+      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -217,7 +237,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
           req,
         });
       } catch (error) {
-      // Handle uniqueness error from MongoDB
+        // Handle uniqueness error from MongoDB
         throw error.code === 11000 && error.keyValue
           ? new ValidationError([{ message: req.t('error:valueMustBeUnique'), field: Object.keys(error.keyValue)[0] }], req.t)
           : error;
@@ -270,6 +290,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       overrideAccess,
       req,
       showHiddenFields,
+      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -282,6 +303,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       result = await hook({
         req,
         doc: result,
+        context: req.context,
       }) || result;
     }, Promise.resolve());
 
@@ -296,7 +318,20 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       entityConfig: collectionConfig,
       operation: 'create',
       req,
+      context: req.context,
     });
+
+    // Remove temp files if enabled, as express-fileupload does not do this automatically
+    if (config.upload?.useTempFiles && collectionConfig.upload) {
+      const { files } = req;
+      const fileArray = Array.isArray(files) ? files : [files];
+      await mapAsync(fileArray, async ({ file }) => {
+        // Still need this check because this will not be populated if using local API
+        if (file.tempFilePath) {
+          await unlinkFile(file.tempFilePath);
+        }
+      });
+    }
 
     // /////////////////////////////////////
     // afterChange - Collection
@@ -310,6 +345,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
         previousDoc: {},
         req: args.req,
         operation: 'create',
+        context: req.context,
       }) || result;
     }, Promise.resolve());
 
@@ -318,7 +354,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       const { files } = req;
       const fileArray = Array.isArray(files) ? files : [files];
       await mapAsync(fileArray, async ({ file }) => {
-      // Still need this check because this will not be populated if using local API
+        // Still need this check because this will not be populated if using local API
         if (file.tempFilePath) {
           await unlinkFile(file.tempFilePath);
         }

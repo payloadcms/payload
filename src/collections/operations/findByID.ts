@@ -28,6 +28,20 @@ async function findByID<T extends TypeWithID>(
 ): Promise<T> {
   let args = incomingArgs;
 
+  // /////////////////////////////////////
+  // beforeOperation - Collection
+  // /////////////////////////////////////
+
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+    await priorHook;
+
+    args = (await hook({
+      args,
+      operation: 'read',
+      context: args.req.context,
+    })) || args;
+  }, Promise.resolve());
+
   const {
     depth,
     collection: {
@@ -61,6 +75,7 @@ async function findByID<T extends TypeWithID>(
       args = (await hook({
         args,
         operation: 'read',
+        context: req.context,
       })) || args;
     }, Promise.resolve());
 
@@ -143,6 +158,7 @@ async function findByID<T extends TypeWithID>(
         req,
         query: findOneArgs.where,
         doc: result,
+        context: req.context,
       }) || result;
     }, Promise.resolve());
 
@@ -158,6 +174,7 @@ async function findByID<T extends TypeWithID>(
       overrideAccess,
       req,
       showHiddenFields,
+      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -171,6 +188,7 @@ async function findByID<T extends TypeWithID>(
         req,
         query: findOneArgs.where,
         doc: result,
+        context: req.context,
       }) || result;
     }, Promise.resolve());
 

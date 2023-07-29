@@ -95,6 +95,7 @@ async function findVersionByID<T extends TypeWithID = any>(args: Arguments): Pro
         req,
         query: fullWhere,
         doc: result.version,
+        context: req.context,
       }) || result.version;
     }, Promise.resolve());
 
@@ -110,6 +111,7 @@ async function findVersionByID<T extends TypeWithID = any>(args: Arguments): Pro
       overrideAccess,
       req,
       showHiddenFields,
+      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -123,6 +125,7 @@ async function findVersionByID<T extends TypeWithID = any>(args: Arguments): Pro
         req,
         query: fullWhere,
         doc: result.version,
+        context: req.context,
       }) || result.version;
     }, Promise.resolve());
 

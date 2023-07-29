@@ -1,6 +1,6 @@
 import { Config as GeneratedTypes } from '../../../generated-types';
 import { Document, Where } from '../../../types';
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { Payload } from '../../../payload';
 import deleteOperation from '../delete';
 import deleteByID from '../deleteByID';
@@ -8,6 +8,7 @@ import { getDataLoader } from '../../dataloader';
 import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { BulkOperationResult } from '../../config/types';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
   req?: PayloadRequest,
@@ -18,6 +19,10 @@ export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
   user?: Document
   overrideAccess?: boolean
   showHiddenFields?: boolean
+  /**
+   * context, which will then be passed to req.context, which can be read by hooks
+   */
+  context?: RequestContext
 }
 
 export type ByIDOptions<T extends keyof GeneratedTypes['collections']> = BaseOptions<T> & {
@@ -46,7 +51,7 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     user,
     overrideAccess = true,
     showHiddenFields,
-    req = {} as PayloadRequest,
+    context,
   } = options;
 
   const collection = payload.collections[collectionSlug];
@@ -56,13 +61,15 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Delete Operation.`);
   }
 
-  req.payloadAPI = req.payloadAPI || 'local';
-  req.locale = locale ?? req?.locale ?? defaultLocale;
-  req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
-  req.payload = payload;
-  req.i18n = i18nInit(payload.config.i18n);
-
-  if (typeof user !== 'undefined') req.user = user;
+  const req = {
+    user,
+    payloadAPI: 'local',
+    locale: locale ?? defaultLocale,
+    fallbackLocale: fallbackLocale ?? defaultLocale,
+    payload,
+    i18n: i18nInit(payload.config.i18n),
+  } as PayloadRequest;
+  setRequestContext(req, context);
 
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

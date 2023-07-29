@@ -1,7 +1,7 @@
 import path from 'path';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   graphQL: {
     schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),
   },

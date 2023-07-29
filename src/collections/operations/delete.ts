@@ -34,6 +34,21 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   }[]
 }> {
   let args = incomingArgs;
+
+  // /////////////////////////////////////
+  // beforeOperation - Collection
+  // /////////////////////////////////////
+
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+    await priorHook;
+
+    args = (await hook({
+      args,
+      operation: 'delete',
+      context: args.req.context,
+    })) || args;
+  }, Promise.resolve());
+
   const {
     depth,
     collection: {
@@ -66,6 +81,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
       args = (await hook({
         args,
         operation: 'delete',
+        context: req.context,
       })) || args;
     }, Promise.resolve());
 
@@ -112,9 +128,9 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
       const { id } = doc;
 
       try {
-      // /////////////////////////////////////
-      // beforeDelete - Collection
-      // /////////////////////////////////////
+        // /////////////////////////////////////
+        // beforeDelete - Collection
+        // /////////////////////////////////////
 
         await collectionConfig.hooks.beforeDelete.reduce(async (priorHook, hook) => {
           await priorHook;
@@ -122,6 +138,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           return hook({
             req,
             id,
+            context: req.context,
           });
         }, Promise.resolve());
 
@@ -171,6 +188,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           overrideAccess,
           req,
           showHiddenFields,
+          context: req.context,
         });
 
         // /////////////////////////////////////
@@ -183,6 +201,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           result = await hook({
             req,
             doc: result || doc,
+            context: req.context,
           }) || result;
         }, Promise.resolve());
 
@@ -197,6 +216,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
             req,
             id,
             doc: result,
+            context: req.context,
           }) || result;
         }, Promise.resolve());
 

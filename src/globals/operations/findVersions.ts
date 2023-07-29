@@ -94,6 +94,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
           overrideAccess,
           showHiddenFields,
           findMany: true,
+          context: req.context,
         }),
       }))),
     } as PaginatedDocs<T>;

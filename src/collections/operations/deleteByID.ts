@@ -24,6 +24,21 @@ export type Arguments = {
 
 async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(incomingArgs: Arguments): Promise<Document> {
   let args = incomingArgs;
+
+  // /////////////////////////////////////
+  // beforeOperation - Collection
+  // /////////////////////////////////////
+
+  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+    await priorHook;
+
+    args = (await hook({
+      args,
+      operation: 'delete',
+      context: args.req.context,
+    })) || args;
+  }, Promise.resolve());
+
   const {
     depth,
     collection: {
@@ -55,6 +70,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
       args = (await hook({
         args,
         operation: 'delete',
+        context: req.context,
       })) || args;
     }, Promise.resolve());
 
@@ -75,6 +91,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
       return hook({
         req,
         id,
+        context: req.context,
       });
     }, Promise.resolve());
 
@@ -143,6 +160,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
       overrideAccess,
       req,
       showHiddenFields,
+      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -154,6 +172,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
 
       result = await hook({
         req,
+        context: req.context,
         doc: result,
       }) || result;
     }, Promise.resolve());
@@ -165,7 +184,12 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
       await priorHook;
 
-      result = await hook({ req, id, doc: result }) || result;
+      result = await hook({
+        req,
+        id,
+        doc: result,
+        context: req.context,
+      }) || result;
     }, Promise.resolve());
 
     // /////////////////////////////////////

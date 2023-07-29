@@ -1,17 +1,17 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
-import { UploadedFile } from 'express-fileupload';
 import { Payload } from '../../../payload';
 import { Document, Where } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import update from '../update';
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 import updateByID from '../updateByID';
 import { BulkOperationResult } from '../../config/types';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
   req?: PayloadRequest,
@@ -28,6 +28,10 @@ export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
   overwriteExistingFiles?: boolean
   draft?: boolean
   autosave?: boolean
+  /**
+   * context, which will then be passed to req.context, which can be read by hooks
+   */
+  context?: RequestContext
 }
 
 export type ByIDOptions<TSlug extends keyof GeneratedTypes['collections']> = BaseOptions<TSlug> & {
@@ -62,7 +66,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     autosave,
     id,
     where,
-    req = {} as PayloadRequest,
+    context,
   } = options;
 
   const collection = payload.collections[collectionSlug];
@@ -73,15 +77,18 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Update Operation.`);
   }
 
-  req.payloadAPI = req.payloadAPI || 'local';
-  req.locale = locale ?? req?.locale ?? defaultLocale;
-  req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
-  req.payload = payload;
-  req.user = user;
-  req.i18n = i18n;
-  req.files = {
-    file: (file ?? (await getFileByPath(filePath))) as UploadedFile,
-  };
+  const req = {
+    user,
+    payloadAPI: 'local',
+    locale: locale ?? defaultLocale,
+    fallbackLocale: fallbackLocale ?? defaultLocale,
+    payload,
+    i18n,
+    files: {
+      file: file ?? await getFileByPath(filePath),
+    },
+  } as PayloadRequest;
+  setRequestContext(req, context);
 
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

@@ -95,7 +95,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     showError,
     errorMessage,
     value,
-    rows,
+    rows = [],
     valid,
   } = useField<number>({
     path,
@@ -142,7 +142,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     dispatchFields({ type: 'SET_ROW_COLLAPSED', path, collapsed, rowID, setDocFieldPreferences });
   }, [dispatchFields, path, setDocFieldPreferences]);
 
-  const hasMaxRows = maxRows && rows?.length >= maxRows;
+  const hasMaxRows = maxRows && rows.length >= maxRows;
   const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0) + (valid ? 0 : 1);
   const fieldHasErrors = submitted && fieldErrorCount > 0;
 
@@ -152,8 +152,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     className,
     fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
   ].filter(Boolean).join(' ');
-
-  if (!rows) return null;
 
   return (
     <div
@@ -218,6 +216,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       <DraggableSortable
         ids={rows.map((row) => row.id)}
         onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
+        className={`${baseClass}__draggable-rows`}
       >
         {rows.length > 0 && rows.map((row, i) => (
           <DraggableSortableItem
@@ -244,6 +243,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                 rowIndex={i}
                 indexPath={indexPath}
                 labels={labels}
+                hasMaxRows={hasMaxRows}
               />
             )}
           </DraggableSortableItem>

@@ -100,6 +100,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
       req,
       overrideAccess,
       showHiddenFields,
+      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -120,6 +121,10 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     // /////////////////////////////////////
 
     if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    // /////////////////////////////////////
+    // Return results
+    // /////////////////////////////////////
 
     return doc;
   } catch (error: unknown) {

@@ -5,6 +5,7 @@ import unlock from '../unlock';
 import { getDataLoader } from '../../../collections/dataloader';
 import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -25,6 +26,7 @@ async function localUnlock<T extends keyof GeneratedTypes['collections']>(
     overrideAccess = true,
     req = {} as PayloadRequest,
   } = options;
+  setRequestContext(options.req);
 
   const collection = payload.collections[collectionSlug];
 

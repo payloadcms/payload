@@ -86,9 +86,9 @@ export const generateFileData = async <T>({
 
     if (fileSupportsResize && (resizeOptions || formatOptions || trimOptions)) {
       if (file.tempFilePath) {
-        sharpFile = sharp(file.tempFilePath, sharpOptions);
+        sharpFile = sharp(file.tempFilePath, sharpOptions).rotate(); // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
-        sharpFile = sharp(file.data, sharpOptions);
+        sharpFile = sharp(file.data, sharpOptions).rotate(); // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       }
 
       if (resizeOptions) {

@@ -1,12 +1,12 @@
 import { v4 as uuid } from 'uuid';
 import { mapAsync } from '../../src/utilities/mapAsync';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 import { AuthDebug } from './AuthDebug';
 
 export const slug = 'users';
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   admin: {
     user: 'users',
     autoLogin: false,

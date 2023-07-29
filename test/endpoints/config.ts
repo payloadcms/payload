@@ -1,6 +1,6 @@
 import express, { Response } from 'express';
 import { devUser } from '../credentials';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { openAccess } from '../helpers/configHelpers';
 import { PayloadRequest } from '../../src/express/types';
 import { Config } from '../../src/config/types';
@@ -148,4 +148,4 @@ const MyConfig: Config = {
   },
 };
 
-export default buildConfig(MyConfig);
+export default buildConfigWithDefaults(MyConfig);

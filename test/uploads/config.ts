@@ -1,10 +1,11 @@
 import path from 'path';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 import getFileByPath from '../../src/uploads/getFileByPath';
 import removeFiles from '../helpers/removeFiles';
 import { Uploads1 } from './collections/Upload1';
 import Uploads2 from './collections/Upload2';
+import AdminThumbnailCol from './collections/admin-thumbnail';
 
 export const mediaSlug = 'media';
 
@@ -12,9 +13,11 @@ export const relationSlug = 'relation';
 
 export const audioSlug = 'audio';
 
+export const adminThumbnailSlug = 'admin-thumbnail';
+
 const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js');
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   admin: {
     webpack: (config) => ({
       ...config,
@@ -198,6 +201,7 @@ export default buildConfig({
     },
     Uploads1,
     Uploads2,
+    AdminThumbnailCol,
   ],
   onInit: async (payload) => {
     const uploadsDir = path.resolve(__dirname, './media');
@@ -242,6 +246,25 @@ export default buildConfig({
       collection: audioSlug,
       data: {
         audio: file.id,
+      },
+    });
+
+    // Create admin thumbnail media
+    await payload.create({
+      collection: AdminThumbnailCol.slug,
+      data: {},
+      file: {
+        ...audioFile,
+        name: 'audio-thumbnail.mp3', // Override to avoid conflicts
+      },
+    });
+
+    await payload.create({
+      collection: AdminThumbnailCol.slug,
+      data: {},
+      file: {
+        ...imageFile,
+        name: `thumb-${imageFile.name}`,
       },
     });
   },
