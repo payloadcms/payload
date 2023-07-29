@@ -58,7 +58,7 @@ import findConfig from './config/find';
 
 import { defaults as emailDefaults } from './email/defaults';
 import type { DatabaseAdapter } from '.';
-import { mongooseAdapter } from './mongoose';
+import { mongooseAdapter } from './database/adapters/mongoose';
 import type { PaginatedDocs } from './database/types';
 
 /**
