@@ -9,8 +9,9 @@ export const formatAppURL = ({ doc }): string => {
 
 // Revalidate the page in the background, so the user doesn't have to wait
 // Notice that the hook itself is not async and we are not awaiting `revalidate`
+// Only revalidate existing docs that are published
 export const revalidatePage: AfterChangeHook = ({ doc, req, operation }) => {
-  if (operation === 'update') {
+  if (operation === 'update' && doc._status === 'published') {
     const url = formatAppURL({ doc })
 
     const revalidate = async (): Promise<void> => {
