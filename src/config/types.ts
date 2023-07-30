@@ -552,17 +552,16 @@ export type Config = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>;
   /** Pass in a database adapter for use on this project. */
-  db?: DatabaseAdapter
+  db: (args: { payload: Payload }) => DatabaseAdapter
 };
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'globals' | 'endpoint' | 'db'
+  'collections' | 'globals' | 'endpoint'
 > & {
   collections: SanitizedCollectionConfig[];
   globals: SanitizedGlobalConfig[];
   endpoints: Endpoint[];
-  db: DatabaseAdapter
   paths: {
     configDir: string
     config: string

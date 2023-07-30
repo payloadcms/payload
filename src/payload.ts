@@ -58,7 +58,6 @@ import findConfig from './config/find';
 
 import { defaults as emailDefaults } from './email/defaults';
 import type { DatabaseAdapter } from '.';
-import { mongooseAdapter } from './database/adapters/mongoose';
 import type { PaginatedDocs } from './database/types';
 
 /**
@@ -159,10 +158,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       );
     }
 
-    if (!options.local && options.mongoURL !== false && typeof options.mongoURL !== 'string') {
-      throw new Error('Error: missing MongoDB connection URL.');
-    }
-
     this.secret = crypto
       .createHash('sha256')
       .update(options.secret)
@@ -198,21 +193,10 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       };
     });
 
-    // THIS BLOCK IS TEMPORARY UNTIL 2.0.0
-    // We automatically add the Mongoose adapter
-    // if there is no defined database adapter
-    if (!this.config.db) {
-      this.config.db = mongooseAdapter({
-        payload: this,
-        url: this.mongoURL ? this.mongoURL : false,
-        connectOptions: options.mongoOptions,
-      });
-    }
-
-    this.db = this.config.db;
+    this.db = this.config.db({ payload: this });
     this.db.payload = this;
 
-    if (this.db?.connect) {
+    if (this.db.connect) {
       await this.db.connect(this);
     }
 

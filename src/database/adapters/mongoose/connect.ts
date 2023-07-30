@@ -12,6 +12,11 @@ export const connect: Connect = async function connect(
   if (this.url === false) {
     return;
   }
+
+  if (!payload.local && typeof this.url !== 'string') {
+    throw new Error('Error: missing MongoDB connection URL.');
+  }
+
   let urlToConnect = this.url;
   let successfulConnectionMessage = 'Connected to MongoDB server successfully!';
 

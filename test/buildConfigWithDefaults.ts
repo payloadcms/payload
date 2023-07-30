@@ -1,8 +1,16 @@
 import { Config, SanitizedConfig } from '../src/config/types';
 import { buildConfig as buildPayloadConfig } from '../src/config/build';
+import { mongooseAdapter } from '../src/database/adapters/mongoose';
+
+const databaseAdapters = {
+  mongoose: mongooseAdapter({
+    url: 'mongodb://127.0.0.1/payload',
+  }),
+};
 
 export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<SanitizedConfig> {
   const [name] = process.argv.slice(2);
+
   const config: Config = {
     telemetry: false,
     rateLimit: {
@@ -10,6 +18,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
       max: 9999999999,
     },
     ...testConfig,
+    db: databaseAdapters[process.env.PAYLOAD_DATABASE || 'mongoose'],
   };
 
   config.admin = {

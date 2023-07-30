@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+import { Configuration } from 'webpack';
 import { transaction } from './transaction';
 import { migrate } from './migrations/migrate';
 import { migrateStatus } from './migrations/migrateStatus';
@@ -8,8 +10,7 @@ import { DatabaseAdapter } from './types';
 import type { Payload } from '../index';
 import { createMigration } from './migrations/createMigration';
 
-
-type BaseDatabaseAdapter = Pick<DatabaseAdapter, 'payload'
+type BaseDatabaseAdapter = Omit<DatabaseAdapter,
   | 'transaction'
   | 'migrate'
   | 'createMigration'
@@ -19,18 +20,24 @@ type BaseDatabaseAdapter = Pick<DatabaseAdapter, 'payload'
   | 'migrateReset'
   | 'migrateFresh'
   | 'migrationDir'
-  >
+>
 
 type Args = {
   payload: Payload,
   migrationDir?: string,
 }
-export function baseDatabaseAdapter({
-  payload,
-  migrationDir = '.migrations',
-}: Args): BaseDatabaseAdapter {
+export function withBaseDatabaseAdapter<T extends BaseDatabaseAdapter>(args: T): T {
+  // Need to implement DB Webpack config extensions here
+  if (args.webpack) {
+    const existingWebpackConfig = args.payload.config.admin.webpack ? args.payload.config.admin.webpack : (webpackConfig) => webpackConfig;
+    args.payload.config.admin.webpack = (webpackConfig: Configuration) => {
+      return args.webpack(
+        existingWebpackConfig(webpackConfig),
+      );
+    };
+  }
+
   return {
-    payload,
     transaction,
     migrate,
     createMigration,
@@ -39,6 +46,6 @@ export function baseDatabaseAdapter({
     migrateRefresh,
     migrateReset,
     migrateFresh: async () => null,
-    migrationDir,
+    ...args,
   };
 }

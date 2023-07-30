@@ -24,12 +24,11 @@ import { updateGlobal } from './updateGlobal';
 import { updateOne } from './updateOne';
 import { updateVersion } from './updateVersion';
 import { deleteMany } from './deleteMany';
-import { baseDatabaseAdapter } from '../../baseDatabaseAdapter';
+import { withBaseDatabaseAdapter } from '../../baseDatabaseAdapter';
 import { destroy } from './destroy';
 import type { CollectionModel, GlobalModel } from './types';
 
 export interface Args {
-  payload: Payload;
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: string | false;
   migrationDir?: string;
@@ -54,50 +53,52 @@ export type MongooseAdapter = DatabaseAdapter &
     connection: Connection
   }
 
+type MongooseAdapterResult = (args: { payload: Payload }) => MongooseAdapter
+
 export function mongooseAdapter({
-  payload,
   url,
   connectOptions,
   migrationDir,
-}: Args): MongooseAdapter {
-  const adapter = baseDatabaseAdapter({
-    payload,
-    migrationDir,
-  });
-  mongoose.set('strictQuery', false);
-  return {
-    ...adapter,
-    connection: undefined,
-    mongoMemoryServer: undefined,
-    sessions: {},
-    payload,
-    url,
-    connectOptions: connectOptions || {},
-    globals: undefined,
-    collections: {},
-    versions: {},
-    connect,
-    destroy,
-    init,
-    webpack,
-    createMigration: async (migrationName) => createMigration({ payload, migrationDir, migrationName }),
-    beginTransaction,
-    rollbackTransaction,
-    commitTransaction,
-    queryDrafts,
-    findOne,
-    find,
-    create,
-    updateOne,
-    deleteOne,
-    deleteMany,
-    findGlobal,
-    createGlobal,
-    updateGlobal,
-    findVersions,
-    findGlobalVersions,
-    createVersion,
-    updateVersion,
-    deleteVersions,
-  };
+}: Args): MongooseAdapterResult {
+  function adapter({ payload }: { payload: Payload }) {
+    mongoose.set('strictQuery', false);
+
+    return withBaseDatabaseAdapter<MongooseAdapter>({
+      payload,
+      migrationDir,
+      connection: undefined,
+      mongoMemoryServer: undefined,
+      sessions: {},
+      url,
+      connectOptions: connectOptions || {},
+      globals: undefined,
+      collections: {},
+      versions: {},
+      connect,
+      destroy,
+      init,
+      webpack,
+      createMigration: async (migrationName) => createMigration({ payload, migrationDir, migrationName }),
+      beginTransaction,
+      rollbackTransaction,
+      commitTransaction,
+      queryDrafts,
+      findOne,
+      find,
+      create,
+      updateOne,
+      deleteOne,
+      deleteMany,
+      findGlobal,
+      createGlobal,
+      updateGlobal,
+      findVersions,
+      findGlobalVersions,
+      createVersion,
+      updateVersion,
+      deleteVersions,
+    });
+  }
+
+  return adapter;
 }
