@@ -1,37 +1,29 @@
 import React from 'react'
 import { Metadata } from 'next'
 
-// import { AdminBar } from '../components/AdminBar'
-import { Footer } from '../components/Footer'
-import { Header } from '../components/Header'
-import { fetchGlobals } from '../graphql'
-import { Providers } from '../providers'
-import { mergeOpenGraph } from '../seo/mergeOpenGraph'
+import { AdminBar } from './_components/AdminBar'
+import { Footer } from './_components/Footer'
+import { Header } from './_components/Header'
+import { Providers } from './_providers'
+import { InitTheme } from './_providers/Theme/InitTheme'
+import { mergeOpenGraph } from './_utilities/mergeOpenGraph'
 
-import '../css/app.scss'
-
-import classes from './layout.module.scss'
+import './_css/app.scss'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { header, footer } = await fetchGlobals()
-
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <InitTheme />
+      </head>
       <body>
-        {/* <AdminBar
-              adminBarProps={{
-                collection,
-                id,
-                preview,
-                onPreviewExit,
-              }}
-            /> */}
         <Providers>
-          <Header {...header} />
-          <div className={classes.layout}>
-            {children}
-            <Footer {...footer} />
-          </div>
+          <AdminBar />
+          {/* @ts-expect-error */}
+          <Header />
+          {children}
+          {/* @ts-expect-error */}
+          <Footer />
         </Providers>
       </body>
     </html>
@@ -39,6 +31,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SERVER_URL),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SERVER_URL || 'https://payloadcms.com'),
+  twitter: {
+    card: 'summary_large_image',
+    creator: '@payloadcms',
+  },
   openGraph: mergeOpenGraph(),
 }

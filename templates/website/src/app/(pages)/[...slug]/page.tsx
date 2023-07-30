@@ -2,59 +2,59 @@ import React from 'react'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { Blocks } from '../../../components/Blocks'
-import { Hero } from '../../../components/Hero'
-import { fetchPage, fetchPages } from '../../../graphql'
-import { mergeOpenGraph } from '../../../seo/mergeOpenGraph'
+import { Page } from '../../../payload/payload-types'
+import { staticHome } from '../../../payload/seed/static-home'
+import { fetchDoc } from '../../_api/fetchDoc'
+import { fetchDocs } from '../../_api/fetchDocs'
+import { Blocks } from '../../_components/Blocks'
+import { Hero } from '../../_components/Hero'
+import { generateMeta } from '../../_utilities/generateMeta'
 
-const Page = async ({ params: { slug } }) => {
-  const page = await fetchPage(slug)
+export default async function Page({ params: { slug = 'home' } }) {
+  let page = await fetchDoc<Page>({
+    collection: 'pages',
+    slug,
+  })
+
+  // If no `home` page exists, render a static one using dummy content
+  // You should delete this code once you have created a home page in the CMS
+  // This is really only useful for those who are demoing this template
+  if (!page && slug === 'home') {
+    page = staticHome
+  }
 
   if (!page) return notFound()
 
+  const { hero, layout } = page
+
   return (
     <React.Fragment>
-      <Hero page={page} />
+      <Hero {...hero} />
       <Blocks
-        blocks={page.layout}
-        disableTopPadding={page.hero.type === 'none' || page.hero.type === 'lowImpact'}
+        blocks={layout}
+        disableTopPadding={!hero || hero?.type === 'none' || hero?.type === 'lowImpact'}
       />
     </React.Fragment>
   )
 }
 
-export default Page
-
 export async function generateStaticParams() {
-  const pages = await fetchPages()
+  const pages = await fetchDocs<Page>('pages')
 
-  return pages.map(({ breadcrumbs }) => ({
-    slug: breadcrumbs?.[breadcrumbs.length - 1]?.url?.replace(/^\/|\/$/g, '').split('/'),
-  }))
+  return pages?.map(({ slug }) => slug)
 }
 
-export async function generateMetadata({ params: { slug } }): Promise<Metadata> {
-  const page = await fetchPage(slug)
+export async function generateMetadata({ params: { slug = ['home'] } }): Promise<Metadata> {
+  const lastSlug = slug[slug.length - 1]
 
-  const ogImage =
-    typeof page?.meta?.image === 'object' &&
-    page?.meta?.image !== null &&
-    'url' in page?.meta?.image &&
-    `${process.env.NEXT_PUBLIC_CMS_URL}${page.meta.image.url}`
+  let page = await fetchDoc<Page>({
+    collection: 'pages',
+    slug: lastSlug,
+  })
 
-  return {
-    title: page?.meta?.title || 'Website Template',
-    description: page?.meta?.description,
-    openGraph: mergeOpenGraph({
-      title: page?.meta?.title || 'Website Template',
-      url: Array.isArray(slug) ? slug.join('/') : '/',
-      images: ogImage
-        ? [
-            {
-              url: ogImage,
-            },
-          ]
-        : undefined,
-    }),
+  if (!page && lastSlug === 'home') {
+    page = staticHome
   }
+
+  return generateMeta({ doc: page })
 }

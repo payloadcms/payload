@@ -1,0 +1,43 @@
+@use '../../_css/queries.scss' as *;
+
+.footer {
+  padding: calc(var(--base) * 4) 0;
+  background-color: var(--theme-elevation-1000);
+  color: var(--theme-elevation-0);
+
+  @include small-break {
+    padding: calc(var(--base) * 2) 0;
+  }
+}
+
+:global([data-theme="dark"]) {
+  .footer {
+    background-color: var(--theme-elevation-50);
+    color: var(--theme-elevation-1000);
+  }
+}
+
+.wrap {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: calc(var(--base) / 2) var(--base);
+}
+
+.logo {
+  width: 150px;
+}
+
+.nav {
+  display: flex;
+  gap: calc(var(--base) / 4) var(--base);
+  align-items: center;
+  flex-wrap: wrap;
+  opacity: 1;
+  transition: opacity 100ms linear;
+  visibility: visible;
+
+  > * {
+    text-decoration: none;
+  }
+}

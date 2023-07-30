@@ -1,20 +1,20 @@
 import React from 'react'
+import { StaticImageData } from 'next/image'
 
-import { Gutter } from '../../../components/Gutter'
-import { Media } from '../../../components/Media'
-import RichText from '../../../components/RichText'
-import { Page } from '../../../payload-types'
+import { Page } from '../../../payload/payload-types'
+import { Gutter } from '../../_components/Gutter'
+import { Media } from '../../_components/Media'
+import RichText from '../../_components/RichText'
 
 import classes from './index.module.scss'
 
-type Props = Extract<Page['layout'][0], { blockType: 'mediaBlock' }>
+type Props = Extract<Page['layout'][0], { blockType: 'mediaBlock' }> & {
+  staticImage?: StaticImageData
+  id?: string
+}
 
-export const MediaBlock: React.FC<
-  Props & {
-    id?: string
-  }
-> = props => {
-  const { media, position = 'default' } = props
+export const MediaBlock: React.FC<Props> = props => {
+  const { media, position = 'default', staticImage } = props
 
   let caption
   if (media && typeof media === 'object') caption = media.caption
@@ -22,15 +22,13 @@ export const MediaBlock: React.FC<
   return (
     <div className={classes.mediaBlock}>
       {position === 'fullscreen' && (
-        <div>
-          <Media resource={media} />
+        <div className={classes.fullscreen}>
+          <Media resource={media} src={staticImage} />
         </div>
       )}
       {position === 'default' && (
         <Gutter>
-          <div>
-            <Media resource={media} />
-          </div>
+          <Media resource={media} src={staticImage} />
         </Gutter>
       )}
       {caption && (
