@@ -1,6 +1,6 @@
 # Payload Draft Preview Example Front-End
 
-This is a [Next.js](https://nextjs.org) app using the [Pages Router](https://nextjs.org/docs/pages). It was made explicitly for Payload's [Draft Preview Example](https://github.com/payloadcms/payload/tree/master/examples/draft-preview/payload).
+This is a [Next.js](https://nextjs.org) app using the [Pages Router](https://nextjs.org/docs/pages). It was made explicitly for Payload's [Draft Preview Example](https://github.com/payloadcms/payload/tree/master/examples/draft-preview).
 
 > This example uses the Pages Router, the legacy API of Next.js. If your app is using the latest [App Router](https://nextjs.org/docs/app), check out the official [App Router Example](https://github.com/payloadcms/payload/tree/master/examples/draft-preview/next-app).
 
@@ -8,7 +8,7 @@ This is a [Next.js](https://nextjs.org) app using the [Pages Router](https://nex
 
 ### Payload
 
-First you'll need a running [Payload](https://github.com/payloadcms/payload) app. If you have not done so already, open up the `cms` folder and follow the setup instructions. Take note of your `serverURL`, you'll need this in the next step.
+First you'll need a running Payload app. There is one made explicitly for this example and [can be found here](https://github.com/payloadcms/payload/tree/master/examples/draft-preview/payload). If you have not done so already, clone it down and follow the setup instructions there. This will provide all the necessary APIs that your Next.js app requires for authentication.
 
 ### Next.js
 
