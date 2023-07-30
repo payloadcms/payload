@@ -1,17 +1,22 @@
 .adminBar {
   z-index: 10;
   width: 100%;
-  background-color: rgb(var(--foreground-rgb));
+  background-color: rgba(var(--foreground-rgb), 0.1);
   padding: calc(var(--base) * 0.5) 0;
   display: none;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 150ms linear;
 }
 
 .payloadAdminBar {
-  color: rgb(var(--background-rgb)) !important;
+  color: rgb(var(--foreground-rgb)) !important;
 }
 
 .show {
   display: block;
+  visibility: visible;
+  opacity: 1;
 }
 
 .controls {

@@ -26,7 +26,7 @@ const start = async (): Promise<void> => {
     },
   })
 
-  if (process.env.PAYLOAD_SEED === 'true') {
+  if (process.env.PAYLOAD_PUBLIC_SEED === 'true') {
     payload.logger.info('---- SEEDING DATABASE ----')
     await seed(payload)
   }
