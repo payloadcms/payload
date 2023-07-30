@@ -21,7 +21,7 @@ export const home: Partial<Page> = {
         {
           type: 'link',
           newTab: true,
-          url: 'https://github.com/payloadcms/payload/tree/master/examples/redirects/cms',
+          url: 'https://github.com/payloadcms/payload/tree/master/examples/redirects',
           children: [{ text: '' }],
         },
         { text: '' },
@@ -29,10 +29,10 @@ export const home: Partial<Page> = {
           type: 'link',
           linkType: 'custom',
           newTab: true,
-          url: 'https://github.com/payloadcms/payload/tree/master/examples/preview/cms',
-          children: [{ text: 'Preview Example' }],
+          url: 'https://github.com/payloadcms/payload/tree/master/examples/draft-preview/payload',
+          children: [{ text: 'Draft Preview Example' }],
         },
-        { text: '. This example demonstrates how to implement preview into Payload using ' },
+        { text: '. This example demonstrates how to implement draft preview into Payload using ' },
         {
           type: 'link',
           newTab: true,
@@ -61,7 +61,7 @@ export const home: Partial<Page> = {
           children: [{ text: 'Payload Admin Bar' }],
         },
         {
-          text: ' appear at the top of the viewport. This will allow you to seamlessly navigate between the two apps. Then, navigate to the ',
+          text: ' appear at the top of this site. This will allow you to seamlessly navigate between the two apps. Then, navigate to the ',
         },
         {
           type: 'link',
@@ -69,7 +69,7 @@ export const home: Partial<Page> = {
           url: 'http://localhost:3001/example-page',
           children: [{ text: 'example page' }],
         },
-        { text: ' to see how access to draft content is controlled. ' },
+        { text: ' to see how we control access to draft content. ' },
       ],
     },
   ],

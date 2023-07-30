@@ -1,8 +1,8 @@
-# Payload Preview Example Front-End
+# Payload Draft Preview Example Front-End
 
-This is a [Next.js](https://nextjs.org) app using the [App Router](https://nextjs.org/docs/app). It was made explicitly for Payload's [Preview Example](https://github.com/payloadcms/payload/tree/master/examples/preview/cms).
+This is a [Next.js](https://nextjs.org) app using the [App Router](https://nextjs.org/docs/app). It was made explicitly for Payload's [Draft Preview Example](https://github.com/payloadcms/payload/tree/master/examples/draft-preview/payload).
 
-> This example uses the App Router, the latest API of Next.js. If your app is using the legacy [Pages Router](https://nextjs.org/docs/pages), check out the official [Pages Router Example](https://github.com/payloadcms/payload/tree/master/examples/preview/next-pages).
+> This example uses the App Router, the latest API of Next.js. If your app is using the legacy [Pages Router](https://nextjs.org/docs/pages), check out the official [Pages Router Example](https://github.com/payloadcms/payload/tree/master/examples/draft-preview/next-pages).
 
 ## Getting Started
 
@@ -18,7 +18,7 @@ First you'll need a running [Payload](https://github.com/payloadcms/payload) app
 4. `yarn dev` or `npm run dev` to start the server
 5. `open http://localhost:3001` to see the result
 
-Once running you will find a couple seeded pages on your local environment with some basic instructions. You can also start editing the pages by modifying the documents within Payload. See the [Preview Example](https://github.com/payloadcms/payload/tree/master/examples/preview/cms) for full details.
+Once running you will find a couple seeded pages on your local environment with some basic instructions. You can also start editing the pages by modifying the documents within Payload. See the [Draft Preview Example](https://github.com/payloadcms/payload/tree/master/examples/draft-preview/payload) for full details.
 
 ## Learn More
 

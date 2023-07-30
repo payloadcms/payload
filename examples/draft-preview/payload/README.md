@@ -1,8 +1,11 @@
-# Payload Preview Example
+# Payload Draft Preview Example
 
-This example demonstrates how to implement preview in [Payload](https://github.com/payloadcms/payload) using [Versions](https://payloadcms.com/docs/versions/overview) and [Drafts](https://payloadcms.com/docs/versions/drafts). Preview allows you to see draft content on your front-end before it is published.
+This example demonstrates how to implement draft preview in [Payload](https://github.com/payloadcms/payload) using [Versions](https://payloadcms.com/docs/versions/overview) and [Drafts](https://payloadcms.com/docs/versions/drafts). Draft preview allows you to see content on your front-end before it is published. There are various fully working front-ends made explicitly for this example, including:
 
-There is a fully working Next.js app made explicitly for this example which can be found [here](../next-app). Follow the instructions there to get started. If you are setting up preview for another front-end, please consider contributing to this repo with your own example!
+- [Next.js App Router](../next-app)
+- [Next.js Pages Router](../next-pages)
+
+Follow the instructions in each respective README to get started. If you are setting up draft preview for another front-end, please consider contributing to this repo with your own example!
 
 ## Quick Start
 
@@ -17,7 +20,7 @@ That's it! Changes made in `./src` will be reflected in your app. See the [Devel
 
 ## How it works
 
-Preview works by sending the user to your front-end with a `secret` along with their http-only cookies. Your front-end catches the request, verifies the authenticity, then enters into it's own preview mode. Once in preview mode, your front-end can begin securely requesting draft documents from Payload.
+Draft preview works by sending the user to your front-end with a `secret` along with their http-only cookies. Your front-end catches the request, verifies the authenticity, then enters into it's own preview mode. Once in preview mode, your front-end can begin securely requesting draft documents from Payload. See [Preview Mode](#preview-mode) for more details.
 
 ### Collections
 
@@ -27,11 +30,11 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
   The `users` collection is auth-enabled which provides access to the admin panel. When previewing documents on your front-end, the user's JWT is used to authenticate the request. See [Pages](#pages) for more details.
 
-  For additional help with authentication, see the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs or the official [Auth Example](https://github.com/payloadcms/payload/tree/master/examples/auth/cms#readme).
+  For additional help with authentication, see the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs or the official [Auth Example](https://github.com/payloadcms/payload/tree/master/examples/auth).
 
 - #### Pages
 
-  The `pages` collection is draft-enabled and has access control that restricts public users from viewing pages with a `draft` status. To fetch draft documents on your front-end, simply include the `draft=true` query param along with the `Authorization` header once you have entered [Preview Mode](#preview-mode).
+  The `pages` collection is draft-enabled and has access control that restricts public users from viewing pages with a `_status` of `draft`. To fetch draft documents on your front-end, simply include the `draft=true` query param along with the `Authorization` header once you have entered [Preview Mode](#preview-mode).
 
   ```ts
     const preview = true; // set this based on your own front-end environment (see `Preview Mode` below)
@@ -52,7 +55,7 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 ### Preview Mode
 
-To enter preview mode, the user first needs to have at least one draft document saved. When they click the "preview" button from the Payload admin panel, a custom [preview function](https://payloadcms.com/docs/configuration/collections#preview) routes them to your front-end with a `secret` and their http-only cookies. An API route on your front-end will verify the secret and token before entering into it's own preview mode. Once in preview mode, it can begin requesting drafts from Payload using the `Authorization` header, see [Pages](#pages) for more details.
+To preview draft documents, the user first needs to have at least one draft document saved. When they click the "preview" button from the Payload admin panel, a custom [preview function](https://payloadcms.com/docs/configuration/collections#preview) routes them to your front-end with a `secret` along with their http-only cookies. An API route on your front-end will verify the secret and token before entering into it's own preview mode. Once in preview mode, it can begin requesting drafts from Payload using the `Authorization` header. See [Pages](#pages) for more details.
 
 > "Preview mode" looks differently for every front-end framework. For instance, check out the differences between Next.js [Preview Mode](https://nextjs.org/docs/pages/building-your-application/configuring/preview-mode) in the Pages Router and [Draft Mode](https://nextjs.org/docs/pages/building-your-application/configuring/draft-mode) in the App Router. In Next.js, methods are provided that set cookies in your browser, but this may not be the case for all frameworks.
 
@@ -64,11 +67,11 @@ If your front-end is statically generated then you may also want to regenerate t
 
 ### Admin Bar
 
-You might also want to render an admin bar on your front-end so that logged-in users can quickly navigate between the front-end and Payload as they're editing. For React apps, check out the official [Payload Admin Bar](https://github.com/payloadcms/payload-admin-bar). For other frameworks, simply hit the `/me` route with `credentials: include` and render your own admin bar if the user is logged in in order to display quick links to your CMS.
+You might also want to render an admin bar on your front-end so that logged-in users can quickly navigate between the front-end and Payload as they're editing. For React apps, check out the official [Payload Admin Bar](https://github.com/payloadcms/payload-admin-bar). For other frameworks, simply hit the `/me` route with `credentials: 'include'` and render your own admin bar if the user is logged in.
 
 ### CORS
 
-The [`cors`](https://payloadcms.com/docs/production/preventing-abuse#cross-origin-resource-sharing-cors), [`csrf`](https://payloadcms.com/docs/production/preventing-abuse#cross-site-request-forgery-csrf), and [`cookies`](https://payloadcms.com/docs/authentication/config#options) settings are configured to ensure that the admin panel and front-end can communicate with each other securely. If you are combining your front-end and admin panel into a single application that runs of a shared port and domain, you can remove these settings from your config.
+The [`cors`](https://payloadcms.com/docs/production/preventing-abuse#cross-origin-resource-sharing-cors), [`csrf`](https://payloadcms.com/docs/production/preventing-abuse#cross-site-request-forgery-csrf), and [`cookies`](https://payloadcms.com/docs/authentication/config#options) settings are configured to ensure that the admin panel and front-end can communicate with each other securely. If you are combining your front-end and admin panel into a single application that runs of a shared port and domain, you can simplify your config by removing these settings.
 
 For more details on this, see the [CORS](https://payloadcms.com/docs/production/preventing-abuse#cross-origin-resource-sharing-cors) docs.
 
