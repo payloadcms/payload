@@ -1,7 +1,7 @@
 import { Config, SanitizedConfig } from '../src/config/types';
 import { buildConfig as buildPayloadConfig } from '../src/config/build';
-import { mongooseAdapter } from '../src/database/adapters/mongoose';
-import { postgresAdapter } from '../src/database/adapters/postgres';
+import { mongooseAdapter } from '../packages/db-mongodb/src';
+import { postgresAdapter } from '../packages/db-postgres/src';
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({

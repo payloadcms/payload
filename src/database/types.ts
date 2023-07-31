@@ -1,27 +1,4 @@
 import type { Configuration } from 'webpack';
-import type {
-  ArrayField,
-  BlockField,
-  CheckboxField,
-  CodeField,
-  CollapsibleField,
-  DateField,
-  EmailField,
-  Field,
-  GroupField,
-  JSONField,
-  NumberField,
-  PointField,
-  RadioField,
-  RelationshipField,
-  RichTextField,
-  RowField,
-  SelectField,
-  TabsField,
-  TextareaField,
-  TextField,
-  UploadField,
-} from '../fields/config/types';
 import type { TypeWithID } from '../collections/config/types';
 import type { TypeWithID as GlobalsTypeWithID } from '../globals/config/types';
 import type { Payload } from '../payload';

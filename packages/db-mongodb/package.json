@@ -9,20 +9,16 @@
   "scripts": {
     "build": "tsc"
   },
-  "peerDependencies": {
-    "mongoose": "6.11.4",
-    "mongoose-aggregate-paginate-v2": "^1.0.6",
-    "mongoose-paginate-v2": "1.7.22"
-  },
   "devDependencies": {
     "@types/mongoose-aggregate-paginate-v2": "^1.0.5",
     "mongodb-memory-server": "^8.13.0",
-    "mongoose": "6.11.4",
-    "mongoose-aggregate-paginate-v2": "^1.0.6",
-    "mongoose-paginate-v2": "1.7.22",
+    "payload": "^1.11.7",
     "typescript": "^4.9.4"
   },
   "dependencies": {
-    "get-port": "^7.0.0"
+    "get-port": "^7.0.0",
+    "mongoose": "6.11.4",
+    "mongoose-aggregate-paginate-v2": "^1.0.6",
+    "mongoose-paginate-v2": "1.7.22"
   }
 }
