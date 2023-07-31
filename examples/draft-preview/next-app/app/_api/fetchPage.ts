@@ -1,12 +1,17 @@
-import { cookies } from 'next/headers'
+import type { RequestCookie } from 'next/dist/compiled/@edge-runtime/cookies'
 
-import type { Page } from '../payload-types'
+import type { Page } from '../../payload-types'
 
 export const fetchPage = async (
   slug: string,
   draft?: boolean,
 ): Promise<Page | undefined | null> => {
-  const payloadToken = cookies().get('payload-token')
+  let payloadToken: RequestCookie | undefined
+
+  if (draft) {
+    const { cookies } = await import('next/headers')
+    payloadToken = cookies().get('payload-token')
+  }
 
   const pageRes: {
     docs: Page[]
@@ -26,14 +31,4 @@ export const fetchPage = async (
   ).then(res => res.json())
 
   return pageRes?.docs?.[0] ?? null
-}
-
-export const fetchPages = async (): Promise<Page[]> => {
-  const pageRes: {
-    docs: Page[]
-  } = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/pages?depth=0&limit=100`).then(res =>
-    res.json(),
-  ) // eslint-disable-line function-paren-newline
-
-  return pageRes?.docs ?? []
 }

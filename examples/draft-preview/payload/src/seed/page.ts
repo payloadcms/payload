@@ -22,10 +22,10 @@ export const examplePage: Partial<Page> = {
           linkType: 'custom',
           url: 'http://localhost:3000/admin',
           newTab: true,
-          children: [{ text: 'Log in' }],
+          children: [{ text: 'Log in to the admin panel' }],
         },
         {
-          text: ' to the admin panel and click "preview" to return to this page and view the latest draft content in Next.js preview mode. To make additional changes to the draft, click "save draft" before returning to the preview.',
+          text: ' and click "preview" to return to this page and view the latest draft content in Next.js preview mode. To make additional changes to the draft, click "save draft" before returning to the preview.',
         },
       ],
     },

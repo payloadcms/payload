@@ -50,9 +50,9 @@ export const home: Partial<Page> = {
           linkType: 'custom',
           url: 'http://localhost:3000/admin',
           newTab: true,
-          children: [{ text: 'Log in' }],
+          children: [{ text: 'Log in to the admin panel' }],
         },
-        { text: ' to the admin panel and refresh this page to see the ' },
+        { text: ' and refresh this page to see the ' },
         {
           type: 'link',
           linkType: 'custom',
