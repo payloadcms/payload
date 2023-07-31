@@ -1,8 +1,8 @@
+import { DeleteOne } from 'payload/dist/database/types';
+import sanitizeInternalFields from 'payload/dist/utilities/sanitizeInternalFields';
 import type { MongooseAdapter } from '.';
-import type { DeleteOne } from '../../types';
 import type { Document } from '../../../types';
 import { PayloadRequest } from '../../../types';
-import sanitizeInternalFields from '../../../utilities/sanitizeInternalFields';
 import { withSession } from './withSession';
 
 export const deleteOne: DeleteOne = async function deleteOne(
