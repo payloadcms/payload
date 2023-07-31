@@ -21,7 +21,6 @@ type Args = {
   overrideAccess: boolean
 }
 
-
 /**
  * Validate the Payload key / value / operator
  */
