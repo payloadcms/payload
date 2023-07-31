@@ -70,13 +70,16 @@ export const init: Init = async function init(
           versionModelName,
           versionSchema,
         ) as CollectionModel;
-        this.payload.versions[collection.slug] = model;
+        // this.payload.versions[collection.slug] = model;
         this.versions[collection.slug] = model;
       }
 
       const model = mongoose.model(collection.slug, schema) as CollectionModel;
       this.collections[collection.slug] = model;
 
+      // TS expect error only needed until we launch 2.0.0
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       this.payload.collections[collection.slug] = {
         config: collection,
       };
@@ -115,8 +118,6 @@ export const init: Init = async function init(
         versionSchema,
       ) as CollectionModel;
       this.versions[global.slug] = versionsModel;
-
-      this.payload.versions[global.slug] = versionsModel;
     }
   });
 };

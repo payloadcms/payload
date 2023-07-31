@@ -1,6 +1,4 @@
-import { Document as MongooseDocument } from 'mongoose';
 import { TypeWithTimestamps } from '../collections/config/types';
-import { FileData } from '../uploads/types';
 
 export { PayloadRequest } from '../express/types';
 
@@ -31,12 +29,6 @@ export type Where = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any;
-
-export interface PayloadMongooseDocument extends MongooseDocument {
-  setLocale: (locale: string, fallback: string) => void;
-  filename?: string;
-  sizes?: FileData[];
-}
 
 export type Operation = 'create' | 'read' | 'update' | 'delete';
 export type VersionOperations = 'readVersions';

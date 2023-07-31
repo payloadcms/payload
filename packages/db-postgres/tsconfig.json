@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "declaration": true, /* Generates corresponding '.d.ts' file. */
     "module": "commonjs",                                /* Specify what module code is generated. */
     "rootDir": "./src",                                  /* Specify the root folder within your source files. */
     "outDir": "./dist",                                   /* Specify an output folder for all emitted files. */

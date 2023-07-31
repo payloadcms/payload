@@ -1,3 +1,4 @@
+import path from 'path';
 import { Config, SanitizedConfig } from '../src/config/types';
 import { buildConfig as buildPayloadConfig } from '../src/config/build';
 import { mongooseAdapter } from '../packages/db-mongodb/src';
@@ -41,6 +42,14 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
         cache: process.env.NODE_ENV === 'test'
           ? { type: 'memory' }
           : existingConfig.cache,
+        resolve: {
+          ...existingConfig.resolve,
+          alias: {
+            ...existingConfig.resolve?.alias,
+            [path.resolve(__dirname, '../packages/db-postgres/src/index')]: path.resolve(__dirname, '../packages/db-postgres/src/mock'),
+            [path.resolve(__dirname, '../packages/db-mongodb/src/index')]: path.resolve(__dirname, '../packages/db-mongodb/src/mock'),
+          },
+        },
       };
     },
   };
