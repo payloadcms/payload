@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import objectID from 'bson-objectid';
+import { getLocalizedPaths } from 'payload/database/getLocalizedPaths';
 import { Field, fieldAffectsData } from '../../../../../fields/config/types';
 import { operatorMap } from './operatorMap';
-import { getLocalizedPaths } from './getLocalizedPaths';
 import { sanitizeQueryValue } from './sanitizeQueryValue';
 import { PathToQuery, validOperators } from '../../../../queryValidation/types';
 import { Payload } from '../../../../..';
