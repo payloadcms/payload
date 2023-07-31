@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import type { Payload } from 'payload'
 
+import { contactPage } from './contact-page'
 import { home } from './home'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
@@ -147,6 +148,11 @@ export const seed = async (payload: Payload): Promise<void> => {
     data: projectsPage,
   })
 
+  const { id: contactPageID } = await payload.create({
+    collection: 'pages',
+    data: contactPage,
+  })
+
   await payload.create({
     collection: 'pages',
     data: JSON.parse(
@@ -188,6 +194,16 @@ export const seed = async (payload: Payload): Promise<void> => {
               value: projectsPageID,
             },
             label: 'Portfolio',
+          },
+        },
+        {
+          link: {
+            type: 'reference',
+            reference: {
+              relationTo: 'pages',
+              value: contactPageID,
+            },
+            label: 'Contact',
           },
         },
       ],

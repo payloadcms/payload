@@ -1,3 +1,5 @@
+import type { RequestCookie } from 'next/dist/compiled/@edge-runtime/cookies'
+
 import type { Config } from '../../payload/payload-types'
 import { PAGE } from '../_graphql/pages'
 import { POST } from '../_graphql/posts'
@@ -22,9 +24,15 @@ export const fetchDoc = async <T>(args: {
   collection: keyof Config['collections']
   slug?: string
   id?: string
-  token?: string
+  draft?: boolean
 }): Promise<T> => {
-  const { collection, slug, token } = args || {}
+  const { collection, slug, draft } = args || {}
+  let payloadToken: RequestCookie | undefined
+
+  if (draft) {
+    const { cookies } = await import('next/headers')
+    payloadToken = cookies().get('payload-token')
+  }
 
   if (!queryMap[collection]) throw new Error(`Collection ${collection} not found`)
 
@@ -32,13 +40,14 @@ export const fetchDoc = async <T>(args: {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `JWT ${token}` } : {}),
+      ...(draft && payloadToken ? { Authorization: `JWT ${payloadToken}` } : {}),
     },
     body: JSON.stringify({
       query: queryMap[collection].query,
       variables: {
         slug,
       },
+      draft: draft ?? false,
     }),
   })
     ?.then(res => res.json())

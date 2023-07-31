@@ -30,10 +30,10 @@ export async function Footer() {
             return <CMSLink key={i} {...link} />
           })}
           <Link href="/admin">Admin</Link>
-          <Link href="https://github.com/payloadcms/payload/tree/master/templates/ecommerce">
+          <Link href="https://github.com/payloadcms/payload/tree/master/templates/website">
             Source Code
           </Link>
-          <Link href="https://github.com/payloadcms/payload">Payload</Link>
+          <Link href="https://payloadcms.com">Payload</Link>
         </nav>
       </Gutter>
     </footer>

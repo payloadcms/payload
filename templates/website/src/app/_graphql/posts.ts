@@ -16,7 +16,7 @@ export const POSTS = `
 
 export const POST = `
   query Post($slug: String ) {
-    Posts(where: { AND: [{ slug: { equals: $slug }}] }) {
+    Posts(where: { slug: { equals: $slug}}, limit: 1, draft: true) {
       docs {
         id
         title

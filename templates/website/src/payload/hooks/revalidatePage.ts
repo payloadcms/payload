@@ -9,27 +9,30 @@ export const formatAppURL = ({ doc }): string => {
 
 // Revalidate the page in the background, so the user doesn't have to wait
 // Notice that the hook itself is not async and we are not awaiting `revalidate`
-export const revalidatePage: AfterChangeHook = ({ doc, req }) => {
-  const revalidate = async (): Promise<void> => {
-    let url
+// Only revalidate existing docs that are published
+export const revalidatePage: AfterChangeHook = ({ doc, req, operation }) => {
+  if (operation === 'update' && doc._status === 'published') {
+    const revalidate = async (): Promise<void> => {
+      let url
 
-    try {
-      url = formatAppURL({ doc })
-      const res = await fetch(
-        `${process.env.PAYLOAD_PUBLIC_SITE_URL}/api/revalidate?secret=${process.env.REVALIDATION_KEY}&revalidatePath=${url}`,
-      )
+      try {
+        url = formatAppURL({ doc })
+        const res = await fetch(
+          `${process.env.PAYLOAD_PUBLIC_SITE_URL}/api/revalidate?secret=${process.env.REVALIDATION_KEY}&revalidatePath=${url}`,
+        )
 
-      if (res.ok) {
-        req.payload.logger.info(`Revalidated path ${url}`)
-      } else {
-        req.payload.logger.error(`Error revalidating path ${url}`)
+        if (res.ok) {
+          req.payload.logger.info(`Revalidated path ${url}`)
+        } else {
+          req.payload.logger.error(`Error revalidating path ${url}`)
+        }
+      } catch (err: unknown) {
+        req.payload.logger.error(`Error hitting revalidate route for ${url}`)
       }
-    } catch (err: unknown) {
-      req.payload.logger.error(`Error hitting revalidate route for ${url}`)
     }
-  }
 
-  revalidate()
+    revalidate()
+  }
 
   return doc
 }

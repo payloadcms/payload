@@ -16,7 +16,7 @@ export const PROJECTS = `
 
 export const PROJECT = `
   query Project($slug: String ) {
-    Projects(where: { slug: { equals: $slug}}) {
+    Projects(where: { slug: { equals: $slug}}, limit: 1, draft: true) {
       docs {
         id
         title

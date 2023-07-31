@@ -5,8 +5,8 @@ export const home: Partial<Page> = {
   slug: 'home',
   _status: 'published',
   meta: {
-    title: 'Payload E-Commerce Template',
-    description: 'An open-source e-commerce store built with Payload and Next.js.',
+    title: 'Payload Website Template',
+    description: 'An open-source website built with Payload and Next.js.',
     image: '{{POST1_IMAGE}}',
   },
   hero: {
@@ -15,7 +15,7 @@ export const home: Partial<Page> = {
       {
         children: [
           {
-            text: 'Payload E-Commerce Store',
+            text: 'Payload Website Template',
           },
         ],
         type: 'h1',
@@ -23,7 +23,7 @@ export const home: Partial<Page> = {
       {
         children: [
           {
-            text: 'Welcome to your store! ',
+            text: 'Welcome to your website! ',
           },
           {
             type: 'link',
@@ -41,7 +41,7 @@ export const home: Partial<Page> = {
           {
             type: 'link',
             linkType: 'custom',
-            url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
+            url: 'https://github.com/payloadcms/payload/tree/master/templates/website',
             newTab: true,
             children: [
               {
@@ -63,20 +63,22 @@ export const home: Partial<Page> = {
           appearance: 'primary',
           reference: {
             relationTo: 'pages',
-            value: '{{POSTS_PAGE_ID}}',
+            value: '{{PROJECTS_PAGE_ID}}',
           },
-          label: 'Read blog',
+          label: 'View portfolio',
           url: '',
         },
       },
       {
         link: {
-          type: 'custom',
+          type: 'reference',
           appearance: 'secondary',
-          reference: null,
-          label: 'View on GitHub',
-          url: 'https://github.com/payloadcms/payload/tree/master/templates/ecommerce',
-          newTab: true,
+          reference: {
+            relationTo: 'pages',
+            value: '{{POSTS_PAGE_ID}}',
+          },
+          label: 'Read blog',
+          url: '',
         },
       },
     ],
@@ -121,7 +123,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: "Manage this site's pages, projects, pages and more from the ",
+                  text: "Manage this site's pages, projects, posts and more from the ",
                 },
                 {
                   type: 'link',
@@ -155,204 +157,6 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Authentication',
-                },
-              ],
-              type: 'h3',
-            },
-            {
-              children: [
-                {
-                  text: 'Complete user ',
-                },
-                {
-                  type: 'link',
-                  linkType: 'custom',
-                  url: '/login',
-                  children: [
-                    {
-                      text: 'login',
-                    },
-                  ],
-                },
-                {
-                  text: ' and ',
-                },
-                {
-                  type: 'link',
-                  linkType: 'custom',
-                  url: '/create-account',
-                  children: [
-                    {
-                      text: 'create account',
-                    },
-                  ],
-                },
-                {
-                  text: ' flows with email verification and password reset.',
-                },
-              ],
-            },
-          ],
-          enableLink: false,
-          link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
-            url: '',
-            label: '',
-          },
-        },
-        {
-          size: 'oneThird',
-          richText: [
-            {
-              children: [
-                {
-                  text: 'Customer Accounts',
-                },
-              ],
-              type: 'h3',
-            },
-            {
-              children: [
-                {
-                  text: 'Customers can ',
-                },
-                {
-                  type: 'link',
-                  linkType: 'custom',
-                  url: '/account',
-                  children: [
-                    {
-                      text: 'manage their account',
-                    },
-                  ],
-                },
-                {
-                  text: ', ',
-                },
-                {
-                  type: 'link',
-                  linkType: 'custom',
-                  url: '/orders',
-                  children: [
-                    {
-                      text: 'view their order history',
-                    },
-                  ],
-                },
-                {
-                  text: ', and more without leaving the site.',
-                },
-              ],
-            },
-          ],
-          enableLink: false,
-          link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
-            url: '',
-            label: '',
-          },
-        },
-
-        {
-          size: 'oneThird',
-          richText: [
-            {
-              children: [
-                {
-                  text: 'Gated Content',
-                },
-              ],
-              type: 'h3',
-            },
-            {
-              children: [
-                {
-                  text: 'Easily gate digital content behind a paywall or require users to be logged in to access it.',
-                },
-              ],
-            },
-          ],
-          enableLink: false,
-          link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
-            url: '',
-            label: '',
-          },
-        },
-        {
-          size: 'oneThird',
-          richText: [
-            {
-              children: [
-                {
-                  text: 'Shopping cart',
-                },
-              ],
-              type: 'h3',
-            },
-            {
-              children: [
-                {
-                  text: 'Shopping carts persist between sessions, can saved for later and accessed from any device.',
-                },
-              ],
-            },
-          ],
-          enableLink: false,
-          link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
-            url: '',
-            label: '',
-          },
-        },
-        {
-          size: 'oneThird',
-          richText: [
-            {
-              children: [
-                {
-                  text: 'Checkout',
-                },
-              ],
-              type: 'h3',
-            },
-            {
-              children: [
-                {
-                  text: 'Secure in-app checkout powered by Stripe so your customers never have to leave your site.',
-                },
-              ],
-            },
-          ],
-          enableLink: false,
-          link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
-            url: '',
-            label: '',
-          },
-        },
-        {
-          size: 'oneThird',
-          richText: [
-            {
-              children: [
-                {
                   text: 'Page builder',
                 },
               ],
@@ -362,6 +166,122 @@ export const home: Partial<Page> = {
               children: [
                 {
                   text: 'Custom page builder allows you to create unique page and project layouts for any type of content.',
+                },
+              ],
+            },
+          ],
+          enableLink: false,
+          link: {
+            reference: {
+              value: '',
+              relationTo: 'pages',
+            },
+            url: '',
+            label: '',
+          },
+        },
+        {
+          size: 'oneThird',
+          richText: [
+            {
+              children: [
+                {
+                  text: 'Blog',
+                },
+              ],
+              type: 'h3',
+            },
+            {
+              children: [
+                {
+                  text: 'Create and manage blog posts that have completely custom layouts and content.',
+                },
+              ],
+            },
+          ],
+          enableLink: false,
+          link: {
+            reference: {
+              value: '',
+              relationTo: 'pages',
+            },
+            url: '',
+            label: '',
+          },
+        },
+        {
+          size: 'oneThird',
+          richText: [
+            {
+              children: [
+                {
+                  text: 'Portfolio',
+                },
+              ],
+              type: 'h3',
+            },
+            {
+              children: [
+                {
+                  text: 'Showcase your work with projects that have completely custom layouts and content.',
+                },
+              ],
+            },
+          ],
+          enableLink: false,
+          link: {
+            reference: {
+              value: '',
+              relationTo: 'pages',
+            },
+            url: '',
+            label: '',
+          },
+        },
+        {
+          size: 'oneThird',
+          richText: [
+            {
+              children: [
+                {
+                  text: 'Draft Preview',
+                },
+              ],
+              type: 'h3',
+            },
+            {
+              children: [
+                {
+                  text: 'Preview changes to pages, projects, or posts directly on your site before they go live.',
+                },
+              ],
+            },
+          ],
+          enableLink: false,
+          link: {
+            reference: {
+              value: '',
+              relationTo: 'pages',
+            },
+            url: '',
+            label: '',
+          },
+        },
+        {
+          size: 'oneThird',
+          richText: [
+            {
+              children: [
+                {
+                  text: 'Form Builder',
+                },
+              ],
+              type: 'h3',
+            },
+            {
+              children: [
+                {
+                  text: 'Easily create and manage forms that send email notifications and are stored in your database.',
                 },
               ],
             },
@@ -462,7 +382,7 @@ export const home: Partial<Page> = {
         {
           children: [
             {
-              text: 'Shop now',
+              text: 'View portfolio',
             },
           ],
           type: 'h4',
@@ -493,10 +413,10 @@ export const home: Partial<Page> = {
           link: {
             type: 'reference',
             url: '',
-            label: 'Shop now',
+            label: 'View portfolio',
             appearance: 'primary',
             reference: {
-              value: '{{POSTS_PAGE_ID}}',
+              value: '{{PROJECTS_PAGE_ID}}',
               relationTo: 'pages',
             },
           },

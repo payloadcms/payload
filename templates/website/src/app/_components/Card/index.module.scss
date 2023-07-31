@@ -37,10 +37,6 @@
   flex-grow: 1;
 }
 
-.priceActions {
-  gap: var(--base);
-}
-
 .leader {
   @extend %label;
   display: flex;

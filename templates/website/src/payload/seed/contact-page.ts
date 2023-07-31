@@ -1,13 +1,12 @@
-import type { Project } from '../payload-types'
+import type { Page } from '../payload-types'
 
-export const project1: Partial<Project> = {
-  title: 'Project 1',
-  slug: 'project-1',
+export const contactPage: Partial<Page> = {
+  title: 'Contact Page',
+  slug: 'contact',
   _status: 'published',
   meta: {
-    title: 'Project 1',
-    description: 'This is project 1',
-    image: '{{PROJECT_IMAGE}}',
+    title: 'Contact Page',
+    description: 'This is the contact page',
   },
   hero: {
     type: 'lowImpact',
@@ -18,7 +17,7 @@ export const project1: Partial<Project> = {
         type: 'h1',
         children: [
           {
-            text: 'Project 1',
+            text: 'Contact Page',
           },
         ],
       },
@@ -26,7 +25,7 @@ export const project1: Partial<Project> = {
         type: 'p',
         children: [
           {
-            text: 'This is project 1. This hero and the content on this page is completely dynamic and ',
+            text: 'This is the contact page. This hero and the content on this page is completely dynamic and ',
           },
           {
             type: 'link',

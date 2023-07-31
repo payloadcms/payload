@@ -28,7 +28,7 @@ export const staticHome: Page = {
             bold: true,
           },
           {
-            text: ' To seed your database with a few posts, pages, and projects, ',
+            text: ' To seed your database with a few pages, projects, and posts, ',
           },
           {
             type: 'link',

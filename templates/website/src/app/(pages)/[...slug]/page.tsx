@@ -10,7 +10,9 @@ import { Blocks } from '../../_components/Blocks'
 import { Hero } from '../../_components/Hero'
 import { generateMeta } from '../../_utilities/generateMeta'
 
-export default async function Page({ params: { slug = 'home' } }) {
+export default async function Page({ params: { slug: slugs = ['home'] } }) {
+  const slug = slugs[slugs.length - 1]
+
   let page = await fetchDoc<Page>({
     collection: 'pages',
     slug,

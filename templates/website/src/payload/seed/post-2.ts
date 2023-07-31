@@ -1,13 +1,46 @@
 import type { Post } from '../payload-types'
 
 export const post2: Partial<Post> = {
-  title: 'E-Book',
-  slug: 'ebook',
+  title: 'Post 2',
+  slug: 'post-2',
   _status: 'published',
   meta: {
-    title: 'E-Book',
-    description: 'Make a one-time purchase for this digital asset.',
+    title: 'Post 2',
+    description: 'This is post 2',
     image: '{{POST_IMAGE}}',
+  },
+  hero: {
+    type: 'lowImpact',
+    links: [],
+    media: '',
+    richText: [
+      {
+        type: 'h1',
+        children: [
+          {
+            text: 'Post 2',
+          },
+        ],
+      },
+      {
+        type: 'p',
+        children: [
+          {
+            text: 'This is post 2. This hero and the content on this page is completely dynamic and ',
+          },
+          {
+            type: 'link',
+            linkType: 'custom',
+            url: '/admin',
+            children: [
+              {
+                text: 'configured in the admin dashboard',
+              },
+            ],
+          },
+        ],
+      },
+    ],
   },
   layout: [
     {
@@ -20,13 +53,6 @@ export const post2: Partial<Post> = {
               children: [
                 {
                   text: "All content from this point is completely dynamic using custom layout building block configured in the CMS. This can be anything you'd like.",
-                },
-              ],
-            },
-            {
-              children: [
-                {
-                  text: 'Purchase this product to gain access to the gated content behind the paywall which will appear below.',
                 },
               ],
             },
