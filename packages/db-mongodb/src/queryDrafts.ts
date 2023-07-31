@@ -1,11 +1,11 @@
-import { PaginateOptions } from 'mongoose';
+import type { PaginateOptions } from 'mongoose';
+import type { QueryDrafts } from 'payload/dist/database/types';
+import flattenWhereToOperators from 'payload/dist/database/flattenWhereToOperators';
+import sanitizeInternalFields from 'payload/dist/utilities/sanitizeInternalFields';
+import { PayloadRequest } from 'payload/dist/express/types';
 import type { MongooseAdapter } from '.';
-import type { QueryDrafts } from '../../../types';
-import flattenWhereToOperators from '../../../flattenWhereToOperators';
-import sanitizeInternalFields from '../../../../utilities/sanitizeInternalFields';
 import { buildSortParam } from './queries/buildSortParam';
 import { withSession } from './withSession';
-import { PayloadRequest } from '../../../../express/types';
 
 type AggregateVersion<T> = {
   _id: string;
