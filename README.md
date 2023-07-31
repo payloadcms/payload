@@ -25,20 +25,20 @@
 <a target="_blank" href="https://payloadcms.com/docs/getting-started/what-is-payload" rel="dofollow"><strong>Explore the Docs</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://payloadcms.com/community-help" rel="dofollow"><strong>Community Help</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://demo.payloadcms.com/" rel="dofollow"><strong>Try Live Demo</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://github.com/payloadcms/payload/discussions/1539" rel="dofollow"><strong>Roadmap</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://www.g2.com/products/payload-cms/reviews#reviews" rel="dofollow"><strong>View G2 Reviews</strong></a>
 </h4>
 <hr/>
-<br />
-<p style="font-size: 20px; font-weight: bold;">Benefits over a regular CMS</p>
+<h3>Benefits over a regular CMS</h3>
 <ul>
-  <li>Don’t hit their API, hit yours</li>
+  <li>Don’t hit some third-party SaaS API, hit your own API</li>
   <li>Use your own database and own your data</li>
+  <li>It's just Express - do what you want outside of Payload</li>
+  <li>No need to learn how Payload works - if you know JS, you know Payload</li>
   <li>No vendor lock-in</li>
-  <li>Avoid microservices hell</li>
+  <li>Avoid microservices hell - get everything (even auth) in one place</li>
   <li>Never touch ancient WP code again</li>
   <li>Build faster, never hit a roadblock</li>
   <li>Both admin and backend are 100% extensible</li>
 </ul>
-<br />
 
-## ☁️ Deploy your entire stack in one place with Payload Cloud.
+## ☁️ Deploy instantly with Payload Cloud.
 Create a cloud account, connect your GitHub, and [deploy in minutes](https://payloadcms.com/new).
 
 ## 🚀 Get started by self-hosting completely free, forever.
@@ -58,17 +58,6 @@ Eliminate the need to combine Shopify and a CMS, and instead do it all with Payl
 [All Official Templates](https://github.com/orgs/payloadcms/repositories?q=topic%3Apayload-template)&nbsp;·&nbsp;[Community Templates](https://github.com/topics/payload-template)
 
 **If you maintain your own template, consider adding the `payload-template` topic to your GitHub repository for others to find.**
-
-## ⭐ Why Payload?
-
-Payload is a CMS that has been designed for developers from the ground up to deliver them what they need to build great digital products. If you know JavaScript, you know Payload. It's a _code-first_ CMS, which allows us to do a lot of things right:
-
-- Payload gives you everything you need, but then steps back and lets you build what you want in JavaScript or TypeScript - with no unnecessary complexity brought by GUIs. You'll understand how your CMS works because you will have written it exactly how you want it.
-- Bring your own Express server and do whatever you need on top of Payload. Payload doesn't impose anything on you or your app.
-- Completely control the Admin panel by using your own React components. Swap out fields or even entire views with ease.
-- Use your data however and wherever you need thanks to auto-generated, yet fully extensible REST, GraphQL, and Local Node APIs.
-
-<a target="_blank" href="https://payloadcms.com/" rel="dofollow"><strong>Read more on our website</strong></a>
 
 ## ✨ Features
 
