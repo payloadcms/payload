@@ -2,16 +2,16 @@
 import mongoose, { PaginateOptions } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
-import { buildVersionCollectionFields } from '../../../versions/buildCollectionFields';
-import getBuildQueryPlugin from './src/queries/buildQuery';
-import buildCollectionSchema from './src/models/buildCollectionSchema';
-import buildSchema from './src/models/buildSchema';
-import { SanitizedCollectionConfig } from '../../../collections/config/types';
-import { getVersionsModelName } from '../../../versions/getVersionsModelName';
+import { buildVersionCollectionFields } from 'payload/dist/versions/buildCollectionFields';
+import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
+import { getVersionsModelName } from 'payload/dist/versions/getVersionsModelName';
+import { buildVersionGlobalFields } from 'payload/dist/versions/buildGlobalFields';
+import type { Init } from 'payload/dist/database/types';
+import getBuildQueryPlugin from './queries/buildQuery';
+import buildCollectionSchema from './models/buildCollectionSchema';
+import buildSchema from './models/buildSchema';
 import type { MongooseAdapter } from '.';
-import { buildGlobalModel } from './src/models/buildGlobalModel';
-import { buildVersionGlobalFields } from '../../../versions/buildGlobalFields';
-import type { Init } from '../../types';
+import { buildGlobalModel } from './models/buildGlobalModel';
 import { CollectionModel } from './types';
 
 export const init: Init = async function init(
