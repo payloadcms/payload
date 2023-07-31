@@ -1,7 +1,7 @@
 import type { PaginateOptions } from 'mongoose';
 import type { QueryDrafts } from 'payload/dist/database/types';
 import flattenWhereToOperators from 'payload/dist/database/flattenWhereToOperators';
-import sanitizeInternalFields from 'payload/dist/utilities/sanitizeInternalFields';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import { PayloadRequest } from 'payload/dist/express/types';
 import type { MongooseAdapter } from '.';
 import { buildSortParam } from './queries/buildSortParam';

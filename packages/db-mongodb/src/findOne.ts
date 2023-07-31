@@ -2,7 +2,7 @@ import type { MongooseQueryOptions } from 'mongoose';
 import type { FindOne } from 'payload/dist/database/types';
 import type { Document } from 'payload/types';
 import { PayloadRequest } from 'payload/dist/express/types';
-import sanitizeInternalFields from 'payload/dist/utilities/sanitizeInternalFields';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import type { MongooseAdapter } from '.';
 import { withSession } from './withSession';
 

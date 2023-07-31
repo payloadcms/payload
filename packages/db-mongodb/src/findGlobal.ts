@@ -1,7 +1,7 @@
 import { combineQueries } from 'payload/dist/database/combineQueries';
 import type { FindGlobal } from 'payload/dist/database/types';
-import sanitizeInternalFields from 'payload/dist/utilities/sanitizeInternalFields';
 import { PayloadRequest } from 'payload/dist/express/types';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import type { MongooseAdapter } from '.';
 import { withSession } from './withSession';
 
