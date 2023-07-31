@@ -1,5 +1,5 @@
 import path from 'path';
-import type { Webpack } from '../../../types';
+import type { Webpack } from '../../../types'; // Need to export this
 
 export const webpack: Webpack = (config) => {
   return {

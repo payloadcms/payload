@@ -1,10 +1,10 @@
+import { ValidationError } from 'payload/errors';
+import type { PayloadRequest } from 'payload/types';
+import type { UpdateOne } from 'payload/dist/database/types';
+import sanitizeInternalFields from 'payload/dist/utilities/sanitizeInternalFields';
+import i18nInit from 'payload/dist/translations/init';
 import type { MongooseAdapter } from '.';
-import type { UpdateOne } from '../../../types';
-import { ValidationError } from '../../../../errors';
-import sanitizeInternalFields from '../../../../utilities/sanitizeInternalFields';
-import { i18nInit } from '../../../../translations/init';
 import { withSession } from './withSession';
-import { PayloadRequest } from '../../../../express/types';
 
 export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,

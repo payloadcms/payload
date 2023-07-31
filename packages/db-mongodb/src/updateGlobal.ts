@@ -1,8 +1,8 @@
+import type { UpdateGlobal } from 'payload/dist/database/types';
+import sanitizeInternalFields from 'payload/dist/utilities/sanitizeInternalFields';
+import type { PayloadRequest } from 'payload/dist/express/types';
 import type { MongooseAdapter } from '.';
-import type { UpdateGlobal } from '../../../types';
-import sanitizeInternalFields from '../../../../utilities/sanitizeInternalFields';
 import { withSession } from './withSession';
-import { PayloadRequest } from '../../../../express/types';
 
 export const updateGlobal: UpdateGlobal = async function updateGlobal(
   this: MongooseAdapter,
