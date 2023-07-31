@@ -1,5 +1,5 @@
+import { Create } from 'payload/dist/database/types';
 import type { MongooseAdapter } from '.';
-import type { Create } from '../../types';
 import type { Document } from '../../../types';
 import { PayloadRequest } from '../../../types';
 import { withSession } from './withSession';
