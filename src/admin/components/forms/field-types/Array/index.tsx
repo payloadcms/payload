@@ -63,7 +63,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const locale = useLocale();
   const operation = useOperation();
   const { t, i18n } = useTranslation('fields');
-  const { localization, collections } = useConfig();
+  const { localization } = useConfig();
 
   const editingDefaultLocale = (() => {
     if (localization && localization.fallback) {
@@ -152,7 +152,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     className,
     fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
   ].filter(Boolean).join(' ');
-  console.log(path, collections[0].fields, fields);
+
   return (
     <div
       id={`field-${path.replace(/\./gi, '__')}`}
