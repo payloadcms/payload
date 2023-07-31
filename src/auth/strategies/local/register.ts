@@ -35,10 +35,13 @@ export const registerLocalStrategy = async ({
 
   const { salt, hash } = await generatePasswordSaltHash({ password });
 
+  const sanitizedDoc = { ...doc };
+  if (sanitizedDoc.password) delete sanitizedDoc.password;
+
   return payload.db.create({
     collection: collection.slug,
     data: {
-      ...doc,
+      ...sanitizedDoc,
       salt,
       hash,
     },
