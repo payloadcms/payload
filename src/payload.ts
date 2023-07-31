@@ -64,12 +64,15 @@ import PreferencesModel from './preferences/model';
 import findConfig from './config/find';
 
 import { defaults as emailDefaults } from './email/defaults';
+import { DatabaseAdapter } from './database/types';
 
 /**
  * @description Payload
  */
 export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   config: SanitizedConfig;
+
+  db: DatabaseAdapter;
 
   collections: {
     [slug: string | number | symbol]: Collection;

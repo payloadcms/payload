@@ -96,6 +96,7 @@
     "compression": "^1.7.4",
     "conf": "^10.2.0",
     "connect-history-api-fallback": "^1.6.0",
+    "console-table-printer": "^2.11.2",
     "css-loader": "^5.2.7",
     "css-minimizer-webpack-plugin": "^5.0.0",
     "dataloader": "^2.1.0",
