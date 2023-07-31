@@ -11,15 +11,13 @@ export const readMigrationFiles = async ({
 }: {
   payload: Payload;
 }): Promise<Migration[]> => {
-  const { config } = payload;
-
-  if (!fs.existsSync(config.db.migrationDir)) return [];
+  if (!fs.existsSync(payload.db.migrationDir)) return [];
 
   const files = fs
-    .readdirSync(config.db.migrationDir)
+    .readdirSync(payload.db.migrationDir)
     .sort()
     .map((file) => {
-      return path.resolve(config.db.migrationDir, file);
+      return path.resolve(payload.db.migrationDir, file);
     });
   return files.map((filePath) => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-dynamic-require

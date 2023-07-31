@@ -1,10 +1,14 @@
 import { Config, SanitizedConfig } from '../src/config/types';
 import { buildConfig as buildPayloadConfig } from '../src/config/build';
 import { mongooseAdapter } from '../src/database/adapters/mongoose';
+import { postgresAdapter } from '../src/database/adapters/postgres';
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({
     url: 'mongodb://127.0.0.1/payload',
+  }),
+  postgres: postgresAdapter({
+    url: 'my-url',
   }),
 };
 

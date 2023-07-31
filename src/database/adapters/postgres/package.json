@@ -1,0 +1,24 @@
+{
+  "name": "@payloadcms/db-postgres",
+  "version": "0.0.1",
+  "description": "The officially supported Postgres database adapter for Payload",
+  "main": "index.js",
+  "repository": "https://github.com/payloadcms/payload",
+  "author": "Payload CMS, Inc.",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc"
+  },
+  "peerDependencies": {
+    "payload": "^1.11.7"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.27.2",
+    "pg": "^8.11.1"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.10.2",
+    "payload": "^1.11.7",
+    "typescript": "^4.9.4"
+  }
+}

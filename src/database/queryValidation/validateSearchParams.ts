@@ -1,6 +1,6 @@
 import { Field, fieldAffectsData } from '../../fields/config/types';
 import { PayloadRequest } from '../../express/types';
-import { getLocalizedPaths } from '../adapters/mongoose/queries/getLocalizedPaths';
+import { getLocalizedPaths } from '../adapters/mongoose/src/queries/getLocalizedPaths';
 import { getEntityPolicies } from '../../utilities/getEntityPolicies';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../globals/config/types';

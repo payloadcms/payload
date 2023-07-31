@@ -7,7 +7,7 @@ export const migrate = async (args: string[]): Promise<void> => {
     local: true,
   });
 
-  const adapter = payload.config.db;
+  const adapter = payload.db;
 
   if (!adapter) {
     throw new Error('No database adapter found');
