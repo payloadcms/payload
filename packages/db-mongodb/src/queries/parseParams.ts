@@ -2,13 +2,13 @@
 /* eslint-disable no-await-in-loop */
 import { FilterQuery } from 'mongoose';
 import deepmerge from 'deepmerge';
-import { Where } from '../../../../../types';
+import { Where } from 'payload/types';
+import { combineMerge } from 'payload/dist/utilities/combineMerge';
+import { Field } from 'payload/dist/fields/config/types';
+import { validOperators } from 'payload/dist/database/queryValidation/types';
+import { Payload } from 'payload';
 import { buildSearchParam } from './buildSearchParams';
-import { combineMerge } from '../../../../../utilities/combineMerge';
 import { buildAndOrConditions } from './buildAndOrConditions';
-import { Field } from '../../../../../fields/config/types';
-import { validOperators } from '../../../../queryValidation/types';
-import { Payload } from '../../../../..';
 
 export async function parseParams({
   where,

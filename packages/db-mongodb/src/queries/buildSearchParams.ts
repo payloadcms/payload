@@ -1,12 +1,12 @@
 import mongoose from 'mongoose';
 import objectID from 'bson-objectid';
-import { getLocalizedPaths } from 'payload/database/getLocalizedPaths';
-import { Field, fieldAffectsData } from '../../../../../fields/config/types';
+import { getLocalizedPaths } from 'payload/dist/database/getLocalizedPaths';
+import { Field, fieldAffectsData } from 'payload/dist/fields/config/types';
+import { PathToQuery, validOperators } from 'payload/dist/database/queryValidation/types';
+import { Payload } from 'payload';
 import { operatorMap } from './operatorMap';
 import { sanitizeQueryValue } from './sanitizeQueryValue';
-import { PathToQuery, validOperators } from '../../../../queryValidation/types';
-import { Payload } from '../../../../..';
-import { MongooseAdapter } from '../..';
+import { MongooseAdapter } from '..';
 
 type SearchParam = {
   path?: string,

@@ -1,7 +1,7 @@
 import { PaginateOptions } from 'mongoose';
-import { Config } from '../../../../../config/types';
+import { Config } from 'payload/dist/config/types';
+import { Field } from 'payload/dist/fields/config/types';
 import { getLocalizedSortProperty } from './getLocalizedSortProperty';
-import { Field } from '../../../../../fields/config/types';
 
 type Args = {
   sort: string

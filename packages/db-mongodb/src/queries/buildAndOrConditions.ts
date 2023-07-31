@@ -1,7 +1,7 @@
-import { Where } from '../../../../../types';
+import { Where } from 'payload/types';
+import { Field } from 'payload/dist/fields/config/types';
+import { Payload } from 'payload';
 import { parseParams } from './parseParams';
-import { Field } from '../../../../../fields/config/types';
-import { Payload } from '../../../../..';
 
 export async function buildAndOrConditions({
   where,

@@ -1,5 +1,4 @@
-import { RollbackTransaction } from '../../../../types';
-
+import { RollbackTransaction } from 'payload/dist/database/types';
 
 export const rollbackTransaction: RollbackTransaction = async function rollbackTransaction(id = '') {
   if (!this.session[id]?.inTransaction()) {

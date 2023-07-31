@@ -1,5 +1,4 @@
-import { CommitTransaction } from '../../../../types';
-
+import { CommitTransaction } from 'payload/dist/database/types';
 
 export const commitTransaction: CommitTransaction = async function commitTransaction(id) {
   if (!this.connection.get('replicaSet')) {
