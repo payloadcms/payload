@@ -1,5 +1,7 @@
 
 
+## [1.11.8](https://github.com/payloadcms/payload/compare/v1.11.7...v1.11.8) (2023-07-31)
+
 ## [1.11.7](https://github.com/payloadcms/payload/compare/v1.11.6...v1.11.7) (2023-07-27)
 
 
