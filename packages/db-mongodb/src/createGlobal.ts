@@ -1,8 +1,8 @@
-import type { MongooseAdapter } from '.';
-import type { CreateGlobal } from '../../types';
-import sanitizeInternalFields from '../../../utilities/sanitizeInternalFields';
+import { PayloadRequest } from 'payload/types';
+import sanitizeInternalFields from 'payload/dist/utilities/sanitizeInternalFields';
+import { CreateGlobal } from 'payload/dist/database/types';
 import { withSession } from './withSession';
-import { PayloadRequest } from '../../../express/types';
+import type { MongooseAdapter } from '.';
 
 export const createGlobal: CreateGlobal = async function createGlobal(
   this: MongooseAdapter,

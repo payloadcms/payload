@@ -1,9 +1,9 @@
 import type { TransactionOptions } from 'mongodb';
 import { v4 as uuid } from 'uuid';
 import { BeginTransaction } from 'payload/dist/database/types';
-import { APIError } from 'payload/dist/errors';
+import { APIError } from 'payload/errors';
 
-let transactionsNotAvailable;
+let transactionsNotAvailable: boolean;
 export const beginTransaction: BeginTransaction = async function beginTransaction(
   options: TransactionOptions = {},
 ) {

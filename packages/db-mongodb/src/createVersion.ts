@@ -1,7 +1,7 @@
+import { CreateVersion } from 'payload/dist/database/types';
+import { PayloadRequest } from 'payload/dist/express/types';
+import type { Document } from 'payload/types';
 import type { MongooseAdapter } from '.';
-import type { CreateVersion } from '../../types';
-import type { Document } from '../../../types';
-import { PayloadRequest } from '../../../types';
 import { withSession } from './withSession';
 
 export const createVersion: CreateVersion = async function createVersion(

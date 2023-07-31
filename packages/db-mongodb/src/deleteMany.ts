@@ -1,7 +1,7 @@
+import { DeleteMany } from 'payload/dist/database/types';
+import { PayloadRequest } from 'payload/dist/express/types';
 import type { MongooseAdapter } from '.';
-import type { DeleteMany } from '../../types';
 import { withSession } from './withSession';
-import { PayloadRequest } from '../../../express/types';
 
 export const deleteMany: DeleteMany = async function deleteMany(this: MongooseAdapter,
   { collection, where, req = {} as PayloadRequest }) {

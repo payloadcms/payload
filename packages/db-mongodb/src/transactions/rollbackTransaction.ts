@@ -1,5 +1,6 @@
 import { RollbackTransaction } from 'payload/dist/database/types';
 
+
 export const rollbackTransaction: RollbackTransaction = async function rollbackTransaction(id = '') {
   if (!this.session[id]?.inTransaction()) {
     this.payload.logger.warn('rollbackTransaction called when no transaction exists');
