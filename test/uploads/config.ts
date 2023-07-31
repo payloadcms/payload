@@ -16,7 +16,7 @@ export const audioSlug = 'audio';
 export const enlargeSlug = 'enlarge';
 
 export const reduceSlug = 'reduce';
-=======
+
 export const adminThumbnailSlug = 'admin-thumbnail';
 
 const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js');
