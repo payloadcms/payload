@@ -13,7 +13,6 @@ export async function generateGraphQLSchema(): Promise<void> {
 
   await payload.init({
     secret: '--unused--',
-    mongoURL: false,
     local: true,
   });
 

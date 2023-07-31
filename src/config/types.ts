@@ -5,7 +5,6 @@ import { Options as ExpressFileUploadOptions } from 'express-fileupload';
 import type { Configuration } from 'webpack';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
-import { ConnectOptions } from 'mongoose';
 import React from 'react';
 import { DestinationStream, LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
@@ -81,13 +80,6 @@ export type GraphQLExtension = (
 export type InitOptions = {
   /** Express app for Payload to use */
   express?: Express;
-  /** MongoDB connection URL, starts with `mongo` */
-  mongoURL?: string | false;
-  /** Extra configuration options that will be passed to MongoDB */
-  mongoOptions?: ConnectOptions & {
-    /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
-    useFacet?: boolean
-  };
 
   /** Secure string that Payload will use for any encryption workflows */
   secret: string;

@@ -75,6 +75,13 @@ export default buildConfigWithDefaults({
       },
       fields: [],
     },
+    {
+      slug: 'public-users',
+      auth: {
+        verify: true,
+      },
+      fields: [],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({

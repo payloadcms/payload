@@ -88,18 +88,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   secret: string;
 
-  mongoURL: string | false;
-
-  mongoOptions: InitOptions['mongoOptions'];
-
-  /**
-   * @deprecated
-   *
-   * This will be removed in 2.0.0 and will become the responsibility
-   * of the database adapter itself
-   */
-  mongoMemoryServer: any;
-
   local: boolean;
 
   encrypt = encrypt;
@@ -148,8 +136,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    */
   async init(options: InitOptions): Promise<Payload> {
     this.logger = Logger('payload', options.loggerOptions, options.loggerDestination);
-    this.mongoURL = options.mongoURL;
-    this.mongoOptions = options.mongoOptions;
 
     this.logger.info('Starting Payload...');
     if (!options.secret) {
@@ -222,7 +208,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
     serverInitTelemetry(this);
 
-    if (options.local !== false && this.mongoURL) {
+    if (options.local !== false) {
       if (typeof options.onInit === 'function') await options.onInit(this);
       if (typeof this.config.onInit === 'function') await this.config.onInit(this);
     }

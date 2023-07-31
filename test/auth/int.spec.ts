@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import payload from '../../src';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { slug } from './config';
@@ -22,7 +21,9 @@ describe('Auth', () => {
   });
 
   afterAll(async () => {
-    await payload.db.destroy(payload);
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy(payload);
+    }
   });
 
   describe('admin user', () => {
@@ -191,7 +192,7 @@ describe('Auth', () => {
         expect(doc).toHaveProperty('roles');
       });
 
-      it.skip('should allow verification of a user', async () => {
+      it('should allow verification of a user', async () => {
         const emailToVerify = 'verify@me.com';
         const response = await fetch(`${apiUrl}/public-users`, {
           body: JSON.stringify({
@@ -207,14 +208,19 @@ describe('Auth', () => {
         });
 
         expect(response.status).toBe(201);
-        // const client = await MongoClient.connect(`${mongoURL}:${mongoPort}`, {
-        //   useUnifiedTopology: true,
-        // });
 
-        // const db = client.db(mongoDBName);
-        const { db } = mongoose.connection;
-        const userResult = await db.collection('public-users').findOne({ email: emailToVerify });
-        const { _verified, _verificationToken } = userResult;
+        const userResult = await payload.find({
+          collection: 'public-users',
+          limit: 1,
+          showHiddenFields: true,
+          where: {
+            email: {
+              equals: emailToVerify,
+            },
+          },
+        });
+
+        const { _verified, _verificationToken } = userResult.docs[0];
 
         expect(_verified).toBe(false);
         expect(_verificationToken).toBeDefined();
@@ -228,11 +234,20 @@ describe('Auth', () => {
 
         expect(verificationResponse.status).toBe(200);
 
-        const afterVerifyResult = await db.collection('public-users').findOne({ email: emailToVerify });
-        // @ts-expect-error trust
-        const { _verified: afterVerified, _verificationToken: afterToken } = afterVerifyResult;
+        const afterVerifyResult = await payload.find({
+          collection: 'public-users',
+          limit: 1,
+          showHiddenFields: true,
+          where: {
+            email: {
+              equals: emailToVerify,
+            },
+          },
+        });
+
+        const { _verified: afterVerified, _verificationToken: afterToken } = afterVerifyResult.docs[0];
         expect(afterVerified).toBe(true);
-        expect(afterToken).toBeUndefined();
+        expect(afterToken).toBeNull();
       });
 
       describe('Account Locking', () => {
@@ -283,8 +298,18 @@ describe('Auth', () => {
           await tryLogin();
           await tryLogin();
 
-          const userResult = await mongoose.connection.db.collection(slug).findOne<any>({ email: userEmail });
-          const { loginAttempts, lockUntil } = userResult;
+          const userResult = await payload.find({
+            collection: slug,
+            limit: 1,
+            showHiddenFields: true,
+            where: {
+              email: {
+                equals: userEmail,
+              },
+            },
+          });
+
+          const { loginAttempts, lockUntil } = userResult.docs[0];
 
           expect(loginAttempts).toBe(2);
           expect(lockUntil).toBeDefined();
@@ -295,10 +320,17 @@ describe('Auth', () => {
           await tryLogin();
           await tryLogin();
 
-          // set lockUntil
-          await mongoose.connection.db
-            .collection(slug)
-            .findOneAndUpdate({ email: userEmail }, { $set: { lockUntil: Date.now() - 605 * 1000 } });
+          await payload.update({
+            collection: slug,
+            where: {
+              email: {
+                equals: userEmail,
+              },
+            },
+            data: {
+              lockUntil: Date.now() - 605 * 1000,
+            },
+          });
 
           // login
           await fetch(`${apiUrl}/${slug}/login`, {
@@ -313,10 +345,18 @@ describe('Auth', () => {
             method: 'post',
           });
 
-          const userResult = await mongoose.connection.db
-            .collection(slug)
-            .findOne<any>({ email: userEmail });
-          const { loginAttempts, lockUntil } = userResult;
+          const userResult = await payload.find({
+            collection: slug,
+            limit: 1,
+            showHiddenFields: true,
+            where: {
+              email: {
+                equals: userEmail,
+              },
+            },
+          });
+
+          const { loginAttempts, lockUntil } = userResult.docs[0];
 
           expect(loginAttempts).toBe(0);
           expect(lockUntil).toBeNull();

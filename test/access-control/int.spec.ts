@@ -36,7 +36,9 @@ describe('Access Control', () => {
   });
 
   afterAll(async () => {
-    await payload.db.destroy(payload);
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy(payload);
+    }
   });
 
   it('should not affect hidden fields when patching data', async () => {

@@ -12,7 +12,9 @@ describe('array-update', () => {
   });
 
   afterAll(async () => {
-    await payload.db.destroy(payload);
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy(payload);
+    }
   });
 
   it('should persist existing array-based data while updating and passing row ID', async () => {

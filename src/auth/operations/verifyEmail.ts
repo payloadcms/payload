@@ -34,7 +34,7 @@ async function verifyEmail(args: Args): Promise<boolean> {
     where: { id: { equals: user.id } },
     data: {
       _verified: true,
-      _verificationToken: undefined,
+      _verificationToken: null,
     },
     req,
   });

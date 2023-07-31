@@ -24,7 +24,9 @@ describe('Hooks', () => {
   });
 
   afterAll(async () => {
-    await payload.db.destroy(payload);
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy(payload);
+    }
   });
 
   describe('transform actions', () => {

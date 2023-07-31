@@ -34,7 +34,9 @@ describe('_Community Tests', () => {
   });
 
   afterAll(async () => {
-    await payload.db.destroy(payload);
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy(payload);
+    }
   });
 
   // --__--__--__--__--__--__--__--__--__
