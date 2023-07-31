@@ -57,8 +57,8 @@ import Logger from './utilities/logger';
 import findConfig from './config/find';
 
 import { defaults as emailDefaults } from './email/defaults';
-import type { DatabaseAdapter } from '.';
 import type { PaginatedDocs } from './database/types';
+import { DatabaseAdapter } from './database/types';
 
 /**
  * @description Payload

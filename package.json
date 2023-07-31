@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "1.11.7",
+  "version": "1.11.8",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "engines": {
@@ -97,7 +97,7 @@
     "compression": "^1.7.4",
     "conf": "^10.2.0",
     "connect-history-api-fallback": "^1.6.0",
-    "console-table-printer": "^2.11.1",
+    "console-table-printer": "^2.11.2",
     "css-loader": "^5.2.7",
     "css-minimizer-webpack-plugin": "^5.0.0",
     "dataloader": "^2.1.0",
