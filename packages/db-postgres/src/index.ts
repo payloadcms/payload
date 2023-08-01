@@ -1,7 +1,9 @@
+import type { ClientConfig, PoolConfig } from 'pg';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { Payload } from 'payload';
 import type { DatabaseAdapter } from 'payload/dist/database/types';
-// import { connect } from './connect';
 import { createDatabaseAdapter } from 'payload/dist/database/createAdapter';
+import { connect } from './connect';
 import { init } from './init';
 import { webpack } from './webpack';
 // import { createGlobal } from './createGlobal';
@@ -24,28 +26,37 @@ import { webpack } from './webpack';
 // import { deleteMany } from './deleteMany';
 // import { destroy } from './destroy';
 
-export interface Args {
-  /** The URL to connect to Postgres or false to start payload and prevent connecting */
-  url: string | false;
+type BaseArgs = {
   migrationDir?: string;
 }
 
-export type PostgresAdapter = DatabaseAdapter & Args
+type ClientArgs = {
+  /** Client connection options for the Node package `pg` */
+  client?: ClientConfig | string | false
+} & BaseArgs
+
+type PoolArgs = {
+  /** Pool connection options for the Node package `pg` */
+  pool?: PoolConfig | false
+} & BaseArgs
+
+export type Args = ClientArgs | PoolArgs
+
+export type PostgresAdapter = DatabaseAdapter & Args & {
+  connection: NodePgDatabase<Record<string, never>>
+}
 
 type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
 
-export function postgresAdapter({
-  url,
-  migrationDir,
-}: Args): PostgresAdapterResult {
+export function postgresAdapter(args: Args): PostgresAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     return createDatabaseAdapter<PostgresAdapter>({
+      ...args,
       payload,
-      migrationDir,
-      url,
-      // connect,
+      connect,
+      connection: undefined,
       // destroy,
       init,
       webpack,
