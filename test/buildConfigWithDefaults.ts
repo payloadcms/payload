@@ -9,7 +9,9 @@ const databaseAdapters = {
     url: 'mongodb://127.0.0.1/payload',
   }),
   postgres: postgresAdapter({
-    url: 'my-url',
+    client: {
+      connectionString: 'postgres://127.0.0.1:5432/payload',
+    },
   }),
 };
 
