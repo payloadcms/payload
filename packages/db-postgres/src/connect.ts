@@ -9,18 +9,18 @@ export const connect: Connect = async function connect(
   this: PostgresAdapter,
   payload,
 ) {
-  let connection: NodePgDatabase<Record<string, never>>;
+  let db: NodePgDatabase<Record<string, never>>;
 
   try {
     if ('pool' in this && this.pool !== false) {
       const pool = new Pool(this.pool);
-      connection = drizzle(pool);
+      db = drizzle(pool);
     }
 
     if ('client' in this && this.client !== false) {
       const client = new Client(this.client);
       await client.connect();
-      connection = drizzle(client);
+      db = drizzle(client);
     }
 
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
@@ -37,5 +37,5 @@ export const connect: Connect = async function connect(
   }
 
   this.payload.logger.info('Connected to Postgres successfully');
-  this.connection = connection;
+  this.db = db;
 };

@@ -43,7 +43,7 @@ type PoolArgs = {
 export type Args = ClientArgs | PoolArgs
 
 export type PostgresAdapter = DatabaseAdapter & Args & {
-  connection: NodePgDatabase<Record<string, never>>
+  db: NodePgDatabase<Record<string, never>>
 }
 
 type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
@@ -56,7 +56,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       ...args,
       payload,
       connect,
-      connection: undefined,
+      db: undefined,
       // destroy,
       init,
       webpack,
