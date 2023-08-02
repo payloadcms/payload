@@ -363,15 +363,15 @@ const Form: React.FC<Props> = (props) => {
   ]);
 
   // Array/Block row manipulation
-  const addFieldRow: Context['addFieldRow'] = useCallback(async ({ path, rowIndex, blockType, data }) => {
+  const addFieldRow: Context['addFieldRow'] = useCallback(async ({ path, rowIndex, data }) => {
     const preferences = await getDocPreferences();
     const nonIndexedPath = path.split('.').filter((segment) => !isNumber(segment)).join('.');
-    const schemaKey = blockType ? `${nonIndexedPath}.${blockType}` : nonIndexedPath;
+    const schemaKey = data?.blockType ? `${nonIndexedPath}.${data.blockType}` : nonIndexedPath;
     const rowFieldSchema = collectionFieldSchemaMap.get(schemaKey);
 
     if (rowFieldSchema) {
       const subFieldState = await buildStateFromSchema({ fieldSchema: rowFieldSchema, data, preferences, operation, id, user, locale, t });
-      dispatchFields({ type: 'ADD_ROW', rowIndex, path, blockType, subFieldState });
+      dispatchFields({ type: 'ADD_ROW', rowIndex, path, blockType: data?.blockType, subFieldState });
     }
   }, [dispatchFields, collectionFieldSchemaMap, getDocPreferences, id, user, operation, locale, t]);
 
@@ -379,15 +379,15 @@ const Form: React.FC<Props> = (props) => {
     dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
   }, [dispatchFields]);
 
-  const replaceFieldRow: Context['replaceFieldRow'] = useCallback(async ({ path, rowIndex, blockType, data }) => {
+  const replaceFieldRow: Context['replaceFieldRow'] = useCallback(async ({ path, rowIndex, data }) => {
     const preferences = await getDocPreferences();
     const nonIndexedPath = path.split('.').filter((segment) => !isNumber(segment)).join('.');
-    const schemaKey = blockType ? `${nonIndexedPath}.${blockType}` : nonIndexedPath;
+    const schemaKey = data?.blockType ? `${nonIndexedPath}.${data.blockType}` : nonIndexedPath;
     const rowFieldSchema = collectionFieldSchemaMap.get(schemaKey);
 
     if (rowFieldSchema) {
       const subFieldState = await buildStateFromSchema({ fieldSchema: rowFieldSchema, data, preferences, operation, id, user, locale, t });
-      dispatchFields({ type: 'REPLACE_ROW', rowIndex, path, blockType, subFieldState });
+      dispatchFields({ type: 'REPLACE_ROW', rowIndex, path, blockType: data?.blockType, subFieldState });
     }
   }, [dispatchFields, collectionFieldSchemaMap, getDocPreferences, id, user, operation, locale, t]);
 
@@ -459,7 +459,6 @@ const Form: React.FC<Props> = (props) => {
     const entityFields = collection?.fields || global?.fields || [];
     if (entityFields.length === 0) return;
     const fieldSchemaMap = buildFieldSchemaMap(entityFields);
-    console.log(fieldSchemaMap);
     setCollectionFieldSchemaMap(fieldSchemaMap);
   }, [collection?.fields, global?.fields]);
 

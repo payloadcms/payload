@@ -98,7 +98,13 @@ const BlocksField: React.FC<Props> = (props) => {
   });
 
   const addRow = useCallback(async (rowIndex: number, blockType: string) => {
-    addFieldRow({ path, rowIndex, blockType });
+    addFieldRow({
+      path,
+      rowIndex,
+      data: {
+        blockType,
+      },
+    });
     setModified(true);
 
     setTimeout(() => {
