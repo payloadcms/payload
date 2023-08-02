@@ -19,8 +19,8 @@
       "cwd": "${workspaceFolder}"
     },
     {
-      "command": "yarn run dev:postgres fields",
-      "name": "Run Dev Fields - Postgres",
+      "command": "yarn run dev:postgres postgres",
+      "name": "Run Dev Postgres",
       "request": "launch",
       "type": "node-terminal",
       "cwd": "${workspaceFolder}"

@@ -8,7 +8,9 @@ import { createIndex } from './createIndex';
 
 type Args = {
   adapter: PostgresAdapter
+  buildRelationships: boolean
   columns: Record<string, AnyPgColumnBuilder>
+  columnPrefix?: string
   fields: Field[]
   indexes: Record<string, (cols: GenericColumns) => IndexBuilder>
   localesColumns: Record<string, AnyPgColumnBuilder>
@@ -17,8 +19,10 @@ type Args = {
   relationships: Set<string>
 }
 
-export const mapFields = ({
+export const traverseFields = ({
   adapter,
+  buildRelationships,
+  columnPrefix,
   columns,
   fields,
   indexes,
@@ -30,11 +34,14 @@ export const mapFields = ({
   let hasLocalizedField = false;
 
   fields.forEach((field) => {
-    const formattedName = 'name' in field ? formatName(field.name) : '';
+    let formattedName: string;
+
     let targetTable = columns;
     let targetIndexes = indexes;
 
     if (fieldAffectsData(field)) {
+      formattedName = `${columnPrefix || ''}${formatName(field.name)}`;
+
       // If field is localized,
       // add the column to the locale table
       if (field.localized) {
@@ -60,9 +67,29 @@ export const mapFields = ({
         targetTable[field.name] = numeric(formattedName);
         break;
 
-      case 'row':
-        ({ hasLocalizedField } = mapFields({
+      case 'group': {
+        const { hasLocalizedField: groupHasLocalizedField } = traverseFields({
           adapter,
+          buildRelationships,
+          columnPrefix: `${columnPrefix}${field.name}_`,
+          columns,
+          fields: field.fields,
+          indexes,
+          localesColumns,
+          localesIndexes,
+          tableName,
+          relationships,
+        });
+
+        if (groupHasLocalizedField) hasLocalizedField = true;
+
+        break;
+      }
+
+      case 'row':
+        ({ hasLocalizedField } = traverseFields({
+          adapter,
+          buildRelationships,
           columns,
           fields: field.fields,
           indexes,

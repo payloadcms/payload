@@ -11,7 +11,12 @@ export const init: Init = async function init(
 ) {
   this.payload.config.collections.forEach(
     (collection: SanitizedCollectionConfig) => {
-      buildTable({ adapter: this, name: collection.slug, fields: collection.fields });
+      buildTable({
+        adapter: this,
+        buildRelationships: true,
+        fields: collection.fields,
+        tableName: collection.slug,
+      });
     },
   );
 
