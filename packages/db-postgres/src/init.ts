@@ -3,14 +3,15 @@ import { buildVersionCollectionFields } from 'payload/dist/versions/buildCollect
 import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
 import { getVersionsModelName } from 'payload/dist/versions/getVersionsModelName';
 import type { Init } from 'payload/dist/database/types';
-import type { PostgresAdapter } from '.';
+import type { PostgresAdapter } from './types';
+import { buildTable } from './schema/build';
 
 export const init: Init = async function init(
   this: PostgresAdapter,
 ) {
   this.payload.config.collections.forEach(
     (collection: SanitizedCollectionConfig) => {
-      // create collection model
+      buildTable({ adapter: this, name: collection.slug, fields: collection.fields });
     },
   );
 

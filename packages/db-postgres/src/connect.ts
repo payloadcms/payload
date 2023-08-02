@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { Connect } from 'payload/dist/database/types';
-import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import { Client, Pool } from 'pg';
 
 import type { PostgresAdapter } from '.';
+import { DrizzleDB } from './types';
 
 export const connect: Connect = async function connect(
   this: PostgresAdapter,
   payload,
 ) {
-  let db: NodePgDatabase<Record<string, never>>;
+  let db: DrizzleDB;
 
   try {
     if ('pool' in this && this.pool !== false) {
