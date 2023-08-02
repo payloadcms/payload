@@ -1081,10 +1081,11 @@ describe('fields', () => {
       await expect(page.locator('.Toastify')).toContainText('successfully');
 
       // Assert that the media field has the png upload
-      await expect(page.locator('.field-type.upload .file-details .file-meta__url a')).toHaveAttribute('href', '/uploads/payload-1.png');
-      await expect(page.locator('.field-type.upload .file-details .file-meta__url a')).toContainText('payload-1.png');
-      await expect(page.locator('.field-type.upload .file-details img')).toHaveAttribute('src', '/uploads/payload-1.png');
-      await page.locator('#action-save').click();
+      await page.locator('.field-type.upload .file-details .file-meta__url button').first().click();
+      await expect(page.locator('[id^=doc-drawer_uploads_1_] .file-details .file-meta__url a')).toHaveAttribute('href', '/uploads/payload-1.png');
+      await expect(page.locator('[id^=doc-drawer_uploads_1_] .file-details .file-meta__url a')).toContainText('payload-1.png');
+      await expect(page.locator('[id^=doc-drawer_uploads_1_] .file-details img')).toHaveAttribute('src', '/uploads/payload-1.png');
+      await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click();
       await wait(200);
       await expect(page.locator('.Toastify')).toContainText('successfully');
     });
