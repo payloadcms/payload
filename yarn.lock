@@ -12420,10 +12420,10 @@ vite-plugin-dynamic-import@^1.5.0:
     fast-glob "^3.2.12"
     magic-string "^0.30.1"
 
-vite@^4.4.6:
-  version "4.4.6"
-  resolved "https://registry.yarnpkg.com/vite/-/vite-4.4.6.tgz#97a0a43868ec773fd88980d7c323c80233521cf1"
-  integrity sha512-EY6Mm8vJ++S3D4tNAckaZfw3JwG3wa794Vt70M6cNJ6NxT87yhq7EC8Rcap3ahyHdo8AhCmV9PTk+vG1HiYn1A==
+vite@^4.4.8:
+  version "4.4.8"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-4.4.8.tgz#31e4a438f8748695c68bd57ffd262ba93540fdf7"
+  integrity sha512-LONawOUUjxQridNWGQlNizfKH89qPigK36XhMI7COMGztz8KNY0JHim7/xDd71CZwGT4HtSRgI7Hy+RlhG0Gvg==
   dependencies:
     esbuild "^0.18.10"
     postcss "^8.4.26"
