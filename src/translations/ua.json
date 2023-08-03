@@ -180,6 +180,8 @@
     "email": "Email",
     "emailAddress": "Email адреса",
     "enterAValue": "Введіть значення",
+    "error": "Помилка",
+    "errors": "Помилки",
     "fallbackToDefaultLocale": "Відновлення локалі за замовчуванням",
     "filter": "Фільтрувати",
     "filterWhere": "Де фільтрувати {{label}}",

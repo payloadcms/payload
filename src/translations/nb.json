@@ -184,6 +184,8 @@
     "email": "E-post",
     "emailAddress": "E-postadresse",
     "enterAValue": "Skriv inn en verdi",
+    "error": "Feil",
+    "errors": "Feil",
     "fallbackToDefaultLocale": "Tilbakestilling til standard lokalitet",
     "filter": "Filtrer",
     "filterWhere": "Filtrer {{label}} der",

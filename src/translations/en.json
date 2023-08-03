@@ -90,9 +90,7 @@
     "unspecific": "An error has occurred.",
     "userLocked": "This user is locked due to having too many failed login attempts.",
     "valueMustBeUnique": "Value must be unique",
-    "verificationTokenInvalid": "Verification token is invalid.",
-    "singular": "Error",
-    "plural": "Errors"
+    "verificationTokenInvalid": "Verification token is invalid."
   },
   "fields": {
     "addLabel": "Add {{label}}",
@@ -186,6 +184,8 @@
     "email": "Email",
     "emailAddress": "Email Address",
     "enterAValue": "Enter a value",
+    "error": "Error",
+    "errors": "Errors",
     "fallbackToDefaultLocale": "Fallback to default locale",
     "filter": "Filter",
     "filterWhere": "Filter {{label}} where",

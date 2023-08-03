@@ -184,6 +184,8 @@
     "email": "رایانامه",
     "emailAddress": "نشانی رایانامه",
     "enterAValue": "یک مقدار وارد کنید",
+    "error": "خطا",
+    "errors": "خطاها",
     "fallbackToDefaultLocale": "بازگردان پیشفرض زبان",
     "filter": "علامت‌گذاری",
     "filterWhere": "علامت گذاری کردن {{label}} جایی که",

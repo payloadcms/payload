@@ -181,6 +181,8 @@
     "editingLabel_many": "تعديل {{count}} {{label}}",
     "editingLabel_one": "تعديل {{count}} {{label}}",
     "editingLabel_other": "تعديل {{count}} {{label}}",
+    "error": "خطأ",
+    "errors": "أخطاء",
     "email": "البريد الإلكتروني",
     "emailAddress": "عنوان البريد الإلكتروني",
     "enterAValue": "أدخل قيمة",
