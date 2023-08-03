@@ -30,25 +30,30 @@ type Args = {
   tableName: string
 }
 
+type Result = {
+  arrayBlockRelations: Map<string, string>
+}
+
 export const buildTable = ({
   adapter,
   baseColumns = {},
   buildRelationships,
   fields,
   tableName,
-}: Args): void => {
+}: Args): Result => {
   const formattedTableName = toSnakeCase(tableName);
   const columns: Record<string, AnyPgColumnBuilder> = baseColumns;
   const indexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {};
 
   let hasLocalizedField = false;
-
   const localesColumns: Record<string, AnyPgColumnBuilder> = {};
   const localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {};
   let localesTable: GenericTable;
 
   const relationships: Set<string> = new Set();
   let relationshipsTable: GenericTable;
+
+  const arrayBlockRelations: Map<string, string> = new Map();
 
   const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id');
 
@@ -60,6 +65,7 @@ export const buildTable = ({
 
   ({ hasLocalizedField } = traverseFields({
     adapter,
+    arrayBlockRelations,
     buildRelationships,
     columns,
     fields,
@@ -93,6 +99,15 @@ export const buildTable = ({
     });
 
     adapter.tables[localeTableName] = localesTable;
+
+    const localesTableRelations = relations(localesTable, ({ one }) => ({
+      _parentID: one(table, {
+        fields: [localesTable._parentID],
+        references: [table.id],
+      }),
+    }));
+
+    adapter.relations[localeTableName] = localesTableRelations;
   }
 
   if (buildRelationships) {
@@ -109,14 +124,41 @@ export const buildTable = ({
         relationshipColumns[`${relationTo}ID`] = integer(`${formattedRelationTo}_id`).references(() => adapter.tables[formattedRelationTo].id);
       });
 
-      relationshipsTable = pgTable(`${formattedTableName}_relationships`, relationshipColumns);
+      const relationshipsTableName = `${formattedTableName}_relationships`;
+      relationshipsTable = pgTable(relationshipsTableName, relationshipColumns);
+      adapter.tables[relationshipsTableName] = relationshipsTable;
 
-      adapter.tables[`${formattedTableName}_relationships`] = relationshipsTable;
+      const relationshipsTableRelations = relations(relationshipsTable, ({ one, many }) => {
+        const result: Record<string, Relation<string>> = {
+          parent: one(table, {
+            relationName: '_relationships',
+            fields: [relationshipsTable.parent],
+            references: [table.id],
+          }),
+        };
+
+        relationships.forEach((relationTo) => {
+          const relatedTableName = toSnakeCase(relationTo);
+          const idColumnName = `${relationTo}ID`;
+          result[idColumnName] = one(adapter.tables[relatedTableName], {
+            fields: [relationshipsTable[idColumnName]],
+            references: [adapter.tables[relatedTableName].id],
+          });
+        });
+
+        return result;
+      });
+
+      adapter.relations[relationshipsTableName] = relationshipsTableRelations;
     }
   }
 
   const tableRelations = relations(table, ({ many }) => {
     const result: Record<string, Relation<string>> = {};
+
+    arrayBlockRelations.forEach((val, key) => {
+      result[key] = many(adapter.tables[val]);
+    });
 
     if (hasLocalizedField) {
       result._locales = many(localesTable);
@@ -132,4 +174,6 @@ export const buildTable = ({
   });
 
   adapter.relations[`${formattedTableName}`] = tableRelations;
+
+  return { arrayBlockRelations };
 };

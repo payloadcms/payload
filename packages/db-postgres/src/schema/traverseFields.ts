@@ -3,12 +3,14 @@ import { AnyPgColumnBuilder, integer, pgEnum, pgTable, serial, uniqueIndex, text
 import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
 import { fieldAffectsData } from 'payload/dist/fields/config/types';
+import { Relation, relations } from 'drizzle-orm';
 import { GenericColumns, PostgresAdapter } from '../types';
 import { createIndex } from './createIndex';
 import { buildTable } from './build';
 
 type Args = {
   adapter: PostgresAdapter
+  arrayBlockRelations: Map<string, string>
   buildRelationships: boolean
   columns: Record<string, AnyPgColumnBuilder>
   columnPrefix?: string
@@ -23,6 +25,7 @@ type Args = {
 
 export const traverseFields = ({
   adapter,
+  arrayBlockRelations,
   buildRelationships,
   columnPrefix,
   columns,
@@ -82,11 +85,86 @@ export const traverseFields = ({
           baseColumns._locale = adapter.enums._locales('_locale').notNull();
         }
 
-        buildTable({
+        const arrayTableName = `${tableName}_${toSnakeCase(field.name)}`;
+
+        const { arrayBlockRelations: subArrayBlockRelations } = buildTable({
           adapter,
           baseColumns,
           fields: field.fields,
-          tableName: `${tableName}_${toSnakeCase(field.name)}`,
+          tableName: arrayTableName,
+        });
+
+        arrayBlockRelations.set(`${fieldPrefix || ''}${field.name}`, arrayTableName);
+
+        const arrayTableRelations = relations(adapter.tables[arrayTableName], ({ many, one }) => {
+          const result: Record<string, Relation<string>> = {
+            _parentID: one(adapter.tables[tableName], {
+              fields: [adapter.tables[arrayTableName]._parentID],
+              references: [adapter.tables[tableName].id],
+            }),
+          };
+
+          if (field.localized) {
+            result._locales = many(adapter.tables[`${arrayTableName}_locales`]);
+          }
+
+          subArrayBlockRelations.forEach((val, key) => {
+            result[key] = many(adapter.tables[val]);
+          });
+
+          return result;
+        });
+
+        adapter.relations[arrayTableName] = arrayTableRelations;
+
+        break;
+      }
+
+      case 'blocks': {
+        field.blocks.forEach((block) => {
+          const baseColumns: Record<string, AnyPgColumnBuilder> = {
+            _order: integer('_order').notNull(),
+            _path: text('_path').notNull(),
+            _parentID: integer('_parent_id').references(() => adapter.tables[tableName].id).notNull(),
+          };
+
+          if (field.localized && adapter.payload.config.localization) {
+            baseColumns._locale = adapter.enums._locales('_locale').notNull();
+          }
+
+          const blockTableName = `${tableName}_${toSnakeCase(block.slug)}`;
+
+          if (!adapter.tables[blockTableName]) {
+            const { arrayBlockRelations: subArrayBlockRelations } = buildTable({
+              adapter,
+              baseColumns,
+              fields: block.fields,
+              tableName: blockTableName,
+            });
+
+            const blockTableRelations = relations(adapter.tables[blockTableName], ({ many, one }) => {
+              const result: Record<string, Relation<string>> = {
+                _parentID: one(adapter.tables[tableName], {
+                  fields: [adapter.tables[blockTableName]._parentID],
+                  references: [adapter.tables[tableName].id],
+                }),
+              };
+
+              if (field.localized) {
+                result._locales = many(adapter.tables[`${blockTableName}_locales`]);
+              }
+
+              subArrayBlockRelations.forEach((val, key) => {
+                result[key] = many(adapter.tables[val]);
+              });
+
+              return result;
+            });
+
+            adapter.relations[blockTableName] = blockTableRelations;
+          }
+
+          arrayBlockRelations.set(`_${fieldPrefix || ''}${field.name}`, blockTableName);
         });
 
         break;
@@ -96,6 +174,7 @@ export const traverseFields = ({
         // Todo: determine what should happen if groups are set to localized
         const { hasLocalizedField: groupHasLocalizedField } = traverseFields({
           adapter,
+          arrayBlockRelations,
           buildRelationships,
           columnPrefix: `${columnName}_`,
           columns,
@@ -116,6 +195,7 @@ export const traverseFields = ({
       case 'row':
         ({ hasLocalizedField } = traverseFields({
           adapter,
+          arrayBlockRelations,
           buildRelationships,
           columns,
           fields: field.fields,
