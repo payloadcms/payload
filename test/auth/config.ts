@@ -39,6 +39,12 @@ export default buildConfigWithDefaults({
           hasMany: true,
         },
         {
+          name: 'namedSaveToJWT',
+          type: 'text',
+          defaultValue: 'namedSaveToJWT',
+          saveToJWT: 'named',
+        },
+        {
           name: 'custom',
           label: 'Custom',
           type: 'text',

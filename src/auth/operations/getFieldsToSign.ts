@@ -18,16 +18,17 @@ export const getFieldsToSign = (args: {
       ...signedFields,
     };
 
+    // get subfields from non-named fields like rows
     if (!fieldAffectsData(field) && fieldHasSubFields(field)) {
       field.fields.forEach((subField) => {
         if (fieldAffectsData(subField) && subField.saveToJWT) {
-          result[subField.name] = user[subField.name];
+          result[typeof subField.saveToJWT === 'string' ? subField.saveToJWT : subField.name] = user[subField.name];
         }
       });
     }
 
     if (fieldAffectsData(field) && field.saveToJWT) {
-      result[field.name] = user[field.name];
+      result[typeof field.saveToJWT === 'string' ? field.saveToJWT : field.name] = user[field.name];
     }
 
     return result;

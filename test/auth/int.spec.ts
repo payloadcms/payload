@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import jwtDecode from 'jwt-decode';
 import payload from '../../src';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { slug } from './config';
@@ -101,6 +102,23 @@ describe('Auth', () => {
         expect(data.user.email).toBeDefined();
       });
 
+      it('should have fields saved to JWT', async () => {
+        const {
+          email: jwtEmail,
+          collection,
+          roles,
+          named,
+          iat,
+          exp,
+        } = jwtDecode<User>(token);
+
+        expect(jwtEmail).toBeDefined();
+        expect(collection).toEqual('users');
+        expect(Array.isArray(roles)).toBeTruthy();
+        expect(named).toEqual('namedSaveToJWT');
+        expect(iat).toBeDefined();
+        expect(exp).toBeDefined();
+      });
 
       it('should allow authentication with an API key with useAPIKey', async () => {
         const apiKey = '0123456789ABCDEFGH';
