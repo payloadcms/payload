@@ -1091,6 +1091,7 @@ describe('fields', () => {
     });
 
     test('should clear selected upload', async () => {
+      await page.locator('.doc-drawer__header-close').click();
       await page.locator('.field-type.upload .file-details__remove').click();
     });
 
