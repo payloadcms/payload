@@ -1,7 +1,7 @@
+import { sql } from 'drizzle-orm';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import type { Connect } from 'payload/dist/database/types';
-import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { Client, ClientConfig, Pool, PoolConfig } from 'pg';
-import { dropdb } from 'pgtools';
+import { Client, Pool } from 'pg';
 
 import type { PostgresAdapter } from '.';
 import { DrizzleDB } from './types';
@@ -13,40 +13,23 @@ export const connect: Connect = async function connect(
   let db: DrizzleDB;
 
   try {
-    let config: string | ClientConfig | PoolConfig;
     if ('pool' in this && this.pool !== false) {
       const pool = new Pool(this.pool);
       db = drizzle(pool);
-      config = this.pool;
+      await pool.connect();
     }
 
     if ('client' in this && this.client !== false) {
       const client = new Client(this.client);
-      await client.connect();
       db = drizzle(client);
-      config = this.client;
+      await client.connect();
     }
 
-    // if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-    //   this.payload.logger.info('---- DROPPING DATABASE ----');
-
-    //   // Get database name from config
-    //   let databaseName: string | undefined;
-    //   if (typeof config === 'string') {
-    //     databaseName = config.split('/').pop() || '';
-    //   } else {
-    //     databaseName = config.database;
-    //   }
-
-    //   if (!databaseName) {
-    //     throw new Error(
-    //       'Cannot drop database. Database name not found in config.',
-    //     );
-    //   }
-
-    //   await dropdb(config, databaseName);
-    //   this.payload.logger.info('---- DROPPED DATABASE ----');
-    // }
+    if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
+      this.payload.logger.info('---- DROPPING TABLES ----');
+      await db.execute(sql`drop schema public cascade;\ncreate schema public;`);
+      this.payload.logger.info('---- DROPPED TABLES ----');
+    }
   } catch (err) {
     payload.logger.error(
       `Error: cannot connect to Postgres. Details: ${err.message}`,
