@@ -26,6 +26,7 @@ import type { PayloadRequest } from '../express/types'
 import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types'
 import type { Payload } from '../payload'
 import type { Where } from '../types'
+import type { PayloadLogger } from '../utilities/logger'
 
 type Prettify<T> = {
   [K in keyof T]: T[K]
@@ -151,6 +152,11 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions
+  /**
+   * A previously instantiated logger instance. Must conform to the PayloadLogger interface which uses Pino
+   * This allows you to bring your own logger instance and let payload use it
+   */
+  logger?: PayloadLogger
 
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
