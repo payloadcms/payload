@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { AnyPgColumnBuilder, integer, pgEnum, pgTable, serial, uniqueIndex, text, varchar, PgColumn, PgTableExtraConfig, index, numeric, PgColumnHKT, IndexBuilder } from 'drizzle-orm/pg-core';
+import { AnyPgColumnBuilder, integer, pgEnum, pgTable, serial, uniqueIndex, text, varchar, PgColumn, PgTableExtraConfig, index, numeric, PgColumnHKT, IndexBuilder, PgNumericBuilder, PgVarcharBuilder } from 'drizzle-orm/pg-core';
 import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
 import { fieldAffectsData } from 'payload/dist/fields/config/types';
@@ -7,6 +7,7 @@ import { Relation, relations } from 'drizzle-orm';
 import { GenericColumns, PostgresAdapter } from '../types';
 import { createIndex } from './createIndex';
 import { buildTable } from './build';
+import { parentIDColumnMap } from './parentIDColumnMap';
 
 type Args = {
   adapter: PostgresAdapter
@@ -39,7 +40,12 @@ export const traverseFields = ({
 }: Args): { hasLocalizedField: boolean } => {
   let hasLocalizedField = false;
 
+  let parentIDColType = 'integer';
+  if (columns.id instanceof PgNumericBuilder) parentIDColType = 'numeric';
+  if (columns.id instanceof PgVarcharBuilder) parentIDColType = 'varchar';
+
   fields.forEach((field) => {
+    if ('name' in field && field.name === 'id') return;
     let columnName: string;
 
     let targetTable = columns;
@@ -78,7 +84,7 @@ export const traverseFields = ({
       case 'array': {
         const baseColumns: Record<string, AnyPgColumnBuilder> = {
           _order: integer('_order').notNull(),
-          _parentID: integer('_parent_id').references(() => adapter.tables[tableName].id).notNull(),
+          _parentID: parentIDColumnMap[parentIDColType]('_parent_id').references(() => adapter.tables[tableName].id).notNull(),
         };
 
         if (field.localized && adapter.payload.config.localization) {
@@ -125,7 +131,7 @@ export const traverseFields = ({
           const baseColumns: Record<string, AnyPgColumnBuilder> = {
             _order: integer('_order').notNull(),
             _path: text('_path').notNull(),
-            _parentID: integer('_parent_id').references(() => adapter.tables[tableName].id).notNull(),
+            _parentID: parentIDColumnMap[parentIDColType]('_parent_id').references(() => adapter.tables[tableName].id).notNull(),
           };
 
           if (field.localized && adapter.payload.config.localization) {
@@ -183,12 +189,49 @@ export const traverseFields = ({
           indexes,
           localesColumns,
           localesIndexes,
-          tableName: `${tableName}_${toSnakeCase(field.name)}`,
+          tableName,
           relationships,
         });
 
         if (groupHasLocalizedField) hasLocalizedField = true;
 
+        break;
+      }
+
+      case 'tabs': {
+        field.tabs.forEach((tab) => {
+          if ('name' in tab) {
+            const { hasLocalizedField: tabHasLocalizedField } = traverseFields({
+              adapter,
+              arrayBlockRelations,
+              buildRelationships,
+              columnPrefix: `${columnName}_`,
+              columns,
+              fieldPrefix: `${fieldPrefix || ''}${tab.name}_`,
+              fields: tab.fields,
+              indexes,
+              localesColumns,
+              localesIndexes,
+              tableName,
+              relationships,
+            });
+
+            if (tabHasLocalizedField) hasLocalizedField = true;
+          } else {
+            ({ hasLocalizedField } = traverseFields({
+              adapter,
+              arrayBlockRelations,
+              buildRelationships,
+              columns,
+              fields: tab.fields,
+              indexes,
+              localesColumns,
+              localesIndexes,
+              tableName,
+              relationships,
+            }));
+          }
+        });
         break;
       }
 

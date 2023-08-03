@@ -21,6 +21,7 @@ import { Relation, relations } from 'drizzle-orm';
 import { fieldAffectsData } from 'payload/dist/fields/config/types';
 import { GenericColumns, GenericTable, PostgresAdapter } from '../types';
 import { traverseFields } from './traverseFields';
+import { parentIDColumnMap } from './parentIDColumnMap';
 
 type Args = {
   adapter: PostgresAdapter
@@ -56,9 +57,18 @@ export const buildTable = ({
   const arrayBlockRelations: Map<string, string> = new Map();
 
   const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+  let idColType = 'integer';
 
   if (idField) {
-    columns.id = idField.type === 'number' ? integer('id').primaryKey() : text('id').primaryKey();
+    if (idField.type === 'number') {
+      idColType = 'numeric';
+      columns.id = numeric('id').primaryKey();
+    }
+
+    if (idField.type === 'text') {
+      idColType = 'varchar';
+      columns.id = varchar('id').primaryKey();
+    }
   } else {
     columns.id = serial('id').primaryKey();
   }
@@ -89,7 +99,7 @@ export const buildTable = ({
     const localeTableName = `${formattedTableName}_locales`;
     localesColumns.id = integer('id').primaryKey();
     localesColumns._locale = adapter.enums._locales('_locale').notNull();
-    localesColumns._parentID = integer('_parent_id').references(() => table.id).notNull();
+    localesColumns._parentID = parentIDColumnMap[idColType]('_parent_id').references(() => table.id).notNull();
 
     localesTable = pgTable(localeTableName, localesColumns, (cols) => {
       return Object.entries(localesIndexes).reduce((acc, [colName, func]) => {
@@ -114,7 +124,7 @@ export const buildTable = ({
     if (relationships.size) {
       const relationshipColumns: Record<string, AnyPgColumnBuilder> = {
         id: serial('id').primaryKey(),
-        parent: integer('parent_id').references(() => table.id).notNull(),
+        parent: parentIDColumnMap[idColType]('parent_id').references(() => table.id).notNull(),
         path: varchar('path').notNull(),
         order: integer('order'),
       };
