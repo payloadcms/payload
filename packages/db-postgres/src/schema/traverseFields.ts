@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
 import { AnyPgColumnBuilder, integer, pgEnum, pgTable, serial, uniqueIndex, text, varchar, PgColumn, PgTableExtraConfig, index, numeric, PgColumnHKT, IndexBuilder } from 'drizzle-orm/pg-core';
 import { Field } from 'payload/types';
+import toSnakeCase from 'to-snake-case';
 import { fieldAffectsData } from 'payload/dist/fields/config/types';
 import { GenericColumns, PostgresAdapter } from '../types';
-import { formatName } from '../utilities/formatName';
 import { createIndex } from './createIndex';
 
 type Args = {
@@ -11,6 +11,7 @@ type Args = {
   buildRelationships: boolean
   columns: Record<string, AnyPgColumnBuilder>
   columnPrefix?: string
+  fieldPrefix?: string
   fields: Field[]
   indexes: Record<string, (cols: GenericColumns) => IndexBuilder>
   localesColumns: Record<string, AnyPgColumnBuilder>
@@ -24,6 +25,7 @@ export const traverseFields = ({
   buildRelationships,
   columnPrefix,
   columns,
+  fieldPrefix,
   fields,
   indexes,
   localesColumns,
@@ -34,13 +36,13 @@ export const traverseFields = ({
   let hasLocalizedField = false;
 
   fields.forEach((field) => {
-    let formattedName: string;
+    let columnName: string;
 
     let targetTable = columns;
     let targetIndexes = indexes;
 
     if (fieldAffectsData(field)) {
-      formattedName = `${columnPrefix || ''}${formatName(field.name)}`;
+      columnName = `${columnPrefix || ''}${toSnakeCase(field.name)}`;
 
       // If field is localized,
       // add the column to the locale table
@@ -51,7 +53,7 @@ export const traverseFields = ({
       }
 
       if (field.unique || field.index) {
-        targetIndexes[`${field.name}Idx`] = createIndex({ formattedName, name: field.name, unique: field.unique });
+        targetIndexes[`${field.name}Idx`] = createIndex({ columnName, name: field.name, unique: field.unique });
       }
     }
 
@@ -60,19 +62,20 @@ export const traverseFields = ({
       case 'email':
       case 'code':
       case 'textarea':
-        targetTable[field.name] = varchar(formattedName);
+        targetTable[`${fieldPrefix || ''}${field.name}`] = varchar(columnName);
         break;
 
       case 'number':
-        targetTable[field.name] = numeric(formattedName);
+        targetTable[`${fieldPrefix || ''}${field.name}`] = numeric(columnName);
         break;
 
       case 'group': {
         const { hasLocalizedField: groupHasLocalizedField } = traverseFields({
           adapter,
           buildRelationships,
-          columnPrefix: `${columnPrefix}${field.name}_`,
+          columnPrefix: `${columnName}_`,
           columns,
+          fieldPrefix: `${fieldPrefix || ''}${field.name}_`,
           fields: field.fields,
           indexes,
           localesColumns,

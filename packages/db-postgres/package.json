@@ -15,7 +15,8 @@
   "dependencies": {
     "drizzle-orm": "^0.27.2",
     "pg": "^8.11.1",
-    "pgtools": "^1.0.0"
+    "pgtools": "^1.0.0",
+    "to-snake-case": "^1.0.0"
   },
   "devDependencies": {
     "@types/pg": "^8.10.2",

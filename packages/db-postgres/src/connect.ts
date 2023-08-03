@@ -27,26 +27,26 @@ export const connect: Connect = async function connect(
       config = this.client;
     }
 
-    if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-      this.payload.logger.info('---- DROPPING DATABASE ----');
+    // if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
+    //   this.payload.logger.info('---- DROPPING DATABASE ----');
 
-      // Get database name from config
-      let databaseName: string | undefined;
-      if (typeof config === 'string') {
-        databaseName = config.split('/').pop() || '';
-      } else {
-        databaseName = config.database;
-      }
+    //   // Get database name from config
+    //   let databaseName: string | undefined;
+    //   if (typeof config === 'string') {
+    //     databaseName = config.split('/').pop() || '';
+    //   } else {
+    //     databaseName = config.database;
+    //   }
 
-      if (!databaseName) {
-        throw new Error(
-          'Cannot drop database. Database name not found in config.',
-        );
-      }
+    //   if (!databaseName) {
+    //     throw new Error(
+    //       'Cannot drop database. Database name not found in config.',
+    //     );
+    //   }
 
-      await dropdb(config, databaseName);
-      this.payload.logger.info('---- DROPPED DATABASE ----');
-    }
+    //   await dropdb(config, databaseName);
+    //   this.payload.logger.info('---- DROPPED DATABASE ----');
+    // }
   } catch (err) {
     payload.logger.error(
       `Error: cannot connect to Postgres. Details: ${err.message}`,

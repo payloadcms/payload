@@ -16,10 +16,10 @@ import {
   IndexBuilder,
 } from 'drizzle-orm/pg-core';
 import { Field } from 'payload/types';
+import toSnakeCase from 'to-snake-case';
 import { Relation, relations } from 'drizzle-orm';
 import { fieldAffectsData } from 'payload/dist/fields/config/types';
 import { GenericColumns, GenericTable, PostgresAdapter } from '../types';
-import { formatName } from '../utilities/formatName';
 import { traverseFields } from './traverseFields';
 
 type Args = {
@@ -35,7 +35,7 @@ export const buildTable = ({
   fields,
   tableName,
 }: Args): void => {
-  const formattedTableName = formatName(tableName);
+  const formattedTableName = toSnakeCase(tableName);
   const columns: Record<string, AnyPgColumnBuilder> = {};
   const indexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {};
 
@@ -99,7 +99,7 @@ export const buildTable = ({
       };
 
       relationships.forEach((relationTo) => {
-        const formattedRelationTo = formatName(relationTo);
+        const formattedRelationTo = toSnakeCase(relationTo);
         relationshipColumns[`${relationTo}ID`] = integer(`${formattedRelationTo}_id`).references(() => adapter.tables[formattedRelationTo].id);
       });
 
