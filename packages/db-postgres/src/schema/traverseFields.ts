@@ -5,6 +5,7 @@ import toSnakeCase from 'to-snake-case';
 import { fieldAffectsData } from 'payload/dist/fields/config/types';
 import { GenericColumns, PostgresAdapter } from '../types';
 import { createIndex } from './createIndex';
+import { buildTable } from './build';
 
 type Args = {
   adapter: PostgresAdapter
@@ -61,15 +62,38 @@ export const traverseFields = ({
       case 'text':
       case 'email':
       case 'code':
-      case 'textarea':
+      case 'textarea': {
         targetTable[`${fieldPrefix || ''}${field.name}`] = varchar(columnName);
         break;
+      }
 
-      case 'number':
+      case 'number': {
         targetTable[`${fieldPrefix || ''}${field.name}`] = numeric(columnName);
         break;
+      }
+
+      case 'array': {
+        const baseColumns: Record<string, AnyPgColumnBuilder> = {
+          _order: integer('_order').notNull(),
+          _parentID: integer('_parent_id').references(() => adapter.tables[tableName].id).notNull(),
+        };
+
+        if (field.localized && adapter.payload.config.localization) {
+          baseColumns._locale = adapter.enums._locales('_locale').notNull();
+        }
+
+        buildTable({
+          adapter,
+          baseColumns,
+          fields: field.fields,
+          tableName: `${tableName}_${toSnakeCase(field.name)}`,
+        });
+
+        break;
+      }
 
       case 'group': {
+        // Todo: determine what should happen if groups are set to localized
         const { hasLocalizedField: groupHasLocalizedField } = traverseFields({
           adapter,
           buildRelationships,
@@ -80,7 +104,7 @@ export const traverseFields = ({
           indexes,
           localesColumns,
           localesIndexes,
-          tableName,
+          tableName: `${tableName}_${toSnakeCase(field.name)}`,
           relationships,
         });
 

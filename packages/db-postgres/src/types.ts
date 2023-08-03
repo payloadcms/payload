@@ -1,6 +1,6 @@
 import { Relation, Relations } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { PgColumn, PgColumnHKT, PgTableWithColumns } from 'drizzle-orm/pg-core';
+import { PgColumn, PgColumnHKT, PgEnum, PgTableWithColumns } from 'drizzle-orm/pg-core';
 import { Payload } from 'payload';
 import { DatabaseAdapter } from 'payload/dist/database/types';
 import { ClientConfig, PoolConfig } from 'pg';
@@ -42,8 +42,9 @@ export type GenericTable = PgTableWithColumns<{
 
 export type PostgresAdapter = DatabaseAdapter & Args & {
   db: DrizzleDB
-  tables: Record<string, GenericTable>
+  enums: Record<string, PgEnum<[string, ...string[]]>>
   relations: Record<string, Relations<string, Record<string, Relation<string>>>>
+  tables: Record<string, GenericTable>
 }
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter

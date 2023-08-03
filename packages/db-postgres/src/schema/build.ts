@@ -24,6 +24,7 @@ import { traverseFields } from './traverseFields';
 
 type Args = {
   adapter: PostgresAdapter
+  baseColumns?: Record<string, AnyPgColumnBuilder>,
   buildRelationships?: boolean
   fields: Field[]
   tableName: string
@@ -31,15 +32,17 @@ type Args = {
 
 export const buildTable = ({
   adapter,
+  baseColumns = {},
   buildRelationships,
   fields,
   tableName,
 }: Args): void => {
   const formattedTableName = toSnakeCase(tableName);
-  const columns: Record<string, AnyPgColumnBuilder> = {};
+  const columns: Record<string, AnyPgColumnBuilder> = baseColumns;
   const indexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {};
 
   let hasLocalizedField = false;
+
   const localesColumns: Record<string, AnyPgColumnBuilder> = {};
   const localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {};
   let localesTable: GenericTable;
@@ -78,6 +81,9 @@ export const buildTable = ({
 
   if (hasLocalizedField) {
     const localeTableName = `${formattedTableName}_locales`;
+    localesColumns.id = integer('id').primaryKey();
+    localesColumns._locale = adapter.enums._locales('_locale').notNull();
+    localesColumns._parentID = integer('_parent_id').references(() => table.id).notNull();
 
     localesTable = pgTable(localeTableName, localesColumns, (cols) => {
       return Object.entries(localesIndexes).reduce((acc, [colName, func]) => {
@@ -108,7 +114,6 @@ export const buildTable = ({
       adapter.tables[`${formattedTableName}_relationships`] = relationshipsTable;
     }
   }
-
 
   const tableRelations = relations(table, ({ many }) => {
     const result: Record<string, Relation<string>> = {};

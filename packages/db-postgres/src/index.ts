@@ -30,8 +30,9 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
     // @ts-expect-error
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
-      tables: {},
+      enums: {},
       relations: {},
+      tables: {},
       payload,
       connect,
       db: undefined,
