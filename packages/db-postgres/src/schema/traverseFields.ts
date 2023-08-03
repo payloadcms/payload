@@ -81,6 +81,27 @@ export const traverseFields = ({
         break;
       }
 
+      case 'richText':
+      case 'json': {
+        break;
+      }
+
+      case 'date': {
+        break;
+      }
+
+      case 'point': {
+        break;
+      }
+
+      case 'radio': {
+        break;
+      }
+
+      case 'select': {
+        break;
+      }
+
       case 'array': {
         const baseColumns: Record<string, AnyPgColumnBuilder> = {
           _order: integer('_order').notNull(),
@@ -236,6 +257,7 @@ export const traverseFields = ({
       }
 
       case 'row':
+      case 'collapsible': {
         ({ hasLocalizedField } = traverseFields({
           adapter,
           arrayBlockRelations,
@@ -249,6 +271,7 @@ export const traverseFields = ({
           relationships,
         }));
         break;
+      }
 
       case 'relationship':
       case 'upload':
