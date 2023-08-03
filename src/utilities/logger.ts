@@ -9,10 +9,19 @@ const defaultLoggerOptions = {
   },
 };
 
-const getLogger = (name = 'payload', options?: pino.LoggerOptions, destination?: pino.DestinationStream): PayloadLogger => pino({
-  name: options?.name || name,
-  enabled: process.env.DISABLE_LOGGING !== 'true',
-  ...(options || defaultLoggerOptions),
-}, destination);
+const getLogger = (
+  name = 'payload',
+  options?: pino.LoggerOptions,
+  destination?: pino.DestinationStream,
+): PayloadLogger => pino(
+  {
+    name: options?.name || name,
+    enabled: process.env.DISABLE_LOGGING !== 'true',
+    ...(options || process.env.NODE_ENV !== 'production'
+      ? defaultLoggerOptions
+      : {}),
+  },
+  destination,
+);
 
 export default getLogger;
