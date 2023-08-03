@@ -37,6 +37,9 @@ export const insertRows = async ({
     tableName,
   });
 
+  // TODO:
+  // What do we do if we want to insert a new row and let default values populate,
+  // but we don't have any values?
   const [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
     .values(row).returning();
 

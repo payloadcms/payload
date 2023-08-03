@@ -22,6 +22,7 @@ export const init: Init = async function init(
         buildRelationships: true,
         fields: collection.fields,
         tableName: collection.slug,
+        timestamps: collection.timestamps,
       });
     },
   );

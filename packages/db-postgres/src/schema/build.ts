@@ -13,6 +13,7 @@ import {
   index,
   numeric,
   PgColumnHKT,
+  timestamp,
   IndexBuilder,
 } from 'drizzle-orm/pg-core';
 import { Field } from 'payload/types';
@@ -29,6 +30,7 @@ type Args = {
   buildRelationships?: boolean
   fields: Field[]
   tableName: string
+  timestamps?: boolean
 }
 
 type Result = {
@@ -41,6 +43,7 @@ export const buildTable = ({
   buildRelationships,
   fields,
   tableName,
+  timestamps,
 }: Args): Result => {
   const formattedTableName = toSnakeCase(tableName);
   const columns: Record<string, AnyPgColumnBuilder> = baseColumns;
@@ -86,6 +89,11 @@ export const buildTable = ({
     tableName,
     relationships,
   }));
+
+  if (timestamps) {
+    columns.createdAt = timestamp('created_at').defaultNow().notNull();
+    columns.updatedAt = timestamp('updated_at').defaultNow().notNull();
+  }
 
   const table = pgTable(formattedTableName, columns, (cols) => {
     return Object.entries(indexes).reduce((acc, [colName, func]) => {
