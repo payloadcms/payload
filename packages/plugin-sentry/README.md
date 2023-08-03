@@ -19,7 +19,7 @@ This plugin seamlessly integrates [Sentry](https://sentry.io/) with [Payload](ht
 
 ```js
 import { buildConfig } from 'payload/config';
-import sentry from '@payloadcms/plugin-sentry';
+import { sentry } from '@payloadcms/plugin-sentry';
 import { Pages, Media } from './collections';
 
 const config = buildConfig({
@@ -66,7 +66,7 @@ You can configure any of these options by passing them to the plugin under optio
 
 ```js
 import { buildConfig } from 'payload/config';
-import seo from '@payloadcms/plugin-sentry';
+import { sentry } from '@payloadcms/plugin-sentry';
 import { Pages, Media } from './collections';
 
 const config = buildConfig({
