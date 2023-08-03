@@ -20,6 +20,10 @@ export const migrationsCollection: CollectionConfig = {
       name: 'schema',
       type: 'json',
     },
+    {
+      name: 'pushed',
+      type: 'checkbox',
+    },
     // TODO: do we need to persist the indexes separate from the schema?
     // {
     //   name: 'indexes',

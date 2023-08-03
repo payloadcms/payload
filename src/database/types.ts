@@ -39,7 +39,7 @@ export interface DatabaseAdapter {
   /**
    * Output a migration file
    */
-  createMigration: (CreateMigrationArgs) => Promise<void>;
+  createMigration: CreateMigration;
 
   /**
    * Run any migration up functions that have not yet been performed and update the status

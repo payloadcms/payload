@@ -49,7 +49,7 @@ export const traverseFields = ({
       columnName = `${columnPrefix || ''}${toSnakeCase(field.name)}`;
 
       // If field is localized,
-      // add the column to the locale table
+      // add the column to the locale table instead of main table
       if (field.localized) {
         hasLocalizedField = true;
         targetTable = localesColumns;

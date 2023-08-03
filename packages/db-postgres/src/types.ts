@@ -40,10 +40,14 @@ export type GenericTable = PgTableWithColumns<{
   name: string, schema: undefined, columns: GenericColumns
 }>
 
+export type GenericEnum = PgEnum<[string, ...string[]]>
+
+export type GenericRelation = Relations<string, Record<string, Relation<string>>>
+
 export type PostgresAdapter = DatabaseAdapter & Args & {
   db: DrizzleDB
-  enums: Record<string, PgEnum<[string, ...string[]]>>
-  relations: Record<string, Relations<string, Record<string, Relation<string>>>>
+  enums: Record<string, GenericEnum>
+  relations: Record<string, GenericRelation>
   tables: Record<string, GenericTable>
 }
 

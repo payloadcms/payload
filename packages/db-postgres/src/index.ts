@@ -2,6 +2,7 @@ import type { Payload } from 'payload';
 import { createDatabaseAdapter } from 'payload/dist/database/createAdapter';
 import { connect } from './connect';
 import { init } from './init';
+import { createMigration } from './createMigration';
 import { webpack } from './webpack';
 import { Args, PostgresAdapter, PostgresAdapterResult } from './types';
 // import { createGlobal } from './createGlobal';
@@ -39,7 +40,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       // destroy,
       init,
       webpack,
-      // createMigration: async (migrationName) => createMigration({ payload, migrationDir, migrationName }),
+      createMigration,
       // beginTransaction,
       // rollbackTransaction,
       // commitTransaction,
