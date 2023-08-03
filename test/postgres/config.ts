@@ -1,5 +1,6 @@
 import { CollectionConfig } from '../../src/collections/config/types';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import { devUser } from '../credentials';
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -163,6 +164,111 @@ const config = buildConfigWithDefaults({
   localization: {
     locales: ['en', 'es'],
     defaultLocale: 'en',
+  },
+  onInit: async (payload) => {
+    // await payload.create({
+    //   collection: 'users',
+    //   data: {
+    //     email: devUser.email,
+    //     password: devUser.password,
+    //   },
+    // });
+
+    const page1 = await payload.create({
+      collection: 'pages',
+      data: {
+        slug: 'first',
+      },
+    });
+
+    const page2 = await payload.create({
+      collection: 'pages',
+      data: {
+        slug: 'second',
+      },
+    });
+
+    const person1 = await payload.create({
+      collection: 'people',
+      data: {
+        fullName: 'Dan Ribbens',
+      },
+    });
+
+    await payload.create({
+      collection: 'posts',
+      data: {
+        title: 'hello',
+        number: 1337,
+        myGroup: {
+          subField: 'hello',
+          subFieldLocalized: 'hello in english',
+          subGroup: {
+            subSubField: 'sub hello',
+            subSubFieldLocalized: 'sub hello in english',
+          },
+          groupArray: [
+            {
+              groupArrayText: 'hello 1',
+            },
+            {
+              groupArrayText: 'hello 2',
+            },
+          ],
+        },
+        relationHasOne: page1.id,
+        relationHasOnePoly: {
+          relationTo: 'people',
+          value: person1.id,
+        },
+        relationHasMany: [page1.id, page2.id],
+        relationHasManyPoly: [
+          {
+            relationTo: 'people',
+            value: person1.id,
+          },
+          {
+            relationTo: 'pages',
+            value: page2.id,
+          },
+        ],
+        myArray: [
+          {
+            subField: 'hello 1',
+            mySubArray: [
+              {
+                subSubField: 'row 1 subrow 1',
+              },
+              {
+                subSubField: 'row 1 subrow 2',
+              },
+            ],
+          },
+          {
+            subField: 'hello 2',
+            mySubArray: [
+              {
+                subSubField: 'row 2 subrow 1',
+              },
+              {
+                subSubField: 'row 2 subrow 2',
+              },
+            ],
+          },
+        ],
+        myBlocks: [
+          {
+            blockType: 'block1',
+            nonLocalizedText: 'hello',
+            localizedText: 'hello in english',
+          },
+          {
+            blockType: 'block2',
+            number: 123,
+          },
+        ],
+      },
+    });
   },
 });
 

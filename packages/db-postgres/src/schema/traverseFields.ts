@@ -24,6 +24,11 @@ type Args = {
   relationships: Set<string>
 }
 
+type Result = {
+  hasLocalizedField: boolean
+  hasLocalizedRelationshipField: boolean
+}
+
 export const traverseFields = ({
   adapter,
   arrayBlockRelations,
@@ -37,8 +42,9 @@ export const traverseFields = ({
   localesIndexes,
   tableName,
   relationships,
-}: Args): { hasLocalizedField: boolean } => {
+}: Args): Result => {
   let hasLocalizedField = false;
+  let hasLocalizedRelationshipField = false;
 
   let parentIDColType = 'integer';
   if (columns.id instanceof PgNumericBuilder) parentIDColType = 'numeric';
@@ -72,11 +78,15 @@ export const traverseFields = ({
       case 'email':
       case 'code':
       case 'textarea': {
+        // TODO: handle hasMany
+        // TODO: handle min / max length
         targetTable[`${fieldPrefix || ''}${field.name}`] = varchar(columnName);
         break;
       }
 
       case 'number': {
+        // TODO: handle hasMany
+        // TODO: handle min / max
         targetTable[`${fieldPrefix || ''}${field.name}`] = numeric(columnName);
         break;
       }
@@ -199,7 +209,10 @@ export const traverseFields = ({
 
       case 'group': {
         // Todo: determine what should happen if groups are set to localized
-        const { hasLocalizedField: groupHasLocalizedField } = traverseFields({
+        const {
+          hasLocalizedField: groupHasLocalizedField,
+          hasLocalizedRelationshipField: groupHasLocalizedRelationshipField,
+        } = traverseFields({
           adapter,
           arrayBlockRelations,
           buildRelationships,
@@ -215,14 +228,17 @@ export const traverseFields = ({
         });
 
         if (groupHasLocalizedField) hasLocalizedField = true;
-
+        if (groupHasLocalizedRelationshipField) hasLocalizedRelationshipField = true;
         break;
       }
 
       case 'tabs': {
         field.tabs.forEach((tab) => {
           if ('name' in tab) {
-            const { hasLocalizedField: tabHasLocalizedField } = traverseFields({
+            const {
+              hasLocalizedField: tabHasLocalizedField,
+              hasLocalizedRelationshipField: tabHasLocalizedRelationshipField,
+            } = traverseFields({
               adapter,
               arrayBlockRelations,
               buildRelationships,
@@ -238,8 +254,12 @@ export const traverseFields = ({
             });
 
             if (tabHasLocalizedField) hasLocalizedField = true;
+            if (tabHasLocalizedRelationshipField) hasLocalizedRelationshipField = true;
           } else {
-            ({ hasLocalizedField } = traverseFields({
+            ({
+              hasLocalizedField,
+              hasLocalizedRelationshipField,
+            } = traverseFields({
               adapter,
               arrayBlockRelations,
               buildRelationships,
@@ -258,7 +278,10 @@ export const traverseFields = ({
 
       case 'row':
       case 'collapsible': {
-        ({ hasLocalizedField } = traverseFields({
+        ({
+          hasLocalizedField,
+          hasLocalizedRelationshipField,
+        } = traverseFields({
           adapter,
           arrayBlockRelations,
           buildRelationships,
@@ -280,6 +303,10 @@ export const traverseFields = ({
         } else {
           relationships.add(field.relationTo);
         }
+
+        if (field.localized) {
+          hasLocalizedRelationshipField = true;
+        }
         break;
 
       default:
@@ -287,5 +314,5 @@ export const traverseFields = ({
     }
   });
 
-  return { hasLocalizedField };
+  return { hasLocalizedField, hasLocalizedRelationshipField };
 };

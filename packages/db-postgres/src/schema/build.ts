@@ -47,6 +47,7 @@ export const buildTable = ({
   const indexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {};
 
   let hasLocalizedField = false;
+  let hasLocalizedRelationshipField = false;
   const localesColumns: Record<string, AnyPgColumnBuilder> = {};
   const localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {};
   let localesTable: GenericTable;
@@ -73,7 +74,7 @@ export const buildTable = ({
     columns.id = serial('id').primaryKey();
   }
 
-  ({ hasLocalizedField } = traverseFields({
+  ({ hasLocalizedField, hasLocalizedRelationshipField } = traverseFields({
     adapter,
     arrayBlockRelations,
     buildRelationships,
@@ -129,13 +130,28 @@ export const buildTable = ({
         order: integer('order'),
       };
 
+      if (hasLocalizedRelationshipField) {
+        relationshipColumns.locale = adapter.enums._locale('locale');
+      }
+
       relationships.forEach((relationTo) => {
         const formattedRelationTo = toSnakeCase(relationTo);
-        relationshipColumns[`${relationTo}ID`] = integer(`${formattedRelationTo}_id`).references(() => adapter.tables[formattedRelationTo].id);
+        let colType = 'integer';
+        const relatedCollectionCustomID = adapter.payload.collections[relationTo].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+        if (relatedCollectionCustomID?.type === 'number') colType = 'numeric';
+        if (relatedCollectionCustomID?.type === 'text') colType = 'varchar';
+
+        relationshipColumns[`${relationTo}ID`] = parentIDColumnMap[colType](`${formattedRelationTo}_id`).references(() => adapter.tables[formattedRelationTo].id);
       });
 
       const relationshipsTableName = `${formattedTableName}_relationships`;
-      relationshipsTable = pgTable(relationshipsTableName, relationshipColumns);
+
+      relationshipsTable = pgTable(relationshipsTableName, relationshipColumns, (cols) => {
+        const result: Record<string, IndexBuilder> = {};
+        if (hasLocalizedRelationshipField) result.localeIdx = index('locale_idx').on(cols.locale);
+        return result;
+      });
+
       adapter.tables[relationshipsTableName] = relationshipsTable;
 
       const relationshipsTableRelations = relations(relationshipsTable, ({ one, many }) => {

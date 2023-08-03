@@ -14,7 +14,7 @@ import { Args, PostgresAdapter, PostgresAdapterResult } from './types';
 // import { find } from './find';
 // import { findGlobalVersions } from './findGlobalVersions';
 // import { findVersions } from './findVersions';
-// import { create } from './create';
+import { create } from './create';
 // import { deleteOne } from './deleteOne';
 // import { deleteVersions } from './deleteVersions';
 // import { findGlobal } from './findGlobal';
@@ -47,7 +47,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       // queryDrafts,
       // findOne,
       // find,
-      // create,
+      create,
       // updateOne,
       // deleteOne,
       // deleteMany,
