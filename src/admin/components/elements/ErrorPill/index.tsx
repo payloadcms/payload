@@ -23,7 +23,7 @@ export const ErrorPill: React.FC<Props> = (props) => {
     <div className={classes}>
       <div className={`${baseClass}__content`}>
         <span className={`${baseClass}__count`}>{count}</span>
-        {withMessage && ` ${count > 1 ? t('error:plural') : t('error:singular')}`}
+        {withMessage && ` ${count > 1 ? t('general:errors') : t('general:error')}`}
       </div>
     </div>
   );

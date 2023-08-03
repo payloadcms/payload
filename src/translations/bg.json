@@ -184,6 +184,8 @@
     "email": "Имейл",
     "emailAddress": "Имейл адрес",
     "enterAValue": "Въведи стойност",
+    "error": "Грешка",
+    "errors": "Грешки",
     "fallbackToDefaultLocale": "Използвай локализация по подразбиране",
     "filter": "Филтрирай",
     "filterWhere": "Филтрирай {{label}} където",
