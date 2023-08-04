@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import jwtDecode from 'jwt-decode';
 import payload from '../../src';
 import { initPayloadTest } from '../helpers/configHelpers';
-import { slug } from './config';
+import { namedSaveToJWTValue, saveToJWTKey, slug } from './config';
 import { devUser } from '../credentials';
 import type { User } from '../../src/auth';
 
@@ -107,7 +107,7 @@ describe('Auth', () => {
           email: jwtEmail,
           collection,
           roles,
-          named,
+          [saveToJWTKey]: customJWTPropertyKey,
           iat,
           exp,
         } = jwtDecode<User>(token);
@@ -115,7 +115,8 @@ describe('Auth', () => {
         expect(jwtEmail).toBeDefined();
         expect(collection).toEqual('users');
         expect(Array.isArray(roles)).toBeTruthy();
-        expect(named).toEqual('namedSaveToJWT');
+        // 'x-custom-jwt-property-name': 'namedSaveToJWT value'
+        expect(customJWTPropertyKey).toEqual(namedSaveToJWTValue);
         expect(iat).toBeDefined();
         expect(exp).toBeDefined();
       });
