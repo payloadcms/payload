@@ -9,7 +9,11 @@ export const slug = 'users';
 export default buildConfig({
   admin: {
     user: 'users',
-    autoLogin: false,
+    autoLogin: {
+      email: 'test@example.com',
+      password: 'test',
+      prefillOnly: true,
+    },
   },
   collections: [
     {
