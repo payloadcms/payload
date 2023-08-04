@@ -30,6 +30,8 @@ export interface StripeConfig {
   stripeSecretKey: string
   isTestKey?: boolean
   stripeWebhooksEndpointSecret?: string
+  // @deprecated this will default as `false` in the next major version release
+  rest?: boolean
   webhooks?: StripeWebhookHandler | StripeWebhookHandlers
   sync?: SyncConfig[]
   logs?: boolean

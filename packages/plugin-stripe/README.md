@@ -42,23 +42,27 @@ export default config;
 
 ### Options
 
-- `stripeSecretKey`
+- `stripeSecretKey`: string
 
   Required. Your Stripe secret key.
 
-- `sync`
+- `sync`: array
 
   Optional. An array of sync configs. This will automatically configure a sync between Payload collections and Stripe resources on create, delete, and update. See [sync](#sync) for more details.
 
-- `stripeWebhooksEndpointSecret`
+- `stripeWebhooksEndpointSecret`: string
 
   Optional. Your Stripe webhook endpoint secret. This is needed only if you wish to sync data _from_ Stripe _to_ Payload.
 
-- `webhooks`
+- `rest`: boolean
+
+  Optional. When `true`, opens the `/api/stripe/rest` endpoint. See [endpoints](#endpoints) for more details.
+
+- `webhooks`: object | function
 
   Optional. Either a function to handle all webhooks events, or an object of Stripe webhook handlers, keyed to the name of the event. See [webhooks](#webhooks) for more details or for a list of all available webhooks, see [here](https://stripe.com/docs/cli/trigger#trigger-event).
 
-- `logs`
+- `logs`: boolean
 
   Optional. When `true`, logs sync events to the console as they happen.
 
@@ -121,7 +125,7 @@ The following custom endpoints are automatically opened for you:
 
 - #### `POST /api/stripe/rest`
 
-  Proxies the [Stripe REST API](https://stripe.com/docs/api) behind [Payload access control](https://payloadcms.com/docs/access-control/overview) and returns the result. If you need to proxy the API server-side, use the [stripeProxy](#node) function.
+  If `rest` is true, proxies the [Stripe REST API](https://stripe.com/docs/api) behind [Payload access control](https://payloadcms.com/docs/access-control/overview) and returns the result. If you need to proxy the API server-side, use the [stripeProxy](#node) function.
 
   ```js
   const res = await fetch(`/api/stripe/rest`, {

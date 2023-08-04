@@ -1,51 +1,44 @@
-import { buildConfig } from 'payload/config';
-import path from 'path';
-import stripePlugin from '../../src';
-import Users from './collections/Users';
-import Customers from './collections/Customers';
-import { subscriptionCreatedOrUpdated } from './webhooks/subscriptionCreatedOrUpdated';
-import Products from './collections/Products';
-import { subscriptionDeleted } from './webhooks/subscriptionDeleted';
-import { syncPriceJSON } from './webhooks/syncPriceJSON';
+import path from 'path'
+import { buildConfig } from 'payload/config'
 
-const mockModulePath = path.resolve(__dirname, 'mocks/serverModule.js');
+import stripePlugin from '../../src'
+import Customers from './collections/Customers'
+import Products from './collections/Products'
+import Users from './collections/Users'
+import { subscriptionCreatedOrUpdated } from './webhooks/subscriptionCreatedOrUpdated'
+import { subscriptionDeleted } from './webhooks/subscriptionDeleted'
+import { syncPriceJSON } from './webhooks/syncPriceJSON'
+
+const mockModulePath = path.resolve(__dirname, 'mocks/serverModule.js')
 
 export default buildConfig({
   serverURL: process.env.PAYLOAD_PUBLIC_CMS_URL,
   admin: {
     user: Users.slug,
-    webpack: (config) => {
+    webpack: config => {
       const newConfig = {
         ...config,
         resolve: {
           ...config.resolve,
           alias: {
             ...config.resolve.alias,
-            "payload": path.join(__dirname, "../node_modules/payload"),
-            "react": path.join(__dirname, "../node_modules/react"),
-            "react-dom": path.join(__dirname, "../node_modules/react-dom"),
-            "stripe": mockModulePath,
-            "express": mockModulePath,
+            payload: path.join(__dirname, '../node_modules/payload'),
+            react: path.join(__dirname, '../node_modules/react'),
+            'react-dom': path.join(__dirname, '../node_modules/react-dom'),
+            stripe: mockModulePath,
+            express: mockModulePath,
             [path.resolve(__dirname, './webhooks/subscriptionCreatedOrUpdated')]: mockModulePath,
             [path.resolve(__dirname, './webhooks/subscriptionDeleted')]: mockModulePath,
           },
         },
-      };
+      }
 
-      return newConfig;
+      return newConfig
     },
   },
-  collections: [
-    Users,
-    Customers,
-    Products
-  ],
+  collections: [Users, Customers, Products],
   localization: {
-    locales: [
-      'en',
-      'es',
-      'de',
-    ],
+    locales: ['en', 'es', 'de'],
     defaultLocale: 'en',
     fallback: true,
   },
@@ -75,7 +68,7 @@ export default buildConfig({
             //   field: 'subscriptions.name',
             //   property: 'plan.name',
             // }
-          ]
+          ],
         },
         {
           collection: 'products',
@@ -88,11 +81,12 @@ export default buildConfig({
             },
             {
               fieldPath: 'price.stripePriceID',
-              stripeProperty: 'default_price'
-            }
-          ]
+              stripeProperty: 'default_price',
+            },
+          ],
         },
       ],
+      rest: false,
       webhooks: {
         'customer.subscription.created': subscriptionCreatedOrUpdated,
         'customer.subscription.updated': subscriptionCreatedOrUpdated,
@@ -104,6 +98,6 @@ export default buildConfig({
     }),
   ],
   typescript: {
-    outputFile: path.resolve(__dirname, 'payload-types.ts')
+    outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
-});
+})

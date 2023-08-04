@@ -1,5 +1,7 @@
+import type { NextFunction, Response } from 'express'
 import express from 'express'
 import type { Config } from 'payload/config'
+import type { PayloadRequest } from 'payload/types'
 
 import { extendWebpackConfig } from './extendWebpackConfig'
 import { createNewInStripe } from './hooks/createNewInStripe'
@@ -18,11 +20,13 @@ const stripePlugin =
     // set config defaults here
     const stripeConfig: SanitizedStripeConfig = {
       ...incomingStripeConfig,
+      // TODO: in the next major version, default this to `false`
+      rest: incomingStripeConfig?.rest ?? true,
       sync: incomingStripeConfig?.sync || [],
     }
 
-    // NOTE: env variables are never passed to the client, and bc we use theme in the admin panel
-    // so unfortunately we must set the 'isTestKey' property on the config instead of using the following code:
+    // NOTE: env variables are never passed to the client, but we need to know if `stripeSecretKey` is a test key
+    // unfortunately we must set the 'isTestKey' property on the config instead of using the following code:
     // const isTestKey = stripeConfig.stripeSecretKey?.startsWith('sk_test_');
 
     return {
@@ -50,18 +54,22 @@ const stripePlugin =
             },
           ],
         },
-        {
-          path: '/stripe/rest',
-          method: 'post',
-          handler: (req, res, next) => {
-            stripeREST({
-              req,
-              res,
-              next,
-              stripeConfig,
-            })
-          },
-        },
+        ...(incomingStripeConfig?.rest
+          ? [
+              {
+                path: '/stripe/rest',
+                method: 'post',
+                handler: (req: PayloadRequest, res: Response, next: NextFunction) => {
+                  stripeREST({
+                    req,
+                    res,
+                    next,
+                    stripeConfig,
+                  })
+                },
+              },
+            ]
+          : []),
       ],
       collections: collections?.map(collection => {
         const { hooks: existingHooks } = collection
