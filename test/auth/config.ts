@@ -13,7 +13,11 @@ export const saveToJWTKey = 'x-custom-jwt-property-name';
 export default buildConfigWithDefaults({
   admin: {
     user: 'users',
-    autoLogin: false,
+    autoLogin: {
+      email: 'test@example.com',
+      password: 'test',
+      prefillOnly: true,
+    },
   },
   collections: [
     {
