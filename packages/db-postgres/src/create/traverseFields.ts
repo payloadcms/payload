@@ -191,7 +191,7 @@ export const traverseFields = async ({
 
       default: {
         if (typeof data[field.name] !== 'undefined') {
-          targetRow[columnName] = data[field.name];
+          targetRow[field.name] = data[field.name];
         }
         break;
       }
