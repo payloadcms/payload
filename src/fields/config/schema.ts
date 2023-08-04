@@ -33,7 +33,10 @@ export const baseField = joi.object().keys({
     joi.valid(false),
   ),
   required: joi.boolean().default(false),
-  saveToJWT: joi.boolean().default(false),
+  saveToJWT: joi.alternatives().try(
+    joi.boolean(),
+    joi.string(),
+  ).default(false),
   unique: joi.boolean().default(false),
   localized: joi.boolean().default(false),
   index: joi.boolean().default(false),

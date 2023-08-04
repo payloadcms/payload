@@ -6,6 +6,10 @@ import { AuthDebug } from './AuthDebug';
 
 export const slug = 'users';
 
+export const namedSaveToJWTValue = 'namedSaveToJWT value';
+
+export const saveToJWTKey = 'x-custom-jwt-property-name';
+
 export default buildConfigWithDefaults({
   admin: {
     user: 'users',
@@ -37,6 +41,12 @@ export default buildConfigWithDefaults({
           required: true,
           saveToJWT: true,
           hasMany: true,
+        },
+        {
+          name: 'namedSaveToJWT',
+          type: 'text',
+          defaultValue: namedSaveToJWTValue,
+          saveToJWT: saveToJWTKey,
         },
         {
           name: 'custom',

@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
+import jwtDecode from 'jwt-decode';
 import payload from '../../src';
 import { initPayloadTest } from '../helpers/configHelpers';
-import { slug } from './config';
+import { namedSaveToJWTValue, saveToJWTKey, slug } from './config';
 import { devUser } from '../credentials';
 import type { User } from '../../src/auth';
 
@@ -101,6 +102,24 @@ describe('Auth', () => {
         expect(data.user.email).toBeDefined();
       });
 
+      it('should have fields saved to JWT', async () => {
+        const {
+          email: jwtEmail,
+          collection,
+          roles,
+          [saveToJWTKey]: customJWTPropertyKey,
+          iat,
+          exp,
+        } = jwtDecode<User>(token);
+
+        expect(jwtEmail).toBeDefined();
+        expect(collection).toEqual('users');
+        expect(Array.isArray(roles)).toBeTruthy();
+        // 'x-custom-jwt-property-name': 'namedSaveToJWT value'
+        expect(customJWTPropertyKey).toEqual(namedSaveToJWTValue);
+        expect(iat).toBeDefined();
+        expect(exp).toBeDefined();
+      });
 
       it('should allow authentication with an API key with useAPIKey', async () => {
         const apiKey = '0123456789ABCDEFGH';

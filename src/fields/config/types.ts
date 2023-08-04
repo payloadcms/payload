@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
-import type { TFunction, i18n as Ii18n } from 'i18next';
+import type { i18n as Ii18n, TFunction } from 'i18next';
 import type { EditorProps } from '@monaco-editor/react';
 import { Operation, Where } from '../../types';
 import { SanitizedConfig } from '../../config/types';
@@ -108,7 +108,7 @@ export interface FieldBase {
   index?: boolean;
   defaultValue?: any;
   hidden?: boolean;
-  saveToJWT?: boolean
+  saveToJWT?: string | boolean;
   localized?: boolean;
   validate?: Validate;
   hooks?: {
