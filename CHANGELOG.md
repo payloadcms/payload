@@ -1,5 +1,23 @@
 
 
+# [1.12.0](https://github.com/payloadcms/payload/compare/v1.11.8...v1.12.0) (2023-08-04)
+
+
+### Bug Fixes
+
+* excludes useAsTitle field from searchableFields in collection view ([#3105](https://github.com/payloadcms/payload/issues/3105)) ([8c4d251](https://github.com/payloadcms/payload/commit/8c4d2514b0f195e0059c6063346199785979c70c))
+* relationship field filter long titles ([#3113](https://github.com/payloadcms/payload/issues/3113)) ([da27a8a](https://github.com/payloadcms/payload/commit/da27a8aadbb103c5f6fe0ccc62c032876851b88f))
+* wrong links in verification and forgot password emails if serverURL not set ([#3010](https://github.com/payloadcms/payload/issues/3010)) ([6a189c6](https://github.com/payloadcms/payload/commit/6a189c6548b233aba64598af8804a56ec47e45f0))
+
+
+### Features
+
+* add support for sharp resize options ([#2844](https://github.com/payloadcms/payload/issues/2844)) ([144bb81](https://github.com/payloadcms/payload/commit/144bb81721814c19eb4957d4c8fcc845c73e2aa4))
+* allows for upload relationship drawer to be opened ([#3108](https://github.com/payloadcms/payload/issues/3108)) ([ea73e68](https://github.com/payloadcms/payload/commit/ea73e689ac46f2a7ba3b6c34e7a190944b5d5868))
+* option to pre-fill login credentials automatically ([#3021](https://github.com/payloadcms/payload/issues/3021)) ([c5756ed](https://github.com/payloadcms/payload/commit/c5756ed4a13b46bc73ae7b23309d6e9980fc81bf))
+* programmatic control over array and block rows inside the form  ([#3110](https://github.com/payloadcms/payload/issues/3110)) ([a78c463](https://github.com/payloadcms/payload/commit/a78c4631b4aabb5b57448ab21ef98749b1cf1935))
+* set JWT token field name with saveToJWT ([#3126](https://github.com/payloadcms/payload/issues/3126)) ([356f174](https://github.com/payloadcms/payload/commit/356f174b9ff601facb0062d0b65db18803ef2aa2))
+
 ## [1.11.8](https://github.com/payloadcms/payload/compare/v1.11.7...v1.11.8) (2023-07-31)
 
 ## [1.11.7](https://github.com/payloadcms/payload/compare/v1.11.6...v1.11.7) (2023-07-27)
