@@ -124,6 +124,7 @@
     "passwordsDoNotMatch": "Mật khẩu không trùng.",
     "relatedDocument": "bản tài liệu liên quan",
     "relationTo": "Có quan hệ với",
+    "removeRelationship": "Xóa Mối quan hệ",
     "removeUpload": "Xóa bản tải lên",
     "saveChanges": "Luu thay đổi",
     "searchForBlock": "Tìm block",

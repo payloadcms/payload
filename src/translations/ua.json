@@ -94,9 +94,11 @@
   },
   "fields": {
     "addLabel": "Додати {{label}}",
+    "addLink": "Додати посилання",
     "addNew": "Додати новий",
     "addNewLabel": "Створити {{label}}",
     "addRelationship": "Додати взаємозв'язок",
+    "addUpload": "Додати завантаження",
     "block": "блок",
     "blockType": "Тип блока",
     "blocks": "блоки",
@@ -122,6 +124,7 @@
     "passwordsDoNotMatch": "Паролі не співпадають.",
     "relatedDocument": "Пов'язаний документ",
     "relationTo": "Зв'язано з",
+    "removeRelationship": "Видалити зв'язок",
     "removeUpload": "Видалити завантаження",
     "saveChanges": "Зберегти зміни",
     "searchForBlock": "Знайти блок",
@@ -129,6 +132,7 @@
     "selectFieldsToEdit": "Виберіть поля для редагування",
     "showAll": "Показати все",
     "swapUpload": "Замінити завантаження",
+    "swapRelationship": "Замінити зв'язок",
     "textToDisplay": "Текст для відображення",
     "toggleBlock": "Перемкнути блок",
     "uploadNewLabel": "Завантажити новий {{label}}"
