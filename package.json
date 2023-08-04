@@ -196,7 +196,7 @@
   },
   "devDependencies": {
     "@playwright/test": "1.33.0",
-    "@release-it/conventional-changelog": "^5.1.1",
+    "@release-it/conventional-changelog": "^7.0.0",
     "@swc/jest": "^0.2.24",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
