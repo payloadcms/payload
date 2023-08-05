@@ -5,14 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "command": "yarn run dev _community",
+      "command": "pnpm run dev _community",
       "name": "Run Dev Community",
       "request": "launch",
       "type": "node-terminal",
       "cwd": "${workspaceFolder}"
     },
     {
-      "command": "yarn run dev fields",
+      "command": "pnpm run dev fields",
       "name": "Run Dev Fields",
       "request": "launch",
       "type": "node-terminal",

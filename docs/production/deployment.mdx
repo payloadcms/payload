@@ -160,8 +160,8 @@ WORKDIR /home/node
 COPY package*.json ./
 
 COPY . .
-RUN yarn install
-RUN yarn build
+RUN pnpm install
+RUN pnpm build
 
 FROM base as runtime
 
@@ -170,7 +170,7 @@ ENV NODE_ENV=production
 WORKDIR /home/node
 COPY package*.json  ./
 
-RUN yarn install --production
+RUN pnpm install --production
 COPY --from=builder /home/node/dist ./dist
 COPY --from=builder /home/node/build ./build
 
@@ -195,7 +195,7 @@ services:
       - .:/home/node/app
       - node_modules:/home/node/app/node_modules
     working_dir: /home/node/app/
-    command: sh -c "yarn install && yarn dev"
+    command: sh -c "pnpm install && pnpm dev"
     depends_on:
       - mongo
     environment:

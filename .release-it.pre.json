@@ -14,7 +14,7 @@
     "tag": "canary"
   },
   "hooks": {
-    "before:init": ["yarn", "yarn clean", "yarn test"]
+    "before:init": ["pnpm i", "pnpm clean", "pnpm test"]
   },
   "plugins": {
     "@release-it/conventional-changelog": {

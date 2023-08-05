@@ -7,7 +7,7 @@ on:
     branches: ["master"]
 
 jobs:
-  build_yarn:
+  build_pnpm:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -31,26 +31,26 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
-      - run: yarn
+      - run: pnpm i
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: yarn build
+      - run: pnpm build
 
       - name: Component Tests
-        run: yarn test:components
+        run: pnpm test:components
       - name: Integration Tests
-        run: yarn test:int
+        run: pnpm test:int
 
       - name: Generate Payload Types
-        run: yarn dev:generate-types fields
+        run: pnpm dev:generate-types fields
 
       - name: Generate GraphQL schema file
-        run: yarn dev:generate-graphql-schema graphql-schema-gen
+        run: pnpm dev:generate-graphql-schema graphql-schema-gen
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: E2E Tests
-        run: yarn test:e2e --bail
+        run: pnpm test:e2e --bail
 
       - uses: actions/upload-artifact@v3
         if: always()
