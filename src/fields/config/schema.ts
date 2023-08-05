@@ -224,13 +224,14 @@ export const collapsible = baseField.keys({
 });
 
 const tab = baseField.keys({
-  name: joi.string().when('localized', { is: joi.exist(), then: joi.required() }),
+  name: joi.string()
+    .when('localized', { is: joi.exist(), then: joi.required() }),
   localized: joi.boolean(),
   interfaceName: joi.string().when('name', { not: joi.exist(), then: joi.forbidden() }),
   label: joi.alternatives().try(
     joi.string(),
     joi.object().pattern(joi.string(), [joi.string()]),
-  ).required(),
+  ).when('name', { is: joi.not(), then: joi.required() }),
   fields: joi.array().items(joi.link('#field')).required(),
   description: joi.alternatives().try(
     joi.string(),
