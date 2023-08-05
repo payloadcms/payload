@@ -5,7 +5,7 @@
   "license": "MIT",
   "engines": {
     "node": ">=14",
-    "yarn": ">=1.22 <2"
+    "pnpm": ">=8"
   },
   "author": {
     "email": "info@payloadcms.com",
@@ -34,13 +34,13 @@
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
     "build:tsc": "tsc",
     "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
-    "build": "yarn copyfiles && yarn build:tsc && yarn build:components",
-    "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"yarn build:tsc\"",
+    "build": "pnpm copyfiles && pnpm build:tsc && pnpm build:components",
+    "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
     "dev": "nodemon",
     "dev:generate-types": "ts-node -T ./test/generateTypes.ts",
     "dev:generate-graphql-schema": "ts-node -T ./test/generateGraphQLSchema.ts",
-    "pretest": "yarn build",
-    "test": "yarn test:int && yarn test:components && yarn test:e2e",
+    "pretest": "pnpm build",
+    "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:int": "cross-env DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
     "test:e2e": "ts-node -T ./test/runE2E.ts",
     "test:e2e:headed": "cross-env DISABLE_LOGGING=true playwright test --headed",
