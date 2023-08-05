@@ -22,16 +22,25 @@ jobs:
           registry-url: https://registry.npmjs.org
           scope: "@payloadcms"
           always-auth: true
-      - name: Cache node modules
-        uses: actions/cache@v1
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          version: 8
+          run_install: false
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-      - run: pnpm i
+            ${{ runner.os }}-pnpm-store-
+      - name: Install dependencies
+        run: pnpm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: pnpm build
