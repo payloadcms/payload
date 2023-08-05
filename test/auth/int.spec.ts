@@ -1,14 +1,17 @@
 import mongoose from 'mongoose';
 import jwtDecode from 'jwt-decode';
+import { GraphQLClient } from 'graphql-request';
 import payload from '../../src';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { namedSaveToJWTValue, saveToJWTKey, slug } from './config';
 import { devUser } from '../credentials';
 import type { User } from '../../src/auth';
+import configPromise from '../collections-graphql/config';
 
 require('isomorphic-fetch');
 
 let apiUrl;
+let client: GraphQLClient;
 
 const headers = {
   'Content-Type': 'application/json',
@@ -20,6 +23,9 @@ describe('Auth', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
     apiUrl = `${serverURL}/api`;
+    const config = await configPromise;
+    const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`;
+    client = new GraphQLClient(url);
   });
 
   afterAll(async () => {
@@ -28,7 +34,50 @@ describe('Auth', () => {
     await payload.mongoMemoryServer.stop();
   });
 
-  describe('admin user', () => {
+  describe('GraphQL - admin user', () => {
+    let token;
+    let user;
+    beforeAll(async () => {
+      // language=graphQL
+      const query = `mutation {
+          loginUser(email: "${devUser.email}", password: "${devUser.password}") {
+          token
+            user {
+              id
+              email
+            }
+          }
+      }`;
+      const response = await client.request(query);
+      user = response.loginUser.user;
+      token = response.loginUser.token;
+    });
+
+    it('should login', async () => {
+      expect(user.id).toBeDefined();
+      expect(user.email).toEqual(devUser.email);
+      expect(token).toBeDefined();
+    });
+
+    it('should have fields saved to JWT', async () => {
+      const decoded = jwtDecode<User>(token);
+      const {
+        email: jwtEmail,
+        collection,
+        roles,
+        iat,
+        exp,
+      } = decoded;
+
+      expect(jwtEmail).toBeDefined();
+      expect(collection).toEqual('users');
+      expect(Array.isArray(roles)).toBeTruthy();
+      expect(iat).toBeDefined();
+      expect(exp).toBeDefined();
+    });
+  });
+
+  describe('REST - admin user', () => {
     beforeAll(async () => {
       await fetch(`${apiUrl}/${slug}/first-register`, {
         body: JSON.stringify({
@@ -103,20 +152,39 @@ describe('Auth', () => {
       });
 
       it('should have fields saved to JWT', async () => {
+        const decoded = jwtDecode<User>(token);
         const {
           email: jwtEmail,
           collection,
           roles,
           [saveToJWTKey]: customJWTPropertyKey,
+          'x-lifted-from-group': liftedFromGroup,
+          'x-tab-field': unnamedTabSaveToJWTString,
+          tabLiftedSaveToJWT,
+          unnamedTabSaveToJWTFalse,
           iat,
           exp,
-        } = jwtDecode<User>(token);
+        } = decoded;
+
+        const group = decoded['x-group'] as Record<string, unknown>;
+        const tab = decoded.saveToJWTTab as Record<string, unknown>;
+        const tabString = decoded['tab-test'] as Record<string, unknown>;
 
         expect(jwtEmail).toBeDefined();
+        expect(collection).toEqual('users');
         expect(collection).toEqual('users');
         expect(Array.isArray(roles)).toBeTruthy();
         // 'x-custom-jwt-property-name': 'namedSaveToJWT value'
         expect(customJWTPropertyKey).toEqual(namedSaveToJWTValue);
+        expect(group).toBeDefined();
+        expect(group['x-test']).toEqual('nested property');
+        expect(group.saveToJWTFalse).toBeUndefined();
+        expect(liftedFromGroup).toEqual('lifted from group');
+        expect(tabLiftedSaveToJWT).toEqual('lifted from unnamed tab');
+        expect(tab['x-field']).toEqual('yes');
+        expect(tabString.includedByDefault).toEqual('yes');
+        expect(unnamedTabSaveToJWTString).toEqual('text');
+        expect(unnamedTabSaveToJWTFalse).toBeUndefined();
         expect(iat).toBeDefined();
         expect(exp).toBeDefined();
       });

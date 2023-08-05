@@ -234,6 +234,7 @@ export type TabsAdmin = Omit<Admin, 'description'>;
 
 type TabBase = Omit<FieldBase, 'required' | 'validation'> & {
   fields: Field[]
+  saveToJWT?: boolean | string
   description?: Description
   interfaceName?: string
 }
@@ -256,7 +257,7 @@ export type UnnamedTab = Omit<TabBase, 'name'> & {
 
 export type Tab = NamedTab | UnnamedTab
 
-export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized'> & {
+export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized' | 'saveToJWT'> & {
   type: 'tabs';
   tabs: Tab[]
   admin?: TabsAdmin
