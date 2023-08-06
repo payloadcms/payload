@@ -53,7 +53,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
           readOnly
           onInput={onToggle}
         />
-        <span className={`${baseClass}__icon`}>
+        <span className={`${baseClass}__icon ${!partialChecked ? 'check' : 'partial'}`}>
           {!partialChecked && (
             <Check />
           )}
