@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 
 import { SelectAllStatus, useSelection } from '../SelectionProvider';
 
-import './index.scss';
 import { CheckboxInput } from '../../../../forms/field-types/Checkbox/Input';
 
 const SelectAll: React.FC = () => {
