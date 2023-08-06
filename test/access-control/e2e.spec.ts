@@ -206,7 +206,7 @@ describe('access control', () => {
       const duplicateAction = page.locator('.collection-edit__collection-actions >> li').last();
       await expect(duplicateAction).toContainText('Duplicate');
 
-      await page.locator('#field-approvedForRemoval + button').click();
+      await page.locator('#field-approvedForRemoval').check();
       await page.locator('#action-save').click();
 
       const deleteAction = page.locator('.collection-edit__collection-actions >> li').last();
