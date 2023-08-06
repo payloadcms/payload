@@ -12,6 +12,7 @@ const SelectAll: React.FC = () => {
 
   return (
     <CheckboxInput
+      id="select-all"
       aria-label={selectAll === SelectAllStatus.None ? t('selectAllRows') : t('deselectAllRows')}
       checked={selectAll === SelectAllStatus.AllInPage || selectAll === SelectAllStatus.AllAvailable}
       partialChecked={selectAll === SelectAllStatus.Some}
