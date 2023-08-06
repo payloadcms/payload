@@ -517,11 +517,11 @@ describe('admin', () => {
         const indeterminateSelectAll = selectAll.locator('.custom-checkbox__icon.partial');
         expect(indeterminateSelectAll).toBeDefined();
 
-        await selectAll.locator('input').check();
+        await selectAll.locator('input').click();
         const emptySelectAll = selectAll.locator('.custom-checkbox__icon:not(.check):not(.partial)');
         await expect(emptySelectAll).toHaveCount(0);
 
-        await selectAll.locator('input').check();
+        await selectAll.locator('input').click();
         const checkSelectAll = selectAll.locator('.custom-checkbox__icon.check');
         expect(checkSelectAll).toBeDefined();
       });
