@@ -85,6 +85,89 @@ export default buildConfigWithDefaults({
             },
           ],
         },
+
+        {
+          type: 'tabs',
+          label: 'Tabs',
+          tabs: [{
+            label: 'Tab 1',
+            name: 'tab1',
+            fields: [
+              {
+                type: 'blocks',
+                name: 'layout',
+                blocks: [{
+                  slug: 'block-1',
+                  fields: [
+                    {
+                      type: 'array',
+                      name: 'items',
+                      fields: [
+                        {
+                          type: 'text',
+                          name: 'title',
+                          required: true,
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  slug: 'block-2',
+                  fields: [
+                    {
+                      type: 'array',
+                      name: 'items',
+                      fields: [
+                        {
+                          type: 'text',
+                          name: 'title2',
+                          required: true,
+                        },
+                      ],
+                    },
+                  ],
+                }],
+              },
+            ],
+          }],
+        },
+        {
+          type: 'blocks',
+          name: 'blocksWithSimilarConfigs',
+          blocks: [{
+            slug: 'block-1',
+            fields: [
+              {
+                type: 'array',
+                name: 'items',
+                fields: [
+                  {
+                    type: 'text',
+                    name: 'title',
+                    required: true,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            slug: 'block-2',
+            fields: [
+              {
+                type: 'array',
+                name: 'items',
+                fields: [
+                  {
+                    type: 'text',
+                    name: 'title2',
+                    required: true,
+                  },
+                ],
+              },
+            ],
+          }],
+        },
       ],
     },
   ],

@@ -30,6 +30,7 @@ import { splitPathByArrayFields } from '../../../../utilities/splitPathByArrayFi
 import { setsAreEqual } from '../../../../utilities/setsAreEqual';
 import { buildFieldSchemaMap } from '../../../../utilities/buildFieldSchemaMap';
 import { isNumber } from '../../../../utilities/isNumber';
+import { CollectionConfig } from '../../../../collections/config/types';
 
 const baseClass = 'form';
 
@@ -61,7 +62,6 @@ const Form: React.FC<Props> = (props) => {
   const [processing, setProcessing] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formattedInitialData, setFormattedInitialData] = useState(buildInitialState(initialData));
-  const [collectionFieldSchemaMap, setCollectionFieldSchemaMap] = useState(new Map<string, Field[]>());
 
   const formRef = useRef<HTMLFormElement>(null);
   const contextRef = useRef({} as FormContextType);
@@ -113,6 +113,7 @@ const Form: React.FC<Props> = (props) => {
         }
       }
     });
+    // console.log('ERROR', newFieldRows);
 
     // Now loop over all fields with rows -
     // if anything changed, dispatch an update for the field
@@ -362,34 +363,93 @@ const Form: React.FC<Props> = (props) => {
     waitForAutocomplete,
   ]);
 
+  const getDeepestRowFieldsConfig = React.useCallback(({ pathPrefix, path, fieldConfig }) => {
+    const config = fieldConfig || collection?.fields || global?.fields || [];
+    const pathSegments = splitPathByArrayFields(path);
+    const configMap = buildFieldSchemaMap(config);
+
+    for (let i = 0; i < pathSegments.length; i += 1) {
+      const pathSegment = pathSegments[i];
+
+      if (isNumber(pathSegment)) {
+        const parentFieldPath = pathSegments.slice(0, i).join('.');
+        const remainingPath = pathSegments.slice(i + 1).join('.');
+        const rowIndex = parseInt(pathSegment, 10);
+        const arrayFieldPath = pathPrefix ? `${pathPrefix}.${parentFieldPath}` : parentFieldPath;
+        const parentArrayField = contextRef.current.getField(arrayFieldPath);
+        const rowField = parentArrayField.rows[rowIndex];
+
+        if (rowField.blockType) {
+          const blockConfig = configMap.get(`${parentFieldPath}.${rowField.blockType}`);
+          if (blockConfig) {
+            return getDeepestRowFieldsConfig({
+              pathPrefix: `${arrayFieldPath}.${rowIndex}`,
+              path: remainingPath,
+              fieldConfig: blockConfig,
+            });
+          }
+
+          throw new Error(`Block config not found for ${rowField.blockType} at path ${path}`);
+        } else {
+          return getDeepestRowFieldsConfig({
+            pathPrefix: `${arrayFieldPath}.${rowIndex}`,
+            path: remainingPath,
+            fieldConfig: configMap.get(parentFieldPath),
+          });
+        }
+      }
+    }
+
+    return config;
+  }, [collection?.fields, global?.fields]);
+
+  const findFieldConfig = React.useCallback(({ pathPrefix, path, fieldConfig, blockType }: {
+    fieldConfig?: CollectionConfig['fields'],
+    path: string,
+    pathPrefix: string,
+    blockType?: string
+  }) => {
+    const pathSegments = splitPathByArrayFields(path);
+    const deepestConfig = getDeepestRowFieldsConfig({ pathPrefix, path, fieldConfig });
+    const configMap = buildFieldSchemaMap(deepestConfig);
+
+    const fieldKey = pathSegments.at(-1);
+    const key = blockType ? `${fieldKey}.${blockType}` : fieldKey;
+    return configMap.get(key);
+  }, [getDeepestRowFieldsConfig]);
+
   // Array/Block row manipulation
   const addFieldRow: Context['addFieldRow'] = useCallback(async ({ path, rowIndex, data }) => {
     const preferences = await getDocPreferences();
-    const nonIndexedPath = path.split('.').filter((segment) => !isNumber(segment)).join('.');
-    const schemaKey = data?.blockType ? `${nonIndexedPath}.${data.blockType}` : nonIndexedPath;
-    const rowFieldSchema = collectionFieldSchemaMap.get(schemaKey);
+    const fieldConfig = findFieldConfig({
+      path,
+      blockType: data?.blockType,
+      pathPrefix: '',
+    });
 
-    if (rowFieldSchema) {
-      const subFieldState = await buildStateFromSchema({ fieldSchema: rowFieldSchema, data, preferences, operation, id, user, locale, t });
+    if (fieldConfig) {
+      const subFieldState = await buildStateFromSchema({ fieldSchema: fieldConfig, data, preferences, operation, id, user, locale, t });
       dispatchFields({ type: 'ADD_ROW', rowIndex, path, blockType: data?.blockType, subFieldState });
     }
-  }, [dispatchFields, collectionFieldSchemaMap, getDocPreferences, id, user, operation, locale, t]);
+  }, [dispatchFields, getDocPreferences, id, user, operation, locale, t, findFieldConfig]);
 
   const removeFieldRow: Context['removeFieldRow'] = useCallback(async ({ path, rowIndex }) => {
     dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
   }, [dispatchFields]);
 
   const replaceFieldRow: Context['replaceFieldRow'] = useCallback(async ({ path, rowIndex, data }) => {
+    const fieldConfig = findFieldConfig({
+      path,
+      blockType: data?.blockType,
+      pathPrefix: '',
+    });
     const preferences = await getDocPreferences();
-    const nonIndexedPath = path.split('.').filter((segment) => !isNumber(segment)).join('.');
-    const schemaKey = data?.blockType ? `${nonIndexedPath}.${data.blockType}` : nonIndexedPath;
-    const rowFieldSchema = collectionFieldSchemaMap.get(schemaKey);
 
-    if (rowFieldSchema) {
-      const subFieldState = await buildStateFromSchema({ fieldSchema: rowFieldSchema, data, preferences, operation, id, user, locale, t });
+    if (fieldConfig) {
+      const subFieldState = await buildStateFromSchema({ fieldSchema: fieldConfig, data, preferences, operation, id, user, locale, t });
       dispatchFields({ type: 'REPLACE_ROW', rowIndex, path, blockType: data?.blockType, subFieldState });
     }
-  }, [dispatchFields, collectionFieldSchemaMap, getDocPreferences, id, user, operation, locale, t]);
+  }, [dispatchFields, getDocPreferences, id, user, operation, locale, t, findFieldConfig]);
 
   const getFields = useCallback(() => contextRef.current.fields, [contextRef]);
   const getField = useCallback((path: string) => contextRef.current.fields[path], [contextRef]);
@@ -454,13 +514,6 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.addFieldRow = addFieldRow;
   contextRef.current.removeFieldRow = removeFieldRow;
   contextRef.current.replaceFieldRow = replaceFieldRow;
-
-  useEffect(() => {
-    const entityFields = collection?.fields || global?.fields || [];
-    if (entityFields.length === 0) return;
-    const fieldSchemaMap = buildFieldSchemaMap(entityFields);
-    setCollectionFieldSchemaMap(fieldSchemaMap);
-  }, [collection?.fields, global?.fields]);
 
   useEffect(() => {
     if (initialState) {
