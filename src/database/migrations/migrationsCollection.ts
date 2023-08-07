@@ -14,15 +14,12 @@ export const migrationsCollection: CollectionConfig = {
     {
       name: 'batch',
       type: 'number',
+      // NOTE: This value is -1 if it is a "dev push"
     },
     // TODO: determine how schema will impact migration workflow
     {
       name: 'schema',
       type: 'json',
-    },
-    {
-      name: 'pushed',
-      type: 'checkbox',
     },
     // TODO: do we need to persist the indexes separate from the schema?
     // {

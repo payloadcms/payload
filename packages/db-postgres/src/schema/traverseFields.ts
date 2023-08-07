@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { AnyPgColumnBuilder, integer, pgEnum, pgTable, serial, uniqueIndex, text, varchar, PgColumn, PgTableExtraConfig, index, numeric, PgColumnHKT, IndexBuilder, PgNumericBuilder, PgVarcharBuilder } from 'drizzle-orm/pg-core';
+import { AnyPgColumnBuilder, integer, pgEnum, pgTable, serial, uniqueIndex, text, varchar, PgColumn, PgTableExtraConfig, index, numeric, PgColumnHKT, IndexBuilder, PgNumericBuilder, PgVarcharBuilder, jsonb } from 'drizzle-orm/pg-core';
 import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
 import { fieldAffectsData } from 'payload/dist/fields/config/types';
@@ -93,6 +93,7 @@ export const traverseFields = ({
 
       case 'richText':
       case 'json': {
+        targetTable[`${fieldPrefix || ''}${field.name}`] = jsonb(columnName);
         break;
       }
 
