@@ -14,9 +14,11 @@
     "better-sqlite3": "^8.5.0"
   },
   "dependencies": {
+    "@libsql/client": "^0.3.1",
     "drizzle-kit": "^0.19.13-a511135",
     "drizzle-orm": "^0.27.2",
     "pg": "^8.11.1",
+    "prompts": "^2.4.2",
     "to-snake-case": "^1.0.0"
   },
   "devDependencies": {
