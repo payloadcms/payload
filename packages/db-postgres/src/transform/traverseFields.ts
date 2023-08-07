@@ -153,6 +153,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
         case 'relationship': {
           const relationPathMatch = relationships[`${sanitizedPath}${field.name}`];
+          if (!relationPathMatch) break;
 
           if (!field.hasMany) {
             const relation = relationPathMatch[0];

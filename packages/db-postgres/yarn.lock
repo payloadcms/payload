@@ -3120,10 +3120,10 @@ drizzle-kit@^0.19.13-a511135:
     minimatch "^7.4.3"
     zod "^3.20.2"
 
-drizzle-orm@^0.27.2:
-  version "0.27.2"
-  resolved "https://registry.npmjs.org/drizzle-orm/-/drizzle-orm-0.27.2.tgz#bff4b9bb3dc53aa9f12ad2804bc8229f4c757cf8"
-  integrity sha512-ZvBvceff+JlgP7FxHKe0zOU9CkZ4RcOtibumIrqfYzDGuOeF0YUY0F9iMqYpRM7pxnLRfC+oO7rWOUH3T5oFQA==
+drizzle-orm@^0.28.0:
+  version "0.28.0"
+  resolved "https://registry.npmjs.org/drizzle-orm/-/drizzle-orm-0.28.0.tgz#8412b32077028b664ce21fe946de0578af6a5837"
+  integrity sha512-iNNNtWM6YwXWI5vAkgFx+FPtZvo/ZnLh8uZV1e7+Alhan5ZS0q3tqbGFP8uCMngW+hNbJqsaHsxPw6AN87urmw==
 
 duplexer@^0.1.2:
   version "0.1.2"

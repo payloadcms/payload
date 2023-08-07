@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "drizzle-kit": "^0.19.13-a511135",
-    "drizzle-orm": "^0.27.2",
+    "drizzle-orm": "^0.28.0",
     "pg": "^8.11.1",
     "to-snake-case": "^1.0.0"
   },

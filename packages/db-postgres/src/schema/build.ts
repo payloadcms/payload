@@ -106,7 +106,7 @@ export const buildTable = ({
 
   if (hasLocalizedField) {
     const localeTableName = `${formattedTableName}_locales`;
-    localesColumns.id = integer('id').primaryKey();
+    localesColumns.id = serial('id').primaryKey();
     localesColumns._locale = adapter.enums._locales('_locale').notNull();
     localesColumns._parentID = parentIDColumnMap[idColType]('_parent_id').references(() => table.id).notNull();
 

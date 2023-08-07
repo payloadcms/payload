@@ -5,17 +5,18 @@ import { insertRows } from './insertRows';
 export const create: Create = async function create({
   collection: collectionSlug,
   data,
-  // fallbackLocale,
-  locale,
+  req,
 }) {
   const collection = this.payload.collections[collectionSlug].config;
 
-  return insertRows({
+  const [result] = await insertRows({
     adapter: this,
-    data,
-    fallbackLocale: false,
+    rows: [data],
+    fallbackLocale: req.fallbackLocale,
     fields: collection.fields,
-    locale,
+    locale: req.locale,
     tableName: toSnakeCase(collectionSlug),
   });
+
+  return result;
 };

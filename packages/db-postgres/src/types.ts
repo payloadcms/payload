@@ -1,6 +1,6 @@
-import { Relation, Relations } from 'drizzle-orm';
+import { ColumnBaseConfig, ColumnDataType, Relation, Relations } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { PgColumn, PgColumnHKT, PgEnum, PgTableWithColumns } from 'drizzle-orm/pg-core';
+import { PgColumn, PgEnum, PgTableWithColumns } from 'drizzle-orm/pg-core';
 import { Payload } from 'payload';
 import { DatabaseAdapter } from 'payload/dist/database/types';
 import { ClientConfig, PoolConfig } from 'pg';
@@ -23,7 +23,7 @@ type PoolArgs = {
 
 export type Args = ClientArgs | PoolArgs
 
-export type GenericColumn = PgColumn<PgColumnHKT, {
+export type GenericColumn = PgColumn<ColumnBaseConfig<ColumnDataType, string>, {
   tableName: string;
   name: string;
   data: unknown;
@@ -37,7 +37,7 @@ export type GenericColumns = {
 }
 
 export type GenericTable = PgTableWithColumns<{
-  name: string, schema: undefined, columns: GenericColumns
+  name: string, schema: undefined, columns: GenericColumns, dialect: string
 }>
 
 export type GenericEnum = PgEnum<[string, ...string[]]>
