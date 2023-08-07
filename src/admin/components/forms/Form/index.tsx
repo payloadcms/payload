@@ -113,7 +113,6 @@ const Form: React.FC<Props> = (props) => {
         }
       }
     });
-    // console.log('ERROR', newFieldRows);
 
     // Now loop over all fields with rows -
     // if anything changed, dispatch an update for the field
