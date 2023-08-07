@@ -21,13 +21,15 @@ import wait from '../../../../utilities/wait';
 import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
-import { Fields, Context as FormContextType, GetDataByPath, Props, Row, SubmitOptions } from './types';
+import { Context, Fields, Context as FormContextType, GetDataByPath, Props, Row, SubmitOptions } from './types';
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
 import { WatchFormErrors } from './WatchFormErrors';
 import { splitPathByArrayFields } from '../../../../utilities/splitPathByArrayFields';
 import { setsAreEqual } from '../../../../utilities/setsAreEqual';
+import { buildFieldSchemaMap } from '../../../../utilities/buildFieldSchemaMap';
+import { isNumber } from '../../../../utilities/isNumber';
 
 const baseClass = 'form';
 
@@ -52,13 +54,14 @@ const Form: React.FC<Props> = (props) => {
   const locale = useLocale();
   const { t, i18n } = useTranslation('general');
   const { refreshCookie, user } = useAuth();
-  const { id, getDocPreferences } = useDocumentInfo();
+  const { id, getDocPreferences, collection, global } = useDocumentInfo();
   const operation = useOperation();
 
   const [modified, setModified] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formattedInitialData, setFormattedInitialData] = useState(buildInitialState(initialData));
+  const [collectionFieldSchemaMap, setCollectionFieldSchemaMap] = useState(new Map<string, Field[]>());
 
   const formRef = useRef<HTMLFormElement>(null);
   const contextRef = useRef({} as FormContextType);
@@ -359,6 +362,35 @@ const Form: React.FC<Props> = (props) => {
     waitForAutocomplete,
   ]);
 
+  // Array/Block row manipulation
+  const addFieldRow: Context['addFieldRow'] = useCallback(async ({ path, rowIndex, data }) => {
+    const preferences = await getDocPreferences();
+    const nonIndexedPath = path.split('.').filter((segment) => !isNumber(segment)).join('.');
+    const schemaKey = data?.blockType ? `${nonIndexedPath}.${data.blockType}` : nonIndexedPath;
+    const rowFieldSchema = collectionFieldSchemaMap.get(schemaKey);
+
+    if (rowFieldSchema) {
+      const subFieldState = await buildStateFromSchema({ fieldSchema: rowFieldSchema, data, preferences, operation, id, user, locale, t });
+      dispatchFields({ type: 'ADD_ROW', rowIndex, path, blockType: data?.blockType, subFieldState });
+    }
+  }, [dispatchFields, collectionFieldSchemaMap, getDocPreferences, id, user, operation, locale, t]);
+
+  const removeFieldRow: Context['removeFieldRow'] = useCallback(async ({ path, rowIndex }) => {
+    dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
+  }, [dispatchFields]);
+
+  const replaceFieldRow: Context['replaceFieldRow'] = useCallback(async ({ path, rowIndex, data }) => {
+    const preferences = await getDocPreferences();
+    const nonIndexedPath = path.split('.').filter((segment) => !isNumber(segment)).join('.');
+    const schemaKey = data?.blockType ? `${nonIndexedPath}.${data.blockType}` : nonIndexedPath;
+    const rowFieldSchema = collectionFieldSchemaMap.get(schemaKey);
+
+    if (rowFieldSchema) {
+      const subFieldState = await buildStateFromSchema({ fieldSchema: rowFieldSchema, data, preferences, operation, id, user, locale, t });
+      dispatchFields({ type: 'REPLACE_ROW', rowIndex, path, blockType: data?.blockType, subFieldState });
+    }
+  }, [dispatchFields, collectionFieldSchemaMap, getDocPreferences, id, user, operation, locale, t]);
+
   const getFields = useCallback(() => contextRef.current.fields, [contextRef]);
   const getField = useCallback((path: string) => contextRef.current.fields[path], [contextRef]);
   const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [contextRef]);
@@ -419,6 +451,16 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.reset = reset;
   contextRef.current.replaceState = replaceState;
   contextRef.current.buildRowErrors = buildRowErrors;
+  contextRef.current.addFieldRow = addFieldRow;
+  contextRef.current.removeFieldRow = removeFieldRow;
+  contextRef.current.replaceFieldRow = replaceFieldRow;
+
+  useEffect(() => {
+    const entityFields = collection?.fields || global?.fields || [];
+    if (entityFields.length === 0) return;
+    const fieldSchemaMap = buildFieldSchemaMap(entityFields);
+    setCollectionFieldSchemaMap(fieldSchemaMap);
+  }, [collection?.fields, global?.fields]);
 
   useEffect(() => {
     if (initialState) {

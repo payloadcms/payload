@@ -1,11 +1,9 @@
 import React, { Fragment, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../../utilities/Auth';
 import { useLocale } from '../../../utilities/Locale';
 import withCondition from '../../withCondition';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { useForm, useFormSubmitted } from '../../Form/context';
-import buildStateFromSchema from '../../Form/buildStateFromSchema';
 import Error from '../../Error';
 import useField from '../../useField';
 import { BlocksDrawer } from './BlocksDrawer';
@@ -13,7 +11,6 @@ import { blocks as blocksValidator } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
 import FieldDescription from '../../FieldDescription';
 import { Props } from './types';
-import { useOperation } from '../../../utilities/OperationProvider';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { NullifyLocaleField } from '../../NullifyField';
@@ -57,11 +54,9 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const { id, setDocFieldPreferences, getDocPreferences } = useDocumentInfo();
-  const { dispatchFields, setModified } = useForm();
-  const { user } = useAuth();
+  const { setDocFieldPreferences } = useDocumentInfo();
+  const { dispatchFields, setModified, addFieldRow, removeFieldRow } = useForm();
   const locale = useLocale();
-  const operation = useOperation();
   const { localization } = useConfig();
   const drawerSlug = useDrawerSlug('blocks-drawer');
   const submitted = useFormSubmitted();
@@ -103,16 +98,19 @@ const BlocksField: React.FC<Props> = (props) => {
   });
 
   const addRow = useCallback(async (rowIndex: number, blockType: string) => {
-    const block = blocks.find((potentialBlock) => potentialBlock.slug === blockType);
-    const preferences = await getDocPreferences();
-    const subFieldState = await buildStateFromSchema({ fieldSchema: block.fields, preferences, operation, id, user, locale, t });
-    dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path, blockType });
+    addFieldRow({
+      path,
+      rowIndex,
+      data: {
+        blockType,
+      },
+    });
     setModified(true);
 
     setTimeout(() => {
       scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
-  }, [blocks, dispatchFields, id, locale, operation, path, getDocPreferences, setModified, t, user]);
+  }, [addFieldRow, path, setModified]);
 
   const duplicateRow = useCallback(async (rowIndex: number) => {
     dispatchFields({ type: 'DUPLICATE_ROW', rowIndex, path });
@@ -124,9 +122,9 @@ const BlocksField: React.FC<Props> = (props) => {
   }, [dispatchFields, path, setModified]);
 
   const removeRow = useCallback((rowIndex: number) => {
-    dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
+    removeFieldRow({ path, rowIndex });
     setModified(true);
-  }, [dispatchFields, path, setModified]);
+  }, [path, removeFieldRow, setModified]);
 
   const moveRow = useCallback((moveFromIndex: number, moveToIndex: number) => {
     dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
