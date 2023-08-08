@@ -47,7 +47,11 @@ export const buildFieldSchemaMap = (entityFields: Field[]): Map<string, Field[]>
 
         case 'tabs':
           field.tabs.forEach((tab) => {
-            nextPath = 'name' in tab ? `${nextPath}.${tab.name}` : nextPath;
+            if (nextPath) {
+              nextPath = 'name' in tab ? `${nextPath}.${tab.name}` : nextPath;
+            } else {
+              nextPath = 'name' in tab ? `${tab.name}` : nextPath;
+            }
             buildUpMap(tab.fields, nextPath);
           });
           break;
