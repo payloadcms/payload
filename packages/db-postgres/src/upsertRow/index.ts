@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { Field } from 'payload/types';
-import { eq } from 'drizzle-orm';
+import { SQL } from 'drizzle-orm';
 import { PostgresAdapter } from '../types';
 import { traverseFields } from './traverseFields';
 import { transform } from '../transform';
@@ -9,25 +9,25 @@ import { insertArrays } from './insertArrays';
 
 type Args = {
   adapter: PostgresAdapter
+  data: Record<string, unknown>
   fallbackLocale?: string | false
   fields: Field[]
-  id?: string | number
   locale: string
   operation: 'create' | 'update'
   path?: string
-  data: Record<string, unknown>
+  query?: SQL<unknown>
   tableName: string
 }
 
-export const insertRow = async ({
+export const upsertRow = async ({
   adapter,
+  data,
   fallbackLocale,
   fields,
-  id,
   locale,
   operation,
   path = '',
-  data,
+  query,
   tableName,
 }: Args): Promise<Record<string, unknown>> => {
   // Split out the incoming data into the corresponding:
@@ -66,7 +66,7 @@ export const insertRow = async ({
       .values(rowToInsert.row).returning();
   } else {
     [insertedRow] = await adapter.db.update(adapter.tables[tableName])
-      .set(rowToInsert.row).where(eq(adapter.tables[tableName].id, id)).returning();
+      .set(rowToInsert.row).where(query).returning();
   }
 
   let localeToInsert: Record<string, unknown>;
@@ -147,7 +147,7 @@ export const insertRow = async ({
   const insertedBlockRows: Record<string, Record<string, unknown>[]> = {};
 
   Object.entries(blocksToInsert).forEach(([blockName, blockRows]) => {
-    // For each block, push insert into promises to run parallen
+    // For each block, push insert into promises to run parallel
     promises.push(async () => {
       insertedBlockRows[blockName] = await adapter.db.insert(adapter.tables[`${tableName}_${blockName}`])
         .values(blockRows.map(({ row }) => row)).returning();

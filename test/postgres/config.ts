@@ -212,7 +212,14 @@ const config = buildConfigWithDefaults({
       },
     });
 
-    await payload.create({
+    const person2 = await payload.create({
+      collection: 'people',
+      data: {
+        fullName: 'Elliot DeNolf',
+      },
+    });
+
+    const post = await payload.create({
       collection: 'posts',
       data: {
         title: 'hello',
@@ -288,6 +295,89 @@ const config = buildConfigWithDefaults({
               },
               {
                 subBlockArray: 'row 2',
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    await payload.update({
+      collection: 'posts',
+      id: post.id,
+      data: {
+        title: 'hello 2',
+        number: 1338,
+        myGroup: {
+          subFieldLocalized: 'hello in english updated',
+          subGroup: {
+            subSubField: 'sub hello updated',
+            subSubFieldLocalized: 'sub hello in english updated',
+          },
+          groupArray: [
+            {
+              groupArrayText: 'hello 1 updated',
+            },
+            {
+              groupArrayText: 'hello 2 updated',
+            },
+          ],
+        },
+        relationHasOne: page2.id,
+        relationHasOnePoly: {
+          relationTo: 'people',
+          value: person2.id,
+        },
+        relationHasMany: [page2.id, page1.id],
+        relationHasManyPoly: [
+          {
+            relationTo: 'pages',
+            value: page2.id,
+          },
+          {
+            relationTo: 'people',
+            value: person1.id,
+          },
+        ],
+        myArray: [
+          {
+            subField: 'hello 1 updated',
+            mySubArray: [
+              {
+                subSubField: 'row 1 subrow 1 updated',
+              },
+              {
+                subSubField: 'row 1 subrow 2 updated',
+              },
+            ],
+          },
+          {
+            subField: 'hello 2 updated',
+            mySubArray: [
+              {
+                subSubField: 'row 2 subrow 1 updated',
+              },
+              {
+                subSubField: 'row 2 subrow 2 updated',
+              },
+            ],
+          },
+        ],
+        myBlocks: [
+          {
+            blockType: 'block1',
+            nonLocalizedText: 'hello updated',
+            localizedText: 'hello in english updated',
+          },
+          {
+            blockType: 'block2',
+            number: 1234,
+            blockArray: [
+              {
+                subBlockArray: 'row 1 updated',
+              },
+              {
+                subBlockArray: 'row 2 updated',
               },
             ],
           },
