@@ -133,6 +133,7 @@ export const insertRow = async ({
   const insertedBlockRows: Record<string, Record<string, unknown>[]> = {};
 
   Object.entries(blocksToInsert).forEach(([blockName, blockRows]) => {
+    // For each block, push insert into promises to run parallen
     promises.push(async () => {
       insertedBlockRows[blockName] = await adapter.db.insert(adapter.tables[`${tableName}_${blockName}`])
         .values(blockRows.map(({ row }) => row)).returning();
@@ -163,6 +164,12 @@ export const insertRow = async ({
           insertedBlockRows[blockName][blockLocaleIndexMap[i]]._locales = [blockLocaleRow];
         });
       }
+
+      await insertArrays({
+        adapter,
+        arrays: blockRows.map(({ arrays }) => arrays),
+        parentRows: insertedBlockRows[blockName],
+      });
     });
   });
 

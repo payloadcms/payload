@@ -61,6 +61,16 @@ export const Posts: CollectionConfig = {
               name: 'number',
               type: 'number',
             },
+            {
+              name: 'blockArray',
+              type: 'array',
+              fields: [
+                {
+                  name: 'subBlockArray',
+                  type: 'text',
+                },
+              ],
+            },
           ],
         },
       ],
@@ -166,13 +176,13 @@ const config = buildConfigWithDefaults({
     defaultLocale: 'en',
   },
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    });
+    // await payload.create({
+    //   collection: 'users',
+    //   data: {
+    //     email: devUser.email,
+    //     password: devUser.password,
+    //   },
+    // });
 
     const page1 = await payload.create({
       collection: 'pages',
@@ -188,12 +198,12 @@ const config = buildConfigWithDefaults({
       },
     });
 
-    const findResult = await payload.find({
-      collection: 'pages',
-      where: { slug: { equals: 'second' } },
-    });
+    // const findResult = await payload.find({
+    //   collection: 'pages',
+    //   where: { slug: { equals: 'second' } },
+    // });
 
-    console.log(findResult);
+    // console.log(findResult);
 
     const person1 = await payload.create({
       collection: 'people',
@@ -272,6 +282,14 @@ const config = buildConfigWithDefaults({
           {
             blockType: 'block2',
             number: 123,
+            blockArray: [
+              {
+                subBlockArray: 'row 1',
+              },
+              {
+                subBlockArray: 'row 2',
+              },
+            ],
           },
         ],
       },
