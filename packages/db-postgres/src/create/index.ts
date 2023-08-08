@@ -15,6 +15,7 @@ export const create: Create = async function create({
     fallbackLocale: req.fallbackLocale,
     fields: collection.fields,
     locale: req.locale,
+    operation: 'create',
     tableName: toSnakeCase(collectionSlug),
   });
 

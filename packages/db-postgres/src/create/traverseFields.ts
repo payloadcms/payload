@@ -3,47 +3,48 @@ import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
 import { fieldAffectsData, valueIsValueWithRelation } from 'payload/dist/fields/config/types';
 import { PostgresAdapter } from '../types';
-import { ArrayRowPromise, ArrayRowPromisesMap, BlockRowsToInsert } from './types';
-import { insertRows } from './insertRows';
+import { ArrayRowToInsert, BlockRowToInsert } from './types';
 import { isArrayOfRows } from '../utilities/isArrayOfRows';
 
 type Args = {
   adapter: PostgresAdapter
-  arrayRowPromises: ArrayRowPromisesMap
-  blockRows: { [blockType: string]: BlockRowsToInsert }
-  columnPrefix?: string
+  arrays: {
+    [tableName: string]: ArrayRowToInsert[]
+  }
+  blocks: {
+    [blockType: string]: BlockRowToInsert[]
+  }
+  columnPrefix: string
   data: Record<string, unknown>
-  fallbackLocale?: string | false
   fields: Field[]
   locale: string
   localeRow: Record<string, unknown>
-  operation: 'create' | 'update'
+  newTableName: string
+  parentTableName: string
   path: string
-  relationshipRows: Record<string, unknown>[]
+  relationships: Record<string, unknown>[]
   row: Record<string, unknown>
-  tableName: string
 }
 
-export const traverseFields = async ({
+export const traverseFields = ({
   adapter,
-  arrayRowPromises,
-  blockRows,
+  arrays,
+  blocks,
   columnPrefix,
   data,
-  fallbackLocale,
   fields,
   locale,
   localeRow,
-  operation,
+  newTableName,
+  parentTableName,
   path,
-  relationshipRows,
+  relationships,
   row,
-  tableName,
 }: Args) => {
-  await Promise.all(fields.map(async (field) => {
+  fields.forEach((field) => {
     let targetRow = row;
-    let columnName: string;
-    let fieldData: unknown;
+    let columnName = '';
+    let fieldData;
 
     if (fieldAffectsData(field)) {
       columnName = `${columnPrefix || ''}${field.name}`;
@@ -73,34 +74,42 @@ export const traverseFields = async ({
 
       case 'array': {
         if (isArrayOfRows(fieldData)) {
-          const arrayTableName = `${tableName}_${toSnakeCase(field.name)}`;
+          const arrayTableName = `${newTableName}_${toSnakeCase(field.name)}`;
+          if (!arrays[arrayTableName]) arrays[arrayTableName] = [];
 
-          const promise: ArrayRowPromise = async ({ parentID }) => {
-            const result = await insertRows({
-              adapter,
-              addRowIndexToPath: true,
-              fallbackLocale,
-              fields: field.fields,
-              incomingBlockRows: blockRows,
-              incomingRelationshipRows: relationshipRows,
-              initialRowData: (fieldData as []).map((_, i) => ({
+          fieldData.forEach((arrayRow, i) => {
+            const newRow: ArrayRowToInsert = {
+              columnName,
+              parentTableName,
+              row: {
                 _order: i + 1,
-                _parentID: parentID,
-              })),
+              },
+              locale: {
+                _locale: locale,
+              },
+              arrays: {},
+            };
+
+            if (field.localized) newRow.row._locale = locale;
+
+            traverseFields({
+              adapter,
+              arrays: newRow.arrays,
+              blocks,
+              columnPrefix: '',
+              data: arrayRow,
+              fields: field.fields,
               locale,
-              operation,
-              rows: fieldData as Record<string, unknown>[],
-              tableName: arrayTableName,
+              localeRow: newRow.locale,
+              newTableName: arrayTableName,
+              parentTableName: arrayTableName,
+              path: `${path || ''}${field.name}.${i}.`,
+              relationships,
+              row: newRow.row,
             });
 
-            return result.map((subRow) => {
-              delete subRow._order;
-              delete subRow._parentID;
-              return subRow;
-            });
-          };
-
-          arrayRowPromises[columnName] = promise;
+            arrays[arrayTableName].push(newRow);
+          });
         }
 
         break;
@@ -113,15 +122,38 @@ export const traverseFields = async ({
             const matchedBlock = field.blocks.find(({ slug }) => slug === blockRow.blockType);
             if (!matchedBlock) return;
 
-            if (!blockRows[blockRow.blockType]) {
-              blockRows[blockRow.blockType] = {
-                rows: [],
-                block: matchedBlock,
-              };
-            }
-            blockRow._order = i + 1;
-            blockRow._path = `${path}${field.name}`;
-            blockRows[blockRow.blockType].rows.push(blockRow);
+            if (!blocks[blockRow.blockType]) blocks[blockRow.blockType] = [];
+
+            const newRow: BlockRowToInsert = {
+              arrays: {},
+              row: {
+                _order: i + 1,
+                _path: `${path}${field.name}`,
+              },
+              locale: {},
+            };
+
+            if (field.localized) newRow.row._locale = locale;
+
+            const blockTableName = `${newTableName}_${toSnakeCase(blockRow.blockType)}`;
+
+            traverseFields({
+              adapter,
+              arrays: newRow.arrays,
+              blocks,
+              columnPrefix: '',
+              data: blockRow,
+              fields: matchedBlock.fields,
+              locale,
+              localeRow: newRow.locale,
+              newTableName: blockTableName,
+              parentTableName: blockTableName,
+              path: `${path || ''}${field.name}.${i}.`,
+              relationships,
+              row: newRow.row,
+            });
+
+            blocks[blockRow.blockType].push(newRow);
           });
         }
 
@@ -130,86 +162,86 @@ export const traverseFields = async ({
 
       case 'group': {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
-          await traverseFields({
+          traverseFields({
             adapter,
-            arrayRowPromises,
-            blockRows,
+            arrays,
+            blocks,
             columnPrefix: `${columnName}_`,
             data: data[field.name] as Record<string, unknown>,
             fields: field.fields,
             locale,
             localeRow,
-            operation,
+            newTableName: `${parentTableName}_${toSnakeCase(field.name)}`,
+            parentTableName,
             path: `${path || ''}${field.name}.`,
-            relationshipRows,
+            relationships,
             row,
-            tableName,
           });
         }
 
         break;
       }
 
-      case 'tabs': {
-        await Promise.all(field.tabs.map(async (tab) => {
-          if ('name' in tab) {
-            if (typeof data[tab.name] === 'object' && data[tab.name] !== null) {
-              await traverseFields({
-                adapter,
-                arrayRowPromises,
-                blockRows,
-                columnPrefix: `${columnName}_`,
-                data: data[tab.name] as Record<string, unknown>,
-                fields: tab.fields,
-                locale,
-                localeRow,
-                operation,
-                path: `${path || ''}${tab.name}.`,
-                relationshipRows,
-                row,
-                tableName,
-              });
-            }
-          } else {
-            await traverseFields({
-              adapter,
-              arrayRowPromises,
-              blockRows,
-              columnPrefix,
-              data,
-              fields: tab.fields,
-              locale,
-              localeRow,
-              operation,
-              path,
-              relationshipRows,
-              row,
-              tableName,
-            });
-          }
-        }));
-        break;
-      }
+      // case 'tabs': {
+      //   await Promise.all(field.tabs.map(async (tab) => {
+      //     if ('name' in tab) {
+      //       if (typeof data[tab.name] === 'object' && data[tab.name] !== null) {
+      //         await traverseFields({
+      //           adapter,
+      //           arrayRowPromises,
+      //           blockRows,
+      //           columnPrefix: `${columnName}_`,
+      //           data: data[tab.name] as Record<string, unknown>,
+      //           fields: tab.fields,
+      //           locale,
+      //           localeRow,
+      //           operation,
+      //           path: `${path || ''}${tab.name}.`,
+      //           relationshipRows,
+      //           row,
+      //           tableName,
+      //         });
+      //       }
+      //     } else {
+      //       await traverseFields({
+      //         adapter,
+      //         arrayRowPromises,
+      //         blockRows,
+      //         columnPrefix,
+      //         data,
+      //         fields: tab.fields,
+      //         locale,
+      //         localeRow,
+      //         operation,
+      //         path,
+      //         relationshipRows,
+      //         row,
+      //         tableName,
+      //       });
+      //     }
+      //   }));
+      //   break;
+      // }
 
-      case 'row':
-      case 'collapsible': {
-        await traverseFields({
-          adapter,
-          arrayRowPromises,
-          blockRows,
-          columnPrefix,
-          data,
-          fields: field.fields,
-          locale,
-          localeRow,
-          operation,
-          path,
-          relationshipRows,
-          row,
-          tableName,
-        });
-        break;
-      }
+      // case 'row':
+      // case 'collapsible': {
+      //   await traverseFields({
+      //     adapter,
+      //     arrayRowPromises,
+      //     blockRows,
+      //     columnPrefix,
+      //     data,
+      //     fields: field.fields,
+      //     locale,
+      //     localeRow,
+      //     operation,
+      //     path,
+      //     relationshipRows,
+      //     row,
+      //     tableName,
+      //   });
+      //   break;
+      // }
 
       case 'relationship':
       case 'upload': {
@@ -225,10 +257,10 @@ export const traverseFields = async ({
 
           if (Array.isArray(field.relationTo) && valueIsValueWithRelation(relation)) {
             relationRow[`${relation.relationTo}ID`] = relation.value;
-            relationshipRows.push(relationRow);
+            relationships.push(relationRow);
           } else {
             relationRow[`${field.relationTo}ID`] = relation;
-            relationshipRows.push(relationRow);
+            relationships.push(relationRow);
           }
         });
 
@@ -243,5 +275,5 @@ export const traverseFields = async ({
         break;
       }
     }
-  }));
+  });
 };

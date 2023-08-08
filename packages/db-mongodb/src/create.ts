@@ -22,5 +22,6 @@ export const create: Create = async function create(
   if (verificationToken) {
     result._verificationToken = verificationToken;
   }
+
   return result;
 };

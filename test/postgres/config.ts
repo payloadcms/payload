@@ -1,6 +1,7 @@
 import { CollectionConfig } from '../../src/collections/config/types';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
+import { timestamp } from '../../src/utilities/timestamp';
 
 export const Posts: CollectionConfig = {
   slug: 'posts',

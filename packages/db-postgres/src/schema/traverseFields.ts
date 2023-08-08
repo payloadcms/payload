@@ -20,7 +20,8 @@ type Args = {
   indexes: Record<string, (cols: GenericColumns) => IndexBuilder>
   localesColumns: Record<string, AnyPgColumnBuilder>
   localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder>
-  tableName: string
+  newTableName: string
+  parentTableName: string
   relationships: Set<string>
 }
 
@@ -40,7 +41,8 @@ export const traverseFields = ({
   indexes,
   localesColumns,
   localesIndexes,
-  tableName,
+  newTableName,
+  parentTableName,
   relationships,
 }: Args): Result => {
   let hasLocalizedField = false;
@@ -115,14 +117,14 @@ export const traverseFields = ({
       case 'array': {
         const baseColumns: Record<string, AnyPgColumnBuilder> = {
           _order: integer('_order').notNull(),
-          _parentID: parentIDColumnMap[parentIDColType]('_parent_id').references(() => adapter.tables[tableName].id).notNull(),
+          _parentID: parentIDColumnMap[parentIDColType]('_parent_id').references(() => adapter.tables[parentTableName].id).notNull(),
         };
 
         if (field.localized && adapter.payload.config.localization) {
           baseColumns._locale = adapter.enums._locales('_locale').notNull();
         }
 
-        const arrayTableName = `${tableName}_${toSnakeCase(field.name)}`;
+        const arrayTableName = `${newTableName}_${toSnakeCase(field.name)}`;
 
         const { arrayBlockRelations: subArrayBlockRelations } = buildTable({
           adapter,
@@ -135,9 +137,9 @@ export const traverseFields = ({
 
         const arrayTableRelations = relations(adapter.tables[arrayTableName], ({ many, one }) => {
           const result: Record<string, Relation<string>> = {
-            _parentID: one(adapter.tables[tableName], {
+            _parentID: one(adapter.tables[parentTableName], {
               fields: [adapter.tables[arrayTableName]._parentID],
-              references: [adapter.tables[tableName].id],
+              references: [adapter.tables[parentTableName].id],
             }),
           };
 
@@ -162,14 +164,14 @@ export const traverseFields = ({
           const baseColumns: Record<string, AnyPgColumnBuilder> = {
             _order: integer('_order').notNull(),
             _path: text('_path').notNull(),
-            _parentID: parentIDColumnMap[parentIDColType]('_parent_id').references(() => adapter.tables[tableName].id).notNull(),
+            _parentID: parentIDColumnMap[parentIDColType]('_parent_id').references(() => adapter.tables[parentTableName].id).notNull(),
           };
 
           if (field.localized && adapter.payload.config.localization) {
             baseColumns._locale = adapter.enums._locales('_locale').notNull();
           }
 
-          const blockTableName = `${tableName}_${toSnakeCase(block.slug)}`;
+          const blockTableName = `${newTableName}_${toSnakeCase(block.slug)}`;
 
           if (!adapter.tables[blockTableName]) {
             const { arrayBlockRelations: subArrayBlockRelations } = buildTable({
@@ -181,9 +183,9 @@ export const traverseFields = ({
 
             const blockTableRelations = relations(adapter.tables[blockTableName], ({ many, one }) => {
               const result: Record<string, Relation<string>> = {
-                _parentID: one(adapter.tables[tableName], {
+                _parentID: one(adapter.tables[parentTableName], {
                   fields: [adapter.tables[blockTableName]._parentID],
-                  references: [adapter.tables[tableName].id],
+                  references: [adapter.tables[parentTableName].id],
                 }),
               };
 
@@ -223,7 +225,8 @@ export const traverseFields = ({
           indexes,
           localesColumns,
           localesIndexes,
-          tableName,
+          newTableName: `${parentTableName}_${toSnakeCase(field.name)}`,
+          parentTableName,
           relationships,
         });
 
@@ -249,7 +252,8 @@ export const traverseFields = ({
               indexes,
               localesColumns,
               localesIndexes,
-              tableName,
+              newTableName: `${parentTableName}_${toSnakeCase(tab.name)}`,
+              parentTableName,
               relationships,
             });
 
@@ -268,7 +272,8 @@ export const traverseFields = ({
               indexes,
               localesColumns,
               localesIndexes,
-              tableName,
+              newTableName: parentTableName,
+              parentTableName,
               relationships,
             }));
           }
@@ -290,7 +295,8 @@ export const traverseFields = ({
           indexes,
           localesColumns,
           localesIndexes,
-          tableName,
+          newTableName: parentTableName,
+          parentTableName,
           relationships,
         }));
         break;

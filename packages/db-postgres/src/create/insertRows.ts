@@ -1,159 +1,181 @@
 /* eslint-disable no-param-reassign */
 import { Field } from 'payload/types';
-import toSnakeCase from 'to-snake-case';
-import { Block, fieldAffectsData } from 'payload/dist/fields/config/types';
 import { PostgresAdapter } from '../types';
 import { traverseFields } from './traverseFields';
 import { transform } from '../transform';
-import { ArrayRowPromisesMap, BlockRowsToInsert, RowInsertionGroup } from './types';
+import { BlockRowToInsert, RowToInsert } from './types';
+import { insertArrays } from './insertArrays';
 
 type Args = {
   adapter: PostgresAdapter
-  addRowIndexToPath?: boolean
-  rows: Record<string, unknown>[]
   fallbackLocale?: string | false
   fields: Field[]
-  initialRowData?: Record<string, unknown>[]
-  incomingRelationshipRows?: Record<string, unknown>[]
-  incomingBlockRows?: { [blockType: string]: BlockRowsToInsert }
   locale: string
   operation: 'create' | 'update'
   path?: string
+  rows: Record<string, unknown>[]
   tableName: string
 }
 
 export const insertRows = async ({
   adapter,
-  addRowIndexToPath,
-  rows,
   fallbackLocale,
   fields,
-  initialRowData,
-  incomingBlockRows,
-  incomingRelationshipRows,
   locale,
   operation,
   path = '',
+  rows,
   tableName,
 }: Args): Promise<Record<string, unknown>[]> => {
-  const insertions: RowInsertionGroup[] = [];
+  const rowsToInsert: RowToInsert[] = [];
 
-  await Promise.all(rows.map(async (data, i) => {
-    const insertion: RowInsertionGroup = {
-      row: { ...initialRowData?.[i] || {} },
-      localeRow: {},
-      relationshipRows: incomingRelationshipRows || [],
-      blockRows: incomingBlockRows || {},
-      arrayRowPromises: {},
-    };
+  rows.forEach((data, i) => {
+    rowsToInsert.push({
+      row: {},
+      locale: {},
+      relationships: [],
+      blocks: {},
+      arrays: {},
+    });
 
-    await traverseFields({
+    traverseFields({
       adapter,
-      arrayRowPromises: insertion.arrayRowPromises,
-      blockRows: insertion.blockRows,
+      arrays: rowsToInsert[i].arrays,
+      blocks: rowsToInsert[i].blocks,
+      columnPrefix: '',
       data,
-      fallbackLocale,
       fields,
       locale,
-      localeRow: insertion.localeRow,
-      operation,
-      path: addRowIndexToPath ? `${path}${i}.` : path,
-      relationshipRows: insertion.relationshipRows,
-      row: insertion.row,
-      tableName,
+      localeRow: rowsToInsert[i].locale,
+      newTableName: tableName,
+      parentTableName: tableName,
+      path,
+      relationships: rowsToInsert[i].relationships,
+      row: rowsToInsert[i].row,
     });
-
-    insertions.push(insertion);
-  }));
-
-  const insertedRows = await adapter.db.insert(adapter.tables[tableName])
-    .values(insertions.map(({ row }) => row)).returning();
-
-  let insertedLocaleRows: Record<string, unknown>[] = [];
-  let insertedRelationshipRows: Record<string, unknown>[] = [];
-
-  const relatedRowPromises = [];
-
-  // Fill related rows with parent IDs returned from database
-  insertedRows.forEach((row, i) => {
-    insertions[i].row = row;
-    const { localeRow, relationshipRows, blockRows, arrayRowPromises } = insertions[i];
-
-    if (Object.keys(arrayRowPromises).length > 0) {
-      Object.entries(arrayRowPromises).forEach(([key, func]) => {
-        relatedRowPromises.push(async () => {
-          insertions[i].row[key] = await func({ parentID: row.id as string });
-        });
-      });
-    }
-
-    if (!incomingBlockRows && Object.keys(blockRows).length > 0) {
-      Object.entries(blockRows).forEach(([blockType, { block, rows: blockRowsToInsert }]) => {
-        relatedRowPromises.push(async () => {
-          const result = await insertRows({
-            adapter,
-            addRowIndexToPath: true,
-            rows: blockRowsToInsert,
-            fallbackLocale,
-            fields: block.fields,
-            initialRowData: blockRowsToInsert.map((initialBlockRow) => ({
-              _order: initialBlockRow._order,
-              _parentID: row.id,
-              _path: initialBlockRow._path,
-            })),
-            incomingBlockRows,
-            incomingRelationshipRows,
-            locale,
-            operation,
-            path,
-            tableName: `${tableName}_${toSnakeCase(blockType)}`,
-          });
-
-          return result;
-        });
-      });
-    }
-
-    if (Object.keys(localeRow).length > 0) {
-      localeRow._parentID = row.id;
-      localeRow._locale = locale;
-      insertedLocaleRows.push(localeRow);
-    }
-
-    if (relationshipRows.length > 0) {
-      insertedRelationshipRows = insertedRelationshipRows.concat(relationshipRows.map((relationshipRow) => {
-        relationshipRow.parent = row.id;
-        return relationshipRow;
-      }));
-    }
   });
 
-  // Insert locales
-  if (insertedLocaleRows.length > 0) {
-    relatedRowPromises.push(async () => {
+  const insertedRows = await adapter.db.insert(adapter.tables[tableName])
+    .values(rowsToInsert.map(({ row }) => row)).returning();
+
+  const localesToInsert: Record<string, unknown>[] = [];
+  const relationsToInsert: Record<string, unknown>[] = [];
+  const blocksToInsert: { [blockType: string]: BlockRowToInsert[] } = {};
+
+  const promises = [];
+
+  insertedRows.forEach((insertedRow, i) => {
+    if (Object.keys(rowsToInsert[i].locale).length > 0) {
+      rowsToInsert[i].locale._parentID = insertedRow.id;
+      rowsToInsert[i].locale._locale = locale;
+      localesToInsert.push(rowsToInsert[i].locale);
+    }
+
+    if (rowsToInsert[i].relationships) {
+      rowsToInsert[i].relationships.forEach((relation) => {
+        relation.parent = insertedRow.id;
+        relationsToInsert.push(relation);
+      });
+    }
+
+    Object.keys(rowsToInsert[i].blocks).forEach((blockName) => {
+      rowsToInsert[i].blocks[blockName].forEach((blockRow) => {
+        blockRow.row._parentID = insertedRow.id;
+        if (!blocksToInsert[blockName]) blocksToInsert[blockName] = [];
+        blocksToInsert[blockName].push(blockRow);
+      });
+    });
+  });
+
+  await insertArrays({
+    adapter,
+    rowsToInsert,
+    parentRows: insertedRows,
+  });
+
+  // //////////////////////////////////
+  // INSERT LOCALES
+  // //////////////////////////////////
+
+  let insertedLocaleRows;
+
+  if (localesToInsert.length > 0) {
+    promises.push(async () => {
       insertedLocaleRows = await adapter.db.insert(adapter.tables[`${tableName}_locales`])
-        .values(insertedLocaleRows).returning();
+        .values(localesToInsert).returning();
     });
   }
 
-  // Insert relationships
-  // NOTE - only do this if there are no incoming relationship rows
-  // because `insertRows` is recursive and relationships should only happen at the top level
-  if (!incomingRelationshipRows && insertedRelationshipRows.length > 0) {
-    relatedRowPromises.push(async () => {
+  // //////////////////////////////////
+  // INSERT RELATIONSHIPS
+  // //////////////////////////////////
+
+  let insertedRelationshipRows;
+
+  if (relationsToInsert.length > 0) {
+    promises.push(async () => {
       insertedRelationshipRows = await adapter.db.insert(adapter.tables[`${tableName}_relationships`])
-        .values(insertedRelationshipRows).returning();
+        .values(relationsToInsert).returning();
     });
   }
 
-  await Promise.all(relatedRowPromises.map((promise) => promise()));
+  // //////////////////////////////////
+  // INSERT BLOCKS
+  // //////////////////////////////////
+
+  const insertedBlockRows: Record<string, Record<string, unknown>[]> = {};
+
+  Object.entries(blocksToInsert).forEach(([blockName, blockRows]) => {
+    promises.push(async () => {
+      insertedBlockRows[blockName] = await adapter.db.insert(adapter.tables[`${tableName}_${blockName}`])
+        .values(blockRows.map(({ row }) => row)).returning();
+
+      insertedBlockRows[blockName].forEach((row, i) => {
+        blockRows[i].row = row;
+      });
+
+      const blockLocaleIndexMap: number[] = [];
+
+      const blockLocaleRowsToInsert = blockRows.reduce((acc, blockRow, i) => {
+        if (Object.keys(blockRow.locale).length > 0) {
+          blockRow.locale._parentID = blockRow.row.id;
+          blockRow.locale._locale = locale;
+          acc.push(blockRow.locale);
+          blockLocaleIndexMap.push(i);
+          return acc;
+        }
+
+        return acc;
+      }, []);
+
+      if (blockLocaleRowsToInsert.length > 0) {
+        const insertedBlockLocaleRows = await adapter.db.insert(adapter.tables[`${tableName}_${blockName}_locales`])
+          .values(blockLocaleRowsToInsert).returning();
+
+        insertedBlockLocaleRows.forEach((blockLocaleRow, i) => {
+          insertedBlockRows[blockName][blockLocaleIndexMap[i]]._locales = [blockLocaleRow];
+        });
+      }
+    });
+  });
+
+  await Promise.all(promises.map((promise) => promise()));
+
+  // //////////////////////////////////
+  // TRANSFORM DATA
+  // //////////////////////////////////
 
   return insertedRows.map((row) => {
-    const matchedLocaleRow = insertedLocaleRows.find(({ _parentID }) => _parentID === row.id);
+    const matchedLocaleRow = insertedLocaleRows?.find(({ _parentID }) => _parentID === row.id);
     if (matchedLocaleRow) row._locales = [matchedLocaleRow];
 
-    const matchedRelationshipRows = insertedRelationshipRows.filter(({ parent }) => parent === row.id);
-    if (matchedRelationshipRows.length > 0) row._relationships = matchedRelationshipRows;
+    const matchedRelationshipRows = insertedRelationshipRows?.filter(({ parent }) => parent === row.id);
+    if (matchedRelationshipRows?.length > 0) row._relationships = matchedRelationshipRows;
+
+    Object.entries(insertedBlockRows).forEach(([blockName, blocks]) => {
+      const matchedBlocks = blocks.filter(({ _parentID }) => _parentID === row.id);
+      if (matchedBlocks.length > 0) row[`_blocks_${blockName}`] = matchedBlocks;
+    });
 
     const result = transform({
       config: adapter.payload.config,

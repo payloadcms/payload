@@ -161,7 +161,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
             if (relation) {
               // Handle hasOne Poly
               if (Array.isArray(field.relationTo)) {
-                const matchedRelation = Object.entries(relation).find(([, val]) => val !== null);
+                const matchedRelation = Object.entries(relation).find(([key, val]) => val !== null && !['order', 'id', 'parent'].includes(key));
 
                 if (matchedRelation) {
                   const relationTo = matchedRelation[0].replace('ID', '');
@@ -234,7 +234,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 }
               } else {
                 // Handle hasMany Poly
-                const matchedRelation = Object.entries(relation).find(([key, val]) => val !== null && key !== 'order');
+                const matchedRelation = Object.entries(relation).find(([key, val]) => val !== null && !['order', 'parent', 'id'].includes(key));
 
                 if (matchedRelation) {
                   const relationTo = matchedRelation[0].replace('ID', '');

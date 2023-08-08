@@ -86,7 +86,8 @@ export const buildTable = ({
     indexes,
     localesColumns,
     localesIndexes,
-    tableName,
+    newTableName: tableName,
+    parentTableName: tableName,
     relationships,
   }));
 
