@@ -8,7 +8,6 @@
 * `setPreference()` return type ([#3125](https://github.com/payloadcms/payload/issues/3125)) ([463d6bb](https://github.com/payloadcms/payload/commit/463d6bbec66e61523bae3869df88bd98e7617390))
 * absolute staticURL admin thumbnails ([#3135](https://github.com/payloadcms/payload/issues/3135)) ([1039f39](https://github.com/payloadcms/payload/commit/1039f39c09260537616b22228080466e8df6e981))
 * adding and replacing similarly shaped block configs ([#3140](https://github.com/payloadcms/payload/issues/3140)) ([8e188cf](https://github.com/payloadcms/payload/commit/8e188cfe61db808c94d726967affdadf2e5abb9f))
-* fix form-builder buildInitialFormState example ([0aa494b](https://github.com/payloadcms/payload/commit/0aa494b3394c6e63909bfff713443ab5cefe8647))
 
 
 ### Features
