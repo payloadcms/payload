@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { Field } from 'payload/types';
+import { eq } from 'drizzle-orm';
 import { PostgresAdapter } from '../types';
 import { traverseFields } from './traverseFields';
 import { transform } from '../transform';
@@ -10,6 +11,7 @@ type Args = {
   adapter: PostgresAdapter
   fallbackLocale?: string | false
   fields: Field[]
+  id?: string | number
   locale: string
   operation: 'create' | 'update'
   path?: string
@@ -21,6 +23,7 @@ export const insertRow = async ({
   adapter,
   fallbackLocale,
   fields,
+  id,
   locale,
   operation,
   path = '',
@@ -55,9 +58,16 @@ export const insertRow = async ({
     row: rowToInsert.row,
   });
 
-  // First, we insert the main row
-  const [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
-    .values(rowToInsert.row).returning();
+  let insertedRow: Record<string, unknown>;
+
+  // First, we insert / update the main row
+  if (operation === 'create') {
+    [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
+      .values(rowToInsert.row).returning();
+  } else {
+    [insertedRow] = await adapter.db.update(adapter.tables[tableName])
+      .set(rowToInsert.row).where(eq(adapter.tables[tableName].id, id)).returning();
+  }
 
   let localeToInsert: Record<string, unknown>;
   const relationsToInsert: Record<string, unknown>[] = [];
@@ -92,13 +102,12 @@ export const insertRow = async ({
     });
   });
 
-  // Recursively insert arrays w/ their locales, one level at a time,
-  // filling parent ID accordingly
-  await insertArrays({
-    adapter,
-    arrays: [rowToInsert.arrays],
-    parentRows: [insertedRow],
-  });
+  if (operation === 'update') {
+    // TODO: delete existing data for paths that are updated
+    // 1. Arrays, and all sub-arrays from that point on including all locales
+    // 2. Blocks by path including locales, and sub arrays
+    // 3. Relationships by path
+  }
 
   // //////////////////////////////////
   // INSERT LOCALES
@@ -108,8 +117,13 @@ export const insertRow = async ({
 
   if (localeToInsert) {
     promises.push(async () => {
-      [insertedLocaleRow] = await adapter.db.insert(adapter.tables[`${tableName}_locales`])
-        .values(localeToInsert).returning();
+      if (operation === 'create') {
+        [insertedLocaleRow] = await adapter.db.insert(adapter.tables[`${tableName}_locales`])
+          .values(localeToInsert).returning();
+      } else {
+        // TODO: QUERY for existing locale by parent ID, to get its ID
+        // and upsert if it doesn't exist already
+      }
     });
   }
 
@@ -172,6 +186,18 @@ export const insertRow = async ({
         arrays: blockRows.map(({ arrays }) => arrays),
         parentRows: insertedBlockRows[blockName],
       });
+    });
+  });
+
+  // //////////////////////////////////
+  // INSERT ARRAYS RECURSIVELY
+  // //////////////////////////////////
+
+  promises.push(async () => {
+    await insertArrays({
+      adapter,
+      arrays: [rowToInsert.arrays],
+      parentRows: [insertedRow],
     });
   });
 

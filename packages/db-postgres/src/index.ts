@@ -20,7 +20,7 @@ import { create } from './create';
 // import { findGlobal } from './findGlobal';
 // import { findOne } from './findOne';
 // import { updateGlobal } from './updateGlobal';
-// import { updateOne } from './updateOne';
+import { updateOne } from './update';
 // import { updateVersion } from './updateVersion';
 // import { deleteMany } from './deleteMany';
 // import { destroy } from './destroy';
@@ -48,7 +48,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       // findOne,
       find,
       create,
-      // updateOne,
+      updateOne,
       // deleteOne,
       // deleteMany,
       // findGlobal,
