@@ -80,7 +80,6 @@ export const traverseFields = ({
           fieldData.forEach((arrayRow, i) => {
             const newRow: ArrayRowToInsert = {
               columnName,
-              parentTableName,
               row: {
                 _order: i + 1,
               },

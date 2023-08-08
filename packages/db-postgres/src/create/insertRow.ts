@@ -13,96 +13,103 @@ type Args = {
   locale: string
   operation: 'create' | 'update'
   path?: string
-  rows: Record<string, unknown>[]
+  data: Record<string, unknown>
   tableName: string
 }
 
-export const insertRows = async ({
+export const insertRow = async ({
   adapter,
   fallbackLocale,
   fields,
   locale,
   operation,
   path = '',
-  rows,
+  data,
   tableName,
-}: Args): Promise<Record<string, unknown>[]> => {
-  const rowsToInsert: RowToInsert[] = [];
+}: Args): Promise<Record<string, unknown>> => {
+  // Split out the incoming data into the corresponding:
+  // base row, locales, relationships, blocks, and arrays
+  const rowToInsert: RowToInsert = {
+    row: {},
+    locale: {},
+    relationships: [],
+    blocks: {},
+    arrays: {},
+  };
 
-  rows.forEach((data, i) => {
-    rowsToInsert.push({
-      row: {},
-      locale: {},
-      relationships: [],
-      blocks: {},
-      arrays: {},
-    });
-
-    traverseFields({
-      adapter,
-      arrays: rowsToInsert[i].arrays,
-      blocks: rowsToInsert[i].blocks,
-      columnPrefix: '',
-      data,
-      fields,
-      locale,
-      localeRow: rowsToInsert[i].locale,
-      newTableName: tableName,
-      parentTableName: tableName,
-      path,
-      relationships: rowsToInsert[i].relationships,
-      row: rowsToInsert[i].row,
-    });
+  // This function is responsible for building up the
+  // above rowToInsert
+  traverseFields({
+    adapter,
+    arrays: rowToInsert.arrays,
+    blocks: rowToInsert.blocks,
+    columnPrefix: '',
+    data,
+    fields,
+    locale,
+    localeRow: rowToInsert.locale,
+    newTableName: tableName,
+    parentTableName: tableName,
+    path,
+    relationships: rowToInsert.relationships,
+    row: rowToInsert.row,
   });
 
-  const insertedRows = await adapter.db.insert(adapter.tables[tableName])
-    .values(rowsToInsert.map(({ row }) => row)).returning();
+  // First, we insert the main row
+  const [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
+    .values(rowToInsert.row).returning();
 
-  const localesToInsert: Record<string, unknown>[] = [];
+  let localeToInsert: Record<string, unknown>;
   const relationsToInsert: Record<string, unknown>[] = [];
   const blocksToInsert: { [blockType: string]: BlockRowToInsert[] } = {};
 
+  // Maintain a list of promises to run locale, blocks, and relationships
+  // all in parallel
   const promises = [];
 
-  insertedRows.forEach((insertedRow, i) => {
-    if (Object.keys(rowsToInsert[i].locale).length > 0) {
-      rowsToInsert[i].locale._parentID = insertedRow.id;
-      rowsToInsert[i].locale._locale = locale;
-      localesToInsert.push(rowsToInsert[i].locale);
-    }
+  // If there is a locale row with data, add the parent and locale
+  if (Object.keys(rowToInsert.locale).length > 0) {
+    rowToInsert.locale._parentID = insertedRow.id;
+    rowToInsert.locale._locale = locale;
+    localeToInsert = rowToInsert.locale;
+  }
 
-    if (rowsToInsert[i].relationships) {
-      rowsToInsert[i].relationships.forEach((relation) => {
-        relation.parent = insertedRow.id;
-        relationsToInsert.push(relation);
-      });
-    }
+  // If there are relationships, add parent to each
+  if (rowToInsert.relationships.length > 0) {
+    rowToInsert.relationships.forEach((relation) => {
+      relation.parent = insertedRow.id;
+      relationsToInsert.push(relation);
+    });
+  }
 
-    Object.keys(rowsToInsert[i].blocks).forEach((blockName) => {
-      rowsToInsert[i].blocks[blockName].forEach((blockRow) => {
-        blockRow.row._parentID = insertedRow.id;
-        if (!blocksToInsert[blockName]) blocksToInsert[blockName] = [];
-        blocksToInsert[blockName].push(blockRow);
-      });
+  // If there are blocks, add parent to each, and then
+  // store by table name and rows
+  Object.keys(rowToInsert.blocks).forEach((blockName) => {
+    rowToInsert.blocks[blockName].forEach((blockRow) => {
+      blockRow.row._parentID = insertedRow.id;
+      if (!blocksToInsert[blockName]) blocksToInsert[blockName] = [];
+      blocksToInsert[blockName].push(blockRow);
     });
   });
 
+  // Recursively insert arrays w/ their locales, one level at a time,
+  // filling parent ID accordingly
   await insertArrays({
     adapter,
-    rowsToInsert,
-    parentRows: insertedRows,
+    arrays: [rowToInsert.arrays],
+    parentRows: [insertedRow],
   });
 
   // //////////////////////////////////
   // INSERT LOCALES
   // //////////////////////////////////
 
-  let insertedLocaleRows;
+  let insertedLocaleRow;
 
-  if (localesToInsert.length > 0) {
+  if (localeToInsert) {
     promises.push(async () => {
-      insertedLocaleRows = await adapter.db.insert(adapter.tables[`${tableName}_locales`])
-        .values(localesToInsert).returning();
+      [insertedLocaleRow] = await adapter.db.insert(adapter.tables[`${tableName}_locales`])
+        .values(localeToInsert).returning();
     });
   }
 
@@ -110,7 +117,7 @@ export const insertRows = async ({
   // INSERT RELATIONSHIPS
   // //////////////////////////////////
 
-  let insertedRelationshipRows;
+  let insertedRelationshipRows: Record<string, unknown>[];
 
   if (relationsToInsert.length > 0) {
     promises.push(async () => {
@@ -165,26 +172,20 @@ export const insertRows = async ({
   // TRANSFORM DATA
   // //////////////////////////////////
 
-  return insertedRows.map((row) => {
-    const matchedLocaleRow = insertedLocaleRows?.find(({ _parentID }) => _parentID === row.id);
-    if (matchedLocaleRow) row._locales = [matchedLocaleRow];
+  if (insertedLocaleRow) insertedRow._locales = [insertedLocaleRow];
+  if (insertedRelationshipRows?.length > 0) insertedRow._relationships = insertedRelationshipRows;
 
-    const matchedRelationshipRows = insertedRelationshipRows?.filter(({ parent }) => parent === row.id);
-    if (matchedRelationshipRows?.length > 0) row._relationships = matchedRelationshipRows;
-
-    Object.entries(insertedBlockRows).forEach(([blockName, blocks]) => {
-      const matchedBlocks = blocks.filter(({ _parentID }) => _parentID === row.id);
-      if (matchedBlocks.length > 0) row[`_blocks_${blockName}`] = matchedBlocks;
-    });
-
-    const result = transform({
-      config: adapter.payload.config,
-      data: row,
-      fallbackLocale,
-      fields,
-      locale,
-    });
-
-    return result;
+  Object.entries(insertedBlockRows).forEach(([blockName, blocks]) => {
+    if (blocks.length > 0) insertedRow[`_blocks_${blockName}`] = blocks;
   });
+
+  const result = transform({
+    config: adapter.payload.config,
+    data: insertedRow,
+    fallbackLocale,
+    fields,
+    locale,
+  });
+
+  return result;
 };

@@ -1,6 +1,5 @@
 export type ArrayRowToInsert = {
   columnName: string
-  parentTableName: string
   row: Record<string, unknown>,
   locale: Record<string, unknown>
   arrays: {
