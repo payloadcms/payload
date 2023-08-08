@@ -369,7 +369,7 @@ describe('fields', () => {
       await expect(firstRow.locator('.blocks-field__block-pill-text')).toContainText('Text en');
     });
 
-    test('should allow adding of similarly named blocks', async () => {
+    test('should add different blocks with similar field configs', async () => {
       await page.goto(url.create);
 
       async function addBlock(name: 'Block 1' | 'Block 2') {
