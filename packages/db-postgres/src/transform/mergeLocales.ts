@@ -22,6 +22,7 @@ export const mergeLocales = ({
           ...matchedLocale,
         };
 
+        delete merged._parentID;
         delete merged._locales;
         delete merged._locale;
         return merged;
@@ -35,6 +36,7 @@ export const mergeLocales = ({
             ...data,
             ...matchedFallbackLocale,
           };
+          delete merged._parentID;
           delete merged._locales;
           delete merged._locale;
           return merged;

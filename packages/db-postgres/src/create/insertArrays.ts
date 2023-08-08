@@ -52,7 +52,7 @@ export const insertArrays = async ({
       // We store row indexes to "slice out" the array rows
       // that belong to each parent row
       rowsByTable[tableName].rowIndexMap.push([
-        rowsByTable[tableName].rows.length, arrayRows.length,
+        rowsByTable[tableName].rows.length, rowsByTable[tableName].rows.length + arrayRows.length,
       ]);
 
       // Add any sub arrays that need to be created
@@ -79,7 +79,11 @@ export const insertArrays = async ({
     const insertedRows = await adapter.db.insert(adapter.tables[tableName])
       .values(row.rows).returning();
 
-    rowsByTable[tableName].rows = insertedRows;
+    rowsByTable[tableName].rows = insertedRows.map((arrayRow) => {
+      delete arrayRow._parentID;
+      delete arrayRow._order;
+      return arrayRow;
+    });
 
     // Insert locale rows
     if (adapter.tables[`${tableName}_locales`]) {
@@ -87,6 +91,7 @@ export const insertArrays = async ({
         .values(row.locales).returning();
 
       insertedLocaleRows.forEach((localeRow, i) => {
+        delete localeRow._parentID;
         rowsByTable[tableName].rows[i]._locales = [localeRow];
       });
     }

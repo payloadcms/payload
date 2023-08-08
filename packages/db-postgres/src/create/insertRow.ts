@@ -139,6 +139,7 @@ export const insertRow = async ({
         .values(blockRows.map(({ row }) => row)).returning();
 
       insertedBlockRows[blockName].forEach((row, i) => {
+        delete row._parentID;
         blockRows[i].row = row;
       });
 
@@ -161,6 +162,7 @@ export const insertRow = async ({
           .values(blockLocaleRowsToInsert).returning();
 
         insertedBlockLocaleRows.forEach((blockLocaleRow, i) => {
+          delete blockLocaleRow._parentID;
           insertedBlockRows[blockName][blockLocaleIndexMap[i]]._locales = [blockLocaleRow];
         });
       }
