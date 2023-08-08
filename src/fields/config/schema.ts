@@ -228,6 +228,10 @@ const tab = baseField.keys({
     .when('localized', { is: joi.exist(), then: joi.required() }),
   localized: joi.boolean(),
   interfaceName: joi.string().when('name', { not: joi.exist(), then: joi.forbidden() }),
+  saveToJWT: joi.alternatives().try(
+    joi.boolean(),
+    joi.string(),
+  ),
   label: joi.alternatives().try(
     joi.string(),
     joi.object().pattern(joi.string(), [joi.string()]),

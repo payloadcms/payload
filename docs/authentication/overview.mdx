@@ -83,7 +83,7 @@ Once enabled, each document that is created within the Collection can be thought
 
 Successfully logging in returns a `JWT` (JSON web token) which is how a user will identify themselves to Payload. By providing this JWT via either an HTTP-only cookie or an `Authorization` header, Payload will automatically identify the user and add its user JWT data to the Express `req`, which is available throughout Payload including within access control, hooks, and more.
 
-You can specify what data gets encoded to the JWT token by setting `saveToJWT` to true in your auth collection fields. If you wish to use a different key other than the field `name`, you can provide it to `saveToJWT` as a string.
+You can specify what data gets encoded to the JWT token by setting `saveToJWT` to true in your auth collection fields. If you wish to use a different key other than the field `name`, you can provide it to `saveToJWT` as a string. It is also possible to use `saveToJWT` on fields that are nested in inside groups and tabs. If a group has a `saveToJWT` set it will include the object with all sub-fields in the token. You can set `saveToJWT: false` for any fields you wish to omit. If a field inside a group has `saveToJWT` set, but the group does not, the field will be included at the top level of the token.
 
 <Banner type="success">
   <strong>Tip:</strong><br/>
