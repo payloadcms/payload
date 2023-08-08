@@ -120,42 +120,37 @@ const ArrayFields: CollectionConfig = {
       },
     },
     {
-      type: 'row',
-      fields: [
+      name: 'customBlocks',
+      type: 'blocks',
+      blocks: [
         {
-          name: 'customBlocks',
-          type: 'blocks',
-          blocks: [
+          slug: 'block-1',
+          fields: [
             {
-              slug: 'block-1',
-              fields: [
-                {
-                  name: 'block1Title',
-                  type: 'text',
-                },
-              ],
-            },
-            {
-              slug: 'block-2',
-              fields: [
-                {
-                  name: 'block2Title',
-                  type: 'text',
-                },
-              ],
+              name: 'block1Title',
+              type: 'text',
             },
           ],
         },
         {
-          type: 'ui',
-          name: 'ui',
-          admin: {
-            components: {
-              Field: AddCustomBlocks,
+          slug: 'block-2',
+          fields: [
+            {
+              name: 'block2Title',
+              type: 'text',
             },
-          },
+          ],
         },
       ],
+    },
+    {
+      type: 'ui',
+      name: 'ui',
+      admin: {
+        components: {
+          Field: AddCustomBlocks,
+        },
+      },
     },
   ],
 };
