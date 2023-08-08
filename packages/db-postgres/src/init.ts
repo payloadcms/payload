@@ -1,13 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { pushSchema } from 'drizzle-kit/utils';
 import { eq } from 'drizzle-orm';
-import {
-  jsonb,
-  numeric,
-  pgEnum,
-  pgTable,
-  varchar,
-} from 'drizzle-orm/pg-core';
+import { jsonb, numeric, pgEnum, pgTable, varchar } from 'drizzle-orm/pg-core';
 import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
 import type { Init } from 'payload/dist/database/types';
 import { configToJSONSchema } from 'payload/dist/utilities/configToJSONSchema';
@@ -22,24 +16,23 @@ const migrationsSchema = pgTable('payload_migrations', {
   schema: jsonb('schema'),
 });
 
-export const init: Init = async function init(
-  this: PostgresAdapter,
-) {
+export const init: Init = async function init(this: PostgresAdapter) {
   if (this.payload.config.localization) {
-    this.enums._locales = pgEnum('_locales', this.payload.config.localization.locales as [string, ...string[]]);
+    this.enums._locales = pgEnum(
+      '_locales',
+      this.payload.config.localization.locales as [string, ...string[]],
+    );
   }
 
-  this.payload.config.collections.forEach(
-    (collection: SanitizedCollectionConfig) => {
-      buildTable({
-        adapter: this,
-        buildRelationships: true,
-        fields: collection.fields,
-        tableName: collection.slug,
-        timestamps: collection.timestamps,
-      });
-    },
-  );
+  this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
+    buildTable({
+      adapter: this,
+      buildRelationships: true,
+      fields: collection.fields,
+      tableName: collection.slug,
+      timestamps: collection.timestamps,
+    });
+  });
 
   this.payload.config.globals.forEach((global) => {
     // create global model
@@ -63,12 +56,7 @@ export const init: Init = async function init(
   });
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
-  const {
-    hasDataLoss,
-    warnings,
-    statementsToExecute,
-    apply,
-  } = await pushSchema(schema, this.db);
+  const { hasDataLoss, warnings, statementsToExecute, apply } = await pushSchema(schema, this.db);
 
   this.payload.logger.debug({
     msg: 'Schema push results',
@@ -114,7 +102,10 @@ export const init: Init = async function init(
 
   await apply();
 
-  const devPush = await this.db.select().from(migrationsSchema).where(eq(migrationsSchema.batch, '-1'));
+  const devPush = await this.db
+    .select()
+    .from(migrationsSchema)
+    .where(eq(migrationsSchema.batch, '-1'));
 
   if (!devPush.length) {
     await this.db.insert(migrationsSchema).values({
@@ -123,8 +114,11 @@ export const init: Init = async function init(
       schema: JSON.stringify(jsonSchema),
     });
   } else {
-    await this.db.update(migrationsSchema).set({
-      schema: JSON.stringify(jsonSchema),
-    }).where(eq(migrationsSchema.batch, '-1'));
+    await this.db
+      .update(migrationsSchema)
+      .set({
+        schema: JSON.stringify(jsonSchema),
+      })
+      .where(eq(migrationsSchema.batch, '-1'));
   }
 };
