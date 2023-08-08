@@ -11,7 +11,7 @@ import { Args, PostgresAdapter, PostgresAdapterResult } from './types';
 // import { rollbackTransaction } from './transactions/rollbackTransaction';
 // import { commitTransaction } from './transactions/commitTransaction';
 // import { queryDrafts } from './queryDrafts';
-// import { find } from './find';
+import { find } from './find';
 // import { findGlobalVersions } from './findGlobalVersions';
 // import { findVersions } from './findVersions';
 import { create } from './create';
@@ -46,7 +46,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       // commitTransaction,
       // queryDrafts,
       // findOne,
-      // find,
+      find,
       create,
       // updateOne,
       // deleteOne,

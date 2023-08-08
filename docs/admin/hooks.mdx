@@ -138,25 +138,487 @@ The `useForm` hook can be used to interact with the form itself, and sends back 
   This hook is optimized to avoid causing rerenders when fields change, and as such, its `fields` property will be out of date. You should only leverage this hook if you need to perform actions against the form in response to your users' actions. Do not rely on its returned "fields" as being up-to-date. They will be removed from this hook's response in an upcoming version.
 </Banner>
 
-The `useForm` hook returns an object with the following properties:
+The `useForm` hook returns an object with the following properties: |
 
-| Action               | Description                                                         |
-|----------------------|---------------------------------------------------------------------|
-| **`fields`**         | Deprecated. This property cannot be relied on as up-to-date.        |
-| **`submit`**         | Method to trigger the form to submit                                |
-| **`dispatchFields`** | Dispatch actions to the form field state                            |
-| **`validateForm`**   | Trigger a validation of the form state                              |
-| **`createFormData`** | Create a `multipart/form-data` object from the current form's state |
-| **`disabled`**       | Boolean denoting whether or not the form is disabled                |
-| **`getFields`**      | Gets all fields from state                                          |
-| **`getField`**       | Gets a single field from state by path                              |
-| **`getData`**        | Returns the data stored in the form                                 |
-| **`getSiblingData`** | Returns form sibling data for the given field path                  |
-| **`setModified`**    | Set the form's `modified` state                                     |
-| **`setProcessing`**  | Set the form's `processing` state                                   |
-| **`setSubmitted`**   | Set the form's `submitted` state                                    |
-| **`formRef`**        | The ref from the form HTML element                                  |
-| **`reset`**          | Method to reset the form to its initial state                       |
+<TableWithDrawers
+  columns={[
+    'Action',
+    'Description',
+    'Example',
+  ]}
+  rows={[
+    [
+      {
+        value: <strong><code>fields</code></strong>,
+      },
+      {
+        value: "Deprecated. This property cannot be relied on as up-to-date.",
+      },
+      {
+        value: ''
+      }
+    ],
+    [
+      {
+        value: <strong><code>submit</code></strong>,
+      },
+      {
+        value: "Method to trigger the form to submit",
+      },
+      {
+        value: ''
+      }
+    ],
+    [
+      {
+        value: <strong><code>dispatchFields</code></strong>,
+      },
+      {
+        value: "Dispatch actions to the form field state",
+      },
+      {
+        value: ''
+      }
+    ],
+    [
+      {
+        value: <strong><code>validateForm</code></strong>,
+      },
+      {
+        value: "Trigger a validation of the form state",
+      },
+      {
+        value: ''
+      }
+    ],
+    [
+      {
+        value: <strong><code>createFormData</code></strong>,
+      },
+      {
+        value: <>Create a <code>multipart/form-data</code> object from the current form's state</>,
+      },
+      {
+        value: ''
+      }
+    ],
+    [
+      {
+        value: <strong><code>disabled</code></strong>,
+      },
+      {
+        value: "Boolean denoting whether or not the form is disabled",
+      },
+      {
+        value: ''
+      }
+    ],
+    [
+      {
+        value: <strong><code>getFields</code></strong>,
+      },
+      {
+        value: 'Gets all fields from state',
+      },
+      {
+        value: '',
+      }
+    ],
+    [
+      {
+        value: <strong><code>getField</code></strong>,
+      },
+      {
+        value: 'Gets a single field from state by path',
+      },
+      {
+        value: '',
+      },
+    ],
+    [
+      {
+        value: <strong><code>getData</code></strong>,
+      },
+      {
+        value: 'Returns the data stored in the form',
+      },
+      {
+        value: '',
+      },
+    ],
+    [
+      {
+        value: <strong><code>getSiblingData</code></strong>,
+      },
+      {
+        value: 'Returns form sibling data for the given field path',
+      },
+      {
+        value: '',
+      },
+    ],
+    [
+      {
+        value: <strong><code>setModified</code></strong>,
+      },
+      {
+        value: <>Set the form\'s <code>modified</code> state</>,
+      },
+      {
+        value: '',
+      },
+    ],
+    [
+      {
+        value: <strong><code>setProcessing</code></strong>,
+      },
+      {
+        value: <>Set the form\'s <code>processing</code> state</>,
+      },
+      {
+        value: '',
+      },
+    ],
+    [
+      {
+        value: <strong><code>setSubmitted</code></strong>,
+      },
+      {
+        value: <>Set the form\'s <code>submitted</code> state</>,
+      },
+      {
+        value: '',
+      },
+    ],
+    [
+      {
+        value: <strong><code>formRef</code></strong>,
+      },
+      {
+        value: 'The ref from the form HTML element',
+      },
+      {
+        value: '',
+      },
+    ],
+    [
+      {
+        value: <strong><code>reset</code></strong>,
+      },
+      {
+        value: 'Method to reset the form to its initial state',
+      },
+      {
+        value: '',
+      },
+    ],
+    [
+      {
+        value: <strong><code>addFieldRow</code></strong>,
+      },
+      {
+        value: "Method to add a row on an array or block field",
+      },
+      {
+        drawerTitle: 'addFieldRow',
+        drawerDescription: 'A useful method to programtically add a row to an array or block field.',
+        drawerSlug: 'addFieldRow',
+        drawerContent: (
+<>
+  <TableWithDrawers
+    columns={[
+      'Prop',
+      'Description',
+    ]}
+    rows={[
+      [
+        {
+          value: <strong><code>path</code></strong>,
+        },
+        {
+          value: "The path to the array or block field",
+        },
+      ],
+      [
+        {
+          value: <strong><code>rowIndex</code></strong>,
+        },
+        {
+          value: "The index of the row to add",
+        },
+      ],
+      [
+        {
+          value: <strong><code>data</code></strong>,
+        },
+        {
+          value: "The data to add to the row",
+        },
+      ],
+    ]}
+  />
+
+  <br />
+
+  <pre>
+{`import { useForm } from "payload/components/forms";
+
+export const CustomArrayManager = () => {
+  const { addFieldRow } = useForm()
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        addFieldRow({
+          path: "arrayField",
+          rowIndex: 0,
+          data: {
+            textField: "text",
+            // blockType: "yourBlockSlug",
+            // ^ if managing a block array, you need to specify the block type
+          },
+        })
+      }}
+    >
+      Add Row
+    </button>
+  )
+}`}
+  </pre>
+
+  <p>An example config to go along with the custom component</p>
+  <pre>
+{`const ExampleCollection = {
+  slug: "example-collection",
+  fields: [
+    {
+      name: "arrayField",
+      type: "array",
+      fields: [
+        {
+          name: "textField",
+          type: "text",
+        },
+      ],
+    },
+    {
+      type: "ui",
+      name: "customArrayManager",
+      admin: {
+        components: {
+          Field: CustomArrayManager,
+        },
+      },
+    },
+  ],
+}`}
+  </pre>
+</>
+        )
+      }
+    ],
+    [
+      {
+        value: <strong><code>removeFieldRow</code></strong>,
+      },
+      {
+        value: "Method to remove a row from an array or block field",
+      },
+      {
+        drawerTitle: 'removeFieldRow',
+        drawerDescription: 'A useful method to programtically remove a row from an array or block field.',
+        drawerSlug: 'removeFieldRow',
+        drawerContent: (
+<>
+  <TableWithDrawers
+    columns={[
+      'Prop',
+      'Description',
+    ]}
+    rows={[
+      [
+        {
+          value: <strong><code>path</code></strong>,
+        },
+        {
+          value: "The path to the array or block field",
+        },
+      ],
+      [
+        {
+          value: <strong><code>rowIndex</code></strong>,
+        },
+        {
+          value: "The index of the row to remove",
+        },
+      ],
+    ]}
+  />
+
+  <br />
+
+  <pre>
+{`import { useForm } from "payload/components/forms";
+
+export const CustomArrayManager = () => {
+  const { removeFieldRow } = useForm()
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        removeFieldRow({
+          path: "arrayField",
+          rowIndex: 0,
+        })
+      }}
+    >
+      Remove Row
+    </button>
+  )
+}`}
+  </pre>
+
+  <p>An example config to go along with the custom component</p>
+  <pre>
+{`const ExampleCollection = {
+  slug: "example-collection",
+  fields: [
+    {
+      name: "arrayField",
+      type: "array",
+      fields: [
+        {
+          name: "textField",
+          type: "text",
+        },
+      ],
+    },
+    {
+      type: "ui",
+      name: "customArrayManager",
+      admin: {
+        components: {
+          Field: CustomArrayManager,
+        },
+      },
+    },
+  ],
+}`}
+  </pre>
+</>
+        )
+      }
+    ],
+    [
+      {
+        value: <strong><code>replaceFieldRow</code></strong>,
+      },
+      {
+        value: "Method to replace a row from an array or block field",
+      },
+      {
+        drawerTitle: 'replaceFieldRow',
+        drawerDescription: 'A useful method to programtically replace a row from an array or block field.',
+        drawerSlug: 'replaceFieldRow',
+        drawerContent: (
+<>
+  <TableWithDrawers
+    columns={[
+      'Prop',
+      'Description',
+    ]}
+    rows={[
+      [
+        {
+          value: <strong><code>path</code></strong>,
+        },
+        {
+          value: "The path to the array or block field",
+        },
+      ],
+      [
+        {
+          value: <strong><code>rowIndex</code></strong>,
+        },
+        {
+          value: "The index of the row to replace",
+        },
+      ],
+      [
+        {
+          value: <strong><code>data</code></strong>,
+        },
+        {
+          value: "The data to replace within the row",
+        },
+      ],
+    ]}
+  />
+
+  <br />
+
+  <pre>
+{`import { useForm } from "payload/components/forms";
+
+export const CustomArrayManager = () => {
+  const { replaceFieldRow } = useForm()
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        replaceFieldRow({
+          path: "arrayField",
+          rowIndex: 0,
+          data: {
+            textField: "updated text",
+            // blockType: "yourBlockSlug",
+            // ^ if managing a block array, you need to specify the block type
+          },
+        })
+      }}
+    >
+      Replace Row
+    </button>
+  )
+}`}
+  </pre>
+
+  <p>An example config to go along with the custom component</p>
+  <pre>
+{`const ExampleCollection = {
+  slug: "example-collection",
+  fields: [
+    {
+      name: "arrayField",
+      type: "array",
+      fields: [
+        {
+          name: "textField",
+          type: "text",
+        },
+      ],
+    },
+    {
+      type: "ui",
+      name: "customArrayManager",
+      admin: {
+        components: {
+          Field: CustomArrayManager,
+        },
+      },
+    },
+  ],
+}`}
+  </pre>
+</>
+        )
+      }
+    ],
+  ]}
+/>
 
 ### useDocumentInfo
 

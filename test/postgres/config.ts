@@ -1,7 +1,6 @@
 import { CollectionConfig } from '../../src/collections/config/types';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
-import { timestamp } from '../../src/utilities/timestamp';
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -167,13 +166,13 @@ const config = buildConfigWithDefaults({
     defaultLocale: 'en',
   },
   onInit: async (payload) => {
-    // await payload.create({
-    //   collection: 'users',
-    //   data: {
-    //     email: devUser.email,
-    //     password: devUser.password,
-    //   },
-    // });
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    });
 
     const page1 = await payload.create({
       collection: 'pages',
@@ -188,6 +187,13 @@ const config = buildConfigWithDefaults({
         slug: 'second',
       },
     });
+
+    const findResult = await payload.find({
+      collection: 'pages',
+      where: { slug: { equals: 'second' } },
+    });
+
+    console.log(findResult);
 
     const person1 = await payload.create({
       collection: 'people',

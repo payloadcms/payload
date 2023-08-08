@@ -184,6 +184,8 @@
     "email": "E-mail",
     "emailAddress": "E-mail cím",
     "enterAValue": "Adjon meg egy értéket",
+    "error": "Hiba",
+    "errors": "Hibák",
     "fallbackToDefaultLocale": "Visszatérés az alapértelmezett nyelvhez",
     "filter": "Szűrő",
     "filterWhere": "Szűrő {{label}} ahol",

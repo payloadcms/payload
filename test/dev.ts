@@ -36,7 +36,7 @@ const startDev = async () => {
     secret: uuid(),
     express: expressApp,
     email: {
-      logMockCredentials: true,
+      logMockCredentials: false,
       fromName: 'Payload',
       fromAddress: 'hello@payloadcms.com',
     },

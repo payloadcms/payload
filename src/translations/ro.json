@@ -184,6 +184,8 @@
     "email": "Email",
     "emailAddress": "Adresa de email",
     "enterAValue": "Introduceți o valoare",
+    "error": "Eroare",
+    "errors": "Erori",
     "fallbackToDefaultLocale": "Revenire la locația implicită",
     "filter": "Filtru",
     "filterWhere": "Filtrează {{label}} unde",

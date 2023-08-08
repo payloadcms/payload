@@ -1,12 +1,26 @@
 /* eslint-disable no-param-reassign */
-import { generateDrizzleJson, generateMigration, pushSchema } from 'drizzle-kit/utils';
-import { buildVersionCollectionFields } from 'payload/dist/versions/buildCollectionFields';
+import { eq, sql } from 'drizzle-orm';
+import {
+  numeric,
+  pgEnum,
+  pgTable,
+  varchar,
+  jsonb,
+} from 'drizzle-orm/pg-core';
+import { pushSchema } from 'drizzle-kit/utils';
 import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
-import { getVersionsModelName } from 'payload/dist/versions/getVersionsModelName';
+import { configToJSONSchema } from 'payload/dist/utilities/configToJSONSchema';
 import type { Init } from 'payload/dist/database/types';
-import { pgEnum } from 'drizzle-orm/pg-core';
-import type { GenericEnum, GenericRelation, GenericTable, PostgresAdapter } from './types';
+import prompts from 'prompts';
 import { buildTable } from './schema/build';
+import type { GenericEnum, GenericRelation, GenericTable, PostgresAdapter } from './types';
+
+// Migration table def in order to use query using drizzle
+const migrationsSchema = pgTable('payload_migrations', {
+  name: varchar('name'),
+  batch: numeric('batch'),
+  schema: jsonb('schema'),
+});
 
 export const init: Init = async function init(
   this: PostgresAdapter,
@@ -50,6 +64,7 @@ export const init: Init = async function init(
       schema[`enum_${key}`] = val;
     });
 
+    // This will prompt if clarifications are needed for Drizzle to push new schema
     const {
       hasDataLoss,
       warnings,
@@ -57,19 +72,71 @@ export const init: Init = async function init(
       apply,
     } = await pushSchema(schema, this.db);
 
-    // TODO:
-    // if there are warnings, make the user accept them via CLI
-    // Log the warnings and the statements, etc.
-    // Only apply if user accepts warnings
+    this.payload.logger.info({
+      msg: 'Schema push results',
+      hasDataLoss,
+      warnings,
+      statementsToExecute,
+    });
 
-    // TODO:
-    // PUSH MIGRATION RECORD to db with shape of JSON schema
-    // this migration needs to have some "flag" that says "pushed"
-    // we don't want 1000 pushes in dev mode, just update the most recently pushed one
-    // to do this, we will say "give me the most recent migration in the DB"
-    // if pushed: true, update that one with the new schema
-    // if pushed is false or does not exist, create a new migration
-    // with pushed: true and the shape of the schema (generated via generateDrizzleJSON)
+    if (warnings.length) {
+      this.payload.logger.warn({
+        msg: `Warnings detected during schema push: ${warnings.join('\n')}`,
+        warnings,
+      });
+
+      if (hasDataLoss) {
+        this.payload.logger.warn({
+          msg: 'DATA LOSS WARNING: Possible data loss detected if schema is pushed.',
+        });
+      }
+
+      const { confirm: acceptWarnings } = await prompts(
+        {
+          type: 'confirm',
+          name: 'confirm',
+          message: 'Accept warnings and push schema to database?',
+          initial: false,
+        },
+        {
+          onCancel: () => {
+            process.exit(0);
+          },
+        },
+      );
+
+      // Exit if user does not accept warnings.
+      // Q: Is this the right type of exit for this interaction?
+      if (!acceptWarnings) {
+        process.exit(0);
+      }
+    }
+
+    const jsonSchema = configToJSONSchema(this.payload.config);
+
+    // This should mirror the generated table definition from schema/build.ts
+    await this.db.execute(sql`CREATE TABLE IF NOT EXISTS "payload_migrations" (
+        id SERIAL PRIMARY KEY,
+        name character varying,
+        batch numeric,
+        schema jsonb,
+        created_at timestamp without time zone DEFAULT now() NOT NULL,
+        updated_at timestamp without time zone DEFAULT now() NOT NULL
+      );`);
+
+    const devPush = await this.db.select().from(migrationsSchema).where(eq(migrationsSchema.batch, '-1'));
+
+    if (!devPush.length) {
+      await this.db.insert(migrationsSchema).values({
+        name: 'dev',
+        batch: '-1',
+        schema: JSON.stringify(jsonSchema),
+      });
+    } else {
+      await this.db.update(migrationsSchema).set({
+        schema: JSON.stringify(jsonSchema),
+      }).where(eq(migrationsSchema.batch, '-1'));
+    }
 
     await apply();
   }

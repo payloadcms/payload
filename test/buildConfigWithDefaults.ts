@@ -10,7 +10,7 @@ const databaseAdapters = {
   }),
   postgres: postgresAdapter({
     client: {
-      connectionString: 'postgres://127.0.0.1:5432/payload',
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payload',
     },
   }),
 };

@@ -184,6 +184,8 @@
     "email": "Email",
     "emailAddress": "Email adresa",
     "enterAValue": "Unesi vrijednost",
+    "error": "Greška",
+    "errors": "Greške",
     "fallbackToDefaultLocale": "Vraćanje na zadani jezik",
     "filter": "Filter",
     "filterWhere": "Filter {{label}} gdje",

@@ -19,7 +19,7 @@
       "cwd": "${workspaceFolder}"
     },
     {
-      "command": "yarn run dev:postgres postgres",
+      "command": "yarn run dev:postgres postgres -- -I", // Allow input
       "name": "Run Dev Postgres",
       "request": "launch",
       "type": "node-terminal",

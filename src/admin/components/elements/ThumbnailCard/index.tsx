@@ -18,7 +18,6 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
     thumbnail,
     label: labelFromProps,
     alignLabel,
-    onKeyDown,
   } = props;
 
   const { t, i18n } = useTranslation('general');
@@ -43,11 +42,11 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
   }
 
   return (
-    <div
+    <button
+      type="button"
       title={title}
       className={classes}
-      onClick={typeof onClick === 'function' ? onClick : undefined}
-      onKeyDown={typeof onKeyDown === 'function' ? onKeyDown : undefined}
+      onClick={onClick}
     >
       <div className={`${baseClass}__thumbnail`}>
         {thumbnail && thumbnail}
@@ -62,6 +61,6 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
       <div className={`${baseClass}__label`}>
         {title}
       </div>
-    </div>
+    </button>
   );
 };

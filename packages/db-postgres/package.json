@@ -10,17 +10,21 @@
     "build": "tsc"
   },
   "peerDependencies": {
-    "payload": "^1.11.8"
+    "payload": "^1.12.0",
+    "better-sqlite3": "^8.5.0"
   },
   "dependencies": {
+    "@libsql/client": "^0.3.1",
     "drizzle-kit": "^0.19.13-a511135",
     "drizzle-orm": "^0.28.0",
     "pg": "^8.11.1",
+    "prompts": "^2.4.2",
     "to-snake-case": "^1.0.0"
   },
   "devDependencies": {
     "@types/pg": "^8.10.2",
-    "payload": "^1.11.8",
-    "typescript": "^4.9.4"
+    "payload": "^1.12.0",
+    "typescript": "^4.9.4",
+    "better-sqlite3": "^8.5.0"
   }
 }

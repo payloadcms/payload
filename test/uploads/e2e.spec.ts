@@ -107,13 +107,16 @@ describe('uploads', () => {
     await expect(maintainedImageSizeWithNewFormatMeta).toContainText('image/jpeg');
     await expect(maintainedImageSizeWithNewFormatMeta).toContainText('1600x1600');
 
-    const tabletMeta = page.locator('.file-details__sizes .file-meta').nth(4);
+    const sameSizeMeta = page.locator('.file-details__sizes .file-meta').nth(4);
+    await expect(sameSizeMeta).toContainText('320x80');
+
+    const tabletMeta = page.locator('.file-details__sizes .file-meta').nth(5);
     await expect(tabletMeta).toContainText('640x480');
 
-    const mobileMeta = page.locator('.file-details__sizes .file-meta').nth(5);
+    const mobileMeta = page.locator('.file-details__sizes .file-meta').nth(6);
     await expect(mobileMeta).toContainText('320x240');
 
-    const iconMeta = page.locator('.file-details__sizes .file-meta').nth(6);
+    const iconMeta = page.locator('.file-details__sizes .file-meta').nth(7);
     await expect(iconMeta).toContainText('16x16');
   });
 

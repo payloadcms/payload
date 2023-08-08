@@ -249,3 +249,39 @@ If you pass a strategy to the `strategy` property directly, the `name` property 
 However, if you pass a function to `strategy`, `name` is a required property.
 
 In either case, Payload will prefix the strategy name with the collection `slug` that the strategy is passed to.
+
+
+### Admin autologin
+
+For testing and demo purposes you may want to skip forcing the admin user to login in order to access the panel.
+The `admin.autologin` property is used to configure the how visitors are handled when accessing the admin panel.
+The default is that all users will have to login and this should not be enabled for environments where data needs to protected.
+
+#### autoLogin Options
+
+| Option                     | Description                                                                                                                                                   |
+| -------------------------- |---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`email`**            | The email address of the user to login as                                                                                                                    |
+| **`password`**      | The password of the user to login as                                               |
+| **`prefillOnly`**     | If set to true, the login credentials will be prefilled but the user will still need to click the login button. |
+
+The recommended way to use this feature is behind an environment variable to ensure it is disabled when in production.
+
+**Example:**
+
+```ts
+
+export default buildConfig({
+  admin: {
+    user: 'users',
+    // highlight-start
+    autoLogin: process.env.PAYLOAD_PUBLIC_ENABLE_AUTOLOGIN === 'true' ? {
+      email: 'test@example.com',
+      password: 'test',
+      prefillOnly: true,
+    } : false,
+    // highlight-end
+  },
+  collections: [ /** */],
+})
+```
