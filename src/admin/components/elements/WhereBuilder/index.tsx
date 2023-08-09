@@ -69,7 +69,11 @@ const WhereBuilder: React.FC<Props> = (props) => {
   // Example: /admin/collections/posts?where[or][0][and][0][text][equals]=example%20post
   const [conditions, dispatchConditions] = useReducer(reducer, params.where, (whereFromSearch) => {
     if (modifySearchQuery && whereFromSearch) {
-      // Make sure the where query is always in the right format. This will transform something simple like [text][equals]=example%20post to the right format
+      if (validateWhereQuery(whereFromSearch)) {
+        return whereFromSearch.or;
+      }
+
+      // Transform the where query to be in the right format. This will transform something simple like [text][equals]=example%20post to the right format
       const transformedWhere = transformWhereQuery(whereFromSearch);
 
       if (validateWhereQuery(transformedWhere)) {
