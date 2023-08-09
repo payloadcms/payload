@@ -272,6 +272,14 @@ export const traverseFields = <T extends Record<string, unknown>>({
           break;
         }
 
+        case 'date': {
+          if (fieldData instanceof Date) {
+            result[field.name] = fieldData.toISOString();
+          }
+
+          break;
+        }
+
         default: {
           break;
         }

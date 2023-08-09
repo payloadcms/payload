@@ -16,13 +16,14 @@ export const findOne: FindOne = async function findOne({
   const tableName = toSnakeCase(collection);
 
   const query = await buildQuery({
-    collectionSlug: collection,
     adapter: this,
+    collectionSlug: collection,
     locale,
     where,
   });
 
   const findManyArgs = buildFindManyArgs({
+    adapter: this,
     config: this.payload.config,
     collection: collectionConfig,
     depth: 0,

@@ -1,13 +1,16 @@
 /* eslint-disable no-param-reassign */
 import { SanitizedConfig } from 'payload/config';
+import toSnakeCase from 'to-snake-case';
 import { fieldAffectsData } from 'payload/dist/fields/config/types';
 import { ArrayField, Block, Field } from 'payload/types';
-import { hasLocalesTable } from '../utilities/hasLocalesTable';
 import { Result } from './buildFindManyArgs';
+import { PostgresAdapter } from '../types';
 
 type TraverseFieldArgs = {
+  adapter: PostgresAdapter
   config: SanitizedConfig,
   currentArgs: Record<string, unknown>,
+  currentTableName: string
   depth?: number,
   fields: Field[]
   _locales: Record<string, unknown>
@@ -15,11 +18,14 @@ type TraverseFieldArgs = {
   locatedBlocks: Block[],
   path: string,
   topLevelArgs: Record<string, unknown>,
+  topLevelTableName: string
 }
 
 export const traverseFields = ({
+  adapter,
   config,
   currentArgs,
+  currentTableName,
   depth,
   fields,
   _locales,
@@ -27,6 +33,7 @@ export const traverseFields = ({
   locatedBlocks,
   path,
   topLevelArgs,
+  topLevelTableName,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
     if (fieldAffectsData(field)) {
@@ -41,12 +48,16 @@ export const traverseFields = ({
             with: {},
           };
 
-          if (hasLocalesTable(field.fields) && _locales) withArray.with._locales = _locales;
+          const arrayTableName = `${currentTableName}_${toSnakeCase(field.name)}`;
+
+          if (adapter.tables[`${arrayTableName}_locales`]) withArray.with._locales = _locales;
           currentArgs.with[`${path}${field.name}`] = withArray;
 
           traverseFields({
+            adapter,
             config,
             currentArgs: withArray,
+            currentTableName: arrayTableName,
             depth,
             fields: field.fields,
             _locales,
@@ -54,6 +65,7 @@ export const traverseFields = ({
             locatedBlocks,
             path: '',
             topLevelArgs,
+            topLevelTableName,
           });
 
           break;
@@ -72,12 +84,14 @@ export const traverseFields = ({
                 with: {},
               };
 
-              if (hasLocalesTable(block.fields) && _locales) withBlock.with._locales = _locales;
+              if (adapter.tables[`${topLevelArgs}_${toSnakeCase(block.slug)}_locales`]) withBlock.with._locales = _locales;
               topLevelArgs.with[blockKey] = withBlock;
 
               traverseFields({
+                adapter,
                 config,
                 currentArgs: withBlock,
+                currentTableName,
                 depth,
                 fields: block.fields,
                 _locales,
@@ -85,6 +99,7 @@ export const traverseFields = ({
                 locatedBlocks,
                 path,
                 topLevelArgs,
+                topLevelTableName,
               });
             }
           });
@@ -93,8 +108,10 @@ export const traverseFields = ({
 
         case 'group':
           traverseFields({
+            adapter,
             config,
             currentArgs,
+            currentTableName,
             depth,
             fields: field.fields,
             _locales,
@@ -102,6 +119,7 @@ export const traverseFields = ({
             locatedBlocks,
             path: `${path}${field.name}_`,
             topLevelArgs,
+            topLevelTableName,
           });
 
           break;

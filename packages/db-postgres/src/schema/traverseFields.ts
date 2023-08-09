@@ -8,6 +8,7 @@ import { GenericColumns, PostgresAdapter } from '../types';
 import { createIndex } from './createIndex';
 import { buildTable } from './build';
 import { parentIDColumnMap } from './parentIDColumnMap';
+import { hasLocalesTable } from '../utilities/hasLocalesTable';
 
 type Args = {
   adapter: PostgresAdapter
@@ -144,7 +145,7 @@ export const traverseFields = ({
             }),
           };
 
-          if (field.localized) {
+          if (hasLocalesTable(field.fields)) {
             result._locales = many(adapter.tables[`${arrayTableName}_locales`]);
           }
 
@@ -190,7 +191,7 @@ export const traverseFields = ({
                 }),
               };
 
-              if (field.localized) {
+              if (hasLocalesTable(block.fields)) {
                 result._locales = many(adapter.tables[`${blockTableName}_locales`]);
               }
 
@@ -204,7 +205,7 @@ export const traverseFields = ({
             adapter.relations[`relations_${blockTableName}`] = blockTableRelations;
           }
 
-          arrayBlockRelations.set(`_${fieldPrefix || ''}${field.name}`, blockTableName);
+          arrayBlockRelations.set(`_blocks_${block.slug}`, blockTableName);
         });
 
         break;

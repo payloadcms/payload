@@ -23,19 +23,11 @@ export const connect: Connect = async function connect(
 ) {
   let db: DrizzleDB;
 
-  const schema: Record<string, GenericEnum | GenericTable | GenericRelation> = {};
-
-  Object.entries(this.tables).forEach(([key, val]) => {
-    schema[`${key}`] = val;
-  });
-
-  Object.entries(this.relations).forEach(([key, val]) => {
-    schema[`${key}`] = val;
-  });
-
-  Object.entries(this.enums).forEach(([key, val]) => {
-    schema[`${key}`] = val;
-  });
+  const schema: Record<string, GenericEnum | GenericTable | GenericRelation> = {
+    ...this.tables,
+    ...this.relations,
+    ...this.enums,
+  };
 
   try {
     if ('pool' in this && this.pool !== false) {
