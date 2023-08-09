@@ -2,11 +2,21 @@
 import fs from 'fs';
 import { CreateMigration } from 'payload/dist/database/types';
 
+import { generateDrizzleJson, generateMigration } from 'drizzle-kit/utils';
+import { eq } from 'drizzle-orm';
+import { jsonb, numeric, pgEnum, pgTable, varchar } from 'drizzle-orm/pg-core';
+import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
+import type { DatabaseAdapter, Init } from 'payload/dist/database/types';
+import { configToJSONSchema } from 'payload/dist/utilities/configToJSONSchema';
+import prompts from 'prompts';
+import { buildTable } from './schema/build';
+import type { GenericEnum, GenericRelation, GenericTable, PostgresAdapter } from './types';
+
 const migrationTemplate = `
 import payload, { Payload } from 'payload';
 
 export async function up(payload: Payload): Promise<void> {
-  {{SQL}}
+  await payload.db.db.execute(\`{{SQL}}\`);
 };
 
 export async function down(payload: Payload): Promise<void> {
@@ -14,11 +24,13 @@ export async function down(payload: Payload): Promise<void> {
 };
 `;
 
-export const createMigration: CreateMigration = async function createMigration({
+export const createMigration: CreateMigration = async function createMigration(
+  this: PostgresAdapter,
   payload,
   migrationDir,
   migrationName,
-}) {
+) {
+  payload.logger.info({ msg: 'Creating migration from postgres adapter...' });
   const dir = migrationDir || '.migrations'; // TODO: Verify path after linking
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
@@ -33,8 +45,12 @@ export const createMigration: CreateMigration = async function createMigration({
   const formattedName = migrationName.replace(/\W/g, '_');
   const fileName = `${timestamp}_${formattedName}.ts`;
   const filePath = `${dir}/${fileName}`;
-  fs.writeFileSync(filePath, migrationTemplate);
-  payload.logger.info({ msg: `Migration created at ${filePath}` });
+
+  const snapshotJSON = fs.readFileSync(`${dir}/drizzle-snapshot.json`, 'utf8');
+  const drizzleJsonBefore = generateDrizzleJson(JSON.parse(snapshotJSON));
+  const drizzleJsonAfter = generateDrizzleJson(this.schema, drizzleJsonBefore.id);
+  const sqlStatements = await generateMigration(drizzleJsonBefore, drizzleJsonAfter);
+  fs.writeFileSync(filePath, migrationTemplate.replace('{{SQL}}', sqlStatements.join('\n')));
 
   // TODO:
   // Get the most recent migration schema from the file system

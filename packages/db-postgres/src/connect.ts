@@ -1,8 +1,9 @@
+import fs from 'fs';
 import { sql, eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import type { Connect } from 'payload/dist/database/types';
 import { Client, Pool } from 'pg';
-import { pushSchema } from 'drizzle-kit/utils';
+import { generateDrizzleJson, pushSchema } from 'drizzle-kit/utils';
 import { configToJSONSchema } from 'payload/dist/utilities/configToJSONSchema';
 import prompts from 'prompts';
 
@@ -23,30 +24,30 @@ export const connect: Connect = async function connect(
 ) {
   let db: DrizzleDB;
 
-  const schema: Record<string, GenericEnum | GenericTable | GenericRelation> = {};
+  this.schema = {};
 
   Object.entries(this.tables).forEach(([key, val]) => {
-    schema[`${key}`] = val;
+    this.schema[`${key}`] = val;
   });
 
   Object.entries(this.relations).forEach(([key, val]) => {
-    schema[`${key}`] = val;
+    this.schema[`${key}`] = val;
   });
 
   Object.entries(this.enums).forEach(([key, val]) => {
-    schema[`${key}`] = val;
+    this.schema[`${key}`] = val;
   });
 
   try {
     if ('pool' in this && this.pool !== false) {
       const pool = new Pool(this.pool);
-      db = drizzle(pool, { schema });
+      db = drizzle(pool, { schema: this.schema });
       await pool.connect();
     }
 
     if ('client' in this && this.client !== false) {
       const client = new Client(this.client);
-      db = drizzle(client, { schema });
+      db = drizzle(client, { schema: this.schema });
       await client.connect();
     }
 
@@ -66,12 +67,11 @@ export const connect: Connect = async function connect(
   this.payload.logger.info('Connected to Postgres successfully');
   this.db = db;
 
-
   // Only push schema if not in production
   if (process.env.NODE_ENV === 'production') return;
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
-  const { hasDataLoss, warnings, statementsToExecute, apply } = await pushSchema(schema, this.db);
+  const { hasDataLoss, warnings, statementsToExecute, apply } = await pushSchema(this.schema, this.db);
 
   this.payload.logger.debug({
     msg: 'Schema push results',
@@ -111,6 +111,20 @@ export const connect: Connect = async function connect(
     if (!acceptWarnings) {
       process.exit(0);
     }
+  }
+
+  this.migrationDir = '.migrations';
+
+  // Create drizzle snapshot if it doesn't exist
+  if (!fs.existsSync(`${this.migrationDir}/drizzle-snapshot.json`)) {
+    // Ensure migration dir exists
+    if (!fs.existsSync(this.migrationDir)) {
+      fs.mkdirSync(this.migrationDir);
+    }
+
+    const drizzleJSON = generateDrizzleJson(this.schema);
+
+    fs.writeFileSync(`${this.migrationDir}/drizzle-snapshot.json`, JSON.stringify(drizzleJSON, null, 2));
   }
 
   const jsonSchema = configToJSONSchema(this.payload.config);
