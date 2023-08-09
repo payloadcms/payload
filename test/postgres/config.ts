@@ -1,6 +1,5 @@
 import { CollectionConfig } from '../../src/collections/config/types';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -198,12 +197,10 @@ const config = buildConfigWithDefaults({
       },
     });
 
-    // const findResult = await payload.find({
-    //   collection: 'pages',
-    //   where: { slug: { equals: 'second' } },
-    // });
-
-    // console.log(findResult);
+    const findResult = await payload.find({
+      collection: 'pages',
+      where: { slug: { equals: 'second' } },
+    });
 
     const person1 = await payload.create({
       collection: 'people',
