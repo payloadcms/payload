@@ -20,7 +20,7 @@ export const Orders: CollectionConfig = {
   },
   access: {
     read: adminsOrOrderedBy,
-    update: adminsOrOrderedBy,
+    update: admins,
     create: adminsOrLoggedIn,
     delete: admins,
   },
