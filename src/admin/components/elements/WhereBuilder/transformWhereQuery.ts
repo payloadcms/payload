@@ -9,20 +9,24 @@ export const transformWhereQuery = (whereQuery): Where => {
   if (!whereQuery) {
     return {};
   }
-  // Check if 'whereQuery' has 'or' field but no 'and'.
+  // Check if 'whereQuery' has 'or' field but no 'and'. This is the case for "correct" queries
   if (whereQuery.or && !whereQuery.and) {
     return {
-      ...whereQuery,
-      or: whereQuery.or.map((query) => ({
-        and: [query],
-      })),
+      or: whereQuery.or.map((query) => {
+        // ...but if the or query does not have an and, we need to add it
+        if(!query.and) {
+          return {
+            and: [query]
+          }
+        }
+        return query;
+      }),
     };
   }
 
   // Check if 'whereQuery' has 'and' field but no 'or'.
   if (whereQuery.and && !whereQuery.or) {
     return {
-      ...whereQuery,
       or: [
         {
           and: whereQuery.and,
@@ -36,12 +40,12 @@ export const transformWhereQuery = (whereQuery): Where => {
     return {
       or: [
         {
-          and: [whereQuery],
+          and: [whereQuery], // top-level siblings are considered 'and'
         },
       ],
     };
   }
 
-  // If 'whereQuery' already has 'or' and 'and', just return it as it is.
+  // If 'whereQuery' has 'or' and 'and', just return it as it is.
   return whereQuery;
 };
