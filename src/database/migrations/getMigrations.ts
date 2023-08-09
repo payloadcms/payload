@@ -9,6 +9,11 @@ export async function getMigrations({
   const migrationQuery = await payload.find({
     collection: 'payload-migrations',
     sort: '-name',
+    where: {
+      batch: {
+        not_equals: '-1',
+      },
+    },
   });
 
   const existingMigrations = migrationQuery.docs as unknown as MigrationData[];

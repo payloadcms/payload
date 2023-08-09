@@ -33,10 +33,15 @@ export const migrate = async (args: string[]): Promise<void> => {
       await adapter.migrateFresh();
       break;
     case 'migrate:create':
-      if (!args[1]) {
-        throw new Error('Please provide a migration name.');
+      try {
+        await adapter.createMigration(
+          payload,
+          '.migrations',
+          args[1],
+        );
+      } catch (err) {
+        throw new Error(`Error creating migration: ${err.message}`);
       }
-      await adapter.createMigration(args[1]);
       break;
 
     default:
@@ -44,7 +49,7 @@ export const migrate = async (args: string[]): Promise<void> => {
   }
 };
 
-// when launched directly
+// When launched directly call migrate
 if (module.id === require.main.id) {
   const args = process.argv.slice(2);
   migrate(args).then(() => {
