@@ -13,9 +13,9 @@ import { useSearchParams } from '../../utilities/SearchParams';
 import validateWhereQuery from './validateWhereQuery';
 import { Where } from '../../../../types';
 import { getTranslation } from '../../../../utilities/getTranslation';
+import { transformWhereQuery } from './transformWhereQuery';
 
 import './index.scss';
-import { transformWhereQuery } from './transformWhereQuery';
 
 const baseClass = 'where-builder';
 
@@ -69,11 +69,9 @@ const WhereBuilder: React.FC<Props> = (props) => {
   // Example: /admin/collections/posts?where[or][0][and][0][text][equals]=example%20post
   const [conditions, dispatchConditions] = useReducer(reducer, params.where, (whereFromSearch) => {
     if (modifySearchQuery && whereFromSearch) {
-      if (validateWhereQuery(whereFromSearch)) {
-        return whereFromSearch.or;
-      }
-      // attempt to fix invalid where query. Could be something simple like [text][equals]=example%20post
+      // Make sure the where query is always in the right format. This will transform something simple like [text][equals]=example%20post to the right format
       const transformedWhere = transformWhereQuery(whereFromSearch);
+
       if (validateWhereQuery(transformedWhere)) {
         return transformedWhere.or;
       }
