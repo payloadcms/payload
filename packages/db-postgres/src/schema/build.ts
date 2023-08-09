@@ -127,7 +127,7 @@ export const buildTable = ({
       }),
     }));
 
-    adapter.relations[localeTableName] = localesTableRelations;
+    adapter.relations[`relations_${localeTableName}`] = localesTableRelations;
   }
 
   if (buildRelationships) {
@@ -184,7 +184,7 @@ export const buildTable = ({
         return result;
       });
 
-      adapter.relations[relationshipsTableName] = relationshipsTableRelations;
+      adapter.relations[`relations_${relationshipsTableName}`] = relationshipsTableRelations;
     }
   }
 
@@ -208,7 +208,7 @@ export const buildTable = ({
     return result;
   });
 
-  adapter.relations[`${formattedTableName}`] = tableRelations;
+  adapter.relations[`relations_${formattedTableName}`] = tableRelations;
 
   return { arrayBlockRelations };
 };

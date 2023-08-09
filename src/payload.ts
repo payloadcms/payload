@@ -182,6 +182,10 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
     this.db = this.config.db({ payload: this });
     this.db.payload = this;
 
+    if (this.db?.init) {
+      await this.db.init(this);
+    }
+
     if (this.db.connect) {
       await this.db.connect(this);
     }
@@ -200,10 +204,6 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
     if (!this.config.graphQL.disable) {
       registerGraphQLSchema(this);
-    }
-
-    if (this.db?.init) {
-      await this.db.init(this);
     }
 
     serverInitTelemetry(this);

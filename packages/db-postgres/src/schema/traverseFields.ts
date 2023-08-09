@@ -155,7 +155,7 @@ export const traverseFields = ({
           return result;
         });
 
-        adapter.relations[arrayTableName] = arrayTableRelations;
+        adapter.relations[`relations_${arrayTableName}`] = arrayTableRelations;
 
         break;
       }
@@ -201,7 +201,7 @@ export const traverseFields = ({
               return result;
             });
 
-            adapter.relations[blockTableName] = blockTableRelations;
+            adapter.relations[`relations_${blockTableName}`] = blockTableRelations;
           }
 
           arrayBlockRelations.set(`_${fieldPrefix || ''}${field.name}`, blockTableName);

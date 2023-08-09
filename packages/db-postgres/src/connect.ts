@@ -1,10 +1,21 @@
-import { sql } from 'drizzle-orm';
+import { sql, eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import type { Connect } from 'payload/dist/database/types';
 import { Client, Pool } from 'pg';
+import { pushSchema } from 'drizzle-kit/utils';
+import { configToJSONSchema } from 'payload/dist/utilities/configToJSONSchema';
+import prompts from 'prompts';
 
-import type { PostgresAdapter } from '.';
-import { DrizzleDB } from './types';
+import { jsonb, numeric, pgTable, varchar } from 'drizzle-orm/pg-core';
+import type { PostgresAdapter } from './types';
+import { DrizzleDB, GenericEnum, GenericRelation, GenericTable } from './types';
+
+// Migration table def in order to use query using drizzle
+const migrationsSchema = pgTable('payload_migrations', {
+  name: varchar('name'),
+  batch: numeric('batch'),
+  schema: jsonb('schema'),
+});
 
 export const connect: Connect = async function connect(
   this: PostgresAdapter,
@@ -12,16 +23,30 @@ export const connect: Connect = async function connect(
 ) {
   let db: DrizzleDB;
 
+  const schema: Record<string, GenericEnum | GenericTable | GenericRelation> = {};
+
+  Object.entries(this.tables).forEach(([key, val]) => {
+    schema[`${key}`] = val;
+  });
+
+  Object.entries(this.relations).forEach(([key, val]) => {
+    schema[`${key}`] = val;
+  });
+
+  Object.entries(this.enums).forEach(([key, val]) => {
+    schema[`${key}`] = val;
+  });
+
   try {
     if ('pool' in this && this.pool !== false) {
       const pool = new Pool(this.pool);
-      db = drizzle(pool);
+      db = drizzle(pool, { schema });
       await pool.connect();
     }
 
     if ('client' in this && this.client !== false) {
       const client = new Client(this.client);
-      db = drizzle(client);
+      db = drizzle(client, { schema });
       await client.connect();
     }
 
@@ -40,4 +65,75 @@ export const connect: Connect = async function connect(
 
   this.payload.logger.info('Connected to Postgres successfully');
   this.db = db;
+
+
+  // Only push schema if not in production
+  if (process.env.NODE_ENV === 'production') return;
+
+  // This will prompt if clarifications are needed for Drizzle to push new schema
+  const { hasDataLoss, warnings, statementsToExecute, apply } = await pushSchema(schema, this.db);
+
+  this.payload.logger.debug({
+    msg: 'Schema push results',
+    hasDataLoss,
+    warnings,
+    statementsToExecute,
+  });
+
+  if (warnings.length) {
+    this.payload.logger.warn({
+      msg: `Warnings detected during schema push: ${warnings.join('\n')}`,
+      warnings,
+    });
+
+    if (hasDataLoss) {
+      this.payload.logger.warn({
+        msg: 'DATA LOSS WARNING: Possible data loss detected if schema is pushed.',
+      });
+    }
+
+    const { confirm: acceptWarnings } = await prompts(
+      {
+        type: 'confirm',
+        name: 'confirm',
+        message: 'Accept warnings and push schema to database?',
+        initial: false,
+      },
+      {
+        onCancel: () => {
+          process.exit(0);
+        },
+      },
+    );
+
+    // Exit if user does not accept warnings.
+    // Q: Is this the right type of exit for this interaction?
+    if (!acceptWarnings) {
+      process.exit(0);
+    }
+  }
+
+  const jsonSchema = configToJSONSchema(this.payload.config);
+
+  await apply();
+
+  const devPush = await this.db
+    .select()
+    .from(migrationsSchema)
+    .where(eq(migrationsSchema.batch, '-1'));
+
+  if (!devPush.length) {
+    await this.db.insert(migrationsSchema).values({
+      name: 'dev',
+      batch: '-1',
+      schema: JSON.stringify(jsonSchema),
+    });
+  } else {
+    await this.db
+      .update(migrationsSchema)
+      .set({
+        schema: JSON.stringify(jsonSchema),
+      })
+      .where(eq(migrationsSchema.batch, '-1'));
+  }
 };
