@@ -2,17 +2,11 @@
 import {
   AnyPgColumnBuilder,
   integer,
-  pgEnum,
   pgTable,
   serial,
-  uniqueIndex,
-  text,
   varchar,
-  PgColumn,
-  PgTableExtraConfig,
   index,
   numeric,
-  PgColumnHKT,
   timestamp,
   IndexBuilder,
 } from 'drizzle-orm/pg-core';
@@ -163,7 +157,7 @@ export const buildTable = ({
 
       adapter.tables[relationshipsTableName] = relationshipsTable;
 
-      const relationshipsTableRelations = relations(relationshipsTable, ({ one, many }) => {
+      const relationshipsTableRelations = relations(relationshipsTable, ({ one }) => {
         const result: Record<string, Relation<string>> = {
           parent: one(table, {
             relationName: '_relationships',

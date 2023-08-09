@@ -24,14 +24,7 @@ type PoolArgs = {
 
 export type Args = ClientArgs | PoolArgs
 
-export type GenericColumn = PgColumn<ColumnBaseConfig<ColumnDataType, string>, {
-  tableName: string;
-  name: string;
-  data: unknown;
-  driverParam: unknown;
-  notNull: boolean;
-  hasDefault: boolean;
-}>
+export type GenericColumn = PgColumn<ColumnBaseConfig<ColumnDataType, string>, Record<string, unknown>>
 
 export type GenericColumns = {
   [x: string]: GenericColumn

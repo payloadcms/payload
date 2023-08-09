@@ -1869,6 +1869,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/to-snake-case@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/@types/to-snake-case/-/to-snake-case-1.0.0.tgz#1b32f1b5ad8ea907b6c847346cdd3782e486654e"
+  integrity sha512-9YtLP+wuIL2EwOqyUjwTzWK6CGVnsP13vJ3i0U8S7O+SLAxrsi1jwC2TkHkdqVqfGLQWnk5H+Z+sSPT7SJeGYg==
+
 "@types/webidl-conversions@*":
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/@types/webidl-conversions/-/webidl-conversions-7.0.0.tgz#2b8e60e33906459219aa587e9d1a612ae994cfe7"

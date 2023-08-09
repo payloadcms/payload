@@ -6,7 +6,6 @@ import { DBQueryConfig } from 'drizzle-orm';
 import { traverseFields } from './traverseFields';
 import { buildWithFromDepth } from './buildWithFromDepth';
 import { createLocaleWhereQuery } from './createLocaleWhereQuery';
-import { hasLocalesTable } from '../utilities/hasLocalesTable';
 import { PostgresAdapter } from '../types';
 
 type BuildFindQueryArgs = {
@@ -51,7 +50,13 @@ export const buildFindManyArgs = ({
         id: false,
         parent: false,
       },
-      with: buildWithFromDepth({ config, depth, fallbackLocale, locale }),
+      with: buildWithFromDepth({
+        adapter,
+        config,
+        depth,
+        fallbackLocale,
+        locale,
+      }),
     };
   }
 
