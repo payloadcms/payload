@@ -9,6 +9,7 @@ export type DrizzleDB = NodePgDatabase<Record<string, never>>
 
 type BaseArgs = {
   migrationDir?: string;
+  migrationName?: string;
 }
 
 type ClientArgs = {
@@ -49,6 +50,7 @@ export type PostgresAdapter = DatabaseAdapter & Args & {
   enums: Record<string, GenericEnum>
   relations: Record<string, GenericRelation>
   tables: Record<string, GenericTable>
+  schema: Record<string, GenericEnum | GenericTable | GenericRelation>
 }
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter

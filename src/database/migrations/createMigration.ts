@@ -3,11 +3,11 @@ import fs from 'fs';
 import { migrationTemplate } from './migrationTemplate';
 import { CreateMigration } from '../types';
 
-export const createMigration: CreateMigration = async function createMigration({
+export const createMigration: CreateMigration = async function createMigration(
   payload,
   migrationDir,
   migrationName,
-}) {
+) {
   const dir = migrationDir || '.migrations'; // TODO: Verify path after linking
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);

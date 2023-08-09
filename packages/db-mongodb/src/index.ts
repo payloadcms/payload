@@ -78,7 +78,7 @@ export function mongooseAdapter({
       destroy,
       init,
       webpack,
-      createMigration: async (migrationName) => createMigration({ payload, migrationDir, migrationName }),
+      createMigration,
       beginTransaction,
       rollbackTransaction,
       commitTransaction,
