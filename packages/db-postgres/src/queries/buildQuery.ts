@@ -21,7 +21,7 @@ const buildQuery = async function buildQuery({
   collectionSlug,
   globalSlug,
   versionsFields,
-}: BuildQueryArgs): Promise<SQL> { // TODO: return type drizzle query
+}: BuildQueryArgs): Promise<SQL> {
   let fields = versionsFields;
   if (!fields) {
     if (globalSlug) {

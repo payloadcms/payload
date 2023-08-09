@@ -18,7 +18,7 @@ import { create } from './create';
 // import { deleteOne } from './deleteOne';
 // import { deleteVersions } from './deleteVersions';
 // import { findGlobal } from './findGlobal';
-// import { findOne } from './findOne';
+import { findOne } from './findOne';
 // import { updateGlobal } from './updateGlobal';
 import { updateOne } from './update';
 // import { updateVersion } from './updateVersion';
@@ -45,7 +45,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       // rollbackTransaction,
       // commitTransaction,
       // queryDrafts,
-      // findOne,
+      findOne,
       find,
       create,
       updateOne,

@@ -202,6 +202,11 @@ const config = buildConfigWithDefaults({
       where: { slug: { equals: 'second' } },
     });
 
+    const findOneResult = await payload.findByID({
+      collection: 'pages',
+      id: page1.id,
+    });
+
     const person1 = await payload.create({
       collection: 'people',
       data: {
