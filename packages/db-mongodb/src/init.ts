@@ -75,7 +75,11 @@ export const init: Init = async function init(
         this.versions[collection.slug] = model;
       }
 
-      const model = mongoose.model(collection.slug, schema) as CollectionModel;
+      const model = mongoose.model(
+        collection.slug,
+        schema,
+        this.autoPluralization === true ? undefined : collection.slug,
+      ) as CollectionModel;
       this.collections[collection.slug] = model;
 
       // TS expect error only needed until we launch 2.0.0
