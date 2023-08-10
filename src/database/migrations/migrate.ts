@@ -21,10 +21,11 @@ export async function migrate(this: DatabaseAdapter): Promise<void> {
     }
 
     const start = Date.now();
-    let transactionID;
+    let transactionID: string | number | undefined;
+
+    payload.logger.info({ msg: `Migrating: ${migration.name}` });
 
     try {
-      payload.logger.info({ msg: `Migrating: ${migration.name}` });
       transactionID = await this.beginTransaction();
       await migration.up({ payload });
       payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` });
@@ -34,9 +35,7 @@ export async function migrate(this: DatabaseAdapter): Promise<void> {
           name: migration.name,
           batch: newBatch,
         },
-        req: {
-          transactionID,
-        } as PayloadRequest,
+        ...(transactionID && { req: { transactionID } as PayloadRequest }),
       });
       await this.commitTransaction(transactionID);
     } catch (err: unknown) {

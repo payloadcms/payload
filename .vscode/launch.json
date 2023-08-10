@@ -33,54 +33,39 @@
       "cwd": "${workspaceFolder}"
     },
     {
-      "type": "node",
-      "request": "launch",
-      "name": "Migrate CLI - create",
-      "runtimeArgs": [
-        "-r",
-        "ts-node/register"
-      ],
-      "args": [
-        "src/bin/migrate.ts",
-        "migrate:create",
-        "second"
-      ],
-      "env": {
-        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
-      },
-      "outputCapture": "std",
-    },
-    {
-      "type": "node",
+      "type": "node-terminal",
+      "command": "ts-node src/bin/migrate.ts migrate",
       "request": "launch",
       "name": "Migrate CLI - migrate",
-      "runtimeArgs": [
-        "-r",
-        "ts-node/register"
-      ],
-      "args": [
-        "src/bin/migrate.ts",
-        "migrate",
-      ],
       "env": {
-        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_DATABASE": "postgres",
+        "PAYLOAD_DROP_DATABASE": "true",
       },
       "outputCapture": "std",
     },
     {
-      "type": "node",
+      "type": "node-terminal",
+      "command": "ts-node src/bin/migrate.ts migrate:status",
       "request": "launch",
       "name": "Migrate CLI - status",
-      "runtimeArgs": [
-        "-r",
-        "ts-node/register"
-      ],
-      "args": [
-        "src/bin/migrate.ts",
-        "migrate:status",
-      ],
       "env": {
-        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_DATABASE": "postgres",
+        "PAYLOAD_DROP_DATABASE": "true",
+      },
+      "outputCapture": "std",
+    },
+    {
+      "type": "node-terminal",
+      "command": "ts-node src/bin/migrate.ts migrate:create yass",
+      "request": "launch",
+      "name": "Migrate CLI - create",
+      "env": {
+        // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
+        "PAYLOAD_DATABASE": "postgres",
+        // "PAYLOAD_DROP_DATABASE": "true",
       },
       "outputCapture": "std",
     },

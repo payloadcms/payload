@@ -7,8 +7,12 @@ import { migrateStatus } from './migrations/migrateStatus';
 import { migrateDown } from './migrations/migrateDown';
 import { migrateRefresh } from './migrations/migrateRefresh';
 import { migrateReset } from './migrations/migrateReset';
-import { DatabaseAdapter } from './types';
+import { BeginTransaction, CommitTransaction, DatabaseAdapter, RollbackTransaction } from './types';
 import { createMigration } from './migrations/createMigration';
+
+const beginTransaction: BeginTransaction = async () => null;
+const rollbackTransaction: RollbackTransaction = async () => null;
+const commitTransaction: CommitTransaction = async () => null;
 
 export function createDatabaseAdapter<T extends DatabaseAdapter>(args: MarkOptional<T,
   | 'transaction'
@@ -19,7 +23,8 @@ export function createDatabaseAdapter<T extends DatabaseAdapter>(args: MarkOptio
   | 'migrateRefresh'
   | 'migrateReset'
   | 'migrateFresh'
-  | 'migrationDir'>): T {
+  | 'migrationDir'
+>): T {
   // Need to implement DB Webpack config extensions here
   if (args.webpack) {
     const existingWebpackConfig = args.payload.config.admin.webpack ? args.payload.config.admin.webpack : (webpackConfig) => webpackConfig;
@@ -39,6 +44,12 @@ export function createDatabaseAdapter<T extends DatabaseAdapter>(args: MarkOptio
     migrateRefresh,
     migrateReset,
     migrateFresh: async () => null,
+
+    // Default 'null' transaction functions
+    beginTransaction,
+    commitTransaction,
+    rollbackTransaction,
+
     ...args,
   } as T;
 }

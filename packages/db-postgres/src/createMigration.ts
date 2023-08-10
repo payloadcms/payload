@@ -12,11 +12,11 @@ import prompts from 'prompts';
 import { buildTable } from './schema/build';
 import type { GenericEnum, GenericRelation, GenericTable, PostgresAdapter } from './types';
 
-const migrationTemplate = `
+const migrationTemplate = (upSQL?: string) => `
 import payload, { Payload } from 'payload';
 
 export async function up(payload: Payload): Promise<void> {
-  await payload.db.db.execute(\`{{SQL}}\`);
+  ${upSQL ? `await payload.db.db.execute(\`${upSQL}\`);` : '// Migration code'}
 };
 
 export async function down(payload: Payload): Promise<void> {
@@ -50,7 +50,7 @@ export const createMigration: CreateMigration = async function createMigration(
   const drizzleJsonBefore = generateDrizzleJson(JSON.parse(snapshotJSON));
   const drizzleJsonAfter = generateDrizzleJson(this.schema, drizzleJsonBefore.id);
   const sqlStatements = await generateMigration(drizzleJsonBefore, drizzleJsonAfter);
-  fs.writeFileSync(filePath, migrationTemplate.replace('{{SQL}}', sqlStatements.join('\n')));
+  fs.writeFileSync(filePath, migrationTemplate(sqlStatements.length ? sqlStatements?.join('\n') : undefined));
 
   // TODO:
   // Get the most recent migration schema from the file system
