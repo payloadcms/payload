@@ -69,6 +69,7 @@ export const init: Init = async function init(
         const model = mongoose.model(
           versionModelName,
           versionSchema,
+          versionModelName,
         ) as CollectionModel;
         // this.payload.versions[collection.slug] = model;
         this.versions[collection.slug] = model;
