@@ -10,11 +10,7 @@ import React from 'react';
 import { DestinationStream, LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
 import { Payload } from '../payload';
-import {
-  AfterErrorHook,
-  CollectionConfig,
-  SanitizedCollectionConfig,
-} from '../collections/config/types';
+import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types';
 import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
 import { PayloadRequest } from '../express/types';
 import { Where } from '../types';
@@ -289,10 +285,19 @@ export type Config = {
     inactivityRoute?: string;
     /** Automatically log in as a user when visiting the admin dashboard. */
     autoLogin?: false | {
-      /** The email address of the user to login as */
+      /**
+       * The email address of the user to login as
+       *
+       */
       email: string;
       /** The password of the user to login as */
       password: string;
+      /**
+       * If set to true, the login credentials will be prefilled but the user will still need to click the login button.
+       *
+       * @default false
+      */
+      prefillOnly?: boolean;
     }
     /**
      * Add extra and/or replace built-in components with custom components

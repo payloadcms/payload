@@ -28,6 +28,10 @@ export declare type PayloadRequest<U = any> = Request & {
   collection?: Collection;
   /** What triggered this request */
   payloadAPI?: 'REST' | 'local' | 'GraphQL';
+  /**
+   * Identifier for the database transaction for interactions in a single, all-or-nothing operation.
+   */
+  transactionID?: string | number;
   /** context allows you to pass your own data to the request object as context
    * This is useful for, for example, passing data from a beforeChange hook to an afterChange hook.
    * payoadContext can also be fully typed using declare module

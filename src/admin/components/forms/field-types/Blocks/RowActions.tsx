@@ -1,5 +1,5 @@
-import { useModal } from '@faceless-ui/modal';
 import React from 'react';
+import { useModal } from '@faceless-ui/modal';
 import { Block, Labels } from '../../../../../fields/config/types';
 import { ArrayAction } from '../../../elements/ArrayAction';
 import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug';
@@ -33,14 +33,16 @@ export const RowActions: React.FC<{
   const { openModal, closeModal } = useModal();
   const drawerSlug = useDrawerSlug('blocks-drawer');
 
+  const [indexToAdd, setIndexToAdd] = React.useState<number | null>(null);
+
   return (
     <React.Fragment>
       <BlocksDrawer
         drawerSlug={drawerSlug}
         blocks={blocks}
-        addRow={(index, rowBlockType) => {
+        addRow={(_, rowBlockType) => {
           if (typeof addRow === 'function') {
-            addRow(index, rowBlockType);
+            addRow(indexToAdd, rowBlockType);
           }
           closeModal(drawerSlug);
         }}
@@ -49,7 +51,8 @@ export const RowActions: React.FC<{
       />
       <ArrayAction
         rowCount={rowCount}
-        addRow={() => {
+        addRow={(index) => {
+          setIndexToAdd(index);
           openModal(drawerSlug);
         }}
         duplicateRow={() => duplicateRow(rowIndex, blockType)}

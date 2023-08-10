@@ -368,19 +368,41 @@ describe('fields', () => {
       await expect(firstRow).toBeVisible();
       await expect(firstRow.locator('.blocks-field__block-pill-text')).toContainText('Text en');
     });
+
+    test('should add different blocks with similar field configs', async () => {
+      await page.goto(url.create);
+
+      async function addBlock(name: 'Block 1' | 'Block 2') {
+        await page.locator('#field-blocksWithSimilarConfigs').getByRole('button', { name: 'Add Blocks With Similar Config' }).click();
+        await page.getByRole('button', { name }).click();
+      }
+
+      await addBlock('Block 1');
+
+      await page.locator('#blocksWithSimilarConfigs-row-0').getByRole('button', { name: 'Add Item' }).click();
+      await page.locator('input[name="blocksWithSimilarConfigs.0.items.0.title"]').fill('items>0>title');
+
+      expect(await page.locator('input[name="blocksWithSimilarConfigs.0.items.0.title"]').inputValue()).toEqual('items>0>title');
+
+      await addBlock('Block 2');
+
+      await page.locator('#blocksWithSimilarConfigs-row-1').getByRole('button', { name: 'Add Item' }).click();
+      await page.locator('input[name="blocksWithSimilarConfigs.1.items.0.title2"]').fill('items>1>title');
+
+      expect(await page.locator('input[name="blocksWithSimilarConfigs.1.items.0.title2"]').inputValue()).toEqual('items>1>title');
+    });
   });
 
   describe('array', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, arrayFieldsSlug);
+      url = new AdminUrlUtil(serverURL, 'array-fields');
     });
 
     test('should be readOnly', async () => {
       await page.goto(url.create);
       const field = page.locator('#field-readOnly__0__text');
-      await expect(field)
-        .toBeDisabled();
+      await expect(field).toBeDisabled();
     });
 
     test('should have defaultValue', async () => {
@@ -410,6 +432,103 @@ describe('fields', () => {
       await wait(100);
       const customRowLabel = await page.locator('#rowLabelAsComponent-row-0 >> .row-label :text("custom row label")');
       await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase');
+    });
+
+    describe('row manipulation', () => {
+      test('should add 2 new rows', async () => {
+        await page.goto(url.create);
+
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1');
+        await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2');
+
+        await saveDocAndAssert(page);
+      });
+
+      test('should remove 2 new rows', async () => {
+        await page.goto(url.create);
+
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1');
+        await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2');
+
+        await page.locator('#potentiallyEmptyArray-row-1 .array-actions__button').click();
+        await page.locator('#potentiallyEmptyArray-row-1 .popup__scroll .array-actions__remove').click();
+        await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click();
+        await page.locator('#potentiallyEmptyArray-row-0 .popup__scroll .array-actions__remove').click();
+
+        const rowsContainer = await page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
+        const directChildDivCount = await rowsContainer.evaluate((element) => {
+          const childDivCount = element.querySelectorAll(':scope > div');
+          return childDivCount.length;
+        });
+
+        expect(directChildDivCount).toBe(0);
+      });
+
+      test('should remove existing row', async () => {
+        await page.goto(url.create);
+
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1');
+
+        await saveDocAndAssert(page);
+
+        await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click();
+        await page.locator('#potentiallyEmptyArray-row-0 .popup__scroll .array-actions__action.array-actions__remove').click();
+
+        const rowsContainer = await page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
+        const directChildDivCount = await rowsContainer.evaluate((element) => {
+          const childDivCount = element.querySelectorAll(':scope > div');
+          return childDivCount.length;
+        });
+
+        expect(directChildDivCount).toBe(0);
+      });
+
+      test('should add row after removing existing row', async () => {
+        await page.goto(url.create);
+
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1');
+        await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2');
+
+        await saveDocAndAssert(page);
+
+        await page.locator('#potentiallyEmptyArray-row-1 .array-actions__button').click();
+        await page.locator('#potentiallyEmptyArray-row-1 .popup__scroll .array-actions__action.array-actions__remove').click();
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+
+        await page.locator('#field-potentiallyEmptyArray__1__text').fill('updated array row 2');
+
+        await saveDocAndAssert(page);
+
+        const rowsContainer = await page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
+        const directChildDivCount = await rowsContainer.evaluate((element) => {
+          const childDivCount = element.querySelectorAll(':scope > div');
+          return childDivCount.length;
+        });
+
+        expect(directChildDivCount).toBe(2);
+      });
+    });
+
+    describe('row react hooks', () => {
+      test('should add 2 new block rows', async () => {
+        await page.goto(url.create);
+
+        await page.locator('.custom-blocks-field-management').getByRole('button', { name: 'Add Block 1' }).click();
+        expect(await page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]').inputValue()).toEqual('Block 1: Prefilled Title');
+
+        await page.locator('.custom-blocks-field-management').getByRole('button', { name: 'Add Block 2' }).click();
+        expect(await page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]').inputValue()).toEqual('Block 2: Prefilled Title');
+
+        await page.locator('.custom-blocks-field-management').getByRole('button', { name: 'Replace Block 2' }).click();
+        expect(await page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]').inputValue()).toEqual('REPLACED BLOCK');
+      });
     });
   });
 
@@ -494,7 +613,7 @@ describe('fields', () => {
         await wait(200);
         await editLinkModal.locator('button[type="submit"]').click();
         const errorField = await page.locator('[id^=drawer_1_rich-text-link-] .render-fields > :nth-child(3)');
-        const hasErrorClass = await errorField.evaluate(el => el.classList.contains('error'));
+        const hasErrorClass = await errorField.evaluate((el) => el.classList.contains('error'));
         expect(hasErrorClass).toBe(true);
       });
 

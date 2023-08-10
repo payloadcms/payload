@@ -3,7 +3,7 @@ import { Response } from 'express';
 import { Collection } from '../../collections/config/types';
 import { APIError } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
-import { fieldAffectsData } from '../../fields/config/types';
+import { getFieldsToSign } from './getFieldsToSign';
 import { PayloadRequest } from '../../express/types';
 import { authenticateLocalStrategy } from '../strategies/local/authenticate';
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash';
@@ -83,18 +83,10 @@ async function resetPassword(args: Arguments): Promise<Result> {
 
   await authenticateLocalStrategy({ password: data.password, doc });
 
-  const fieldsToSign = collectionConfig.fields.reduce((signedFields, field) => {
-    if (fieldAffectsData(field) && field.saveToJWT) {
-      return {
-        ...signedFields,
-        [field.name]: user[field.name],
-      };
-    }
-    return signedFields;
-  }, {
+  const fieldsToSign = getFieldsToSign({
+    collectionConfig,
+    user,
     email: user.email,
-    id: user.id,
-    collection: collectionConfig.slug,
   });
 
   const token = jwt.sign(

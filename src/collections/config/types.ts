@@ -276,7 +276,7 @@ export type CollectionConfig = {
   graphQL?: {
     singularName?: string
     pluralName?: string
-  }
+  } | false
   /**
    * Options used in typescript generation
    */

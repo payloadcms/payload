@@ -20,4 +20,8 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  &__edit {
+    position: relative;
+  }
 }

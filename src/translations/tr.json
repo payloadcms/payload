@@ -184,6 +184,8 @@
     "email": "E-posta",
     "emailAddress": "E-posta adresi",
     "enterAValue": "Değer girin",
+    "error": "Hata",
+    "errors": "Hatalar",
     "fallbackToDefaultLocale": "Varsayılan yerel ayara geri dönme",
     "filter": "Filtrele",
     "filterWhere": "{{label}} filtrele:",

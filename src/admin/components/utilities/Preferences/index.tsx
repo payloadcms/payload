@@ -7,7 +7,7 @@ import { requests } from '../../../api';
 
 type PreferencesContext = {
   getPreference: <T = any>(key: string) => T | Promise<T>;
-  setPreference: <T = any>(key: string, value: T) => void;
+  setPreference: <T = any>(key: string, value: T) => Promise<void>;
 }
 
 const Context = createContext({} as PreferencesContext);
