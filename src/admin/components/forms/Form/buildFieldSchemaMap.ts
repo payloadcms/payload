@@ -1,4 +1,5 @@
-import { Field } from '../fields/config/types';
+import { Field } from '../../../../fields/config/types';
+import { createNestedFieldPath } from './createNestedFieldPath';
 
 /**
  * **Returns Map with array and block field schemas**
@@ -14,41 +15,33 @@ import { Field } from '../fields/config/types';
 export const buildFieldSchemaMap = (entityFields: Field[]): Map<string, Field[]> => {
   const fieldMap = new Map<string, Field[]>();
 
-  const buildUpMap = (fields: Field[], fieldPath = '') => {
+  const buildUpMap = (fields: Field[], parentPath = '') => {
     fields.forEach((field) => {
-      let currentPath = fieldPath;
-
-      if (currentPath) {
-        if ('name' in field && field?.name) {
-          currentPath = `${currentPath}.${field.name}`;
-        }
-      } else if ('name' in field && field?.name) {
-        currentPath = field.name;
-      }
+      const path = createNestedFieldPath(parentPath, field);
 
       switch (field.type) {
         case 'blocks':
           field.blocks.forEach((block) => {
-            const blockPath = `${currentPath}.${block.slug}`;
+            const blockPath = `${path}.${block.slug}`;
             fieldMap.set(blockPath, block.fields);
             buildUpMap(block.fields, blockPath);
           });
           break;
 
         case 'array':
-          fieldMap.set(currentPath, field.fields);
-          buildUpMap(field.fields, currentPath);
+          fieldMap.set(path, field.fields);
+          buildUpMap(field.fields, path);
           break;
 
         case 'row':
         case 'collapsible':
         case 'group':
-          buildUpMap(field.fields, currentPath);
+          buildUpMap(field.fields, path);
           break;
 
         case 'tabs':
           field.tabs.forEach((tab) => {
-            let tabPath = currentPath;
+            let tabPath = path;
             if (tabPath) {
               tabPath = 'name' in tab ? `${tabPath}.${tab.name}` : tabPath;
             } else {
