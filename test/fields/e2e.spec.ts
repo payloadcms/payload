@@ -13,8 +13,9 @@ import wait from '../../src/utilities/wait';
 import { jsonDoc } from './collections/JSON';
 import { numberDoc } from './collections/Number';
 import { relationshipFieldsSlug } from './collections/Relationship';
+import { mapAsync } from '../../src/utilities/mapAsync';
 
-const { beforeAll, describe } = test;
+const { afterEach, beforeAll, describe } = test;
 
 let page: Page;
 let serverURL;
@@ -934,8 +935,18 @@ describe('fields', () => {
   describe('relationship', () => {
     let url: AdminUrlUtil;
 
-    beforeAll(() => {
+    beforeAll(async () => {
       url = new AdminUrlUtil(serverURL, 'relationship-fields');
+    });
+
+
+    afterEach(async () => {
+      // delete all existing relationship documents
+      const allRelationshipDocs = await payload.find({ collection: relationshipFieldsSlug, limit: 100 });
+      const relationshipIDs = allRelationshipDocs.docs.map((doc) => doc.id);
+      await mapAsync(relationshipIDs, async (id) => {
+        await payload.delete({ collection: relationshipFieldsSlug, id });
+      });
     });
 
     test('should create inline relationship within field with many relations', async () => {
