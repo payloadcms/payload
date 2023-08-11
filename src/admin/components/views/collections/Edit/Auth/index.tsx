@@ -73,7 +73,7 @@ const Auth: React.FC<Props> = (props) => {
 
   return (
     <div className={baseClass}>
-      { !collection.auth.disableLocalStrategy && (
+      {!collection.auth.disableLocalStrategy && (
         <React.Fragment>
           <Email
             required

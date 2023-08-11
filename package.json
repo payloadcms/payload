@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "1.9.5",
+  "version": "1.11.8",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "engines": {
@@ -33,7 +33,7 @@
   "scripts": {
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
     "build:tsc": "tsc",
-    "build:components": "webpack --config dist/webpack/components.config.js",
+    "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
     "build": "yarn copyfiles && yarn build:tsc && yarn build:components",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"yarn build:tsc\"",
     "dev": "nodemon",
@@ -96,6 +96,7 @@
     "compression": "^1.7.4",
     "conf": "^10.2.0",
     "connect-history-api-fallback": "^1.6.0",
+    "console-table-printer": "^2.11.2",
     "css-loader": "^5.2.7",
     "css-minimizer-webpack-plugin": "^5.0.0",
     "dataloader": "^2.1.0",
@@ -137,9 +138,9 @@
     "minimist": "^1.2.7",
     "mkdirp": "^1.0.4",
     "monaco-editor": "^0.38.0",
-    "mongoose": "6.5.0",
+    "mongoose": "6.11.4",
     "mongoose-aggregate-paginate-v2": "^1.0.6",
-    "mongoose-paginate-v2": "^1.6.1",
+    "mongoose-paginate-v2": "1.7.22",
     "nodemailer": "^6.9.0",
     "object-to-formdata": "^4.4.2",
     "passport": "^0.6.0",
@@ -153,7 +154,7 @@
     "pluralize": "^8.0.0",
     "postcss": "^8.4.21",
     "postcss-loader": "^6.2.1",
-    "postcss-preset-env": "^7.8.3",
+    "postcss-preset-env": "^9.0.0",
     "probe-image-size": "^6.0.0",
     "process": "^0.11.10",
     "qs": "^6.11.0",
@@ -194,7 +195,7 @@
     "webpack-hot-middleware": "^2.25.3"
   },
   "devDependencies": {
-    "@playwright/test": "^1.32.3",
+    "@playwright/test": "1.33.0",
     "@release-it/conventional-changelog": "^5.1.1",
     "@swc/jest": "^0.2.24",
     "@testing-library/jest-dom": "^5.16.5",
@@ -262,7 +263,7 @@
     "eslint-plugin-jest-dom": "^4.0.3",
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-playwright": "^0.11.2",
+    "eslint-plugin-playwright": "^0.12.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "form-data": "^3.0.1",

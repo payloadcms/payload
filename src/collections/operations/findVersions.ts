@@ -48,12 +48,12 @@ async function findVersions<T extends TypeWithVersion<T>>(
   // Access
   // /////////////////////////////////////
 
-  let useEstimatedCount = false;
+  let hasNearConstraint = false;
 
   if (where) {
     const constraints = flattenWhereConstraints(where);
 
-    useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 
   let accessResults;
@@ -73,23 +73,28 @@ async function findVersions<T extends TypeWithVersion<T>>(
   // Find
   // /////////////////////////////////////
 
-  const [sortProperty, sortOrder] = buildSortParam({
-    sort: args.sort || '-updatedAt',
-    fields: buildVersionCollectionFields(collectionConfig),
-    timestamps: true,
-    config: payload.config,
-    locale,
-  });
+  let sort;
+  if (!hasNearConstraint) {
+    const [sortProperty, sortOrder] = buildSortParam({
+      sort: args.sort || '-updatedAt',
+      fields: buildVersionCollectionFields(collectionConfig),
+      timestamps: true,
+      config: payload.config,
+      locale,
+    });
+    sort = {
+      [sortProperty]: sortOrder,
+    };
+  }
 
   const paginatedDocs = await VersionsModel.paginate(query, {
     page: page || 1,
     limit: limit ?? 10,
-    sort: {
-      [sortProperty]: sortOrder,
-    },
+    sort,
     lean: true,
     leanWithId: true,
-    useEstimatedCount,
+    useEstimatedCount: hasNearConstraint,
+    forceCountFn: hasNearConstraint,
   });
 
   // /////////////////////////////////////
@@ -105,7 +110,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
       await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef.version = await hook({ req, query, doc: docRef.version }) || docRef.version;
+        docRef.version = await hook({ req, query, doc: docRef.version, context: req.context }) || docRef.version;
       }, Promise.resolve());
 
       return docRef;
@@ -128,6 +133,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
         req,
         showHiddenFields,
         findMany: true,
+        context: req.context,
       }),
     }))),
   };
@@ -144,7 +150,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
       await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
         await priorHook;
 
-        docRef.version = await hook({ req, query, doc: doc.version, findMany: true }) || doc.version;
+        docRef.version = await hook({ req, query, doc: doc.version, findMany: true, context: req.context }) || doc.version;
       }, Promise.resolve());
 
       return docRef;

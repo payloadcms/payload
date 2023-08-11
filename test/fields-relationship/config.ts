@@ -1,5 +1,5 @@
 import type { CollectionConfig } from '../../src/collections/config/types';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 import { mapAsync } from '../../src/utilities/mapAsync';
 import { FilterOptionsProps } from '../../src/fields/config/types';
@@ -33,7 +33,7 @@ const baseRelationshipFields: CollectionConfig['fields'] = [
   },
 ];
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   collections: [
     {
       slug,

@@ -326,6 +326,22 @@ describe('collections-rest', () => {
           const { doc: updatedDoc } = await client.update({ slug: customIdNumberSlug, id: doc.id, data: { name: 'updated' } });
           expect(updatedDoc.name).toEqual('updated');
         });
+
+        it('should allow querying by in', async () => {
+          const id = 98234698237;
+          await client.create({ slug: customIdNumberSlug, data: { id, name: 'query using in operator' } });
+
+          const { result: { docs } } = await client.find({
+            slug: customIdNumberSlug,
+            query: {
+              id: {
+                in: `${id}, ${2349856723948764}`,
+              },
+            },
+          });
+
+          expect(docs).toHaveLength(1);
+        });
       });
     });
 
@@ -648,6 +664,22 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1);
       });
 
+      it('like - cyrillic characters in multiple words', async () => {
+        const post1 = await createPost({ title: 'привет, это тест полезной нагрузки' });
+
+        const { status, result } = await client.find<Post>({
+          query: {
+            title: {
+              like: 'привет нагрузки',
+            },
+          },
+        });
+
+        expect(status).toEqual(200);
+        expect(result.docs).toEqual([post1]);
+        expect(result.totalDocs).toEqual(1);
+      });
+
       it('like - partial word match', async () => {
         const post = await createPost({ title: 'separate words should partially match' });
 
@@ -796,6 +828,38 @@ describe('collections-rest', () => {
 
           expect(status).toEqual(200);
           expect(result.docs).toHaveLength(0);
+        });
+
+        it('should sort find results by nearest distance', async () => {
+          // creating twice as many records as we are querying to get a random sample
+          await mapAsync([...Array(10)], async () => {
+            // setTimeout used to randomize the creation timestamp
+            setTimeout(async () => {
+              await payload.create({
+                collection: pointSlug,
+                data: {
+                  // only randomize longitude to make distance comparison easy
+                  point: [Math.random(), 0],
+                },
+              });
+            }, Math.random());
+          });
+
+          const { result } = await client.find({
+            slug: pointSlug,
+            query: {
+              // querying large enough range to include all docs
+              point: { near: '0, 0, 100000, 0' },
+            },
+            limit: 5,
+          });
+          const { docs } = result;
+          let previous = 0;
+          docs.forEach((({ point: coordinates }) => {
+            // the next document point should always be greater than the one before
+            expect(previous).toBeLessThanOrEqual(coordinates[0]);
+            [previous] = coordinates;
+          }));
         });
       });
 

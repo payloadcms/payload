@@ -233,12 +233,13 @@ export class ParamParser {
         hasCustomID = true;
       }
 
+
       paths.push({
         path: '_id',
         field: {
           name: 'id',
           type: idFieldType,
-        },
+        } as Field, // With the hasMany union type stuff for the number field, typescript gets confused if we remove the `as Field` here
         complete: true,
         collectionSlug: this.collectionSlug,
       });
@@ -370,6 +371,23 @@ export class ParamParser {
           if (result.value.$or.length > 1) {
             return result;
           }
+        }
+
+        if (operator === 'like' && typeof formattedValue === 'string') {
+          const words = formattedValue.split(' ');
+
+          const result = {
+            value: {
+              $and: words.map((word) => ({
+                [path]: {
+                  $regex: word.replace(/[\\^$*+?\\.()|[\]{}]/g, '\\$&'),
+                  $options: 'i',
+                },
+              })),
+            },
+          };
+
+          return result;
         }
 
         // Some operators like 'near' need to define a full query

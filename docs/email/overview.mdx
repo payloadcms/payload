@@ -25,21 +25,22 @@ in the `email` property object of your payload init call. Payload will make use 
 
 The following options are configurable in the `email` property object as part of the options object when calling payload.init().
 
-| Option                       | Description  |
-| ---------------------------- | -------------|
-| **`fromName`** *             | The name part of the From field that will be seen on the delivered email |
-| **`fromAddress`** *          | The email address part of the From field that will be used when delivering email |
-| **`transport`**              | The NodeMailer transport object for when you want to do it yourself, not needed when transportOptions is set |
-| **`transportOptions`**       | An object that configures the transporter that Payload will create. For all the available options see the [NodeMailer documentation](https://nodemailer.com/smtp/) or see the examples below |
-| **`logMockCredentials`**          | If set to true and no transport/transportOptions, ethereal credentials will be logged to console on startup |
+| Option                   | Description                                                                                                                                                                                  |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`fromName`** \*        | The name part of the From field that will be seen on the delivered email                                                                                                                     |
+| **`fromAddress`** \*     | The email address part of the From field that will be used when delivering email                                                                                                             |
+| **`transport`**          | The NodeMailer transport object for when you want to do it yourself, not needed when transportOptions is set                                                                                 |
+| **`transportOptions`**   | An object that configures the transporter that Payload will create. For all the available options see the [NodeMailer documentation](https://nodemailer.com/smtp/) or see the examples below |
+| **`logMockCredentials`** | If set to true and no transport/transportOptions, ethereal credentials will be logged to console on startup                                                                                  |
 
-*\* An asterisk denotes that a property is required.*
+_\* An asterisk denotes that a property is required._
 
 ### Use SMTP
 
 Simple Mail Transfer Protocol, also known as SMTP can be passed in using the `transportOptions` object on the `email` options.
 
 **Example email part using SMTP:**
+
 ```ts
 payload.init({
   email: {
@@ -47,24 +48,24 @@ payload.init({
       host: process.env.SMTP_HOST,
       auth: {
         user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
+        pass: process.env.SMTP_PASS,
       },
       port: 587,
       secure: true, // use TLS
       tls: {
         // do not fail on invalid certs
-        rejectUnauthorized: false
-        }
+        rejectUnauthorized: false,
       },
-    fromName: 'hello',
-    fromAddress: 'hello@example.com'
-  }
+    },
+    fromName: "hello",
+    fromAddress: "hello@example.com",
+  },
   // ...
-})
+});
 ```
 
 <Banner type="warning">
-  It is best practice to avoid saving credentials or API keys directly in your code, use <a href="/docs/configuration/overview#using-environment-variables-in-your-config">environment variables</a>.
+  It is best practice to avoid saving credentials or API keys directly in your code, use [environment variables](/docs/configuration/overview#using-environment-variables-in-your-config).
 </Banner>
 
 ### Use an email service
@@ -72,57 +73,62 @@ payload.init({
 Many third party mail providers are available and offer benefits beyond basic SMTP. As an example your payload init could look this if you wanted to use SendGrid.com though the same approach would work for any other [NodeMailer transports](https://nodemailer.com/transports/) shown here or provided by another third party.
 
 ```ts
-import payload from 'payload'
-import nodemailerSendgrid from 'nodemailer-sendgrid'
+import payload from "payload";
+import nodemailerSendgrid from "nodemailer-sendgrid";
 
 const sendGridAPIKey = process.env.SENDGRID_API_KEY;
 
 payload.init({
-  ...sendGridAPIKey ? {
-    email: {
-      transportOptions: nodemailerSendgrid({
-        apiKey: sendGridAPIKey,
-      }),
-      fromName: 'Admin',
-      fromAddress: 'admin@example.com',
-    },
-  } : {},
+  ...(sendGridAPIKey
+    ? {
+        email: {
+          transportOptions: nodemailerSendgrid({
+            apiKey: sendGridAPIKey,
+          }),
+          fromName: "Admin",
+          fromAddress: "admin@example.com",
+        },
+      }
+    : {}),
 });
 ```
 
 ### Use a custom NodeMailer transport
+
 To take full control of the mail transport you may wish to use `nodemailer.createTransport()` on your server and provide it to Payload init.
 
 ```ts
-import payload from 'payload'
-import nodemailer from 'nodemailer'
+import payload from "payload";
+import nodemailer from "nodemailer";
 
-const payload = require('payload');
-const nodemailer = require('nodemailer');
+const payload = require("payload");
+const nodemailer = require("nodemailer");
 
 const transport = await nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: 587,
   auth: {
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
+    pass: process.env.SMTP_PASS,
   },
 });
 
 payload.init({
   email: {
-    fromName: 'Admin',
-    fromAddress: 'admin@example.com',
-    transport
+    fromName: "Admin",
+    fromAddress: "admin@example.com",
+    transport,
   },
   // ...
 });
 ```
 
 ### Sending Mail
+
 With a working transport you can call it anywhere you have access to payload by calling `payload.sendEmail(message)`. The `message` will contain the `to`, `subject` and `email` or `text` for the email being sent. To see all available message configuration options see [NodeMailer](https://nodemailer.com/message).
 
 ### Mock transport
+
 By default, Payload uses a mock implementation that only sends mail to the [ethereal](https://ethereal.email) capture service that will never reach a user's inbox. While in development you may wish to make use of the captured messages which is why the payload output during server output helpfully logs this out on the server console.
 
 To see ethereal credentials, add `logMockCredentials: true` to the email options. This will cause them to be logged to console on startup.
@@ -130,8 +136,8 @@ To see ethereal credentials, add `logMockCredentials: true` to the email options
 ```ts
 payload.init({
   email: {
-    fromName: 'Admin',
-    fromAddress: 'admin@example.com',
+    fromName: "Admin",
+    fromAddress: "admin@example.com",
     logMockCredentials: true, // Optional
   },
   // ...
@@ -139,6 +145,7 @@ payload.init({
 ```
 
 **Console output when starting payload with a mock email instance and logMockCredentials: true**
+
 ```
 [06:37:21] INFO  (payload): Starting Payload...
 [06:37:22] INFO  (payload): Payload Demo Initialized

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { SanitizedConfig } from '../../config/types';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { useFormFields } from '../components/forms/Form/context';
-import { Field } from '../components/forms/Form/types';
+import { FormField } from '../components/forms/Form/types';
 import { useConfig } from '../components/utilities/Config';
 import { formatDate } from '../utilities/formatDate';
 import { getObjectDotNotation } from '../../utilities/getObjectDotNotation';
@@ -11,7 +11,7 @@ import { getObjectDotNotation } from '../../utilities/getObjectDotNotation';
 // either send the `useAsTitle` field itself
 // or an object to dynamically extract the `useAsTitle` field from
 export const formatUseAsTitle = (args: {
-  field?: Field
+  field?: FormField
   doc?: Record<string, any>
   collection: SanitizedCollectionConfig
   i18n: typeof i18next
@@ -36,7 +36,7 @@ export const formatUseAsTitle = (args: {
     return '';
   }
 
-  const field = fieldFromProps || getObjectDotNotation<Field>(doc, collection.admin.useAsTitle);
+  const field = fieldFromProps || getObjectDotNotation<FormField>(doc, collection.admin.useAsTitle);
 
   let title = typeof field === 'string' ? field : field?.value as string;
 

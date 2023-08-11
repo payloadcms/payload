@@ -6,7 +6,7 @@ import type { EditorProps } from '@monaco-editor/react';
 import { Operation, Where } from '../../types';
 import { SanitizedConfig } from '../../config/types';
 import { TypeWithID } from '../../collections/config/types';
-import { PayloadRequest } from '../../express/types';
+import { PayloadRequest, RequestContext } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 import { User } from '../../auth';
@@ -33,6 +33,7 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** The value of the field. */
   value?: P,
   previousValue?: P,
+  context: RequestContext
 }
 
 export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => Promise<P> | P;
@@ -122,20 +123,40 @@ export interface FieldBase {
     read?: FieldAccess;
     update?: FieldAccess;
   };
-  /** Extension  point to add your custom data. */
+  /** Extension point to add your custom data. */
   custom?: Record<string, any>;
 }
 
 export type NumberField = FieldBase & {
   type: 'number';
   admin?: Admin & {
+    /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
+    /** Set this property to define a placeholder string for the field. */
     placeholder?: Record<string, string> | string
+    /** Set a value for the number field to increment / decrement using browser controls. */
     step?: number
   }
+  /** Minimum value accepted. Used in the default `validation` function. */
   min?: number
+  /** Maximum value accepted. Used in the default `validation` function. */
   max?: number
-}
+} & ({
+  /** Makes this field an ordered array of numbers instead of just a single number. */
+  hasMany: true
+  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+  minRows?: number
+  /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
+  maxRows?: number
+} | {
+  /** Makes this field an ordered array of numbers instead of just a single number. */
+  hasMany?: false | undefined
+  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+  minRows?: undefined
+  /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
+  maxRows?: undefined
+})
+
 
 export type TextField = FieldBase & {
   type: 'text';
@@ -261,7 +282,7 @@ export type UIField = {
     }
   }
   type: 'ui';
-  /** Extension  point to add your custom data. */
+  /** Extension point to add your custom data. */
   custom?: Record<string, any>;
 }
 

@@ -1,6 +1,6 @@
 import { SanitizedCollectionConfig } from '../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../globals/config/types';
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import deepCopyObject from '../../../utilities/deepCopyObject';
 
@@ -14,6 +14,7 @@ type Args = {
   req: PayloadRequest
   overrideAccess: boolean
   showHiddenFields: boolean
+  context: RequestContext
 }
 
 export async function afterRead<T = any>(args: Args): Promise<T> {
@@ -27,19 +28,15 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     req,
     overrideAccess,
     showHiddenFields,
+    context,
   } = args;
 
   const doc = deepCopyObject(incomingDoc);
   const fieldPromises = [];
   const populationPromises = [];
 
-  let depth = 0;
-
-  if (req.payloadAPI === 'REST' || req.payloadAPI === 'local') {
-    depth = (incomingDepth || incomingDepth === 0) ? parseInt(String(incomingDepth), 10) : req.payload.config.defaultDepth;
-
-    if (depth > req.payload.config.maxDepth) depth = req.payload.config.maxDepth;
-  }
+  let depth = (incomingDepth || incomingDepth === 0) ? parseInt(String(incomingDepth), 10) : req.payload.config.defaultDepth;
+  if (depth > req.payload.config.maxDepth) depth = req.payload.config.maxDepth;
 
   const currentDepth = incomingCurrentDepth || 1;
 
@@ -56,6 +53,7 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
     req,
     siblingDoc: doc,
     showHiddenFields,
+    context,
   });
 
   await Promise.all(fieldPromises);

@@ -21,10 +21,15 @@ import wait from '../../../../utilities/wait';
 import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
-import { Fields, Context as FormContextType, GetDataByPath, Props, SubmitOptions } from './types';
+import { Context, Fields, Context as FormContextType, GetDataByPath, Props, Row, SubmitOptions } from './types';
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
+import { WatchFormErrors } from './WatchFormErrors';
+import { splitPathByArrayFields } from '../../../../utilities/splitPathByArrayFields';
+import { setsAreEqual } from '../../../../utilities/setsAreEqual';
+import { buildFieldSchemaMap } from '../../../../utilities/buildFieldSchemaMap';
+import { isNumber } from '../../../../utilities/isNumber';
 
 const baseClass = 'form';
 
@@ -49,13 +54,14 @@ const Form: React.FC<Props> = (props) => {
   const locale = useLocale();
   const { t, i18n } = useTranslation('general');
   const { refreshCookie, user } = useAuth();
-  const { id, getDocPreferences } = useDocumentInfo();
+  const { id, getDocPreferences, collection, global } = useDocumentInfo();
   const operation = useOperation();
 
   const [modified, setModified] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formattedInitialData, setFormattedInitialData] = useState(buildInitialState(initialData));
+  const [collectionFieldSchemaMap, setCollectionFieldSchemaMap] = useState(new Map<string, Field[]>());
 
   const formRef = useRef<HTMLFormElement>(null);
   const contextRef = useRef({} as FormContextType);
@@ -70,6 +76,62 @@ const Form: React.FC<Props> = (props) => {
 
   contextRef.current.fields = fields;
   contextRef.current.dispatchFields = dispatchFields;
+
+  // Build a current set of child errors for all rows in form state
+  const buildRowErrors = useCallback(() => {
+    const existingFieldRows: { [path: string]: Row[] } = {};
+    const newFieldRows: { [path: string]: Row[] } = {};
+
+    Object.entries(fields).forEach(([path, field]) => {
+      const pathSegments = splitPathByArrayFields(path);
+
+      for (let i = 0; i < pathSegments.length; i += 1) {
+        const fieldPath = pathSegments.slice(0, i + 1).join('.');
+        const formField = fields?.[fieldPath];
+
+        // Is this an array or blocks field?
+        if (Array.isArray(formField?.rows)) {
+          // Keep a reference to the existing row state
+          existingFieldRows[fieldPath] = formField.rows;
+
+          // A new row state will be used to compare
+          // against the old state later,
+          // to see if we need to dispatch an update
+          if (!newFieldRows[fieldPath]) {
+            newFieldRows[fieldPath] = formField.rows.map((existingRow) => ({
+              ...existingRow,
+              childErrorPaths: new Set(),
+            }));
+          }
+
+          const rowIndex = pathSegments[i + 1];
+          const childFieldPath = pathSegments.slice(i + 1).join('.');
+
+          if (field.valid === false && childFieldPath) {
+            newFieldRows[fieldPath][rowIndex].childErrorPaths.add(`${fieldPath}.${childFieldPath}`);
+          }
+        }
+      }
+    });
+
+    // Now loop over all fields with rows -
+    // if anything changed, dispatch an update for the field
+    // with the new row state
+    Object.entries(newFieldRows).forEach(([path, newRows]) => {
+      const stateMatches = newRows.every((newRow, i) => {
+        const existingRowErrorPaths = existingFieldRows[path][i]?.childErrorPaths;
+        return setsAreEqual(newRow.childErrorPaths, existingRowErrorPaths);
+      });
+
+      if (!stateMatches) {
+        dispatchFields({
+          type: 'UPDATE',
+          path,
+          rows: newRows,
+        });
+      }
+    });
+  }, [fields, dispatchFields]);
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {};
@@ -140,6 +202,7 @@ const Form: React.FC<Props> = (props) => {
     if (waitForAutocomplete) await wait(100);
 
     const isValid = skipValidation ? true : await contextRef.current.validateForm();
+    contextRef.current.buildRowErrors();
 
     if (!skipValidation) setSubmitted(true);
 
@@ -277,8 +340,6 @@ const Form: React.FC<Props> = (props) => {
 
         toast.error(message);
       }
-
-      return;
     } catch (err) {
       setProcessing(false);
 
@@ -300,6 +361,35 @@ const Form: React.FC<Props> = (props) => {
     i18n,
     waitForAutocomplete,
   ]);
+
+  // Array/Block row manipulation
+  const addFieldRow: Context['addFieldRow'] = useCallback(async ({ path, rowIndex, data }) => {
+    const preferences = await getDocPreferences();
+    const nonIndexedPath = path.split('.').filter((segment) => !isNumber(segment)).join('.');
+    const schemaKey = data?.blockType ? `${nonIndexedPath}.${data.blockType}` : nonIndexedPath;
+    const rowFieldSchema = collectionFieldSchemaMap.get(schemaKey);
+
+    if (rowFieldSchema) {
+      const subFieldState = await buildStateFromSchema({ fieldSchema: rowFieldSchema, data, preferences, operation, id, user, locale, t });
+      dispatchFields({ type: 'ADD_ROW', rowIndex, path, blockType: data?.blockType, subFieldState });
+    }
+  }, [dispatchFields, collectionFieldSchemaMap, getDocPreferences, id, user, operation, locale, t]);
+
+  const removeFieldRow: Context['removeFieldRow'] = useCallback(async ({ path, rowIndex }) => {
+    dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
+  }, [dispatchFields]);
+
+  const replaceFieldRow: Context['replaceFieldRow'] = useCallback(async ({ path, rowIndex, data }) => {
+    const preferences = await getDocPreferences();
+    const nonIndexedPath = path.split('.').filter((segment) => !isNumber(segment)).join('.');
+    const schemaKey = data?.blockType ? `${nonIndexedPath}.${data.blockType}` : nonIndexedPath;
+    const rowFieldSchema = collectionFieldSchemaMap.get(schemaKey);
+
+    if (rowFieldSchema) {
+      const subFieldState = await buildStateFromSchema({ fieldSchema: rowFieldSchema, data, preferences, operation, id, user, locale, t });
+      dispatchFields({ type: 'REPLACE_ROW', rowIndex, path, blockType: data?.blockType, subFieldState });
+    }
+  }, [dispatchFields, collectionFieldSchemaMap, getDocPreferences, id, user, operation, locale, t]);
 
   const getFields = useCallback(() => contextRef.current.fields, [contextRef]);
   const getField = useCallback((path: string) => contextRef.current.fields[path], [contextRef]);
@@ -360,6 +450,17 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.formRef = formRef;
   contextRef.current.reset = reset;
   contextRef.current.replaceState = replaceState;
+  contextRef.current.buildRowErrors = buildRowErrors;
+  contextRef.current.addFieldRow = addFieldRow;
+  contextRef.current.removeFieldRow = removeFieldRow;
+  contextRef.current.replaceFieldRow = replaceFieldRow;
+
+  useEffect(() => {
+    const entityFields = collection?.fields || global?.fields || [];
+    if (entityFields.length === 0) return;
+    const fieldSchemaMap = buildFieldSchemaMap(entityFields);
+    setCollectionFieldSchemaMap(fieldSchemaMap);
+  }, [collection?.fields, global?.fields]);
 
   useEffect(() => {
     if (initialState) {
@@ -410,6 +511,7 @@ const Form: React.FC<Props> = (props) => {
             <ProcessingContext.Provider value={processing}>
               <ModifiedContext.Provider value={modified}>
                 <FormFieldsContext.Provider value={fieldsReducer}>
+                  <WatchFormErrors buildRowErrors={buildRowErrors} />
                   {children}
                 </FormFieldsContext.Provider>
               </ModifiedContext.Provider>

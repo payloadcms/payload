@@ -4,12 +4,12 @@ import serveStatic from 'serve-static';
 import { Sharp, ResizeOptions } from 'sharp';
 
 export type FileSize = {
-  filename: string;
-  filesize: number;
-  mimeType: string;
-  width: number;
-  height: number;
-}
+  filename: string | null;
+  filesize: number | null;
+  mimeType: string | null;
+  width: number | null;
+  height: number | null;
+};
 
 export type FileSizes = {
   [size: string]: FileSize
@@ -57,7 +57,7 @@ export type ImageSize = ResizeOptions & {
   crop?: string // comes from sharp package
 };
 
-export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => string
+export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => string | null | false
 
 export type IncomingUploadType = {
   imageSizes?: ImageSize[]

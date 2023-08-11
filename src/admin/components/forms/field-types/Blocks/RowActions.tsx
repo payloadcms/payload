@@ -4,7 +4,6 @@ import { Block, Labels } from '../../../../../fields/config/types';
 import { ArrayAction } from '../../../elements/ArrayAction';
 import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug';
 import { BlocksDrawer } from './BlocksDrawer';
-import { Row } from '../../Form/types';
 
 export const RowActions: React.FC<{
   addRow: (rowIndex: number, blockType: string) => void
@@ -14,8 +13,9 @@ export const RowActions: React.FC<{
   labels: Labels
   blocks: Block[]
   rowIndex: number
-  rows: Row[]
+  rowCount: number
   blockType: string
+  hasMaxRows?: boolean
 }> = (props) => {
   const {
     addRow,
@@ -25,8 +25,9 @@ export const RowActions: React.FC<{
     labels,
     blocks,
     rowIndex,
-    rows,
+    rowCount,
     blockType,
+    hasMaxRows,
   } = props;
 
   const { openModal, closeModal } = useModal();
@@ -47,7 +48,7 @@ export const RowActions: React.FC<{
         labels={labels}
       />
       <ArrayAction
-        rowCount={rows.length}
+        rowCount={rowCount}
         addRow={() => {
           openModal(drawerSlug);
         }}
@@ -55,6 +56,7 @@ export const RowActions: React.FC<{
         moveRow={moveRow}
         removeRow={removeRow}
         index={rowIndex}
+        hasMaxRows={hasMaxRows}
       />
     </React.Fragment>
   );

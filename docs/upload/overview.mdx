@@ -190,9 +190,7 @@ export const Media: CollectionConfig = {
 <Banner>
   <strong>Note:</strong>
   <br />
-  If you specify a function to return an admin thumbnail, but your upload is not
-  an image file type (for example, PDF or TXT) your function will not be used.
-  Instead, Payload will display its generic file upload graphic.
+  This function runs in the browser. If your function returns `null` or `false` Payload will show the default generic file thumbnail instead.
 </Banner>
 
 ### MimeTypes
