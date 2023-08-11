@@ -1,5 +1,12 @@
 
 
+## [1.13.4](https://github.com/payloadcms/payload/compare/v1.13.3...v1.13.4) (2023-08-11)
+
+
+### Bug Fixes
+
+* correctly passes block path inside buildFieldSchemaMap ([#3162](https://github.com/payloadcms/payload/issues/3162)) ([3c60abd](https://github.com/payloadcms/payload/commit/3c60abd61aaf24d49712c80bcbd0f1113c22b85a))
+
 ## [1.13.3](https://github.com/payloadcms/payload/compare/v1.13.2...v1.13.3) (2023-08-11)
 
 
