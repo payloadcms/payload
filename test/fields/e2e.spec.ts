@@ -4,15 +4,15 @@ import path from 'path';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { saveDocAndAssert } from '../helpers';
-import { textDoc } from './collections/Text';
-import { arrayFieldsSlug } from './collections/Array';
+import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers';
+import { textDoc, textFieldsSlug } from './collections/Text';
 import { pointFieldsSlug } from './collections/Point';
 import { tabsSlug } from './collections/Tabs';
 import { collapsibleFieldsSlug } from './collections/Collapsible';
 import wait from '../../src/utilities/wait';
 import { jsonDoc } from './collections/JSON';
 import { numberDoc } from './collections/Number';
+import { relationshipFieldsSlug } from './collections/Relationship';
 
 const { beforeAll, describe } = test;
 
@@ -1084,6 +1084,42 @@ describe('fields', () => {
 
       // check if the value is saved
       await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toHaveText(`${value}123456`);
+    });
+
+    test('should save using hotkey in drawer', async () => {
+      await page.goto(url.create);
+
+      // First fill out the relationship field, as it's required
+      await page.locator('#relationship-add-new .relationship-add-new__add-button').click();
+      await page.locator('#field-relationship .value-container').click();
+      // Select "Seeded text document" relationship
+      await page.getByText('Seeded text document', { exact: true }).click();
+
+      // Click edit button which opens drawer
+      await page.getByRole('button', { name: 'Edit Seeded text document' }).click();
+
+      // Fill 'text' field of 'Seeded text document'
+      await page.locator('#field-text').fill('some updated text value');
+
+      // Save drawer (not parent page) with hotkey
+      await saveDocHotkeyAndAssert(page);
+
+      const seededTextDocument = await payload.find({
+        collection: textFieldsSlug,
+        where: {
+          text: {
+            equals: 'some updated text value',
+          },
+        },
+      });
+      const relationshipDocuments = await payload.find({
+        collection: relationshipFieldsSlug,
+      });
+
+      // The Seeded text document should now have a text field with value 'some updated text value',
+      expect(seededTextDocument.docs.length).toEqual(1);
+      // but the relationship document should NOT exist, as the hotkey should have saved the drawer and not the parent page
+      expect(relationshipDocuments.docs.length).toEqual(0);
     });
   });
 

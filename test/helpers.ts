@@ -46,7 +46,6 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
   }
   await page.keyboard.down('s');
   await expect(page.locator('.Toastify')).toContainText('successfully');
-  expect(page.url()).not.toContain('create');
 }
 
 export async function saveDocAndAssert(page: Page, selector = '#action-save'): Promise<void> {
