@@ -110,8 +110,8 @@ const useHotkey = (options: {
   }, []);
 
   useEffect(() => {
-    document.addEventListener('keydown', keydown, false);
-    document.addEventListener('keyup', keyup, false);
+    document.addEventListener('keydown', keydown, true);
+    document.addEventListener('keyup', keyup, true);
 
     return () => {
       document.removeEventListener('keydown', keydown);
