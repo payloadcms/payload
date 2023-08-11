@@ -14,45 +14,46 @@ import { Field } from '../fields/config/types';
 export const buildFieldSchemaMap = (entityFields: Field[]): Map<string, Field[]> => {
   const fieldMap = new Map<string, Field[]>();
 
-  const buildUpMap = (fields: Field[], builtUpPath = '') => {
+  const buildUpMap = (fields: Field[], fieldPath = '') => {
     fields.forEach((field) => {
-      let nextPath = builtUpPath;
+      let currentPath = fieldPath;
 
-      if (nextPath) {
+      if (currentPath) {
         if ('name' in field && field?.name) {
-          nextPath = `${nextPath}.${field.name}`;
+          currentPath = `${currentPath}.${field.name}`;
         }
       } else if ('name' in field && field?.name) {
-        nextPath = field.name;
+        currentPath = field.name;
       }
 
       switch (field.type) {
         case 'blocks':
           field.blocks.forEach((block) => {
-            fieldMap.set(`${nextPath}.${block.slug}`, block.fields);
-            buildUpMap(block.fields, nextPath);
+            fieldMap.set(`${currentPath}.${block.slug}`, block.fields);
+            buildUpMap(block.fields, currentPath);
           });
           break;
 
         case 'array':
-          fieldMap.set(nextPath, field.fields);
-          buildUpMap(field.fields, nextPath);
+          fieldMap.set(currentPath, field.fields);
+          buildUpMap(field.fields, currentPath);
           break;
 
         case 'row':
         case 'collapsible':
         case 'group':
-          buildUpMap(field.fields, nextPath);
+          buildUpMap(field.fields, currentPath);
           break;
 
         case 'tabs':
           field.tabs.forEach((tab) => {
-            if (nextPath) {
-              nextPath = 'name' in tab ? `${nextPath}.${tab.name}` : nextPath;
+            let tabPath = currentPath;
+            if (tabPath) {
+              tabPath = 'name' in tab ? `${tabPath}.${tab.name}` : tabPath;
             } else {
-              nextPath = 'name' in tab ? `${tab.name}` : nextPath;
+              tabPath = 'name' in tab ? `${tab.name}` : tabPath;
             }
-            buildUpMap(tab.fields, nextPath);
+            buildUpMap(tab.fields, tabPath);
           });
           break;
 
