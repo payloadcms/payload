@@ -1,5 +1,5 @@
 {
-  "name": "payload-nextjs-auth-example",
+  "name": "payload-auth-next-pages",
   "version": "1.0.0",
   "scripts": {
     "dev": "next dev -p 3001",

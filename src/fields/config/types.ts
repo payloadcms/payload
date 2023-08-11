@@ -1,12 +1,12 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
-import type { TFunction, i18n as Ii18n } from 'i18next';
+import type { i18n as Ii18n, TFunction } from 'i18next';
 import type { EditorProps } from '@monaco-editor/react';
 import { Operation, Where } from '../../types';
 import { SanitizedConfig } from '../../config/types';
 import { TypeWithID } from '../../collections/config/types';
-import { PayloadRequest } from '../../express/types';
+import { PayloadRequest, RequestContext } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 import { User } from '../../auth';
@@ -33,6 +33,7 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** The value of the field. */
   value?: P,
   previousValue?: P,
+  context: RequestContext
 }
 
 export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => Promise<P> | P;
@@ -107,7 +108,7 @@ export interface FieldBase {
   index?: boolean;
   defaultValue?: any;
   hidden?: boolean;
-  saveToJWT?: boolean
+  saveToJWT?: string | boolean;
   localized?: boolean;
   validate?: Validate;
   hooks?: {
@@ -233,6 +234,7 @@ export type TabsAdmin = Omit<Admin, 'description'>;
 
 type TabBase = Omit<FieldBase, 'required' | 'validation'> & {
   fields: Field[]
+  saveToJWT?: boolean | string
   description?: Description
   interfaceName?: string
 }
@@ -255,7 +257,7 @@ export type UnnamedTab = Omit<TabBase, 'name'> & {
 
 export type Tab = NamedTab | UnnamedTab
 
-export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized'> & {
+export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized' | 'saveToJWT'> & {
   type: 'tabs';
   tabs: Tab[]
   admin?: TabsAdmin

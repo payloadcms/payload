@@ -1,11 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/router'
 
-import { useAuth } from '../../components/Auth'
+import { Button } from '../../components/Button'
 import { Gutter } from '../../components/Gutter'
 import { Input } from '../../components/Input'
-import classes from './index.module.css'
+import { Message } from '../../components/Message'
+import { useAuth } from '../../providers/Auth'
+
+import classes from './index.module.scss'
 
 type FormData = {
   password: string
@@ -14,10 +17,10 @@ type FormData = {
 
 const ResetPassword: React.FC = () => {
   const [error, setError] = useState('')
-  const { login, resetPassword } = useAuth()
+  const { login } = useAuth()
   const router = useRouter()
-
-  const token = typeof router.query.token === 'string' ? router.query.token : undefined
+  const searchParams = useMemo(() => new URLSearchParams(router.query as any), [router.query])
+  const token = searchParams.get('token')
 
   const {
     register,
@@ -28,33 +31,41 @@ const ResetPassword: React.FC = () => {
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      try {
-        const user = await resetPassword(data as Parameters<typeof resetPassword>[0])
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/reset-password`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
 
-        if (user) {
-          // Automatically log the user in after they successfully reset password
-          // Then redirect them to /account with success message in URL
-          await login({ email: user.email, password: data.password })
-          router.push('/account?success=Password reset successfully.')
-        }
-      } catch (err) {
-        setError(err?.message || 'An error occurred while attempting to reset password.')
+      if (response.ok) {
+        const json = await response.json()
+
+        // Automatically log the user in after they successfully reset password
+        await login({ email: json.user.email, password: data.password })
+
+        // Redirect them to `/account` with success message in URL
+        router.push('/account?success=Password reset successfully.')
+      } else {
+        setError('There was a problem while resetting your password. Please try again later.')
       }
     },
-    [router, login, resetPassword],
+    [router, login],
   )
 
-  // When Next.js populates token within router, reset form with new token value
+  // when Next.js populates token within router,
+  // reset form with new token value
   useEffect(() => {
-    reset({ token })
+    reset({ token: token || undefined })
   }, [reset, token])
 
   return (
-    <Gutter>
+    <Gutter className={classes.resetPassword}>
       <h1>Reset Password</h1>
       <p>Please enter a new password below.</p>
-      {error && <div className={classes.error}>{error}</div>}
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
+        <Message error={error} className={classes.message} />
         <Input
           name="password"
           type="password"
@@ -64,7 +75,12 @@ const ResetPassword: React.FC = () => {
           error={errors.password}
         />
         <input type="hidden" {...register('token')} />
-        <button type="submit">Submit</button>
+        <Button
+          type="submit"
+          className={classes.submit}
+          label="Reset Password"
+          appearance="primary"
+        />
       </form>
     </Gutter>
   )

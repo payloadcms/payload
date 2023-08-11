@@ -184,6 +184,8 @@
     "email": "E-post",
     "emailAddress": "E-postadress",
     "enterAValue": "Ange ett värde",
+    "error": "Fel",
+    "errors": "Fel",
     "fallbackToDefaultLocale": "Återgång till standardlokalspråk",
     "filter": "Filter",
     "filterWhere": "Filtrera {{label}} där",

@@ -1,5 +1,100 @@
 
 
+## [1.13.3](https://github.com/payloadcms/payload/compare/v1.13.2...v1.13.3) (2023-08-11)
+
+
+### Bug Fixes
+
+* unable to add arrays inside secondary named tabs ([#3158](https://github.com/payloadcms/payload/issues/3158)) ([cb04d4a](https://github.com/payloadcms/payload/commit/cb04d4a82a68a764330582b93882d422b32c2527))
+
+## [1.13.2](https://github.com/payloadcms/payload/compare/v1.13.1...v1.13.2) (2023-08-10)
+
+## [1.13.1](https://github.com/payloadcms/payload/compare/v1.13.0...v1.13.1) (2023-08-08)
+
+
+### Bug Fixes
+
+* updates addFieldRow and replaceFieldRow rowIndex insertion ([#3145](https://github.com/payloadcms/payload/issues/3145)) ([f5cf546](https://github.com/payloadcms/payload/commit/f5cf546e1918de66998d5f0e5410bfbc1f054567))
+
+# [1.13.0](https://github.com/payloadcms/payload/compare/v1.12.0...v1.13.0) (2023-08-08)
+
+
+### Bug Fixes
+
+* `setPreference()` return type ([#3125](https://github.com/payloadcms/payload/issues/3125)) ([463d6bb](https://github.com/payloadcms/payload/commit/463d6bbec66e61523bae3869df88bd98e7617390))
+* absolute staticURL admin thumbnails ([#3135](https://github.com/payloadcms/payload/issues/3135)) ([1039f39](https://github.com/payloadcms/payload/commit/1039f39c09260537616b22228080466e8df6e981))
+* adding and replacing similarly shaped block configs ([#3140](https://github.com/payloadcms/payload/issues/3140)) ([8e188cf](https://github.com/payloadcms/payload/commit/8e188cfe61db808c94d726967affdadf2e5abb9f))
+
+
+### Features
+
+* default tab labels from name ([#3129](https://github.com/payloadcms/payload/issues/3129)) ([e8f0516](https://github.com/payloadcms/payload/commit/e8f05165eb3a28c00deb11931db01ad1f8c75c74))
+* radio and select fields are filterable by options ([#3136](https://github.com/payloadcms/payload/issues/3136)) ([b117e73](https://github.com/payloadcms/payload/commit/b117e7346434bfc8edbfa92f5db45f63c57bab08))
+* recursive saveToJWT field support ([#3130](https://github.com/payloadcms/payload/issues/3130)) ([c6e0908](https://github.com/payloadcms/payload/commit/c6e09080767dad2ab8128ba330b2b344bb25ac6f))
+
+# [1.12.0](https://github.com/payloadcms/payload/compare/v1.11.8...v1.12.0) (2023-08-04)
+
+
+### Bug Fixes
+
+* excludes useAsTitle field from searchableFields in collection view ([#3105](https://github.com/payloadcms/payload/issues/3105)) ([8c4d251](https://github.com/payloadcms/payload/commit/8c4d2514b0f195e0059c6063346199785979c70c))
+* relationship field filter long titles ([#3113](https://github.com/payloadcms/payload/issues/3113)) ([da27a8a](https://github.com/payloadcms/payload/commit/da27a8aadbb103c5f6fe0ccc62c032876851b88f))
+* wrong links in verification and forgot password emails if serverURL not set ([#3010](https://github.com/payloadcms/payload/issues/3010)) ([6a189c6](https://github.com/payloadcms/payload/commit/6a189c6548b233aba64598af8804a56ec47e45f0))
+
+
+### Features
+
+* add support for sharp resize options ([#2844](https://github.com/payloadcms/payload/issues/2844)) ([144bb81](https://github.com/payloadcms/payload/commit/144bb81721814c19eb4957d4c8fcc845c73e2aa4))
+* allows for upload relationship drawer to be opened ([#3108](https://github.com/payloadcms/payload/issues/3108)) ([ea73e68](https://github.com/payloadcms/payload/commit/ea73e689ac46f2a7ba3b6c34e7a190944b5d5868))
+* option to pre-fill login credentials automatically ([#3021](https://github.com/payloadcms/payload/issues/3021)) ([c5756ed](https://github.com/payloadcms/payload/commit/c5756ed4a13b46bc73ae7b23309d6e9980fc81bf))
+* programmatic control over array and block rows inside the form  ([#3110](https://github.com/payloadcms/payload/issues/3110)) ([a78c463](https://github.com/payloadcms/payload/commit/a78c4631b4aabb5b57448ab21ef98749b1cf1935))
+* set JWT token field name with saveToJWT ([#3126](https://github.com/payloadcms/payload/issues/3126)) ([356f174](https://github.com/payloadcms/payload/commit/356f174b9ff601facb0062d0b65db18803ef2aa2))
+
+## [1.11.8](https://github.com/payloadcms/payload/compare/v1.11.7...v1.11.8) (2023-07-31)
+
+## [1.11.7](https://github.com/payloadcms/payload/compare/v1.11.6...v1.11.7) (2023-07-27)
+
+
+### Bug Fixes
+
+* [#3062](https://github.com/payloadcms/payload/issues/3062) ([0280953](https://github.com/payloadcms/payload/commit/02809532b484d9018c6528cfbbbb43abfd55a540))
+* array row deletion ([#3062](https://github.com/payloadcms/payload/issues/3062)) ([cf9795b](https://github.com/payloadcms/payload/commit/cf9795b8d8b53c48335ff4c32c6c51b3de4f7bc9))
+* incorrect image rotation after being processed by sharp ([#3081](https://github.com/payloadcms/payload/issues/3081)) ([0a91950](https://github.com/payloadcms/payload/commit/0a91950f052ce40427801e6561a0f676354a2ca4))
+
+
+### Features
+
+* ability to add context to payload's request object ([#2796](https://github.com/payloadcms/payload/issues/2796)) ([67ba131](https://github.com/payloadcms/payload/commit/67ba131cc61f3d3b30ef9ef7fc150344ca82da2f))
+
+## [1.11.6](https://github.com/payloadcms/payload/compare/v1.11.5...v1.11.6) (2023-07-25)
+
+
+### Bug Fixes
+
+* **collections:admin:** Enable adminThumbnail fn execution on all types ([2c74e93](https://github.com/payloadcms/payload/commit/2c74e9396a216a033e2bacdf189b7f28a0f97505))
+* threads hasMaxRows into ArrayAction components within blocks and arrays ([#3066](https://github.com/payloadcms/payload/issues/3066)) ([d43c83d](https://github.com/payloadcms/payload/commit/d43c83dad1bab5b05f4fcbae7d41de369905797c))
+
+## [1.11.5](https://github.com/payloadcms/payload/compare/v1.11.4...v1.11.5) (2023-07-25)
+
+
+### Bug Fixes
+
+* admin route not mounting on production serve ([#3071](https://github.com/payloadcms/payload/issues/3071)) ([e718668](https://github.com/payloadcms/payload/commit/e71866856fffefcfb61dd3d29135cccb66939a62))
+
+## [1.11.4](https://github.com/payloadcms/payload/compare/v1.11.3...v1.11.4) (2023-07-25)
+
+
+### Bug Fixes
+
+* if arrayFieldType rows are undefined, page would crash ([#3049](https://github.com/payloadcms/payload/issues/3049)) ([08377cc](https://github.com/payloadcms/payload/commit/08377cc5a7ea9d02350177e2e1d69390ee97af78))
+
+
+### Features
+
+* bump mongoose and mongoose-paginate versions ([#3025](https://github.com/payloadcms/payload/issues/3025)) ([41d3eee](https://github.com/payloadcms/payload/commit/41d3eee35f3855798a5c3372f8ad7c742a7810f7))
+* improve keyboard focus styles ([#3011](https://github.com/payloadcms/payload/issues/3011)) ([080e619](https://github.com/payloadcms/payload/commit/080e6195ef39ec858fbb115e8f554a8dfc436438))
+* solidifies bundler adapter pattern ([#3044](https://github.com/payloadcms/payload/issues/3044)) ([641c765](https://github.com/payloadcms/payload/commit/641c765fb921e162c98f09218929348037dd0f88))
+
 ## [1.11.3](https://github.com/payloadcms/payload/compare/v1.11.2...v1.11.3) (2023-07-19)
 
 

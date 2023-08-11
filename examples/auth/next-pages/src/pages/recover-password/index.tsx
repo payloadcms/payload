@@ -1,10 +1,13 @@
 import React, { useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import Link from 'next/link'
 
-import { useAuth } from '../../components/Auth'
+import { Button } from '../../components/Button'
 import { Gutter } from '../../components/Gutter'
 import { Input } from '../../components/Input'
-import classes from './index.module.css'
+import { Message } from '../../components/Message'
+
+import classes from './index.module.scss'
 
 type FormData = {
   email: string
@@ -13,7 +16,6 @@ type FormData = {
 const RecoverPassword: React.FC = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const { forgotPassword } = useAuth()
 
   const {
     register,
@@ -21,42 +23,57 @@ const RecoverPassword: React.FC = () => {
     formState: { errors },
   } = useForm<FormData>()
 
-  const onSubmit = useCallback(
-    async (data: FormData) => {
-      try {
-        const user = await forgotPassword(data as Parameters<typeof forgotPassword>[0])
+  const onSubmit = useCallback(async (data: FormData) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/forgot-password`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
 
-        if (user) {
-          setSuccess(true)
-          setError('')
-        }
-      } catch (err) {
-        setError(err?.message || 'An error occurred while attempting to recover password.')
-      }
-    },
-    [forgotPassword],
-  )
+    if (response.ok) {
+      setSuccess(true)
+      setError('')
+    } else {
+      setError(
+        'There was a problem while attempting to send you a password reset email. Please try again.',
+      )
+    }
+  }, [])
 
   return (
-    <Gutter>
+    <Gutter className={classes.recoverPassword}>
       {!success && (
         <React.Fragment>
           <h1>Recover Password</h1>
-          <p>
-            Please enter your email below. You will receive an email message with instructions on
-            how to reset your password.
-          </p>
-          {error && <div className={classes.error}>{error}</div>}
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Input
-              name="email"
-              label="Email Address"
-              required
-              register={register}
-              error={errors.email}
-            />
-            <button type="submit">Submit</button>
-          </form>
+          <div className={classes.formWrapper}>
+            <p>
+              {`Please enter your email below. You will receive an email message with instructions on
+              how to reset your password. To manage your all users, `}
+              <Link href={`${process.env.NEXT_PUBLIC_CMS_URL}/admin/collections/users`}>
+                login to the admin dashboard
+              </Link>
+              {'.'}
+            </p>
+            <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
+              <Message error={error} className={classes.message} />
+              <Input
+                name="email"
+                label="Email Address"
+                required
+                register={register}
+                error={errors.email}
+                type="email"
+              />
+              <Button
+                type="submit"
+                className={classes.submit}
+                label="Recover Password"
+                appearance="primary"
+              />
+            </form>
+          </div>
         </React.Fragment>
       )}
       {success && (

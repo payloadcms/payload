@@ -184,6 +184,8 @@
     "email": "อีเมล",
     "emailAddress": "อีเมล",
     "enterAValue": "ระบุค่า",
+    "error": "ข้อผิดพลาด",
+    "errors": "ข้อผิดพลาด",
     "fallbackToDefaultLocale": "สำรองไปยังตำแหน่งที่ตั้งเริ่มต้น",
     "filter": "กรอง",
     "filterWhere": "กรอง {{label}} เฉพาะ",

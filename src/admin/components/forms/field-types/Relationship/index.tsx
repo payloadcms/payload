@@ -14,7 +14,7 @@ import { Where } from '../../../../../types';
 import { PaginatedDocs } from '../../../../../mongoose/types';
 import { useFormProcessing } from '../../Form/context';
 import optionsReducer from './optionsReducer';
-import { FilterOptionsResult, GetResults, Props, Value } from './types';
+import { FilterOptionsResult, GetResults, Option, Props, Value } from './types';
 import { createRelationMap } from './createRelationMap';
 import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
 import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex';
@@ -361,6 +361,26 @@ const Relationship: React.FC<Props> = (props) => {
     dispatchOptions({ type: 'UPDATE', doc: args.doc, collection: args.collectionConfig, i18n, config });
   }, [i18n, config]);
 
+  const filterOption = useCallback((item: Option, searchFilter: string) => {
+    if (!searchFilter) {
+      return true;
+    }
+    const r = wordBoundariesRegex(searchFilter || '');
+    // breaking the labels to search into smaller parts increases performance
+    const breakApartThreshold = 250;
+    let string = item.label;
+    // strings less than breakApartThreshold length won't be chunked
+    while (string.length > breakApartThreshold) {
+      // slicing by the next space after the length of the search input prevents slicing the string up by partial words
+      const indexOfSpace = string.indexOf(' ', searchFilter.length);
+      if (r.test(string.slice(0, indexOfSpace === -1 ? searchFilter.length : indexOfSpace + 1))) {
+        return true;
+      }
+      string = string.slice(indexOfSpace === -1 ? searchFilter.length : indexOfSpace + 1);
+    }
+    return r.test(string.slice(-breakApartThreshold));
+  }, []);
+
   const classes = [
     'field-type',
     baseClass,
@@ -457,10 +477,7 @@ const Relationship: React.FC<Props> = (props) => {
                 });
               }
             }}
-            filterOption={enableWordBoundarySearch ? (item, searchFilter) => {
-              const r = wordBoundariesRegex(searchFilter || '');
-              return r.test(item.label);
-            } : undefined}
+            filterOption={enableWordBoundarySearch ? filterOption : undefined}
           />
           {!readOnly && allowCreate && (
             <AddNewRelation

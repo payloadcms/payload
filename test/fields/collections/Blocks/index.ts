@@ -203,6 +203,42 @@ const BlockFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'blocks',
+      name: 'blocksWithSimilarConfigs',
+      blocks: [{
+        slug: 'block-1',
+        fields: [
+          {
+            type: 'array',
+            name: 'items',
+            fields: [
+              {
+                type: 'text',
+                name: 'title',
+                required: true,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        slug: 'block-2',
+        fields: [
+          {
+            type: 'array',
+            name: 'items',
+            fields: [
+              {
+                type: 'text',
+                name: 'title2',
+                required: true,
+              },
+            ],
+          },
+        ],
+      }],
+    },
   ],
 };
 

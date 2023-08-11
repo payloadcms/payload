@@ -71,6 +71,7 @@ export default joi.object({
         joi.object().keys({
           email: joi.string(),
           password: joi.string(),
+          prefillOnly: joi.boolean(),
         }),
         joi.boolean(),
       ),
@@ -107,6 +108,11 @@ export default joi.object({
         }),
       }),
     webpack: joi.func(),
+    bundler: {
+      dev: joi.func(),
+      build: joi.func(),
+      serve: joi.func(),
+    },
   }),
   email: joi.object(),
   i18n: joi.object(),

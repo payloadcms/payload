@@ -103,6 +103,14 @@ export type REMOVE_ROW = {
 
 export type ADD_ROW = {
   type: 'ADD_ROW'
+  rowIndex?: number
+  path: string
+  subFieldState?: Fields
+  blockType?: string
+}
+
+export type REPLACE_ROW = {
+  type: 'REPLACE_ROW'
   rowIndex: number
   path: string
   subFieldState?: Fields
@@ -144,6 +152,7 @@ export type FieldAction =
   | UPDATE
   | REMOVE_ROW
   | ADD_ROW
+  | REPLACE_ROW
   | DUPLICATE_ROW
   | MOVE_ROW
   | SET_ROW_COLLAPSED
@@ -173,4 +182,7 @@ export type Context = {
   reset: Reset
   replaceState: (state: Fields) => void
   buildRowErrors: () => void
+  addFieldRow: ({ path, rowIndex, data }: { path: string, rowIndex: number, data?: Data }) => Promise<void>
+  removeFieldRow: ({ path, rowIndex }: { path: string, rowIndex: number }) => Promise<void>
+  replaceFieldRow: ({ path, rowIndex, data }: { path: string, rowIndex: number, data?: Data }) => Promise<void>
 }
