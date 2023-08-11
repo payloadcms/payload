@@ -1,0 +1,14 @@
+@import '../../../scss/styles';
+
+.icon--localized {
+  height: base(.75);
+  width: base(.75);
+  margin-top: base(.125);
+  padding-left: base(.125);
+
+  .stroke {
+    fill: none;
+    stroke: var(--theme-elevation-800);
+    stroke-width: $style-stroke-width-s;
+  }
+}

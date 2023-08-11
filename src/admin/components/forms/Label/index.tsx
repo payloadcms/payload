@@ -6,10 +6,11 @@ import { Props } from './types';
 import { getTranslation } from '../../../../utilities/getTranslation';
 
 import './index.scss';
+import Localized from '../../icons/Localized';
 
 const Label: React.FC<Props> = (props) => {
   const {
-    label, required = false, htmlFor,
+    label, required = false, htmlFor, localized,
   } = props;
   const { i18n } = useTranslation();
 
@@ -21,6 +22,7 @@ const Label: React.FC<Props> = (props) => {
       >
         { getTranslation(label, i18n) }
         {required && <span className="required">*</span>}
+        {localized && <Localized />}
       </label>
     );
   }

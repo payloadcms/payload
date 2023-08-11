@@ -43,6 +43,7 @@ const TextInput: React.FC<TextInputProps> = (props) => {
     className,
     width,
     inputRef,
+    localized,
   } = props;
 
   const { i18n } = useTranslation();
@@ -71,6 +72,7 @@ const TextInput: React.FC<TextInputProps> = (props) => {
         htmlFor={`field-${path.replace(/\./gi, '__')}`}
         label={label}
         required={required}
+        localized={localized}
       />
       <input
         ref={inputRef}

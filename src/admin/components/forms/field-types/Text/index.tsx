@@ -14,6 +14,7 @@ const Text: React.FC<Props> = (props) => {
     label,
     minLength,
     maxLength,
+    localized,
     admin: {
       placeholder,
       readOnly,
@@ -62,6 +63,7 @@ const Text: React.FC<Props> = (props) => {
       width={width}
       description={description}
       inputRef={inputRef}
+      localized={localized}
     />
   );
 };
