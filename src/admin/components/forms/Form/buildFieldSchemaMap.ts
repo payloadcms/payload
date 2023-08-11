@@ -22,8 +22,9 @@ export const buildFieldSchemaMap = (entityFields: Field[]): Map<string, Field[]>
       switch (field.type) {
         case 'blocks':
           field.blocks.forEach((block) => {
-            fieldMap.set(`${path}.${block.slug}`, block.fields);
-            buildUpMap(block.fields, path);
+            const blockPath = `${path}.${block.slug}`;
+            fieldMap.set(blockPath, block.fields);
+            buildUpMap(block.fields, blockPath);
           });
           break;
 
