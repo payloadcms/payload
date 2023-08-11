@@ -1097,7 +1097,7 @@ describe('fields', () => {
       await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toHaveText(`${value}123456`);
     });
 
-    test('should save using hotkey in drawer', async () => {
+    test('should save using hotkey in edit document drawer', async () => {
       await page.goto(url.create);
 
       // First fill out the relationship field, as it's required
