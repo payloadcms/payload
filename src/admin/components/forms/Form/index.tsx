@@ -28,7 +28,7 @@ import { useOperation } from '../../utilities/OperationProvider';
 import { WatchFormErrors } from './WatchFormErrors';
 import { splitPathByArrayFields } from '../../../../utilities/splitPathByArrayFields';
 import { setsAreEqual } from '../../../../utilities/setsAreEqual';
-import { buildFieldSchemaMap } from '../../../../utilities/buildFieldSchemaMap';
+import { buildFieldSchemaMap } from './buildFieldSchemaMap';
 import { isNumber } from '../../../../utilities/isNumber';
 
 const baseClass = 'form';
