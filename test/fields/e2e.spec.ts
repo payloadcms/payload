@@ -1097,6 +1097,9 @@ describe('fields', () => {
       await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toHaveText(`${value}123456`);
     });
 
+    // Drawers opened through the edit button are prone to issues due to the use of stopPropagation for certain
+    // events - specifically for drawers opened through the edit button. This test is to ensure that drawers
+    // opened through the edit button can be saved using the hotkey.
     test('should save using hotkey in edit document drawer', async () => {
       await page.goto(url.create);
 
