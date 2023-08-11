@@ -1,5 +1,12 @@
 
 
+## [1.13.3](https://github.com/payloadcms/payload/compare/v1.13.2...v1.13.3) (2023-08-11)
+
+
+### Bug Fixes
+
+* unable to add arrays inside secondary named tabs ([#3158](https://github.com/payloadcms/payload/issues/3158)) ([cb04d4a](https://github.com/payloadcms/payload/commit/cb04d4a82a68a764330582b93882d422b32c2527))
+
 ## [1.13.2](https://github.com/payloadcms/payload/compare/v1.13.1...v1.13.2) (2023-08-10)
 
 ## [1.13.1](https://github.com/payloadcms/payload/compare/v1.13.0...v1.13.1) (2023-08-08)
