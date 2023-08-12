@@ -67,7 +67,6 @@ const useHotkey = (options: {
 }, func: (e: KeyboardEvent, deps: boolean[]) => void, deps: boolean[]): void => {
   const { keyCodes, cmdCtrlKey, editDepth } = options;
 
-
   // on mounting of the component, add the callback function to the callbacks object
   useEffect(() => {
     hotkeyCallbacks[editDepth] = func;
@@ -79,7 +78,8 @@ const useHotkey = (options: {
   }, [func, editDepth]);
 
 
-  const keydown = useCallback((e: KeyboardEvent) => {
+  const keydown = useCallback((event: KeyboardEvent | CustomEvent) => {
+    const e: KeyboardEvent = event.detail?.key ? event.detail : event;
     if (e.key === undefined) {
       // Autofill events, or other synthetic events, can be ignored
       return;
@@ -97,24 +97,30 @@ const useHotkey = (options: {
     ) {
       // get the maximum edit depth
       const maxEditDepth = Math.max(...Object.keys(hotkeyCallbacks).map(Number));
+      if (maxEditDepth !== editDepth) {
+        // We only want to execute the hotkey from the most top-level drawer / edit deoth.
+        return;
+      }
 
       // execute the function associated with the maximum edit depth
       if (hotkeyCallbacks[maxEditDepth]) {
         hotkeyCallbacks[maxEditDepth](e, deps);
       }
     }
-  }, [keyCodes, cmdCtrlKey, deps]);
+  }, [keyCodes, cmdCtrlKey, deps, editDepth]);
 
   const keyup = useCallback((e: KeyboardEvent) => {
     removeFromKeys(e.code);
   }, []);
 
   useEffect(() => {
-    document.addEventListener('keydown', keydown, true);
-    document.addEventListener('keyup', keyup, true);
+    document.addEventListener('keydown', keydown, false);
+    document.addEventListener('bypassKeyDown', keydown, false); // this is called if the keydown event's propagation is stopped by react-select
+    document.addEventListener('keyup', keyup, false);
 
     return () => {
       document.removeEventListener('keydown', keydown);
+      document.removeEventListener('bypassKeyDown', keydown);
       document.removeEventListener('keyup', keyup);
     };
   }, [keydown, keyup]);
