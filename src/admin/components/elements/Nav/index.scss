@@ -71,6 +71,10 @@
     >* {
       margin-top: base(1);
     }
+
+    a:focus-visible {
+      outline: var(--accessibility-outline);
+    }
   }
 
   &__log-out {
@@ -88,12 +92,12 @@
       display: flex;
       text-decoration: none;
 
-      &:focus {
+      &:focus:not(:focus-visible) {
         box-shadow: none;
         font-weight: 600;
       }
 
-      &:hover {
+      &:hover, &:focus-visible {
         text-decoration: underline;
       }
 

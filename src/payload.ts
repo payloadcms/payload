@@ -64,12 +64,15 @@ import PreferencesModel from './preferences/model';
 import findConfig from './config/find';
 
 import { defaults as emailDefaults } from './email/defaults';
+import { DatabaseAdapter } from './database/types';
 
 /**
  * @description Payload
  */
 export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   config: SanitizedConfig;
+
+  db: DatabaseAdapter;
 
   collections: {
     [slug: string | number | symbol]: Collection;
@@ -146,7 +149,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    */
   async init(options: InitOptions): Promise<Payload> {
-    this.logger = Logger('payload', options.loggerOptions);
+    this.logger = Logger('payload', options.loggerOptions, options.loggerDestination);
     this.mongoURL = options.mongoURL;
     this.mongoOptions = options.mongoOptions;
 

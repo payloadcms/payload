@@ -692,6 +692,12 @@
         "enterAValue": {
           "type": "string"
         },
+        "error": {
+          "type": "string"
+        },
+        "errors": {
+          "type": "string"
+        },
         "fallbackToDefaultLocale": {
           "type": "string"
         },

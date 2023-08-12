@@ -184,6 +184,8 @@
     "email": "Email",
     "emailAddress": "Email Address",
     "enterAValue": "Enter a value",
+    "error": "Error",
+    "errors": "Errors",
     "fallbackToDefaultLocale": "Fallback to default locale",
     "filter": "Filter",
     "filterWhere": "Filter {{label}} where",

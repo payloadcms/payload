@@ -4,7 +4,7 @@ import path from 'path';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { login, saveDocAndAssert } from '../helpers';
+import { saveDocAndAssert } from '../helpers';
 import { textDoc } from './collections/Text';
 import { arrayFieldsSlug } from './collections/Array';
 import { pointFieldsSlug } from './collections/Point';
@@ -26,8 +26,6 @@ describe('fields', () => {
 
     const context = await browser.newContext();
     page = await context.newPage();
-
-    await login({ page, serverURL });
   });
 
   describe('text', () => {
@@ -319,7 +317,7 @@ describe('fields', () => {
       await firstBlockSelector.click();
 
       // ensure the block was appended to the rows
-      const addedRow = await page.locator('#field-blocks #blocks-row-3');
+      const addedRow = await page.locator('#field-blocks .blocks-field__row').last();
       await expect(addedRow).toBeVisible();
       await expect(addedRow.locator('.blocks-field__block-pill-text')).toContainText('Text');
     });
@@ -366,7 +364,7 @@ describe('fields', () => {
       await firstBlockSelector.click();
 
       // ensure the block was appended to the rows
-      const firstRow = page.locator('#i18nBlocks-row-0');
+      const firstRow = page.locator('#field-i18nBlocks .blocks-field__row').first();
       await expect(firstRow).toBeVisible();
       await expect(firstRow.locator('.blocks-field__block-pill-text')).toContainText('Text en');
     });
@@ -412,6 +410,88 @@ describe('fields', () => {
       await wait(100);
       const customRowLabel = await page.locator('#rowLabelAsComponent-row-0 >> .row-label :text("custom row label")');
       await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase');
+    });
+
+    describe('row manipulation', () => {
+      test('should add 2 new rows', async () => {
+        await page.goto(url.create);
+
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1');
+        await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2');
+
+        await saveDocAndAssert(page);
+      });
+
+      test('should remove 2 new rows', async () => {
+        await page.goto(url.create);
+
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1');
+        await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2');
+
+        await page.locator('#potentiallyEmptyArray-row-1 .array-actions__button').click();
+        await page.locator('#potentiallyEmptyArray-row-1 .popup__scroll .array-actions__remove').click();
+        await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click();
+        await page.locator('#potentiallyEmptyArray-row-0 .popup__scroll .array-actions__remove').click();
+
+        const rowsContainer = await page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
+        const directChildDivCount = await rowsContainer.evaluate((element) => {
+          const childDivCount = element.querySelectorAll(':scope > div');
+          return childDivCount.length;
+        });
+
+        expect(directChildDivCount).toBe(0);
+      });
+
+      test('should remove existing row', async () => {
+        await page.goto(url.create);
+
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1');
+
+        await saveDocAndAssert(page);
+
+        await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click();
+        await page.locator('#potentiallyEmptyArray-row-0 .popup__scroll .array-actions__action.array-actions__remove').click();
+
+        const rowsContainer = await page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
+        const directChildDivCount = await rowsContainer.evaluate((element) => {
+          const childDivCount = element.querySelectorAll(':scope > div');
+          return childDivCount.length;
+        });
+
+        expect(directChildDivCount).toBe(0);
+      });
+
+      test('should add row after removing existing row', async () => {
+        await page.goto(url.create);
+
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+        await page.locator('#field-potentiallyEmptyArray__0__text').fill('array row 1');
+        await page.locator('#field-potentiallyEmptyArray__1__text').fill('array row 2');
+
+        await saveDocAndAssert(page);
+
+        await page.locator('#potentiallyEmptyArray-row-1 .array-actions__button').click();
+        await page.locator('#potentiallyEmptyArray-row-1 .popup__scroll .array-actions__action.array-actions__remove').click();
+        await page.locator('#field-potentiallyEmptyArray > .array-field__add-button-wrap > button').click();
+
+        await page.locator('#field-potentiallyEmptyArray__1__text').fill('updated array row 2');
+
+        await saveDocAndAssert(page);
+
+        const rowsContainer = await page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
+        const directChildDivCount = await rowsContainer.evaluate((element) => {
+          const childDivCount = element.querySelectorAll(':scope > div');
+          return childDivCount.length;
+        });
+
+        expect(directChildDivCount).toBe(2);
+      });
     });
   });
 
@@ -479,6 +559,27 @@ describe('fields', () => {
     }
 
     describe('toolbar', () => {
+      test('should run url validation', async () => {
+        await navigateToRichTextFields();
+
+        // Open link drawer
+        await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
+
+        // find the drawer
+        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
+        await expect(editLinkModal).toBeVisible();
+
+        // Fill values and click Confirm
+        await editLinkModal.locator('#field-text').fill('link text');
+        await editLinkModal.locator('label[for="field-linkType-custom"]').click();
+        await editLinkModal.locator('#field-url').fill('');
+        await wait(200);
+        await editLinkModal.locator('button[type="submit"]').click();
+        const errorField = await page.locator('[id^=drawer_1_rich-text-link-] .render-fields > :nth-child(3)');
+        const hasErrorClass = await errorField.evaluate((el) => el.classList.contains('error'));
+        expect(hasErrorClass).toBe(true);
+      });
+
       test('should create new url custom link', async () => {
         await navigateToRichTextFields();
 
@@ -736,6 +837,25 @@ describe('fields', () => {
         const textField = await editLinkModal.locator('#field-text');
         await expect(textField).toHaveValue('Hello, I\'m a rich text field.');
       });
+      test('should not take value from previous block', async () => {
+        await navigateToRichTextFields();
+
+        // check first block value
+        const textField = await page.locator('#field-blocks__0__text');
+        await expect(textField).toHaveValue('Regular text');
+
+        // remove the first block
+        const editBlock = await page.locator('#blocks-row-0 .popup-button');
+        await editBlock.click();
+        const removeButton = await page.locator('#blocks-row-0').getByRole('button', { name: 'Remove' });
+        await expect(removeButton).toBeVisible();
+        await removeButton.click();
+
+        // check new first block value
+        const richTextField = await page.locator('#field-blocks__0__text');
+        const richTextValue = await richTextField.innerText();
+        await expect(richTextValue).toContain('Rich text');
+      });
     });
   });
 
@@ -892,7 +1012,6 @@ describe('fields', () => {
       await page.locator('#action-save').click();
       await expect(page.locator('.Toastify')).toContainText('successfully');
 
-
       // Create a new doc for the `relationshipHasMany` field
       await page.locator('#field-relationshipHasMany button.relationship-add-new__add-button').click();
       const textField2 = page.locator('[id^=doc-drawer_text-fields_1_] #field-text');
@@ -905,12 +1024,17 @@ describe('fields', () => {
       await page.locator('[id^=close-drawer__doc-drawer_text-fields_1_]').click();
 
       // Now open the drawer again to edit the `text` field _using the keyboard_
+      // Mimic real user behavior by typing into the field with spaces and backspaces
+      // Explicitly use both `down` and `type` to cover edge cases
       await page.locator('#field-relationshipHasMany button.relationship--multi-value-label__drawer-toggler').click();
-      const textField3 = page.locator('[id^=doc-drawer_text-fields_1_] #field-text');
-      await textField3.click();
+      await page.locator('[id^=doc-drawer_text-fields_1_] #field-text').click();
       await page.keyboard.down('1');
-      await page.keyboard.down('2');
-      await page.keyboard.down('3');
+      await page.keyboard.type('23');
+      await expect(await page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(`${value}123`);
+      await page.keyboard.type('4567');
+      await page.keyboard.press('Backspace');
+      await expect(await page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(`${value}123456`);
+
       // save drawer
       await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click();
       await expect(page.locator('.Toastify')).toContainText('successfully');
@@ -920,8 +1044,9 @@ describe('fields', () => {
       await page.locator('#action-save').click();
       await expect(page.locator('.Toastify')).toContainText('successfully');
       await page.reload();
+
       // check if the value is saved
-      await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toContainText(`${value}123`);
+      await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toHaveText(`${value}123456`);
     });
   });
 

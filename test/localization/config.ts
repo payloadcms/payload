@@ -1,4 +1,4 @@
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 import { ArrayCollection } from './collections/Array';
 import { LocalizedPost, RelationshipLocalized } from './payload-types';
@@ -32,7 +32,7 @@ const openAccess = {
   update: () => true,
 };
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   localization: {
     locales: [defaultLocale, spanishLocale],
     defaultLocale,
@@ -168,6 +168,20 @@ export default buildConfig({
           hasMany: true,
           localized: true,
         },
+        {
+          name: 'arrayField',
+          label: 'Array Field',
+          type: 'array',
+          localized: true,
+          fields: [
+            {
+              type: 'relationship',
+              name: 'nestedRelation',
+              label: 'Nested Relation',
+              relationTo: localizedPostsSlug,
+            },
+          ],
+        },
       ],
     },
     {
@@ -287,6 +301,11 @@ export default buildConfig({
         relationMultiRelationToHasMany: [
           { relationTo: localizedPostsSlug, value: localizedRelation.id },
           { relationTo: localizedPostsSlug, value: localizedRelation2.id },
+        ],
+        arrayField: [
+          {
+            nestedRelation: localizedRelation.id,
+          },
         ],
       },
     });

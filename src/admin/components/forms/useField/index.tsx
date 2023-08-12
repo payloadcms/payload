@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../utilities/Auth';
-import { useFormProcessing, useFormSubmitted, useFormModified, useForm, useFormFields } from '../Form/context';
+import { useFormProcessing, useFormSubmitted, useForm, useFormFields } from '../Form/context';
 import { Options, FieldType } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useOperation } from '../../utilities/OperationProvider';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
-import { UPDATE } from '../Form/types';
+import type { UPDATE } from '../Form/types';
 
 /**
  * Get and set the value of a form field.
@@ -24,14 +24,12 @@ const useField = <T, >(options: Options): FieldType<T> => {
 
   const submitted = useFormSubmitted();
   const processing = useFormProcessing();
-  const modified = useFormModified();
   const { user } = useAuth();
   const { id } = useDocumentInfo();
   const operation = useOperation();
   const field = useFormFields(([fields]) => fields[path]);
-
-  const dispatchField = useFormFields(([_, dispatch]) => dispatch);
   const { t } = useTranslation();
+  const dispatchField = useFormFields(([_, dispatch]) => dispatch);
 
   const { getData, getSiblingData, setModified } = useForm();
 
@@ -45,7 +43,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
   const setValue = useCallback((e, disableModifyingForm = false) => {
     const val = (e && e.target) ? e.target.value : e;
 
-    if (!modified && !disableModifyingForm) {
+    if (!disableModifyingForm) {
       if (typeof setModified === 'function') {
         // Update modified state after field value comes back
         // to avoid cursor jump caused by state value / DOM mismatch
@@ -63,7 +61,6 @@ const useField = <T, >(options: Options): FieldType<T> => {
     });
   }, [
     setModified,
-    modified,
     path,
     dispatchField,
     disableFormData,
@@ -72,7 +69,7 @@ const useField = <T, >(options: Options): FieldType<T> => {
 
   // Store result from hook as ref
   // to prevent unnecessary rerenders
-  const result = useMemo(() => ({
+  const result: FieldType<T> = useMemo(() => ({
     showError,
     errorMessage: field?.errorMessage,
     value,
@@ -81,7 +78,18 @@ const useField = <T, >(options: Options): FieldType<T> => {
     setValue,
     initialValue,
     rows: field?.rows,
-  }), [field, processing, setValue, showError, submitted, value, initialValue]);
+    valid: field?.valid,
+  }), [
+    field?.errorMessage,
+    field?.rows,
+    field?.valid,
+    processing,
+    setValue,
+    showError,
+    submitted,
+    value,
+    initialValue,
+  ]);
 
   // Throttle the validate function
   useThrottledEffect(() => {

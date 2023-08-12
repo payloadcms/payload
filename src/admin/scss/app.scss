@@ -20,10 +20,17 @@
   --font-mono: monospace;
   --font-serif: 'Merriweather', serif;
 
+  --style-radius-s: #{$style-radius-s};
+  --style-radius-m: #{$style-radius-m};
+  --style-radius-l: #{$style-radius-l};
+
   --z-popup: 10;
   --z-nav: 20;
   --z-modal: 30;
   --z-status: 40;
+
+  --accessibility-outline: 2px solid var(--theme-text);
+  --accessibility-outline-offset: 2px;
 
   --gutter-h: #{base(5)};
 
@@ -138,11 +145,17 @@ ol {
   margin: 0 0 $baseline;
 }
 
+:focus-visible {
+  outline: var(--accessibility-outline);
+}
+
 a {
   color: currentColor;
 
   &:focus {
-    opacity: .8;
+    &:not(:focus-visible) {
+      opacity: .8;
+    }
     outline: none;
   }
 

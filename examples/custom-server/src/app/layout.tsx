@@ -1,6 +1,7 @@
 import React from 'react'
+import Link from 'next/link'
 
-import './globals.scss'
+import './app.scss'
 
 import classes from './layout.module.scss'
 
@@ -14,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={classes.body}>
         <header className={classes.header}>
-          <a href="https://payloadcms.com" target="_blank" rel="noopener noreferrer">
+          <Link href="https://payloadcms.com" target="_blank" rel="noopener noreferrer">
             <picture>
               <source
                 media="(prefers-color-scheme: dark)"
@@ -22,11 +23,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               />
               <img
                 className={classes.logo}
-                alt="payload cms logo"
+                alt="Payload Logo"
                 src="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/payload-logo-dark.svg"
               />
             </picture>
-          </a>
+          </Link>
         </header>
         {children}
       </body>

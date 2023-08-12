@@ -34,6 +34,7 @@ export default {
   fa,
   fr,
   hr,
+  hu,
   it,
   ja,
   my,
@@ -49,5 +50,4 @@ export default {
   ua,
   vi,
   zh,
-  hu,
 };

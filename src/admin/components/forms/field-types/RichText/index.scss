@@ -169,3 +169,23 @@
 [data-slate-node=element] {
   margin-bottom: base(0.25);
 }
+
+html[data-theme=light] {
+  .rich-text {
+    &.error {
+      .rich-text__editor, .rich-text__toolbar {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .rich-text {
+    &.error {
+      .rich-text__editor, .rich-text__toolbar {
+        @include darkInputError;
+      }
+    }
+  }
+}

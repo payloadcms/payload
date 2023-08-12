@@ -184,6 +184,8 @@
     "email": "电子邮件",
     "emailAddress": "电子邮件地址",
     "enterAValue": "输入一个值",
+    "error": "错误",
+    "errors": "错误",
     "fallbackToDefaultLocale": "回退到默认语言环境",
     "filter": "过滤器",
     "filterWhere": "过滤{{label}}",

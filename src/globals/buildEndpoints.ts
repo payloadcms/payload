@@ -8,10 +8,10 @@ import findOne from './requestHandlers/findOne';
 import docAccessRequestHandler from './requestHandlers/docAccess';
 
 const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
-  const { endpoints, slug } = global;
+  const endpoints = [...global.endpoints];
 
   if (global.versions) {
-    endpoints.push(...[
+    endpoints.push(
       {
         path: '/versions',
         method: 'get',
@@ -27,10 +27,10 @@ const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
         method: 'post',
         handler: restoreVersion(global),
       },
-    ]);
+    );
   }
 
-  endpoints.push(...[
+  endpoints.push(
     {
       path: '/access',
       method: 'get',
@@ -46,7 +46,7 @@ const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
       method: 'post',
       handler: update(global),
     },
-  ]);
+  );
 
   return endpoints;
 };

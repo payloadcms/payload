@@ -7,10 +7,24 @@
   input {
     @include formInput;
   }
+}
 
-  &.error {
-    input {
-      background-color: var(--theme-error-200);
+html[data-theme=light] {
+  .field-type.field-type.confirm-password {
+    &.error {
+      input {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .field-type.field-type.confirm-password {
+    &.error {
+      input {
+        @include darkInputError;
+      }
     }
   }
 }

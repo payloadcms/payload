@@ -183,6 +183,8 @@
     "email": "Email",
     "emailAddress": "Địa chỉ Email",
     "enterAValue": "Nhập một giá trị",
+    "error": "Lỗi",
+    "errors": "Lỗi",
     "fallbackToDefaultLocale": "Ngôn ngữ mặc định",
     "filter": "Lọc",
     "filterWhere": "Lọc {{label}} với điều kiện:",

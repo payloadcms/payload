@@ -1,4 +1,4 @@
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { openAccess } from '../helpers/configHelpers';
 import { Config } from '../../src/config/types';
 
@@ -62,4 +62,4 @@ const config: Config = {
   custom: { name: 'Customer portal' },
 };
 
-export default buildConfig(config);
+export default buildConfigWithDefaults(config);

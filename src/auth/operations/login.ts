@@ -6,13 +6,13 @@ import { PayloadRequest } from '../../express/types';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import isLocked from '../isLocked';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Field, fieldHasSubFields, fieldAffectsData } from '../../fields/config/types';
 import { User } from '../types';
 import { Collection } from '../../collections/config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import unlock from './unlock';
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts';
 import { authenticateLocalStrategy } from '../strategies/local/authenticate';
+import { getFieldsToSign } from './getFieldsToSign';
 
 export type Result = {
   user?: User,
@@ -48,6 +48,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'login',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -121,28 +122,10 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     });
   }
 
-  const fieldsToSign = collectionConfig.fields.reduce((signedFields, field: Field) => {
-    const result = {
-      ...signedFields,
-    };
-
-    if (!fieldAffectsData(field) && fieldHasSubFields(field)) {
-      field.fields.forEach((subField) => {
-        if (fieldAffectsData(subField) && subField.saveToJWT) {
-          result[subField.name] = user[subField.name];
-        }
-      });
-    }
-
-    if (fieldAffectsData(field) && field.saveToJWT) {
-      result[field.name] = user[field.name];
-    }
-
-    return result;
-  }, {
+  const fieldsToSign = getFieldsToSign({
+    collectionConfig,
+    user,
     email,
-    id: user.id,
-    collection: collectionConfig.slug,
   });
 
   await collectionConfig.hooks.beforeLogin.reduce(async (priorHook, hook) => {
@@ -151,6 +134,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     user = (await hook({
       user,
       req: args.req,
+      context: req.context,
     })) || user;
   }, Promise.resolve());
 
@@ -190,6 +174,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       user,
       req: args.req,
       token,
+      context: req.context,
     }) || user;
   }, Promise.resolve());
 
@@ -204,6 +189,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -216,6 +202,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     user = await hook({
       req,
       doc: user,
+      context: req.context,
     }) || user;
   }, Promise.resolve());
 

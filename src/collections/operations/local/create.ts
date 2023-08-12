@@ -2,7 +2,7 @@ import { Config as GeneratedTypes } from 'payload/generated-types';
 import { UploadedFile } from 'express-fileupload';
 import { MarkOptional } from 'ts-essentials';
 import { Payload } from '../../../payload';
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { Document } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import create from '../create';
@@ -10,6 +10,7 @@ import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
 import i18n from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
@@ -26,6 +27,10 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   overwriteExistingFiles?: boolean
   req?: PayloadRequest
   draft?: boolean
+  /**
+   * context, which will then be passed to req.context, which can be read by hooks
+   */
+  context?: RequestContext
 }
 
 export default async function createLocal<TSlug extends keyof GeneratedTypes['collections']>(
@@ -47,13 +52,15 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     overwriteExistingFiles = false,
     req = {} as PayloadRequest,
     draft,
+    context,
   } = options;
+  setRequestContext(req, context);
 
   const collection = payload.collections[collectionSlug];
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Create Operation.`);
   }
 
   req.payloadAPI = req.payloadAPI || 'local';

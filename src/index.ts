@@ -3,6 +3,8 @@ import { InitOptions } from './config/types';
 import { initHTTP } from './initHTTP';
 import { Payload as LocalPayload, BasePayload } from './payload';
 
+import type { RequestContext } from './express/types';
+
 export { getPayload } from './payload';
 
 require('isomorphic-fetch');
@@ -25,3 +27,5 @@ const payload = new Payload();
 
 export default payload;
 module.exports = payload;
+// Export RequestContext type
+export type { RequestContext };

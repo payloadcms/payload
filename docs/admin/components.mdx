@@ -11,10 +11,8 @@ While designing the Payload Admin panel, we determined it should be as minimal a
 To swap in your own React component, first, consult the list of available component overrides below. Determine the scope that corresponds to what you are trying to accomplish, and then author your React component accordingly.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
-  Custom components will automatically be provided with all props that the
-  default component would accept.
+  <strong>Tip:</strong><br />
+  Custom components will automatically be provided with all props that the default component would accept.
 </Banner>
 
 ### Base Component Overrides
@@ -85,14 +83,11 @@ You can override components on a Collection-by-Collection basis via each Collect
 | **`edit.SaveDraftButton`** | Replace the default `Save Draft` button with a custom component. Drafts must be enabled and autosave must be disabled. |
 | **`edit.PublishButton`**   | Replace the default `Publish` button with a custom component. Drafts must be enabled.                                  |
 | **`edit.PreviewButton`**   | Replace the default `Preview` button with a custom component.                                                          |
-| **`BeforeList`**   | Array of components to inject _before_ the built-in List view
-                                                         |
-| **`BeforeListTable`**   | Array of components to inject _before_ the built-in List view's table
-                                                         |
-| **`AfterListTable`**   | Array of components to inject _after_ the built-in List view's table
-                                                         |
-| **`AfterList`**   | Array of components to inject _after_ the built-in List view
-                                                         |
+| **`BeforeList`**           | Array of components to inject _before_ the built-in List view                                                          |
+| **`BeforeListTable`**      | Array of components to inject _before_ the built-in List view's table                                                  |
+| **`AfterListTable`**       | Array of components to inject _after_ the built-in List view's table                                                   |
+| **`AfterList`**            | Array of components to inject _after_ the built-in List view                                                           |
+
 #### Examples
 
 ```tsx
@@ -146,6 +141,7 @@ export const CustomPreviewButton: CustomPreviewButtonProps = ({
 ##### Custom Collection List View Example
 
 Collection.ts
+
 ```tsx
 import { MyListComponent } from './MyListComponent';
 export const MyCollection: CollectionConfig = {
@@ -164,12 +160,16 @@ export const MyCollection: CollectionConfig = {
 ```
 
 MyListComponent.tsx
+
 ```tsx
-import React from 'react';
-import {List, type Props} from 'payload/components/views/List' // Payload's default List view component and its props
+import React from "react";
+import { List, type Props } from "payload/components/views/List"; // Payload's default List view component and its props
 export const MyListComponent: React.FC<Props> = (props) => (
   <div>
-    <p>Some text before the default list view component. If you just want to do that, you can also use the admin.components.list.BeforeList hook</p>
+    <p>
+      Some text before the default list view component. If you just want to do
+      that, you can also use the admin.components.list.BeforeList hook
+    </p>
     <List {...props} />
   </div>
 );
@@ -260,11 +260,8 @@ const CustomTextField: React.FC<Props> = ({ path }) => {
 
 <Banner type="success">
   For more information regarding the hooks that are available to you while you
-  build custom components, including the <strong>useField</strong> hook,{" "}
-  <a href="/docs/admin/hooks" style={{ color: "black" }}>
-    click here
-  </a>
-  .
+  build custom components, including the <strong>useField</strong> hook, [click
+  here](/docs/admin/hooks).
 </Banner>
 
 ## Custom routes

@@ -19,7 +19,7 @@
     text-align: left;
     width: 100%;
 
-    &:hover {
+    &:hover, &:focus-visible {
       text-decoration: underline;
     }
   }
