@@ -63,7 +63,7 @@
     "deletingFile": "",
     "deletingTitle": "Wystąpił błąd podczas usuwania {{title}}. Proszę, sprawdź swoje połączenie i spróbuj ponownie.",
     "emailOrPasswordIncorrect": "Podany adres e-mail lub hasło jest nieprawidłowe.",
-    "followingFieldsInvalid_many": "Następujące pola są nieprawidłowe:",
+    "followingFieldsInvalid_other": "Następujące pola są nieprawidłowe:",
     "followingFieldsInvalid_one": "To pole jest nieprawidłowe:",
     "incorrectCollection": "Nieprawidłowa kolekcja",
     "invalidFileType": "Nieprawidłowy typ pliku",

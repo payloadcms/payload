@@ -63,7 +63,7 @@
     "deletingFile": "Při mazání souboru došlo k chybě.",
     "deletingTitle": "Při mazání {{title}} došlo k chybě. Zkontrolujte své připojení a zkuste to znovu.",
     "emailOrPasswordIncorrect": "Zadaný email nebo heslo není správné.",
-    "followingFieldsInvalid_many": "Následující pole jsou neplatná:",
+    "followingFieldsInvalid_other": "Následující pole jsou neplatná:",
     "followingFieldsInvalid_one": "Následující pole je neplatné:",
     "incorrectCollection": "Nesprávná kolekce",
     "invalidFileType": "Neplatný typ souboru",
