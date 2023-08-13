@@ -64,7 +64,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(json.user);
           } else {
             setUser(null);
-            push(`${admin}${logoutInactivityRoute}?redirect=${encodeURIComponent(window.location.pathname)}`);
+            if (window.location.pathname.startsWith(admin)) {
+              const redirectParam = `?redirect=${encodeURIComponent(window.location.pathname.replace(admin, ''))}`;
+              push(`${admin}${logoutInactivityRoute}${redirectParam}`);
+            } else {
+              push(`${admin}${logoutInactivityRoute}`);
+            }
           }
         } catch (e) {
           toast.error(e.message);
@@ -220,7 +225,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (remainingTime > 0) {
       forceLogOut = setTimeout(() => {
         setUser(null);
-        push(`${admin}${logoutInactivityRoute}?redirect=${encodeURIComponent(window.location.pathname)}`);
+        if (window.location.pathname.startsWith(admin)) {
+          const redirectParam = `?redirect=${encodeURIComponent(window.location.pathname.replace(admin, ''))}`;
+          push(`${admin}${logoutInactivityRoute}${redirectParam}`);
+        } else {
+          push(`${admin}${logoutInactivityRoute}`);
+        }
         closeAllModals();
       }, Math.min(remainingTime * 1000, maxTimeoutTime));
     }
