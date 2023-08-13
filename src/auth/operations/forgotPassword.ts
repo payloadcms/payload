@@ -85,9 +85,11 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
   const userJSON = user.toJSON({ virtuals: true });
 
   if (!disableEmail) {
+    const serverURL = (config.serverURL !== null && config.serverURL !== '') ? config.serverURL : `${req.protocol}://${req.get('host')}`;
+
     let html = `${t('authentication:youAreReceivingResetPassword')}
-    <a href="${config.serverURL}${config.routes.admin}/reset/${token}">
-     ${config.serverURL}${config.routes.admin}/reset/${token}
+    <a href="${serverURL}${config.routes.admin}/reset/${token}">
+     ${serverURL}${config.routes.admin}/reset/${token}
     </a>
     ${t('authentication:youDidNotRequestPassword')}`;
 

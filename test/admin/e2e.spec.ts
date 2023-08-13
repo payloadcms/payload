@@ -30,6 +30,8 @@ describe('admin', () => {
 
   afterEach(async () => {
     await clearDocs();
+    // clear preferences
+    await payload.preferences.Model.deleteMany();
   });
 
   describe('Nav', () => {
@@ -57,7 +59,7 @@ describe('admin', () => {
     test('should collapse and expand collection groups', async () => {
       await page.goto(url.admin);
       const navGroup = page.locator('#nav-group-One .nav-group__toggle');
-      const link = await page.locator('#nav-group-one-collection-ones');
+      const link = page.locator('#nav-group-one-collection-ones');
 
       await expect(navGroup).toContainText('One');
       await expect(link).toBeVisible();
@@ -72,7 +74,7 @@ describe('admin', () => {
     test('should collapse and expand globals groups', async () => {
       await page.goto(url.admin);
       const navGroup = page.locator('#nav-group-Group .nav-group__toggle');
-      const link = await page.locator('#nav-global-group-globals-one');
+      const link = page.locator('#nav-global-group-globals-one');
 
       await expect(navGroup).toContainText('Group');
       await expect(link).toBeVisible();
@@ -92,7 +94,7 @@ describe('admin', () => {
 
       await page.goto(url.admin);
 
-      const link = await page.locator('#nav-group-one-collection-ones');
+      const link = page.locator('#nav-group-one-collection-ones');
       await expect(link).toBeHidden();
     });
 
@@ -114,18 +116,18 @@ describe('admin', () => {
       await page.goto(url.admin);
 
       // nav menu
-      await expect(await page.locator('#nav-hidden-collection')).toBeHidden();
-      await expect(await page.locator('#nav-hidden-global')).toBeHidden();
+      await expect(page.locator('#nav-hidden-collection')).toBeHidden();
+      await expect(page.locator('#nav-hidden-global')).toBeHidden();
 
       // dashboard
-      await expect(await page.locator('#card-hidden-collection')).toBeHidden();
-      await expect(await page.locator('#card-hidden-global')).toBeHidden();
+      await expect(page.locator('#card-hidden-collection')).toBeHidden();
+      await expect(page.locator('#card-hidden-global')).toBeHidden();
 
       // routing
       await page.goto(url.collection('hidden-collection'));
-      await expect(await page.locator('.not-found')).toContainText('Nothing found');
+      await expect(page.locator('.not-found')).toContainText('Nothing found');
       await page.goto(url.global('hidden-global'));
-      await expect(await page.locator('.not-found')).toContainText('Nothing found');
+      await expect(page.locator('.not-found')).toContainText('Nothing found');
     });
   });
 
@@ -134,7 +136,6 @@ describe('admin', () => {
       await page.goto(url.create);
       await page.locator('#field-title').fill(title);
       await page.locator('#field-description').fill(description);
-      await page.click('#action-save', { delay: 100 });
 
       await saveDocAndAssert(page);
 
@@ -207,12 +208,12 @@ describe('admin', () => {
       await page.locator('.edit-many__toggle').click();
       await page.locator('.field-select .rs__control').click();
       const options = page.locator('.rs__option');
-      const titleOption = await options.locator('text=Title en');
+      const titleOption = options.locator('text=Title en');
 
       await expect(titleOption).toHaveText('Title en');
 
       await titleOption.click();
-      const titleInput = await page.locator('#field-title');
+      const titleInput = page.locator('#field-title');
 
       await expect(titleInput).toBeVisible();
 
@@ -229,9 +230,8 @@ describe('admin', () => {
       await page.goto(url.global(globalSlug));
 
       await page.locator('#field-title').fill(title);
-      await page.click('#action-save', { delay: 100 });
+      await saveDocAndAssert(page);
 
-      await expect(page.locator('.Toastify__toast--success')).toHaveCount(1);
       await expect(page.locator('#field-title')).toHaveValue(title);
     });
   });
@@ -242,19 +242,20 @@ describe('admin', () => {
 
       const field = page.locator('.account__language .react-select');
 
-      await field.click({ delay: 100 });
+      await field.click();
       const options = page.locator('.rs__option');
       await options.locator('text=Español').click();
 
       await expect(page.locator('.step-nav')).toContainText('Tablero');
 
-      await field.click({ delay: 100 });
+      await field.click();
       await options.locator('text=English').click();
-      await field.click({ delay: 100 });
+      await field.click();
       await expect(page.locator('.form-submit .btn')).toContainText('Save');
     });
 
     test('should allow custom translation', async () => {
+      await page.goto(url.account);
       await expect(page.locator('.step-nav')).toContainText('Home');
     });
   });
@@ -270,7 +271,6 @@ describe('admin', () => {
       test('search by id', async () => {
         const { id } = await createPost();
         await page.locator('.search-filter__input').fill(id);
-        await wait(250);
         const tableItems = page.locator(tableRowLocator);
         await expect(tableItems).toHaveCount(1);
       });
@@ -282,11 +282,9 @@ describe('admin', () => {
         });
 
         await page.locator('.search-filter__input').fill('find me');
-        await wait(250);
         await expect(page.locator(tableRowLocator)).toHaveCount(1);
 
         await page.locator('.search-filter__input').fill('this is fun');
-        await wait(250);
         await expect(page.locator(tableRowLocator)).toHaveCount(1);
       });
 
@@ -295,38 +293,46 @@ describe('admin', () => {
         await createPost();
 
         await page.locator('.list-controls__toggle-columns').click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector
+
+        // wait until the column toggle UI is visible and fully expanded
+        await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible();
+
 
         const numberOfColumns = await page.locator(columnCountLocator).count();
-        await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID');
+        await expect(page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID');
 
-        const idButton = await page.locator('.column-selector >> text=ID');
+        const idButton = page.locator('.column-selector >> text=ID');
 
         // Remove ID column
         await idButton.click();
-        await wait(100);
-        await expect(await page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1);
-        await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('Number');
+        // wait until .cell-id is not present on the page:
+        await page.locator('.cell-id').waitFor({ state: 'detached' });
+
+        await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1);
+        await expect(page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('Number');
 
         // Add back ID column
         await idButton.click();
-        await wait(100);
-        await expect(await page.locator(columnCountLocator)).toHaveCount(numberOfColumns);
-        await expect(await page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID');
+        await expect(page.locator('.cell-id')).toBeVisible();
+
+        await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns);
+        await expect(page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID');
       });
 
       test('2nd cell is a link', async () => {
         const { id } = await createPost();
-        const linkCell = await page.locator(`${tableRowLocator} td`).nth(1).locator('a');
+        const linkCell = page.locator(`${tableRowLocator} td`).nth(1).locator('a');
         await expect(linkCell).toHaveAttribute('href', `/admin/collections/posts/${id}`);
 
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+        // wait until the column toggle UI is visible and fully expanded
+        await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible();
 
         // toggle off the ID column
         page.locator('.column-selector >> text=ID').click();
-        await wait(200);
+        // wait until .cell-id is not present on the page:
+        await page.locator('.cell-id').waitFor({ state: 'detached' });
 
         // recheck that the 2nd cell is still a link
         await expect(linkCell).toHaveAttribute('href', `/admin/collections/posts/${id}`);
@@ -338,20 +344,23 @@ describe('admin', () => {
 
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+        // wait until the column toggle UI is visible and fully expanded
+        await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible();
+
 
         // ensure the ID column is active
-        const idButton = await page.locator('.column-selector >> text=ID');
+        const idButton = page.locator('.column-selector >> text=ID');
         const buttonClasses = await idButton.getAttribute('class');
         if (buttonClasses && !buttonClasses.includes('column-selector__column--active')) {
           await idButton.click();
-          await wait(200);
+          await expect(page.locator(tableRowLocator).first().locator('.cell-id')).toBeVisible();
         }
 
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
 
         await page.locator('.list-controls__toggle-where').click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+        // wait until the filter UI is visible and fully expanded
+        await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible();
 
         await page.locator('.where-builder__add-first-filter').click();
 
@@ -364,7 +373,6 @@ describe('admin', () => {
         await dropdownOptions.locator('text=equals').click();
 
         await valueField.fill(id);
-        await wait(1000);
 
         await expect(page.locator(tableRowLocator)).toHaveCount(1);
         const firstId = await page.locator(tableRowLocator).first().locator('.cell-id').innerText();
@@ -372,18 +380,16 @@ describe('admin', () => {
 
         // Remove filter
         await page.locator('.condition__actions-remove').click();
-        await wait(1000);
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
       });
     });
 
     describe('table columns', () => {
-      test('should drag to reorder columns and save to preferences', async () => {
-        await createPost();
-
+      const reorderColumns = async () => {
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+        // wait until the column toggle UI is visible and fully expanded
+        await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible();
 
         const numberBoundingBox = await page.locator('.column-selector >> text=Number').boundingBox();
         const idBoundingBox = await page.locator('.column-selector >> text=ID').boundingBox();
@@ -393,25 +399,38 @@ describe('admin', () => {
         // drag the "number" column to the left of the "ID" column
         await page.mouse.move(numberBoundingBox.x + 2, numberBoundingBox.y + 2, { steps: 10 });
         await page.mouse.down();
-        await wait(200);
+        await wait(300);
+
         await page.mouse.move(idBoundingBox.x - 2, idBoundingBox.y - 2, { steps: 10 });
         await page.mouse.up();
 
-        // wait for the new preferences to save and internal state to update and re-render
-        await wait(400);
-
         // ensure the "number" column is now first
-        await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
-        await expect(await page.locator('table thead tr th').nth(1)).toHaveText('Number');
-        // await expect(await page.locator('table >> thead >> tr >> th').first()).toHaveText('Number');
+        await expect(page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
+        await expect(page.locator('table thead tr th').nth(1)).toHaveText('Number');
+
+        // TODO: This wait makes sure the preferences are actually saved. Just waiting for the UI to update is not enough. We should replace this wait
+        await wait(1000);
+      };
+
+      test('should drag to reorder columns and save to preferences', async () => {
+        await createPost();
+
+        await reorderColumns();
 
         // reload to ensure the preferred order was stored in the database
         await page.reload();
-        await expect(await page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
-        await expect(await page.locator('table thead tr th').nth(1)).toHaveText('Number');
+        await expect(page.locator('.list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
+        await expect(page.locator('table thead tr th').nth(1)).toHaveText('Number');
       });
 
       test('should render drawer columns in order', async () => {
+        // Re-order columns like done in the previous test
+        await createPost();
+        await reorderColumns();
+
+        await page.reload();
+
+
         await createPost();
         await page.goto(url.create);
 
@@ -420,19 +439,20 @@ describe('admin', () => {
         const listDrawer = page.locator('[id^=list-drawer_1_]');
         await expect(listDrawer).toBeVisible();
 
-        const collectionSelector = await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select');
+        const collectionSelector = page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select');
 
         // select the "Post en" collection
         await collectionSelector.click();
         await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post en"').click();
 
         // open the column controls
-        const columnSelector = await page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns');
+        const columnSelector = page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns');
         await columnSelector.click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+        // wait until the column toggle UI is visible and fully expanded
+        await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible();
 
         // ensure that the columns are in the correct order
-        await expect(await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
+        await expect(page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column').first()).toHaveText('Number');
       });
 
       test('should retain preferences when changing drawer collections', async () => {
@@ -443,12 +463,13 @@ describe('admin', () => {
         const listDrawer = page.locator('[id^=list-drawer_1_]');
         await expect(listDrawer).toBeVisible();
 
-        const collectionSelector = await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select');
-        const columnSelector = await page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns');
+        const collectionSelector = page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select');
+        const columnSelector = page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns');
 
         // open the column controls
         await columnSelector.click();
-        await wait(500); // Wait for column toggle UI, should probably use waitForSelector (same as above)
+        // wait until the column toggle UI is visible and fully expanded
+        await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible();
 
         // deselect the "id" column
         await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column >> text=ID').click();
@@ -465,20 +486,20 @@ describe('admin', () => {
         await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="User"').click();
 
         // ensure that the "id" column is still deselected
-        await expect(await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column').first()).not.toHaveClass('column-selector__column--active');
+        await expect(page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column').first()).not.toHaveClass('column-selector__column--active');
 
         // select the "Post en" collection again
         await collectionSelector.click();
         await page.locator('[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post en"').click();
 
         // ensure that the "number" column is still deselected
-        await expect(await page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column').first()).not.toHaveClass('column-selector__column--active');
+        await expect(page.locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column').first()).not.toHaveClass('column-selector__column--active');
       });
 
       test('should render custom table cell component', async () => {
         await createPost();
         await page.goto(url.list);
-        await expect(await page.locator('table >> thead >> tr >> th >> text=Demo UI Field')).toBeVisible();
+        await expect(page.locator('table >> thead >> tr >> th >> text=Demo UI Field')).toBeVisible();
       });
     });
 
@@ -518,7 +539,7 @@ describe('admin', () => {
 
         await page.locator('.delete-documents__toggle').click();
         await page.locator('#confirm-delete').click();
-        await expect(await page.locator('.select-row')).toHaveCount(1);
+        await expect(page.locator('.select-row')).toHaveCount(1);
       });
     });
 
@@ -552,7 +573,7 @@ describe('admin', () => {
     describe('custom css', () => {
       test('should see custom css in admin UI', async () => {
         await page.goto(url.admin);
-        const navControls = await page.locator('.nav__controls');
+        const navControls = page.locator('.nav__controls');
         await expect(navControls).toHaveCSS('font-family', 'monospace');
       });
     });
@@ -604,25 +625,24 @@ describe('admin', () => {
 
         // column controls
         await page.locator('.list-controls__toggle-columns').click();
-        await expect(await page.locator('.column-selector__column >> text=Title en')).toHaveText('Title en');
+        await expect(page.locator('.column-selector__column >> text=Title en')).toHaveText('Title en');
 
         // filters
         await page.locator('.list-controls__toggle-where').click();
         await page.locator('.where-builder__add-first-filter').click();
         await page.locator('.condition__field .rs__control').click();
         const options = page.locator('.rs__option');
-        await expect(await options.locator('text=Title en')).toHaveText('Title en');
+        await expect(options.locator('text=Title en')).toHaveText('Title en');
 
         // list columns
-        await expect(await page.locator('#heading-title .sort-column__label')).toHaveText('Title en');
-        await expect(await page.locator('.search-filter input')).toHaveAttribute('placeholder', /(Title en)/);
+        await expect(page.locator('#heading-title .sort-column__label')).toHaveText('Title en');
+        await expect(page.locator('.search-filter input')).toHaveAttribute('placeholder', /(Title en)/);
       });
 
       test('should use fallback language on field titles', async () => {
         // change language German
         await page.goto(url.account);
-        const field = page.locator('.account__language .react-select');
-        await field.click({ delay: 100 });
+        await page.locator('.account__language .react-select').click();
         const languageSelect = page.locator('.rs__option');
         // text field does not have a 'de' label
         await languageSelect.locator('text=Deutsch').click();
@@ -630,7 +650,7 @@ describe('admin', () => {
         await page.goto(url.list);
         await page.locator('.list-controls__toggle-columns').click();
         // expecting the label to fall back to english as default fallbackLng
-        await expect(await page.locator('.column-selector__column >> text=Title en')).toHaveText('Title en');
+        await expect(page.locator('.column-selector__column >> text=Title en')).toHaveText('Title en');
       });
     });
   });

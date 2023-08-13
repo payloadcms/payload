@@ -26,6 +26,7 @@ const Login: React.FC = () => {
     admin: {
       user: userSlug,
       logoutRoute,
+      autoLogin,
       components: {
         beforeLogin,
         afterLogin,
@@ -103,6 +104,10 @@ const Login: React.FC = () => {
               onSuccess={onSuccess}
               method="post"
               action={`${serverURL}${api}/${userSlug}/login`}
+              initialData={{
+                email: autoLogin && autoLogin.prefillOnly ? autoLogin.email : undefined,
+                password: autoLogin && autoLogin.prefillOnly ? autoLogin.password : undefined,
+              }}
             >
               <FormLoadingOverlayToggle
                 action="loading"

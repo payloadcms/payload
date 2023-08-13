@@ -182,7 +182,7 @@ export type Context = {
   reset: Reset
   replaceState: (state: Fields) => void
   buildRowErrors: () => void
-  addFieldRow: ({ path, rowIndex, data }: { path: string, rowIndex?: number, data?: Data }) => Promise<void>
+  addFieldRow: ({ path, rowIndex, data }: { path: string, rowIndex: number, data?: Data }) => Promise<void>
   removeFieldRow: ({ path, rowIndex }: { path: string, rowIndex: number }) => Promise<void>
   replaceFieldRow: ({ path, rowIndex, data }: { path: string, rowIndex: number, data?: Data }) => Promise<void>
 }

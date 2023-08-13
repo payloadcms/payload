@@ -368,19 +368,41 @@ describe('fields', () => {
       await expect(firstRow).toBeVisible();
       await expect(firstRow.locator('.blocks-field__block-pill-text')).toContainText('Text en');
     });
+
+    test('should add different blocks with similar field configs', async () => {
+      await page.goto(url.create);
+
+      async function addBlock(name: 'Block 1' | 'Block 2') {
+        await page.locator('#field-blocksWithSimilarConfigs').getByRole('button', { name: 'Add Blocks With Similar Config' }).click();
+        await page.getByRole('button', { name }).click();
+      }
+
+      await addBlock('Block 1');
+
+      await page.locator('#blocksWithSimilarConfigs-row-0').getByRole('button', { name: 'Add Item' }).click();
+      await page.locator('input[name="blocksWithSimilarConfigs.0.items.0.title"]').fill('items>0>title');
+
+      expect(await page.locator('input[name="blocksWithSimilarConfigs.0.items.0.title"]').inputValue()).toEqual('items>0>title');
+
+      await addBlock('Block 2');
+
+      await page.locator('#blocksWithSimilarConfigs-row-1').getByRole('button', { name: 'Add Item' }).click();
+      await page.locator('input[name="blocksWithSimilarConfigs.1.items.0.title2"]').fill('items>1>title');
+
+      expect(await page.locator('input[name="blocksWithSimilarConfigs.1.items.0.title2"]').inputValue()).toEqual('items>1>title');
+    });
   });
 
   describe('array', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, arrayFieldsSlug);
+      url = new AdminUrlUtil(serverURL, 'array-fields');
     });
 
     test('should be readOnly', async () => {
       await page.goto(url.create);
       const field = page.locator('#field-readOnly__0__text');
-      await expect(field)
-        .toBeDisabled();
+      await expect(field).toBeDisabled();
     });
 
     test('should have defaultValue', async () => {
@@ -491,6 +513,21 @@ describe('fields', () => {
         });
 
         expect(directChildDivCount).toBe(2);
+      });
+    });
+
+    describe('row react hooks', () => {
+      test('should add 2 new block rows', async () => {
+        await page.goto(url.create);
+
+        await page.locator('.custom-blocks-field-management').getByRole('button', { name: 'Add Block 1' }).click();
+        expect(await page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]').inputValue()).toEqual('Block 1: Prefilled Title');
+
+        await page.locator('.custom-blocks-field-management').getByRole('button', { name: 'Add Block 2' }).click();
+        expect(await page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]').inputValue()).toEqual('Block 2: Prefilled Title');
+
+        await page.locator('.custom-blocks-field-management').getByRole('button', { name: 'Replace Block 2' }).click();
+        expect(await page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]').inputValue()).toEqual('REPLACED BLOCK');
       });
     });
   });
