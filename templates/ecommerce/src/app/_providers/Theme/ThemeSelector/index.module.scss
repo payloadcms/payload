@@ -1,0 +1,52 @@
+.selectContainer {
+  position: relative;
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 50ms linear;
+}
+
+.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.select {
+  all: unset;
+  padding-right: 14px;
+}
+
+.selectIcon {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  pointer-events: none;
+  width: 6px;
+
+  & > svg {
+    width: 8px;
+    height: 6px;
+
+    path {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1px;
+      vector-effect: non-scaling-stroke;
+      stroke-linecap: round;
+    }
+  }
+}
+
+.iconUp {
+  position: absolute;
+  top: calc(50% - 8px);
+  left: 50%;
+  transform: translate3d(-50%, 0, 0) rotate(180deg);
+}
+
+.iconDown {
+  position: absolute;
+  bottom: calc(50% - 8px);
+  left: 50%;
+  transform: translate3d(-50%, 0, 0);
+}

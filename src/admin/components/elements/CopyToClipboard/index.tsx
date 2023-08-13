@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Copy from '../../icons/Copy';
 import Tooltip from '../Tooltip';
@@ -50,6 +50,7 @@ const CopyToClipboard: React.FC<Props> = ({
         </Tooltip>
         <textarea
           readOnly
+          tabIndex={-1}
           value={value}
           ref={ref}
         />

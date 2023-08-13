@@ -3,7 +3,14 @@
 .collapsible-field {
   margin: 0 0 base(2);
 
-  &__label {
+  &__row-label-wrap {
     pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: base(.5);
+  }
+
+  &--has-error {
+    border: 1px solid var(--theme-error-500);
   }
 }

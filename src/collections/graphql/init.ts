@@ -41,6 +41,9 @@ function initCollectionsGraphQL(payload: Payload): void {
         versions,
       },
     } = collection;
+
+    if (!graphQL) return;
+
     const { fields } = config;
 
     let singularName;
@@ -97,7 +100,7 @@ function initCollectionsGraphQL(payload: Payload): void {
 
     collection.graphQL.paginatedType = buildPaginatedListType(
       pluralName,
-      collection.graphQL.type
+      collection.graphQL.type,
     );
 
     collection.graphQL.whereInputType = buildWhereInputType(

@@ -12,14 +12,17 @@ import { hooksUsersSlug } from './collections/Users';
 import { devUser, regularUser } from '../credentials';
 import { AuthenticationError } from '../../src/errors';
 import { afterOperationSlug } from './collections/AfterOperation';
+import { contextHooksSlug } from './collections/ContextHooks';
 
 let client: RESTClient;
+let apiUrl;
 
 describe('Hooks', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
     const config = await configPromise;
     client = new RESTClient(config, { serverURL, defaultSlug: transformSlug });
+    apiUrl = `${serverURL}/api`;
   });
 
   afterAll(async () => {
@@ -207,6 +210,63 @@ describe('Hooks', () => {
       expect(findResult2.docs).toHaveLength(2);
       expect(findResult2.docs[0].title === 'Title read').toBeTruthy();
       expect(findResult2.docs[1].title === 'Title').toBeTruthy();
+    });
+
+    it('should pass context from beforeChange to afterChange', async () => {
+      const document = await payload.create({
+        collection: contextHooksSlug,
+        data: {
+          value: 'wrongvalue',
+        },
+      });
+
+      const retrievedDoc = await payload.findByID({
+        collection: contextHooksSlug,
+        id: document.id,
+      });
+
+      expect(retrievedDoc.value).toEqual('secret');
+    });
+
+    it('should pass context from local API to hooks', async () => {
+      const document = await payload.create({
+        collection: contextHooksSlug,
+        data: {
+          value: 'wrongvalue',
+        },
+        context: {
+          secretValue: 'data from local API',
+        },
+      });
+
+      const retrievedDoc = await payload.findByID({
+        collection: contextHooksSlug,
+        id: document.id,
+      });
+
+      expect(retrievedDoc.value).toEqual('data from local API');
+    });
+
+    it('should pass context from rest API to hooks', async () => {
+      const params = new URLSearchParams({
+        context_secretValue: 'data from rest API',
+      });
+      // send context as query params. It will be parsed by the beforeOperation hook
+      const response = await fetch(`${apiUrl}/${contextHooksSlug}?${params.toString()}`, {
+        body: JSON.stringify({
+          value: 'wrongvalue',
+        }),
+        method: 'post',
+      });
+
+      const document = (await response.json()).doc;
+
+      const retrievedDoc = await payload.findByID({
+        collection: contextHooksSlug,
+        id: document.id,
+      });
+
+      expect(retrievedDoc.value).toEqual('data from rest API');
     });
   });
 

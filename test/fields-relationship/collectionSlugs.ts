@@ -1,4 +1,3 @@
-
 export const slug = 'fields-relationship';
 
 export const relationOneSlug = 'relation-one';

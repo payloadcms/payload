@@ -13,6 +13,9 @@ type Args = {
   operation?: 'create' | 'update'
   locale: string
   t: TFunction
+  preferences: {
+    [key: string]: unknown
+  }
 }
 
 const buildStateFromSchema = async (args: Args): Promise<Fields> => {
@@ -24,6 +27,7 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
     operation,
     locale,
     t,
+    preferences,
   } = args;
 
   if (fieldSchema) {
@@ -41,6 +45,7 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
       fullData,
       parentPassesCondition: true,
       t,
+      preferences,
     });
 
     return state;

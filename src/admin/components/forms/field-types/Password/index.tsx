@@ -19,6 +19,7 @@ const Password: React.FC<Props> = (props) => {
     width,
     autoComplete,
     label,
+    disabled,
   } = props;
 
   const path = pathFromProps || name;
@@ -67,7 +68,7 @@ const Password: React.FC<Props> = (props) => {
         id={`field-${path.replace(/\./gi, '__')}`}
         value={value as string || ''}
         onChange={setValue}
-        disabled={formProcessing}
+        disabled={formProcessing || disabled}
         type="password"
         autoComplete={autoComplete}
         name={path}

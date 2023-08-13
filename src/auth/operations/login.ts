@@ -6,12 +6,14 @@ import { PayloadRequest } from '../../express/types';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import isLocked from '../isLocked';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Field, fieldHasSubFields, fieldAffectsData } from '../../fields/config/types';
 import { User } from '../types';
 import { Collection } from '../../collections/config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import unlock from './unlock';
 import { buildAfterOperation } from '../../collections/operations/utils';
+import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts';
+import { authenticateLocalStrategy } from '../strategies/local/authenticate';
+import { getFieldsToSign } from './getFieldsToSign';
 
 export type Result = {
   user?: User,
@@ -47,6 +49,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'login',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -78,7 +81,9 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore Improper typing in library, additional args should be optional
-  const userDoc = await Model.findByUsername(email);
+  const userDoc = await Model.findOne({ email }).lean();
+
+  let user = JSON.parse(JSON.stringify(userDoc));
 
   if (!userDoc || (args.collection.config.auth.verify && userDoc._verified === false)) {
     throw new AuthenticationError(req.t);
@@ -88,12 +93,21 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     throw new LockedAuth(req.t);
   }
 
-  const authResult = await userDoc.authenticate(password);
+  const authResult = await authenticateLocalStrategy({ password, doc: user });
+
+  user = sanitizeInternalFields(user);
 
   const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0;
 
-  if (!authResult.user) {
-    if (maxLoginAttemptsEnabled) await userDoc.incLoginAttempts();
+  if (!authResult) {
+    if (maxLoginAttemptsEnabled) {
+      await incrementLoginAttempts({
+        payload: req.payload,
+        doc: user,
+        collection: collectionConfig,
+      });
+    }
+
     throw new AuthenticationError(req.t);
   }
 
@@ -109,32 +123,10 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     });
   }
 
-  let user = userDoc.toJSON({ virtuals: true });
-  user = JSON.parse(JSON.stringify(user));
-  user = sanitizeInternalFields(user);
-
-  const fieldsToSign = collectionConfig.fields.reduce((signedFields, field: Field) => {
-    const result = {
-      ...signedFields,
-    };
-
-    if (!fieldAffectsData(field) && fieldHasSubFields(field)) {
-      field.fields.forEach((subField) => {
-        if (fieldAffectsData(subField) && subField.saveToJWT) {
-          result[subField.name] = user[subField.name];
-        }
-      });
-    }
-
-    if (fieldAffectsData(field) && field.saveToJWT) {
-      result[field.name] = user[field.name];
-    }
-
-    return result;
-  }, {
+  const fieldsToSign = getFieldsToSign({
+    collectionConfig,
+    user,
     email,
-    id: user.id,
-    collection: collectionConfig.slug,
   });
 
   await collectionConfig.hooks.beforeLogin.reduce(async (priorHook, hook) => {
@@ -143,6 +135,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     user = (await hook({
       user,
       req: args.req,
+      context: req.context,
     })) || user;
   }, Promise.resolve());
 
@@ -182,6 +175,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       user,
       req: args.req,
       token,
+      context: req.context,
     }) || user;
   }, Promise.resolve());
 
@@ -196,6 +190,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -208,6 +203,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     user = await hook({
       req,
       doc: user,
+      context: req.context,
     }) || user;
   }, Promise.resolve());
 

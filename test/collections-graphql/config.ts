@@ -1,6 +1,7 @@
+import path from 'path';
 import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 
 export interface Relation {
   id: string;
@@ -29,7 +30,10 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 
 export const slug = 'posts';
 export const relationSlug = 'relation';
-export default buildConfig({
+export default buildConfigWithDefaults({
+  graphQL: {
+    schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),
+  },
   collections: [
     {
       slug: 'users',
@@ -64,6 +68,11 @@ export default buildConfig({
           type: 'relationship',
           relationTo: relationSlug,
         },
+        {
+          name: 'relationToCustomID',
+          type: 'relationship',
+          relationTo: 'custom-ids',
+        },
         // Relation hasMany
         {
           name: 'relationHasManyField',
@@ -84,10 +93,194 @@ export default buildConfig({
           relationTo: [relationSlug, 'dummy'],
           hasMany: true,
         },
+        {
+          name: 'A1',
+          type: 'group',
+          fields: [
+            {
+              type: 'text',
+              name: 'A2',
+              defaultValue: 'textInRowInGroup',
+            },
+          ],
+        },
+        {
+          name: 'B1',
+          type: 'group',
+          fields: [
+            {
+              type: 'collapsible',
+              label: 'Collapsible',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'B2',
+                  defaultValue: 'textInRowInGroup',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'C1',
+          type: 'group',
+          fields: [
+            {
+              type: 'text',
+              name: 'C2Text',
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  type: 'collapsible',
+                  label: 'Collapsible2',
+                  fields: [
+                    {
+                      name: 'C2',
+                      type: 'group',
+                      fields: [
+                        {
+                          type: 'row',
+                          fields: [
+                            {
+                              type: 'collapsible',
+                              label: 'Collapsible2',
+                              fields: [
+                                {
+                                  type: 'text',
+                                  name: 'C3',
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Tab1',
+              name: 'D1',
+              fields: [
+                {
+                  name: 'D2',
+                  type: 'group',
+                  fields: [
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          type: 'collapsible',
+                          label: 'Collapsible2',
+                          fields: [
+                            {
+                              type: 'tabs',
+                              tabs: [
+                                {
+                                  label: 'Tab1',
+                                  fields: [
+                                    {
+                                      name: 'D3',
+                                      type: 'group',
+                                      fields: [
+                                        {
+                                          type: 'row',
+                                          fields: [
+                                            {
+                                              type: 'collapsible',
+                                              label: 'Collapsible2',
+                                              fields: [
+                                                {
+                                                  type: 'text',
+                                                  name: 'D4',
+                                                },
+                                              ],
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'custom-ids',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'id',
+          type: 'number',
+        },
+        {
+          name: 'title',
+          type: 'text',
+        },
       ],
     },
     collectionWithName(relationSlug),
     collectionWithName('dummy'),
+    {
+      slug: 'payload-api-test-ones',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'payloadAPI',
+          type: 'text',
+          hooks: {
+            afterRead: [
+              ({ req }) => req.payloadAPI,
+            ],
+          },
+        },
+      ],
+    },
+    {
+      slug: 'payload-api-test-twos',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'payloadAPI',
+          type: 'text',
+          hooks: {
+            afterRead: [
+              ({ req }) => req.payloadAPI,
+            ],
+          },
+        },
+        {
+          name: 'relation',
+          type: 'relationship',
+          relationTo: 'payload-api-test-ones',
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -99,11 +292,28 @@ export default buildConfig({
     });
 
     await payload.create({
+      collection: 'custom-ids',
+      data: {
+        id: 1,
+        title: 'hello',
+      },
+    });
+
+    await payload.create({
+      collection: slug,
+      data: {
+        title: 'has custom ID relation',
+        relationToCustomID: 1,
+      },
+    });
+
+    await payload.create({
       collection: slug,
       data: {
         title: 'post1',
       },
     });
+
     await payload.create({
       collection: slug,
       data: {
@@ -190,6 +400,18 @@ export default buildConfig({
             value: rel2.id,
           },
         ],
+      },
+    });
+
+    const payloadAPITest1 = await payload.create({
+      collection: 'payload-api-test-ones',
+      data: {},
+    });
+
+    await payload.create({
+      collection: 'payload-api-test-twos',
+      data: {
+        relation: payloadAPITest1.id,
       },
     });
   },

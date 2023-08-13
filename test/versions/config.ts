@@ -1,4 +1,4 @@
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import AutosavePosts from './collections/Autosave';
 import DraftPosts from './collections/Drafts';
 import AutosaveGlobal from './globals/Autosave';
@@ -7,7 +7,7 @@ import DraftGlobal from './globals/Draft';
 import VersionPosts from './collections/Versions';
 import { draftSlug } from './shared';
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   collections: [
     AutosavePosts,
     DraftPosts,
@@ -21,6 +21,7 @@ export default buildConfig({
     locales: ['en', 'es'],
     defaultLocale: 'en',
   },
+  indexSortableFields: true,
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

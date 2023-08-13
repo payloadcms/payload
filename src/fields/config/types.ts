@@ -1,12 +1,12 @@
 /* eslint-disable no-use-before-define */
 import { CSSProperties } from 'react';
 import { Editor } from 'slate';
-import type { TFunction, i18n as Ii18n } from 'i18next';
+import type { i18n as Ii18n, TFunction } from 'i18next';
 import type { EditorProps } from '@monaco-editor/react';
 import { Operation, Where } from '../../types';
 import { SanitizedConfig } from '../../config/types';
 import { TypeWithID } from '../../collections/config/types';
-import { PayloadRequest } from '../../express/types';
+import { PayloadRequest, RequestContext } from '../../express/types';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
 import { Description } from '../../admin/components/forms/FieldDescription/types';
 import { User } from '../../auth';
@@ -33,6 +33,7 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** The value of the field. */
   value?: P,
   previousValue?: P,
+  context: RequestContext
 }
 
 export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => Promise<P> | P;
@@ -107,7 +108,7 @@ export interface FieldBase {
   index?: boolean;
   defaultValue?: any;
   hidden?: boolean;
-  saveToJWT?: boolean
+  saveToJWT?: string | boolean;
   localized?: boolean;
   validate?: Validate;
   hooks?: {
@@ -122,20 +123,40 @@ export interface FieldBase {
     read?: FieldAccess;
     update?: FieldAccess;
   };
-  /** Extension  point to add your custom data. */
+  /** Extension point to add your custom data. */
   custom?: Record<string, any>;
 }
 
 export type NumberField = FieldBase & {
   type: 'number';
   admin?: Admin & {
+    /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
+    /** Set this property to define a placeholder string for the field. */
     placeholder?: Record<string, string> | string
+    /** Set a value for the number field to increment / decrement using browser controls. */
     step?: number
   }
+  /** Minimum value accepted. Used in the default `validation` function. */
   min?: number
+  /** Maximum value accepted. Used in the default `validation` function. */
   max?: number
-}
+} & ({
+  /** Makes this field an ordered array of numbers instead of just a single number. */
+  hasMany: true
+  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+  minRows?: number
+  /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
+  maxRows?: number
+} | {
+  /** Makes this field an ordered array of numbers instead of just a single number. */
+  hasMany?: false | undefined
+  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+  minRows?: undefined
+  /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
+  maxRows?: undefined
+})
+
 
 export type TextField = FieldBase & {
   type: 'text';
@@ -183,6 +204,13 @@ export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
   admin?: Admin & {
     hideGutter?: boolean
   }
+  /** Customize generated GraphQL and Typescript schema names.
+   * By default it is bound to the collection.
+   *
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
+   */
+  interfaceName?: string
 }
 
 export type RowAdmin = Omit<Admin, 'description'>;
@@ -206,19 +234,30 @@ export type TabsAdmin = Omit<Admin, 'description'>;
 
 type TabBase = Omit<FieldBase, 'required' | 'validation'> & {
   fields: Field[]
+  saveToJWT?: boolean | string
   description?: Description
+  interfaceName?: string
 }
 
-export type NamedTab = TabBase
+export type NamedTab = TabBase & {
+  /** Customize generated GraphQL and Typescript schema names.
+   * The slug is used by default.
+   *
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
+   */
+  interfaceName?: string
+}
 
 export type UnnamedTab = Omit<TabBase, 'name'> & {
   label: Record<string, string> | string
   localized?: never
+  interfaceName?: never
 }
 
 export type Tab = NamedTab | UnnamedTab
 
-export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized'> & {
+export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized' | 'saveToJWT'> & {
   type: 'tabs';
   tabs: Tab[]
   admin?: TabsAdmin
@@ -244,7 +283,7 @@ export type UIField = {
     }
   }
   type: 'ui';
-  /** Extension  point to add your custom data. */
+  /** Extension point to add your custom data. */
   custom?: Record<string, any>;
 }
 
@@ -295,15 +334,31 @@ export type RelationshipField = FieldBase & {
   admin?: Admin & {
     isSortable?: boolean;
     allowCreate?: boolean;
-  }
+  },
 } & ({
   hasMany: true
+  /**
+   * @deprecated Use 'minRows' instead
+   */
   min?: number
+  /**
+   * @deprecated Use 'maxRows' instead
+   */
   max?: number
+  minRows?: number
+  maxRows?: number
 } | {
   hasMany?: false | undefined
+  /**
+   * @deprecated Use 'minRows' instead
+   */
   min?: undefined
+  /**
+   * @deprecated Use 'maxRows' instead
+   */
   max?: undefined
+  minRows?: undefined
+  maxRows?: undefined
 })
 
 export type ValueWithRelation = {
@@ -354,7 +409,7 @@ export type RichTextField = FieldBase & {
       }
     }
     link?: {
-      fields?: Field[] | ((args: {defaultFields: Field[], config: SanitizedConfig, i18n: Ii18n}) => Field[]);
+      fields?: Field[] | ((args: { defaultFields: Field[], config: SanitizedConfig, i18n: Ii18n }) => Field[]);
     }
   }
 }
@@ -371,6 +426,13 @@ export type ArrayField = FieldBase & {
       RowLabel?: RowLabel
     } & Admin['components']
   };
+  /** Customize generated GraphQL and Typescript schema names.
+   * By default it is bound to the collection.
+   *
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
+   */
+  interfaceName?: string
 };
 
 export type RadioField = FieldBase & {
@@ -387,9 +449,17 @@ export type Block = {
   fields: Field[];
   imageURL?: string;
   imageAltText?: string;
+  /** @deprecated - please migrate to the interfaceName property instead. */
   graphQL?: {
     singularName?: string
   }
+  /** Customize generated GraphQL and Typescript schema names.
+   * The slug is used by default.
+   *
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
+   */
+  interfaceName?: string
 }
 
 export type BlockField = FieldBase & {

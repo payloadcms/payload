@@ -19,6 +19,7 @@ import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVe
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
 import { buildAfterOperation } from './utils';
+import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -49,6 +50,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'update',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -130,6 +132,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     req,
     overrideAccess: true,
     showHiddenFields: true,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -165,6 +168,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     operation: 'update',
     overrideAccess,
     req,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -179,6 +183,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       req,
       operation: 'update',
       originalDoc,
+      context: req.context,
     })) || data;
   }, Promise.resolve());
 
@@ -202,6 +207,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       req,
       originalDoc,
       operation: 'update',
+      context: req.context,
     })) || data;
   }, Promise.resolve());
 
@@ -218,15 +224,19 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     operation: 'update',
     req,
     skipValidation: shouldSaveDraft || data._status === 'draft',
+    context: req.context,
   });
 
   // /////////////////////////////////////
   // Handle potential password update
   // /////////////////////////////////////
 
-  if (shouldSavePassword) {
-    await doc.setPassword(password);
-    await doc.save();
+  const dataToUpdate: Record<string, unknown> = { ...result };
+
+  if (shouldSavePassword && typeof password === 'string') {
+    const { hash, salt } = await generatePasswordSaltHash({ password });
+    dataToUpdate.salt = salt;
+    dataToUpdate.hash = hash;
     delete data.password;
     delete result.password;
   }
@@ -239,7 +249,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     try {
       result = await Model.findByIdAndUpdate(
         { _id: id },
-        result,
+        dataToUpdate,
         { new: true },
       );
     } catch (error) {
@@ -284,6 +294,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     req,
     overrideAccess,
     showHiddenFields,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -296,6 +307,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     result = await hook({
       req,
       doc: result,
+      context: req.context,
     }) || result;
   }, Promise.resolve());
 
@@ -310,6 +322,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     entityConfig: collectionConfig,
     operation: 'update',
     req,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -324,6 +337,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       previousDoc: originalDoc,
       req,
       operation: 'update',
+      context: req.context,
     }) || result;
   }, Promise.resolve());
 

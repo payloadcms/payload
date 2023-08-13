@@ -1,35 +1,35 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../utilities/Auth';
-import { useFormProcessing, useFormSubmitted, useFormModified, useForm, useFormFields } from '../Form/context';
+import { useFormProcessing, useFormSubmitted, useForm, useFormFields } from '../Form/context';
 import { Options, FieldType } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useOperation } from '../../utilities/OperationProvider';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
-import { UPDATE } from '../Form/types';
+import type { UPDATE } from '../Form/types';
 
 /**
  * Get and set the value of a form field.
  *
  * @see https://payloadcms.com/docs/admin/hooks#usefield
  */
-const useField = <T extends unknown>(options: Options): FieldType<T> => {
+const useField = <T, >(options: Options): FieldType<T> => {
   const {
     path,
     validate,
     disableFormData = false,
     condition,
+    hasRows,
   } = options;
 
   const submitted = useFormSubmitted();
   const processing = useFormProcessing();
-  const modified = useFormModified();
   const { user } = useAuth();
   const { id } = useDocumentInfo();
   const operation = useOperation();
   const field = useFormFields(([fields]) => fields[path]);
-  const dispatchField = useFormFields(([_, dispatch]) => dispatch);
   const { t } = useTranslation();
+  const dispatchField = useFormFields(([_, dispatch]) => dispatch);
 
   const { getData, getSiblingData, setModified } = useForm();
 
@@ -43,7 +43,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
   const setValue = useCallback((e, disableModifyingForm = false) => {
     const val = (e && e.target) ? e.target.value : e;
 
-    if (!modified && !disableModifyingForm) {
+    if (!disableModifyingForm) {
       if (typeof setModified === 'function') {
         // Update modified state after field value comes back
         // to avoid cursor jump caused by state value / DOM mismatch
@@ -57,19 +57,19 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       type: 'UPDATE',
       path,
       value: val,
-      disableFormData,
+      disableFormData: disableFormData || (hasRows && val > 0),
     });
   }, [
     setModified,
-    modified,
     path,
     dispatchField,
     disableFormData,
+    hasRows,
   ]);
 
   // Store result from hook as ref
   // to prevent unnecessary rerenders
-  const result = useMemo(() => ({
+  const result: FieldType<T> = useMemo(() => ({
     showError,
     errorMessage: field?.errorMessage,
     value,
@@ -77,7 +77,19 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     formProcessing: processing,
     setValue,
     initialValue,
-  }), [field, processing, setValue, showError, submitted, value, initialValue]);
+    rows: field?.rows,
+    valid: field?.valid,
+  }), [
+    field?.errorMessage,
+    field?.rows,
+    field?.valid,
+    processing,
+    setValue,
+    showError,
+    submitted,
+    value,
+    initialValue,
+  ]);
 
   // Throttle the validate function
   useThrottledEffect(() => {
@@ -85,12 +97,13 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
       const action: UPDATE = {
         type: 'UPDATE',
         path,
-        disableFormData,
+        disableFormData: disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
         validate,
         condition,
         value,
         valid: false,
         errorMessage: undefined,
+        rows: field?.rows,
       };
 
       const validateOptions = {
@@ -130,6 +143,7 @@ const useField = <T extends unknown>(options: Options): FieldType<T> => {
     path,
     user,
     validate,
+    field?.rows,
   ]);
 
   return result;

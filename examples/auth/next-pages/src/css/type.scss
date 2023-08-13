@@ -1,0 +1,110 @@
+@use 'queries' as *;
+
+%h1,
+%h2,
+%h3,
+%h4,
+%h5,
+%h6 {
+  font-weight: 700;
+}
+
+%h1 {
+  margin: 40px 0;
+  font-size: 64px;
+  line-height: 70px;
+  font-weight: bold;
+
+  @include mid-break {
+    margin: 24px 0;
+    font-size: 42px;
+    line-height: 42px;
+  }
+}
+
+%h2 {
+  margin: 28px 0;
+  font-size: 48px;
+  line-height: 54px;
+  font-weight: bold;
+
+  @include mid-break {
+    margin: 22px 0;
+    font-size: 32px;
+    line-height: 40px;
+  }
+}
+
+%h3 {
+  margin: 24px 0;
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: bold;
+
+  @include mid-break {
+    margin: 20px 0;
+    font-size: 26px;
+    line-height: 32px;
+  }
+}
+
+%h4 {
+  margin: 20px 0;
+  font-size: 26px;
+  line-height: 32px;
+  font-weight: bold;
+
+  @include mid-break {
+    font-size: 22px;
+    line-height: 30px;
+  }
+}
+
+%h5 {
+  margin: 20px 0;
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: bold;
+
+  @include mid-break {
+    font-size: 18px;
+    line-height: 24px;
+  }
+}
+
+%h6 {
+  margin: 20px 0;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: bold;
+}
+
+%body {
+  font-size: 18px;
+  line-height: 32px;
+
+  @include mid-break {
+    font-size: 15px;
+    line-height: 24px;
+  }
+}
+
+%large-body {
+  font-size: 25px;
+  line-height: 32px;
+
+  @include mid-break {
+    font-size: 22px;
+    line-height: 30px;
+  }
+}
+
+%label {
+  font-size: 16px;
+  line-height: 24px;
+  text-transform: uppercase;
+
+  @include mid-break {
+    font-size: 13px;
+  }
+}

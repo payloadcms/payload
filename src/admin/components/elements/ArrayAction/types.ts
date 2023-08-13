@@ -5,4 +5,5 @@ export type Props = {
   moveRow: (from: number, to: number) => void
   index: number
   rowCount: number
+  hasMaxRows: boolean
 }

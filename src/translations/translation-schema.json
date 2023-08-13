@@ -522,9 +522,11 @@
         "openInNewTab",
         "textToDisplay",
         "addLabel",
+        "addLink",
         "addNew",
         "addNewLabel",
         "addRelationship",
+        "addUpload",
         "blockType",
         "chooseFromExisting",
         "chooseLabel",
@@ -539,12 +541,14 @@
         "passwordsDoNotMatch",
         "relatedDocument",
         "relationTo",
+        "removeRelationship",
         "removeUpload",
         "saveChanges",
         "searchForBlock",
         "selectExistingLabel",
         "selectFieldsToEdit",
         "showAll",
+        "swapRelationship",
         "swapUpload",
         "toggleBlock",
         "uploadNewLabel"
@@ -690,6 +694,12 @@
           "type": "string"
         },
         "enterAValue": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "errors": {
           "type": "string"
         },
         "fallbackToDefaultLocale": {
@@ -863,6 +873,9 @@
         "users": {
           "type": "string"
         },
+        "value": {
+          "type": "string"
+        },
         "welcome": {
           "type": "string"
         }
@@ -881,6 +894,7 @@
         "backToDashboard",
         "cancel",
         "changesNotSaved",
+        "close",
         "collections",
         "columnToSort",
         "columns",
@@ -904,6 +918,7 @@
         "descending",
         "duplicate",
         "duplicateWithoutSaving",
+        "edit",
         "editLabel",
         "editing",
         "editingLabel_many",
@@ -912,6 +927,9 @@
         "email",
         "emailAddress",
         "enterAValue",
+        "error",
+        "errors",
+        "fallbackToDefaultLocale",
         "filter",
         "filterWhere",
         "filters",
@@ -964,8 +982,11 @@
         "updatedAt",
         "updatedCountSuccessfully",
         "updatedSuccessfully",
+        "updating",
+        "uploading",
         "user",
         "users",
+        "value",
         "welcome"
       ]
     },
@@ -976,37 +997,37 @@
         "equals": {
           "type": "string"
         },
-        "isNotEqualTo":{
+        "isNotEqualTo": {
           "type": "string"
         },
         "isIn": {
           "type": "string"
         },
-        "isNotIn":{
+        "isNotIn": {
           "type": "string"
         },
         "exists": {
           "type": "string"
         },
-        "isGreaterThan":{
+        "isGreaterThan": {
           "type": "string"
         },
         "isLessThan": {
           "type": "string"
         },
-        "isLessThanOrEqualTo":{
+        "isLessThanOrEqualTo": {
           "type": "string"
         },
         "isGreaterThanOrEqualTo": {
           "type": "string"
         },
-        "near":{
+        "near": {
           "type": "string"
         },
         "isLike": {
           "type": "string"
         },
-        "contains":{
+        "contains": {
           "type": "string"
         }
       },

@@ -5,6 +5,7 @@
   position: relative;
   cursor: pointer;
   vertical-align: middle;
+  border-radius: 100%;
 
   textarea {
     position: absolute;
@@ -17,5 +18,9 @@
   &:focus,
   &:active {
     outline: none;
+  }
+
+  &:focus-visible {
+    outline: var(--accessibility-outline);
   }
 }

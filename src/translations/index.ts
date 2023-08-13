@@ -1,4 +1,5 @@
 import ar from './ar.json';
+import bg from './bg.json';
 import cs from './cs.json';
 import de from './de.json';
 import en from './en.json';
@@ -25,6 +26,7 @@ import hu from './hu.json';
 
 export default {
   ar,
+  bg,
   cs,
   de,
   en,
@@ -32,6 +34,7 @@ export default {
   fa,
   fr,
   hr,
+  hu,
   it,
   ja,
   my,
@@ -47,5 +50,4 @@ export default {
   ua,
   vi,
   zh,
-  hu,
 };

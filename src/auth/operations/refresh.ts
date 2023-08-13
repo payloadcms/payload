@@ -1,3 +1,4 @@
+import url from 'url';
 import jwt from 'jsonwebtoken';
 import { Response } from 'express';
 import { Collection, BeforeOperationHook } from '../../collections/config/types';
@@ -6,6 +7,7 @@ import getCookieExpiration from '../../utilities/getCookieExpiration';
 import { Document } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import { buildAfterOperation } from '../../collections/operations/utils';
+import { getFieldsToSign } from './getFieldsToSign';
 
 export type Result = {
   exp: number,
@@ -33,6 +35,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
     args = (await hook({
       args,
       operation: 'refresh',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -52,16 +55,32 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
     },
   } = args;
 
-  const opts = {
-    expiresIn: args.collection.config.auth.tokenExpiration,
-  };
-
   if (typeof args.token !== 'string') throw new Forbidden(args.req.t);
 
-  const payload = jwt.verify(args.token, secret, {}) as Record<string, unknown>;
-  delete payload.iat;
-  delete payload.exp;
-  const refreshedToken = jwt.sign(payload, secret, opts);
+  const parsedURL = url.parse(args.req.url);
+  const isGraphQL = parsedURL.pathname === config.routes.graphQL;
+
+  const user = await args.req.payload.findByID({
+    id: args.req.user.id,
+    collection: args.req.user.collection,
+    req: args.req,
+    depth: isGraphQL ? 0 : args.collection.config.auth.depth,
+  });
+
+  const fieldsToSign = getFieldsToSign({
+    collectionConfig,
+    user: args?.req?.user,
+    email: user?.email as string,
+  });
+
+  const refreshedToken = jwt.sign(
+    fieldsToSign,
+    secret,
+    {
+      expiresIn: collectionConfig.auth.tokenExpiration,
+    },
+  );
+
   const exp = (jwt.decode(refreshedToken) as Record<string, unknown>).exp as number;
 
   if (args.res) {
@@ -79,6 +98,12 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
     args.res.cookie(`${config.cookiePrefix}-token`, refreshedToken, cookieOptions);
   }
 
+  let result: Result = {
+    user,
+    refreshedToken,
+    exp,
+  };
+
   // /////////////////////////////////////
   // After Refresh - Collection
   // /////////////////////////////////////
@@ -86,20 +111,15 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
   await collectionConfig.hooks.afterRefresh.reduce(async (priorHook, hook) => {
     await priorHook;
 
-    args = (await hook({
+    result = (await hook({
       req: args.req,
       res: args.res,
       exp,
       token: refreshedToken,
-    })) || args;
+      context: args.req.context,
+    })) || result;
   }, Promise.resolve());
 
-
-  let result = {
-    refreshedToken,
-    exp,
-    user: payload,
-  };
 
   // /////////////////////////////////////
   // afterOperation - Collection

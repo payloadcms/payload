@@ -25,3 +25,23 @@
     margin: 0;
   }
 }
+
+html[data-theme=light] {
+  .radio-group {
+   &.error {
+      .radio-input__styled-radio {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .radio-group {
+   &.error {
+      .radio-input__styled-radio {
+        @include darkInputError;
+      }
+    }
+  }
+}

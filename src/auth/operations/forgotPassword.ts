@@ -35,6 +35,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     args = (await hook({
       args,
       operation: 'forgotPassword',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -69,6 +70,10 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     resetPasswordExpiration?: number | Date,
   }
 
+  if (!data.email) {
+    throw new APIError('Missing email.');
+  }
+
   const user: UserDoc = await Model.findOne({ email: (data.email as string).toLowerCase() });
 
   if (!user) return null;
@@ -81,9 +86,11 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
   const userJSON = user.toJSON({ virtuals: true });
 
   if (!disableEmail) {
+    const serverURL = (config.serverURL !== null && config.serverURL !== '') ? config.serverURL : `${req.protocol}://${req.get('host')}`;
+
     let html = `${t('authentication:youAreReceivingResetPassword')}
-    <a href="${config.serverURL}${config.routes.admin}/reset/${token}">
-     ${config.serverURL}${config.routes.admin}/reset/${token}
+    <a href="${serverURL}${config.routes.admin}/reset/${token}">
+     ${serverURL}${config.routes.admin}/reset/${token}
     </a>
     ${t('authentication:youDidNotRequestPassword')}`;
 
@@ -119,7 +126,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
 
   await collectionConfig.hooks.afterForgotPassword.reduce(async (priorHook, hook) => {
     await priorHook;
-    await hook({ args });
+    await hook({ args, context: req.context });
   }, Promise.resolve());
 
   // /////////////////////////////////////

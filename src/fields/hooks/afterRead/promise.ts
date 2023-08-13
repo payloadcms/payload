@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise';
 import relationshipPopulationPromise from './relationshipPopulationPromise';
@@ -18,6 +18,7 @@ type Args = {
   overrideAccess: boolean
   siblingDoc: Record<string, unknown>
   showHiddenFields: boolean
+  context: RequestContext
 }
 
 // This function is responsible for the following actions, in order:
@@ -41,6 +42,7 @@ export const promise = async ({
   req,
   siblingDoc,
   showHiddenFields,
+  context,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field) && field.hidden && typeof siblingDoc[field.name] !== 'undefined' && !showHiddenFields) {
     delete siblingDoc[field.name];
@@ -161,6 +163,7 @@ export const promise = async ({
               siblingData: siblingDoc,
               operation: 'read',
               req,
+              context,
             });
 
             if (hookedValue !== undefined) {
@@ -178,6 +181,7 @@ export const promise = async ({
             siblingData: siblingDoc,
             req,
             value: siblingDoc[field.name],
+            context,
           });
 
           if (hookedValue !== undefined) {
@@ -227,6 +231,7 @@ export const promise = async ({
         req,
         siblingDoc: groupDoc,
         showHiddenFields,
+        context,
       });
 
       break;
@@ -250,7 +255,30 @@ export const promise = async ({
             req,
             siblingDoc: row || {},
             showHiddenFields,
+            context,
           });
+        });
+      } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
+        Object.values(rows).forEach((localeRows) => {
+          if (Array.isArray(localeRows)) {
+            localeRows.forEach((row) => {
+              traverseFields({
+                currentDepth,
+                depth,
+                doc,
+                fields: field.fields,
+                fieldPromises,
+                findMany,
+                flattenLocales,
+                overrideAccess,
+                populationPromises,
+                req,
+                siblingDoc: row || {},
+                showHiddenFields,
+                context,
+              });
+            });
+          }
         });
       }
       break;
@@ -277,6 +305,33 @@ export const promise = async ({
               req,
               siblingDoc: row || {},
               showHiddenFields,
+              context,
+            });
+          }
+        });
+      } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
+        Object.values(rows).forEach((localeRows) => {
+          if (Array.isArray(localeRows)) {
+            localeRows.forEach((row) => {
+              const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
+
+              if (block) {
+                traverseFields({
+                  currentDepth,
+                  depth,
+                  doc,
+                  fields: block.fields,
+                  fieldPromises,
+                  findMany,
+                  flattenLocales,
+                  overrideAccess,
+                  populationPromises,
+                  req,
+                  siblingDoc: row || {},
+                  showHiddenFields,
+                  context,
+                });
+              }
             });
           }
         });
@@ -300,6 +355,7 @@ export const promise = async ({
         req,
         siblingDoc,
         showHiddenFields,
+        context,
       });
 
       break;
@@ -325,6 +381,7 @@ export const promise = async ({
         req,
         siblingDoc: tabDoc,
         showHiddenFields,
+        context,
       });
 
       break;
@@ -344,6 +401,7 @@ export const promise = async ({
         req,
         siblingDoc,
         showHiddenFields,
+        context,
       });
       break;
     }

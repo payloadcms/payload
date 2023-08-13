@@ -2,7 +2,6 @@ import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { login } from '../helpers';
 
 const { beforeAll, describe } = test;
 let url: AdminUrlUtil;
@@ -16,11 +15,6 @@ describe('Admin Panel', () => {
 
     const context = await browser.newContext();
     page = await context.newPage();
-
-    await login({
-      page,
-      serverURL,
-    });
   });
 
   test('example test', async () => {

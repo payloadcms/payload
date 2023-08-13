@@ -86,6 +86,26 @@ describe('collections-graphql', () => {
       expect(docs).toContainEqual(expect.objectContaining({ id: existingDoc.id }));
     });
 
+    it('should retain payload api', async () => {
+      const query = `
+        query {
+          PayloadApiTestTwos {
+            docs {
+              payloadAPI
+              relation {
+                payloadAPI
+              }
+            }
+          }
+        }      
+      `;
+
+      const response = await client.request(query);
+      const res = response.PayloadApiTestTwos;
+
+      expect(res.docs[0].relation.payloadAPI).toStrictEqual('GraphQL');
+    });
+
     it('should update existing', async () => {
       const updatedTitle = 'updated title';
 
@@ -363,6 +383,51 @@ describe('collections-graphql', () => {
 
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }));
       });
+
+      it('can query deeply nested fields within rows, tabs, collapsibles', async () => {
+        const withNestedField = await createPost({ D1: { D2: { D3: { D4: 'nested message' } } } });
+        const query = `{
+          Posts(where: { D1__D2__D3__D4: { equals: "nested message" } }) {
+            docs {
+              id
+              D1 {
+                D2 {
+                  D3 {
+                    D4
+                  }
+                }
+              }
+            }
+          }
+        }`;
+        const response = await client.request(query);
+        const { docs } = response.Posts;
+
+        expect(docs).toContainEqual(expect.objectContaining({ id: withNestedField.id, D1: { D2: { D3: { D4: 'nested message' } } } }));
+      });
+    });
+
+    describe('relationships', () => {
+      it('should query on relationships with custom IDs', async () => {
+        const query = `query {
+          Posts(where: { title: { equals: "has custom ID relation" }}) {
+            docs {
+              id
+              title
+              relationToCustomID {
+                id
+              }
+            }
+            totalDocs
+          }
+        }`;
+
+        const response = await client.request(query);
+        const { docs, totalDocs } = response.Posts;
+
+        expect(totalDocs).toStrictEqual(1);
+        expect(docs[0].relationToCustomID.id).toStrictEqual(1);
+      });
     });
   });
 
@@ -427,15 +492,15 @@ describe('collections-graphql', () => {
       });
 
       expect(Array.isArray(error.response.errors)).toBe(true);
-      expect(error.response.errors[0].message).toEqual('No password was given');
+      expect(error.response.errors[0].message).toEqual('The following field is invalid: password');
       expect(Array.isArray(error.response.errors[0].locations)).toEqual(true);
       expect(error.response.errors[0].path[0]).toEqual('test2');
-      expect(error.response.errors[0].extensions.name).toEqual('MissingPasswordError');
+      expect(error.response.errors[0].extensions.name).toEqual('ValidationError');
 
       expect(error.response.errors[1].message).toEqual('The following field is invalid: email');
       expect(error.response.errors[1].path[0]).toEqual('test3');
       expect(error.response.errors[1].extensions.name).toEqual('ValidationError');
-      expect(error.response.errors[1].extensions.data[0].message).toEqual('A user with the given username is already registered');
+      expect(error.response.errors[1].extensions.data[0].message).toEqual('A user with the given email is already registered');
       expect(error.response.errors[1].extensions.data[0].field).toEqual('email');
     });
   });

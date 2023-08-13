@@ -79,18 +79,17 @@ const DeleteDocument: React.FC<Props> = (props) => {
   if (id) {
     return (
       <React.Fragment>
-        <button
-          type="button"
+        <Button
+          buttonStyle="none"
           id={buttonId}
           className={`${baseClass}__toggle`}
-          onClick={(e) => {
-            e.preventDefault();
+          onClick={() => {
             setDeleting(false);
             toggleModal(modalSlug);
           }}
         >
           {t('delete')}
-        </button>
+        </Button>
         <Modal
           slug={modalSlug}
           className={baseClass}

@@ -1,9 +1,8 @@
-import { useModal } from '@faceless-ui/modal';
 import React from 'react';
+import { useModal } from '@faceless-ui/modal';
 import { Block, Labels } from '../../../../../fields/config/types';
 import { ArrayAction } from '../../../elements/ArrayAction';
 import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug';
-import { Row } from '../rowReducer';
 import { BlocksDrawer } from './BlocksDrawer';
 
 export const RowActions: React.FC<{
@@ -14,8 +13,9 @@ export const RowActions: React.FC<{
   labels: Labels
   blocks: Block[]
   rowIndex: number
-  rows: Row[]
+  rowCount: number
   blockType: string
+  hasMaxRows?: boolean
 }> = (props) => {
   const {
     addRow,
@@ -25,21 +25,24 @@ export const RowActions: React.FC<{
     labels,
     blocks,
     rowIndex,
-    rows,
+    rowCount,
     blockType,
+    hasMaxRows,
   } = props;
 
   const { openModal, closeModal } = useModal();
   const drawerSlug = useDrawerSlug('blocks-drawer');
+
+  const [indexToAdd, setIndexToAdd] = React.useState<number | null>(null);
 
   return (
     <React.Fragment>
       <BlocksDrawer
         drawerSlug={drawerSlug}
         blocks={blocks}
-        addRow={(index, rowBlockType) => {
+        addRow={(_, rowBlockType) => {
           if (typeof addRow === 'function') {
-            addRow(index, rowBlockType);
+            addRow(indexToAdd, rowBlockType);
           }
           closeModal(drawerSlug);
         }}
@@ -47,14 +50,16 @@ export const RowActions: React.FC<{
         labels={labels}
       />
       <ArrayAction
-        rowCount={rows.length}
-        addRow={() => {
+        rowCount={rowCount}
+        addRow={(index) => {
+          setIndexToAdd(index);
           openModal(drawerSlug);
         }}
         duplicateRow={() => duplicateRow(rowIndex, blockType)}
         moveRow={moveRow}
         removeRow={removeRow}
         index={rowIndex}
+        hasMaxRows={hasMaxRows}
       />
     </React.Fragment>
   );

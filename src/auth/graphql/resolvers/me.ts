@@ -6,6 +6,7 @@ function meResolver(collection: Collection): any {
     const options = {
       collection,
       req: context.req,
+      depth: 0,
     };
     return me(options);
   }
