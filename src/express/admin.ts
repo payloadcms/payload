@@ -24,7 +24,7 @@ function initAdmin(ctx: Payload): void {
       router.use(express.static(ctx.config.admin.buildPath, {
         redirect: false,
         setHeaders: (res, path) => {
-          const staticFilesRegex = new RegExp('\.(svg|css|js|jp(e)?g|png|avif|webp|webm|gif|ico|woff|woff2|ttf|otf)$', 'ig');
+          const staticFilesRegex = new RegExp('.(svg|css|js|jp(e)?g|png|avif|webp|webm|gif|ico|woff|woff2|ttf|otf)$', 'i');
           if (path.match(staticFilesRegex)) {
             res.set('Cache-Control', `public, max-age=${60 * 60 * 24 * 365}, immutable`);
           }
