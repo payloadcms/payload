@@ -3,6 +3,7 @@ import { PayloadRequest, RequestContext } from '../../../express/types';
 import { Field, fieldAffectsData, TabAsField, tabHasName, valueIsValueWithRelation } from '../../config/types';
 import getValueWithDefault from '../../getDefaultValue';
 import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc';
+import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc';
 import { traverseFields } from './traverseFields';
 
 type Args<T> = {
@@ -251,7 +252,7 @@ export const promise = async <T>({
             overrideAccess,
             req,
             siblingData: row,
-            siblingDoc: siblingDoc[field.name]?.[i] || {},
+            siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
             context,
           }));
         });
@@ -278,7 +279,7 @@ export const promise = async <T>({
               overrideAccess,
               req,
               siblingData: row,
-              siblingDoc: siblingDoc[field.name]?.[i] || {},
+              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
               context,
             }));
           }
@@ -311,8 +312,11 @@ export const promise = async <T>({
       let tabSiblingData;
       let tabSiblingDoc;
       if (tabHasName(field)) {
-        tabSiblingData = typeof siblingData[field.name] === 'object' ? siblingData[field.name] : {};
-        tabSiblingDoc = typeof siblingDoc[field.name] === 'object' ? siblingDoc[field.name] : {};
+        if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {};
+        if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {};
+
+        tabSiblingData = siblingData[field.name] as Record<string, unknown>;
+        tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>;
       } else {
         tabSiblingData = siblingData;
         tabSiblingDoc = siblingDoc;
