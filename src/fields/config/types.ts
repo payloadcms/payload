@@ -56,7 +56,7 @@ export type FilterOptionsProps<T = any> = {
   relationTo: string,
 }
 
-export type FilterOptions<T = any> = Where | ((options: FilterOptionsProps<T>) => Where);
+export type FilterOptions<T = any> = Where | ((options: FilterOptionsProps<T>) => (Where | Promise<Where>));
 
 type Admin = {
   position?: 'sidebar';
