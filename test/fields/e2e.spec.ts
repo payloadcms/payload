@@ -4,17 +4,18 @@ import path from 'path';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { saveDocAndAssert } from '../helpers';
-import { textDoc } from './collections/Text';
-import { arrayFieldsSlug } from './collections/Array';
+import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers';
+import { textDoc, textFieldsSlug } from './collections/Text';
 import { pointFieldsSlug } from './collections/Point';
 import { tabsSlug } from './collections/Tabs';
 import { collapsibleFieldsSlug } from './collections/Collapsible';
 import wait from '../../src/utilities/wait';
 import { jsonDoc } from './collections/JSON';
 import { numberDoc } from './collections/Number';
+import { relationshipFieldsSlug } from './collections/Relationship';
+import { mapAsync } from '../../src/utilities/mapAsync';
 
-const { beforeAll, describe } = test;
+const { afterEach, beforeAll, describe } = test;
 
 let page: Page;
 let serverURL;
@@ -934,8 +935,18 @@ describe('fields', () => {
   describe('relationship', () => {
     let url: AdminUrlUtil;
 
-    beforeAll(() => {
+    beforeAll(async () => {
       url = new AdminUrlUtil(serverURL, 'relationship-fields');
+    });
+
+
+    afterEach(async () => {
+      // delete all existing relationship documents
+      const allRelationshipDocs = await payload.find({ collection: relationshipFieldsSlug, limit: 100 });
+      const relationshipIDs = allRelationshipDocs.docs.map((doc) => doc.id);
+      await mapAsync(relationshipIDs, async (id) => {
+        await payload.delete({ collection: relationshipFieldsSlug, id });
+      });
     });
 
     test('should create inline relationship within field with many relations', async () => {
@@ -1084,6 +1095,45 @@ describe('fields', () => {
 
       // check if the value is saved
       await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toHaveText(`${value}123456`);
+    });
+
+    // Drawers opened through the edit button are prone to issues due to the use of stopPropagation for certain
+    // events - specifically for drawers opened through the edit button. This test is to ensure that drawers
+    // opened through the edit button can be saved using the hotkey.
+    test('should save using hotkey in edit document drawer', async () => {
+      await page.goto(url.create);
+
+      // First fill out the relationship field, as it's required
+      await page.locator('#relationship-add-new .relationship-add-new__add-button').click();
+      await page.locator('#field-relationship .value-container').click();
+      // Select "Seeded text document" relationship
+      await page.getByText('Seeded text document', { exact: true }).click();
+
+      // Click edit button which opens drawer
+      await page.getByRole('button', { name: 'Edit Seeded text document' }).click();
+
+      // Fill 'text' field of 'Seeded text document'
+      await page.locator('#field-text').fill('some updated text value');
+
+      // Save drawer (not parent page) with hotkey
+      await saveDocHotkeyAndAssert(page);
+
+      const seededTextDocument = await payload.find({
+        collection: textFieldsSlug,
+        where: {
+          text: {
+            equals: 'some updated text value',
+          },
+        },
+      });
+      const relationshipDocuments = await payload.find({
+        collection: relationshipFieldsSlug,
+      });
+
+      // The Seeded text document should now have a text field with value 'some updated text value',
+      expect(seededTextDocument.docs.length).toEqual(1);
+      // but the relationship document should NOT exist, as the hotkey should have saved the drawer and not the parent page
+      expect(relationshipDocuments.docs.length).toEqual(0);
     });
   });
 
