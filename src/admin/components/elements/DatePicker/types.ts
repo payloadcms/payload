@@ -1,6 +1,6 @@
 type SharedProps = {
   displayFormat?: string
-  pickerAppearance?: 'dayAndTime' | 'timeOnly' | 'dayOnly' | 'monthOnly'
+  pickerAppearance?: 'default' | 'dayAndTime' | 'timeOnly' | 'dayOnly' | 'monthOnly'
 }
 
 type TimePickerProps = {
@@ -22,6 +22,9 @@ type MonthPickerProps = {
 }
 
 export type ConditionalDateProps =
+  | SharedProps & {
+    pickerAppearance?: 'default'
+  }
   | SharedProps & DayPickerProps & TimePickerProps & {
     pickerAppearance?: 'dayAndTime'
   }
