@@ -74,7 +74,7 @@ Set to `false` if you'd like to disable the ability to create new documents from
 
 Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both for validating input and filtering available relationships in the UI.
 
-The `filterOptions` property can either be a `Where` query directly, or a function that returns one. When using a function, it will be called with an argument object with the following properties:
+The `filterOptions` property can either be a `Where` query directly, or a function (synchronous or asynchronous) that returns one. When using a function, it will be called with an argument object containing the following properties:
 
 | Property      | Description                                                                          |
 | ------------- | ------------------------------------------------------------------------------------ |

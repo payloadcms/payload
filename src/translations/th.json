@@ -63,7 +63,7 @@
     "deletingFile": "เกิดปัญหาระหว่างการลบไฟล์",
     "deletingTitle": "เกิดปัญหาระหว่างการลบ {{title}} โปรดตรวจสอบการเชื่อมต่อของคุณแล้วลองอีกครั้ง",
     "emailOrPasswordIncorrect": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
-    "followingFieldsInvalid_many": "ช่องต่อไปนี้ไม่ถูกต้อง:",
+    "followingFieldsInvalid_other": "ช่องต่อไปนี้ไม่ถูกต้อง:",
     "followingFieldsInvalid_one": "ช่องต่อไปนี้ไม่ถูกต้อง:",
     "incorrectCollection": "Collection ไม่ถูกต้อง",
     "invalidFileType": "ประเภทของไฟล์ไม่ถูกต้อง",

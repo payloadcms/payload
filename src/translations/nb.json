@@ -63,7 +63,7 @@
     "deletingFile": "Det oppstod en feil under sletting av filen.",
     "deletingTitle": "Det oppstod en feil under sletting av {{title}}. Sjekk tilkoblingen og prøv igjen.",
     "emailOrPasswordIncorrect": "E-postadressen eller passordet er feil.",
-    "followingFieldsInvalid_many": "Følgende felter er ugyldige:",
+    "followingFieldsInvalid_other": "Følgende felter er ugyldige:",
     "followingFieldsInvalid_one": "Følgende felt er ugyldig:",
     "incorrectCollection": "Ugyldig samling",
     "invalidFileType": "Ugyldig filtype",

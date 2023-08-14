@@ -63,7 +63,7 @@
     "deletingFile": "Dosya silinirken bir hatayla karşılaşıldı.",
     "deletingTitle": "{{title}} silinirken bir sorun yaşandı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.",
     "emailOrPasswordIncorrect": "Girilen e-posta veya parola hatalı",
-    "followingFieldsInvalid_many": "Lütfen geçersiz alanları düzeltin:",
+    "followingFieldsInvalid_other": "Lütfen geçersiz alanları düzeltin:",
     "followingFieldsInvalid_one": "Lütfen geçersiz alanı düzeltin:",
     "incorrectCollection": "Hatalı koleksiyon",
     "invalidFileType": "Geçersiz dosya türü",
