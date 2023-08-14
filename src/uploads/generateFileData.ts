@@ -9,7 +9,7 @@ import { FileUploadError, MissingFile } from '../errors';
 import { PayloadRequest } from '../express/types';
 import getImageSize from './getImageSize';
 import getSafeFileName from './getSafeFilename';
-import resizeAndSave from './imageResizer';
+import resizeAndTransformImageSizes from './imageResizer';
 import { FileData, FileToSave, ProbedImageSize } from './types';
 import canResizeImage from './canResizeImage';
 import isImage from './isImage';
@@ -56,7 +56,7 @@ export const generateFileData = async <T>({
     };
   }
 
-  const { staticDir, imageSizes, disableLocalStorage, resizeOptions, formatOptions } = collectionConfig.upload;
+  const { staticDir, imageSizes, disableLocalStorage, resizeOptions, formatOptions, trimOptions } = collectionConfig.upload;
 
   let staticPath = staticDir;
   if (staticDir.indexOf('/') !== 0) {
@@ -85,11 +85,11 @@ export const generateFileData = async <T>({
 
     if (fileIsAnimated) sharpOptions.animated = true;
 
-    if (fileSupportsResize && (resizeOptions || formatOptions)) {
+    if (fileSupportsResize && (resizeOptions || formatOptions || trimOptions)) {
       if (file.tempFilePath) {
-        sharpFile = sharp(file.tempFilePath, sharpOptions);
+        sharpFile = sharp(file.tempFilePath, sharpOptions).rotate(); // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
-        sharpFile = sharp(file.data, sharpOptions);
+        sharpFile = sharp(file.data, sharpOptions).rotate(); // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       }
 
       if (resizeOptions) {
@@ -98,6 +98,9 @@ export const generateFileData = async <T>({
       }
       if (formatOptions) {
         sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options);
+      }
+      if (trimOptions) {
+        sharpFile = sharpFile.trim(trimOptions);
       }
     }
 
@@ -108,15 +111,26 @@ export const generateFileData = async <T>({
     }
 
     if (sharpFile) {
+      const metadata = await sharpFile.metadata();
       fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true });
-      ({ mime, ext } = await fromBuffer(fileBuffer.data));
+      ({ mime, ext } = await fromBuffer(fileBuffer.data)); // This is getting an incorrect gif height back.
       fileData.width = fileBuffer.info.width;
-      fileData.height = fileBuffer.info.height;
-      fileData.filesize = fileBuffer.data.length;
+      fileData.filesize = fileBuffer.info.size;
+
+      // Animated GIFs + WebP aggregate the height from every frame, so we need to use divide by number of pages
+      if (metadata.pages) {
+        fileData.height = fileBuffer.info.height / metadata.pages;
+        fileData.filesize = fileBuffer.data.length;
+      }
     } else {
       mime = file.mimetype;
       fileData.filesize = file.size;
-      ext = file.name.split('.').pop();
+
+      if (file.name.includes('.')) {
+        ext = file.name.split('.').pop();
+      } else {
+        ext = '';
+      }
     }
 
     // Adust SVG mime type. fromBuffer modifies it.
@@ -124,10 +138,10 @@ export const generateFileData = async <T>({
     fileData.mimeType = mime;
 
     const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
-    fsSafeName = `${baseFilename}.${ext}`;
+    fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`;
 
     if (!overwriteExistingFiles) {
-      fsSafeName = await getSafeFileName(Model, staticPath, `${baseFilename}.${ext}`);
+      fsSafeName = await getSafeFileName(Model, staticPath, fsSafeName);
     }
 
     fileData.filename = fsSafeName;
@@ -141,7 +155,7 @@ export const generateFileData = async <T>({
     if (Array.isArray(imageSizes) && fileSupportsResize) {
       req.payloadUploadSizes = {};
 
-      const { sizeData, sizesToSave } = await resizeAndSave({
+      const { sizeData, sizesToSave } = await resizeAndTransformImageSizes({
         req,
         file,
         dimensions,

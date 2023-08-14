@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Redirect, useRouteMatch, useHistory, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import { useAuth } from '../../../utilities/Auth';
@@ -13,7 +13,6 @@ import { useLocale } from '../../../utilities/Locale';
 import { IndexProps } from './types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { Fields } from '../../../forms/Form/types';
-import { usePreferences } from '../../../utilities/Preferences';
 import { EditDepthContext } from '../../../utilities/EditDepth';
 import { CollectionPermission } from '../../../../../auth';
 
@@ -38,19 +37,36 @@ const EditView: React.FC<IndexProps> = (props) => {
   const locale = useLocale();
   const { serverURL, routes: { admin, api } } = useConfig();
   const { params: { id } = {} } = useRouteMatch<Record<string, string>>();
-  const { state: locationState } = useLocation();
   const history = useHistory();
   const [internalState, setInternalState] = useState<Fields>();
   const [updatedAt, setUpdatedAt] = useState<string>();
   const { user } = useAuth();
-  const { getVersions, preferencesKey, getDocPermissions, docPermissions } = useDocumentInfo();
-  const { getPreference } = usePreferences();
+  const userRef = useRef(user);
+  const { getVersions, getDocPermissions, docPermissions, getDocPreferences } = useDocumentInfo();
   const { t } = useTranslation('general');
 
   const [{ data, isLoading: isLoadingData, isError }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
     { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' }, initialData: null },
   );
+
+  const buildState = useCallback(async (doc, overrides?: Partial<Parameters<typeof buildStateFromSchema>[0]>) => {
+    const preferences = await getDocPreferences();
+
+    const state = await buildStateFromSchema({
+      fieldSchema: overrides.fieldSchema,
+      preferences,
+      data: doc || {},
+      user: userRef.current,
+      id,
+      operation: 'update',
+      locale,
+      t,
+      ...overrides,
+    });
+
+    setInternalState(state);
+  }, [getDocPreferences, id, locale, t]);
 
   const onSave = useCallback(async (json: {
     doc
@@ -61,23 +77,25 @@ const EditView: React.FC<IndexProps> = (props) => {
     if (!isEditing) {
       setRedirect(`${admin}/collections/${collection.slug}/${json?.doc?.id}`);
     } else {
-      const state = await buildStateFromSchema({ fieldSchema: collection.fields, data: json.doc, user, id, operation: 'update', locale, t });
-      setInternalState(state);
+      buildState(json.doc, {
+        fieldSchema: collection.fields,
+      });
     }
-  }, [admin, collection, isEditing, getVersions, user, id, t, locale, getDocPermissions]);
-
-  const dataToRender = (locationState as Record<string, unknown>)?.data || data;
+  }, [admin, getVersions, isEditing, buildState, getDocPermissions, collection]);
 
   useEffect(() => {
-    const awaitInternalState = async () => {
-      setUpdatedAt(dataToRender?.updatedAt);
-      const state = await buildStateFromSchema({ fieldSchema: fields, data: dataToRender || {}, user, operation: isEditing ? 'update' : 'create', id, locale, t });
-      await getPreference(preferencesKey);
-      setInternalState(state);
-    };
+    if (fields && (isEditing ? data : true)) {
+      const awaitInternalState = async () => {
+        setUpdatedAt(data?.updatedAt);
+        buildState(data, {
+          operation: isEditing ? 'update' : 'create',
+          fieldSchema: fields,
+        });
+      };
 
-    if (!isEditing || dataToRender) awaitInternalState();
-  }, [dataToRender, fields, isEditing, id, user, locale, preferencesKey, getPreference, t]);
+      awaitInternalState();
+    }
+  }, [isEditing, data, buildState, fields]);
 
   useEffect(() => {
     if (redirect) {
@@ -91,7 +109,7 @@ const EditView: React.FC<IndexProps> = (props) => {
     );
   }
 
-  const apiURL = `${serverURL}${api}/${slug}/${id}${collection.versions.drafts ? '?draft=true' : ''}`;
+  const apiURL = `${serverURL}${api}/${slug}/${id}?locale=${locale}${collection.versions.drafts ? '&draft=true' : ''}`;
   const action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
   const hasSavePermission = (isEditing && docPermissions?.update?.permission) || (!isEditing && (docPermissions as CollectionPermission)?.create?.permission);
   const isLoading = !internalState || !docPermissions || isLoadingData;
@@ -104,7 +122,7 @@ const EditView: React.FC<IndexProps> = (props) => {
         componentProps={{
           id,
           isLoading,
-          data: dataToRender,
+          data,
           collection,
           permissions: docPermissions,
           isEditing,
@@ -113,7 +131,7 @@ const EditView: React.FC<IndexProps> = (props) => {
           hasSavePermission,
           apiURL,
           action,
-          updatedAt: updatedAt || dataToRender?.updatedAt,
+          updatedAt: updatedAt || data?.updatedAt,
         }}
       />
     </EditDepthContext.Provider>

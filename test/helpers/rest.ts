@@ -57,7 +57,7 @@ type UpdateManyArgs<T = any> = {
   slug?: string;
   data: Partial<T>;
   auth?: boolean;
-  query: any;
+  where: any;
 };
 
 type DeleteArgs = {
@@ -69,7 +69,7 @@ type DeleteArgs = {
 type DeleteManyArgs = {
   slug?: string;
   auth?: boolean;
-  query: any;
+  where: any;
 };
 
 type FindGlobalArgs<T = any> = {
@@ -92,7 +92,7 @@ type DocResponse<T> = {
 type DocsResponse<T> = {
   status: number;
   docs: T[];
-  errors?: { name: string, message: string, data: any, id: string | number}[]
+  errors?: { name: string, message: string, data: any, id: string | number }[]
 };
 
 const headers = {
@@ -205,9 +205,9 @@ export class RESTClient {
   }
 
   async updateMany<T = any>(args: UpdateManyArgs<T>): Promise<DocsResponse<T>> {
-    const { slug, data, query } = args;
+    const { slug, data, where } = args;
     const formattedQs = qs.stringify({
-      ...(query ? { where: query } : {}),
+      ...(where ? { where } : {}),
     }, {
       addQueryPrefix: true,
     });
@@ -225,9 +225,9 @@ export class RESTClient {
   }
 
   async deleteMany<T = any>(args: DeleteManyArgs): Promise<DocsResponse<T>> {
-    const { slug, query } = args;
+    const { slug, where } = args;
     const formattedQs = qs.stringify({
-      ...(query ? { where: query } : {}),
+      ...(where ? { where } : {}),
     }, {
       addQueryPrefix: true,
     });

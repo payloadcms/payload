@@ -18,6 +18,7 @@ function refreshResolver(collection: Collection) {
       token,
       req: context.req,
       res: context.res,
+      depth: 0,
     };
 
     const result = await refresh(options);

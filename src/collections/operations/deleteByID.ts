@@ -32,6 +32,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     args = (await hook({
       args,
       operation: 'delete',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -45,7 +46,6 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     req,
     req: {
       t,
-      locale,
       payload,
       payload: {
         config,
@@ -73,6 +73,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     return hook({
       req,
       id,
+      context: req.context,
     });
   }, Promise.resolve());
 
@@ -80,25 +81,16 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: {
-    where: Where
-  } = {
+  const query = await Model.buildQuery({
+    req,
     where: {
-      and: [
-        {
-          id: {
-            equals: id,
-          },
-        },
-      ],
+      id: {
+        equals: id,
+      },
     },
-  };
-
-  if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
-  }
-
-  const query = await Model.buildQuery(queryToBuild, locale);
+    access: accessResults,
+    overrideAccess,
+  });
 
   const docToDelete = await Model.findOne(query);
 
@@ -155,6 +147,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -167,6 +160,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     result = await hook({
       req,
       doc: result,
+      context: req.context,
     }) || result;
   }, Promise.resolve());
 
@@ -177,7 +171,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
     await priorHook;
 
-    result = await hook({ req, id, doc: result }) || result;
+    result = await hook({ req, id, doc: result, context: req.context }) || result;
   }, Promise.resolve());
 
   // /////////////////////////////////////

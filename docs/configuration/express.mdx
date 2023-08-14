@@ -8,6 +8,40 @@ keywords: config, configuration, documentation, Content Management System, cms, 
 
 Payload utilizes a few Express-specific middleware packages within its own routers. You can customize how they work by passing in configuration options to the main Payload config's `express` property.
 
+### Custom Middleware
+
+Payload allows you to pass in custom Express middleware to be used on all of the routes it opens. This is useful for adding logging or any other custom functionality to your endpoints.
+
+There are 2 exposed properties. Each property is an array of middleware functions.
+
+- `preMiddleware` - runs before any of the Payload middleware
+- `postMiddleware` - runs after all of the Payload middleware
+
+```ts
+{
+  express: {
+    preMiddleware: [
+      (req, res, next) => {
+        // do something
+        next()
+      }
+    ],
+    postMiddleware: [
+      (req, res, next) => {
+        // do something
+        next()
+      }
+    ]
+  }
+}
+
+// Example logging middleware function
+const requestLoggerMiddleware = (req, res, next) => {
+  req.payload.logger.info(`request: ${req.method} ${req.url}`)
+  next()
+}
+```
+
 ### JSON
 
 `express.json()` is used to parse JSON body content into JavaScript objects accessible on the Express `req`. Payload allows you to customize all of the `json` method's options. Common examples of customization use-cases are increasing the max allowed JSON body size which defaults to `2MB`.

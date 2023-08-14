@@ -5,8 +5,6 @@ import { Collection, CollectionModel } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { APIError, Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
-import { Where } from '../../types';
-import { hasWhereAccessResult } from '../../auth/types';
 import { TypeWithVersion } from '../../versions/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 
@@ -31,7 +29,6 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     req,
     req: {
       t,
-      locale,
       payload,
     },
     disableErrors,
@@ -57,23 +54,16 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
 
   const hasWhereAccess = typeof accessResults === 'object';
 
-  const queryToBuild: { where: Where } = {
+  const query = await VersionsModel.buildQuery({
     where: {
-      and: [
-        {
-          _id: {
-            equals: id,
-          },
-        },
-      ],
+      _id: {
+        equals: id,
+      },
     },
-  };
-
-  if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
-  }
-
-  const query = await VersionsModel.buildQuery(queryToBuild, locale);
+    access: accessResults,
+    req,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
   // Find by ID
@@ -108,6 +98,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
       req,
       query,
       doc: result.version,
+      context: req.context,
     }) || result.version;
   }, Promise.resolve());
 
@@ -123,6 +114,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -136,6 +128,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
       req,
       query,
       doc: result.version,
+      context: req.context,
     }) || result.version;
   }, Promise.resolve());
 

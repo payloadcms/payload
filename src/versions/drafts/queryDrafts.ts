@@ -1,6 +1,6 @@
 import { PaginateOptions } from 'mongoose';
 import { AccessResult } from '../../config/types';
-import { Where } from '../../types';
+import { PayloadRequest, Where } from '../../types';
 import { Payload } from '../../payload';
 import { PaginatedDocs } from '../../mongoose/types';
 import { Collection, CollectionModel, TypeWithID } from '../../collections/config/types';
@@ -17,7 +17,8 @@ type AggregateVersion<T> = {
 type Args = {
   accessResult: AccessResult
   collection: Collection
-  locale: string
+  req: PayloadRequest
+  overrideAccess: boolean
   paginationOptions?: PaginateOptions
   payload: Payload
   where: Where
@@ -26,7 +27,8 @@ type Args = {
 export const queryDrafts = async <T extends TypeWithID>({
   accessResult,
   collection,
-  locale,
+  req,
+  overrideAccess,
   payload,
   paginationOptions,
   where: incomingWhere,
@@ -35,21 +37,18 @@ export const queryDrafts = async <T extends TypeWithID>({
 
   const where = appendVersionToQueryKey(incomingWhere || {});
 
-  const versionQueryToBuild: { where: Where } = {
-    where: {
-      ...where,
-      and: [
-        ...where?.and || [],
-      ],
-    },
-  };
+  let versionAccessResult;
 
   if (hasWhereAccessResult(accessResult)) {
-    const versionAccessResult = appendVersionToQueryKey(accessResult);
-    versionQueryToBuild.where.and.push(versionAccessResult);
+    versionAccessResult = appendVersionToQueryKey(accessResult);
   }
 
-  const versionQuery = await VersionModel.buildQuery(versionQueryToBuild, locale);
+  const versionQuery = await VersionModel.buildQuery({
+    where,
+    access: versionAccessResult,
+    req,
+    overrideAccess,
+  });
 
   const aggregate = VersionModel.aggregate<AggregateVersion<T>>([
     // Sort so that newest are first

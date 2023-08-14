@@ -112,8 +112,12 @@ const fieldTypeConditions = {
     component: 'Relationship',
     operators: [...base],
   },
+  radio: {
+    component: 'Select',
+    operators: [...base],
+  },
   select: {
-    component: 'Text',
+    component: 'Select',
     operators: [...base],
   },
   checkbox: {

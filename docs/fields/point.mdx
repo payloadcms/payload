@@ -11,6 +11,13 @@ keywords: point, geolocation, geospatial, geojson, 2dsphere, config, configurati
   The Point field type saves a pair of coordinates in the database and assigns an index for location related queries.
 </Banner>
 
+<LightDarkImage 
+  srcLight='https://payloadcms.com/images/docs/fields/point.png'
+  srcDark='https://payloadcms.com/images/docs/fields/point-dark.png'
+  alt='Shows a Point field in the Payload admin panel'
+  caption='Admin panel screenshot of a Point field'
+/>
+
 The data structure in the database matches the GeoJSON structure to represent point. The Payload APIs simplifies the object data to only the [longitude, latitude] location.
 
 ### Config
@@ -30,6 +37,7 @@ The data structure in the database matches the GeoJSON structure to represent po
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -39,7 +47,7 @@ The data structure in the database matches the GeoJSON structure to represent po
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {

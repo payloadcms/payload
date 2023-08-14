@@ -7,7 +7,6 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import executeAccess from '../../auth/executeAccess';
 import { APIError, ValidationError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
-import { hasWhereAccessResult } from '../../auth/types';
 import { saveVersion } from '../../versions/saveVersion';
 import { uploadFiles } from '../../uploads/uploadFiles';
 import { beforeChange } from '../../fields/hooks/beforeChange';
@@ -47,6 +46,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'update',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -61,7 +61,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     req,
     req: {
       t,
-      locale,
       payload,
       payload: {
         config,
@@ -77,44 +76,25 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     throw new APIError('Missing \'where\' query of documents to update.', httpStatus.BAD_REQUEST);
   }
 
-  let { data } = args;
+  const { data: bulkUpdateData } = args;
   const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
 
   // /////////////////////////////////////
   // Access
   // /////////////////////////////////////
 
-  const queryToBuild: { where?: Where } = {
-    where: {
-      and: [],
-    },
-  };
-
-  if (where) {
-    queryToBuild.where = {
-      and: [],
-      ...where,
-    };
-
-    if (Array.isArray(where.AND)) {
-      queryToBuild.where.and = [
-        ...queryToBuild.where.and,
-        ...where.AND,
-      ];
-    }
-  }
-
   let accessResult: AccessResult;
 
   if (!overrideAccess) {
     accessResult = await executeAccess({ req }, collectionConfig.access.update);
-
-    if (hasWhereAccessResult(accessResult)) {
-      queryToBuild.where.and.push(accessResult);
-    }
   }
 
-  const query = await Model.buildQuery(queryToBuild, locale);
+  const query = await Model.buildQuery({
+    where,
+    access: accessResult,
+    req,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
   // Retrieve documents
@@ -125,7 +105,8 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     docs = await queryDrafts<GeneratedTypes['collections'][TSlug]>({
       accessResult,
       collection,
-      locale,
+      req,
+      overrideAccess,
       payload,
       where: query,
     });
@@ -144,16 +125,18 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     config,
     collection,
     req,
-    data,
+    data: bulkUpdateData,
     throwOnMissingFile: false,
     overwriteExistingFiles,
   });
 
-  data = newFileData;
-
   const errors = [];
 
   const promises = docs.map(async (doc) => {
+    let data = {
+      ...newFileData,
+      ...bulkUpdateData,
+    };
     let docWithLocales: Document = JSON.stringify(doc);
     docWithLocales = JSON.parse(docWithLocales);
 
@@ -167,6 +150,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         req,
         overrideAccess: true,
         showHiddenFields: true,
+        context: req.context,
       });
 
       await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc: docWithLocales, t, overrideDelete: false });
@@ -183,6 +167,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         operation: 'update',
         overrideAccess,
         req,
+        context: req.context,
       });
 
       // /////////////////////////////////////
@@ -197,6 +182,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           req,
           operation: 'update',
           originalDoc,
+          context: req.context,
         })) || data;
       }, Promise.resolve());
 
@@ -220,6 +206,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           req,
           originalDoc,
           operation: 'update',
+          context: req.context,
         })) || data;
       }, Promise.resolve());
 
@@ -236,6 +223,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         operation: 'update',
         req,
         skipValidation: shouldSaveDraft || data._status === 'draft',
+        context: req.context,
       });
 
       // /////////////////////////////////////
@@ -293,6 +281,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         req,
         overrideAccess,
         showHiddenFields,
+        context: req.context,
       });
 
       // /////////////////////////////////////
@@ -305,6 +294,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         result = await hook({
           req,
           doc: result,
+          context: req.context,
         }) || result;
       }, Promise.resolve());
 
@@ -319,6 +309,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         entityConfig: collectionConfig,
         operation: 'update',
         req,
+        context: req.context,
       });
 
       // /////////////////////////////////////
@@ -333,6 +324,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           previousDoc: originalDoc,
           req,
           operation: 'update',
+          context: req.context,
         }) || result;
       }, Promise.resolve());
 

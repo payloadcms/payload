@@ -1,5 +1,6 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
 import { ArrayRowLabel } from './LabelComponent';
+import { AddCustomBlocks } from './components/AddCustomBlocks';
 
 export const arrayDefaultValue = [
   { text: 'row one' },
@@ -10,6 +11,9 @@ export const arrayFieldsSlug = 'array-fields';
 
 const ArrayFields: CollectionConfig = {
   slug: arrayFieldsSlug,
+  admin: {
+    enableRichTextLink: false,
+  },
   fields: [
     {
       name: 'items',
@@ -112,6 +116,39 @@ const ArrayFields: CollectionConfig = {
         description: 'Row labels rendered as react components.',
         components: {
           RowLabel: ArrayRowLabel,
+        },
+      },
+    },
+    {
+      name: 'customBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block-1',
+          fields: [
+            {
+              name: 'block1Title',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'block-2',
+          fields: [
+            {
+              name: 'block2Title',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'ui',
+      name: 'ui',
+      admin: {
+        components: {
+          Field: AddCustomBlocks,
         },
       },
     },

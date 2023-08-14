@@ -1,19 +1,21 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import path from 'path';
-import { relationSlug, mediaSlug, audioSlug } from './config';
+import { relationSlug, mediaSlug, audioSlug, adminThumbnailSlug } from './config';
 import type { Media } from './payload-types';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { login, saveDocAndAssert } from '../helpers';
+import { saveDocAndAssert } from '../helpers';
 import wait from '../../src/utilities/wait';
+import { adminThumbnailSrc } from './collections/admin-thumbnail';
 
 const { beforeAll, describe } = test;
 
 let mediaURL: AdminUrlUtil;
 let audioURL: AdminUrlUtil;
 let relationURL: AdminUrlUtil;
+let adminThumbnailURL: AdminUrlUtil;
 
 describe('uploads', () => {
   let page: Page;
@@ -26,6 +28,7 @@ describe('uploads', () => {
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug);
     audioURL = new AdminUrlUtil(serverURL, audioSlug);
     relationURL = new AdminUrlUtil(serverURL, relationSlug);
+    adminThumbnailURL = new AdminUrlUtil(serverURL, adminThumbnailSlug);
 
     const context = await browser.newContext();
     page = await context.newPage();
@@ -50,8 +53,6 @@ describe('uploads', () => {
     });
 
     audioDoc = findAudio.docs[0] as Media;
-
-    await login({ page, serverURL });
   });
 
   test('should see upload filename in relation list', async () => {
@@ -79,7 +80,7 @@ describe('uploads', () => {
 
     const filename = page.locator('.file-field__filename');
 
-    await expect(filename).toContainText('.png');
+    await expect(filename).toHaveValue('image.png');
 
     await saveDocAndAssert(page);
   });
@@ -99,13 +100,23 @@ describe('uploads', () => {
     const differentFormatFromMainImageMeta = page.locator('.file-details__sizes .file-meta').nth(1);
     await expect(differentFormatFromMainImageMeta).toContainText('image/jpeg');
 
-    const tabletMeta = page.locator('.file-details__sizes .file-meta').nth(2);
+    const maintainedImageSizeMeta = page.locator('.file-details__sizes .file-meta').nth(2);
+    await expect(maintainedImageSizeMeta).toContainText('1600x1600');
+
+    const maintainedImageSizeWithNewFormatMeta = page.locator('.file-details__sizes .file-meta').nth(3);
+    await expect(maintainedImageSizeWithNewFormatMeta).toContainText('image/jpeg');
+    await expect(maintainedImageSizeWithNewFormatMeta).toContainText('1600x1600');
+
+    const sameSizeMeta = page.locator('.file-details__sizes .file-meta').nth(4);
+    await expect(sameSizeMeta).toContainText('320x80');
+
+    const tabletMeta = page.locator('.file-details__sizes .file-meta').nth(5);
     await expect(tabletMeta).toContainText('640x480');
 
-    const mobileMeta = page.locator('.file-details__sizes .file-meta').nth(3);
+    const mobileMeta = page.locator('.file-details__sizes .file-meta').nth(6);
     await expect(mobileMeta).toContainText('320x240');
 
-    const iconMeta = page.locator('.file-details__sizes .file-meta').nth(4);
+    const iconMeta = page.locator('.file-details__sizes .file-meta').nth(7);
     await expect(iconMeta).toContainText('16x16');
   });
 
@@ -138,5 +149,18 @@ describe('uploads', () => {
     await page.locator('button#action-save').click();
     await wait(200);
     await expect(page.locator('.Toastify')).toContainText('The following field is invalid: audio');
+  });
+
+  test('Should execute adminThumbnail and provide thumbnail when set', async () => {
+    await page.goto(adminThumbnailURL.list);
+    await wait(200);
+
+    // Ensure sure false or null shows generic file svg
+    const genericUploadImage = page.locator('tr.row-1 .thumbnail svg');
+    await expect(genericUploadImage).toBeVisible();
+
+    // Ensure adminThumbnail fn returns correct value based on audio/mp3 mime
+    const audioUploadImage = page.locator('tr.row-2 .thumbnail img');
+    expect(await audioUploadImage.getAttribute('src')).toContain(adminThumbnailSrc);
   });
 });

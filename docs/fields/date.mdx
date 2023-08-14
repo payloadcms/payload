@@ -11,6 +11,13 @@ keywords: date, fields, config, configuration, documentation, Content Management
   with a customizable time picker interface.
 </Banner>
 
+<LightDarkImage 
+  srcLight='https://payloadcms.com/images/docs/fields/date.png'
+  srcDark='https://payloadcms.com/images/docs/fields/date-dark.png'
+  alt='Shows a Date field in the Payload admin panel'
+  caption='Admin panel screenshot of a Date field'
+/>
+
 This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepicker) for the Admin panel component.
 
 ### Config
@@ -29,6 +36,7 @@ This field uses [`react-datepicker`](https://www.npmjs.com/package/react-datepic
 | **`localized`**    | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                                                     |
 | **`required`**     | Require this field to have a value.                                                                                                                                                                 |
 | **`admin`**        | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                           |
+| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                           |
 
 _\* An asterisk denotes that a property is required._
 
@@ -69,7 +77,7 @@ When only `pickerAppearance` is set, an equivalent format will be rendered in th
 ```ts
 import { CollectionConfig } from "payload/types";
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: "example-collection",
   fields: [
     {

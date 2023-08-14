@@ -12,6 +12,7 @@ export const defaults = {
   admin: {
     useAsTitle: 'id',
     components: {},
+    enableRichTextLink: true,
     enableRichTextRelationship: true,
     pagination: {
       defaultLimit: 10,
@@ -39,6 +40,7 @@ export const defaults = {
   auth: false,
   upload: false,
   versions: false,
+  custom: {},
 };
 
 export const authDefaults = {

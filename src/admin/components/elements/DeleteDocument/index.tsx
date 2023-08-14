@@ -79,18 +79,17 @@ const DeleteDocument: React.FC<Props> = (props) => {
   if (id) {
     return (
       <React.Fragment>
-        <button
-          type="button"
+        <Button
+          buttonStyle="none"
           id={buttonId}
           className={`${baseClass}__toggle`}
-          onClick={(e) => {
-            e.preventDefault();
+          onClick={() => {
             setDeleting(false);
             toggleModal(modalSlug);
           }}
         >
           {t('delete')}
-        </button>
+        </Button>
         <Modal
           slug={modalSlug}
           className={baseClass}
@@ -109,20 +108,22 @@ const DeleteDocument: React.FC<Props> = (props) => {
                 </strong>
               </Trans>
             </p>
-            <Button
-              id="confirm-cancel"
-              buttonStyle="secondary"
-              type="button"
-              onClick={deleting ? undefined : () => toggleModal(modalSlug)}
-            >
-              {t('cancel')}
-            </Button>
-            <Button
-              onClick={deleting ? undefined : handleDelete}
-              id="confirm-delete"
-            >
-              {deleting ? t('deleting') : t('confirm')}
-            </Button>
+            <div className={`${baseClass}__actions`}>
+              <Button
+                id="confirm-cancel"
+                buttonStyle="secondary"
+                type="button"
+                onClick={deleting ? undefined : () => toggleModal(modalSlug)}
+              >
+                {t('cancel')}
+              </Button>
+              <Button
+                onClick={deleting ? undefined : handleDelete}
+                id="confirm-delete"
+              >
+                {deleting ? t('deleting') : t('confirm')}
+              </Button>
+            </div>
           </MinimalTemplate>
         </Modal>
       </React.Fragment>

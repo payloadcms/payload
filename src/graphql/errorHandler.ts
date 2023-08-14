@@ -2,19 +2,12 @@ import { GraphQLFormattedError } from 'graphql';
 import { AfterErrorHook } from '../collections/config/types';
 import { Payload } from '../payload';
 
-/**
- *
- * @param info
- * @param debug
- * @param afterErrorHook
- * @returns {Promise<unknown[]>}
- */
 const errorHandler = async (
   payload: Payload,
-  info: any,
+  err: any,
   debug: boolean,
   afterErrorHook: AfterErrorHook,
-): Promise<GraphQLFormattedError[]> => Promise.all(info.result.errors.map(async (err) => {
+): Promise<GraphQLFormattedError> => {
   payload.logger.error(err.stack);
 
   let response: GraphQLFormattedError = {
@@ -29,10 +22,10 @@ const errorHandler = async (
   };
 
   if (afterErrorHook) {
-    ({ response } = await afterErrorHook(err, response) || { response });
+    ({ response } = await afterErrorHook(err, response, null) || { response });
   }
 
   return response;
-}));
+};
 
 export default errorHandler;

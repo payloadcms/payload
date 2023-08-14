@@ -5,8 +5,6 @@ import { Collection, TypeWithID } from '../config/types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
-import { Where } from '../../types';
-import { hasWhereAccessResult } from '../../auth/types';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
 
@@ -37,6 +35,7 @@ async function findByID<T extends TypeWithID>(
     args = (await hook({
       args,
       operation: 'read',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -50,7 +49,6 @@ async function findByID<T extends TypeWithID>(
     req,
     req: {
       t,
-      locale,
       payload,
     },
     disableErrors,
@@ -69,23 +67,16 @@ async function findByID<T extends TypeWithID>(
   // If errors are disabled, and access returns false, return null
   if (accessResult === false) return null;
 
-  const queryToBuild: { where: Where } = {
+  const query = await Model.buildQuery({
     where: {
-      and: [
-        {
-          _id: {
-            equals: id,
-          },
-        },
-      ],
+      _id: {
+        equals: id,
+      },
     },
-  };
-
-  if (hasWhereAccessResult(accessResult)) {
-    queryToBuild.where.and.push(accessResult);
-  }
-
-  const query = await Model.buildQuery(queryToBuild, locale);
+    access: accessResult,
+    req,
+    overrideAccess,
+  });
 
   // /////////////////////////////////////
   // Find by ID
@@ -132,7 +123,8 @@ async function findByID<T extends TypeWithID>(
       entityType: 'collection',
       doc: result,
       accessResult,
-      locale,
+      req,
+      overrideAccess,
     });
   }
 
@@ -147,6 +139,7 @@ async function findByID<T extends TypeWithID>(
       req,
       query,
       doc: result,
+      context: req.context,
     }) || result;
   }, Promise.resolve());
 
@@ -162,6 +155,7 @@ async function findByID<T extends TypeWithID>(
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -175,6 +169,7 @@ async function findByID<T extends TypeWithID>(
       req,
       query,
       doc: result,
+      context: req.context,
     }) || result;
   }, Promise.resolve());
 

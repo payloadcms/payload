@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 
 export interface Relation {
   id: string;
@@ -34,7 +34,7 @@ export const customIdSlug = 'custom-id';
 export const customIdNumberSlug = 'custom-id-number';
 export const errorOnHookSlug = 'error-on-hooks';
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   endpoints: [
     {
       path: '/send-test-email',
@@ -75,6 +75,12 @@ export default buildConfig({
           name: 'number',
           type: 'number',
         },
+        {
+          name: 'fakeLocalization',
+          type: 'text',
+          // field is localized even though the config localization is not on
+          localized: true,
+        },
         // Relationship
         {
           name: 'relationField',
@@ -101,6 +107,72 @@ export default buildConfig({
           relationTo: [relationSlug, 'dummy'],
           hasMany: true,
         },
+        {
+          name: 'restrictedField',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Tab1',
+              name: 'D1',
+              fields: [
+                {
+                  name: 'D2',
+                  type: 'group',
+                  fields: [
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          type: 'collapsible',
+                          label: 'Collapsible2',
+                          fields: [
+                            {
+                              type: 'tabs',
+                              tabs: [
+                                {
+                                  label: 'Tab1',
+                                  fields: [
+                                    {
+                                      name: 'D3',
+                                      type: 'group',
+                                      fields: [
+                                        {
+                                          type: 'row',
+                                          fields: [
+                                            {
+                                              type: 'collapsible',
+                                              label: 'Collapsible2',
+                                              fields: [
+                                                {
+                                                  type: 'text',
+                                                  name: 'D4',
+                                                },
+                                              ],
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -114,7 +186,23 @@ export default buildConfig({
       ],
     },
     collectionWithName(relationSlug),
-    collectionWithName('dummy'),
+    {
+      slug: 'dummy',
+      access: openAccess,
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+        {
+          type: 'text',
+          name: 'name',
+          access: {
+            read: () => false,
+          },
+        },
+      ],
+    },
     {
       slug: customIdSlug,
       access: openAccess,

@@ -11,7 +11,7 @@ module.exports = {
     '@typescript-eslint',
   ],
   extends: [
-    '@trbl',
+    './eslint-config',
   ],
   settings: {
     'import/resolver': {

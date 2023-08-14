@@ -10,6 +10,13 @@ keywords: checkbox, fields, config, configuration, documentation, Content Manage
   The Checkbox field type saves a boolean in the database.
 </Banner>
 
+<LightDarkImage 
+  srcLight='https://payloadcms.com/images/docs/fields/checkbox.png'
+  srcDark='https://payloadcms.com/images/docs/fields/checkbox-dark.png'
+  alt='Checkbox field with text field in Payload admin panel'
+  caption='Admin panel screenshot of Checkbox field with Text field below'
+/>
+
 ### Config
 
 | Option           | Description |
@@ -26,6 +33,7 @@ keywords: checkbox, fields, config, configuration, documentation, Content Manage
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See the [default field admin config](/docs/fields/overview#admin-config) for more details. |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -35,7 +43,7 @@ keywords: checkbox, fields, config, configuration, documentation, Content Manage
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {

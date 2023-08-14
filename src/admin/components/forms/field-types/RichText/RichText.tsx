@@ -247,7 +247,7 @@ const RichText: React.FC<Props> = (props) => {
       const parsedJSON = JSON.parse(valueToRender);
       valueToRender = parsedJSON;
     } catch (err) {
-      // do nothing
+      valueToRender = null;
     }
   }
 
@@ -272,7 +272,7 @@ const RichText: React.FC<Props> = (props) => {
           required={required}
         />
         <Slate
-          key={JSON.stringify(initialValue)}
+          key={JSON.stringify({ initialValue, path })}
           editor={editor}
           value={valueToRender as any[]}
           onChange={handleChange}

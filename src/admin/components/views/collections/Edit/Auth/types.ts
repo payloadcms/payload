@@ -8,4 +8,5 @@ export type Props = {
   collection: SanitizedCollectionConfig
   email: string
   operation: 'update' | 'create'
+  readOnly: boolean
 }

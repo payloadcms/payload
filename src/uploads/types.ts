@@ -4,12 +4,12 @@ import serveStatic from 'serve-static';
 import { Sharp, ResizeOptions } from 'sharp';
 
 export type FileSize = {
-  filename: string;
-  filesize: number;
-  mimeType: string;
-  width: number;
-  height: number;
-}
+  filename: string | null;
+  filesize: number | null;
+  mimeType: string | null;
+  width: number | null;
+  height: number | null;
+};
 
 export type FileSizes = {
   [size: string]: FileSize
@@ -41,16 +41,23 @@ export type ImageUploadFormatOptions = {
   options?: Parameters<Sharp['toFormat']>[1]
 }
 
+/**
+ * Params sent to the sharp trim() function
+ * @link https://sharp.pixelplumbing.com/api-resize#trim
+ */
+export type ImageUploadTrimOptions = Parameters<Sharp['trim']>[0]
+
 export type ImageSize = ResizeOptions & {
   name: string
   formatOptions?: ImageUploadFormatOptions
+  trimOptions?: ImageUploadTrimOptions
   /**
    * @deprecated prefer position
    */
   crop?: string // comes from sharp package
 };
 
-export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => string
+export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => string | null | false
 
 export type IncomingUploadType = {
   imageSizes?: ImageSize[]
@@ -64,6 +71,7 @@ export type IncomingUploadType = {
   resizeOptions?: ResizeOptions
   /** Options for original upload file only. For sizes, set each formatOptions individually. */
   formatOptions?: ImageUploadFormatOptions
+  trimOptions?: ImageUploadTrimOptions
 }
 
 export type Upload = {
@@ -77,6 +85,7 @@ export type Upload = {
   handlers?: any[]
   resizeOptions?: ResizeOptions;
   formatOptions?: ImageUploadFormatOptions
+  trimOptions?: ImageUploadTrimOptions
 }
 
 export type File = {

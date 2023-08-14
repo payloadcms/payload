@@ -46,9 +46,7 @@ export const getBaseFields = (config: Config): Field[] => [
     type: 'text',
     required: true,
     admin: {
-      condition: ({ linkType, url }) => {
-        return (typeof linkType === 'undefined' && url) || linkType === 'custom';
-      },
+      condition: ({ linkType }) => linkType !== 'internal',
     },
   },
   {
@@ -56,7 +54,7 @@ export const getBaseFields = (config: Config): Field[] => [
     label: translations['fields:chooseDocumentToLink'],
     type: 'relationship',
     required: true,
-    relationTo: config.collections.map(({ slug }) => slug),
+    relationTo: config.collections.filter(({ admin: { enableRichTextLink } }) => enableRichTextLink).map(({ slug }) => slug),
     admin: {
       condition: ({ linkType }) => {
         return linkType === 'internal';

@@ -1,5 +1,5 @@
 {
-  "name": "redirects-example-cms",
+  "name": "payload-example-redirects-cms",
   "description": "The CMS is used to demonstrate the redirects feature.",
   "version": "1.0.0",
   "main": "dist/server.js",
@@ -20,7 +20,7 @@
     "@payloadcms/plugin-redirects": "^1.0.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "payload": "^1.6.15"
+    "payload": "latest"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "^0.0.1",

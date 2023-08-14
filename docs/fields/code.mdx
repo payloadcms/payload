@@ -11,6 +11,13 @@ keywords: code, fields, config, configuration, documentation, Content Management
   The Code field type saves a string in the database, but provides the Admin panel with a code editor styled interface.
 </Banner>
 
+<LightDarkImage 
+  srcLight='https://payloadcms.com/images/docs/fields/code.png'
+  srcDark='https://payloadcms.com/images/docs/fields/code-dark.png'
+  alt='Shows a Code field in the Payload admin panel'
+  caption='Admin panel screenshot of a Code field'
+/>
+
 This field uses the `monaco-react` editor syntax highlighting.
 
 ### Config
@@ -32,6 +39,7 @@ This field uses the `monaco-react` editor syntax highlighting.
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 _\* An asterisk denotes that a property is required._
 
@@ -50,7 +58,7 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {

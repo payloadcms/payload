@@ -1,4 +1,4 @@
-const { entityToJSONSchema } = require('./dist/utilities/entityToJSONSchema');
+const { entityToJSONSchema } = require('./dist/utilities/configToJSONSchema');
 
 module.exports = {
   entityToJSONSchema,

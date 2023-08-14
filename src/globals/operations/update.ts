@@ -1,9 +1,7 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
-import { Where } from '../../types';
 import { SanitizedGlobalConfig } from '../config/types';
 import executeAccess from '../../auth/executeAccess';
-import { hasWhereAccessResult } from '../../auth';
 import { beforeChange } from '../../fields/hooks/beforeChange';
 import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
@@ -33,7 +31,6 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     slug,
     req,
     req: {
-      locale,
       payload,
       payload: {
         globals: {
@@ -62,23 +59,17 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   // Retrieve document
   // /////////////////////////////////////
 
-  const queryToBuild: { where: Where } = {
+  const query = await Model.buildQuery({
     where: {
-      and: [
-        {
-          globalType: {
-            equals: slug,
-          },
-        },
-      ],
+      globalType: {
+        equals: slug,
+      },
     },
-  };
-
-  if (hasWhereAccessResult(accessResults)) {
-    (queryToBuild.where.and as Where[]).push(accessResults);
-  }
-
-  const query = await Model.buildQuery(queryToBuild, locale);
+    access: accessResults,
+    req,
+    overrideAccess,
+    globalSlug: slug,
+  });
 
   // /////////////////////////////////////
   // 2. Retrieve document
@@ -103,12 +94,13 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   }
 
   const originalDoc = await afterRead({
-    depth,
+    depth: 0,
     doc: globalJSON,
     entityConfig: globalConfig,
     req,
     overrideAccess: true,
     showHiddenFields,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -122,6 +114,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     operation: 'update',
     overrideAccess,
     req,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -164,6 +157,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     operation: 'update',
     req,
     skipValidation: shouldSaveDraft,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -216,6 +210,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     req,
     overrideAccess,
     showHiddenFields,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -241,6 +236,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     previousDoc: originalDoc,
     entityConfig: globalConfig,
     operation: 'update',
+    context: req.context,
     req,
   });
 

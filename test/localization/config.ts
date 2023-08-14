@@ -1,4 +1,4 @@
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 import { ArrayCollection } from './collections/Array';
 import { LocalizedPost, RelationshipLocalized } from './payload-types';
@@ -20,7 +20,7 @@ export type LocalizedPostAllLocale = LocalizedPost & {
   };
 };
 
-export const slug = 'localized-posts';
+export const localizedPostsSlug = 'localized-posts';
 export const withLocalizedRelSlug = 'with-localized-relationship';
 export const relationshipLocalizedSlug = 'relationship-localized';
 export const withRequiredLocalizedFields = 'localized-required';
@@ -32,7 +32,7 @@ const openAccess = {
   update: () => true,
 };
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   localization: {
     locales: [defaultLocale, spanishLocale],
     defaultLocale,
@@ -46,13 +46,16 @@ export default buildConfig({
         {
           name: 'relation',
           type: 'relationship',
-          relationTo: slug,
+          relationTo: localizedPostsSlug,
         },
       ],
     },
     {
-      slug,
+      slug: localizedPostsSlug,
       access: openAccess,
+      admin: {
+        useAsTitle: 'title',
+      },
       fields: [
         {
           name: 'title',
@@ -112,26 +115,26 @@ export default buildConfig({
         {
           name: 'localizedRelationship',
           type: 'relationship',
-          relationTo: slug,
+          relationTo: localizedPostsSlug,
         },
         // Relation hasMany
         {
           name: 'localizedRelationHasManyField',
           type: 'relationship',
-          relationTo: slug,
+          relationTo: localizedPostsSlug,
           hasMany: true,
         },
         // Relation multiple relationTo
         {
           name: 'localizedRelationMultiRelationTo',
           type: 'relationship',
-          relationTo: [slug, 'dummy'],
+          relationTo: [localizedPostsSlug, 'dummy'],
         },
         // Relation multiple relationTo hasMany
         {
           name: 'localizedRelationMultiRelationToHasMany',
           type: 'relationship',
-          relationTo: [slug, 'dummy'],
+          relationTo: [localizedPostsSlug, 'dummy'],
           hasMany: true,
         },
       ],
@@ -142,28 +145,42 @@ export default buildConfig({
         {
           name: 'relationship',
           type: 'relationship',
-          relationTo: slug,
+          relationTo: localizedPostsSlug,
           localized: true,
         },
         {
           name: 'relationshipHasMany',
           type: 'relationship',
-          relationTo: slug,
+          relationTo: localizedPostsSlug,
           hasMany: true,
           localized: true,
         },
         {
           name: 'relationMultiRelationTo',
           type: 'relationship',
-          relationTo: [slug, 'dummy'],
+          relationTo: [localizedPostsSlug, 'dummy'],
           localized: true,
         },
         {
           name: 'relationMultiRelationToHasMany',
           type: 'relationship',
-          relationTo: [slug, 'dummy'],
+          relationTo: [localizedPostsSlug, 'dummy'],
           hasMany: true,
           localized: true,
+        },
+        {
+          name: 'arrayField',
+          label: 'Array Field',
+          type: 'array',
+          localized: true,
+          fields: [
+            {
+              type: 'relationship',
+              name: 'nestedRelation',
+              label: 'Nested Relation',
+              relationTo: localizedPostsSlug,
+            },
+          ],
         },
       ],
     },
@@ -197,7 +214,7 @@ export default buildConfig({
     },
   ],
   onInit: async (payload) => {
-    const collection = slug;
+    const collection = localizedPostsSlug;
 
     await payload.create({
       collection,
@@ -269,8 +286,8 @@ export default buildConfig({
         localizedRelationHasManyField: [localizedRelation.id, localizedRelation2.id],
         localizedRelationMultiRelationTo: { relationTo: collection, value: localizedRelation.id },
         localizedRelationMultiRelationToHasMany: [
-          { relationTo: slug, value: localizedRelation.id },
-          { relationTo: slug, value: localizedRelation2.id },
+          { relationTo: localizedPostsSlug, value: localizedRelation.id },
+          { relationTo: localizedPostsSlug, value: localizedRelation2.id },
         ],
       },
     });
@@ -282,8 +299,13 @@ export default buildConfig({
         relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
         relationMultiRelationTo: { relationTo: collection, value: localizedRelation.id },
         relationMultiRelationToHasMany: [
-          { relationTo: slug, value: localizedRelation.id },
-          { relationTo: slug, value: localizedRelation2.id },
+          { relationTo: localizedPostsSlug, value: localizedRelation.id },
+          { relationTo: localizedPostsSlug, value: localizedRelation2.id },
+        ],
+        arrayField: [
+          {
+            nestedRelation: localizedRelation.id,
+          },
         ],
       },
     });

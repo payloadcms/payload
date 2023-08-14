@@ -6,9 +6,16 @@ desc: The Email field enforces that the value provided is a valid email address.
 keywords: email, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-<Banner >
+<Banner>
   The Email field enforces that the value provided is a valid email address.
 </Banner>
+
+<LightDarkImage 
+  srcLight='https://payloadcms.com/images/docs/fields/email.png'
+  srcDark='https://payloadcms.com/images/docs/fields/email-dark.png'
+  alt='Shows an Email field in the Payload admin panel'
+  caption='Admin panel screenshot of an Email field'
+/>
 
 ### Config
 
@@ -27,6 +34,7 @@ keywords: email, fields, config, configuration, documentation, Content Managemen
 | **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
 | **`required`**       | Require this field to have a value. |
 | **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
+| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
 
 *\* An asterisk denotes that a property is required.*
 
@@ -48,7 +56,7 @@ Set this property to a string that will be used for browser autocomplete.
 ```ts
 import { CollectionConfig } from 'payload/types';
 
-const ExampleCollection: CollectionConfig = {
+export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {

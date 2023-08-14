@@ -3,7 +3,7 @@ import { ReactEditor, useSlate } from 'slate-react';
 import { Transforms, Node, Editor } from 'slate';
 import { useModal } from '@faceless-ui/modal';
 import { Trans, useTranslation } from 'react-i18next';
-import { unwrapLink } from '../utilities';
+import { transformExtraFields, unwrapLink } from '../utilities';
 import Popup from '../../../../../../elements/Popup';
 import { LinkDrawer } from '../LinkDrawer';
 import { Fields } from '../../../../../Form/types';
@@ -11,18 +11,22 @@ import buildStateFromSchema from '../../../../../Form/buildStateFromSchema';
 import { useAuth } from '../../../../../../utilities/Auth';
 import { useLocale } from '../../../../../../utilities/Locale';
 import { useConfig } from '../../../../../../utilities/Config';
-import { getBaseFields } from '../LinkDrawer/baseFields';
-import { Field } from '../../../../../../../../fields/config/types';
 import reduceFieldsToValues from '../../../../../Form/reduceFieldsToValues';
 import deepCopyObject from '../../../../../../../../utilities/deepCopyObject';
 import Button from '../../../../../../elements/Button';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 import { Props as RichTextFieldProps } from '../../../types';
-import './index.scss';
 import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
+import { useDocumentInfo } from '../../../../../../utilities/DocumentInfo';
+
+import './index.scss';
 
 const baseClass = 'rich-text-link';
 
+/**
+ * This function is called when an existing link is edited.
+ * When a link is first created, another function is called: {@link ../Button/index.tsx#insertLink}
+ */
 const insertChange = (editor, fields, customFieldSchema) => {
   const data = reduceFieldsToValues(fields, true);
 
@@ -78,26 +82,10 @@ export const LinkElement: React.FC<{
   const [renderModal, setRenderModal] = useState(false);
   const [renderPopup, setRenderPopup] = useState(false);
   const [initialState, setInitialState] = useState<Fields>({});
+  const { getDocPreferences } = useDocumentInfo();
   const [fieldSchema] = useState(() => {
-    const fields: Field[] = [
-      ...getBaseFields(config),
-    ];
+    const fields = transformExtraFields(customFieldSchema, config, i18n);
 
-    if (customFieldSchema) {
-      fields.push({
-        name: 'fields',
-        type: 'group',
-        admin: {
-          style: {
-            margin: 0,
-            padding: 0,
-            borderTop: 0,
-            borderBottom: 0,
-          },
-        },
-        fields: customFieldSchema,
-      });
-    }
 
     return fields;
   });
@@ -121,12 +109,13 @@ export const LinkElement: React.FC<{
         fields: deepCopyObject(element.fields),
       };
 
-      const state = await buildStateFromSchema({ fieldSchema, data, user, operation: 'update', locale, t });
+      const preferences = await getDocPreferences();
+      const state = await buildStateFromSchema({ fieldSchema, preferences, data, user, operation: 'update', locale, t });
       setInitialState(state);
     };
 
     awaitInitialState();
-  }, [renderModal, element, fieldSchema, user, locale, t]);
+  }, [renderModal, element, fieldSchema, user, locale, t, getDocPreferences]);
 
   return (
     <span

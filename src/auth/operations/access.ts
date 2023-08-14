@@ -24,11 +24,9 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
   adminInitTelemetry(req);
 
   const results = {} as Permissions;
-  const promises = [];
 
   const isLoggedIn = !!(user);
   const userCollectionConfig = (user && user.collection) ? config.collections.find((collection) => collection.slug === user.collection) : null;
-
 
   if (userCollectionConfig) {
     results.canAccessAdmin = userCollectionConfig.access.admin ? await userCollectionConfig.access.admin(args) : isLoggedIn;
@@ -36,7 +34,7 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
     results.canAccessAdmin = false;
   }
 
-  config.collections.forEach((collection) => {
+  await Promise.all(config.collections.map(async (collection) => {
     const collectionOperations = [...allOperations];
 
     if (collection.auth && (typeof collection.auth.maxLoginAttempts !== 'undefined' && collection.auth.maxLoginAttempts !== 0)) {
@@ -47,7 +45,7 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
       collectionOperations.push('readVersions');
     }
 
-    const [collectionPolicy, collectionPromises] = getEntityPolicies({
+    const collectionPolicy = await getEntityPolicies({
       type: 'collection',
       req,
       entity: collection,
@@ -57,17 +55,16 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
       ...results.collections,
       [collection.slug]: collectionPolicy,
     };
-    promises.push(...collectionPromises);
-  });
+  }));
 
-  config.globals.forEach((global) => {
+  await Promise.all(config.globals.map(async (global) => {
     const globalOperations: AllOperations[] = ['read', 'update'];
 
     if (global.versions) {
       globalOperations.push('readVersions');
     }
 
-    const [globalPolicy, globalPromises] = getEntityPolicies({
+    const globalPolicy = await getEntityPolicies({
       type: 'global',
       req,
       entity: global,
@@ -77,10 +74,7 @@ async function accessOperation(args: Arguments): Promise<Permissions> {
       ...results.globals,
       [global.slug]: globalPolicy,
     };
-    promises.push(...globalPromises);
-  });
-
-  await Promise.all(promises);
+  }));
 
   return results;
 }

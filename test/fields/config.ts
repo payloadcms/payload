@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import path from 'path';
 import fs from 'fs';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 import ArrayFields, { arrayDoc } from './collections/Array';
 import BlockFields, { blocksDoc } from './collections/Blocks';
@@ -26,7 +26,7 @@ import Uploads2 from './collections/Upload2';
 import Uploads3 from './collections/Uploads3';
 import RowFields from './collections/Row';
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   admin: {
     webpack: (config) => ({
       ...config,
@@ -40,6 +40,20 @@ export default buildConfig({
     }),
   },
   collections: [
+    {
+      slug: 'users',
+      auth: true,
+      admin: {
+        useAsTitle: 'email',
+      },
+      fields: [
+        {
+          name: 'canViewConditionalField',
+          type: 'checkbox',
+          defaultValue: true,
+        },
+      ],
+    },
     ArrayFields,
     BlockFields,
     CodeFields,

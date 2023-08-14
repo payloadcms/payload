@@ -1,11 +1,13 @@
 @import '../../../../../../scss/styles.scss';
 
-.relationship--single-value {
-  display: flex;
-  align-items: center;
 
-  .rs__single-value {
-    color: currentColor;
+.relationship--single-value {
+  &.rs__single-value {
+    overflow: visible;
+    min-width: 0;
+  }
+
+  &__label-text {
     max-width: unset;
     display: flex;
     align-items: center;

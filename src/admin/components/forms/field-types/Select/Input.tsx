@@ -99,7 +99,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
         onChange={onChange}
         value={valueToRender as Option}
         showError={showError}
-        isDisabled={readOnly}
+        disabled={readOnly}
         options={options.map((option) => ({ ...option, label: getTranslation(option.label, i18n) }))}
         isMulti={hasMany}
         isSortable={isSortable}

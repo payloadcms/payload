@@ -4,7 +4,7 @@ import { initPayloadTest } from '../helpers/configHelpers';
 import config, { customIdSlug, chainedRelSlug, defaultAccessRelSlug, slug, relationSlug, customIdNumberSlug } from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
-import type { ChainedRelation, CustomIdNumberRelation, CustomIdRelation, Post, Relation } from './payload-types';
+import type { ChainedRelation, CustomIdNumberRelation, CustomIdRelation, Director, Post, Relation } from './payload-types';
 import { mapAsync } from '../../src/utilities/mapAsync';
 
 let client: RESTClient;
@@ -239,8 +239,6 @@ describe('Relationships', () => {
 
         thirdLevelID = thirdLevelDoc.id;
 
-        console.log({ thirdLevelID });
-
         const secondLevelDoc = await payload.create({
           collection: 'chained-relation',
           data: {
@@ -251,8 +249,6 @@ describe('Relationships', () => {
 
         secondLevelID = secondLevelDoc.id;
 
-        console.log({ secondLevelID });
-
         const firstLevelDoc = await payload.create({
           collection: 'chained-relation',
           data: {
@@ -262,8 +258,6 @@ describe('Relationships', () => {
         });
 
         firstLevelID = firstLevelDoc.id;
-
-        console.log({ firstLevelID });
       });
 
       it('should allow querying one level deep', async () => {
@@ -306,15 +300,60 @@ describe('Relationships', () => {
         expect(query.docs[0].id).toStrictEqual(firstLevelID);
       });
     });
+
+    describe('Nested Querying Separate Collections', () => {
+      let director: Director;
+
+      beforeAll(async () => {
+        // 1. create a director
+        director = await payload.create({
+          collection: 'directors',
+          data: {
+            name: 'Quentin Tarantino',
+          },
+        });
+
+        // 2. create a movie
+        const movie = await payload.create({
+          collection: 'movies',
+          data: {
+            name: 'Pulp Fiction',
+            director: director.id,
+          },
+        });
+
+        // 3. create a screening
+        await payload.create({
+          collection: 'screenings',
+          data: {
+            movie: movie.id,
+            name: 'Pulp Fiction Screening',
+          },
+        });
+      });
+
+      it('should allow querying two levels deep', async () => {
+        const query = await payload.find({
+          collection: 'screenings',
+          where: {
+            'movie.director.name': {
+              equals: director.name,
+            },
+          },
+        });
+
+        expect(query.docs).toHaveLength(1);
+      });
+    });
   });
 });
 
 async function createPost(overrides?: Partial<Post>) {
-  return payload.create<Post>({ collection: slug, data: { title: 'title', ...overrides } });
+  return payload.create({ collection: slug, data: { title: 'title', ...overrides } });
 }
 
 async function clearDocs(): Promise<void> {
-  const allDocs = await payload.find<Post>({ collection: slug, limit: 100 });
+  const allDocs = await payload.find({ collection: slug, limit: 100 });
   const ids = allDocs.docs.map((doc) => doc.id);
   await mapAsync(ids, async (id) => {
     await payload.delete({ collection: slug, id });

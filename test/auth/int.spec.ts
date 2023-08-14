@@ -1,22 +1,31 @@
 import mongoose from 'mongoose';
+import jwtDecode from 'jwt-decode';
+import { GraphQLClient } from 'graphql-request';
 import payload from '../../src';
 import { initPayloadTest } from '../helpers/configHelpers';
-import { slug } from './config';
+import { namedSaveToJWTValue, saveToJWTKey, slug } from './config';
 import { devUser } from '../credentials';
+import type { User } from '../../src/auth';
+import configPromise from '../collections-graphql/config';
 
 require('isomorphic-fetch');
 
 let apiUrl;
+let client: GraphQLClient;
 
 const headers = {
   'Content-Type': 'application/json',
 };
+
 const { email, password } = devUser;
 
 describe('Auth', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
     apiUrl = `${serverURL}/api`;
+    const config = await configPromise;
+    const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`;
+    client = new GraphQLClient(url);
   });
 
   afterAll(async () => {
@@ -25,7 +34,50 @@ describe('Auth', () => {
     await payload.mongoMemoryServer.stop();
   });
 
-  describe('admin user', () => {
+  describe('GraphQL - admin user', () => {
+    let token;
+    let user;
+    beforeAll(async () => {
+      // language=graphQL
+      const query = `mutation {
+          loginUser(email: "${devUser.email}", password: "${devUser.password}") {
+          token
+            user {
+              id
+              email
+            }
+          }
+      }`;
+      const response = await client.request(query);
+      user = response.loginUser.user;
+      token = response.loginUser.token;
+    });
+
+    it('should login', async () => {
+      expect(user.id).toBeDefined();
+      expect(user.email).toEqual(devUser.email);
+      expect(token).toBeDefined();
+    });
+
+    it('should have fields saved to JWT', async () => {
+      const decoded = jwtDecode<User>(token);
+      const {
+        email: jwtEmail,
+        collection,
+        roles,
+        iat,
+        exp,
+      } = decoded;
+
+      expect(jwtEmail).toBeDefined();
+      expect(collection).toEqual('users');
+      expect(Array.isArray(roles)).toBeTruthy();
+      expect(iat).toBeDefined();
+      expect(exp).toBeDefined();
+    });
+  });
+
+  describe('REST - admin user', () => {
     beforeAll(async () => {
       await fetch(`${apiUrl}/${slug}/first-register`, {
         body: JSON.stringify({
@@ -68,6 +120,8 @@ describe('Auth', () => {
 
     describe('logged in', () => {
       let token: string | undefined;
+      let loggedInUser: User | undefined;
+
       beforeAll(async () => {
         const response = await fetch(`${apiUrl}/${slug}/login`, {
           body: JSON.stringify({
@@ -80,6 +134,7 @@ describe('Auth', () => {
 
         const data = await response.json();
         token = data.token;
+        loggedInUser = data.user;
       });
 
       it('should return a logged in user from /me', async () => {
@@ -96,9 +151,47 @@ describe('Auth', () => {
         expect(data.user.email).toBeDefined();
       });
 
+      it('should have fields saved to JWT', async () => {
+        const decoded = jwtDecode<User>(token);
+        const {
+          email: jwtEmail,
+          collection,
+          roles,
+          [saveToJWTKey]: customJWTPropertyKey,
+          'x-lifted-from-group': liftedFromGroup,
+          'x-tab-field': unnamedTabSaveToJWTString,
+          tabLiftedSaveToJWT,
+          unnamedTabSaveToJWTFalse,
+          iat,
+          exp,
+        } = decoded;
+
+        const group = decoded['x-group'] as Record<string, unknown>;
+        const tab = decoded.saveToJWTTab as Record<string, unknown>;
+        const tabString = decoded['tab-test'] as Record<string, unknown>;
+
+        expect(jwtEmail).toBeDefined();
+        expect(collection).toEqual('users');
+        expect(collection).toEqual('users');
+        expect(Array.isArray(roles)).toBeTruthy();
+        // 'x-custom-jwt-property-name': 'namedSaveToJWT value'
+        expect(customJWTPropertyKey).toEqual(namedSaveToJWTValue);
+        expect(group).toBeDefined();
+        expect(group['x-test']).toEqual('nested property');
+        expect(group.saveToJWTFalse).toBeUndefined();
+        expect(liftedFromGroup).toEqual('lifted from group');
+        expect(tabLiftedSaveToJWT).toEqual('lifted from unnamed tab');
+        expect(tab['x-field']).toEqual('yes');
+        expect(tabString.includedByDefault).toEqual('yes');
+        expect(unnamedTabSaveToJWTString).toEqual('text');
+        expect(unnamedTabSaveToJWTFalse).toBeUndefined();
+        expect(iat).toBeDefined();
+        expect(exp).toBeDefined();
+      });
 
       it('should allow authentication with an API key with useAPIKey', async () => {
         const apiKey = '0123456789ABCDEFGH';
+
         const user = await payload.create({
           collection: slug,
           data: {
@@ -107,10 +200,11 @@ describe('Auth', () => {
             apiKey,
           },
         });
+
         const response = await fetch(`${apiUrl}/${slug}/me`, {
           headers: {
             ...headers,
-            Authorization: `${slug} API-Key ${user.apiKey}`,
+            Authorization: `${slug} API-Key ${user?.apiKey}`,
           },
         });
 
@@ -133,6 +227,30 @@ describe('Auth', () => {
 
         expect(response.status).toBe(200);
         expect(data.refreshedToken).toBeDefined();
+      });
+
+      it('should refresh a token and receive an up-to-date user', async () => {
+        expect(loggedInUser?.custom).toBe('Hello, world!');
+
+        await payload.update({
+          collection: slug,
+          id: loggedInUser?.id || '',
+          data: {
+            custom: 'Goodbye, world!',
+          },
+        });
+
+        const response = await fetch(`${apiUrl}/${slug}/refresh-token`, {
+          method: 'post',
+          headers: {
+            Authorization: `JWT ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        expect(response.status).toBe(200);
+        expect(data.user.custom).toBe('Goodbye, world!');
       });
 
       it('should allow a user to be created', async () => {
@@ -201,6 +319,7 @@ describe('Auth', () => {
         expect(verificationResponse.status).toBe(200);
 
         const afterVerifyResult = await db.collection('public-users').findOne({ email: emailToVerify });
+        // @ts-expect-error trust
         const { _verified: afterVerified, _verificationToken: afterToken } = afterVerifyResult;
         expect(afterVerified).toBe(true);
         expect(afterToken).toBeUndefined();
@@ -290,7 +409,7 @@ describe('Auth', () => {
           const { loginAttempts, lockUntil } = userResult;
 
           expect(loginAttempts).toBe(0);
-          expect(lockUntil).toBeUndefined();
+          expect(lockUntil).toBeNull();
         });
       });
     });
@@ -310,6 +429,27 @@ describe('Auth', () => {
       // expect(mailSpy).toHaveBeenCalled();
 
       expect(response.status).toBe(200);
+    });
+
+    it('should allow reset password', async () => {
+      const token = await payload.forgotPassword({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+        },
+        disableEmail: true,
+      });
+
+      const result = await payload.resetPassword({
+        collection: 'users',
+        data: {
+          password: devUser.password,
+          token,
+        },
+        overrideAccess: true,
+      }).catch((e) => console.error(e));
+
+      expect(result).toBeTruthy();
     });
   });
 
