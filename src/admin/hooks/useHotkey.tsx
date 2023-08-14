@@ -88,7 +88,7 @@ const useHotkey = (options: {
 
     // Check for Mac and iPad
     const hasCmd = window.navigator.userAgent.includes('Mac OS X');
-    const pressedWithoutModifier = [...pressedKeys].filter((key) => key !== 'meta' && key !== 'ctrl' && key !== 'alt' && key !== 'shift');
+    const pressedWithoutModifier = [...pressedKeys].filter((key) => !['meta', 'ctrl', 'alt', 'shift'].includes(key));
 
     // Check whether arrays contain the same values (regardless of number of occurrences)
     if (
