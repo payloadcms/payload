@@ -10,9 +10,19 @@ export async function getMigrations({
     collection: 'payload-migrations',
     sort: '-name',
     where: {
-      batch: {
-        not_equals: '-1',
-      },
+      and: [
+        {
+          batch: {
+            not_equals: '-1',
+          },
+        },
+        {
+          batch: {
+            not_equals: -1,
+          },
+        },
+      ],
+
     },
   });
 
@@ -22,7 +32,13 @@ export async function getMigrations({
   const latestBatch = Number(existingMigrations?.[0]?.batch) || 0;
 
   return {
-    existingMigrations,
-    latestBatch,
+    existingMigrations: existingMigrations.map((m) => {
+      return {
+        ...m,
+        // Cast to number to accomodate postgres numeric field type. Stores as string.
+        batch: Number(m.batch),
+      };
+    }),
+    latestBatch: Number(latestBatch),
   };
 }

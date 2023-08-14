@@ -40,7 +40,7 @@
       "env": {
         "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
         "PAYLOAD_DATABASE": "postgres",
-        "PAYLOAD_DROP_DATABASE": "true",
+        // "PAYLOAD_DROP_DATABASE": "true",
       },
       "outputCapture": "std",
     },
@@ -52,7 +52,7 @@
       "env": {
         "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
         "PAYLOAD_DATABASE": "postgres",
-        "PAYLOAD_DROP_DATABASE": "true",
+        // "PAYLOAD_DROP_DATABASE": "true",
       },
       "outputCapture": "std",
     },
@@ -70,53 +70,41 @@
       "outputCapture": "std",
     },
     {
-      "type": "node",
+      "type": "node-terminal",
+      "command": "ts-node src/bin/migrate.ts migrate:down",
       "request": "launch",
       "name": "Migrate CLI - down",
-      "runtimeArgs": [
-        "-r",
-        "ts-node/register"
-      ],
-      "args": [
-        "src/bin/migrate.ts",
-        "migrate:down",
-      ],
       "env": {
-        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
+        // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
+        "PAYLOAD_DATABASE": "postgres",
+        // "PAYLOAD_DROP_DATABASE": "true",
       },
       "outputCapture": "std",
     },
     {
-      "type": "node",
+      "type": "node-terminal",
+      "command": "ts-node src/bin/migrate.ts migrate:reset",
       "request": "launch",
       "name": "Migrate CLI - reset",
-      "runtimeArgs": [
-        "-r",
-        "ts-node/register"
-      ],
-      "args": [
-        "src/bin/migrate.ts",
-        "migrate:reset",
-      ],
       "env": {
-        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
+        // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
+        "PAYLOAD_DATABASE": "postgres",
+        // "PAYLOAD_DROP_DATABASE": "true",
       },
       "outputCapture": "std",
     },
     {
-      "type": "node",
+      "type": "node-terminal",
+      "command": "ts-node src/bin/migrate.ts migrate:refresh",
       "request": "launch",
       "name": "Migrate CLI - refresh",
-      "runtimeArgs": [
-        "-r",
-        "ts-node/register"
-      ],
-      "args": [
-        "src/bin/migrate.ts",
-        "migrate:refresh",
-      ],
       "env": {
-        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts"
+        // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
+        "PAYLOAD_DATABASE": "postgres",
+        // "PAYLOAD_DROP_DATABASE": "true",
       },
       "outputCapture": "std",
     },

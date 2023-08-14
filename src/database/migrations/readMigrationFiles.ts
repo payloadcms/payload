@@ -20,6 +20,7 @@ export const readMigrationFiles = async ({
     .map((file) => {
       return path.resolve(payload.db.migrationDir, file);
     });
+
   return files.map((filePath) => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-dynamic-require
     const migration = require(filePath) as Migration;
