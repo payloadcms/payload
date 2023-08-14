@@ -84,7 +84,7 @@ const useHotkey = (options: {
       // Autofill events, or other synthetic events, can be ignored
       return;
     }
-    pushToKeys(e.code);
+    if (e.code) pushToKeys(e.code);
 
     // Check for Mac and iPad
     const hasCmd = window.navigator.userAgent.includes('Mac OS X');
@@ -98,7 +98,7 @@ const useHotkey = (options: {
       // get the maximum edit depth
       const maxEditDepth = Math.max(...Object.keys(hotkeyCallbacks).map(Number));
       if (maxEditDepth !== editDepth) {
-        // We only want to execute the hotkey from the most top-level drawer / edit deoth.
+        // We only want to execute the hotkey from the most top-level drawer / edit depth.
         return;
       }
 
@@ -110,7 +110,7 @@ const useHotkey = (options: {
   }, [keyCodes, cmdCtrlKey, deps, editDepth]);
 
   const keyup = useCallback((e: KeyboardEvent) => {
-    removeFromKeys(e.code);
+    if (e.code) removeFromKeys(e.code);
   }, []);
 
   useEffect(() => {
