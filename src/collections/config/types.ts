@@ -12,7 +12,7 @@ import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
 import { BuildQueryArgs } from '../../mongoose/buildQuery';
 import { CustomPreviewButtonProps, CustomPublishButtonProps, CustomSaveButtonProps, CustomSaveDraftButtonProps } from '../../admin/components/elements/types';
-import { buildAfterOperation } from '../operations/utils';
+import { AfterOperationHook2, AfterOperationMap, buildAfterOperation } from '../operations/utils';
 import type { Props as ListProps } from '../../admin/components/views/collections/List/types';
 import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types';
 
@@ -124,7 +124,10 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   context: RequestContext;
 }) => any;
 
-export type AfterOperationHook = typeof buildAfterOperation;
+export type AfterOperationHook<
+  T extends TypeWithID & {slug: string} & Record<string, unknown> = any,
+  O extends keyof AfterOperationMap = keyof AfterOperationMap
+> = AfterOperationHook2<T, O>;
 
 export type AfterErrorHook = (err: Error, res: unknown, context: RequestContext) => { response: any, status: number } | void;
 
