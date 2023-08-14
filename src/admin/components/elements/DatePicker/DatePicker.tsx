@@ -16,8 +16,8 @@ const DateTime: React.FC<Props> = (props) => {
   const {
     value,
     onChange,
-    displayFormat,
-    pickerAppearance = "dayOnly",
+    displayFormat: customDisplayFormat,
+    pickerAppearance = 'default',
     minDate,
     maxDate,
     monthsToShow = 1,
@@ -39,20 +39,21 @@ const DateTime: React.FC<Props> = (props) => {
     console.warn(`Could not find DatePicker locale for ${locale}`);
   }
 
-  let dateTimeFormat = displayFormat;
+  let dateFormat = customDisplayFormat;
 
-  if (dateTimeFormat === undefined && pickerAppearance) {
-    if (pickerAppearance === 'dayAndTime') dateTimeFormat = 'MMM d, yyy h:mm a';
-    else if (pickerAppearance === 'timeOnly') dateTimeFormat = 'h:mm a';
-    else if (pickerAppearance === 'dayOnly') dateTimeFormat = 'dd';
-    else if (pickerAppearance === 'monthOnly') dateTimeFormat = 'MMMM';
-    else dateTimeFormat = 'MMM d, yyy';
+  if (!customDisplayFormat) {
+    // when no displayFormat is provided, determine format based on the picker appearance
+    if (pickerAppearance === 'default') dateFormat = 'MM/dd/yyyy';
+    else if (pickerAppearance === 'dayAndTime') dateFormat = 'MMM d, yyy h:mm a';
+    else if (pickerAppearance === 'timeOnly') dateFormat = 'h:mm a';
+    else if (pickerAppearance === 'dayOnly') dateFormat = 'MMM dd';
+    else if (pickerAppearance === 'monthOnly') dateFormat = 'MMMM';
   }
 
   const dateTimePickerProps = {
     minDate,
     maxDate,
-    dateFormat: dateTimeFormat,
+    dateFormat,
     monthsShown: Math.min(2, monthsToShow),
     showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
     minTime,
