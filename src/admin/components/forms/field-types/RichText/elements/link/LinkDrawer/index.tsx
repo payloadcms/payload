@@ -49,14 +49,13 @@ const LinkSubmit: React.FC = () => {
   const ref = useRef<HTMLButtonElement>(null);
   const editDepth = useEditDepth();
 
-  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true, editDepth }, (e, deps) => {
+  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true, editDepth }, (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const [enableClick] = deps as [boolean];
-    if (enableClick && ref.current) {
+    if (ref?.current) {
       ref.current.click();
     }
-  }, [true]);
+  });
 
 
   return (

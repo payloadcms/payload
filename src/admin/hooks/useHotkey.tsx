@@ -1,9 +1,7 @@
 /* eslint-disable no-shadow */
 import { useCallback, useEffect } from 'react';
+import { useModal } from '@faceless-ui/modal';
 import { setsAreEqual } from '../utilities/setsAreEqual';
-
-// Store the callback functions with their associated edit depths
-const hotkeyCallbacks: { [editDepth: number]: (e: KeyboardEvent, deps: boolean[]) => void } = {};
 
 // Required to be outside of hook, else debounce would be necessary
 // and then one could not prevent the default behaviour.
@@ -64,18 +62,10 @@ const useHotkey = (options: {
   keyCodes: string[]
   cmdCtrlKey: boolean
   editDepth: number
-}, func: (e: KeyboardEvent, deps: boolean[]) => void, deps: boolean[]): void => {
+}, func: (e: KeyboardEvent) => void): void => {
   const { keyCodes, cmdCtrlKey, editDepth } = options;
 
-  // on mounting of the component, add the callback function to the callbacks object
-  useEffect(() => {
-    hotkeyCallbacks[editDepth] = func;
-
-    return () => {
-      // on unmounting of the component, remove the callback function from the callbacks object
-      delete hotkeyCallbacks[editDepth];
-    };
-  }, [func, editDepth]);
+  const { modalState } = useModal();
 
 
   const keydown = useCallback((event: KeyboardEvent | CustomEvent) => {
@@ -95,19 +85,17 @@ const useHotkey = (options: {
       setsAreEqual(new Set(pressedWithoutModifier), new Set(keyCodes))
       && (!cmdCtrlKey || (hasCmd && pressedKeys.has('meta')) || (!hasCmd && e.ctrlKey))
     ) {
-      // get the maximum edit depth
-      const maxEditDepth = Math.max(...Object.keys(hotkeyCallbacks).map(Number));
+      // get the maximum edit depth by counting the number of open drawers. modalState is and object which contains the state of all drawers.
+      const maxEditDepth = Object.keys(modalState).filter((key) => modalState[key]?.isOpen)?.length + 1 ?? 1;
+
       if (maxEditDepth !== editDepth) {
         // We only want to execute the hotkey from the most top-level drawer / edit depth.
         return;
       }
-
       // execute the function associated with the maximum edit depth
-      if (hotkeyCallbacks[maxEditDepth]) {
-        hotkeyCallbacks[maxEditDepth](e, deps);
-      }
+      func(e);
     }
-  }, [keyCodes, cmdCtrlKey, deps, editDepth]);
+  }, [keyCodes, cmdCtrlKey, editDepth, modalState, func]);
 
   const keyup = useCallback((e: KeyboardEvent) => {
     if (e.code) removeFromKeys(e.code);

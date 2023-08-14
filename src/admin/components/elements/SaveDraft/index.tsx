@@ -24,14 +24,17 @@ const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({ disable
   const ref = useRef<HTMLButtonElement>(null);
   const editDepth = useEditDepth();
 
-  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true, editDepth }, (e, deps) => {
+  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true, editDepth }, (e) => {
+    if (disabled) {
+      return;
+    }
+
     e.preventDefault();
     e.stopPropagation();
-    const [enableClick] = deps as [boolean]; // alias for `disabled`
-    if (enableClick && ref.current) {
+    if (ref?.current) {
       ref.current.click();
     }
-  }, [!disabled]);
+  });
 
   return (
     <FormSubmit
