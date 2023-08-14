@@ -56,7 +56,7 @@ export type FilterOptionsProps<T = any> = {
   relationTo: string,
 }
 
-export type FilterOptions<T = any> = Where | ((options: FilterOptionsProps<T>) => Where);
+export type FilterOptions<T = any> = Where | ((options: FilterOptionsProps<T>) => (Where | Promise<Where>));
 
 type Admin = {
   position?: 'sidebar';
@@ -391,7 +391,7 @@ export type RichTextCustomLeaf = {
   plugins?: RichTextPlugin[]
 }
 
-export type RichTextElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link' | 'relationship' | 'upload' | 'indent' | RichTextCustomElement;
+export type RichTextElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link' | 'relationship' | 'upload' | 'indent' | 'textAlign' | RichTextCustomElement;
 export type RichTextLeaf = 'bold' | 'italic' | 'underline' | 'strikethrough' | 'code' | RichTextCustomLeaf;
 
 export type RichTextField = FieldBase & {

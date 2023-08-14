@@ -63,7 +63,7 @@
     "deletingFile": "Произошла ошибка при удалении файла.",
     "deletingTitle": "При удалении {{title}} произошла ошибка. Пожалуйста, проверьте соединение и повторите попытку.",
     "emailOrPasswordIncorrect": "Указанный email или пароль неверен.",
-    "followingFieldsInvalid_many": "Следующие поля недействительны:",
+    "followingFieldsInvalid_other": "Следующие поля недействительны:",
     "followingFieldsInvalid_one": "Следующее поле недействительно:",
     "incorrectCollection": "Неправильная Коллекция",
     "invalidFileType": "Недопустимый тип файла",

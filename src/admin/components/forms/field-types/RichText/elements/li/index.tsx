@@ -7,7 +7,7 @@ const LI = (props) => {
 
   return (
     <li
-      style={{ listStyle: disableListStyle ? 'none' : undefined }}
+      style={{ listStyle: disableListStyle ? 'none' : undefined, listStylePosition: disableListStyle ? 'outside' : undefined }}
       {...attributes}
     >
       {children}

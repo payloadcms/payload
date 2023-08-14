@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import path from 'path';
 import minimist from 'minimist';
 import swcRegister from '@swc/register';
 import { getTsconfig as getTSconfig } from 'get-tsconfig';
@@ -16,7 +17,7 @@ const swcOptions = {
       tsx: true,
     },
     paths: undefined,
-    baseUrl: undefined,
+    baseUrl: __dirname,
   },
   module: {
     type: 'commonjs',
@@ -30,7 +31,9 @@ if (tsConfig?.config?.compilerOptions?.paths) {
   swcOptions.jsc.paths = tsConfig.config.compilerOptions.paths;
 
   if (tsConfig?.config?.compilerOptions?.baseUrl) {
-    swcOptions.jsc.baseUrl = tsConfig.config.compilerOptions.baseUrl;
+    swcOptions.jsc.baseUrl = path.resolve(
+      tsConfig.config.compilerOptions.baseUrl,
+    );
   }
 }
 

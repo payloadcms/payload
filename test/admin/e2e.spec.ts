@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { saveDocAndAssert } from '../helpers';
+import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers';
 import type { Post } from './config';
 import { globalSlug, slug } from './shared';
 import { mapAsync } from '../../src/utilities/mapAsync';
@@ -166,6 +166,18 @@ describe('admin', () => {
 
       await expect(page.locator('#field-title')).toHaveValue(newTitle);
       await expect(page.locator('#field-description')).toHaveValue(newDesc);
+    });
+
+    test('should save using hotkey', async () => {
+      const { id } = await createPost();
+      await page.goto(url.edit(id));
+
+      const newTitle = 'new title';
+      await page.locator('#field-title').fill(newTitle);
+
+      await saveDocHotkeyAndAssert(page);
+
+      await expect(page.locator('#field-title')).toHaveValue(newTitle);
     });
 
     test('should delete existing', async () => {

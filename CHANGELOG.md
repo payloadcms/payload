@@ -1,5 +1,28 @@
 
 
+## [1.13.4](https://github.com/payloadcms/payload/compare/v1.13.3...v1.13.4) (2023-08-11)
+
+
+### Bug Fixes
+
+* correctly passes block path inside buildFieldSchemaMap ([#3162](https://github.com/payloadcms/payload/issues/3162)) ([3c60abd](https://github.com/payloadcms/payload/commit/3c60abd61aaf24d49712c80bcbd0f1113c22b85a))
+
+## [1.13.3](https://github.com/payloadcms/payload/compare/v1.13.2...v1.13.3) (2023-08-11)
+
+
+### Bug Fixes
+
+* unable to add arrays inside secondary named tabs ([#3158](https://github.com/payloadcms/payload/issues/3158)) ([cb04d4a](https://github.com/payloadcms/payload/commit/cb04d4a82a68a764330582b93882d422b32c2527))
+
+## [1.13.2](https://github.com/payloadcms/payload/compare/v1.13.1...v1.13.2) (2023-08-10)
+
+## [1.13.1](https://github.com/payloadcms/payload/compare/v1.13.0...v1.13.1) (2023-08-08)
+
+
+### Bug Fixes
+
+* updates addFieldRow and replaceFieldRow rowIndex insertion ([#3145](https://github.com/payloadcms/payload/issues/3145)) ([f5cf546](https://github.com/payloadcms/payload/commit/f5cf546e1918de66998d5f0e5410bfbc1f054567))
+
 # [1.13.0](https://github.com/payloadcms/payload/compare/v1.12.0...v1.13.0) (2023-08-08)
 
 
