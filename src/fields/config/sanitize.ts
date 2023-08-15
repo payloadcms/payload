@@ -1,9 +1,9 @@
 import { formatLabels, toWords } from '../../utilities/formatLabels';
-import { MissingFieldType, InvalidFieldRelationship, InvalidFieldName } from '../../errors';
+import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors';
 import { baseBlockFields } from '../baseFields/baseBlockFields';
 import validations from '../validations';
 import { baseIDField } from '../baseFields/baseIDField';
-import { Field, fieldAffectsData } from './types';
+import { Field, fieldAffectsData, tabHasName } from './types';
 import withCondition from '../../admin/components/forms/withCondition';
 
 const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] => {
@@ -87,6 +87,9 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
     if (field.type === 'tabs') {
       field.tabs = field.tabs.map((tab) => {
         const unsanitizedTab = { ...tab };
+        if (tabHasName(tab) && typeof tab.label === 'undefined') {
+          unsanitizedTab.label = toWords(tab.name);
+        }
         unsanitizedTab.fields = sanitizeFields(tab.fields, validRelationships);
         return unsanitizedTab;
       });

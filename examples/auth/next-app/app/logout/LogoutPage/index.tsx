@@ -32,7 +32,7 @@ export const LogoutPage: React.FC = props => {
             {'What would you like to do next? '}
             <Link href="/">Click here</Link>
             {` to go to the home page. To log back in, `}
-            <Link href="login">click here</Link>
+            <Link href="/login">click here</Link>
             {'.'}
           </p>
         </div>

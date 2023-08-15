@@ -6,5 +6,6 @@ export type ButtonProps = {
   className?: string
   children?: React.ReactNode
   tooltip?: string
+  type?: string
   el?: ElementType
 }

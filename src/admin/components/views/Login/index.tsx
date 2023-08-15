@@ -26,6 +26,7 @@ const Login: React.FC = () => {
     admin: {
       user: userSlug,
       logoutRoute,
+      autoLogin,
       components: {
         beforeLogin,
         afterLogin,
@@ -50,7 +51,8 @@ const Login: React.FC = () => {
     if (data.token) {
       setToken(data.token);
 
-      history.push(redirect || admin);
+      // Ensure the redirect always starts with the admin route, and concatenate the redirect path
+      history.push(admin + (redirect || ''));
     }
   };
 
@@ -103,6 +105,10 @@ const Login: React.FC = () => {
               onSuccess={onSuccess}
               method="post"
               action={`${serverURL}${api}/${userSlug}/login`}
+              initialData={{
+                email: autoLogin && autoLogin.prefillOnly ? autoLogin.email : undefined,
+                password: autoLogin && autoLogin.prefillOnly ? autoLogin.password : undefined,
+              }}
             >
               <FormLoadingOverlayToggle
                 action="loading"

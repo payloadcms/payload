@@ -11,6 +11,7 @@ import { BulkOperationResult } from '../../config/types';
 import { setRequestContext } from '../../../express/setRequestContext';
 
 export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
+  req?: PayloadRequest,
   collection: T
   depth?: number
   locale?: string

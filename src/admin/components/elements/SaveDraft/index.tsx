@@ -1,11 +1,13 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import FormSubmit from '../../forms/Submit';
 import { useForm, useFormModified } from '../../forms/Form/context';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useLocale } from '../../utilities/Locale';
+import useHotkey from '../../../hooks/useHotkey';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import { useEditDepth } from '../../utilities/EditDepth';
 
 
 const baseClass = 'save-draft';
@@ -19,6 +21,21 @@ export type DefaultSaveDraftButtonProps = {
   label: string;
 };
 const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({ disabled, saveDraft, label }) => {
+  const ref = useRef<HTMLButtonElement>(null);
+  const editDepth = useEditDepth();
+
+  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true, editDepth }, (e) => {
+    if (disabled) {
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+    if (ref?.current) {
+      ref.current.click();
+    }
+  });
+
   return (
     <FormSubmit
       className={baseClass}
@@ -26,6 +43,7 @@ const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({ disable
       buttonStyle="secondary"
       onClick={saveDraft}
       disabled={disabled}
+      ref={ref}
     >
       {label}
     </FormSubmit>

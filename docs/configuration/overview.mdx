@@ -126,21 +126,31 @@ project-name
   here](/docs/admin/webpack#admin-environment-vars) for more info.
 </Banner>
 
-### Customizing & overriding the config location
+### Customizing & Automating Config Location Detection
 
-By default, the Payload config must be in the root of your current working directory and named either `payload.config.js` or `payload.config.ts` if you're using TypeScript.
+Payload is designed to automatically locate your configuration file. By default, it will first look in the root of your current working directory for a file named `payload.config.js` or `payload.config.ts` if you're using TypeScript.
 
-But, you can specify where your Payload config is located as well as what it's named by using the environment variable `PAYLOAD_CONFIG_PATH`. The path you provide via this environment variable can either be absolute or relative to your current working directory.
+In development mode, if the configuration file is not found at the root, Payload will attempt to read your `tsconfig.json`, and search in the directory specified in `compilerOptions.rootDir` (typically "src").
+
+In production mode, Payload will first attempt to find the config file in the output directory specified in `compilerOptions.outDir` of your `tsconfig.json`, then fallback to the source directory (`compilerOptions.rootDir`), and finally will check the 'dist' directory.
+
+Please ensure your `tsconfig.json` is properly configured if you want Payload to accurately auto-detect your configuration file location. If `tsconfig.json` does not exist or doesn't specify `rootDir` or `outDir`, Payload will default to the current working directory.
+
+#### Overriding the Config Location
+
+In addition to the above automated detection, you can specify your own location for the Payload config file. This is done by using the environment variable `PAYLOAD_CONFIG_PATH`. The path you provide via this environment variable can either be absolute or relative to your current working directory. This can be useful in situations where your Payload config is not in a standard location, or you wish to switch between multiple configurations.
 
 **Example in package.json:**
 
-```
+```json
 {
-	"scripts": {
-		"dev": "PAYLOAD_CONFIG_PATH=path/to/custom-config.js node server.js",
-	}
+  "scripts": {
+    "dev": "PAYLOAD_CONFIG_PATH=path/to/custom-config.js node server.js",
+  }
 }
 ```
+
+When `PAYLOAD_CONFIG_PATH` is set, Payload will use this path to load the configuration, bypassing all automated detection.
 
 ### Developing within the Config
 

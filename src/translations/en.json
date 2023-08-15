@@ -63,7 +63,7 @@
     "deletingFile": "There was an error deleting file.",
     "deletingTitle": "There was an error while deleting {{title}}. Please check your connection and try again.",
     "emailOrPasswordIncorrect": "The email or password provided is incorrect.",
-    "followingFieldsInvalid_many": "The following fields are invalid:",
+    "followingFieldsInvalid_other": "The following fields are invalid:",
     "followingFieldsInvalid_one": "The following field is invalid:",
     "incorrectCollection": "Incorrect Collection",
     "invalidFileType": "Invalid file type",
@@ -90,9 +90,7 @@
     "unspecific": "An error has occurred.",
     "userLocked": "This user is locked due to having too many failed login attempts.",
     "valueMustBeUnique": "Value must be unique",
-    "verificationTokenInvalid": "Verification token is invalid.",
-    "singular": "Error",
-    "plural": "Errors"
+    "verificationTokenInvalid": "Verification token is invalid."
   },
   "fields": {
     "addLabel": "Add {{label}}",
@@ -186,6 +184,8 @@
     "email": "Email",
     "emailAddress": "Email Address",
     "enterAValue": "Enter a value",
+    "error": "Error",
+    "errors": "Errors",
     "fallbackToDefaultLocale": "Fallback to default locale",
     "filter": "Filter",
     "filterWhere": "Filter {{label}} where",

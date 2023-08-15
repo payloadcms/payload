@@ -12,6 +12,7 @@ import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
 import { BuildQueryArgs } from '../../mongoose/buildQuery';
 import { CustomPreviewButtonProps, CustomPublishButtonProps, CustomSaveButtonProps, CustomSaveDraftButtonProps } from '../../admin/components/elements/types';
+import { AfterOperationArg, AfterOperationMap } from '../operations/utils';
 import type { Props as ListProps } from '../../admin/components/views/collections/List/types';
 import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types';
 
@@ -122,6 +123,13 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   id: string | number;
   context: RequestContext;
 }) => any;
+
+
+export type AfterOperationHook<
+  T extends TypeWithID = any,
+> = (
+    arg: AfterOperationArg<T>,
+  ) => Promise<ReturnType<AfterOperationMap<T>[keyof AfterOperationMap<T>]>>;
 
 export type AfterErrorHook = (err: Error, res: unknown, context: RequestContext) => { response: any, status: number } | void;
 
@@ -276,7 +284,7 @@ export type CollectionConfig = {
   graphQL?: {
     singularName?: string
     pluralName?: string
-  }
+  } | false
   /**
    * Options used in typescript generation
    */
@@ -314,6 +322,7 @@ export type CollectionConfig = {
     afterMe?: AfterMeHook[];
     afterRefresh?: AfterRefreshHook[];
     afterForgotPassword?: AfterForgotPasswordHook[];
+    afterOperation?: AfterOperationHook[];
   };
   /**
    * Custom rest api endpoints

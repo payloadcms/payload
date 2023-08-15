@@ -3,24 +3,27 @@ import { ReactEditor } from 'slate-react';
 import isElementActive from './isActive';
 import { isWithinListItem } from './isWithinListItem';
 
-const toggleElement = (editor: Editor, format: string): void => {
-  const isActive = isElementActive(editor, format);
-  let type = format;
+const toggleElement = (editor: Editor, format: string, blockType = 'type'): void => {
+  const isActive = isElementActive(editor, format, blockType);
+
+  const formatByBlockType = {
+    [blockType]: format,
+  };
 
   const isWithinLI = isWithinListItem(editor);
 
   if (isActive) {
-    type = undefined;
+    formatByBlockType[blockType] = undefined;
   }
 
-  if (!isActive && isWithinLI) {
+  if (!isActive && isWithinLI && blockType !== 'textAlign') {
     const block = { type: 'li', children: [] };
     Transforms.wrapNodes(editor, block, {
       at: Editor.unhangRange(editor, editor.selection),
     });
   }
 
-  Transforms.setNodes(editor, { type }, {
+  Transforms.setNodes(editor, { [blockType]: formatByBlockType[blockType] }, {
     at: Editor.unhangRange(editor, editor.selection),
   });
 

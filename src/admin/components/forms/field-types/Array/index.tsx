@@ -1,10 +1,8 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
 import Button from '../../../elements/Button';
 import { useForm, useFormSubmitted } from '../../Form/context';
-import buildStateFromSchema from '../../Form/buildStateFromSchema';
 import useField from '../../useField';
 import { useLocale } from '../../../utilities/Locale';
 import Error from '../../Error';
@@ -12,7 +10,6 @@ import { array } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
 import FieldDescription from '../../FieldDescription';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
-import { useOperation } from '../../../utilities/OperationProvider';
 import { Props } from './types';
 import { scrollToID } from '../../../../utilities/scrollToID';
 import { getTranslation } from '../../../../../utilities/getTranslation';
@@ -56,12 +53,10 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const CustomRowLabel = components?.RowLabel || undefined;
 
-  const { setDocFieldPreferences, id, getDocPreferences } = useDocumentInfo();
-  const { dispatchFields, setModified } = useForm();
+  const { setDocFieldPreferences } = useDocumentInfo();
+  const { dispatchFields, setModified, addFieldRow, removeFieldRow } = useForm();
   const submitted = useFormSubmitted();
-  const { user } = useAuth();
   const locale = useLocale();
-  const operation = useOperation();
   const { t, i18n } = useTranslation('fields');
   const { localization } = useConfig();
 
@@ -95,7 +90,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     showError,
     errorMessage,
     value,
-    rows,
+    rows = [],
     valid,
   } = useField<number>({
     path,
@@ -105,15 +100,13 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   });
 
   const addRow = useCallback(async (rowIndex: number) => {
-    const preferences = await getDocPreferences();
-    const subFieldState = await buildStateFromSchema({ fieldSchema: fields, preferences, operation, id, user, locale, t });
-    dispatchFields({ type: 'ADD_ROW', rowIndex, subFieldState, path });
+    await addFieldRow({ rowIndex, path });
     setModified(true);
 
     setTimeout(() => {
       scrollToID(`${path}-row-${rowIndex + 1}`);
     }, 0);
-  }, [dispatchFields, fields, id, locale, operation, path, setModified, t, user, getDocPreferences]);
+  }, [addFieldRow, path, setModified]);
 
   const duplicateRow = useCallback(async (rowIndex: number) => {
     dispatchFields({ type: 'DUPLICATE_ROW', rowIndex, path });
@@ -125,9 +118,9 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   }, [dispatchFields, path, setModified]);
 
   const removeRow = useCallback((rowIndex: number) => {
-    dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
+    removeFieldRow({ rowIndex, path });
     setModified(true);
-  }, [dispatchFields, path, setModified]);
+  }, [removeFieldRow, path, setModified]);
 
   const moveRow = useCallback((moveFromIndex: number, moveToIndex: number) => {
     dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
@@ -142,8 +135,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     dispatchFields({ type: 'SET_ROW_COLLAPSED', path, collapsed, rowID, setDocFieldPreferences });
   }, [dispatchFields, path, setDocFieldPreferences]);
 
-  const hasMaxRows = maxRows && rows?.length >= maxRows;
-  const fieldErrorCount = (rows || []).reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0) + (valid ? 0 : 1);
+  const hasMaxRows = maxRows && rows.length >= maxRows;
+  const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0) + (valid ? 0 : 1);
   const fieldHasErrors = submitted && fieldErrorCount > 0;
 
   const classes = [
@@ -152,8 +145,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     className,
     fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
   ].filter(Boolean).join(' ');
-
-  if (!rows) return null;
 
   return (
     <div
@@ -218,6 +209,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       <DraggableSortable
         ids={rows.map((row) => row.id)}
         onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
+        className={`${baseClass}__draggable-rows`}
       >
         {rows.length > 0 && rows.map((row, i) => (
           <DraggableSortableItem

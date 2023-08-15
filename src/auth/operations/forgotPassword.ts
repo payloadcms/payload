@@ -3,6 +3,7 @@ import { Document } from 'mongoose';
 import { APIError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { Collection } from '../../collections/config/types';
+import { buildAfterOperation } from '../../collections/operations/utils';
 
 export type Arguments = {
   collection: Collection
@@ -85,9 +86,11 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
   const userJSON = user.toJSON({ virtuals: true });
 
   if (!disableEmail) {
+    const serverURL = (config.serverURL !== null && config.serverURL !== '') ? config.serverURL : `${req.protocol}://${req.get('host')}`;
+
     let html = `${t('authentication:youAreReceivingResetPassword')}
-    <a href="${config.serverURL}${config.routes.admin}/reset/${token}">
-     ${config.serverURL}${config.routes.admin}/reset/${token}
+    <a href="${serverURL}${config.routes.admin}/reset/${token}">
+     ${serverURL}${config.routes.admin}/reset/${token}
     </a>
     ${t('authentication:youDidNotRequestPassword')}`;
 
@@ -125,6 +128,16 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     await priorHook;
     await hook({ args, context: req.context });
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  token = await buildAfterOperation({
+    operation: 'forgotPassword',
+    args,
+    result: token,
+  });
 
   return token;
 }
