@@ -95,7 +95,7 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
       [lng, lat, maxDistance, minDistance] = createArrayFromCommaDelineated(formattedValue);
     }
 
-    if (!lng || !lat || (!maxDistance && !minDistance)) {
+    if (lng == null || lat == null || (maxDistance == null && minDistance == null)) {
       formattedValue = undefined;
     } else {
       formattedValue = {
@@ -110,7 +110,7 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
   if (operator === 'within' || operator === 'intersects') {
     formattedValue = {
       $geometry: formattedValue,
-    }
+    };
   }
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
