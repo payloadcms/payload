@@ -40,6 +40,7 @@ export type GenericRelation = Relations<string, Record<string, Relation<string>>
 
 export type PostgresAdapter = DatabaseAdapter & Args & {
   db: DrizzleDB
+  sessions: Record<string, DrizzleDB>
   enums: Record<string, GenericEnum>
   relations: Record<string, GenericRelation>
   tables: Record<string, GenericTable>
