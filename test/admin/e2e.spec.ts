@@ -394,6 +394,25 @@ describe('admin', () => {
         await page.locator('.condition__actions-remove').click();
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
       });
+
+      test('should accept where query from valid URL where parameter', async () => {
+        await createPost({ title: 'post1' });
+        await createPost({ title: 'post2' });
+        await page.goto(`${url.list}?limit=10&page=1&where[or][0][and][0][title][equals]=post1`);
+
+        await expect(page.locator('.react-select--single-value').first()).toContainText('Title en');
+        await expect(page.locator(tableRowLocator)).toHaveCount(1);
+      });
+
+      test('should accept transformed where query from invalid URL where parameter', async () => {
+        await createPost({ title: 'post1' });
+        await createPost({ title: 'post2' });
+        // [title][equals]=post1 should be getting transformed into a valid where[or][0][and][0][title][equals]=post1
+        await page.goto(`${url.list}?limit=10&page=1&where[title][equals]=post1`);
+
+        await expect(page.locator('.react-select--single-value').first()).toContainText('Title en');
+        await expect(page.locator(tableRowLocator)).toHaveCount(1);
+      });
     });
 
     describe('table columns', () => {
