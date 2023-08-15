@@ -384,6 +384,134 @@ describe('collections-graphql', () => {
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }));
       });
 
+
+      describe('within', () => {
+        type Point = [number, number];
+        const polygon: Point[] = [
+          [9.0, 19.0], // bottom-left
+          [9.0, 21.0], // top-left
+          [11.0, 21.0], // top-right
+          [11.0, 19.0], // bottom-right
+          [9.0, 19.0], // back to starting point to close the polygon
+        ];
+
+        it('should return a document with the point inside the polygon', async () => {
+          const query = `
+            query {
+              Points(
+                where: {
+                  point: {
+                    within: {
+                      type: "Polygon",
+                      coordinates: ${JSON.stringify([polygon])}
+                    }
+                  }
+              }) {
+                docs {
+                  id
+                  point
+                }
+              }
+            }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Points;
+
+          expect(docs).toHaveLength(1);
+          expect(docs[0].point).toEqual([10, 20]);
+        });
+
+        it('should not return a document with the point outside the polygon', async () => {
+          const reducedPolygon = polygon.map((vertex) => vertex.map((coord) => coord * 0.1));
+          const query = `
+            query {
+              Points(
+                where: {
+                  point: {
+                    within: {
+                      type: "Polygon",
+                      coordinates: ${JSON.stringify([reducedPolygon])}
+                    }
+                  }
+              }) {
+                docs {
+                  id
+                  point
+                }
+              }
+            }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Points;
+
+          expect(docs).toHaveLength(0);
+        });
+      });
+
+      describe('intersects', () => {
+        type Point = [number, number];
+        const polygon: Point[] = [
+          [9.0, 19.0], // bottom-left
+          [9.0, 21.0], // top-left
+          [11.0, 21.0], // top-right
+          [11.0, 19.0], // bottom-right
+          [9.0, 19.0], // back to starting point to close the polygon
+        ];
+
+        it('should return a document with the point intersecting the polygon', async () => {
+          const query = `
+            query {
+              Points(
+                where: {
+                  point: {
+                    intersects: {
+                      type: "Polygon",
+                      coordinates: ${JSON.stringify([polygon])}
+                    }
+                  }
+              }) {
+                docs {
+                  id
+                  point
+                }
+              }
+            }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Points;
+
+          expect(docs).toHaveLength(1);
+          expect(docs[0].point).toEqual([10, 20]);
+        });
+
+        it('should not return a document with the point not intersecting a smaller polygon', async () => {
+          const reducedPolygon = polygon.map((vertex) => vertex.map((coord) => coord * 0.1));
+          const query = `
+            query {
+              Points(
+                where: {
+                  point: {
+                    within: {
+                      type: "Polygon",
+                      coordinates: ${JSON.stringify([reducedPolygon])}
+                    }
+                  }
+              }) {
+                docs {
+                  id
+                  point
+                }
+              }
+            }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Points;
+
+          expect(docs).toHaveLength(0);
+        });
+      });
+
+
       it('can query deeply nested fields within rows, tabs, collapsibles', async () => {
         const withNestedField = await createPost({ D1: { D2: { D3: { D4: 'nested message' } } } });
         const query = `{
