@@ -262,7 +262,7 @@ export const withOperators = (field: FieldAffectingData, parentName: string): Gr
   }
 
 
-  const ii = new GraphQLInputObjectType({
+  return new GraphQLInputObjectType({
     name,
     fields: fieldOperators.reduce((objectTypeFields, operator) => {
       // Get the type of the operator. It can be either static, or dynamic (=> a function)
@@ -296,6 +296,4 @@ export const withOperators = (field: FieldAffectingData, parentName: string): Gr
       };
     }, {}),
   });
-
-  return ii;
 };
