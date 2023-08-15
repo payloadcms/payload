@@ -19,20 +19,26 @@ export default function Home() {
         <Link href="https://nextjs.org/docs/app" target="_blank" rel="noopener noreferrer">
           App Router
         </Link>
-        {" made explicitly for Payload's "}
-        <Link href="https://github.com/payloadcms/payload/tree/master/examples/auth/cms">
-          Auth Example
+        {' made explicitly for the '}
+        <Link href="https://github.com/payloadcms/payload/tree/master/examples/auth">
+          Payload Auth Example
         </Link>
         {". This example demonstrates how to implement Payload's "}
         <Link href="https://payloadcms.com/docs/authentication/overview">Authentication</Link>
-        {' strategies in both the REST and GraphQL APIs.'}
+        {
+          ' strategies in both the REST and GraphQL APIs. To toggle between these APIs, see `_layout.tsx`.'
+        }
       </p>
       <p>
         {'Visit the '}
-        <Link href="/login">Login</Link>
-        {' page to start the authentication flow. Once logged in, you will be redirected to the '}
-        <Link href="/account">Account</Link>
-        {` page which is restricted to users only. To toggle APIs, simply toggle the "api" prop between "rest" and "gql" in "_app.tsx".`}
+        <Link href="/login">login page</Link>
+        {' to start the authentication flow. Once logged in, you will be redirected to the '}
+        <Link href="/account">account page</Link>
+        {` which is restricted to users only. To manage all users, `}
+        <Link href={`${process.env.NEXT_PUBLIC_CMS_URL}/admin/collections/users`}>
+          login to the admin dashboard
+        </Link>
+        {'.'}
       </p>
     </Gutter>
   )

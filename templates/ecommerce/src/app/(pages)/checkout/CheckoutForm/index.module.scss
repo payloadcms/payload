@@ -1,0 +1,13 @@
+@import "../../../_css/common";
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--base);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--base);
+}

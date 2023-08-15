@@ -1,9 +1,7 @@
-import { AuthProvider } from './_components/Auth'
 import { Header } from './_components/Header'
+import { AuthProvider } from './_providers/Auth'
 
-import './app.scss'
-
-import classes from './index.module.scss'
+import './_css/app.scss'
 
 export const metadata = {
   title: 'Payload Auth + Next.js App Router Example',
@@ -16,9 +14,13 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
+        <AuthProvider
+          // To toggle between the REST and GraphQL APIs,
+          // change the `api` prop to either `rest` or `gql`
+          api="rest" // change this to `gql` to use the GraphQL API
+        >
           <Header />
-          <div className={classes.page}>{children}</div>
+          <main>{children}</main>
         </AuthProvider>
       </body>
     </html>

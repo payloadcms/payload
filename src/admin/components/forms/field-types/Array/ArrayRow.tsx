@@ -29,6 +29,7 @@ type ArrayRowProps = UseDraggableSortableReturn & Pick<Props, 'fields' | 'path' 
   row: Row
   CustomRowLabel?: RowLabelType
   readOnly?: boolean
+  hasMaxRows?: boolean
 }
 export const ArrayRow: React.FC<ArrayRowProps> = ({
   path: parentPath,
@@ -51,6 +52,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   permissions,
   CustomRowLabel,
   fields,
+  hasMaxRows,
 }) => {
   const path = `${parentPath}.${rowIndex}`;
   const { i18n } = useTranslation();
@@ -108,6 +110,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             duplicateRow={duplicateRow}
             rowCount={rowCount}
             index={rowIndex}
+            hasMaxRows={hasMaxRows}
           />
         ) : undefined}
       >

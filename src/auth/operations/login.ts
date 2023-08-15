@@ -10,6 +10,7 @@ import { User } from '../types';
 import { Collection } from '../../collections/config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import unlock from './unlock';
+import { buildAfterOperation } from '../../collections/operations/utils';
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts';
 import { authenticateLocalStrategy } from '../strategies/local/authenticate';
 import { getFieldsToSign } from './getFieldsToSign';
@@ -48,6 +49,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'login',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -133,6 +135,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     user = (await hook({
       user,
       req: args.req,
+      context: req.context,
     })) || user;
   }, Promise.resolve());
 
@@ -172,6 +175,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       user,
       req: args.req,
       token,
+      context: req.context,
     }) || user;
   }, Promise.resolve());
 
@@ -186,6 +190,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -198,18 +203,32 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     user = await hook({
       req,
       doc: user,
+      context: req.context,
     }) || user;
   }, Promise.resolve());
+
+
+  let result: Result & { user: GeneratedTypes['collections'][TSlug] } = {
+    token,
+    user,
+    exp: (jwt.decode(token) as jwt.JwtPayload).exp,
+  };
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    operation: 'login',
+    args,
+    result,
+  });
 
   // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////
 
-  return {
-    token,
-    user,
-    exp: (jwt.decode(token) as jwt.JwtPayload).exp,
-  };
+  return result;
 }
 
 export default login;

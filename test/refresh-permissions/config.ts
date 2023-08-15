@@ -1,10 +1,10 @@
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 import GlobalViewWithRefresh from './GlobalViewWithRefresh';
 
 export const pagesSlug = 'pages';
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   globals: [
     {
       slug: 'settings',

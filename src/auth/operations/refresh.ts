@@ -1,11 +1,12 @@
+import url from 'url';
 import jwt from 'jsonwebtoken';
 import { Response } from 'express';
-import url from 'url';
 import { Collection, BeforeOperationHook } from '../../collections/config/types';
 import { Forbidden } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import { Document } from '../../types';
 import { PayloadRequest } from '../../express/types';
+import { buildAfterOperation } from '../../collections/operations/utils';
 import { getFieldsToSign } from './getFieldsToSign';
 
 export type Result = {
@@ -34,6 +35,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
     args = (await hook({
       args,
       operation: 'refresh',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -96,7 +98,7 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
     args.res.cookie(`${config.cookiePrefix}-token`, refreshedToken, cookieOptions);
   }
 
-  let response: Result = {
+  let result: Result = {
     user,
     refreshedToken,
     exp,
@@ -109,19 +111,31 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
   await collectionConfig.hooks.afterRefresh.reduce(async (priorHook, hook) => {
     await priorHook;
 
-    response = (await hook({
+    result = (await hook({
       req: args.req,
       res: args.res,
       exp,
       token: refreshedToken,
-    })) || response;
+      context: args.req.context,
+    })) || result;
   }, Promise.resolve());
+
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation({
+    operation: 'refresh',
+    args,
+    result,
+  });
 
   // /////////////////////////////////////
   // Return results
   // /////////////////////////////////////
 
-  return response;
+  return result;
 }
 
 export default refresh;

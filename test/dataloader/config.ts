@@ -1,7 +1,7 @@
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   collections: [
     {
       slug: 'posts',

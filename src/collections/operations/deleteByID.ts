@@ -4,11 +4,12 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { NotFound, Forbidden } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { BeforeOperationHook, Collection } from '../config/types';
-import { Document, Where } from '../../types';
+import { Document } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
+import { buildAfterOperation } from './utils';
 
 export type Arguments = {
   depth?: number
@@ -32,6 +33,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     args = (await hook({
       args,
       operation: 'delete',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -72,6 +74,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     return hook({
       req,
       id,
+      context: req.context,
     });
   }, Promise.resolve());
 
@@ -145,6 +148,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -157,6 +161,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     result = await hook({
       req,
       doc: result,
+      context: req.context,
     }) || result;
   }, Promise.resolve());
 
@@ -167,8 +172,18 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
     await priorHook;
 
-    result = await hook({ req, id, doc: result }) || result;
+    result = await hook({ req, id, doc: result, context: req.context }) || result;
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    operation: 'deleteByID',
+    args,
+    result,
+  });
 
   // /////////////////////////////////////
   // 8. Return results

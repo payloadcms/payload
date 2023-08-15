@@ -6,12 +6,13 @@ import { Response } from 'express';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
-import { PayloadRequest } from '../../express/types';
+import { PayloadRequest, RequestContext } from '../../express/types';
 import { Auth, IncomingAuthType, User } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
 import { BuildQueryArgs } from '../../mongoose/buildQuery';
 import { CustomPreviewButtonProps, CustomPublishButtonProps, CustomSaveButtonProps, CustomSaveDraftButtonProps } from '../../admin/components/elements/types';
+import { AfterOperationArg, AfterOperationMap } from '../operations/utils';
 import type { Props as ListProps } from '../../admin/components/views/collections/List/types';
 import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types';
 
@@ -49,6 +50,7 @@ export type BeforeOperationHook = (args: {
    * Hook operation being performed
    */
   operation: HookOperationType;
+  context: RequestContext;
 }) => any;
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
@@ -64,6 +66,7 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T;
+  context: RequestContext;
 }) => any;
 
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
@@ -79,6 +82,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T;
+  context: RequestContext;
 }) => any;
 
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
@@ -89,53 +93,69 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    * Hook operation being performed
    */
   operation: CreateOrUpdateOperation;
+  context: RequestContext;
 }) => any;
 
 export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   query: { [key: string]: any };
+  context: RequestContext;
 }) => any;
 
 export type AfterReadHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   query?: { [key: string]: any };
-  findMany?: boolean
+  findMany?: boolean;
+  context: RequestContext;
 }) => any;
 
 export type BeforeDeleteHook = (args: {
   req: PayloadRequest;
   id: string | number;
+  context: RequestContext;
 }) => any;
 
 export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   id: string | number;
+  context: RequestContext;
 }) => any;
 
-export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
+
+export type AfterOperationHook<
+  T extends TypeWithID = any,
+> = (
+    arg: AfterOperationArg<T>,
+  ) => Promise<ReturnType<AfterOperationMap<T>[keyof AfterOperationMap<T>]>>;
+
+export type AfterErrorHook = (err: Error, res: unknown, context: RequestContext) => { response: any, status: number } | void;
 
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
-  user: T
+  user: T;
+  context: RequestContext;
 }) => any;
 
 export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   user: T;
   token: string;
+  context: RequestContext;
 }) => any;
 
 export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   res: Response;
+  context: RequestContext;
 }) => any;
 
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   response: unknown;
+  context: RequestContext;
 }) => any;
 
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
@@ -143,10 +163,12 @@ export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   res: Response;
   token: string;
   exp: number;
+  context: RequestContext;
 }) => any;
 
 export type AfterForgotPasswordHook = (args: {
   args?: any;
+  context: RequestContext;
 }) => any;
 
 type BeforeDuplicateArgs<T> = {
@@ -262,7 +284,7 @@ export type CollectionConfig = {
   graphQL?: {
     singularName?: string
     pluralName?: string
-  }
+  } | false
   /**
    * Options used in typescript generation
    */
@@ -300,6 +322,7 @@ export type CollectionConfig = {
     afterMe?: AfterMeHook[];
     afterRefresh?: AfterRefreshHook[];
     afterForgotPassword?: AfterForgotPasswordHook[];
+    afterOperation?: AfterOperationHook[];
   };
   /**
    * Custom rest api endpoints

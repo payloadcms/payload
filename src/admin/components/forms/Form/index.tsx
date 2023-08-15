@@ -21,13 +21,15 @@ import wait from '../../../../utilities/wait';
 import { Field } from '../../../../fields/config/types';
 import buildInitialState from './buildInitialState';
 import errorMessages from './errorMessages';
-import { Fields, Context as FormContextType, GetDataByPath, Props, Row, SubmitOptions } from './types';
+import { Context, Fields, Context as FormContextType, GetDataByPath, Props, Row, SubmitOptions } from './types';
 import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
 import buildStateFromSchema from './buildStateFromSchema';
 import { useOperation } from '../../utilities/OperationProvider';
 import { WatchFormErrors } from './WatchFormErrors';
 import { splitPathByArrayFields } from '../../../../utilities/splitPathByArrayFields';
 import { setsAreEqual } from '../../../../utilities/setsAreEqual';
+import { buildFieldSchemaMap } from './buildFieldSchemaMap';
+import { isNumber } from '../../../../utilities/isNumber';
 
 const baseClass = 'form';
 
@@ -52,7 +54,7 @@ const Form: React.FC<Props> = (props) => {
   const locale = useLocale();
   const { t, i18n } = useTranslation('general');
   const { refreshCookie, user } = useAuth();
-  const { id, getDocPreferences } = useDocumentInfo();
+  const { id, getDocPreferences, collection, global } = useDocumentInfo();
   const operation = useOperation();
 
   const [modified, setModified] = useState(false);
@@ -359,6 +361,92 @@ const Form: React.FC<Props> = (props) => {
     waitForAutocomplete,
   ]);
 
+  const traverseRowConfigs = React.useCallback(({ pathPrefix, path, fieldConfig }: {
+    path: string,
+    fieldConfig: Field[]
+    pathPrefix?: string,
+  }) => {
+    const config = fieldConfig;
+    const pathSegments = splitPathByArrayFields(path);
+    const configMap = buildFieldSchemaMap(config);
+
+    for (let i = 0; i < pathSegments.length; i += 1) {
+      const pathSegment = pathSegments[i];
+
+      if (isNumber(pathSegment)) {
+        const rowIndex = parseInt(pathSegment, 10);
+        const parentFieldPath = pathSegments.slice(0, i).join('.');
+        const remainingPath = pathSegments.slice(i + 1).join('.');
+        const arrayFieldPath = pathPrefix ? `${pathPrefix}.${parentFieldPath}` : parentFieldPath;
+        const parentArrayField = contextRef.current.getField(arrayFieldPath);
+        const rowField = parentArrayField.rows[rowIndex];
+
+        if (rowField.blockType) {
+          const blockConfig = configMap.get(`${parentFieldPath}.${rowField.blockType}`);
+          if (blockConfig) {
+            return traverseRowConfigs({
+              pathPrefix: `${arrayFieldPath}.${rowIndex}`,
+              path: remainingPath,
+              fieldConfig: blockConfig,
+            });
+          }
+
+          throw new Error(`Block config not found for ${rowField.blockType} at path ${path}`);
+        } else {
+          return traverseRowConfigs({
+            pathPrefix: `${arrayFieldPath}.${rowIndex}`,
+            path: remainingPath,
+            fieldConfig: configMap.get(parentFieldPath),
+          });
+        }
+      }
+    }
+
+    return config;
+  }, []);
+
+  const getRowConfigByPath = React.useCallback(({ path, blockType }: {
+    path: string,
+    blockType?: string
+  }) => {
+    const rowConfig = traverseRowConfigs({ path, fieldConfig: collection?.fields || global?.fields });
+    const rowFieldConfigs = buildFieldSchemaMap(rowConfig);
+    const pathSegments = splitPathByArrayFields(path);
+    const fieldKey = pathSegments.at(-1);
+    return rowFieldConfigs.get(blockType ? `${fieldKey}.${blockType}` : fieldKey);
+  }, [traverseRowConfigs, collection?.fields, global?.fields]);
+
+  // Array/Block row manipulation
+  const addFieldRow: Context['addFieldRow'] = useCallback(async ({ path, rowIndex, data }) => {
+    const preferences = await getDocPreferences();
+    const fieldConfig = getRowConfigByPath({
+      path,
+      blockType: data?.blockType,
+    });
+
+    if (fieldConfig) {
+      const subFieldState = await buildStateFromSchema({ fieldSchema: fieldConfig, data, preferences, operation, id, user, locale, t });
+      dispatchFields({ type: 'ADD_ROW', rowIndex: rowIndex - 1, path, blockType: data?.blockType, subFieldState });
+    }
+  }, [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath]);
+
+  const removeFieldRow: Context['removeFieldRow'] = useCallback(async ({ path, rowIndex }) => {
+    dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
+  }, [dispatchFields]);
+
+  const replaceFieldRow: Context['replaceFieldRow'] = useCallback(async ({ path, rowIndex, data }) => {
+    const preferences = await getDocPreferences();
+    const fieldConfig = getRowConfigByPath({
+      path,
+      blockType: data?.blockType,
+    });
+
+    if (fieldConfig) {
+      const subFieldState = await buildStateFromSchema({ fieldSchema: fieldConfig, data, preferences, operation, id, user, locale, t });
+      dispatchFields({ type: 'REPLACE_ROW', rowIndex: rowIndex - 1, path, blockType: data?.blockType, subFieldState });
+    }
+  }, [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath]);
+
   const getFields = useCallback(() => contextRef.current.fields, [contextRef]);
   const getField = useCallback((path: string) => contextRef.current.fields[path], [contextRef]);
   const getData = useCallback(() => reduceFieldsToValues(contextRef.current.fields, true), [contextRef]);
@@ -419,6 +507,9 @@ const Form: React.FC<Props> = (props) => {
   contextRef.current.reset = reset;
   contextRef.current.replaceState = replaceState;
   contextRef.current.buildRowErrors = buildRowErrors;
+  contextRef.current.addFieldRow = addFieldRow;
+  contextRef.current.removeFieldRow = removeFieldRow;
+  contextRef.current.replaceFieldRow = replaceFieldRow;
 
   useEffect(() => {
     if (initialState) {

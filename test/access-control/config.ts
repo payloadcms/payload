@@ -1,5 +1,5 @@
 import { devUser } from '../credentials';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { FieldAccess } from '../../src/fields/config/types';
 import { firstArrayText, secondArrayText } from './shared';
 
@@ -36,7 +36,7 @@ const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
   return !!headers && headers.authorization === requestHeaders.authorization;
 };
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   admin: {
     user: 'users',
   },

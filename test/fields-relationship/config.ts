@@ -1,5 +1,5 @@
 import type { CollectionConfig } from '../../src/collections/config/types';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 import { mapAsync } from '../../src/utilities/mapAsync';
 import { FilterOptionsProps } from '../../src/fields/config/types';
@@ -33,7 +33,7 @@ const baseRelationshipFields: CollectionConfig['fields'] = [
   },
 ];
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   collections: [
     {
       slug,
@@ -84,6 +84,18 @@ export default buildConfig({
           name: 'relationshipFiltered',
           relationTo: relationOneSlug,
           filterOptions: (args: FilterOptionsProps<FieldsRelationship>) => {
+            return ({
+              id: {
+                equals: args.data.relationship,
+              },
+            });
+          },
+        },
+        {
+          type: 'relationship',
+          name: 'relationshipFilteredAsync',
+          relationTo: relationOneSlug,
+          filterOptions: async (args: FilterOptionsProps<FieldsRelationship>) => {
             return ({
               id: {
                 equals: args.data.relationship,
