@@ -5,7 +5,6 @@ import { Operation } from '../../../types';
 import { PayloadRequest, RequestContext } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import { getExistingRowDoc } from './getExistingRowDoc';
-import { cloneDataFromOriginalDoc } from './cloneDataFromOriginalDoc';
 
 type Args = {
   data: Record<string, unknown>
