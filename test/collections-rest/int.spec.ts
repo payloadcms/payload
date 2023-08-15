@@ -890,7 +890,7 @@ describe('collections-rest', () => {
           expect(result.docs).toHaveLength(1);
         });
 
-        it('should not return a document with the point outside the polygon', async () => {
+        it('should not return a document with the point outside a smaller polygon', async () => {
           const { status, result } = await client.find({
             slug: pointSlug,
             query: {
@@ -936,7 +936,7 @@ describe('collections-rest', () => {
           expect(result.docs).toHaveLength(1);
         });
 
-        it('should not return a document with the point not intersecting the reduced polygon', async () => {
+        it('should not return a document with the point not intersecting a smaller polygon', async () => {
           const { status, result } = await client.find({
             slug: pointSlug,
             query: {
