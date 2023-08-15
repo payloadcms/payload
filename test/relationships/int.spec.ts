@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
 import { randomBytes } from 'crypto';
+import mongoose from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers';
 import config, { customIdSlug, chainedRelSlug, defaultAccessRelSlug, slug, relationSlug, customIdNumberSlug } from './config';
 import payload from '../../src';
@@ -365,8 +365,7 @@ describe('Relationships', () => {
       ];
 
       beforeAll(async () => {
-        let movieDocs: any[] = [];
-        movieDocs = await Promise.all(movieList.map((movie) => {
+        await Promise.all(movieList.map((movie) => {
           return payload.create({
             collection: 'movies',
             data: {
