@@ -361,7 +361,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
   // afterOperation - Collection
   // /////////////////////////////////////
 
-  result = await buildAfterOperation<'update'>({
+  result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
     operation: 'update',
     args,
     result,

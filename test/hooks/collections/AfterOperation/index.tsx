@@ -8,9 +8,8 @@ const AfterOperation: CollectionConfig = {
   hooks: {
     // beforeRead: [(operation) => operation.doc],
     afterOperation: [
-      async ({ result, operation, args }) => {
+      async ({ result, operation }) => {
         if (operation === 'create') {
-          console.log('create', result, args);
           if ('docs' in result) {
             return {
               ...result,
@@ -23,18 +22,8 @@ const AfterOperation: CollectionConfig = {
 
           return { ...result, title: 'Title created' };
         }
-        if (operation === 'delete') {
-          console.log('delete', result, args);
-        }
-        if (operation === 'deleteByID') {
-          console.log('deleteByID', result, args);
-        }
-        if (operation === 'findByID') {
-          console.log('find', result, args);
-        }
 
         if (operation === 'find') {
-          console.log('find', result, args);
           // only modify the first doc for `find` operations
           // this is so we can test against the other operations
           return {
@@ -68,7 +57,7 @@ const AfterOperation: CollectionConfig = {
 
         return result;
       },
-    ],
+    ] as AfterOperationHook<AfterOperation>[],
   },
   fields: [
     {

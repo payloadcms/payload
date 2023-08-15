@@ -325,7 +325,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
   // afterOperation - Collection
   // /////////////////////////////////////
 
-  result = await buildAfterOperation<'create'>({
+  result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
     operation: 'create',
     args,
     result,

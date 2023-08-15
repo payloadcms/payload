@@ -178,7 +178,7 @@ async function findByID<T extends TypeWithID>(
   // afterOperation - Collection
   // /////////////////////////////////////
 
-  result = await buildAfterOperation<'findByID'>({
+  result = await buildAfterOperation<T>({
     operation: 'findByID',
     args,
     result,

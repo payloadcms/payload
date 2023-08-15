@@ -179,7 +179,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
   // afterOperation - Collection
   // /////////////////////////////////////
 
-  result = await buildAfterOperation<'deleteByID'>({
+  result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
     operation: 'deleteByID',
     args,
     result,

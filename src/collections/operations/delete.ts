@@ -222,7 +222,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   // afterOperation - Collection
   // /////////////////////////////////////
 
-  result = await buildAfterOperation<'delete'>({
+  result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
     operation: 'delete',
     args,
     result,

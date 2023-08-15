@@ -218,7 +218,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
   // afterOperation - Collection
   // /////////////////////////////////////
 
-  result = await buildAfterOperation<'login'>({
+  result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
     operation: 'login',
     args,
     result,
