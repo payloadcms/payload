@@ -1,4 +1,5 @@
-import { Field } from '../fields/config/types';
+import { Field } from '../../../../fields/config/types';
+import { createNestedFieldPath } from './createNestedFieldPath';
 
 /**
  * **Returns Map with array and block field schemas**
@@ -14,45 +15,39 @@ import { Field } from '../fields/config/types';
 export const buildFieldSchemaMap = (entityFields: Field[]): Map<string, Field[]> => {
   const fieldMap = new Map<string, Field[]>();
 
-  const buildUpMap = (fields: Field[], builtUpPath = '') => {
+  const buildUpMap = (fields: Field[], parentPath = '') => {
     fields.forEach((field) => {
-      let nextPath = builtUpPath;
-
-      if (nextPath) {
-        if ('name' in field && field?.name) {
-          nextPath = `${nextPath}.${field.name}`;
-        }
-      } else if ('name' in field && field?.name) {
-        nextPath = field.name;
-      }
+      const path = createNestedFieldPath(parentPath, field);
 
       switch (field.type) {
         case 'blocks':
           field.blocks.forEach((block) => {
-            fieldMap.set(`${nextPath}.${block.slug}`, block.fields);
-            buildUpMap(block.fields, nextPath);
+            const blockPath = `${path}.${block.slug}`;
+            fieldMap.set(blockPath, block.fields);
+            buildUpMap(block.fields, blockPath);
           });
           break;
 
         case 'array':
-          fieldMap.set(nextPath, field.fields);
-          buildUpMap(field.fields, nextPath);
+          fieldMap.set(path, field.fields);
+          buildUpMap(field.fields, path);
           break;
 
         case 'row':
         case 'collapsible':
         case 'group':
-          buildUpMap(field.fields, nextPath);
+          buildUpMap(field.fields, path);
           break;
 
         case 'tabs':
           field.tabs.forEach((tab) => {
-            if (nextPath) {
-              nextPath = 'name' in tab ? `${nextPath}.${tab.name}` : nextPath;
+            let tabPath = path;
+            if (tabPath) {
+              tabPath = 'name' in tab ? `${tabPath}.${tab.name}` : tabPath;
             } else {
-              nextPath = 'name' in tab ? `${tab.name}` : nextPath;
+              tabPath = 'name' in tab ? `${tab.name}` : tabPath;
             }
-            buildUpMap(tab.fields, nextPath);
+            buildUpMap(tab.fields, tabPath);
           });
           break;
 

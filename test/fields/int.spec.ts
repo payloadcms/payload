@@ -724,6 +724,19 @@ describe('Fields', () => {
       expect(workingRichTextQuery.docs).toHaveLength(1);
     });
 
+    it('should show center alignment', async () => {
+      const query = await payload.find({
+        collection: 'rich-text-fields',
+        where: {
+          'richText.children.text': {
+            like: 'hello',
+          },
+        },
+      });
+
+      expect(query.docs[0].richText[0].textAlign).toEqual('center');
+    });
+
     it('should populate link relationship', async () => {
       const query = await payload.find({
         collection: 'rich-text-fields',

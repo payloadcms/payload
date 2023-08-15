@@ -18,6 +18,7 @@ import { generateFileData } from '../../uploads/generateFileData';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
+import { buildAfterOperation } from './utils';
 import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
@@ -339,6 +340,16 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
     }) || result;
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    operation: 'updateByID',
+    args,
+    result,
+  });
 
   await unlinkTempFiles({
     req,

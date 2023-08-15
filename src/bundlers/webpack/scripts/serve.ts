@@ -21,7 +21,15 @@ export const serveAdmin: ServeAdminType = async ({ payload }) => {
   });
 
   router.use(compression(payload.config.express.compression));
-  router.use(express.static(payload.config.admin.buildPath, { redirect: false }));
+  router.use(express.static(payload.config.admin.buildPath, {
+    redirect: false,
+    setHeaders: (res, path) => {
+      const staticFilesRegex = new RegExp('.(svg|css|js|jp(e)?g|png|avif|webp|webm|gif|ico|woff|woff2|ttf|otf)$', 'i');
+      if (path.match(staticFilesRegex)) {
+        res.set('Cache-Control', `public, max-age=${60 * 60 * 24 * 365}, immutable`);
+      }
+    },
+  }));
 
   return router;
 };

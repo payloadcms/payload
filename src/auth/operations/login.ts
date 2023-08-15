@@ -10,6 +10,7 @@ import { User } from '../types';
 import { Collection } from '../../collections/config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import unlock from './unlock';
+import { buildAfterOperation } from '../../collections/operations/utils';
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts';
 import { authenticateLocalStrategy } from '../strategies/local/authenticate';
 import { getFieldsToSign } from './getFieldsToSign';
@@ -206,15 +207,28 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     }) || user;
   }, Promise.resolve());
 
-  // /////////////////////////////////////
-  // Return results
-  // /////////////////////////////////////
 
-  return {
+  let result: Result & { user: GeneratedTypes['collections'][TSlug] } = {
     token,
     user,
     exp: (jwt.decode(token) as jwt.JwtPayload).exp,
   };
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    operation: 'login',
+    args,
+    result,
+  });
+
+  // /////////////////////////////////////
+  // Return results
+  // /////////////////////////////////////
+
+  return result;
 }
 
 export default login;

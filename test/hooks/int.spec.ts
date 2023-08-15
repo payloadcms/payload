@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers';
-import config from './config';
+import configPromise from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
 import { transformSlug } from './collections/Transform';
@@ -8,10 +8,10 @@ import { hooksSlug } from './collections/Hook';
 import { chainingHooksSlug } from './collections/ChainingHooks';
 import { generatedAfterReadText, nestedAfterReadHooksSlug } from './collections/NestedAfterReadHooks';
 import { relationsSlug } from './collections/Relations';
-import type { NestedAfterReadHook } from './payload-types';
 import { hooksUsersSlug } from './collections/Users';
 import { devUser, regularUser } from '../credentials';
 import { AuthenticationError } from '../../src/errors';
+import { afterOperationSlug } from './collections/AfterOperation';
 import { contextHooksSlug } from './collections/ContextHooks';
 
 let client: RESTClient;
@@ -20,6 +20,7 @@ let apiUrl;
 describe('Hooks', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
+    const config = await configPromise;
     client = new RESTClient(config, { serverURL, defaultSlug: transformSlug });
     apiUrl = `${serverURL}/api`;
   });
@@ -74,7 +75,7 @@ describe('Hooks', () => {
     });
 
     it('should save data generated with afterRead hooks in nested field structures', async () => {
-      const document = await payload.create<NestedAfterReadHook>({
+      const document = await payload.create({
         collection: nestedAfterReadHooksSlug,
         data: {
           text: 'ok',
@@ -153,6 +154,62 @@ describe('Hooks', () => {
       });
 
       expect(retrievedDocs[0].text).toEqual('ok!!');
+    });
+
+    it('should execute collection afterOperation hook', async () => {
+      const [doc1, doc2] = await Promise.all([
+        await payload.create({
+          collection: afterOperationSlug,
+          data: {
+            title: 'Title',
+          },
+        }),
+        await payload.create({
+          collection: afterOperationSlug,
+          data: {
+            title: 'Title',
+          },
+        }),
+      ]);
+
+      expect(doc1.title === 'Title created').toBeTruthy();
+      expect(doc2.title === 'Title created').toBeTruthy();
+
+      const findResult = await payload.find({
+        collection: afterOperationSlug,
+      });
+
+      expect(findResult.docs).toHaveLength(2);
+      expect(findResult.docs[0].title === 'Title read').toBeTruthy();
+      expect(findResult.docs[1].title === 'Title').toBeTruthy();
+
+      const [updatedDoc1, updatedDoc2] = await Promise.all([
+        await payload.update({
+          collection: afterOperationSlug,
+          id: doc1.id,
+          data: {
+            title: 'Title',
+          },
+        }),
+        await payload.update({
+          collection: afterOperationSlug,
+          id: doc2.id,
+          data: {
+            title: 'Title',
+          },
+        }),
+      ]);
+
+      expect(updatedDoc1.title === 'Title updated').toBeTruthy();
+      expect(updatedDoc2.title === 'Title updated').toBeTruthy();
+
+      const findResult2 = await payload.find({
+        collection: afterOperationSlug,
+      });
+
+      expect(findResult2.docs).toHaveLength(2);
+      expect(findResult2.docs[0].title === 'Title read').toBeTruthy();
+      expect(findResult2.docs[1].title === 'Title').toBeTruthy();
     });
 
     it('should pass context from beforeChange to afterChange', async () => {

@@ -63,7 +63,7 @@
     "deletingFile": "هنگام حذف فایل خطایی روی داد.",
     "deletingTitle": "هنگام حذف {{title}} خطایی رخ داد. لطفاً وضعیت اتصال اینترنت خود را بررسی کنید.",
     "emailOrPasswordIncorrect": "رایانامه یا گذرواژه ارائه شده نادرست است.",
-    "followingFieldsInvalid_many": "کادرهای زیر نامعتبر هستند:",
+    "followingFieldsInvalid_other": "کادرهای زیر نامعتبر هستند:",
     "followingFieldsInvalid_one": "کادر زیر نامعتبر است:",
     "incorrectCollection": "مجموعه نادرست",
     "invalidFileType": "نوع رسانه نامعتبر است",
