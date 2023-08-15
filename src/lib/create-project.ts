@@ -87,11 +87,9 @@ export async function createProject(
 ): Promise<void> {
   await createOrFindProjectDir(projectDir)
 
-  console.log(
-    `\n  Creating a new Payload app in ${chalk.green(path.resolve(projectDir))}\n`,
-  )
+  console.log(`\n  Creating project in ${chalk.green(path.resolve(projectDir))}\n`)
 
-  if (template.type === 'starter') {
+  if ('url' in template) {
     const emitter = degit(template.url)
     await emitter.clone(projectDir)
   } else {

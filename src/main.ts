@@ -56,20 +56,27 @@ export class Main {
       const projectName = await parseProjectName(this.args)
       const validTemplates = await getValidTemplates()
       const template = await parseTemplate(this.args, validTemplates)
-      const databaseUri = await getDatabaseConnection(this.args, projectName)
-      const payloadSecret = await generateSecret()
+
       const projectDir =
         projectName === '.' ? process.cwd() : `./${slugify(projectName)}`
       const packageManager = await getPackageManager(this.args)
 
-      if (!this.args['--dry-run']) {
-        await createProject(this.args, projectDir, template, packageManager)
-        await writeEnvFile({
-          databaseUri,
-          payloadSecret,
-          template,
-          projectDir,
-        })
+      if (template.type !== 'plugin') {
+        const databaseUri = await getDatabaseConnection(this.args, projectName)
+        const payloadSecret = await generateSecret()
+        if (!this.args['--dry-run']) {
+          await createProject(this.args, projectDir, template, packageManager)
+          await writeEnvFile({
+            databaseUri,
+            payloadSecret,
+            template,
+            projectDir,
+          })
+        }
+      } else {
+        if (!this.args['--dry-run']) {
+          await createProject(this.args, projectDir, template, packageManager)
+        }
       }
 
       success('Payload project successfully created')

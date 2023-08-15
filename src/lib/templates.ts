@@ -1,5 +1,5 @@
 import { error, info } from '../utils/log'
-import type { GitTemplate, ProjectTemplate } from '../types'
+import type { GitTemplate, PluginTemplate, ProjectTemplate } from '../types'
 
 export async function validateTemplate(templateName: string): Promise<boolean> {
   const validTemplates = await getValidTemplates()
@@ -66,5 +66,14 @@ export async function getValidTemplates(): Promise<ProjectTemplate[]> {
     },
   ]
 
-  return [...templates, ...starters]
+  const pluginTemplates: PluginTemplate[] = [
+    {
+      name: 'plugin',
+      type: 'plugin',
+      url: 'https://github.com/payloadcms/payload-plugin-template',
+      description: 'Template for creating a Payload plugin',
+    },
+  ]
+
+  return [...templates, ...starters, ...pluginTemplates]
 }
