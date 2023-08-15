@@ -15,12 +15,13 @@ const title = 'title';
 const description = 'description';
 
 let url: AdminUrlUtil;
+let serverURL: string;
 
 describe('admin', () => {
   let page: Page;
 
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E(__dirname);
+    serverURL = (await initPayloadE2E(__dirname)).serverURL;
     await clearDocs(); // Clear any seeded data from onInit
     url = new AdminUrlUtil(serverURL, slug);
 
@@ -411,6 +412,14 @@ describe('admin', () => {
         await page.goto(`${url.list}?limit=10&page=1&where[title][equals]=post1`);
 
         await expect(page.locator('.react-select--single-value').first()).toContainText('Title en');
+        await expect(page.locator(tableRowLocator)).toHaveCount(1);
+      });
+
+      test('should accept where query from complex, valid URL where parameter using the near operator', async () => {
+        // We have one point collection with the point [5,-5] and one with [7,-7]
+        await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}?limit=10&page=1&where[or][0][and][0][point][near]=6,-7,200000`);
+
+        await expect(page.getByPlaceholder('Enter a value')).toHaveValue('6,-7,200000');
         await expect(page.locator(tableRowLocator)).toHaveCount(1);
       });
     });
