@@ -224,6 +224,16 @@ const defaults: DefaultsType = {
 
 const listOperators = ['in', 'not_in', 'all'];
 
+const gqlTypeCache = new Map();
+
+const getGqlTypeFromCache = (cacheKey: string): GraphQLType => {
+  return gqlTypeCache.get(cacheKey);
+};
+
+const storeGqlTypeInCache = (cacheKey: string, type: GraphQLType) => {
+  gqlTypeCache.set(cacheKey, type);
+};
+
 /**
  * In GraphQL, you can use "where" as an argument to filter a collection. Example:
  * { Posts(where: { title: { equals: "Hello" } }) { text } }
@@ -252,13 +262,25 @@ export const withOperators = (field: FieldAffectingData, parentName: string): Gr
   }
 
 
-  return new GraphQLInputObjectType({
+  const ii = new GraphQLInputObjectType({
     name,
     fields: fieldOperators.reduce((objectTypeFields, operator) => {
       // Get the type of the operator. It can be either static, or dynamic (=> a function)
       let gqlType: GraphQLType = typeof operator.type === 'function'
         ? operator.type(field, parentName)
         : operator.type;
+
+      // GraphQL does not allow types with duplicate names, so we use this cache to avoid that.
+      // Without this, select and radio fields would have the same name, and GraphQL would throw an error
+      // This usually only happens if a custom type is returned from the operator.type function
+      if (typeof operator.type === 'function' && 'name' in gqlType) {
+        const cachedType = getGqlTypeFromCache(gqlType.name);
+        if (cachedType) {
+          gqlType = cachedType;
+        } else {
+          storeGqlTypeInCache(gqlType.name, gqlType);
+        }
+      }
 
       if (listOperators.includes(operator.operator)) {
         gqlType = new GraphQLList(gqlType);
@@ -274,4 +296,6 @@ export const withOperators = (field: FieldAffectingData, parentName: string): Gr
       };
     }, {}),
   });
+
+  return ii;
 };
