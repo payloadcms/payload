@@ -407,6 +407,7 @@ describe('admin', () => {
       test('should accept transformed where query from invalid URL where parameter', async () => {
         await createPost({ title: 'post1' });
         await createPost({ title: 'post2' });
+        // [title][equals]=post1 should be getting transformed into a valid where[or][0][and][0][title][equals]=post1
         await page.goto(`${url.list}?limit=10&page=1&where[title][equals]=post1`);
 
         await expect(page.locator('.react-select--single-value').first()).toContainText('Title en');
