@@ -4,17 +4,18 @@ import path from 'path';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { saveDocAndAssert } from '../helpers';
-import { textDoc } from './collections/Text';
-import { arrayFieldsSlug } from './collections/Array';
+import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers';
+import { textDoc, textFieldsSlug } from './collections/Text';
 import { pointFieldsSlug } from './collections/Point';
 import { tabsSlug } from './collections/Tabs';
 import { collapsibleFieldsSlug } from './collections/Collapsible';
 import wait from '../../src/utilities/wait';
 import { jsonDoc } from './collections/JSON';
 import { numberDoc } from './collections/Number';
+import { relationshipFieldsSlug } from './collections/Relationship';
+import { mapAsync } from '../../src/utilities/mapAsync';
 
-const { beforeAll, describe } = test;
+const { afterEach, beforeAll, describe } = test;
 
 let page: Page;
 let serverURL;
@@ -368,19 +369,41 @@ describe('fields', () => {
       await expect(firstRow).toBeVisible();
       await expect(firstRow.locator('.blocks-field__block-pill-text')).toContainText('Text en');
     });
+
+    test('should add different blocks with similar field configs', async () => {
+      await page.goto(url.create);
+
+      async function addBlock(name: 'Block 1' | 'Block 2') {
+        await page.locator('#field-blocksWithSimilarConfigs').getByRole('button', { name: 'Add Blocks With Similar Config' }).click();
+        await page.getByRole('button', { name }).click();
+      }
+
+      await addBlock('Block 1');
+
+      await page.locator('#blocksWithSimilarConfigs-row-0').getByRole('button', { name: 'Add Item' }).click();
+      await page.locator('input[name="blocksWithSimilarConfigs.0.items.0.title"]').fill('items>0>title');
+
+      expect(await page.locator('input[name="blocksWithSimilarConfigs.0.items.0.title"]').inputValue()).toEqual('items>0>title');
+
+      await addBlock('Block 2');
+
+      await page.locator('#blocksWithSimilarConfigs-row-1').getByRole('button', { name: 'Add Item' }).click();
+      await page.locator('input[name="blocksWithSimilarConfigs.1.items.0.title2"]').fill('items>1>title');
+
+      expect(await page.locator('input[name="blocksWithSimilarConfigs.1.items.0.title2"]').inputValue()).toEqual('items>1>title');
+    });
   });
 
   describe('array', () => {
     let url: AdminUrlUtil;
     beforeAll(() => {
-      url = new AdminUrlUtil(serverURL, arrayFieldsSlug);
+      url = new AdminUrlUtil(serverURL, 'array-fields');
     });
 
     test('should be readOnly', async () => {
       await page.goto(url.create);
       const field = page.locator('#field-readOnly__0__text');
-      await expect(field)
-        .toBeDisabled();
+      await expect(field).toBeDisabled();
     });
 
     test('should have defaultValue', async () => {
@@ -491,6 +514,21 @@ describe('fields', () => {
         });
 
         expect(directChildDivCount).toBe(2);
+      });
+    });
+
+    describe('row react hooks', () => {
+      test('should add 2 new block rows', async () => {
+        await page.goto(url.create);
+
+        await page.locator('.custom-blocks-field-management').getByRole('button', { name: 'Add Block 1' }).click();
+        expect(await page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]').inputValue()).toEqual('Block 1: Prefilled Title');
+
+        await page.locator('.custom-blocks-field-management').getByRole('button', { name: 'Add Block 2' }).click();
+        expect(await page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]').inputValue()).toEqual('Block 2: Prefilled Title');
+
+        await page.locator('.custom-blocks-field-management').getByRole('button', { name: 'Replace Block 2' }).click();
+        expect(await page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]').inputValue()).toEqual('REPLACED BLOCK');
       });
     });
   });
@@ -897,8 +935,18 @@ describe('fields', () => {
   describe('relationship', () => {
     let url: AdminUrlUtil;
 
-    beforeAll(() => {
+    beforeAll(async () => {
       url = new AdminUrlUtil(serverURL, 'relationship-fields');
+    });
+
+
+    afterEach(async () => {
+      // delete all existing relationship documents
+      const allRelationshipDocs = await payload.find({ collection: relationshipFieldsSlug, limit: 100 });
+      const relationshipIDs = allRelationshipDocs.docs.map((doc) => doc.id);
+      await mapAsync(relationshipIDs, async (id) => {
+        await payload.delete({ collection: relationshipFieldsSlug, id });
+      });
     });
 
     test('should create inline relationship within field with many relations', async () => {
@@ -1047,6 +1095,45 @@ describe('fields', () => {
 
       // check if the value is saved
       await expect(page.locator('#field-relationshipHasMany .relationship--multi-value-label__text')).toHaveText(`${value}123456`);
+    });
+
+    // Drawers opened through the edit button are prone to issues due to the use of stopPropagation for certain
+    // events - specifically for drawers opened through the edit button. This test is to ensure that drawers
+    // opened through the edit button can be saved using the hotkey.
+    test('should save using hotkey in edit document drawer', async () => {
+      await page.goto(url.create);
+
+      // First fill out the relationship field, as it's required
+      await page.locator('#relationship-add-new .relationship-add-new__add-button').click();
+      await page.locator('#field-relationship .value-container').click();
+      // Select "Seeded text document" relationship
+      await page.getByText('Seeded text document', { exact: true }).click();
+
+      // Click edit button which opens drawer
+      await page.getByRole('button', { name: 'Edit Seeded text document' }).click();
+
+      // Fill 'text' field of 'Seeded text document'
+      await page.locator('#field-text').fill('some updated text value');
+
+      // Save drawer (not parent page) with hotkey
+      await saveDocHotkeyAndAssert(page);
+
+      const seededTextDocument = await payload.find({
+        collection: textFieldsSlug,
+        where: {
+          text: {
+            equals: 'some updated text value',
+          },
+        },
+      });
+      const relationshipDocuments = await payload.find({
+        collection: relationshipFieldsSlug,
+      });
+
+      // The Seeded text document should now have a text field with value 'some updated text value',
+      expect(seededTextDocument.docs.length).toEqual(1);
+      // but the relationship document should NOT exist, as the hotkey should have saved the drawer and not the parent page
+      expect(relationshipDocuments.docs.length).toEqual(0);
     });
   });
 

@@ -18,8 +18,10 @@ import { AccessResult } from '../../config/types';
 import { queryDrafts } from '../../versions/drafts/queryDrafts';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
+import { buildAfterOperation } from './utils';
+import { CreateUpdateType } from './create';
 
-export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
+export type Arguments<T extends CreateUpdateType> = {
   collection: Collection
   req: PayloadRequest
   where: Where
@@ -350,10 +352,22 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
   const awaitedDocs = await Promise.all(promises);
 
-  return {
+  let result = {
     docs: awaitedDocs.filter(Boolean),
     errors,
   };
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    operation: 'update',
+    args,
+    result,
+  });
+
+  return result;
 }
 
 export default update;

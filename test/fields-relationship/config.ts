@@ -93,6 +93,18 @@ export default buildConfigWithDefaults({
         },
         {
           type: 'relationship',
+          name: 'relationshipFilteredAsync',
+          relationTo: relationOneSlug,
+          filterOptions: async (args: FilterOptionsProps<FieldsRelationship>) => {
+            return ({
+              id: {
+                equals: args.data.relationship,
+              },
+            });
+          },
+        },
+        {
+          type: 'relationship',
           name: 'relationshipManyFiltered',
           relationTo: [relationWithTitleSlug, relationOneSlug],
           hasMany: true,

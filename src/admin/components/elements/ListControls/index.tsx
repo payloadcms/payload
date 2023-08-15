@@ -38,6 +38,11 @@ const getUseAsTitle = (collection: SanitizedCollectionConfig) => {
   return topLevelFields.find((field) => fieldAffectsData(field) && field.name === useAsTitle);
 };
 
+/**
+ * The ListControls component is used to render the controls (search, filter, where)
+ * for a collection's list view. You can find those directly above the table which lists
+ * the collection's documents.
+ */
 const ListControls: React.FC<Props> = (props) => {
   const {
     collection,

@@ -63,7 +63,7 @@
     "deletingFile": "Имаше грешка при изтриването на файла.",
     "deletingTitle": "Имаше проблем при изтриването на {{title}}. Моля провери връзката си и опитай отново.",
     "emailOrPasswordIncorrect": "Имейлът или паролата не са правилни.",
-    "followingFieldsInvalid_many": "Следните полета са некоректни:",
+    "followingFieldsInvalid_other": "Следните полета са некоректни:",
     "followingFieldsInvalid_one": "Следното поле е некоректно:",
     "incorrectCollection": "Некоректно събиране",
     "invalidFileType": "Невалиден тип на файл",

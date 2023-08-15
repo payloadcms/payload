@@ -46,6 +46,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const id = user?.id;
 
+  const redirectToInactivityRoute = useCallback(() => {
+    if (window.location.pathname.startsWith(admin)) {
+      const redirectParam = `?redirect=${encodeURIComponent(window.location.pathname.replace(admin, ''))}`;
+      push(`${admin}${logoutInactivityRoute}${redirectParam}`);
+    } else {
+      push(`${admin}${logoutInactivityRoute}`);
+    }
+    closeAllModals();
+  }, [push, admin, logoutInactivityRoute, closeAllModals]);
+
   const refreshCookie = useCallback((forceRefresh?: boolean) => {
     const now = Math.round((new Date()).getTime() / 1000);
     const remainingTime = (exp as number || 0) - now;
@@ -64,14 +74,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(json.user);
           } else {
             setUser(null);
-            push(`${admin}${logoutInactivityRoute}?redirect=${encodeURIComponent(window.location.pathname)}`);
+            redirectToInactivityRoute();
           }
         } catch (e) {
           toast.error(e.message);
         }
       }, 1000);
     }
-  }, [exp, serverURL, api, userSlug, push, admin, logoutInactivityRoute, i18n]);
+  }, [exp, serverURL, api, userSlug, i18n, redirectToInactivityRoute]);
 
   const refreshCookieAsync = useCallback(async (skipSetUser?: boolean): Promise<User> => {
     try {
@@ -88,13 +98,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       setUser(null);
-      push(`${admin}${logoutInactivityRoute}`);
+      redirectToInactivityRoute();
       return null;
     } catch (e) {
       toast.error(`Refreshing token failed: ${e.message}`);
       return null;
     }
-  }, [serverURL, api, userSlug, push, admin, logoutInactivityRoute, i18n]);
+  }, [serverURL, api, userSlug, i18n, redirectToInactivityRoute]);
 
   const setToken = useCallback((token: string) => {
     const decoded = jwtDecode<User>(token);
@@ -220,15 +230,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (remainingTime > 0) {
       forceLogOut = setTimeout(() => {
         setUser(null);
-        push(`${admin}${logoutInactivityRoute}?redirect=${encodeURIComponent(window.location.pathname)}`);
-        closeAllModals();
+        redirectToInactivityRoute();
       }, Math.min(remainingTime * 1000, maxTimeoutTime));
     }
 
     return () => {
       if (forceLogOut) clearTimeout(forceLogOut);
     };
-  }, [exp, push, closeAllModals, admin, i18n, logoutInactivityRoute]);
+  }, [exp, closeAllModals, i18n, redirectToInactivityRoute]);
 
   return (
     <Context.Provider value={{
