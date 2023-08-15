@@ -112,7 +112,7 @@ const fieldTypeConditions = {
   },
   point: {
     component: 'Point',
-    operators: [...geo],
+    operators: [...geo, within, intersects],
   },
   upload: {
     component: 'Text',
