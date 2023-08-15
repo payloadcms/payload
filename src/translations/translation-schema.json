@@ -252,7 +252,7 @@
         "emailOrPasswordIncorrect": {
           "type": "string"
         },
-        "followingFieldsInvalid_many": {
+        "followingFieldsInvalid_other": {
           "type": "string"
         },
         "followingFieldsInvalid_one": {
@@ -344,7 +344,7 @@
         "deletingFile",
         "deletingTitle",
         "emailOrPasswordIncorrect",
-        "followingFieldsInvalid_many",
+        "followingFieldsInvalid_other",
         "followingFieldsInvalid_one",
         "incorrectCollection",
         "invalidFileType",

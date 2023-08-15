@@ -63,7 +63,7 @@
     "deletingFile": "Виникла помилка під час видалення файлу",
     "deletingTitle": "Виникла помилка під час видалення {{title}}, Будь ласка, перевірте ваше з'єднання та спробуйте ще раз.",
     "emailOrPasswordIncorrect": "Вказаний email або пароль не є вірними",
-    "followingFieldsInvalid_many": "Наступні поля не є вірними",
+    "followingFieldsInvalid_other": "Наступні поля не є вірними",
     "followingFieldsInvalid_one": "Наступне поле не є вірним:",
     "incorrectCollection": "Неправильна колекція",
     "invalidFileType": "Невіртий тип файлу",

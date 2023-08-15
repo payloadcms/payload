@@ -188,7 +188,7 @@ describe('fields - relationship', () => {
     await expect(field).toHaveText(relationOneDoc.id);
   });
 
-  test('should allow dynamic filterOptions', async () => {
+  async function runFilterOptionsTest(fieldName: string) {
     await page.goto(url.edit(docWithExistingRelations.id));
 
     // fill the first relation field
@@ -199,7 +199,7 @@ describe('fields - relationship', () => {
     await expect(field).toContainText(relationOneDoc.id);
 
     // then verify that the filtered field's options match
-    let filteredField = page.locator('#field-relationshipFiltered .react-select');
+    let filteredField = page.locator(`#field-${fieldName} .react-select`);
     await filteredField.click({ delay: 100 });
     const filteredOptions = filteredField.locator('.rs__option');
     await expect(filteredOptions).toHaveCount(1); // one doc
@@ -211,12 +211,27 @@ describe('fields - relationship', () => {
     await options.nth(1).click();
     await expect(field).toContainText(anotherRelationOneDoc.id);
 
+    // Now, save the document. This should fail, as the filitered field doesn't match the selected relationship value
+    await page.locator('#action-save').click();
+    await expect(page.locator('.Toastify')).toContainText(`is invalid: ${fieldName}`);
+
     // then verify that the filtered field's options match
-    filteredField = page.locator('#field-relationshipFiltered .react-select');
+    filteredField = page.locator(`#field-${fieldName} .react-select`);
     await filteredField.click({ delay: 100 });
     await expect(filteredOptions).toHaveCount(2); // two options because the currently selected option is still there
     await filteredOptions.nth(1).click();
     await expect(filteredField).toContainText(anotherRelationOneDoc.id);
+
+    // Now, saving the document should succeed
+    await saveDocAndAssert(page);
+  }
+
+  test('should allow dynamic filterOptions', async () => {
+    await runFilterOptionsTest('relationshipFiltered');
+  });
+
+  test('should allow dynamic async filterOptions', async () => {
+    await runFilterOptionsTest('relationshipFilteredAsync');
   });
 
   test('should allow usage of relationTo in filterOptions', async () => {

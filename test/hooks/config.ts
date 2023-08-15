@@ -4,11 +4,13 @@ import Hooks, { hooksSlug } from './collections/Hook';
 import NestedAfterReadHooks from './collections/NestedAfterReadHooks';
 import ChainingHooks from './collections/ChainingHooks';
 import Relations from './collections/Relations';
+import AfterOperation from './collections/AfterOperation';
 import Users, { seedHooksUsers } from './collections/Users';
 import ContextHooks from './collections/ContextHooks';
 
 export default buildConfigWithDefaults({
   collections: [
+    AfterOperation,
     ContextHooks,
     TransformHooks,
     Hooks,

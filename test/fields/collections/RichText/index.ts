@@ -60,6 +60,7 @@ const RichTextFields: CollectionConfig = {
           'h6',
           'ul',
           'ol',
+          'textAlign',
           'indent',
           'link',
           'relationship',
@@ -224,6 +225,7 @@ function generateRichText() {
         },
       ],
       type: 'h1',
+      textAlign: 'center',
     },
     {
       children: [

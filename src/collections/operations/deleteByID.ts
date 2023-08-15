@@ -4,11 +4,12 @@ import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { NotFound, Forbidden } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { BeforeOperationHook, Collection } from '../config/types';
-import { Document, Where } from '../../types';
+import { Document } from '../../types';
 import { hasWhereAccessResult } from '../../auth/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
+import { buildAfterOperation } from './utils';
 
 export type Arguments = {
   depth?: number
@@ -173,6 +174,16 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
 
     result = await hook({ req, id, doc: result, context: req.context }) || result;
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    operation: 'deleteByID',
+    args,
+    result,
+  });
 
   // /////////////////////////////////////
   // 8. Return results

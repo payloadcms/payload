@@ -16,6 +16,7 @@ const ElementButton: React.FC<ButtonProps> = (props) => {
     onClick,
     className,
     tooltip,
+    type = 'type',
     el = 'button',
   } = props;
 
@@ -25,8 +26,8 @@ const ElementButton: React.FC<ButtonProps> = (props) => {
   const defaultOnClick = useCallback((event) => {
     event.preventDefault();
     setShowTooltip(false);
-    toggleElement(editor, format);
-  }, [editor, format]);
+    toggleElement(editor, format, type);
+  }, [editor, format, type]);
 
   const Tag: ElementType = el;
 
@@ -36,7 +37,7 @@ const ElementButton: React.FC<ButtonProps> = (props) => {
       className={[
         baseClass,
         className,
-        isElementActive(editor, format) && `${baseClass}__button--active`,
+        isElementActive(editor, format, type) && `${baseClass}__button--active`,
       ].filter(Boolean).join(' ')}
       onClick={onClick || defaultOnClick}
       onMouseEnter={() => setShowTooltip(true)}

@@ -211,7 +211,7 @@ const validateFilterOptions: Validate = async (value, { t, filterOptions, id, us
     const values = Array.isArray(value) ? value : [value];
 
     await Promise.all(collections.map(async (collection) => {
-      const optionFilter = typeof filterOptions === 'function' ? filterOptions({
+      const optionFilter = typeof filterOptions === 'function' ? await filterOptions({
         id,
         data,
         siblingData,
