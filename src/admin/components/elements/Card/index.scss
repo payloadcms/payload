@@ -5,7 +5,8 @@
   padding: base(1.25) $baseline;
   position: relative;
 
-  h5 {
+  &__title {
+    @extend %h5;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -18,7 +18,7 @@ const SortColumn: React.FC<Props> = (props) => {
   } = props;
   const params = useSearchParams();
   const history = useHistory();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation('general');
 
   const { sort } = params;
 
@@ -50,6 +50,7 @@ const SortColumn: React.FC<Props> = (props) => {
             buttonStyle="none"
             className={ascClasses.join(' ')}
             onClick={() => setSort(asc)}
+            aria-label={t('sortByLabelDirection', { label: getTranslation(label, i18n), direction: t('ascending') })}
           >
             <Chevron />
           </Button>
@@ -58,6 +59,7 @@ const SortColumn: React.FC<Props> = (props) => {
             buttonStyle="none"
             className={descClasses.join(' ')}
             onClick={() => setSort(desc)}
+            aria-label={t('sortByLabelDirection', { label: getTranslation(label, i18n), direction: t('descending') })}
           >
             <Chevron />
           </Button>
