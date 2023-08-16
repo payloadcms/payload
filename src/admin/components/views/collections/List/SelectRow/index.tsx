@@ -9,7 +9,7 @@ const SelectRow: React.FC<{ id: string | number }> = ({ id }) => {
 
   return (
     <CheckboxInput
-      checked={selected[id] ?? false}
+      checked={selected[id]}
       onToggle={() => setSelection(id)}
     />
   );
