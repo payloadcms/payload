@@ -35,6 +35,13 @@
 
         outline: 0;
         box-shadow: 0 0 3px 3px var(--theme-success-400)!important;
+        border: 1px solid var(--theme-elevation-150);
+      }
+    }
+
+    &:hover {
+      .custom-checkbox__input, & input[type="checkbox"] {
+        border-color: var(--theme-elevation-250);
       }
     }
   }
