@@ -54,7 +54,8 @@
     "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.json",
     "release:canary": "release-it pre --preReleaseId=canary --npm.tag=canary --config .release-it.pre.json",
     "fix": "eslint \"src/**/*.ts\" --fix",
-    "lint": "eslint \"src/**/*.ts\""
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:react": "eslint \"src/admin/**/*.tsx\""
   },
   "bugs": {
     "url": "https://github.com/payloadcms/payload"
@@ -84,13 +85,15 @@
     "@date-io/date-fns": "^2.16.0",
     "@dnd-kit/core": "^6.0.7",
     "@dnd-kit/sortable": "^7.0.2",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@faceless-ui/modal": "^2.0.1",
     "@faceless-ui/scroll-info": "^1.3.0",
     "@faceless-ui/window-info": "^2.1.1",
     "@monaco-editor/react": "^4.5.1",
     "@rollup/plugin-commonjs": "^25.0.2",
     "@rollup/plugin-image": "^3.0.2",
-    "@swc/core": "^1.3.76",
+    "@swc/core": "^1.3.77",
     "@swc/register": "^0.1.10",
     "@types/sharp": "^0.31.1",
     "@vitejs/plugin-react": "^4.0.3",
@@ -271,6 +274,7 @@
     "eslint-plugin-playwright": "^0.12.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
     "form-data": "^3.0.1",
     "get-port": "5.1.1",
     "glob": "^8.1.0",
@@ -289,7 +293,8 @@
     "shelljs": "^0.8.5",
     "slash": "^3.0.0",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.4"
+    "typescript": "^4.9.4",
+    "vite-plugin-node-polyfills": "0.9.0"
   },
   "files": [
     "bin.js",

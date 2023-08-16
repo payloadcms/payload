@@ -4,7 +4,7 @@ import { useConfig } from '../../../../../../../utilities/Config';
 import { useAuth } from '../../../../../../../utilities/Auth';
 import { useFormFields } from '../../../../../../Form/context';
 import Relationship from '../../../../../Relationship';
-import Select from '../../../../../Select';
+import { Select } from '../../../../../Select';
 
 const createOptions = (collections, permissions) => collections.reduce((options, collection) => {
   if (permissions?.collections?.[collection.slug]?.read?.permission && collection?.admin?.enableRichTextRelationship) {

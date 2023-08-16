@@ -5,12 +5,12 @@ import { useConfig } from '../Config';
 import { useAuth } from '../Auth';
 import { requests } from '../../../api';
 
-type PreferencesContext = {
+export type PreferencesContext = {
   getPreference: <T = any>(key: string) => T | Promise<T>;
   setPreference: <T = any>(key: string, value: T) => Promise<void>;
 }
 
-const Context = createContext({} as PreferencesContext);
+export const Context = createContext({} as PreferencesContext);
 
 const requestOptions = (value, language) => ({
   body: JSON.stringify({ value }),

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import RenderFieldsToDiff from '../..';
+import { RenderFieldsToDiff } from '../..';
 import { Props } from '../types';
 import Label from '../../Label';
 import { ArrayField, BlockField, Field, fieldAffectsData } from '../../../../../../../fields/config/types';

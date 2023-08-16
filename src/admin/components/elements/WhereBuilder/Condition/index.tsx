@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Props } from './types';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
-import ReactSelect from '../../ReactSelect';
+import { ReactSelect } from '../../ReactSelect';
 import Button from '../../Button';
 import Date from './Date';
 import Number from './Number';

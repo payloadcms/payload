@@ -9,7 +9,7 @@ import password from './Password';
 import confirmPassword from './ConfirmPassword';
 import relationship from './Relationship';
 import textarea from './Textarea';
-import select from './Select';
+import { Select as select } from './Select';
 import number from './Number';
 import checkbox from './Checkbox';
 import richText from './RichText';
@@ -24,35 +24,9 @@ import collapsible from './Collapsible';
 import tabs from './Tabs';
 import upload from './Upload';
 import ui from './UI';
+import { FieldTypes } from './types';
 
-export type FieldTypes = {
-  code: React.ComponentType<any>
-  json: React.ComponentType<any>
-  email: React.ComponentType<any>
-  hidden: React.ComponentType<any>
-  text: React.ComponentType<any>
-  date: React.ComponentType<any>
-  password: React.ComponentType<any>
-  confirmPassword: React.ComponentType<any>
-  relationship: React.ComponentType<any>
-  textarea: React.ComponentType<any>
-  select: React.ComponentType<any>
-  number: React.ComponentType<any>
-  point: React.ComponentType<any>
-  checkbox: React.ComponentType<any>
-  richText: React.ComponentType<any>
-  radio: React.ComponentType<any>
-  blocks: React.ComponentType<any>
-  group: React.ComponentType<any>
-  array: React.ComponentType<any>
-  row: React.ComponentType<any>
-  collapsible: React.ComponentType<any>
-  tabs: React.ComponentType<any>
-  upload: React.ComponentType<any>
-  ui: React.ComponentType<any>
-}
-
-const fieldTypes: FieldTypes = {
+export const fieldTypes: FieldTypes = {
   code,
   json,
   email,
@@ -78,5 +52,3 @@ const fieldTypes: FieldTypes = {
   upload,
   ui,
 };
-
-export default fieldTypes;

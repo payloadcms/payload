@@ -4,7 +4,7 @@ import { ReactEditor, useSlateStatic } from 'slate-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ElementProps } from '..';
-import fieldTypes from '../../../../..';
+import { fieldTypes } from '../../../../..';
 import { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types';
 import { Drawer } from '../../../../../../../elements/Drawer';
 import { useAuth } from '../../../../../../../utilities/Auth';

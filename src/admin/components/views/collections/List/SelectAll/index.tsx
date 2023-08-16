@@ -1,5 +1,6 @@
 import React from 'react';
-import { SelectAllStatus, useSelection } from '../SelectionProvider';
+import { useSelection } from '../SelectionProvider';
+import { SelectAllStatus } from '../SelectionProvider/types';
 import Check from '../../../../icons/Check';
 import Line from '../../../../icons/Line';
 

@@ -5,7 +5,7 @@ import {
   fieldHasSubFields, FieldWithPath,
   tabHasName,
 } from '../../../../fields/config/types';
-import ReactSelect from '../ReactSelect';
+import { ReactSelect } from '../ReactSelect';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import Label from '../../forms/Label';
 import { useForm } from '../../forms/Form/context';

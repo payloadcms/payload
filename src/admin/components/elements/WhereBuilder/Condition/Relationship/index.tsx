@@ -4,7 +4,7 @@ import { useConfig } from '../../../../utilities/Config';
 import { Props, ValueWithRelation, GetResults } from './types';
 import optionsReducer from './optionsReducer';
 import useDebounce from '../../../../../hooks/useDebounce';
-import ReactSelect from '../../../ReactSelect';
+import { ReactSelect } from '../../../ReactSelect';
 import { Option } from '../../../ReactSelect/types';
 import { PaginatedDocs } from '../../../../../../mongoose/types';
 

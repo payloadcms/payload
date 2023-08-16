@@ -2,14 +2,14 @@ import React from 'react';
 import { DiffMethod } from 'react-diff-viewer-continued';
 import { Props } from './types';
 import { fieldAffectsData, fieldHasSubFields } from '../../../../../fields/config/types';
-import Nested from './fields/Nested';
 import { diffMethods } from './fields/diffMethods';
+import Nested from './fields/Nested';
 
 import './index.scss';
 
 const baseClass = 'render-field-diffs';
 
-const RenderFieldsToDiff: React.FC<Props> = ({
+export const RenderFieldsToDiff: React.FC<Props> = ({
   fields,
   fieldComponents,
   fieldPermissions,
@@ -123,5 +123,3 @@ const RenderFieldsToDiff: React.FC<Props> = ({
     })}
   </div>
 );
-
-export default RenderFieldsToDiff;

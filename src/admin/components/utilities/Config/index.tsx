@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { SanitizedConfig } from '../../../../config/types';
 
-const Context = createContext<SanitizedConfig>({} as SanitizedConfig);
+export const Context = createContext<SanitizedConfig>({} as SanitizedConfig);
 
 export const ConfigProvider: React.FC<{config: SanitizedConfig, children: React.ReactNode}> = ({ children, config: incomingConfig }) => {
   const [config, setConfig] = React.useState<SanitizedConfig>();
@@ -13,6 +13,7 @@ export const ConfigProvider: React.FC<{config: SanitizedConfig, children: React.
 
       const awaitConfig = async () => {
         const resolvedConfig = await incomingConfig;
+
         setConfig(resolvedConfig);
       };
       awaitConfig();

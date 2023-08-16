@@ -4,7 +4,8 @@ import { useModal } from '@faceless-ui/modal';
 import { useConfig } from '../../utilities/Config';
 import { Drawer, DrawerToggler } from '../Drawer';
 import { Props } from './types';
-import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider';
+import { useSelection } from '../../views/collections/List/SelectionProvider';
+import { SelectAllStatus } from '../../views/collections/List/SelectionProvider/types';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { useAuth } from '../../utilities/Auth';
 import { FieldSelect } from '../FieldSelect';
@@ -13,7 +14,7 @@ import Form from '../../forms/Form';
 import { useForm } from '../../forms/Form/context';
 import RenderFields from '../../forms/RenderFields';
 import { OperationContext } from '../../utilities/OperationProvider';
-import fieldTypes from '../../forms/field-types';
+import { fieldTypes } from '../../forms/field-types';
 import X from '../../icons/X';
 
 import './index.scss';

@@ -3,7 +3,7 @@ import queryString from 'qs';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Props } from './types';
-import ReactSelect from '../ReactSelect';
+import { ReactSelect } from '../ReactSelect';
 import sortableFieldTypes from '../../../../fields/sortableFieldTypes';
 import { useSearchParams } from '../../utilities/SearchParams';
 import { fieldAffectsData, OptionObject } from '../../../../fields/config/types';

@@ -1,14 +1,14 @@
 import vite from 'vite';
 import type { InlineConfig } from 'vite';
 import { SanitizedConfig } from '../../../config/types';
-import { getProdConfig } from '../configs/prod';
+import { getViteConfig } from '../configs/vite';
 
 type BuildAdminType = (options: {
   payloadConfig: SanitizedConfig
   viteConfig: InlineConfig;
 }) => Promise<void>;
 export const buildAdmin: BuildAdminType = async ({ payloadConfig, viteConfig: viteConfigArg }) => {
-  const viteConfig = getProdConfig(payloadConfig);
+  const viteConfig = getViteConfig(payloadConfig);
 
   // TODO: merge vite configs (https://vitejs.dev/guide/api-javascript.html#mergeconfig)
 

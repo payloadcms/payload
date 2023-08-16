@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import RenderFieldsToDiff from '../..';
+import { RenderFieldsToDiff } from '../..';
 import { Props } from '../types';
 import Label from '../../Label';
 import { FieldWithSubFields } from '../../../../../../../fields/config/types';
@@ -10,7 +10,7 @@ import './index.scss';
 
 const baseClass = 'nested-diff';
 
-const Nested: React.FC<Props & { field: FieldWithSubFields}> = ({
+export const Nested: React.FC<Props & { field: FieldWithSubFields }> = ({
   version,
   comparison,
   permissions,

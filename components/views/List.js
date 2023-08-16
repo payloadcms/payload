@@ -1,1 +1,1 @@
-exports.List = require('../../dist/admin/components/views/collections/List/Default').default;
+exports.List = require('../../dist/admin/components/views/collections/List/Default').DefaultList;

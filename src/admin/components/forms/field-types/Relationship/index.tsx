@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import { useAuth } from '../../../utilities/Auth';
 import withCondition from '../../withCondition';
-import ReactSelect from '../../../elements/ReactSelect';
+import { ReactSelect } from '../../../elements/ReactSelect';
 import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';

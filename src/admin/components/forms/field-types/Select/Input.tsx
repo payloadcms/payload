@@ -5,13 +5,13 @@ import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import { OptionObject, SelectField } from '../../../../../fields/config/types';
 import { Description } from '../../FieldDescription/types';
-import ReactSelect from '../../../elements/ReactSelect';
+import { ReactSelect } from '../../../elements/ReactSelect';
 import { Option } from '../../../elements/ReactSelect/types';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 
 import './index.scss';
 
-export type SelectInputProps = Omit<SelectField, 'type' | 'value' | 'options'> & {
+type SelectInputProps = Omit<SelectField, 'type' | 'value' | 'options'> & {
   showError?: boolean
   errorMessage?: string
   readOnly?: boolean
@@ -29,7 +29,7 @@ export type SelectInputProps = Omit<SelectField, 'type' | 'value' | 'options'> &
   isClearable?: boolean
 }
 
-const SelectInput: React.FC<SelectInputProps> = (props) => {
+export const SelectInput: React.FC<SelectInputProps> = (props) => {
   const {
     showError,
     errorMessage,
@@ -112,5 +112,3 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
     </div>
   );
 };
-
-export default SelectInput;

@@ -7,7 +7,7 @@ import PreviewButton from '../../elements/PreviewButton';
 import RenderFields from '../../forms/RenderFields';
 import CopyToClipboard from '../../elements/CopyToClipboard';
 import Meta from '../../utilities/Meta';
-import fieldTypes from '../../forms/field-types';
+import { fieldTypes } from '../../forms/field-types';
 import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
 import VersionsCount from '../../elements/VersionsCount';
 import { Props } from './types';

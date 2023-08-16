@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import { useAuth } from '../../../utilities/Auth';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI';
-import DefaultList from './Default';
+import { DefaultList } from './Default';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import { useStepNav } from '../../../elements/StepNav';
 import formatFields from './formatFields';

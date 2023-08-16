@@ -177,7 +177,7 @@ const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
   );
 };
 
-const ReactSelect: React.FC<ReactSelectAdapterProps> = (props) => {
+export const ReactSelect: React.FC<ReactSelectAdapterProps> = (props) => {
   const {
     isMulti,
     isSortable,
@@ -193,5 +193,3 @@ const ReactSelect: React.FC<ReactSelectAdapterProps> = (props) => {
     <SelectAdapter {...props} />
   );
 };
-
-export default ReactSelect;

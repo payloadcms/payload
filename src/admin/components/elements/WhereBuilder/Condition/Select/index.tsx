@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useTranslation } from 'react-i18next';
-import ReactSelect from '../../../ReactSelect';
+import { ReactSelect } from '../../../ReactSelect';
 import { getTranslation } from '../../../../../../utilities/getTranslation';
 import { Props } from './types';
 import { Option, OptionObject } from '../../../../../../fields/config/types';

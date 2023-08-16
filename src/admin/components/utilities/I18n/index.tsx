@@ -22,5 +22,3 @@ export const I18n: React.FC = () => {
   loader.config({ 'vs/nls': { availableLanguages: { '*': getSupportedMonacoLocale(i18n.language) } } });
   return null;
 };
-
-export default I18n;

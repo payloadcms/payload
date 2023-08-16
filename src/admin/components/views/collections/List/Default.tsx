@@ -27,7 +27,7 @@ import './index.scss';
 
 const baseClass = 'collection-list';
 
-const DefaultList: React.FC<Props> = (props) => {
+export const DefaultList: React.FC<Props> = (props) => {
   const {
     collection,
     collection: {
@@ -236,4 +236,4 @@ const DefaultList: React.FC<Props> = (props) => {
   );
 };
 
-export default DefaultList;
+// export default DefaultList;

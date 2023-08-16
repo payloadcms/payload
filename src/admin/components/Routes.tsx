@@ -26,7 +26,7 @@ const ResetPassword = lazy(() => import('./views/ResetPassword'));
 const Unauthorized = lazy(() => import('./views/Unauthorized'));
 const Account = lazy(() => import('./views/Account'));
 
-const Routes: React.FC = () => {
+export const Routes: React.FC = () => {
   const [initialized, setInitialized] = useState(null);
   const { user, permissions, refreshCookie } = useAuth();
   const { i18n } = useTranslation();
@@ -331,5 +331,3 @@ const Routes: React.FC = () => {
     </Suspense>
   );
 };
-
-export default Routes;

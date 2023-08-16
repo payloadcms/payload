@@ -3,13 +3,7 @@ import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { Where } from '../../../../../../types';
 import { useLocale } from '../../../../utilities/Locale';
-
-export enum SelectAllStatus {
-  AllAvailable = 'allAvailable',
-  AllInPage = 'allInPage',
-  Some = 'some',
-  None = 'none',
-}
+import { SelectAllStatus } from './types';
 
 type SelectionContext = {
   selected: Record<string | number, boolean>

@@ -28,7 +28,7 @@ const StepNavProvider: React.FC<{children?: React.ReactNode}> = ({ children }) =
 
 const useStepNav = (): ContextType => useContext(Context);
 
-const StepNav: React.FC = () => {
+export const StepNav: React.FC = () => {
   const { t, i18n } = useTranslation();
   const dashboardLabel = <span>{t('general:dashboard')}</span>;
   const { stepNav } = useStepNav();
@@ -70,5 +70,3 @@ export {
   StepNavProvider,
   useStepNav,
 };
-
-export default StepNav;

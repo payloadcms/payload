@@ -54,5 +54,3 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
 };
 
 export const useLocale = (): string => useContext(Context);
-
-export default Context;

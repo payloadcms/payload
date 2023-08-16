@@ -3,7 +3,7 @@ import qs from 'qs';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../utilities/Config';
 import { Props } from './types';
-import ReactSelect from '../../../elements/ReactSelect';
+import { ReactSelect } from '../../../elements/ReactSelect';
 import { PaginatedDocs } from '../../../../../mongoose/types';
 import { Where } from '../../../../../types';
 import { mostRecentVersionOption, publishedVersionOption } from '../shared';

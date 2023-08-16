@@ -6,7 +6,7 @@ import MinimalTemplate from '../../templates/Minimal';
 import Meta from '../../utilities/Meta';
 import Form from '../../forms/Form';
 import RenderFields from '../../forms/RenderFields';
-import fieldTypes from '../../forms/field-types';
+import { fieldTypes } from '../../forms/field-types';
 import FormSubmit from '../../forms/Submit';
 import { Props } from './types';
 import { Field } from '../../../../fields/config/types';

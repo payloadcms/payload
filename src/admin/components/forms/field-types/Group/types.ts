@@ -1,5 +1,5 @@
 import { GroupField } from '../../../../../fields/config/types';
-import { FieldTypes } from '..';
+import { FieldTypes } from '../types';
 import { FieldPermissions } from '../../../../../auth/types';
 
 export type Props = Omit<GroupField, 'type'> & {

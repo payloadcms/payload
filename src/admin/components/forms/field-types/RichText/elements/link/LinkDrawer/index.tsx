@@ -4,7 +4,7 @@ import { Drawer } from '../../../../../../elements/Drawer';
 import Form from '../../../../../Form';
 import FormSubmit from '../../../../../Submit';
 import { Props } from './types';
-import fieldTypes from '../../../..';
+import { fieldTypes } from '../../../..';
 import RenderFields from '../../../../../RenderFields';
 
 import './index.scss';

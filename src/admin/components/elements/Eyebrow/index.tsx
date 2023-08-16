@@ -1,5 +1,5 @@
 import React from 'react';
-import StepNav from '../StepNav';
+import { StepNav } from '../StepNav';
 import { Props } from './types';
 import { Gutter } from '../Gutter';
 

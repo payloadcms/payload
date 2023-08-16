@@ -6,7 +6,7 @@ import FileDetails from '../../../elements/FileDetails';
 import FieldDescription from '../../FieldDescription';
 import { FilterOptions, UploadField } from '../../../../../fields/config/types';
 import { Description } from '../../FieldDescription/types';
-import { FieldTypes } from '..';
+import { FieldTypes } from '../types';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer';

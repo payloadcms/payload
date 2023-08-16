@@ -4,7 +4,7 @@ import useField from '../../useField';
 import { select } from '../../../../../fields/validations';
 import { Option, OptionObject } from '../../../../../fields/config/types';
 import { Props } from './types';
-import SelectInput from './Input';
+import { SelectInput } from './Input';
 
 const formatOptions = (options: Option[]): OptionObject[] => options.map((option) => {
   if (typeof option === 'object' && (option.value || option.value === '')) {
@@ -17,7 +17,7 @@ const formatOptions = (options: Option[]): OptionObject[] => options.map((option
   } as OptionObject;
 });
 
-const Select: React.FC<Props> = (props) => {
+const SelectField: React.FC<Props> = (props) => {
   const {
     path: pathFromProps,
     name,
@@ -107,4 +107,4 @@ const Select: React.FC<Props> = (props) => {
   );
 };
 
-export default withCondition(Select);
+export const Select = withCondition(SelectField);

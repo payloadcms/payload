@@ -1,5 +1,5 @@
 import React from 'react';
-import RenderFieldsToDiff from '../..';
+import { RenderFieldsToDiff } from '../..';
 import { Props } from '../types';
 import { TabsField } from '../../../../../../../fields/config/types';
 import Nested from '../Nested';

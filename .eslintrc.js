@@ -9,6 +9,7 @@ module.exports = {
   },
   plugins: [
     '@typescript-eslint',
+    'react-refresh',
   ],
   extends: [
     './eslint-config',
@@ -27,12 +28,12 @@ module.exports = {
         '@typescript-eslint/no-use-before-define': 'off',
         '@typescript-eslint/consistent-type-imports': 'warn',
         'jest/prefer-strict-equal': 'off',
-      }
+      },
     },
     {
       files: ['test/**/e2e.spec.ts'],
       extends: [
-        'plugin:playwright/playwright-test'
+        'plugin:playwright/playwright-test',
       ],
       rules: {
         'jest/consistent-test-it': 'off',
@@ -41,7 +42,7 @@ module.exports = {
         'jest/prefer-strict-equal': 'off',
         'jest/expect-expect': 'off',
         'jest-dom/prefer-to-have-attribute': 'off',
-      }
+      },
     },
     {
       files: ['*.ts', '*.tsx'],
@@ -100,5 +101,6 @@ module.exports = {
         tsx: 'never',
       },
     ],
+    'react-refresh/only-export-components': 'error',
   },
 };
