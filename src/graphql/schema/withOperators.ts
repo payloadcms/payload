@@ -248,7 +248,7 @@ export const withOperators = (field: FieldAffectingData, parentName: string): Gr
 
   if (!('required' in field) || !field.required) {
     fieldOperators.push({
-      operator: 'exists',
+      name: 'exists',
       type: fieldOperators[0].type,
     });
   }
