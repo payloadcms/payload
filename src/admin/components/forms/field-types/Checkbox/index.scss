@@ -30,11 +30,11 @@
     &:active,
     &:focus-within,
     &:focus {
-      .custom-checkbox__input {
+      .custom-checkbox__input, & input[type="checkbox"] {
         @include inputShadowActive;
 
-        border-color: var(--theme-elevation-400);
         outline: 0;
+        box-shadow: 0 0 3px 3px var(--theme-success-400)!important;
       }
     }
   }
@@ -59,7 +59,7 @@
     width: $baseline;
     height: $baseline;
 
-    &input[type="checkbox"] {
+    & input[type="checkbox"] {
       position: absolute;
       // Without the extra 4px, there is an uncheckable area due to the border of the parent element
       width: calc(100% + 4px);
@@ -72,10 +72,6 @@
       border-radius: 0;
       z-index: 1;
       cursor: pointer;
-    }
-
-    &:focus-within {
-      box-shadow: 0 0 3px 3px var(--theme-success-400);
     }
   }
 
