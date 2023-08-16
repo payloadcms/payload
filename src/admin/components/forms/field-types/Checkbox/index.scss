@@ -25,7 +25,7 @@
     padding-left: base(.5);
   }
   
-  &:hover {
+  &:hover:not(&--read-only) {
     cursor: pointer;
 
     svg {
