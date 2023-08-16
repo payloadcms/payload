@@ -6,10 +6,10 @@ import FormSubmit from '../../../../../Submit';
 import { Props } from './types';
 import { fieldTypes } from '../../../..';
 import RenderFields from '../../../../../RenderFields';
-
-import './index.scss';
 import useHotkey from '../../../../../../../hooks/useHotkey';
 import { useEditDepth } from '../../../../../../utilities/EditDepth';
+
+import './index.scss';
 
 const baseClass = 'rich-text-link-edit-modal';
 

@@ -10,9 +10,9 @@ import { Props } from './types';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { Option } from '../../../elements/ReactSelect/types';
 import { ReactSelect } from '../../../elements/ReactSelect';
+import { isNumber } from '../../../../../utilities/isNumber';
 
 import './index.scss';
-import { isNumber } from '../../../../../utilities/isNumber';
 
 const NumberField: React.FC<Props> = (props) => {
   const {
