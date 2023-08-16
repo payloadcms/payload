@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
 import { randomBytes } from 'crypto';
+import mongoose from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers';
 import config, { customIdSlug, chainedRelSlug, defaultAccessRelSlug, slug, relationSlug, customIdNumberSlug } from './config';
 import payload from '../../src';
@@ -343,6 +343,64 @@ describe('Relationships', () => {
         });
 
         expect(query.docs).toHaveLength(1);
+      });
+    });
+    describe('Multiple Docs', () => {
+      const movieList = [
+        'Pulp Fiction',
+        'Reservoir Dogs',
+        'Once Upon a Time in Hollywood',
+        'Shrek',
+        'Shrek 2',
+        'Shrek 3',
+        'Scream',
+        'The Matrix',
+        'The Matrix Reloaded',
+        'The Matrix Revolutions',
+        'The Matrix Resurrections',
+        'The Haunting',
+        'The Haunting of Hill House',
+        'The Haunting of Bly Manor',
+        'Insidious',
+      ];
+
+      beforeAll(async () => {
+        await Promise.all(movieList.map((movie) => {
+          return payload.create({
+            collection: 'movies',
+            data: {
+              name: movie,
+            },
+          });
+        }));
+      });
+
+      it('should return more than 10 docs in relationship', async () => {
+        const allMovies = await payload.find({
+          collection: 'movies',
+          limit: 20,
+        });
+
+        const movieIDs = allMovies.docs.map((doc) => doc.id);
+
+        await payload.create({
+          collection: 'directors',
+          data: {
+            name: 'Quentin Tarantino',
+            movies: movieIDs,
+          },
+        });
+
+        const director = await payload.find({
+          collection: 'directors',
+          where: {
+            name: {
+              equals: 'Quentin Tarantino',
+            },
+          },
+        });
+
+        expect(director.docs[0].movies.length).toBeGreaterThan(10);
       });
     });
   });

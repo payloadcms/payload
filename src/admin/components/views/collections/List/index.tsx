@@ -16,6 +16,12 @@ import { useSearchParams } from '../../../utilities/SearchParams';
 import { TableColumnsProvider } from '../../../elements/TableColumns';
 import type { Field } from '../../../../../fields/config/types';
 
+/**
+ * The ListView component is table which lists the collection's documents.
+ * The default list view can be found at the {@link DefaultList} component.
+ * Users can also create pass their own custom list view component instead
+ * of using the default one.
+ */
 const ListView: React.FC<ListIndexProps> = (props) => {
   const {
     collection,

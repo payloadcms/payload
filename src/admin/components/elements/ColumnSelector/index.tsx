@@ -1,4 +1,4 @@
-import React, { useId, useState } from 'react';
+import React, { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import Pill from '../Pill';
 import Plus from '../../icons/Plus';
@@ -61,6 +61,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
             alignIcon="left"
             key={`${collection.slug}-${col.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
             icon={active ? <X /> : <Plus />}
+            aria-checked={active}
             className={[
               `${baseClass}__column`,
               active && `${baseClass}__column--active`,

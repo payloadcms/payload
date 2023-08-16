@@ -190,6 +190,12 @@ export default buildConfigWithDefaults({
           name: 'name',
           type: 'text',
         },
+        {
+          name: 'movies',
+          type: 'relationship',
+          relationTo: 'movies',
+          hasMany: true,
+        },
       ],
     },
   ],

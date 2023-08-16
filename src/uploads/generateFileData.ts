@@ -115,6 +115,7 @@ export const generateFileData = async <T>({
       fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true });
       ({ mime, ext } = await fromBuffer(fileBuffer.data)); // This is getting an incorrect gif height back.
       fileData.width = fileBuffer.info.width;
+      fileData.height = fileBuffer.info.height;
       fileData.filesize = fileBuffer.info.size;
 
       // Animated GIFs + WebP aggregate the height from every frame, so we need to use divide by number of pages

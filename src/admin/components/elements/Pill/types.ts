@@ -11,6 +11,10 @@ export type Props = {
   draggable?: boolean,
   rounded?: boolean
   id?: string
+  'aria-label'?: string,
+  'aria-expanded'?: boolean,
+  'aria-controls'?: string,
+  'aria-checked'?: boolean,
   elementProps?: HTMLAttributes<HTMLElement> & {
     ref: React.RefCallback<HTMLElement>
   }

@@ -198,7 +198,7 @@ describe('admin', () => {
 
       await page.goto(url.list);
 
-      await page.locator('.select-all__input').click();
+      await page.locator('input#select-all').check();
 
       await page.locator('.delete-documents__toggle').click();
 
@@ -216,7 +216,7 @@ describe('admin', () => {
       const bulkTitle = 'Bulk update title';
       await page.goto(url.list);
 
-      await page.locator('.select-all__input').click();
+      await page.locator('input#select-all').check();
       await page.locator('.edit-many__toggle').click();
       await page.locator('.field-select .rs__control').click();
       const options = page.locator('.rs__option');
@@ -394,6 +394,25 @@ describe('admin', () => {
         await page.locator('.condition__actions-remove').click();
         await expect(page.locator(tableRowLocator)).toHaveCount(2);
       });
+
+      test('should accept where query from valid URL where parameter', async () => {
+        await createPost({ title: 'post1' });
+        await createPost({ title: 'post2' });
+        await page.goto(`${url.list}?limit=10&page=1&where[or][0][and][0][title][equals]=post1`);
+
+        await expect(page.locator('.react-select--single-value').first()).toContainText('Title en');
+        await expect(page.locator(tableRowLocator)).toHaveCount(1);
+      });
+
+      test('should accept transformed where query from invalid URL where parameter', async () => {
+        await createPost({ title: 'post1' });
+        await createPost({ title: 'post2' });
+        // [title][equals]=post1 should be getting transformed into a valid where[or][0][and][0][title][equals]=post1
+        await page.goto(`${url.list}?limit=10&page=1&where[title][equals]=post1`);
+
+        await expect(page.locator('.react-select--single-value').first()).toContainText('Title en');
+        await expect(page.locator(tableRowLocator)).toHaveCount(1);
+      });
     });
 
     describe('table columns', () => {
@@ -523,18 +542,18 @@ describe('admin', () => {
       });
 
       test('should select multiple rows', async () => {
-        const selectAll = page.locator('.select-all');
-        await page.locator('.row-1 .select-row button').click();
+        const selectAll = page.locator('.custom-checkbox:has(#select-all)');
+        await page.locator('.row-1 .cell-_select input').check();
 
-        const indeterminateSelectAll = selectAll.locator('.icon--line');
+        const indeterminateSelectAll = selectAll.locator('.custom-checkbox__icon.partial');
         expect(indeterminateSelectAll).toBeDefined();
 
-        await selectAll.locator('button').click();
-        const emptySelectAll = selectAll.locator('.icon');
+        await selectAll.locator('input').click();
+        const emptySelectAll = selectAll.locator('.custom-checkbox__icon:not(.check):not(.partial)');
         await expect(emptySelectAll).toHaveCount(0);
 
-        await selectAll.locator('button').click();
-        const checkSelectAll = selectAll.locator('.icon .icon--check');
+        await selectAll.locator('input').click();
+        const checkSelectAll = selectAll.locator('.custom-checkbox__icon.check');
         expect(checkSelectAll).toBeDefined();
       });
 
@@ -542,16 +561,16 @@ describe('admin', () => {
         // delete should not appear without selection
         await expect(page.locator('#confirm-delete')).toHaveCount(0);
         // select one row
-        await page.locator('.row-1 .select-row button').click();
+        await page.locator('.row-1 .cell-_select input').check();
 
         // delete button should be present
         await expect(page.locator('#confirm-delete')).toHaveCount(1);
 
-        await page.locator('.row-2 .select-row button').click();
+        await page.locator('.row-2 .cell-_select input').check();
 
         await page.locator('.delete-documents__toggle').click();
         await page.locator('#confirm-delete').click();
-        await expect(page.locator('.select-row')).toHaveCount(1);
+        await expect(await page.locator('.cell-_select')).toHaveCount(1);
       });
     });
 

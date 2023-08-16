@@ -130,9 +130,11 @@ const DefaultAccount: React.FC<Props> = (props) => {
                     <h3>{t('general:payloadSettings')}</h3>
                     <div className={`${baseClass}__language`}>
                       <Label
+                        htmlFor="language-select"
                         label={t('general:language')}
                       />
                       <ReactSelect
+                        inputId="language-select"
                         value={languageOptions.find((language) => (language.value === i18n.language))}
                         options={languageOptions}
                         onChange={({ value }) => (i18n.changeLanguage(value))}

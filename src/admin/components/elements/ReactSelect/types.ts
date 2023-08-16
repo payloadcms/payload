@@ -43,6 +43,7 @@ export type OptionGroup = {
 }
 
 export type Props = {
+  inputId?: string
   className?: string
   value?: Option | Option[],
   onChange?: (value: any) => void, // eslint-disable-line @typescript-eslint/no-explicit-any

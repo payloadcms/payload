@@ -1,32 +1,21 @@
 import React from 'react';
-import { useSelection } from '../SelectionProvider';
+import { useTranslation } from 'react-i18next';
 import { SelectAllStatus } from '../SelectionProvider/types';
-import Check from '../../../../icons/Check';
-import Line from '../../../../icons/Line';
-
-import './index.scss';
-
-const baseClass = 'select-all';
+import { useSelection } from '../SelectionProvider';
+import { CheckboxInput } from '../../../../forms/field-types/Checkbox/Input';
 
 const SelectAll: React.FC = () => {
+  const { t } = useTranslation('general');
   const { selectAll, toggleAll } = useSelection();
 
   return (
-    <div className={baseClass}>
-      <button
-        type="button"
-        onClick={() => toggleAll()}
-      >
-        <span className={`${baseClass}__input`}>
-          { (selectAll === SelectAllStatus.AllInPage || selectAll === SelectAllStatus.AllAvailable) && (
-            <Check />
-          )}
-          { selectAll === SelectAllStatus.Some && (
-            <Line />
-          )}
-        </span>
-      </button>
-    </div>
+    <CheckboxInput
+      id="select-all"
+      aria-label={selectAll === SelectAllStatus.None ? t('selectAllRows') : t('deselectAllRows')}
+      checked={selectAll === SelectAllStatus.AllInPage || selectAll === SelectAllStatus.AllAvailable}
+      partialChecked={selectAll === SelectAllStatus.Some}
+      onToggle={() => toggleAll()}
+    />
   );
 };
 
