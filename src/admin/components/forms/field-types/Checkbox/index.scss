@@ -25,13 +25,30 @@
     padding-left: base(.5);
   }
   
-  &:hover:not(&--read-only) {
-    cursor: pointer;
+ 
+  &:not(:disabled):not(&--read-only){
+    &:active,
+    &:focus-within,
+    &:focus {
+      .custom-checkbox__input {
+        @include inputShadowActive;
 
-    svg {
-      opacity: 0.2;
+        border-color: var(--theme-elevation-400);
+        outline: 0;
+      }
     }
   }
+  
+  &:not(:disabled):not(&--read-only):not(&--checked) {
+    &:hover {
+      cursor: pointer;
+
+      svg {
+        opacity: 0.2;
+      }
+    }
+  }
+
 
   &__input {
     @include formInput;
