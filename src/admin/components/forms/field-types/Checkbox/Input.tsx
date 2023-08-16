@@ -1,9 +1,9 @@
 import React from 'react';
 import Check from '../../../icons/Check';
 import Label from '../../Label';
+import Line from '../../../icons/Line';
 
 import './index.scss';
-import Line from '../../../icons/Line';
 
 const baseClass = 'custom-checkbox';
 
@@ -49,7 +49,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
           type="checkbox"
           name={name}
           aria-label={ariaLabel}
-          checked={checked}
+          checked={Boolean(checked)}
           readOnly
           onInput={onToggle}
         />

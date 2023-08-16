@@ -13,7 +13,6 @@ import Button from '../../elements/Button';
 import Meta from '../../utilities/Meta';
 import HiddenInput from '../../forms/field-types/HiddenInput';
 
-
 import './index.scss';
 
 const baseClass = 'reset-password';
