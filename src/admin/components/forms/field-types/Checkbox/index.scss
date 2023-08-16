@@ -18,16 +18,14 @@
 
 
 .custom-checkbox {
-  display: flex;
+  display: inline-flex;
   
   label {
     padding-bottom: 0;
   }
   
   &:hover {
-    label {
-      cursor: pointer;
-    }
+    cursor: pointer;
 
     svg {
       opacity: 0.2;
