@@ -204,6 +204,7 @@
     "newPassword": "Mật khảu mới",
     "noFiltersSet": "Không có bộ lọc nào được áp dụng",
     "noLabel": "<Không có {{label}}>",
+    "noOptions": "Không có lựa chọn",
     "noResults": "Danh sách rỗng: {{label}}. Có thể {{label}} chưa tồn tại hoặc không có dữ kiện trùng với bộ lọc hiện tại.",
     "noValue": "Không có giá trị",
     "none": "Không có",

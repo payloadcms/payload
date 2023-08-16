@@ -204,6 +204,7 @@
     "newPassword": "Nytt passord",
     "noFiltersSet": "Ingen filtre satt",
     "noLabel": "<Ingen {{label}}>",
+    "noOptions": "Ingen alternativer",
     "noResults": "Ingen {{label}} funnet. Enten finnes det ingen {{label}} enda eller ingen matcher filterne du har spesifisert ovenfor.",
     "noValue": "Ingen verdi",
     "none": "Ingen",

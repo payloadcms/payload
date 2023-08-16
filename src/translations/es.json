@@ -204,6 +204,7 @@
     "newPassword": "Nueva contraseña",
     "noFiltersSet": "No hay filtros establecidos",
     "noLabel": "<Sin {{label}}>",
+    "noOptions": "Sin opciones",
     "noResults": "No encontramos {{label}}. Puede que no existan {{label}} todavía o no hay coincidencias con los filtros introducidos arriba.",
     "noValue": "Sin valor",
     "none": "Ninguna",

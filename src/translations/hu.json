@@ -204,6 +204,7 @@
     "newPassword": "Új jelszó",
     "noFiltersSet": "Nincs beállítva szűrő",
     "noLabel": "<No {{label}}>",
+    "noOptions": "Nincs lehetőség",
     "noResults": "Nem találtunk {{label}}. Vagy még nem létezik {{label}}, vagy egyik sem felel meg a fent megadott szűrőknek.",
     "noValue": "Nincs érték",
     "none": "Semmi",

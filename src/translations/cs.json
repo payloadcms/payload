@@ -204,6 +204,7 @@
     "newPassword": "Nové heslo",
     "noFiltersSet": "Nenastaveny žádné filtry",
     "noLabel": "<Žádný {{label}}>",
+    "noOptions": "Žádné možnosti",
     "noResults": "Nebyly nalezeny žádné {{label}}. Buď ještě neexistují žádné {{label}}, nebo žádné nesplňují filtry, které jste zadali výše.",
     "noValue": "Žádná hodnota",
     "none": "Žádné",

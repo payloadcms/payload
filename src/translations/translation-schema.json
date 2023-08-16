@@ -756,6 +756,9 @@
         "noLabel": {
           "type": "string"
         },
+        "noOptions": {
+          "type": "string"
+        },
         "noResults": {
           "type": "string"
         },

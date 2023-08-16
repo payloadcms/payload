@@ -204,6 +204,7 @@
     "newPassword": "Nouveau mot de passe",
     "noFiltersSet": "Aucun filtre défini",
     "noLabel": "<Pas de {{label}}>",
+    "noOptions": "Aucune option",
     "noResults": "Aucun(e) {{label}} trouvé(e). Soit aucun(e) {{label}} n'existe encore, soit aucun(e) ne correspond aux filtres que vous avez spécifiés ci-dessus",
     "noValue": "Aucune valeur",
     "none": "Aucun(e)",

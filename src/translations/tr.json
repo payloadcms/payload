@@ -204,6 +204,7 @@
     "newPassword": "Yeni parola",
     "noFiltersSet": "Tanımlı filtre yok",
     "noLabel": "<{{label}} yok>",
+    "noOptions": "Seçenek yok",
     "noResults": "{{label}} bulunamadı. Henüz bir {{label}} eklenmemiş olabilir veya seçtiğiniz filtrelerle eşleşen bir sonuç bulunamamış olabilir.",
     "noValue": "Değer yok",
     "none": "Hiç",

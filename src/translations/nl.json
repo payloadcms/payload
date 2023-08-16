@@ -204,6 +204,7 @@
     "newPassword": "Nieuw wachtwoord",
     "noFiltersSet": "Geen filters ingesteld",
     "noLabel": "Geen \"{{label}}\"",
+    "noOptions": "Geen opties",
     "noResults": "Geen {{label}} gevonden. Of er bestaat nog geen {{label}}, of niets komt overeen met de hierboven gespecifieerde filters.",
     "noValue": "Geen waarde",
     "none": "Niets",

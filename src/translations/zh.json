@@ -204,6 +204,7 @@
     "newPassword": "新密码",
     "noFiltersSet": "没有设置过滤器",
     "noLabel": "<没有{{label}}>",
+    "noOptions": "没有选项",
     "noResults": "没有找到{{label}}。{{label}}并不存在或没有符合您上面所指定的过滤器。",
     "noValue": "没有值",
     "none": "无",
