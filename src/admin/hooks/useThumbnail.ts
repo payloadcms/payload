@@ -21,20 +21,27 @@ const useThumbnail = (collection: SanitizedCollectionConfig, doc: Record<string,
   } = doc;
 
   const { serverURL } = useConfig();
+  let pathURL = `${serverURL}${staticURL || ''}`;
+
+  if (absoluteURLPattern.test(staticURL)) {
+    pathURL = staticURL;
+  }
+
+  if (typeof adminThumbnail === 'function') {
+    const thumbnailURL = adminThumbnail({ doc });
+
+    if (!thumbnailURL) return false;
+
+    if (absoluteURLPattern.test(thumbnailURL) || base64Pattern.test(thumbnailURL)) {
+      return thumbnailURL;
+    }
+
+    return `${pathURL}/${thumbnailURL}`;
+  }
 
   if (isImage(mimeType as string)) {
     if (typeof adminThumbnail === 'undefined' && url) {
       return url as string;
-    }
-
-    if (typeof adminThumbnail === 'function') {
-      const thumbnailURL = adminThumbnail({ doc });
-
-      if (absoluteURLPattern.test(thumbnailURL) || base64Pattern.test(thumbnailURL)) {
-        return thumbnailURL;
-      }
-
-      return `${serverURL}${thumbnailURL}`;
     }
 
     if (sizes?.[adminThumbnail]?.url) {
@@ -42,10 +49,10 @@ const useThumbnail = (collection: SanitizedCollectionConfig, doc: Record<string,
     }
 
     if (sizes?.[adminThumbnail]?.filename) {
-      return `${serverURL}${staticURL}/${sizes[adminThumbnail].filename}`;
+      return `${pathURL}/${sizes[adminThumbnail].filename}`;
     }
 
-    return `${serverURL}${staticURL}/${filename}`;
+    return `${pathURL}/${filename}`;
   }
 
   return false;

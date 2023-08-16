@@ -1,6 +1,6 @@
 # Payload Auth Example Front-End
 
-This is a [Payload](https://payloadcms.com) + [Next.js](https://nextjs.org) app using the [App Router](https://nextjs.org/docs/app) made explicitly for the [Payload Auth Example](https://github.com/payloadcms/payload/tree/master/examples/auth). It demonstrates how  to authenticate your Next.js app using [Payload Authentication](https://payloadcms.com/docs/authentication/overview).
+This is a [Payload](https://payloadcms.com) + [Next.js](https://nextjs.org) app using the [App Router](https://nextjs.org/docs/app) made explicitly for the [Payload Auth Example](https://github.com/payloadcms/payload/tree/master/examples/auth). It demonstrates how to authenticate your Next.js app using [Payload Authentication](https://payloadcms.com/docs/authentication/overview).
 
 > This example uses the App Router, the latest API of Next.js. If your app is using the legacy [Pages Router](https://nextjs.org/docs/pages), check out the official [Pages Router Example](https://github.com/payloadcms/payload/tree/master/examples/auth/next-pages).
 
@@ -8,7 +8,7 @@ This is a [Payload](https://payloadcms.com) + [Next.js](https://nextjs.org) app 
 
 ### Payload
 
-First you'll need a running Payload app. If you have not done so already, clone down the [`cms`](../cms) folder and follow the setup instructions there to get it up and running. This will provide all the necessary APIs that your Next.js app will be using for authentication.
+First you'll need a running Payload app. There is one made explicitly for this example and [can be found here](https://github.com/payloadcms/payload/tree/master/examples/auth/payload). If you have not done so already, clone it down and follow the setup instructions there. This will provide all the necessary APIs that your Next.js app requires for authentication.
 
 ### Next.js
 

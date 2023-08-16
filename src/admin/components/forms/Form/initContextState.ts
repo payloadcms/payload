@@ -44,6 +44,9 @@ const initialContextState: Context = {
   reset,
   replaceState: () => undefined,
   buildRowErrors: () => undefined,
+  addFieldRow: () => undefined,
+  removeFieldRow: () => undefined,
+  replaceFieldRow: () => undefined,
 };
 
 export default initialContextState;

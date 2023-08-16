@@ -7,6 +7,7 @@ import { NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { buildAfterOperation } from './utils';
 
 export type Arguments = {
   collection: Collection
@@ -35,6 +36,7 @@ async function findByID<T extends TypeWithID>(
     args = (await hook({
       args,
       operation: 'read',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -138,6 +140,7 @@ async function findByID<T extends TypeWithID>(
       req,
       query,
       doc: result,
+      context: req.context,
     }) || result;
   }, Promise.resolve());
 
@@ -153,6 +156,7 @@ async function findByID<T extends TypeWithID>(
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -166,8 +170,19 @@ async function findByID<T extends TypeWithID>(
       req,
       query,
       doc: result,
+      context: req.context,
     }) || result;
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation<T>({
+    operation: 'findByID',
+    args,
+    result,
+  });
 
   // /////////////////////////////////////
   // Return results

@@ -10,6 +10,7 @@ import { Where } from '../../types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
+import { buildAfterOperation } from './utils';
 
 export type Arguments = {
   depth?: number
@@ -41,6 +42,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     args = (await hook({
       args,
       operation: 'delete',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -116,6 +118,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         return hook({
           req,
           id,
+          context: req.context,
         });
       }, Promise.resolve());
 
@@ -150,6 +153,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         overrideAccess,
         req,
         showHiddenFields,
+        context: req.context,
       });
 
       // /////////////////////////////////////
@@ -162,6 +166,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         result = await hook({
           req,
           doc: result || doc,
+          context: req.context,
         }) || result;
       }, Promise.resolve());
 
@@ -176,6 +181,7 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           req,
           id,
           doc: result,
+          context: req.context,
         }) || result;
       }, Promise.resolve());
 
@@ -207,10 +213,22 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
   }
   preferences.Model.deleteMany({ key: { in: docs.map(({ id }) => `collection-${collectionConfig.slug}-${id}`) } });
 
-  return {
+  let result = {
     docs: awaitedDocs.filter(Boolean),
     errors,
   };
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    operation: 'delete',
+    args,
+    result,
+  });
+
+  return result;
 }
 
 export default deleteOperation;

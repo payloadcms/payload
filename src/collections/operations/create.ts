@@ -22,11 +22,14 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 import { saveVersion } from '../../versions/saveVersion';
 import { mapAsync } from '../../utilities/mapAsync';
+import { buildAfterOperation } from './utils';
 import { registerLocalStrategy } from '../../auth/strategies/local/register';
 
 const unlinkFile = promisify(fs.unlink);
 
-export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
+export type CreateUpdateType = { [field: string | number | symbol]: unknown }
+
+export type Arguments<T extends CreateUpdateType> = {
   collection: Collection
   req: PayloadRequest
   depth?: number
@@ -54,6 +57,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'create',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
@@ -130,6 +134,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     operation: 'create',
     overrideAccess,
     req,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -143,6 +148,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       data,
       req,
       operation: 'create',
+      context: req.context,
     })) || data;
   }, Promise.resolve());
 
@@ -165,6 +171,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       data,
       req,
       operation: 'create',
+      context: req.context,
     })) || data;
   }, Promise.resolve());
 
@@ -180,6 +187,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     operation: 'create',
     req,
     skipValidation: shouldSaveDraft,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -203,7 +211,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       doc: resultWithLocales,
       payload: req.payload,
       password: data.password as string,
-    })
+    });
   } else {
     try {
       doc = await Model.create(resultWithLocales);
@@ -266,6 +274,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess,
     req,
     showHiddenFields,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -278,6 +287,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     result = await hook({
       req,
       doc: result,
+      context: req.context,
     }) || result;
   }, Promise.resolve());
 
@@ -292,6 +302,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     entityConfig: collectionConfig,
     operation: 'create',
     req,
+    context: req.context,
   });
 
   // /////////////////////////////////////
@@ -306,8 +317,19 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       previousDoc: {},
       req: args.req,
       operation: 'create',
+      context: req.context,
     }) || result;
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    operation: 'create',
+    args,
+    result,
+  });
 
   // Remove temp files if enabled, as express-fileupload does not do this automatically
   if (config.upload?.useTempFiles && collectionConfig.upload) {

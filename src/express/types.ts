@@ -24,10 +24,20 @@ export declare type PayloadRequest<U = any> = Request & {
    * - Configuration from payload-config.ts
    * - MongoDB model for this collection
    * - GraphQL type metadata
-   * */
+   */
   collection?: Collection;
   /** What triggered this request */
   payloadAPI?: 'REST' | 'local' | 'GraphQL';
+  /**
+   * Identifier for the database transaction for interactions in a single, all-or-nothing operation.
+   */
+  transactionID?: string | number;
+  /** context allows you to pass your own data to the request object as context
+   * This is useful for, for example, passing data from a beforeChange hook to an afterChange hook.
+   * payoadContext can also be fully typed using declare module
+   * {@link https://payloadcms.com/docs/hooks/context More info in the Payload Documentation}.
+   */
+  context: RequestContext;
   /** Uploaded files */
   files?: {
     /**
@@ -49,3 +59,7 @@ export declare type PayloadRequest<U = any> = Request & {
     [slug: string]: (q: unknown) => Document;
   };
 };
+
+export interface RequestContext {
+  [key: string]: unknown;
+}

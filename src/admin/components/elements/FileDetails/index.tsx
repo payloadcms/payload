@@ -39,6 +39,7 @@ const FileDetails: React.FC<Props> = (props) => {
       staticURL,
       imageSizes,
     },
+    slug: collectionSlug,
   } = collection;
 
   const {
@@ -49,6 +50,7 @@ const FileDetails: React.FC<Props> = (props) => {
     mimeType,
     sizes,
     url,
+    id,
   } = doc;
 
   const [orderedSizes, setOrderedSizes] = useState<FileSizes>(() => sortSizes(sizes, imageSizes));
@@ -78,6 +80,8 @@ const FileDetails: React.FC<Props> = (props) => {
             height={height as number}
             mimeType={mimeType as string}
             url={url as string}
+            id={id as string}
+            collection={collectionSlug as string}
           />
           {hasSizes && (
             <Button

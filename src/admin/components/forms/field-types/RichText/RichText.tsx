@@ -77,13 +77,50 @@ const RichText: React.FC<Props> = (props) => {
   const drawerIsOpen = drawerDepth > 1;
 
   const renderElement = useCallback(({ attributes, children, element }) => {
-    const matchedElement = enabledElements[element?.type];
+    const matchedElement = enabledElements[element.type];
     const Element = matchedElement?.Element;
 
+    let attr = { ...attributes };
+
+    // this converts text alignment to margin when dealing with void elements
+    if (element.textAlign) {
+      if (element.type === 'relationship' || element.type === 'upload') {
+        switch (element.textAlign) {
+          case 'left':
+            attr = { ...attr, style: { marginRight: 'auto' } };
+            break;
+          case 'right':
+            attr = { ...attr, style: { marginLeft: 'auto' } };
+            break;
+          case 'center':
+            attr = { ...attr, style: { marginLeft: 'auto', marginRight: 'auto' } };
+            break;
+          default:
+            attr = { ...attr, style: { textAlign: element.textAlign } };
+            break;
+        }
+      } else if (element.type === 'li') {
+        switch (element.textAlign) {
+          case 'right':
+            attr = { ...attr, style: { textAlign: 'right', listStylePosition: 'inside' } };
+            break;
+          case 'center':
+            attr = { ...attr, style: { textAlign: 'center', listStylePosition: 'inside' } };
+            break;
+          case 'left':
+          default:
+            attr = { ...attr, style: { textAlign: 'left', listStylePosition: 'outside' } };
+            break;
+        }
+      } else {
+        attr = { ...attr, style: { textAlign: element.textAlign } };
+      }
+    }
+
     if (Element) {
-      return (
+      const el = (
         <Element
-          attributes={attributes}
+          attributes={attr}
           element={element}
           path={path}
           fieldProps={props}
@@ -92,9 +129,17 @@ const RichText: React.FC<Props> = (props) => {
           {children}
         </Element>
       );
+
+      return el;
     }
 
-    return <div {...attributes}>{children}</div>;
+    return (
+      <div
+        {...attr}
+      >
+        {children}
+      </div>
+    );
   }, [enabledElements, path, props]);
 
   const renderLeaf = useCallback(({ attributes, children, leaf }) => {
@@ -163,7 +208,6 @@ const RichText: React.FC<Props> = (props) => {
     );
 
     CreatedEditor = withHTML(CreatedEditor);
-
     CreatedEditor = enablePlugins(CreatedEditor, elements);
     CreatedEditor = enablePlugins(CreatedEditor, leaves);
 

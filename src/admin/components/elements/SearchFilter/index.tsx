@@ -35,14 +35,13 @@ const SearchFilter: React.FC<Props> = (props) => {
 
   useEffect(() => {
     const newWhere: Where = { ...typeof params?.where === 'object' ? params.where as Where : {} };
-    const fieldNamesToSearch = [fieldName, ...(listSearchableFields || []).map(({ name }) => name)];
+    const fieldNamesToSearch = listSearchableFields?.length > 0 ? [...(listSearchableFields).map(({ name }) => name)] : [fieldName];
 
     fieldNamesToSearch.forEach((fieldNameToSearch) => {
       const hasOrQuery = Array.isArray(newWhere.or);
       const existingFieldSearchIndex = hasOrQuery ? newWhere.or.findIndex((condition) => {
         return (condition?.[fieldNameToSearch] as WhereField)?.like;
       }) : -1;
-
       if (debouncedSearch) {
         if (!hasOrQuery) newWhere.or = [];
 
@@ -80,11 +79,14 @@ const SearchFilter: React.FC<Props> = (props) => {
   useEffect(() => {
     if (listSearchableFields?.length > 0) {
       placeholder.current = listSearchableFields.reduce<string>((prev, curr, i) => {
+        if (i === 0) {
+          return `${t('searchBy', { label: getTranslation(curr.label || curr.name, i18n) })}`;
+        }
         if (i === listSearchableFields.length - 1) {
           return `${prev} ${t('or')} ${getTranslation(curr.label || curr.name, i18n)}`;
         }
         return `${prev}, ${getTranslation(curr.label || curr.name, i18n)}`;
-      }, placeholder.current);
+      }, '');
     } else {
       placeholder.current = t('searchBy', { label: getTranslation(fieldLabel, i18n) });
     }
