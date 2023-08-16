@@ -26,7 +26,7 @@
   }
   
  
-  &:not(:disabled):not(&--read-only){
+  &:not(:disabled):not(&--read-only) {
     &:active,
     &:focus-within,
     &:focus {
@@ -59,8 +59,9 @@
     width: $baseline;
     height: $baseline;
 
-    & input[type="checkbox"] {
+    &input[type="checkbox"] {
       position: absolute;
+      // Without the extra 4px, there is an uncheckable area due to the border of the parent element
       width: calc(100% + 4px);
       height: calc(100% + 4px);
       padding: 0;
