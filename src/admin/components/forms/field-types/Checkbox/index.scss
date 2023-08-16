@@ -23,6 +23,16 @@
   label {
     padding-bottom: 0;
   }
+  
+  &:hover {
+    label {
+      cursor: pointer;
+    }
+
+    svg {
+      opacity: 0.2;
+    }
+  }
 
   &__input {
     @include formInput;
@@ -43,12 +53,6 @@
       border-radius: 0;
       z-index: 1;
       cursor: pointer;
-    }
-
-    &:hover {
-      svg {
-        opacity: 0.2;
-      }
     }
 
     &:focus-within {
