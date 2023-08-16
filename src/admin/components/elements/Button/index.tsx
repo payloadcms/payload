@@ -72,6 +72,7 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, Props>((props, 
     iconPosition = 'right',
     newTab,
     tooltip,
+    'aria-label': ariaLabel,
   } = props;
 
   const [showTooltip, setShowTooltip] = React.useState(false);
@@ -101,6 +102,8 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, Props>((props, 
     type,
     className: classes,
     disabled,
+    'aria-disabled': disabled,
+    'aria-label': ariaLabel,
     onMouseEnter: tooltip ? () => setShowTooltip(true) : undefined,
     onMouseLeave: tooltip ? () => setShowTooltip(false) : undefined,
     onClick: !disabled ? handleClick : undefined,

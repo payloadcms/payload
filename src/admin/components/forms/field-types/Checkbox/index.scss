@@ -4,10 +4,6 @@
   position: relative;
   margin-bottom: $baseline;
 
-  input[type=checkbox] {
-    display: none;
-  }
-
   .tooltip:not([aria-hidden="true"]) {
     right: auto;
     position: relative;
@@ -22,30 +18,59 @@
 
 
 .custom-checkbox {
+  display: inline-flex;
+  
   label {
     padding-bottom: 0;
+    padding-left: base(.5);
   }
+  
+  &:hover {
+    cursor: pointer;
 
-  input {
-    // hidden HTML checkbox
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
+    svg {
+      opacity: 0.2;
+    }
   }
 
   &__input {
-    // visible checkbox
     @include formInput;
+    display: flex;
     padding: 0;
     line-height: 0;
     position: relative;
     width: $baseline;
     height: $baseline;
-    margin-right: base(.5);
+
+    & input[type="checkbox"] {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      opacity: 0;
+      border-radius: 0;
+      z-index: 1;
+      cursor: pointer;
+    }
+
+    &:focus-within {
+      box-shadow: 0 0 3px 3px var(--theme-success-400);
+    }
+  }
+
+  &__icon {
+    position: absolute;
 
     svg {
       opacity: 0;
+    }
+  }
+
+  &--checked {
+    .custom-checkbox__icon {
+      svg {
+        opacity: 1;
+      }
     }
   }
 
@@ -56,40 +81,6 @@
 
     label {
       color: var(--theme-elevation-400);
-    }
-  }
-
-  button {
-    @extend %btn-reset;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-
-    &:focus,
-    &:active {
-      outline: none;
-    }
-
-    &:focus {
-      .custom-checkbox__input {
-        box-shadow: 0 0 3px 3px var(--theme-success-400);
-      }
-    }
-
-    &:hover {
-      svg {
-        opacity: .2;
-      }
-    }
-  }
-
-  &--checked {
-    button {
-      .custom-checkbox__input {
-        svg {
-          opacity: 1;
-        }
-      }
     }
   }
 }

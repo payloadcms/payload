@@ -5,11 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { Props, TogglerProps } from './types';
 import { EditDepthContext, useEditDepth } from '../../utilities/EditDepth';
 import { Gutter } from '../Gutter';
-import './index.scss';
 import X from '../../icons/X';
 
-const baseClass = 'drawer';
+import './index.scss';
 
+const baseClass = 'drawer';
 const zBase = 100;
 
 export const formatDrawerSlug = ({

@@ -1,26 +1,9 @@
 import { Document as MongooseDocument } from 'mongoose';
 import { TypeWithTimestamps } from '../collections/config/types';
 import { FileData } from '../uploads/types';
+import { validOperators } from './constants';
 
 export { PayloadRequest } from '../express/types';
-
-export const validOperators = [
-  'equals',
-  'contains',
-  'not_equals',
-  'in',
-  'all',
-  'not_in',
-  'exists',
-  'greater_than',
-  'greater_than_equal',
-  'less_than',
-  'less_than_equal',
-  'like',
-  'within',
-  'intersects',
-  'near',
-] as const;
 
 export type Operator = typeof validOperators[number];
 
