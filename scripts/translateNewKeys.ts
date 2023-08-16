@@ -7,7 +7,7 @@ import * as path from 'path';
 const TRANSLATIONS_DIR = './src/translations';
 const SOURCE_LANG_FILE = 'en.json';
 const OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions'; // Adjust if needed
-const OPENAI_API_KEY = 'ÜTs'; // Remember to replace with your actual key
+const OPENAI_API_KEY = 'sk-YOURKEYHERE'; // Remember to replace with your actual key
 
 
 async function main() {
