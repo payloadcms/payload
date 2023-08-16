@@ -1,0 +1,49 @@
+@use "../../css/common.scss" as *;
+
+.icon {
+  width: calc(var(--base) * 0.5);
+  height: calc(var(--base) * 0.5);
+  overflow: visible;
+  transition: transform 500ms linear;
+  will-change: transform;
+
+  :global() {
+    path {
+      vector-effect: non-scaling-stroke;
+    }
+  }
+}
+
+.stroke {
+  stroke-width: 1px;
+  fill: none;
+  stroke: currentColor;
+}
+
+.small {
+  width: calc(var(--base) * 0.25);
+  height: calc(var(--base) * 0.25);
+}
+
+.medium {
+  height: calc(var(--base) * 0.75);
+  width: calc(var(--base) * 0.75);
+}
+
+.large {
+  height: var(--base);
+  width: var(--base);
+}
+
+.full {
+  height: 100%;
+  width: 100%;
+}
+
+.bold {
+  &:local() {
+    .stroke {
+      stroke-width: 2px;
+    }
+  }
+}
