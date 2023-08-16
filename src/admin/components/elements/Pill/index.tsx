@@ -45,6 +45,10 @@ const StaticPill: React.FC<Props> = (props) => {
     children,
     elementProps,
     rounded,
+    'aria-label': ariaLabel,
+    'aria-expanded': ariaExpanded,
+    'aria-controls': ariaControls,
+    'aria-checked': ariaChecked,
   } = props;
 
   const classes = [
@@ -67,6 +71,10 @@ const StaticPill: React.FC<Props> = (props) => {
   return (
     <Element
       {...elementProps}
+      aria-label={ariaLabel}
+      aria-expanded={ariaExpanded}
+      aria-controls={ariaControls}
+      aria-checked={ariaChecked}
       className={classes}
       type={Element === 'button' ? 'button' : undefined}
       to={to || undefined}

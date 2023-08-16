@@ -24,7 +24,7 @@ const DefaultNav = () => {
   const [menuActive, setMenuActive] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
   const history = useHistory();
-  const { i18n } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
   const {
     collections,
     globals,
@@ -81,6 +81,7 @@ const DefaultNav = () => {
           <Link
             to={admin}
             className={`${baseClass}__brand`}
+            aria-label={t('dashboard')}
           >
             <Icon />
           </Link>
@@ -141,6 +142,7 @@ const DefaultNav = () => {
             <Link
               to={`${admin}/account`}
               className={`${baseClass}__account`}
+              aria-label={t('authentication:account')}
             >
               <Account />
             </Link>

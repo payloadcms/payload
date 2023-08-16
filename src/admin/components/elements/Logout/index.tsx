@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import LogOut from '../../icons/LogOut';
@@ -7,16 +8,21 @@ import LogOut from '../../icons/LogOut';
 const baseClass = 'nav';
 
 const DefaultLogout = () => {
+  const { t } = useTranslation('authentication');
   const config = useConfig();
   const {
     routes: { admin },
     admin: {
       logoutRoute,
-      components: { logout }
-    }
+      components: { logout },
+    },
   } = config;
   return (
-    <Link to={`${admin}${logoutRoute}`} className={`${baseClass}__log-out`}>
+    <Link
+      to={`${admin}${logoutRoute}`}
+      className={`${baseClass}__log-out`}
+      aria-label={t('logOut')}
+    >
       <LogOut />
     </Link>
   );
