@@ -24,14 +24,14 @@ const GeoJSONObject = new GraphQLInputObjectType({
 type DefaultsType = {
   [key in staticTypes]: {
     operators: {
-      operator: string;
+      name: string;
       type: GraphQLType | ((field: FieldAffectingData, parentName: string) => GraphQLType);
     }[];
   }
 } & {
   [key in dynamicTypes]: {
     operators: {
-      operator: string;
+      name: string;
       type: ((field: FieldAffectingData, parentName: string) => GraphQLType);
     }[];
   }
@@ -41,7 +41,7 @@ const defaults: DefaultsType = {
   number: {
     operators: [
       ...[...operators.equality, ...operators.comparison].map((operator) => ({
-        operator,
+        name: operator,
         type: (field: NumberField): GraphQLType => {
           return field?.name === 'id' ? GraphQLInt : GraphQLFloat;
         },
@@ -51,7 +51,7 @@ const defaults: DefaultsType = {
   text: {
     operators: [
       ...[...operators.equality, ...operators.partial, ...operators.contains].map((operator) => ({
-        operator,
+        name: operator,
         type: GraphQLString,
       })),
     ],
@@ -59,7 +59,7 @@ const defaults: DefaultsType = {
   email: {
     operators: [
       ...[...operators.equality, ...operators.partial, ...operators.contains].map((operator) => ({
-        operator,
+        name: operator,
         type: EmailAddressResolver,
       })),
     ],
@@ -67,7 +67,7 @@ const defaults: DefaultsType = {
   textarea: {
     operators: [
       ...[...operators.equality, ...operators.partial].map((operator) => ({
-        operator,
+        name: operator,
         type: GraphQLString,
       })),
     ],
@@ -75,7 +75,7 @@ const defaults: DefaultsType = {
   richText: {
     operators: [
       ...[...operators.equality, ...operators.partial].map((operator) => ({
-        operator,
+        name: operator,
         type: GraphQLJSON,
       })),
     ],
@@ -83,7 +83,7 @@ const defaults: DefaultsType = {
   json: {
     operators: [
       ...[...operators.equality, ...operators.partial, ...operators.geojson].map((operator) => ({
-        operator,
+        name: operator,
         type: GraphQLJSON,
       })),
     ],
@@ -91,7 +91,7 @@ const defaults: DefaultsType = {
   code: {
     operators: [
       ...[...operators.equality, ...operators.partial].map((operator) => ({
-        operator,
+        name: operator,
         type: GraphQLString,
       })),
     ],
@@ -99,7 +99,7 @@ const defaults: DefaultsType = {
   radio: {
     operators: [
       ...[...operators.equality, ...operators.partial].map((operator) => ({
-        operator,
+        name: operator,
         type: (field: RadioField, parentName): GraphQLType => new GraphQLEnumType({
           name: `${combineParentName(parentName, field.name)}_Input`,
           values: field.options.reduce((values, option) => {
@@ -126,7 +126,7 @@ const defaults: DefaultsType = {
   date: {
     operators: [
       ...[...operators.equality, ...operators.comparison, 'like'].map((operator) => ({
-        operator,
+        name: operator,
         type: DateTimeResolver,
       })),
     ],
@@ -134,11 +134,11 @@ const defaults: DefaultsType = {
   point: {
     operators: [
       ...[...operators.equality, ...operators.comparison, ...operators.geo].map((operator) => ({
-        operator,
+        name: operator,
         type: new GraphQLList(GraphQLFloat),
       })),
       ...operators.geojson.map((operator) => ({
-        operator,
+        name: operator,
         /**
          * @example:
          * within: {
@@ -163,7 +163,7 @@ const defaults: DefaultsType = {
   relationship: {
     operators: [
       ...[...operators.equality, ...operators.contains].map((operator) => ({
-        operator,
+        name: operator,
         type: GraphQLString,
       })),
     ],
@@ -171,7 +171,7 @@ const defaults: DefaultsType = {
   upload: {
     operators: [
       ...operators.equality.map((operator) => ({
-        operator,
+        name: operator,
         type: GraphQLString,
       })),
     ],
@@ -179,7 +179,7 @@ const defaults: DefaultsType = {
   checkbox: {
     operators: [
       ...operators.equality.map((operator) => ({
-        operator,
+        name: operator,
         type: GraphQLBoolean,
       })),
     ],
@@ -187,7 +187,7 @@ const defaults: DefaultsType = {
   select: {
     operators: [
       ...[...operators.equality, ...operators.contains].map((operator) => ({
-        operator,
+        name: operator,
         type: (field: SelectField, parentName): GraphQLType => new GraphQLEnumType({
           name: `${combineParentName(parentName, field.name)}_Input`,
           values: field.options.reduce((values, option) => {
@@ -224,15 +224,7 @@ const defaults: DefaultsType = {
 
 const listOperators = ['in', 'not_in', 'all'];
 
-const gqlTypeCache = new Map();
-
-const getGqlTypeFromCache = (cacheKey: string): GraphQLType => {
-  return gqlTypeCache.get(cacheKey);
-};
-
-const storeGqlTypeInCache = (cacheKey: string, type: GraphQLType) => {
-  gqlTypeCache.set(cacheKey, type);
-};
+const gqlTypeCache: Record<string, GraphQLType> = {};
 
 /**
  * In GraphQL, you can use "where" as an argument to filter a collection. Example:
@@ -274,23 +266,22 @@ export const withOperators = (field: FieldAffectingData, parentName: string): Gr
       // Without this, select and radio fields would have the same name, and GraphQL would throw an error
       // This usually only happens if a custom type is returned from the operator.type function
       if (typeof operator.type === 'function' && 'name' in gqlType) {
-        const cachedType = getGqlTypeFromCache(gqlType.name);
-        if (cachedType) {
-          gqlType = cachedType;
+        if (gqlTypeCache[gqlType.name]) {
+          gqlType = gqlTypeCache[gqlType.name];
         } else {
-          storeGqlTypeInCache(gqlType.name, gqlType);
+          gqlTypeCache[gqlType.name] = gqlType;
         }
       }
 
-      if (listOperators.includes(operator.operator)) {
+      if (listOperators.includes(operator.name)) {
         gqlType = new GraphQLList(gqlType);
-      } else if (operator.operator === 'exists') {
+      } else if (operator.name === 'exists') {
         gqlType = GraphQLBoolean;
       }
 
       return {
         ...objectTypeFields,
-        [operator.operator]: {
+        [operator.name]: {
           type: gqlType,
         },
       };
