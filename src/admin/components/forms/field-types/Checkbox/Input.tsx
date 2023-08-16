@@ -1,9 +1,9 @@
 import React from 'react';
 import Check from '../../../icons/Check';
 import Label from '../../Label';
+import Line from '../../../icons/Line';
 
 import './index.scss';
-import Line from '../../../icons/Line';
 
 const baseClass = 'custom-checkbox';
 
