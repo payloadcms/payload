@@ -8,7 +8,7 @@ type BuildAdminType = (options: {
   viteConfig: InlineConfig;
 }) => Promise<void>;
 export const buildAdmin: BuildAdminType = async ({ payloadConfig, viteConfig: viteConfigArg }) => {
-  const viteConfig = getViteConfig(payloadConfig);
+  const viteConfig = await getViteConfig(payloadConfig);
 
   // TODO: merge vite configs (https://vitejs.dev/guide/api-javascript.html#mergeconfig)
 

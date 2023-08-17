@@ -1,11 +1,12 @@
 import path from 'path';
 import { InlineConfig, createLogger } from 'vite';
 import viteCommonJS from 'vite-plugin-commonjs';
-import dynamicImport from 'vite-plugin-dynamic-import';
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import virtual from 'vite-plugin-virtual';
 import scss from 'rollup-plugin-scss';
 import image from '@rollup/plugin-image';
 import rollupCommonJS from '@rollup/plugin-commonjs';
+import react from '@vitejs/plugin-react';
+import getPort from 'get-port';
 import { getDevConfig as getDevWebpackConfig } from '../../webpack/configs/dev';
 import type { SanitizedConfig } from '../../../config/types';
 
@@ -20,9 +21,10 @@ logger.warn = (msg, options) => {
 const bundlerPath = path.resolve(__dirname, '../bundler');
 const relativeAdminPath = path.resolve(__dirname, '../../../admin');
 
-export const getViteConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
+export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<InlineConfig> => {
   const webpackConfig = getDevWebpackConfig(payloadConfig);
   const webpackAliases = webpackConfig?.resolve?.alias || {} as any;
+  const hmrPort = await getPort();
 
   return {
     root: path.resolve(__dirname, '../../../admin'),
@@ -30,6 +32,9 @@ export const getViteConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
     customLogger: logger,
     server: {
       middlewareMode: true,
+      hmr: {
+        port: hmrPort,
+      },
     },
     resolve: {
       alias: {
@@ -45,18 +50,13 @@ export const getViteConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
       process: '({argv:[],env:{},cwd:()=>""})',
     },
     plugins: [
-      dynamicImport(),
-      viteCommonJS(),
-      nodePolyfills({
-        exclude: [
-          'fs',
-        ],
-        globals: {
-          Buffer: true,
-          global: true,
-          process: true,
-        },
+      virtual({
+        crypto: 'export default {}',
+        https: 'export default {}',
+        http: 'export default {}',
       }),
+      react(),
+      viteCommonJS(),
       {
         name: 'init-admin-panel',
         transformIndexHtml(html) {
@@ -71,16 +71,16 @@ export const getViteConfig = (payloadConfig: SanitizedConfig): InlineConfig => {
         },
       },
       {
-        name: 'replace-bundler-path',
-        transform(code, id) {
+        name: 'shim-bundler-file',
+        load(id) {
           if (id.startsWith(bundlerPath)) {
             return 'export default () => { };';
           }
-
-          return code;
+          return null;
         },
       },
     ],
+
     build: {
       outDir: payloadConfig.admin.buildPath,
       commonjsOptions: {

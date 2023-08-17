@@ -15,7 +15,7 @@ export const devAdmin: DevAdminType = async ({ payload, viteConfig: viteConfigAr
   // TODO: merge vite configs (https://vitejs.dev/guide/api-javascript.html#mergeconfig)
 
   try {
-    const viteConfig = getViteConfig(payload.config);
+    const viteConfig = await getViteConfig(payload.config);
     const viteServer = await vite.createServer(viteConfig);
 
     router.use(viteServer.middlewares);
