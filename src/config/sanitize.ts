@@ -8,65 +8,54 @@ import sanitizeGlobals from '../globals/config/sanitize';
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections';
 import { defaults } from './defaults';
 import getDefaultBundler from '../bundlers/webpack/bundler';
-import { SanitizedCollectionConfig } from '../collections/config/types';
 
-const sanitizeAdminConfig = (config: Config): { adminCollection?: SanitizedCollectionConfig, adminConfig: SanitizedConfig['admin'] } => {
-  const results = {
-    adminCollection: null,
-    adminConfig: { ...config.admin as SanitizedConfig['admin'] },
-  };
+const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
+  const sanitizedConfig = { ...configToSanitize };
 
   // add default user collection if none provided
-  if (!results?.adminConfig?.user) {
-    const firstCollectionWithAuth = config.collections.find(({ auth }) => Boolean(auth));
+  if (!sanitizedConfig?.admin?.user) {
+    const firstCollectionWithAuth = sanitizedConfig.collections.find(({ auth }) => Boolean(auth));
     if (firstCollectionWithAuth) {
-      results.adminConfig.user = firstCollectionWithAuth.slug;
+      sanitizedConfig.admin.user = firstCollectionWithAuth.slug;
     } else {
-      results.adminConfig.user = 'users';
-      const sanitizedDefaultUser = sanitizeCollection(config, defaultUserCollection);
-      results.adminCollection = sanitizedDefaultUser;
+      sanitizedConfig.admin.user = 'users';
+      sanitizedConfig.collections.push(defaultUserCollection);
     }
   }
 
-  if (!config.collections.find(({ slug }) => slug === results.adminConfig.user)) {
-    throw new InvalidConfiguration(`${config.admin.user} is not a valid admin user collection`);
+  if (!sanitizedConfig.collections.find(({ slug }) => slug === sanitizedConfig.admin.user)) {
+    throw new InvalidConfiguration(`${sanitizedConfig.admin.user} is not a valid admin user collection`);
   }
 
   // add default bundler if none provided
-  if (!results.adminConfig.bundler) {
-    results.adminConfig.bundler = getDefaultBundler();
+  if (!sanitizedConfig.admin.bundler) {
+    sanitizedConfig.admin.bundler = getDefaultBundler();
   }
 
-  return results;
+  return sanitizedConfig as Partial<SanitizedConfig>;
 };
 
-export const sanitizeConfig = (config: Config): SanitizedConfig => {
-  const configWithDefaults: Partial<Config> = merge(defaults, config, {
+export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
+  const configWithDefaults: Config = merge(defaults, incomingConfig, {
     isMergeableObject: isPlainObject,
   });
 
-  const { adminCollection, adminConfig } = sanitizeAdminConfig(configWithDefaults as Config);
-  const sanitizedCollections = configWithDefaults.collections.map((collection) => sanitizeCollection(configWithDefaults, collection));
-  const allCollections = [adminCollection, ...sanitizedCollections].filter(Boolean);
-  checkDuplicateCollections(allCollections);
+  const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults);
+  config.collections = config.collections.map((collection) => sanitizeCollection(configWithDefaults, collection));
 
-  const sanitizedConfig: Partial<SanitizedConfig> = {
-    ...configWithDefaults as Partial<SanitizedConfig>,
-    admin: adminConfig,
-    collections: allCollections,
-  };
+  checkDuplicateCollections(config.collections);
 
-  if (sanitizedConfig.globals.length > 0) {
-    sanitizedConfig.globals = sanitizeGlobals(sanitizedConfig.collections, sanitizedConfig.globals);
+  if (config.globals.length > 0) {
+    config.globals = sanitizeGlobals(config.collections, config.globals);
   }
 
-  if (typeof sanitizedConfig.serverURL === 'undefined') {
-    sanitizedConfig.serverURL = '';
+  if (typeof config.serverURL === 'undefined') {
+    config.serverURL = '';
   }
 
-  if (sanitizedConfig.serverURL !== '') {
-    sanitizedConfig.csrf.push(sanitizedConfig.serverURL);
+  if (config.serverURL !== '') {
+    config.csrf.push(config.serverURL);
   }
 
-  return sanitizedConfig as SanitizedConfig;
+  return config as SanitizedConfig;
 };
