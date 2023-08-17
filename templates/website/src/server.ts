@@ -29,7 +29,7 @@ const start = async (): Promise<void> => {
     payload.logger.info('Done.')
   }
 
-  app.listen(process.env.PORT)
+  app.listen(process.env.PORT || 3000)
 }
 
 start()
