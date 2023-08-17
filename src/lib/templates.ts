@@ -12,28 +12,31 @@ export async function validateTemplate(templateName: string): Promise<boolean> {
 }
 
 export async function getValidTemplates(): Promise<ProjectTemplate[]> {
-  const templates: ProjectTemplate[] = [
+  return [
     {
       name: 'blank',
-      type: 'static',
-      description: 'Blank',
-      directory: 'blank',
+      type: 'starter',
+      url: 'https://github.com/payloadcms/payload/templates/blank',
+      description: 'Blank Template',
     },
     {
-      name: 'todo',
-      type: 'static',
-      description: 'Todo list',
-      directory: 'todo',
+      name: 'website',
+      type: 'starter',
+      url: 'https://github.com/payloadcms/payload/templates/website',
+      description: 'Website Template',
     },
     {
-      name: 'blog',
-      type: 'static',
-      description: 'Blog',
-      directory: 'blog',
+      name: 'ecommerce',
+      type: 'starter',
+      url: 'https://github.com/payloadcms/payload/templates/ecommerce',
+      description: 'E-commerce Template',
     },
-  ]
-
-  const starters: GitTemplate[] = [
+    {
+      name: 'plugin',
+      type: 'plugin',
+      url: 'https://github.com/payloadcms/payload-plugin-template',
+      description: 'Template for creating a Payload plugin',
+    },
     {
       name: 'payload-demo',
       type: 'starter',
@@ -46,34 +49,5 @@ export async function getValidTemplates(): Promise<ProjectTemplate[]> {
       url: 'https://github.com/payloadcms/website-cms',
       description: 'Payload website CMS at https://payloadcms.com',
     },
-    {
-      name: 'cloud-template-blank',
-      type: 'starter',
-      url: 'https://github.com/payloadcms/template-blank',
-      description: 'Blank template for Payload Cloud',
-    },
-    {
-      name: 'cloud-template-website',
-      type: 'starter',
-      url: 'https://github.com/payloadcms/template-website',
-      description: 'Website template for Payload Cloud',
-    },
-    {
-      name: 'cloud-template-ecommerce',
-      type: 'starter',
-      url: 'https://github.com/payloadcms/template-ecommerce',
-      description: 'E-commerce template for Payload Cloud',
-    },
   ]
-
-  const pluginTemplates: PluginTemplate[] = [
-    {
-      name: 'plugin',
-      type: 'plugin',
-      url: 'https://github.com/payloadcms/payload-plugin-template',
-      description: 'Template for creating a Payload plugin',
-    },
-  ]
-
-  return [...templates, ...starters, ...pluginTemplates]
 }

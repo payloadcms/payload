@@ -3,6 +3,7 @@ import fs from 'fs-extra'
 import type { ProjectTemplate } from '../types'
 import { error, success } from '../utils/log'
 
+/** Parse and swap .env.example values and write .env */
 export async function writeEnvFile(args: {
   databaseUri: string
   payloadSecret: string
@@ -20,31 +21,28 @@ export async function writeEnvFile(args: {
         path.join(projectDir, '.env.example'),
         'utf8',
       )
-      const envFileLines = envFile.split('\n').filter(e => e)
+      const envWithValues: string[] = envFile
+        .split('\n')
+        .filter(e => e)
+        .map(line => {
+          if (line.startsWith('#') || !line.includes('=')) return line
 
-      const envFilePairs = envFileLines.map(line => {
-        const [key, value] = line.split('=')
-        return { key, value }
-      })
+          const split = line.split('=')
+          const key = split[0]
+          let value = split[1]
 
-      // Replace MONGODB_URI and PAYLOAD_SECRET values
-      const newEnvFilePairs = envFilePairs.map(pair => {
-        if (pair.key === 'MONGODB_URI' || pair.key === 'MONGO_URL') {
-          return { key: pair.key, value: databaseUri }
-        }
-        if (pair.key === 'PAYLOAD_SECRET' || pair.key === 'PAYLOAD_SECRET_KEY') {
-          return { key: pair.key, value: payloadSecret }
-        }
-        return pair
-      })
+          if (key === 'MONGODB_URI' || key === 'MONGO_URL') {
+            value = databaseUri
+          }
+          if (key === 'PAYLOAD_SECRET' || key === 'PAYLOAD_SECRET_KEY') {
+            value = payloadSecret
+          }
+
+          return `${key}=${value}`
+        })
 
       // Write new .env file
-      const newEnvFileLines = newEnvFilePairs.map(
-        pair => `${pair.key}=${pair.value}`,
-      )
-
-      await fs.writeFile(path.join(projectDir, '.env'), newEnvFileLines.join('\n'))
-      return
+      await fs.writeFile(path.join(projectDir, '.env'), envWithValues.join('\n'))
     }
 
     const content = `MONGODB_URI=${databaseUri}\nPAYLOAD_SECRET=${payloadSecret}`

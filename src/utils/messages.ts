@@ -3,6 +3,7 @@ import figures from 'figures'
 import terminalLink from 'terminal-link'
 import { getValidTemplates } from '../lib/templates'
 import type { ProjectTemplate } from '../types'
+import path from 'path'
 
 const header = (message: string): string =>
   `${chalk.yellow(figures.star)} ${chalk.bold(message)}`
@@ -46,7 +47,12 @@ export function successMessage(projectDir: string, packageManager: string): stri
   ${header('Launch Application:')}
 
     - cd ${projectDir}
-    - ${packageManager === 'yarn' ? 'yarn' : 'npm run'} dev
+    - ${
+      packageManager === 'yarn' ? 'yarn' : 'npm run'
+    } dev or follow directions in ${createTerminalLink(
+    'README.md',
+    `file://${path.resolve(projectDir, 'README.md')}`,
+  )}
 
   ${header('Documentation:')}
 
