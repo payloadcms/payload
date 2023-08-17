@@ -8,43 +8,53 @@ import sanitizeGlobals from '../globals/config/sanitize';
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections';
 import { defaults } from './defaults';
 import getDefaultBundler from '../bundlers/webpack/bundler';
+import { SanitizedCollectionConfig } from '../collections/config/types';
 
-const sanitizeAdmin = (config: SanitizedConfig): SanitizedConfig['admin'] => {
-  const adminConfig = config.admin;
+const sanitizeAdminConfig = (config: Config): { adminCollection?: SanitizedCollectionConfig, adminConfig: SanitizedConfig['admin'] } => {
+  const results = {
+    adminCollection: null,
+    adminConfig: { ...config.admin as SanitizedConfig['admin'] },
+  };
 
   // add default user collection if none provided
-  if (!adminConfig?.user) {
+  if (!results?.adminConfig?.user) {
     const firstCollectionWithAuth = config.collections.find(({ auth }) => Boolean(auth));
     if (firstCollectionWithAuth) {
-      adminConfig.user = firstCollectionWithAuth.slug;
+      results.adminConfig.user = firstCollectionWithAuth.slug;
     } else {
-      adminConfig.user = 'users';
+      results.adminConfig.user = 'users';
       const sanitizedDefaultUser = sanitizeCollection(config, defaultUserCollection);
-      config.collections.push(sanitizedDefaultUser);
+      results.adminCollection = sanitizedDefaultUser;
     }
   }
 
-  if (!config.collections.find(({ slug }) => slug === adminConfig.user)) {
+  if (!config.collections.find(({ slug }) => slug === results.adminConfig.user)) {
     throw new InvalidConfiguration(`${config.admin.user} is not a valid admin user collection`);
   }
 
   // add default bundler if none provided
-  if (!adminConfig.bundler) {
-    adminConfig.bundler = getDefaultBundler();
+  if (!results.adminConfig.bundler) {
+    results.adminConfig.bundler = getDefaultBundler();
   }
 
-  return adminConfig;
+  return results;
 };
 
 export const sanitizeConfig = (config: Config): SanitizedConfig => {
-  const sanitizedConfig: Config = merge(defaults, config, {
+  const configWithDefaults: Partial<Config> = merge(defaults, config, {
     isMergeableObject: isPlainObject,
-  }) as Config;
+  });
 
-  sanitizedConfig.admin = sanitizeAdmin(sanitizedConfig as SanitizedConfig);
+  const { adminCollection, adminConfig } = sanitizeAdminConfig(configWithDefaults as Config);
+  const sanitizedCollections = configWithDefaults.collections.map((collection) => sanitizeCollection(configWithDefaults, collection));
+  const allCollections = [adminCollection, ...sanitizedCollections].filter(Boolean);
+  checkDuplicateCollections(allCollections);
 
-  sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig, collection));
-  checkDuplicateCollections(sanitizedConfig.collections);
+  const sanitizedConfig: Partial<SanitizedConfig> = {
+    ...configWithDefaults as Partial<SanitizedConfig>,
+    admin: adminConfig,
+    collections: allCollections,
+  };
 
   if (sanitizedConfig.globals.length > 0) {
     sanitizedConfig.globals = sanitizeGlobals(sanitizedConfig.collections, sanitizedConfig.globals);
