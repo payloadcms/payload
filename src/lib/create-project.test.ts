@@ -1,11 +1,7 @@
 import fse from 'fs-extra'
 import path from 'path'
 import type { CliArgs, ProjectTemplate } from '../types'
-import {
-  createProject,
-  getLatestPayloadVersion,
-  updatePayloadVersion,
-} from './create-project'
+import { createProject } from './create-project'
 
 const projectDir = path.resolve(__dirname, './tmp')
 describe('createProject', () => {
@@ -29,51 +25,50 @@ describe('createProject', () => {
     const args = { _: ['project-name'], '--no-deps': true } as CliArgs
     const packageManager = 'yarn'
 
-    it('creates static project', async () => {
-      const expectedPayloadVersion = await getLatestPayloadVersion()
-      const templateName = 'todo'
+    it('creates starter project', async () => {
+      const projectName = 'starter-project'
       const template: ProjectTemplate = {
-        name: templateName,
-        type: 'static',
-        directory: 'todo',
+        name: 'blank',
+        type: 'starter',
+        url: 'https://github.com/payloadcms/payload/templates/blank',
+        description: 'Blank Template',
       }
-      await createProject(args, projectDir, template, packageManager)
+      await createProject({
+        cliArgs: args,
+        projectName,
+        projectDir,
+        template,
+        packageManager,
+      })
 
       const packageJsonPath = path.resolve(projectDir, 'package.json')
       const packageJson = fse.readJsonSync(packageJsonPath)
 
-      expect(packageJson.dependencies.payload).toBe(expectedPayloadVersion)
+      // Check package name and description
+      expect(packageJson.name).toEqual(projectName)
+    })
+
+    it('creates plugin template', async () => {
+      const projectName = 'plugin'
+      const template: ProjectTemplate = {
+        name: 'plugin',
+        type: 'plugin',
+        url: 'https://github.com/payloadcms/payload-plugin-template',
+        description: 'Template for creating a Payload plugin',
+      }
+      await createProject({
+        cliArgs: args,
+        projectName,
+        projectDir,
+        template,
+        packageManager,
+      })
+
+      const packageJsonPath = path.resolve(projectDir, 'package.json')
+      const packageJson = fse.readJsonSync(packageJsonPath)
 
       // Check package name and description
-      expect(packageJson.name).toEqual(path.basename(projectDir))
-      expect(packageJson.description).toContain(templateName)
-
-      // Check all common files are create
-      assertProjectFileExists('.gitignore')
-      assertProjectFileExists('nodemon.json')
-      assertProjectFileExists('README.md')
-      assertProjectFileExists('tsconfig.json')
-      assertProjectFileExists('docker-compose.yml')
-    })
-  })
-
-  describe('#updatePayloadVersion', () => {
-    it('updates payload version in package.json', async () => {
-      const packageJsonPath = path.resolve(projectDir, 'package.json')
-      await fse.mkdir(projectDir)
-      await fse.writeJson(
-        packageJsonPath,
-        { dependencies: { payload: '0.0.1' } },
-        { spaces: 2 },
-      )
-      await updatePayloadVersion(projectDir)
-      const modified = await fse.readJson(packageJsonPath)
-      expect(modified.dependencies.payload).not.toBe('0.0.1')
+      expect(packageJson.name).toEqual(projectName)
     })
   })
 })
-
-async function assertProjectFileExists(fileName: string) {
-  const filePath = path.resolve(projectDir, fileName)
-  expect(await fse.pathExists(filePath)).toBe(true)
-}

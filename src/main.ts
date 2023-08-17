@@ -65,7 +65,13 @@ export class Main {
         const databaseUri = await getDatabaseConnection(this.args, projectName)
         const payloadSecret = await generateSecret()
         if (!this.args['--dry-run']) {
-          await createProject(this.args, projectDir, template, packageManager)
+          await createProject({
+            cliArgs: this.args,
+            projectName,
+            projectDir,
+            template,
+            packageManager,
+          })
           await writeEnvFile({
             databaseUri,
             payloadSecret,
@@ -75,7 +81,13 @@ export class Main {
         }
       } else {
         if (!this.args['--dry-run']) {
-          await createProject(this.args, projectDir, template, packageManager)
+          await createProject({
+            cliArgs: this.args,
+            projectName,
+            projectDir,
+            template,
+            packageManager,
+          })
         }
       }
 

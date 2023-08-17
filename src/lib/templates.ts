@@ -1,5 +1,5 @@
+import type { ProjectTemplate } from '../types'
 import { error, info } from '../utils/log'
-import type { GitTemplate, PluginTemplate, ProjectTemplate } from '../types'
 
 export async function validateTemplate(templateName: string): Promise<boolean> {
   const validTemplates = await getValidTemplates()

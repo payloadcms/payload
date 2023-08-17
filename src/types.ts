@@ -17,15 +17,7 @@ export interface Args extends arg.Spec {
 
 export type CliArgs = arg.Result<Args>
 
-export type ProjectTemplate = StaticTemplate | GitTemplate | PluginTemplate
-
-/**
- * Template that copies from the templates directory
- */
-export interface StaticTemplate extends Template {
-  type: 'static'
-  directory: string
-}
+export type ProjectTemplate = GitTemplate | PluginTemplate
 
 /**
  * Template that is cloned verbatim from a git repo
