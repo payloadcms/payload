@@ -18,7 +18,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     if (firstCollectionWithAuth) {
       sanitizedConfig.admin.user = firstCollectionWithAuth.slug;
     } else {
-      sanitizedConfig.admin.user = 'users';
+      sanitizedConfig.admin.user = defaultUserCollection.slug;
       sanitizedConfig.collections.push(defaultUserCollection);
     }
   }
