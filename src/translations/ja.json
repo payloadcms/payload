@@ -192,6 +192,7 @@
     "filterWhere": "{{label}} の絞り込み",
     "filters": "絞り込み",
     "globals": "グローバル",
+    "items": "アイテム",
     "language": "言語",
     "lastModified": "最終更新",
     "leaveAnyway": "すぐに画面を離れる",
