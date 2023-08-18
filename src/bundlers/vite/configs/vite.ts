@@ -18,7 +18,7 @@ logger.warn = (msg, options) => {
   originalWarning(msg, options);
 };
 
-const bundlerPath = path.resolve(__dirname, '../bundler');
+const bundlerPath = path.resolve(__dirname, '../bundler.ts');
 const relativeAdminPath = path.resolve(__dirname, '../../../admin');
 
 export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<InlineConfig> => {
@@ -73,7 +73,7 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       {
         name: 'shim-bundler-file',
         load(id) {
-          if (id.startsWith(bundlerPath)) {
+          if (id === bundlerPath) {
             return 'export default () => { };';
           }
           return null;
