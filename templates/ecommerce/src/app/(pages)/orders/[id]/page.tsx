@@ -99,7 +99,7 @@ export default async function Order({ params: { id } }) {
                         <Link
                           href={`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/collections/products/${id}`}
                         >
-                          navigate to the admin dashboard
+                          edit this product in the admin panel
                         </Link>
                         {'.'}
                       </p>

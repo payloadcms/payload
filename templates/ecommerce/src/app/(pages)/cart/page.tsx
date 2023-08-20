@@ -3,6 +3,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { Page, Settings } from '../../../payload/payload-types'
+import { staticCart } from '../../../payload/seed/cart-static'
 import { fetchDoc } from '../../_api/fetchDoc'
 import { fetchSettings } from '../../_api/fetchGlobals'
 import { Blocks } from '../../_components/Blocks'
@@ -23,7 +24,21 @@ export default async function Cart() {
       slug: 'cart',
     })
   } catch (error) {
-    notFound()
+    // when deploying this template on Payload Cloud, this page needs to build before the APIs are live
+    // so swallow the error here and simply render the page with fallback data where necessary
+    // in production you may want to redirect to a 404  page or at least log the error somewhere
+    // console.error(error)
+  }
+
+  // if no `cart` page exists, render a static one using dummy content
+  // you should delete this code once you have a cart page in the CMS
+  // this is really only useful for those who are demoing this template
+  if (!page) {
+    page = staticCart
+  }
+
+  if (!page) {
+    return notFound()
   }
 
   let settings: Settings | null = null
@@ -84,7 +99,16 @@ export async function generateMetadata(): Promise<Metadata> {
       collection: 'pages',
       slug: 'cart',
     })
-  } catch (error) {}
+  } catch (error) {
+    // don't throw an error if the fetch fails
+    // this is so that we can render a static cart page for the demo
+    // when deploying this template on Payload Cloud, this page needs to build before the APIs are live
+    // in production you may want to redirect to a 404  page or at least log the error somewhere
+  }
+
+  if (!page) {
+    page = staticCart
+  }
 
   return generateMeta({ doc: page })
 }

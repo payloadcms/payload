@@ -3,6 +3,9 @@ import type { Page } from '../payload-types'
 export const staticHome: Page = {
   id: '',
   title: 'Home',
+  slug: 'home',
+  createdAt: '',
+  updatedAt: '',
   meta: {
     title: 'Payload E-Commerce Template',
     description: 'An open-source e-commerce store built with Payload and Next.js.',
@@ -73,9 +76,6 @@ export const staticHome: Page = {
     ],
     media: '',
   },
-  createdAt: '',
-  updatedAt: '',
-  slug: 'home',
   layout: [
     {
       richText: [
