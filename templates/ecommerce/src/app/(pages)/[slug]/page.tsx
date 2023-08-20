@@ -1,9 +1,10 @@
 import React from 'react'
 import { Metadata } from 'next'
+import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
 import { Page } from '../../../payload/payload-types'
-import { staticHome } from '../../../payload/seed/static-home'
+import { staticHome } from '../../../payload/seed/home-static'
 import { fetchDoc } from '../../_api/fetchDoc'
 import { fetchDocs } from '../../_api/fetchDocs'
 import { Blocks } from '../../_components/Blocks'
@@ -11,12 +12,15 @@ import { Hero } from '../../_components/Hero'
 import { generateMeta } from '../../_utilities/generateMeta'
 
 export default async function Page({ params: { slug = 'home' } }) {
+  const { isEnabled: isDraftMode } = draftMode()
+
   let page: Page | null = null
 
   try {
     page = await fetchDoc<Page>({
       collection: 'pages',
       slug,
+      draft: isDraftMode,
     })
   } catch (error) {
     // when deploying this template on Payload Cloud, this page needs to build before the APIs are live
@@ -25,9 +29,9 @@ export default async function Page({ params: { slug = 'home' } }) {
     // console.error(error)
   }
 
-  // If no `home` page exists, render a static one using dummy content
-  // You should delete this code once you have created a home page in the CMS
-  // This is really only useful for those who are demoing this template
+  // if no `home` page exists, render a static one using dummy content
+  // you should delete this code once you have a home page in the CMS
+  // this is really only useful for those who are demoing this template
   if (!page && slug === 'home') {
     page = staticHome
   }
@@ -59,12 +63,15 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params: { slug = 'home' } }): Promise<Metadata> {
+  const { isEnabled: isDraftMode } = draftMode()
+
   let page: Page | null = null
 
   try {
     page = await fetchDoc<Page>({
       collection: 'pages',
       slug,
+      draft: isDraftMode,
     })
   } catch (error) {
     // don't throw an error if the fetch fails
