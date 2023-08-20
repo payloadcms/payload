@@ -19,9 +19,8 @@ export const CartPage: React.FC<{
   settings: Settings
   page: Page
 }> = props => {
-  const {
-    settings: { productsPage },
-  } = props
+  const { settings } = props
+  const { productsPage } = settings || {}
 
   const { user } = useAuth()
 

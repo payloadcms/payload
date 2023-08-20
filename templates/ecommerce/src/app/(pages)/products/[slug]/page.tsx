@@ -11,12 +11,20 @@ import { ProductHero } from '../../../_heros/Product'
 import { generateMeta } from '../../../_utilities/generateMeta'
 
 export default async function Product({ params: { slug } }) {
-  const product = await fetchDoc<Product>({
-    collection: 'products',
-    slug,
-  })
+  let product: Product | null = null
 
-  if (!product) return notFound()
+  try {
+    product = await fetchDoc<Product>({
+      collection: 'products',
+      slug,
+    })
+  } catch (error) {
+    console.error(error) // eslint-disable-line no-console
+  }
+
+  if (!product) {
+    notFound()
+  }
 
   const { layout } = product
 
@@ -30,16 +38,23 @@ export default async function Product({ params: { slug } }) {
 }
 
 export async function generateStaticParams() {
-  const products = await fetchDocs<ProductType>('products')
-
-  return products?.map(({ slug }) => slug)
+  try {
+    const products = await fetchDocs<ProductType>('products')
+    return products?.map(({ slug }) => slug)
+  } catch (error) {
+    return []
+  }
 }
 
 export async function generateMetadata({ params: { slug } }): Promise<Metadata> {
-  const product = await fetchDoc<Product>({
-    collection: 'products',
-    slug,
-  })
+  let product: Product | null = null
+
+  try {
+    product = await fetchDoc<Product>({
+      collection: 'products',
+      slug,
+    })
+  } catch (error) {}
 
   return generateMeta({ doc: product })
 }

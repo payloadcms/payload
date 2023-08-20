@@ -11,10 +11,19 @@ import { Hero } from '../../_components/Hero'
 import { generateMeta } from '../../_utilities/generateMeta'
 
 export default async function Page({ params: { slug = 'home' } }) {
-  let page = await fetchDoc<Page>({
-    collection: 'pages',
-    slug,
-  })
+  let page: Page | null = null
+
+  try {
+    page = await fetchDoc<Page>({
+      collection: 'pages',
+      slug,
+    })
+  } catch (error) {
+    // when deploying this template on Payload Cloud, this page needs to build before the APIs are live
+    // so swallow the error here and simply render the page with fallback data where necessary
+    // in production you may want to redirect to a 404  page or at least log the error somewhere
+    // console.error(error)
+  }
 
   // If no `home` page exists, render a static one using dummy content
   // You should delete this code once you have created a home page in the CMS
@@ -23,7 +32,9 @@ export default async function Page({ params: { slug = 'home' } }) {
     page = staticHome
   }
 
-  if (!page) return notFound()
+  if (!page) {
+    return notFound()
+  }
 
   const { hero, layout } = page
 
@@ -39,16 +50,28 @@ export default async function Page({ params: { slug = 'home' } }) {
 }
 
 export async function generateStaticParams() {
-  const pages = await fetchDocs<Page>('pages')
-
-  return pages?.map(({ slug }) => slug)
+  try {
+    const pages = await fetchDocs<Page>('pages')
+    return pages?.map(({ slug }) => slug)
+  } catch (error) {
+    return []
+  }
 }
 
 export async function generateMetadata({ params: { slug = 'home' } }): Promise<Metadata> {
-  let page = await fetchDoc<Page>({
-    collection: 'pages',
-    slug,
-  })
+  let page: Page | null = null
+
+  try {
+    page = await fetchDoc<Page>({
+      collection: 'pages',
+      slug,
+    })
+  } catch (error) {
+    // don't throw an error if the fetch fails
+    // this is so that we can render a static home page for the demo
+    // when deploying this template on Payload Cloud, this page needs to build before the APIs are live
+    // in production you may want to redirect to a 404  page or at least log the error somewhere
+  }
 
   if (!page && slug === 'home') {
     page = staticHome

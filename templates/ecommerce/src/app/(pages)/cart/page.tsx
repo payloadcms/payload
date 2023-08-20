@@ -1,9 +1,10 @@
 import React, { Fragment } from 'react'
 import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 
-import { Page } from '../../../payload/payload-types'
+import { Page, Settings } from '../../../payload/payload-types'
 import { fetchDoc } from '../../_api/fetchDoc'
-import { fetchGlobals } from '../../_api/fetchGlobals'
+import { fetchSettings } from '../../_api/fetchGlobals'
 import { Blocks } from '../../_components/Blocks'
 import { Gutter } from '../../_components/Gutter'
 import { Hero } from '../../_components/Hero'
@@ -14,12 +15,27 @@ import { CartPage } from './CartPage'
 import classes from './index.module.scss'
 
 export default async function Cart() {
-  const { settings } = await fetchGlobals()
+  let page: Page | null = null
 
-  const page = await fetchDoc<Page>({
-    collection: 'pages',
-    slug: 'cart',
-  })
+  try {
+    page = await fetchDoc<Page>({
+      collection: 'pages',
+      slug: 'cart',
+    })
+  } catch (error) {
+    notFound()
+  }
+
+  let settings: Settings | null = null
+
+  try {
+    settings = await fetchSettings()
+  } catch (error) {
+    // when deploying this template on Payload Cloud, this page needs to build before the APIs are live
+    // so swallow the error here and simply render the page with fallback data where necessary
+    // in production you may want to redirect to a 404  page or at least log the error somewhere
+    // console.error(error)
+  }
 
   return (
     <Fragment>
@@ -61,10 +77,14 @@ export default async function Cart() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await fetchDoc<Page>({
-    collection: 'pages',
-    slug: 'cart',
-  })
+  let page: Page | null = null
+
+  try {
+    page = await fetchDoc<Page>({
+      collection: 'pages',
+      slug: 'cart',
+    })
+  } catch (error) {}
 
   return generateMeta({ doc: page })
 }
