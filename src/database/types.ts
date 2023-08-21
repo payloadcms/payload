@@ -270,10 +270,10 @@ export type UpdateVersionArgs<T = TypeWithID> = {
   req?: PayloadRequest
 } & ({
   where: Where
-  id: never
+  id?: never
 } | {
   id: string | number
-  where: never
+  where?: never
 })
 
 export type UpdateVersion = <T = TypeWithID>(args: UpdateVersionArgs<T>) => Promise<TypeWithVersion<T>>
@@ -297,9 +297,9 @@ export type UpdateOneArgs = {
   req?: PayloadRequest
 } & ({
   where: Where
-  id: never
+  id?: never
 } | {
-  where: never
+  where?: never
   id: string | number
 })
 

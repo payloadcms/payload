@@ -1,6 +1,6 @@
 import { Create } from 'payload/dist/database/types';
 import toSnakeCase from 'to-snake-case';
-import { insertRow } from '../insertRow';
+import { upsertRow } from '../upsertRow';
 
 export const create: Create = async function create({
   collection: collectionSlug,
@@ -9,12 +9,13 @@ export const create: Create = async function create({
 }) {
   const collection = this.payload.collections[collectionSlug].config;
 
-  const result = await insertRow({
+  const result = await upsertRow({
     adapter: this,
     data,
     fallbackLocale: req.fallbackLocale,
     fields: collection.fields,
     locale: req.locale,
+    operation: 'create',
     tableName: toSnakeCase(collectionSlug),
   });
 

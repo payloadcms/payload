@@ -33,6 +33,7 @@ export const updateOne: UpdateOne = async function updateOne({
     fields: collection.fields,
     id,
     locale: req.locale,
+    operation: 'update',
     tableName: toSnakeCase(collectionSlug),
     where: query,
   });
