@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 import path from 'path';
-import fs from 'fs';
 import { InlineConfig, createLogger } from 'vite';
 import viteCommonJS from 'vite-plugin-commonjs';
 import virtual from 'vite-plugin-virtual';
@@ -66,6 +65,14 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       exclude: [
         // Dependencies that need aliases should be excluded
         // from pre-bundling
+      ],
+      include: [
+        'slate',
+        'slate-react',
+        'slate-history',
+        'is-hotkey',
+        'slate-hyperscript',
+        '@monaco-editor/react',
       ],
     },
     server: {
