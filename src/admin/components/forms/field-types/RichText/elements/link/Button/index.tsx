@@ -14,7 +14,7 @@ import { Props as RichTextFieldProps } from '../../../types';
 import buildStateFromSchema from '../../../../../Form/buildStateFromSchema';
 import { useAuth } from '../../../../../../utilities/Auth';
 import { Fields } from '../../../../../Form/types';
-import { useLocale } from '../../../../../../utilities/Locale';
+import { useLocaleCode } from '../../../../../../utilities/Locale';
 import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
 import { useDocumentInfo } from '../../../../../../utilities/DocumentInfo';
 
@@ -62,7 +62,7 @@ export const LinkButton: React.FC<{
 }> = ({ fieldProps }) => {
   const customFieldSchema = fieldProps?.admin?.link?.fields;
   const { user } = useAuth();
-  const locale = useLocale();
+  const locale = useLocaleCode();
   const [initialState, setInitialState] = useState<Fields>({});
 
   const { t, i18n } = useTranslation(['upload', 'general']);

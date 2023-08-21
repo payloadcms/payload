@@ -4,7 +4,7 @@ import withCondition from '../../withCondition';
 import { text } from '../../../../../fields/validations';
 import { Props } from './types';
 import TextInput from './Input';
-import { useLabeledLocale } from '../../../utilities/Locale';
+import { useLocale } from '../../../utilities/Locale';
 import { useConfig } from '../../../utilities/Config';
 import { isFieldRTL } from '../shared';
 
@@ -32,7 +32,7 @@ const Text: React.FC<Props> = (props) => {
   } = props;
 
   const path = pathFromProps || name;
-  const labeledLocale = useLabeledLocale();
+  const labeledLocale = useLocale();
 
   const { localization } = useConfig();
   const isRTL = isFieldRTL({

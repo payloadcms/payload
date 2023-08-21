@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import queryString from 'qs';
 import { useTranslation } from 'react-i18next';
-import { useLocale } from '../components/utilities/Locale';
+import { useLocaleCode } from '../components/utilities/Locale';
 import { requests } from '../api';
 
 type Result = [
@@ -33,7 +33,7 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   const [params, setParams] = useState(initialParams);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const locale = useLocale();
+  const locale = useLocaleCode();
 
   const search = queryString.stringify({
     locale,

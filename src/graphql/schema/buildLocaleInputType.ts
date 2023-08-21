@@ -7,7 +7,7 @@ const buildLocaleInputType = (
 ): GraphQLEnumType | GraphQLScalarType => {
   return new GraphQLEnumType({
     name: 'LocaleInputType',
-    values: localization.localesSimple.reduce(
+    values: localization.localeCodes.reduce(
       (values, locale) => ({
         ...values,
         [formatName(locale)]: {

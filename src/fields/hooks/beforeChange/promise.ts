@@ -151,7 +151,7 @@ export const promise = async ({
       mergeLocaleActions.push(() => {
         if (req.payload.config.localization) {
           const { localization } = req.payload.config;
-          const localeData = localization.localesSimple.reduce((localizedValues, locale) => {
+          const localeData = localization.localeCodes.reduce((localizedValues, locale) => {
             const fieldValue = locale === req.locale
               ? siblingData[field.name]
               : siblingDocWithLocales?.[field.name]?.[locale];

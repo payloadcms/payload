@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CheckboxInput } from '../field-types/Checkbox/Input';
 import { Banner } from '../../elements/Banner';
-import { useLocale } from '../../utilities/Locale';
+import { useLocaleCode } from '../../utilities/Locale';
 import { useConfig } from '../../utilities/Config';
 import { useForm } from '../Form/context';
 
@@ -13,7 +13,7 @@ type NullifyLocaleFieldProps = {
 }
 export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({ localized, path, fieldValue }) => {
   const { dispatchFields, setModified } = useForm();
-  const currentLocale = useLocale();
+  const currentLocale = useLocaleCode();
   const { localization } = useConfig();
   const [checked, setChecked] = React.useState<boolean>(typeof fieldValue !== 'number');
   const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';

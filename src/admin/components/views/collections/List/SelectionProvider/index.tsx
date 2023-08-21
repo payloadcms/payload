@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { Where } from '../../../../../../types';
-import { useLocale } from '../../../../utilities/Locale';
+import { useLocaleCode } from '../../../../utilities/Locale';
 
 export enum SelectAllStatus {
   AllAvailable = 'allAvailable',
@@ -32,7 +32,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const contextRef = useRef({} as SelectionContext);
 
   const history = useHistory();
-  const locale = useLocale();
+  const locale = useLocaleCode();
   const [selected, setSelected] = useState<SelectionContext['selected']>({});
   const [selectAll, setSelectAll] = useState<SelectAllStatus>(SelectAllStatus.None);
   const [count, setCount] = useState(0);

@@ -36,7 +36,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({
     // set locale from search param
     if (
       localeFromParams
-      && localization.localesSimple.indexOf(localeFromParams as string) > -1
+      && localization.localeCodes.indexOf(localeFromParams as string) > -1
     ) {
       setLocale(localeFromParams as string);
       setLabeledLocale(
@@ -53,7 +53,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({
       if (user) {
         preferenceLocale = await getPreference<string>('locale');
         isPreferenceInConfig = preferenceLocale
-          && localization.localesSimple.indexOf(preferenceLocale) > -1;
+          && localization.localeCodes.indexOf(preferenceLocale) > -1;
         if (isPreferenceInConfig) {
           setLocale(preferenceLocale);
           setLabeledLocale(
@@ -84,10 +84,13 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({
   );
 };
 
-export const useLocale = (): string => useContext(LocaleContext);
+/**
+ * A hook that returns the current locale code.
+ */
+export const useLocaleCode = (): string => useContext(LocaleContext);
 
 /**
- * A hook that returns the current labeled locale.
+ * A hook that returns the current locale object.
  */
-export const useLabeledLocale = (): LabeledLocale | null => useContext(LabeledLocaleContext);
+export const useLocale = (): LabeledLocale | null => useContext(LabeledLocaleContext);
 export default LocaleContext;

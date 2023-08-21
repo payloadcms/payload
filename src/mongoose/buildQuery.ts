@@ -524,7 +524,7 @@ export class ParamParser {
           }
 
           const nextSegment = pathSegments[i + 1];
-          const nextSegmentIsLocale = this.localizationConfig ? this.localizationConfig.localesSimple.includes(nextSegment) : undefined;
+          const nextSegmentIsLocale = this.localizationConfig ? this.localizationConfig.localeCodes.includes(nextSegment) : undefined;
 
           if (nextSegmentIsLocale) {
             // Skip the next iteration, because it's a locale

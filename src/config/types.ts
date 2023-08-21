@@ -234,7 +234,7 @@ export type LabeledLocale = {
    * value of supported locale
    * @example "en"
    */
-  value: string;
+  code: string;
   /**
    * if true, defaults textAligmnent on text fields to RTL
    */
@@ -281,7 +281,7 @@ LocalizationConfigWithLabels & {
    * List of supported locales
    * @example `["en", "es", "fr", "nl", "de", "jp"]`
    */
-  localesSimple: string[];
+  localeCodes: string[];
 }
 >;
 

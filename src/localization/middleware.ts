@@ -9,8 +9,8 @@ import type { SanitizedLocalizationConfig } from '../config/types';
 export default function localizationMiddleware(localization: false | SanitizedLocalizationConfig) {
   const middleware = (req, res, next) => {
     if (localization) {
-      const validLocales = [...localization.localesSimple, 'all'];
-      const validFallbackLocales = [...localization.localesSimple, 'null'];
+      const validLocales = [...localization.localeCodes, 'all'];
+      const validFallbackLocales = [...localization.localeCodes, 'null'];
 
       let requestedLocale = req.query.locale || localization.defaultLocale;
       let requestedFallbackLocale = req.query['fallback-locale'] || localization.defaultLocale;

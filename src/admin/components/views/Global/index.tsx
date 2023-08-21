@@ -5,7 +5,7 @@ import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import { useStepNav } from '../../elements/StepNav';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
-import { useLocale } from '../../utilities/Locale';
+import { useLocaleCode } from '../../utilities/Locale';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultGlobal from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
@@ -16,7 +16,7 @@ import { usePreferences } from '../../utilities/Preferences';
 
 const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{ data?: Record<string, unknown> }>();
-  const locale = useLocale();
+  const locale = useLocaleCode();
   const { setStepNav } = useStepNav();
   const { user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();

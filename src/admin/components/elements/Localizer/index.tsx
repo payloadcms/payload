@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import qs from 'qs';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
-import { useLabeledLocale } from '../../utilities/Locale';
+import { useLocale } from '../../utilities/Locale';
 import { useSearchParams } from '../../utilities/SearchParams';
 import Popup from '../Popup';
 
@@ -16,7 +16,7 @@ const Localizer: React.FC = () => {
   const config = useConfig();
   const { localization } = config;
 
-  const locale = useLabeledLocale();
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const { t } = useTranslation('general');
 
@@ -38,20 +38,20 @@ const Localizer: React.FC = () => {
 
                   const localeClasses = [
                     baseLocaleClass,
-                    locale.value === localeOption.value && `${baseLocaleClass}--active`,
+                    locale.code === localeOption.code && `${baseLocaleClass}--active`,
                   ].filter(Boolean).join('');
 
                   const newParams = {
                     ...searchParams,
-                    locale: localeOption.value,
+                    locale: localeOption.code,
                   };
 
                   const search = qs.stringify(newParams);
 
-                  if (localeOption.value !== locale.value) {
+                  if (localeOption.code !== locale.code) {
                     return (
                       <li
-                        key={localeOption.value}
+                        key={localeOption.code}
                         className={localeClasses}
                       >
                         <Link

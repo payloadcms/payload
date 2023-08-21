@@ -7,7 +7,7 @@ const buildFallbackLocaleInputType = (
 ): GraphQLEnumType => {
   return new GraphQLEnumType({
     name: 'FallbackLocaleInputType',
-    values: [...localization.localesSimple, 'none'].reduce(
+    values: [...localization.localeCodes, 'none'].reduce(
       (values, locale) => ({
         ...values,
         [formatName(locale)]: {

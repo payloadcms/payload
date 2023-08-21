@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { GeneratePreviewURL } from '../../../../config/types';
 import { useAuth } from '../../utilities/Auth';
 import Button from '../Button';
-import { useLocale } from '../../utilities/Locale';
+import { useLocaleCode } from '../../utilities/Locale';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useConfig } from '../../utilities/Config';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
@@ -43,7 +43,7 @@ const PreviewButton: React.FC<Props> = ({
   const { id, collection, global } = useDocumentInfo();
 
   const [isLoading, setIsLoading] = useState(false);
-  const locale = useLocale();
+  const locale = useLocaleCode();
   const { token } = useAuth();
   const { serverURL, routes: { api } } = useConfig();
   const { t } = useTranslation('version');

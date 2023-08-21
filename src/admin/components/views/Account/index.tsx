@@ -5,7 +5,7 @@ import { useConfig } from '../../utilities/Config';
 import { useAuth } from '../../utilities/Auth';
 import { useStepNav } from '../../elements/StepNav';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
-import { useLocale } from '../../utilities/Locale';
+import { useLocaleCode } from '../../utilities/Locale';
 import DefaultAccount from './Default';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
@@ -15,7 +15,7 @@ import { usePreferences } from '../../utilities/Preferences';
 
 const AccountView: React.FC = () => {
   const { state: locationState } = useLocation<{ data: unknown }>();
-  const locale = useLocale();
+  const locale = useLocaleCode();
   const { setStepNav } = useStepNav();
   const { user } = useAuth();
   const userRef = useRef(user);

@@ -9,7 +9,7 @@ import { LinkDrawer } from '../LinkDrawer';
 import { Fields } from '../../../../../Form/types';
 import buildStateFromSchema from '../../../../../Form/buildStateFromSchema';
 import { useAuth } from '../../../../../../utilities/Auth';
-import { useLocale } from '../../../../../../utilities/Locale';
+import { useLocaleCode } from '../../../../../../utilities/Locale';
 import { useConfig } from '../../../../../../utilities/Config';
 import reduceFieldsToValues from '../../../../../Form/reduceFieldsToValues';
 import deepCopyObject from '../../../../../../../../utilities/deepCopyObject';
@@ -76,7 +76,7 @@ export const LinkElement: React.FC<{
   const editor = useSlate();
   const config = useConfig();
   const { user } = useAuth();
-  const locale = useLocale();
+  const locale = useLocaleCode();
   const { t, i18n } = useTranslation('fields');
   const { openModal, toggleModal, closeModal } = useModal();
   const [renderModal, setRenderModal] = useState(false);

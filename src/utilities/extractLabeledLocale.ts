@@ -11,7 +11,7 @@ export const extractLabeledLocale = (
   }
 
   return localizationConfig.locales.find(
-    (el) => el?.value === locale,
+    (el) => el?.code === locale,
   );
 };
 

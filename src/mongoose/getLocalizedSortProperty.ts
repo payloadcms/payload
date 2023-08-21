@@ -42,7 +42,7 @@ export const getLocalizedSortProperty = ({
     if (matchedField.localized) {
       // Check to see if next segment is a locale
       if (segments.length > 0) {
-        const nextSegmentIsLocale = config.localization.localesSimple.includes(remainingSegments[0]);
+        const nextSegmentIsLocale = config.localization.localeCodes.includes(remainingSegments[0]);
 
         // If next segment is locale, remove it from remaining segments
         // and use it to localize the current segment

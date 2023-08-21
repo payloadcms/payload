@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDiffViewer from 'react-diff-viewer-continued';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../../../../utilities/Config';
-import { useLocale } from '../../../../../utilities/Locale';
+import { useLocaleCode } from '../../../../../utilities/Locale';
 import { SanitizedCollectionConfig } from '../../../../../../../collections/config/types';
 import { fieldAffectsData, fieldIsPresentationalOnly, RelationshipField } from '../../../../../../../fields/config/types';
 import Label from '../../Label';
@@ -63,7 +63,7 @@ const generateLabelFromValue = (
 const Relationship: React.FC<Props & { field: RelationshipField }> = ({ field, version, comparison }) => {
   const { collections } = useConfig();
   const { t, i18n } = useTranslation('general');
-  const locale = useLocale();
+  const locale = useLocaleCode();
 
   let placeholder = '';
 

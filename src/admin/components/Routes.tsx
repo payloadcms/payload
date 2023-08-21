@@ -10,7 +10,7 @@ import StayLoggedIn from './modals/StayLoggedIn';
 import Versions from './views/Versions';
 import Version from './views/Version';
 import { DocumentInfoProvider } from './utilities/DocumentInfo';
-import { useLocale } from './utilities/Locale';
+import { useLocaleCode } from './utilities/Locale';
 import { LoadingOverlayToggle } from './elements/Loading';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
@@ -30,7 +30,7 @@ const Routes: React.FC = () => {
   const [initialized, setInitialized] = useState(null);
   const { user, permissions, refreshCookie } = useAuth();
   const { i18n } = useTranslation();
-  const locale = useLocale();
+  const locale = useLocaleCode();
 
   const canAccessAdmin = permissions?.canAccessAdmin;
 

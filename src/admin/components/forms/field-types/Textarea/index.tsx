@@ -6,7 +6,7 @@ import { textarea } from '../../../../../fields/validations';
 import { Props } from './types';
 import TextareaInput from './Input';
 import { getTranslation } from '../../../../../utilities/getTranslation';
-import { useLabeledLocale } from '../../../utilities/Locale';
+import { useLocale } from '../../../utilities/Locale';
 
 import './index.scss';
 import { useConfig } from '../../../utilities/Config';
@@ -39,7 +39,7 @@ const Textarea: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const labeledLocale = useLabeledLocale();
+  const labeledLocale = useLocale();
 
   const { localization } = useConfig();
   const isRTL = isFieldRTL({

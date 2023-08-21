@@ -77,7 +77,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
     if (localization) {
       duplicateID = await create(localization.defaultLocale);
       let abort = false;
-      localization.localesSimple
+      localization.localeCodes
         .filter((locale) => locale !== localization.defaultLocale)
         .forEach(async (locale) => {
           if (!abort) {

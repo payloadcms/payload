@@ -1,7 +1,7 @@
 import React, { Fragment, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../utilities/Auth';
-import { useLocale } from '../../../utilities/Locale';
+import { useLocaleCode } from '../../../utilities/Locale';
 import withCondition from '../../withCondition';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { useForm, useFormSubmitted } from '../../Form/context';
@@ -60,7 +60,7 @@ const BlocksField: React.FC<Props> = (props) => {
   const { id, setDocFieldPreferences, getDocPreferences } = useDocumentInfo();
   const { dispatchFields, setModified } = useForm();
   const { user } = useAuth();
-  const locale = useLocale();
+  const locale = useLocaleCode();
   const operation = useOperation();
   const { localization } = useConfig();
   const drawerSlug = useDrawerSlug('blocks-drawer');

@@ -24,7 +24,7 @@ import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
 import { SingleValue } from './select-components/SingleValue';
 import { MultiValueLabel } from './select-components/MultiValueLabel';
 import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
-import { useLocale } from '../../../utilities/Locale';
+import { useLocaleCode } from '../../../utilities/Locale';
 
 import './index.scss';
 
@@ -66,7 +66,7 @@ const Relationship: React.FC<Props> = (props) => {
 
   const { t, i18n } = useTranslation('fields');
   const { permissions } = useAuth();
-  const locale = useLocale();
+  const locale = useLocaleCode();
   const formProcessing = useFormProcessing();
   const hasMultipleRelations = Array.isArray(relationTo);
   const [options, dispatchOptions] = useReducer(optionsReducer, []);

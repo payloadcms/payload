@@ -20,7 +20,7 @@ export function isFieldRTL({
       && (localizationConfig)
       && (localizationConfig.locales)
       && (localizationConfig.locales.length > 1);
-  const isCurrentLocaleDefaultLocale = labeledLocale?.value === localizationConfig?.defaultLocale;
+  const isCurrentLocaleDefaultLocale = labeledLocale?.code === localizationConfig?.defaultLocale;
 
   return ((fieldRTL !== false && labeledLocale?.rtl === true)
       && (

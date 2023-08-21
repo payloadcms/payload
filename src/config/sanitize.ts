@@ -1,6 +1,6 @@
 import merge from 'deepmerge';
 import { isPlainObject } from 'is-plain-object';
-import type { Config, LocalizationConfigWithNoLabels, SanitizedConfig, SanitizedLocalizationConfig } from './types';
+import type { Config, LocalizationConfigWithLabels, LocalizationConfigWithNoLabels, SanitizedConfig, SanitizedLocalizationConfig } from './types';
 import { defaultUserCollection } from '../auth/defaultUser';
 import sanitizeCollection from '../collections/config/sanitize';
 import { InvalidConfiguration } from '../errors';
@@ -47,21 +47,26 @@ export const sanitizeConfig = (config: Config): SanitizedConfig => {
     // clone localization config so to not break everything
     const firstLocale = sanitizedConfig.localization.locales[0];
     if (typeof firstLocale === 'string') {
-      (sanitizedConfig.localization as SanitizedLocalizationConfig).localesSimple = [...(sanitizedConfig.localization as LocalizationConfigWithNoLabels).locales];
+      (sanitizedConfig.localization as SanitizedLocalizationConfig).localeCodes = [...(sanitizedConfig.localization as LocalizationConfigWithNoLabels).locales];
 
       // is string[], so convert to LabeledLocale[]
       (sanitizedConfig.localization as SanitizedLocalizationConfig).locales = (sanitizedConfig.localization as LocalizationConfigWithNoLabels).locales.map((locale) => ({
         label: locale,
-        value: locale,
+        code: locale,
         rtl: false,
         toString: () => locale,
       }));
     } else {
-      // is LabeledLocale[], so convert to string[] for localesSimple
-      (sanitizedConfig.localization as SanitizedLocalizationConfig).localesSimple = (sanitizedConfig.localization as SanitizedLocalizationConfig).locales.reduce((locales, locale) => {
-        locales.push(locale.value);
+      // is LabeledLocale[], so convert to string[] for localeCodes
+      (sanitizedConfig.localization as SanitizedLocalizationConfig).localeCodes = (sanitizedConfig.localization as SanitizedLocalizationConfig).locales.reduce((locales, locale) => {
+        locales.push(locale.code);
         return locales;
       }, [] as string[]);
+
+      (sanitizedConfig.localization as SanitizedLocalizationConfig).locales = (sanitizedConfig.localization as LocalizationConfigWithLabels).locales.map((locale) => ({
+        ...locale,
+        toString: () => locale.code,
+      }));
     }
   }
 
