@@ -288,6 +288,7 @@
     "invalidSelection": "Lựa chọn ở field này không hợp lệ.",
     "invalidSelections": "'Field này có những lựa chọn không hợp lệ sau:'",
     "lessThanMin": "{{value}} nhỏ hơn giá trị tối thiểu cho phép của {{label}} là {{min}}.",
+    "limitReached": "Đã đạt giới hạn, chỉ có thể thêm {{max}} mục.",
     "longerThanMin": "Giá trị này cần có độ dài tối thiểu {{minLength}} ký tự.",
     "notValidDate": "\"{{value}}\" không phải là một ngày (date) hợp lệ.",
     "required": "Field này cần được diền.",

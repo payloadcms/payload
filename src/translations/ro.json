@@ -288,6 +288,7 @@
     "invalidSelection": "Acest câmp are o selecție invalidă.",
     "invalidSelections": "Acest câmp are următoarele selecții invalide:",
     "lessThanMin": "{{value}} este mai mic decât valoarea minimă permisă pentru {{label}} de {{min}}.",
+    "limitReached": "Limita atinsă, doar {{max}} elemente pot fi adăugate.",
     "longerThanMin": "Această valoare trebuie să fie mai mare decât lungimea minimă de {{minLength}} caractere.",
     "notValidDate": "\"{{value}}\" nu este o dată valabilă.",
     "required": "Acest câmp este obligatoriu.",

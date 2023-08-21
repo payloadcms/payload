@@ -288,6 +288,7 @@
     "invalidSelection": "Ovo polje ima nevaljan odabir.",
     "invalidSelections": "Ovo polje ima sljedeće nevaljane odabire:",
     "lessThanMin": "{{value}} is below the minimum allowable {{label}} limit of {{min}}.",
+    "limitReached": "Dosegnut je limit, može se dodati samo {{max}} stavki.",
     "longerThanMin": "Ova vrijednost mora biti duža od minimalne dužine od {{minLength}} znakova",
     "notValidDate": "\"{{value}}\" nije valjan datum.",
     "required": "Ovo polje je obvezno.",

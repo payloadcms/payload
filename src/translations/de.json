@@ -288,6 +288,7 @@
     "invalidSelection": "Dieses Feld hat eine inkorrekte Auswahl.",
     "invalidSelections": "'Dieses Feld enthält die folgenden inkorrekten Auswahlen:'",
     "lessThanMin": "{{value}} ist kleiner als der minimal erlaubte {{label}} von {{min}}.",
+    "limitReached": "Limit erreicht, es können nur {{max}} Elemente hinzugefügt werden.",
     "longerThanMin": "Dieser Wert muss länger als die minimale Länge von {{minLength}} Zeichen sein.",
     "notValidDate": "\"{{value}}\" ist kein gültiges Datum.",
     "required": "Pflichtfeld",

@@ -146,7 +146,7 @@ const NumberField: React.FC<Props> = (props) => {
           noOptionsMessage={({ inputValue }) => {
             const isOverHasMany = Array.isArray(value) && value.length >= maxRows;
             if (isOverHasMany) {
-              return t('validation:exceededLimit', { value: value.length + 1, max: maxRows });
+              return t('validation:limitReached', { value: value.length + 1, max: maxRows });
             }
             return t('general:noOptions');
           }}

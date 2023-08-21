@@ -281,7 +281,7 @@
   "validation": {
     "emailAddress": "Please enter a valid email address.",
     "enterNumber": "Please enter a valid number.",
-    "exceededLimit": "You've entered {{value}} items, but the limit is {{max}}.",
+    "limitReached": "Limit reached, only {{max}} items can be added.",
     "fieldHasNo": "This field has no {{label}}",
     "greaterThanMax": "{{value}} is greater than the max allowed {{label}} of {{max}}.",
     "invalidInput": "This field has an invalid input.",

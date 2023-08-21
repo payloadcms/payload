@@ -288,6 +288,7 @@
     "invalidSelection": "To pole ma nieprawidłowy wybór.",
     "invalidSelections": "To pole zawiera następujące, nieprawidłowe wybory:",
     "lessThanMin": "{{value}} jest mniejsze niż minimalnie dozwolony {{label}} wynoszący {{min}}.",
+    "limitReached": "Osiągnięto limit, można dodać tylko {{max}} elementów.",
     "longerThanMin": "Ta wartość musi być dłuższa niż minimalna długość znaków: {{minLength}}.",
     "notValidDate": "\"{{value}}\" nie jest prawidłową datą.",
     "required": "To pole jest wymagane.",

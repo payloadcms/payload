@@ -288,6 +288,7 @@
     "invalidSelection": "Toto pole má neplatný výběr.",
     "invalidSelections": "Toto pole má následující neplatné výběry:",
     "lessThanMin": "{{value}} je nižší než minimálně povolená {{label}} {{min}}.",
+    "limitReached": "Dosáhnutý limit, mohou být přidány pouze {{max}} položky.",
     "longerThanMin": "Tato hodnota musí být delší než minimální délka {{minLength}} znaků.",
     "notValidDate": "\"{{value}}\" není platné datum.",
     "required": "Toto pole je povinné.",

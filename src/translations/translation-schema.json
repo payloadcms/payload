@@ -1123,7 +1123,7 @@
         "enterNumber": {
           "type": "string"
         },
-        "exceededLimit": {
+        "limitReached": {
           "type": "string"
         },
         "fieldHasNo": {

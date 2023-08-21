@@ -288,6 +288,7 @@
     "invalidSelection": "La selección en este campo es inválida.",
     "invalidSelections": "Este campo tiene las siguientes selecciones inválidas:",
     "lessThanMin": "{{value}} es menor que el {{label}} mínimo permitido de {{min}}.",
+    "limitReached": "Se ha alcanzado el límite, solo se pueden agregar {{max}} elementos.",
     "longerThanMin": "Este dato debe ser más largo que el mínimo de {{minLength}} caracteres.",
     "notValidDate": "\"{{value}}\" es una fecha inválida.",
     "required": "Este campo es obligatorio.",
