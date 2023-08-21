@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { SanitizedGlobalConfig } from '../config/types';
@@ -30,9 +30,9 @@ export default function updateHandler(globalConfig: SanitizedGlobalConfig): Upda
       if (draft) message = req.t('version:draftSavedSuccessfully');
       if (autosave) message = req.t('version:autosavedSuccessfully');
 
-      return res.status(httpStatus.OK).json({ message, result });
+      res.status(httpStatus.OK).json({ message, result });
     } catch (error) {
-      return next(error);
+      next(error);
     }
   };
 }

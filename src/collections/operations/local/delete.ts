@@ -5,12 +5,13 @@ import { Payload } from '../../../payload';
 import deleteOperation from '../delete';
 import deleteByID from '../deleteByID';
 import { getDataLoader } from '../../dataloader';
-import i18n from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { BulkOperationResult } from '../../config/types';
 import { setRequestContext } from '../../../express/setRequestContext';
 
 export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
+  req?: PayloadRequest,
   collection: T
   depth?: number
   locale?: string
@@ -56,7 +57,6 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
   const collection = payload.collections[collectionSlug];
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
-
   if (!collection) {
     throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Delete Operation.`);
   }
@@ -67,7 +67,7 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     locale: locale ?? defaultLocale,
     fallbackLocale: fallbackLocale ?? defaultLocale,
     payload,
-    i18n: i18n(payload.config.i18n),
+    i18n: i18nInit(payload.config.i18n),
   } as PayloadRequest;
   setRequestContext(req, context);
 

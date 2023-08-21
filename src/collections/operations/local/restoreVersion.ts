@@ -4,7 +4,7 @@ import { PayloadRequest, RequestContext } from '../../../express/types';
 import { Document } from '../../../types';
 import { getDataLoader } from '../../dataloader';
 import restoreVersion from '../restoreVersion';
-import i18nInit from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { setRequestContext } from '../../../express/setRequestContext';
 

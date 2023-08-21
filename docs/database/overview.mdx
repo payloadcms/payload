@@ -1,0 +1,85 @@
+---
+title: Database
+label: Overview
+order: 10
+desc: Manage your data and customize the Admin Panel by swapping in your own React components. Create, modify or remove views, fields, styles and much more.
+keywords: admin, components, custom, customize, documentation, Content Management System, cms, headless, javascript, node, react, express
+---
+
+Payload is compatible with a wide range of database systems. You may choose to configure your project with any of the supported databases by adding the necessary dependencies and following the setup instructions for the database adapter of choice.
+
+## Selecting a database
+
+There are several factors to consider when choosing which database technology and hosting option is right for your project and workload.
+
+## Configuration
+
+To configure the database for your Payload an adapter can be assigned to `config.db`.
+
+## Transactions
+
+Database transactions allow your application to make a series of database changes in an all-or-nothing commit. Consider an HTTP request that creates a new **Order** and has an `afterChange` hook to update the stock count of related **Items**. If an error occurs when updating an **Item** and an HTTP error is returned to the user, you would not want the new **Order** to be persisted or any other items to be changed either. This kind of interaction with the database is handled seamlessly with transactions.
+
+By default, Payload will use transactions for all operations, as long as it is supported by the configured database. Database changes are contained within all Payload operations and any errors thrown will result in all changes being rolled back without being committed. When transactions are not supported by the database, Payload will continue to operate as expected without them.
+
+<Banner type="info">
+  <strong>Note:</strong><br/>
+  MongoDB requires a connection to a replicaset in order to make use of transactions.
+</Banner>
+
+The initial request made to Payload will begin a new transaction and attach it to the `req.transactionID`. If you have a `hook` that interacts with the database, you can opt-in to using the same transaction by passing the `req` in the arguments. For example:
+
+```ts
+const afterChange: CollectionAfterChangeHook = async ({ req }) => {
+  // because req.transactionID is assigned from Payload and passed through, my-slug will only persist if the entire request is successful
+  await req.payload.create({
+    req,
+    collection: 'my-slug',
+    data: {
+      some: 'data',
+    }
+  });
+}
+```
+
+### Async Hooks with Transactions
+Since Payload hooks can be async and be written to not await the result, it is possible to have an incorrect success response returned on a request that is rolled back. If you have a hook where you do not `await` the result, then you should **not** pass the `req.transactionID`.
+
+```ts
+const afterChange: CollectionAfterChangeHook = async ({ req }) => {
+  // WARNING: an async call made with the same req may fail resulting in an OK response being returned with response data that is not committed
+  const dangerouslyIgnoreAsync = req.payload.create({
+    req,
+    collection: 'my-slug',
+    data: {
+      some: 'other data',
+    }
+  })
+
+  // Should this call fail, it will not rollback other changes
+  const safelyIgnoredAsync = req.payload.create({
+    req: {
+      ...req,
+      transactionID: undefined,
+    },
+    collection: 'my-slug',
+    data: {
+      some: 'other data',
+    }
+  })
+}
+```
+
+### Direct Transaction Access
+
+When writing your own scripts or custom endpoints, you may wish to have direct control over the database. This is useful for interacting with your database, outside of Payload's local API.
+
+The following functions can be used for managing transactions:
+
+`payload.db.transaction` - Helper function that takes a callback and wraps begin, commit, and rollback in try, catch, and error respectively.
+`payload.db.beginTransaction` - Starts a new session and returns an identifier for later reference.
+`payload.db.commitTransaction` - Takes the identifier for the transaction, finalizes any changes.
+`payload.db.rollbackTransaction` - Takes the identifier for the transaction, discards any changes.
+
+## Migrations
+

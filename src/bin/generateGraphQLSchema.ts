@@ -9,9 +9,10 @@ export async function generateGraphQLSchema(): Promise<void> {
   const logger = Logger();
   const config = await loadConfig();
 
+  config.db = null;
+
   await payload.init({
     secret: '--unused--',
-    mongoURL: false,
     local: true,
   });
 

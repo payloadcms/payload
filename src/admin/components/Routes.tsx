@@ -315,7 +315,7 @@ const Routes: React.FC = () => {
                         <Unauthorized />
                       )}
                     </Fragment>
-                  ) : <Redirect to={`${match.url}/login?redirect=${encodeURIComponent(window.location.pathname)}`} />}
+                  ) : <Redirect to={`${match.url}/login${window.location.pathname.startsWith(routes.admin) ? `?redirect=${encodeURIComponent(window.location.pathname.replace(routes.admin, ''))}` : ''}`} />}
                 </Route>
                 <Route path={`${match.url}*`}>
                   <NotFound />

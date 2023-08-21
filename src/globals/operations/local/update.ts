@@ -5,7 +5,7 @@ import { Document } from '../../../types';
 import { PayloadRequest } from '../../../express/types';
 import update from '../update';
 import { getDataLoader } from '../../../collections/dataloader';
-import i18nInit from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { setRequestContext } from '../../../express/setRequestContext';
 
@@ -58,7 +58,7 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return update<TSlug>({
-    slug: globalSlug,
+    slug: globalSlug as string,
     data,
     depth,
     globalConfig,

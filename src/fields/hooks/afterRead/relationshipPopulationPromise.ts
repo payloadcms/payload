@@ -1,5 +1,5 @@
 import { PayloadRequest } from '../../../express/types';
-import { RelationshipField, fieldSupportsMany, fieldHasMaxDepth, UploadField } from '../../config/types';
+import { fieldHasMaxDepth, fieldSupportsMany, RelationshipField, UploadField } from '../../config/types';
 
 type PopulateArgs = {
   depth: number
@@ -41,6 +41,7 @@ const populate = async ({
 
     if (shouldPopulate) {
       relationshipValue = await req.payloadDataLoader.load(JSON.stringify([
+        req.transactionID,
         relatedCollection.config.slug,
         id,
         depth,

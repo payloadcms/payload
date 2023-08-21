@@ -1,10 +1,10 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
+import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PayloadRequest } from '../../express/types';
-import { Preference } from '../types';
 import findOne from '../operations/findOne';
 
-export default async function findOneHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<Preference> | void> {
+export default async function findOneHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<GeneratedTypes['collections']['_preference']> | void> {
   try {
     const result = await findOne({
       req,

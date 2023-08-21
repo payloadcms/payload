@@ -1,10 +1,11 @@
 /* eslint-disable no-param-reassign */
 import { Response } from 'express';
-import { Collection } from '../../config/types';
+import { Collection, TypeWithID } from '../../config/types';
 import { PayloadRequest } from '../../../express/types';
 import findVersionByID from '../../operations/findVersionByID';
+import type { TypeWithVersion } from '../../../versions/types';
 
-export type Resolver = (
+export type Resolver<T extends TypeWithID = any> = (
   _: unknown,
   args: {
     locale?: string
@@ -16,7 +17,7 @@ export type Resolver = (
     req: PayloadRequest,
     res: Response
   }
-) => Promise<Document>
+) => Promise<TypeWithVersion<T>>
 
 export default function findVersionByIDResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context) {

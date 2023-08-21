@@ -1,13 +1,15 @@
-import { ValidationError } from "../../../errors"
-import { Payload } from '../../..'
-import { SanitizedCollectionConfig } from '../../../collections/config/types'
+import { ValidationError } from '../../../errors';
+import { Payload } from '../../..';
+import { SanitizedCollectionConfig } from '../../../collections/config/types';
 import { generatePasswordSaltHash } from './generatePasswordSaltHash';
+import { PayloadRequest } from '../../../express/types';
 
 type Args = {
   collection: SanitizedCollectionConfig
   doc: Record<string, unknown>
   password: string
   payload: Payload
+  req: PayloadRequest
 }
 
 export const registerLocalStrategy = async ({
@@ -15,6 +17,7 @@ export const registerLocalStrategy = async ({
   doc,
   password,
   payload,
+  req,
 }: Args): Promise<Record<string, unknown>> => {
   const existingUser = await payload.find({
     collection: collection.slug,
@@ -22,22 +25,26 @@ export const registerLocalStrategy = async ({
     where: {
       email: {
         equals: doc.email,
-      }
-    }
-  })
+      },
+    },
+  });
 
   if (existingUser.docs.length > 0) {
-    throw new ValidationError([{ message: 'A user with the given email is already registered', field: 'email' }])
+    throw new ValidationError([{ message: 'A user with the given email is already registered', field: 'email' }]);
   }
 
-  const { salt, hash } = await generatePasswordSaltHash({ password })
+  const { salt, hash } = await generatePasswordSaltHash({ password });
 
-  const result = await payload.collections[collection.slug].Model.create({
-    ...doc,
-    salt,
-    hash
-  })
+  const sanitizedDoc = { ...doc };
+  if (sanitizedDoc.password) delete sanitizedDoc.password;
 
-  return result
-}
-
+  return payload.db.create({
+    collection: collection.slug,
+    data: {
+      ...sanitizedDoc,
+      salt,
+      hash,
+    },
+    req,
+  });
+};

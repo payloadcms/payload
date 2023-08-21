@@ -1,4 +1,4 @@
-import { Preference, PreferenceUpdateRequest } from '../types';
+import { PreferenceUpdateRequest } from '../types';
 import defaultAccess from '../../auth/defaultAccess';
 import executeAccess from '../../auth/executeAccess';
 import UnauthorizedError from '../../errors/UnathorizedError';
@@ -9,15 +9,28 @@ async function update(args: PreferenceUpdateRequest) {
     user,
     req,
     req: {
-      payload: {
-        preferences: {
-          Model,
-        },
-      },
+      payload,
     },
     key,
     value,
   } = args;
+
+  const collection = 'payload-preferences';
+
+  const filter = {
+    key: { equals: key },
+    'user.value': { equals: user.id },
+    'user.relationTo': { equals: user.collection },
+  };
+
+  const preference = {
+    key,
+    value,
+    user: {
+      value: user.id,
+      relationTo: user.collection,
+    },
+  };
 
   if (!user) {
     throw new UnauthorizedError(req.t);
@@ -27,9 +40,21 @@ async function update(args: PreferenceUpdateRequest) {
     await executeAccess({ req }, defaultAccess);
   }
 
-  const filter = { user: user.id, key, userCollection: user.collection };
-  const preference: Preference = { ...filter, value };
-  await Model.updateOne(filter, { ...preference }, { upsert: true });
+  // TODO: workaround to prevent race-conditions 500 errors from violating unique constraints
+  try {
+    await payload.db.create({
+      collection,
+      data: preference,
+      req,
+    });
+  } catch (err: unknown) {
+    await payload.db.updateOne({
+      collection,
+      where: filter,
+      data: preference,
+      req,
+    });
+  }
 
   return preference;
 }

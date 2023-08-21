@@ -5,10 +5,13 @@ import { Collection, TypeWithID } from '../config/types';
 import { APIError, Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { hasWhereAccessResult } from '../../auth/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
+import { combineQueries } from '../../database/combineQueries';
+import type { FindOneArgs } from '../../database/types';
+import { initTransaction } from '../../utilities/initTransaction';
+import { killTransaction } from '../../utilities/killTransaction';
 
 export type Arguments = {
   collection: Collection
@@ -24,7 +27,6 @@ export type Arguments = {
 async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Promise<T> {
   const {
     collection: {
-      Model,
       config: collectionConfig,
     },
     id,
@@ -34,163 +36,168 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     req: {
       t,
       payload,
+      locale,
     },
     req,
   } = args;
 
-  if (!id) {
-    throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST);
-  }
+  try {
+    const shouldCommit = await initTransaction(req);
 
-  // /////////////////////////////////////
-  // Retrieve original raw version
-  // /////////////////////////////////////
+    if (!id) {
+      throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST);
+    }
 
-  const VersionModel = payload.versions[collectionConfig.slug];
+    // /////////////////////////////////////
+    // Retrieve original raw version
+    // /////////////////////////////////////
 
-  let rawVersion = await VersionModel.findOne({
-    _id: id,
-  });
-
-  if (!rawVersion) {
-    throw new NotFound(t);
-  }
-
-  rawVersion = rawVersion.toJSON({ virtuals: true });
-
-  const parentDocID = rawVersion.parent;
-
-  // /////////////////////////////////////
-  // Access
-  // /////////////////////////////////////
-
-  const accessResults = !overrideAccess ? await executeAccess({ req, id: parentDocID }, collectionConfig.access.update) : true;
-  const hasWherePolicy = hasWhereAccessResult(accessResults);
-
-  // /////////////////////////////////////
-  // Retrieve document
-  // /////////////////////////////////////
-
-  const query = await Model.buildQuery({
-    where: {
-      id: {
-        equals: parentDocID,
-      },
-    },
-    access: accessResults,
-    req,
-    overrideAccess,
-  });
-
-  const doc = await Model.findOne(query);
-
-  if (!doc && !hasWherePolicy) throw new NotFound(t);
-  if (!doc && hasWherePolicy) throw new Forbidden(t);
-
-  // /////////////////////////////////////
-  // fetch previousDoc
-  // /////////////////////////////////////
-
-  const prevDocWithLocales = await getLatestCollectionVersion({
-    payload,
-    id: parentDocID,
-    query,
-    Model,
-    config: collectionConfig,
-  });
-
-  // /////////////////////////////////////
-  // Update
-  // /////////////////////////////////////
-
-  let result = await Model.findByIdAndUpdate(
-    { _id: parentDocID },
-    rawVersion.version,
-    { new: true },
-  );
-
-  result = result.toJSON({ virtuals: true });
-
-  // custom id type reset
-  result.id = result._id;
-  result = JSON.parse(JSON.stringify(result));
-  result = sanitizeInternalFields(result);
-
-  // /////////////////////////////////////
-  // Save `previousDoc` as a version after restoring
-  // /////////////////////////////////////
-
-  const prevVersion = { ...prevDocWithLocales };
-
-  delete prevVersion.id;
-
-  await VersionModel.create({
-    parent: parentDocID,
-    version: rawVersion.version,
-    autosave: false,
-    createdAt: prevVersion.createdAt,
-    updatedAt: new Date().toISOString(),
-  });
-
-  // /////////////////////////////////////
-  // afterRead - Fields
-  // /////////////////////////////////////
-
-  result = await afterRead({
-    depth,
-    doc: result,
-    entityConfig: collectionConfig,
-    req,
-    overrideAccess,
-    showHiddenFields,
-    context: req.context,
-  });
-
-  // /////////////////////////////////////
-  // afterRead - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result = await hook({
+    const { docs: versionDocs } = await req.payload.db.findVersions({
+      collection: collectionConfig.slug,
+      where: { id: { equals: id } },
+      locale,
+      limit: 1,
       req,
+    });
+
+    const [rawVersion] = versionDocs;
+
+    if (!rawVersion) {
+      throw new NotFound(t);
+    }
+
+    const parentDocID = rawVersion.parent;
+
+    // /////////////////////////////////////
+    // Access
+    // /////////////////////////////////////
+
+    const accessResults = !overrideAccess ? await executeAccess({ req, id: parentDocID }, collectionConfig.access.update) : true;
+    const hasWherePolicy = hasWhereAccessResult(accessResults);
+
+    // /////////////////////////////////////
+    // Retrieve document
+    // /////////////////////////////////////
+
+    const findOneArgs: FindOneArgs = {
+      collection: collectionConfig.slug,
+      where: combineQueries({ id: { equals: parentDocID } }, accessResults),
+      locale,
+      req,
+    };
+
+    const doc = await req.payload.db.findOne(findOneArgs);
+
+
+    if (!doc && !hasWherePolicy) throw new NotFound(t);
+    if (!doc && hasWherePolicy) throw new Forbidden(t);
+
+    // /////////////////////////////////////
+    // fetch previousDoc
+    // /////////////////////////////////////
+
+    const prevDocWithLocales = await getLatestCollectionVersion({
+      payload,
+      id: parentDocID,
+      query: findOneArgs,
+      config: collectionConfig,
+      req,
+    });
+
+    // /////////////////////////////////////
+    // Update
+    // /////////////////////////////////////
+
+    let result = await req.payload.db.updateOne({
+      collection: collectionConfig.slug,
+      where: { id: { equals: parentDocID } },
+      data: rawVersion.version,
+      req,
+    });
+
+    // /////////////////////////////////////
+    // Save `previousDoc` as a version after restoring
+    // /////////////////////////////////////
+
+    const prevVersion = { ...prevDocWithLocales };
+
+    delete prevVersion.id;
+
+    await payload.db.createVersion({
+      collectionSlug: collectionConfig.slug,
+      parent: parentDocID,
+      versionData: rawVersion.version,
+      autosave: false,
+      createdAt: prevVersion.createdAt,
+      updatedAt: new Date().toISOString(),
+      req,
+    });
+
+    // /////////////////////////////////////
+    // afterRead - Fields
+    // /////////////////////////////////////
+
+    result = await afterRead({
+      depth,
       doc: result,
+      entityConfig: collectionConfig,
+      req,
+      overrideAccess,
+      showHiddenFields,
       context: req.context,
-    }) || result;
-  }, Promise.resolve());
+    });
 
-  // /////////////////////////////////////
-  // afterChange - Fields
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // afterRead - Collection
+    // /////////////////////////////////////
 
-  result = await afterChange({
-    data: result,
-    doc: result,
-    previousDoc: prevDocWithLocales,
-    entityConfig: collectionConfig,
-    operation: 'update',
-    context: req.context,
-    req,
-  });
+    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await priorHook;
 
-  // /////////////////////////////////////
-  // afterChange - Collection
-  // /////////////////////////////////////
+      result = await hook({
+        req,
+        doc: result,
+        context: req.context,
+      }) || result;
+    }, Promise.resolve());
 
-  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-    await priorHook;
+    // /////////////////////////////////////
+    // afterChange - Fields
+    // /////////////////////////////////////
 
-    result = await hook({
+    result = await afterChange({
+      data: result,
       doc: result,
-      req,
       previousDoc: prevDocWithLocales,
+      entityConfig: collectionConfig,
       operation: 'update',
       context: req.context,
-    }) || result;
-  }, Promise.resolve());
+      req,
+    });
 
-  return result;
+    // /////////////////////////////////////
+    // afterChange - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      result = await hook({
+        doc: result,
+        req,
+        previousDoc: prevDocWithLocales,
+        operation: 'update',
+        context: req.context,
+      }) || result;
+    }, Promise.resolve());
+
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return result;
+  } catch (error: unknown) {
+    await killTransaction(req);
+    throw error;
+  }
 }
 
 export default restoreVersion;

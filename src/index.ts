@@ -2,8 +2,9 @@ import { Config as GeneratedTypes } from 'payload/generated-types';
 import { InitOptions } from './config/types';
 import { initHTTP } from './initHTTP';
 import { Payload as LocalPayload, BasePayload } from './payload';
-
 import type { RequestContext } from './express/types';
+
+export { DatabaseAdapter } from './database/types';
 
 export { getPayload } from './payload';
 

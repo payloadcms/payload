@@ -3,6 +3,8 @@ import executeAccess from '../executeAccess';
 import { Collection } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts';
+import { initTransaction } from '../../utilities/initTransaction';
+import { killTransaction } from '../../utilities/killTransaction';
 
 export type Args = {
   collection: Collection
@@ -20,44 +22,67 @@ async function unlock(args: Args): Promise<boolean> {
 
   const {
     collection: {
-      Model,
       config: collectionConfig,
     },
     req,
+    req: {
+      payload,
+      locale,
+    },
     overrideAccess,
   } = args;
 
-  // /////////////////////////////////////
-  // Access
-  // /////////////////////////////////////
+  try {
+    const shouldCommit = await initTransaction(req);
 
-  if (!overrideAccess) {
-    await executeAccess({ req }, collectionConfig.access.unlock);
+    // /////////////////////////////////////
+    // Access
+    // /////////////////////////////////////
+
+    if (!overrideAccess) {
+      await executeAccess({ req }, collectionConfig.access.unlock);
+    }
+
+    const options = { ...args };
+
+    const { data } = options;
+
+    // /////////////////////////////////////
+    // Unlock
+    // /////////////////////////////////////
+
+    if (!data.email) {
+      throw new APIError('Missing email.');
+    }
+
+    const user = await req.payload.db.findOne({
+      collection: collectionConfig.slug,
+      where: { email: { equals: data.email.toLowerCase() } },
+      locale,
+      req,
+    });
+
+    let result;
+
+    if (user) {
+      await resetLoginAttempts({
+        req,
+        payload: req.payload,
+        collection: collectionConfig,
+        doc: user,
+      });
+      result = true;
+    } else {
+      result = null;
+    }
+
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return result;
+  } catch (error: unknown) {
+    await killTransaction(req);
+    throw error;
   }
-
-  const options = { ...args };
-
-  const { data } = options;
-
-  // /////////////////////////////////////
-  // Unlock
-  // /////////////////////////////////////
-
-  if (!data.email) {
-    throw new APIError('Missing email.');
-  }
-
-  const user = await Model.findOne({ email: data.email.toLowerCase() });
-
-  if (!user) return null;
-
-  await resetLoginAttempts({
-    payload: req.payload,
-    collection: collectionConfig,
-    doc: user,
-  });
-
-  return true;
 }
 
 export default unlock;

@@ -4,6 +4,10 @@
 @import './colors.scss';
 
 :root {
+  --base-px: 25;
+  --base-body-size: 13;
+  --base: calc((var(--base-px) / var(--base-body-size)) * 1rem);
+
   --breakpoint-xs-width : #{$breakpoint-xs-width};
   --breakpoint-s-width : #{$breakpoint-s-width};
   --breakpoint-m-width : #{$breakpoint-m-width};

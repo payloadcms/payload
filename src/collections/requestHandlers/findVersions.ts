@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import { Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import { TypeWithID } from '../config/types';
-import { PaginatedDocs } from '../../mongoose/types';
+import type { PaginatedDocs } from '../../database/types';
 import { isNumber } from '../../utilities/isNumber';
 import findVersions from '../operations/findVersions';
 

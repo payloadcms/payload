@@ -252,7 +252,7 @@
         "emailOrPasswordIncorrect": {
           "type": "string"
         },
-        "followingFieldsInvalid_many": {
+        "followingFieldsInvalid_other": {
           "type": "string"
         },
         "followingFieldsInvalid_one": {
@@ -344,7 +344,7 @@
         "deletingFile",
         "deletingTitle",
         "emailOrPasswordIncorrect",
-        "followingFieldsInvalid_many",
+        "followingFieldsInvalid_other",
         "followingFieldsInvalid_one",
         "incorrectCollection",
         "invalidFileType",
@@ -522,9 +522,11 @@
         "openInNewTab",
         "textToDisplay",
         "addLabel",
+        "addLink",
         "addNew",
         "addNewLabel",
         "addRelationship",
+        "addUpload",
         "blockType",
         "chooseFromExisting",
         "chooseLabel",
@@ -539,12 +541,14 @@
         "passwordsDoNotMatch",
         "relatedDocument",
         "relationTo",
+        "removeRelationship",
         "removeUpload",
         "saveChanges",
         "searchForBlock",
         "selectExistingLabel",
         "selectFieldsToEdit",
         "showAll",
+        "swapRelationship",
         "swapUpload",
         "toggleBlock",
         "uploadNewLabel"
@@ -690,6 +694,12 @@
           "type": "string"
         },
         "enterAValue": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "errors": {
           "type": "string"
         },
         "fallbackToDefaultLocale": {
@@ -884,6 +894,7 @@
         "backToDashboard",
         "cancel",
         "changesNotSaved",
+        "close",
         "collections",
         "columnToSort",
         "columns",
@@ -907,6 +918,7 @@
         "descending",
         "duplicate",
         "duplicateWithoutSaving",
+        "edit",
         "editLabel",
         "editing",
         "editingLabel_many",
@@ -915,6 +927,9 @@
         "email",
         "emailAddress",
         "enterAValue",
+        "error",
+        "errors",
+        "fallbackToDefaultLocale",
         "filter",
         "filterWhere",
         "filters",
@@ -967,8 +982,11 @@
         "updatedAt",
         "updatedCountSuccessfully",
         "updatedSuccessfully",
+        "updating",
+        "uploading",
         "user",
         "users",
+        "value",
         "welcome"
       ]
     },

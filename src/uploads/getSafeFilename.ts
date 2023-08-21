@@ -1,7 +1,7 @@
 import sanitize from 'sanitize-filename';
-import { CollectionModel } from '../collections/config/types';
 import docWithFilenameExists from './docWithFilenameExists';
 import fileExists from './fileExists';
+import { Payload } from '..';
 
 const incrementName = (name: string) => {
   const extension = name.split('.').pop();
@@ -20,11 +20,11 @@ const incrementName = (name: string) => {
   return `${incrementedName}.${extension}`;
 };
 
-async function getSafeFileName(Model: CollectionModel, staticPath: string, desiredFilename: string): Promise<string> {
+async function getSafeFileName(payload: Payload, collectionSlug: string, staticPath: string, desiredFilename: string): Promise<string> {
   let modifiedFilename = desiredFilename;
 
   // eslint-disable-next-line no-await-in-loop
-  while (await docWithFilenameExists(Model, staticPath, modifiedFilename) || await fileExists(`${staticPath}/${modifiedFilename}`)) {
+  while (await docWithFilenameExists(payload, collectionSlug, staticPath, modifiedFilename) || await fileExists(`${staticPath}/${modifiedFilename}`)) {
     modifiedFilename = incrementName(modifiedFilename);
   }
   return modifiedFilename;

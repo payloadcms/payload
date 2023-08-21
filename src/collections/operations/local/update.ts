@@ -7,13 +7,14 @@ import update from '../update';
 import { PayloadRequest, RequestContext } from '../../../express/types';
 import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
-import i18nInit from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 import updateByID from '../updateByID';
 import { BulkOperationResult } from '../../config/types';
 import { setRequestContext } from '../../../express/setRequestContext';
 
 export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
+  req?: PayloadRequest,
   collection: TSlug
   data: DeepPartial<GeneratedTypes['collections'][TSlug]>
   depth?: number
@@ -69,13 +70,12 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
   } = options;
 
   const collection = payload.collections[collectionSlug];
+  const i18n = i18nInit(payload.config.i18n);
+  const defaultLocale = payload.config.localization ? payload.config.localization?.defaultLocale : null;
 
   if (!collection) {
     throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Update Operation.`);
   }
-
-  const i18n = i18nInit(payload.config.i18n);
-  const defaultLocale = payload.config.localization ? payload.config.localization?.defaultLocale : null;
 
   const req = {
     user,

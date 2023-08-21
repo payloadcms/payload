@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import { Document } from 'mongoose';
 import { APIError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { Collection } from '../../collections/config/types';
@@ -40,7 +39,6 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
 
   const {
     collection: {
-      Model,
       config: collectionConfig,
     },
     data,
@@ -48,6 +46,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     expiration,
     req: {
       t,
+      payload,
       payload: {
         config,
         sendEmail: email,
@@ -64,30 +63,39 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
   let token: string | Buffer = crypto.randomBytes(20);
   token = token.toString('hex');
 
-  type UserDoc = Document & {
+  type UserDoc = {
+    id: string | number
     resetPasswordToken?: string,
-    resetPasswordExpiration?: number | Date,
+    resetPasswordExpiration?: Date,
   }
 
   if (!data.email) {
     throw new APIError('Missing email.');
   }
 
-  const user: UserDoc = await Model.findOne({ email: (data.email as string).toLowerCase() });
+  let user = await payload.db.findOne<UserDoc>({
+    collection: collectionConfig.slug,
+    where: { email: { equals: (data.email as string).toLowerCase() } },
+  });
+
 
   if (!user) return null;
 
   user.resetPasswordToken = token;
-  user.resetPasswordExpiration = expiration || Date.now() + 3600000; // 1 hour
+  user.resetPasswordExpiration = new Date(expiration || Date.now() + 3600000); // 1 hour
 
-  await user.save();
-
-  const userJSON = user.toJSON({ virtuals: true });
+  user = await payload.update({
+    collection: collectionConfig.slug,
+    id: user.id,
+    data: user,
+  });
 
   if (!disableEmail) {
+    const serverURL = (config.serverURL !== null && config.serverURL !== '') ? config.serverURL : `${req.protocol}://${req.get('host')}`;
+
     let html = `${t('authentication:youAreReceivingResetPassword')}
-    <a href="${config.serverURL}${config.routes.admin}/reset/${token}">
-     ${config.serverURL}${config.routes.admin}/reset/${token}
+    <a href="${serverURL}${config.routes.admin}/reset/${token}">
+     ${serverURL}${config.routes.admin}/reset/${token}
     </a>
     ${t('authentication:youDidNotRequestPassword')}`;
 
@@ -95,7 +103,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
       html = await collectionConfig.auth.forgotPassword.generateEmailHTML({
         req,
         token,
-        user: userJSON,
+        user,
       });
     }
 
@@ -105,7 +113,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
       subject = await collectionConfig.auth.forgotPassword.generateEmailSubject({
         req,
         token,
-        user: userJSON,
+        user,
       });
     }
 

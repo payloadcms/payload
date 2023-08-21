@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { Document } from '../../types';
@@ -21,11 +21,12 @@ export default async function restoreVersionHandler(req: PayloadRequest, res: Re
 
   try {
     const doc = await restoreVersion(options);
-    return res.status(httpStatus.OK).json({
-      ...formatSuccessResponse(req.t('version:restoredSuccessfully'), 'message'),
-      doc,
-    });
+    res.status(httpStatus.OK)
+      .json({
+        ...formatSuccessResponse(req.t('version:restoredSuccessfully'), 'message'),
+        doc,
+      });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 }

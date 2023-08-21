@@ -141,5 +141,16 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      // this should not be written to the generated schema
+      slug: 'no-graphql',
+      graphQL: false,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
   ],
 });

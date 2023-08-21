@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers';
 import config from './config';
 import payload from '../../src';
@@ -25,9 +24,9 @@ describe('Hooks', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await payload.mongoMemoryServer.stop();
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy(payload);
+    }
   });
 
   describe('transform actions', () => {

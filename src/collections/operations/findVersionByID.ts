@@ -1,12 +1,14 @@
 /* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
-import { Collection, CollectionModel } from '../config/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
+import { Collection, TypeWithID } from '../config/types';
 import { APIError, Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { TypeWithVersion } from '../../versions/types';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { combineQueries } from '../../database/combineQueries';
+import { initTransaction } from '../../utilities/initTransaction';
+import { killTransaction } from '../../utilities/killTransaction';
 
 export type Arguments = {
   collection: Collection
@@ -19,7 +21,7 @@ export type Arguments = {
   depth?: number
 }
 
-async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<T> {
+async function findVersionByID<T extends TypeWithID = any>(args: Arguments): Promise<TypeWithVersion<T>> {
   const {
     depth,
     collection: {
@@ -30,6 +32,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     req: {
       t,
       payload,
+      locale,
     },
     disableErrors,
     currentDepth,
@@ -41,102 +44,102 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     throw new APIError('Missing ID of version.', httpStatus.BAD_REQUEST);
   }
 
-  const VersionsModel = (payload.versions[collectionConfig.slug]) as CollectionModel;
+  try {
+    const shouldCommit = await initTransaction(req);
 
-  // /////////////////////////////////////
-  // Access
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // Access
+    // /////////////////////////////////////
 
-  const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors, id }, collectionConfig.access.readVersions) : true;
+    const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors, id }, collectionConfig.access.readVersions) : true;
 
-  // If errors are disabled, and access returns false, return null
-  if (accessResults === false) return null;
+    // If errors are disabled, and access returns false, return null
+    if (accessResults === false) return null;
 
-  const hasWhereAccess = typeof accessResults === 'object';
+    const hasWhereAccess = typeof accessResults === 'object';
 
-  const query = await VersionsModel.buildQuery({
-    where: {
-      _id: {
-        equals: id,
-      },
-    },
-    access: accessResults,
-    req,
-    overrideAccess,
-  });
+    const fullWhere = combineQueries({ _id: { equals: id } }, accessResults);
 
-  // /////////////////////////////////////
-  // Find by ID
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // Find by ID
+    // /////////////////////////////////////
 
-  if (!query.$and[0]._id) throw new NotFound(t);
+    const versionsQuery = await payload.db.findVersions<T>({
+      locale,
+      collection: collectionConfig.slug,
+      limit: 1,
+      pagination: false,
+      where: fullWhere,
+      req,
+    });
 
-  let result = await VersionsModel.findOne(query, {}).lean();
+    const result = versionsQuery.docs[0];
 
-  if (!result) {
-    if (!disableErrors) {
-      if (!hasWhereAccess) throw new NotFound(t);
-      if (hasWhereAccess) throw new Forbidden(t);
+    if (!result) {
+      if (!disableErrors) {
+        if (!hasWhereAccess) throw new NotFound(t);
+        if (hasWhereAccess) throw new Forbidden(t);
+      }
+
+      return null;
     }
 
-    return null;
+    // /////////////////////////////////////
+    // beforeRead - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      result.version = await hook({
+        req,
+        query: fullWhere,
+        doc: result.version,
+        context: req.context,
+      }) || result.version;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // afterRead - Fields
+    // /////////////////////////////////////
+
+    result.version = await afterRead({
+      currentDepth,
+      depth,
+      doc: result.version,
+      entityConfig: collectionConfig,
+      overrideAccess,
+      req,
+      showHiddenFields,
+      context: req.context,
+    });
+
+    // /////////////////////////////////////
+    // afterRead - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      result.version = await hook({
+        req,
+        query: fullWhere,
+        doc: result.version,
+        context: req.context,
+      }) || result.version;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // Return results
+    // /////////////////////////////////////
+
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return result;
+  } catch (error: unknown) {
+    await killTransaction(req);
+    throw error;
   }
-
-  // Clone the result - it may have come back memoized
-  result = JSON.parse(JSON.stringify(result));
-
-  result = sanitizeInternalFields(result);
-
-  // /////////////////////////////////////
-  // beforeRead - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result.version = await hook({
-      req,
-      query,
-      doc: result.version,
-      context: req.context,
-    }) || result.version;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // afterRead - Fields
-  // /////////////////////////////////////
-
-  result.version = await afterRead({
-    currentDepth,
-    depth,
-    doc: result.version,
-    entityConfig: collectionConfig,
-    overrideAccess,
-    req,
-    showHiddenFields,
-    context: req.context,
-  });
-
-  // /////////////////////////////////////
-  // afterRead - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result.version = await hook({
-      req,
-      query,
-      doc: result.version,
-      context: req.context,
-    }) || result.version;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // Return results
-  // /////////////////////////////////////
-
-  return result;
 }
 
 export default findVersionByID;

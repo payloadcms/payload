@@ -1,12 +1,13 @@
-import mongoose from 'mongoose';
 import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
 import payload from '../../src';
-import type {
-  LocalizedPost,
-  WithLocalizedRelationship,
-} from './payload-types';
-import configPromise, { relationshipLocalizedSlug, localizedPostsSlug, withLocalizedRelSlug, withRequiredLocalizedFields } from './config';
+import type { LocalizedPost, WithLocalizedRelationship } from './payload-types';
+import configPromise, {
+  localizedPostsSlug,
+  relationshipLocalizedSlug,
+  withLocalizedRelSlug,
+  withRequiredLocalizedFields,
+} from './config';
 import {
   defaultLocale,
   englishTitle,
@@ -59,9 +60,9 @@ describe('Localization', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await payload.mongoMemoryServer.stop();
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy(payload);
+    }
   });
 
   describe('localized text', () => {

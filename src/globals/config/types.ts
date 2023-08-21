@@ -1,13 +1,18 @@
 import React from 'react';
-import { Document, Model } from 'mongoose';
 import { DeepRequired } from 'ts-essentials';
 import { GraphQLNonNull, GraphQLObjectType } from 'graphql';
+import type { Where } from '../../types';
 import { User } from '../../auth/types';
 import { PayloadRequest } from '../../express/types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
 import { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types';
-import { CustomSaveButtonProps, CustomSaveDraftButtonProps, CustomPublishButtonProps, CustomPreviewButtonProps } from '../../admin/components/elements/types';
+import {
+  CustomPreviewButtonProps,
+  CustomPublishButtonProps,
+  CustomSaveButtonProps,
+  CustomSaveDraftButtonProps,
+} from '../../admin/components/elements/types';
 
 export type TypeWithID = {
   id: string | number
@@ -39,13 +44,9 @@ export type BeforeReadHook = (args: {
 export type AfterReadHook = (args: {
   doc: any
   req: PayloadRequest
-  query?: { [key: string]: any }
+  query?: Where
   findMany?: boolean
 }) => any;
-
-export interface GlobalModel extends Model<Document> {
-  buildQuery: (query: unknown, locale?: string) => Record<string, unknown>
-}
 
 export type GlobalAdminOptions = {
   /**
@@ -105,7 +106,7 @@ export type GlobalConfig = {
   label?: Record<string, string> | string
   graphQL?: {
     name?: string
-  }
+  } | false
   /**
    * Options used in typescript generation
    */
@@ -123,7 +124,7 @@ export type GlobalConfig = {
     beforeRead?: BeforeReadHook[]
     afterRead?: AfterReadHook[]
   }
-  endpoints?: Omit<Endpoint, 'root'>[],
+  endpoints?: Omit<Endpoint, 'root'>[] | false
   access?: {
     read?: Access;
     readDrafts?: Access;
@@ -138,12 +139,11 @@ export type GlobalConfig = {
 
 export interface SanitizedGlobalConfig extends Omit<DeepRequired<GlobalConfig>, 'fields' | 'versions' | 'endpoints'> {
   fields: Field[]
-  endpoints: Omit<Endpoint, 'root'>[],
+  endpoints: Omit<Endpoint, 'root'>[] | false
   versions: SanitizedGlobalVersions
 }
 
 export type Globals = {
-  Model: GlobalModel
   config: SanitizedGlobalConfig[]
   graphQL?: {
     [slug: string]: {
@@ -151,5 +151,5 @@ export type Globals = {
       mutationInputType: GraphQLNonNull<any>
       versionType?: GraphQLObjectType
     }
-  }
+  } | false
 }

@@ -18,8 +18,8 @@ const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[
     // Ensure that collection has required object structure
     // /////////////////////////////////
 
+    sanitizedGlobal.endpoints = sanitizedGlobal.endpoints ?? [];
     if (!sanitizedGlobal.hooks) sanitizedGlobal.hooks = {};
-    if (!sanitizedGlobal.endpoints) sanitizedGlobal.endpoints = [];
     if (!sanitizedGlobal.access) sanitizedGlobal.access = {};
     if (!sanitizedGlobal.admin) sanitizedGlobal.admin = {};
 

@@ -1,16 +1,13 @@
 import init from '../../operations/init';
-import { Collection } from '../../../collections/config/types';
 
-function initResolver(collection: Collection) {
+function initResolver(collection: string) {
   async function resolver(_, args, context) {
     const options = {
-      Model: collection.Model,
+      collection,
       req: context.req,
     };
 
-    const result = await init(options);
-
-    return result;
+    return init(options);
   }
 
   return resolver;

@@ -3,7 +3,7 @@ import type { i18n, InitOptions } from 'i18next';
 import deepmerge from 'deepmerge';
 import { defaultOptions } from './defaultOptions';
 
-export default (options: InitOptions): i18n => {
+export function i18nInit(options: InitOptions): i18n {
   if (i18next.isInitialized) {
     return i18next;
   }
@@ -11,4 +11,4 @@ export default (options: InitOptions): i18n => {
     ...deepmerge(defaultOptions, options || {}),
   });
   return i18next;
-};
+}

@@ -9,7 +9,7 @@ import { FileUploadError, MissingFile } from '../errors';
 import { PayloadRequest } from '../express/types';
 import getImageSize from './getImageSize';
 import getSafeFileName from './getSafeFilename';
-import resizeAndSave from './imageResizer';
+import resizeAndTransformImageSizes from './imageResizer';
 import { FileData, FileToSave, ProbedImageSize } from './types';
 import canResizeImage from './canResizeImage';
 import isImage from './isImage';
@@ -32,7 +32,6 @@ export const generateFileData = async <T>({
   config,
   collection: {
     config: collectionConfig,
-    Model,
   },
   req,
   data,
@@ -87,9 +86,9 @@ export const generateFileData = async <T>({
 
     if (fileSupportsResize && (resizeOptions || formatOptions || trimOptions)) {
       if (file.tempFilePath) {
-        sharpFile = sharp(file.tempFilePath, sharpOptions);
+        sharpFile = sharp(file.tempFilePath, sharpOptions).rotate(); // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
-        sharpFile = sharp(file.data, sharpOptions);
+        sharpFile = sharp(file.data, sharpOptions).rotate(); // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       }
 
       if (resizeOptions) {
@@ -141,7 +140,7 @@ export const generateFileData = async <T>({
     fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`;
 
     if (!overwriteExistingFiles) {
-      fsSafeName = await getSafeFileName(Model, staticPath, fsSafeName);
+      fsSafeName = await getSafeFileName(req.payload, collectionConfig.slug, staticPath, fsSafeName);
     }
 
     fileData.filename = fsSafeName;
@@ -155,7 +154,7 @@ export const generateFileData = async <T>({
     if (Array.isArray(imageSizes) && fileSupportsResize) {
       req.payloadUploadSizes = {};
 
-      const { sizeData, sizesToSave } = await resizeAndSave({
+      const { sizeData, sizesToSave } = await resizeAndTransformImageSizes({
         req,
         file,
         dimensions,

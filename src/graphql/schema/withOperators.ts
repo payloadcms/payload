@@ -2,7 +2,7 @@ import { GraphQLBoolean, GraphQLInputObjectType, GraphQLString, GraphQLList, Gra
 import type { GraphQLType } from 'graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { FieldAffectingData, NumberField, RadioField, SelectField, optionIsObject } from '../../fields/config/types';
+import { FieldAffectingData, NumberField, RadioField, RelationshipField, SelectField, optionIsObject } from '../../fields/config/types';
 import combineParentName from '../utilities/combineParentName';
 import formatName from '../utilities/formatName';
 import operators from './operators';
@@ -88,7 +88,9 @@ const defaults: DefaultsType = {
     operators: [...operators.equality, ...operators.comparison, ...operators.geo],
   },
   relationship: {
-    type: GraphQLString,
+    type: (field: RelationshipField): GraphQLType => {
+      return field?.hasMany === true ? new GraphQLList(GraphQLString) : GraphQLString;
+    },
     operators: [...operators.equality, ...operators.contains],
   },
   upload: {

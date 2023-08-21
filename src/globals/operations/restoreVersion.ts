@@ -1,11 +1,12 @@
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { NotFound } from '../../errors';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { initTransaction } from '../../utilities/initTransaction';
+import { killTransaction } from '../../utilities/killTransaction';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
@@ -25,132 +26,134 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     req: {
       t,
       payload,
-      payload: {
-        globals: {
-          Model,
-        },
-      },
     },
     overrideAccess,
     showHiddenFields,
   } = args;
 
-  // /////////////////////////////////////
-  // Access
-  // /////////////////////////////////////
+  try {
+    const shouldCommit = await initTransaction(req);
 
-  if (!overrideAccess) {
-    await executeAccess({ req }, globalConfig.access.update);
-  }
+    // /////////////////////////////////////
+    // Access
+    // /////////////////////////////////////
 
-  // /////////////////////////////////////
-  // Retrieve original raw version
-  // /////////////////////////////////////
+    if (!overrideAccess) {
+      await executeAccess({ req }, globalConfig.access.update);
+    }
 
-  const VersionModel = payload.versions[globalConfig.slug];
+    // /////////////////////////////////////
+    // Retrieve original raw version
+    // /////////////////////////////////////
 
-  let rawVersion = await VersionModel.findOne({
-    _id: id,
-  });
-
-  if (!rawVersion) {
-    throw new NotFound(t);
-  }
-
-  rawVersion = rawVersion.toJSON({ virtuals: true });
-
-  // /////////////////////////////////////
-  // fetch previousDoc
-  // /////////////////////////////////////
-
-  const previousDoc = await payload.findGlobal({
-    slug: globalConfig.slug,
-    depth,
-  });
-
-  // /////////////////////////////////////
-  // Update global
-  // /////////////////////////////////////
-
-  const global = await Model.findOne({ globalType: globalConfig.slug });
-
-  let result = rawVersion.version;
-
-  if (global) {
-    result = await Model.findOneAndUpdate(
-      { globalType: globalConfig.slug },
-      result,
-      { new: true },
-    );
-  } else {
-    result.globalType = globalConfig.slug;
-    result = await Model.create(result);
-  }
-
-  result = result.toJSON({ virtuals: true });
-
-  // custom id type reset
-  result.id = result._id;
-  result = JSON.stringify(result);
-  result = JSON.parse(result);
-  result = sanitizeInternalFields(result);
-
-  // /////////////////////////////////////
-  // afterRead - Fields
-  // /////////////////////////////////////
-
-  result = await afterRead({
-    depth,
-    doc: result,
-    entityConfig: globalConfig,
-    req,
-    overrideAccess,
-    showHiddenFields,
-    context: req.context,
-  });
-
-  // /////////////////////////////////////
-  // afterRead - Global
-  // /////////////////////////////////////
-
-  await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result = await hook({
-      doc: result,
+    const { docs: versionDocs } = await payload.db.findGlobalVersions<any>({
+      global: globalConfig.slug,
+      where: { id: { equals: id } },
+      limit: 1,
       req,
-    }) || result;
-  }, Promise.resolve());
+    });
 
-  // /////////////////////////////////////
-  // afterChange - Fields
-  // /////////////////////////////////////
 
-  result = await afterChange({
-    data: result,
-    doc: result,
-    previousDoc,
-    entityConfig: globalConfig,
-    operation: 'update',
-    req,
-    context: req.context,
-  });
+    if (!versionDocs || versionDocs.length === 0) {
+      throw new NotFound(t);
+    }
 
-  // /////////////////////////////////////
-  // afterChange - Global
-  // /////////////////////////////////////
+    const rawVersion = versionDocs[0];
 
-  await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-    await priorHook;
+    // /////////////////////////////////////
+    // fetch previousDoc
+    // /////////////////////////////////////
 
-    result = await hook({
+    const previousDoc = await payload.findGlobal({
+      slug: globalConfig.slug,
+      depth,
+      req,
+    });
+
+    // /////////////////////////////////////
+    // Update global
+    // /////////////////////////////////////
+
+    const global = await payload.db.findGlobal({
+      slug: globalConfig.slug,
+    });
+
+    let result = rawVersion.version;
+
+    if (global) {
+      result = await payload.db.updateGlobal({
+        slug: globalConfig.slug,
+        data: result,
+      });
+    } else {
+      result = await payload.db.createGlobal({
+        slug: globalConfig.slug,
+        data: result,
+      });
+    }
+
+    // /////////////////////////////////////
+    // afterRead - Fields
+    // /////////////////////////////////////
+
+    result = await afterRead({
+      depth,
+      doc: result,
+      entityConfig: globalConfig,
+      req,
+      overrideAccess,
+      showHiddenFields,
+      context: req.context,
+    });
+
+    // /////////////////////////////////////
+    // afterRead - Global
+    // /////////////////////////////////////
+
+    await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      result = await hook({
+        doc: result,
+        req,
+      }) || result;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // afterChange - Fields
+    // /////////////////////////////////////
+
+    result = await afterChange({
+      data: result,
       doc: result,
       previousDoc,
+      entityConfig: globalConfig,
+      operation: 'update',
       req,
-    }) || result;
-  }, Promise.resolve());
+      context: req.context,
+    });
 
-  return result;
+    // /////////////////////////////////////
+    // afterChange - Global
+    // /////////////////////////////////////
+
+    await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      result = await hook({
+        doc: result,
+        previousDoc,
+        req,
+      }) || result;
+    }, Promise.resolve());
+
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return result;
+  } catch (error: unknown) {
+    await killTransaction(req);
+    throw error;
+  }
 }
 
 export default restoreVersion;

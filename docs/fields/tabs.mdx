@@ -12,8 +12,13 @@ keywords: tabs, fields, config, configuration, documentation, Content Management
   component that separates certain sub-fields by a tabbed interface.
 </Banner>
 
-![Tabs field type used to separate Hero fields from Page Layout](https://payloadcms.com/images/docs/fields/tabs/tabs.jpg)
-_Tabs field type used to separate Hero fields from Page Layout_
+<LightDarkImage 
+  srcLight='https://payloadcms.com/images/docs/fields/tabs.png'
+  srcDark='https://payloadcms.com/images/docs/fields/tabs-dark.png'
+  alt='Shows a tabs field used to separate Hero and Page layout in the Payload admin panel'
+  caption='Tabs field type used to separate Hero fields from Page Layout'
+/>
+
 
 ### Config
 
@@ -25,14 +30,14 @@ _Tabs field type used to separate Hero fields from Page Layout_
 
 #### Tab-specific Config
 
-Each tab has its own required `label` and `fields` array. You can also optionally pass a `description` to render within each individual tab.
+Each tab must have either a `name` or `label` and the required `fields` array. You can also optionally pass a `description` to render within each individual tab.
 
-| Option              | Description                                                                                                                                                                                                  |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`name`**          | An optional property name to be used when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                  |
-| **`label`** \*      | The label to render on the tab itself.                                                                                                                                                                       |
-| **`fields`** \*     | The fields to render within this tab.                                                                                                                                                                        |
-| **`description`**   | Optionally render a description within this tab to describe the contents of the tab itself.                                                                                                                  |
+| Option           | Description                                                                                                                                                                                                  |
+| ---------------- |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`name`**       | Groups field data into an object when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                      |
+| **`label`**      | The label to render on the tab itself. Required when name is undefined, defaults to name converted to words.                                                                                                 |
+| **`fields`** \*  | The fields to render within this tab.                                                                                                                                                                        |
+| **`description`** | Optionally render a description within this tab to describe the contents of the tab itself.                                                                                                                  |
 | **`interfaceName`** | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas). (`name` must be present) |
 
 _\* An asterisk denotes that a property is required._

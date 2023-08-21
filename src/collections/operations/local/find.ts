@@ -1,11 +1,11 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { PaginatedDocs } from '../../../mongoose/types';
+import type { PaginatedDocs } from '../../../database/types';
 import { Document, Where } from '../../../types';
 import { Payload } from '../../../payload';
 import { PayloadRequest, RequestContext } from '../../../express/types';
 import find from '../find';
 import { getDataLoader } from '../../dataloader';
-import i18n from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { setRequestContext } from '../../../express/setRequestContext';
 
@@ -67,7 +67,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
   req.payloadAPI = req.payloadAPI || 'local';
   req.locale = locale ?? req?.locale ?? defaultLocale;
   req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
-  req.i18n = i18n(payload.config.i18n);
+  req.i18n = i18nInit(payload.config.i18n);
   req.payload = payload;
 
   if (!req.t) req.t = req.i18n.t;

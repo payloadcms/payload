@@ -5,21 +5,17 @@ import { Options as ExpressFileUploadOptions } from 'express-fileupload';
 import type { Configuration } from 'webpack';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
-import { ConnectOptions } from 'mongoose';
 import React from 'react';
 import { DestinationStream, LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
 import { Validate } from '../fields/config/types';
 import { Payload } from '../payload';
-import {
-  AfterErrorHook,
-  CollectionConfig,
-  SanitizedCollectionConfig,
-} from '../collections/config/types';
+import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types';
 import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
 import { PayloadRequest } from '../express/types';
 import { Where } from '../types';
 import { User } from '../auth/types';
+import { DatabaseAdapter } from '../database/types';
 import type { PayloadBundler } from '../bundlers/types';
 
 type Prettify<T> = {
@@ -85,13 +81,6 @@ export type GraphQLExtension = (
 export type InitOptions = {
   /** Express app for Payload to use */
   express?: Express;
-  /** MongoDB connection URL, starts with `mongo` */
-  mongoURL: string | false;
-  /** Extra configuration options that will be passed to MongoDB */
-  mongoOptions?: ConnectOptions & {
-    /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
-    useFacet?: boolean;
-  };
 
   /** Secure string that Payload will use for any encryption workflows */
   secret: string;
@@ -344,10 +333,19 @@ export type Config = {
     inactivityRoute?: string;
     /** Automatically log in as a user when visiting the admin dashboard. */
     autoLogin?: false | {
-      /** The email address of the user to login as */
+      /**
+       * The email address of the user to login as
+       *
+       */
       email: string;
       /** The password of the user to login as */
       password: string;
+      /**
+       * If set to true, the login credentials will be prefilled but the user will still need to click the login button.
+       *
+       * @default false
+      */
+      prefillOnly?: boolean;
     }
     /**
      * Add extra and/or replace built-in components with custom components
@@ -605,6 +603,8 @@ export type Config = {
   onInit?: (payload: Payload) => Promise<void> | void;
   /** Extension point to add your custom data. */
   custom?: Record<string, any>;
+  /** Pass in a database adapter for use on this project. */
+  db: (args: { payload: Payload }) => DatabaseAdapter
 };
 
 export type SanitizedConfig = Omit<

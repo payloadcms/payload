@@ -12,6 +12,7 @@ import li from './li';
 import indent from './indent';
 import relationship from './relationship';
 import upload from './upload';
+import textAlign from './textAlign';
 
 const elements = {
   h1,
@@ -25,6 +26,7 @@ const elements = {
   ol,
   ul,
   li,
+  textAlign,
   indent,
   relationship,
   upload,

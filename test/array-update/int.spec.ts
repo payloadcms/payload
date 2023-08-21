@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers';
 import payload from '../../src';
 import configPromise from './config';
@@ -13,9 +12,9 @@ describe('array-update', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await payload.mongoMemoryServer.stop();
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy(payload);
+    }
   });
 
   it('should persist existing array-based data while updating and passing row ID', async () => {

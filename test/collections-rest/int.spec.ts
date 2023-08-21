@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { randomBytes } from 'crypto';
 import { initPayloadTest } from '../helpers/configHelpers';
 import type { Relation } from './config';
@@ -17,9 +16,9 @@ describe('collections-rest', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await payload.mongoMemoryServer.stop();
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy(payload);
+    }
   });
 
   beforeEach(async () => {

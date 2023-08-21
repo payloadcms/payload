@@ -1,10 +1,11 @@
-import { Response, NextFunction } from 'express';
+import { NextFunction, Response } from 'express';
 import { Where } from '../types';
 import executeAccess from './executeAccess';
 import { Forbidden } from '../errors';
 import { PayloadRequest } from '../express/types';
+import { SanitizedCollectionConfig } from '../collections/config/types';
 
-const getExecuteStaticAccess = ({ config, Model }) => async (req: PayloadRequest, res: Response, next: NextFunction) => {
+const getExecuteStaticAccess = (config: SanitizedCollectionConfig) => async (req: PayloadRequest, res: Response, next: NextFunction) => {
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
@@ -41,13 +42,10 @@ const getExecuteStaticAccess = ({ config, Model }) => async (req: PayloadRequest
           });
         }
 
-        const query = await Model.buildQuery({
+        const doc = await req.payload.db.findOne({
+          collection: config.slug,
           where: queryToBuild,
-          req,
-          overrideAccess: true,
         });
-
-        const doc = await Model.findOne(query);
 
         if (!doc) {
           throw new Forbidden(req.t);

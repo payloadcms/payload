@@ -12,8 +12,9 @@ import { blocksFieldSeedData } from './collections/Blocks';
 import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
 import { defaultNumber, numberDoc } from './collections/Number';
 import { dateDoc } from './collections/Date';
-import type { PaginatedDocs } from '../../src/mongoose/types';
 import type { RichTextField } from './payload-types';
+import type { PaginatedDocs } from '../../src/database/types';
+import type { MongooseAdapter } from '../../packages/db-mongodb/src';
 
 let client;
 let graphQLClient: GraphQLClient;
@@ -228,7 +229,7 @@ describe('Fields', () => {
     const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
-      indexes = payload.collections['indexed-fields'].Model.schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
+      indexes = (payload.db as MongooseAdapter).collections['indexed-fields'].schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
 
       indexes.forEach((index) => {
         const field = Object.keys(index[0])[0];
@@ -318,7 +319,7 @@ describe('Fields', () => {
     const options: Record<string, IndexOptions> = {};
 
     beforeAll(() => {
-      indexes = payload.versions['indexed-fields'].schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
+      indexes = (payload.db as MongooseAdapter).versions['indexed-fields'].schema.indexes() as [Record<string, IndexDirection>, IndexOptions];
       indexes.forEach((index) => {
         const field = Object.keys(index[0])[0];
         definitions[field] = index[0][field];
@@ -713,6 +714,19 @@ describe('Fields', () => {
       });
 
       expect(workingRichTextQuery.docs).toHaveLength(1);
+    });
+
+    it('should show center alignment', async () => {
+      const query = await payload.find({
+        collection: 'rich-text-fields',
+        where: {
+          'richText.children.text': {
+            like: 'hello',
+          },
+        },
+      });
+
+      expect(query.docs[0].richText[0].textAlign).toEqual('center');
     });
 
     it('should populate link relationship', async () => {

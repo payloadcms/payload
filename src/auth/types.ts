@@ -1,7 +1,7 @@
 import { Strategy } from 'passport';
 import { DeepRequired } from 'ts-essentials';
 import { PayloadRequest } from '../express/types';
-import { Where, PayloadMongooseDocument } from '../types';
+import { Where } from '../types';
 import { Payload } from '../payload';
 
 export type Permission = {
@@ -66,14 +66,6 @@ export type User = {
   email: string
   collection: string
   [key: string]: unknown
-}
-
-export interface UserDocument extends PayloadMongooseDocument {
-  setPassword: (pass: string) => Promise<void>
-  authenticate: (pass: string) => Promise<void>
-  resetPasswordExpiration: number
-  email: string
-  _verified?: boolean
 }
 
 type GenerateVerifyEmailHTML = (args: { req: PayloadRequest, token: string, user: any }) => Promise<string> | string
