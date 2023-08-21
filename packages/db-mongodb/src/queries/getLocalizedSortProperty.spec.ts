@@ -1,4 +1,4 @@
-import { sanitizeConfig } from 'payload/dist/config';
+import { sanitizeConfig } from 'payload/dist/config/sanitize';
 import { Config } from 'payload/dist/config/types';
 import { getLocalizedSortProperty } from './getLocalizedSortProperty';
 
