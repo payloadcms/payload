@@ -181,6 +181,15 @@ export const traverseFields = ({
         break;
       }
 
+      case 'date': {
+        if (typeof fieldData === 'string') {
+          const parsedDate = new Date(fieldData);
+          targetRow[columnName] = parsedDate;
+        }
+
+        break;
+      }
+
       // case 'tabs': {
       //   await Promise.all(field.tabs.map(async (tab) => {
       //     if ('name' in tab) {
