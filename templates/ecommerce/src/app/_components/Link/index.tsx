@@ -13,7 +13,7 @@ type CMSLinkType = {
     relationTo: 'pages'
   }
   label?: string
-  appearance?: 'default' | 'primary' | 'secondary'
+  appearance?: ButtonProps['appearance']
   children?: React.ReactNode
   className?: string
   invert?: ButtonProps['invert']
@@ -34,6 +34,8 @@ export const CMSLink: React.FC<CMSLinkType> = ({
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
       ? `/${reference.value.slug}`
       : url
+
+  if (!href) return null
 
   if (!appearance) {
     const newTabProps = newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}

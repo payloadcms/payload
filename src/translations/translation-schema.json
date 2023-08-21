@@ -252,7 +252,7 @@
         "emailOrPasswordIncorrect": {
           "type": "string"
         },
-        "followingFieldsInvalid_many": {
+        "followingFieldsInvalid_other": {
           "type": "string"
         },
         "followingFieldsInvalid_one": {
@@ -344,7 +344,7 @@
         "deletingFile",
         "deletingTitle",
         "emailOrPasswordIncorrect",
-        "followingFieldsInvalid_many",
+        "followingFieldsInvalid_other",
         "followingFieldsInvalid_one",
         "incorrectCollection",
         "invalidFileType",
@@ -663,6 +663,9 @@
         "descending": {
           "type": "string"
         },
+        "deselectAllRows": {
+          "type": "string"
+        },
         "duplicate": {
           "type": "string"
         },
@@ -810,16 +813,25 @@
         "selectAll": {
           "type": "string"
         },
+        "selectAllRows": {
+          "type": "string"
+        },
         "selectValue": {
           "type": "string"
         },
         "selectedCount": {
           "type": "string"
         },
+        "showAllLabel": {
+          "type": "string"
+        },
         "sorryNotFound": {
           "type": "string"
         },
         "sort": {
+          "type": "string"
+        },
+        "sortByLabelDirection": {
           "type": "string"
         },
         "stayOnThisPage": {

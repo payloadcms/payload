@@ -22,11 +22,14 @@ import { afterRead } from '../../fields/hooks/afterRead';
 import { generateFileData } from '../../uploads/generateFileData';
 import { saveVersion } from '../../versions/saveVersion';
 import { mapAsync } from '../../utilities/mapAsync';
+import { buildAfterOperation } from './utils';
 import { registerLocalStrategy } from '../../auth/strategies/local/register';
 
 const unlinkFile = promisify(fs.unlink);
 
-export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
+export type CreateUpdateType = { [field: string | number | symbol]: unknown }
+
+export type Arguments<T extends CreateUpdateType> = {
   collection: Collection
   req: PayloadRequest
   depth?: number
@@ -317,6 +320,16 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       context: req.context,
     }) || result;
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+    operation: 'create',
+    args,
+    result,
+  });
 
   // Remove temp files if enabled, as express-fileupload does not do this automatically
   if (config.upload?.useTempFiles && collectionConfig.upload) {

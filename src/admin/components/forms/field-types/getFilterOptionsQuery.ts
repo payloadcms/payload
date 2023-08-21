@@ -1,14 +1,14 @@
 import { Where } from '../../../../types';
 import { FilterOptions, FilterOptionsProps } from '../../../../fields/config/types';
 
-export const getFilterOptionsQuery = (filterOptions: FilterOptions, options: Omit<FilterOptionsProps, 'relationTo'> & { relationTo: string | string[] }): {[collection: string]: Where } => {
+export const getFilterOptionsQuery = async (filterOptions: FilterOptions, options: Omit<FilterOptionsProps, 'relationTo'> & { relationTo: string | string[] }): Promise<{[collection: string]: Where }> => {
   const { relationTo } = options;
   const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
   const query = {};
   if (typeof filterOptions !== 'undefined') {
-    relations.forEach((relation) => {
-      query[relation] = typeof filterOptions === 'function' ? filterOptions({ ...options, relationTo: relation }) : filterOptions;
-    });
+    await Promise.all(relations.map(async (relation) => {
+      query[relation] = typeof filterOptions === 'function' ? await filterOptions({ ...options, relationTo: relation }) : filterOptions;
+    }));
   }
   return query;
 };

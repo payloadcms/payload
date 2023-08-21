@@ -13,6 +13,7 @@ import { useSearchParams } from '../../utilities/SearchParams';
 import validateWhereQuery from './validateWhereQuery';
 import { Where } from '../../../../types';
 import { getTranslation } from '../../../../utilities/getTranslation';
+import { transformWhereQuery } from './transformWhereQuery';
 
 import './index.scss';
 
@@ -43,6 +44,10 @@ const reduceFields = (fields, i18n) => flattenTopLevelFields(fields).reduce((red
   return reduced;
 }, []);
 
+/**
+ * The WhereBuilder component is used to render the filter controls for a collection's list view.
+ * It is part of the {@link ListControls} component which is used to render the controls (search, filter, where).
+ */
 const WhereBuilder: React.FC<Props> = (props) => {
   const {
     collection,
@@ -59,16 +64,30 @@ const WhereBuilder: React.FC<Props> = (props) => {
   const params = useSearchParams();
   const { t, i18n } = useTranslation('general');
 
+  // This handles initializing the where conditions from the search query (URL). That way, if you pass in
+  // query params to the URL, the where conditions will be initialized from those and displayed in the UI.
+  // Example: /admin/collections/posts?where[or][0][and][0][text][equals]=example%20post
   const [conditions, dispatchConditions] = useReducer(reducer, params.where, (whereFromSearch) => {
-    if (modifySearchQuery && validateWhereQuery(whereFromSearch)) {
-      return whereFromSearch.or;
-    }
+    if (modifySearchQuery && whereFromSearch) {
+      if (validateWhereQuery(whereFromSearch)) {
+        return whereFromSearch.or;
+      }
 
+      // Transform the where query to be in the right format. This will transform something simple like [text][equals]=example%20post to the right format
+      const transformedWhere = transformWhereQuery(whereFromSearch);
+
+      if (validateWhereQuery(transformedWhere)) {
+        return transformedWhere.or;
+      }
+
+      console.warn('Invalid where query in URL. Ignoring.');
+    }
     return [];
   });
 
   const [reducedFields] = useState(() => reduceFields(collection.fields, i18n));
 
+  // This handles updating the search query (URL) when the where conditions change
   useThrottledEffect(() => {
     const currentParams = queryString.parse(history.location.search, { ignoreQueryPrefix: true, depth: 10 }) as { where: Where };
 
@@ -83,8 +102,11 @@ const WhereBuilder: React.FC<Props> = (props) => {
       ];
     }, []) : [];
 
+    const hasNewWhereConditions = conditions.length > 0;
+
+
     const newWhereQuery = {
-      ...typeof currentParams?.where === 'object' ? currentParams.where : {},
+      ...typeof currentParams?.where === 'object' && (validateWhereQuery(currentParams?.where) || !hasNewWhereConditions) ? currentParams.where : {},
       or: [
         ...conditions,
         ...paramsToKeep,
@@ -94,7 +116,6 @@ const WhereBuilder: React.FC<Props> = (props) => {
     if (handleChange) handleChange(newWhereQuery as Where);
 
     const hasExistingConditions = typeof currentParams?.where === 'object' && 'or' in currentParams.where;
-    const hasNewWhereConditions = conditions.length > 0;
 
     if (modifySearchQuery && ((hasExistingConditions && !hasNewWhereConditions) || hasNewWhereConditions)) {
       history.replace({

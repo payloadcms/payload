@@ -57,6 +57,16 @@ const geo = [
   },
 ];
 
+const within = {
+  label: 'within',
+  value: 'within',
+};
+
+const intersects = {
+  label: 'intersects',
+  value: 'intersects',
+};
+
 const like = {
   label: 'isLike',
   value: 'like',
@@ -86,7 +96,7 @@ const fieldTypeConditions = {
   },
   json: {
     component: 'Text',
-    operators: [...base, like, contains],
+    operators: [...base, like, contains, within, intersects],
   },
   richText: {
     component: 'Text',
@@ -102,7 +112,7 @@ const fieldTypeConditions = {
   },
   point: {
     component: 'Point',
-    operators: [...geo],
+    operators: [...geo, within, intersects],
   },
   upload: {
     component: 'Text',
@@ -112,8 +122,12 @@ const fieldTypeConditions = {
     component: 'Relationship',
     operators: [...base],
   },
+  radio: {
+    component: 'Select',
+    operators: [...base],
+  },
   select: {
-    component: 'Text',
+    component: 'Select',
     operators: [...base],
   },
   checkbox: {

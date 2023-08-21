@@ -32,6 +32,9 @@ export const Control: React.FC<ControlProps<Option, any>> = (props) => {
         onKeyDown: (e) => {
           if (disableKeyDown) {
             e.stopPropagation();
+            // Create event for keydown listeners which specifically want to bypass this stopPropagation
+            const bypassEvent = new CustomEvent('bypassKeyDown', { detail: e });
+            document.dispatchEvent(bypassEvent);
           }
         },
       }}

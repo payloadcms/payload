@@ -20,6 +20,12 @@ Payload documentation can be found directly within its codebase and you can feel
 
 If you're an incredibly awesome person and want to help us make Payload even better through new features or additions, we would be thrilled to work with you.
 
+## Design Contributions
+
+When it comes to design-related changes or additions, it's crucial for us to ensure a cohesive user experience and alignment with our broader design vision. Before embarking on any implementation that would affect the design or UI/UX, we ask that you **first share your design proposal** with us for review and approval.
+
+Our design review ensures that proposed changes fit seamlessly with other components, both existing and planned. This step is meant to prevent unintentional design inconsistencies and to save you from investing time in implementing features that might need significant design alterations later.
+
 ### Before Starting
 
 To help us work on new features, you can create a new feature request post in [GitHub Discussion](https://github.com/payloadcms/payload/discussions) or discuss it in our [Discord](https://discord.com/invite/payload). New functionality often has large implications across the entire Payload repo, so it is best to discuss the architecture and approach before starting work on a pull request.

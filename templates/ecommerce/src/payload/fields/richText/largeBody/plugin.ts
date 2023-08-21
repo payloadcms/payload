@@ -5,7 +5,7 @@ type RichTextPlugin = Exclude<RichTextCustomElement['plugins'], undefined>[0]
 
 const withLargeBody: RichTextPlugin = incomingEditor => {
   const editor: BaseEditor & {
-    shouldBreakOutOnEnter?: (element: any) => boolean
+    shouldBreakOutOnEnter?: (element: any) => boolean // eslint-disable-line @typescript-eslint/no-explicit-any
   } = incomingEditor
 
   const { shouldBreakOutOnEnter } = editor

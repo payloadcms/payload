@@ -9,6 +9,7 @@ import { buildSortParam } from '../../mongoose/buildSortParam';
 import { AccessResult } from '../../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import { queryDrafts } from '../../versions/drafts/queryDrafts';
+import { buildAfterOperation } from './utils';
 
 export type Arguments = {
   collection: Collection
@@ -225,6 +226,16 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       return docRef;
     })),
   };
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  result = await buildAfterOperation<T>({
+    operation: 'find',
+    args,
+    result,
+  });
 
   // /////////////////////////////////////
   // Return results

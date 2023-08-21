@@ -57,7 +57,7 @@ export type FilterOptionsProps<T = any> = {
   relationTo: string,
 }
 
-export type FilterOptions<T = any> = Where | ((options: FilterOptionsProps<T>) => Where);
+export type FilterOptions<T = any> = Where | ((options: FilterOptionsProps<T>) => (Where | Promise<Where>));
 
 type Admin = {
   position?: 'sidebar';
@@ -235,6 +235,7 @@ export type TabsAdmin = Omit<Admin, 'description'>;
 
 type TabBase = Omit<FieldBase, 'required' | 'validation'> & {
   fields: Field[]
+  saveToJWT?: boolean | string
   description?: Description
   interfaceName?: string
 }
@@ -257,7 +258,7 @@ export type UnnamedTab = Omit<TabBase, 'name'> & {
 
 export type Tab = NamedTab | UnnamedTab
 
-export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized'> & {
+export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized' | 'saveToJWT'> & {
   type: 'tabs';
   tabs: Tab[]
   admin?: TabsAdmin
@@ -391,7 +392,7 @@ export type RichTextCustomLeaf = {
   plugins?: RichTextPlugin[]
 }
 
-export type RichTextElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link' | 'relationship' | 'upload' | 'indent' | RichTextCustomElement;
+export type RichTextElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link' | 'relationship' | 'upload' | 'indent' | 'textAlign' | RichTextCustomElement;
 export type RichTextLeaf = 'bold' | 'italic' | 'underline' | 'strikethrough' | 'code' | RichTextCustomLeaf;
 
 export type RichTextField = FieldBase & {

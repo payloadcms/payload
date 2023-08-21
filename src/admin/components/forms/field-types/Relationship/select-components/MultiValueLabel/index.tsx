@@ -6,6 +6,7 @@ import Tooltip from '../../../../../elements/Tooltip';
 import Edit from '../../../../../icons/Edit';
 import { useAuth } from '../../../../../utilities/Auth';
 import { Option } from '../../types';
+
 import './index.scss';
 
 const baseClass = 'relationship--multi-value-label';

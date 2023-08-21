@@ -3,6 +3,7 @@ import { Document } from 'mongoose';
 import { APIError } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { Collection } from '../../collections/config/types';
+import { buildAfterOperation } from '../../collections/operations/utils';
 
 export type Arguments = {
   collection: Collection
@@ -127,6 +128,16 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     await priorHook;
     await hook({ args, context: req.context });
   }, Promise.resolve());
+
+  // /////////////////////////////////////
+  // afterOperation - Collection
+  // /////////////////////////////////////
+
+  token = await buildAfterOperation({
+    operation: 'forgotPassword',
+    args,
+    result: token,
+  });
 
   return token;
 }

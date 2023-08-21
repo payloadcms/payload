@@ -6,9 +6,16 @@ desc: The Rich Text field allows dynamic content to be written through the Admin
 keywords: rich text, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-<Banner >
+<Banner>
   The Rich Text field is a powerful way to allow editors to write dynamic content. The content is saved as JSON in the database and can be converted into any format, including HTML, that you need.
 </Banner>
+
+<LightDarkImage 
+  srcLight='https://payloadcms.com/images/docs/fields/richtext.png'
+  srcDark='https://payloadcms.com/images/docs/fields/richtext-dark.png'
+  alt='Shows a Rich Text field in the Payload admin panel'
+  caption='Admin panel screenshot of a Rich Text field'
+/>
 
 The Admin component is built on the powerful [`slatejs`](https://docs.slatejs.org/) editor and is meant to be as extensible and customizable as possible.
 
@@ -18,22 +25,22 @@ The Admin component is built on the powerful [`slatejs`](https://docs.slatejs.or
 
 ### Config
 
-| Option           | Description |
-| ---------------- | ----------- |
-| **`name`** *         | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names) |
-| **`label`**          | Text used as a field label in the Admin panel or an object with keys for each language. |
-| **`validate`**       | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation) |
-| **`saveToJWT`**      | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT. |
-| **`hooks`**          | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks) |
-| **`access`**         | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control) |
-| **`hidden`**         | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel. |
-| **`defaultValue`**   | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values) |
-| **`localized`**      | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. |
-| **`required`**       | Require this field to have a value. |
-| **`admin`**          | Admin-specific configuration. See below for [more detail](#admin-config). |
-| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
+| Option             | Description                                                                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                  |
+| **`label`**        | Text used as a field label in the Admin panel or an object with keys for each language.                                                                 |
+| **`validate`**     | Provide a custom validation function that will be executed on both the Admin panel and the backend. [More](/docs/fields/overview#validation)            |
+| **`saveToJWT`**    | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/config), include its data in the user JWT.           |
+| **`hooks`**        | Provide field-based hooks to control logic for this field. [More](/docs/fields/overview#field-level-hooks)                                              |
+| **`access`**       | Provide field-based access control to denote what users can see and do with this field's data. [More](/docs/fields/overview#field-level-access-control) |
+| **`hidden`**       | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin panel.        |
+| **`defaultValue`** | Provide data to be used for this field's default value. [More](/docs/fields/overview#default-values)                                                    |
+| **`localized`**    | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                         |
+| **`required`**     | Require this field to have a value.                                                                                                                     |
+| **`admin`**        | Admin-specific configuration. See below for [more detail](#admin-config).                                                                               |
+| **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                               |
 
-*\* An asterisk denotes that a property is required.*
+_\* An asterisk denotes that a property is required._
 
 ### Admin config
 
@@ -59,9 +66,11 @@ The default `elements` available in Payload are:
 - `link`
 - `ol`
 - `ul`
+- `textAlign`
 - `indent`
 - [`relationship`](#relationship-element)
 - [`upload`](#upload-element)
+- [`textAlign`](#text-align)
 
 **`leaves`**
 
@@ -86,17 +95,17 @@ This allows [fields](/docs/fields/overview) to be saved as extra fields on a lin
 `link.fields` may either be an array of fields (in which case all fields defined in it will be appended below the default fields) or a function that accepts the default fields as only argument and returns an array defining the entirety of fields to be used (thus providing a mechanism of overriding the default fields).
 
 ![RichText link fields](https://payloadcms.com/images/docs/fields/richText/rte-link-fields-modal.jpg)
-*RichText link with custom fields*
+_RichText link with custom fields_
 
 **`upload.collections[collection-name].fields`**
 
 This allows [fields](/docs/fields/overview) to be saved as meta data on an upload field inside the Rich Text Editor. When this is present, the fields will render inside a modal that can be opened by clicking the "edit" button on the upload element.
 
 ![RichText upload element](https://payloadcms.com/images/docs/fields/richText/rte-upload-element.jpg)
-*RichText field using the upload element*
+_RichText field using the upload element_
 
 ![RichText upload element modal](https://payloadcms.com/images/docs/fields/richText/rte-upload-fields-modal.jpg)
-*RichText upload element modal displaying fields from the config*
+_RichText upload element modal displaying fields from the config_
 
 ### Relationship element
 
@@ -107,11 +116,14 @@ The built-in `relationship` element is a powerful way to reference other Documen
 Similar to the `relationship` element, the `upload` element is a user-friendly way to reference [Upload-enabled collections](/docs/upload/overview) with a UI specifically designed for media / image-based uploads.
 
 <Banner type="success">
-  <strong>Tip:</strong><br/>
-  Collections are automatically allowed to be selected within the Rich Text relationship and upload elements by default. If you want to disable a collection from being able to be referenced in Rich Text fields, set the collection admin options of <strong>enableRichTextLink</strong> and <strong>enableRichTextRelationship</strong> to false.
+  <strong>Tip:</strong><br />Collections are automatically allowed to be selected within the Rich Text relationship and upload elements by default. If you want to disable a collection from being able to be referenced in Rich Text fields, set the collection admin options of <strong>enableRichTextLink</strong> and <strong>enableRichTextRelationship</strong> to false.
 </Banner>
 
 Relationship and Upload elements are populated dynamically into your Rich Text field' content. Within the REST and Local APIs, any present RichText `relationship` or `upload` elements will respect the `depth` option that you pass, and will be populated accordingly. In GraphQL, each `richText` field accepts an argument of `depth` for you to utilize.
+
+### TextAlign element
+
+Text Alignment is not included by default and can be added to a Rich Text Editor by adding `textAlign` to the list of elements. TextAlign will alter the existing element to include a new `textAlign` field in the resulting JSON. This field can be used in combination with other elements and leaves to position content to the left, center or right.
 
 ### Specifying which elements and leaves to allow
 
@@ -125,71 +137,75 @@ Once you're up to speed with the general concepts involved, you can pass in your
 
 **Both custom elements and leaves are defined via the following config:**
 
-| Property         | Description |
-| ---------------- | ----------- |
-| **`name`** *     | The name to be used as a `type` for this element.  |
-| **`Button`** *   | A React component to be rendered in the Rich Text toolbar. |
-| **`plugins`**    | An array of plugins to provide to the Rich Text editor. |
+| Property        | Description                                                |
+| --------------- | ---------------------------------------------------------- |
+| **`name`** \*   | The default name to be used as a `type` for this element.  |
+| **`Button`** \* | A React component to be rendered in the Rich Text toolbar. |
+| **`plugins`**   | An array of plugins to provide to the Rich Text editor.    |
+| **`type`**      | A type that overrides the default type used by `name`      |
 
 Custom `Element`s also require the `Element` property set to a React component to be rendered as the `Element` within the rich text editor itself.
 
 Custom `Leaf` objects follow a similar pattern but require you to define the `Leaf` property instead.
 
+Specifying custom `Type`s let you extend your custom elements by adding additional fields to your JSON object.
+
 ### Example
 
 `collections/ExampleCollection.ts`
+
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from "payload/types";
 
 export const ExampleCollection: CollectionConfig = {
-  slug: 'example-collection',
+  slug: "example-collection",
   fields: [
     {
-      name: 'content', // required
-      type: 'richText', // required
-      defaultValue: [{
-        children: [{ text: 'Here is some default content for this field' }],
-      }],
+      name: "content", // required
+      type: "richText", // required
+      defaultValue: [
+        {
+          children: [{ text: "Here is some default content for this field" }],
+        },
+      ],
       required: true,
       admin: {
         elements: [
-          'h2',
-          'h3',
-          'h4',
-          'link',
-          'blockquote',
+          "h2",
+          "h3",
+          "h4",
+          "link",
+          "blockquote",
           {
-            name: 'cta',
+            name: "cta",
             Button: CustomCallToActionButton,
             Element: CustomCallToActionElement,
             plugins: [
               // any plugins that are required by this element go here
-            ]
-          }
+            ],
+          },
         ],
         leaves: [
-          'bold',
-          'italic',
+          "bold",
+          "italic",
           {
-            name: 'highlight',
+            name: "highlight",
             Button: CustomHighlightButton,
             Leaf: CustomHighlightLeaf,
             plugins: [
               // any plugins that are required by this leaf go here
-            ]
-          }
+            ],
+          },
         ],
         link: {
           // Inject your own fields into the Link element
           fields: [
             {
-              name: 'rel',
-              label: 'Rel Attribute',
-              type: 'select',
+              name: "rel",
+              label: "Rel Attribute",
+              type: "select",
               hasMany: true,
-              options: [
-                'noopener', 'noreferrer', 'nofollow',
-              ],
+              options: ["noopener", "noreferrer", "nofollow"],
             },
           ],
         },
@@ -203,9 +219,9 @@ export const ExampleCollection: CollectionConfig = {
             },
           },
         },
-      }
-    }
-  ]
+      },
+    },
+  ],
 };
 ```
 
@@ -216,112 +232,67 @@ For more examples regarding how to define your own elements and leaves, check ou
 As the Rich Text field saves its content in a JSON format, you'll need to render it as HTML yourself. Here is an example for how to generate JSX / HTML from Rich Text content:
 
 ```ts
-import React, { Fragment } from 'react';
-import escapeHTML from 'escape-html';
-import { Text } from 'slate';
+import React, { Fragment } from "react";
+import escapeHTML from "escape-html";
+import { Text } from "slate";
 
-const serialize = (children) => children.map((node, i) => {
-  if (Text.isText(node)) {
-    let text = <span dangerouslySetInnerHTML={{ __html: escapeHTML(node.text) }} />;
-
-    if (node.bold) {
-      text = (
-        <strong key={i}>
-          {text}
-        </strong>
+const serialize = (children) =>
+  children.map((node, i) => {
+    if (Text.isText(node)) {
+      let text = (
+        <span dangerouslySetInnerHTML={{ __html: escapeHTML(node.text) }} />
       );
+
+      if (node.bold) {
+        text = <strong key={i}>{text}</strong>;
+      }
+
+      if (node.code) {
+        text = <code key={i}>{text}</code>;
+      }
+
+      if (node.italic) {
+        text = <em key={i}>{text}</em>;
+      }
+
+      // Handle other leaf types here...
+
+      return <Fragment key={i}>{text}</Fragment>;
     }
 
-    if (node.code) {
-      text = (
-        <code key={i}>
-          {text}
-        </code>
-      );
+    if (!node) {
+      return null;
     }
 
-    if (node.italic) {
-      text = (
-        <em key={i}>
-          {text}
-        </em>
-      );
+    switch (node.type) {
+      case "h1":
+        return <h1 key={i}>{serialize(node.children)}</h1>;
+      // Iterate through all headings here...
+      case "h6":
+        return <h6 key={i}>{serialize(node.children)}</h6>;
+      case "blockquote":
+        return <blockquote key={i}>{serialize(node.children)}</blockquote>;
+      case "ul":
+        return <ul key={i}>{serialize(node.children)}</ul>;
+      case "ol":
+        return <ol key={i}>{serialize(node.children)}</ol>;
+      case "li":
+        return <li key={i}>{serialize(node.children)}</li>;
+      case "link":
+        return (
+          <a href={escapeHTML(node.url)} key={i}>
+            {serialize(node.children)}
+          </a>
+        );
+
+      default:
+        return <p key={i}>{serialize(node.children)}</p>;
     }
-
-    // Handle other leaf types here...
-
-    return (
-      <Fragment key={i}>
-        {text}
-      </Fragment>
-    );
-  }
-
-  if (!node) {
-    return null;
-  }
-
-  switch (node.type) {
-    case 'h1':
-      return (
-        <h1 key={i}>
-          {serialize(node.children)}
-        </h1>
-      );
-    // Iterate through all headings here...
-    case 'h6':
-      return (
-        <h6 key={i}>
-          {serialize(node.children)}
-        </h6>
-      );
-    case 'blockquote':
-      return (
-        <blockquote key={i}>
-          {serialize(node.children)}
-        </blockquote>
-      );
-    case 'ul':
-      return (
-        <ul key={i}>
-          {serialize(node.children)}
-        </ul>
-      );
-    case 'ol':
-      return (
-        <ol key={i}>
-          {serialize(node.children)}
-        </ol>
-      );
-    case 'li':
-      return (
-        <li key={i}>
-          {serialize(node.children)}
-        </li>
-      );
-    case 'link':
-      return (
-        <a
-          href={escapeHTML(node.url)}
-          key={i}
-        >
-          {serialize(node.children)}
-        </a>
-      );
-
-    default:
-      return (
-        <p key={i}>
-          {serialize(node.children)}
-        </p>
-      );
-  }
-});
+  });
 ```
 
 <Banner>
-  <strong>Note:</strong><br/>
-   The above example is for how to render to JSX, although for plain HTML the pattern is similar. Just remove the JSX and return HTML strings instead!
+  <strong>Note:</strong><br />The above example is for how to render to JSX, although for plain HTML the pattern is similar. Just remove the JSX and return HTML strings instead!
 </Banner>
 
 ### Built-in SlateJS Plugins
@@ -337,12 +308,12 @@ If you want to utilize this functionality within your own custom elements, you c
 `customLargeBodyElement.js`:
 
 ```ts
-import Button from './Button';
-import Element from './Element';
-import withLargeBody from './plugin';
+import Button from "./Button";
+import Element from "./Element";
+import withLargeBody from "./plugin";
 
 export default {
-  name: 'large-body',
+  name: "large-body",
   Button,
   Element,
   plugins: [
@@ -350,10 +321,11 @@ export default {
       const editor = incomingEditor;
       const { shouldBreakOutOnEnter } = editor;
 
-      editor.shouldBreakOutOnEnter = (element) => (element.type === 'large-body' ? true : shouldBreakOutOnEnter(element));
+      editor.shouldBreakOutOnEnter = (element) =>
+        element.type === "large-body" ? true : shouldBreakOutOnEnter(element);
 
       return editor;
-    }
+    },
   ],
 };
 ```
@@ -367,8 +339,5 @@ The plugin itself extends Payload's built-in `shouldBreakOutOnEnter` Slate funct
 If you are building your own custom Rich Text elements or leaves, you may benefit from importing the following types:
 
 ```ts
-import type {
-  RichTextCustomElement,
-  RichTextCustomLeaf,
-} from 'payload/types';
+import type { RichTextCustomElement, RichTextCustomLeaf } from "payload/types";
 ```

@@ -11,6 +11,7 @@ import { populatePublishedDate } from '../../hooks/populatePublishedDate'
 import { checkUserPurchases } from './access/checkUserPurchases'
 import { beforeProductChange } from './hooks/beforeChange'
 import { deleteProductFromCarts } from './hooks/deleteProductFromCarts'
+import { revalidateProduct } from './hooks/revalidateProduct'
 import { ProductSelect } from './ui/ProductSelect'
 
 const Products: CollectionConfig = {
@@ -18,11 +19,15 @@ const Products: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'stripeProductID', '_status'],
-    preview: doc =>
-      `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/products/${doc.slug !== 'home' ? doc.slug : ''}`,
+    preview: doc => {
+      return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/api/preview?url=${encodeURIComponent(
+        `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/products/${doc.slug}`,
+      )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
+    },
   },
   hooks: {
     beforeChange: [populatePublishedDate, beforeProductChange],
+    afterChange: [revalidateProduct],
     afterRead: [populateArchiveBlock],
     afterDelete: [deleteProductFromCarts],
   },

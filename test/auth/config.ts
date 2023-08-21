@@ -53,6 +53,88 @@ export default buildConfigWithDefaults({
           saveToJWT: saveToJWTKey,
         },
         {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'liftedSaveToJWT',
+              type: 'text',
+              saveToJWT: 'x-lifted-from-group',
+              defaultValue: 'lifted from group',
+            },
+          ],
+        },
+        {
+          name: 'groupSaveToJWT',
+          type: 'group',
+          saveToJWT: 'x-group',
+          fields: [
+            {
+              name: 'saveToJWTString',
+              type: 'text',
+              saveToJWT: 'x-test',
+              defaultValue: 'nested property',
+            },
+            {
+              name: 'saveToJWTFalse',
+              type: 'text',
+              saveToJWT: false,
+              defaultValue: 'nested property',
+            },
+          ],
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'saveToJWTTab',
+              saveToJWT: true,
+              fields: [
+                {
+                  name: 'test',
+                  type: 'text',
+                  saveToJWT: 'x-field',
+                  defaultValue: 'yes',
+                },
+              ],
+            },
+            {
+              name: 'tabSaveToJWTString',
+              saveToJWT: 'tab-test',
+              fields: [
+                {
+                  name: 'includedByDefault',
+                  type: 'text',
+                  defaultValue: 'yes',
+                },
+              ],
+            },
+            {
+              label: 'No Name',
+              fields: [
+                {
+                  name: 'tabLiftedSaveToJWT',
+                  type: 'text',
+                  saveToJWT: true,
+                  defaultValue: 'lifted from unnamed tab',
+                },
+                {
+                  name: 'unnamedTabSaveToJWTString',
+                  type: 'text',
+                  saveToJWT: 'x-tab-field',
+                  defaultValue: 'text',
+                },
+                {
+                  name: 'unnamedTabSaveToJWTFalse',
+                  type: 'text',
+                  saveToJWT: false,
+                  defaultValue: 'false',
+                },
+              ],
+            },
+          ],
+        },
+        {
           name: 'custom',
           label: 'Custom',
           type: 'text',

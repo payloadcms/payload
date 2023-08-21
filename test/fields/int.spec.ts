@@ -47,6 +47,15 @@ describe('Fields', () => {
       expect(doc.defaultFunction).toEqual(defaultText);
       expect(doc.defaultAsync).toEqual(defaultText);
     });
+
+    it('should populate default values in beforeValidate hook', async () => {
+      const { fieldWithDefaultValue, dependentOnFieldWithDefaultValue } = await payload.create({
+        collection: 'text-fields',
+        data: { text },
+      });
+
+      await expect(fieldWithDefaultValue).toEqual(dependentOnFieldWithDefaultValue);
+    });
   });
 
   describe('timestamps', () => {
@@ -713,6 +722,19 @@ describe('Fields', () => {
       });
 
       expect(workingRichTextQuery.docs).toHaveLength(1);
+    });
+
+    it('should show center alignment', async () => {
+      const query = await payload.find({
+        collection: 'rich-text-fields',
+        where: {
+          'richText.children.text': {
+            like: 'hello',
+          },
+        },
+      });
+
+      expect(query.docs[0].richText[0].textAlign).toEqual('center');
     });
 
     it('should populate link relationship', async () => {
