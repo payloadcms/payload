@@ -1,6 +1,6 @@
 import express, { Response } from 'express';
 import { devUser } from '../credentials';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { openAccess } from '../helpers/configHelpers';
 import { PayloadRequest } from '../../src/express/types';
 import { Config } from '../../src/config/types';
@@ -11,6 +11,8 @@ export const globalSlug = 'global-endpoints';
 export const globalEndpoint = 'global';
 export const applicationEndpoint = 'path';
 export const rootEndpoint = 'root';
+export const noEndpointsCollectionSlug = 'no-endpoints';
+export const noEndpointsGlobalSlug = 'global-no-endpoints';
 
 const MyConfig: Config = {
   collections: [
@@ -57,6 +59,17 @@ const MyConfig: Config = {
         },
       ],
     },
+    {
+      slug: noEndpointsCollectionSlug,
+      graphQL: false,
+      endpoints: false,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
   ],
   globals: [
     {
@@ -69,6 +82,17 @@ const MyConfig: Config = {
         },
       }],
       fields: [],
+    },
+    {
+      slug: noEndpointsGlobalSlug,
+      graphQL: false,
+      endpoints: false,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
     },
   ],
   endpoints: [
@@ -124,4 +148,4 @@ const MyConfig: Config = {
   },
 };
 
-export default buildConfig(MyConfig);
+export default buildConfigWithDefaults(MyConfig);

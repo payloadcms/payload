@@ -2,7 +2,7 @@ name: build
 
 on:
   pull_request:
-    types: [opened, reopened, edited, synchronize]
+    types: [opened, reopened, synchronize]
   push:
     branches: ["master"]
 
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [16.x, 18.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -45,7 +45,7 @@ jobs:
         run: yarn dev:generate-types fields
 
       - name: Generate GraphQL schema file
-        run: yarn dev:generate-graphql-schema
+        run: yarn dev:generate-graphql-schema graphql-schema-gen
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
@@ -83,6 +83,6 @@ jobs:
             ${{ runner.os }}-npm-${{ env.cache-name }}-
             ${{ runner.os }}-npm-
             ${{ runner.os }}-
-      - run: npm install --legacy-peer-deps
+      - run: npm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

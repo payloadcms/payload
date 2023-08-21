@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import login, { Result } from '../operations/login';
@@ -13,7 +13,7 @@ export default async function loginHandler(req: PayloadRequest, res: Response, n
       depth: parseInt(String(req.query.depth), 10),
     });
 
-    return res.status(httpStatus.OK)
+    res.status(httpStatus.OK)
       .json({
         message: 'Auth Passed',
         user: result.user,
@@ -21,6 +21,6 @@ export default async function loginHandler(req: PayloadRequest, res: Response, n
         exp: result.exp,
       });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 }

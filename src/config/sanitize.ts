@@ -1,30 +1,53 @@
 import merge from 'deepmerge';
 import { isPlainObject } from 'is-plain-object';
 import { Config, SanitizedConfig } from './types';
-import defaultUser from '../auth/defaultUser';
+import { defaultUserCollection } from '../auth/defaultUser';
 import sanitizeCollection from '../collections/config/sanitize';
 import { InvalidConfiguration } from '../errors';
 import sanitizeGlobals from '../globals/config/sanitize';
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections';
 import { defaults } from './defaults';
+import getPreferencesCollection from '../preferences/preferencesCollection';
+import { migrationsCollection } from '../database/migrations/migrationsCollection';
+import getDefaultBundler from '../bundlers/webpack/bundler';
 
-const sanitizeConfig = (config: Config): SanitizedConfig => {
-  const sanitizedConfig = merge(defaults, config, {
+const sanitizeAdmin = (config: SanitizedConfig): SanitizedConfig['admin'] => {
+  const adminConfig = config.admin;
+
+  // add default user collection if none provided
+  if (!adminConfig?.user) {
+    const firstCollectionWithAuth = config.collections.find(({ auth }) => Boolean(auth));
+    if (firstCollectionWithAuth) {
+      adminConfig.user = firstCollectionWithAuth.slug;
+    } else {
+      adminConfig.user = 'users';
+      const sanitizedDefaultUser = sanitizeCollection(config, defaultUserCollection);
+      config.collections.push(sanitizedDefaultUser);
+    }
+  }
+
+  if (!config.collections.find(({ slug }) => slug === adminConfig.user)) {
+    throw new InvalidConfiguration(`${config.admin.user} is not a valid admin user collection`);
+  }
+
+  // add default bundler if none provided
+  if (!adminConfig.bundler) {
+    adminConfig.bundler = getDefaultBundler();
+  }
+
+  return adminConfig;
+};
+
+export const sanitizeConfig = (config: Config): SanitizedConfig => {
+  const sanitizedConfig: Config = merge(defaults, config, {
     isMergeableObject: isPlainObject,
   }) as Config;
 
-  if (!sanitizedConfig.admin.user) {
-    const firstCollectionWithAuth = sanitizedConfig.collections.find((c) => c.auth);
-    if (firstCollectionWithAuth) {
-      sanitizedConfig.admin.user = firstCollectionWithAuth.slug;
-    } else {
-      sanitizedConfig.admin.user = 'users';
-      const sanitizedDefaultUser = sanitizeCollection(sanitizedConfig, defaultUser);
-      sanitizedConfig.collections.push(sanitizedDefaultUser);
-    }
-  } else if (!sanitizedConfig.collections.find((c) => c.slug === sanitizedConfig.admin.user)) {
-    throw new InvalidConfiguration(`${sanitizedConfig.admin.user} is not a valid admin user collection`);
-  }
+  sanitizedConfig.admin = sanitizeAdmin(sanitizedConfig as SanitizedConfig);
+
+  sanitizedConfig.collections.push(getPreferencesCollection(sanitizedConfig));
+
+  sanitizedConfig.collections.push(migrationsCollection);
 
   sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig, collection));
   checkDuplicateCollections(sanitizedConfig.collections);
@@ -43,5 +66,3 @@ const sanitizeConfig = (config: Config): SanitizedConfig => {
 
   return sanitizedConfig as SanitizedConfig;
 };
-
-export default sanitizeConfig;

@@ -1,10 +1,23 @@
-import mongoose from 'mongoose';
 import { randomBytes } from 'crypto';
 import { initPayloadTest } from '../helpers/configHelpers';
-import config, { customIdSlug, chainedRelSlug, defaultAccessRelSlug, slug, relationSlug, customIdNumberSlug } from './config';
+import config, {
+  chainedRelSlug,
+  customIdNumberSlug,
+  customIdSlug,
+  defaultAccessRelSlug,
+  relationSlug,
+  slug,
+} from './config';
 import payload from '../../src';
 import { RESTClient } from '../helpers/rest';
-import type { ChainedRelation, CustomIdNumberRelation, CustomIdRelation, Director, Post, Relation } from './payload-types';
+import type {
+  ChainedRelation,
+  CustomIdNumberRelation,
+  CustomIdRelation,
+  Director,
+  Post,
+  Relation,
+} from './payload-types';
 import { mapAsync } from '../../src/utilities/mapAsync';
 
 let client: RESTClient;
@@ -19,9 +32,9 @@ describe('Relationships', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await payload.mongoMemoryServer.stop();
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy(payload);
+    }
   });
 
   beforeEach(async () => {

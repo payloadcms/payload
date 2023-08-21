@@ -29,10 +29,15 @@ const collectionSchema = joi.object().keys({
     admin: joi.func(),
   }),
   defaultSort: joi.string(),
-  graphQL: joi.object().keys({
-    singularName: joi.string(),
-    pluralName: joi.string(),
-  }),
+  graphQL: joi.alternatives().try(
+    joi.object().keys(
+      {
+        singularName: joi.string(),
+        pluralName: joi.string(),
+      },
+    ),
+    joi.boolean(),
+  ),
   typescript: joi.object().keys({
     interface: joi.string(),
   }),
@@ -69,6 +74,10 @@ const collectionSchema = joi.object().keys({
         SaveDraftButton: componentSchema,
         PreviewButton: componentSchema,
       }),
+      BeforeList: joi.array().items(componentSchema),
+      BeforeListTable: joi.array().items(componentSchema),
+      AfterListTable: joi.array().items(componentSchema),
+      AfterList: joi.array().items(componentSchema),
     }),
     pagination: joi.object({
       defaultLimit: joi.number(),

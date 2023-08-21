@@ -1,4 +1,3 @@
-
 import { GraphQLJSONObject } from 'graphql-type-json';
 import { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import formatName from '../utilities/formatName';
@@ -128,9 +127,11 @@ type BuildPolicyType = {
 })
 export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
   const { typeSuffix, entity, type, scope } = args;
-  const { slug } = entity;
+  const { slug, graphQL, fields, versions } = entity;
 
   let operations = [];
+
+  if (graphQL === false) return null;
 
   if (type === 'collection') {
     operations = ['create', 'read', 'update', 'delete'];
@@ -139,7 +140,7 @@ export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
       operations.push('unlock');
     }
 
-    if (entity.versions) {
+    if (versions) {
       operations.push('readVersions');
     }
 
@@ -149,7 +150,7 @@ export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
       name: collectionTypeName,
       fields: buildEntityPolicy({
         name: slug,
-        entityFields: entity.fields,
+        entityFields: fields,
         operations,
         scope,
       }),
@@ -168,7 +169,7 @@ export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
   return new GraphQLObjectType({
     name: globalTypeName,
     fields: buildEntityPolicy({
-      name: entity?.graphQL?.name || slug,
+      name: (entity.graphQL) ? entity?.graphQL?.name || slug : slug,
       entityFields: entity.fields,
       operations,
       scope,
@@ -184,6 +185,9 @@ export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
   };
 
   Object.values(payload.config.collections).forEach((collection: SanitizedCollectionConfig) => {
+    if (collection.graphQL === false) {
+      return;
+    }
     const collectionPolicyType = buildPolicyType({
       typeSuffix: 'Access',
       entity: collection,

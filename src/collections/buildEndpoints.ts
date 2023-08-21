@@ -23,7 +23,8 @@ import docAccessRequestHandler from './requestHandlers/docAccess';
 import deleteByID from './requestHandlers/deleteByID';
 
 const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
-  let { endpoints } = collection;
+  if (!collection.endpoints) return [];
+  const endpoints = [...collection.endpoints];
 
   if (collection.auth) {
     if (!collection.auth.disableLocalStrategy) {
@@ -43,7 +44,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
         });
       }
 
-      endpoints = endpoints.concat([
+      endpoints.push(
         {
           path: '/login',
           method: 'post',
@@ -64,10 +65,10 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
           method: 'post',
           handler: resetPassword,
         },
-      ]);
+      );
     }
 
-    endpoints = endpoints.concat([
+    endpoints.push(
       {
         path: '/init',
         method: 'get',
@@ -88,11 +89,11 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
         method: 'post',
         handler: refreshHandler,
       },
-    ]);
+    );
   }
 
   if (collection.versions) {
-    endpoints = endpoints.concat([
+    endpoints.push(
       {
         path: '/versions',
         method: 'get',
@@ -108,10 +109,10 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
         method: 'post',
         handler: restoreVersion,
       },
-    ]);
+    );
   }
 
-  return endpoints.concat([
+  endpoints.push(
     {
       path: '/',
       method: 'get',
@@ -157,7 +158,9 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
       method: 'delete',
       handler: deleteHandler,
     },
-  ]);
+  );
+
+  return endpoints;
 };
 
 export default buildEndpoints;

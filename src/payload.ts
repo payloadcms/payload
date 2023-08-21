@@ -3,13 +3,12 @@ import type { Express, Router } from 'express';
 import { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql';
 import crypto from 'crypto';
 import path from 'path';
-import mongoose from 'mongoose';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler';
-import { BulkOperationResult, Collection, CollectionModel } from './collections/config/types';
+import { SendMailOptions } from 'nodemailer';
+import { BulkOperationResult, Collection } from './collections/config/types';
 import { EmailOptions, InitOptions, SanitizedConfig } from './config/types';
 import { TypeWithVersion } from './versions/types';
-import { PaginatedDocs } from './mongoose/types';
 
 import { PayloadAuthenticate } from './express/middleware/authenticate';
 import { Globals } from './globals/config/types';
@@ -17,8 +16,7 @@ import { ErrorHandler } from './express/middleware/errorHandler';
 import localOperations from './collections/operations/local';
 import localGlobalOperations from './globals/operations/local';
 import { decrypt, encrypt } from './auth/crypto';
-import { BuildEmailResult, Message } from './email/types';
-import { Preferences } from './preferences/types';
+import { BuildEmailResult } from './email/types';
 
 import { Options as CreateOptions } from './collections/operations/local/create';
 import { Options as FindOptions } from './collections/operations/local/find';
@@ -50,19 +48,17 @@ import { Result as LoginResult } from './auth/operations/login';
 import { Options as FindGlobalOptions } from './globals/operations/local/findOne';
 import { Options as UpdateGlobalOptions } from './globals/operations/local/update';
 
-import connectMongoose from './mongoose/connect';
-import initCollections from './collections/initLocal';
-import initGlobals from './globals/initLocal';
-import registerSchema from './graphql/registerSchema';
+import registerGraphQLSchema from './graphql/registerSchema';
 import buildEmail from './email/build';
 import sendEmail from './email/sendEmail';
 
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit';
 import Logger from './utilities/logger';
-import PreferencesModel from './preferences/model';
 import findConfig from './config/find';
 
 import { defaults as emailDefaults } from './email/defaults';
+import type { PaginatedDocs } from './database/types';
+import { DatabaseAdapter } from './database/types';
 
 /**
  * @description Payload
@@ -70,15 +66,15 @@ import { defaults as emailDefaults } from './email/defaults';
 export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   config: SanitizedConfig;
 
+  db: DatabaseAdapter;
+
   collections: {
     [slug: string | number | symbol]: Collection;
   } = {};
 
   versions: {
-    [slug: string]: CollectionModel;
+    [slug: string]: any; // TODO: Type this
   } = {};
-
-  preferences: Preferences;
 
   globals: Globals;
 
@@ -88,15 +84,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   email: BuildEmailResult;
 
-  sendEmail: (message: Message) => Promise<unknown>;
+  sendEmail: (message: SendMailOptions) => Promise<unknown>;
 
   secret: string;
-
-  mongoURL: string | false;
-
-  mongoOptions: InitOptions['mongoOptions'];
-
-  mongoMemoryServer: any;
 
   local: boolean;
 
@@ -115,6 +105,9 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   types: {
     blockTypes: any;
     blockInputTypes: any;
+    groupTypes: any;
+    arrayTypes: any;
+    tabTypes: any;
     localeInputType?: any;
     fallbackLocaleInputType?: any;
   };
@@ -142,24 +135,13 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    */
   async init(options: InitOptions): Promise<Payload> {
-    this.logger = Logger('payload', options.loggerOptions);
-    this.mongoURL = options.mongoURL;
-    this.mongoOptions = options.mongoOptions;
-
-    if (this.mongoURL) {
-      mongoose.set('strictQuery', false);
-      this.mongoMemoryServer = await connectMongoose(this.mongoURL, options.mongoOptions, this.logger);
-    }
+    this.logger = Logger('payload', options.loggerOptions, options.loggerDestination);
 
     this.logger.info('Starting Payload...');
     if (!options.secret) {
       throw new Error(
         'Error: missing secret key. A secret key is needed to secure Payload.',
       );
-    }
-
-    if (options.mongoURL !== false && typeof options.mongoURL !== 'string') {
-      throw new Error('Error: missing MongoDB connection URL.');
     }
 
     this.secret = crypto
@@ -188,25 +170,41 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       this.config = await loadConfig(this.logger);
     }
 
+    this.globals = {
+      config: this.config.globals,
+    };
+    this.config.collections.forEach((collection) => {
+      this.collections[collection.slug] = {
+        config: collection,
+      };
+    });
+
+    this.db = this.config.db({ payload: this });
+    this.db.payload = this;
+
+    if (this.db?.init) {
+      await this.db.init(this);
+    }
+
+    if (this.db.connect) {
+      await this.db.connect(this);
+    }
+
     // Configure email service
-    const emailOptions = options.email ? { ...(options.email) } : this.config.email;
+    const emailOptions = options.email ? { ...options.email } : this.config.email;
     if (options.email && this.config.email) {
-      this.logger.warn('Email options provided in both init options and config. Using init options.');
+      this.logger.warn(
+        'Email options provided in both init options and config. Using init options.',
+      );
     }
 
     this.emailOptions = emailOptions ?? emailDefaults;
     this.email = buildEmail(this.emailOptions, this.logger);
     this.sendEmail = sendEmail.bind(this);
 
-    // Initialize collections & globals
-    initCollections(this);
-    initGlobals(this);
-
     if (!this.config.graphQL.disable) {
-      registerSchema(this);
+      registerGraphQLSchema(this);
     }
-
-    this.preferences = { Model: PreferencesModel };
 
     serverInitTelemetry(this);
 
@@ -260,11 +258,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns Updated document(s)
    */
-  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateByIDOptions<T>):Promise<TGeneratedTypes['collections'][T]>
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateByIDOptions<T>): Promise<TGeneratedTypes['collections'][T]>
 
-  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateManyOptions<T>):Promise<BulkOperationResult<T>>
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateManyOptions<T>): Promise<BulkOperationResult<T>>
 
-  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateOptions<T>):Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateOptions<T>): Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
     const { update } = localOperations;
     return update<T>(this, options);
   }
@@ -274,11 +272,11 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @param options
    * @returns Updated document(s)
    */
-  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteByIDOptions<T>):Promise<TGeneratedTypes['collections'][T]>
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteByIDOptions<T>): Promise<TGeneratedTypes['collections'][T]>
 
-  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteManyOptions<T>):Promise<BulkOperationResult<T>>
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteManyOptions<T>): Promise<BulkOperationResult<T>>
 
-  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteOptions<T>):Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteOptions<T>): Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
     const { deleteLocal } = localOperations;
     return deleteLocal<T>(this, options);
   }

@@ -6,11 +6,15 @@ import { PayloadRequest } from '../../express/types';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
 import isLocked from '../isLocked';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Field, fieldHasSubFields, fieldAffectsData } from '../../fields/config/types';
 import { User } from '../types';
 import { Collection } from '../../collections/config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
 import unlock from './unlock';
+import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts';
+import { authenticateLocalStrategy } from '../strategies/local/authenticate';
+import { getFieldsToSign } from './getFieldsToSign';
+import { initTransaction } from '../../utilities/initTransaction';
+import { killTransaction } from '../../utilities/killTransaction';
 
 export type Result = {
   user?: User,
@@ -46,16 +50,17 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     args = (await hook({
       args,
       operation: 'login',
+      context: args.req.context,
     })) || args;
   }, Promise.resolve());
 
   const {
     collection: {
-      Model,
       config: collectionConfig,
     },
     data,
     req: {
+      payload,
       payload: {
         secret,
         config,
@@ -67,158 +72,188 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     showHiddenFields,
   } = args;
 
-  // /////////////////////////////////////
-  // Login
-  // /////////////////////////////////////
+  try {
+    const shouldCommit = await initTransaction(req);
 
-  const { email: unsanitizedEmail, password } = data;
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
 
-  const email = unsanitizedEmail ? (unsanitizedEmail as string).toLowerCase().trim() : null;
+    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
+      await priorHook;
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore Improper typing in library, additional args should be optional
-  const userDoc = await Model.findByUsername(email);
+      args = (await hook({
+        args,
+        operation: 'login',
+        context: args.req.context,
+      })) || args;
+    }, Promise.resolve());
 
-  if (!userDoc || (args.collection.config.auth.verify && userDoc._verified === false)) {
-    throw new AuthenticationError(req.t);
-  }
+    // /////////////////////////////////////
+    // Login
+    // /////////////////////////////////////
 
-  if (userDoc && isLocked(userDoc.lockUntil)) {
-    throw new LockedAuth(req.t);
-  }
+    const { email: unsanitizedEmail, password } = data;
 
-  const authResult = await userDoc.authenticate(password);
+    const email = unsanitizedEmail ? (unsanitizedEmail as string).toLowerCase().trim() : null;
 
-  const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0;
-
-  if (!authResult.user) {
-    if (maxLoginAttemptsEnabled) await userDoc.incLoginAttempts();
-    throw new AuthenticationError(req.t);
-  }
-
-  if (maxLoginAttemptsEnabled) {
-    await unlock({
-      collection: {
-        Model,
-        config: collectionConfig,
-      },
+    let user = await payload.db.findOne<any>({
+      collection: collectionConfig.slug,
+      where: { email: { equals: email.toLowerCase() } },
       req,
-      data,
-      overrideAccess: true,
     });
-  }
 
-  let user = userDoc.toJSON({ virtuals: true });
-  user = JSON.parse(JSON.stringify(user));
-  user = sanitizeInternalFields(user);
+    if (!user || (args.collection.config.auth.verify && user._verified === false)) {
+      throw new AuthenticationError(req.t);
+    }
 
-  const fieldsToSign = collectionConfig.fields.reduce((signedFields, field: Field) => {
-    const result = {
-      ...signedFields,
-    };
+    if (user && isLocked(user.lockUntil)) {
+      throw new LockedAuth(req.t);
+    }
 
-    if (!fieldAffectsData(field) && fieldHasSubFields(field)) {
-      field.fields.forEach((subField) => {
-        if (fieldAffectsData(subField) && subField.saveToJWT) {
-          result[subField.name] = user[subField.name];
-        }
+    const authResult = await authenticateLocalStrategy({ password, doc: user });
+
+    user = sanitizeInternalFields(user);
+
+    const maxLoginAttemptsEnabled = args.collection.config.auth.maxLoginAttempts > 0;
+
+    if (!authResult) {
+      if (maxLoginAttemptsEnabled) {
+        await incrementLoginAttempts({
+          req,
+          payload: req.payload,
+          doc: user,
+          collection: collectionConfig,
+        });
+      }
+
+      throw new AuthenticationError(req.t);
+    }
+
+    if (maxLoginAttemptsEnabled) {
+      await unlock({
+        collection: {
+          config: collectionConfig,
+        },
+        req,
+        data,
+        overrideAccess: true,
       });
     }
 
-    if (fieldAffectsData(field) && field.saveToJWT) {
-      result[field.name] = user[field.name];
+    const fieldsToSign = getFieldsToSign({
+      collectionConfig,
+      user,
+      email,
+
+    });
+
+    await collectionConfig.hooks.beforeLogin.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      user = (await hook({
+        user,
+        req: args.req,
+        context: args.req.context,
+      })) || user;
+    }, Promise.resolve());
+
+    const token = jwt.sign(
+      fieldsToSign,
+      secret,
+      {
+        expiresIn: collectionConfig.auth.tokenExpiration,
+      },
+    );
+
+    if (args.res) {
+      const cookieOptions: CookieOptions = {
+        path: '/',
+        httpOnly: true,
+        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
+        secure: collectionConfig.auth.cookies.secure,
+        sameSite: collectionConfig.auth.cookies.sameSite,
+        domain: undefined,
+      };
+
+      if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
+
+      args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
     }
 
-    return result;
-  }, {
-    email,
-    id: user.id,
-    collection: collectionConfig.slug,
-  });
+    req.user = user;
 
-  await collectionConfig.hooks.beforeLogin.reduce(async (priorHook, hook) => {
-    await priorHook;
+    // /////////////////////////////////////
+    // afterLogin - Collection
+    // /////////////////////////////////////
 
-    user = (await hook({
-      user,
-      req: args.req,
-    })) || user;
-  }, Promise.resolve());
+    await collectionConfig.hooks.afterLogin.reduce(async (priorHook, hook) => {
+      await priorHook;
 
-  const token = jwt.sign(
-    fieldsToSign,
-    secret,
-    {
-      expiresIn: collectionConfig.auth.tokenExpiration,
-    },
-  );
+      user = await hook({
+        user,
+        req: args.req,
+        token,
+        context: args.req.context,
+      }) || user;
+    }, Promise.resolve());
 
-  if (args.res) {
-    const cookieOptions: CookieOptions = {
-      path: '/',
-      httpOnly: true,
-      expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-      secure: collectionConfig.auth.cookies.secure,
-      sameSite: collectionConfig.auth.cookies.sameSite,
-      domain: undefined,
-    };
+    // /////////////////////////////////////
+    // afterRead - Fields
+    // /////////////////////////////////////
 
-    if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
-
-    args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
-  }
-
-  req.user = user;
-
-  // /////////////////////////////////////
-  // afterLogin - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterLogin.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    user = await hook({
-      user,
-      req: args.req,
-      token,
-    }) || user;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // afterRead - Fields
-  // /////////////////////////////////////
-
-  user = await afterRead({
-    depth,
-    doc: user,
-    entityConfig: collectionConfig,
-    overrideAccess,
-    req,
-    showHiddenFields,
-  });
-
-  // /////////////////////////////////////
-  // afterRead - Collection
-  // /////////////////////////////////////
-
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    user = await hook({
-      req,
+    user = await afterRead({
+      depth,
       doc: user,
-    }) || user;
-  }, Promise.resolve());
+      entityConfig: collectionConfig,
+      overrideAccess,
+      req,
+      showHiddenFields,
+      context: req.context,
+    });
 
-  // /////////////////////////////////////
-  // Return results
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // afterRead - Collection
+    // /////////////////////////////////////
 
-  return {
-    token,
-    user,
-    exp: (jwt.decode(token) as jwt.JwtPayload).exp,
-  };
+    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      user = await hook({
+        req,
+        doc: user,
+        context: req.context,
+      }) || user;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // afterRead - Collection
+    // /////////////////////////////////////
+
+    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      user = await hook({
+        req,
+        doc: user,
+        context: req.context,
+      }) || user;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // Return results
+    // /////////////////////////////////////
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return {
+      token,
+      user,
+      exp: (jwt.decode(token) as jwt.JwtPayload).exp,
+    };
+  } catch (error: unknown) {
+    await killTransaction(req);
+    throw error;
+  }
 }
 
 export default login;

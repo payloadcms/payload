@@ -1,13 +1,23 @@
 import { v4 as uuid } from 'uuid';
 import { mapAsync } from '../../src/utilities/mapAsync';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
+import { AuthDebug } from './AuthDebug';
 
 export const slug = 'users';
 
-export default buildConfig({
+export const namedSaveToJWTValue = 'namedSaveToJWT value';
+
+export const saveToJWTKey = 'x-custom-jwt-property-name';
+
+export default buildConfigWithDefaults({
   admin: {
     user: 'users',
+    autoLogin: {
+      email: 'test@example.com',
+      password: 'test',
+      prefillOnly: true,
+    },
   },
   collections: [
     {
@@ -36,6 +46,109 @@ export default buildConfig({
           saveToJWT: true,
           hasMany: true,
         },
+        {
+          name: 'namedSaveToJWT',
+          type: 'text',
+          defaultValue: namedSaveToJWTValue,
+          saveToJWT: saveToJWTKey,
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'liftedSaveToJWT',
+              type: 'text',
+              saveToJWT: 'x-lifted-from-group',
+              defaultValue: 'lifted from group',
+            },
+          ],
+        },
+        {
+          name: 'groupSaveToJWT',
+          type: 'group',
+          saveToJWT: 'x-group',
+          fields: [
+            {
+              name: 'saveToJWTString',
+              type: 'text',
+              saveToJWT: 'x-test',
+              defaultValue: 'nested property',
+            },
+            {
+              name: 'saveToJWTFalse',
+              type: 'text',
+              saveToJWT: false,
+              defaultValue: 'nested property',
+            },
+          ],
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'saveToJWTTab',
+              saveToJWT: true,
+              fields: [
+                {
+                  name: 'test',
+                  type: 'text',
+                  saveToJWT: 'x-field',
+                  defaultValue: 'yes',
+                },
+              ],
+            },
+            {
+              name: 'tabSaveToJWTString',
+              saveToJWT: 'tab-test',
+              fields: [
+                {
+                  name: 'includedByDefault',
+                  type: 'text',
+                  defaultValue: 'yes',
+                },
+              ],
+            },
+            {
+              label: 'No Name',
+              fields: [
+                {
+                  name: 'tabLiftedSaveToJWT',
+                  type: 'text',
+                  saveToJWT: true,
+                  defaultValue: 'lifted from unnamed tab',
+                },
+                {
+                  name: 'unnamedTabSaveToJWTString',
+                  type: 'text',
+                  saveToJWT: 'x-tab-field',
+                  defaultValue: 'text',
+                },
+                {
+                  name: 'unnamedTabSaveToJWTFalse',
+                  type: 'text',
+                  saveToJWT: false,
+                  defaultValue: 'false',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'custom',
+          label: 'Custom',
+          type: 'text',
+        },
+        {
+          name: 'authDebug',
+          label: 'Auth Debug',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: AuthDebug,
+            },
+          },
+        },
       ],
     },
     {
@@ -58,6 +171,13 @@ export default buildConfig({
       },
       fields: [],
     },
+    {
+      slug: 'public-users',
+      auth: {
+        verify: true,
+      },
+      fields: [],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -65,6 +185,7 @@ export default buildConfig({
       data: {
         email: devUser.email,
         password: devUser.password,
+        custom: 'Hello, world!',
       },
     });
 

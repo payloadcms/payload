@@ -1,11 +1,14 @@
 /* eslint-disable no-underscore-dangle */
 import { PayloadRequest } from '../../express/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { Forbidden, NotFound } from '../../errors';
 import executeAccess from '../../auth/executeAccess';
 import { TypeWithVersion } from '../../versions/types';
 import { SanitizedGlobalConfig } from '../config/types';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { combineQueries } from '../../database/combineQueries';
+import { FindGlobalVersionsArgs } from '../../database/types';
+import { killTransaction } from '../../utilities/killTransaction';
+import { initTransaction } from '../../utilities/initTransaction';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig
@@ -27,6 +30,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     req: {
       t,
       payload,
+      locale,
     },
     disableErrors,
     currentDepth,
@@ -34,99 +38,102 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     showHiddenFields,
   } = args;
 
-  const VersionsModel = payload.versions[globalConfig.slug];
+  try {
+    const shouldCommit = await initTransaction(req);
 
-  // /////////////////////////////////////
-  // Access
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // Access
+    // /////////////////////////////////////
 
-  const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors, id }, globalConfig.access.readVersions) : true;
+    const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors, id }, globalConfig.access.readVersions) : true;
 
-  // If errors are disabled, and access returns false, return null
-  if (accessResults === false) return null;
+    // If errors are disabled, and access returns false, return null
+    if (accessResults === false) return null;
 
-  const hasWhereAccess = typeof accessResults === 'object';
+    const hasWhereAccess = typeof accessResults === 'object';
 
-  const query = await VersionsModel.buildQuery({
-    where: {
-      _id: {
-        equals: id,
-      },
-    },
-    access: accessResults,
-    req,
-    overrideAccess,
-    globalSlug: globalConfig.slug,
-  });
+    const findGlobalVersionsArgs: FindGlobalVersionsArgs = {
+      global: globalConfig.slug,
+      where: combineQueries({ id: { equals: id } }, accessResults),
+      locale,
+      limit: 1,
+      req,
+    };
 
-  // /////////////////////////////////////
-  // Find by ID
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // Find by ID
+    // /////////////////////////////////////
 
-  if (!query.$and[0]._id) throw new NotFound(t);
+    if (!findGlobalVersionsArgs.where.and[0].id) throw new NotFound(t);
 
-  let result = await VersionsModel.findOne(query, {}).lean();
 
-  if (!result) {
-    if (!disableErrors) {
-      if (!hasWhereAccess) throw new NotFound(t);
-      if (hasWhereAccess) throw new Forbidden(t);
+    const { docs: results } = await payload.db.findGlobalVersions(findGlobalVersionsArgs);
+    if (!results || results?.length === 0) {
+      if (!disableErrors) {
+        if (!hasWhereAccess) throw new NotFound(t);
+        if (hasWhereAccess) throw new Forbidden(t);
+      }
+
+      return null;
     }
 
-    return null;
+
+    // Clone the result - it may have come back memoized
+    let result = JSON.parse(JSON.stringify(results[0]));
+
+    // /////////////////////////////////////
+    // beforeRead - Collection
+    // /////////////////////////////////////
+
+    await globalConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      result = await hook({
+        req,
+        doc: result.version,
+      }) || result.version;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // afterRead - Fields
+    // /////////////////////////////////////
+
+    result.version = await afterRead({
+      currentDepth,
+      depth,
+      doc: result.version,
+      entityConfig: globalConfig,
+      req,
+      overrideAccess,
+      showHiddenFields,
+      context: req.context,
+    });
+
+    // /////////////////////////////////////
+    // afterRead - Global
+    // /////////////////////////////////////
+
+    await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+      await priorHook;
+
+      result.version = await hook({
+        req,
+        query: findGlobalVersionsArgs.where,
+        doc: result.version,
+      }) || result.version;
+    }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // Return results
+    // /////////////////////////////////////
+
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return result;
+  } catch (error: unknown) {
+    await killTransaction(req);
+    throw error;
   }
-
-  // Clone the result - it may have come back memoized
-  result = JSON.parse(JSON.stringify(result));
-
-  result = sanitizeInternalFields(result);
-
-  // /////////////////////////////////////
-  // beforeRead - Collection
-  // /////////////////////////////////////
-
-  await globalConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result.version = await hook({
-      req,
-      doc: result.version,
-    }) || result.version;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // afterRead - Fields
-  // /////////////////////////////////////
-
-  result.version = await afterRead({
-    currentDepth,
-    depth,
-    doc: result.version,
-    entityConfig: globalConfig,
-    req,
-    overrideAccess,
-    showHiddenFields,
-  });
-
-  // /////////////////////////////////////
-  // afterRead - Global
-  // /////////////////////////////////////
-
-  await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook;
-
-    result.version = await hook({
-      req,
-      query,
-      doc: result.version,
-    }) || result.version;
-  }, Promise.resolve());
-
-  // /////////////////////////////////////
-  // Return results
-  // /////////////////////////////////////
-
-  return result;
 }
 
 export default findVersionByID;

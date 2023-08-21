@@ -1,14 +1,16 @@
-import { CollectionModel } from '../../collections/config/types';
 import { PayloadRequest } from '../../express/types';
 
-async function init(args: { Model: CollectionModel, req: PayloadRequest }): Promise<boolean> {
+async function init(args: { req: PayloadRequest, collection: string }): Promise<boolean> {
   const {
-    Model,
+    req: { payload },
+    collection: slug,
   } = args;
 
-  const count = await Model.countDocuments({});
+  const doc = await payload.db.findOne({
+    collection: slug,
+  });
 
-  return count >= 1;
+  return !!doc;
 }
 
 export default init;

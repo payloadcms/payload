@@ -14,6 +14,7 @@ import { PayloadRequest } from '../types';
 import corsHeaders from './corsHeaders';
 import convertPayload from './convertPayload';
 import { i18nMiddleware } from './i18n';
+import defaultPayload from './defaultPayload';
 
 const middleware = (payload: Payload): any => {
   const rateLimitOptions: {
@@ -32,6 +33,7 @@ const middleware = (payload: Payload): any => {
   }
 
   return [
+    defaultPayload,
     ...(payload.config.express.preMiddleware || []),
     rateLimit(rateLimitOptions),
     passport.initialize(),

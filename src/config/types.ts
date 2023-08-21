@@ -2,23 +2,20 @@ import { Express, NextFunction, Response } from 'express';
 import { DeepRequired } from 'ts-essentials';
 import { Transporter } from 'nodemailer';
 import { Options as ExpressFileUploadOptions } from 'express-fileupload';
-import { Configuration } from 'webpack';
+import type { Configuration } from 'webpack';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import GraphQL from 'graphql';
-import { ConnectOptions } from 'mongoose';
 import React from 'react';
-import { LoggerOptions } from 'pino';
+import { DestinationStream, LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
 import { Payload } from '../payload';
-import {
-  AfterErrorHook,
-  CollectionConfig,
-  SanitizedCollectionConfig,
-} from '../collections/config/types';
+import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types';
 import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
 import { PayloadRequest } from '../express/types';
 import { Where } from '../types';
 import { User } from '../auth/types';
+import { DatabaseAdapter } from '../database/types';
+import type { PayloadBundler } from '../bundlers/types';
 
 type Email = {
   fromName: string;
@@ -79,13 +76,6 @@ export type GraphQLExtension = (
 export type InitOptions = {
   /** Express app for Payload to use */
   express?: Express;
-  /** MongoDB connection URL, starts with `mongo` */
-  mongoURL: string | false;
-  /** Extra configuration options that will be passed to MongoDB */
-  mongoOptions?: ConnectOptions & {
-    /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
-    useFacet?: boolean
-  };
 
   /** Secure string that Payload will use for any encryption workflows */
   secret: string;
@@ -116,7 +106,14 @@ export type InitOptions = {
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions;
-  config?: Promise<SanitizedConfig>
+  loggerDestination?: DestinationStream;
+
+  /**
+   * Sometimes, with the local API, you might need to pass a config file directly, for example, serverless on Vercel
+   * The passed config should match the config file, and if it doesn't, there could be mismatches between the admin UI
+   * and the backend functionality
+   */
+  config?: Promise<SanitizedConfig>;
 };
 
 /**
@@ -181,8 +178,7 @@ export type Endpoint = {
   | 'patch'
   | 'delete'
   | 'connect'
-  | 'options'
-  | string;
+  | 'options';
   /**
    * Middleware that will be called when the path/method matches
    *
@@ -194,7 +190,7 @@ export type Endpoint = {
    * @default false
    */
   root?: boolean;
-  /** Extension  point to add your custom data. */
+  /** Extension point to add your custom data. */
   custom?: Record<string, any>;
 };
 
@@ -260,7 +256,11 @@ export type Config = {
        */
       favicon?: string;
     };
-    /** Specify an absolute path for where to store the built Admin panel bundle used in production. */
+    /**
+     * Specify an absolute path for where to store the built Admin panel bundle used in production.
+     *
+     * @default "/build"
+     * */
     buildPath?: string
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean;
@@ -276,6 +276,22 @@ export type Config = {
     logoutRoute?: string;
     /** The route the user will be redirected to after being inactive for too long. */
     inactivityRoute?: string;
+    /** Automatically log in as a user when visiting the admin dashboard. */
+    autoLogin?: false | {
+      /**
+       * The email address of the user to login as
+       *
+       */
+      email: string;
+      /** The password of the user to login as */
+      password: string;
+      /**
+       * If set to true, the login credentials will be prefilled but the user will still need to click the login button.
+       *
+       * @default false
+      */
+      prefillOnly?: boolean;
+    }
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -340,6 +356,8 @@ export type Config = {
     };
     /** Customize the Webpack config that's used to generate the Admin panel. */
     webpack?: (config: Configuration) => Configuration;
+    /** Customize the bundler used to run your admin panel. */
+    bundler?: PayloadBundler;
   };
   /**
    * Manage the datamodel of your application
@@ -394,13 +412,13 @@ export type Config = {
   cors?: string[] | '*';
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
-    /** Defaults to /api  */
+    /** @default "/api"  */
     api?: string;
-    /** Defaults to /admin */
+    /** @default "/admin" */
     admin?: string;
-    /** Defaults to /graphql  */
+    /** @default "/graphql"  */
     graphQL?: string;
-    /** Defaults to /playground */
+    /** @default "/playground" */
     graphQLPlayground?: string;
   };
   /** Control how typescript interfaces are generated from your collections. */
@@ -528,8 +546,10 @@ export type Config = {
   telemetry?: boolean;
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void;
-  /** Extension  point to add your custom data. */
+  /** Extension point to add your custom data. */
   custom?: Record<string, any>;
+  /** Pass in a database adapter for use on this project. */
+  db: (args: { payload: Payload }) => DatabaseAdapter
 };
 
 export type SanitizedConfig = Omit<

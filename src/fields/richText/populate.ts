@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { Collection } from '../../collections/config/types';
-import { RichTextField, Field } from '../config/types';
+import { Field, RichTextField } from '../config/types';
 import { PayloadRequest } from '../../express/types';
 
 type Arguments = {
@@ -32,6 +32,7 @@ export const populate = async ({
   const dataRef = data as Record<string, unknown>;
 
   const doc = await req.payloadDataLoader.load(JSON.stringify([
+    req.transactionID,
     collection.config.slug,
     id,
     depth,

@@ -2,9 +2,9 @@
 import qs from 'qs';
 import fetch from 'node-fetch';
 import type { Config } from '../../src/config/types';
-import type { PaginatedDocs } from '../../src/mongoose/types';
 import type { Where } from '../../src/types';
 import { devUser } from '../credentials';
+import type { PaginatedDocs } from '../../src/database/types';
 
 type Args = {
   serverURL: string;

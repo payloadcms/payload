@@ -1,11 +1,12 @@
 import React from 'react';
-import { Action } from '../types';
+import { Action, OptionGroup, Value } from '../types';
 
 export type Props = {
   hasMany: boolean
   relationTo: string | string[]
   path: string
-  value: unknown
+  value: Value | Value[]
+  options: OptionGroup[]
   setValue: (value: unknown) => void
   dispatchOptions: React.Dispatch<Action>
 }

@@ -36,7 +36,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const hasInitializedState = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [collectionConfig] = useRelatedCollections(collectionSlug);
-  const { docPermissions, id } = useDocumentInfo();
+  const { docPermissions, id, getDocPreferences } = useDocumentInfo();
 
   const [fields, setFields] = useState(() => formatFields(collectionConfig, true));
 
@@ -57,8 +57,10 @@ const Content: React.FC<DocumentDrawerProps> = ({
     }
 
     const awaitInitialState = async () => {
+      const preferences = await getDocPreferences();
       const state = await buildStateFromSchema({
         fieldSchema: fields,
+        preferences,
         data,
         user,
         operation: id ? 'update' : 'create',
@@ -71,7 +73,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
     awaitInitialState();
     hasInitializedState.current = true;
-  }, [data, fields, id, user, locale, isLoadingDocument, t]);
+  }, [data, fields, id, user, locale, isLoadingDocument, t, getDocPreferences]);
 
   useEffect(() => {
     setIsOpen(Boolean(modalState[drawerSlug]?.isOpen));
@@ -87,7 +89,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   if (isError) return null;
 
   const isEditing = Boolean(id);
-  const apiURL = id ? `${serverURL}${api}/${collectionSlug}/${id}` : null;
+  const apiURL = id ? `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}` : null;
   const action = `${serverURL}${api}/${collectionSlug}${id ? `/${id}` : ''}?locale=${locale}&depth=0&fallback-locale=null`;
   const hasSavePermission = (isEditing && docPermissions?.update?.permission) || (!isEditing && (docPermissions as CollectionPermission)?.create?.permission);
   const isLoading = !internalState || !docPermissions || isLoadingDocument;

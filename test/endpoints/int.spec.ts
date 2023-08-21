@@ -1,6 +1,14 @@
 import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
-import { applicationEndpoint, collectionSlug, globalEndpoint, globalSlug, rootEndpoint } from './config';
+import {
+  applicationEndpoint,
+  collectionSlug,
+  globalEndpoint,
+  globalSlug,
+  noEndpointsCollectionSlug,
+  noEndpointsGlobalSlug,
+  rootEndpoint,
+} from './config';
 
 require('isomorphic-fetch');
 
@@ -34,6 +42,16 @@ describe('Endpoints', () => {
       expect(data.name).toStrictEqual(params.name);
       expect(data.age).toStrictEqual(params.age);
     });
+
+    it('should disable built-in endpoints when false', async () => {
+      let result;
+      try {
+        result = await client.endpoint(`/api/${noEndpointsCollectionSlug}`, 'get');
+      } catch (err: unknown) {
+        result = err;
+      }
+      expect(result instanceof Error).toBe(true);
+    });
   });
 
   describe('Globals', () => {
@@ -43,6 +61,15 @@ describe('Endpoints', () => {
 
       expect(status).toBe(200);
       expect(params).toMatchObject(data);
+    });
+    it('should disable built-in endpoints when false', async () => {
+      let result;
+      try {
+        result = await client.endpoint(`/api/globals/${noEndpointsGlobalSlug}`, 'get');
+      } catch (err: unknown) {
+        result = err;
+      }
+      expect(result instanceof Error).toBe(true);
     });
   });
 

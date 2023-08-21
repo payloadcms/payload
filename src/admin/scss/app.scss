@@ -4,6 +4,10 @@
 @import './colors.scss';
 
 :root {
+  --base-px: 25;
+  --base-body-size: 13;
+  --base: calc((var(--base-px) / var(--base-body-size)) * 1rem);
+
   --breakpoint-xs-width : #{$breakpoint-xs-width};
   --breakpoint-s-width : #{$breakpoint-s-width};
   --breakpoint-m-width : #{$breakpoint-m-width};
@@ -20,10 +24,17 @@
   --font-mono: monospace;
   --font-serif: 'Merriweather', serif;
 
+  --style-radius-s: #{$style-radius-s};
+  --style-radius-m: #{$style-radius-m};
+  --style-radius-l: #{$style-radius-l};
+
   --z-popup: 10;
   --z-nav: 20;
   --z-modal: 30;
   --z-status: 40;
+
+  --accessibility-outline: 2px solid var(--theme-text);
+  --accessibility-outline-offset: 2px;
 
   --gutter-h: #{base(5)};
 
@@ -34,7 +45,7 @@
 
   @include mid-break {
     --gutter-h: #{base(2)};
-    --nav-width: 0;
+    --nav-width: 0px;
   }
 
   @include small-break {
@@ -138,11 +149,17 @@ ol {
   margin: 0 0 $baseline;
 }
 
+:focus-visible {
+  outline: var(--accessibility-outline);
+}
+
 a {
   color: currentColor;
 
   &:focus {
-    opacity: .8;
+    &:not(:focus-visible) {
+      opacity: .8;
+    }
     outline: none;
   }
 

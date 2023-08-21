@@ -1,7 +1,7 @@
 import path from 'path';
 import { Config } from './types';
 
-export const defaults: Config = {
+export const defaults: Omit<Config, 'db'> = {
   serverURL: '',
   defaultDepth: 2,
   maxDepth: 10,

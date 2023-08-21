@@ -28,7 +28,7 @@ const batchAndLoadDocs = (req: PayloadRequest): BatchLoadFn<string, TypeWithID> 
 
   // {
   //   // key is stringified set of find args
-  //   '["pages",2,0,"es","en",false,false]': [
+  //   '[null,"pages",2,0,"es","en",false,false]': [
   //     // value is array of IDs to find with these args
   //     'q34tl23462346234524',
   //     '435523540194324280',
@@ -38,9 +38,10 @@ const batchAndLoadDocs = (req: PayloadRequest): BatchLoadFn<string, TypeWithID> 
   // };
 
   const batchByFindArgs = keys.reduce((batches, key) => {
-    const [collection, id, depth, currentDepth, locale, fallbackLocale, overrideAccess, showHiddenFields] = JSON.parse(key);
+    const [transactionID, collection, id, depth, currentDepth, locale, fallbackLocale, overrideAccess, showHiddenFields] = JSON.parse(key);
 
     const batchKeyArray = [
+      transactionID,
       collection,
       depth,
       currentDepth,
@@ -54,9 +55,9 @@ const batchAndLoadDocs = (req: PayloadRequest): BatchLoadFn<string, TypeWithID> 
 
     const idField = payload.collections?.[collection].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
 
-    let sanitizedID: string | number = id
+    let sanitizedID: string | number = id;
 
-    if (idField?.type === 'number') sanitizedID = parseFloat(id)
+    if (idField?.type === 'number') sanitizedID = parseFloat(id);
 
     if (isValidID(sanitizedID, getIDType(idField))) {
       return {
@@ -73,7 +74,7 @@ const batchAndLoadDocs = (req: PayloadRequest): BatchLoadFn<string, TypeWithID> 
   // Run find requests in parallel
 
   const results = Object.entries(batchByFindArgs).map(async ([batchKey, ids]) => {
-    const [collection, depth, currentDepth, locale, fallbackLocale, overrideAccess, showHiddenFields] = JSON.parse(batchKey);
+    const [/* transactionID */, collection, depth, currentDepth, locale, fallbackLocale, overrideAccess, showHiddenFields] = JSON.parse(batchKey);
 
     const result = await payload.find({
       collection,
@@ -97,7 +98,7 @@ const batchAndLoadDocs = (req: PayloadRequest): BatchLoadFn<string, TypeWithID> 
     // Inject doc within docs array if index exists
 
     result.docs.forEach((doc) => {
-      const docKey = JSON.stringify([collection, doc.id, depth, currentDepth, locale, fallbackLocale, overrideAccess, showHiddenFields]);
+      const docKey = JSON.stringify([req.transactionID, collection, doc.id, depth, currentDepth, locale, fallbackLocale, overrideAccess, showHiddenFields]);
       const docsIndex = keys.findIndex((key) => key === docKey);
 
       if (docsIndex > -1) {

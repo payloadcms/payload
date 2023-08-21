@@ -1,0 +1,14 @@
+.addToCartButton {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 100ms linear;
+}
+
+.green {
+  color: var(--theme-success-700);
+}
+
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+}

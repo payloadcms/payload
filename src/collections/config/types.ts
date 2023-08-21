@@ -1,33 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DeepRequired } from 'ts-essentials';
-import { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateModel } from 'mongoose';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
 import { Field } from '../../fields/config/types';
-import { PayloadRequest } from '../../express/types';
+import { PayloadRequest, RequestContext } from '../../express/types';
 import { Auth, IncomingAuthType, User } from '../../auth/types';
 import { IncomingUploadType, Upload } from '../../uploads/types';
 import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
-import { BuildQueryArgs } from '../../mongoose/buildQuery';
-import { CustomPreviewButtonProps, CustomPublishButtonProps, CustomSaveButtonProps, CustomSaveDraftButtonProps } from '../../admin/components/elements/types';
-
-type Register<T = any> = (doc: T, password: string) => T;
-
-interface PassportLocalModel {
-  register: Register
-  authenticate: any
-}
-
-export interface CollectionModel extends Model<any>, PaginateModel<any>, AggregatePaginateModel<any>, PassportLocalModel {
-  buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>>
-}
-
-export interface AuthCollectionModel extends CollectionModel {
-  resetPasswordToken: string;
-  resetPasswordExpiration: Date;
-}
+import {
+  CustomPreviewButtonProps,
+  CustomPublishButtonProps,
+  CustomSaveButtonProps,
+  CustomSaveDraftButtonProps,
+} from '../../admin/components/elements/types';
+import type { Props as ListProps } from '../../admin/components/views/collections/List/types';
+import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types';
 
 export type HookOperationType =
   | 'create'
@@ -47,6 +36,7 @@ export type BeforeOperationHook = (args: {
    * Hook operation being performed
    */
   operation: HookOperationType;
+  context: RequestContext;
 }) => any;
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
@@ -62,6 +52,7 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T;
+  context: RequestContext;
 }) => any;
 
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
@@ -77,6 +68,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T;
+  context: RequestContext;
 }) => any;
 
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
@@ -87,53 +79,62 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
    * Hook operation being performed
    */
   operation: CreateOrUpdateOperation;
+  context: RequestContext;
 }) => any;
 
 export type BeforeReadHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   query: { [key: string]: any };
+  context: RequestContext;
 }) => any;
 
 export type AfterReadHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   query?: { [key: string]: any };
-  findMany?: boolean
+  findMany?: boolean;
+  context: RequestContext;
 }) => any;
 
 export type BeforeDeleteHook = (args: {
   req: PayloadRequest;
   id: string | number;
+  context: RequestContext;
 }) => any;
 
 export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   doc: T;
   req: PayloadRequest;
   id: string | number;
+  context: RequestContext;
 }) => any;
 
-export type AfterErrorHook = (err: Error, res: unknown) => { response: any, status: number } | void;
+export type AfterErrorHook = (err: Error, res: unknown, context: RequestContext) => { response: any, status: number } | void;
 
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
-  user: T
+  user: T;
+  context: RequestContext;
 }) => any;
 
 export type AfterLoginHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   user: T;
   token: string;
+  context: RequestContext;
 }) => any;
 
 export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   res: Response;
+  context: RequestContext;
 }) => any;
 
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
   req: PayloadRequest;
   response: unknown;
+  context: RequestContext;
 }) => any;
 
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
@@ -141,10 +142,12 @@ export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   res: Response;
   token: string;
   exp: number;
+  context: RequestContext;
 }) => any;
 
 export type AfterForgotPasswordHook = (args: {
   args?: any;
+  context: RequestContext;
 }) => any;
 
 type BeforeDuplicateArgs<T> = {
@@ -220,9 +223,13 @@ export type CollectionAdminOptions = {
       PreviewButton?: CustomPreviewButtonProps
     },
     views?: {
-      Edit?: React.ComponentType<any>
-      List?: React.ComponentType<any>
-    }
+      Edit?: React.ComponentType<EditProps>
+      List?: React.ComponentType<ListProps>
+    },
+    BeforeList?: React.ComponentType<ListProps>[],
+    BeforeListTable?: React.ComponentType<ListProps>[],
+    AfterListTable?: React.ComponentType<ListProps>[],
+    AfterList?: React.ComponentType<ListProps>[],
   };
   pagination?: {
     defaultLimit?: number
@@ -256,7 +263,7 @@ export type CollectionConfig = {
   graphQL?: {
     singularName?: string
     pluralName?: string
-  }
+  } | false
   /**
    * Options used in typescript generation
    */
@@ -296,9 +303,9 @@ export type CollectionConfig = {
     afterForgotPassword?: AfterForgotPasswordHook[];
   };
   /**
-   * Custom rest api endpoints
+   * Custom rest api endpoints, set false to disable all rest endpoints for this collection.
    */
-  endpoints?: Omit<Endpoint, 'root'>[]
+  endpoints?: Omit<Endpoint, 'root'>[] | false;
   /**
    * Access control
    */
@@ -335,7 +342,7 @@ export type CollectionConfig = {
    * @default true
    */
   timestamps?: boolean
-  /** Extension  point to add your custom data. */
+  /** Extension point to add your custom data. */
   custom?: Record<string, any>;
 };
 
@@ -344,11 +351,10 @@ export interface SanitizedCollectionConfig extends Omit<DeepRequired<CollectionC
   upload: Upload;
   fields: Field[];
   versions: SanitizedCollectionVersions;
-  endpoints: Omit<Endpoint, 'root'>[];
+  endpoints: Omit<Endpoint, 'root'>[] | false;
 }
 
 export type Collection = {
-  Model: CollectionModel;
   config: SanitizedCollectionConfig;
   graphQL?: {
     type: GraphQLObjectType
@@ -370,7 +376,6 @@ export type BulkOperationResult<TSlug extends keyof GeneratedTypes['collections'
 }
 
 export type AuthCollection = {
-  Model: AuthCollectionModel;
   config: SanitizedCollectionConfig;
 }
 
@@ -385,7 +390,40 @@ export type TypeWithTimestamps = {
   [key: string]: unknown
 }
 
+type IndexDirection = 1 | -1 | '2d' | '2dsphere' | 'geoHaystack' | 'hashed' | 'text' | 'ascending' | 'asc' | 'descending' | 'desc';
+
+type IndexOptions = {
+  expires?: number | string
+  weights?: Record<string, number>
+  /** Creates the index in the background, yielding whenever possible. */
+  background?: boolean;
+  /** Creates an unique index. */
+  unique?: boolean;
+  /** Override the autogenerated index name (useful if the resulting name is larger than 128 bytes) */
+  name?: string;
+  /** Creates a sparse index. */
+  sparse?: boolean;
+  /** Allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher) */
+  expireAfterSeconds?: number;
+  /** (MongoDB 4.4. or higher) Specifies how many data-bearing members of a replica set, including the primary, must complete the index builds successfully before the primary marks the indexes as ready. This option accepts the same values for the "w" field in a write concern plus "votingMembers", which indicates all voting data-bearing nodes. */
+  commitQuorum?: number | string;
+  /** Specifies the index version number, either 0 or 1. */
+  version?: number;
+  default_language?: string;
+  language_override?: string;
+  textIndexVersion?: number;
+  '2dsphereIndexVersion'?: number;
+  bits?: number;
+  /** For geospatial indexes set the lower bound for the co-ordinates. */
+  min?: number;
+  /** For geospatial indexes set the high bound for the co-ordinates. */
+  max?: number;
+  bucketSize?: number;
+  /** Specifies that the index should exist on the target collection but should not be used by the query planner when executing operations. (MongoDB 4.4 or higher) */
+  hidden?: boolean;
+}
+
 export type TypeOfIndex = {
-  fields: IndexDefinition
+  fields: Record<string, IndexDirection>
   options?: IndexOptions
 }

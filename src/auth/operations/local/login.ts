@@ -4,8 +4,9 @@ import login, { Result } from '../login';
 import { PayloadRequest } from '../../../express/types';
 import { Payload } from '../../../payload';
 import { getDataLoader } from '../../../collections/dataloader';
-import i18n from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
@@ -37,16 +38,18 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
     overrideAccess = true,
     showHiddenFields,
   } = options;
+  setRequestContext(options.req);
+
 
   const collection = payload.collections[collectionSlug];
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Login Operation.`);
   }
 
-  req.payloadAPI = 'local';
+  req.payloadAPI = req.payloadAPI || 'local';
   req.payload = payload;
-  req.i18n = i18n(payload.config.i18n);
+  req.i18n = i18nInit(payload.config.i18n);
   req.locale = undefined;
   req.fallbackLocale = undefined;
 

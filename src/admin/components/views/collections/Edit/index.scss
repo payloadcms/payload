@@ -166,7 +166,7 @@
       font-weight: 600;
       text-decoration: none;
 
-      &:hover {
+      &:hover, &:focus-visible {
         text-decoration: underline;
       }
     }

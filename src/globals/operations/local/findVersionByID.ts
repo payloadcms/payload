@@ -5,8 +5,9 @@ import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import { TypeWithVersion } from '../../../versions/types';
 import findVersionByID from '../findVersionByID';
-import i18nInit from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   slug: T
@@ -52,6 +53,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     i18n,
     t: i18n.t,
   } as PayloadRequest;
+  setRequestContext(req);
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 

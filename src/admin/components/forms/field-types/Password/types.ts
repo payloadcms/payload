@@ -9,8 +9,9 @@ export type Props = {
   required?: boolean
   validate?: Validate
   style?: React.CSSProperties
-  className?: string,
+  className?: string
   width?: string
   label?: string
   description?: Description
+  disabled?: boolean
 }

@@ -4,15 +4,17 @@ import { Payload } from '../../../payload';
 import { Document, Where } from '../../../types';
 import getFileByPath from '../../../uploads/getFileByPath';
 import update from '../update';
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { getDataLoader } from '../../dataloader';
 import { File } from '../../../uploads/types';
-import i18nInit from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 import updateByID from '../updateByID';
 import { BulkOperationResult } from '../../config/types';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
+  req?: PayloadRequest,
   collection: TSlug
   data: DeepPartial<GeneratedTypes['collections'][TSlug]>
   depth?: number
@@ -26,6 +28,10 @@ export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
   overwriteExistingFiles?: boolean
   draft?: boolean
   autosave?: boolean
+  /**
+   * context, which will then be passed to req.context, which can be read by hooks
+   */
+  context?: RequestContext
 }
 
 export type ByIDOptions<TSlug extends keyof GeneratedTypes['collections']> = BaseOptions<TSlug> & {
@@ -60,16 +66,16 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     autosave,
     id,
     where,
+    context,
   } = options;
 
   const collection = payload.collections[collectionSlug];
-
-  if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
-  }
-
   const i18n = i18nInit(payload.config.i18n);
   const defaultLocale = payload.config.localization ? payload.config.localization?.defaultLocale : null;
+
+  if (!collection) {
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Update Operation.`);
+  }
 
   const req = {
     user,
@@ -82,6 +88,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
       file: file ?? await getFileByPath(filePath),
     },
   } as PayloadRequest;
+  setRequestContext(req, context);
 
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

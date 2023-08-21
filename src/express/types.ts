@@ -5,7 +5,7 @@ import { UploadedFile } from 'express-fileupload';
 import { Payload } from '../payload';
 import { Collection, TypeWithID } from '../collections/config/types';
 import { User } from '../auth/types';
-import { Document } from '../types';
+import type { FindOneArgs } from '../database/types';
 
 /** Express request with some Payload related context added */
 export declare type PayloadRequest<U = any> = Request & {
@@ -24,10 +24,20 @@ export declare type PayloadRequest<U = any> = Request & {
    * - Configuration from payload-config.ts
    * - MongoDB model for this collection
    * - GraphQL type metadata
-   * */
+   */
   collection?: Collection;
   /** What triggered this request */
   payloadAPI?: 'REST' | 'local' | 'GraphQL';
+  /**
+   * Identifier for the database transaction for interactions in a single, all-or-nothing operation.
+   */
+  transactionID?: string | number;
+  /** context allows you to pass your own data to the request object as context
+   * This is useful for, for example, passing data from a beforeChange hook to an afterChange hook.
+   * payoadContext can also be fully typed using declare module
+   * {@link https://payloadcms.com/docs/hooks/context More info in the Payload Documentation}.
+   */
+  context: RequestContext;
   /** Uploaded files */
   files?: {
     /**
@@ -46,6 +56,12 @@ export declare type PayloadRequest<U = any> = Request & {
   payloadUploadSizes?: Record<string, Buffer>;
   /** Cache of documents related to the current request */
   findByID?: {
-    [slug: string]: (q: unknown) => Document;
+    [transactionID: string]: {
+      [slug: string]: (q: FindOneArgs) => Promise<TypeWithID>;
+    }
   };
 };
+
+export interface RequestContext {
+  [key: string]: unknown;
+}

@@ -1,41 +1,78 @@
-import { FilterQuery } from 'mongoose';
 import { Payload } from '../payload';
-import { CollectionModel } from '../collections/config/types';
+import type { SanitizedCollectionConfig } from '../collections/config/types';
+import type { SanitizedGlobalConfig } from '../globals/config/types';
+import type { Where } from '../types';
+import { PayloadRequest } from '../types';
 
 type Args = {
   payload: Payload
-  Model: CollectionModel
   max: number
-  slug: string
-  entityType: 'global' | 'collection'
+  collection?: SanitizedCollectionConfig
+  global?: SanitizedGlobalConfig
   id?: string | number
+  req?: PayloadRequest
 }
 
 export const enforceMaxVersions = async ({
   payload,
-  Model,
   max,
-  slug,
-  entityType,
+  collection,
+  global,
   id,
+  req,
 }: Args): Promise<void> => {
+  const entityType = collection ? 'collection' : 'global';
+  const slug = collection ? collection.slug : global?.slug;
+
   try {
-    const query: { parent?: string | number } = {};
+    const where: Where = {};
+    let oldestAllowedDoc;
 
-    if (entityType === 'collection') query.parent = id;
+    if (collection) {
+      where.parent = {
+        equals: id,
+      };
 
-    const oldestAllowedDoc = await Model.find(query).limit(1).skip(max).sort({ updatedAt: -1 });
+      const query = await payload.db.findVersions({
+        where,
+        collection: collection.slug,
+        skip: max,
+        sort: '-updatedAt',
+        pagination: false,
+        req,
+      });
 
-    if (oldestAllowedDoc?.[0]?.updatedAt) {
-      const deleteQuery: FilterQuery<unknown> = {
+      [oldestAllowedDoc] = query.docs;
+    } else if (global) {
+      const query = await payload.db.findGlobalVersions({
+        where,
+        global: global.slug,
+        skip: max,
+        sort: '-updatedAt',
+        req,
+      });
+
+      [oldestAllowedDoc] = query.docs;
+    }
+
+    if (oldestAllowedDoc?.updatedAt) {
+      const deleteQuery: Where = {
         updatedAt: {
-          $lte: oldestAllowedDoc[0].updatedAt,
+          less_than_equal: oldestAllowedDoc.updatedAt,
         },
       };
 
-      if (entityType === 'collection') deleteQuery.parent = id;
+      if (collection) {
+        deleteQuery.parent = {
+          equals: id,
+        };
+      }
 
-      await Model.deleteMany(deleteQuery);
+      await payload.db.deleteVersions({
+        collection: collection?.slug,
+        where: deleteQuery,
+        req,
+      });
     }
   } catch (err) {
     payload.logger.error(`There was an error cleaning up old versions for the ${entityType} ${slug}`);

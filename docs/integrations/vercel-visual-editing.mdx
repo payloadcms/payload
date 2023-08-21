@@ -1,0 +1,104 @@
+---
+title: Vercel Visual Editing
+label: Vercel Visual Editing
+order: 10
+desc: Payload + Vercel Visual Editing allows yours editors to navigate directly from the content rendered on your front-end to the fields in Payload that control it.
+keywords: vercel, vercel visual editing, visual editing, content source maps, Content Management System, cms, headless, javascript, node, react, express
+---
+
+[Vercel Visual Editing](https://vercel.com/docs/workflow-collaboration/visual-editing) will allow your editors to navigate directly from the content rendered on your front-end to the fields in Payload that control it. This requires no changes to your front-end code and very few changes to your Payload config.
+
+![Versions](/images/docs/vercel-visual-editing.jpg)
+
+<Banner type="warning">
+  Vercel Visual Editing is an enterprise-only feature and only available for
+  deployments hosted on Vercel. If you are an existing enterprise customer,
+  [contact our sales team](https://payloadcms.com/for-enterprise) for help with
+  your integration.
+</Banner>
+
+### How it works
+
+To power Vercel Visual Editing, Payload embeds Content Source Maps into its API responses. Content Source Maps are invisible, encoded JSON values that include a link back to the field in the CMS that generated the content. When rendered on the page, Vercel detects and decodes these values to display the Visual Editing interface.
+
+For full details on how the encoding and decoding algorithm works, check out [`@vercel/stega`](https://www.npmjs.com/package/@vercel/stega).
+
+### Getting Started
+
+Setting up Payload with Vercel Visual Editing is easy. First, install the `@payloadcms/plugin-csm` plugin into your project. This plugin requires an API key to install, [contact our sales team](https://payloadcms.com/for-enterprise) if you don't already have one.
+
+```bash
+npm i @payloadcms/plugin-csm
+```
+
+Then in the `plugins` array of your Payload config, call the plugin and enable any collections that require Content Source Maps.
+
+```ts
+import { buildConfig } from "payload/config"
+import contentSourceMaps from "@payloadcms/plugin-csm"
+
+const config = buildConfig({
+  collections: [
+    {
+      slug: "pages",
+      fields: [
+        {
+          name: 'slug',
+          type: 'text',
+        },
+        {
+          name: 'title,'
+          type: 'text',
+        },
+      ],
+    },
+  ],
+  plugins: [
+    contentSourceMaps({
+      collections: ["pages"],
+    }),
+  ],
+})
+
+export default config
+```
+
+Now in your Next.js app, include the `?encodeSourceMaps=true` parameter in any of your API requests. For performance reasons, this should only be done when in draft mode or on preview deployments.
+
+```ts
+if (isDraftMode || process.env.VERCEL_ENV === "preview") {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_PAYLOAD_CMS_URL}/api/pages?where[slug][equals]=${slug}&encodeSourceMaps=true`
+  );
+}
+```
+
+And that's it! You are now ready to enter Edit Mode and begin visually editing your content.
+
+##### Edit Mode
+
+To see Visual Editing on your site, you first need to visit any preview deployment on Vercel and login using the Vercel Toolbar. When Content Source Maps are detected on the page, a pencil icon will appear in the toolbar. Clicking this icon will enable Edit Mode, highlighting all editable fields on the page in blue.
+
+![Versions](/images/docs/vercel-toolbar.jpg)
+
+### Troubleshooting
+
+##### Dates
+
+The plugin does not encode `date` fields by default, but for some cases like text that uses negative CSS letter-spacing, it may be necessary to split the encoded data out from the rendered text. This way you can safely use the cleaned data as expected.
+
+```ts
+import { vercelStegaSplit } from "@vercel/stega";
+const { cleaned, encoded } = vercelStegaSplit(text);
+```
+
+##### Blocks
+
+All `blocks` fields by definition do not have plain text strings to encode. For this reason, blocks are given an additional `encodedSourceMap` key, which you can use to enable Visual Editing on entire sections of your site. You can then specify the editing container by adding the `data-vercel-edit-target` HTML attribute to any top-level element of your block.
+
+```ts
+<div data-vercel-edit-target>
+  <span style={{ display: "none" }}>{encodedSourceMap}</span>
+  {children}
+</div>
+```

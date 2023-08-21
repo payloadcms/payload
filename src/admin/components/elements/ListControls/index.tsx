@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
 import { useTranslation } from 'react-i18next';
 import { useWindowInfo } from '@faceless-ui/window-info';
@@ -20,10 +20,23 @@ import EditMany from '../EditMany';
 import DeleteMany from '../DeleteMany';
 import PublishMany from '../PublishMany';
 import UnpublishMany from '../UnpublishMany';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 
 import './index.scss';
 
 const baseClass = 'list-controls';
+
+const getUseAsTitle = (collection: SanitizedCollectionConfig) => {
+  const {
+    admin: {
+      useAsTitle,
+    },
+    fields,
+  } = collection;
+
+  const topLevelFields = flattenFields(fields);
+  return topLevelFields.find((field) => fieldAffectsData(field) && field.name === useAsTitle);
+};
 
 const ListControls: React.FC<Props> = (props) => {
   const {
@@ -37,7 +50,6 @@ const ListControls: React.FC<Props> = (props) => {
     collection: {
       fields,
       admin: {
-        useAsTitle,
         listSearchableFields,
       },
     },
@@ -46,10 +58,11 @@ const ListControls: React.FC<Props> = (props) => {
   const params = useSearchParams();
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where);
 
-  const [titleField] = useState(() => {
-    const topLevelFields = flattenFields(fields);
-    return topLevelFields.find((field) => fieldAffectsData(field) && field.name === useAsTitle);
-  });
+  const [titleField, setTitleField] = useState(getUseAsTitle(collection));
+  useEffect(() => {
+    setTitleField(getUseAsTitle(collection));
+  }, [collection]);
+
   const [textFieldsToBeSearched] = useState(getTextFieldsToBeSearched(listSearchableFields, fields));
   const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>(shouldInitializeWhereOpened ? 'where' : undefined);
   const { t, i18n } = useTranslation('general');

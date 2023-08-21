@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { NotFound } from '../../errors';
@@ -20,11 +20,13 @@ export default async function deleteByIDHandler(req: PayloadRequest, res: Respon
     });
 
     if (!doc) {
-      return res.status(httpStatus.NOT_FOUND).json(new NotFound(req.t));
+      res.status(httpStatus.NOT_FOUND)
+        .json(new NotFound(req.t));
     }
 
-    return res.status(httpStatus.OK).send(doc);
+    res.status(httpStatus.OK)
+      .send(doc);
   } catch (error) {
-    return next(error);
+    next(error);
   }
 }

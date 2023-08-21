@@ -4,12 +4,17 @@ import useField from '../../useField';
 import Label from '../../Label';
 import Error from '../../Error';
 import { useFormFields } from '../../Form/context';
-import { Field } from '../../Form/types';
+import { FormField } from '../../Form/types';
+import type { Props } from './types';
 
 import './index.scss';
 
-const ConfirmPassword: React.FC = () => {
-  const password = useFormFields<Field>(([fields]) => fields.password);
+const ConfirmPassword: React.FC<Props> = (props) => {
+  const {
+    disabled,
+  } = props;
+
+  const password = useFormFields<FormField>(([fields]) => fields.password);
   const { t } = useTranslation('fields');
 
   const validate = useCallback((value: string) => {
@@ -59,6 +64,7 @@ const ConfirmPassword: React.FC = () => {
         autoComplete="off"
         id="field-confirm-password"
         name="confirm-password"
+        disabled={!!disabled}
       />
     </div>
   );

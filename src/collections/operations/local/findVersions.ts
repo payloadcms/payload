@@ -1,13 +1,14 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Payload } from '../../../payload';
 import { Document, Where } from '../../../types';
-import { PaginatedDocs } from '../../../mongoose/types';
+import type { PaginatedDocs } from '../../../database/types';
 import { TypeWithVersion } from '../../../versions/types';
-import { PayloadRequest } from '../../../express/types';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import findVersions from '../findVersions';
 import { getDataLoader } from '../../dataloader';
-import i18nInit from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -21,6 +22,11 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   showHiddenFields?: boolean
   sort?: string
   where?: Where
+  draft?: boolean
+  /**
+   * context, which will then be passed to req.context, which can be read by hooks
+   */
+  context?: RequestContext,
 }
 
 export default async function findVersionsLocal<T extends keyof GeneratedTypes['collections']>(
@@ -39,13 +45,14 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     overrideAccess = true,
     showHiddenFields,
     sort,
+    context,
   } = options;
 
   const collection = payload.collections[collectionSlug];
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`);
+    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Find Versions Operation.`);
   }
 
   const i18n = i18nInit(payload.config.i18n);
@@ -57,6 +64,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     payload,
     i18n,
   } as PayloadRequest;
+  setRequestContext(req, context);
 
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

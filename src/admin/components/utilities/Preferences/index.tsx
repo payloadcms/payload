@@ -7,7 +7,7 @@ import { requests } from '../../../api';
 
 type PreferencesContext = {
   getPreference: <T = any>(key: string) => T | Promise<T>;
-  setPreference: <T = any>(key: string, value: T) => void;
+  setPreference: <T = any>(key: string, value: T) => Promise<void>;
 }
 
 const Context = createContext({} as PreferencesContext);
@@ -40,7 +40,7 @@ export const PreferencesProvider: React.FC<{children?: React.ReactNode}> = ({ ch
     if (typeof prefs[key] !== 'undefined') return prefs[key];
     const promise = new Promise((resolve: (value: T) => void) => {
       (async () => {
-        const request = await requests.get(`${serverURL}${api}/_preferences/${key}`, {
+        const request = await requests.get(`${serverURL}${api}/payload-preferences/${key}`, {
           headers: {
             'Accept-Language': i18n.language,
           },
@@ -60,7 +60,7 @@ export const PreferencesProvider: React.FC<{children?: React.ReactNode}> = ({ ch
 
   const setPreference = useCallback(async (key: string, value: unknown): Promise<void> => {
     preferencesRef.current[key] = value;
-    await requests.post(`${serverURL}${api}/_preferences/${key}`, requestOptions(value, i18n.language));
+    await requests.post(`${serverURL}${api}/payload-preferences/${key}`, requestOptions(value, i18n.language));
   }, [api, i18n.language, serverURL]);
 
   contextRef.current.getPreference = getPreference;

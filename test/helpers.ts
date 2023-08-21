@@ -36,6 +36,18 @@ export async function login(args: LoginArgs): Promise<void> {
   await page.waitForURL(`${serverURL}/admin`);
 }
 
+export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
+  const ua = page.evaluate(() => navigator.userAgent);
+  const isMac = (await ua).includes('Mac OS X');
+  if (isMac) {
+    await page.keyboard.down('Meta');
+  } else {
+    await page.keyboard.down('Control');
+  }
+  await page.keyboard.down('s');
+  await expect(page.locator('.Toastify')).toContainText('successfully');
+}
+
 export async function saveDocAndAssert(page: Page, selector = '#action-save'): Promise<void> {
   await page.click(selector, { delay: 100 });
   await expect(page.locator('.Toastify')).toContainText('successfully');

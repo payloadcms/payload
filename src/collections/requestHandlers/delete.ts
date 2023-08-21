@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types';
 import { Document, Where } from '../../types';
@@ -26,10 +26,11 @@ export default async function deleteHandler(req: PayloadRequest, res: Response, 
         label: getTranslation(req.collection.config.labels[result.docs.length > 1 ? 'plural' : 'singular'], req.i18n),
       });
 
-      return res.status(httpStatus.OK).json({
+      res.status(httpStatus.OK).json({
         ...formatSuccessResponse(message, 'message'),
         ...result,
       });
+      return;
     }
 
     const total = result.docs.length + result.errors.length;
@@ -39,11 +40,11 @@ export default async function deleteHandler(req: PayloadRequest, res: Response, 
       label: getTranslation(req.collection.config.labels[total > 1 ? 'plural' : 'singular'], req.i18n),
     });
 
-    return res.status(httpStatus.BAD_REQUEST).json({
+    res.status(httpStatus.BAD_REQUEST).json({
       message,
       ...result,
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 }

@@ -18,9 +18,11 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
       label,
     },
     children,
-    customProps: {
-      setDrawerIsOpen,
-      onSave,
+    selectProps: {
+      customProps: {
+        setDrawerIsOpen,
+        onSave,
+      } = {},
     } = {},
   } = props;
 
@@ -35,7 +37,9 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
   });
 
   useEffect(() => {
-    if (typeof setDrawerIsOpen === 'function') setDrawerIsOpen(isDrawerOpen);
+    if (typeof setDrawerIsOpen === 'function') {
+      setDrawerIsOpen(isDrawerOpen);
+    }
   }, [isDrawerOpen, setDrawerIsOpen]);
 
   return (
@@ -53,6 +57,7 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
               <DocumentDrawerToggler
                 className={`${baseClass}__drawer-toggler`}
                 aria-label={t('editLabel', { label })}
+                onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
                 onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}

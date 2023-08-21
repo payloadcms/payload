@@ -1,5 +1,5 @@
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import { PaginatedDocs } from '../../../../../mongoose/types';
+import type { PaginatedDocs } from '../../../../../database/types';
 import { CompareOption } from '../types';
 
 export type Props = {

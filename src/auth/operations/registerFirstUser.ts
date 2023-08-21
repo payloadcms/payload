@@ -4,6 +4,8 @@ import { MarkOptional } from 'ts-essentials';
 import { Forbidden } from '../../errors';
 import { PayloadRequest } from '../../express/types';
 import { Collection } from '../../collections/config/types';
+import { initTransaction } from '../../utilities/initTransaction';
+import { killTransaction } from '../../utilities/killTransaction';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection
@@ -25,7 +27,7 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
 ): Promise<Result<GeneratedTypes['collections'][TSlug]>> {
   const {
     collection: {
-      Model,
+      config,
       config: {
         slug,
         auth: {
@@ -40,50 +42,62 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     data,
   } = args;
 
-  const count = await Model.countDocuments({});
+  try {
+    const shouldCommit = await initTransaction(req);
 
-  if (count >= 1) throw new Forbidden(req.t);
-
-  // /////////////////////////////////////
-  // Register first user
-  // /////////////////////////////////////
-
-  const result = await payload.create<TSlug>({
-    req,
-    collection: slug as TSlug,
-    data,
-    overrideAccess: true,
-  });
-
-  // auto-verify (if applicable)
-  if (verify) {
-    await payload.update({
-      id: result.id,
-      collection: slug,
-      data: {
-        _verified: true,
-      },
+    const doc = await payload.db.findOne({
+      collection: config.slug,
+      req,
     });
+
+    if (doc) throw new Forbidden(req.t);
+
+    // /////////////////////////////////////
+    // Register first user
+    // /////////////////////////////////////
+
+    const result = await payload.create<TSlug>({
+      req,
+      collection: slug as TSlug,
+      data,
+      overrideAccess: true,
+    });
+
+    // auto-verify (if applicable)
+    if (verify) {
+      await payload.update({
+        id: result.id,
+        collection: slug,
+        data: {
+          _verified: true,
+        },
+      });
+    }
+
+    // /////////////////////////////////////
+    // Log in new user
+    // /////////////////////////////////////
+
+    const { token } = await payload.login({
+      ...args,
+      collection: slug,
+    });
+
+    const resultToReturn = {
+      ...result,
+      token,
+    };
+
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return {
+      message: 'Registered and logged in successfully. Welcome!',
+      user: resultToReturn,
+    };
+  } catch (error: unknown) {
+    await killTransaction(req);
+    throw error;
   }
-
-  // /////////////////////////////////////
-  // Log in new user
-  // /////////////////////////////////////
-
-  const { token } = await payload.login({
-    ...args,
-    collection: slug,
-  });
-
-  const resultToReturn = {
-    ...result,
-    token,
-  };
-
-  return {
-    message: 'Registered and logged in successfully. Welcome!',
-    user: resultToReturn,
-  };
 }
 
 export default registerFirstUser;

@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import payload from '../../../src';
 import { initPayloadTest } from '../../helpers/configHelpers';
 import { slug } from './config';
@@ -20,9 +19,9 @@ describe('AuthStrategies', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await payload.mongoMemoryServer.stop();
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy(payload);
+    }
   });
 
   describe('create user', () => {

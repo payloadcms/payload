@@ -8,7 +8,6 @@ import initAdmin from './express/admin';
 import initAuth from './auth/init';
 import access from './auth/requestHandlers/access';
 import initCollectionsHTTP from './collections/initHTTP';
-import initPreferences from './preferences/init';
 import initGlobalsHTTP from './globals/initHTTP';
 import initGraphQLPlayground from './graphql/initPlayground';
 import initStatic from './express/static';
@@ -48,8 +47,7 @@ export const initHTTP = async (options: InitOptions): Promise<Payload> => {
       payload.express.set('trust proxy', 1);
     }
 
-    initAdmin(payload);
-    initPreferences(payload);
+    await initAdmin(payload);
 
     payload.router.get('/access', access);
 

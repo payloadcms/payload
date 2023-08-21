@@ -17,16 +17,16 @@ export default function initCollectionsHTTP(ctx: Payload): void {
     router.all('*', bindCollectionMiddleware(ctx.collections[formattedCollection.slug]));
 
     if (collection.auth) {
-      const AuthCollection = ctx.collections[formattedCollection.slug];
+      const { config } = ctx.collections[formattedCollection.slug];
 
       if (collection.auth.useAPIKey) {
-        passport.use(`${AuthCollection.config.slug}-api-key`, apiKeyStrategy(ctx, AuthCollection));
+        passport.use(`${config.slug}-api-key`, apiKeyStrategy(ctx, config));
       }
 
       if (Array.isArray(collection.auth.strategies)) {
         collection.auth.strategies.forEach(({ name, strategy }, index) => {
           const passportStrategy = typeof strategy === 'object' ? strategy : strategy(ctx);
-          passport.use(`${AuthCollection.config.slug}-${name ?? index}`, passportStrategy);
+          passport.use(`${config.slug}-${name ?? index}`, passportStrategy);
         });
       }
     }

@@ -37,11 +37,13 @@ function initCollectionsGraphQL(payload: Payload): void {
     const {
       config,
       config: {
+        fields,
         graphQL = {} as SanitizedCollectionConfig['graphQL'],
         versions,
       },
     } = collection;
-    const { fields } = config;
+
+    if (!graphQL) return;
 
     let singularName;
     let pluralName;
@@ -97,7 +99,7 @@ function initCollectionsGraphQL(payload: Payload): void {
 
     collection.graphQL.paginatedType = buildPaginatedListType(
       pluralName,
-      collection.graphQL.type
+      collection.graphQL.type,
     );
 
     collection.graphQL.whereInputType = buildWhereInputType(
@@ -317,7 +319,7 @@ function initCollectionsGraphQL(payload: Payload): void {
 
       payload.Query.fields[`initialized${singularName}`] = {
         type: GraphQLBoolean,
-        resolve: init(collection),
+        resolve: init(collection.config.slug),
       };
 
       payload.Mutation.fields[`refreshToken${singularName}`] = {

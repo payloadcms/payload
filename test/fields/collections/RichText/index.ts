@@ -60,6 +60,7 @@ const RichTextFields: CollectionConfig = {
           'h6',
           'ul',
           'ol',
+          'textAlign',
           'indent',
           'link',
           'relationship',
@@ -114,21 +115,16 @@ const RichTextFields: CollectionConfig = {
           'upload',
         ],
         link: {
-          fields: () => [
-            {
-              required: false,
-              name: 'rel',
-              label: 'Rel Attribute',
-              type: 'select',
-              hasMany: true,
-              options: [
-                'noopener', 'noreferrer', 'nofollow',
-              ],
-              admin: {
-                description: 'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
+          fields: ({ defaultFields }) => {
+            return [
+              ...defaultFields,
+              {
+                label: 'Custom',
+                name: 'customLinkField',
+                type: 'text',
               },
-            },
-          ],
+            ];
+          },
         },
         upload: {
           collections: {
@@ -193,6 +189,30 @@ const RichTextFields: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'textBlock',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'richTextBlock',
+          fields: [
+            {
+              name: 'text',
+              type: 'richText',
+            },
+          ],
+        },
+      ],
+    },
   ],
 };
 
@@ -205,6 +225,7 @@ function generateRichText() {
         },
       ],
       type: 'h1',
+      textAlign: 'center',
     },
     {
       children: [
@@ -445,12 +466,32 @@ export const richTextBulletsDoc = {
   ],
 };
 
+export const richTextBlocks = [
+  {
+    blockType: 'textBlock',
+    text: 'Regular text',
+  },
+  {
+    blockType: 'richTextBlock',
+    text: [
+      {
+        children: [
+          {
+            text: 'Rich text',
+          },
+        ],
+        type: 'h1',
+      },
+    ],
+  },
+];
 export const richTextDoc = {
   title: 'Rich Text',
   selectHasMany: ['one', 'five'],
   richText: generateRichText(),
   richTextReadOnly: generateRichText(),
   richTextCustomFields: generateRichText(),
+  blocks: richTextBlocks,
 };
 
 export default RichTextFields;

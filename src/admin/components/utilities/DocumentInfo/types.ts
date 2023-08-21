@@ -2,7 +2,7 @@ import React from 'react';
 import { CollectionPermission, GlobalPermission } from '../../../../auth';
 import { SanitizedCollectionConfig, TypeWithID, TypeWithTimestamps } from '../../../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../../../globals/config/types';
-import { PaginatedDocs } from '../../../../mongoose/types';
+import type { PaginatedDocs } from '../../../../database/types';
 import { TypeWithVersion } from '../../../../versions/types';
 
 export type Version = TypeWithVersion<any>
@@ -21,6 +21,8 @@ export type ContextType = {
   getVersions: () => Promise<void>
   docPermissions: DocumentPermissions
   getDocPermissions: () => Promise<void>
+  setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
+  getDocPreferences: () => Promise<{ [key: string]: unknown }>
 }
 
 export type Props = {

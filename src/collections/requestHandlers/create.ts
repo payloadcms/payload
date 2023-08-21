@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import { Response, NextFunction } from 'express';
+import { NextFunction, Response } from 'express';
 import { PayloadRequest } from '../../express/types';
 import formatSuccessResponse from '../../express/responses/formatSuccess';
 import { Document } from '../../types';
@@ -25,11 +25,11 @@ export default async function createHandler(req: PayloadRequest, res: Response, 
       autosave,
     });
 
-    return res.status(httpStatus.CREATED).json({
+    res.status(httpStatus.CREATED).json({
       ...formatSuccessResponse(req.t('general:successfullyCreated', { label: getTranslation(req.collection.config.labels.singular, req.i18n) }), 'message'),
       doc,
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 }

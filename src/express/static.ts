@@ -17,7 +17,7 @@ function initStatic(ctx: Payload): void {
       router.use(passport.initialize());
       router.use(authenticate(ctx.config));
 
-      router.use(getExecuteStaticAccess(collection));
+      router.use(getExecuteStaticAccess(config));
 
       if (Array.isArray(config.upload?.handlers)) {
         router.get('/:filename*', config.upload.handlers);

@@ -4,8 +4,9 @@ import { getDataLoader } from '../../../collections/dataloader';
 import { PayloadRequest } from '../../../express/types';
 import { Document } from '../../../types';
 import findOne from '../findOne';
-import i18nInit from '../../../translations/init';
+import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
+import { setRequestContext } from '../../../express/setRequestContext';
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   slug: T
@@ -16,6 +17,7 @@ export type Options<T extends keyof GeneratedTypes['globals']> = {
   overrideAccess?: boolean
   showHiddenFields?: boolean
   draft?: boolean
+  req?: PayloadRequest
 }
 
 export default async function findOneLocal<T extends keyof GeneratedTypes['globals']>(
@@ -34,22 +36,25 @@ export default async function findOneLocal<T extends keyof GeneratedTypes['globa
   } = options;
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
-  const i18n = i18nInit(payload.config.i18n);
-
+  const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
 
   if (!globalConfig) {
     throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`);
   }
 
+  const i18n = i18nInit(payload.config.i18n);
+
+
   const req = {
     user,
     payloadAPI: 'local',
-    locale,
-    fallbackLocale,
+    locale: locale ?? options.req?.locale ?? defaultLocale,
+    fallbackLocale: fallbackLocale ?? options.req?.fallbackLocale ?? defaultLocale,
     payload,
     i18n,
     t: i18n.t,
   } as PayloadRequest;
+  setRequestContext(req);
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 

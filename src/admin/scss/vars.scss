@@ -47,6 +47,7 @@ $color-purple : #F3DDF3 !default;
 
 $style-radius-s : 3px !default;
 $style-radius-m : 4px !default;
+$style-radius-l: 9px !default;
 $style-stroke-width : 1px !default;
 
 $style-stroke-width-s : 1px !default;
@@ -182,5 +183,19 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
     &:hover {
       border-color: var(--theme-elevation-150);
     }
+  }
+}
+
+@mixin lightInputError {
+  background-color: var(--theme-error-50);
+  border: 1px solid var(--theme-error-500);
+}
+
+@mixin darkInputError {
+  background-color: var(--theme-error-100);
+  border: 1px solid var(--theme-error-400);
+
+  &:hover {
+    border-color: var(--theme-error-500);
   }
 }

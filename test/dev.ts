@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import express from 'express';
 import { v4 as uuid } from 'uuid';
+import * as dotenv from 'dotenv';
 import payload from '../src';
-import * as dotenv from "dotenv";
 
 dotenv.config();
 
@@ -25,15 +25,18 @@ process.env.PAYLOAD_CONFIG_PATH = configPath;
 
 process.env.PAYLOAD_DROP_DATABASE = 'true';
 
+if (process.argv.includes('--no-auto-login') && process.env.NODE_ENV !== 'production') {
+  process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN = 'true';
+}
+
 const expressApp = express();
 
 const startDev = async () => {
   await payload.init({
     secret: uuid(),
-    mongoURL: process.env.MONGO_URL || 'mongodb://127.0.0.1/payload',
     express: expressApp,
     email: {
-      logMockCredentials: true,
+      logMockCredentials: false,
       fromName: 'Payload',
       fromAddress: 'hello@payloadcms.com',
     },
@@ -52,8 +55,8 @@ const startDev = async () => {
   externalRouter.use(payload.authenticate);
 
   expressApp.listen(3000, async () => {
-    payload.logger.info(`Admin URL on ${payload.getAdminURL()}`);
-    payload.logger.info(`API URL on ${payload.getAPIURL()}`);
+    payload.logger.info(`Admin URL on http://localhost:3000${payload.getAdminURL()}`);
+    payload.logger.info(`API URL on http://localhost:3000${payload.getAPIURL()}`);
   });
 };
 

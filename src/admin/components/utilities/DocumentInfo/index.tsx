@@ -5,7 +5,7 @@ import qs from 'qs';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useConfig } from '../Config';
-import { PaginatedDocs } from '../../../../mongoose/types';
+import type { PaginatedDocs } from '../../../../database/types';
 import { ContextType, DocumentPermissions, Props, Version } from './types';
 import { TypeWithID } from '../../../../globals/config/types';
 import { TypeWithTimestamps } from '../../../../collections/config/types';
@@ -29,7 +29,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const id = idFromProps || (getIDFromParams ? idFromParams : null);
 
   const { serverURL, routes: { api } } = useConfig();
-  const { getPreference } = usePreferences();
+  const { getPreference, setPreference } = usePreferences();
   const { i18n } = useTranslation();
   const { permissions } = useAuth();
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null);
@@ -39,20 +39,17 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 
   const baseURL = `${serverURL}${api}`;
   let slug: string;
-  let type: 'global' | 'collection';
   let pluralType: 'globals' | 'collections';
   let preferencesKey: string;
 
   if (global) {
     slug = global.slug;
-    type = 'global';
     pluralType = 'globals';
     preferencesKey = `global-${slug}`;
   }
 
   if (collection) {
     slug = collection.slug;
-    type = 'collection';
     pluralType = 'collections';
 
     if (id) {
@@ -198,7 +195,12 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
 
     if (docAccessURL) {
-      const res = await fetch(`${serverURL}${api}${docAccessURL}`);
+      const res = await fetch(`${serverURL}${api}${docAccessURL}`, {
+        credentials: 'include',
+        headers: {
+          'Accept-Language': i18n.language,
+        },
+      });
       const json = await res.json();
       setDocPermissions(json);
     } else {
@@ -206,29 +208,39 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       // (i.e. create has no id)
       setDocPermissions(permissions[pluralType][slug]);
     }
-  }, [serverURL, api, pluralType, slug, id, permissions]);
+  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language]);
+
+  const getDocPreferences = useCallback(async () => {
+    return getPreference<DocumentPreferences>(preferencesKey);
+  }, [getPreference, preferencesKey]);
+
+  const setDocFieldPreferences = useCallback<ContextType['setDocFieldPreferences']>(async (path, fieldPreferences) => {
+    const allPreferences = await getDocPreferences();
+
+    if (preferencesKey) {
+      setPreference(preferencesKey, {
+        ...allPreferences,
+        fields: {
+          ...(allPreferences?.fields || {}),
+          [path]: {
+            ...allPreferences?.fields?.[path],
+            ...fieldPreferences,
+          },
+        },
+      });
+    }
+  }, [setPreference, preferencesKey, getDocPreferences]);
 
   useEffect(() => {
     getVersions();
   }, [getVersions]);
 
   useEffect(() => {
-    if (preferencesKey) {
-      const getDocPreferences = async () => {
-        await getPreference<DocumentPreferences>(preferencesKey);
-      };
-
-      getDocPreferences();
-    }
-  }, [getPreference, preferencesKey]);
-
-  useEffect(() => {
     getDocPermissions();
   }, [getDocPermissions]);
 
-  const value = {
+  const value: ContextType = {
     slug,
-    type,
     preferencesKey,
     global,
     collection,
@@ -239,6 +251,8 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     id,
     getDocPermissions,
     docPermissions,
+    setDocFieldPreferences,
+    getDocPreferences,
   };
 
   return (

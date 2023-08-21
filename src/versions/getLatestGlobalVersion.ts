@@ -1,32 +1,43 @@
 import { Payload } from '../payload';
-import { docHasTimestamps, Document } from '../types';
-import { GlobalModel, SanitizedGlobalConfig } from '../globals/config/types';
+import { docHasTimestamps, Document, PayloadRequest, Where } from '../types';
+import { SanitizedGlobalConfig } from '../globals/config/types';
 
 type Args = {
   payload: Payload
-  query: Record<string, unknown>
-  lean?: boolean
-  Model: GlobalModel
+  where: Where
+  slug: string
   config: SanitizedGlobalConfig
+  locale?: string
+  req?: PayloadRequest
 }
 
 export const getLatestGlobalVersion = async ({
   payload,
   config,
-  Model,
-  query,
-  lean = true,
+  slug,
+  where,
+  locale,
+  req,
 }: Args): Promise<{global: Document, globalExists: boolean}> => {
   let latestVersion;
 
   if (config.versions?.drafts) {
-    latestVersion = await payload.versions[config.slug].findOne({}, {}, {
-      sort: { updatedAt: 'desc' },
-      lean,
-    });
+    // eslint-disable-next-line prefer-destructuring
+    latestVersion = (await payload.db.findGlobalVersions({
+      global: slug,
+      limit: 1,
+      sort: '-updatedAt',
+      locale,
+      req,
+    })).docs[0];
   }
 
-  const global = await (Model as any).findOne(query, {}, { lean }) as Document;
+  const global = await payload.db.findGlobal({
+    slug,
+    where,
+    locale,
+    req,
+  });
   const globalExists = Boolean(global);
 
   if (!latestVersion || (docHasTimestamps(global) && latestVersion.updatedAt < global.updatedAt)) {

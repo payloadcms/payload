@@ -1,9 +1,9 @@
 import { formatLabels, toWords } from '../../utilities/formatLabels';
-import { MissingFieldType, InvalidFieldRelationship, InvalidFieldName } from '../../errors';
+import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors';
 import { baseBlockFields } from '../baseFields/baseBlockFields';
 import validations from '../validations';
 import { baseIDField } from '../baseFields/baseIDField';
-import { Field, fieldAffectsData } from './types';
+import { Field, fieldAffectsData, tabHasName } from './types';
 import withCondition from '../../admin/components/forms/withCondition';
 
 const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] => {
@@ -35,6 +35,17 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
           throw new InvalidFieldRelationship(field, relationship);
         }
       });
+
+      if (field.type === 'relationship') {
+        if (field.min && !field.minRows) {
+          console.warn(`(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`);
+        }
+        if (field.max && !field.maxRows) {
+          console.warn(`(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`);
+        }
+        field.minRows = field.minRows || field.min;
+        field.maxRows = field.maxRows || field.max;
+      }
     }
 
     if (field.type === 'blocks' && field.blocks) {
@@ -76,6 +87,9 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
     if (field.type === 'tabs') {
       field.tabs = field.tabs.map((tab) => {
         const unsanitizedTab = { ...tab };
+        if (tabHasName(tab) && typeof tab.label === 'undefined') {
+          unsanitizedTab.label = toWords(tab.name);
+        }
         unsanitizedTab.fields = sanitizeFields(tab.fields, validRelationships);
         return unsanitizedTab;
       });
