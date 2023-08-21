@@ -9,6 +9,7 @@ import {
   numeric,
   timestamp,
   IndexBuilder,
+  unique,
 } from 'drizzle-orm/pg-core';
 import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
@@ -109,7 +110,9 @@ export const buildTable = ({
       return Object.entries(localesIndexes).reduce((acc, [colName, func]) => {
         acc[colName] = func(cols);
         return acc;
-      }, {});
+      }, {
+        _localeParent: unique().on(cols._locale, cols._parentID),
+      });
     });
 
     adapter.tables[localeTableName] = localesTable;

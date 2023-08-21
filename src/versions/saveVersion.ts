@@ -72,11 +72,7 @@ export const saveVersion = async ({
         result = await payload.db.updateVersion({
           collectionSlug: entityConfig.slug,
           versionData: data,
-          where: {
-            id: {
-              equals: latestVersion.id,
-            },
-          },
+          id: latestVersion.id,
           req,
         });
       }

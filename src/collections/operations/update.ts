@@ -273,7 +273,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           result = await req.payload.db.updateOne({
             collection: collectionConfig.slug,
             locale,
-            where: { id: { equals: id } },
+            id,
             data: result,
             req,
           });

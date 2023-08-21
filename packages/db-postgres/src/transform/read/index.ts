@@ -3,9 +3,9 @@ import { Field } from 'payload/types';
 import { TypeWithID } from 'payload/dist/collections/config/types';
 import { SanitizedConfig } from 'payload/config';
 import { traverseFields } from './traverseFields';
-import { createRelationshipMap } from '../utilities/createRelationshipMap';
+import { createRelationshipMap } from '../../utilities/createRelationshipMap';
 import { mergeLocales } from './mergeLocales';
-import { createBlocksMap } from '../utilities/createBlocksMap';
+import { createBlocksMap } from '../../utilities/createBlocksMap';
 
 type TransformArgs = {
   config: SanitizedConfig

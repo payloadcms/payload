@@ -31,7 +31,7 @@ async function verifyEmail(args: Args): Promise<boolean> {
 
   await req.payload.db.updateOne({
     collection: collection.config.slug,
-    where: { id: { equals: user.id } },
+    id: user.id,
     data: {
       _verified: true,
       _verificationToken: null,

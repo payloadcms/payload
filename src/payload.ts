@@ -1,8 +1,8 @@
+import crypto from 'crypto';
+import path from 'path';
 import pino from 'pino';
 import type { Express, Router } from 'express';
 import { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql';
-import crypto from 'crypto';
-import path from 'path';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler';
 import { SendMailOptions } from 'nodemailer';

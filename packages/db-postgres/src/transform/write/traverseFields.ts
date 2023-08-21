@@ -2,12 +2,10 @@
 import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
 import { fieldAffectsData, valueIsValueWithRelation } from 'payload/dist/fields/config/types';
-import { PostgresAdapter } from '../types';
 import { ArrayRowToInsert, BlockRowToInsert } from './types';
-import { isArrayOfRows } from '../utilities/isArrayOfRows';
+import { isArrayOfRows } from '../../utilities/isArrayOfRows';
 
 type Args = {
-  adapter: PostgresAdapter
   arrays: {
     [tableName: string]: ArrayRowToInsert[]
   }
@@ -27,7 +25,6 @@ type Args = {
 }
 
 export const traverseFields = ({
-  adapter,
   arrays,
   blocks,
   columnPrefix,
@@ -92,7 +89,6 @@ export const traverseFields = ({
             if (field.localized) newRow.row._locale = locale;
 
             traverseFields({
-              adapter,
               arrays: newRow.arrays,
               blocks,
               columnPrefix: '',
@@ -137,7 +133,6 @@ export const traverseFields = ({
             const blockTableName = `${newTableName}_${toSnakeCase(blockRow.blockType)}`;
 
             traverseFields({
-              adapter,
               arrays: newRow.arrays,
               blocks,
               columnPrefix: '',
@@ -162,7 +157,6 @@ export const traverseFields = ({
       case 'group': {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
           traverseFields({
-            adapter,
             arrays,
             blocks,
             columnPrefix: `${columnName}_`,
@@ -268,7 +262,7 @@ export const traverseFields = ({
             relationships.push(relationRow);
           } else {
             relationRow[`${field.relationTo}ID`] = relation;
-            relationships.push(relationRow);
+            if (relation) relationships.push(relationRow);
           }
         });
 
