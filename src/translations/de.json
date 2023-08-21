@@ -281,7 +281,6 @@
   "validation": {
     "emailAddress": "Bitte gib eine korrekte E-Mail-Adresse an.",
     "enterNumber": "Bitte gib eine gültige Nummer an,",
-    "exceededLimit": "Sie haben {{value}} Elemente eingegeben, aber das Limit liegt bei {{max}}.",
     "fieldHasNo": "Dieses Feld hat kein {{label}}",
     "greaterThanMax": "{{value}} ist größer als der maximal erlaubte {{label}} von {{max}}.",
     "invalidInput": "Dieses Feld hat einen inkorrekten Wert.",

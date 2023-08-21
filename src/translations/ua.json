@@ -281,7 +281,6 @@
   "validation": {
     "emailAddress": "Будь ласка, введіть валідну email адресу.",
     "enterNumber": "Будь ласка, введіть валідний номер.",
-    "exceededLimit": "Ви ввели {{value}} предмети, але ліміт становить {{max}}.",
     "fieldHasNo": "В цього поля немає {{label}}",
     "greaterThanMax": "{{value}} більше, ніж дозволено максимуму {{label}} в {{max}}.",
     "invalidInput": "У цьому полі введено некоректне значення.",

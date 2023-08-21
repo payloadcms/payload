@@ -281,7 +281,6 @@
   "validation": {
     "emailAddress": "Моля, въведи валиден имейл адрес.",
     "enterNumber": "Моля, въведи валиден номер.",
-    "exceededLimit": "Вие сте въвeли {{value}} артикула, но лимитът е {{max}}.",
     "fieldHasNo": "Това поле няма {{label}}",
     "greaterThanMax": "{{value}} е по-голямо от максимално допустимото {{label}} от {{max}}.",
     "invalidInput": "Това поле има невалиден вход.",

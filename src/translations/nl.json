@@ -281,7 +281,6 @@
   "validation": {
     "emailAddress": "Voer een geldig e-mailadres in.",
     "enterNumber": "Voer een geldig nummer in.",
-    "exceededLimit": "U heeft {{value}} items ingevoerd, maar de limiet is {{max}}.",
     "fieldHasNo": "Dit veld heeft geen {{label}}",
     "greaterThanMax": "{{value}} is groter dan de maximaal toegestane {{label}} van {{max}}.",
     "invalidInput": "Dit veld heeft een ongeldige invoer.",

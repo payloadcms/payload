@@ -281,7 +281,6 @@
   "validation": {
     "emailAddress": "Vennligst skriv inn en gyldig e-postadresse.",
     "enterNumber": "Vennligst skriv inn et gyldig tall.",
-    "exceededLimit": "Du har lagt inn {{value}} elementer, men grensen er {{max}}.",
     "fieldHasNo": "Dette feltet har ingen {{label}}",
     "greaterThanMax": "{{value}} er større enn den tillatte maksimale {{label}} på {{max}}.",
     "invalidInput": "Dette feltet har en ugyldig inndata.",

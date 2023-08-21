@@ -281,7 +281,6 @@
   "validation": {
     "emailAddress": "Vänligen ange en giltig e-postadress.",
     "enterNumber": "Vänligen skriv in ett giltigt nummer.",
-    "exceededLimit": "Du har lagt in {{value}} objekt, men gränsen är {{max}}.",
     "fieldHasNo": "Detta fält har ingen {{label}}",
     "greaterThanMax": "{{value}} är större än den maximalt tillåtna {{label}} av {{max}}.",
     "invalidInput": "Det här fältet har en ogiltig inmatning.",
