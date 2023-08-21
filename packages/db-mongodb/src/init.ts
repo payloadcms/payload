@@ -69,12 +69,17 @@ export const init: Init = async function init(
         const model = mongoose.model(
           versionModelName,
           versionSchema,
+          versionModelName,
         ) as CollectionModel;
         // this.payload.versions[collection.slug] = model;
         this.versions[collection.slug] = model;
       }
 
-      const model = mongoose.model(collection.slug, schema) as CollectionModel;
+      const model = mongoose.model(
+        collection.slug,
+        schema,
+        this.autoPluralization === true ? undefined : collection.slug,
+      ) as CollectionModel;
       this.collections[collection.slug] = model;
 
       // TS expect error only needed until we launch 2.0.0
@@ -116,6 +121,7 @@ export const init: Init = async function init(
       const versionsModel = mongoose.model(
         versionModelName,
         versionSchema,
+        versionModelName,
       ) as CollectionModel;
       this.versions[global.slug] = versionsModel;
     }
