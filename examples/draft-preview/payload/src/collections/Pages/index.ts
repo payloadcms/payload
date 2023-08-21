@@ -16,7 +16,7 @@ export const Pages: CollectionConfig = {
         formatAppURL({
           doc,
         }),
-      )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
+      )}&collection=pages&slug=${doc.slug}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
     },
   },
   versions: {

@@ -7,9 +7,11 @@ export const formatAppURL = ({ doc }): string => {
   return pathname
 }
 
-// Revalidate the page in the background, so the user doesn't have to wait
-// Notice that the hook itself is not async and we are not awaiting `revalidate`
-// Only revalidate existing docs that are published
+// revalidate the page in the background, so the user doesn't have to wait
+// notice that the hook itself is not async and we are not awaiting `revalidate`
+// only revalidate existing docs that are published (not drafts)
+// send `revalidatePath`, `collection`, and `slug` to the frontend to use in its revalidate route
+// frameworks may have different ways of doing this, but the idea is the same
 export const revalidatePage: AfterChangeHook = ({ doc, req, operation }) => {
   if (operation === 'update' && doc._status === 'published') {
     const url = formatAppURL({ doc })
@@ -17,7 +19,7 @@ export const revalidatePage: AfterChangeHook = ({ doc, req, operation }) => {
     const revalidate = async (): Promise<void> => {
       try {
         const res = await fetch(
-          `${process.env.PAYLOAD_PUBLIC_SITE_URL}/api/revalidate?secret=${process.env.REVALIDATION_KEY}&revalidatePath=${url}`,
+          `${process.env.PAYLOAD_PUBLIC_SITE_URL}/api/revalidate?secret=${process.env.REVALIDATION_KEY}&collection=pages&slug=${doc?.slug}&path=${url}`,
         )
 
         if (res.ok) {

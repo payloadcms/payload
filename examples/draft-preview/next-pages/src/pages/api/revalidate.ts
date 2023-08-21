@@ -6,9 +6,9 @@ const revalidate = async (req: NextApiRequest, res: NextApiResponse): Promise<vo
     return res.status(401).json({ message: 'Invalid token' })
   }
 
-  if (typeof req.query.revalidatePath === 'string') {
+  if (typeof req.query.path === 'string') {
     try {
-      await res.revalidate(req.query.revalidatePath)
+      await res.revalidate(req.query.path)
       return res.json({ revalidated: true })
     } catch (err: unknown) {
       // If there was an error, Next.js will continue
