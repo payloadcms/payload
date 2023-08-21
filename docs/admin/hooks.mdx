@@ -198,9 +198,32 @@ const LinkFromCategoryToPosts: React.FC = () => {
 };
 ```
 
-### useLocale
+### useLocaleCode
 
-In any custom component you can get the selected locale with the `useLocale` hook. Here is a simple example:
+In any custom component you can get the selected locale code with the `useLocaleCode` hook. Here is a simple example:
+
+```tsx
+import { useLocaleCode } from 'payload/components/utilities';
+
+const Greeting: React.FC = () => {
+  // highlight-start
+  const localeCode = useLocaleCode();
+  // highlight-end
+
+  const trans = {
+    en: 'Hello',
+    es: 'Hola',
+  };
+
+  return (
+    <span> { trans[localeCode] } </span>
+  );
+};
+```
+
+### useLocaleCode
+
+In any custom component you can get the selected locale object with the `useLocale` hook. Unlike `useLocaleCode`, `useLocale`gives you the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
 
 ```tsx
 import { useLocale } from 'payload/components/utilities';
@@ -216,7 +239,7 @@ const Greeting: React.FC = () => {
   };
 
   return (
-    <span> { trans[locale] } </span>
+    <span> { trans[locale.code] } </span>
   );
 };
 ```
