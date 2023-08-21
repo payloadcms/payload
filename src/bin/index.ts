@@ -33,6 +33,8 @@ if (tsConfig?.config?.compilerOptions?.paths) {
     swcOptions.jsc.baseUrl = path.resolve(
       tsConfig.config.compilerOptions.baseUrl,
     );
+  } else {
+    swcOptions.jsc.baseUrl = '.';
   }
 }
 

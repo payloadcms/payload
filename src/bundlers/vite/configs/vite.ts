@@ -1,4 +1,6 @@
+/* eslint-disable no-param-reassign */
 import path from 'path';
+import fs from 'fs';
 import { InlineConfig, createLogger } from 'vite';
 import viteCommonJS from 'vite-plugin-commonjs';
 import virtual from 'vite-plugin-virtual';
@@ -7,7 +9,6 @@ import image from '@rollup/plugin-image';
 import rollupCommonJS from '@rollup/plugin-commonjs';
 import react from '@vitejs/plugin-react';
 import getPort from 'get-port';
-import { getDevConfig as getDevWebpackConfig } from '../../webpack/configs/dev';
 import type { SanitizedConfig } from '../../../config/types';
 
 const logger = createLogger('warn', { prefix: '[VITE-WARNING]', allowClearScreen: false });
@@ -18,18 +19,55 @@ logger.warn = (msg, options) => {
   originalWarning(msg, options);
 };
 
-const bundlerPath = path.resolve(__dirname, '../bundler.ts');
+const bundlerPath = path.resolve(__dirname, '../bundler');
+const mockModulePath = path.resolve(__dirname, '../../mocks/emptyModule.js');
+const mockDotENVPath = path.resolve(__dirname, '../../mocks/dotENV.js');
 const relativeAdminPath = path.resolve(__dirname, '../../../admin');
 
 export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<InlineConfig> => {
-  const webpackConfig = getDevWebpackConfig(payloadConfig);
-  const webpackAliases = webpackConfig?.resolve?.alias || {} as any;
   const hmrPort = await getPort();
+
+  const absoluteAliases = {
+    [`${bundlerPath}`]: path.resolve(__dirname, '../mock.js'),
+  };
+
+  const alias = [
+    { find: 'path', replacement: require.resolve('path-browserify') },
+    { find: 'payload-config', replacement: payloadConfig.paths.rawConfig },
+    { find: /payload$/, replacement: mockModulePath },
+    { find: '~payload-user-css', replacement: payloadConfig.admin.css },
+    { find: '~react-toastify', replacement: 'react-toastify' },
+    { find: 'dotenv', replacement: mockDotENVPath },
+  ];
+
+  if (payloadConfig.admin.webpack && typeof payloadConfig.admin.webpack === 'function') {
+    const webpackConfig = payloadConfig.admin.webpack({
+      resolve: {
+        alias: {},
+      },
+    });
+
+    if (Object.keys(webpackConfig.resolve.alias).length > 0) {
+      Object.entries(webpackConfig.resolve.alias).forEach(([source, target]) => {
+        if (path.isAbsolute(source)) {
+          absoluteAliases[source] = target;
+        } else {
+          alias[source] = target;
+        }
+      });
+    }
+  }
 
   return {
     root: path.resolve(__dirname, '../../../admin'),
     base: payloadConfig.routes.admin,
     customLogger: logger,
+    optimizeDeps: {
+      exclude: [
+        // Dependencies that need aliases should be excluded
+        // from pre-bundling
+      ],
+    },
     server: {
       middlewareMode: true,
       hmr: {
@@ -37,12 +75,7 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       },
     },
     resolve: {
-      alias: {
-        // Alternative is to remove ~ from the import
-        '~payload-user-css': payloadConfig.admin.css,
-        '~react-toastify': 'react-toastify',
-        ...(webpackAliases || {}),
-      },
+      alias,
     },
     define: {
       __dirname: '""',
@@ -50,6 +83,27 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       process: '({argv:[],env:{},cwd:()=>""})',
     },
     plugins: [
+      {
+        name: 'absolute-aliases',
+        enforce: 'pre',
+        resolveId(source, importer) {
+          let fullSourcePath: string;
+
+          // TODO: need to handle this better. This is overly simple.
+          if (source.startsWith('.')) {
+            fullSourcePath = path.resolve(path.dirname(importer), source);
+          }
+
+          if (fullSourcePath) {
+            const aliasMatch = absoluteAliases[fullSourcePath];
+            if (aliasMatch) {
+              return aliasMatch;
+            }
+          }
+
+          return null;
+        },
+      },
       virtual({
         crypto: 'export default {}',
         https: 'export default {}',
@@ -68,15 +122,6 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
             '</body>',
             `<script> var exports = {}; </script></script><script type="module" src="${payloadConfig.routes.admin}/${indexFile}"></script></body>`,
           );
-        },
-      },
-      {
-        name: 'shim-bundler-file',
-        load(id) {
-          if (id === bundlerPath) {
-            return 'export default () => { };';
-          }
-          return null;
         },
       },
     ],
