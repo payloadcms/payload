@@ -282,6 +282,7 @@
   "validation": {
     "emailAddress": "S'il vous plaît, veuillez entrer une adresse e-mail valide.",
     "enterNumber": "S'il vous plait, veuillez entrer un nombre valide.",
+    "exceededLimit": "Vous avez entré {{value}} éléments, mais la limite est de {{max}}.",
     "fieldHasNo": "Ce champ n'a pas de {{label}}",
     "greaterThanMax": "{{value}} est supérieur au max autorisé {{label}} de {{max}}.",
     "invalidInput": "Ce champ a une entrée invalide.",

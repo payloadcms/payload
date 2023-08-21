@@ -720,6 +720,9 @@
         "globals": {
           "type": "string"
         },
+        "items": {
+          "type": "string"
+        },
         "language": {
           "type": "string"
         },
@@ -1121,6 +1124,9 @@
           "type": "string"
         },
         "enterNumber": {
+          "type": "string"
+        },
+        "exceededLimit": {
           "type": "string"
         },
         "fieldHasNo": {

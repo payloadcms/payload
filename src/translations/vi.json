@@ -282,6 +282,7 @@
   "validation": {
     "emailAddress": "Địa chỉ email không hợp lệ.",
     "enterNumber": "Vui lòng nhập số.",
+    "exceededLimit": "Bạn đã nhập {{value}} mục, nhưng giới hạn là {{max}}.",
     "fieldHasNo": "Field này không có: {{label}}",
     "greaterThanMax": "{{value}} lớn hơn giá trị tối đa cho phép của {{label}} là {{max}}.",
     "invalidInput": "Dữ liệu nhập vào không hợp lệ.",

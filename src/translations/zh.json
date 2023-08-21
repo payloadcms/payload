@@ -282,6 +282,7 @@
   "validation": {
     "emailAddress": "请输入一个有效的电子邮件地址。",
     "enterNumber": "请输入一个有效的号码。",
+    "exceededLimit": "您已输入了{{value}}个项目，但限制为{{max}}个。",
     "fieldHasNo": "这个字段没有{{label}}",
     "greaterThanMax": "{{value}}超过了允许的最大{{label}}，该最大值为{{max}}。",
     "invalidInput": "这个字段有一个无效的输入。",

@@ -282,6 +282,7 @@
   "validation": {
     "emailAddress": "Vă rugăm să introduceți o adresă de email validă.",
     "enterNumber": "Vă rugăm să introduceți un număr valid.",
+    "exceededLimit": "Ai introdus {{value}} articole, dar limita este {{max}}.",
     "fieldHasNo": "Acest câmp nu are un {{label}}",
     "greaterThanMax": "{{value}} este mai mare decât valoarea maximă permisă pentru {{label}} de {{max}}.",
     "invalidInput": "Acest câmp are o intrare invalidă.",

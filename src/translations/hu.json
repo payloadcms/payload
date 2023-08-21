@@ -282,6 +282,7 @@
   "validation": {
     "emailAddress": "Kérjük, adjon meg egy érvényes e-mail címet.",
     "enterNumber": "Kérjük, adjon meg egy érvényes számot.",
+    "exceededLimit": "Ön {{value}} elemet adott meg, de a limit {{max}}.",
     "fieldHasNo": "Ennek a mezőnek nincs {{label}}",
     "greaterThanMax": "{{value}} nagyobb, mint a megengedett maximum {{label}} érték, ami {{max}}.",
     "invalidInput": "Ez a mező érvénytelen értéket tartalmaz.",

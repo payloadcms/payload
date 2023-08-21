@@ -282,6 +282,7 @@
   "validation": {
     "emailAddress": "Zadejte prosím platnou e-mailovou adresu.",
     "enterNumber": "Zadejte prosím platné číslo.",
+    "exceededLimit": "Zadali jste {{value}} položek, ale limit je {{max}}.",
     "fieldHasNo": "Toto pole nemá {{label}}",
     "greaterThanMax": "{{value}} je vyšší než maximálně povolená {{label}} {{max}}.",
     "invalidInput": "Toto pole má neplatný vstup.",

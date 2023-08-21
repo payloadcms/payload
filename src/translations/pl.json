@@ -282,6 +282,7 @@
   "validation": {
     "emailAddress": "Wprowadź poprawny adres email.",
     "enterNumber": "Wprowadź poprawny numer telefonu.",
+    "exceededLimit": "Wprowadziłeś {{value}} pozycji, ale limit wynosi {{max}}.",
     "fieldHasNo": "To pole nie posiada {{label}}",
     "greaterThanMax": "{{value}} jest większe niż maksymalnie dozwolony {{label}} wynoszący {{max}}.",
     "invalidInput": "To pole zawiera nieprawidłowe dane.",

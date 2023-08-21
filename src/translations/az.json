@@ -283,6 +283,7 @@
   "validation": {
     "emailAddress": "Xahiş edirik doğru elektron poçt ünvanını daxil edin.",
     "enterNumber": "Xahiş edirik doğru nömrəni daxil edin.",
+    "exceededLimit": "Siz {{value}} element daxil etdiniz, lakin limit {{max}}-dir.",
     "fieldHasNo": "Bu sahədə heç bir {{label}} yoxdur",
     "greaterThanMax": "{{value}} icazə verilən maksimal {{label}} olan {{max}}-dən böyükdür.",
     "invalidInput": "Bu sahə yanlış daxil edilmişdir.",

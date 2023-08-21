@@ -282,6 +282,7 @@
   "validation": {
     "emailAddress": "กรุณาระบุอีเมลที่ถูกต้อง",
     "enterNumber": "กรุณาระบุตัวเลขที่ถูกต้อง",
+    "exceededLimit": "คุณได้ป้อน {{value}} รายการ แต่จำกัดที่ {{max}}",
     "fieldHasNo": "ช่องนี้ไม่มี {{label}}",
     "greaterThanMax": "{{value}} มากกว่าค่าสูงสุดที่อนุญาตของ {{label}} ซึ่งคือ {{max}}.",
     "invalidInput": "ข้อมูลไม่ถูกต้อง",

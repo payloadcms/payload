@@ -282,6 +282,7 @@
   "validation": {
     "emailAddress": "Molim unestie valjanu email adresu.",
     "enterNumber": "Molim unesite valjani broj.",
+    "exceededLimit": "Unijeli ste {{value}} stavke, ali je limit {{max}}.",
     "fieldHasNo": "Ovo polje nema {{label}}",
     "greaterThanMax": "{{value}} exceeds the maximum allowable {{label}} limit of {{max}}.",
     "invalidInput": "Ovo polje ima nevaljan unos.",

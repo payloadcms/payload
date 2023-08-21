@@ -282,6 +282,7 @@
   "validation": {
     "emailAddress": "يرجى إدخال عنوان بريد إلكتروني صحيح.",
     "enterNumber": "يرجى إدخال رقم صحيح.",
+    "exceededLimit": "لقد أدخلت {{value}} عناصر، ولكن الحد الأقصى هو {{max}}.",
     "fieldHasNo": "هذا الحقل ليس لديه {{label}}",
     "greaterThanMax": "{{value}} أكبر من الحد الأقصى المسموح به {{label}} الذي يبلغ {{max}}.",
     "invalidInput": "هذا الحقل لديه إدخال غير صالح.",

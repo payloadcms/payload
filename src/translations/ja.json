@@ -282,6 +282,7 @@
   "validation": {
     "emailAddress": "有効なメールアドレスを入力してください。",
     "enterNumber": "有効な数値を入力してください。",
+    "exceededLimit": "あなたは{{value}}個のアイテムを入力しましたが、上限は{{max}}個です。",
     "fieldHasNo": "{{label}} が必要です。",
     "greaterThanMax": "{{value}}は許容最大{{label}}の{{max}}を超えています。",
     "invalidInput": "無効な入力値です。",
