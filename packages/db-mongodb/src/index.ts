@@ -37,6 +37,8 @@ export interface Args {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
     useFacet?: boolean;
   };
+  /** Set to false to disable auto-pluralization of collection names, Defaults to true */
+  autoPluralization?: boolean;
 }
 
 export type MongooseAdapter = DatabaseAdapter &
@@ -59,6 +61,7 @@ export function mongooseAdapter({
   url,
   connectOptions,
   migrationDir,
+  autoPluralization = true,
 }: Args): MongooseAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
     mongoose.set('strictQuery', false);
@@ -71,6 +74,7 @@ export function mongooseAdapter({
       sessions: {},
       url,
       connectOptions: connectOptions || {},
+      autoPluralization,
       globals: undefined,
       collections: {},
       versions: {},
