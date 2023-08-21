@@ -756,6 +756,9 @@
         "noLabel": {
           "type": "string"
         },
+        "noOptions": {
+          "type": "string"
+        },
         "noResults": {
           "type": "string"
         },
@@ -1118,6 +1121,9 @@
           "type": "string"
         },
         "enterNumber": {
+          "type": "string"
+        },
+        "limitReached": {
           "type": "string"
         },
         "fieldHasNo": {
