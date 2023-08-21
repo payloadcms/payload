@@ -81,6 +81,8 @@
   --color-error-900: rgb(51, 22, 24);
   --color-error-950: rgb(25, 11, 12);
 
+  --theme-border-color: var(--theme-elevation-150);
+
   --theme-success-50: var(--color-success-50);
   --theme-success-100: var(--color-success-100);
   --theme-success-150: var(--color-success-150);
@@ -165,6 +167,8 @@
 }
 
 html[data-theme=dark] {
+  --theme-border-color: var(--theme-elevation-150);
+
   --theme-elevation-0: var(--color-base-900);
   --theme-elevation-50: var(--color-base-850);
   --theme-elevation-100: var(--color-base-800);

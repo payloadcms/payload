@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
@@ -22,6 +22,7 @@ import Label from '../../forms/Label';
 import type { Translation } from '../../../../translations/type';
 import { LoadingOverlayToggle } from '../../elements/Loading';
 import { formatDate } from '../../../utilities/formatDate';
+import { useAuth } from '../../utilities/Auth';
 
 import './index.scss';
 
@@ -37,7 +38,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
     initialState,
     isLoading,
     action,
-    onSave,
+    onSave: onSaveFromProps,
   } = props;
 
   const {
@@ -51,12 +52,20 @@ const DefaultAccount: React.FC<Props> = (props) => {
     auth,
   } = collection;
 
+  const { refreshCookieAsync } = useAuth();
   const { admin: { dateFormat }, routes: { admin } } = useConfig();
   const { t, i18n } = useTranslation('authentication');
 
   const languageOptions = Object.entries(i18n.options.resources).map(([language, resource]) => (
     { label: (resource as Translation).general.thisLanguage, value: language }
   ));
+
+  const onSave = useCallback(async () => {
+    await refreshCookieAsync();
+    if (typeof onSaveFromProps === 'function') {
+      onSaveFromProps();
+    }
+  }, [onSaveFromProps, refreshCookieAsync]);
 
   const classes = [
     baseClass,
@@ -69,7 +78,6 @@ const DefaultAccount: React.FC<Props> = (props) => {
         show={isLoading}
         type="withoutNav"
       />
-
       <div className={classes}>
         {!isLoading && (
           <OperationContext.Provider value="update">
@@ -122,9 +130,11 @@ const DefaultAccount: React.FC<Props> = (props) => {
                     <h3>{t('general:payloadSettings')}</h3>
                     <div className={`${baseClass}__language`}>
                       <Label
+                        htmlFor="language-select"
                         label={t('general:language')}
                       />
                       <ReactSelect
+                        inputId="language-select"
                         value={languageOptions.find((language) => (language.value === i18n.language))}
                         options={languageOptions}
                         onChange={({ value }) => (i18n.changeLanguage(value))}
@@ -201,7 +211,6 @@ const DefaultAccount: React.FC<Props> = (props) => {
                           )}
                         </React.Fragment>
                       )}
-
                     </ul>
                   </div>
                 </div>

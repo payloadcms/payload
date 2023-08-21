@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
 import { randomBytes } from 'crypto';
+import mongoose from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers';
 import type { Relation } from './config';
 import config, { customIdNumberSlug, customIdSlug, errorOnHookSlug, pointSlug, relationSlug, slug } from './config';
@@ -60,6 +60,22 @@ describe('collections-rest', () => {
       expect(status).toEqual(200);
       expect(result.totalDocs).toEqual(1);
       expect(result.docs[0].id).toEqual(post1.id);
+    });
+
+    it('should find with pagination false', async () => {
+      const post1 = await createPost();
+      const post2 = await createPost();
+
+      const { docs, totalDocs } = await payload.find({
+        collection: slug,
+        pagination: false,
+      });
+
+      const expectedDocs = [post1, post2];
+      expect(docs).toHaveLength(expectedDocs.length);
+      expect(docs).toEqual(expect.arrayContaining(expectedDocs));
+
+      expect(totalDocs).toEqual(2);
     });
 
     it('should update existing', async () => {
@@ -309,6 +325,22 @@ describe('collections-rest', () => {
           const { doc } = await client.create({ slug: customIdNumberSlug, data: { id: customId, name: 'custom-id-number-name' } });
           const { doc: updatedDoc } = await client.update({ slug: customIdNumberSlug, id: doc.id, data: { name: 'updated' } });
           expect(updatedDoc.name).toEqual('updated');
+        });
+
+        it('should allow querying by in', async () => {
+          const id = 98234698237;
+          await client.create({ slug: customIdNumberSlug, data: { id, name: 'query using in operator' } });
+
+          const { result: { docs } } = await client.find({
+            slug: customIdNumberSlug,
+            query: {
+              id: {
+                in: `${id}, ${2349856723948764}`,
+              },
+            },
+          });
+
+          expect(docs).toHaveLength(1);
         });
       });
     });
@@ -632,6 +664,22 @@ describe('collections-rest', () => {
         expect(result.totalDocs).toEqual(1);
       });
 
+      it('like - cyrillic characters in multiple words', async () => {
+        const post1 = await createPost({ title: 'привет, это тест полезной нагрузки' });
+
+        const { status, result } = await client.find<Post>({
+          query: {
+            title: {
+              like: 'привет нагрузки',
+            },
+          },
+        });
+
+        expect(status).toEqual(200);
+        expect(result.docs).toEqual([post1]);
+        expect(result.totalDocs).toEqual(1);
+      });
+
       it('like - partial word match', async () => {
         const post = await createPost({ title: 'separate words should partially match' });
 
@@ -781,7 +829,131 @@ describe('collections-rest', () => {
           expect(status).toEqual(200);
           expect(result.docs).toHaveLength(0);
         });
+
+        it('should sort find results by nearest distance', async () => {
+          // creating twice as many records as we are querying to get a random sample
+          await mapAsync([...Array(10)], async () => {
+            // setTimeout used to randomize the creation timestamp
+            setTimeout(async () => {
+              await payload.create({
+                collection: pointSlug,
+                data: {
+                  // only randomize longitude to make distance comparison easy
+                  point: [Math.random(), 0],
+                },
+              });
+            }, Math.random());
+          });
+
+          const { result } = await client.find({
+            slug: pointSlug,
+            query: {
+              // querying large enough range to include all docs
+              point: { near: '0, 0, 100000, 0' },
+            },
+            limit: 5,
+          });
+          const { docs } = result;
+          let previous = 0;
+          docs.forEach((({ point: coordinates }) => {
+            // the next document point should always be greater than the one before
+            expect(previous).toBeLessThanOrEqual(coordinates[0]);
+            [previous] = coordinates;
+          }));
+        });
       });
+
+      describe('within', () => {
+        type Point = [number, number];
+        const polygon: Point[] = [
+          [9.0, 19.0], // bottom-left
+          [9.0, 21.0], // top-left
+          [11.0, 21.0], // top-right
+          [11.0, 19.0], // bottom-right
+          [9.0, 19.0], // back to starting point to close the polygon
+        ];
+        it('should return a document with the point inside the polygon', async () => {
+          // There should be 1 total points document populated by default with the point [10, 20]
+          const { status, result } = await client.find({
+            slug: pointSlug,
+            query: {
+              point: {
+                within: {
+                  type: 'Polygon',
+                  coordinates: [polygon],
+                },
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toHaveLength(1);
+        });
+
+        it('should not return a document with the point outside a smaller polygon', async () => {
+          const { status, result } = await client.find({
+            slug: pointSlug,
+            query: {
+              point: {
+                within: {
+                  type: 'Polygon',
+                  coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
+                },
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toHaveLength(0);
+        });
+      });
+
+      describe('intersects', () => {
+        type Point = [number, number];
+        const polygon: Point[] = [
+          [9.0, 19.0], // bottom-left
+          [9.0, 21.0], // top-left
+          [11.0, 21.0], // top-right
+          [11.0, 19.0], // bottom-right
+          [9.0, 19.0], // back to starting point to close the polygon
+        ];
+
+        it('should return a document with the point intersecting the polygon', async () => {
+          // There should be 1 total points document populated by default with the point [10, 20]
+          const { status, result } = await client.find({
+            slug: pointSlug,
+            query: {
+              point: {
+                intersects: {
+                  type: 'Polygon',
+                  coordinates: [polygon],
+                },
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toHaveLength(1);
+        });
+
+        it('should not return a document with the point not intersecting a smaller polygon', async () => {
+          const { status, result } = await client.find({
+            slug: pointSlug,
+            query: {
+              point: {
+                intersects: {
+                  type: 'Polygon',
+                  coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
+                },
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toHaveLength(0);
+        });
+      });
+
 
       it('or', async () => {
         const post1 = await createPost({ title: 'post1' });

@@ -3,7 +3,6 @@ import { expect, test } from '@playwright/test';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { login } from '../helpers';
 import { restrictedVersionsSlug, readOnlySlug, restrictedSlug, slug, docLevelAccessSlug, unrestrictedSlug } from './config';
 import type { ReadOnlyCollection, RestrictedVersion } from './payload-types';
 import wait from '../../src/utilities/wait';
@@ -37,8 +36,6 @@ describe('access control', () => {
 
     const context = await browser.newContext();
     page = await context.newPage();
-
-    await login({ page, serverURL });
   });
 
   test('field without read access should not show', async () => {
@@ -209,7 +206,7 @@ describe('access control', () => {
       const duplicateAction = page.locator('.collection-edit__collection-actions >> li').last();
       await expect(duplicateAction).toContainText('Duplicate');
 
-      await page.locator('#field-approvedForRemoval + button').click();
+      await page.locator('#field-approvedForRemoval').check();
       await page.locator('#action-save').click();
 
       const deleteAction = page.locator('.collection-edit__collection-actions >> li').last();

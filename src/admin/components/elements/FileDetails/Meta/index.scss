@@ -8,7 +8,7 @@
       font-weight: 600;
       text-decoration: none;
 
-      &:hover {
+      &:hover, &:focus-visible {
         text-decoration: underline;
       }
     }
@@ -19,5 +19,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  &__edit {
+    position: relative;
   }
 }

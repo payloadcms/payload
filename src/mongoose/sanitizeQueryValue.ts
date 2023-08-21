@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import { createArrayFromCommaDelineated } from './createArrayFromCommaDelineated';
-import wordBoundariesRegex from '../utilities/wordBoundariesRegex';
 import { Field, TabAsField } from '../fields/config/types';
 
 type SanitizeQueryValueArgs = {
@@ -39,7 +38,15 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
     if (val.toLowerCase() === 'false') formattedValue = false;
   }
 
-  if (field.type === 'number' && typeof val === 'string') {
+  if (['all', 'not_in', 'in'].includes(operator) && typeof formattedValue === 'string') {
+    formattedValue = createArrayFromCommaDelineated(formattedValue);
+
+    if (field.type === 'number') {
+      formattedValue = formattedValue.map((arrayVal) => parseFloat(arrayVal));
+    }
+  }
+
+  if (field.type === 'number' && typeof formattedValue === 'string') {
     formattedValue = Number(val);
   }
 
@@ -49,6 +56,7 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
       return undefined;
     }
   }
+
 
   if (['relationship', 'upload'].includes(field.type)) {
     if (val === 'null') {
@@ -87,7 +95,7 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
       [lng, lat, maxDistance, minDistance] = createArrayFromCommaDelineated(formattedValue);
     }
 
-    if (!lng || !lat || (!maxDistance && !minDistance)) {
+    if (lng == null || lat == null || (maxDistance == null && minDistance == null)) {
       formattedValue = undefined;
     } else {
       formattedValue = {
@@ -99,18 +107,15 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
     }
   }
 
-  if (['all', 'not_in', 'in'].includes(operator) && typeof formattedValue === 'string') {
-    formattedValue = createArrayFromCommaDelineated(formattedValue);
+  if (operator === 'within' || operator === 'intersects') {
+    formattedValue = {
+      $geometry: formattedValue,
+    };
   }
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
     if (operator === 'contains') {
       formattedValue = { $regex: formattedValue, $options: 'i' };
-    }
-
-    if (operator === 'like' && typeof formattedValue === 'string') {
-      const $regex = wordBoundariesRegex(formattedValue);
-      formattedValue = { $regex };
     }
   }
 

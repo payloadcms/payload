@@ -861,7 +861,7 @@ type User {
   id: String
   updatedAt: DateTime
   createdAt: DateTime
-  email: EmailAddress
+  email: EmailAddress!
   resetPasswordToken: String
   resetPasswordExpiration: DateTime
   salt: String
@@ -929,7 +929,6 @@ input User_email_operator {
   in: [EmailAddress]
   not_in: [EmailAddress]
   all: [EmailAddress]
-  exists: Boolean
 }
 
 input User_id_operator {
@@ -1855,7 +1854,7 @@ input mutationCollection2Update_NestedGroup_MetaInput {
 input mutationUserInput {
   updatedAt: String
   createdAt: String
-  email: String
+  email: String!
   resetPasswordToken: String
   resetPasswordExpiration: String
   salt: String

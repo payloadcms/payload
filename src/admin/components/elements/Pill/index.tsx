@@ -44,6 +44,11 @@ const StaticPill: React.FC<Props> = (props) => {
     draggable,
     children,
     elementProps,
+    rounded,
+    'aria-label': ariaLabel,
+    'aria-expanded': ariaExpanded,
+    'aria-controls': ariaControls,
+    'aria-checked': ariaChecked,
   } = props;
 
   const classes = [
@@ -55,6 +60,7 @@ const StaticPill: React.FC<Props> = (props) => {
     icon && `${baseClass}--has-icon`,
     icon && `${baseClass}--align-icon-${alignIcon}`,
     draggable && `${baseClass}--draggable`,
+    rounded && `${baseClass}--rounded`,
   ].filter(Boolean).join(' ');
 
   let Element: ElementType | React.FC<RenderedTypeProps> = 'div';
@@ -65,6 +71,10 @@ const StaticPill: React.FC<Props> = (props) => {
   return (
     <Element
       {...elementProps}
+      aria-label={ariaLabel}
+      aria-expanded={ariaExpanded}
+      aria-controls={ariaControls}
+      aria-checked={ariaChecked}
       className={classes}
       type={Element === 'button' ? 'button' : undefined}
       to={to || undefined}

@@ -1,0 +1,65 @@
+@import '../../_css/common';
+
+.orders {
+  margin-bottom: var(--block-padding);
+}
+
+.form {
+  margin-bottom: var(--base);
+}
+
+.success,
+.error {
+  margin-bottom: 15px;
+}
+
+.success {
+  color: green;
+}
+
+.error {
+  color: red;
+}
+
+.noOrders {
+  font-weight: 600;
+}
+
+.ordersList {
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-wrap: 1;
+  align-items: center;
+  gap: calc(var(--base) / 2);
+  text-decoration: none;
+}
+
+.itemContent {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--base) / 2);
+  flex-grow: 1;
+}
+
+.itemTitle {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.itemMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  & > * {
+    margin: 0;
+  }
+}
+
+.button {
+  flex-shrink: 0;
+}

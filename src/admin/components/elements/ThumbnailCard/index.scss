@@ -1,7 +1,9 @@
 @import '../../../scss/styles.scss';
 
 .thumbnail-card {
+  @include btn-reset;
   @include shadow;
+  width: 100%;
   background: var(--theme-input-bg);
 
   &__label {

@@ -2,11 +2,9 @@
 import merge from 'deepmerge';
 import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
 import { Operation } from '../../../types';
-import { PayloadRequest } from '../../../express/types';
-import getValueWithDefault from '../../getDefaultValue';
+import { PayloadRequest, RequestContext } from '../../../express/types';
 import { traverseFields } from './traverseFields';
 import { getExistingRowDoc } from './getExistingRowDoc';
-import { cloneDataFromOriginalDoc } from './cloneDataFromOriginalDoc';
 
 type Args = {
   data: Record<string, unknown>
@@ -23,12 +21,11 @@ type Args = {
   siblingDoc: Record<string, unknown>
   siblingDocWithLocales?: Record<string, unknown>
   skipValidation: boolean
+  context: RequestContext
 }
 
 // This function is responsible for the following actions, in order:
 // - Run condition
-// - Merge original document data into incoming data
-// - Compute default values for undefined fields
 // - Execute field hooks
 // - Validate data
 // - Transform data for storage
@@ -49,6 +46,7 @@ export const promise = async ({
   siblingDoc,
   siblingDocWithLocales,
   skipValidation,
+  context,
 }: Args): Promise<void> => {
   const passesCondition = (field.admin?.condition) ? field.admin.condition(data, siblingData, { user: req.user }) : true;
   let skipValidationFromHere = skipValidation || !passesCondition;
@@ -57,26 +55,6 @@ export const promise = async ({
   const operationLocale = req.locale || defaultLocale;
 
   if (fieldAffectsData(field)) {
-    if (typeof siblingData[field.name] === 'undefined') {
-      // If no incoming data, but existing document data is found, merge it in
-      if (typeof siblingDoc[field.name] !== 'undefined') {
-        if (field.localized && typeof siblingDocWithLocales[field.name] === 'object' && siblingDocWithLocales[field.name] !== null) {
-          siblingData[field.name] = cloneDataFromOriginalDoc(siblingDocWithLocales[field.name][req.locale]);
-        } else {
-          siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name]);
-        }
-
-        // Otherwise compute default value
-      } else if (typeof field.defaultValue !== 'undefined') {
-        siblingData[field.name] = await getValueWithDefault({
-          value: siblingData[field.name],
-          defaultValue: field.defaultValue,
-          locale: req.locale,
-          user: req.user,
-        });
-      }
-    }
-
     // skip validation if the field is localized and the incoming data is null
     if (field.localized && operationLocale !== defaultLocale) {
       if (['array', 'blocks'].includes(field.type) && siblingData[field.name] === null) {
@@ -96,6 +74,7 @@ export const promise = async ({
           siblingData,
           operation,
           req,
+          context,
         });
 
         if (hookedValue !== undefined) {
@@ -208,6 +187,7 @@ export const promise = async ({
         siblingDoc: siblingDoc[field.name] as Record<string, unknown>,
         siblingDocWithLocales: siblingDocWithLocales[field.name] as Record<string, unknown>,
         skipValidation: skipValidationFromHere,
+        context,
       });
 
       break;
@@ -234,6 +214,7 @@ export const promise = async ({
             siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
             siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
             skipValidation: skipValidationFromHere,
+            context,
           }));
         });
 
@@ -267,6 +248,7 @@ export const promise = async ({
               siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
               siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
               skipValidation: skipValidationFromHere,
+              context,
             }));
           }
         });
@@ -294,6 +276,7 @@ export const promise = async ({
         siblingDoc,
         siblingDocWithLocales,
         skipValidation: skipValidationFromHere,
+        context,
       });
 
       break;
@@ -331,6 +314,7 @@ export const promise = async ({
         siblingDoc: tabSiblingDoc,
         siblingDocWithLocales: tabSiblingDocWithLocales,
         skipValidation: skipValidationFromHere,
+        context,
       });
 
       break;
@@ -352,6 +336,7 @@ export const promise = async ({
         siblingDoc,
         siblingDocWithLocales,
         skipValidation: skipValidationFromHere,
+        context,
       });
 
       break;

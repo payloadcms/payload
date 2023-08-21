@@ -24,7 +24,7 @@ const Dashboard: React.FC<Props> = (props) => {
   } = props;
 
   const { push } = useHistory();
-  const { i18n } = useTranslation('general');
+  const { t, i18n } = useTranslation('general');
 
   const {
     routes: {
@@ -77,12 +77,14 @@ const Dashboard: React.FC<Props> = (props) => {
               <ul className={`${baseClass}__card-list`}>
                 {entities.map(({ entity, type }, entityIndex) => {
                   let title: string;
+                  let buttonAriaLabel: string;
                   let createHREF: string;
                   let onClick: () => void;
                   let hasCreatePermission: boolean;
 
                   if (type === EntityType.collection) {
                     title = getTranslation(entity.labels.plural, i18n);
+                    buttonAriaLabel = t('showAllLabel', { label: title });
                     onClick = () => push({ pathname: `${admin}/collections/${entity.slug}` });
                     createHREF = `${admin}/collections/${entity.slug}/create`;
                     hasCreatePermission = permissions?.collections?.[entity.slug]?.create?.permission;
@@ -90,6 +92,7 @@ const Dashboard: React.FC<Props> = (props) => {
 
                   if (type === EntityType.global) {
                     title = getTranslation(entity.label, i18n);
+                    buttonAriaLabel = t('editLabel', { label: getTranslation(entity.label, i18n) });
                     onClick = () => push({ pathname: `${admin}/globals/${entity.slug}` });
                   }
 
@@ -97,8 +100,10 @@ const Dashboard: React.FC<Props> = (props) => {
                     <li key={entityIndex}>
                       <Card
                         title={title}
+                        titleAs="h3"
                         id={`card-${entity.slug}`}
                         onClick={onClick}
+                        buttonAriaLabel={buttonAriaLabel}
                         actions={(hasCreatePermission && type === EntityType.collection) ? (
                           <Button
                             el="link"
@@ -107,6 +112,7 @@ const Dashboard: React.FC<Props> = (props) => {
                             round
                             buttonStyle="icon-label"
                             iconStyle="with-border"
+                            aria-label={t('createNewLabel', { label: getTranslation(entity.labels.singular, i18n) })}
                           />
                         ) : undefined}
                       />

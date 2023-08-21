@@ -98,6 +98,7 @@ const collectionSchema = joi.object().keys({
     afterRead: joi.array().items(joi.func()),
     beforeDelete: joi.array().items(joi.func()),
     afterDelete: joi.array().items(joi.func()),
+    afterOperation: joi.array().items(joi.func()),
     beforeLogin: joi.array().items(joi.func()),
     afterLogin: joi.array().items(joi.func()),
     afterLogout: joi.array().items(joi.func()),

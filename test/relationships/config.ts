@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 
 const openAccess = {
   create: () => true,
@@ -41,7 +41,7 @@ export const defaultAccessRelSlug = 'strict-access';
 export const chainedRelSlug = 'chained-relation';
 export const customIdSlug = 'custom-id-relation';
 export const customIdNumberSlug = 'custom-id-number-relation';
-export default buildConfig({
+export default buildConfigWithDefaults({
   collections: [
     {
       slug,
@@ -189,6 +189,12 @@ export default buildConfig({
         {
           name: 'name',
           type: 'text',
+        },
+        {
+          name: 'movies',
+          type: 'relationship',
+          relationTo: 'movies',
+          hasMany: true,
         },
       ],
     },

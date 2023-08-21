@@ -66,6 +66,15 @@ export default joi.object({
       ),
     logoutRoute: joi.string(),
     inactivityRoute: joi.string(),
+    autoLogin: joi.alternatives()
+      .try(
+        joi.object().keys({
+          email: joi.string(),
+          password: joi.string(),
+          prefillOnly: joi.boolean(),
+        }),
+        joi.boolean(),
+      ),
     components: joi.object()
       .keys({
         routes: joi.array()
@@ -99,6 +108,11 @@ export default joi.object({
         }),
       }),
     webpack: joi.func(),
+    bundler: {
+      dev: joi.func(),
+      build: joi.func(),
+      serve: joi.func(),
+    },
   }),
   email: joi.object(),
   i18n: joi.object(),

@@ -3,7 +3,7 @@ import { Response } from 'express';
 import { Collection } from '../../collections/config/types';
 import { APIError } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
-import { fieldAffectsData } from '../../fields/config/types';
+import { getFieldsToSign } from './getFieldsToSign';
 import { PayloadRequest } from '../../express/types';
 import { authenticateLocalStrategy } from '../strategies/local/authenticate';
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash';
@@ -23,6 +23,7 @@ export type Arguments = {
   req: PayloadRequest
   overrideAccess?: boolean
   res?: Response
+  depth?: number
 }
 
 async function resetPassword(args: Arguments): Promise<Result> {
@@ -45,6 +46,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
     },
     overrideAccess,
     data,
+    depth,
   } = args;
 
   // /////////////////////////////////////
@@ -57,7 +59,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
   }).lean();
 
   user = JSON.parse(JSON.stringify(user));
-  user = sanitizeInternalFields(user);
+  user = user ? sanitizeInternalFields(user) : null;
 
   if (!user) throw new APIError('Token is either invalid or has expired.');
 
@@ -81,18 +83,10 @@ async function resetPassword(args: Arguments): Promise<Result> {
 
   await authenticateLocalStrategy({ password: data.password, doc });
 
-  const fieldsToSign = collectionConfig.fields.reduce((signedFields, field) => {
-    if (fieldAffectsData(field) && field.saveToJWT) {
-      return {
-        ...signedFields,
-        [field.name]: user[field.name],
-      };
-    }
-    return signedFields;
-  }, {
+  const fieldsToSign = getFieldsToSign({
+    collectionConfig,
+    user,
     email: user.email,
-    id: user.id,
-    collection: collectionConfig.slug,
   });
 
   const token = jwt.sign(
@@ -119,8 +113,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
     args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
   }
 
-  const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess });
-
+  const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess, depth });
   return {
     token: collectionConfig.auth.removeTokenFromResponses ? undefined : token,
     user: fullUser,

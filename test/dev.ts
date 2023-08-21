@@ -25,6 +25,10 @@ process.env.PAYLOAD_CONFIG_PATH = configPath;
 
 process.env.PAYLOAD_DROP_DATABASE = 'true';
 
+if (process.argv.includes('--no-auto-login') && process.env.NODE_ENV !== 'production') {
+  process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN = 'true';
+}
+
 const expressApp = express();
 
 const startDev = async () => {

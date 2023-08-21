@@ -135,7 +135,6 @@ const TabsFields: CollectionConfig = {
         },
         {
           name: 'namedTabWithDefaultValue',
-          label: 'Tab with Default Value',
           description: 'This tab has a name, which should namespace the contained fields.',
           fields: [
             {
@@ -159,7 +158,6 @@ const TabsFields: CollectionConfig = {
         },
         {
           name: 'accessControlTab',
-          label: 'Access Control Tab',
           access: {
             read: () => false,
           },

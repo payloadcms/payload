@@ -11,6 +11,13 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
   provides for the ability to easily relate documents together.
 </Banner>
 
+<LightDarkImage 
+  srcLight='https://payloadcms.com/images/docs/fields/relationship.png'
+  srcDark='https://payloadcms.com/images/docs/fields/relationship-dark.png'
+  alt='Shows a relationship field in the Payload admin panel'
+  caption='Admin panel screenshot of a Relationship field'
+/>
+
 **Example uses:**
 
 - To add `Product` documents to an `Order` document
@@ -25,8 +32,8 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 | **`relationTo`** \* | Provide one or many collection `slug`s to be able to assign relationships to.                                                                                                                       |
 | **`filterOptions`** | A query to filter which options appear in the UI and validate against. [More](#filtering-relationship-options).                                                                                     |
 | **`hasMany`**       | Boolean when, if set to `true`, allows this field to have many relations instead of only one.                                                                                                       |
-| **`min`**           | A number for the fewest allowed items during validation when a value is present. Used with `hasMany`.                                                                                               |
-| **`max`**           | A number for the most allowed items during validation when a value is present. Used with `hasMany`.                                                                                                 |
+| **`minRows`**       | A number for the fewest allowed items during validation when a value is present. Used with `hasMany`.                                                                                               |
+| **`maxRows`**       | A number for the most allowed items during validation when a value is present. Used with `hasMany`.                                                                                                 |
 | **`maxDepth`**      | Sets a number limit on iterations of related documents to populate when queried. [Depth](/docs/getting-started/concepts#depth)                                                                      |
 | **`label`**         | Text used as a field label in the Admin panel or an object with keys for each language.                                                                                                             |
 | **`unique`**        | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                        |
@@ -47,8 +54,8 @@ _\* An asterisk denotes that a property is required._
 <Banner type="success">
   <strong>Tip:</strong>
   <br />
-  The <a href="/docs/getting-started/concepts#depth">Depth</a> parameter can be
-  used to automatically populate related documents that are returned by the API.
+  The [Depth](/docs/getting-started/concepts#depth) parameter can be used to
+  automatically populate related documents that are returned by the API.
 </Banner>
 
 ### Admin config
@@ -67,7 +74,7 @@ Set to `false` if you'd like to disable the ability to create new documents from
 
 Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both for validating input and filtering available relationships in the UI.
 
-The `filterOptions` property can either be a `Where` query directly, or a function that returns one. When using a function, it will be called with an argument object with the following properties:
+The `filterOptions` property can either be a `Where` query directly, or a function (synchronous or asynchronous) that returns one. When using a function, it will be called with an argument object containing the following properties:
 
 | Property      | Description                                                                          |
 | ------------- | ------------------------------------------------------------------------------------ |

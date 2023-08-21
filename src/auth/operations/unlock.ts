@@ -43,6 +43,10 @@ async function unlock(args: Args): Promise<boolean> {
   // Unlock
   // /////////////////////////////////////
 
+  if (!data.email) {
+    throw new APIError('Missing email.');
+  }
+
   const user = await Model.findOne({ email: data.email.toLowerCase() });
 
   if (!user) return null;

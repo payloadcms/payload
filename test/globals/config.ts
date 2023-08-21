@@ -1,5 +1,5 @@
 import { devUser } from '../credentials';
-import { buildConfig } from '../buildConfig';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 
 export const slug = 'global';
 export const arraySlug = 'array';
@@ -16,7 +16,7 @@ const access = {
   update: () => true,
 };
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   localization: {
     locales: [englishLocale, spanishLocale],
     defaultLocale: englishLocale,

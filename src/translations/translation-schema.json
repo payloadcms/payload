@@ -252,7 +252,7 @@
         "emailOrPasswordIncorrect": {
           "type": "string"
         },
-        "followingFieldsInvalid_many": {
+        "followingFieldsInvalid_other": {
           "type": "string"
         },
         "followingFieldsInvalid_one": {
@@ -344,7 +344,7 @@
         "deletingFile",
         "deletingTitle",
         "emailOrPasswordIncorrect",
-        "followingFieldsInvalid_many",
+        "followingFieldsInvalid_other",
         "followingFieldsInvalid_one",
         "incorrectCollection",
         "invalidFileType",
@@ -522,9 +522,11 @@
         "openInNewTab",
         "textToDisplay",
         "addLabel",
+        "addLink",
         "addNew",
         "addNewLabel",
         "addRelationship",
+        "addUpload",
         "blockType",
         "chooseFromExisting",
         "chooseLabel",
@@ -539,12 +541,14 @@
         "passwordsDoNotMatch",
         "relatedDocument",
         "relationTo",
+        "removeRelationship",
         "removeUpload",
         "saveChanges",
         "searchForBlock",
         "selectExistingLabel",
         "selectFieldsToEdit",
         "showAll",
+        "swapRelationship",
         "swapUpload",
         "toggleBlock",
         "uploadNewLabel"
@@ -659,6 +663,9 @@
         "descending": {
           "type": "string"
         },
+        "deselectAllRows": {
+          "type": "string"
+        },
         "duplicate": {
           "type": "string"
         },
@@ -690,6 +697,12 @@
           "type": "string"
         },
         "enterAValue": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "errors": {
           "type": "string"
         },
         "fallbackToDefaultLocale": {
@@ -741,6 +754,9 @@
           "type": "string"
         },
         "noLabel": {
+          "type": "string"
+        },
+        "noOptions": {
           "type": "string"
         },
         "noResults": {
@@ -800,16 +816,25 @@
         "selectAll": {
           "type": "string"
         },
+        "selectAllRows": {
+          "type": "string"
+        },
         "selectValue": {
           "type": "string"
         },
         "selectedCount": {
           "type": "string"
         },
+        "showAllLabel": {
+          "type": "string"
+        },
         "sorryNotFound": {
           "type": "string"
         },
         "sort": {
+          "type": "string"
+        },
+        "sortByLabelDirection": {
           "type": "string"
         },
         "stayOnThisPage": {
@@ -863,6 +888,9 @@
         "users": {
           "type": "string"
         },
+        "value": {
+          "type": "string"
+        },
         "welcome": {
           "type": "string"
         }
@@ -881,6 +909,7 @@
         "backToDashboard",
         "cancel",
         "changesNotSaved",
+        "close",
         "collections",
         "columnToSort",
         "columns",
@@ -904,6 +933,7 @@
         "descending",
         "duplicate",
         "duplicateWithoutSaving",
+        "edit",
         "editLabel",
         "editing",
         "editingLabel_many",
@@ -912,6 +942,9 @@
         "email",
         "emailAddress",
         "enterAValue",
+        "error",
+        "errors",
+        "fallbackToDefaultLocale",
         "filter",
         "filterWhere",
         "filters",
@@ -964,8 +997,11 @@
         "updatedAt",
         "updatedCountSuccessfully",
         "updatedSuccessfully",
+        "updating",
+        "uploading",
         "user",
         "users",
+        "value",
         "welcome"
       ]
     },
@@ -976,37 +1012,37 @@
         "equals": {
           "type": "string"
         },
-        "isNotEqualTo":{
+        "isNotEqualTo": {
           "type": "string"
         },
         "isIn": {
           "type": "string"
         },
-        "isNotIn":{
+        "isNotIn": {
           "type": "string"
         },
         "exists": {
           "type": "string"
         },
-        "isGreaterThan":{
+        "isGreaterThan": {
           "type": "string"
         },
         "isLessThan": {
           "type": "string"
         },
-        "isLessThanOrEqualTo":{
+        "isLessThanOrEqualTo": {
           "type": "string"
         },
         "isGreaterThanOrEqualTo": {
           "type": "string"
         },
-        "near":{
+        "near": {
           "type": "string"
         },
         "isLike": {
           "type": "string"
         },
-        "contains":{
+        "contains": {
           "type": "string"
         }
       },
@@ -1085,6 +1121,9 @@
           "type": "string"
         },
         "enterNumber": {
+          "type": "string"
+        },
+        "limitReached": {
           "type": "string"
         },
         "fieldHasNo": {

@@ -32,7 +32,9 @@ async function sendVerificationEmail(args: Args): Promise<void> {
   } = args;
 
   if (!disableEmail) {
-    const verificationURL = `${config.serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`;
+    const serverURL = (config.serverURL !== null && config.serverURL !== '') ? config.serverURL : `${req.protocol}://${req.get('host')}`;
+
+    const verificationURL = `${serverURL}${config.routes.admin}/${collectionConfig.slug}/verify/${token}`;
 
     let html = `${req.t('authentication:newAccountCreated', { interpolation: { escapeValue: false }, serverURL: config.serverURL, verificationURL })}`;
 

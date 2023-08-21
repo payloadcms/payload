@@ -157,7 +157,7 @@
       font-weight: bold;
       text-decoration: none;
 
-      &:hover {
+      &:hover, &:focus-visible {
         text-decoration: underline;
       }
     }

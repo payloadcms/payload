@@ -19,9 +19,10 @@ export const Collapsible: React.FC<Props> = ({
   initCollapsed,
   dragHandleProps,
   actions,
+  collapsibleStyle = 'default',
 }) => {
   const [collapsedLocal, setCollapsedLocal] = useState(Boolean(initCollapsed));
-  const [hovered, setHovered] = useState(false);
+  const [hoveringToggle, setHoveringToggle] = useState(false);
   const isNested = useCollapsible();
   const { t } = useTranslation('fields');
 
@@ -34,14 +35,15 @@ export const Collapsible: React.FC<Props> = ({
       dragHandleProps && `${baseClass}--has-drag-handle`,
       collapsed && `${baseClass}--collapsed`,
       isNested && `${baseClass}--nested`,
-      hovered && `${baseClass}--hovered`,
+      hoveringToggle && `${baseClass}--hovered`,
+      `${baseClass}--style-${collapsibleStyle}`,
     ].filter(Boolean).join(' ')}
     >
       <CollapsibleProvider>
         <div
           className={`${baseClass}__toggle-wrap`}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
+          onMouseEnter={() => setHoveringToggle(true)}
+          onMouseLeave={() => setHoveringToggle(false)}
         >
           {dragHandleProps && (
             <div

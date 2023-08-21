@@ -57,6 +57,26 @@ const TextFields: CollectionConfig = {
       type: 'text',
       maxLength: 50000,
     },
+    {
+      name: 'fieldWithDefaultValue',
+      type: 'text',
+      defaultValue: async () => {
+        const defaultValue = new Promise((resolve) => setTimeout(() => resolve('some-value'), 1000));
+
+        return defaultValue;
+      },
+    },
+    {
+      name: 'dependentOnFieldWithDefaultValue',
+      type: 'text',
+      hooks: {
+        beforeChange: [
+          ({ data }) => {
+            return data?.fieldWithDefaultValue || '';
+          },
+        ],
+      },
+    },
   ],
 };
 

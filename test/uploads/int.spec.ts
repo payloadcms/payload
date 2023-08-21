@@ -1,20 +1,20 @@
 import fs from 'fs';
 import path from 'path';
-import FormData from 'form-data';
 import { promisify } from 'util';
-import { initPayloadTest } from '../helpers/configHelpers';
-import { RESTClient } from '../helpers/rest';
-import configPromise, { mediaSlug, relationSlug } from './config';
+import FormData from 'form-data';
 import payload from '../../src';
 import getFileByPath from '../../src/uploads/getFileByPath';
+import { initPayloadTest } from '../helpers/configHelpers';
+import { RESTClient } from '../helpers/rest';
+import configPromise, { enlargeSlug, mediaSlug, reduceSlug, relationSlug } from './config';
 
 const stat = promisify(fs.stat);
 
 require('isomorphic-fetch');
 
-let client;
-
 describe('Collections - Uploads', () => {
+  let client: RESTClient;
+
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
     const config = await configPromise;
@@ -31,27 +31,31 @@ describe('Collections - Uploads', () => {
         const { status, doc } = await client.create({
           file: true,
           data: formData,
-          headers: {},
         });
 
         expect(status).toBe(201);
 
+        const { sizes } = doc;
+        const expectedPath = path.join(__dirname, './media');
+
         // Check for files
-        expect(await fileExists(path.join(__dirname, './media', doc.filename))).toBe(true);
-        expect(await fileExists(path.join(__dirname, './media', doc.sizes.maintainedAspectRatio.filename))).toBe(true);
-        expect(await fileExists(path.join(__dirname, './media', doc.sizes.tablet.filename))).toBe(true);
-        expect(await fileExists(path.join(__dirname, './media', doc.sizes.mobile.filename))).toBe(true);
-        expect(await fileExists(path.join(__dirname, './media', doc.sizes.icon.filename))).toBe(true);
+        expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true);
+        expect(
+          await fileExists(path.join(expectedPath, sizes.maintainedAspectRatio.filename)),
+        ).toBe(true);
+        expect(await fileExists(path.join(expectedPath, sizes.tablet.filename))).toBe(true);
+        expect(await fileExists(path.join(expectedPath, sizes.mobile.filename))).toBe(true);
+        expect(await fileExists(path.join(expectedPath, sizes.icon.filename))).toBe(true);
 
         // Check api response
         expect(doc.mimeType).toEqual('image/png');
-        expect(doc.sizes.maintainedAspectRatio.url).toContain('/media/image');
-        expect(doc.sizes.maintainedAspectRatio.url).toContain('.png');
-        expect(doc.sizes.maintainedAspectRatio.width).toEqual(1024);
-        expect(doc.sizes.maintainedAspectRatio.height).toEqual(1024);
-        expect(doc.sizes).toHaveProperty('tablet');
-        expect(doc.sizes).toHaveProperty('mobile');
-        expect(doc.sizes).toHaveProperty('icon');
+        expect(sizes.maintainedAspectRatio.url).toContain('/media/image');
+        expect(sizes.maintainedAspectRatio.url).toContain('.png');
+        expect(sizes.maintainedAspectRatio.width).toEqual(1024);
+        expect(sizes.maintainedAspectRatio.height).toEqual(1024);
+        expect(sizes).toHaveProperty('tablet');
+        expect(sizes).toHaveProperty('mobile');
+        expect(sizes).toHaveProperty('icon');
       });
 
       it('creates from form data given an svg', async () => {
@@ -61,7 +65,6 @@ describe('Collections - Uploads', () => {
         const { status, doc } = await client.create({
           file: true,
           data: formData,
-          headers: {},
         });
 
         expect(status).toBe(201);
@@ -84,15 +87,16 @@ describe('Collections - Uploads', () => {
       const { status, doc } = await client.create({
         file: true,
         data: formData,
-        headers: {},
       });
 
       expect(status).toBe(201);
 
+      const expectedPath = path.join(__dirname, './media');
+
       // Check for files
-      expect(await fileExists(path.join(__dirname, './media', doc.filename))).toBe(true);
-      expect(await fileExists(path.join(__dirname, './media', 'small-640x480.png'))).toBe(false);
-      expect(await fileExists(path.join(__dirname, './media', doc.sizes.icon.filename))).toBe(true);
+      expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true);
+      expect(await fileExists(path.join(expectedPath, 'small-640x480.png'))).toBe(false);
+      expect(await fileExists(path.join(expectedPath, doc.sizes.icon.filename))).toBe(true);
 
       // Check api response
       expect(doc.sizes.tablet.filename).toBeNull();
@@ -106,14 +110,15 @@ describe('Collections - Uploads', () => {
       const { status, doc } = await client.create({
         file: true,
         data: formData,
-        headers: {},
       });
 
       expect(status).toBe(201);
 
+      const expectedPath = path.join(__dirname, './media');
+
       // Check for files
-      expect(await fileExists(path.join(__dirname, './media', doc.filename))).toBe(true);
-      expect(await fileExists(path.join(__dirname, './media', doc.sizes.tablet.filename))).toBe(true);
+      expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true);
+      expect(await fileExists(path.join(expectedPath, doc.sizes.tablet.filename))).toBe(true);
 
       // Check api response
       expect(doc.filename).toContain('.png');
@@ -133,7 +138,6 @@ describe('Collections - Uploads', () => {
         slug: 'unstored-media',
         file: true,
         data: formData,
-        headers: {},
       });
 
       expect(status).toBe(201);
@@ -143,6 +147,119 @@ describe('Collections - Uploads', () => {
 
       // Check api response
       expect(doc.filename).toBeDefined();
+    });
+
+    it('should enlarge images if resize options `withoutEnlargement` is set to false', async () => {
+      const small = await getFileByPath(path.resolve(__dirname, './small.png'));
+
+      const result = await payload.create({
+        collection: enlargeSlug,
+        data: {},
+        file: small,
+      });
+
+      expect(result).toBeTruthy();
+
+      const { sizes } = result;
+      const expectedPath = path.join(__dirname, './media/enlarge');
+
+      // Check for files
+      expect(await fileExists(path.join(expectedPath, small.name))).toBe(true);
+      expect(await fileExists(path.join(expectedPath, sizes.resizedLarger.filename))).toBe(true);
+      expect(await fileExists(path.join(expectedPath, sizes.resizedSmaller.filename))).toBe(true);
+      expect(await fileExists(path.join(expectedPath, sizes.accidentalSameSize.filename))).toBe(
+        true,
+      );
+      expect(await fileExists(path.join(expectedPath, sizes.sameSizeWithNewFormat.filename))).toBe(
+        true,
+      );
+
+      // Check api response
+      expect(sizes.sameSizeWithNewFormat.mimeType).toBe('image/jpeg');
+      expect(sizes.sameSizeWithNewFormat.filename).toBe('small-320x80.jpg');
+
+      expect(sizes.resizedLarger.mimeType).toBe('image/png');
+      expect(sizes.resizedLarger.filename).toBe('small-640x480.png');
+
+      expect(sizes.resizedSmaller.mimeType).toBe('image/png');
+      expect(sizes.resizedSmaller.filename).toBe('small-180x50.png');
+
+      expect(sizes.accidentalSameSize.mimeType).toBe('image/png');
+      expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png');
+
+      await payload.delete({
+        collection: enlargeSlug,
+        id: result.id,
+      });
+    });
+
+    // This test makes sure that the image resizing is not prevented if only one dimension is larger (due to payload preventing enlargement by default)
+    it('should resize images if one desired dimension is smaller and the other is larger', async () => {
+      const small = await getFileByPath(path.resolve(__dirname, './small.png'));
+
+      const result = await payload.create({
+        collection: enlargeSlug,
+        data: {},
+        file: small,
+      });
+
+      expect(result).toBeTruthy();
+
+      const { sizes } = result;
+      const expectedPath = path.join(__dirname, './media/enlarge');
+
+      // Check for files
+      expect(await fileExists(path.join(expectedPath, sizes.widthLowerHeightLarger.filename))).toBe(
+        true,
+      );
+      // Check api response
+      expect(sizes.widthLowerHeightLarger.mimeType).toBe('image/png');
+      expect(sizes.widthLowerHeightLarger.filename).toBe('small-300x300.png');
+      await payload.delete({
+        collection: enlargeSlug,
+        id: result.id,
+      });
+    });
+
+    it('should not reduce images if resize options `withoutReduction` is set to true', async () => {
+      const formData = new FormData();
+      formData.append('file', fs.createReadStream(path.join(__dirname, './small.png')));
+      const small = await getFileByPath(path.resolve(__dirname, './small.png'));
+
+      const result = await payload.create({
+        collection: reduceSlug,
+        data: {},
+        file: small,
+      });
+
+      expect(result).toBeTruthy();
+
+      const { sizes } = result;
+      const expectedPath = path.join(__dirname, './media/reduce');
+
+      // Check for files
+      expect(await fileExists(path.join(expectedPath, small.name))).toBe(true);
+      expect(await fileExists(path.join(expectedPath, 'small-640x480.png'))).toBe(false);
+      expect(await fileExists(path.join(expectedPath, 'small-180x50.png'))).toBe(false);
+      expect(await fileExists(path.join(expectedPath, sizes.accidentalSameSize.filename))).toBe(
+        true,
+      );
+      expect(await fileExists(path.join(expectedPath, sizes.sameSizeWithNewFormat.filename))).toBe(
+        true,
+      );
+
+      // Check api response
+      expect(sizes.sameSizeWithNewFormat.mimeType).toBe('image/jpeg');
+      expect(sizes.sameSizeWithNewFormat.filename).toBe('small-320x80.jpg');
+
+      expect(sizes.resizedLarger.mimeType).toBeNull();
+      expect(sizes.resizedLarger.filename).toBeNull();
+
+      expect(sizes.accidentalSameSize.mimeType).toBe('image/png');
+      expect(sizes.resizedSmaller.filename).toBe('small-320x80.png');
+
+      expect(sizes.accidentalSameSize.mimeType).toBe('image/png');
+      expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png');
     });
   });
 
@@ -163,16 +280,16 @@ describe('Collections - Uploads', () => {
 
     const { status } = await client.update({
       id: mediaDoc.id,
-      file: true,
       data: formData,
-      headers: {},
     });
 
     expect(status).toBe(200);
 
+    const expectedPath = path.join(__dirname, './media');
+
     // Check that previously existing files were removed
-    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(true);
-    expect(await fileExists(path.join(__dirname, './media', mediaDoc.sizes.icon.filename))).toBe(true);
+    expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(true);
+    expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(true);
   });
 
   it('update - update many', async () => {
@@ -195,16 +312,16 @@ describe('Collections - Uploads', () => {
       where: {
         id: { equals: mediaDoc.id },
       },
-      file: true,
       data: formData,
-      headers: {},
     });
 
     expect(status).toBe(200);
 
+    const expectedPath = path.join(__dirname, './media');
+
     // Check that previously existing files were removed
-    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(true);
-    expect(await fileExists(path.join(__dirname, './media', mediaDoc.sizes.icon.filename))).toBe(true);
+    expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(true);
+    expect(await fileExists(path.join(expectedPath, mediaDoc.sizes.icon.filename))).toBe(true);
   });
 
   it('should remove existing media on re-upload', async () => {
@@ -219,8 +336,10 @@ describe('Collections - Uploads', () => {
       file,
     });
 
+    const expectedPath = path.join(__dirname, './media');
+
     // Check that the temp file was created
-    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(true);
+    expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(true);
 
     // Replace the temp file with a new one
     const newFilePath = path.resolve(__dirname, './temp-renamed.png');
@@ -235,8 +354,8 @@ describe('Collections - Uploads', () => {
     });
 
     // Check that the replacement file was created and the old one was removed
-    expect(await fileExists(path.join(__dirname, './media', updatedMediaDoc.filename))).toBe(true);
-    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(false);
+    expect(await fileExists(path.join(expectedPath, updatedMediaDoc.filename))).toBe(true);
+    expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false);
   });
 
   it('should remove existing media on re-upload - update many', async () => {
@@ -251,8 +370,10 @@ describe('Collections - Uploads', () => {
       file,
     });
 
+    const expectedPath = path.join(__dirname, './media');
+
     // Check that the temp file was created
-    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(true);
+    expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(true);
 
     // Replace the temp file with a new one
     const newFilePath = path.resolve(__dirname, './temp-renamed.png');
@@ -269,8 +390,8 @@ describe('Collections - Uploads', () => {
     });
 
     // Check that the replacement file was created and the old one was removed
-    expect(await fileExists(path.join(__dirname, './media', updatedMediaDoc.docs[0].filename))).toBe(true);
-    expect(await fileExists(path.join(__dirname, './media', mediaDoc.filename))).toBe(false);
+    expect(await fileExists(path.join(expectedPath, updatedMediaDoc.docs[0].filename))).toBe(true);
+    expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false);
   });
 
   it('should remove extra sizes on update', async () => {
@@ -386,10 +507,10 @@ describe('Collections - Uploads', () => {
     const { doc } = await client.create({
       file: true,
       data: formData,
-      headers: {},
     });
 
     const { status } = await client.delete(doc.id, {
+      id: doc.id,
     });
 
     expect(status).toBe(200);
@@ -404,7 +525,6 @@ describe('Collections - Uploads', () => {
     const { doc } = await client.create({
       file: true,
       data: formData,
-      headers: {},
     });
 
     const { errors } = await client.deleteMany({

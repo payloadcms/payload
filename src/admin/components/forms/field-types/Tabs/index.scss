@@ -53,6 +53,7 @@
   &__tab-button {
     @extend %btn-reset;
     @extend %h4;
+    display: flex;
     padding-bottom: base(.75);
     margin: 0 $baseline 0 0;
     cursor: pointer;
@@ -60,6 +61,7 @@
     position: relative;
     white-space: nowrap;
     flex-shrink: 0;
+    gap: base(.5);
 
     &:last-child {
       margin: 0;
@@ -109,6 +111,28 @@
 
       &:last-child {
         margin: 0;
+      }
+    }
+  }
+}
+
+html[data-theme=light] {
+  .tabs-field {
+    &__tab-button--has-error {
+      color: var(--theme-error-750);
+      &:after {
+        background: var(--theme-error-500);
+      }
+    }
+  }
+}
+
+html[data-theme=dark] {
+  .tabs-field {
+    &__tab-button--has-error {
+      color: var(--theme-error-500);
+      &:after {
+        background: var(--theme-error-500);
       }
     }
   }
