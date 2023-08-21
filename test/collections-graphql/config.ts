@@ -30,6 +30,9 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
 
 export const slug = 'posts';
 export const relationSlug = 'relation';
+
+export const pointSlug = 'point';
+
 export default buildConfigWithDefaults({
   graphQL: {
     schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),
@@ -40,6 +43,16 @@ export default buildConfigWithDefaults({
       auth: true,
       access: openAccess,
       fields: [],
+    },
+    {
+      slug: pointSlug,
+      access: openAccess,
+      fields: [
+        {
+          type: 'point',
+          name: 'point',
+        },
+      ],
     },
     {
       slug,
@@ -412,6 +425,13 @@ export default buildConfigWithDefaults({
       collection: 'payload-api-test-twos',
       data: {
         relation: payloadAPITest1.id,
+      },
+    });
+
+    await payload.create({
+      collection: pointSlug,
+      data: {
+        point: [10, 20],
       },
     });
   },

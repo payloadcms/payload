@@ -11,5 +11,7 @@ export const validOperators = [
   'less_than',
   'less_than_equal',
   'like',
+  'within',
+  'intersects',
   'near',
 ] as const;

@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
+import qs from 'qs';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
@@ -15,12 +16,13 @@ const title = 'title';
 const description = 'description';
 
 let url: AdminUrlUtil;
+let serverURL: string;
 
 describe('admin', () => {
   let page: Page;
 
   beforeAll(async ({ browser }) => {
-    const { serverURL } = await initPayloadE2E(__dirname);
+    serverURL = (await initPayloadE2E(__dirname)).serverURL;
     await clearDocs(); // Clear any seeded data from onInit
     url = new AdminUrlUtil(serverURL, slug);
 
@@ -411,6 +413,54 @@ describe('admin', () => {
         await page.goto(`${url.list}?limit=10&page=1&where[title][equals]=post1`);
 
         await expect(page.locator('.react-select--single-value').first()).toContainText('Title en');
+        await expect(page.locator(tableRowLocator)).toHaveCount(1);
+      });
+
+      test('should accept where query from complex, valid URL where parameter using the near operator', async () => {
+        // We have one point collection with the point [5,-5] and one with [7,-7]. This where query should kick out the [5,-5] point
+        await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}?limit=10&page=1&where[or][0][and][0][point][near]=6,-7,200000`);
+
+        await expect(page.getByPlaceholder('Enter a value')).toHaveValue('6,-7,200000');
+        await expect(page.locator(tableRowLocator)).toHaveCount(1);
+      });
+
+      test('should accept transformed where query from complex, invalid URL where parameter using the near operator', async () => {
+        // We have one point collection with the point [5,-5] and one with [7,-7]. This where query should kick out the [5,-5] point
+        await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}?limit=10&page=1&where[point][near]=6,-7,200000`);
+
+        await expect(page.getByPlaceholder('Enter a value')).toHaveValue('6,-7,200000');
+        await expect(page.locator(tableRowLocator)).toHaveCount(1);
+      });
+
+      test('should accept where query from complex, valid URL where parameter using the within operator', async () => {
+        type Point = [number, number];
+        const polygon: Point[] = [
+          [3.5, -3.5], // bottom-left
+          [3.5, -6.5], // top-left
+          [6.5, -6.5], // top-right
+          [6.5, -3.5], // bottom-right
+          [3.5, -3.5], // back to starting point to close the polygon
+        ];
+
+        const whereQueryJSON = {
+          point: {
+            within: {
+              type: 'Polygon',
+              coordinates: [polygon],
+            },
+          },
+        };
+
+        const whereQuery = qs.stringify({
+          ...({ where: whereQueryJSON }),
+        }, {
+          addQueryPrefix: false,
+        });
+
+        // We have one point collection with the point [5,-5] and one with [7,-7]. This where query should kick out the [7,-7] point, as it's not within the polygon
+        await page.goto(`${new AdminUrlUtil(serverURL, 'geo').list}?limit=10&page=1&${whereQuery}`);
+
+        await expect(page.getByPlaceholder('Enter a value')).toHaveValue('[object Object]');
         await expect(page.locator(tableRowLocator)).toHaveCount(1);
       });
     });
