@@ -39,13 +39,13 @@ const Textarea: React.FC<Props> = (props) => {
 
   const path = pathFromProps || name;
 
-  const labeledLocale = useLocale();
+  const locale = useLocale();
 
   const { localization } = useConfig();
   const isRTL = isFieldRTL({
     fieldRTL: rtl,
     fieldLocalized: localized,
-    labeledLocale,
+    locale,
     localizationConfig: localization || undefined,
   });
   const memoizedValidate = useCallback((value, options) => {

@@ -32,13 +32,13 @@ const Text: React.FC<Props> = (props) => {
   } = props;
 
   const path = pathFromProps || name;
-  const labeledLocale = useLocale();
+  const locale = useLocale();
 
   const { localization } = useConfig();
   const isRTL = isFieldRTL({
     fieldRTL: rtl,
     fieldLocalized: localized,
-    labeledLocale,
+    locale,
     localizationConfig: localization || undefined,
   });
 

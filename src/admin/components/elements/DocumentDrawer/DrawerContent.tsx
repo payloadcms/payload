@@ -10,7 +10,7 @@ import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import Button from '../Button';
 import { useConfig } from '../../utilities/Config';
-import { useLocaleCode } from '../../utilities/Locale';
+import { useLocale } from '../../utilities/Locale';
 import { useAuth } from '../../utilities/Auth';
 import { DocumentInfoProvider, useDocumentInfo } from '../../utilities/DocumentInfo';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
@@ -29,7 +29,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 }) => {
   const { serverURL, routes: { api } } = useConfig();
   const { toggleModal, modalState, closeModal } = useModal();
-  const locale = useLocaleCode();
+  const { code: locale } = useLocale();
   const { permissions, user } = useAuth();
   const [internalState, setInternalState] = useState<Fields>();
   const { t, i18n } = useTranslation(['fields', 'general']);

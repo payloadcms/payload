@@ -8,7 +8,7 @@ import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../utilities/Auth';
-import { useLocaleCode } from '../../utilities/Locale';
+import { useLocale } from '../../utilities/Locale';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { requests } from '../../../api';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
@@ -49,7 +49,7 @@ const Form: React.FC<Props> = (props) => {
   } = props;
 
   const history = useHistory();
-  const locale = useLocaleCode();
+  const { code: locale } = useLocale();
   const { t, i18n } = useTranslation('general');
   const { refreshCookie, user } = useAuth();
   const { id, getDocPreferences } = useDocumentInfo();

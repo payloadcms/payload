@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConfig } from '../../utilities/Config';
 import { useFormModified, useAllFormFields } from '../../forms/Form/context';
-import { useLocaleCode } from '../../utilities/Locale';
+import { useLocale } from '../../utilities/Locale';
 import { Props } from './types';
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
@@ -19,7 +19,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
   const { versions, getVersions } = useDocumentInfo();
   const [fields] = useAllFormFields();
   const modified = useFormModified();
-  const locale = useLocaleCode();
+  const { code: locale } = useLocale();
   const { replace } = useHistory();
   const { t, i18n } = useTranslation('version');
 

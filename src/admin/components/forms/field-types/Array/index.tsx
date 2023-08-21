@@ -6,7 +6,7 @@ import Button from '../../../elements/Button';
 import { useForm, useFormSubmitted } from '../../Form/context';
 import buildStateFromSchema from '../../Form/buildStateFromSchema';
 import useField from '../../useField';
-import { useLocaleCode } from '../../../utilities/Locale';
+import { useLocale } from '../../../utilities/Locale';
 import Error from '../../Error';
 import { array } from '../../../../../fields/validations';
 import Banner from '../../../elements/Banner';
@@ -60,7 +60,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const { dispatchFields, setModified } = useForm();
   const submitted = useFormSubmitted();
   const { user } = useAuth();
-  const locale = useLocaleCode();
+  const { code: locale } = useLocale();
   const operation = useOperation();
   const { t, i18n } = useTranslation('fields');
   const { localization } = useConfig();

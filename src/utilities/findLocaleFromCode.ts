@@ -1,11 +1,11 @@
-import type { SanitizedLocalizationConfig, LabeledLocale } from '../config/types';
+import type { SanitizedLocalizationConfig, Locale } from '../config/types';
 /*
- return the LabeledLocale for given locale string, else return null
+ return the Locale for given locale code, else return null
 */
-export const extractLabeledLocale = (
+export const findLocaleFromCode = (
   localizationConfig: SanitizedLocalizationConfig,
   locale: string,
-): LabeledLocale | null => {
+): Locale | null => {
   if (!localizationConfig?.locales || localizationConfig.locales.length === 0) {
     return null;
   }
@@ -14,5 +14,3 @@ export const extractLabeledLocale = (
     (el) => el?.code === locale,
   );
 };
-
-export default extractLabeledLocale;

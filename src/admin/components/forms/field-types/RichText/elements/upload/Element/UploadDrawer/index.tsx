@@ -8,7 +8,7 @@ import fieldTypes from '../../../../..';
 import { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types';
 import { Drawer } from '../../../../../../../elements/Drawer';
 import { useAuth } from '../../../../../../../utilities/Auth';
-import { useLocaleCode } from '../../../../../../../utilities/Locale';
+import { useLocale } from '../../../../../../../utilities/Locale';
 import Form from '../../../../../../Form';
 import RenderFields from '../../../../../../RenderFields';
 import FormSubmit from '../../../../../../Submit';
@@ -31,7 +31,7 @@ export const UploadDrawer: React.FC<ElementProps & {
   } = props;
 
   const { t, i18n } = useTranslation();
-  const locale = useLocaleCode();
+  const { code: locale } = useLocale();
   const { user } = useAuth();
   const { closeModal } = useModal();
   const { getDocPreferences } = useDocumentInfo();

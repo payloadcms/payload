@@ -49,7 +49,7 @@ export const sanitizeConfig = (config: Config): SanitizedConfig => {
     if (typeof firstLocale === 'string') {
       (sanitizedConfig.localization as SanitizedLocalizationConfig).localeCodes = [...(sanitizedConfig.localization as LocalizationConfigWithNoLabels).locales];
 
-      // is string[], so convert to LabeledLocale[]
+      // is string[], so convert to Locale[]
       (sanitizedConfig.localization as SanitizedLocalizationConfig).locales = (sanitizedConfig.localization as LocalizationConfigWithNoLabels).locales.map((locale) => ({
         label: locale,
         code: locale,
@@ -57,7 +57,7 @@ export const sanitizeConfig = (config: Config): SanitizedConfig => {
         toString: () => locale,
       }));
     } else {
-      // is LabeledLocale[], so convert to string[] for localeCodes
+      // is Locale[], so convert to string[] for localeCodes
       (sanitizedConfig.localization as SanitizedLocalizationConfig).localeCodes = (sanitizedConfig.localization as SanitizedLocalizationConfig).locales.reduce((locales, locale) => {
         locales.push(locale.code);
         return locales;

@@ -9,7 +9,7 @@ import { MinimalTemplate } from '../..';
 import { requests } from '../../../api';
 import { useForm } from '../../forms/Form/context';
 import { Field } from '../../../../fields/config/types';
-import { useLocaleCode } from '../../utilities/Locale';
+import { useLocale } from '../../utilities/Locale';
 
 import './index.scss';
 
@@ -32,7 +32,7 @@ const Status: React.FC = () => {
   } = useConfig();
   const [processing, setProcessing] = useState(false);
   const { reset: resetForm } = useForm();
-  const locale = useLocaleCode();
+  const { code: locale } = useLocale();
   const { t, i18n } = useTranslation('version');
 
   const unPublishModalSlug = `confirm-un-publish-${id}`;

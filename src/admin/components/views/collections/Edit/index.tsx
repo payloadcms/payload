@@ -9,7 +9,7 @@ import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
 import DefaultEdit from './Default';
 import formatFields from './formatFields';
 import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema';
-import { useLocaleCode } from '../../../utilities/Locale';
+import { useLocale } from '../../../utilities/Locale';
 import { IndexProps } from './types';
 import { useDocumentInfo } from '../../../utilities/DocumentInfo';
 import { Fields } from '../../../forms/Form/types';
@@ -34,7 +34,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const [collection] = useState(() => ({ ...incomingCollection, fields }));
   const [redirect, setRedirect] = useState<string>();
 
-  const locale = useLocaleCode();
+  const { code: locale } = useLocale();
   const { serverURL, routes: { admin, api } } = useConfig();
   const { params: { id } = {} } = useRouteMatch<Record<string, string>>();
   const history = useHistory();

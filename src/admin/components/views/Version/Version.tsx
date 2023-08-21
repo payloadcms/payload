@@ -19,7 +19,7 @@ import fieldComponents from './RenderFieldsToDiff/fields';
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { Field, FieldAffectingData, fieldAffectsData } from '../../../../fields/config/types';
 import { FieldPermissions } from '../../../../auth';
-import { useLocaleCode } from '../../utilities/Locale';
+import { useLocale } from '../../utilities/Locale';
 import { Gutter } from '../../elements/Gutter';
 import { formatDate } from '../../../utilities/formatDate';
 
@@ -35,7 +35,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const [localeOptions] = useState<LocaleOption[]>(() => (localization ? localization.locales : []));
   const [locales, setLocales] = useState<LocaleOption[]>(localeOptions);
   const { permissions } = useAuth();
-  const locale = useLocaleCode();
+  const { code: locale } = useLocale();
   const { t, i18n } = useTranslation('version');
   const { docPermissions } = useDocumentInfo();
 

@@ -1,4 +1,4 @@
-import type { LabeledLocale, SanitizedLocalizationConfig } from '../../../../config/types';
+import type { Locale, SanitizedLocalizationConfig } from '../../../../config/types';
 
 /**
  * Determines whether a field should be displayed as right-to-left (RTL) based on its configuration, payload's localization configuration and the adming user's currently enabled locale.
@@ -8,21 +8,21 @@ import type { LabeledLocale, SanitizedLocalizationConfig } from '../../../../con
 export function isFieldRTL({
   fieldRTL,
   fieldLocalized,
-  labeledLocale,
+  locale,
   localizationConfig,
 }: {
     fieldRTL: boolean;
     fieldLocalized: boolean;
-    labeledLocale: LabeledLocale;
+    locale: Locale;
     localizationConfig?: SanitizedLocalizationConfig;
 }) {
-  const hasMultipleLocales = labeledLocale
+  const hasMultipleLocales = locale
       && (localizationConfig)
       && (localizationConfig.locales)
       && (localizationConfig.locales.length > 1);
-  const isCurrentLocaleDefaultLocale = labeledLocale?.code === localizationConfig?.defaultLocale;
+  const isCurrentLocaleDefaultLocale = locale?.code === localizationConfig?.defaultLocale;
 
-  return ((fieldRTL !== false && labeledLocale?.rtl === true)
+  return ((fieldRTL !== false && locale?.rtl === true)
       && (
         fieldLocalized
         || (!fieldLocalized && !hasMultipleLocales) // If there is only one locale which is also rtl, that field is rtl too

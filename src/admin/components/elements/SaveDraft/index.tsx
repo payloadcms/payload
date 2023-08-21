@@ -4,7 +4,7 @@ import { useConfig } from '../../utilities/Config';
 import FormSubmit from '../../forms/Submit';
 import { useForm, useFormModified } from '../../forms/Form/context';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import { useLocaleCode } from '../../utilities/Locale';
+import { useLocale } from '../../utilities/Locale';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
 
@@ -40,7 +40,7 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
   const { submit } = useForm();
   const { collection, global, id } = useDocumentInfo();
   const modified = useFormModified();
-  const locale = useLocaleCode();
+  const { code: locale } = useLocale();
   const { t } = useTranslation('version');
 
   const canSaveDraft = modified;

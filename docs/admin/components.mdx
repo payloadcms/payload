@@ -351,14 +351,13 @@ const CustomComponent: React.FC = () => {
 
 ### Getting the current locale
 
-In any custom component you can get the selected locale with either the `useLocaleCode` or the `useLocale` hook. `useLocaleCode` only returns the locale code as a string, and `useLocale` returns the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
+In any custom component you can get the selected locale with `useLocale` hook. `useLocale` returns the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
 
 ```tsx
-import { useLocaleCode, useLocale } from "payload/components/utilities";
+import { useLocale } from "payload/components/utilities";
 
 const Greeting: React.FC = () => {
   // highlight-start
-  const localeCode = useLocaleCode();
   const locale = useLocale();
   // highlight-end
 
@@ -367,11 +366,6 @@ const Greeting: React.FC = () => {
     es: "Hola",
   };
 
-  return (
-    <div>
-      <span>With useLocaleCode: {trans[localeCode]} </span>;
-      <span>With useLocale: {trans[locale.code]} </span>;
-    </div>
-  );
+  return <span> {trans[locale.code]} </span>
 };
 ```

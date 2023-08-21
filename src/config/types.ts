@@ -224,7 +224,7 @@ export type AdminRoute = {
   sensitive?: boolean;
 };
 
-export type LabeledLocale = {
+export type Locale = {
   /**
    * label of supported locale
    * @example "English"
@@ -271,7 +271,7 @@ export type LocalizationConfigWithLabels = Prettify<
      *  rtl: false
      * }
      */
-    locales: LabeledLocale[];
+    locales: Locale[];
   }
 >;
 

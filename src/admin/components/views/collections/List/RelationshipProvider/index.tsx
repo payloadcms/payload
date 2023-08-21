@@ -5,7 +5,7 @@ import { useConfig } from '../../../../utilities/Config';
 import { TypeWithID } from '../../../../../../collections/config/types';
 import { reducer } from './reducer';
 import useDebounce from '../../../../../hooks/useDebounce';
-import { useLocaleCode } from '../../../../utilities/Locale';
+import { useLocale } from '../../../../utilities/Locale';
 
 // documents are first set to null when requested
 // set to false when no doc is returned
@@ -31,7 +31,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
   const debouncedDocuments = useDebounce(documents, 100);
   const config = useConfig();
   const { i18n } = useTranslation();
-  const locale = useLocaleCode();
+  const { code: locale } = useLocale();
   const prevLocale = useRef(locale);
 
   const {
