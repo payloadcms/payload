@@ -720,9 +720,6 @@
         "globals": {
           "type": "string"
         },
-        "items": {
-          "type": "string"
-        },
         "language": {
           "type": "string"
         },
