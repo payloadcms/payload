@@ -1,73 +1,57 @@
 /* eslint-disable no-param-reassign */
-import { Field } from 'payload/types';
-import { SQL } from 'drizzle-orm';
-import { PostgresAdapter } from '../types';
-import { traverseFields } from './traverseFields';
-import { transform } from '../transform';
-import { BlockRowToInsert, RowToInsert } from './types';
-import { insertArrays } from './insertArrays';
-
-type Args = {
-  adapter: PostgresAdapter
-  data: Record<string, unknown>
-  fallbackLocale?: string | false
-  fields: Field[]
-  locale: string
-  operation: 'create' | 'update'
-  path?: string
-  query?: SQL<unknown>
-  tableName: string
-}
+import { and, eq, inArray } from 'drizzle-orm';
+import { transform } from '../transform/read';
+import { BlockRowToInsert } from '../transform/write/types';
+import { insertArrays } from '../insertArrays';
+import { transformForWrite } from '../transform/write';
+import { Args } from './types';
 
 export const upsertRow = async ({
   adapter,
   data,
   fallbackLocale,
   fields,
+  id,
   locale,
   operation,
   path = '',
-  query,
   tableName,
+  upsertTarget,
+  where,
 }: Args): Promise<Record<string, unknown>> => {
   // Split out the incoming data into the corresponding:
   // base row, locales, relationships, blocks, and arrays
-  const rowToInsert: RowToInsert = {
-    row: {},
-    locale: {},
-    relationships: [],
-    blocks: {},
-    arrays: {},
-  };
-
-  // This function is responsible for building up the
-  // above rowToInsert
-  traverseFields({
-    adapter,
-    arrays: rowToInsert.arrays,
-    blocks: rowToInsert.blocks,
-    columnPrefix: '',
+  const rowToInsert = transformForWrite({
     data,
     fields,
     locale,
-    localeRow: rowToInsert.locale,
-    newTableName: tableName,
-    parentTableName: tableName,
     path,
-    relationships: rowToInsert.relationships,
-    row: rowToInsert.row,
+    tableName,
   });
 
+  // First, we insert the main row
   let insertedRow: Record<string, unknown>;
 
-  // First, we insert / update the main row
-  if (operation === 'create') {
+  if (operation === 'update') {
+    const target = upsertTarget || adapter.tables[tableName].id;
+
+    if (id) {
+      rowToInsert.row.id = id;
+      [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
+        .values(rowToInsert.row)
+        .onConflictDoUpdate({ target, set: rowToInsert.row })
+        .returning();
+    } else {
+      [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
+        .values(rowToInsert.row)
+        .onConflictDoUpdate({ target, set: rowToInsert.row, where })
+        .returning();
+    }
+  } else {
     [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
       .values(rowToInsert.row).returning();
-  } else {
-    [insertedRow] = await adapter.db.update(adapter.tables[tableName])
-      .set(rowToInsert.row).where(query).returning();
   }
+
 
   let localeToInsert: Record<string, unknown>;
   const relationsToInsert: Record<string, unknown>[] = [];
@@ -102,27 +86,27 @@ export const upsertRow = async ({
     });
   });
 
-  if (operation === 'update') {
-    // TODO: delete existing data for paths that are updated
-    // 1. Arrays, and all sub-arrays from that point on including all locales
-    // 2. Blocks by path including locales, and sub arrays
-    // 3. Relationships by path
-  }
-
   // //////////////////////////////////
   // INSERT LOCALES
   // //////////////////////////////////
 
-  let insertedLocaleRow;
+  let insertedLocaleRow: Record<string, unknown>;
 
   if (localeToInsert) {
+    const localeTableName = adapter.tables[`${tableName}_locales`];
+
     promises.push(async () => {
-      if (operation === 'create') {
-        [insertedLocaleRow] = await adapter.db.insert(adapter.tables[`${tableName}_locales`])
-          .values(localeToInsert).returning();
+      if (operation === 'update') {
+        [insertedLocaleRow] = await adapter.db.insert(localeTableName)
+          .values(localeToInsert)
+          .onConflictDoUpdate({
+            target: [localeTableName._locale, localeTableName._parentID],
+            set: localeToInsert,
+          })
+          .returning();
       } else {
-        // TODO: QUERY for existing locale by parent ID, to get its ID
-        // and upsert if it doesn't exist already
+        [insertedLocaleRow] = await adapter.db.insert(localeTableName)
+          .values(localeToInsert).returning();
       }
     });
   }
@@ -135,6 +119,44 @@ export const upsertRow = async ({
 
   if (relationsToInsert.length > 0) {
     promises.push(async () => {
+      if (operation === 'update') {
+        // Delete any relationship rows for parent ID and paths that have been updated
+        // prior to recreating them
+        const localizedPathsToDelete = new Set<string>();
+        const pathsToDelete = new Set<string>();
+
+        relationsToInsert.forEach((relation) => {
+          if (typeof relation.path === 'string') {
+            if (typeof relation.locale === 'string') {
+              localizedPathsToDelete.add(relation.path);
+            } else {
+              pathsToDelete.add(relation.path);
+            }
+          }
+        });
+
+        if (localizedPathsToDelete.size > 0) {
+          await adapter.db.delete(adapter.tables[`${tableName}_relationships`])
+            .where(
+              and(
+                eq(adapter.tables[`${tableName}_relationships`].parent, insertedRow.id),
+                inArray(adapter.tables[`${tableName}_relationships`].path, [localizedPathsToDelete]),
+                eq(adapter.tables[`${tableName}_relationships`].locale, locale),
+              ),
+            );
+        }
+
+        if (pathsToDelete.size > 0) {
+          await adapter.db.delete(adapter.tables[`${tableName}_relationships`])
+            .where(
+              and(
+                eq(adapter.tables[`${tableName}_relationships`].parent, insertedRow.id),
+                inArray(adapter.tables[`${tableName}_relationships`].path, Array.from(pathsToDelete)),
+              ),
+            );
+        }
+      }
+
       insertedRelationshipRows = await adapter.db.insert(adapter.tables[`${tableName}_relationships`])
         .values(relationsToInsert).returning();
     });

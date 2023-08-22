@@ -1,28 +1,29 @@
-export type ArrayRowToInsert = {
-  columnName: string
-  row: Record<string, unknown>,
-  locale: Record<string, unknown>
-  arrays: {
-    [tableName: string]: ArrayRowToInsert[]
-  }
+import { Field } from 'payload/types';
+import { SQL } from 'drizzle-orm';
+import { GenericColumn, PostgresAdapter } from '../types';
+
+type BaseArgs = {
+  adapter: PostgresAdapter
+  data: Record<string, unknown>
+  fallbackLocale?: string | false
+  fields: Field[]
+  locale: string
+  path?: string
+  tableName: string
 }
 
-export type BlockRowToInsert = {
-  row: Record<string, unknown>,
-  locale: Record<string, unknown>
-  arrays: {
-    [tableName: string]: ArrayRowToInsert[]
-  }
+type CreateArgs = BaseArgs & {
+  upsertTarget?: never
+  where?: never
+  id?: never
+  operation: 'create'
 }
 
-export type RowToInsert = {
-  row: Record<string, unknown>,
-  locale: Record<string, unknown>,
-  relationships: Record<string, unknown>[],
-  blocks: {
-    [blockType: string]: BlockRowToInsert[]
-  }
-  arrays: {
-    [tableName: string]: ArrayRowToInsert[]
-  }
+type UpdateArgs = BaseArgs & {
+  upsertTarget?: GenericColumn
+  operation: 'update'
+  where?: SQL<unknown>
+  id?: string | number
 }
+
+export type Args = CreateArgs | UpdateArgs

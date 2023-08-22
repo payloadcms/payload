@@ -82,7 +82,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
 
     const doc = await payload.db.updateOne({
       collection: collectionConfig.slug,
-      where: { id: { equals: user.id } },
+      id: user.id,
       data: user,
       req,
     });

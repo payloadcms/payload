@@ -265,11 +265,16 @@ export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>;
 
 export type UpdateVersionArgs<T = TypeWithID> = {
   collectionSlug: string
-  where: Where
   locale?: string
   versionData: T
   req?: PayloadRequest
-}
+} & ({
+  where: Where
+  id?: never
+} | {
+  id: string | number
+  where?: never
+})
 
 export type UpdateVersion = <T = TypeWithID>(args: UpdateVersionArgs<T>) => Promise<TypeWithVersion<T>>
 
@@ -284,25 +289,19 @@ export type CreateArgs = {
 
 export type Create = (args: CreateArgs) => Promise<Document>
 
-export type UpdateArgs = {
-  collection: string
-  data: Record<string, unknown>
-  where: Where
-  draft?: boolean
-  locale?: string
-  req?: PayloadRequest
-}
-
-export type Update = (args: UpdateArgs) => Promise<Document>
-
 export type UpdateOneArgs = {
   collection: string
   data: Record<string, unknown>
-  where: Where
   draft?: boolean
   locale?: string
   req?: PayloadRequest
-}
+} & ({
+  where: Where
+  id?: never
+} | {
+  where?: never
+  id: string | number
+})
 
 export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 

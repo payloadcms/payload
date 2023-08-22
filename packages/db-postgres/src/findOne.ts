@@ -4,7 +4,7 @@ import type { PayloadRequest } from 'payload/dist/express/types';
 import type { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
 import buildQuery from './queries/buildQuery';
 import { buildFindManyArgs } from './find/buildFindManyArgs';
-import { transform } from './transform';
+import { transform } from './transform/read';
 
 export const findOne: FindOne = async function findOne({
   collection,
