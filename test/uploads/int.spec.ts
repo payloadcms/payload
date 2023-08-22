@@ -1,7 +1,7 @@
-import FormData from 'form-data';
 import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
+import FormData from 'form-data';
 import payload from '../../src';
 import getFileByPath from '../../src/uploads/getFileByPath';
 import { initPayloadTest } from '../helpers/configHelpers';
@@ -31,7 +31,6 @@ describe('Collections - Uploads', () => {
         const { status, doc } = await client.create({
           file: true,
           data: formData,
-          auth: true,
         });
 
         expect(status).toBe(201);
@@ -66,7 +65,6 @@ describe('Collections - Uploads', () => {
         const { status, doc } = await client.create({
           file: true,
           data: formData,
-          auth: true,
         });
 
         expect(status).toBe(201);
@@ -89,7 +87,6 @@ describe('Collections - Uploads', () => {
       const { status, doc } = await client.create({
         file: true,
         data: formData,
-        auth: true,
       });
 
       expect(status).toBe(201);
@@ -113,7 +110,6 @@ describe('Collections - Uploads', () => {
       const { status, doc } = await client.create({
         file: true,
         data: formData,
-        auth: true,
       });
 
       expect(status).toBe(201);
@@ -142,7 +138,6 @@ describe('Collections - Uploads', () => {
         slug: 'unstored-media',
         file: true,
         data: formData,
-        auth: true,
       });
 
       expect(status).toBe(201);
@@ -286,7 +281,6 @@ describe('Collections - Uploads', () => {
     const { status } = await client.update({
       id: mediaDoc.id,
       data: formData,
-      auth: true,
     });
 
     expect(status).toBe(200);
@@ -319,7 +313,6 @@ describe('Collections - Uploads', () => {
         id: { equals: mediaDoc.id },
       },
       data: formData,
-      auth: true,
     });
 
     expect(status).toBe(200);
@@ -514,12 +507,10 @@ describe('Collections - Uploads', () => {
     const { doc } = await client.create({
       file: true,
       data: formData,
-      auth: true,
     });
 
     const { status } = await client.delete(doc.id, {
       id: doc.id,
-      auth: true,
     });
 
     expect(status).toBe(200);
@@ -534,7 +525,6 @@ describe('Collections - Uploads', () => {
     const { doc } = await client.create({
       file: true,
       data: formData,
-      auth: true,
     });
 
     const { errors } = await client.deleteMany({
@@ -542,7 +532,6 @@ describe('Collections - Uploads', () => {
       where: {
         id: { equals: doc.id },
       },
-      auth: true,
     });
 
     expect(errors).toHaveLength(0);

@@ -98,6 +98,7 @@ export interface IncomingAuthType {
     generateEmailSubject?: GenerateForgotPasswordEmailSubject,
   }
   disableLocalStrategy?: true
+  removeTokenFromResponses?: true
   strategies?: {
     name?: string
     strategy: AuthStrategy

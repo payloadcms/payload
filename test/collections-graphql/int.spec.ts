@@ -707,6 +707,10 @@ describe('collections-graphql', () => {
         test3:createUser(data: { email: "test@test.com", password: "test" }) {
           email
         }
+
+        test4:createUser(data: { email: "", password: "test" }) {
+          email
+        }
       }`;
 
       await client.request(query).catch((err) => {
@@ -714,16 +718,48 @@ describe('collections-graphql', () => {
       });
 
       expect(Array.isArray(error.response.errors)).toBe(true);
-      expect(error.response.errors[0].message).toEqual('The following field is invalid: password');
+
       expect(Array.isArray(error.response.errors[0].locations)).toEqual(true);
+      expect(error.response.errors[0].message).toEqual('The following field is invalid: password');
       expect(error.response.errors[0].path[0]).toEqual('test2');
       expect(error.response.errors[0].extensions.name).toEqual('ValidationError');
+      expect(error.response.errors[0].extensions.data[0].message).toEqual('No password was given');
+      expect(error.response.errors[0].extensions.data[0].field).toEqual('password');
 
+      expect(Array.isArray(error.response.errors[1].locations)).toEqual(true);
       expect(error.response.errors[1].message).toEqual('The following field is invalid: email');
       expect(error.response.errors[1].path[0]).toEqual('test3');
       expect(error.response.errors[1].extensions.name).toEqual('ValidationError');
       expect(error.response.errors[1].extensions.data[0].message).toEqual('A user with the given email is already registered');
       expect(error.response.errors[1].extensions.data[0].field).toEqual('email');
+
+      expect(Array.isArray(error.response.errors[2].locations)).toEqual(true);
+      expect(error.response.errors[2].message).toEqual('The following field is invalid: email');
+      expect(error.response.errors[2].path[0]).toEqual('test4');
+      expect(error.response.errors[2].extensions.name).toEqual('ValidationError');
+      expect(error.response.errors[2].extensions.data[0].message).toEqual('Please enter a valid email address.');
+      expect(error.response.errors[2].extensions.data[0].field).toEqual('email');
+    });
+
+    it('should return the minimum allowed information about internal errors', async () => {
+      let error;
+      // language=graphQL
+      const query = `query {
+        QueryWithInternalError {
+            text
+        }
+      }`;
+
+      await client.request(query).catch((err) => {
+        error = err;
+      });
+
+      expect(Array.isArray(error.response.errors)).toBe(true);
+      expect(Array.isArray(error.response.errors[0].locations)).toEqual(true);
+      expect(error.response.errors[0].message).toEqual('Something went wrong.');
+      expect(error.response.errors[0].path[0]).toEqual('QueryWithInternalError');
+      expect(error.response.errors[0].extensions.statusCode).toEqual(500);
+      expect(error.response.errors[0].extensions.name).toEqual('Error');
     });
   });
 });

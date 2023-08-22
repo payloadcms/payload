@@ -257,6 +257,10 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       result,
     });
 
+    if (collectionConfig.auth.removeTokenFromResponses) {
+      delete result.token;
+    }
+
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
