@@ -20,7 +20,7 @@ To report an issue, please follow the steps below:
 - `config.ts` - This is the _granular_ Payload config for testing. It should be as lightweight as possible. Reference existing configs for an example
 - `int.spec.ts` [Optional] - This is the test file run by jest. Any test file must have a `*int.spec.ts` suffix.
 - `e2e.spec.ts` [Optional] - This is the end-to-end test file that will load up the admin UI using the above config and run Playwright tests.
-- `payload-types.ts` - Generated types from `config.ts`. Generate this file by running `yarn dev:generate-types _community`.
+- `payload-types.ts` - Generated types from `config.ts`. Generate this file by running `pnpm dev:generate-types _community`.
 
 The directory split up in this way specifically to reduce friction when creating tests and to add the ability to boot up Payload with that specific config. You should modify the files in `test/_community` to get started.
 
@@ -30,7 +30,7 @@ To start the admin panel so you can manually recreate your issue, you can run th
   ```bash
   # This command will start up Payload using your config
   # NOTE: it will wipe the test database on restart
-  yarn dev _community
+  pnpm dev _community
   ```
 
 
@@ -47,7 +47,7 @@ There are a couple ways to do this:
 - **Manually** - you can run all int tests in the `/test/_community/int.spec.ts` file by running the following command:
 
   ```bash
-  yarn test:int _community
+  pnpm test:int _community
   ```
 
 ### How to run E2E tests (Admin Panel UI tests)

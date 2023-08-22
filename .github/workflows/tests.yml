@@ -7,7 +7,7 @@ on:
     branches: ["master"]
 
 jobs:
-  build_yarn:
+  build_pnpm:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,35 +22,48 @@ jobs:
           registry-url: https://registry.npmjs.org
           scope: "@payloadcms"
           always-auth: true
-      - name: Cache node modules
-        uses: actions/cache@v1
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          version: 8
+          run_install: false
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-      - run: yarn
+            ${{ runner.os }}-pnpm-store-
+      - name: Debug print versions
+        run: |
+          node -v
+          pnpm -v
+      - name: Install dependencies
+        run: pnpm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: yarn build
+      - run: pnpm build
 
       - name: Component Tests
-        run: yarn test:components
+        run: pnpm test:components
       - name: Integration Tests
-        run: yarn test:int
+        run: pnpm test:int
 
       - name: Generate Payload Types
-        run: yarn dev:generate-types fields
+        run: pnpm dev:generate-types fields
 
       - name: Generate GraphQL schema file
-        run: yarn dev:generate-graphql-schema graphql-schema-gen
+        run: pnpm dev:generate-graphql-schema graphql-schema-gen
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: E2E Tests
-        run: yarn test:e2e --bail
+        run: pnpm test:e2e --bail
 
       - uses: actions/upload-artifact@v3
         if: always()

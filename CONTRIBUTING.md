@@ -49,13 +49,13 @@ A typical directory with `test/` will be structured like this:
 - `config.ts` - This is the _granular_ Payload config for testing. It should be as lightweight as possible. Reference existing configs for an example
 - `int.spec.ts` - This is the test file run by jest. Any test file must have a `*int.spec.ts` suffix.
 - `e2e.spec.ts` - This is the end-to-end test file that will load up the admin UI using the above config and run Playwright tests. These tests are typically only needed if a large change is being made to the Admin UI.
-- `payload-types.ts` - Generated types from `config.ts`. Generate this file by running `yarn dev:generate-types my-test-dir`.
+- `payload-types.ts` - Generated types from `config.ts`. Generate this file by running `pnpm dev:generate-types my-test-dir`.
 
 The directory split up in this way specifically to reduce friction when creating tests and to add the ability to boot up Payload with that specific config.
 
-The following command will start Payload with your config: `yarn dev my-test-dir`. This command will start up Payload using your config and refresh a test database on every restart.
+The following command will start Payload with your config: `pnpm dev my-test-dir`. This command will start up Payload using your config and refresh a test database on every restart.
 
-By default, it will automatically log you in with the default credentials. To disable that, you can either pass in the --no-auto-login flag (example: `yarn dev my-test-dir --no-auto-login`) or set the `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN` environment variable to `false`.
+By default, it will automatically log you in with the default credentials. To disable that, you can either pass in the --no-auto-login flag (example: `pnpm dev my-test-dir --no-auto-login`) or set the `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN` environment variable to `false`.
 
 If you wish to use to your own Mongo database for the `test` directory instead of using the in memory database, all you need to do is add the following env vars to the `test/dev.ts` file:
 
