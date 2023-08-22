@@ -56,7 +56,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const { setDocFieldPreferences } = useDocumentInfo();
   const { dispatchFields, setModified, addFieldRow, removeFieldRow } = useForm();
   const submitted = useFormSubmitted();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const { t, i18n } = useTranslation('fields');
   const { localization } = useConfig();
 

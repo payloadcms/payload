@@ -56,7 +56,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const { setDocFieldPreferences } = useDocumentInfo();
   const { dispatchFields, setModified, addFieldRow, removeFieldRow } = useForm();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const { localization } = useConfig();
   const drawerSlug = useDrawerSlug('blocks-drawer');
   const submitted = useFormSubmitted();

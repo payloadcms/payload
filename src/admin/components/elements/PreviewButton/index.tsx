@@ -43,7 +43,7 @@ const PreviewButton: React.FC<Props> = ({
   const { id, collection, global } = useDocumentInfo();
 
   const [isLoading, setIsLoading] = useState(false);
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const { token } = useAuth();
   const { serverURL, routes: { api } } = useConfig();
   const { t } = useTranslation('version');

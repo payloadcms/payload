@@ -76,7 +76,7 @@ export const LinkElement: React.FC<{
   const editor = useSlate();
   const config = useConfig();
   const { user } = useAuth();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const { t, i18n } = useTranslation('fields');
   const { openModal, toggleModal, closeModal } = useModal();
   const [renderModal, setRenderModal] = useState(false);

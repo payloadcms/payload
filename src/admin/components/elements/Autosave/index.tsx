@@ -19,7 +19,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
   const { versions, getVersions } = useDocumentInfo();
   const [fields] = useAllFormFields();
   const modified = useFormModified();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const { replace } = useHistory();
   const { t, i18n } = useTranslation('version');
 

@@ -1,6 +1,6 @@
 import merge from 'deepmerge';
 import { isPlainObject } from 'is-plain-object';
-import { Config, SanitizedConfig } from './types';
+import type { Config, LocalizationConfigWithLabels, LocalizationConfigWithNoLabels, SanitizedConfig, SanitizedLocalizationConfig } from './types';
 import { defaultUserCollection } from '../auth/defaultUser';
 import sanitizeCollection from '../collections/config/sanitize';
 import { InvalidConfiguration } from '../errors';
@@ -43,11 +43,40 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   }) as Config;
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults);
+
+  if (config.localization && config.localization.locales?.length > 0) {
+    // clone localization config so to not break everything
+    const firstLocale = config.localization.locales[0];
+    if (typeof firstLocale === 'string') {
+      (config.localization as SanitizedLocalizationConfig).localeCodes = [...(config.localization as unknown as LocalizationConfigWithNoLabels).locales];
+
+      // is string[], so convert to Locale[]
+      (config.localization as SanitizedLocalizationConfig).locales = (config.localization as unknown as LocalizationConfigWithNoLabels).locales.map((locale) => ({
+        label: locale,
+        code: locale,
+        rtl: false,
+        toString: () => locale,
+      }));
+    } else {
+      // is Locale[], so convert to string[] for localeCodes
+      (config.localization as SanitizedLocalizationConfig).localeCodes = (config.localization as SanitizedLocalizationConfig).locales.reduce((locales, locale) => {
+        locales.push(locale.code);
+        return locales;
+      }, [] as string[]);
+
+      (config.localization as SanitizedLocalizationConfig).locales = (config.localization as LocalizationConfigWithLabels).locales.map((locale) => ({
+        ...locale,
+        toString: () => locale.code,
+      }));
+    }
+  }
+
+
   configWithDefaults.collections.push(getPreferencesCollection(configWithDefaults));
   configWithDefaults.collections.push(migrationsCollection);
 
   config.collections = config.collections.map((collection) => sanitizeCollection(configWithDefaults, collection));
-
+  checkDuplicateCollections(config.collections);
 
   if (config.globals.length > 0) {
     config.globals = sanitizeGlobals(config.collections, config.globals);

@@ -15,7 +15,7 @@ import { usePreferences } from '../../utilities/Preferences';
 
 const AccountView: React.FC = () => {
   const { state: locationState } = useLocation<{ data: unknown }>();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const { setStepNav } = useStepNav();
   const { user } = useAuth();
   const userRef = useRef(user);

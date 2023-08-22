@@ -24,6 +24,10 @@
     padding-bottom: 0;
     padding-left: base(.5);
   }
+  [dir=rtl] &__input {
+    margin-right: 0;
+    margin-left: base(.5);
+  }
 
   &__input {
     @include formInput;

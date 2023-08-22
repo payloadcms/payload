@@ -7,6 +7,7 @@
 
     @include mid-break {
       margin-top: base(1.5);
+      
     }
   }
 
@@ -22,9 +23,8 @@
 
     button .pill {
       pointer-events: none;
-      margin: 0;
       margin-top: base(0.25);
-      margin-left: base(0.5);
+      margin-right: base(0.5);
     }
   }
 

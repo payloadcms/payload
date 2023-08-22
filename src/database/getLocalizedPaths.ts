@@ -64,7 +64,7 @@ export async function getLocalizedPaths({
         }
 
         const nextSegment = pathSegments[i + 1];
-        const nextSegmentIsLocale = localizationConfig && localizationConfig.locales.includes(nextSegment);
+        const nextSegmentIsLocale = localizationConfig && localizationConfig.localeCodes.includes(nextSegment);
 
         if (nextSegmentIsLocale) {
           // Skip the next iteration, because it's a locale

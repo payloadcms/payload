@@ -31,7 +31,7 @@ export const UploadDrawer: React.FC<ElementProps & {
   } = props;
 
   const { t, i18n } = useTranslation();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const { user } = useAuth();
   const { closeModal } = useModal();
   const { getDocPreferences } = useDocumentInfo();
