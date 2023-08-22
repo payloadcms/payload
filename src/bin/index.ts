@@ -17,7 +17,7 @@ const swcOptions = {
       tsx: true,
     },
     paths: undefined,
-    baseUrl: __dirname,
+    baseUrl: path.resolve(),
   },
   module: {
     type: 'commonjs',

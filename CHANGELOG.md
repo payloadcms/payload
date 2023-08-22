@@ -1,5 +1,27 @@
 
 
+# [1.14.0](https://github.com/payloadcms/payload/compare/v1.13.4...v1.14.0) (2023-08-16)
+
+
+### Bug Fixes
+
+* DatePicker showing only selected day by default ([#3169](https://github.com/payloadcms/payload/issues/3169)) ([edcb393](https://github.com/payloadcms/payload/commit/edcb3933cfb4532180c822135ea6a8be928e0fdc))
+* only allow redirects to /admin sub-routes ([c0f05a1](https://github.com/payloadcms/payload/commit/c0f05a1c38fb9c958de920fabb698b5ecfb661f0))
+* passes in height to resizeOptions upload option to allow height resize ([#3171](https://github.com/payloadcms/payload/issues/3171)) ([7963d04](https://github.com/payloadcms/payload/commit/7963d04a27888eb5a12d0ab37f2082cd33638abd))
+* WhereBuilder component does not accept all valid Where queries ([#3087](https://github.com/payloadcms/payload/issues/3087)) ([fdfdfc8](https://github.com/payloadcms/payload/commit/fdfdfc83f36a958971f8e4e4f9f5e51560cb26e0))
+
+
+### Features
+
+* add afterOperation hook ([#2697](https://github.com/payloadcms/payload/issues/2697)) ([33686c6](https://github.com/payloadcms/payload/commit/33686c6db8373a16d7f6b0192e0701bf15881aa4))
+* add support for hotkeys ([#1821](https://github.com/payloadcms/payload/issues/1821)) ([942cfec](https://github.com/payloadcms/payload/commit/942cfec286ff050e13417b037cca64b9d757d868))
+* Added Azerbaijani language file ([#3164](https://github.com/payloadcms/payload/issues/3164)) ([63e3063](https://github.com/payloadcms/payload/commit/63e3063b9ecc1afd62d7a287a798d41215008f2a))
+* allow async relationship filter options ([#2951](https://github.com/payloadcms/payload/issues/2951)) ([bad3638](https://github.com/payloadcms/payload/commit/bad363882c9d00d3c73547ca3329eba988e728ff))
+* Improve admin dashboard accessibility ([#3053](https://github.com/payloadcms/payload/issues/3053)) ([e03a8e6](https://github.com/payloadcms/payload/commit/e03a8e6b030e82a17e1cdae5b4032433cf9c75a4))
+* improve field ops ([#3172](https://github.com/payloadcms/payload/issues/3172)) ([d91b44c](https://github.com/payloadcms/payload/commit/d91b44cbb3fd526caca2a6f4bd30fd06ede3a5da))
+* make PAYLOAD_CONFIG_PATH optional ([#2839](https://github.com/payloadcms/payload/issues/2839)) ([5744de7](https://github.com/payloadcms/payload/commit/5744de7ec63e3f17df7e02a7cc827818a79dbbb8))
+* text alignment for richtext editor ([#2803](https://github.com/payloadcms/payload/issues/2803)) ([a0b13a5](https://github.com/payloadcms/payload/commit/a0b13a5b01fa0d7f4c4dffd1895bfe507e5c676d))
+
 ## [1.13.4](https://github.com/payloadcms/payload/compare/v1.13.3...v1.13.4) (2023-08-11)
 
 

@@ -43,6 +43,7 @@ export type OptionGroup = {
 }
 
 export type Props = {
+  inputId?: string
   className?: string
   value?: Option | Option[],
   onChange?: (value: any) => void, // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -76,4 +77,5 @@ export type Props = {
   */
   selectProps?: CustomSelectProps
   backspaceRemovesValue?: boolean
+  noOptionsMessage?: (obj: { inputValue: string }) => string
 }

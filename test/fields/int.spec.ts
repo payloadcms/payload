@@ -48,6 +48,15 @@ describe('Fields', () => {
       expect(doc.defaultFunction).toEqual(defaultText);
       expect(doc.defaultAsync).toEqual(defaultText);
     });
+
+    it('should populate default values in beforeValidate hook', async () => {
+      const { fieldWithDefaultValue, dependentOnFieldWithDefaultValue } = await payload.create({
+        collection: 'text-fields',
+        data: { text },
+      });
+
+      await expect(fieldWithDefaultValue).toEqual(dependentOnFieldWithDefaultValue);
+    });
   });
 
   describe('timestamps', () => {

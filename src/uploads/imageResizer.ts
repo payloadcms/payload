@@ -106,7 +106,7 @@ const createResult = (
  * @returns true if the image needs to be resized, false otherwise
  */
 const needsResize = (
-  { width: desiredWidth, height: desiredHeigth, withoutEnlargement, withoutReduction }: ImageSize,
+  { width: desiredWidth, height: desiredHeight, withoutEnlargement, withoutReduction }: ImageSize,
   original: ProbedImageSize,
 ): boolean => {
   // allow enlargement or prevent reduction (our default is to prevent
@@ -115,7 +115,8 @@ const needsResize = (
     return true; // needs resize
   }
 
-  const isWidthOrHeightNotDefined = !desiredHeigth || !desiredWidth;
+  const isWidthOrHeightNotDefined = !desiredHeight || !desiredWidth;
+
   if (isWidthOrHeightNotDefined) {
     // If with and height are not defined, it means there is a format conversion
     // and the image needs to be "resized" (transformed).
@@ -123,7 +124,7 @@ const needsResize = (
   }
 
   const hasInsufficientWidth = original.width < desiredWidth;
-  const hasInsufficientHeight = original.height < desiredHeigth;
+  const hasInsufficientHeight = original.height < desiredHeight;
   if (hasInsufficientWidth && hasInsufficientHeight) {
     // doesn't need resize - prevent enlargement. This should only happen if both width and height are insufficient.
     // if only one dimension is insufficient and the other is sufficient, resizing needs to happen, as the image

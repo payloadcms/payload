@@ -9,6 +9,9 @@
   text-decoration: none;
   display: inline-flex;
   padding: 12px 24px;
+  font-family: inherit;
+  line-height: inherit;
+  font-size: inherit;
 }
 
 .content {
@@ -53,4 +56,17 @@
 .appearance--default {
   padding: 0;
   color: var(--theme-text);
+}
+
+.appearance--none {
+  padding: 0;
+  color: var(--theme-text);
+
+  &:local() {
+    .label {
+      text-transform: none;
+      line-height: inherit;
+      font-size: inherit;
+    }
+  }
 }

@@ -11,6 +11,8 @@ import { buildVersionCollectionFields } from '../../versions/buildCollectionFiel
 import { combineQueries } from '../../database/combineQueries';
 import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
+import { queryDrafts } from '../../versions/drafts/queryDrafts';
+import { buildAfterOperation } from './utils';
 
 export type Arguments = {
   collection: Collection
@@ -233,6 +235,16 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         return docRef;
       })),
     };
+
+    // /////////////////////////////////////
+    // afterOperation - Collection
+    // /////////////////////////////////////
+
+    result = await buildAfterOperation<T>({
+      operation: 'find',
+      args,
+      result,
+    });
 
     // /////////////////////////////////////
     // Return results

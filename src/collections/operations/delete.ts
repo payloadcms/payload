@@ -14,6 +14,7 @@ import { validateQueryPaths } from '../../database/queryValidation/validateQuery
 import { combineQueries } from '../../database/combineQueries';
 import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
+import { buildAfterOperation } from './utils';
 
 export type Arguments = {
   depth?: number
@@ -247,12 +248,24 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
       req,
     });
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
-
-    return {
+    let result = {
       docs: awaitedDocs.filter(Boolean),
       errors,
     };
+
+    // /////////////////////////////////////
+    // afterOperation - Collection
+    // /////////////////////////////////////
+
+    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+      operation: 'delete',
+      args,
+      result,
+    });
+
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return result;
   } catch (error: unknown) {
     await killTransaction(req);
     throw error;

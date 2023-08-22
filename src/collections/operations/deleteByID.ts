@@ -12,6 +12,7 @@ import { combineQueries } from '../../database/combineQueries';
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences';
 import { killTransaction } from '../../utilities/killTransaction';
 import { initTransaction } from '../../utilities/initTransaction';
+import { buildAfterOperation } from './utils';
 
 export type Arguments = {
   depth?: number
@@ -191,6 +192,16 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
         context: req.context,
       }) || result;
     }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // afterOperation - Collection
+    // /////////////////////////////////////
+
+    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+      operation: 'deleteByID',
+      args,
+      result,
+    });
 
     // /////////////////////////////////////
     // 8. Return results
