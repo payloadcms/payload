@@ -54,12 +54,10 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     config.serverURL = '';
   }
 
-  if (config.serverURL === '') {
-    getLogger().warn('No serverURL provided in config, defaulted to \'\'. If this was intended, ignore this message.');
-  }
-
   if (config.serverURL !== '') {
     config.csrf.push(config.serverURL);
+  } else {
+    getLogger().warn('No serverURL provided in config, defaulted to \'\'. If this was intended, ignore this message.');
   }
 
   return config as SanitizedConfig;
