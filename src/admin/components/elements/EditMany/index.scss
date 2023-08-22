@@ -67,7 +67,13 @@
         width: base(2.75);
         height: base(2.75);
         position: relative;
-        left: base(-.825);
+        [dir=ltr] & {
+          left: base(-.825);
+        }
+
+        [dir=rtl] & {
+          right: base(-.825);
+        }
         top: base(-.825);
 
         .stroke {
@@ -119,7 +125,7 @@
     }
     [dir=rtl] & {
       padding-right: base(1.5);
-    }  
+    }
   }
 
   &__document-actions {

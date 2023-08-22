@@ -33,6 +33,9 @@
   .btn {
     vertical-align: middle;
     margin: 0 0 0 $baseline;
+    [dir=rtl] & {
+      margin: 0 $baseline 0 0;
+    }
   }
 
   @include mid-break {
