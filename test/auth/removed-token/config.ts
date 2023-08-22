@@ -1,8 +1,8 @@
-import { buildConfig } from '../../buildConfig';
+import { buildConfigWithDefaults } from '../../buildConfigWithDefaults';
 
 export const collectionSlug = 'users';
 
-export default buildConfig({
+export default buildConfigWithDefaults({
   debug: true,
   admin: {
     user: 'users',
