@@ -1,8 +1,8 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
-import { Where } from 'payload/types';
+import { Operator, Where } from 'payload/types';
 import { Field } from 'payload/dist/fields/config/types';
-import { validOperators } from 'payload/dist/database/queryValidation/types';
+import { validOperators } from 'payload/dist/types/constants';
 import { and, SQL } from 'drizzle-orm';
 import { buildSearchParam } from './buildSearchParams';
 import { buildAndOrConditions } from './buildAndOrConditions';
@@ -53,7 +53,7 @@ export async function parseParams({
         const pathOperators = where[relationOrPath];
         if (typeof pathOperators === 'object') {
           for (const operator of Object.keys(pathOperators)) {
-            if (validOperators.includes(operator)) {
+            if (validOperators.includes(operator as Operator)) {
               const searchParam = await buildSearchParam({
                 collectionSlug,
                 globalSlug,

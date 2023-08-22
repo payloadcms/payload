@@ -88,6 +88,7 @@ const Checkbox: React.FC<Props> = (props) => {
         label={getTranslation(label || name, i18n)}
         name={path}
         checked={Boolean(value)}
+        readOnly={readOnly}
       />
       <FieldDescription
         value={value}

@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
-import { PayloadRequest, Where, WhereField } from '../../types';
+import { Operator, PayloadRequest, Where } from '../../types';
 import QueryError from '../../errors/QueryError';
 import { SanitizedCollectionConfig } from '../../collections/config/types';
 import { SanitizedGlobalConfig } from '../../globals/config/types';
@@ -8,21 +8,9 @@ import flattenFields from '../../utilities/flattenTopLevelFields';
 import { Field, FieldAffectingData } from '../../fields/config/types';
 import { validateSearchParam } from './validateSearchParams';
 import deepCopyObject from '../../utilities/deepCopyObject';
-import { EntityPolicies, validOperators } from './types';
-
-const flattenWhere = (query: Where): WhereField[] => Object.entries(query).reduce((flattenedConstraints, [key, val]) => {
-  if ((key === 'and' || key === 'or') && Array.isArray(val)) {
-    return [
-      ...flattenedConstraints,
-      ...val.map((subVal) => flattenWhere(subVal)),
-    ];
-  }
-
-  return [
-    ...flattenedConstraints,
-    { [key]: val },
-  ];
-}, []);
+import { EntityPolicies } from './types';
+import flattenWhereToOperators from '../flattenWhereToOperators';
+import { validOperators } from '../../types/constants';
 
 type Args = {
   where: Where
@@ -54,13 +42,13 @@ export async function validateQueryPaths({
   const fields = flattenFields(versionFields || (globalConfig || collectionConfig).fields) as FieldAffectingData[];
   if (typeof where === 'object') {
     // const flattenedWhere = flattenWhere(where);
-    const whereFields = flattenWhere(where);
+    const whereFields = flattenWhereToOperators(where);
     // We need to determine if the whereKey is an AND, OR, or a schema path
     const promises = [];
     whereFields.map(async (constraint) => {
       Object.keys(constraint).map(async (path) => {
         Object.entries(constraint[path]).map(async ([operator, val]) => {
-          if (validOperators.includes(operator)) {
+          if (validOperators.includes(operator as Operator)) {
             promises.push(validateSearchParam({
               collectionConfig: deepCopyObject(collectionConfig),
               globalConfig: deepCopyObject(globalConfig),

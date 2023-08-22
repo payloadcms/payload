@@ -5,7 +5,7 @@ import deepmerge from 'deepmerge';
 import { Where } from 'payload/types';
 import { combineMerge } from 'payload/dist/utilities/combineMerge';
 import { Field } from 'payload/dist/fields/config/types';
-import { validOperators } from 'payload/dist/database/queryValidation/types';
+import { validOperators } from 'payload/dist/types/constants';
 import { Payload } from 'payload';
 import { buildSearchParam } from './buildSearchParams';
 import { buildAndOrConditions } from './buildAndOrConditions';

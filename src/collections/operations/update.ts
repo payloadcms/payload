@@ -22,8 +22,10 @@ import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQu
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
 import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
+import { CreateUpdateType } from './create';
+import { buildAfterOperation } from './utils';
 
-export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
+export type Arguments<T extends CreateUpdateType> = {
   collection: Collection
   req: PayloadRequest
   where: Where
@@ -361,6 +363,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           collectionConfig,
         });
 
+
         // /////////////////////////////////////
         // Return results
         // /////////////////////////////////////
@@ -377,12 +380,24 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
     const awaitedDocs = await Promise.all(promises);
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
-
-    return {
+    let result = {
       docs: awaitedDocs.filter(Boolean),
       errors,
     };
+
+    // /////////////////////////////////////
+    // afterOperation - Collection
+    // /////////////////////////////////////
+
+    result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
+      operation: 'update',
+      args,
+      result,
+    });
+
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+
+    return result;
   } catch (error: unknown) {
     await killTransaction(req);
     throw error;

@@ -11,48 +11,47 @@ import getPreferencesCollection from '../preferences/preferencesCollection';
 import { migrationsCollection } from '../database/migrations/migrationsCollection';
 import getDefaultBundler from '../bundlers/webpack/bundler';
 
-const sanitizeAdmin = (config: SanitizedConfig): SanitizedConfig['admin'] => {
-  const adminConfig = config.admin;
+const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
+  const sanitizedConfig = { ...configToSanitize };
 
   // add default user collection if none provided
-  if (!adminConfig?.user) {
-    const firstCollectionWithAuth = config.collections.find(({ auth }) => Boolean(auth));
+  if (!sanitizedConfig?.admin?.user) {
+    const firstCollectionWithAuth = sanitizedConfig.collections.find(({ auth }) => Boolean(auth));
     if (firstCollectionWithAuth) {
-      adminConfig.user = firstCollectionWithAuth.slug;
+      sanitizedConfig.admin.user = firstCollectionWithAuth.slug;
     } else {
-      adminConfig.user = 'users';
-      const sanitizedDefaultUser = sanitizeCollection(config, defaultUserCollection);
-      config.collections.push(sanitizedDefaultUser);
+      sanitizedConfig.admin.user = defaultUserCollection.slug;
+      sanitizedConfig.collections.push(defaultUserCollection);
     }
   }
 
-  if (!config.collections.find(({ slug }) => slug === adminConfig.user)) {
-    throw new InvalidConfiguration(`${config.admin.user} is not a valid admin user collection`);
+  if (!sanitizedConfig.collections.find(({ slug }) => slug === sanitizedConfig.admin.user)) {
+    throw new InvalidConfiguration(`${sanitizedConfig.admin.user} is not a valid admin user collection`);
   }
 
   // add default bundler if none provided
-  if (!adminConfig.bundler) {
-    adminConfig.bundler = getDefaultBundler();
+  if (!sanitizedConfig.admin.bundler) {
+    sanitizedConfig.admin.bundler = getDefaultBundler();
   }
 
-  return adminConfig;
+  return sanitizedConfig as Partial<SanitizedConfig>;
 };
 
-export const sanitizeConfig = (config: Config): SanitizedConfig => {
-  const sanitizedConfig: Config = merge(defaults, config, {
+export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
+  const configWithDefaults: Config = merge(defaults, incomingConfig, {
     isMergeableObject: isPlainObject,
   }) as Config;
 
-  sanitizedConfig.admin = sanitizeAdmin(sanitizedConfig as SanitizedConfig);
+  const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults);
 
-  if (sanitizedConfig.localization && sanitizedConfig.localization.locales?.length > 0) {
+  if (config.localization && config.localization.locales?.length > 0) {
     // clone localization config so to not break everything
-    const firstLocale = sanitizedConfig.localization.locales[0];
+    const firstLocale = config.localization.locales[0];
     if (typeof firstLocale === 'string') {
-      (sanitizedConfig.localization as SanitizedLocalizationConfig).localeCodes = [...(sanitizedConfig.localization as LocalizationConfigWithNoLabels).locales];
+      (config.localization as SanitizedLocalizationConfig).localeCodes = [...(config.localization as unknown as LocalizationConfigWithNoLabels).locales];
 
       // is string[], so convert to Locale[]
-      (sanitizedConfig.localization as SanitizedLocalizationConfig).locales = (sanitizedConfig.localization as LocalizationConfigWithNoLabels).locales.map((locale) => ({
+      (config.localization as SanitizedLocalizationConfig).locales = (config.localization as unknown as LocalizationConfigWithNoLabels).locales.map((locale) => ({
         label: locale,
         code: locale,
         rtl: false,
@@ -60,35 +59,36 @@ export const sanitizeConfig = (config: Config): SanitizedConfig => {
       }));
     } else {
       // is Locale[], so convert to string[] for localeCodes
-      (sanitizedConfig.localization as SanitizedLocalizationConfig).localeCodes = (sanitizedConfig.localization as SanitizedLocalizationConfig).locales.reduce((locales, locale) => {
+      (config.localization as SanitizedLocalizationConfig).localeCodes = (config.localization as SanitizedLocalizationConfig).locales.reduce((locales, locale) => {
         locales.push(locale.code);
         return locales;
       }, [] as string[]);
 
-      (sanitizedConfig.localization as SanitizedLocalizationConfig).locales = (sanitizedConfig.localization as LocalizationConfigWithLabels).locales.map((locale) => ({
+      (config.localization as SanitizedLocalizationConfig).locales = (config.localization as LocalizationConfigWithLabels).locales.map((locale) => ({
         ...locale,
         toString: () => locale.code,
       }));
     }
   }
-  sanitizedConfig.collections.push(getPreferencesCollection(sanitizedConfig));
 
-  sanitizedConfig.collections.push(migrationsCollection);
 
-  sanitizedConfig.collections = sanitizedConfig.collections.map((collection) => sanitizeCollection(sanitizedConfig, collection));
-  checkDuplicateCollections(sanitizedConfig.collections);
+  configWithDefaults.collections.push(getPreferencesCollection(configWithDefaults));
+  configWithDefaults.collections.push(migrationsCollection);
 
-  if (sanitizedConfig.globals.length > 0) {
-    sanitizedConfig.globals = sanitizeGlobals(sanitizedConfig.collections, sanitizedConfig.globals);
+  config.collections = config.collections.map((collection) => sanitizeCollection(configWithDefaults, collection));
+  checkDuplicateCollections(config.collections);
+
+  if (config.globals.length > 0) {
+    config.globals = sanitizeGlobals(config.collections, config.globals);
   }
 
-  if (typeof sanitizedConfig.serverURL === 'undefined') {
-    sanitizedConfig.serverURL = '';
+  if (typeof config.serverURL === 'undefined') {
+    config.serverURL = '';
   }
 
-  if (sanitizedConfig.serverURL !== '') {
-    sanitizedConfig.csrf.push(sanitizedConfig.serverURL);
+  if (config.serverURL !== '') {
+    config.csrf.push(config.serverURL);
   }
 
-  return sanitizedConfig as SanitizedConfig;
+  return config as SanitizedConfig;
 };
