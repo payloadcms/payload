@@ -1,15 +1,16 @@
 import { ValidationError } from 'payload/errors';
 import type { PayloadRequest } from 'payload/types';
 import type { UpdateOne } from 'payload/dist/database/types';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import i18nInit from 'payload/dist/translations/init';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import type { MongooseAdapter } from '.';
 import { withSession } from './withSession';
 
 export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,
-  { collection, data, where, locale, req = {} as PayloadRequest },
+  { collection, data, where: whereArg, id, locale, req = {} as PayloadRequest },
 ) {
+  const where = id ? { id: { equals: id } } : whereArg;
   const Model = this.collections[collection];
   const options = {
     ...withSession(this, req.transactionID),
@@ -25,7 +26,7 @@ export const updateOne: UpdateOne = async function updateOne(
 
   let result;
   try {
-    result = await Model.findOneAndUpdate(query, data, options).lean();
+    result = await Model.findOneAndUpdate(query, data, options);
   } catch (error) {
     // Handle uniqueness error from MongoDB
     throw error.code === 11000 && error.keyValue
