@@ -43,14 +43,11 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   }) as Config;
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults);
-  config.collections = config.collections.map((collection) => sanitizeCollection(configWithDefaults, collection));
-
   configWithDefaults.collections.push(getPreferencesCollection(configWithDefaults));
-
   configWithDefaults.collections.push(migrationsCollection);
 
-  configWithDefaults.collections = configWithDefaults.collections.map((collection) => sanitizeCollection(configWithDefaults, collection));
-  checkDuplicateCollections(config.collections);
+  config.collections = config.collections.map((collection) => sanitizeCollection(configWithDefaults, collection));
+
 
   if (config.globals.length > 0) {
     config.globals = sanitizeGlobals(config.collections, config.globals);
