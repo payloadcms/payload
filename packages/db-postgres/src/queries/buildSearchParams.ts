@@ -3,7 +3,9 @@ import { inArray } from 'drizzle-orm';
 import { a as SQL } from 'drizzle-orm/column.d-aa4e525d';
 import { getLocalizedPaths } from 'payload/dist/database/getLocalizedPaths';
 import { Field, fieldAffectsData } from 'payload/dist/fields/config/types';
-import { PathToQuery, validOperators } from 'payload/dist/database/queryValidation/types';
+import { PathToQuery } from 'payload/dist/database/queryValidation/types';
+import { validOperators } from 'payload/dist/types/constants';
+import { Operator } from 'payload/types';
 import { operatorMap } from './operatorMap';
 import { PostgresAdapter } from '../types';
 
@@ -177,7 +179,7 @@ export async function buildSearchParam({
       return relationshipQuery;
     }
 
-    if (operator && validOperators.includes(operator)) {
+    if (operator && validOperators.includes(operator as Operator)) {
       const operatorKey = operatorMap[operator];
 
       if (field.type === 'relationship' || field.type === 'upload') {

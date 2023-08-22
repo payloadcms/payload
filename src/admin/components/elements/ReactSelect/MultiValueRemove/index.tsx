@@ -4,6 +4,7 @@ import { MultiValueRemoveProps } from 'react-select';
 import X from '../../../icons/X';
 import Tooltip from '../../Tooltip';
 import { Option as OptionType } from '../types';
+
 import './index.scss';
 
 const baseClass = 'multi-value-remove';

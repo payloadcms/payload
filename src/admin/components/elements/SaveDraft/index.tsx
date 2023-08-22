@@ -58,7 +58,7 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
   const { submit } = useForm();
   const { collection, global, id } = useDocumentInfo();
   const modified = useFormModified();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const { t } = useTranslation('version');
 
   const canSaveDraft = modified;

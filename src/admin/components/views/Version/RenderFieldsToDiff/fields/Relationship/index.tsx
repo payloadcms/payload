@@ -63,7 +63,7 @@ const generateLabelFromValue = (
 const Relationship: React.FC<Props & { field: RelationshipField }> = ({ field, version, comparison }) => {
   const { collections } = useConfig();
   const { t, i18n } = useTranslation('general');
-  const locale = useLocale();
+  const { code: locale } = useLocale();
 
   let placeholder = '';
 

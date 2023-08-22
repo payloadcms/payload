@@ -10,8 +10,8 @@ import { requests } from '../../../api';
 import { useForm, useFormModified } from '../../forms/Form/context';
 import MinimalTemplate from '../../templates/Minimal';
 import { getTranslation } from '../../../../utilities/getTranslation';
-
 import './index.scss';
+
 
 const baseClass = 'duplicate';
 
@@ -77,7 +77,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
     if (localization) {
       duplicateID = await create(localization.defaultLocale);
       let abort = false;
-      localization.locales
+      localization.localeCodes
         .filter((locale) => locale !== localization.defaultLocale)
         .forEach(async (locale) => {
           if (!abort) {

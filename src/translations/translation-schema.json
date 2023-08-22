@@ -663,6 +663,9 @@
         "descending": {
           "type": "string"
         },
+        "deselectAllRows": {
+          "type": "string"
+        },
         "duplicate": {
           "type": "string"
         },
@@ -753,6 +756,9 @@
         "noLabel": {
           "type": "string"
         },
+        "noOptions": {
+          "type": "string"
+        },
         "noResults": {
           "type": "string"
         },
@@ -810,16 +816,25 @@
         "selectAll": {
           "type": "string"
         },
+        "selectAllRows": {
+          "type": "string"
+        },
         "selectValue": {
           "type": "string"
         },
         "selectedCount": {
           "type": "string"
         },
+        "showAllLabel": {
+          "type": "string"
+        },
         "sorryNotFound": {
           "type": "string"
         },
         "sort": {
+          "type": "string"
+        },
+        "sortByLabelDirection": {
           "type": "string"
         },
         "stayOnThisPage": {
@@ -1106,6 +1121,9 @@
           "type": "string"
         },
         "enterNumber": {
+          "type": "string"
+        },
+        "limitReached": {
           "type": "string"
         },
         "fieldHasNo": {

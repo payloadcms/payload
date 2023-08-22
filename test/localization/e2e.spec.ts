@@ -23,6 +23,7 @@ let url: AdminUrlUtil;
 const defaultLocale = 'en';
 const title = 'english title';
 const spanishTitle = 'spanish title';
+const arabicTitle = 'arabic title';
 const description = 'description';
 
 let page: Page;
@@ -73,6 +74,34 @@ describe('Localization', () => {
       await changeLocale(newLocale);
 
       await fillValues({ title: spanishTitle, description });
+      await saveDocAndAssert(page);
+
+      // Change back to English
+      await changeLocale(defaultLocale);
+
+      // Localized field should not be populated
+      await expect(page.locator('#field-title')).toBeEmpty();
+      await expect(page.locator('#field-description')).toHaveValue(description);
+
+      // Add English
+
+      await fillValues({ title, description });
+      await saveDocAndAssert(page);
+      await saveDocAndAssert(page);
+
+      await expect(page.locator('#field-title')).toHaveValue(title);
+      await expect(page.locator('#field-description')).toHaveValue(description);
+    });
+
+    test('create arabic post, add english', async () => {
+      await page.goto(url.create);
+
+      const newLocale = 'ar';
+
+      // Change to Arabic
+      await changeLocale(newLocale);
+
+      await fillValues({ title: arabicTitle, description });
       await saveDocAndAssert(page);
 
       // Change back to English

@@ -1,21 +1,9 @@
 import { TypeWithTimestamps } from '../collections/config/types';
+import { validOperators } from './constants';
 
 export { PayloadRequest } from '../express/types';
 
-export type Operator =
-  | 'equals'
-  | 'contains'
-  | 'not_equals'
-  | 'in'
-  | 'all'
-  | 'not_in'
-  | 'exists'
-  | 'greater_than'
-  | 'greater_than_equal'
-  | 'less_than'
-  | 'less_than_equal'
-  | 'like'
-  | 'near';
+export type Operator = typeof validOperators[number];
 
 export type WhereField = {
   [key in Operator]?: unknown;

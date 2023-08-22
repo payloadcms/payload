@@ -8,7 +8,12 @@
   height: 100vh;
   width: var(--nav-width);
   overflow: hidden;
-  border-right: 1px solid var(--theme-elevation-100);
+  [dir=ltr] & {
+    border-right: 1px solid var(--theme-elevation-100);
+  }
+  [dir=rtl] & {
+    border-left: 1px solid var(--theme-elevation-100);
+  }  
 
   header {
     width: 100%;
@@ -27,7 +32,12 @@
   }
 
   &__brand {
-    margin-right: base(1);
+    [dir=ltr] & {
+      margin-right: base(1);
+    }
+    [dir=rtl] & {
+      margin-left: base(1);
+    }  
   }
 
   &__mobile-menu-btn {
@@ -91,6 +101,9 @@
       padding: base(.125) base(1.5) base(.125) 0;
       display: flex;
       text-decoration: none;
+      [dir=rtl] & {
+        padding: base(.125) 0 base(.125) base(1.5);
+      }
 
       &:focus:not(:focus-visible) {
         box-shadow: none;
@@ -103,8 +116,13 @@
 
       &.active {
         font-weight: normal;
-        padding-left: base(.6);
         font-weight: 600;
+        [dir=ltr] & {
+          padding-left: base(.6);
+        }
+        [dir=rtl] & {
+          padding-right: base(.6);
+        }  
       }
     }
   }
@@ -113,8 +131,14 @@
     svg {
       opacity: 0;
       position: absolute;
-      left: - base(.5);
-      transform: rotate(-90deg);
+      [dir=ltr] & {
+        left: - base(.5);
+        transform: rotate(-90deg);
+      }
+      [dir=rtl] & {
+        right: - base(.5);
+        transform: rotate(90deg);
+      }  
     }
 
     &.active {

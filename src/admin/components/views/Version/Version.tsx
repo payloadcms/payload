@@ -32,10 +32,10 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const { setStepNav } = useStepNav();
   const { params: { id, versionID } } = useRouteMatch<{ id?: string, versionID: string }>();
   const [compareValue, setCompareValue] = useState<CompareOption>(mostRecentVersionOption);
-  const [localeOptions] = useState<LocaleOption[]>(() => (localization ? localization.locales.map((locale) => ({ label: locale, value: locale })) : []));
+  const [localeOptions] = useState<LocaleOption[]>(() => (localization ? localization.locales : []));
   const [locales, setLocales] = useState<LocaleOption[]>(localeOptions);
   const { permissions } = useAuth();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const { t, i18n } = useTranslation('version');
   const { docPermissions } = useDocumentInfo();
 
@@ -214,7 +214,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
           {doc?.version && (
             <RenderFieldsToDiff
-              locales={locales ? locales.map(({ value }) => value) : []}
+              locales={locales ? locales.map(({ code }) => code) : []}
               fields={fields}
               fieldComponents={fieldComponents}
               fieldPermissions={fieldPermissions}

@@ -32,7 +32,7 @@ const Status: React.FC = () => {
   } = useConfig();
   const [processing, setProcessing] = useState(false);
   const { reset: resetForm } = useForm();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const { t, i18n } = useTranslation('version');
 
   const unPublishModalSlug = `confirm-un-publish-${id}`;

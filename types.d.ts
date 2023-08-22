@@ -10,6 +10,7 @@ export { DatabaseAdapter } from './dist/database/types';
 export {
   CollectionConfig,
   SanitizedCollectionConfig,
+  AfterOperationHook as CollectionAfterOperationHook,
   BeforeOperationHook as CollectionBeforeOperationHook,
   BeforeValidateHook as CollectionBeforeValidateHook,
   BeforeChangeHook as CollectionBeforeChangeHook,

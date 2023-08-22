@@ -34,7 +34,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const [collection] = useState(() => ({ ...incomingCollection, fields }));
   const [redirect, setRedirect] = useState<string>();
 
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const { serverURL, routes: { admin, api } } = useConfig();
   const { params: { id } = {} } = useRouteMatch<Record<string, string>>();
   const history = useHistory();

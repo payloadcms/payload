@@ -85,6 +85,7 @@ export interface Movie {
 export interface Director {
   id: string;
   name?: string;
+  movies?: Array<string | Movie>;
   updatedAt: string;
   createdAt: string;
 }

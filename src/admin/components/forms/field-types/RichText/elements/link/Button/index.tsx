@@ -62,7 +62,7 @@ export const LinkButton: React.FC<{
 }> = ({ fieldProps }) => {
   const customFieldSchema = fieldProps?.admin?.link?.fields;
   const { user } = useAuth();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const [initialState, setInitialState] = useState<Fields>({});
 
   const { t, i18n } = useTranslation(['upload', 'general']);

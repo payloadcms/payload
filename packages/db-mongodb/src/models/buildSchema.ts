@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
 import { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose';
-import { SanitizedConfig } from 'payload/dist/config/types';
+import { SanitizedConfig, SanitizedLocalizationConfig } from 'payload/dist/config/types';
 import {
   ArrayField,
   Block,
@@ -66,10 +66,10 @@ const formatBaseSchema = (field: FieldAffectingData, buildSchemaOptions: BuildSc
   return schema;
 };
 
-const localizeSchema = (entity: NonPresentationalField | Tab, schema, localization) => {
+const localizeSchema = (entity: NonPresentationalField | Tab, schema, localization: false | SanitizedLocalizationConfig) => {
   if (fieldIsLocalized(entity) && localization && Array.isArray(localization.locales)) {
     return {
-      type: localization.locales.reduce((localeSchema, locale) => ({
+      type: localization.localeCodes.reduce((localeSchema, locale) => ({
         ...localeSchema,
         [locale]: schema,
       }), {
@@ -242,7 +242,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
 
     if (field.localized && config.localization) {
       schemaToReturn = {
-        type: config.localization.locales.reduce((locales, locale) => {
+        type: config.localization.localeCodes.reduce((locales, locale) => {
           let localeSchema: { [key: string]: any } = {};
 
           if (hasManyRelations) {
@@ -454,10 +454,10 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       });
 
       if (field.localized && config.localization) {
-        config.localization.locales.forEach((locale) => {
+        config.localization.localeCodes.forEach((localeCode) => {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore Possible incorrect typing in mongoose types, this works
-          schema.path(`${field.name}.${locale}`).discriminator(blockItem.slug, blockSchema);
+          schema.path(`${field.name}.${localeCode}`).discriminator(blockItem.slug, blockSchema);
         });
       } else {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

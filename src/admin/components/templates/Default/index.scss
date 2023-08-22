@@ -13,7 +13,12 @@
   @include mid-break {
     display: block;
     width: 100%;
-    margin-left: 0;
+    [dir=ltr] & {
+      margin-left: 0;
+    }
+    [dir=rtl] & {
+      margin-right: 0;
+    }  
     padding-top: base(3);
 
     &__wrap {

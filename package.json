@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "1.13.4",
+  "version": "1.14.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "engines": {
@@ -47,6 +47,7 @@
     "test:e2e:headed": "cross-env DISABLE_LOGGING=true playwright test --headed",
     "test:e2e:debug": "cross-env PWDEBUG=1 DISABLE_LOGGING=true playwright test",
     "test:components": "cross-env jest --config=jest.components.config.js",
+    "translateNewKeys": "ts-node -T ./scripts/translateNewKeys.ts",
     "clean:cache": "rimraf node_modules/.cache",
     "clean": "rimraf dist",
     "release:patch": "release-it patch",
@@ -147,8 +148,8 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "path-browserify": "^1.0.1",
-    "pino": "^6.4.1",
-    "pino-pretty": "^9.1.1",
+    "pino": "^8.15.0",
+    "pino-pretty": "^10.2.0",
     "pluralize": "^8.0.0",
     "postcss": "^8.4.21",
     "postcss-loader": "^6.2.1",

@@ -10,9 +10,9 @@ import { Props } from './types';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { Option } from '../../../elements/ReactSelect/types';
 import ReactSelect from '../../../elements/ReactSelect';
+import { isNumber } from '../../../../../utilities/isNumber';
 
 import './index.scss';
-import { isNumber } from '../../../../../utilities/isNumber';
 
 const NumberField: React.FC<Props> = (props) => {
   const {
@@ -143,9 +143,17 @@ const NumberField: React.FC<Props> = (props) => {
           isMulti
           isSortable
           isClearable
+          noOptionsMessage={({ inputValue }) => {
+            const isOverHasMany = Array.isArray(value) && value.length >= maxRows;
+            if (isOverHasMany) {
+              return t('validation:limitReached', { value: value.length + 1, max: maxRows });
+            }
+            return t('general:noOptions');
+          }}
           filterOption={(option, rawInput) => {
             // eslint-disable-next-line no-restricted-globals
-            return isNumber(rawInput)
+            const isOverHasMany = Array.isArray(value) && value.length >= maxRows;
+            return isNumber(rawInput) && !isOverHasMany;
           }}
           numberOnly
         />

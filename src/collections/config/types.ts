@@ -15,6 +15,7 @@ import {
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from '../../admin/components/elements/types';
+import { AfterOperationArg, AfterOperationMap } from '../operations/utils';
 import type { Props as ListProps } from '../../admin/components/views/collections/List/types';
 import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types';
 
@@ -109,6 +110,13 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
   id: string | number;
   context: RequestContext;
 }) => any;
+
+
+export type AfterOperationHook<
+  T extends TypeWithID = any,
+> = (
+    arg: AfterOperationArg<T>,
+  ) => Promise<ReturnType<AfterOperationMap<T>[keyof AfterOperationMap<T>]>>;
 
 export type AfterErrorHook = (err: Error, res: unknown, context: RequestContext) => { response: any, status: number } | void;
 
@@ -301,6 +309,7 @@ export type CollectionConfig = {
     afterMe?: AfterMeHook[];
     afterRefresh?: AfterRefreshHook[];
     afterForgotPassword?: AfterForgotPasswordHook[];
+    afterOperation?: AfterOperationHook[];
   };
   /**
    * Custom rest api endpoints, set false to disable all rest endpoints for this collection.

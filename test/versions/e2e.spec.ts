@@ -54,7 +54,7 @@ describe('versions', () => {
     test('should bulk publish', async () => {
       await page.goto(url.list);
 
-      await page.locator('.select-all__input').click();
+      await page.locator('.custom-checkbox:has(#select-all) input').check();
 
       await page.locator('.publish-many__toggle').click();
 
@@ -67,7 +67,7 @@ describe('versions', () => {
     test('should bulk unpublish', async () => {
       await page.goto(url.list);
 
-      await page.locator('.select-all__input').click();
+      await page.locator('.custom-checkbox:has(#select-all) input').check();
 
       await page.locator('.unpublish-many__toggle').click();
 
@@ -80,7 +80,7 @@ describe('versions', () => {
     test('should publish while editing many', async () => {
       const description = 'published document';
       await page.goto(url.list);
-      await page.locator('.select-all__input').click();
+      await page.locator('.custom-checkbox:has(#select-all) input').check();
       await page.locator('.edit-many__toggle').click();
       await page.locator('.field-select .rs__control').click();
       const options = page.locator('.rs__option');
@@ -97,7 +97,7 @@ describe('versions', () => {
     test('should save as draft while editing many', async () => {
       const description = 'draft document';
       await page.goto(url.list);
-      await page.locator('.select-all__input').click();
+      await page.locator('.custom-checkbox:has(#select-all) input').check();
       await page.locator('.edit-many__toggle').click();
       await page.locator('.field-select .rs__control').click();
       const options = page.locator('.rs__option');

@@ -16,7 +16,7 @@ import { usePreferences } from '../../utilities/Preferences';
 
 const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{ data?: Record<string, unknown> }>();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const { setStepNav } = useStepNav();
   const { user } = useAuth();
   const [initialState, setInitialState] = useState<Fields>();
