@@ -11,7 +11,6 @@ import { buildVersionCollectionFields } from '../../versions/buildCollectionFiel
 import { combineQueries } from '../../database/combineQueries';
 import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
-import { queryDrafts } from '../../versions/drafts/queryDrafts';
 import { buildAfterOperation } from './utils';
 
 export type Arguments = {
