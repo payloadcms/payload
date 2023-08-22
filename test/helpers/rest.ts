@@ -17,6 +17,10 @@ type LoginArgs = {
   collection: string;
 };
 
+type LogoutArgs = {
+  collection: string;
+};
+
 type CreateArgs<T = any> = {
   slug?: string;
   data: T;
@@ -133,14 +137,34 @@ export class RESTClient {
         password: args.password,
       }),
       headers,
-      method: 'post',
+      method: 'POST',
     });
 
-    const { token } = await response.json();
+    let { token } = await response.json();
+
+    // If the token is not in the response body, then we can extract it from the cookies
+    if (!token) {
+      const setCookie = response.headers.get('Set-Cookie');
+      const tokenMatchResult = setCookie?.match(/payload-token=(?<token>.+?);/);
+      token = tokenMatchResult?.groups?.token;
+    }
 
     this.token = token;
 
     return token;
+  }
+
+  async logout(incomingArgs?: LogoutArgs): Promise<void> {
+    const args = incomingArgs ?? {
+      collection: 'users',
+    };
+
+    await fetch(`${this.serverURL}/api/${args.collection}/logout`, {
+      headers,
+      method: 'POST',
+    });
+
+    this.token = '';
   }
 
   async create<T = any>(args: CreateArgs): Promise<DocResponse<T>> {
@@ -150,10 +174,10 @@ export class RESTClient {
         ...(args.file ? [] : headers),
         Authorization: '',
       },
-      method: 'post',
+      method: 'POST',
     };
 
-    if (args.auth) {
+    if (args?.auth !== false && this.token) {
       options.headers.Authorization = `JWT ${this.token}`;
     }
 
@@ -166,13 +190,13 @@ export class RESTClient {
 
   async find<T = any>(args?: FindArgs): Promise<QueryResponse<T>> {
     const options = {
-      headers: {
-        ...headers,
-        Authorization: args?.auth !== false && this.token ? `JWT ${this.token}` : '',
-      },
+      headers: { ...headers },
     };
 
-    const slug = args?.slug || this.defaultSlug;
+    if (args?.auth !== false && this.token) {
+      options.headers.Authorization = `JWT ${this.token}`;
+    }
+
     const whereQuery = qs.stringify({
       ...(args?.query ? { where: args.query } : {}),
       limit: args?.limit,
@@ -180,8 +204,9 @@ export class RESTClient {
     }, {
       addQueryPrefix: true,
     });
-    const fetchURL = `${this.serverURL}/api/${slug}${whereQuery}`;
-    const response = await fetch(fetchURL, options);
+
+    const slug = args?.slug || this.defaultSlug;
+    const response = await fetch(`${this.serverURL}/api/${slug}${whereQuery}`, options);
     const { status } = response;
     const result = await response.json();
     if (result.errors) throw new Error(result.errors[0].message);
@@ -189,55 +214,70 @@ export class RESTClient {
   }
 
   async update<T = any>(args: UpdateArgs<T>): Promise<DocResponse<T>> {
-    const { slug, id, data, query } = args;
-    const formattedQs = qs.stringify(query);
-    if (args?.auth) {
-      headers.Authorization = `JWT ${this.token}`;
-    }
-    const response = await fetch(`${this.serverURL}/api/${slug || this.defaultSlug}/${id}${formattedQs}`, {
+    const { id, query, data } = args;
+
+    const options = {
       body: JSON.stringify(data),
-      headers,
+      headers: { ...headers },
       method: 'PATCH',
-    });
+    };
+
+    if (args?.auth !== false && this.token) {
+      options.headers.Authorization = `JWT ${this.token}`;
+    }
+
+    const formattedQs = qs.stringify(query);
+    const slug = args.slug || this.defaultSlug;
+    const response = await fetch(`${this.serverURL}/api/${slug}/${id}${formattedQs}`, options);
     const { status } = response;
     const json = await response.json();
     return { status, doc: json.doc, errors: json.errors };
   }
 
   async updateMany<T = any>(args: UpdateManyArgs<T>): Promise<DocsResponse<T>> {
-    const { slug, data, where } = args;
+    const { data, where } = args;
+    const options = {
+      body: JSON.stringify(data),
+      headers: { ...headers },
+      method: 'PATCH',
+    };
+
+    if (args?.auth !== false && this.token) {
+      options.headers.Authorization = `JWT ${this.token}`;
+    }
+
     const formattedQs = qs.stringify({
       ...(where ? { where } : {}),
     }, {
       addQueryPrefix: true,
     });
-    if (args?.auth) {
-      headers.Authorization = `JWT ${this.token}`;
-    }
-    const response = await fetch(`${this.serverURL}/api/${slug || this.defaultSlug}${formattedQs}`, {
-      body: JSON.stringify(data),
-      headers,
-      method: 'PATCH',
-    });
+
+    const slug = args?.slug || this.defaultSlug;
+    const response = await fetch(`${this.serverURL}/api/${slug}${formattedQs}`, options);
     const { status } = response;
     const json = await response.json();
     return { status, docs: json.docs, errors: json.errors };
   }
 
   async deleteMany<T = any>(args: DeleteManyArgs): Promise<DocsResponse<T>> {
-    const { slug, where } = args;
+    const { where } = args;
+    const options = {
+      headers: { ...headers },
+      method: 'DELETE',
+    };
+
+    if (args?.auth !== false && this.token) {
+      options.headers.Authorization = `JWT ${this.token}`;
+    }
+
     const formattedQs = qs.stringify({
       ...(where ? { where } : {}),
     }, {
       addQueryPrefix: true,
     });
-    if (args?.auth) {
-      headers.Authorization = `JWT ${this.token}`;
-    }
-    const response = await fetch(`${this.serverURL}/api/${slug || this.defaultSlug}${formattedQs}`, {
-      headers,
-      method: 'DELETE',
-    });
+
+    const slug = args?.slug || this.defaultSlug;
+    const response = await fetch(`${this.serverURL}/api/${slug}${formattedQs}`, options);
     const { status } = response;
     const json = await response.json();
     return { status, docs: json.docs, errors: json.errors };
@@ -245,18 +285,16 @@ export class RESTClient {
 
   async findByID<T = any>(args: FindByIDArgs): Promise<DocResponse<T>> {
     const options = {
-      headers: {
-        ...headers,
-        Authorization: args?.auth !== false && this.token ? `JWT ${this.token}` : '',
-      },
+      headers: { ...headers },
     };
 
+    if (args?.auth !== false && this.token) {
+      options.headers.Authorization = `JWT ${this.token}`;
+    }
+
+    const slug = args?.slug || this.defaultSlug;
     const formattedOpts = qs.stringify(args?.options || {}, { addQueryPrefix: true });
-    const fetchURL = `${this.serverURL}/api/${args?.slug || this.defaultSlug}/${args.id}${formattedOpts}`;
-    const response = await fetch(fetchURL, {
-      headers: options.headers,
-      method: 'get',
-    });
+    const response = await fetch(`${this.serverURL}/api/${slug}/${args.id}${formattedOpts}`, options);
     const { status } = response;
     const doc = await response.json();
     return { status, doc };
@@ -264,18 +302,16 @@ export class RESTClient {
 
   async delete<T = any>(id: string, args?: DeleteArgs): Promise<DocResponse<T>> {
     const options = {
-      headers: {
-        ...headers,
-        Authorization: '',
-      },
-      method: 'delete',
+      headers: { ...headers },
+      method: 'DELETE',
     };
 
-    if (args?.auth) {
+    if (args?.auth !== false && this.token) {
       options.headers.Authorization = `JWT ${this.token}`;
     }
 
-    const response = await fetch(`${this.serverURL}/api/${args?.slug || this.defaultSlug}/${id}`, options);
+    const slug = args?.slug || this.defaultSlug;
+    const response = await fetch(`${this.serverURL}/api/${slug}/${id}`, options);
     const { status } = response;
     const doc = await response.json();
     return { status, doc };
@@ -283,48 +319,64 @@ export class RESTClient {
 
   async findGlobal<T = any>(args?: FindGlobalArgs): Promise<DocResponse<T>> {
     const options = {
-      headers: {
-        ...headers,
-      },
-      Authorization: '',
-      method: 'get',
+      headers: { ...headers },
     };
-    if (args?.auth) {
+
+    if (args?.auth !== false && this.token) {
       options.headers.Authorization = `JWT ${this.token}`;
     }
-    const response = await fetch(`${this.serverURL}/api/globals/${args?.slug || this.defaultSlug}`, options);
+
+    const slug = args?.slug || this.defaultSlug;
+    const response = await fetch(`${this.serverURL}/api/globals/${slug}`, options);
     const { status } = response;
     const doc = await response.json();
     return { status, doc };
   }
 
   async updateGlobal<T = any>(args: UpdateGlobalArgs): Promise<DocResponse<T>> {
-    const { slug, data: body, auth } = args;
+    const { data } = args;
     const options = {
-      body: JSON.stringify(body),
-      method: 'post',
-      headers: {
-        ...headers,
-        Authorization: '',
-      },
+      body: JSON.stringify(data),
+      headers: { ...headers },
+      method: 'POST',
     };
-    if (auth) {
+
+    if (args?.auth !== false && this.token) {
       options.headers.Authorization = `JWT ${this.token}`;
     }
-    const response = await fetch(`${this.serverURL}/api/globals/${slug || this.defaultSlug}`, options);
+
+    const slug = args?.slug || this.defaultSlug;
+    const response = await fetch(`${this.serverURL}/api/globals/${slug}`, options);
     const { status } = response;
     const { result } = await response.json();
     return { status, doc: result };
   }
 
-  async endpoint<T = any>(path: string, method = 'get', params: any = undefined): Promise<{ status: number, data: T }> {
-    const response = await fetch(`${this.serverURL}${path}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+  async endpoint<T = any>(path: string, method = 'GET', params: any = undefined): Promise<{ status: number, data: T }> {
+    const options = {
       body: JSON.stringify(params),
+      headers: { ...headers },
       method,
-    });
+    };
+
+    const response = await fetch(`${this.serverURL}${path}`, options);
+    const { status } = response;
+    const data = await response.json();
+    return { status, data };
+  }
+
+  async endpointWithAuth<T = any>(path: string, method = 'GET', params: any = undefined): Promise<{ status: number, data: T }> {
+    const options = {
+      body: JSON.stringify(params),
+      headers: { ...headers },
+      method,
+    };
+
+    if (this.token) {
+      options.headers.Authorization = `JWT ${this.token}`;
+    }
+
+    const response = await fetch(`${this.serverURL}${path}`, options);
     const { status } = response;
     const data = await response.json();
     return { status, data };

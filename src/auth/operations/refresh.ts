@@ -135,6 +135,10 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
   // Return results
   // /////////////////////////////////////
 
+  if (collectionConfig.auth.removeTokenFromResponses) {
+    delete result.refreshedToken;
+  }
+
   return result;
 }
 

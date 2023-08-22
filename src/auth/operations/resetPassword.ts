@@ -11,7 +11,7 @@ import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
 
 export type Result = {
-  token: string
+  token?: string
   user: Record<string, unknown>
 }
 
@@ -123,7 +123,10 @@ async function resetPassword(args: Arguments): Promise<Result> {
     const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess, depth, req });
     if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
 
-    return { token, user: fullUser };
+    return {
+      token: collectionConfig.auth.removeTokenFromResponses ? undefined : token,
+      user: fullUser,
+    };
   } catch (error: unknown) {
     await killTransaction(req);
     throw error;
