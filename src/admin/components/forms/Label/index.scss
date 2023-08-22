@@ -9,7 +9,13 @@ label.field-label {
 
   .required {
     color: var(--theme-error-500);
-    margin-left: base(.25);
-    margin-right: auto;
+    [dir=ltr] & {
+      margin-left: base(.25);
+      margin-right: auto;
+    }
+    [dir=rtl] & {
+      margin-right: base(.25);
+      margin-left: auto;
+    } 
   }
 }

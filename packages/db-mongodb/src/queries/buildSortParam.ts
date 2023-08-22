@@ -1,11 +1,11 @@
 import { PaginateOptions } from 'mongoose';
-import { Config } from 'payload/dist/config/types';
+import { SanitizedConfig } from 'payload/dist/config/types';
 import { Field } from 'payload/dist/fields/config/types';
 import { getLocalizedSortProperty } from './getLocalizedSortProperty';
 
 type Args = {
   sort: string
-  config: Config
+  config: SanitizedConfig
   fields: Field[]
   timestamps: boolean
   locale: string

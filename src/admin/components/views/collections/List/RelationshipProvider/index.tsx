@@ -31,7 +31,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
   const debouncedDocuments = useDebounce(documents, 100);
   const config = useConfig();
   const { i18n } = useTranslation();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const prevLocale = useRef(locale);
 
   const {

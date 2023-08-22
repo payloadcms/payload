@@ -8,6 +8,7 @@ import GraphQL from 'graphql';
 import React from 'react';
 import { DestinationStream, LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
+import { Validate } from '../fields/config/types';
 import { Payload } from '../payload';
 import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types';
 import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
@@ -16,6 +17,10 @@ import { Where } from '../types';
 import { User } from '../auth/types';
 import { DatabaseAdapter } from '../database/types';
 import type { PayloadBundler } from '../bundlers/types';
+
+type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & NonNullable<unknown>;
 
 type Email = {
   fromName: string;
@@ -208,23 +213,73 @@ export type AdminRoute = {
   sensitive?: boolean;
 };
 
-/**
- * @see https://payloadcms.com/docs/configuration/localization#localization
- */
-export type LocalizationConfig = {
+export type Locale = {
   /**
-   * List of supported locales
-   * @exanple `["en", "es", "fr", "nl", "de", "jp"]`
+   * label of supported locale
+   * @example "English"
    */
-  locales: string[];
+  label: string;
+  /**
+   * value of supported locale
+   * @example "en"
+   */
+  code: string;
+  /**
+   * if true, defaults textAligmnent on text fields to RTL
+   */
+  rtl?: boolean;
+};
+
+export type BaseLocalizationConfig = {
   /**
    * Locale for users that have not expressed their preference for a specific locale
-   * @exanple `"en"`
+   * @example `"en"`
    */
   defaultLocale: string;
   /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale` */
   fallback?: boolean;
 };
+
+export type LocalizationConfigWithNoLabels = Prettify<
+  BaseLocalizationConfig & {
+    /**
+     * List of supported locales
+     * @example `["en", "es", "fr", "nl", "de", "jp"]`
+     */
+    locales: string[];
+  }
+>;
+
+export type LocalizationConfigWithLabels = Prettify<
+  BaseLocalizationConfig & {
+    /**
+     * List of supported locales with labels
+     * @example {
+     *  label: 'English',
+     *  value: 'en',
+     *  rtl: false
+     * }
+     */
+    locales: Locale[];
+  }
+>;
+
+export type SanitizedLocalizationConfig = Prettify<
+LocalizationConfigWithLabels & {
+  /**
+   * List of supported locales
+   * @example `["en", "es", "fr", "nl", "de", "jp"]`
+   */
+  localeCodes: string[];
+}
+>;
+
+/**
+ * @see https://payloadcms.com/docs/configuration/localization#localization
+ */
+export type LocalizationConfig = Prettify<
+  LocalizationConfigWithNoLabels | LocalizationConfigWithLabels
+>;
 
 /**
  * This is the central configuration
@@ -315,8 +370,8 @@ export type Config = {
        */
       afterDashboard?: React.ComponentType<any>[];
       /**
-      * Add custom components before the email/password field
-      */
+       * Add custom components before the email/password field
+       */
       beforeLogin?: React.ComponentType<any>[];
       /**
        * Add custom components after the email/password field
@@ -482,7 +537,7 @@ export type Config = {
    *   window: 15 * 60 * 100, // 1.5 minutes,
    *   max: 500,
    * }
-  */
+   */
   rateLimit?: {
     window?: number;
     max?: number;
@@ -554,16 +609,17 @@ export type Config = {
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'globals' | 'endpoint'
+  'collections' | 'globals' | 'endpoint' | 'localization'
 > & {
   collections: SanitizedCollectionConfig[];
   globals: SanitizedGlobalConfig[];
   endpoints: Endpoint[];
   paths: {
-    configDir: string
-    config: string
-    rawConfig: string
+    configDir: string;
+    config: string;
+    rawConfig: string;
   };
+  localization: false | SanitizedLocalizationConfig;
 };
 
 export type EntityDescription =

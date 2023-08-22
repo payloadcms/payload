@@ -66,7 +66,7 @@ const Relationship: React.FC<Props> = (props) => {
 
   const { t, i18n } = useTranslation('fields');
   const { permissions } = useAuth();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const formProcessing = useFormProcessing();
   const hasMultipleRelations = Array.isArray(relationTo);
   const [options, dispatchOptions] = useReducer(optionsReducer, []);

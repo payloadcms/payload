@@ -3,7 +3,7 @@ import { SanitizedGlobalConfig } from '../../../../globals/config/types';
 
 export type LocaleOption = {
   label: string
-  value: string
+  code: string
 }
 
 export type CompareOption = {

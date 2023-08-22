@@ -64,6 +64,9 @@
     &::-webkit-scrollbar {
       display: none;
     }
+    &[data-rtl='true'] {
+      direction: rtl;
+    } 
   }
 
   // Clone of textarea with same height

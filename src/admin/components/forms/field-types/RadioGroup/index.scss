@@ -14,8 +14,13 @@
     }
 
     li {
-      padding-right: $baseline;
       flex-shrink: 0;
+      [dir=ltr] & {
+        padding-right: $baseline;
+      }
+      [dir=rtl] & {
+        padding-left: $baseline;
+      }
     }
   }
 

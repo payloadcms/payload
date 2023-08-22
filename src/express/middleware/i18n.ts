@@ -6,7 +6,7 @@ import { Handler } from 'express';
 import { defaultOptions } from '../../translations/defaultOptions';
 
 const i18nMiddleware = (options: InitOptions): Handler => {
-  i18next.use(i18nHTTPMiddleware.LanguageDetector)
+  i18next.use(new i18nHTTPMiddleware.LanguageDetector(defaultOptions.detection))
     .init({
       preload: defaultOptions.supportedLngs,
       ...deepmerge(defaultOptions, options || {}),

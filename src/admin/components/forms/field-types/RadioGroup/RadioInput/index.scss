@@ -36,6 +36,11 @@
       opacity: 0;
     }
   }
+  
+  [dir=rtl] &__label {
+    margin-left: 0;
+    margin-right: base(.5);
+  }
 
   &__label {
     margin-left: base(.5);

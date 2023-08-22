@@ -1,16 +1,21 @@
 import { GraphQLEnumType, GraphQLScalarType } from 'graphql';
-import { LocalizationConfig } from '../../config/types';
+import type { SanitizedLocalizationConfig } from '../../config/types';
 import formatName from '../utilities/formatName';
 
-const buildLocaleInputType = (localization: LocalizationConfig): GraphQLEnumType | GraphQLScalarType => {
+const buildLocaleInputType = (
+  localization: SanitizedLocalizationConfig,
+): GraphQLEnumType | GraphQLScalarType => {
   return new GraphQLEnumType({
     name: 'LocaleInputType',
-    values: localization.locales.reduce((values, locale) => ({
-      ...values,
-      [formatName(locale)]: {
-        value: locale,
-      },
-    }), {}),
+    values: localization.localeCodes.reduce(
+      (values, locale) => ({
+        ...values,
+        [formatName(locale)]: {
+          value: locale,
+        },
+      }),
+      {},
+    ),
   });
 };
 

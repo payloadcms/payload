@@ -17,18 +17,18 @@
     }
   }
 
-  &__buttons {
-    margin-left: $baseline;
-  }
-
   &__buttons-wrap {
     display: flex;
     align-items: center;
-    margin-right: base(.5);
+    gap: base(.5);
 
-    .btn, .pill {
-      margin: 0 0 0 base(.5);
+    [dir=ltr] & {
+      margin-right: base(.5);
     }
+
+    [dir=rtl] & {
+      margin-left: base(.5);
+    } 
 
     .btn {
       background-color: var(--theme-elevation-100);

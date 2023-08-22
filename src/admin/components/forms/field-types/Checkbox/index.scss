@@ -33,6 +33,10 @@
     left: 0;
     opacity: 0;
   }
+  [dir=rtl] &__input {
+    margin-right: 0;
+    margin-left: base(.5);
+  }
 
   &__input {
     // visible checkbox
