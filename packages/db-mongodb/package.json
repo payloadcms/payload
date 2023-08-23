@@ -12,8 +12,7 @@
   "devDependencies": {
     "@types/mongoose-aggregate-paginate-v2": "1.0.9",
     "mongodb-memory-server": "8.13.0",
-    "typescript": "4.9.5",
-    "payload": "payloadcms/payload#build/chore/update-2.0"
+    "payload": "workspace:*"
   },
   "dependencies": {
     "bson-objectid": "2.0.4",

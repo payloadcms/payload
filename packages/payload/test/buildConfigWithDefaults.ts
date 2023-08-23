@@ -1,8 +1,8 @@
 import path from 'path';
 import { Config, SanitizedConfig } from '../src/config/types';
 import { buildConfig as buildPayloadConfig } from '../src/config/build';
-import { mongooseAdapter } from '../packages/db-mongodb/src';
-import { postgresAdapter } from '../packages/db-postgres/src';
+import { mongooseAdapter } from '@payloadcms/db-mongodb/src';
+import { postgresAdapter } from '@payloadcms/db-postgres/src';
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({

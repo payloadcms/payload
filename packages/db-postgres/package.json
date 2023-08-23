@@ -24,7 +24,6 @@
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
     "better-sqlite3": "^8.5.0",
-    "payload": "payloadcms/payload#build/chore/update-2.0",
-    "typescript": "4.9.5"
+    "payload": "workspace:*"
   }
 }
