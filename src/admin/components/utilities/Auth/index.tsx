@@ -150,10 +150,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (request.status === 200) {
           const json = await request.json();
 
-          if (json?.user) {
-            setUser(json.user);
-          } else if (json?.token) {
+          if (json?.token) {
             setToken(json.token);
+          } else if (json?.user) {
+            setUser(json.user);
           } else if (autoLogin && autoLogin.prefillOnly !== true) {
             // auto log-in with the provided autoLogin credentials. This is used in dev mode
             // so you don't have to log in over and over again
