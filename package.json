@@ -86,7 +86,9 @@
     "auth"
   ],
   "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "typescript": "5.1.6"
+  },
   "files": [
     "bin.js",
     "dist",
