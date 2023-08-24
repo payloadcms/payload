@@ -1,5 +1,12 @@
 
 
+# [1.15.0](https://github.com/payloadcms/payload/compare/v1.14.0...v1.15.0) (2023-08-24)
+
+
+### Features
+
+* query support for geo within and intersects + dynamic GraphQL operator types ([#3183](https://github.com/payloadcms/payload/issues/3183)) ([739abdc](https://github.com/payloadcms/payload/commit/739abdcd81176b3e812470eeea97b1be0d8c4a27))
+
 # [1.14.0](https://github.com/payloadcms/payload/compare/v1.13.4...v1.14.0) (2023-08-16)
 
 
