@@ -10,7 +10,6 @@ keywords: select, multi-select, fields, config, configuration, documentation, Co
   The Select field provides a dropdown-style interface for choosing options from
   a predefined list as an enumeration.
 </Banner>
-
 <LightDarkImage 
   srcLight='https://payloadcms.com/images/docs/fields/select.png'
   srcDark='https://payloadcms.com/images/docs/fields/select-dark.png'
@@ -98,4 +97,59 @@ export const ExampleCollection: CollectionConfig = {
   ]
 }
 
+```
+
+### Customization
+
+The Select field UI component can be customized by providing a custom React component to the `components` object in the Base config. 
+
+```ts
+import { Field } from 'payload/types';
+import { CustomSelectComponent } from './component';
+
+export const CustomSelectField: Field = {
+  name: 'customSelectField',
+  type: 'select', // or 'text' if you have dynamic options
+  admin: {
+    components: {
+      Field: CustomSelectComponent,
+    },
+  }
+}
+```
+
+You can import the existing Select component directly from Payload, then extend and customize it as needed. See the [Custom Select Field](/docs/admin/components#field-component) video to learn more.
+
+```ts
+import * as React from 'react';
+import { SelectInput, useField } from 'payload/components/forms';
+
+export const CustomSelectComponent: React.FC<{ path: string }> = ({ path }) => {
+  const { value, setValue } = useField<string>({ path });
+  const options = [
+    {
+      label: 'Option 1',
+      value: '1',
+    },
+    {
+      label: 'Option 2',
+      value: '2',
+    },
+  ];
+
+  return (
+    <div>
+      <label className='field-label'>
+        Custom Select
+      </label>
+      <SelectInput
+        path={path}
+        name={path}
+        options={options}
+        value={value}
+        onChange={(e) => setValue(e.value)}
+      />
+    </div>
+  )
+};
 ```
