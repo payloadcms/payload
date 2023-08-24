@@ -10,7 +10,7 @@ keywords: select, multi-select, fields, config, configuration, documentation, Co
   The Select field provides a dropdown-style interface for choosing options from
   a predefined list as an enumeration.
 </Banner>
-<LightDarkImage 
+<LightDarkImage
   srcLight='https://payloadcms.com/images/docs/fields/select.png'
   srcDark='https://payloadcms.com/images/docs/fields/select-dark.png'
   alt='Shows a Select field in the Payload admin panel'
@@ -101,7 +101,7 @@ export const ExampleCollection: CollectionConfig = {
 
 ### Customization
 
-The Select field UI component can be customized by providing a custom React component to the `components` object in the Base config. 
+The Select field UI component can be customized by providing a custom React component to the `components` object in the Base config.
 
 ```ts
 export const CustomSelectField: Field = {
@@ -126,11 +126,12 @@ export const CustomSelectField: Field = {
 }
 ```
 
-You can import the existing Select component directly from Payload, then extend and customize it as needed. 
+You can import the existing Select component directly from Payload, then extend and customize it as needed.
 
 ```ts
 import * as React from 'react';
 import { SelectInput, useField } from 'payload/components/forms';
+import { useAuth } from 'payload/components/utilities';
 
 type customSelectProps = {
   path: string;
@@ -142,40 +143,37 @@ type customSelectProps = {
 
 export const CustomSelectComponent: React.FC<CustomSelectProps> = ({ path, options }) => {
   const { value, setValue } = useField<string>({ path });
+  const { user } = useAuth();
 
-  const formattedOptions = options.map(option => {
-
-  // here you could adjust what options are available in the select field based on a user role or other logic
-    return {
-      label: option.label,
-      value: option.value,
-    }
-  })
-
-  const handleChange = (e) => {
-    setValue(e.value);
-  }
+  const adjustedOptions = options.filter((option) => {
+    /*
+      A common use case for a custom select
+      is to show different options based on
+      the current user's role.
+    */
+    return option;
+  });
 
   return (
     <div>
-      <label className='field-label'>
+      <label className="field-label">
         Custom Select
       </label>
       <SelectInput
         path={path}
         name={path}
-        options={formattedOptions} 
+        options={adjustedOptions}
         value={value}
-        onChange={handleChange}
+        onChange={() => setValue(e.value)}
       />
     </div>
-  )
+  );
 };
 ```
 
 If you are looking to create a dynamic select field, the following tutorial will walk you through the process of creating a custom select field that fetches its options from an external API.
 
-<VideoDrawer 
+<VideoDrawer
  id='Efn9OxSjA6Y'
  label='How to Create a Custom Select Field'
  drawerTitle='How to Create a Custom Select Field: A Step-by-Step Guide'
