@@ -106,6 +106,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
             onSuccess={onSave}
             disabled={!hasSavePermission}
             initialState={internalState}
+            configFieldsSchema={fields}
           >
             <FormLoadingOverlayToggle
               formIsLoading={isLoading}

@@ -1,6 +1,6 @@
+import path from 'path';
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import path from 'path';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
@@ -835,6 +835,24 @@ describe('fields', () => {
         await expect(documentDrawer).toBeVisible();
         const caption = await documentDrawer.locator('#field-caption');
         await expect(caption).toBeVisible();
+      });
+
+      test('should open upload drawer and populate new entries in a custom relationship array field', async () => {
+        await navigateToRichTextFields();
+        const field = await page.locator('#field-richText');
+        const button = await field.locator('button.rich-text-upload__upload-drawer-toggler');
+
+        await button.click();
+
+        const documentDrawer = await page.locator('[id^=drawer_1_upload-drawer-]');
+        await expect(documentDrawer).toBeVisible();
+
+        // Add new array entry in drawer
+        await documentDrawer.locator('#field-authors .btn').first().click();
+
+        // find added array entry
+        const newArrayEntry = await documentDrawer.locator('#field-authors #authors-row-0');
+        await expect(newArrayEntry).toBeVisible();
       });
 
       test('should open upload document drawer from read-only field', async () => {

@@ -30,6 +30,7 @@ export const LinkDrawer: React.FC<Props> = ({
       <Form
         onSubmit={handleModalSubmit}
         initialState={initialState}
+        configFieldsSchema={fieldSchema}
       >
         <RenderFields
           fieldTypes={fieldTypes}

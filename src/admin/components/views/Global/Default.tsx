@@ -60,6 +60,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
           onSuccess={onSave}
           disabled={!hasSavePermission}
           initialState={initialState}
+          configFieldsSchema={fields}
         >
           <FormLoadingOverlayToggle
             action="update"

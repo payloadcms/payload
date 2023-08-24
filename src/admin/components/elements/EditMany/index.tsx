@@ -145,6 +145,7 @@ const EditMany: React.FC<Props> = (props) => {
           <Form
             className={`${baseClass}__form`}
             onSuccess={onSuccess}
+            configFieldsSchema={selected}
           >
             <div className={`${baseClass}__main`}>
               <div className={`${baseClass}__header`}>
