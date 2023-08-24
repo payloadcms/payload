@@ -104,38 +104,57 @@ export const ExampleCollection: CollectionConfig = {
 The Select field UI component can be customized by providing a custom React component to the `components` object in the Base config. 
 
 ```ts
-import { Field } from 'payload/types';
-import { CustomSelectComponent } from './component';
-
 export const CustomSelectField: Field = {
   name: 'customSelectField',
   type: 'select', // or 'text' if you have dynamic options
   admin: {
     components: {
-      Field: CustomSelectComponent,
+      Field: CustomSelectComponent({
+        options: [
+          {
+            label: 'Option 1',
+            value: '1',
+          },
+          {
+            label: 'Option 2',
+            value: '2',
+          },
+        ],
+      }),
     },
   }
 }
 ```
 
-You can import the existing Select component directly from Payload, then extend and customize it as needed. See the [Custom Select Field](/docs/admin/components#field-component) video to learn more.
+You can import the existing Select component directly from Payload, then extend and customize it as needed. 
 
 ```ts
 import * as React from 'react';
 import { SelectInput, useField } from 'payload/components/forms';
 
-export const CustomSelectComponent: React.FC<{ path: string }> = ({ path }) => {
+type customSelectProps = {
+  path: string;
+  options: {
+    label: string;
+    value: string;
+  }[];
+}
+
+export const CustomSelectComponent: React.FC<CustomSelectProps> = ({ path, options }) => {
   const { value, setValue } = useField<string>({ path });
-  const options = [
-    {
-      label: 'Option 1',
-      value: '1',
-    },
-    {
-      label: 'Option 2',
-      value: '2',
-    },
-  ];
+
+  const formattedOptions = options.map(option => {
+
+  // here you could adjust what options are available in the select field based on a user role or other logic
+    return {
+      label: option.label,
+      value: option.value,
+    }
+  })
+
+  const handleChange = (e) => {
+    setValue(e.value);
+  }
 
   return (
     <div>
@@ -145,11 +164,21 @@ export const CustomSelectComponent: React.FC<{ path: string }> = ({ path }) => {
       <SelectInput
         path={path}
         name={path}
-        options={options}
+        options={formattedOptions} 
         value={value}
-        onChange={(e) => setValue(e.value)}
+        onChange={handleChange}
       />
     </div>
   )
 };
 ```
+
+If you are looking to create a dynamic select field, the following tutorial will walk you through the process of creating a custom select field that fetches its options from an external API.
+
+<VideoDrawer 
+ id='Efn9OxSjA6Y'
+ label='How to Create a Custom Select Field'
+ drawerTitle='How to Create a Custom Select Field: A Step-by-Step Guide'
+/>
+
+If you want to learn more about custom components check out the [Admin > Custom Component](/docs/admin/components#field-component) docs.
