@@ -52,6 +52,11 @@ const CreateFirstUser: React.FC<Props> = (props) => {
     },
   ] as Field[];
 
+  const fieldSchema = [
+    ...fields,
+    ...userConfig.fields,
+  ];
+
   return (
     <MinimalTemplate className={baseClass}>
       <h1>{t('general:welcome')}</h1>
@@ -67,12 +72,10 @@ const CreateFirstUser: React.FC<Props> = (props) => {
         redirect={admin}
         action={`${serverURL}${api}/${userSlug}/first-register`}
         validationOperation="create"
+        configFieldsSchema={fieldSchema}
       >
         <RenderFields
-          fieldSchema={[
-            ...fields,
-            ...userConfig.fields,
-          ]}
+          fieldSchema={fieldSchema}
           fieldTypes={fieldTypes}
         />
         <FormSubmit>{t('general:create')}</FormSubmit>

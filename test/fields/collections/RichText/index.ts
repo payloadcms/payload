@@ -87,40 +87,8 @@ const RichTextFields: CollectionConfig = {
             uploads: {
               fields: [
                 {
-                  name: 'mediaType',
-                  label: 'Media Type',
-                  required: true,
-                  type: 'select',
-                  options: [
-                    {
-                      label: 'Image',
-                      value: 'image',
-                    },
-                    {
-                      label: 'Video',
-                      value: 'video',
-                    },
-                  ],
-                },
-                {
-                  name: 'videoData',
-                  type: 'group',
-                  admin: {
-                    condition: (data) => Boolean(data.mediaType === 'video'),
-                  },
-                  fields: [
-                    {
-                      name: 'captions',
-                      label: 'Captions',
-                      type: 'array',
-                      fields: [
-                        {
-                          name: 'caption',
-                          type: 'text',
-                        },
-                      ],
-                    },
-                  ],
+                  name: 'caption',
+                  type: 'richText',
                 },
               ],
             },
