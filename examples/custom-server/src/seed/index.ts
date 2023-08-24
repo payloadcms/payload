@@ -5,8 +5,8 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.create({
     collection: 'users',
     data: {
-      email: 'dev@payloadcms.com',
-      password: 'test',
+      email: 'demo@payloadcms.com',
+      password: 'demo',
     },
   })
 
