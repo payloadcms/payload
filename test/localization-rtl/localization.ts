@@ -2,11 +2,11 @@ export const localization = {
   locales: [
     {
       label: 'English',
-      value: 'en',
+      code: 'en',
     },
     {
       label: 'Arabic',
-      value: 'ar',
+      code: 'ar',
       rtl: true,
     },
   ],

@@ -26,22 +26,40 @@ export const Posts: CollectionConfig = {
         ar: 'عنوان',
       },
       type: 'text',
+      localized: true,
+      admin: {
+        // rtl: true,
+      },
+    },
+    {
+      name: 'email',
+      type: 'text',
+      label: {
+        en: 'Email',
+        ar: 'البريد الالكتروني',
+      },
+      // localized: true,
       admin: {
         rtl: false,
       },
     },
     {
-      name: 'description',
-      type: 'text',
-      localized: true,
-      admin: {
-        rtl: true,
-      },
-    },
-    {
       name: 'content',
+      label: {
+        en: 'Content',
+        ar: 'المحتوى',
+      },
       type: 'richText',
       localized: true,
+    },
+    {
+      name: 'author',
+      type: 'relationship',
+      relationTo: 'users',
+      defaultValue: ({ user }) => (user.id),
+      admin: {
+        position: 'sidebar',
+      },
     },
   ],
 };
