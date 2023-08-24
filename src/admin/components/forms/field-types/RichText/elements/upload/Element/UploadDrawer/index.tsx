@@ -71,6 +71,7 @@ export const UploadDrawer: React.FC<ElementProps & {
       <Form
         onSubmit={handleUpdateEditData}
         initialState={initialState}
+        configFieldsSchema={fieldSchema}
       >
         <RenderFields
           readOnly={false}
