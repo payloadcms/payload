@@ -63,3 +63,43 @@ export {
 export {
    transaction
 } from '../database/transaction'
+
+export {
+   createMigration
+} from '../database/migrations/createMigration'
+
+export {
+   getMigrations
+} from '../database/migrations/getMigrations'
+
+export {
+   migrate
+} from '../database/migrations/migrate'
+
+export {
+   migrateDown
+} from '../database/migrations/migrateDown'
+
+export {
+   migrateRefresh
+} from '../database/migrations/migrateRefresh'
+
+export {
+   migrateReset
+} from '../database/migrations/migrateReset'
+
+export {
+   migrateStatus
+} from '../database/migrations/migrateStatus'
+
+export {
+   migrationTemplate
+} from '../database/migrations/migrationTemplate'
+
+export {
+   migrationsCollection
+} from '../database/migrations/migrationsCollection'
+
+export {
+   readMigrationFiles
+} from '../database/migrations/readMigrationFiles'

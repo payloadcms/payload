@@ -30,3 +30,6 @@ export default payload;
 module.exports = payload;
 // Export RequestContext type
 export type { RequestContext };
+
+export { buildVersionCollectionFields } from './versions/buildCollectionFields'
+export { buildVersionGlobalFields } from './versions/buildGlobalFields'

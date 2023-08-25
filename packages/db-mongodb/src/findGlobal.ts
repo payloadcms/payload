@@ -1,4 +1,4 @@
-import { combineQueries } from 'payload/dist/database/combineQueries';
+import { combineQueries } from 'payload/database';
 import type { FindGlobal } from 'payload/database';
 import { PayloadRequest } from 'payload/types';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields';

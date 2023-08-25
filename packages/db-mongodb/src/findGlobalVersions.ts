@@ -1,8 +1,8 @@
 import { PaginateOptions } from 'mongoose';
-import type { FindGlobalVersions } from 'payload/dist/database/types';
-import flattenWhereToOperators from 'payload/dist/database/flattenWhereToOperators';
-import { buildVersionGlobalFields } from 'payload/dist/versions/buildGlobalFields';
-import { PayloadRequest } from 'payload/dist/express/types';
+import type { FindGlobalVersions } from 'payload/database';
+import { flattenWhereToOperators } from 'payload/database';
+import { buildVersionGlobalFields } from 'payload';
+import { PayloadRequest } from 'payload/types';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import type { MongooseAdapter } from '.';
 import { buildSortParam } from './queries/buildSortParam';
