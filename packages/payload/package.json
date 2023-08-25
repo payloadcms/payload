@@ -32,8 +32,8 @@
       "import": "./src/index.ts"
     },
     "./*": {
-      "types": "./src/exports/*",
-      "import": "./src/exports/*"
+      "types": "./src/exports/*.ts",
+      "import": "./src/exports/*.ts"
     }
   },
   "sideEffects": false,
