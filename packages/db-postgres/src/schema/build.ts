@@ -10,6 +10,7 @@ import {
   timestamp,
   IndexBuilder,
   unique,
+  UniqueConstraintBuilder,
 } from 'drizzle-orm/pg-core';
 import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
@@ -22,6 +23,7 @@ import { parentIDColumnMap } from './parentIDColumnMap';
 type Args = {
   adapter: PostgresAdapter
   baseColumns?: Record<string, AnyPgColumnBuilder>,
+  baseExtraConfig?: Record<string, (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder>
   buildRelationships?: boolean
   fields: Field[]
   tableName: string
@@ -35,6 +37,7 @@ type Result = {
 export const buildTable = ({
   adapter,
   baseColumns = {},
+  baseExtraConfig = {},
   buildRelationships,
   fields,
   tableName,
@@ -81,8 +84,8 @@ export const buildTable = ({
     indexes,
     localesColumns,
     localesIndexes,
-    newTableName: tableName,
-    parentTableName: tableName,
+    newTableName: formattedTableName,
+    parentTableName: formattedTableName,
     relationships,
   }));
 
@@ -92,10 +95,15 @@ export const buildTable = ({
   }
 
   const table = pgTable(formattedTableName, columns, (cols) => {
+    const extraConfig = Object.entries(baseExtraConfig).reduce((config, [key, func]) => {
+      config[key] = func(cols);
+      return config;
+    }, {});
+
     return Object.entries(indexes).reduce((acc, [colName, func]) => {
       acc[colName] = func(cols);
       return acc;
-    }, {});
+    }, extraConfig);
   });
 
   adapter.tables[formattedTableName] = table;
@@ -104,7 +112,7 @@ export const buildTable = ({
     const localeTableName = `${formattedTableName}_locales`;
     localesColumns.id = serial('id').primaryKey();
     localesColumns._locale = adapter.enums._locales('_locale').notNull();
-    localesColumns._parentID = parentIDColumnMap[idColType]('_parent_id').references(() => table.id).notNull();
+    localesColumns._parentID = parentIDColumnMap[idColType]('_parent_id').references(() => table.id, { onDelete: 'cascade' }).notNull();
 
     localesTable = pgTable(localeTableName, localesColumns, (cols) => {
       return Object.entries(localesIndexes).reduce((acc, [colName, func]) => {
@@ -131,7 +139,7 @@ export const buildTable = ({
     if (relationships.size) {
       const relationshipColumns: Record<string, AnyPgColumnBuilder> = {
         id: serial('id').primaryKey(),
-        parent: parentIDColumnMap[idColType]('parent_id').references(() => table.id).notNull(),
+        parent: parentIDColumnMap[idColType]('parent_id').references(() => table.id, { onDelete: 'cascade' }).notNull(),
         path: varchar('path').notNull(),
         order: integer('order'),
       };
@@ -153,8 +161,15 @@ export const buildTable = ({
       const relationshipsTableName = `${formattedTableName}_relationships`;
 
       relationshipsTable = pgTable(relationshipsTableName, relationshipColumns, (cols) => {
-        const result: Record<string, IndexBuilder> = {};
-        if (hasLocalizedRelationshipField) result.localeIdx = index('locale_idx').on(cols.locale);
+        const result: Record<string, unknown> = {};
+
+        if (hasLocalizedRelationshipField) {
+          result.localeIdx = index('locale_idx').on(cols.locale);
+          result.parentPathOrderLocale = unique().on(cols.parent, cols.path, cols.order, cols.locale);
+        } else {
+          result.parentPathOrder = unique().on(cols.parent, cols.path, cols.order);
+        }
+
         return result;
       });
 

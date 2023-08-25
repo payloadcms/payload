@@ -12,7 +12,6 @@ export const create: Create = async function create({
   const result = await upsertRow({
     adapter: this,
     data,
-    fallbackLocale: req.fallbackLocale,
     fields: collection.fields,
     locale: req.locale,
     operation: 'create',

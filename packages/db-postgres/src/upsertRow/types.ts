@@ -5,7 +5,6 @@ import { GenericColumn, PostgresAdapter } from '../types';
 type BaseArgs = {
   adapter: PostgresAdapter
   data: Record<string, unknown>
-  fallbackLocale?: string | false
   fields: Field[]
   locale: string
   path?: string

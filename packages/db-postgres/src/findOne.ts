@@ -37,8 +37,6 @@ export const findOne: FindOne = async function findOne({
 
   const result = transform({
     config: this.payload.config,
-    fallbackLocale: req.fallbackLocale,
-    locale: req.locale,
     data: doc,
     fields: collectionConfig.fields,
   });

@@ -4,7 +4,6 @@ import { TypeWithID } from 'payload/dist/collections/config/types';
 import { SanitizedConfig } from 'payload/config';
 import { traverseFields } from './traverseFields';
 import { createRelationshipMap } from '../../utilities/createRelationshipMap';
-import { mergeLocales } from './mergeLocales';
 import { createBlocksMap } from '../../utilities/createBlocksMap';
 
 type TransformArgs = {
@@ -20,9 +19,7 @@ type TransformArgs = {
 export const transform = <T extends TypeWithID>({
   config,
   data,
-  fallbackLocale,
   fields,
-  locale,
 }: TransformArgs): T => {
   let relationships: Record<string, Record<string, unknown>[]> = {};
 
@@ -33,17 +30,16 @@ export const transform = <T extends TypeWithID>({
 
   const blocks = createBlocksMap(data);
 
-  const dataWithLocales = mergeLocales({ data, locale, fallbackLocale });
-
-  return traverseFields<T>({
+  const result = traverseFields<T>({
     blocks,
     config,
     data,
     fields,
-    locale,
     path: '',
     relationships,
-    siblingData: dataWithLocales,
-    table: dataWithLocales,
+    siblingData: data,
+    table: data,
   });
+
+  return result;
 };

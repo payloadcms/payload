@@ -29,7 +29,6 @@ export const updateOne: UpdateOne = async function updateOne({
   const result = await upsertRow({
     adapter: this,
     data,
-    fallbackLocale: req.fallbackLocale,
     fields: collection.fields,
     id,
     locale: req.locale,

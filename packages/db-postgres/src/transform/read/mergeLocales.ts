@@ -1,70 +1,86 @@
 /* eslint-disable no-param-reassign */
+import { FieldAffectingData, UIField, fieldAffectsData } from 'payload/dist/fields/config/types';
+import { Field } from 'payload/types';
+import flattenTopLevelFields from 'payload/dist/utilities/flattenTopLevelFields';
+
+type TraverseFieldsArgs = {
+  dataRef?: Record<string, unknown>
+  fields: (UIField | FieldAffectingData)[]
+  parentIsLocalized?: boolean
+  localeRow: Record<string, unknown>
+  prefix?: string
+}
+
+const traverseFields = ({
+  dataRef,
+  fields,
+  parentIsLocalized,
+  localeRow,
+  prefix,
+}: TraverseFieldsArgs) => {
+  const locale = localeRow._locale;
+
+  if (typeof locale === 'string') {
+    fields.forEach((field) => {
+      if (fieldAffectsData(field) && (field.localized || parentIsLocalized)) {
+        switch (field.type) {
+          // TODO: handle named tabs
+          case 'group': {
+            const flattenedFields = flattenTopLevelFields(field.fields);
+            if (!dataRef[field.name]) dataRef[field.name] = {};
+            if (!dataRef[field.name][locale]) dataRef[field.name][locale] = {};
+
+            traverseFields({
+              dataRef: dataRef[field.name][locale] as Record<string, unknown>,
+              fields: flattenedFields,
+              parentIsLocalized: true,
+              localeRow,
+              prefix: `${prefix || ''}${field.name}_`,
+            });
+
+            break;
+          }
+
+          default: {
+            const localeData = localeRow[`${prefix}${field.name}`];
+
+            if (parentIsLocalized) {
+              dataRef[field.name] = localeData;
+            } else {
+              if (typeof dataRef[field.name] !== 'object') dataRef[field.name] = {};
+              dataRef[field.name][locale] = localeData;
+            }
+          }
+        }
+      }
+    });
+  }
+};
+
 type MergeLocalesArgs = {
-  data: Record<string, unknown>
-  fallbackLocale?: string | false
-  locale?: string
+  fields: Field[]
+  table: Record<string, unknown>
 }
 
 // Merge _locales into the parent data
-// based on which locale(s) are asked for
 export const mergeLocales = ({
-  data,
-  fallbackLocale,
-  locale,
+  fields,
+  table,
 }: MergeLocalesArgs): Record<string, unknown> => {
-  if (Array.isArray(data._locales)) {
-    if (locale) {
-      const matchedLocale = data._locales.find((row) => row._locale === locale);
+  const localeRows = table._locales;
+  const flattenedFields = flattenTopLevelFields(fields);
 
-      if (matchedLocale) {
-        const merged = {
-          ...data,
-          ...matchedLocale,
-        };
-
-        delete merged._parentID;
-        delete merged._locales;
-        delete merged._locale;
-        return merged;
-      }
-
-      if (fallbackLocale) {
-        const matchedFallbackLocale = data._locales.find((row) => row._locale === fallbackLocale);
-
-        if (matchedFallbackLocale) {
-          const merged = {
-            ...data,
-            ...matchedFallbackLocale,
-          };
-          delete merged._parentID;
-          delete merged._locales;
-          delete merged._locale;
-          return merged;
-        }
-      }
-    }
-
-    const fieldLocales = data._locales.reduce((res, row) => {
-      const rowLocale = row._locale;
-      delete row._locale;
-
-      if (rowLocale) {
-        Object.entries(row).forEach(([field, val]) => {
-          if (!res[field]) res[field] = {};
-          res[field][rowLocale] = val;
-        });
-      }
-
-      return res;
-    }, {});
-
-    delete data._locales;
-
-    return {
-      ...data,
-      ...fieldLocales,
-    };
+  if (Array.isArray(localeRows)) {
+    localeRows.forEach((localeRow) => {
+      traverseFields({
+        dataRef: table,
+        fields: flattenedFields,
+        localeRow,
+      });
+    });
   }
 
-  return data;
+  delete table._locales;
+
+  return table;
 };

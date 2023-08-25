@@ -4,6 +4,7 @@ import toSnakeCase from 'to-snake-case';
 import { fieldAffectsData, valueIsValueWithRelation } from 'payload/dist/fields/config/types';
 import { ArrayRowToInsert, BlockRowToInsert } from './types';
 import { isArrayOfRows } from '../../utilities/isArrayOfRows';
+import { transformArray } from './array';
 
 type Args = {
   arrays: {
@@ -14,7 +15,9 @@ type Args = {
   }
   columnPrefix: string
   data: Record<string, unknown>
+  existingLocales?: Record<string, unknown>[]
   fields: Field[]
+  forceLocalized?: boolean
   locale: string
   localeRow: Record<string, unknown>
   newTableName: string
@@ -29,7 +32,9 @@ export const traverseFields = ({
   blocks,
   columnPrefix,
   data,
+  existingLocales,
   fields,
+  forceLocalized,
   locale,
   localeRow,
   newTableName,
@@ -41,19 +46,24 @@ export const traverseFields = ({
   fields.forEach((field) => {
     let targetRow = row;
     let columnName = '';
-    let fieldData;
+    let fieldData: unknown;
+    let hasLocalizedFieldData = false;
 
     if (fieldAffectsData(field)) {
       columnName = `${columnPrefix || ''}${field.name}`;
       fieldData = data[field.name];
 
-      if (field.localized) {
+      // If the field is localized, we need to access its data based on the
+      // locale being inserted
+      if (field.localized || forceLocalized) {
         targetRow = localeRow;
 
-        if (typeof data[field.name] === 'object'
-          && data[field.name] !== null
-          && data[field.name][locale]) {
-          fieldData = data[field.name][locale];
+        if (typeof data[field.name] === 'object' && data[field.name] !== null) {
+          hasLocalizedFieldData = true;
+
+          if (typeof data[field.name][locale] !== 'undefined') {
+            fieldData = data[field.name][locale];
+          }
         }
       }
     }
@@ -70,42 +80,31 @@ export const traverseFields = ({
       }
 
       case 'array': {
-        if (isArrayOfRows(fieldData)) {
-          const arrayTableName = `${newTableName}_${toSnakeCase(field.name)}`;
-          if (!arrays[arrayTableName]) arrays[arrayTableName] = [];
+        const arrayTableName = `${newTableName}_${toSnakeCase(field.name)}`;
+        if (!arrays[arrayTableName]) arrays[arrayTableName] = [];
 
-          fieldData.forEach((arrayRow, i) => {
-            const newRow: ArrayRowToInsert = {
-              columnName,
-              row: {
-                _order: i + 1,
-              },
-              locale: {
-                _locale: locale,
-              },
-              arrays: {},
-            };
+        const newRows = transformArray({
+          arrayTableName,
+          blocks,
+          columnName,
+          data: fieldData,
+          field,
+          locale,
+          path,
+          relationships,
+        });
 
-            if (field.localized) newRow.row._locale = locale;
+        arrays[arrayTableName] = arrays[arrayTableName].concat(newRows);
 
-            traverseFields({
-              arrays: newRow.arrays,
-              blocks,
-              columnPrefix: '',
-              data: arrayRow,
-              fields: field.fields,
-              locale,
-              localeRow: newRow.locale,
-              newTableName: arrayTableName,
-              parentTableName: arrayTableName,
-              path: `${path || ''}${field.name}.${i}.`,
-              relationships,
-              row: newRow.row,
-            });
+        // Above, the currently edited locale is being transformed
+        // Need to do this above thing for all other locales as well
 
-            arrays[arrayTableName].push(newRow);
-          });
-        }
+        // if (field.localized && hasLocalizedFieldData) {
+        //   newRow.existingLocales = Object.entries(data[field.name]).map(([existingLocale, existingLocaleData]) => {
+        //     existingLocaleData._locale = existingLocale
+        //     return existingLocaleData
+        //   })
+        // }
 
         break;
       }
@@ -121,6 +120,7 @@ export const traverseFields = ({
 
             const newRow: BlockRowToInsert = {
               arrays: {},
+              existingLocales: {},
               row: {
                 _order: i + 1,
                 _path: `${path}${field.name}`,
@@ -137,6 +137,7 @@ export const traverseFields = ({
               blocks,
               columnPrefix: '',
               data: blockRow,
+              existingLocales: newRow.existingLocales,
               fields: matchedBlock.fields,
               locale,
               localeRow: newRow.locale,
@@ -156,12 +157,19 @@ export const traverseFields = ({
 
       case 'group': {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
+          let targetData = data[field.name];
+          if (field.localized && typeof data[field.name][locale] === 'object' && data[field.name][locale] !== null) {
+            targetData = data[field.name][locale];
+          }
+
           traverseFields({
             arrays,
             blocks,
             columnPrefix: `${columnName}_`,
-            data: data[field.name] as Record<string, unknown>,
+            data: targetData as Record<string, unknown>,
+            existingLocales,
             fields: field.fields,
+            forceLocalized: field.localized,
             locale,
             localeRow,
             newTableName: `${parentTableName}_${toSnakeCase(field.name)}`,
