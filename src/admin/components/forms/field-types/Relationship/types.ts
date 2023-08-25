@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import { RelationshipField } from '../../../../../fields/config/types';
+import { GetOptionLabel, RelationshipField } from '../../../../../fields/config/types';
 import { Where } from '../../../../../types';
 import { SanitizedConfig } from '../../../../../config/types';
 
@@ -37,6 +37,7 @@ type UPDATE = {
   collection: SanitizedCollectionConfig
   i18n: typeof i18n
   config: SanitizedConfig
+  getOptionLabel?: GetOptionLabel
 }
 
 type ADD = {
@@ -47,6 +48,7 @@ type ADD = {
   ids?: (string | number)[]
   i18n: typeof i18n
   config: SanitizedConfig
+  getOptionLabel?: GetOptionLabel
 }
 
 export type Action = CLEAR | ADD | UPDATE

@@ -325,6 +325,13 @@ export type SelectField = FieldBase & {
   }
 }
 
+export type GetOptionLabelProps<T = any> = {
+  doc: T,
+  relationTo: string,
+}
+
+export type GetOptionLabel<T = any> = (options: GetOptionLabelProps<T>) => string;
+
 export type RelationshipField = FieldBase & {
   type: 'relationship';
   relationTo: string | string[];
@@ -334,6 +341,7 @@ export type RelationshipField = FieldBase & {
   admin?: Admin & {
     isSortable?: boolean;
     allowCreate?: boolean;
+    getOptionLabel?: GetOptionLabel;
   },
 } & ({
   hasMany: true

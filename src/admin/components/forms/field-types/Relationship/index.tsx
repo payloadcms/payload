@@ -51,6 +51,7 @@ const Relationship: React.FC<Props> = (props) => {
       condition,
       isSortable = true,
       allowCreate = true,
+      getOptionLabel,
     } = {},
   } = props;
 
@@ -207,6 +208,7 @@ const Relationship: React.FC<Props> = (props) => {
                   sort,
                   i18n,
                   config,
+                  getOptionLabel,
                 });
               }
             } else if (response.status === 403) {
@@ -219,6 +221,7 @@ const Relationship: React.FC<Props> = (props) => {
                 ids: relationMap[relation],
                 i18n,
                 config,
+                getOptionLabel,
               });
             } else {
               setErrorLoading(t('error:unspecific'));
@@ -244,6 +247,7 @@ const Relationship: React.FC<Props> = (props) => {
       i18n,
       config,
       t,
+      getOptionLabel,
     ],
   );
 
@@ -313,6 +317,7 @@ const Relationship: React.FC<Props> = (props) => {
             ids: idsToLoad,
             i18n,
             config,
+            getOptionLabel,
           });
         }
       }
@@ -330,6 +335,7 @@ const Relationship: React.FC<Props> = (props) => {
     relationTo,
     locale,
     config,
+    getOptionLabel,
   ]);
 
   // Determine if we should switch to word boundary search
@@ -358,8 +364,15 @@ const Relationship: React.FC<Props> = (props) => {
   }, [relationTo, filterOptionsResult, locale]);
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
-    dispatchOptions({ type: 'UPDATE', doc: args.doc, collection: args.collectionConfig, i18n, config });
-  }, [i18n, config]);
+    dispatchOptions({
+      type: 'UPDATE',
+      doc: args.doc,
+      collection: args.collectionConfig,
+      i18n,
+      config,
+      getOptionLabel,
+    });
+  }, [i18n, config, getOptionLabel]);
 
   const filterOption = useCallback((item: Option, searchFilter: string) => {
     if (!searchFilter) {
@@ -481,7 +494,7 @@ const Relationship: React.FC<Props> = (props) => {
           />
           {!readOnly && allowCreate && (
             <AddNewRelation
-              {...{ path: pathOrName, hasMany, relationTo, value, setValue, dispatchOptions, options }}
+              {...{ path: pathOrName, hasMany, relationTo, value, setValue, dispatchOptions, options, getOptionLabel }}
             />
           )}
         </div>

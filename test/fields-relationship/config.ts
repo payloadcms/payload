@@ -2,9 +2,9 @@ import type { CollectionConfig } from '../../src/collections/config/types';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 import { mapAsync } from '../../src/utilities/mapAsync';
-import { FilterOptionsProps } from '../../src/fields/config/types';
+import { FilterOptionsProps, GetOptionLabelProps } from '../../src/fields/config/types';
 import { PrePopulateFieldUI } from './PrePopulateFieldUI';
-import { relationOneSlug, relationTwoSlug, relationRestrictedSlug, relationWithTitleSlug, relationUpdatedExternallySlug, collection1Slug, collection2Slug, slug } from './collectionSlugs';
+import { relationOneSlug, relationTwoSlug, relationRestrictedSlug, relationWithTitleSlug, relationUpdatedExternallySlug, collection1Slug, collection2Slug, slug, relationWithCustomLabelSlug } from './collectionSlugs';
 
 export interface FieldsRelationship {
   id: string;
@@ -14,6 +14,7 @@ export interface FieldsRelationship {
   relationshipMultiple: Array<RelationOne | RelationTwo>;
   relationshipRestricted: RelationRestricted;
   relationshipWithTitle: RelationWithTitle;
+  relationshipWithCustomLabel: RelationWithCustomLabel;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,6 +26,9 @@ export interface RelationOne {
 export type RelationTwo = RelationOne;
 export type RelationRestricted = RelationOne;
 export type RelationWithTitle = RelationOne;
+export type RelationWithCustomLabel = RelationOne & {
+  country: string;
+}
 
 const baseRelationshipFields: CollectionConfig['fields'] = [
   {
@@ -128,6 +132,16 @@ export default buildConfigWithDefaults({
           relationTo: relationOneSlug,
           admin: {
             readOnly: true,
+          },
+        },
+        {
+          name: 'relationshipWithCustomLabel',
+          type: 'relationship',
+          relationTo: relationWithCustomLabelSlug,
+          admin: {
+            getOptionLabel: ({ doc, relationTo }: GetOptionLabelProps<RelationWithCustomLabel>) => {
+              return `${doc.country} - ${doc.name} - ${relationTo}`;
+            },
           },
         },
       ],
@@ -251,6 +265,16 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: relationWithCustomLabelSlug,
+      fields: [
+        ...baseRelationshipFields,
+        {
+          type: 'text',
+          name: 'country',
+        },
+      ],
+    },
+    {
       slug: collection1Slug,
       fields: [
         {
@@ -330,12 +354,32 @@ export default buildConfigWithDefaults({
       relationsWithTitle.push(id);
     });
 
+    const relationsWithCustomLabel: string[] = [];
+
+    await mapAsync([
+      {
+        name: 'relation 1',
+        country: 'USA',
+      },
+      {
+        name: 'relation 2',
+        country: 'Germany',
+      },
+    ], async (data) => {
+      const { id } = await payload.create({
+        collection: relationWithCustomLabelSlug,
+        data,
+      });
+      relationsWithCustomLabel.push(id);
+    });
+
     await payload.create({
       collection: slug,
       data: {
         relationship: relationOneDocId,
         relationshipRestricted: restrictedDocId,
         relationshipWithTitle: relationsWithTitle[0],
+        relationshipWithCustomLabel: relationsWithCustomLabel[0],
       },
     });
     await mapAsync([...Array(11)], async () => {

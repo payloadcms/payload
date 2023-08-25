@@ -5,5 +5,6 @@ export const relationTwoSlug = 'relation-two';
 export const relationRestrictedSlug = 'relation-restricted';
 export const relationWithTitleSlug = 'relation-with-title';
 export const relationUpdatedExternallySlug = 'relation-updated-externally';
+export const relationWithCustomLabelSlug = 'relation-custom-label';
 export const collection1Slug = 'collection-1';
 export const collection2Slug = 'collection-2';

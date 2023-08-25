@@ -347,6 +347,7 @@ export const relationship = baseField.keys({
   admin: baseAdminFields.keys({
     isSortable: joi.boolean().default(false),
     allowCreate: joi.boolean().default(true),
+    getOptionLabel: joi.func(),
   }),
   min: joi.number()
     .when('hasMany', { is: joi.not(true), then: joi.forbidden() })

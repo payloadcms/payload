@@ -1,5 +1,6 @@
 import React from 'react';
 import { Action, OptionGroup, Value } from '../types';
+import { GetOptionLabel } from '../../../../../../fields/config/types';
 
 export type Props = {
   hasMany: boolean
@@ -9,4 +10,5 @@ export type Props = {
   options: OptionGroup[]
   setValue: (value: unknown) => void
   dispatchOptions: React.Dispatch<Action>
+  getOptionLabel: GetOptionLabel
 }

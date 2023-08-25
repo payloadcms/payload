@@ -25,6 +25,7 @@ export const AddNewRelation: React.FC<Props> = ({
   value,
   setValue,
   dispatchOptions,
+  getOptionLabel,
 }) => {
   const relatedCollections = useRelatedCollections(relationTo);
   const { permissions } = useAuth();
@@ -70,6 +71,7 @@ export const AddNewRelation: React.FC<Props> = ({
           sort: true,
           i18n,
           config,
+          getOptionLabel,
         });
 
 
@@ -82,7 +84,7 @@ export const AddNewRelation: React.FC<Props> = ({
 
       setSelectedCollection(undefined);
     }
-  }, [relationTo, collectionConfig, dispatchOptions, i18n, hasMany, setValue, value, config]);
+  }, [relationTo, collectionConfig, dispatchOptions, i18n, hasMany, setValue, value, config, getOptionLabel]);
 
   const onPopopToggle = useCallback((state) => {
     setPopupOpen(state);
@@ -158,7 +160,7 @@ export const AddNewRelation: React.FC<Props> = ({
                 >
                   <Plus />
                 </Button>
-            )}
+              )}
               render={({ close: closePopup }) => (
                 <ul className={`${baseClass}__relations`}>
                   {relatedCollections.map((relatedCollection) => {

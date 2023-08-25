@@ -31,11 +31,14 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
     }
 
     case 'UPDATE': {
-      const { collection, doc, i18n, config } = action;
+      const { collection, doc, i18n, config, getOptionLabel } = action;
       const relation = collection.slug;
       const newOptions = [...state];
 
-      const docTitle = formatUseAsTitle({
+      const docTitle = getOptionLabel ? getOptionLabel({
+        doc,
+        relationTo: relation,
+      }) : formatUseAsTitle({
         doc,
         collection,
         i18n,
@@ -54,7 +57,7 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
     }
 
     case 'ADD': {
-      const { collection, docs, sort, ids = [], i18n, config } = action;
+      const { collection, docs, sort, ids = [], i18n, config, getOptionLabel } = action;
       const relation = collection.slug;
       const loadedIDs = reduceToIDs(state);
       const newOptions = [...state];
@@ -64,7 +67,10 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
         if (loadedIDs.indexOf(doc.id) === -1) {
           loadedIDs.push(doc.id);
 
-          const docTitle = formatUseAsTitle({
+          const docTitle = getOptionLabel ? getOptionLabel({
+            doc,
+            relationTo: relation,
+          }) : formatUseAsTitle({
             doc,
             collection,
             i18n,

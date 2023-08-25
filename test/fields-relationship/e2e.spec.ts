@@ -10,9 +10,10 @@ import type {
   RelationOne,
   RelationRestricted,
   RelationTwo,
+  RelationWithCustomLabel,
   RelationWithTitle,
 } from './config';
-import { relationOneSlug, relationRestrictedSlug, relationTwoSlug, relationUpdatedExternallySlug, relationWithTitleSlug, slug } from './collectionSlugs';
+import { relationOneSlug, relationRestrictedSlug, relationTwoSlug, relationUpdatedExternallySlug, relationWithCustomLabelSlug, relationWithTitleSlug, slug } from './collectionSlugs';
 import wait from '../../src/utilities/wait';
 
 const { beforeAll, beforeEach, describe } = test;
@@ -27,6 +28,7 @@ describe('fields - relationship', () => {
   let docWithExistingRelations: CollectionWithRelationships;
   let restrictedRelation: RelationRestricted;
   let relationWithTitle: RelationWithTitle;
+  let relationWithCustomLabel: RelationWithCustomLabel;
   let serverURL: string;
 
   beforeAll(async ({ browser }) => {
@@ -94,6 +96,14 @@ describe('fields - relationship', () => {
       },
     });
 
+    relationWithCustomLabel = await payload.create({
+      collection: relationWithCustomLabelSlug,
+      data: {
+        name: 'Cake',
+        country: 'USA',
+      },
+    });
+
     // Add restricted doc as relation
     docWithExistingRelations = await payload.create({
       collection: slug,
@@ -103,6 +113,7 @@ describe('fields - relationship', () => {
         relationshipRestricted: restrictedRelation.id,
         relationshipWithTitle: relationWithTitle.id,
         relationshipReadOnly: relationOneDoc.id,
+        relationshipWithCustomLabel: relationWithCustomLabel.id,
       },
     });
   });
@@ -379,6 +390,14 @@ describe('fields - relationship', () => {
       const options = field.locator('.rs__option');
 
       await expect(options).toHaveCount(2);
+    });
+
+    test('should show custom option label with getOptionLabel on relation', async () => {
+      await page.goto(url.edit(docWithExistingRelations.id));
+      const field = page.locator('#field-relationshipWithCustomLabel');
+      const value = field.locator('.relationship--single-value__text');
+
+      await expect(value).toHaveText(`${relationWithCustomLabel.country} - ${relationWithCustomLabel.name} - ${relationWithCustomLabelSlug}`);
     });
 
     test('should show id on relation in list view', async () => {
