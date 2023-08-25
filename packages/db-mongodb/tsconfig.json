@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "moduleResolution": "Node16", /* Required for exports to work */
     "composite": true,
     "declaration": true, /* Generates corresponding '.d.ts' file. */
     "module": "commonjs",                                /* Specify what module code is generated. */
