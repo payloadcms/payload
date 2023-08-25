@@ -3,6 +3,7 @@ import nestedDocs from '@payloadcms/plugin-nested-docs'
 import seo from '@payloadcms/plugin-seo'
 import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
 import stripePlugin from '@payloadcms/plugin-stripe'
+import dotenv from 'dotenv'
 import path from 'path'
 import { buildConfig } from 'payload/config'
 
@@ -29,6 +30,10 @@ const generateTitle: GenerateTitle = () => {
 }
 
 const mockModulePath = path.resolve(__dirname, './emptyModuleMock.js')
+
+dotenv.config({
+  path: path.resolve(__dirname, '../../.env'),
+})
 
 export default buildConfig({
   admin: {
