@@ -1,7 +1,7 @@
 import { PaginateOptions } from 'mongoose';
 import type { FindGlobalVersions } from 'payload/database';
 import { flattenWhereToOperators } from 'payload/database';
-import { buildVersionGlobalFields } from 'payload';
+import { buildVersionGlobalFields } from 'payload/versions';
 import { PayloadRequest } from 'payload/types';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import type { MongooseAdapter } from '.';
