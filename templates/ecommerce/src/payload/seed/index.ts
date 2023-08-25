@@ -22,13 +22,19 @@ const globals = ['header', 'settings', 'footer']
 export const seed = async (payload: Payload): Promise<void> => {
   payload.logger.info('Seeding database...')
 
-  // remove the media directory
+  // we need to clear the media directory before seeding
+  // as well as the collections and globals
+  // this is because while `yarn seed` drops the database
+  // the custom `/api/seed` endpoint does not
+
+  payload.logger.info(`— Clearing media...`)
+
   const mediaDir = path.resolve(__dirname, '../../media')
   if (fs.existsSync(mediaDir)) {
     fs.rmdirSync(mediaDir, { recursive: true })
   }
 
-  payload.logger.info(`✓ cleared media`)
+  payload.logger.info(`— Clearing collections and globals...`)
 
   // clear the database
   await Promise.all([
@@ -46,7 +52,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     ), // eslint-disable-line function-paren-newline
   ])
 
-  payload.logger.info(`✓ cleared collections and globals`)
+  payload.logger.info(`— Seeding media...`)
 
   const [image1Doc, image2Doc, image3Doc] = await Promise.all([
     payload.create({
@@ -66,7 +72,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     }),
   ])
 
-  payload.logger.info(`✓ seeded images`)
+  payload.logger.info(`— Seeding categories...`)
 
   const [apparelCategory, ebooksCategory, coursesCategory] = await Promise.all([
     payload.create({
@@ -89,7 +95,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     }),
   ])
 
-  payload.logger.info(`✓ seeded categories`)
+  payload.logger.info(`— Seeding products...`)
 
   Promise.all([
     payload.create({
@@ -121,14 +127,14 @@ export const seed = async (payload: Payload): Promise<void> => {
     }),
   ])
 
-  payload.logger.info(`✓ seeded products`)
+  payload.logger.info(`— Seeding products page...`)
 
   const { id: productsPageID } = await payload.create({
     collection: 'pages',
     data: productsPage,
   })
 
-  payload.logger.info(`✓ seeded products page`)
+  payload.logger.info(`— Seeding home page...`)
 
   await payload.create({
     collection: 'pages',
@@ -140,14 +146,14 @@ export const seed = async (payload: Payload): Promise<void> => {
     ),
   })
 
-  payload.logger.info(`✓ seeded home page`)
+  payload.logger.info(`— Seeding cart page...`)
 
   await payload.create({
     collection: 'pages',
     data: JSON.parse(JSON.stringify(cartPage).replace(/{{PRODUCTS_PAGE_ID}}/g, productsPageID)),
   })
 
-  payload.logger.info(`✓ seeded cart page`)
+  payload.logger.info(`— Seeding settings...`)
 
   await payload.updateGlobal({
     slug: 'settings',
@@ -156,7 +162,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     },
   })
 
-  payload.logger.info(`✓ seeded settings`)
+  payload.logger.info(`— Seeding header...`)
 
   await payload.updateGlobal({
     slug: 'header',
@@ -176,7 +182,5 @@ export const seed = async (payload: Payload): Promise<void> => {
     },
   })
 
-  payload.logger.info(`✓ seeded header`)
-
-  payload.logger.info('Successfully seeded database')
+  payload.logger.info('Seeded database successfully!')
 }

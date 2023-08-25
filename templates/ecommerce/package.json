@@ -21,7 +21,7 @@
     "lint:fix": "eslint --fix --ext .ts,.tsx src"
   },
   "dependencies": {
-    "@payloadcms/plugin-cloud": "latest",
+    "@payloadcms/plugin-cloud": "^2.0.0",
     "@payloadcms/plugin-nested-docs": "^1.0.4",
     "@payloadcms/plugin-seo": "^1.0.10",
     "@payloadcms/plugin-stripe": "^0.0.13",

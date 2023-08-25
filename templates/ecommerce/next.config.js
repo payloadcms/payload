@@ -18,14 +18,6 @@ const nextConfig = {
     domains: ['localhost', process.env.NEXT_PUBLIC_SERVER_URL]
       .filter(Boolean)
       .map(url => url.replace(/https?:\/\//, '')),
-    // remotePatterns: [
-    //   {
-    //     protocol: 'https',
-    //     hostname: 'localhost',
-    //     port: '3000',
-    //     pathname: '/media/**',
-    //   },
-    // ],
   },
   async headers() {
     const headers = []
