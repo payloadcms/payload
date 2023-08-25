@@ -2,8 +2,10 @@ import mongoose from 'mongoose';
 import objectID from 'bson-objectid';
 import { getLocalizedPaths } from 'payload/dist/database/getLocalizedPaths';
 import { Field, fieldAffectsData } from 'payload/dist/fields/config/types';
-import { PathToQuery, validOperators } from 'payload/dist/database/queryValidation/types';
+import { PathToQuery } from 'payload/dist/database/queryValidation/types';
+import { validOperators } from 'payload/dist/types/constants';
 import { Payload } from 'payload';
+import { Operator } from 'payload/types';
 import { operatorMap } from './operatorMap';
 import { sanitizeQueryValue } from './sanitizeQueryValue';
 import { MongooseAdapter } from '..';
@@ -179,7 +181,7 @@ export async function buildSearchParam({
       return relationshipQuery;
     }
 
-    if (operator && validOperators.includes(operator)) {
+    if (operator && validOperators.includes(operator as Operator)) {
       const operatorKey = operatorMap[operator];
 
       if (field.type === 'relationship' || field.type === 'upload') {

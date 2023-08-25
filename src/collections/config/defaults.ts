@@ -29,6 +29,7 @@ export const defaults = {
     afterRead: [],
     beforeDelete: [],
     afterDelete: [],
+    afterOperation: [],
     beforeLogin: [],
     afterLogin: [],
     afterLogout: [],

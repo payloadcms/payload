@@ -100,7 +100,10 @@ const DefaultList: React.FC<Props> = (props) => {
                   {getTranslation(pluralLabel, i18n)}
                 </h1>
                 {hasCreatePermission && (
-                  <Pill to={newDocumentURL}>
+                  <Pill
+                    to={newDocumentURL}
+                    aria-label={t('createNewLabel', { label: getTranslation(singularLabel, i18n) })}
+                  >
                     {t('createNew')}
                   </Pill>
                 )}

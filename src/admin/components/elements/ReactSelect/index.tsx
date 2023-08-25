@@ -45,6 +45,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     components,
     isCreatable,
     selectProps,
+    noOptionsMessage,
   } = props;
 
   const classes = [
@@ -72,6 +73,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         filterOption={filterOption}
         onMenuOpen={onMenuOpen}
         menuPlacement="auto"
+        noOptionsMessage={noOptionsMessage}
         components={{
           ValueContainer,
           SingleValue,
@@ -134,6 +136,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       inputValue={inputValue}
       onInputChange={(newValue) => setInputValue(newValue)}
       onKeyDown={handleKeyDown}
+      noOptionsMessage={noOptionsMessage}
       components={{
         ValueContainer,
         SingleValue,

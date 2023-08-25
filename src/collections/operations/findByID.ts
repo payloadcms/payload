@@ -10,6 +10,7 @@ import { combineQueries } from '../../database/combineQueries';
 import type { FindOneArgs } from '../../database/types';
 import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
+import { buildAfterOperation } from './utils';
 
 export type Arguments = {
   collection: Collection
@@ -191,6 +192,16 @@ async function findByID<T extends TypeWithID>(
         context: req.context,
       }) || result;
     }, Promise.resolve());
+
+    // /////////////////////////////////////
+    // afterOperation - Collection
+    // /////////////////////////////////////
+
+    result = await buildAfterOperation<T>({
+      operation: 'findByID',
+      args,
+      result: result as any,
+    }); // TODO: fix this typing
 
     // /////////////////////////////////////
     // Return results

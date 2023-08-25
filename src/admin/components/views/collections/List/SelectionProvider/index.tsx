@@ -32,7 +32,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   const contextRef = useRef({} as SelectionContext);
 
   const history = useHistory();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const [selected, setSelected] = useState<SelectionContext['selected']>({});
   const [selectAll, setSelectAll] = useState<SelectAllStatus>(SelectAllStatus.None);
   const [count, setCount] = useState(0);

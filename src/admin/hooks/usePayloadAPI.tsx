@@ -33,7 +33,7 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   const [params, setParams] = useState(initialParams);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const locale = useLocale();
+  const { code: locale } = useLocale();
 
   const search = queryString.stringify({
     locale,

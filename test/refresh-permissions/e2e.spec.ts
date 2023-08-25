@@ -24,7 +24,7 @@ describe('refresh-permissions', () => {
     await expect(page.locator('#nav-global-test')).toBeHidden();
 
     // Allow access to test global.
-    await page.locator('.custom-checkbox:has(#field-test) button').click();
+    await page.locator('.custom-checkbox:has(#field-test) input').check();
     await page.locator('#action-save').click();
 
     // Now test collection should appear in the menu.

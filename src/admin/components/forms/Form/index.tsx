@@ -51,7 +51,7 @@ const Form: React.FC<Props> = (props) => {
   } = props;
 
   const history = useHistory();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
   const { t, i18n } = useTranslation('general');
   const { refreshCookie, user } = useAuth();
   const { id, getDocPreferences, collection, global } = useDocumentInfo();

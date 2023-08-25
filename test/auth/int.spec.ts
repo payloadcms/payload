@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import jwtDecode from 'jwt-decode';
 import { GraphQLClient } from 'graphql-request';
 import payload from '../../src';

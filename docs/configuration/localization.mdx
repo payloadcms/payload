@@ -33,15 +33,43 @@ export default buildConfig({
 });
 ```
 
+**Example Payload config set up for localization with full locales objects:**
+
+```ts
+import { buildConfig } from 'payload/config'
+
+export default buildConfig({
+  collections: [
+    // collections go here
+  ],
+  localization: {
+  locales: [
+    {
+      label: "English",
+      code: "en",
+    },
+    {
+      label: "Arabic",
+      code: "ar",
+      // opt-in to setting default text-alignment on Input fields to rtl (right-to-left) when current locale is rtl
+      rtl: true,
+    },
+  ],
+  defaultLocale: "en",
+  fallback: true,
+  },
+});
+```
+
 **Here is a brief explanation of each of the options available within the `localization` property:**
 
 **`locales`**
 
-Array-based list of all locales that you would like to support. These strings do not need to be in any specific format. It's up to you to define how to represent your locales. Common patterns are to use two-letter ISO 639 language codes or four-letter language and country codes (ISO 3166‑1) such as `en-US`, `en-UK`, `es-MX`, etc.
+Array-based list of all locales that you would like to support. These can be strings of locale codes or objects with a `label`, a locale `code`, and the `rtl` (right-to-left) property. The locale codes do not need to be in any specific format. It's up to you to define how to represent your locales. Common patterns are to use two-letter ISO 639 language codes or four-letter language and country codes (ISO 3166‑1) such as `en-US`, `en-UK`, `es-MX`, etc.
 
 **`defaultLocale`**
 
-Required string that matches one of the locales from the array provided. By default, if no locale is specified, documents will be returned in this locale.
+Required string that matches one of the locale codes from the array provided. By default, if no locale is specified, documents will be returned in this locale.
 
 **`fallback`**
 

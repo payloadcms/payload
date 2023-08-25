@@ -7,12 +7,15 @@ import { useLocale } from '../../utilities/Locale';
 import { useSearchParams } from '../../utilities/SearchParams';
 import Popup from '../Popup';
 
+
 import './index.scss';
 
 const baseClass = 'localizer';
 
 const Localizer: React.FC = () => {
-  const { localization } = useConfig();
+  const config = useConfig();
+  const { localization } = config;
+
   const locale = useLocale();
   const searchParams = useSearchParams();
   const { t } = useTranslation('general');
@@ -25,7 +28,7 @@ const Localizer: React.FC = () => {
         <Popup
           showScrollbar
           horizontalAlign="left"
-          button={locale}
+          button={locale.label}
           render={({ close }) => (
             <div>
               <span>{t('locales')}</span>
@@ -35,27 +38,27 @@ const Localizer: React.FC = () => {
 
                   const localeClasses = [
                     baseLocaleClass,
-                    locale === localeOption && `${baseLocaleClass}--active`,
+                    locale.code === localeOption.code && `${baseLocaleClass}--active`,
                   ].filter(Boolean).join('');
 
                   const newParams = {
                     ...searchParams,
-                    locale: localeOption,
+                    locale: localeOption.code,
                   };
 
                   const search = qs.stringify(newParams);
 
-                  if (localeOption !== locale) {
+                  if (localeOption.code !== locale.code) {
                     return (
                       <li
-                        key={localeOption}
+                        key={localeOption.code}
                         className={localeClasses}
                       >
                         <Link
                           to={{ search }}
                           onClick={close}
                         >
-                          {localeOption}
+                          {localeOption.label}
                         </Link>
                       </li>
                     );

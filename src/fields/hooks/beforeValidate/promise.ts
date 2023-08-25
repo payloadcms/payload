@@ -1,6 +1,9 @@
 /* eslint-disable no-param-reassign */
 import { PayloadRequest, RequestContext } from '../../../express/types';
 import { Field, fieldAffectsData, TabAsField, tabHasName, valueIsValueWithRelation } from '../../config/types';
+import getValueWithDefault from '../../getDefaultValue';
+import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc';
+import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc';
 import { traverseFields } from './traverseFields';
 
 type Args<T> = {
@@ -20,6 +23,8 @@ type Args<T> = {
 // - Sanitize incoming data
 // - Execute field hooks
 // - Execute field access control
+// - Merge original document data into incoming data
+// - Compute default values for undefined fields
 
 export const promise = async <T>({
   data,
@@ -189,6 +194,22 @@ export const promise = async <T>({
         delete siblingData[field.name];
       }
     }
+
+    if (typeof siblingData[field.name] === 'undefined') {
+      // If no incoming data, but existing document data is found, merge it in
+      if (typeof siblingDoc[field.name] !== 'undefined') {
+        siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name]);
+
+        // Otherwise compute default value
+      } else if (typeof field.defaultValue !== 'undefined') {
+        siblingData[field.name] = await getValueWithDefault({
+          value: siblingData[field.name],
+          defaultValue: field.defaultValue,
+          locale: req.locale,
+          user: req.user,
+        });
+      }
+    }
   }
 
   // Traverse subfields
@@ -231,7 +252,7 @@ export const promise = async <T>({
             overrideAccess,
             req,
             siblingData: row,
-            siblingDoc: siblingDoc[field.name]?.[i] || {},
+            siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
             context,
           }));
         });
@@ -258,7 +279,7 @@ export const promise = async <T>({
               overrideAccess,
               req,
               siblingData: row,
-              siblingDoc: siblingDoc[field.name]?.[i] || {},
+              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
               context,
             }));
           }
@@ -291,8 +312,11 @@ export const promise = async <T>({
       let tabSiblingData;
       let tabSiblingDoc;
       if (tabHasName(field)) {
-        tabSiblingData = typeof siblingData[field.name] === 'object' ? siblingData[field.name] : {};
-        tabSiblingDoc = typeof siblingDoc[field.name] === 'object' ? siblingDoc[field.name] : {};
+        if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {};
+        if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {};
+
+        tabSiblingData = siblingData[field.name] as Record<string, unknown>;
+        tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>;
       } else {
         tabSiblingData = siblingData;
         tabSiblingDoc = siblingDoc;

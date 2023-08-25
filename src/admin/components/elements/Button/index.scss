@@ -129,6 +129,12 @@ a.btn {
   &--round {
     border-radius: 100%;
   }
+  
+  [dir=rtl]  &--icon {
+    span{
+    margin-left: 5px;
+    }
+  }
 
   &--icon {
     span {

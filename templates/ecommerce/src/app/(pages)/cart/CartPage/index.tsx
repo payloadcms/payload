@@ -19,9 +19,8 @@ export const CartPage: React.FC<{
   settings: Settings
   page: Page
 }> = props => {
-  const {
-    settings: { productsPage },
-  } = props
+  const { settings } = props
+  const { productsPage } = settings || {}
 
   const { user } = useAuth()
 
@@ -103,7 +102,7 @@ export const CartPage: React.FC<{
                               <Link
                                 href={`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/collections/products/${id}`}
                               >
-                                navigate to the admin dashboard
+                                edit this product in the admin panel
                               </Link>
                               {'.'}
                             </p>

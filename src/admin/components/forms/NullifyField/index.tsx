@@ -13,7 +13,7 @@ type NullifyLocaleFieldProps = {
 }
 export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({ localized, path, fieldValue }) => {
   const { dispatchFields, setModified } = useForm();
-  const currentLocale = useLocale();
+  const { code: currentLocale } = useLocale();
   const { localization } = useConfig();
   const [checked, setChecked] = React.useState<boolean>(typeof fieldValue !== 'number');
   const defaultLocale = (localization && localization.defaultLocale) ? localization.defaultLocale : 'en';

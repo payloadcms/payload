@@ -16,7 +16,10 @@ export const I18n: React.FC = () => {
   }
 
   i18n
-    .use(LanguageDetector)
+    .use(new LanguageDetector(null, {
+      lookupCookie: 'lng',
+      lookupLocalStorage: 'lng',
+    }))
     .use(initReactI18next)
     .init(deepmerge(defaultOptions, config.i18n || {}));
   loader.config({ 'vs/nls': { availableLanguages: { '*': getSupportedMonacoLocale(i18n.language) } } });

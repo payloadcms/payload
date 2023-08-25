@@ -11,6 +11,9 @@
     th {
       font-weight: normal;
       text-align: left;
+      [dir = rtl] & {
+        text-align: right;
+      }
     }
   }
 

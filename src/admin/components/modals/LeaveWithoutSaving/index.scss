@@ -15,6 +15,11 @@
   }
 
   .btn {
-    margin-right: $baseline;
+    [dir=ltr] & {
+      margin-right: $baseline;
+    }
+    [dir=rtl] & {
+      margin-left: $baseline;
+    }  
   }
 }

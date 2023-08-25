@@ -30,7 +30,7 @@ const Routes: React.FC = () => {
   const [initialized, setInitialized] = useState(null);
   const { user, permissions, refreshCookie } = useAuth();
   const { i18n } = useTranslation();
-  const locale = useLocale();
+  const { code: locale } = useLocale();
 
   const canAccessAdmin = permissions?.canAccessAdmin;
 
@@ -260,7 +260,7 @@ const Routes: React.FC = () => {
                                 const routesToReturn = [
                                   ...globalRoutes,
                                   <Route
-                                    key={`${global.slug}`}
+                                    key={global.slug}
                                     path={`${match.url}/globals/${global.slug}`}
                                     exact
                                   >
