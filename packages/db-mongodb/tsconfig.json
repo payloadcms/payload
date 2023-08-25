@@ -1,5 +1,4 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "moduleResolution": "Node16", /* Required for exports to work */
     "composite": true,
