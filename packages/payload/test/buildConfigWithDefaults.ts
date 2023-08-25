@@ -3,6 +3,7 @@ import { Config, SanitizedConfig } from '../src/config/types';
 import { buildConfig as buildPayloadConfig } from '../src/config/build';
 import { mongooseAdapter } from '@payloadcms/db-mongodb';
 import { postgresAdapter } from '@payloadcms/db-postgres';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({

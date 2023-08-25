@@ -14,6 +14,8 @@ import {
 } from './config';
 import type { Post, RelyOnRequestHeader, Restricted } from './payload-types';
 import { firstArrayText, secondArrayText } from './shared';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 describe('Access Control', () => {
   let post1: Post;

@@ -6,6 +6,7 @@ import buildQuery from './queries/buildQuery';
 import { buildFindManyArgs } from './find/buildFindManyArgs';
 import { transform } from './transform/read';
 
+// @ts-ignore // TODO: Fix this
 export const findOne: FindOne = async function findOne({
   collection,
   where,

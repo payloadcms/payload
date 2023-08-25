@@ -2,6 +2,7 @@ import path from 'path';
 import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 export interface Relation {
   id: string;

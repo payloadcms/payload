@@ -1,6 +1,6 @@
 import { and, eq, gt, gte, inArray, isNotNull, lt, lte, ne, notInArray, or } from 'drizzle-orm';
 
-export const operatorMap = {
+export const operatorMap: any = {
   greater_than_equal: gte,
   less_than_equal: lte,
   less_than: lt,

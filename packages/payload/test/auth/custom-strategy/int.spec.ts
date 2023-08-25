@@ -1,8 +1,11 @@
 import payload from '../../../src';
 import { initPayloadTest } from '../../helpers/configHelpers';
 import { slug } from './config';
+import path from 'path';
 
-require('isomorphic-fetch');
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
+import 'isomorphic-fetch';
 
 let apiUrl;
 

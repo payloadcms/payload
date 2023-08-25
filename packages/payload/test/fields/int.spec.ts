@@ -15,6 +15,8 @@ import { dateDoc } from './collections/Date';
 import type { RichTextField } from './payload-types';
 import type { PaginatedDocs } from '../../src/database/types';
 import type { MongooseAdapter } from '@payloadcms/db-mongodb';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 let client;
 let graphQLClient: GraphQLClient;

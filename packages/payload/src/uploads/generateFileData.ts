@@ -1,4 +1,5 @@
-import { fromBuffer } from 'file-type';
+import filetype from 'file-type';
+const { fromBuffer } = filetype;
 import mkdirp from 'mkdirp';
 import path from 'path';
 import sanitize from 'sanitize-filename';

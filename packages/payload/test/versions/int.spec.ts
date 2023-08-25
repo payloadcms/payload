@@ -5,6 +5,8 @@ import configPromise from './config';
 import AutosavePosts from './collections/Autosave';
 import AutosaveGlobal from './globals/Autosave';
 import { devUser } from '../credentials';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 let collectionLocalPostID: string;
 let collectionLocalVersionID;

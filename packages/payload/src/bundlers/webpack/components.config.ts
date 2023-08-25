@@ -1,18 +1,24 @@
-import path from 'path';
+import path, { dirname } from 'path';
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
 import TerserJSPlugin from 'terser-webpack-plugin';
 import terser from 'terser'; // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
 import OptimizeCSSAssetsPlugin from 'css-minimizer-webpack-plugin';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'node:module';
+
+const __filename = fileURLToPath(import.meta.url);
+const _dirname = dirname(__filename);
+const require = createRequire(import.meta.url);
 
 export default {
   entry: {
-    main: [path.resolve(__dirname, '../../admin/components/index.js')],
+    main: [path.resolve(_dirname, '../../admin/components/index.js')],
   },
   externals: {
     react: 'react',
   },
   output: {
-    path: path.resolve(__dirname, '../../../components'),
+    path: path.resolve(_dirname, '../../../components'),
     publicPath: '/',
     filename: 'index.js',
     libraryTarget: 'commonjs2',
@@ -29,6 +35,9 @@ export default {
       {
         test: /\.(t|j)sx?$/,
         exclude: /node_modules/,
+        resolve: {
+          fullySpecified: false
+        },
         use: [
           {
             loader: require.resolve('swc-loader'),
@@ -82,9 +91,10 @@ export default {
     }),
   ],
   resolve: {
+    mainFiles: ['index'],
     alias: {
-      'payload-scss-overrides': path.resolve(__dirname, '../../admin/scss/overrides.scss'),
+      'payload-scss-overrides': path.resolve(_dirname, '../../admin/scss/overrides.scss'),
     },
-    modules: ['node_modules', path.resolve(__dirname, '../../../node_modules')],
+    modules: ['node_modules', path.resolve(_dirname, '../../../node_modules')],
   },
 };

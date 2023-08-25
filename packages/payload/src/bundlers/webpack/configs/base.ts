@@ -1,14 +1,22 @@
-import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack, { Configuration } from 'webpack';
 import type { SanitizedConfig } from '../../../config/types';
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path';
+import { createRequire } from 'node:module';
 
-const mockModulePath = path.resolve(__dirname, '../../mocks/emptyModule.js');
-const mockDotENVPath = path.resolve(__dirname, '../../mocks/dotENV.js');
+const __filename = fileURLToPath(import.meta.url);
+const _dirname = dirname(__filename);
 
-const nodeModulesPath = path.resolve(__dirname, '../../../../node_modules');
-const adminFolderPath = path.resolve(__dirname, '../../../admin');
-const bundlerPath = path.resolve(__dirname, '../bundler');
+const mockModulePath = path.resolve(_dirname, '../../mocks/emptyModule.js');
+const mockDotENVPath = path.resolve(_dirname, '../../mocks/dotENV.js');
+
+const nodeModulesPath = path.resolve(_dirname, '../../../../node_modules');
+const adminFolderPath = path.resolve(_dirname, '../../../admin');
+const bundlerPath = path.resolve(_dirname, '../bundler');
+
+const require = createRequire(import.meta.url);
+
 
 export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => ({
   entry: {
@@ -17,7 +25,7 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
     ],
   },
   resolveLoader: {
-    modules: ['node_modules', path.join(__dirname, nodeModulesPath)],
+    modules: ['node_modules', path.join(_dirname, nodeModulesPath)],
   },
   module: {
     rules: [
@@ -55,7 +63,7 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       https: false,
       http: false,
     },
-    modules: ['node_modules', path.resolve(__dirname, nodeModulesPath)],
+    modules: ['node_modules', path.resolve(_dirname, nodeModulesPath)],
     alias: {
       'payload-config': payloadConfig.paths.rawConfig,
       payload$: mockModulePath,

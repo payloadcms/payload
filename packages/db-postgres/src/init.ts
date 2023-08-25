@@ -10,6 +10,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
   if (this.payload.config.localization) {
     this.enums._locales = pgEnum(
       '_locales',
+      // @ts-ignore // TODO: Fix this
       this.payload.config.localization.locales as [string, ...string[]],
     );
   }

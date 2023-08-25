@@ -28,7 +28,6 @@ import { updateOne } from './update';
 export function postgresAdapter(args: Args): PostgresAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
       enums: {},

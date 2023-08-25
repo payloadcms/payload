@@ -4,6 +4,7 @@
   "description": "The officially supported Postgres database adapter for Payload",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
+  "type": "module",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "main": "./dist/index.js",

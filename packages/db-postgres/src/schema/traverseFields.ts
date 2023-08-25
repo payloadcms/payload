@@ -16,12 +16,12 @@ type Args = {
   adapter: PostgresAdapter
   arrayBlockRelations: Map<string, string>
   buildRelationships: boolean
-  columns: Record<string, AnyPgColumnBuilder>
+  columns: Record<string, any> // TODO: Type second generic. Previously, it was AnyPgColumnBuilder
   columnPrefix?: string
   fieldPrefix?: string
   fields: Field[]
   indexes: Record<string, (cols: GenericColumns) => IndexBuilder>
-  localesColumns: Record<string, AnyPgColumnBuilder>
+  localesColumns: Record<string, any> // TODO: Type second generic. Previously, it was AnyPgColumnBuilder
   localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder>
   newTableName: string
   parentTableName: string
@@ -119,7 +119,7 @@ export const traverseFields = ({
       }
 
       case 'array': {
-        const baseColumns: Record<string, AnyPgColumnBuilder> = {
+        const baseColumns: Record<string, any> = { // TODO: Type second generic. Previously, it was AnyPgColumnBuilder
           _order: integer('_order').notNull(),
           _parentID: parentIDColumnMap[parentIDColType]('_parent_id').references(() => adapter.tables[parentTableName].id).notNull(),
         };
@@ -165,7 +165,7 @@ export const traverseFields = ({
 
       case 'blocks': {
         field.blocks.forEach((block) => {
-          const baseColumns: Record<string, AnyPgColumnBuilder> = {
+          const baseColumns: Record<string, any> = { // TODO: Type second generic. Previously, it was AnyPgColumnBuilder
             _order: integer('_order').notNull(),
             _path: text('_path').notNull(),
             _parentID: parentIDColumnMap[parentIDColType]('_parent_id').references(() => adapter.tables[parentTableName].id).notNull(),

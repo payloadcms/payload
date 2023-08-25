@@ -1,6 +1,6 @@
 import path from 'path';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 export default buildConfigWithDefaults({
   graphQL: {
     schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),

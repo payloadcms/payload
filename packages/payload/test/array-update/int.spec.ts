@@ -1,8 +1,10 @@
 import { initPayloadTest } from '../helpers/configHelpers';
 import payload from '../../src';
 import configPromise from './config';
+import path from 'path';
 
 let collection: string;
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 describe('array-update', () => {
   beforeAll(async () => {

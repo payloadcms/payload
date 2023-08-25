@@ -1,19 +1,23 @@
-import path from 'path';
+import path, { dirname } from 'path';
 import fs from 'fs';
 import { generateTypes } from '../src/bin/generateTypes';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const _dirname = dirname(__filename);
 
 const [testConfigDir] = process.argv.slice(2);
 
 let testDir;
 if (testConfigDir) {
-  testDir = path.resolve(__dirname, testConfigDir);
+  testDir = path.resolve(_dirname, testConfigDir);
   setPaths(testDir);
   generateTypes();
 } else {
   // Generate types for entire directory
-  testDir = __dirname;
+  testDir = _dirname;
 
-  fs.readdirSync(__dirname, { withFileTypes: true })
+  fs.readdirSync(_dirname, { withFileTypes: true })
     .filter((f) => f.isDirectory())
     .forEach((dir) => {
       const suiteDir = path.resolve(testDir, dir.name);

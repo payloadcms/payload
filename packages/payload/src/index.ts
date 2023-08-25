@@ -2,13 +2,11 @@ import { Config as GeneratedTypes } from 'payload/generated-types';
 import { InitOptions } from './config/types';
 import { initHTTP } from './initHTTP';
 import { Payload as LocalPayload, BasePayload } from './payload';
-import type { RequestContext } from './express/types';
-
-export { DatabaseAdapter } from './database/types';
+import 'isomorphic-fetch'
+export type { RequestContext } from './express/types';
 
 export { getPayload } from './payload';
 
-require('isomorphic-fetch');
 
 export class Payload extends BasePayload<GeneratedTypes> {
   async init(options: InitOptions): Promise<LocalPayload> {
@@ -27,6 +25,3 @@ export class Payload extends BasePayload<GeneratedTypes> {
 const payload = new Payload();
 
 export default payload;
-module.exports = payload;
-// Export RequestContext type
-export type { RequestContext };

@@ -52,7 +52,7 @@ export async function initPayloadTest(options: Options): Promise<{ serverURL: st
       },
     },
     module: {
-      type: 'commonjs',
+      type: 'es6',
     },
   });
 

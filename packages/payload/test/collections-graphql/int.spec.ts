@@ -3,6 +3,8 @@ import { initPayloadTest } from '../helpers/configHelpers';
 import configPromise, { pointSlug, slug } from './config';
 import payload from '../../src';
 import type { Post } from './payload-types';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 import { mapAsync } from '../../src/utilities/mapAsync';
 
 const title = 'title';

@@ -20,6 +20,8 @@ import type {
   Relation,
 } from './payload-types';
 import { mapAsync } from '../../src/utilities/mapAsync';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 let client: RESTClient;
 

@@ -1,9 +1,13 @@
 import fs from 'fs';
-import path from 'path';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 import express from 'express';
 import { v4 as uuid } from 'uuid';
 import * as dotenv from 'dotenv';
 import payload from '../src';
+
+const __filename = fileURLToPath(import.meta.url);
+const _dirname = dirname(__filename);
 
 dotenv.config();
 
@@ -14,7 +18,7 @@ if (!testSuiteDir) {
   process.exit(1);
 }
 
-const configPath = path.resolve(__dirname, testSuiteDir, 'config.ts');
+const configPath = path.resolve(_dirname, testSuiteDir, 'config.ts');
 
 if (!fs.existsSync(configPath)) {
   console.error('ERROR: You must pass a valid directory under test/ that contains a config.ts');

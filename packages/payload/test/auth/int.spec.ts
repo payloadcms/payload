@@ -6,9 +6,11 @@ import { initPayloadTest } from '../helpers/configHelpers';
 import { namedSaveToJWTValue, saveToJWTKey, slug } from './config';
 import { devUser } from '../credentials';
 import type { User } from '../../src/auth';
+import path from 'path';
 import configPromise from '../collections-graphql/config';
 
-require('isomorphic-fetch');
+import 'isomorphic-fetch';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 let apiUrl;
 let client: GraphQLClient;
