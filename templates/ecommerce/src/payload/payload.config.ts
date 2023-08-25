@@ -15,6 +15,8 @@ import Users from './collections/Users'
 import BeforeDashboard from './components/BeforeDashboard'
 import BeforeLogin from './components/BeforeLogin'
 import { createPaymentIntent } from './endpoints/create-payment-intent'
+import { customersProxy } from './endpoints/customers'
+import { productsProxy } from './endpoints/products'
 import { seed } from './endpoints/seed'
 import { Footer } from './globals/Footer'
 import { Header } from './globals/Header'
@@ -47,9 +49,10 @@ export default buildConfig({
           ...config.resolve?.alias,
           [path.resolve(__dirname, 'collections/Products/hooks/beforeChange')]: mockModulePath,
           [path.resolve(__dirname, 'collections/Users/hooks/createStripeCustomer')]: mockModulePath,
-          [path.resolve(__dirname, 'collections/Users/endpoints/order')]: mockModulePath,
-          [path.resolve(__dirname, 'collections/Users/endpoints/orders')]: mockModulePath,
+          [path.resolve(__dirname, 'collections/Users/endpoints/customer')]: mockModulePath,
           [path.resolve(__dirname, 'endpoints/create-payment-intent')]: mockModulePath,
+          [path.resolve(__dirname, 'endpoints/customers')]: mockModulePath,
+          [path.resolve(__dirname, 'endpoints/products')]: mockModulePath,
           stripe: mockModulePath,
           express: mockModulePath,
         },
@@ -77,6 +80,16 @@ export default buildConfig({
       method: 'post',
       handler: createPaymentIntent,
     },
+    {
+      path: '/stripe/customers',
+      method: 'get',
+      handler: customersProxy,
+    },
+    {
+      path: '/stripe/products',
+      method: 'get',
+      handler: productsProxy,
+    },
     // The seed endpoint is used to populate the database with some example data
     // You should delete this endpoint before deploying your site to production
     {
@@ -90,6 +103,7 @@ export default buildConfig({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
       isTestKey: Boolean(process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY),
       stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET,
+      rest: false,
       webhooks: {
         'product.created': productUpdated,
         'product.updated': productUpdated,
