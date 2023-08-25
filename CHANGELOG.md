@@ -1,5 +1,14 @@
 
 
+## [1.15.1](https://github.com/payloadcms/payload/compare/v1.15.0...v1.15.1) (2023-08-25)
+
+
+### Bug Fixes
+
+* arrays in richtext uploads ([#3222](https://github.com/payloadcms/payload/issues/3222)) ([cb8e07f](https://github.com/payloadcms/payload/commit/cb8e07f85232a26c265872faf408644424312af6))
+* correct out of order dark-mode color variables ([#3197](https://github.com/payloadcms/payload/issues/3197)) ([3a15e07](https://github.com/payloadcms/payload/commit/3a15e077c6914aba3ef26e453fee23c89f3db829))
+* mutation type with tabs missing previous tabs ([#3196](https://github.com/payloadcms/payload/issues/3196)) ([6d3b863](https://github.com/payloadcms/payload/commit/6d3b8636f4e14a4e4155279353fa06e86fe2b25c))
+
 # [1.15.0](https://github.com/payloadcms/payload/compare/v1.14.0...v1.15.0) (2023-08-24)
 
 
