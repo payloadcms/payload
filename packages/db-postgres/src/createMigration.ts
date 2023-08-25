@@ -1,13 +1,13 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import fs from 'fs';
-import { CreateMigration } from 'payload/dist/database/types';
+import { CreateMigration } from 'payload/database';
 
 import { generateDrizzleJson, generateMigration } from 'drizzle-kit/utils';
 import { eq } from 'drizzle-orm';
 import { jsonb, numeric, pgEnum, pgTable, varchar } from 'drizzle-orm/pg-core';
-import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
-import type { DatabaseAdapter, Init } from 'payload/dist/database/types';
-import { configToJSONSchema } from 'payload/dist/utilities/configToJSONSchema';
+import { SanitizedCollectionConfig } from 'payload/types';
+import type { DatabaseAdapter, Init } from 'payload/database';
+import { configToJSONSchema } from 'payload/utilities';
 import prompts from 'prompts';
 import { buildTable } from './schema/build';
 import type { GenericEnum, GenericRelation, GenericTable, PostgresAdapter } from './types';

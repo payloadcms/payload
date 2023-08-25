@@ -1,6 +1,6 @@
-import { Where } from 'payload/dist/types';
-import { Field } from 'payload/dist/fields/config/types';
-import QueryError from 'payload/dist/errors/QueryError';
+import { Where } from 'payload/types';
+import { Field } from 'payload/types';
+import { QueryError } from 'payload/errors';
 import { SQL } from 'drizzle-orm';
 import { parseParams } from './parseParams';
 import { PostgresAdapter } from '../types';

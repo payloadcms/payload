@@ -1,6 +1,6 @@
 import { ArrayField, Block } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
-import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
+import { SanitizedCollectionConfig } from 'payload/types';
 import { SanitizedConfig } from 'payload/config';
 import { DBQueryConfig } from 'drizzle-orm';
 import { traverseFields } from './traverseFields';

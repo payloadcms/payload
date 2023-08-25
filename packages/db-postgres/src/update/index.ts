@@ -1,4 +1,4 @@
-import { UpdateOne } from 'payload/dist/database/types';
+import { UpdateOne } from 'payload/database';
 import toSnakeCase from 'to-snake-case';
 import { SQL } from 'drizzle-orm';
 import buildQuery from '../queries/buildQuery';

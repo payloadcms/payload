@@ -2,7 +2,7 @@
 import { AnyPgColumnBuilder, integer, text, varchar, numeric, IndexBuilder, PgNumericBuilder, PgVarcharBuilder, jsonb } from 'drizzle-orm/pg-core';
 import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
-import { fieldAffectsData } from 'payload/dist/fields/config/types';
+import { fieldAffectsData } from 'payload/fields/utilities';
 import { Relation, relations } from 'drizzle-orm';
 import { GenericColumns, PostgresAdapter } from '../types';
 import { createIndex } from './createIndex';

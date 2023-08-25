@@ -15,6 +15,7 @@ export { DatabaseAdapter } from './../database/types';
 export {
   CollectionConfig,
   SanitizedCollectionConfig,
+  TypeWithID,
   AfterOperationHook as CollectionAfterOperationHook,
   BeforeOperationHook as CollectionBeforeOperationHook,
   BeforeValidateHook as CollectionBeforeValidateHook,

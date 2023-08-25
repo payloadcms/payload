@@ -1,5 +1,5 @@
 import type { Payload } from 'payload';
-import { createDatabaseAdapter } from 'payload/dist/database/createAdapter';
+import { createDatabaseAdapter } from 'payload/database';
 import { connect } from './connect';
 import { init } from './init';
 import { createMigration } from './createMigration';

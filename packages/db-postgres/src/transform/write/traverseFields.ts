@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
-import { fieldAffectsData, valueIsValueWithRelation } from 'payload/dist/fields/config/types';
+import { fieldAffectsData, valueIsValueWithRelation } from 'payload/fields/utilities';
 import { ArrayRowToInsert, BlockRowToInsert } from './types';
 import { isArrayOfRows } from '../../utilities/isArrayOfRows';
 

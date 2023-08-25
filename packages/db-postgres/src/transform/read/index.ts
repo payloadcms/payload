@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { Field } from 'payload/types';
-import { TypeWithID } from 'payload/dist/collections/config/types';
+import { TypeWithID } from 'payload/types';
 import { SanitizedConfig } from 'payload/config';
 import { traverseFields } from './traverseFields';
 import { createRelationshipMap } from '../../utilities/createRelationshipMap';

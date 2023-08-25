@@ -1,7 +1,8 @@
 /* eslint-disable no-param-reassign */
 import { pgEnum } from 'drizzle-orm/pg-core';
-import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
-import type { Init } from 'payload/dist/database/types';
+// import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
+import { SanitizedCollectionConfig } from 'payload/types';
+import type { Init } from 'payload/database';
 import { buildTable } from './schema/build';
 import type { PostgresAdapter } from './types';
 

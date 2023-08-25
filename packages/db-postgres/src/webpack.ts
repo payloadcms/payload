@@ -1,5 +1,5 @@
 import path from 'path';
-import type { Webpack } from 'payload/dist/database/types';
+import type { Webpack } from 'payload/database';
 
 export const webpack: Webpack = (config) => {
   return {

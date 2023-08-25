@@ -1,4 +1,4 @@
-import { Create } from 'payload/dist/database/types';
+import { Create } from 'payload/database';
 import toSnakeCase from 'to-snake-case';
 import { upsertRow } from '../upsertRow';
 

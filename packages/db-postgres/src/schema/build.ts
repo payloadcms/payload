@@ -14,7 +14,7 @@ import {
 import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
 import { Relation, relations } from 'drizzle-orm';
-import { fieldAffectsData } from 'payload/dist/fields/config/types';
+import { fieldAffectsData } from 'payload/fields/utilities';
 import { GenericColumns, GenericTable, PostgresAdapter } from '../types';
 import { traverseFields } from './traverseFields';
 import { parentIDColumnMap } from './parentIDColumnMap';

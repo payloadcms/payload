@@ -1,10 +1,10 @@
 import fs from 'fs';
 import { sql, eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import type { Connect } from 'payload/dist/database/types';
+import type { Connect } from 'payload/database';
 import { Client, Pool } from 'pg';
 import { generateDrizzleJson, pushSchema } from 'drizzle-kit/utils';
-import { configToJSONSchema } from 'payload/dist/utilities/configToJSONSchema';
+import { configToJSONSchema } from 'payload/utilities';
 import prompts from 'prompts';
 
 import { jsonb, numeric, pgTable, varchar } from 'drizzle-orm/pg-core';

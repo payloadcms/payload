@@ -1,7 +1,7 @@
 import toSnakeCase from 'to-snake-case';
-import type { FindOne } from 'payload/dist/database/types';
-import type { PayloadRequest } from 'payload/dist/express/types';
-import type { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
+import type { FindOne } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
+import type { SanitizedCollectionConfig } from 'payload/types';
 import buildQuery from './queries/buildQuery';
 import { buildFindManyArgs } from './find/buildFindManyArgs';
 import { transform } from './transform/read';

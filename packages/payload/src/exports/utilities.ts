@@ -1,4 +1,4 @@
-export { entityToJSONSchema } from '../utilities/configToJSONSchema';
+export { entityToJSONSchema, configToJSONSchema } from '../utilities/configToJSONSchema';
 export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields';
 export { combineMerge } from '../utilities/combineMerge';
 

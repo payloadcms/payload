@@ -1,5 +1,5 @@
 import { Where } from 'payload/types';
-import { Field } from 'payload/dist/fields/config/types';
+import { Field } from 'payload/types';
 import { SQL } from 'drizzle-orm';
 import { parseParams } from './parseParams';
 import { PostgresAdapter } from '../types';
