@@ -15,12 +15,26 @@ import { productsPage } from './products-page'
 const collections = ['categories', 'media', 'pages', 'products']
 const globals = ['header', 'settings', 'footer']
 
+// Next.js revalidation errors are normal when seeding the database without a server running
+// i.e. running `yarn seed` locally instead of using the admin UI within an active app
+// The app is not running to revalidate the pages and so the API routes are not available
+// These error messages can be ignored: `Error hitting revalidate route for...`
 export const seed = async (payload: Payload): Promise<void> => {
-  // remove the media directory
+  payload.logger.info('Seeding database...')
+
+  // we need to clear the media directory before seeding
+  // as well as the collections and globals
+  // this is because while `yarn seed` drops the database
+  // the custom `/api/seed` endpoint does not
+
+  payload.logger.info(`— Clearing media...`)
+
   const mediaDir = path.resolve(__dirname, '../../media')
   if (fs.existsSync(mediaDir)) {
     fs.rmdirSync(mediaDir, { recursive: true })
   }
+
+  payload.logger.info(`— Clearing collections and globals...`)
 
   // clear the database
   await Promise.all([
@@ -37,6 +51,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       }),
     ), // eslint-disable-line function-paren-newline
   ])
+
+  payload.logger.info(`— Seeding media...`)
 
   const [image1Doc, image2Doc, image3Doc] = await Promise.all([
     payload.create({
@@ -55,6 +71,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       data: image3,
     }),
   ])
+
+  payload.logger.info(`— Seeding categories...`)
 
   const [apparelCategory, ebooksCategory, coursesCategory] = await Promise.all([
     payload.create({
@@ -76,6 +94,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       },
     }),
   ])
+
+  payload.logger.info(`— Seeding products...`)
 
   Promise.all([
     payload.create({
@@ -107,10 +127,14 @@ export const seed = async (payload: Payload): Promise<void> => {
     }),
   ])
 
+  payload.logger.info(`— Seeding products page...`)
+
   const { id: productsPageID } = await payload.create({
     collection: 'pages',
     data: productsPage,
   })
+
+  payload.logger.info(`— Seeding home page...`)
 
   await payload.create({
     collection: 'pages',
@@ -122,10 +146,14 @@ export const seed = async (payload: Payload): Promise<void> => {
     ),
   })
 
+  payload.logger.info(`— Seeding cart page...`)
+
   await payload.create({
     collection: 'pages',
     data: JSON.parse(JSON.stringify(cartPage).replace(/{{PRODUCTS_PAGE_ID}}/g, productsPageID)),
   })
+
+  payload.logger.info(`— Seeding settings...`)
 
   await payload.updateGlobal({
     slug: 'settings',
@@ -133,6 +161,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       productsPage: productsPageID,
     },
   })
+
+  payload.logger.info(`— Seeding header...`)
 
   await payload.updateGlobal({
     slug: 'header',
@@ -151,4 +181,6 @@ export const seed = async (payload: Payload): Promise<void> => {
       ],
     },
   })
+
+  payload.logger.info('Seeded database successfully!')
 }

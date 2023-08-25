@@ -26,8 +26,8 @@ const start = async (): Promise<void> => {
   })
 
   if (process.env.PAYLOAD_SEED === 'true') {
-    payload.logger.info('---- SEEDING DATABASE ----')
     await seed(payload)
+    process.exit()
   }
 
   if (process.env.NEXT_BUILD) {
