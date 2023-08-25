@@ -43,6 +43,7 @@
     "pretest": "yarn build",
     "test": "yarn test:int && yarn test:components && yarn test:e2e",
     "test:int": "cross-env DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
+    "test:int:postgres": "cross-env PAYLOAD_DATABASE=postgres yarn test:int",
     "test:e2e": "ts-node -T ./test/runE2E.ts",
     "test:e2e:headed": "cross-env DISABLE_LOGGING=true playwright test --headed",
     "test:e2e:debug": "cross-env PWDEBUG=1 DISABLE_LOGGING=true playwright test",

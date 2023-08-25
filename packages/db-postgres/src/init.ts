@@ -9,7 +9,9 @@ export const init: Init = async function init(this: PostgresAdapter) {
   if (this.payload.config.localization) {
     this.enums._locales = pgEnum(
       '_locales',
-      this.payload.config.localization.locales as [string, ...string[]],
+      // TODO: types out of sync with core, monorepo please
+      // this.payload.config.localization.localeCodes,
+      (this.payload.config.localization.locales as unknown as {code: string}[]).map(({ code }) => code) as [string, ...string[]],
     );
   }
 

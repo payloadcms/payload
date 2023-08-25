@@ -6,7 +6,7 @@ import { postgresAdapter } from '../packages/db-postgres/src';
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({
-    url: 'mongodb://127.0.0.1/payload',
+    url: process.env.MONGO_URL || 'mongodb://127.0.0.1/payload',
   }),
   postgres: postgresAdapter({
     client: {
@@ -14,6 +14,9 @@ const databaseAdapters = {
     },
   }),
 };
+
+// TODO: temporary
+process.env.PAYLOAD_DATABASE = 'postgres';
 
 export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<SanitizedConfig> {
   const [name] = process.argv.slice(2);

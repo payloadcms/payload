@@ -8,7 +8,6 @@ import GraphQL from 'graphql';
 import React from 'react';
 import { DestinationStream, LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
-import { Validate } from '../fields/config/types';
 import { Payload } from '../payload';
 import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types';
 import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
