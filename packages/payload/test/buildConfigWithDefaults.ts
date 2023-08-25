@@ -1,8 +1,8 @@
 import path from 'path';
 import { Config, SanitizedConfig } from '../src/config/types';
 import { buildConfig as buildPayloadConfig } from '../src/config/build';
-import { mongooseAdapter } from '@payloadcms/db-mongodb/src';
-import { postgresAdapter } from '@payloadcms/db-postgres/src';
+import { mongooseAdapter } from '@payloadcms/db-mongodb';
+import { postgresAdapter } from '@payloadcms/db-postgres';
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({
@@ -48,8 +48,10 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
           ...existingConfig.resolve,
           alias: {
             ...existingConfig.resolve?.alias,
-            [path.resolve(__dirname, '../packages/db-postgres/src/index')]: path.resolve(__dirname, '../packages/db-postgres/src/mock'),
-            [path.resolve(__dirname, '../packages/db-mongodb/src/index')]: path.resolve(__dirname, '../packages/db-mongodb/src/mock'),
+            //[path.resolve(__dirname, '../../../packages/db-postgres/src/index')]: path.resolve(__dirname, '../../../packages/db-postgres/src/mock'),
+            //[path.resolve(__dirname, '../../../packages/db-mongodb/src/index')]: path.resolve(__dirname, '../../../packages/db-mongodb/src/mock'),
+            '@payloadcms/db-mongodb': path.resolve(__dirname, '../../../packages/db-mongodb/src/mock'),
+            '@payloadcms/db-postgres': path.resolve(__dirname, '../../../packages/db-postgres/src/mock'),
           },
         },
       };

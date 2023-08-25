@@ -14,7 +14,7 @@ import { defaultNumber, numberDoc } from './collections/Number';
 import { dateDoc } from './collections/Date';
 import type { RichTextField } from './payload-types';
 import type { PaginatedDocs } from '../../src/database/types';
-import type { MongooseAdapter } from '../../packages/db-mongodb/src';
+import type { MongooseAdapter } from '@payloadcms/db-mongodb';
 
 let client;
 let graphQLClient: GraphQLClient;
