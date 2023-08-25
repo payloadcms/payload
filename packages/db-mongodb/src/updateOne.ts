@@ -1,7 +1,7 @@
 import { ValidationError } from 'payload/errors';
 import type { PayloadRequest } from 'payload/types';
-import type { UpdateOne } from 'payload/dist/database/types';
-import i18nInit from 'payload/dist/translations/init';
+import type { UpdateOne } from 'payload/database';
+import { i18nInit } from 'payload/utilities';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import type { MongooseAdapter } from '.';
 import { withSession } from './withSession';

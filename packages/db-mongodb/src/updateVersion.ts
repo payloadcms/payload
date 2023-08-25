@@ -1,5 +1,5 @@
-import type { UpdateVersion } from 'payload/dist/database/types';
-import type { PayloadRequest } from 'payload/dist/express/types';
+import type { UpdateVersion } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
 import type { MongooseAdapter } from '.';
 import { withSession } from './withSession';
 

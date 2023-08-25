@@ -1,6 +1,6 @@
-import type { UpdateGlobal } from 'payload/dist/database/types';
+import type { UpdateGlobal } from 'payload/database';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields';
-import type { PayloadRequest } from 'payload/dist/express/types';
+import type { PayloadRequest } from 'payload/types';
 import type { MongooseAdapter } from '.';
 import { withSession } from './withSession';
 

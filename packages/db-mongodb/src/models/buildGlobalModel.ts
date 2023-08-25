@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { SanitizedConfig } from 'payload/dist/config/types';
+import { SanitizedConfig } from 'payload/config';
 import buildSchema from './buildSchema';
 import getBuildQueryPlugin from '../queries/buildQuery';
 import type { GlobalModel } from '../types';

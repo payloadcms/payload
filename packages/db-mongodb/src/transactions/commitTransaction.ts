@@ -1,4 +1,4 @@
-import { CommitTransaction } from 'payload/dist/database/types';
+import { CommitTransaction } from 'payload/database';
 
 
 export const commitTransaction: CommitTransaction = async function commitTransaction(id) {

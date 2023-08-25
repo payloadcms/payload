@@ -51,6 +51,7 @@ export {
   DateField,
   BlockField,
   GroupField,
+  JSONField,
   RadioField,
   RelationshipField,
   ArrayField,

@@ -1,7 +1,7 @@
 import paginate from 'mongoose-paginate-v2';
 import { PaginateOptions, Schema } from 'mongoose';
-import { SanitizedConfig } from 'payload/dist/config/types';
-import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
+import { SanitizedConfig } from 'payload/config';
+import { SanitizedCollectionConfig } from 'payload/types';
 import getBuildQueryPlugin from '../queries/buildQuery';
 import buildSchema from './buildSchema';
 
