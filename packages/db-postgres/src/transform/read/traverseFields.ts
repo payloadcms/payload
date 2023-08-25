@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { fieldAffectsData } from 'payload/fields/utilities';
+import { fieldAffectsData } from 'payload/types';
 import { Field } from 'payload/types';
 import { SanitizedConfig } from 'payload/config';
 import { mergeLocales } from './mergeLocales';

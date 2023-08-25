@@ -38,7 +38,7 @@ import {
   Tab,
   tabHasName,
   UnnamedTab
-} from 'payload/fields/config'
+} from 'payload/types'
 
 export type BuildSchemaOptions = {
   options?: SchemaOptions

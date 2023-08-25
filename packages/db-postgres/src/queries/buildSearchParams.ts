@@ -1,9 +1,9 @@
 import toSnakeCase from 'to-snake-case';
 import { inArray } from 'drizzle-orm';
-import { a as SQL } from 'drizzle-orm/column.d-aa4e525d';
+import { SQL } from 'drizzle-orm';
 import { getLocalizedPaths } from 'payload/database';
 import { Field } from 'payload/types';
-import { fieldAffectsData } from 'payload/fields/utilities';
+import { fieldAffectsData } from 'payload/types';
 import { PathToQuery } from 'payload/database';
 import { validOperators } from 'payload/types';
 import { Operator } from 'payload/types';
@@ -130,7 +130,7 @@ export async function buildSearchParam({
 
           const relatedIDs: (string | number)[] = [];
 
-          result.forEach((row: {id: string | number, [key: string]: unknown}) => {
+          result.forEach((row: { id: string | number, [key: string]: unknown }) => {
             relatedIDs.push(row.id);
           });
 

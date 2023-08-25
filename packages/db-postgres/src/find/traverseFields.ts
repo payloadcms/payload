@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { SanitizedConfig } from 'payload/config';
 import toSnakeCase from 'to-snake-case';
-import { fieldAffectsData } from 'payload/fields/utilities';
+import { fieldAffectsData } from 'payload/types';
 import { ArrayField, Block, Field } from 'payload/types';
 import { Result } from './buildFindManyArgs';
 import { PostgresAdapter } from '../types';

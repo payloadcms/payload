@@ -55,8 +55,8 @@ importers:
         specifier: 0.19.13-e99bac1
         version: 0.19.13-e99bac1
       drizzle-orm:
-        specifier: 0.28.3
-        version: 0.28.3(@libsql/client@0.3.1)(@types/pg@8.10.2)(better-sqlite3@8.5.0)(pg@8.11.3)
+        specifier: 0.28.5
+        version: 0.28.5(@libsql/client@0.3.1)(@types/pg@8.10.2)(better-sqlite3@8.5.0)(pg@8.11.3)
       pg:
         specifier: 8.11.3
         version: 8.11.3
@@ -6623,8 +6623,8 @@ packages:
       - supports-color
     dev: false
 
-  /drizzle-orm@0.28.3(@libsql/client@0.3.1)(@types/pg@8.10.2)(better-sqlite3@8.5.0)(pg@8.11.3):
-    resolution: {integrity: sha512-7LwNEBJH5EFvkD0vm7RdKWDZsFP9CYR4AWN2fMwns/ezexoX3+UNoVOWGRPJf1qsj357SESldrNEueFvUDfZxA==}
+  /drizzle-orm@0.28.5(@libsql/client@0.3.1)(@types/pg@8.10.2)(better-sqlite3@8.5.0)(pg@8.11.3):
+    resolution: {integrity: sha512-6r6Iw4c38NAmW6TiKH3TUpGUQ1YdlEoLJOQptn8XPx3Z63+vFNKfAiANqrIiYZiMjKR9+NYAL219nFrmo1duXA==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=3'

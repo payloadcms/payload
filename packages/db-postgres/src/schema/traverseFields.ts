@@ -1,14 +1,16 @@
 /* eslint-disable no-param-reassign */
-import { AnyPgColumnBuilder, integer, text, varchar, numeric, IndexBuilder, PgNumericBuilder, PgVarcharBuilder, jsonb } from 'drizzle-orm/pg-core';
+import { integer, text, varchar, numeric, IndexBuilder, PgNumericBuilder, PgVarcharBuilder, jsonb } from 'drizzle-orm/pg-core';
 import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
-import { fieldAffectsData } from 'payload/fields/utilities';
+import { fieldAffectsData } from 'payload/types';
 import { Relation, relations } from 'drizzle-orm';
 import { GenericColumns, PostgresAdapter } from '../types';
 import { createIndex } from './createIndex';
 import { buildTable } from './build';
 import { parentIDColumnMap } from './parentIDColumnMap';
 import { hasLocalesTable } from '../utilities/hasLocalesTable';
+
+type AnyPgColumnBuilder = any; // TODO: Fix this
 
 type Args = {
   adapter: PostgresAdapter
