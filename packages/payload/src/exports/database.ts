@@ -42,4 +42,8 @@ export {
     UpdateVersion,
     UpdateVersionArgs,
     Webpack,
- } from '../../database/types';
+ } from '../database/types';
+
+ export {
+    default as flattenWhereToOperators
+ } from '../database/flattenWhereToOperators'

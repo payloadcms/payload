@@ -1,6 +1,6 @@
 import type { PaginateOptions } from 'mongoose';
 import type { Find } from 'payload/dist/database/types';
-import flattenWhereToOperators from 'payload/dist/database/flattenWhereToOperators';
+import {flattenWhereToOperators} from 'payload/database';
 import { PayloadRequest } from 'payload/dist/express/types';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import { buildSortParam } from './queries/buildSortParam';
