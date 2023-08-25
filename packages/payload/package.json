@@ -264,7 +264,6 @@
     "@types/mini-css-extract-plugin": "1.4.3",
     "@types/minimist": "1.2.2",
     "@types/mkdirp": "1.0.2",
-    "@types/node": "20.4.2",
     "@types/node-fetch": "2.6.4",
     "@types/nodemailer": "6.4.8",
     "@types/optimize-css-assets-webpack-plugin": "5.0.5",
