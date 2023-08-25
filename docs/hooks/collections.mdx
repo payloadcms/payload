@@ -133,7 +133,7 @@ const afterChangeHook: CollectionAfterChangeHook = async ({
   previousDoc, // document data before updating the collection
   operation, // name of the operation ie. 'create', 'update'
 }) => {
-  return doc;
+  return doc; // value to be used in subsequent afterChange hooks
 };
 ```
 
