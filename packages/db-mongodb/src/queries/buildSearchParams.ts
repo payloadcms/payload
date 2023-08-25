@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 import objectID from 'bson-objectid';
-import { getLocalizedPaths } from 'payload/dist/database/getLocalizedPaths';
-import { Field, fieldAffectsData } from 'payload/dist/fields/config/types';
-import { PathToQuery } from 'payload/dist/database/queryValidation/types';
-import { validOperators } from 'payload/dist/types/constants';
+import { getLocalizedPaths } from 'payload/database';
+import { Field, fieldAffectsData } from 'payload/types';
+import { PathToQuery } from 'payload/database';
+import { validOperators } from 'payload/types';
 import { Payload } from 'payload';
 import { Operator } from 'payload/types';
 import { operatorMap } from './operatorMap';

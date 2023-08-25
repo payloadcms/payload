@@ -103,3 +103,16 @@ export {
 export {
    readMigrationFiles
 } from '../database/migrations/readMigrationFiles'
+
+export {
+   EntityPolicies,
+   PathToQuery
+} from '../database/queryValidation/types'
+
+export {
+   validateQueryPaths
+} from '../database/queryValidation/validateQueryPaths'
+
+export {
+   validateSearchParam
+} from '../database/queryValidation/validateSearchParams'

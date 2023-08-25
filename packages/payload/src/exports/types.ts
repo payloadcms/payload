@@ -1,6 +1,11 @@
 export * from './../types';
 
 export {
+  validOperators
+} from './../types/constants';
+
+
+export {
   AccessArgs,
   Access,
 } from './../config/types';
@@ -65,6 +70,45 @@ export {
   TabsField,
   UIField,
   Validate,
+  Condition,
+  FieldAffectingData,
+  FieldBase,
+  FieldHookArgs,
+  FieldPresentationalOnly,
+  FieldWithMany,
+  FieldWithMaxDepth,
+  FieldWithSubFields,
+  FilterOptions,
+  FilterOptionsProps,
+  HookName,
+  Labels,
+  NamedTab,
+  NonPresentationalField,
+  Option,
+  OptionObject,
+  RelationshipValue,
+  RichTextElement,
+  RichTextLeaf,
+  RowAdmin,
+  Tab,
+  TabAsField,
+  TabsAdmin,
+  UnnamedTab,
+  ValidateOptions,
+  ValueWithRelation,
+  fieldAffectsData,
+  fieldHasMaxDepth,
+  fieldHasSubFields,
+  fieldIsArrayType,
+  fieldIsBlockType,
+  fieldIsLocalized,
+  fieldIsPresentationalOnly,
+  fieldSupportsMany,
+  optionIsObject,
+  optionIsValue,
+  optionsAreObjects,
+  tabHasName,
+  valueIsValueWithRelation,
 } from './../fields/config/types';
 
 export {

@@ -16,4 +16,5 @@ export {
     MissingFile,
     NotFound,
     ValidationError,
+    QueryError
 } from '../errors'

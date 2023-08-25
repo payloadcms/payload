@@ -1,5 +1,4 @@
-import { Where } from 'payload/types';
-import { Field } from 'payload/dist/fields/config/types';
+import { Where, Field } from 'payload/types';
 import { Payload } from 'payload';
 import { parseParams } from './parseParams';
 

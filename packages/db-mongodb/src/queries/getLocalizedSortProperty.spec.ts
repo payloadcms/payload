@@ -1,5 +1,5 @@
-import { sanitizeConfig } from 'payload/dist/config/sanitize';
-import { Config } from 'payload/dist/config/types';
+import { sanitizeConfig } from 'payload/config';
+import { Config } from 'payload/config';
 import { getLocalizedSortProperty } from './getLocalizedSortProperty';
 
 const config = {

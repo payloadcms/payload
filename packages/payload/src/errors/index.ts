@@ -16,3 +16,4 @@ export { default as MissingFieldType } from './MissingFieldType';
 export { default as MissingFile } from './MissingFile';
 export { default as NotFound } from './NotFound';
 export { default as ValidationError } from './ValidationError';
+export { default as QueryError } from './QueryError';
