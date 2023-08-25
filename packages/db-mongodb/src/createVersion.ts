@@ -1,5 +1,5 @@
-import type { CreateVersion } from 'payload/dist/database/types';
-import { PayloadRequest } from 'payload/dist/express/types';
+import type { CreateVersion } from 'payload/database';
+import { PayloadRequest } from 'payload/types';
 import type { Document } from 'payload/types';
 import type { MongooseAdapter } from '.';
 import { withSession } from './withSession';

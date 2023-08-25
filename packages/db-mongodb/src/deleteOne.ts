@@ -1,6 +1,6 @@
-import { DeleteOne } from 'payload/dist/database/types';
+import { DeleteOne } from 'payload/database';
 import type { Document } from 'payload/types';
-import { PayloadRequest } from 'payload/dist/express/types';
+import { PayloadRequest } from 'payload/types';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import type { MongooseAdapter } from '.';
 import { withSession } from './withSession';

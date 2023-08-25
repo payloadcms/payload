@@ -1,5 +1,5 @@
 import { PayloadRequest } from 'payload/types';
-import { CreateGlobal } from 'payload/dist/database/types';
+import { CreateGlobal } from 'payload/database';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import { withSession } from './withSession';
 import type { MongooseAdapter } from '.';

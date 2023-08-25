@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { ConnectOptions } from 'mongoose';
 import mongoose from 'mongoose';
-import type { Connect } from 'payload/dist/database/types';
+import type { Connect } from 'payload/database';
 import type { MongooseAdapter } from '.';
 
 export const connect: Connect = async function connect(
