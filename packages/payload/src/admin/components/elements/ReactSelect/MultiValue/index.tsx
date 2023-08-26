@@ -18,7 +18,9 @@ export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
       value,
     },
     selectProps: {
+      // @ts-ignore // TODO: Fix types
       customProps: {
+        // @ts-ignore // TODO: Fix types
         disableMouseDown,
       } = {},
     } = {},

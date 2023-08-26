@@ -9,7 +9,9 @@ const baseClass = 'multi-value-label';
 export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   const {
     selectProps: {
+      // @ts-ignore // TODO: Fix types
       customProps: {
+        // @ts-ignore // TODO: Fix types
         draggableProps,
       } = {},
     } = {},

@@ -7,8 +7,11 @@ export const Control: React.FC<ControlProps<Option, any>> = (props) => {
     children,
     innerProps,
     selectProps: {
+      // @ts-ignore // TODO: Fix types
       customProps: {
+        // @ts-ignore // TODO: Fix types
         disableMouseDown,
+        // @ts-ignore // TODO: Fix types
         disableKeyDown,
       } = {},
     } = {},

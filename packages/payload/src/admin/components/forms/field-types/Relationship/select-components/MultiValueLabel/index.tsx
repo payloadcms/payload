@@ -19,8 +19,11 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
       label,
     },
     selectProps: {
+      // @ts-ignore // TODO: Fix types
       customProps: {
+        // @ts-ignore // TODO: Fix types
         setDrawerIsOpen,
+        // @ts-ignore // TODO: Fix types
         draggableProps,
         // onSave,
       } = {},

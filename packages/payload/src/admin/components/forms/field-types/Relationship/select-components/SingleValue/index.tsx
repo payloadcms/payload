@@ -19,8 +19,11 @@ export const SingleValue: React.FC<SingleValueProps<Option>> = (props) => {
     },
     children,
     selectProps: {
+      // @ts-ignore // TODO: Fix types
       customProps: {
+        // @ts-ignore // TODO: Fix types
         setDrawerIsOpen,
+        // @ts-ignore // TODO: Fix types
         onSave,
       } = {},
     } = {},
