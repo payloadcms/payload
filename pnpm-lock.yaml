@@ -15,6 +15,12 @@ importers:
       '@types/node':
         specifier: 20.5.6
         version: 20.5.6
+      copyfiles:
+        specifier: 2.4.1
+        version: 2.4.1
+      cross-env:
+        specifier: 7.0.3
+        version: 7.0.3
       typescript:
         specifier: 5.2.2
         version: 5.2.2
@@ -594,12 +600,6 @@ importers:
       confusing-browser-globals:
         specifier: 1.0.11
         version: 1.0.11
-      copyfiles:
-        specifier: 2.4.1
-        version: 2.4.1
-      cross-env:
-        specifier: 7.0.3
-        version: 7.0.3
       eslint:
         specifier: 8.45.0
         version: 8.45.0
