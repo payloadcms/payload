@@ -11,5 +11,15 @@
     "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
     "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
     "resolveJsonModule": true,
-  }
+  },
+  "exclude": [
+    "dist",
+    "build",
+    "tests",
+    "test",
+    "node_modules",
+    ".eslintrc.js",
+    "**/*.spec.js",
+    "**/*.spec.ts",
+  ],
 }
