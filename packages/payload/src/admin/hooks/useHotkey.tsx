@@ -3,8 +3,6 @@ import { useCallback, useEffect } from 'react';
 import facelessui from '@faceless-ui/modal';
 import { setsAreEqual } from '../utilities/setsAreEqual';
 
-const {useModal} = facelessui;
-
 // Required to be outside of hook, else debounce would be necessary
 // and then one could not prevent the default behaviour.
 const pressedKeys = new Set<string>([]);
@@ -66,6 +64,7 @@ const useHotkey = (options: {
   editDepth: number
 }, func: (e: KeyboardEvent) => void): void => {
   const { keyCodes, cmdCtrlKey, editDepth } = options;
+  const { useModal } = facelessui;
 
   const { modalState } = useModal();
 
