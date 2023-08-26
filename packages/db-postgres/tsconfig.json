@@ -20,6 +20,8 @@
     "node_modules",
     ".eslintrc.js",
     "**/*.spec.js",
+    "**/*.spec.jsx",
     "**/*.spec.ts",
+    "**/*.spec.tsx",
   ],
 }
