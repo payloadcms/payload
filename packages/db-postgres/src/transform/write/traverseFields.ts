@@ -47,7 +47,6 @@ export const traverseFields = ({
     let targetRow = row;
     let columnName = '';
     let fieldData: unknown;
-    let hasLocalizedFieldData = false;
 
     if (fieldAffectsData(field)) {
       columnName = `${columnPrefix || ''}${field.name}`;
@@ -59,10 +58,10 @@ export const traverseFields = ({
         targetRow = localeRow;
 
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
-          hasLocalizedFieldData = true;
-
           if (typeof data[field.name][locale] !== 'undefined') {
             fieldData = data[field.name][locale];
+          } else {
+            fieldData = undefined;
           }
         }
       }
@@ -96,16 +95,6 @@ export const traverseFields = ({
 
         arrays[arrayTableName] = arrays[arrayTableName].concat(newRows);
 
-        // Above, the currently edited locale is being transformed
-        // Need to do this above thing for all other locales as well
-
-        // if (field.localized && hasLocalizedFieldData) {
-        //   newRow.existingLocales = Object.entries(data[field.name]).map(([existingLocale, existingLocaleData]) => {
-        //     existingLocaleData._locale = existingLocale
-        //     return existingLocaleData
-        //   })
-        // }
-
         break;
       }
 
@@ -120,7 +109,6 @@ export const traverseFields = ({
 
             const newRow: BlockRowToInsert = {
               arrays: {},
-              existingLocales: {},
               row: {
                 _order: i + 1,
                 _path: `${path}${field.name}`,
@@ -137,7 +125,6 @@ export const traverseFields = ({
               blocks,
               columnPrefix: '',
               data: blockRow,
-              existingLocales: newRow.existingLocales,
               fields: matchedBlock.fields,
               locale,
               localeRow: newRow.locale,
@@ -258,19 +245,29 @@ export const traverseFields = ({
         const relations = Array.isArray(fieldData) ? fieldData : [fieldData];
 
         relations.forEach((relation, i) => {
-          const relationRow: Record<string, unknown> = {
-            path: `${path || ''}${field.name}`,
-          };
+          if (relation) {
+            const relationRow: Record<string, unknown> = {
+              path: `${path || ''}${field.name}`,
+            };
 
-          if ('hasMany' in field && field.hasMany) relationRow.order = i + 1;
-          if (field.localized) relationRow.locale = locale;
+            if ('hasMany' in field && field.hasMany) relationRow.order = i + 1;
+            if (field.localized) {
+              relationRow.locale = locale;
 
-          if (Array.isArray(field.relationTo) && valueIsValueWithRelation(relation)) {
-            relationRow[`${relation.relationTo}ID`] = relation.value;
-            relationships.push(relationRow);
-          } else {
-            relationRow[`${field.relationTo}ID`] = relation;
-            if (relation) relationships.push(relationRow);
+              if (Array.isArray(field.relationTo) && valueIsValueWithRelation(relation)) {
+                relationRow[`${relation.relationTo}ID`] = relation.value;
+                relationships.push(relationRow);
+              } else {
+                relationRow[`${field.relationTo}ID`] = relation;
+                if (relation) relationships.push(relationRow);
+              }
+            } else if (Array.isArray(field.relationTo) && valueIsValueWithRelation(relation)) {
+              relationRow[`${relation.relationTo}ID`] = relation.value;
+              relationships.push(relationRow);
+            } else {
+              relationRow[`${field.relationTo}ID`] = relation;
+              if (relation) relationships.push(relationRow);
+            }
           }
         });
 

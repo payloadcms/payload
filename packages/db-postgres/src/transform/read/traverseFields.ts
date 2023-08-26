@@ -3,7 +3,6 @@ import { fieldAffectsData } from 'payload/dist/fields/config/types';
 import { Field } from 'payload/types';
 import { SanitizedConfig } from 'payload/config';
 import { BlocksMap } from '../../utilities/createBlocksMap';
-import { transform } from '.';
 import { transformRelationship } from './relationship';
 
 type TraverseFieldsArgs = {
@@ -263,24 +262,30 @@ export const traverseFields = <T extends Record<string, unknown>>({
           }
 
           case 'number': {
+            let val = fieldData;
             // TODO: handle hasMany
             if (typeof fieldData === 'string') {
-              const val = Number.parseFloat(fieldData);
+              val = Number.parseFloat(fieldData);
+            }
 
-              if (typeof locale === 'string') {
-                ref[locale] = val;
-              } else {
-                result[field.name] = val;
-              }
+            if (typeof locale === 'string') {
+              ref[locale] = val;
+            } else {
+              result[field.name] = val;
             }
 
             break;
           }
 
           case 'date': {
-            // TODO: handle localized date fields
             if (fieldData instanceof Date) {
-              result[field.name] = fieldData.toISOString();
+              const val = fieldData.toISOString();
+
+              if (typeof locale === 'string') {
+                ref[locale] = val;
+              } else {
+                result[field.name] = val;
+              }
             }
 
             break;

@@ -231,7 +231,11 @@ export const promise = async ({
       if (Array.isArray(rows)) {
         const promises = [];
         rows.forEach((row, i) => {
-          const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
+          const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name]);
+          const rowSiblingDocWithLocales = getExistingRowDoc(row, siblingDocWithLocales[field.name]);
+
+          const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType;
+          const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch);
 
           if (block) {
             promises.push(traverseFields({
@@ -246,8 +250,8 @@ export const promise = async ({
               path: `${path}${field.name}.${i}.`,
               req,
               siblingData: row,
-              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
-              siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
+              siblingDoc: rowSiblingDoc,
+              siblingDocWithLocales: rowSiblingDocWithLocales,
               skipValidation: skipValidationFromHere,
               context,
             }));

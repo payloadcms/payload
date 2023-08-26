@@ -4,7 +4,8 @@ import { BlockRowToInsert } from '../transform/write/types';
 import { insertArrays } from '../insertArrays';
 import { transformForWrite } from '../transform/write';
 import { Args } from './types';
-import { deleteChildRows } from './deleteChildRows';
+import { deleteExistingRowsByPath } from './deleteExistingRowsByPath';
+import { deleteExistingArrayRows } from './deleteExistingArrayRows';
 
 export const upsertRow = async ({
   adapter,
@@ -119,14 +120,14 @@ export const upsertRow = async ({
     promises.push(async () => {
       const relationshipsTableName = `${tableName}_relationships`;
       if (operation === 'update') {
-        await deleteChildRows({
+        await deleteExistingRowsByPath({
           adapter,
           locale,
           localeColumnName: 'locale',
           parentColumnName: 'parent',
           parentID: insertedRow.id,
           pathColumnName: 'path',
-          rows: relationsToInsert,
+          newRows: relationsToInsert,
           tableName: relationshipsTableName,
         });
       }
@@ -146,12 +147,12 @@ export const upsertRow = async ({
     // For each block, push insert into promises to run parallel
     promises.push(async () => {
       if (operation === 'update') {
-        await deleteChildRows({
+        await deleteExistingRowsByPath({
           adapter,
           locale,
           parentID: insertedRow.id,
           pathColumnName: '_path',
-          rows: blockRows.map(({ row }) => row),
+          newRows: blockRows.map(({ row }) => row),
           tableName: `${tableName}_${blockName}`,
         });
       }
@@ -203,11 +204,11 @@ export const upsertRow = async ({
   promises.push(async () => {
     if (operation === 'update') {
       await Promise.all(Object.entries(rowToInsert.arrays).map(async ([arrayTableName, tableRows]) => {
-        await deleteChildRows({
+        await deleteExistingArrayRows({
           adapter,
           locale,
           parentID: insertedRow.id,
-          rows: tableRows.map(({ row }) => row),
+          newRows: tableRows.map(({ row }) => row),
           tableName: arrayTableName,
         });
       }));

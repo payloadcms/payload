@@ -84,7 +84,7 @@ export const traverseFields = ({
                 with: {},
               };
 
-              if (adapter.tables[`${topLevelArgs}_${toSnakeCase(block.slug)}_locales`]) withBlock.with._locales = _locales;
+              if (adapter.tables[`${topLevelTableName}_${toSnakeCase(block.slug)}_locales`]) withBlock.with._locales = _locales;
               topLevelArgs.with[blockKey] = withBlock;
 
               traverseFields({

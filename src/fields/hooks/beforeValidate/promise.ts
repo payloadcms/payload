@@ -267,9 +267,13 @@ export const promise = async <T>({
       if (Array.isArray(rows)) {
         const promises = [];
         rows.forEach((row, i) => {
-          const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
+          const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name]);
+          const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType;
+          const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch);
 
           if (block) {
+            row.blockType = blockTypeToMatch;
+
             promises.push(traverseFields({
               data,
               doc,
@@ -279,7 +283,7 @@ export const promise = async <T>({
               overrideAccess,
               req,
               siblingData: row,
-              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
+              siblingDoc: rowSiblingDoc,
               context,
             }));
           }

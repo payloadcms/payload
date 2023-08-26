@@ -78,6 +78,7 @@ export const Posts: CollectionConfig = {
       name: 'relationHasOne',
       type: 'relationship',
       relationTo: 'pages',
+      localized: true,
     },
     // Has Many
     {
@@ -85,12 +86,14 @@ export const Posts: CollectionConfig = {
       type: 'relationship',
       hasMany: true,
       relationTo: 'pages',
+      localized: true,
     },
     // Has One - Polymorphic
     {
       name: 'relationHasOnePoly',
       type: 'relationship',
       relationTo: ['people', 'pages'],
+      localized: true,
     },
     // Has Many - Polymorphic
     {
@@ -98,6 +101,7 @@ export const Posts: CollectionConfig = {
       type: 'relationship',
       hasMany: true,
       relationTo: ['people', 'pages'],
+      localized: true,
     },
     {
       name: 'selfReferencingRelationship',

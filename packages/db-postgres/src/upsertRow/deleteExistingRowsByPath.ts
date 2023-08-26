@@ -8,28 +8,25 @@ type Args = {
   parentColumnName?: string
   parentID: unknown
   pathColumnName?: string
-  rows: Record<string, unknown>[]
+  newRows: Record<string, unknown>[]
   tableName: string
 }
 
-// TODO: Locale is not on block or array rows
-// need to only delete locale rows / recreate them if applicable
-// not sure what to do here yet... Arrays are helpful to see this in action
-
-export const deleteChildRows = async ({
+export const deleteExistingRowsByPath = async ({
   adapter,
   locale,
   localeColumnName = '_locale',
   parentColumnName = '_parentID',
   parentID,
-  pathColumnName,
-  rows,
+  pathColumnName = '_path',
+  newRows,
   tableName,
 }: Args): Promise<void> => {
   const localizedPathsToDelete = new Set<string>();
   const pathsToDelete = new Set<string>();
+  const table = adapter.tables[tableName];
 
-  rows.forEach((row) => {
+  newRows.forEach((row) => {
     const path = row[pathColumnName];
     const localeData = row[localeColumnName];
     if (typeof path === 'string') {
@@ -43,13 +40,13 @@ export const deleteChildRows = async ({
 
   if (localizedPathsToDelete.size > 0 && locale) {
     const whereConstraints = [
-      eq(adapter.tables[tableName][parentColumnName], parentID),
-      eq(adapter.tables[tableName][localeColumnName], locale),
+      eq(table[parentColumnName], parentID),
+      eq(table[localeColumnName], locale),
     ];
 
-    if (pathColumnName) whereConstraints.push(inArray(adapter.tables[tableName][pathColumnName], [localizedPathsToDelete]));
+    if (pathColumnName) whereConstraints.push(inArray(table[pathColumnName], Array.from(localizedPathsToDelete)));
 
-    await adapter.db.delete(adapter.tables[tableName])
+    await adapter.db.delete(table)
       .where(
         and(...whereConstraints),
       );
@@ -57,14 +54,14 @@ export const deleteChildRows = async ({
 
   if (pathsToDelete.size > 0) {
     const whereConstraints = [
-      eq(adapter.tables[tableName][parentColumnName], parentID),
+      eq(table[parentColumnName], parentID),
     ];
 
-    if (pathColumnName) whereConstraints.push(inArray(adapter.tables[tableName][pathColumnName], [pathsToDelete]));
+    if (pathColumnName) whereConstraints.push(inArray(table[pathColumnName], Array.from(pathsToDelete)));
 
-    await adapter.db.delete(adapter.tables[tableName])
+    await adapter.db.delete(table)
       .where(
         and(...whereConstraints),
-      );
+      ).returning();
   }
 };

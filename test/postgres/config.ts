@@ -3,16 +3,12 @@ import { LocalizedArrays } from './collections/LocalizedArrays';
 import { LocalizedBlocks } from './collections/LocalizedBlocks';
 import { LocalizedGroups } from './collections/LocalizedGroups';
 import { Posts } from './collections/Posts';
-import { seedComplexDocs } from './seed/complexDocs';
-import { seedLocalizedArrays } from './seed/localizedArrays';
-import { seedLocalizedBlocks } from './seed/localizedBlocks';
-import { seedLocalizedGroups } from './seed/localizedGroups';
 
 const config = buildConfigWithDefaults({
   collections: [
-    // LocalizedArrays,
-    // LocalizedBlocks,
-    // LocalizedGroups,
+    LocalizedArrays,
+    LocalizedBlocks,
+    LocalizedGroups,
     Posts,
     {
       slug: 'pages',
@@ -37,12 +33,6 @@ const config = buildConfigWithDefaults({
   localization: {
     locales: ['en', 'es'],
     defaultLocale: 'en',
-  },
-  onInit: async (payload) => {
-    await seedComplexDocs(payload);
-    // await seedLocalizedGroups(payload);
-    // await seedLocalizedArrays(payload);
-    // await seedLocalizedBlocks(payload);
   },
 });
 
