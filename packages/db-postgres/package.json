@@ -35,7 +35,8 @@
     "build": "tsc"
   },
   "peerDependencies": {
-    "better-sqlite3": "^8.5.0"
+    "better-sqlite3": "^8.5.0",
+    "payload": "workspace:*"
   },
   "dependencies": {
     "@libsql/client": "^0.3.1",
@@ -43,8 +44,7 @@
     "drizzle-orm": "0.28.5",
     "pg": "8.11.3",
     "prompts": "2.4.2",
-    "to-snake-case": "1.0.0",
-    "payload": "workspace:*"
+    "to-snake-case": "1.0.0"
   },
   "devDependencies": {
     "@types/pg": "8.10.2",

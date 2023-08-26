@@ -34,6 +34,9 @@
   "scripts": {
     "build": "tsc"
   },
+  "peerDependencies": {
+    "payload": "workspace:*"
+  },
   "devDependencies": {
     "@types/mongoose-aggregate-paginate-v2": "1.0.9",
     "mongodb-memory-server": "8.13.0"
@@ -45,7 +48,6 @@
     "mongoose": "6.11.4",
     "mongoose-aggregate-paginate-v2": "1.0.6",
     "mongoose-paginate-v2": "1.7.22",
-    "uuid": "9.0.0",
-    "payload": "workspace:*"
+    "uuid": "9.0.0"
   }
 }
