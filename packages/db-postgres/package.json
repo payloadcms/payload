@@ -43,12 +43,12 @@
     "drizzle-orm": "0.28.5",
     "pg": "8.11.3",
     "prompts": "2.4.2",
-    "to-snake-case": "1.0.0"
+    "to-snake-case": "1.0.0",
+    "payload": "workspace:*"
   },
   "devDependencies": {
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
-    "better-sqlite3": "^8.5.0",
-    "payload": "workspace:*"
+    "better-sqlite3": "^8.5.0"
   }
 }

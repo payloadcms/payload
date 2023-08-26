@@ -35,6 +35,9 @@ importers:
       mongoose-paginate-v2:
         specifier: 1.7.22
         version: 1.7.22
+      payload:
+        specifier: workspace:*
+        version: link:../payload
       uuid:
         specifier: 9.0.0
         version: 9.0.0
@@ -45,9 +48,6 @@ importers:
       mongodb-memory-server:
         specifier: 8.13.0
         version: 8.13.0
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/db-postgres:
     dependencies:
@@ -60,6 +60,9 @@ importers:
       drizzle-orm:
         specifier: 0.28.5
         version: 0.28.5(@libsql/client@0.3.1)(@types/pg@8.10.2)(better-sqlite3@8.5.0)(pg@8.11.3)
+      payload:
+        specifier: workspace:*
+        version: link:../payload
       pg:
         specifier: 8.11.3
         version: 8.11.3
@@ -79,9 +82,6 @@ importers:
       better-sqlite3:
         specifier: ^8.5.0
         version: 8.5.0
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/payload:
     dependencies:
@@ -394,6 +394,9 @@ importers:
       ts-essentials:
         specifier: 7.0.3
         version: 7.0.3(typescript@5.2.2)
+      tsx:
+        specifier: ^3.12.7
+        version: 3.12.7
       url-loader:
         specifier: 4.1.1
         version: 4.1.1(file-loader@6.2.0)(webpack@5.88.2)
@@ -2041,6 +2044,13 @@ packages:
 
   /@emotion/weak-memoize@0.3.1:
     resolution: {integrity: sha512-EsBwpc7hBUJWAsNPBmJy4hxWx12v6bshQsldrVmjxJoc3isbxhOrF2IcCpaXxfvq03NwkI7sbsOLXbYuqF/8Ww==}
+    dev: false
+
+  /@esbuild-kit/cjs-loader@2.4.2:
+    resolution: {integrity: sha512-BDXFbYOJzT/NBEtp71cvsrGPwGAMGRB/349rwKuoxNSiKjPraNNnlK6MIIabViCjqZugu6j+xeMDlEkWdHHJSg==}
+    dependencies:
+      '@esbuild-kit/core-utils': 3.1.0
+      get-tsconfig: 4.6.2
     dev: false
 
   /@esbuild-kit/core-utils@3.1.0:
@@ -7542,7 +7552,7 @@ packages:
     resolution: {integrity: sha512-7Gps/XWymbLk2QLYK4NzpMOrYjMhdIxXuIvy2QBsLE6ljuodKvdkWs/cpyJJ3CVIVpH0Oi1Hvg1ovbMzLdFBBg==}
     engines: {node: ^10.12.0 || >=12.0.0}
     dependencies:
-      flat-cache: 3.0.4
+      flat-cache: 3.1.0
     dev: true
 
   /file-loader@6.2.0(webpack@5.88.2):
@@ -7631,11 +7641,12 @@ packages:
       path-exists: 4.0.0
     dev: true
 
-  /flat-cache@3.0.4:
-    resolution: {integrity: sha512-dm9s5Pw7Jc0GvMYbshN6zchCA9RgQlzzEZX3vylR9IqFfS8XciblUXOKfW6SiuJ0e13eDYZoZV5wdrev7P3Nwg==}
-    engines: {node: ^10.12.0 || >=12.0.0}
+  /flat-cache@3.1.0:
+    resolution: {integrity: sha512-OHx4Qwrrt0E4jEIcI5/Xb+f+QmJYNj2rrK8wiIdQOIrB9WrrJL8cjZvXdXuBTkkEwEqLycb5BeZDV1o2i9bTew==}
+    engines: {node: '>=12.0.0'}
     dependencies:
       flatted: 3.2.7
+      keyv: 4.5.3
       rimraf: 3.0.2
     dev: true
 
@@ -13524,6 +13535,17 @@ packages:
       tslib: 1.14.1
       typescript: 5.2.2
     dev: true
+
+  /tsx@3.12.7:
+    resolution: {integrity: sha512-C2Ip+jPmqKd1GWVQDvz/Eyc6QJbGfE7NrR3fx5BpEHMZsEHoIxHL1j+lKdGobr8ovEyqeNkPLSKp6SCSOt7gmw==}
+    hasBin: true
+    dependencies:
+      '@esbuild-kit/cjs-loader': 2.4.2
+      '@esbuild-kit/core-utils': 3.1.0
+      '@esbuild-kit/esm-loader': 2.5.5
+    optionalDependencies:
+      fsevents: 2.3.3
+    dev: false
 
   /tunnel-agent@0.6.0:
     resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}

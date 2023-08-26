@@ -75,6 +75,7 @@
     "build": "pnpm copyfiles && pnpm build:tsc && pnpm build:components",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
     "dev": "nodemon",
+    "dev2": "tsx ./test/dev.ts _community",
     "dev:postgres": "cross-env PAYLOAD_DATABASE=postgres nodemon",
     "dev:generate-types": "node --no-warnings=ExperimentalWarning --loader ts-node/esm ./test/generateTypes.ts",
     "dev:generate-graphql-schema": "node --no-warnings=ExperimentalWarning --loader ts-node/esm ./test/generateGraphQLSchema.ts",
@@ -121,8 +122,6 @@
     "auth"
   ],
   "dependencies": {
-    "@payloadcms/db-postgres": "workspace:*",
-    "@payloadcms/db-mongodb": "workspace:*",
     "@date-io/date-fns": "2.16.0",
     "@dnd-kit/core": "6.0.8",
     "@dnd-kit/sortable": "7.0.2",
@@ -130,6 +129,8 @@
     "@faceless-ui/scroll-info": "1.3.0",
     "@faceless-ui/window-info": "2.1.1",
     "@monaco-editor/react": "4.5.1",
+    "@payloadcms/db-mongodb": "workspace:*",
+    "@payloadcms/db-postgres": "workspace:*",
     "@swc/core": "1.3.76",
     "@swc/register": "0.1.10",
     "@types/sharp": "0.31.1",
@@ -224,6 +225,7 @@
     "swc-minify-webpack-plugin": "2.1.1",
     "terser-webpack-plugin": "5.3.9",
     "ts-essentials": "7.0.3",
+    "tsx": "^3.12.7",
     "url-loader": "4.1.1",
     "use-context-selector": "1.4.1",
     "uuid": "8.3.2",

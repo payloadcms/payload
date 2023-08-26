@@ -36,8 +36,7 @@
   },
   "devDependencies": {
     "@types/mongoose-aggregate-paginate-v2": "1.0.9",
-    "mongodb-memory-server": "8.13.0",
-    "payload": "workspace:*"
+    "mongodb-memory-server": "8.13.0"
   },
   "dependencies": {
     "bson-objectid": "2.0.4",
@@ -46,6 +45,7 @@
     "mongoose": "6.11.4",
     "mongoose-aggregate-paginate-v2": "1.0.6",
     "mongoose-paginate-v2": "1.7.22",
-    "uuid": "9.0.0"
+    "uuid": "9.0.0",
+    "payload": "workspace:*"
   }
 }
