@@ -77,10 +77,6 @@
   .section-title {
     min-width: 0;
     flex-grow: 1;
-    align-self: center;
-    &__input {
-      transform: translateY(-50%);
-    }
   }
 
   &__row {
