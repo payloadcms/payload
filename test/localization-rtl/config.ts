@@ -4,22 +4,16 @@ import { Users } from './collections/users';
 import { Posts } from './collections/posts';
 import { Roles } from './collections/roles';
 import { Orders } from './collections/orders';
-import en from '../../src/translations/en.json';
-import { ar } from './ar';
-import deepMerge from './deepMerge';
+import { i18n } from './i18n';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { Categories } from './collections/categories';
 import { Customers } from './collections/customers';
+import type { Config } from '../../src/config/types';
+import config2 from './fields/config';
 
-export default buildConfigWithDefaults({
+const config1 = {
   collections: [Users, Posts, Roles, Orders, Customers, Categories],
-  i18n: {
-    fallbackLng: 'en', // default
-    debug: false, // default
-    resources: {
-      ar: deepMerge(en, ar),
-    },
-  },
+  i18n,
   localization,
   onInit: async (payload) => {
     await payload.create({
@@ -30,4 +24,6 @@ export default buildConfigWithDefaults({
       },
     });
   },
-});
+};
+const config = config2 as Partial<Config>
+export default buildConfigWithDefaults(config);

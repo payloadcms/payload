@@ -5,7 +5,7 @@ export const localization = {
       code: 'en',
     },
     {
-      label: 'Arabic',
+      label: 'العربية',
       code: 'ar',
       rtl: true,
     },
