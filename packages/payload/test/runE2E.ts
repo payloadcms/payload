@@ -3,6 +3,7 @@ import path from 'path';
 import shelljs from 'shelljs';
 import glob from 'glob';
 import slash from 'slash';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 shelljs.env.DISABLE_LOGGING = 'true';
 

@@ -6,6 +6,8 @@ import { initPayloadE2E } from '../helpers/configHelpers';
 import { restrictedVersionsSlug, readOnlySlug, restrictedSlug, slug, docLevelAccessSlug, unrestrictedSlug } from './config';
 import type { ReadOnlyCollection, RestrictedVersion } from './payload-types';
 import wait from '../../src/utilities/wait';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 /**
  * TODO: Access Control

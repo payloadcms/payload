@@ -1,6 +1,5 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import path from 'path';
 import { relationSlug, mediaSlug, audioSlug, adminThumbnailSlug } from './config';
 import type { Media } from './payload-types';
 import payload from '../../src';
@@ -9,6 +8,8 @@ import { initPayloadE2E } from '../helpers/configHelpers';
 import { saveDocAndAssert } from '../helpers';
 import wait from '../../src/utilities/wait';
 import { adminThumbnailSrc } from './collections/admin-thumbnail';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const { beforeAll, describe } = test;
 

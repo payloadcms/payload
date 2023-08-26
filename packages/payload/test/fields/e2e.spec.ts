@@ -1,6 +1,5 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import path from 'path';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
@@ -14,6 +13,8 @@ import { jsonDoc } from './collections/JSON';
 import { numberDoc } from './collections/Number';
 import { relationshipFieldsSlug } from './collections/Relationship';
 import { mapAsync } from '../../src/utilities/mapAsync';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const { afterEach, beforeAll, describe } = test;
 

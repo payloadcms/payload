@@ -4,6 +4,8 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
 import { login, saveDocAndAssert } from '../helpers';
 import { slug } from './config';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 /**
  * TODO: Auth

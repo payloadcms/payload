@@ -14,6 +14,8 @@ import type {
 } from './config';
 import { relationOneSlug, relationRestrictedSlug, relationTwoSlug, relationUpdatedExternallySlug, relationWithTitleSlug, slug } from './collectionSlugs';
 import wait from '../../src/utilities/wait';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const { beforeAll, beforeEach, describe } = test;
 

@@ -30,6 +30,8 @@ import { initPayloadE2E } from '../helpers/configHelpers';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { draftSlug, autosaveSlug } from './shared';
 import wait from '../../src/utilities/wait';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const { beforeAll, describe } = test;
 

@@ -9,6 +9,8 @@ import type { Post } from './config';
 import { globalSlug, slug } from './shared';
 import { mapAsync } from '../../src/utilities/mapAsync';
 import wait from '../../src/utilities/wait';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const { afterEach, beforeAll, beforeEach, describe } = test;
 

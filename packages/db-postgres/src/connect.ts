@@ -4,7 +4,8 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import type { Connect } from 'payload/database';
 import pkg from 'pg';
 const { Client, Pool } = pkg;
-import { generateDrizzleJson, pushSchema } from 'drizzle-kit/utils';
+import drizzleKit from 'drizzle-kit/utils.js';
+const { generateDrizzleJson, pushSchema } = drizzleKit;
 import { configToJSONSchema } from 'payload/utilities';
 import prompts from 'prompts';
 

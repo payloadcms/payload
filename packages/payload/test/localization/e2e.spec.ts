@@ -7,6 +7,8 @@ import { saveDocAndAssert } from '../helpers';
 import type { LocalizedPost } from './payload-types';
 import { localizedPostsSlug } from './config';
 import { englishTitle, spanishLocale } from './shared';
+import path from 'path';
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 /**
  * TODO: Localization

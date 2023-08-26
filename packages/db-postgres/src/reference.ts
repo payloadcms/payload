@@ -7,7 +7,7 @@
 
 // drizzle-kit@utils
 
-import { generateDrizzleJson, generateMigration, pushSchema } from 'drizzle-kit/utils';
+import { generateDrizzleJson, generateMigration, pushSchema } from 'drizzle-kit/utils.js';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 

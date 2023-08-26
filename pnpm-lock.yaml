@@ -55,8 +55,8 @@ importers:
         specifier: ^0.3.1
         version: 0.3.1
       drizzle-kit:
-        specifier: 0.19.13-e99bac1
-        version: 0.19.13-e99bac1
+        specifier: 0.19.13
+        version: 0.19.13
       drizzle-orm:
         specifier: 0.28.5
         version: 0.28.5(@libsql/client@0.3.1)(@types/pg@8.10.2)(better-sqlite3@8.5.0)(pg@8.11.3)
@@ -6606,8 +6606,8 @@ packages:
       wordwrap: 1.0.0
     dev: false
 
-  /drizzle-kit@0.19.13-e99bac1:
-    resolution: {integrity: sha512-25Ahwm7CoaXCcrSuDjNqNH7vwrjt1s+I4O1yXVDBwYnyRe4RY8ZD57s5iA9PE5C+IJwBJtxBSXYWkat+efb3ug==}
+  /drizzle-kit@0.19.13:
+    resolution: {integrity: sha512-Rba5VW1O2JfJlwVBeZ8Zwt2E2us5oZ08PQBDiVSGlug53TOc8hzXjblZFuF+dnll9/RQEHrkzBmJFgqTvn5Rxg==}
     hasBin: true
     dependencies:
       '@drizzle-team/studio': 0.0.5

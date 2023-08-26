@@ -2,7 +2,8 @@
 import fs from 'fs';
 import { CreateMigration } from 'payload/database';
 
-import { generateDrizzleJson, generateMigration } from 'drizzle-kit/utils';
+import drizzleKit from 'drizzle-kit/utils.js';
+const { generateDrizzleJson, pushSchema } = drizzleKit;
 import { eq } from 'drizzle-orm';
 import { jsonb, numeric, pgEnum, pgTable, varchar } from 'drizzle-orm/pg-core';
 import { SanitizedCollectionConfig } from 'payload/types';
