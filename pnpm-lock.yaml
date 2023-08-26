@@ -420,12 +420,6 @@ importers:
         specifier: 2.25.4
         version: 2.25.4
     devDependencies:
-      '@payloadcms/db-mongodb':
-        specifier: workspace:*
-        version: link:../db-mongodb
-      '@payloadcms/db-postgres':
-        specifier: workspace:*
-        version: link:../db-postgres
       '@playwright/test':
         specifier: 1.37.1
         version: 1.37.1
