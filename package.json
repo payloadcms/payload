@@ -86,10 +86,12 @@
     "react",
     "auth"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "turbo": "^1.10.13"
+  },
   "devDependencies": {
-    "typescript": "5.2.2",
-    "@types/node": "20.5.6"
+    "@types/node": "20.5.6",
+    "typescript": "5.2.2"
   },
   "files": [
     "bin.js",
