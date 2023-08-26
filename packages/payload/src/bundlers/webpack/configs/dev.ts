@@ -10,7 +10,6 @@ const __filename = fileURLToPath(import.meta.url);
 const require = createRequire(import.meta.url);
 
 export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
-  console.log('getDevConfig')
 
   const baseConfig = getBaseConfig(payloadConfig) as any;
 

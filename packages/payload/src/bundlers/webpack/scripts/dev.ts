@@ -11,7 +11,6 @@ const router = express.Router();
 
 type DevAdminType = (options: { payload: Payload }) => Promise<PayloadHandler>;
 export const devAdmin: DevAdminType = async ({ payload }) => {
-  console.log('devAdmin')
   router.use(history());
 
   try {
