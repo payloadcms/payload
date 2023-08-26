@@ -29,22 +29,22 @@
   "types": "./src/index.ts",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "main": "./dist/esm/index.js",
+    "types": "./dist/esm/index.d.ts",
     "exports": {
       ".": {
-        "types": "./dist/index.d.ts",
-        "import": "./dist/index.js",
-        "default": "./dist/index.js",
-        "node": "./dist/index.js",
-        "require": "./dist/index.js"
+        "types": "./dist/esm/index.d.ts",
+        "import": "./dist/esm/index.js",
+        "default": "./dist/esm/index.js",
+        "node": "./dist/esm/index.js",
+        "require": "./dist/cjs/index.js"
       },
       "./*": {
-        "types": "./dist/exports/*.d.ts",
-        "import": "./dist/exports/*.js",
-        "default": "./dist/exports/*.js",
-        "node": "./dist/exports/*.js",
-        "require": "./dist/exports/*.js"
+        "types": "./dist/esm/exports/*.d.ts",
+        "import": "./dist/esm/exports/*.js",
+        "default": "./dist/esm/exports/*.js",
+        "node": "./dist/esm/exports/*.js",
+        "require": "./dist/cjs/exports/*.js"
       }
     }
   },
