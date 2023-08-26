@@ -11,38 +11,38 @@ import { seedLocalizedGroups } from './seed/localizedGroups';
 const config = buildConfigWithDefaults({
   collections: [
     // LocalizedArrays,
-    LocalizedBlocks,
+    // LocalizedBlocks,
     // LocalizedGroups,
-    //   Posts,
-    //   {
-    //     slug: 'pages',
-    //     fields: [
-    //       {
-    //         name: 'slug',
-    //         type: 'text',
-    //         localized: true,
-    //       },
-    //     ],
-    //   },
-    //   {
-    //     slug: 'people',
-    //     fields: [
-    //       {
-    //         name: 'fullName',
-    //         type: 'text',
-    //       },
-    //     ],
-    //   },
+    Posts,
+    {
+      slug: 'pages',
+      fields: [
+        {
+          name: 'slug',
+          type: 'text',
+          localized: true,
+        },
+      ],
+    },
+    {
+      slug: 'people',
+      fields: [
+        {
+          name: 'fullName',
+          type: 'text',
+        },
+      ],
+    },
   ],
   localization: {
     locales: ['en', 'es'],
     defaultLocale: 'en',
   },
   onInit: async (payload) => {
-    // await seedComplexDocs(payload);
+    await seedComplexDocs(payload);
     // await seedLocalizedGroups(payload);
     // await seedLocalizedArrays(payload);
-    await seedLocalizedBlocks(payload);
+    // await seedLocalizedBlocks(payload);
   },
 });
 

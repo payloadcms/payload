@@ -41,5 +41,9 @@ export const transform = <T extends TypeWithID>({
     table: data,
   });
 
+  if ('_locales' in result) {
+    delete result._locales;
+  }
+
   return result;
 };

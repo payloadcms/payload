@@ -4,6 +4,7 @@ import { Field } from 'payload/types';
 import { SanitizedConfig } from 'payload/config';
 import { BlocksMap } from '../../utilities/createBlocksMap';
 import { transform } from '.';
+import { transformRelationship } from './relationship';
 
 type TraverseFieldsArgs = {
   /**
@@ -165,116 +166,38 @@ export const traverseFields = <T extends Record<string, unknown>>({
         return result;
       }
 
-      // TODO: make sure localized relationships are all written back
       if (field.type === 'relationship') {
         const relationPathMatch = relationships[`${sanitizedPath}${field.name}`];
         if (!relationPathMatch) return result;
 
-        if (!field.hasMany) {
-          const relation = relationPathMatch[0];
+        if (field.localized) {
+          result[field.name] = {};
+          const relationsByLocale: Record<string, Record<string, unknown>[]> = {};
 
-          if (relation) {
-            // Handle hasOne Poly
-            if (Array.isArray(field.relationTo)) {
-              const matchedRelation = Object.entries(relation).find(([key, val]) => val !== null && !['order', 'id', 'parent'].includes(key));
-
-              if (matchedRelation) {
-                const relationTo = matchedRelation[0].replace('ID', '');
-
-                if (typeof matchedRelation[1] === 'object') {
-                  const relatedCollection = config.collections.find(({ slug }) => slug === relationTo);
-
-                  if (relatedCollection) {
-                    const value = transform({
-                      config,
-                      data: matchedRelation[1] as Record<string, unknown>,
-                      fields: relatedCollection.fields,
-                    });
-
-                    result[field.name] = {
-                      relationTo,
-                      value,
-                    };
-                  }
-                } else {
-                  result[field.name] = {
-                    relationTo,
-                    value: matchedRelation[1],
-                  };
-                }
-              }
-            } else {
-              // Handle hasOne
-              const relatedData = relation[`${field.relationTo}ID`];
-
-              if (typeof relatedData === 'object' && relatedData !== null) {
-                const relatedCollection = config.collections.find(({ slug }) => slug === field.relationTo);
-                result[field.name] = transform({
-                  config,
-                  data: relatedData as Record<string, unknown>,
-                  fields: relatedCollection.fields,
-                });
-              } else {
-                result[field.name] = relatedData;
-              }
-            }
-          }
-        } else {
-          const transformedRelations = [
-            ...(Array.isArray(fieldData) ? fieldData : []),
-          ];
-
-          relationPathMatch.forEach((relation) => {
-            // Handle hasMany
-            if (!Array.isArray(field.relationTo)) {
-              const relatedCollection = config.collections.find(({ slug }) => slug === field.relationTo);
-              const relatedData = relation[`${field.relationTo}ID`];
-
-              if (relatedData) {
-                if (typeof relatedData === 'object' && relatedData !== null) {
-                  transformedRelations.push(transform({
-                    config,
-                    data: relatedData as Record<string, unknown>,
-                    fields: relatedCollection.fields,
-                  }));
-                } else {
-                  transformedRelations.push(relatedData);
-                }
-              }
-            } else {
-              // Handle hasMany Poly
-              const matchedRelation = Object.entries(relation).find(([key, val]) => val !== null && !['order', 'parent', 'id'].includes(key));
-
-              if (matchedRelation) {
-                const relationTo = matchedRelation[0].replace('ID', '');
-
-                if (typeof matchedRelation[1] === 'object') {
-                  const relatedCollection = config.collections.find(({ slug }) => slug === relationTo);
-
-                  if (relatedCollection) {
-                    const value = transform({
-                      config,
-                      data: matchedRelation[1] as Record<string, unknown>,
-                      fields: relatedCollection.fields,
-                    });
-
-                    transformedRelations.push({
-                      relationTo,
-                      value,
-                    });
-                  }
-                } else {
-                  transformedRelations.push({
-                    relationTo,
-                    value: matchedRelation[1],
-                  });
-                }
-              }
+          relationPathMatch.forEach((row) => {
+            if (typeof row.locale === 'string') {
+              if (!relationsByLocale[row.locale]) relationsByLocale[row.locale] = [];
+              relationsByLocale[row.locale].push(row);
             }
           });
 
-          result[field.name] = transformedRelations;
+          Object.entries(relationsByLocale).forEach(([locale, relations]) => {
+            transformRelationship({
+              field,
+              locale,
+              ref: result,
+              relations,
+            });
+          });
+        } else {
+          transformRelationship({
+            field,
+            ref: result,
+            relations: relationPathMatch,
+          });
         }
+
+        return result;
       }
 
       const localizedFieldData = {};

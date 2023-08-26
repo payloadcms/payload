@@ -145,7 +145,7 @@ export const buildTable = ({
       };
 
       if (hasLocalizedRelationshipField) {
-        relationshipColumns.locale = adapter.enums._locale('locale');
+        relationshipColumns.locale = adapter.enums._locales('locale');
       }
 
       relationships.forEach((relationTo) => {

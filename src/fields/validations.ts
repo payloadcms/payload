@@ -352,6 +352,8 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
         type = 'ObjectID';
       }
 
+      if (typeof requestedID === 'number') return false;
+
       return !isValidID(requestedID, type);
     });
 
