@@ -1,13 +1,14 @@
 import { sql } from 'drizzle-orm';
 import toSnakeCase from 'to-snake-case';
-import type { Find } from 'payload/dist/database/types';
+import type { QueryDrafts } from 'payload/dist/database/types';
 import type { PayloadRequest } from 'payload/dist/express/types';
 import type { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
+import { buildVersionCollectionFields } from 'payload/dist/versions/buildCollectionFields';
 import buildQuery from './queries/buildQuery';
 import { buildFindManyArgs } from './find/buildFindManyArgs';
 import { transform } from './transform/read';
 
-export const find: Find = async function find({
+export const queryDrafts: QueryDrafts = async function queryDrafts({
   collection,
   where,
   page = 1,
@@ -19,10 +20,12 @@ export const find: Find = async function find({
 }) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config;
   const tableName = toSnakeCase(collection);
-  const table = this.tables[tableName];
+  const versionsTableName = `_${tableName}_versions`;
+  const table = this.tables[versionsTableName];
   const limit = typeof limitArg === 'number' ? limitArg : collectionConfig.admin.pagination.defaultLimit;
   // TODO: use sort
   const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort;
+
   let totalDocs;
   let totalPages;
   let hasPrevPage;
@@ -31,6 +34,7 @@ export const find: Find = async function find({
 
   const query = await buildQuery({
     collectionSlug: collection,
+    versionsFields: buildVersionCollectionFields(collectionConfig),
     adapter: this,
     locale,
     where,
