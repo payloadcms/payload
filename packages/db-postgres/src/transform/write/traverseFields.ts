@@ -5,6 +5,7 @@ import { fieldAffectsData, valueIsValueWithRelation } from 'payload/dist/fields/
 import { ArrayRowToInsert, BlockRowToInsert } from './types';
 import { isArrayOfRows } from '../../utilities/isArrayOfRows';
 import { transformArray } from './array';
+import { transformBlocks } from './blocks';
 
 type Args = {
   arrays: {
@@ -98,46 +99,29 @@ export const traverseFields = ({
     if (field.type === 'blocks') {
       if (field.localized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
-          // loop over each locale
-          console.log(data[field.name]);
+          Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
+            if (Array.isArray(localeData)) {
+              transformBlocks({
+                blocks,
+                data: localeData,
+                field,
+                locale: localeKey,
+                path,
+                relationships,
+                tableName: newTableName,
+              });
+            }
+          });
         }
       } else if (isArrayOfRows(fieldData)) {
-        fieldData.forEach((blockRow, i) => {
-          if (typeof blockRow.blockType !== 'string') return;
-          const matchedBlock = field.blocks.find(({ slug }) => slug === blockRow.blockType);
-          if (!matchedBlock) return;
-
-          if (!blocks[blockRow.blockType]) blocks[blockRow.blockType] = [];
-
-          const newRow: BlockRowToInsert = {
-            arrays: {},
-            row: {
-              _order: i + 1,
-              _path: `${path}${field.name}`,
-            },
-            locales: {},
-          };
-
-          if (field.localized) newRow.row._locale = locale;
-
-          const blockTableName = `${newTableName}_${toSnakeCase(blockRow.blockType)}`;
-
-          traverseFields({
-            arrays: newRow.arrays,
-            blocks,
-            columnPrefix: '',
-            data: blockRow,
-            fields: matchedBlock.fields,
-            locale,
-            locales: newRow.locales,
-            newTableName: blockTableName,
-            parentTableName: blockTableName,
-            path: `${path || ''}${field.name}.${i}.`,
-            relationships,
-            row: newRow.row,
-          });
-
-          blocks[blockRow.blockType].push(newRow);
+        transformBlocks({
+          blocks,
+          data: fieldData,
+          field,
+          locale,
+          path,
+          relationships,
+          tableName: newTableName,
         });
       }
 
@@ -209,7 +193,7 @@ export const traverseFields = ({
     if (fieldAffectsData(field)) {
       const valuesToTransform: { localeKey?: string, ref: unknown, value: unknown }[] = [];
 
-      if ((field.localized || forceLocalized)) {
+      if ((field.localized)) {
         if (typeof fieldData === 'object' && fieldData !== null) {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
             if (!locales[localeKey]) locales[localeKey] = {};
@@ -222,7 +206,14 @@ export const traverseFields = ({
           });
         }
       } else {
-        valuesToTransform.push({ value: fieldData, ref: row });
+        let ref = row;
+
+        if (forceLocalized) {
+          if (!locales[locale]) locales[locale] = {};
+          ref = locales[locale];
+        }
+
+        valuesToTransform.push({ value: fieldData, ref });
       }
 
       valuesToTransform.forEach(({ localeKey, ref, value }) => {

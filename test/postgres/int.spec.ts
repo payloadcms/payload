@@ -339,4 +339,116 @@ describe('Postgres', () => {
       expect(retrievedArray.array.es[1].text).toStrictEqual('hello 2 in spanish');
     });
   });
+
+  describe('localized blocks', () => {
+    let localizedBlocks;
+
+    it('creates localized blocks', async () => {
+      localizedBlocks = await payload.create({
+        collection: 'localized-blocks',
+        data: {
+          title: 'hello',
+          layout: [
+            {
+              blockType: 'text',
+              text: 'hello in english',
+            },
+            {
+              blockType: 'number',
+              number: 1337,
+            },
+          ],
+        },
+      });
+
+      expect(localizedBlocks.layout[0].text).toStrictEqual('hello in english');
+      expect(localizedBlocks.layout[1].number).toStrictEqual(1337);
+    });
+
+    it('adds localized blocks', async () => {
+      const updated = await payload.update({
+        collection: 'localized-blocks',
+        id: localizedBlocks.id,
+        locale: 'es',
+        data: {
+          title: 'hello in spanish',
+          layout: [
+            {
+              blockType: 'text',
+              text: 'hello in spanish',
+            },
+            {
+              blockType: 'number',
+              number: 1338,
+            },
+          ],
+        },
+      });
+
+      expect(updated.layout[0].text).toStrictEqual('hello in spanish');
+      expect(updated.layout[1].number).toStrictEqual(1338);
+    });
+
+    it('retrieves blocks field in all locales', async () => {
+      const retrievedBlocks = await payload.findByID({
+        collection: 'localized-blocks',
+        id: localizedBlocks.id,
+        locale: 'all',
+      });
+
+      expect(retrievedBlocks.layout.en[0].text).toStrictEqual('hello in english');
+      expect(retrievedBlocks.layout.en[1].number).toStrictEqual(1337);
+      expect(retrievedBlocks.layout.es[0].text).toStrictEqual('hello in spanish');
+      expect(retrievedBlocks.layout.es[1].number).toStrictEqual(1338);
+    });
+  });
+
+  describe('localized group', () => {
+    let localizedGroup;
+
+    it('creates localized group', async () => {
+      localizedGroup = await payload.create({
+        collection: 'localized-groups',
+        data: {
+          group: {
+            text: 'en',
+            number: 123,
+          },
+        },
+      });
+
+      expect(localizedGroup.group.text).toStrictEqual('en');
+      expect(localizedGroup.group.number).toStrictEqual(123);
+    });
+
+    it('adds localized group', async () => {
+      const updated = await payload.update({
+        collection: 'localized-groups',
+        id: localizedGroup.id,
+        locale: 'es',
+        data: {
+          group: {
+            text: 'es',
+            number: 456,
+          },
+        },
+      });
+
+      expect(updated.group.text).toStrictEqual('es');
+      expect(updated.group.number).toStrictEqual(456);
+    });
+
+    it('retrieves group field in all locales', async () => {
+      const retrievedGroup = await payload.findByID({
+        collection: 'localized-groups',
+        id: localizedGroup.id,
+        locale: 'all',
+      });
+
+      expect(retrievedGroup.group.en.text).toStrictEqual('en');
+      expect(retrievedGroup.group.en.number).toStrictEqual(123);
+      expect(retrievedGroup.group.es.text).toStrictEqual('es');
+      expect(retrievedGroup.group.es.number).toStrictEqual(456);
+    });
+  });
 });

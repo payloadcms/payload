@@ -41,7 +41,6 @@ export const deleteExistingRowsByPath = async ({
   if (localizedPathsToDelete.size > 0 && locale) {
     const whereConstraints = [
       eq(table[parentColumnName], parentID),
-      eq(table[localeColumnName], locale),
     ];
 
     if (pathColumnName) whereConstraints.push(inArray(table[pathColumnName], Array.from(localizedPathsToDelete)));
@@ -62,6 +61,6 @@ export const deleteExistingRowsByPath = async ({
     await adapter.db.delete(table)
       .where(
         and(...whereConstraints),
-      ).returning();
+      );
   }
 };
