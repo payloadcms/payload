@@ -10,12 +10,36 @@ import { build } from "./build.js";
 
 const tsConfig = getTSconfig();
 
-const swcOptions = {
+const swcOptions_cjs = {
   sourceMaps: 'inline',
   jsc: {
     parser: {
       syntax: 'typescript',
       tsx: true,
+      dts: true,
+    },
+    paths: undefined,
+    baseUrl: path.resolve(),
+  },
+  module: {
+    type: 'commonjs',
+  },
+  ignore: [
+    /.*\/node_modules\/.*/, // parse everything besides files within node_modules
+  ],
+};
+
+const swcOptions_esm = {
+  sourceMaps: 'inline',
+  jsc: {
+    experimental: {
+      keepImportAssertions: true,
+    },
+    parser: {
+      syntax: 'typescript',
+      tsx: true,
+      dts: true,
+      importAssertions: true,
     },
     paths: undefined,
     baseUrl: path.resolve(),
@@ -29,20 +53,32 @@ const swcOptions = {
 };
 
 if (tsConfig?.config?.compilerOptions?.paths) {
-  swcOptions.jsc.paths = tsConfig.config.compilerOptions.paths;
+  swcOptions_esm.jsc.paths = tsConfig.config.compilerOptions.paths;
+  swcOptions_cjs.jsc.paths = tsConfig.config.compilerOptions.paths;
 
   if (tsConfig?.config?.compilerOptions?.baseUrl) {
-    swcOptions.jsc.baseUrl = path.resolve(
+    swcOptions_esm.jsc.baseUrl = path.resolve(
+      tsConfig.config.compilerOptions.baseUrl,
+    );
+    swcOptions_cjs.jsc.baseUrl = path.resolve(
       tsConfig.config.compilerOptions.baseUrl,
     );
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore - bad @swc/register types
-swcRegister(swcOptions);
+
 
 const args = minimist(process.argv.slice(2));
+
+if (args._.includes('--cjs')) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - bad @swc/register types
+  swcRegister(swcOptions_cjs);
+} else {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore - bad @swc/register types
+  swcRegister(swcOptions_esm);
+}
 
 const scriptIndex = args._.findIndex((x) => x === 'build');
 
