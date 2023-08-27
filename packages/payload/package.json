@@ -1,6 +1,6 @@
 {
   "name": "@alessiogr/payloadtest",
-  "version": "1.31.0",
+  "version": "1.32.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "type": "module",
@@ -65,6 +65,7 @@
   "scripts": {
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "copyfiles:new": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/esm/ && copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/cjs/",
+    "build": "pnpm copyfiles:new && pnpm build:swc:esm && pnpm build:swc:cjs && pnpm build:components:esm && pnpm build:components:cjs && pnpm build:tsc:both && node ./scripts/build.js",
     "build:tsc": "tsc",
     "build:tsc:esm": "tsc --module NodeNext --target ESNext --emitDeclarationOnly --outDir dist/esm",
     "build:tsc:cjs": "tsc --module NodeNext --target ESNext --emitDeclarationOnly --outDir dist/cjs",
@@ -74,7 +75,6 @@
     "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
     "build:components:esm": "webpack --config dist/esm/bundlers/webpack/components.config.js",
     "build:components:cjs": "webpack --config webpack-config-wrapper.cjs",
-    "build": "pnpm copyfiles:new && pnpm build:swc:esm && pnpm build:swc:cjs && pnpm build:components:esm && pnpm build:components:cjs && pnpm build:tsc:both",
     "buildworks": "pnpm copyfiles:new && pnpm build:swc:esm && pnpm build:swc:cjs && pnpm build:components:esm && pnpm build:components:cjs && pnpm build:tsc:esm && pnpm build:tsc:cjs",
     "build:cjstsc": "tsc --module commonjs --moduleResolution Node16 --target ESNext --emitDeclarationOnly --outDir dist/cjstest",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
