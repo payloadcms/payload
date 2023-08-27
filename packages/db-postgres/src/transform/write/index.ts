@@ -22,7 +22,7 @@ export const transformForWrite = ({
   // base row, locales, relationships, blocks, and arrays
   const rowToInsert: RowToInsert = {
     row: {},
-    locale: {},
+    locales: {},
     relationships: [],
     blocks: {},
     arrays: {},
@@ -37,7 +37,7 @@ export const transformForWrite = ({
     data,
     fields,
     locale,
-    localeRow: rowToInsert.locale,
+    locales: rowToInsert.locales,
     newTableName: tableName,
     parentTableName: tableName,
     path,

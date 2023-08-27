@@ -12,15 +12,17 @@ type Args = {
 
 type RowsByTable = {
   [tableName: string]: {
-    rows: Record<string, unknown>[]
-    locales: Record<string, unknown>[]
-    columnName: string
-    rowIndexMap: [number, number][]
     arrays: {
       [tableName: string]: ArrayRowToInsert[]
     }[]
+    columnName: string
+    localeRowIndexMap: [number, number][]
+    locales: Record<string, unknown>[]
+    rowIndexMap: [number, number][]
+    rows: Record<string, unknown>[]
   }
 }
+
 // We want to insert ALL array rows per table with a single insertion
 // rather than inserting each array row separately.
 // To do this, we take in an array of arrays by table name and parent rows
@@ -39,11 +41,12 @@ export const insertArrays = async ({
       // If the table doesn't exist in map, initialize it
       if (!rowsByTable[tableName]) {
         rowsByTable[tableName] = {
-          rows: [],
-          locales: [],
           columnName: arrayRows[0]?.columnName,
-          rowIndexMap: [],
           arrays: [],
+          localeRowIndexMap: [],
+          locales: [],
+          rowIndexMap: [],
+          rows: [],
         };
       }
 
@@ -57,7 +60,7 @@ export const insertArrays = async ({
 
       // Add any sub arrays that need to be created
       // We will call this recursively below
-      arrayRows.forEach((arrayRow) => {
+      arrayRows.forEach((arrayRow, arrayRowIndex) => {
         if (Object.keys(arrayRow.arrays).length > 0) {
           rowsByTable[tableName].arrays.push(arrayRow.arrays);
         }
@@ -65,8 +68,19 @@ export const insertArrays = async ({
         // Set up parent IDs for both row and locale row
         arrayRow.row._parentID = parentID;
         rowsByTable[tableName].rows.push(arrayRow.row);
-        arrayRow.locale._parentID = arrayRow.row.id;
-        rowsByTable[tableName].locales.push(arrayRow.locale);
+
+        const existingLocaleCount = rowsByTable[tableName].locales.length;
+
+        Object.entries(arrayRow.locales).forEach(([arrayRowLocale, arrayRowLocaleData]) => {
+          arrayRowLocaleData._parentID = arrayRow.row.id;
+          arrayRowLocaleData._locale = arrayRowLocale;
+          rowsByTable[tableName].locales.push(arrayRowLocaleData);
+        });
+
+        rowsByTable[tableName].localeRowIndexMap[arrayRowIndex] = [
+          existingLocaleCount,
+          existingLocaleCount + Object.keys(arrayRow.locales).length,
+        ];
       });
     });
   });
@@ -79,22 +93,27 @@ export const insertArrays = async ({
     const insertedRows = await adapter.db.insert(adapter.tables[tableName])
       .values(row.rows).returning();
 
-    rowsByTable[tableName].rows = insertedRows.map((arrayRow) => {
-      delete arrayRow._parentID;
-      delete arrayRow._order;
-      return arrayRow;
-    });
+    let insertedLocaleRows: Record<string, unknown>[] = [];
 
     // Insert locale rows
     if (adapter.tables[`${tableName}_locales`]) {
-      const insertedLocaleRows = await adapter.db.insert(adapter.tables[`${tableName}_locales`])
+      insertedLocaleRows = await adapter.db.insert(adapter.tables[`${tableName}_locales`])
         .values(row.locales).returning();
-
-      insertedLocaleRows.forEach((localeRow, i) => {
-        delete localeRow._parentID;
-        rowsByTable[tableName].rows[i]._locales = [localeRow];
-      });
     }
+
+    rowsByTable[tableName].rows = insertedRows.map((arrayRow, i) => {
+      if (Array.isArray(row.localeRowIndexMap[i])) {
+        const sliceStart = row.localeRowIndexMap[i][0];
+        const sliceEnd = row.localeRowIndexMap[i][1];
+        const localeRows = insertedLocaleRows.slice(sliceStart, sliceEnd);
+
+        if (localeRows.length > 0) {
+          arrayRow._locales = localeRows;
+        }
+      }
+
+      return arrayRow;
+    });
 
     // If there are sub arrays, call this function recursively
     if (row.arrays.length > 0) {

@@ -61,10 +61,10 @@ export const upsertRow = async ({
   const promises = [];
 
   // If there is a locale row with data, add the parent and locale
-  if (Object.keys(rowToInsert.locale).length > 0) {
-    rowToInsert.locale._parentID = insertedRow.id;
-    rowToInsert.locale._locale = locale;
-    localeToInsert = rowToInsert.locale;
+  if (rowToInsert.locales?.[locale] && Object.keys(rowToInsert.locales[locale]).length > 0) {
+    rowToInsert.locales[locale]._parentID = insertedRow.id;
+    rowToInsert.locales[locale]._locale = locale;
+    localeToInsert = rowToInsert.locales[locale];
   }
 
   // If there are relationships, add parent to each
@@ -161,19 +161,21 @@ export const upsertRow = async ({
         .values(blockRows.map(({ row }) => row)).returning();
 
       insertedBlockRows[blockName].forEach((row, i) => {
-        delete row._parentID;
         blockRows[i].row = row;
       });
 
       const blockLocaleIndexMap: number[] = [];
 
       const blockLocaleRowsToInsert = blockRows.reduce((acc, blockRow, i) => {
-        if (Object.keys(blockRow.locale).length > 0) {
-          blockRow.locale._parentID = blockRow.row.id;
-          blockRow.locale._locale = locale;
-          acc.push(blockRow.locale);
-          blockLocaleIndexMap.push(i);
-          return acc;
+        if (Object.entries(blockRow.locales).length > 0) {
+          Object.entries(blockRow.locales).forEach(([blockLocale, blockLocaleData]) => {
+            if (Object.keys(blockLocaleData).length > 0) {
+              blockLocaleData._parentID = blockRow.row.id;
+              blockLocaleData._locale = blockLocale;
+              acc.push(blockLocaleData);
+              blockLocaleIndexMap.push(i);
+            }
+          });
         }
 
         return acc;
@@ -184,7 +186,6 @@ export const upsertRow = async ({
           .values(blockLocaleRowsToInsert).returning();
 
         insertedBlockLocaleRows.forEach((blockLocaleRow, i) => {
-          delete blockLocaleRow._parentID;
           insertedBlockRows[blockName][blockLocaleIndexMap[i]]._locales = [blockLocaleRow];
         });
       }

@@ -1,7 +1,9 @@
 export type ArrayRowToInsert = {
   columnName: string
   row: Record<string, unknown>,
-  locale: Record<string, unknown>
+  locales: {
+    [locale: string]: Record<string, unknown>
+  }
   arrays: {
     [tableName: string]: ArrayRowToInsert[]
   }
@@ -9,7 +11,9 @@ export type ArrayRowToInsert = {
 
 export type BlockRowToInsert = {
   row: Record<string, unknown>,
-  locale: Record<string, unknown>
+  locales: {
+    [locale: string]: Record<string, unknown>
+  }
   arrays: {
     [tableName: string]: ArrayRowToInsert[]
   }
@@ -17,7 +21,9 @@ export type BlockRowToInsert = {
 
 export type RowToInsert = {
   row: Record<string, unknown>,
-  locale: Record<string, unknown>,
+  locales: {
+    [locale: string]: Record<string, unknown>
+  }
   relationships: Record<string, unknown>[],
   blocks: {
     [blockType: string]: BlockRowToInsert[]

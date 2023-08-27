@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign */
-import toSnakeCase from 'to-snake-case';
 import { ArrayField } from 'payload/types';
 import { ArrayRowToInsert, BlockRowToInsert } from './types';
 import { isArrayOfRows } from '../../utilities/isArrayOfRows';
@@ -35,9 +34,10 @@ export const transformArray = ({
       const newRow: ArrayRowToInsert = {
         arrays: {},
         columnName,
-        existingLocales: [],
-        locale: {
-          _locale: locale,
+        locales: {
+          [locale]: {
+            _locale: locale,
+          },
         },
         row: {
           _order: i + 1,
@@ -53,10 +53,9 @@ export const transformArray = ({
         blocks,
         columnPrefix: '',
         data: arrayRow,
-        existingLocales: newRow.existingLocales,
         fields: field.fields,
         locale,
-        localeRow: newRow.locale,
+        locales: newRow.locales,
         newTableName: arrayTableName,
         parentTableName: arrayTableName,
         path: `${path || ''}${field.name}.${i}.`,

@@ -19,7 +19,9 @@ type Args = {
   fields: Field[]
   forceLocalized?: boolean
   locale: string
-  localeRow: Record<string, unknown>
+  locales: {
+    [locale: string]: Record<string, unknown>
+  }
   newTableName: string
   parentTableName: string
   path: string
@@ -36,7 +38,7 @@ export const traverseFields = ({
   fields,
   forceLocalized,
   locale,
-  localeRow,
+  locales,
   newTableName,
   parentTableName,
   path,
@@ -50,20 +52,28 @@ export const traverseFields = ({
 
     if (fieldAffectsData(field)) {
       columnName = `${columnPrefix || ''}${field.name}`;
-      fieldData = data[field.name];
 
       // If the field is localized, we need to access its data based on the
       // locale being inserted
       if (field.localized || forceLocalized) {
-        targetRow = localeRow;
+        if (!locales[locale]) locales[locale] = {};
+        targetRow = locales[locale];
 
-        if (typeof data[field.name] === 'object' && data[field.name] !== null) {
-          if (typeof data[field.name][locale] !== 'undefined') {
-            fieldData = data[field.name][locale];
-          } else {
-            fieldData = undefined;
-          }
+        if (typeof fieldData === 'object' && fieldData !== null) {
+          Object.entries(fieldData).forEach(([fieldLocale, fieldLocaleData]) => {
+            // If this is the locale being created / updated,
+            // set the field data equal to this locale's data
+            if (fieldLocale === locale) {
+              if (typeof fieldData[locale] !== 'undefined') {
+                fieldData = fieldData[locale];
+              }
+            } else {
+              // Otherwise, transform the locale row and store it
+            }
+          });
         }
+      } else {
+        fieldData = data[field.name];
       }
     }
 
@@ -113,7 +123,7 @@ export const traverseFields = ({
                 _order: i + 1,
                 _path: `${path}${field.name}`,
               },
-              locale: {},
+              locales: {},
             };
 
             if (field.localized) newRow.row._locale = locale;
@@ -127,7 +137,7 @@ export const traverseFields = ({
               data: blockRow,
               fields: matchedBlock.fields,
               locale,
-              localeRow: newRow.locale,
+              locales: newRow.locales,
               newTableName: blockTableName,
               parentTableName: blockTableName,
               path: `${path || ''}${field.name}.${i}.`,
@@ -158,7 +168,7 @@ export const traverseFields = ({
             fields: field.fields,
             forceLocalized: field.localized,
             locale,
-            localeRow,
+            locales,
             newTableName: `${parentTableName}_${toSnakeCase(field.name)}`,
             parentTableName,
             path: `${path || ''}${field.name}.`,
