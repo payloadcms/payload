@@ -60,8 +60,22 @@ export const traverseFields = ({
 
       if (field.localized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
-          // loop over each locale
-          console.log(data[field.name]);
+          Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
+            if (Array.isArray(localeData)) {
+              const newRows = transformArray({
+                arrayTableName,
+                blocks,
+                columnName,
+                data: localeData,
+                field,
+                locale: localeKey,
+                path,
+                relationships,
+              });
+
+              arrays[arrayTableName] = arrays[arrayTableName].concat(newRows);
+            }
+          });
         }
       } else {
         const newRows = transformArray({

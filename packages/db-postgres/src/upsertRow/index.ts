@@ -200,9 +200,7 @@ export const upsertRow = async ({
       await Promise.all(Object.entries(rowToInsert.arrays).map(async ([arrayTableName, tableRows]) => {
         await deleteExistingArrayRows({
           adapter,
-          locale,
           parentID: insertedRow.id,
-          newRows: tableRows.map(({ row }) => row),
           tableName: arrayTableName,
         });
       }));
