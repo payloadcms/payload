@@ -387,18 +387,6 @@ export default buildConfigWithDefaults({
         number: 5,
         bool: true,
       },
-      {
-        number: 35,
-        bool: false,
-      },
-      {
-        number: 1,
-        bool: true,
-      },
-      {
-        number: 40,
-        bool: true,
-      },
     ];
 
     await mapAsync(sortMultipleData, async (data) => {
