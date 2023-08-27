@@ -1,6 +1,7 @@
 import type { CollectionConfig } from '../../src/collections/config/types';
 import { devUser } from '../credentials';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import { mapAsync } from '../../src/utilities/mapAsync';
 
 export interface Relation {
   id: string;
@@ -33,6 +34,7 @@ export const pointSlug = 'point';
 export const customIdSlug = 'custom-id';
 export const customIdNumberSlug = 'custom-id-number';
 export const errorOnHookSlug = 'error-on-hooks';
+export const sortMultipleSlug = 'sort-multiple';
 
 export default buildConfigWithDefaults({
   endpoints: [
@@ -266,6 +268,20 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: sortMultipleSlug,
+      access: openAccess,
+      fields: [
+        {
+          name: 'number',
+          type: 'number',
+        },
+        {
+          name: 'bool',
+          type: 'checkbox',
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
@@ -356,6 +372,40 @@ export default buildConfigWithDefaults({
         id: 123,
         name: 'name',
       },
+    });
+
+    const sortMultipleData = [
+      {
+        number: 10,
+        bool: true,
+      },
+      {
+        number: 30,
+        bool: false,
+      },
+      {
+        number: 5,
+        bool: true,
+      },
+      {
+        number: 35,
+        bool: false,
+      },
+      {
+        number: 1,
+        bool: true,
+      },
+      {
+        number: 40,
+        bool: true,
+      },
+    ];
+
+    await mapAsync(sortMultipleData, async (data) => {
+      payload.create({
+        collection: sortMultipleSlug,
+        data,
+      });
     });
   },
 });
