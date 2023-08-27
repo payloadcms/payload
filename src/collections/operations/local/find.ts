@@ -1,6 +1,6 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PaginatedDocs } from '../../../mongoose/types';
-import { Document, Where } from '../../../types';
+import { Document, Sort, Where } from '../../../types';
 import { Payload } from '../../../payload';
 import { PayloadRequest, RequestContext } from '../../../express/types';
 import find from '../find';
@@ -22,7 +22,7 @@ export type Options<T extends keyof GeneratedTypes['collections']> = {
   disableErrors?: boolean
   showHiddenFields?: boolean
   pagination?: boolean
-  sort?: string
+  sort?: Sort
   where?: Where
   draft?: boolean
   req?: PayloadRequest

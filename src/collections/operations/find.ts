@@ -1,4 +1,4 @@
-import { Where } from '../../types';
+import { Sort, Where } from '../../types';
 import { PayloadRequest } from '../../express/types';
 import executeAccess from '../../auth/executeAccess';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
@@ -16,7 +16,7 @@ export type Arguments = {
   where?: Where
   page?: number
   limit?: number
-  sort?: string
+  sort?: Sort
   depth?: number
   currentDepth?: number
   req?: PayloadRequest
@@ -115,16 +115,19 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
   let sort;
   if (!hasNearConstraint) {
-    const [sortProperty, sortOrder] = buildSortParam({
-      sort: args.sort ?? collectionConfig.defaultSort,
-      config: payload.config,
-      fields: collectionConfig.fields,
-      timestamps: collectionConfig.timestamps,
-      locale,
-    });
-    sort = {
-      [sortProperty]: sortOrder,
-    };
+    if (typeof args.sort === 'object') sort = args.sort;
+    else {
+      const [sortProperty, sortOrder] = buildSortParam({
+        sort: args.sort ?? collectionConfig.defaultSort,
+        config: payload.config,
+        fields: collectionConfig.fields,
+        timestamps: collectionConfig.timestamps,
+        locale,
+      });
+      sort = {
+        [sortProperty]: sortOrder,
+      };
+    }
   }
 
   const usePagination = pagination && limit !== 0;

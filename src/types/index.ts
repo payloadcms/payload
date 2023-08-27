@@ -17,6 +17,8 @@ export type Where = {
   and?: Where[];
 };
 
+export type Sort = string | { [key: string]: -1 | 1 | 'asc' | 'desc' }
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any;
 
