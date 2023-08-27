@@ -82,8 +82,6 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       dotenv: mockDotENVPath,
       [bundlerPath]: mockModulePath,
       [bundlerPath2]: mockModulePath,
-      '@payloadcms/db-mongodb': path.resolve(__dirname, '@payloadcms/db-mongodb/dist/esm/mock.js'),
-      '@payloadcms/db-postgres': path.resolve(__dirname, '@payloadcms/db-mongodb/dist/esm/mock.js'),
     },
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     // Add support for TypeScripts fully qualified ESM imports.
