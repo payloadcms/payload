@@ -133,7 +133,8 @@ describe('Postgres', () => {
 
   it('adds locale to existing doc', async () => {
     const titleES = 'hello es';
-    const arrayTitle = 'hello 1 spanish';
+    const arrayTitle1 = 'hello 1 spanish';
+    const arrayTitle2 = 'hello 2 spanish';
     const blockLocalizedText = 'my block in spanish';
 
     const updatedPost = await payload.update({
@@ -146,7 +147,11 @@ describe('Postgres', () => {
         myArray: [
           {
             id: post.myArray[0].id,
-            subField: arrayTitle,
+            subField: arrayTitle1,
+          },
+          {
+            id: post.myArray[1].id,
+            subField: arrayTitle2,
           },
         ],
         myBlocks: [
@@ -160,7 +165,8 @@ describe('Postgres', () => {
 
     expect(updatedPost.title).toStrictEqual(titleES);
     expect(updatedPost.number).toStrictEqual(1000);
-    expect(updatedPost.myArray[0].subField).toStrictEqual(arrayTitle);
+    expect(updatedPost.myArray[0].subField).toStrictEqual(arrayTitle1);
+    expect(updatedPost.myArray[1].subField).toStrictEqual(arrayTitle2);
     expect(updatedPost.myBlocks[0].localizedText).toStrictEqual(blockLocalizedText);
   });
 
@@ -206,6 +212,7 @@ describe('Postgres', () => {
         ],
         myArray: [
           {
+            id: post.myArray[0].id,
             subField: 'hello 1 updated',
             mySubArray: [
               {
@@ -217,6 +224,7 @@ describe('Postgres', () => {
             ],
           },
           {
+            id: post.myArray[1].id,
             subField: 'hello 2 updated',
             mySubArray: [
               {
@@ -230,11 +238,13 @@ describe('Postgres', () => {
         ],
         myBlocks: [
           {
+            id: post.myBlocks[0].id,
             blockType: 'block1',
             nonLocalizedText: 'hello updated',
             localizedText: 'hello in english updated',
           },
           {
+            id: post.myBlocks[1].id,
             blockType: 'block2',
             number: 1234,
             blockArray: [

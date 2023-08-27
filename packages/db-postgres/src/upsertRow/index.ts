@@ -1,11 +1,13 @@
 /* eslint-disable no-param-reassign */
+import { eq } from 'drizzle-orm';
 import { transform } from '../transform/read';
 import { BlockRowToInsert } from '../transform/write/types';
-import { insertArrays } from '../insertArrays';
+import { insertArrays } from './insertArrays';
 import { transformForWrite } from '../transform/write';
 import { Args } from './types';
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath';
 import { deleteExistingArrayRows } from './deleteExistingArrayRows';
+import { buildFindManyArgs } from '../find/buildFindManyArgs';
 
 export const upsertRow = async ({
   adapter,
@@ -89,23 +91,20 @@ export const upsertRow = async ({
   // INSERT LOCALES
   // //////////////////////////////////
 
-  let insertedLocaleRow: Record<string, unknown>;
-
   if (localeToInsert) {
     const localeTable = adapter.tables[`${tableName}_locales`];
 
     promises.push(async () => {
       if (operation === 'update') {
-        [insertedLocaleRow] = await adapter.db.insert(localeTable)
+        await adapter.db.insert(localeTable)
           .values(localeToInsert)
           .onConflictDoUpdate({
             target: [localeTable._locale, localeTable._parentID],
             set: localeToInsert,
-          })
-          .returning();
+          });
       } else {
-        [insertedLocaleRow] = await adapter.db.insert(localeTable)
-          .values(localeToInsert).returning();
+        await adapter.db.insert(localeTable)
+          .values(localeToInsert);
       }
     });
   }
@@ -113,8 +112,6 @@ export const upsertRow = async ({
   // //////////////////////////////////
   // INSERT RELATIONSHIPS
   // //////////////////////////////////
-
-  let insertedRelationshipRows: Record<string, unknown>[];
 
   if (relationsToInsert.length > 0) {
     promises.push(async () => {
@@ -132,7 +129,7 @@ export const upsertRow = async ({
         });
       }
 
-      insertedRelationshipRows = await adapter.db.insert(adapter.tables[relationshipsTableName])
+      await adapter.db.insert(adapter.tables[relationshipsTableName])
         .values(relationsToInsert).returning();
     });
   }
@@ -182,12 +179,8 @@ export const upsertRow = async ({
       }, []);
 
       if (blockLocaleRowsToInsert.length > 0) {
-        const insertedBlockLocaleRows = await adapter.db.insert(adapter.tables[`${tableName}_${blockName}_locales`])
+        await adapter.db.insert(adapter.tables[`${tableName}_${blockName}_locales`])
           .values(blockLocaleRowsToInsert).returning();
-
-        insertedBlockLocaleRows.forEach((blockLocaleRow, i) => {
-          insertedBlockRows[blockName][blockLocaleIndexMap[i]]._locales = [blockLocaleRow];
-        });
       }
 
       await insertArrays({
@@ -225,19 +218,27 @@ export const upsertRow = async ({
   await Promise.all(promises.map((promise) => promise()));
 
   // //////////////////////////////////
+  // RETRIEVE NEWLY UPDATED ROW
+  // //////////////////////////////////
+
+  const findManyArgs = buildFindManyArgs({
+    adapter,
+    depth: 0,
+    fields,
+    tableName,
+  });
+
+  findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id);
+
+  const doc = await adapter.db.query[tableName].findFirst(findManyArgs);
+
+  // //////////////////////////////////
   // TRANSFORM DATA
   // //////////////////////////////////
 
-  if (insertedLocaleRow) insertedRow._locales = [insertedLocaleRow];
-  if (insertedRelationshipRows?.length > 0) insertedRow._relationships = insertedRelationshipRows;
-
-  Object.entries(insertedBlockRows).forEach(([blockName, blocks]) => {
-    if (blocks.length > 0) insertedRow[`_blocks_${blockName}`] = blocks;
-  });
-
   const result = transform({
     config: adapter.payload.config,
-    data: insertedRow,
+    data: doc,
     fields,
   });
 

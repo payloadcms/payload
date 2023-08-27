@@ -1,19 +1,13 @@
-import { ArrayField, Block } from 'payload/types';
-import toSnakeCase from 'to-snake-case';
-import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
-import { SanitizedConfig } from 'payload/config';
+import { ArrayField, Block, Field } from 'payload/types';
 import { DBQueryConfig } from 'drizzle-orm';
 import { traverseFields } from './traverseFields';
-import { buildWithFromDepth } from './buildWithFromDepth';
 import { PostgresAdapter } from '../types';
 
 type BuildFindQueryArgs = {
   adapter: PostgresAdapter
-  config: SanitizedConfig
-  collection: SanitizedCollectionConfig
   depth: number
-  fallbackLocale?: string | false
-  locale?: string
+  fields: Field[]
+  tableName: string
 }
 
 export type Result = DBQueryConfig<'many', true, any, any>
@@ -22,11 +16,9 @@ export type Result = DBQueryConfig<'many', true, any, any>
 // a collection field structure
 export const buildFindManyArgs = ({
   adapter,
-  config,
-  collection,
   depth,
-  fallbackLocale,
-  locale,
+  fields,
+  tableName,
 }: BuildFindQueryArgs): Record<string, unknown> => {
   const result: Result = {
     with: {},
@@ -39,8 +31,6 @@ export const buildFindManyArgs = ({
     },
   };
 
-  const tableName = toSnakeCase(collection.slug);
-
   if (adapter.tables[`${tableName}_relationships`]) {
     result.with._relationships = {
       orderBy: ({ order }, { asc }) => [asc(order)],
@@ -48,13 +38,6 @@ export const buildFindManyArgs = ({
         id: false,
         parent: false,
       },
-      with: buildWithFromDepth({
-        adapter,
-        config,
-        depth,
-        fallbackLocale,
-        locale,
-      }),
     };
   }
 
@@ -67,11 +50,10 @@ export const buildFindManyArgs = ({
 
   traverseFields({
     adapter,
-    config,
     currentArgs: result,
     currentTableName: tableName,
     depth,
-    fields: collection.fields,
+    fields,
     _locales,
     locatedArrays,
     locatedBlocks,

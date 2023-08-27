@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign */
-import { SanitizedConfig } from 'payload/config';
 import toSnakeCase from 'to-snake-case';
 import { fieldAffectsData } from 'payload/dist/fields/config/types';
 import { ArrayField, Block, Field } from 'payload/types';
@@ -8,7 +7,6 @@ import { PostgresAdapter } from '../types';
 
 type TraverseFieldArgs = {
   adapter: PostgresAdapter
-  config: SanitizedConfig,
   currentArgs: Record<string, unknown>,
   currentTableName: string
   depth?: number,
@@ -23,7 +21,6 @@ type TraverseFieldArgs = {
 
 export const traverseFields = ({
   adapter,
-  config,
   currentArgs,
   currentTableName,
   depth,
@@ -55,7 +52,6 @@ export const traverseFields = ({
 
           traverseFields({
             adapter,
-            config,
             currentArgs: withArray,
             currentTableName: arrayTableName,
             depth,
@@ -89,7 +85,6 @@ export const traverseFields = ({
 
               traverseFields({
                 adapter,
-                config,
                 currentArgs: withBlock,
                 currentTableName,
                 depth,
@@ -109,7 +104,6 @@ export const traverseFields = ({
         case 'group':
           traverseFields({
             adapter,
-            config,
             currentArgs,
             currentTableName,
             depth,

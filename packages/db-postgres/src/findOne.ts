@@ -24,11 +24,9 @@ export const findOne: FindOne = async function findOne({
 
   const findManyArgs = buildFindManyArgs({
     adapter: this,
-    config: this.payload.config,
-    collection: collectionConfig,
     depth: 0,
-    fallbackLocale: req.fallbackLocale,
-    locale: req.locale,
+    fields: collectionConfig.fields,
+    tableName,
   });
 
   findManyArgs.where = query;
