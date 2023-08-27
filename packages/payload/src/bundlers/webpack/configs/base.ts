@@ -116,6 +116,7 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
     }),
     new webpack.HotModuleReplacementPlugin(),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    // This fixes esm: https://github.com/vercel/next.js/issues/41961#issuecomment-1311091390
     new webpack.NormalModuleReplacementPlugin(/\.js$/, function (
       /** @type {{ context: string, request: string }} */
       resource
