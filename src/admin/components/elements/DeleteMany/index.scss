@@ -13,5 +13,9 @@
 
   .btn {
     margin-right: $baseline;
+    [dir = rtl] & {
+      margin-right: 0;
+      margin-left: $baseline
+    }
   }
 }
