@@ -3,6 +3,7 @@
   "version": "1.33.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
+  "type": "module",
   "engines": {
     "node": ">=14",
     "pnpm": ">=8"
