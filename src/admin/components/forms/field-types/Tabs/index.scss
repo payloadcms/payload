@@ -64,7 +64,14 @@
     gap: base(.5);
 
     &:last-child {
-      margin: 0;
+      [dir=ltr] & {
+        margin: 0;
+      }
+    }
+    &:first-child{
+      [dir = rtl] & {
+        margin: 0;
+      }
     }
 
     &:after {
