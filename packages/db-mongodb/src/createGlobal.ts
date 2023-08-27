@@ -2,7 +2,7 @@ import { PayloadRequest } from '@alessiogr/payloadtest/types';
 import { CreateGlobal } from '@alessiogr/payloadtest/database';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
 import { withSession } from './withSession.js';
-import type { MongooseAdapter } from '.';
+import type { MongooseAdapter } from './index.js';
 
 export const createGlobal: CreateGlobal = async function createGlobal(
   this: MongooseAdapter,

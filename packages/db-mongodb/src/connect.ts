@@ -2,7 +2,7 @@
 import type { ConnectOptions } from 'mongoose';
 import mongoose from 'mongoose';
 import type { Connect } from '@alessiogr/payloadtest/database';
-import type { MongooseAdapter } from '.';
+import type { MongooseAdapter } from './index.js';
 
 export const connect: Connect = async function connect(
   this: MongooseAdapter,

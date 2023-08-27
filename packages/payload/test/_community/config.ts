@@ -1,8 +1,8 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
-import { PostsCollection, postsSlug } from './collections/Posts.js';
-import { MenuGlobal } from './globals/Menu.js';
+import { PostsCollection, postsSlug } from './collections/Posts/index.js';
+import { MenuGlobal } from './globals/Menu/index.js';
 import { devUser } from '../credentials.js';
-import { MediaCollection } from './collections/Media.js';
+import { MediaCollection } from './collections/Media/index.js';
 
 export default buildConfigWithDefaults({
   // ...extend config here

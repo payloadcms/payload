@@ -4,7 +4,7 @@ import { flattenWhereToOperators } from '@alessiogr/payloadtest/database';
 import { buildVersionGlobalFields } from '@alessiogr/payloadtest/versions';
 import { PayloadRequest } from '@alessiogr/payloadtest/types';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
-import type { MongooseAdapter } from '.';
+import type { MongooseAdapter } from './index.js';
 import { buildSortParam } from './queries/buildSortParam.js';
 import { withSession } from './withSession.js';
 

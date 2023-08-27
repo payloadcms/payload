@@ -8,7 +8,7 @@ import { Payload } from '@alessiogr/payloadtest';
 import { Operator } from '@alessiogr/payloadtest/types';
 import { operatorMap } from './operatorMap.js';
 import { sanitizeQueryValue } from './sanitizeQueryValue.js';
-import { MongooseAdapter } from '..';
+import { MongooseAdapter } from '../index.js';
 
 type SearchParam = {
   path?: string,

@@ -1,4 +1,4 @@
-import payload from '../../src.js';
+import payload from '../../src/index.js';
 import { initPayloadTest } from '../helpers/configHelpers.js';
 import { devUser } from '../credentials.js';
 import path from 'path';

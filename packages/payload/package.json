@@ -232,6 +232,7 @@
     "swc-minify-webpack-plugin": "2.1.1",
     "terser-webpack-plugin": "5.3.9",
     "ts-essentials": "7.0.3",
+    "ts-loader": "^9.4.4",
     "tsx": "^3.12.7",
     "url-loader": "4.1.1",
     "use-context-selector": "1.4.1",

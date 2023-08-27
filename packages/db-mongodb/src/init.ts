@@ -10,7 +10,7 @@ import type { Init } from '@alessiogr/payloadtest/database';
 import getBuildQueryPlugin from './queries/buildQuery.js';
 import buildCollectionSchema from './models/buildCollectionSchema.js';
 import buildSchema from './models/buildSchema.js';
-import type { MongooseAdapter } from '.';
+import type { MongooseAdapter } from './index.js';
 import { buildGlobalModel } from './models/buildGlobalModel.js';
 import { CollectionModel } from './types.js';
 

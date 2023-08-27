@@ -1,7 +1,7 @@
 import type { UpdateGlobal } from '@alessiogr/payloadtest/database';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
 import type { PayloadRequest } from '@alessiogr/payloadtest/types';
-import type { MongooseAdapter } from '.';
+import type { MongooseAdapter } from './index.js';
 import { withSession } from './withSession.js';
 
 export const updateGlobal: UpdateGlobal = async function updateGlobal(

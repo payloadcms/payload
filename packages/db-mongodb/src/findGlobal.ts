@@ -2,7 +2,7 @@ import { combineQueries } from '@alessiogr/payloadtest/database';
 import type { FindGlobal } from '@alessiogr/payloadtest/database';
 import { PayloadRequest } from '@alessiogr/payloadtest/types';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
-import type { MongooseAdapter } from '.';
+import type { MongooseAdapter } from './index.js';
 import { withSession } from './withSession.js';
 
 export const findGlobal: FindGlobal = async function findGlobal(

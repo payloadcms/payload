@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Field, TabAsField } from '@alessiogr/payloadtest/dist/fields/config/types';
+import { Field, TabAsField } from '@alessiogr/payloadtest/types';
 import { createArrayFromCommaDelineated } from '../utilities/createArrayFromCommaDelineated.js';
 
 type SanitizeQueryValueArgs = {

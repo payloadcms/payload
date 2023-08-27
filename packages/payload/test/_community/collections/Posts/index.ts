@@ -1,5 +1,5 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types.js';
-import { mediaSlug } from '../Media.js';
+import { mediaSlug } from '../Media/index.js';
 
 export const postsSlug = 'posts';
 

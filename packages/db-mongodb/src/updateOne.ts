@@ -3,7 +3,7 @@ import type { PayloadRequest } from '@alessiogr/payloadtest/types';
 import type { UpdateOne } from '@alessiogr/payloadtest/database';
 import { i18nInit } from '@alessiogr/payloadtest/utilities';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
-import type { MongooseAdapter } from '.';
+import type { MongooseAdapter } from './index.js';
 import { withSession } from './withSession.js';
 
 export const updateOne: UpdateOne = async function updateOne(
