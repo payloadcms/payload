@@ -1,6 +1,6 @@
 {
   "name": "@alessiogr/payloadtest",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "type": "module",
@@ -75,7 +75,7 @@
     "copyfiles:new": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/esm/ && copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/cjs/",
     "build:tsc": "tsc",
     "build:tsc:esm": "tsc --module ESNext --target ESNext --emitDeclarationOnly --outDir dist/esm",
-    "build:tsc:cjs": "tsc --module commonjs --target es2015 --emitDeclarationOnly --outDir dist/cjs",
+    "build:tsc:cjs": "tsc --module ESNext --target ESNext --emitDeclarationOnly --outDir dist/cjs",
     "build:swc:esm": "swc ./src -d ./dist/esm --config-file .swcrc-esm",
     "build:swc:cjs": "swc ./src -d ./dist/cjs --config-file .swcrc-cjs",
     "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
