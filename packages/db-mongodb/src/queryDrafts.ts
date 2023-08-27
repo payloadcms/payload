@@ -1,20 +1,14 @@
 import type { PaginateOptions } from 'mongoose';
 import type { QueryDrafts } from 'payload/dist/database/types';
 import flattenWhereToOperators from 'payload/dist/database/flattenWhereToOperators';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import { PayloadRequest } from 'payload/dist/express/types';
+import { combineQueries } from 'payload/dist/database/combineQueries';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import type { MongooseAdapter } from '.';
 import { buildSortParam } from './queries/buildSortParam';
 import { withSession } from './withSession';
 
-type AggregateVersion<T> = {
-  _id: string;
-  version: T;
-  updatedAt: string;
-  createdAt: string;
-};
-
-export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
+export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: MongooseAdapter,
   {
     collection,
@@ -31,20 +25,14 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
   const collectionConfig = this.payload.collections[collection].config;
   const options = withSession(this, req.transactionID);
 
-  const versionQuery = await VersionModel.buildQuery({
-    where,
-    locale,
-    payload: this.payload,
-  });
-
-  let hasNearConstraint = false;
+  let hasNearConstraint;
+  let sort;
 
   if (where) {
     const constraints = flattenWhereToOperators(where);
     hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 
-  let sort;
   if (!hasNearConstraint) {
     sort = buildSortParam({
       sort: sortArg || collectionConfig.defaultSort,
@@ -55,62 +43,32 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
     });
   }
 
-  const aggregate = VersionModel.aggregate<AggregateVersion<T>>(
-    [
-      // Sort so that newest are first
-      { $sort: { updatedAt: -1 } },
-      // Group by parent ID, and take the first of each
-      {
-        $group: {
-          _id: '$parent',
-          version: { $first: '$version' },
-          updatedAt: { $first: '$updatedAt' },
-          createdAt: { $first: '$createdAt' },
-        },
-      },
-      // Filter based on incoming query
-      { $match: versionQuery },
-    ],
-    {
-      ...options,
-      allowDiskUse: true,
-    },
-  );
+  const combinedWhere = combineQueries({ latest: { equals: true } }, where);
 
-  let result;
+  const versionQuery = await VersionModel.buildQuery({
+    where: combinedWhere,
+    locale,
+    payload: this.payload,
+  });
 
-  if (pagination) {
-    let useEstimatedCount;
+  const paginationOptions: PaginateOptions = {
+    page,
+    sort,
+    lean: true,
+    leanWithId: true,
+    useEstimatedCount: hasNearConstraint,
+    forceCountFn: hasNearConstraint,
+    pagination,
+    options,
+  };
 
-    if (where) {
-      const constraints = flattenWhereToOperators(where);
-      useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
-    }
-
-    const aggregatePaginateOptions: PaginateOptions = {
-      page,
-      limit,
-      lean: true,
-      leanWithId: true,
-      useEstimatedCount,
-      pagination,
-      useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
-      useFacet: this.connectOptions.useFacet,
-      options: {
-        ...options,
-        limit,
-      },
-      sort,
-    };
-
-    result = await VersionModel.aggregatePaginate(
-      aggregate,
-      aggregatePaginateOptions,
-    );
-  } else {
-    result = aggregate.exec();
+  if (limit > 0) {
+    paginationOptions.limit = limit;
+    // limit must also be set here, it's ignored when pagination is false
+    paginationOptions.options.limit = limit;
   }
 
+  const result = await VersionModel.paginate(versionQuery, paginationOptions);
   const docs = JSON.parse(JSON.stringify(result.docs));
 
   return {
@@ -118,8 +76,8 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
     docs: docs.map((doc) => {
       // eslint-disable-next-line no-param-reassign
       doc = {
-        _id: doc._id,
-        id: doc._id,
+        _id: doc.parent,
+        id: doc.parent,
         ...doc.version,
         updatedAt: doc.updatedAt,
         createdAt: doc.createdAt,
