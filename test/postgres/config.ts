@@ -3,6 +3,7 @@ import { LocalizedArrays } from './collections/LocalizedArrays';
 import { LocalizedBlocks } from './collections/LocalizedBlocks';
 import { LocalizedGroups } from './collections/LocalizedGroups';
 import { Posts } from './collections/Posts';
+import { MainMenu } from './globals/MainMenu';
 
 const config = buildConfigWithDefaults({
   collections: [
@@ -29,6 +30,9 @@ const config = buildConfigWithDefaults({
         },
       ],
     },
+  ],
+  globals: [
+    MainMenu,
   ],
   localization: {
     locales: ['en', 'es'],

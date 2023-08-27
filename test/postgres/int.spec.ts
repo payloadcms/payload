@@ -493,4 +493,70 @@ describe('Postgres', () => {
       expect(retrievedGroup.group.es.number).toStrictEqual(456);
     });
   });
+
+  describe('globals', () => {
+    let mainMenu;
+    it('creates global', async () => {
+      mainMenu = await payload.updateGlobal({
+        slug: 'main-menu',
+        data: {
+          title: 'hello in english',
+          nonLocalizedField: 'hello',
+          array: [
+            {
+              localizedText: 'row 1 en',
+            },
+            {
+              localizedText: 'row 2 en',
+            },
+          ],
+        },
+      });
+
+      expect(mainMenu.title).toStrictEqual('hello in english');
+      expect(mainMenu.nonLocalizedField).toStrictEqual('hello');
+      expect(mainMenu.array[0].localizedText).toStrictEqual('row 1 en');
+      expect(mainMenu.array[1].localizedText).toStrictEqual('row 2 en');
+    });
+
+    it('adds locale to global', async () => {
+      const updated = await payload.updateGlobal({
+        slug: 'main-menu',
+        locale: 'es',
+        data: {
+          title: 'hello in spanish',
+          array: [
+            {
+              id: mainMenu.array[0].id,
+              localizedText: 'row 1 es',
+            },
+            {
+              id: mainMenu.array[1].id,
+              localizedText: 'row 2 es',
+            },
+          ],
+        },
+      });
+
+      expect(updated.title).toStrictEqual('hello in spanish');
+      expect(updated.nonLocalizedField).toStrictEqual('hello');
+      expect(updated.array[0].localizedText).toStrictEqual('row 1 es');
+      expect(updated.array[1].localizedText).toStrictEqual('row 2 es');
+    });
+
+    it('retrieves global in all locales', async () => {
+      const retrieved = await payload.findGlobal({
+        slug: 'main-menu',
+        locale: 'all',
+      });
+
+      expect(retrieved.title.en).toStrictEqual('hello in english');
+      expect(retrieved.title.es).toStrictEqual('hello in spanish');
+      expect(retrieved.nonLocalizedField).toStrictEqual('hello');
+      expect(retrieved.array[0].localizedText.en).toStrictEqual('row 1 en');
+      expect(retrieved.array[1].localizedText.en).toStrictEqual('row 2 en');
+      expect(retrieved.array[0].localizedText.es).toStrictEqual('row 1 es');
+      expect(retrieved.array[1].localizedText.es).toStrictEqual('row 2 es');
+    });
+  });
 });

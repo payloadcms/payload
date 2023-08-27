@@ -40,6 +40,9 @@ type TraverseFieldsArgs = {
   table: Record<string, unknown>
 }
 
+// TODO: clean up internal data structures:
+// _order, _path, _parentID, _locales, etc.
+
 // Traverse fields recursively, transforming data
 // for each field type into required Payload shape
 export const traverseFields = <T extends Record<string, unknown>>({

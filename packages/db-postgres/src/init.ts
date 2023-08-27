@@ -11,7 +11,7 @@ export const init: Init = async function init(this: PostgresAdapter) {
       '_locales',
       // TODO: types out of sync with core, monorepo please
       // this.payload.config.localization.localeCodes,
-      (this.payload.config.localization.locales as unknown as {code: string}[]).map(({ code }) => code) as [string, ...string[]],
+      (this.payload.config.localization.locales as unknown as { code: string }[]).map(({ code }) => code) as [string, ...string[]],
     );
   }
 
@@ -26,6 +26,12 @@ export const init: Init = async function init(this: PostgresAdapter) {
   });
 
   this.payload.config.globals.forEach((global) => {
-    // create global model
+    buildTable({
+      adapter: this,
+      buildRelationships: true,
+      fields: global.fields,
+      tableName: global.slug,
+      timestamps: false,
+    });
   });
 };

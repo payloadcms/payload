@@ -5,7 +5,7 @@ import { init } from './init';
 import { createMigration } from './createMigration';
 import { webpack } from './webpack';
 import { Args, PostgresAdapter, PostgresAdapterResult } from './types';
-// import { createGlobal } from './createGlobal';
+import { createGlobal } from './createGlobal';
 // import { createVersion } from './createVersion';
 // import { beginTransaction } from './transactions/beginTransaction';
 // import { rollbackTransaction } from './transactions/rollbackTransaction';
@@ -17,9 +17,9 @@ import { find } from './find';
 import { create } from './create';
 // import { deleteOne } from './deleteOne';
 // import { deleteVersions } from './deleteVersions';
-// import { findGlobal } from './findGlobal';
+import { findGlobal } from './findGlobal';
 import { findOne } from './findOne';
-// import { updateGlobal } from './updateGlobal';
+import { updateGlobal } from './updateGlobal';
 import { updateOne } from './update';
 // import { updateVersion } from './updateVersion';
 // import { deleteMany } from './deleteMany';
@@ -51,9 +51,9 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       updateOne,
       // deleteOne,
       // deleteMany,
-      // findGlobal,
-      // createGlobal,
-      // updateGlobal,
+      findGlobal,
+      createGlobal,
+      updateGlobal,
       // findVersions,
       // findGlobalVersions,
       // createVersion,
