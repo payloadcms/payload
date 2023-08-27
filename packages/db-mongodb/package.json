@@ -3,6 +3,7 @@
   "version": "0.0.6",
   "description": "The officially supported MongoDB database adapter for Payload",
   "main": "./src/index.ts",
+  "type": "module",
   "types": "./src/index.ts",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
