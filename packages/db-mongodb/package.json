@@ -7,8 +7,9 @@
   "types": "./src/index.ts",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "main": "./dist/cjs/index.js",
+    "types": "./dist/esm/index.d.ts",
+    "module": "./dist/esm/index.js",
     "exports": {
       ".": {
         "types": "./dist/esm/index.d.ts",
