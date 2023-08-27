@@ -52,8 +52,14 @@
       width: base(2.75);
       height: base(2.75);
       position: relative;
-      left: base(-.825);
       top: base(-.825);
+      left: base(-.825);
+      right: auto;
+      [dir = rtl] & {
+        right: base(-.825);
+        left: auto;
+
+      }
 
       .stroke {
         stroke-width: 2px;
