@@ -76,6 +76,7 @@
     "build:components:cjs": "webpack --config webpack-config-wrapper.cjs",
     "build": "pnpm copyfiles:new && pnpm build:swc:esm && pnpm build:swc:cjs && pnpm build:components:esm && pnpm build:components:cjs && pnpm build:tsc:both",
     "buildworks": "pnpm copyfiles:new && pnpm build:swc:esm && pnpm build:swc:cjs && pnpm build:components:esm && pnpm build:components:cjs && pnpm build:tsc:esm && pnpm build:tsc:cjs",
+    "build:cjstsc": "tsc --module commonjs --moduleResolution Node16 --target ESNext --emitDeclarationOnly --outDir dist/cjstest",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
     "dev": "nodemon",
     "dev2": "tsx ./test/dev.ts _community",

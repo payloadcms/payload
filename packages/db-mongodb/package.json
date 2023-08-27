@@ -8,12 +8,12 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "main": "./dist/cjs/index.js",
-    "types": "./dist/esm/index.d.ts",
+    "types": "./dist/types/index.d.ts",
     "module": "./dist/esm/index.js",
     "access": "public",
     "exports": {
       ".": {
-        "types": "./dist/esm/index.d.ts",
+        "types": "./dist/types/index.d.ts",
         "import": "./dist/esm/index.js",
         "require": "./dist/cjs/index.js"
       }
