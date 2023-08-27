@@ -1,13 +1,14 @@
 {
-    "$schema": "https://json.schemastore.org/swcrc",
-    "sourceMaps": "inline",
-    "jsc": {
-      "parser": {
-        "syntax": "typescript",
-        "tsx": true
-      }
-    },
-    "module": {
-      "type": "es6"
+  "$schema": "https://json.schemastore.org/swcrc",
+  "sourceMaps": "inline",
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "tsx": true,
+      "dts": true
     }
+  },
+  "module": {
+    "type": "es6"
+  }
 }
