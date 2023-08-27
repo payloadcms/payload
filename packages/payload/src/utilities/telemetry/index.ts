@@ -1,5 +1,4 @@
 import { execSync } from 'child_process';
-import Conf from 'conf';
 import { randomBytes } from 'crypto';
 import findUp from 'find-up';
 import fs from 'fs';
@@ -35,7 +34,7 @@ export const sendEvent = async ({ payload, event }: Args): Promise<void> => {
       const packageJSON = await getPackageJSON();
 
       const baseEvent: BaseEvent = {
-        envID: getEnvID(),
+        envID: await getEnvID(),
         projectID: getProjectID(payload, packageJSON),
         nodeVersion: process.version,
         nodeEnv: process.env.NODE_ENV || 'development',
@@ -59,7 +58,11 @@ export const sendEvent = async ({ payload, event }: Args): Promise<void> => {
  * This is a quasi-persistent identifier used to dedupe recurring events. It's
  * generated from random data and completely anonymous.
  */
-const getEnvID = (): string => {
+const getEnvID = async (): Promise<string> => {
+  // Dynamic imports will work for both esm and cjs. This is needed because "conf" is an esm-only library
+  const ConfImport = await import('conf');
+  const Conf = 'default' in ConfImport ? ConfImport.default : ConfImport;
+
   const conf = new Conf();
   const ENV_ID = 'envID';
 
