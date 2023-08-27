@@ -130,6 +130,12 @@ describe('Postgres', () => {
 
       expect(post.title).toEqual(postTitleEN);
       expect(post.myBlocks[0].localizedText).toStrictEqual('hello in english');
+      expect(post.relationHasOne).toStrictEqual(page1.id);
+      expect(post.relationHasOnePoly.value).toStrictEqual(person1.id);
+      expect(post.relationHasMany[0]).toStrictEqual(page1.id);
+      expect(post.relationHasMany[1]).toStrictEqual(page2.id);
+      expect(post.relationHasManyPoly[0].value).toStrictEqual(person1.id);
+      expect(post.relationHasManyPoly[1].value).toStrictEqual(page2.id);
     });
 
     it('adds locale to existing doc', async () => {
@@ -145,6 +151,22 @@ describe('Postgres', () => {
         data: {
           title: titleES,
           number: 1000,
+          relationHasOne: page2.id,
+          relationHasOnePoly: {
+            relationTo: 'people',
+            value: person2.id,
+          },
+          relationHasMany: [page2.id, page1.id],
+          relationHasManyPoly: [
+            {
+              relationTo: 'pages',
+              value: page1.id,
+            },
+            {
+              relationTo: 'people',
+              value: person1.id,
+            },
+          ],
           myArray: [
             {
               id: post.myArray[0].id,
@@ -169,6 +191,12 @@ describe('Postgres', () => {
       expect(updatedPost.myArray[0].subField).toStrictEqual(arrayTitle1);
       expect(updatedPost.myArray[1].subField).toStrictEqual(arrayTitle2);
       expect(updatedPost.myBlocks[0].localizedText).toStrictEqual(blockLocalizedText);
+      expect(updatedPost.relationHasOne).toStrictEqual(page2.id);
+      expect(updatedPost.relationHasOnePoly.value).toStrictEqual(person2.id);
+      expect(updatedPost.relationHasMany[0]).toStrictEqual(page2.id);
+      expect(updatedPost.relationHasMany[1]).toStrictEqual(page1.id);
+      expect(updatedPost.relationHasManyPoly[0].value).toStrictEqual(page1.id);
+      expect(updatedPost.relationHasManyPoly[1].value).toStrictEqual(person1.id);
     });
 
     it('updates original locale', async () => {
@@ -208,7 +236,7 @@ describe('Postgres', () => {
             },
             {
               relationTo: 'people',
-              value: person1.id,
+              value: person2.id,
             },
           ],
           myArray: [
@@ -280,6 +308,20 @@ describe('Postgres', () => {
       expect(postAllLocales.number.es).toStrictEqual(1000);
       expect(postAllLocales.myBlocks[0].localizedText.en).toStrictEqual('hello in english updated');
       expect(postAllLocales.myArray[0].subField.es).toStrictEqual('hello 1 spanish');
+
+      expect(postAllLocales.relationHasOne.en).toStrictEqual(page2.id);
+      expect(postAllLocales.relationHasOnePoly.en.value).toStrictEqual(person2.id);
+      expect(postAllLocales.relationHasMany.en[0]).toStrictEqual(page2.id);
+      expect(postAllLocales.relationHasMany.en[1]).toStrictEqual(page1.id);
+      expect(postAllLocales.relationHasManyPoly.en[0].value).toStrictEqual(page2.id);
+      expect(postAllLocales.relationHasManyPoly.en[1].value).toStrictEqual(person2.id);
+
+      expect(postAllLocales.relationHasOne.es).toStrictEqual(page2.id);
+      expect(postAllLocales.relationHasOnePoly.es.value).toStrictEqual(person2.id);
+      expect(postAllLocales.relationHasMany.es[0]).toStrictEqual(page2.id);
+      expect(postAllLocales.relationHasMany.es[1]).toStrictEqual(page1.id);
+      expect(postAllLocales.relationHasManyPoly.es[0].value).toStrictEqual(page1.id);
+      expect(postAllLocales.relationHasManyPoly.es[1].value).toStrictEqual(person1.id);
     });
   });
 

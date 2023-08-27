@@ -38,10 +38,14 @@ export const deleteExistingRowsByPath = async ({
     }
   });
 
-  if (localizedPathsToDelete.size > 0 && locale) {
+  if (localizedPathsToDelete.size > 0) {
     const whereConstraints = [
       eq(table[parentColumnName], parentID),
     ];
+
+    if (locale) {
+      whereConstraints.push(eq(table[localeColumnName], locale));
+    }
 
     if (pathColumnName) whereConstraints.push(inArray(table[pathColumnName], Array.from(localizedPathsToDelete)));
 

@@ -146,7 +146,6 @@ export const upsertRow = async ({
       if (operation === 'update') {
         await deleteExistingRowsByPath({
           adapter,
-          locale,
           parentID: insertedRow.id,
           pathColumnName: '_path',
           newRows: blockRows.map(({ row }) => row),
