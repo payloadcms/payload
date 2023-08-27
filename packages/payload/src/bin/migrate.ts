@@ -1,4 +1,4 @@
-import payload from '..';
+import payload from '../index.js';
 
 export const migrate = async (args: string[]): Promise<void> => {
   // Barebones instance to access database adapter

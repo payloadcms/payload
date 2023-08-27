@@ -1,6 +1,6 @@
 import React from 'react';
 import { Props } from './types.js';
-import { useTableColumns } from '../TableColumns.js';
+import { useTableColumns } from '../TableColumns/index.js';
 
 import './index.scss';
 

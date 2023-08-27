@@ -1,4 +1,4 @@
-import { CollectionPermission, GlobalPermission } from '../../../auth.js';
+import { CollectionPermission, GlobalPermission } from '../../../auth/types.js';
 import { PayloadRequest } from '../../../express/types.js';
 import { docAccess } from '../../operations/docAccess.js';
 

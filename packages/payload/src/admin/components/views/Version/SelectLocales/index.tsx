@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import ReactSelect from '../../../elements/ReactSelect.js';
+import ReactSelect from '../../../elements/ReactSelect/index.js';
 import { Props } from './types.js';
 
 import './index.scss';

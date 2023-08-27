@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
-import useField from '../../useField.js';
-import withCondition from '../../withCondition.js';
+import useField from '../../useField/index.js';
+import withCondition from '../../withCondition/index.js';
 import { radio } from '../../../../../fields/validations.js';
 import { Props } from './types.js';
 import RadioGroupInput from './Input.js';

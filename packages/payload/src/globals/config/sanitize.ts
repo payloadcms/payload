@@ -5,7 +5,7 @@ import { GlobalConfig, SanitizedGlobalConfig } from './types.js';
 import defaultAccess from '../../auth/defaultAccess.js';
 import baseVersionFields from '../../versions/baseFields.js';
 import mergeBaseFields from '../../fields/mergeBaseFields.js';
-import translations from '../../translations.js';
+import translations from '../../translations/index.js';
 import { fieldAffectsData } from '../../fields/config/types.js';
 
 const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[]): SanitizedGlobalConfig[] => {

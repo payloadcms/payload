@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { MarkOptional } from 'ts-essentials';
-import { Forbidden } from '../../errors.js';
+import { Forbidden } from '../../errors/index.js';
 import { PayloadRequest } from '../../express/types.js';
 import { Collection } from '../../collections/config/types.js';
 import { initTransaction } from '../../utilities/initTransaction.js';

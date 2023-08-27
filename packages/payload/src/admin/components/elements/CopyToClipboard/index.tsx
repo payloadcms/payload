@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Copy from '../../icons/Copy.js';
-import Tooltip from '../Tooltip.js';
+import Copy from '../../icons/Copy/index.js';
+import Tooltip from '../Tooltip/index.js';
 import { Props } from './types.js';
 
 import './index.scss';

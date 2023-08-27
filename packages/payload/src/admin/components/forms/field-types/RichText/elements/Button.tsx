@@ -3,7 +3,7 @@ import { useSlate } from 'slate-react';
 import isElementActive from './isActive.js';
 import toggleElement from './toggle.js';
 import { ButtonProps } from './types.js';
-import Tooltip from '../../../../elements/Tooltip.js';
+import Tooltip from '../../../../elements/Tooltip/index.js';
 
 import '../buttons.scss';
 

@@ -3,9 +3,9 @@ import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { useTranslation } from 'react-i18next';
 import { Props } from './types.js';
-import Chevron from '../../icons/Chevron.js';
-import Button from '../Button.js';
-import { useSearchParams } from '../../utilities/SearchParams.js';
+import Chevron from '../../icons/Chevron/index.js';
+import Button from '../Button/index.js';
+import { useSearchParams } from '../../utilities/SearchParams/index.js';
 import { getTranslation } from '../../../../utilities/getTranslation.js';
 
 import './index.scss';

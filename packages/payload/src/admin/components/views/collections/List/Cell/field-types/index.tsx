@@ -1,14 +1,14 @@
-import array from './Array.js';
-import blocks from './Blocks.js';
-import checkbox from './Checkbox.js';
-import code from './Code.js';
-import date from './Date.js';
-import json from './JSON.js';
-import relationship from './Relationship.js';
-import richText from './Richtext.js';
-import select from './Select.js';
-import textarea from './Textarea.js';
-import File from './File.js';
+import array from './Array/index.js';
+import blocks from './Blocks/index.js';
+import checkbox from './Checkbox/index.js';
+import code from './Code/index.js';
+import date from './Date/index.js';
+import json from './JSON/index.js';
+import relationship from './Relationship/index.js';
+import richText from './Richtext/index.js';
+import select from './Select/index.js';
+import textarea from './Textarea/index.js';
+import File from './File/index.js';
 
 
 export default {

@@ -1,24 +1,24 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import withCondition from '../../withCondition.js';
-import Button from '../../../elements/Button.js';
+import withCondition from '../../withCondition/index.js';
+import Button from '../../../elements/Button/index.js';
 import { useForm, useFormSubmitted } from '../../Form/context.js';
-import useField from '../../useField.js';
-import { useLocale } from '../../../utilities/Locale.js';
-import Error from '../../Error.js';
+import useField from '../../useField/index.js';
+import { useLocale } from '../../../utilities/Locale/index.js';
+import Error from '../../Error/index.js';
 import { array } from '../../../../../fields/validations.js';
-import Banner from '../../../elements/Banner.js';
-import FieldDescription from '../../FieldDescription.js';
-import { useDocumentInfo } from '../../../utilities/DocumentInfo.js';
+import Banner from '../../../elements/Banner/index.js';
+import FieldDescription from '../../FieldDescription/index.js';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo/index.js';
 import { Props } from './types.js';
 import { scrollToID } from '../../../../utilities/scrollToID.js';
 import { getTranslation } from '../../../../../utilities/getTranslation.js';
-import { useConfig } from '../../../utilities/Config.js';
-import { NullifyLocaleField } from '../../NullifyField.js';
-import DraggableSortable from '../../../elements/DraggableSortable.js';
-import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem.js';
+import { useConfig } from '../../../utilities/Config/index.js';
+import { NullifyLocaleField } from '../../NullifyField/index.js';
+import DraggableSortable from '../../../elements/DraggableSortable/index.js';
+import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem/index.js';
 import { ArrayRow } from './ArrayRow.js';
-import { ErrorPill } from '../../../elements/ErrorPill.js';
+import { ErrorPill } from '../../../elements/ErrorPill/index.js';
 
 import './index.scss';
 

@@ -4,20 +4,20 @@ import { Transforms, Node, Editor } from 'slate';
 import { useModal } from '@faceless-ui/modal';
 import { Trans, useTranslation } from 'react-i18next';
 import { transformExtraFields, unwrapLink } from '../utilities.js';
-import Popup from '../../../../../../elements/Popup.js';
-import { LinkDrawer } from '../LinkDrawer.js';
+import Popup from '../../../../../../elements/Popup/index.js';
+import { LinkDrawer } from '../LinkDrawer/index.js';
 import { Fields } from '../../../../../Form/types.js';
-import buildStateFromSchema from '../../../../../Form/buildStateFromSchema.js';
-import { useAuth } from '../../../../../../utilities/Auth.js';
-import { useLocale } from '../../../../../../utilities/Locale.js';
-import { useConfig } from '../../../../../../utilities/Config.js';
+import buildStateFromSchema from '../../../../../Form/buildStateFromSchema/index.js';
+import { useAuth } from '../../../../../../utilities/Auth/index.js';
+import { useLocale } from '../../../../../../utilities/Locale/index.js';
+import { useConfig } from '../../../../../../utilities/Config/index.js';
 import reduceFieldsToValues from '../../../../../Form/reduceFieldsToValues.js';
 import deepCopyObject from '../../../../../../../../utilities/deepCopyObject.js';
-import Button from '../../../../../../elements/Button.js';
+import Button from '../../../../../../elements/Button/index.js';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation.js';
 import { Props as RichTextFieldProps } from '../../../types.js';
 import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug.js';
-import { useDocumentInfo } from '../../../../../../utilities/DocumentInfo.js';
+import { useDocumentInfo } from '../../../../../../utilities/DocumentInfo/index.js';
 
 import './index.scss';
 

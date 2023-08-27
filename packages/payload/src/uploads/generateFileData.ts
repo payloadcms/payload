@@ -6,7 +6,7 @@ import sanitize from 'sanitize-filename';
 import sharp, { Sharp } from 'sharp';
 import { Collection } from '../collections/config/types.js';
 import { SanitizedConfig } from '../config/types.js';
-import { FileUploadError, MissingFile } from '../errors.js';
+import { FileUploadError, MissingFile } from '../errors/index.js';
 import { PayloadRequest } from '../express/types.js';
 import getImageSize from './getImageSize.js';
 import getSafeFileName from './getSafeFilename.js';

@@ -1,5 +1,5 @@
-import elementTypes from './elements.js';
-import leafTypes from './leaves.js';
+import elementTypes from './elements/index.js';
+import leafTypes from './leaves/index.js';
 
 const addPluginReducer = (EditorWithPlugins, plugin) => {
   if (typeof plugin === 'function') return plugin(EditorWithPlugins);

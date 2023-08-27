@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { User } from '..';
+import { User } from '../types.js';
 import { CollectionConfig } from '../../collections/config/types.js';
 import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../fields/config/types.js';
 

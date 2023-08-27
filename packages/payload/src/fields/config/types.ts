@@ -4,13 +4,13 @@ import { Editor } from 'slate';
 import type { i18n as Ii18n, TFunction } from 'i18next';
 import type { EditorProps } from '@monaco-editor/react';
 import monacoeditor from 'monaco-editor'; // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
-import { Operation, Where } from '../../types.js';
+import { Operation, Where } from '../../types/index.js';
 import { SanitizedConfig } from '../../config/types.js';
 import { TypeWithID } from '../../collections/config/types.js';
 import { PayloadRequest, RequestContext } from '../../express/types.js';
 import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types.js';
 import { Description } from '../../admin/components/forms/FieldDescription/types.js';
-import { User } from '../../auth.js';
+import { User } from '../../auth/types.js';
 import { Payload } from '../../payload.js';
 import { RowLabel } from '../../admin/components/forms/RowLabel/types.js';
 

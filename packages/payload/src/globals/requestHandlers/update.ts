@@ -2,7 +2,7 @@ import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types.js';
 import { SanitizedGlobalConfig } from '../config/types.js';
-import { Document } from '../../types.js';
+import { Document } from '../../types/index.js';
 import update from '../operations/update.js';
 
 export type UpdateGlobalResult = Promise<Response<Document> | void>;

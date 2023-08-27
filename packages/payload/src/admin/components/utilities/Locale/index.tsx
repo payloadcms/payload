@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Locale } from '../../../../config/types.js';
-import { useConfig } from '../Config.js';
-import { useAuth } from '../Auth.js';
-import { usePreferences } from '../Preferences.js';
-import { useSearchParams } from '../SearchParams.js';
+import { useConfig } from '../Config/index.js';
+import { useAuth } from '../Auth/index.js';
+import { usePreferences } from '../Preferences/index.js';
+import { useSearchParams } from '../SearchParams/index.js';
 import { findLocaleFromCode } from '../../../../utilities/findLocaleFromCode.js';
 
 const LocaleContext = createContext(null);

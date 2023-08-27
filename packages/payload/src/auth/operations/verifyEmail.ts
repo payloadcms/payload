@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import { APIError } from '../../errors.js';
+import { APIError } from '../../errors/index.js';
 import { Collection } from '../../collections/config/types.js';
 import { PayloadRequest } from '../../express/types.js';
 

@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import Error from '../../Error.js';
-import FieldDescription from '../../FieldDescription.js';
+import Error from '../../Error/index.js';
+import FieldDescription from '../../FieldDescription/index.js';
 import { json } from '../../../../../fields/validations.js';
-import Label from '../../Label.js';
+import Label from '../../Label/index.js';
 import { Props } from './types.js';
-import useField from '../../useField.js';
-import withCondition from '../../withCondition.js';
-import { CodeEditor } from '../../../elements/CodeEditor.js';
+import useField from '../../useField/index.js';
+import withCondition from '../../withCondition/index.js';
+import { CodeEditor } from '../../../elements/CodeEditor/index.js';
 
 import './index.scss';
 

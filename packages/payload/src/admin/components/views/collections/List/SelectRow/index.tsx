@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelection } from '../SelectionProvider.js';
+import { useSelection } from '../SelectionProvider/index.js';
 import { CheckboxInput } from '../../../../forms/field-types/Checkbox/Input.js';
 
 import './index.scss';

@@ -1,20 +1,20 @@
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useModal } from '@faceless-ui/modal';
-import { useConfig } from '../../utilities/Config.js';
-import { Drawer, DrawerToggler } from '../Drawer.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import { Drawer, DrawerToggler } from '../Drawer/index.js';
 import { Props } from './types.js';
-import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider.js';
+import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider/index.js';
 import { getTranslation } from '../../../../utilities/getTranslation.js';
-import { useAuth } from '../../utilities/Auth.js';
-import { FieldSelect } from '../FieldSelect.js';
-import FormSubmit from '../../forms/Submit.js';
-import Form from '../../forms/Form.js';
+import { useAuth } from '../../utilities/Auth/index.js';
+import { FieldSelect } from '../FieldSelect/index.js';
+import FormSubmit from '../../forms/Submit/index.js';
+import Form from '../../forms/Form/index.js';
 import { useForm } from '../../forms/Form/context.js';
-import RenderFields from '../../forms/RenderFields.js';
-import { OperationContext } from '../../utilities/OperationProvider.js';
-import fieldTypes from '../../forms/field-types.js';
-import X from '../../icons/X.js';
+import RenderFields from '../../forms/RenderFields/index.js';
+import { OperationContext } from '../../utilities/OperationProvider/index.js';
+import fieldTypes from '../../forms/field-types/index.js';
+import X from '../../icons/X/index.js';
 
 import './index.scss';
 

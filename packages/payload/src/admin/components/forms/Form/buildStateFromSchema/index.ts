@@ -1,5 +1,5 @@
 import type { TFunction } from 'i18next';
-import { User } from '../../../../../auth.js';
+import { User } from '../../../../../auth/types.js';
 import { Field as FieldSchema } from '../../../../../fields/config/types.js';
 import { Fields, Data } from '../types.js';
 import { iterateFields } from './iterateFields.js';

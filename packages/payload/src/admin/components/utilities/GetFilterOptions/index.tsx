@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import equal from 'deep-equal';
 import { FilterOptions } from '../../../../fields/config/types.js';
-import { useAuth } from '../Auth.js';
-import { useDocumentInfo } from '../DocumentInfo.js';
+import { useAuth } from '../Auth/index.js';
+import { useDocumentInfo } from '../DocumentInfo/index.js';
 import { useAllFormFields } from '../../forms/Form/context.js';
 import { getFilterOptionsQuery } from '../../forms/field-types/getFilterOptionsQuery.js';
 import { FilterOptionsResult } from '../../forms/field-types/Relationship/types.js';

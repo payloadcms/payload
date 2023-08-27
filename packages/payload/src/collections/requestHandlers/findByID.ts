@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { PayloadRequest } from '../../express/types.js';
-import { Document } from '../../types.js';
+import { Document } from '../../types/index.js';
 import findByID from '../operations/findByID.js';
 
 export type FindByIDResult = {

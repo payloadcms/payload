@@ -1,4 +1,4 @@
-import { Operator } from '../../../../../../types.js';
+import { Operator } from '../../../../../../types/index.js';
 import { Option } from '../../../../../../fields/config/types.js';
 
 export type Props = {

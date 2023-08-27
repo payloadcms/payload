@@ -1,7 +1,7 @@
 import React from 'react';
 import md5 from 'md5';
 import qs from 'qs';
-import { useAuth } from '../../utilities/Auth.js';
+import { useAuth } from '../../utilities/Auth/index.js';
 
 const Gravatar: React.FC = () => {
   const { user } = useAuth();

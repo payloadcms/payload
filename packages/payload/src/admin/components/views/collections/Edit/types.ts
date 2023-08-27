@@ -1,7 +1,7 @@
 import React from 'react';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types.js';
 import { CollectionPermission } from '../../../../../auth/types.js';
-import { Document } from '../../../../../types.js';
+import { Document } from '../../../../../types/index.js';
 import { Fields } from '../../../forms/Form/types.js';
 
 export type IndexProps = {

@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import { useSlate, ReactEditor } from 'slate-react';
 import { Editor, Element, Text, Transforms } from 'slate';
-import IndentLeft from '../../../../../icons/IndentLeft.js';
-import IndentRight from '../../../../../icons/IndentRight.js';
+import IndentLeft from '../../../../../icons/IndentLeft/index.js';
+import IndentRight from '../../../../../icons/IndentRight/index.js';
 import { baseClass } from '../Button.js';
 import isElementActive from '../isActive.js';
 import listTypes from '../listTypes.js';

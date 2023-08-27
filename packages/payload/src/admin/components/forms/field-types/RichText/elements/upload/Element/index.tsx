@@ -2,20 +2,20 @@ import React, { HTMLAttributes, useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate';
 import { ReactEditor, useSlateStatic, useFocused, useSelected } from 'slate-react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../../../utilities/Config.js';
+import { useConfig } from '../../../../../../utilities/Config/index.js';
 import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI.js';
-import FileGraphic from '../../../../../../graphics/File.js';
+import FileGraphic from '../../../../../../graphics/File/index.js';
 import useThumbnail from '../../../../../../../hooks/useThumbnail.js';
-import Button from '../../../../../../elements/Button.js';
+import Button from '../../../../../../elements/Button/index.js';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation.js';
-import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer.js';
-import { useListDrawer } from '../../../../../../elements/ListDrawer.js';
+import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer/index.js';
+import { useListDrawer } from '../../../../../../elements/ListDrawer/index.js';
 import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types.js';
 import { Props as RichTextProps } from '../../../types.js';
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js';
 import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug.js';
-import { UploadDrawer } from './UploadDrawer.js';
-import { DrawerToggler } from '../../../../../../elements/Drawer.js';
+import { UploadDrawer } from './UploadDrawer/index.js';
+import { DrawerToggler } from '../../../../../../elements/Drawer/index.js';
 
 import './index.scss';
 

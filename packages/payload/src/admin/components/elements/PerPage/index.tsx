@@ -2,9 +2,9 @@ import React from 'react';
 import qs from 'qs';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from '../../utilities/SearchParams.js';
-import Popup from '../Popup.js';
-import Chevron from '../../icons/Chevron.js';
+import { useSearchParams } from '../../utilities/SearchParams/index.js';
+import Popup from '../Popup/index.js';
+import Chevron from '../../icons/Chevron/index.js';
 import { defaults } from '../../../../collections/config/defaults.js';
 
 import './index.scss';

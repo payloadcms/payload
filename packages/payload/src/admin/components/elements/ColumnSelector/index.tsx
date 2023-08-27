@@ -1,13 +1,13 @@
 import React, { useId } from 'react';
 import { useTranslation } from 'react-i18next';
-import Pill from '../Pill.js';
-import Plus from '../../icons/Plus.js';
-import X from '../../icons/X.js';
+import Pill from '../Pill/index.js';
+import Plus from '../../icons/Plus/index.js';
+import X from '../../icons/X/index.js';
 import { Props } from './types.js';
 import { getTranslation } from '../../../../utilities/getTranslation.js';
-import { useEditDepth } from '../../utilities/EditDepth.js';
-import DraggableSortable from '../DraggableSortable.js';
-import { useTableColumns } from '../TableColumns.js';
+import { useEditDepth } from '../../utilities/EditDepth/index.js';
+import DraggableSortable from '../DraggableSortable/index.js';
+import { useTableColumns } from '../TableColumns/index.js';
 
 import './index.scss';
 

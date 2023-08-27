@@ -5,7 +5,7 @@ import * as facelessui from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import { Permissions, User } from '../../../../auth/types.js';
-import { useConfig } from '../Config.js';
+import { useConfig } from '../Config/index.js';
 import { requests } from '../../../api.js';
 import useDebounce from '../../../hooks/useDebounce.js';
 import { AuthContext } from './types.js';

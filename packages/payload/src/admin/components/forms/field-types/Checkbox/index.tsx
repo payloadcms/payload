@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import useField from '../../useField.js';
-import withCondition from '../../withCondition.js';
-import Error from '../../Error.js';
+import useField from '../../useField/index.js';
+import withCondition from '../../withCondition/index.js';
+import Error from '../../Error/index.js';
 import { checkbox } from '../../../../../fields/validations.js';
-import FieldDescription from '../../FieldDescription.js';
+import FieldDescription from '../../FieldDescription/index.js';
 import { Props } from './types.js';
 import { getTranslation } from '../../../../../utilities/getTranslation.js';
 import { CheckboxInput } from './Input.js';

@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import type { TFunction } from 'i18next';
-import { ErrorDeletingFile } from '../errors.js';
+import { ErrorDeletingFile } from '../errors/index.js';
 import type { FileData, FileToSave } from './types.js';
 import type { SanitizedConfig } from '../config/types.js';
 import type { SanitizedCollectionConfig } from '../collections/config/types.js';

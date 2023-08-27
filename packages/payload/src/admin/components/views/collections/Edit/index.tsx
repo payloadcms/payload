@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../utilities/Config.js';
-import { useAuth } from '../../../utilities/Auth.js';
+import { useConfig } from '../../../utilities/Config/index.js';
+import { useAuth } from '../../../utilities/Auth/index.js';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI.js';
 
-import RenderCustomComponent from '../../../utilities/RenderCustomComponent.js';
+import RenderCustomComponent from '../../../utilities/RenderCustomComponent/index.js';
 import DefaultEdit from './Default.js';
 import formatFields from './formatFields.js';
-import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema.js';
-import { useLocale } from '../../../utilities/Locale.js';
+import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema/index.js';
+import { useLocale } from '../../../utilities/Locale/index.js';
 import { IndexProps } from './types.js';
-import { useDocumentInfo } from '../../../utilities/DocumentInfo.js';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo/index.js';
 import { Fields } from '../../../forms/Form/types.js';
-import { EditDepthContext } from '../../../utilities/EditDepth.js';
-import { CollectionPermission } from '../../../../../auth.js';
+import { EditDepthContext } from '../../../utilities/EditDepth/index.js';
+import { CollectionPermission } from '../../../../../auth/types.js';
 
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection: incomingCollection, isEditing } = props;

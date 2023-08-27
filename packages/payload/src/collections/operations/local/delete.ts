@@ -1,12 +1,12 @@
 import { Config as GeneratedTypes } from '../../../generated-types.js';
-import { Document, Where } from '../../../types.js';
+import { Document, Where } from '../../../types/index.js';
 import { PayloadRequest, RequestContext } from '../../../express/types.js';
 import { Payload } from '../../../payload.js';
 import deleteOperation from '../delete.js';
 import deleteByID from '../deleteByID.js';
 import { getDataLoader } from '../../dataloader.js';
 import { i18nInit } from '../../../translations/init.js';
-import { APIError } from '../../../errors.js';
+import { APIError } from '../../../errors/index.js';
 import { BulkOperationResult } from '../../config/types.js';
 import { setRequestContext } from '../../../express/setRequestContext.js';
 

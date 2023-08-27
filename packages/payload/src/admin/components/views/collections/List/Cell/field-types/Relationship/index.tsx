@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../../../utilities/Config.js';
+import { useConfig } from '../../../../../../utilities/Config/index.js';
 import useIntersect from '../../../../../../../hooks/useIntersect.js';
-import { useListRelationships } from '../../../RelationshipProvider.js';
+import { useListRelationships } from '../../../RelationshipProvider/index.js';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation.js';
 import { formatUseAsTitle } from '../../../../../../../hooks/useTitle.js';
 import { Props as DefaultCellProps } from '../../types.js';

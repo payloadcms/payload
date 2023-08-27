@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Response } from 'express';
 import { Collection } from '../../collections/config/types.js';
-import { APIError } from '../../errors.js';
+import { APIError } from '../../errors/index.js';
 import getCookieExpiration from '../../utilities/getCookieExpiration.js';
 import { getFieldsToSign } from './getFieldsToSign.js';
 import { PayloadRequest } from '../../express/types.js';

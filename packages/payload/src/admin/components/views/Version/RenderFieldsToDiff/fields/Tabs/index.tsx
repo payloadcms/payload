@@ -1,8 +1,8 @@
 import React from 'react';
-import RenderFieldsToDiff from '../...js';
+import RenderFieldsToDiff from '../../index.js';
 import { Props } from '../types.js';
 import { TabsField } from '../../../../../../../fields/config/types.js';
-import Nested from '../Nested.js';
+import Nested from '../Nested/index.js';
 
 const baseClass = 'tabs-diff';
 

@@ -1,7 +1,7 @@
 import i18n from 'i18next';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types.js';
 import { RelationshipField } from '../../../../../fields/config/types.js';
-import { Where } from '../../../../../types.js';
+import { Where } from '../../../../../types/index.js';
 import { SanitizedConfig } from '../../../../../config/types.js';
 
 export type Props = Omit<RelationshipField, 'type'> & {

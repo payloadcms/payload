@@ -1,4 +1,4 @@
-import { Where } from '../../../../types.js';
+import { Where } from '../../../../types/index.js';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
 import { Column } from '../Table/types.js';
 import type { Props as ListProps } from '../../views/collections/List/types.js';

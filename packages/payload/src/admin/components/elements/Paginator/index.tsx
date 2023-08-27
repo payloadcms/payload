@@ -3,10 +3,10 @@ import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { Props, Node } from './types.js';
 
-import Page from './Page.js';
-import Separator from './Separator.js';
-import ClickableArrow from './ClickableArrow.js';
-import { useSearchParams } from '../../utilities/SearchParams.js';
+import Page from './Page/index.js';
+import Separator from './Separator/index.js';
+import ClickableArrow from './ClickableArrow/index.js';
+import { useSearchParams } from '../../utilities/SearchParams/index.js';
 
 import './index.scss';
 

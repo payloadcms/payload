@@ -3,17 +3,17 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../utilities/Config.js';
-import { useAuth } from '../../../utilities/Auth.js';
+import { useConfig } from '../../../utilities/Config/index.js';
+import { useAuth } from '../../../utilities/Auth/index.js';
 import usePayloadAPI from '../../../../hooks/usePayloadAPI.js';
 import DefaultList from './Default.js';
-import RenderCustomComponent from '../../../utilities/RenderCustomComponent.js';
-import { useStepNav } from '../../../elements/StepNav.js';
+import RenderCustomComponent from '../../../utilities/RenderCustomComponent/index.js';
+import { useStepNav } from '../../../elements/StepNav/index.js';
 import formatFields from './formatFields.js';
 import { ListIndexProps, ListPreferences, Props } from './types.js';
-import { usePreferences } from '../../../utilities/Preferences.js';
-import { useSearchParams } from '../../../utilities/SearchParams.js';
-import { TableColumnsProvider } from '../../../elements/TableColumns.js';
+import { usePreferences } from '../../../utilities/Preferences/index.js';
+import { useSearchParams } from '../../../utilities/SearchParams/index.js';
+import { TableColumnsProvider } from '../../../elements/TableColumns/index.js';
 import type { Field } from '../../../../../fields/config/types.js';
 
 /**

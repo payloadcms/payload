@@ -1,6 +1,6 @@
 import React from 'react';
 import LeafButton from '../Button.js';
-import CodeIcon from '../../../../../icons/Code.js';
+import CodeIcon from '../../../../../icons/Code/index.js';
 
 const Code = ({ attributes, children }) => (
   <code {...attributes}>{children}</code>

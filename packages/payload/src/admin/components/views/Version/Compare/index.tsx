@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import qs from 'qs';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../utilities/Config.js';
+import { useConfig } from '../../../utilities/Config/index.js';
 import { Props } from './types.js';
-import ReactSelect from '../../../elements/ReactSelect.js';
+import ReactSelect from '../../../elements/ReactSelect/index.js';
 import type { PaginatedDocs } from '../../../../../database/types.js';
-import { Where } from '../../../../../types.js';
+import { Where } from '../../../../../types/index.js';
 import { mostRecentVersionOption, publishedVersionOption } from '../shared.js';
-import { formatDate } from '../../../../utilities/formatDate.js';
+import { formatDate } from '../../../../utilities/formatDate/index.js';
 
 import './index.scss';
 

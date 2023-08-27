@@ -1,16 +1,16 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Button from '../../../../elements/Button.js';
+import Button from '../../../../elements/Button/index.js';
 import { Props } from './types.js';
 import { SanitizedCollectionConfig } from '../../../../../../collections/config/types.js';
-import Popup from '../../../../elements/Popup.js';
+import Popup from '../../../../elements/Popup/index.js';
 import { useRelatedCollections } from './useRelatedCollections.js';
-import { useAuth } from '../../../../utilities/Auth.js';
-import Plus from '../../../../icons/Plus.js';
+import { useAuth } from '../../../../utilities/Auth/index.js';
+import Plus from '../../../../icons/Plus/index.js';
 import { getTranslation } from '../../../../../../utilities/getTranslation.js';
-import Tooltip from '../../../../elements/Tooltip.js';
-import { useDocumentDrawer } from '../../../../elements/DocumentDrawer.js';
-import { useConfig } from '../../../../utilities/Config.js';
+import Tooltip from '../../../../elements/Tooltip/index.js';
+import { useDocumentDrawer } from '../../../../elements/DocumentDrawer/index.js';
+import { useConfig } from '../../../../utilities/Config/index.js';
 import { Props as EditViewProps } from '../../../../views/collections/Edit/types.js';
 import { Value } from '../types.js';
 

@@ -1,8 +1,8 @@
 import { Payload } from '../payload.js';
 import type { SanitizedCollectionConfig } from '../collections/config/types.js';
 import type { SanitizedGlobalConfig } from '../globals/config/types.js';
-import type { Where } from '../types.js';
-import { PayloadRequest } from '../types.js';
+import type { Where } from '../types/index.js';
+import { PayloadRequest } from '../types/index.js';
 
 type Args = {
   payload: Payload

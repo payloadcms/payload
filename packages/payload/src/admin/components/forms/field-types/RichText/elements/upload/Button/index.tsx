@@ -2,8 +2,8 @@ import React, { Fragment, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactEditor, useSlate } from 'slate-react';
 import ElementButton from '../../Button.js';
-import UploadIcon from '../../../../../../icons/Upload.js';
-import { useListDrawer } from '../../../../../../elements/ListDrawer.js';
+import UploadIcon from '../../../../../../icons/Upload/index.js';
+import { useListDrawer } from '../../../../../../elements/ListDrawer/index.js';
 import { injectVoidElement } from '../../injectVoid.js';
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js';
 

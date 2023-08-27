@@ -2,11 +2,11 @@
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types.js';
 import { Collection, TypeWithID } from '../config/types.js';
-import { APIError, Forbidden, NotFound } from '../../errors.js';
+import { APIError, Forbidden, NotFound } from '../../errors/index.js';
 import executeAccess from '../../auth/executeAccess.js';
 import { hasWhereAccessResult } from '../../auth/types.js';
-import { afterChange } from '../../fields/hooks/afterChange.js';
-import { afterRead } from '../../fields/hooks/afterRead.js';
+import { afterChange } from '../../fields/hooks/afterChange/index.js';
+import { afterRead } from '../../fields/hooks/afterRead/index.js';
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js';
 import { combineQueries } from '../../database/combineQueries.js';
 import type { FindOneArgs } from '../../database/types.js';

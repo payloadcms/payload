@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { Response } from 'express';
 import { SanitizedGlobalConfig } from '../../config/types.js';
-import { Document } from '../../../types.js';
+import { Document } from '../../../types/index.js';
 import { PayloadRequest } from '../../../express/types.js';
 import findVersionByID from '../../operations/findVersionByID.js';
 

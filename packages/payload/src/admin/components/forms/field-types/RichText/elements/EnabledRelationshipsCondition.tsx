@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { SanitizedCollectionConfig } from '../../../../../../collections/config/types.js';
-import { useConfig } from '../../../../utilities/Config.js';
+import { useConfig } from '../../../../utilities/Config/index.js';
 
 type options = { uploads: boolean };
 

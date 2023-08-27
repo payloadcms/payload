@@ -1,4 +1,4 @@
-import { useConfig } from '../components/utilities/Config.js';
+import { useConfig } from '../components/utilities/Config/index.js';
 import { SanitizedCollectionConfig } from '../../collections/config/types.js';
 import isImage from '../../uploads/isImage.js';
 

@@ -3,9 +3,9 @@ import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types.js';
 import { getTranslation } from '../../../../utilities/getTranslation.js';
-import { Drawer, DrawerToggler } from '../Drawer.js';
+import { Drawer, DrawerToggler } from '../Drawer/index.js';
 import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections.js';
-import { useEditDepth } from '../../utilities/EditDepth.js';
+import { useEditDepth } from '../../utilities/EditDepth/index.js';
 import { DocumentDrawerContent } from './DrawerContent.js';
 
 import './index.scss';

@@ -1,5 +1,5 @@
 import React from 'react';
-import Tooltip from '../../elements/Tooltip.js';
+import Tooltip from '../../elements/Tooltip/index.js';
 import { Props } from './types.js';
 
 import './index.scss';

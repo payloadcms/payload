@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
-import { Operator, PayloadRequest, Where } from '../../types.js';
+import { Operator, PayloadRequest, Where } from '../../types/index.js';
 import QueryError from '../../errors/QueryError.js';
 import { SanitizedCollectionConfig } from '../../collections/config/types.js';
 import { SanitizedGlobalConfig } from '../../globals/config/types.js';

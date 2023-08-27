@@ -1,8 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../Config.js';
-import { useAuth } from '../Auth.js';
+import { useConfig } from '../Config/index.js';
+import { useAuth } from '../Auth/index.js';
 import { requests } from '../../../api.js';
 
 type PreferencesContext = {

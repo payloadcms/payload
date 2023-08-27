@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CheckboxInput } from '../field-types/Checkbox/Input.js';
-import { Banner } from '../../elements/Banner.js';
-import { useLocale } from '../../utilities/Locale.js';
-import { useConfig } from '../../utilities/Config.js';
+import { Banner } from '../../elements/Banner/index.js';
+import { useLocale } from '../../utilities/Locale/index.js';
+import { useConfig } from '../../utilities/Config/index.js';
 import { useForm } from '../Form/context.js';
 
 type NullifyLocaleFieldProps = {

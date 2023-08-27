@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config.js';
-import { useAuth } from '../../utilities/Auth.js';
-import { useStepNav } from '../../elements/StepNav.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import { useAuth } from '../../utilities/Auth/index.js';
+import { useStepNav } from '../../elements/StepNav/index.js';
 import usePayloadAPI from '../../../hooks/usePayloadAPI.js';
-import { useLocale } from '../../utilities/Locale.js';
+import { useLocale } from '../../utilities/Locale/index.js';
 import DefaultAccount from './Default.js';
-import buildStateFromSchema from '../../forms/Form/buildStateFromSchema.js';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
-import { useDocumentInfo } from '../../utilities/DocumentInfo.js';
+import buildStateFromSchema from '../../forms/Form/buildStateFromSchema/index.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent/index.js';
+import { useDocumentInfo } from '../../utilities/DocumentInfo/index.js';
 import { Fields } from '../../forms/Form/types.js';
-import { usePreferences } from '../../utilities/Preferences.js';
+import { usePreferences } from '../../utilities/Preferences/index.js';
 
 const AccountView: React.FC = () => {
   const { state: locationState } = useLocation<{ data: unknown }>();

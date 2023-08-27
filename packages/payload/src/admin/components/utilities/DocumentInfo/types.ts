@@ -1,5 +1,5 @@
 import React from 'react';
-import { CollectionPermission, GlobalPermission } from '../../../../auth.js';
+import { CollectionPermission, GlobalPermission } from '../../../../auth/types.js';
 import { SanitizedCollectionConfig, TypeWithID, TypeWithTimestamps } from '../../../../collections/config/types.js';
 import { SanitizedGlobalConfig } from '../../../../globals/config/types.js';
 import type { PaginatedDocs } from '../../../../database/types.js';

@@ -5,9 +5,9 @@ import {
   fieldHasSubFields, FieldWithPath,
   tabHasName,
 } from '../../../../fields/config/types.js';
-import ReactSelect from '../ReactSelect.js';
+import ReactSelect from '../ReactSelect/index.js';
 import { getTranslation } from '../../../../utilities/getTranslation.js';
-import Label from '../../forms/Label.js';
+import Label from '../../forms/Label/index.js';
 import { useForm } from '../../forms/Form/context.js';
 import { createNestedFieldPath } from '../../forms/Form/createNestedFieldPath.js';
 

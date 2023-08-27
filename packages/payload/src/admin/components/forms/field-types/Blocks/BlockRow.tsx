@@ -1,11 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Props } from './types.js';
-import { Collapsible } from '../../../elements/Collapsible.js';
-import RenderFields from '../../RenderFields.js';
-import SectionTitle from './SectionTitle.js';
-import Pill from '../../../elements/Pill.js';
-import HiddenInput from '../HiddenInput.js';
+import { Collapsible } from '../../../elements/Collapsible/index.js';
+import RenderFields from '../../RenderFields/index.js';
+import SectionTitle from './SectionTitle/index.js';
+import Pill from '../../../elements/Pill/index.js';
+import HiddenInput from '../HiddenInput/index.js';
 import { getTranslation } from '../../../../../utilities/getTranslation.js';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath.js';
 import { RowActions } from './RowActions.js';
@@ -13,7 +13,7 @@ import type { UseDraggableSortableReturn } from '../../../elements/DraggableSort
 import type { Row } from '../../Form/types.js';
 import type { Block } from '../../../../../fields/config/types.js';
 import { useFormSubmitted } from '../../Form/context.js';
-import { ErrorPill } from '../../../elements/ErrorPill.js';
+import { ErrorPill } from '../../../elements/ErrorPill/index.js';
 
 const baseClass = 'blocks-field';
 

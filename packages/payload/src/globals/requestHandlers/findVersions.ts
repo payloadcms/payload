@@ -5,7 +5,7 @@ import { TypeWithID } from '../../collections/config/types.js';
 import type { PaginatedDocs } from '../../database/types.js';
 import { SanitizedGlobalConfig } from '../config/types.js';
 import findVersions from '../operations/findVersions.js';
-import { Where } from '../../types.js';
+import { Where } from '../../types/index.js';
 import { isNumber } from '../../utilities/isNumber.js';
 
 export default function findVersionsHandler(global: SanitizedGlobalConfig) {

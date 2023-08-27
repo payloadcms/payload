@@ -2,11 +2,11 @@ import React, { HTMLAttributes, useCallback, useReducer, useState } from 'react'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react';
 import { useTranslation } from 'react-i18next';
 import { Transforms } from 'slate';
-import { useConfig } from '../../../../../../utilities/Config.js';
+import { useConfig } from '../../../../../../utilities/Config/index.js';
 import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI.js';
-import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer.js';
-import Button from '../../../../../../elements/Button.js';
-import { useListDrawer } from '../../../../../../elements/ListDrawer.js';
+import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer/index.js';
+import Button from '../../../../../../elements/Button/index.js';
+import { useListDrawer } from '../../../../../../elements/ListDrawer/index.js';
 import { Props as RichTextProps } from '../../../types.js';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation.js';
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js';

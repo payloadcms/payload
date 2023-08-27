@@ -1,4 +1,4 @@
-import { Where } from '../../../../types.js';
+import { Where } from '../../../../types/index.js';
 import { FilterOptions, FilterOptionsProps } from '../../../../fields/config/types.js';
 
 export const getFilterOptionsQuery = async (filterOptions: FilterOptions, options: Omit<FilterOptionsProps, 'relationTo'> & { relationTo: string | string[] }): Promise<{ [collection: string]: Where }> => {

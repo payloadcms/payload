@@ -1,8 +1,8 @@
-import bold from './bold.js';
-import code from './code.js';
-import italic from './italic.js';
-import strikethrough from './strikethrough.js';
-import underline from './underline.js';
+import bold from './bold/index.js';
+import code from './code/index.js';
+import italic from './italic/index.js';
+import strikethrough from './strikethrough/index.js';
+import underline from './underline/index.js';
 
 export default {
   bold,

@@ -3,13 +3,13 @@ import { UploadedFile } from 'express-fileupload';
 import { MarkOptional } from 'ts-essentials';
 import { Payload } from '../../../payload.js';
 import { PayloadRequest, RequestContext } from '../../../express/types.js';
-import { Document } from '../../../types.js';
+import { Document } from '../../../types/index.js';
 import getFileByPath from '../../../uploads/getFileByPath.js';
 import create from '../create.js';
 import { getDataLoader } from '../../dataloader.js';
 import { File } from '../../../uploads/types.js';
 import { i18nInit } from '../../../translations/init.js';
-import { APIError } from '../../../errors.js';
+import { APIError } from '../../../errors/index.js';
 import { setRequestContext } from '../../../express/setRequestContext.js';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {

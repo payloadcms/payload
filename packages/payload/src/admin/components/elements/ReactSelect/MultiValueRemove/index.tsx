@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MultiValueRemoveProps } from 'react-select';
-import X from '../../../icons/X.js';
-import Tooltip from '../../Tooltip.js';
+import X from '../../../icons/X/index.js';
+import Tooltip from '../../Tooltip/index.js';
 import { Option as OptionType } from '../types.js';
 
 import './index.scss';

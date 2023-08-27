@@ -1,4 +1,4 @@
-import { Payload } from '../../...js';
+import { Payload } from '../../../index.js';
 import { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js';
 import { PayloadRequest } from '../../../express/types.js';
 

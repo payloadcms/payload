@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { useConfig } from '../../utilities/Config.js';
-import { useAuth } from '../../utilities/Auth.js';
-import Logo from '../../graphics/Logo.js';
-import MinimalTemplate from '../../templates/Minimal.js';
-import Button from '../../elements/Button.js';
-import Meta from '../../utilities/Meta.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import { useAuth } from '../../utilities/Auth/index.js';
+import Logo from '../../graphics/Logo/index.js';
+import MinimalTemplate from '../../templates/Minimal/index.js';
+import Button from '../../elements/Button/index.js';
+import Meta from '../../utilities/Meta/index.js';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
-import Login from '../Login.js';
+import Login from '../Login/index.js';
 
 import './index.scss';
 

@@ -1,7 +1,7 @@
 import nodemailer, { Transporter } from 'nodemailer';
 import { Logger } from 'pino';
 import { EmailOptions, EmailTransport, hasTransport, hasTransportOptions } from '../config/types.js';
-import { InvalidConfiguration } from '../errors.js';
+import { InvalidConfiguration } from '../errors/index.js';
 import mockHandler from './mockHandler.js';
 import { BuildEmailResult, MockEmailHandler } from './types.js';
 

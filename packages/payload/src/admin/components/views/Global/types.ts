@@ -1,7 +1,7 @@
 import { GlobalPermission } from '../../../../auth/types.js';
 import { SanitizedGlobalConfig } from '../../../../globals/config/types.js';
 import { Fields } from '../../forms/Form/types.js';
-import { Document } from '../../../../types.js';
+import { Document } from '../../../../types/index.js';
 
 export type IndexProps = {
   global: SanitizedGlobalConfig

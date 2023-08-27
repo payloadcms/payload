@@ -1,10 +1,10 @@
-export { buildConfig } from '../config/build';
-export * from '../config/types';
+export { buildConfig } from '../config/build.js';
+export * from '../config/types.js';
 
 export {
     sanitizeConfig
-} from '../config/sanitize';
+} from '../config/sanitize.js';
 
 export {
     defaults
-} from '../config/defaults';
+} from '../config/defaults.js';

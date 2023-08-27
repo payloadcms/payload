@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config.js';
-import Eyebrow from '../../elements/Eyebrow.js';
-import { useStepNav } from '../../elements/StepNav.js';
-import Button from '../../elements/Button.js';
-import Meta from '../../utilities/Meta.js';
-import { Gutter } from '../../elements/Gutter.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import Eyebrow from '../../elements/Eyebrow/index.js';
+import { useStepNav } from '../../elements/StepNav/index.js';
+import Button from '../../elements/Button/index.js';
+import Meta from '../../utilities/Meta/index.js';
+import { Gutter } from '../../elements/Gutter/index.js';
 
 const baseClass = 'not-found';
 

@@ -1,9 +1,9 @@
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import FormSubmit from '../../forms/Submit.js';
+import FormSubmit from '../../forms/Submit/index.js';
 import useHotkey from '../../../hooks/useHotkey.js';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
-import { useEditDepth } from '../../utilities/EditDepth.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent/index.js';
+import { useEditDepth } from '../../utilities/EditDepth/index.js';
 import { useForm } from '../../forms/Form/context.js';
 
 export type CustomSaveButtonProps = React.ComponentType<DefaultSaveButtonProps & {

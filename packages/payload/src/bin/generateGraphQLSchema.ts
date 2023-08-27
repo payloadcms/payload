@@ -3,7 +3,7 @@ import fs from 'fs';
 import { printSchema } from 'graphql';
 import Logger from '../utilities/logger.js';
 import loadConfig from '../config/load.js';
-import payload from '..';
+import payload from '../index.js';
 
 export async function generateGraphQLSchema(): Promise<void> {
   const logger = Logger();

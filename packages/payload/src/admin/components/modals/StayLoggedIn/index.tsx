@@ -2,9 +2,9 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useModal, Modal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config.js';
-import MinimalTemplate from '../../templates/Minimal.js';
-import Button from '../../elements/Button.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import MinimalTemplate from '../../templates/Minimal/index.js';
+import Button from '../../elements/Button/index.js';
 import { Props } from './types.js';
 
 import './index.scss';

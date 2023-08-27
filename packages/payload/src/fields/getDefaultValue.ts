@@ -1,4 +1,4 @@
-import { User } from '../auth.js';
+import { User } from '../auth/types.js';
 
 type Args = {
   value?: unknown,

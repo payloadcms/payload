@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import useField from '../../../useField.js';
+import useField from '../../../useField/index.js';
 import { Props } from './types.js';
 
 import './index.scss';

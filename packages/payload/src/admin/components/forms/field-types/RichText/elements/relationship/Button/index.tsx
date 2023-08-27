@@ -2,9 +2,9 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { ReactEditor, useSlate } from 'slate-react';
 import { useTranslation } from 'react-i18next';
 import ElementButton from '../../Button.js';
-import RelationshipIcon from '../../../../../../icons/Relationship.js';
+import RelationshipIcon from '../../../../../../icons/Relationship/index.js';
 import { injectVoidElement } from '../../injectVoid.js';
-import { useListDrawer } from '../../../../../../elements/ListDrawer.js';
+import { useListDrawer } from '../../../../../../elements/ListDrawer/index.js';
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js';
 
 import './index.scss';

@@ -13,7 +13,7 @@ import { Payload } from '../payload.js';
 import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types.js';
 import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types.js';
 import { PayloadRequest } from '../express/types.js';
-import { Where } from '../types.js';
+import { Where } from '../types/index.js';
 import { User } from '../auth/types.js';
 import { DatabaseAdapter } from '../database/types.js';
 import type { PayloadBundler } from '../bundlers/types.js';

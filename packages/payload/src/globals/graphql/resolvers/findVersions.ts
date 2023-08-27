@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { Document, Where } from '../../../types.js';
+import { Document, Where } from '../../../types/index.js';
 import { SanitizedGlobalConfig } from '../../config/types.js';
 import { PayloadRequest } from '../../../express/types.js';
 import findVersions from '../../operations/findVersions.js';

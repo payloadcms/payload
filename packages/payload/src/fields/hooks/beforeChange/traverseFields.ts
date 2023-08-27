@@ -1,6 +1,6 @@
 import { Field, TabAsField } from '../../config/types.js';
 import { promise } from './promise.js';
-import { Operation } from '../../../types.js';
+import { Operation } from '../../../types/index.js';
 import { PayloadRequest, RequestContext } from '../../../express/types.js';
 
 type Args = {

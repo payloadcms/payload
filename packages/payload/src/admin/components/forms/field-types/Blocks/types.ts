@@ -1,5 +1,5 @@
 import { BlockField } from '../../../../../fields/config/types.js';
-import { FieldTypes } from '..';
+import { FieldTypes } from '../index.js';
 import { FieldPermissions } from '../../../../../auth/types.js';
 
 export type Props = Omit<BlockField, 'type'> & {

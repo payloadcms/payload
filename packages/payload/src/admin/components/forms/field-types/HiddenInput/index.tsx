@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import useField from '../../useField.js';
-import withCondition from '../../withCondition.js';
+import useField from '../../useField/index.js';
+import withCondition from '../../withCondition/index.js';
 import { Props } from './types.js';
 
 const HiddenInput: React.FC<Props> = (props) => {

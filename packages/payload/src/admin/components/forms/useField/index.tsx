@@ -1,10 +1,10 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../utilities/Auth.js';
+import { useAuth } from '../../utilities/Auth/index.js';
 import { useFormProcessing, useFormSubmitted, useForm, useFormFields } from '../Form/context.js';
 import { Options, FieldType } from './types.js';
-import { useDocumentInfo } from '../../utilities/DocumentInfo.js';
-import { useOperation } from '../../utilities/OperationProvider.js';
+import { useDocumentInfo } from '../../utilities/DocumentInfo/index.js';
+import { useOperation } from '../../utilities/OperationProvider/index.js';
 import useThrottledEffect from '../../../hooks/useThrottledEffect.js';
 import type { UPDATE } from '../Form/types.js';
 

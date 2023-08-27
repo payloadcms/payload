@@ -2,14 +2,14 @@ import React, { useCallback, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config.js';
-import { useDocumentInfo } from '../../utilities/DocumentInfo.js';
-import Button from '../Button.js';
-import { MinimalTemplate } from '../...js';
+import { useConfig } from '../../utilities/Config/index.js';
+import { useDocumentInfo } from '../../utilities/DocumentInfo/index.js';
+import Button from '../Button/index.js';
+import { MinimalTemplate } from '../../index.js';
 import { requests } from '../../../api.js';
 import { useForm } from '../../forms/Form/context.js';
 import { Field } from '../../../../fields/config/types.js';
-import { useLocale } from '../../utilities/Locale.js';
+import { useLocale } from '../../utilities/Locale/index.js';
 
 import './index.scss';
 

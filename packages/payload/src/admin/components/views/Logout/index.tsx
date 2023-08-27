@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useConfig } from '../../utilities/Config.js';
-import { useAuth } from '../../utilities/Auth.js';
-import Minimal from '../../templates/Minimal.js';
-import Button from '../../elements/Button.js';
-import Meta from '../../utilities/Meta.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import { useAuth } from '../../utilities/Auth/index.js';
+import Minimal from '../../templates/Minimal/index.js';
+import Button from '../../elements/Button/index.js';
+import Meta from '../../utilities/Meta/index.js';
 
 import './index.scss';
 

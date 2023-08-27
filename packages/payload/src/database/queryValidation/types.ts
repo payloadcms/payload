@@ -1,4 +1,4 @@
-import { CollectionPermission, GlobalPermission } from '../../auth.js';
+import { CollectionPermission, GlobalPermission } from '../../auth/types.js';
 import { Field, FieldAffectingData, TabAsField, UIField } from '../../fields/config/types.js';
 
 export type EntityPolicies = {

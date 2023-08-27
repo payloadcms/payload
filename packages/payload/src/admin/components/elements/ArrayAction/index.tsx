@@ -1,12 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import Popup from '../Popup.js';
-import More from '../../icons/More.js';
-import Chevron from '../../icons/Chevron.js';
+import Popup from '../Popup/index.js';
+import More from '../../icons/More/index.js';
+import Chevron from '../../icons/Chevron/index.js';
 import { Props } from './types.js';
-import Plus from '../../icons/Plus.js';
-import X from '../../icons/X.js';
-import Copy from '../../icons/Copy.js';
+import Plus from '../../icons/Plus/index.js';
+import X from '../../icons/X/index.js';
+import Copy from '../../icons/Copy/index.js';
 
 import './index.scss';
 

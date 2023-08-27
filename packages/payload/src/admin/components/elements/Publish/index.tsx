@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import FormSubmit from '../../forms/Submit.js';
-import { useDocumentInfo } from '../../utilities/DocumentInfo.js';
+import FormSubmit from '../../forms/Submit/index.js';
+import { useDocumentInfo } from '../../utilities/DocumentInfo/index.js';
 import { useForm, useFormModified } from '../../forms/Form/context.js';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent/index.js';
 
 export type CustomPublishButtonProps = React.ComponentType<DefaultPublishButtonProps & {
   DefaultButton: React.ComponentType<DefaultPublishButtonProps>;

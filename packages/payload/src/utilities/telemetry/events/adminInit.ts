@@ -1,5 +1,5 @@
 import { PayloadRequest } from '../../../express/types.js';
-import { sendEvent } from '..';
+import { sendEvent } from '../index.js';
 import { oneWayHash } from '../oneWayHash.js';
 
 export type AdminInitEvent = {

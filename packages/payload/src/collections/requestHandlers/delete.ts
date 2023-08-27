@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types.js';
-import { Document, Where } from '../../types.js';
+import { Document, Where } from '../../types/index.js';
 import deleteOperation from '../operations/delete.js';
 import formatSuccessResponse from '../../express/responses/formatSuccess.js';
 import { getTranslation } from '../../utilities/getTranslation.js';

@@ -1,13 +1,13 @@
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Drawer } from '../../../../../../elements/Drawer.js';
-import Form from '../../../../../Form.js';
-import FormSubmit from '../../../../../Submit.js';
+import { Drawer } from '../../../../../../elements/Drawer/index.js';
+import Form from '../../../../../Form/index.js';
+import FormSubmit from '../../../../../Submit/index.js';
 import { Props } from './types.js';
-import fieldTypes from '../../../...js';
-import RenderFields from '../../../../../RenderFields.js';
+import fieldTypes from '../../../../index.js';
+import RenderFields from '../../../../../RenderFields/index.js';
 import useHotkey from '../../../../../../../hooks/useHotkey.js';
-import { useEditDepth } from '../../../../../../utilities/EditDepth.js';
+import { useEditDepth } from '../../../../../../utilities/EditDepth/index.js';
 
 import './index.scss';
 

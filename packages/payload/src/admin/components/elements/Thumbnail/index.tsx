@@ -1,6 +1,6 @@
 import React from 'react';
 import { Props } from './types.js';
-import FileGraphic from '../../graphics/File.js';
+import FileGraphic from '../../graphics/File/index.js';
 import useThumbnail from '../../../hooks/useThumbnail.js';
 
 import './index.scss';

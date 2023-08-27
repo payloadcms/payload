@@ -1,6 +1,6 @@
 import React from 'react';
 import { ClearIndicatorProps } from 'react-select';
-import X from '../../../icons/X.js';
+import X from '../../../icons/X/index.js';
 import { Option as OptionType } from '../types.js';
 import './index.scss';
 

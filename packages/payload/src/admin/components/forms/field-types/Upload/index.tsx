@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
-import { useConfig } from '../../../utilities/Config.js';
-import useField from '../../useField.js';
-import withCondition from '../../withCondition.js';
+import { useConfig } from '../../../utilities/Config/index.js';
+import useField from '../../useField/index.js';
+import withCondition from '../../withCondition/index.js';
 import { upload } from '../../../../../fields/validations.js';
 import { Props } from './types.js';
 import UploadInput from './Input.js';

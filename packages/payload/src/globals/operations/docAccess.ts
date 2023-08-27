@@ -1,5 +1,5 @@
-import { AllOperations } from '../../types.js';
-import { GlobalPermission } from '../../auth.js';
+import { AllOperations } from '../../types/index.js';
+import { GlobalPermission } from '../../auth/types.js';
 import type { PayloadRequest } from '../../express/types.js';
 import { getEntityPolicies } from '../../utilities/getEntityPolicies.js';
 import { SanitizedGlobalConfig } from '../config/types.js';

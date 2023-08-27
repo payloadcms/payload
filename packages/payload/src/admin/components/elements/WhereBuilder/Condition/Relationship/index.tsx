@@ -1,10 +1,10 @@
 import React, { useReducer, useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../utilities/Config.js';
+import { useConfig } from '../../../../utilities/Config/index.js';
 import { Props, ValueWithRelation, GetResults } from './types.js';
 import optionsReducer from './optionsReducer.js';
 import useDebounce from '../../../../../hooks/useDebounce.js';
-import ReactSelect from '../../../ReactSelect.js';
+import ReactSelect from '../../../ReactSelect/index.js';
 import { Option } from '../../../ReactSelect/types.js';
 import type { PaginatedDocs } from '../../../../../../database/types.js';
 

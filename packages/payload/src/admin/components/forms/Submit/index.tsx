@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { useForm, useFormProcessing } from '../Form/context.js';
-import Button from '../../elements/Button.js';
+import Button from '../../elements/Button/index.js';
 import { Props } from '../../elements/Button/types.js';
 
 import './index.scss';

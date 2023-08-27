@@ -4,19 +4,19 @@ import { ReactEditor, useSlate } from 'slate-react';
 import { Transforms, Range, Editor } from 'slate';
 import { useModal } from '@faceless-ui/modal';
 import ElementButton from '../../Button.js';
-import LinkIcon from '../../../../../../icons/Link.js';
+import LinkIcon from '../../../../../../icons/Link/index.js';
 import reduceFieldsToValues from '../../../../../Form/reduceFieldsToValues.js';
-import { useConfig } from '../../../../../../utilities/Config.js';
+import { useConfig } from '../../../../../../utilities/Config/index.js';
 import isElementActive from '../../isActive.js';
 import { transformExtraFields, unwrapLink } from '../utilities.js';
-import { LinkDrawer } from '../LinkDrawer.js';
+import { LinkDrawer } from '../LinkDrawer/index.js';
 import { Props as RichTextFieldProps } from '../../../types.js';
-import buildStateFromSchema from '../../../../../Form/buildStateFromSchema.js';
-import { useAuth } from '../../../../../../utilities/Auth.js';
+import buildStateFromSchema from '../../../../../Form/buildStateFromSchema/index.js';
+import { useAuth } from '../../../../../../utilities/Auth/index.js';
 import { Fields } from '../../../../../Form/types.js';
-import { useLocale } from '../../../../../../utilities/Locale.js';
+import { useLocale } from '../../../../../../utilities/Locale/index.js';
 import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug.js';
-import { useDocumentInfo } from '../../../../../../utilities/DocumentInfo.js';
+import { useDocumentInfo } from '../../../../../../utilities/DocumentInfo/index.js';
 
 /**
  * This function is called when an new link is created - not when an existing link is edited.

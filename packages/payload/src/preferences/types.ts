@@ -1,4 +1,4 @@
-import { User } from '../auth.js';
+import { User } from '../auth/types.js';
 import { PayloadRequest } from '../express/types.js';
 
 export type PreferenceRequest = {

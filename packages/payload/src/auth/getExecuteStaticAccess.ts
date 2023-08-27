@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express';
-import { Where } from '../types.js';
+import { Where } from '../types/index.js';
 import executeAccess from './executeAccess.js';
-import { Forbidden } from '../errors.js';
+import { Forbidden } from '../errors/index.js';
 import { PayloadRequest } from '../express/types.js';
 import { SanitizedCollectionConfig } from '../collections/config/types.js';
 

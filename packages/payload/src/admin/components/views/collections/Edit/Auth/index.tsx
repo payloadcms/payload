@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../utilities/Config.js';
-import Email from '../../../../forms/field-types/Email.js';
-import Password from '../../../../forms/field-types/Password.js';
-import Checkbox from '../../../../forms/field-types/Checkbox.js';
-import Button from '../../../../elements/Button.js';
-import ConfirmPassword from '../../../../forms/field-types/ConfirmPassword.js';
+import { useConfig } from '../../../../utilities/Config/index.js';
+import Email from '../../../../forms/field-types/Email/index.js';
+import Password from '../../../../forms/field-types/Password/index.js';
+import Checkbox from '../../../../forms/field-types/Checkbox/index.js';
+import Button from '../../../../elements/Button/index.js';
+import ConfirmPassword from '../../../../forms/field-types/ConfirmPassword/index.js';
 import { useFormModified, useFormFields } from '../../../../forms/Form/context.js';
 import { Props } from './types.js';
 

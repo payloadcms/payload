@@ -1,5 +1,5 @@
 import type { TFunction } from 'i18next';
-import { FileUploadError } from '../errors.js';
+import { FileUploadError } from '../errors/index.js';
 import saveBufferToFile from './saveBufferToFile.js';
 import { FileToSave } from './types.js';
 import { Payload } from '../payload.js';

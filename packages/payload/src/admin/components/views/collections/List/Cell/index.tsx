@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../utilities/Config.js';
-import RenderCustomComponent from '../../../../utilities/RenderCustomComponent.js';
-import cellComponents from './field-types.js';
+import { useConfig } from '../../../../utilities/Config/index.js';
+import RenderCustomComponent from '../../../../utilities/RenderCustomComponent/index.js';
+import cellComponents from './field-types/index.js';
 import { Props } from './types.js';
 import { getTranslation } from '../../../../../../utilities/getTranslation.js';
 import { fieldAffectsData } from '../../../../../../fields/config/types.js';

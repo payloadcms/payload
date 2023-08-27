@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
-import useField from '../../useField.js';
-import Label from '../../Label.js';
-import Error from '../../Error.js';
-import withCondition from '../../withCondition.js';
+import useField from '../../useField/index.js';
+import Label from '../../Label/index.js';
+import Error from '../../Error/index.js';
+import withCondition from '../../withCondition/index.js';
 import { password } from '../../../../../fields/validations.js';
 import { Props } from './types.js';
 

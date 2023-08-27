@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types.js';
 import { getTranslation } from '../../../../../utilities/getTranslation.js';
 import useTitle from '../../../../hooks/useTitle.js';
-import { useStepNav } from '../../../elements/StepNav.js';
+import { useStepNav } from '../../../elements/StepNav/index.js';
 import { StepNavItem } from '../../../elements/StepNav/types.js';
-import { useConfig } from '../../../utilities/Config.js';
+import { useConfig } from '../../../utilities/Config/index.js';
 
 export const SetStepNav: React.FC<{
   collection: SanitizedCollectionConfig

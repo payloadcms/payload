@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent/index.js';
 import useIntersect from '../../../hooks/useIntersect.js';
 import { Props } from './types.js';
 import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../fields/config/types.js';
-import { useOperation } from '../../utilities/OperationProvider.js';
+import { useOperation } from '../../utilities/OperationProvider/index.js';
 import { getTranslation } from '../../../../utilities/getTranslation.js';
 
 const baseClass = 'render-fields';

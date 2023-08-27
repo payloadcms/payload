@@ -3,24 +3,24 @@ import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { ListDrawerProps } from './types.js';
 import { getTranslation } from '../../../../utilities/getTranslation.js';
-import { useConfig } from '../../utilities/Config.js';
-import { useAuth } from '../../utilities/Auth.js';
-import { DocumentInfoProvider } from '../../utilities/DocumentInfo.js';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import { useAuth } from '../../utilities/Auth/index.js';
+import { DocumentInfoProvider } from '../../utilities/DocumentInfo/index.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent/index.js';
 import usePayloadAPI from '../../../hooks/usePayloadAPI.js';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
 import DefaultList from '../../views/collections/List/Default.js';
-import Label from '../../forms/Label.js';
-import ReactSelect from '../ReactSelect.js';
-import { useDocumentDrawer } from '../DocumentDrawer.js';
-import Pill from '../Pill.js';
-import X from '../../icons/X.js';
-import ViewDescription from '../ViewDescription.js';
+import Label from '../../forms/Label/index.js';
+import ReactSelect from '../ReactSelect/index.js';
+import { useDocumentDrawer } from '../DocumentDrawer/index.js';
+import Pill from '../Pill/index.js';
+import X from '../../icons/X/index.js';
+import ViewDescription from '../ViewDescription/index.js';
 import formatFields from '../../views/collections/List/formatFields.js';
-import { usePreferences } from '../../utilities/Preferences.js';
+import { usePreferences } from '../../utilities/Preferences/index.js';
 import { Field } from '../../../../fields/config/types.js';
-import { baseClass } from '.';
-import { TableColumnsProvider } from '../TableColumns.js';
+import { baseClass } from './index.js';
+import { TableColumnsProvider } from '../TableColumns/index.js';
 
 export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   drawerSlug,

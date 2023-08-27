@@ -1,7 +1,7 @@
 import { Field, fieldAffectsData } from '../fields/config/types.js';
 import flattenFields from '../utilities/flattenTopLevelFields.js';
 import { PathToQuery } from './queryValidation/types.js';
-import { Payload } from '..';
+import { Payload } from '../index.js';
 
 export async function getLocalizedPaths({
   payload,

@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { getTranslation } from '../../../../utilities/getTranslation.js';
 import { useFormProcessing } from '../../forms/Form/context.js';
-import { useLoadingOverlay } from '../../utilities/LoadingOverlay.js';
+import { useLoadingOverlay } from '../../utilities/LoadingOverlay/index.js';
 import type { LoadingOverlayTypes } from '../../utilities/LoadingOverlay/types.js';
 
 import './index.scss';

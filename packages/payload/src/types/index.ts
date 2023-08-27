@@ -1,7 +1,7 @@
 import { TypeWithTimestamps } from '../collections/config/types.js';
 import { validOperators } from './constants.js';
 
-export type { PayloadRequest } from '../express/types';
+export type { PayloadRequest } from '../express/types.js';
 
 export type Operator = typeof validOperators[number];
 

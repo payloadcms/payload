@@ -1,7 +1,7 @@
 import { Strategy } from 'passport';
 import { DeepRequired } from 'ts-essentials';
 import { PayloadRequest } from '../express/types.js';
-import { Where } from '../types.js';
+import { Where } from '../types/index.js';
 import { Payload } from '../payload.js';
 
 export type Permission = {

@@ -1,5 +1,5 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { APIError } from '../../../errors.js';
+import { APIError } from '../../../errors/index.js';
 import { Payload } from '../../../payload.js';
 import verifyEmail from '../verifyEmail.js';
 import { PayloadRequest } from '../../../express/types.js';

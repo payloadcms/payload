@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { useAuth } from '../../utilities/Auth.js';
+import { useAuth } from '../../utilities/Auth/index.js';
 import { useAllFormFields } from '../Form/context.js';
-import { useDocumentInfo } from '../../utilities/DocumentInfo.js';
+import { useDocumentInfo } from '../../utilities/DocumentInfo/index.js';
 import reduceFieldsToValues from '../Form/reduceFieldsToValues.js';
 import getSiblingData from '../Form/getSiblingData.js';
 import { Condition } from '../../../../fields/config/types.js';

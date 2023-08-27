@@ -4,7 +4,7 @@ import { PayloadRequest } from '../../express/types.js';
 import { TypeWithID } from '../config/types.js';
 import type { PaginatedDocs } from '../../database/types.js';
 import find from '../operations/find.js';
-import { Where } from '../../types.js';
+import { Where } from '../../types/index.js';
 import { isNumber } from '../../utilities/isNumber.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

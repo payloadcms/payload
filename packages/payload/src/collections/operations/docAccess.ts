@@ -1,5 +1,5 @@
-import { AllOperations } from '../../types.js';
-import { CollectionPermission } from '../../auth.js';
+import { AllOperations } from '../../types/index.js';
+import { CollectionPermission } from '../../auth/types.js';
 import type { PayloadRequest } from '../../express/types.js';
 import { getEntityPolicies } from '../../utilities/getEntityPolicies.js';
 

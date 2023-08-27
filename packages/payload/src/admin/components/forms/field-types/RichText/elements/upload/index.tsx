@@ -1,6 +1,6 @@
 import plugin from './plugin.js';
-import Element from './Element.js';
-import Button from './Button.js';
+import Element from './Element/index.js';
+import Button from './Button/index.js';
 
 export default {
   Button,

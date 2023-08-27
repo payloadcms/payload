@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import RenderFieldsToDiff from '../...js';
+import RenderFieldsToDiff from '../../index.js';
 import { Props } from '../types.js';
-import Label from '../../Label.js';
+import Label from '../../Label/index.js';
 import { FieldWithSubFields } from '../../../../../../../fields/config/types.js';
 import { getTranslation } from '../../../../../../../utilities/getTranslation.js';
 

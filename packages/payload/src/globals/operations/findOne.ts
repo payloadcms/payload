@@ -1,8 +1,8 @@
-import type { Where } from '../../types.js';
+import type { Where } from '../../types/index.js';
 import executeAccess from '../../auth/executeAccess.js';
 import { AccessResult } from '../../config/types.js';
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js';
-import { afterRead } from '../../fields/hooks/afterRead.js';
+import { afterRead } from '../../fields/hooks/afterRead/index.js';
 import { SanitizedGlobalConfig } from '../config/types.js';
 import { PayloadRequest } from '../../express/types.js';
 import { initTransaction } from '../../utilities/initTransaction.js';

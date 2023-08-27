@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config.js';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
-import LogOut from '../../icons/LogOut.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent/index.js';
+import LogOut from '../../icons/LogOut/index.js';
 
 const baseClass = 'nav';
 

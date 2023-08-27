@@ -1,7 +1,7 @@
 import React from 'react';
 import { Props } from './types.js';
 import useTitle from '../../../hooks/useTitle.js';
-import IDLabel from '../IDLabel.js';
+import IDLabel from '../IDLabel/index.js';
 
 const baseClass = 'render-title';
 

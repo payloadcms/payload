@@ -1,4 +1,4 @@
-import { FieldPermissions } from '../../../../../auth.js';
+import { FieldPermissions } from '../../../../../auth/types.js';
 import { Field } from '../../../../../fields/config/types.js';
 import { FieldComponents } from './fields/types.js';
 

@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import ObjectID from 'bson-objectid';
 import type { TFunction } from 'i18next';
-import { User } from '../../../../../auth.js';
+import { User } from '../../../../../auth/types.js';
 import {
   NonPresentationalField,
   fieldAffectsData,

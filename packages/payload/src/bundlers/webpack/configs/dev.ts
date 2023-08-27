@@ -1,7 +1,7 @@
 import webpack, { Configuration } from 'webpack';
 import md5 from 'md5';
-import { getBaseConfig } from './base';
-import { SanitizedConfig } from '../../../config/types';
+import { getBaseConfig } from './base.js';
+import { SanitizedConfig } from '../../../config/types.js';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'node:module';
 

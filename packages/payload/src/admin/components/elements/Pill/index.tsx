@@ -1,7 +1,7 @@
 import React, { ElementType } from 'react';
 import { Link } from 'react-router-dom';
 import { Props, RenderedTypeProps } from './types.js';
-import { useDraggableSortable } from '../DraggableSortable/useDraggableSortable.js';
+import { useDraggableSortable } from '../DraggableSortable/useDraggableSortable/index.js';
 
 import './index.scss';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import ListButton from '../ListButton.js';
-import OLIcon from '../../../../../icons/OrderedList.js';
+import OLIcon from '../../../../../icons/OrderedList/index.js';
 
 import './index.scss';
 

@@ -1,6 +1,6 @@
 import executeAccess from '../../auth/executeAccess.js';
 import defaultAccess from '../../auth/defaultAccess.js';
-import { Document, Where } from '../../types.js';
+import { Document, Where } from '../../types/index.js';
 import UnauthorizedError from '../../errors/UnathorizedError.js';
 import { PreferenceRequest } from '../types.js';
 import NotFound from '../../errors/NotFound.js';

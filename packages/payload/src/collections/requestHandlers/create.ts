@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import { NextFunction, Response } from 'express';
 import { PayloadRequest } from '../../express/types.js';
 import formatSuccessResponse from '../../express/responses/formatSuccess.js';
-import { Document } from '../../types.js';
+import { Document } from '../../types/index.js';
 import create from '../operations/create.js';
 import { getTranslation } from '../../utilities/getTranslation.js';
 

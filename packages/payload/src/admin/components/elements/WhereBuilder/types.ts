@@ -1,6 +1,6 @@
 import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
 import { Field } from '../../../../fields/config/types.js';
-import { Operator, Where } from '../../../../types.js';
+import { Operator, Where } from '../../../../types/index.js';
 
 export type Props = {
   collection: SanitizedCollectionConfig,

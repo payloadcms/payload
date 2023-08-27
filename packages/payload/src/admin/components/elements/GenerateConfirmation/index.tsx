@@ -2,10 +2,10 @@ import React from 'react';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { Trans, useTranslation } from 'react-i18next';
-import Button from '../Button.js';
-import MinimalTemplate from '../../templates/Minimal.js';
+import Button from '../Button/index.js';
+import MinimalTemplate from '../../templates/Minimal/index.js';
 import { Props } from './types.js';
-import { useDocumentInfo } from '../../utilities/DocumentInfo.js';
+import { useDocumentInfo } from '../../utilities/DocumentInfo/index.js';
 
 import './index.scss';
 

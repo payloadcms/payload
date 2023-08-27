@@ -1,17 +1,17 @@
 import React from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config.js';
-import { useAuth } from '../../utilities/Auth.js';
-import Logo from '../../graphics/Logo.js';
-import MinimalTemplate from '../../templates/Minimal.js';
-import Form from '../../forms/Form.js';
-import Email from '../../forms/field-types/Email.js';
-import Password from '../../forms/field-types/Password.js';
-import FormSubmit from '../../forms/Submit.js';
-import Button from '../../elements/Button.js';
-import Meta from '../../utilities/Meta.js';
-import { FormLoadingOverlayToggle } from '../../elements/Loading.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import { useAuth } from '../../utilities/Auth/index.js';
+import Logo from '../../graphics/Logo/index.js';
+import MinimalTemplate from '../../templates/Minimal/index.js';
+import Form from '../../forms/Form/index.js';
+import Email from '../../forms/field-types/Email/index.js';
+import Password from '../../forms/field-types/Password/index.js';
+import FormSubmit from '../../forms/Submit/index.js';
+import Button from '../../elements/Button/index.js';
+import Meta from '../../utilities/Meta/index.js';
+import { FormLoadingOverlayToggle } from '../../elements/Loading/index.js';
 
 import './index.scss';
 

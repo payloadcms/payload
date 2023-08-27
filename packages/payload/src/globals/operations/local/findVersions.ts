@@ -1,12 +1,12 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Document, Where } from '../../../types.js';
+import { Document, Where } from '../../../types/index.js';
 import type { PaginatedDocs } from '../../../database/types.js';
 import { Payload } from '../../../payload.js';
 import { PayloadRequest } from '../../../express/types.js';
 import findVersions from '../findVersions.js';
 import { getDataLoader } from '../../../collections/dataloader.js';
 import { i18nInit } from '../../../translations/init.js';
-import { APIError } from '../../../errors.js';
+import { APIError } from '../../../errors/index.js';
 import { TypeWithVersion } from '../../../versions/types.js';
 import { setRequestContext } from '../../../express/setRequestContext.js';
 

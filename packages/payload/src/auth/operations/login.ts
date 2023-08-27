@@ -1,14 +1,14 @@
 import jwt from 'jsonwebtoken';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { CookieOptions, Response } from 'express';
-import { AuthenticationError, LockedAuth } from '../../errors.js';
+import { AuthenticationError, LockedAuth } from '../../errors/index.js';
 import { PayloadRequest } from '../../express/types.js';
 import getCookieExpiration from '../../utilities/getCookieExpiration.js';
 import isLocked from '../isLocked.js';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js';
 import { User } from '../types.js';
 import { Collection } from '../../collections/config/types.js';
-import { afterRead } from '../../fields/hooks/afterRead.js';
+import { afterRead } from '../../fields/hooks/afterRead/index.js';
 import unlock from './unlock.js';
 import { buildAfterOperation } from '../../collections/operations/utils.js';
 import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js';

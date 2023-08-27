@@ -1,6 +1,6 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
-import { Document, Where } from '../../types.js';
+import { Document, Where } from '../../types/index.js';
 import { PayloadRequest } from '../../express/types.js';
 import formatSuccessResponse from '../../express/responses/formatSuccess.js';
 import update from '../operations/update.js';

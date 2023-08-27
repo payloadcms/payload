@@ -4,7 +4,7 @@ import forgotPassword, { Result } from '../forgotPassword.js';
 import { Payload } from '../../../payload.js';
 import { getDataLoader } from '../../../collections/dataloader.js';
 import { i18nInit } from '../../../translations/init.js';
-import { APIError } from '../../../errors.js';
+import { APIError } from '../../../errors/index.js';
 import { setRequestContext } from '../../../express/setRequestContext.js';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {

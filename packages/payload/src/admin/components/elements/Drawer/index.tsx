@@ -3,9 +3,9 @@ import { Modal, useModal } from '@faceless-ui/modal';
 import { useWindowInfo } from '@faceless-ui/window-info';
 import { useTranslation } from 'react-i18next';
 import { Props, TogglerProps } from './types.js';
-import { EditDepthContext, useEditDepth } from '../../utilities/EditDepth.js';
-import { Gutter } from '../Gutter.js';
-import X from '../../icons/X.js';
+import { EditDepthContext, useEditDepth } from '../../utilities/EditDepth/index.js';
+import { Gutter } from '../Gutter/index.js';
+import X from '../../icons/X/index.js';
 
 import './index.scss';
 

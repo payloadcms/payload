@@ -1,9 +1,9 @@
 import { SanitizedCollectionConfig } from '../../../collections/config/types.js';
 import { SanitizedGlobalConfig } from '../../../globals/config/types.js';
-import { Operation } from '../../../types.js';
+import { Operation } from '../../../types/index.js';
 import { PayloadRequest, RequestContext } from '../../../express/types.js';
 import { traverseFields } from './traverseFields.js';
-import { ValidationError } from '../../../errors.js';
+import { ValidationError } from '../../../errors/index.js';
 import deepCopyObject from '../../../utilities/deepCopyObject.js';
 
 type Args<T> = {

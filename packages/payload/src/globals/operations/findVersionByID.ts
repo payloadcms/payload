@@ -1,10 +1,10 @@
 /* eslint-disable no-underscore-dangle */
 import { PayloadRequest } from '../../express/types.js';
-import { Forbidden, NotFound } from '../../errors.js';
+import { Forbidden, NotFound } from '../../errors/index.js';
 import executeAccess from '../../auth/executeAccess.js';
 import { TypeWithVersion } from '../../versions/types.js';
 import { SanitizedGlobalConfig } from '../config/types.js';
-import { afterRead } from '../../fields/hooks/afterRead.js';
+import { afterRead } from '../../fields/hooks/afterRead/index.js';
 import { combineQueries } from '../../database/combineQueries.js';
 import { FindGlobalVersionsArgs } from '../../database/types.js';
 import { killTransaction } from '../../utilities/killTransaction.js';

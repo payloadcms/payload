@@ -1,6 +1,6 @@
 import React from 'react';
-import RenderFields from '../../RenderFields.js';
-import withCondition from '../../withCondition.js';
+import RenderFields from '../../RenderFields/index.js';
+import withCondition from '../../withCondition/index.js';
 import { Props } from './types.js';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath.js';
 import { RowProvider } from './provider.js';

@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
-import { Where } from '../../types.js';
+import { Where } from '../../types/index.js';
 import { PayloadRequest } from '../../express/types.js';
 import { TypeWithID } from '../config/types.js';
 import type { PaginatedDocs } from '../../database/types.js';

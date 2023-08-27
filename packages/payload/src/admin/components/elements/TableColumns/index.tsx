@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
-import { usePreferences } from '../../utilities/Preferences.js';
+import { usePreferences } from '../../utilities/Preferences/index.js';
 import { ListPreferences } from '../../views/collections/List/types.js';
 import { Column } from '../Table/types.js';
 import buildColumns from './buildColumns.js';

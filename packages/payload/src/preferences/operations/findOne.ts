@@ -1,6 +1,6 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PreferenceRequest } from '../types.js';
-import { Where } from '../../types.js';
+import { Where } from '../../types/index.js';
 
 async function findOne(args: PreferenceRequest): Promise<GeneratedTypes['collections']['_preference']> {
   const {

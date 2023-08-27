@@ -1,14 +1,14 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
 import { Payload } from '../../../payload.js';
-import { Document, Where } from '../../../types.js';
+import { Document, Where } from '../../../types/index.js';
 import getFileByPath from '../../../uploads/getFileByPath.js';
 import update from '../update.js';
 import { PayloadRequest, RequestContext } from '../../../express/types.js';
 import { getDataLoader } from '../../dataloader.js';
 import { File } from '../../../uploads/types.js';
 import { i18nInit } from '../../../translations/init.js';
-import { APIError } from '../../../errors.js';
+import { APIError } from '../../../errors/index.js';
 import updateByID from '../updateByID.js';
 import { BulkOperationResult } from '../../config/types.js';
 import { setRequestContext } from '../../../express/setRequestContext.js';

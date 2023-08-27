@@ -1,5 +1,5 @@
 import { Access } from '../config/types.js';
-import { AllOperations, Document, Where } from '../types.js';
+import { AllOperations, Document, Where } from '../types/index.js';
 import { FieldAccess, tabHasName } from '../fields/config/types.js';
 import type { SanitizedCollectionConfig } from '../collections/config/types.js';
 import { TypeWithID } from '../collections/config/types.js';

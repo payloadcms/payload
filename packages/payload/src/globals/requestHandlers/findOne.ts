@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import { PayloadRequest } from '../../express/types.js';
 import { SanitizedGlobalConfig } from '../config/types.js';
-import { Document } from '../../types.js';
+import { Document } from '../../types/index.js';
 import findOne from '../operations/findOne.js';
 import { isNumber } from '../../utilities/isNumber.js';
 

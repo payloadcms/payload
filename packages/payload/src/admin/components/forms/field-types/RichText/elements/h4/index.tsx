@@ -1,6 +1,6 @@
 import React from 'react';
 import ElementButton from '../Button.js';
-import H4Icon from '../../../../../icons/headings/H4.js';
+import H4Icon from '../../../../../icons/headings/H4/index.js';
 
 const H4 = ({ attributes, children }) => (
   <h4 {...attributes}>{children}</h4>

@@ -1,12 +1,12 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
-import type { Where } from '../../types.js';
+import type { Where } from '../../types/index.js';
 import { SanitizedGlobalConfig } from '../config/types.js';
 import executeAccess from '../../auth/executeAccess.js';
-import { beforeChange } from '../../fields/hooks/beforeChange.js';
-import { beforeValidate } from '../../fields/hooks/beforeValidate.js';
-import { afterChange } from '../../fields/hooks/afterChange.js';
-import { afterRead } from '../../fields/hooks/afterRead.js';
+import { beforeChange } from '../../fields/hooks/beforeChange/index.js';
+import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js';
+import { afterChange } from '../../fields/hooks/afterChange/index.js';
+import { afterRead } from '../../fields/hooks/afterRead/index.js';
 import { PayloadRequest } from '../../express/types.js';
 import { saveVersion } from '../../versions/saveVersion.js';
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js';

@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { APIError } from '../../errors.js';
+import { APIError } from '../../errors/index.js';
 import { PayloadRequest } from '../../express/types.js';
 import { Collection } from '../../collections/config/types.js';
 import { buildAfterOperation } from '../../collections/operations/utils.js';

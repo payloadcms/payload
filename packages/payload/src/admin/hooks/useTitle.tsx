@@ -4,8 +4,8 @@ import { SanitizedConfig } from '../../config/types.js';
 import { SanitizedCollectionConfig } from '../../collections/config/types.js';
 import { useFormFields } from '../components/forms/Form/context.js';
 import { FormField } from '../components/forms/Form/types.js';
-import { useConfig } from '../components/utilities/Config.js';
-import { formatDate } from '../utilities/formatDate.js';
+import { useConfig } from '../components/utilities/Config/index.js';
+import { formatDate } from '../utilities/formatDate/index.js';
 import { getObjectDotNotation } from '../../utilities/getObjectDotNotation.js';
 
 // either send the `useAsTitle` field itself

@@ -1,11 +1,11 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { PayloadRequest } from '../../express/types.js';
-import { Forbidden, NotFound } from '../../errors.js';
+import { Forbidden, NotFound } from '../../errors/index.js';
 import executeAccess from '../../auth/executeAccess.js';
 import { BeforeOperationHook, Collection } from '../config/types.js';
-import { Document } from '../../types.js';
+import { Document } from '../../types/index.js';
 import { hasWhereAccessResult } from '../../auth/types.js';
-import { afterRead } from '../../fields/hooks/afterRead.js';
+import { afterRead } from '../../fields/hooks/afterRead/index.js';
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js';
 import { combineQueries } from '../../database/combineQueries.js';

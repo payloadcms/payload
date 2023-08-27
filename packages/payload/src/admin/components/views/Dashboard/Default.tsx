@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config.js';
+import { useConfig } from '../../utilities/Config/index.js';
 
-import Eyebrow from '../../elements/Eyebrow.js';
-import Card from '../../elements/Card.js';
-import Button from '../../elements/Button.js';
+import Eyebrow from '../../elements/Eyebrow/index.js';
+import Card from '../../elements/Card/index.js';
+import Button from '../../elements/Button/index.js';
 import { Props } from './types.js';
-import { Gutter } from '../../elements/Gutter.js';
+import { Gutter } from '../../elements/Gutter/index.js';
 import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilities/groupNavItems.js';
 import { getTranslation } from '../../../../utilities/getTranslation.js';
 

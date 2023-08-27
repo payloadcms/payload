@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { ListDrawerProps, ListTogglerProps, UseListDrawer } from './types.js';
-import { Drawer, DrawerToggler } from '../Drawer.js';
-import { useEditDepth } from '../../utilities/EditDepth.js';
+import { Drawer, DrawerToggler } from '../Drawer/index.js';
+import { useEditDepth } from '../../utilities/EditDepth/index.js';
 import { ListDrawerContent } from './DrawerContent.js';
-import { useConfig } from '../../utilities/Config.js';
+import { useConfig } from '../../utilities/Config/index.js';
 
 import './index.scss';
 

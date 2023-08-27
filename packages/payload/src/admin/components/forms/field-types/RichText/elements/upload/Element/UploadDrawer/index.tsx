@@ -3,19 +3,19 @@ import { Transforms } from 'slate';
 import { ReactEditor, useSlateStatic } from 'slate-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ElementProps } from '..';
-import fieldTypes from '../../../../...js';
+import { ElementProps } from '../index.js';
+import fieldTypes from '../../../../../index.js';
 import { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types.js';
-import { Drawer } from '../../../../../../../elements/Drawer.js';
-import { useAuth } from '../../../../../../../utilities/Auth.js';
-import { useLocale } from '../../../../../../../utilities/Locale.js';
-import Form from '../../../../../../Form.js';
-import RenderFields from '../../../../../../RenderFields.js';
-import FormSubmit from '../../../../../../Submit.js';
-import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema.js';
+import { Drawer } from '../../../../../../../elements/Drawer/index.js';
+import { useAuth } from '../../../../../../../utilities/Auth/index.js';
+import { useLocale } from '../../../../../../../utilities/Locale/index.js';
+import Form from '../../../../../../Form/index.js';
+import RenderFields from '../../../../../../RenderFields/index.js';
+import FormSubmit from '../../../../../../Submit/index.js';
+import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema/index.js';
 import { getTranslation } from '../../../../../../../../../utilities/getTranslation.js';
 import deepCopyObject from '../../../../../../../../../utilities/deepCopyObject.js';
-import { useDocumentInfo } from '../../../../../../../utilities/DocumentInfo.js';
+import { useDocumentInfo } from '../../../../../../../utilities/DocumentInfo/index.js';
 
 export const UploadDrawer: React.FC<ElementProps & {
   drawerSlug: string

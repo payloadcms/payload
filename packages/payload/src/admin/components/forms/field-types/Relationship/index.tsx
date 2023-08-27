@@ -1,16 +1,16 @@
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import qs from 'qs';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../utilities/Config.js';
-import { useAuth } from '../../../utilities/Auth.js';
-import withCondition from '../../withCondition.js';
-import ReactSelect from '../../../elements/ReactSelect.js';
-import useField from '../../useField.js';
-import Label from '../../Label.js';
-import Error from '../../Error.js';
-import FieldDescription from '../../FieldDescription.js';
+import { useConfig } from '../../../utilities/Config/index.js';
+import { useAuth } from '../../../utilities/Auth/index.js';
+import withCondition from '../../withCondition/index.js';
+import ReactSelect from '../../../elements/ReactSelect/index.js';
+import useField from '../../useField/index.js';
+import Label from '../../Label/index.js';
+import Error from '../../Error/index.js';
+import FieldDescription from '../../FieldDescription/index.js';
 import { relationship } from '../../../../../fields/validations.js';
-import { Where } from '../../../../../types.js';
+import { Where } from '../../../../../types/index.js';
 import type { PaginatedDocs } from '../../../../../database/types.js';
 import { useFormProcessing } from '../../Form/context.js';
 import optionsReducer from './optionsReducer.js';
@@ -18,13 +18,13 @@ import { FilterOptionsResult, GetResults, Option, Props, Value } from './types.j
 import { createRelationMap } from './createRelationMap.js';
 import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback.js';
 import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex.js';
-import { AddNewRelation } from './AddNew.js';
+import { AddNewRelation } from './AddNew/index.js';
 import { findOptionsByValue } from './findOptionsByValue.js';
-import { GetFilterOptions } from '../../../utilities/GetFilterOptions.js';
-import { SingleValue } from './select-components/SingleValue.js';
-import { MultiValueLabel } from './select-components/MultiValueLabel.js';
+import { GetFilterOptions } from '../../../utilities/GetFilterOptions/index.js';
+import { SingleValue } from './select-components/SingleValue/index.js';
+import { MultiValueLabel } from './select-components/MultiValueLabel/index.js';
 import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.js';
-import { useLocale } from '../../../utilities/Locale.js';
+import { useLocale } from '../../../utilities/Locale/index.js';
 
 import './index.scss';
 

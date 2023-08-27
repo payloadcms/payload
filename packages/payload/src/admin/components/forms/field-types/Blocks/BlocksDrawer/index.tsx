@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import type { i18n } from 'i18next';
-import BlockSearch from './BlockSearch.js';
+import BlockSearch from './BlockSearch/index.js';
 import { Props } from './types.js';
-import { Drawer } from '../../../../elements/Drawer.js';
+import { Drawer } from '../../../../elements/Drawer/index.js';
 import { getTranslation } from '../../../../../../utilities/getTranslation.js';
-import { ThumbnailCard } from '../../../../elements/ThumbnailCard.js';
-import DefaultBlockImage from '../../../../graphics/DefaultBlockImage.js';
+import { ThumbnailCard } from '../../../../elements/ThumbnailCard/index.js';
+import DefaultBlockImage from '../../../../graphics/DefaultBlockImage/index.js';
 import { Block } from '../../../../../../fields/config/types.js';
 
 import './index.scss';

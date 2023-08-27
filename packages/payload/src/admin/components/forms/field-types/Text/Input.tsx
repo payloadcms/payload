@@ -1,8 +1,8 @@
 import React, { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import Label from '../../Label.js';
-import Error from '../../Error.js';
-import FieldDescription from '../../FieldDescription.js';
+import Label from '../../Label/index.js';
+import Error from '../../Error/index.js';
+import FieldDescription from '../../FieldDescription/index.js';
 import { TextField } from '../../../../../fields/config/types.js';
 import { Description } from '../../FieldDescription/types.js';
 import { getTranslation } from '../../../../../utilities/getTranslation.js';

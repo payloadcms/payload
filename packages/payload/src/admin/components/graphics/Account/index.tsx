@@ -1,6 +1,6 @@
 import React from 'react';
-import { useAuth } from '../../utilities/Auth.js';
-import { useConfig } from '../../utilities/Config.js';
+import { useAuth } from '../../utilities/Auth/index.js';
+import { useConfig } from '../../utilities/Config/index.js';
 import Gravatar from './Gravatar.js';
 
 const css = `

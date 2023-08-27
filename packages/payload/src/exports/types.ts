@@ -1,14 +1,14 @@
-export * from './../types';
+export * from './../types/index.js';
 
 export {
   validOperators
-} from './../types/constants';
+} from './../types/constants.js';
 
 
 export {
   type AccessArgs,
   type Access,
-} from './../config/types';
+} from './../config/types.js';
 
 export {
   type CollectionConfig,
@@ -27,7 +27,7 @@ export {
   type AfterLoginHook as CollectionAfterLoginHook,
   type AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
   type BeforeDuplicate,
-} from './../collections/config/types';
+} from './../collections/config/types.js';
 
 export {
   type GlobalConfig,
@@ -37,7 +37,7 @@ export {
   type AfterChangeHook as GlobalAfterChangeHook,
   type BeforeReadHook as GlobalBeforeReadHook,
   type AfterReadHook as GlobalAfterReadHook,
-} from './../globals/config/types';
+} from './../globals/config/types.js';
 
 export {
   type Field,
@@ -108,14 +108,14 @@ export {
   optionsAreObjects,
   tabHasName,
   valueIsValueWithRelation,
-} from './../fields/config/types';
+} from './../fields/config/types.js';
 
 export {
   type RowLabel,
-} from './../admin/components/forms/RowLabel/types';
+} from './../admin/components/forms/RowLabel/types.js';
 
 export {
   type CustomSaveButtonProps,
   type CustomSaveDraftButtonProps,
   type CustomPublishButtonProps,
-} from './../admin/components/elements/types';
+} from './../admin/components/elements/types.js';

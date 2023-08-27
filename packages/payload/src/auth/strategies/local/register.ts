@@ -1,5 +1,5 @@
-import { ValidationError } from '../../../errors.js';
-import { Payload } from '../../...js';
+import { ValidationError } from '../../../errors/index.js';
+import { Payload } from '../../../index.js';
 import { SanitizedCollectionConfig } from '../../../collections/config/types.js';
 import { generatePasswordSaltHash } from './generatePasswordSaltHash.js';
 import { PayloadRequest } from '../../../express/types.js';

@@ -1,21 +1,21 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import RenderFields from '../../RenderFields.js';
-import withCondition from '../../withCondition.js';
+import RenderFields from '../../RenderFields/index.js';
+import withCondition from '../../withCondition/index.js';
 import { Props } from './types.js';
 import { tabHasName } from '../../../../../fields/config/types.js';
 import type { Tab } from '../../../../../fields/config/types.js';
-import FieldDescription from '../../FieldDescription.js';
+import FieldDescription from '../../FieldDescription/index.js';
 import toKebabCase from '../../../../../utilities/toKebabCase.js';
 import { useCollapsible } from '../../../elements/Collapsible/provider.js';
 import { TabsProvider } from './provider.js';
 import { getTranslation } from '../../../../../utilities/getTranslation.js';
-import { usePreferences } from '../../../utilities/Preferences.js';
+import { usePreferences } from '../../../utilities/Preferences/index.js';
 import { DocumentPreferences } from '../../../../../preferences/types.js';
-import { useDocumentInfo } from '../../../utilities/DocumentInfo.js';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo/index.js';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath.js';
-import { WatchChildErrors } from '../../WatchChildErrors.js';
-import { ErrorPill } from '../../../elements/ErrorPill.js';
+import { WatchChildErrors } from '../../WatchChildErrors/index.js';
+import { ErrorPill } from '../../../elements/ErrorPill/index.js';
 import { useFormSubmitted } from '../../Form/context.js';
 
 import './index.scss';

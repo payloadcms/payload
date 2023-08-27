@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Props } from './types.js';
-import Thumbnail from '../Thumbnail.js';
-import { useConfig } from '../../utilities/Config.js';
+import Thumbnail from '../Thumbnail/index.js';
+import { useConfig } from '../../utilities/Config/index.js';
 import { formatUseAsTitle } from '../../../hooks/useTitle.js';
 
 import './index.scss';

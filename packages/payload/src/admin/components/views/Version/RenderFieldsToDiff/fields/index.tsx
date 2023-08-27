@@ -1,9 +1,9 @@
-import Text from './Text.js';
-import Nested from './Nested.js';
-import Iterable from './Iterable.js';
-import Relationship from './Relationship.js';
-import Tabs from './Tabs.js';
-import Select from './Select.js';
+import Text from './Text/index.js';
+import Nested from './Nested/index.js';
+import Iterable from './Iterable/index.js';
+import Relationship from './Relationship/index.js';
+import Tabs from './Tabs/index.js';
+import Select from './Select/index.js';
 
 export default {
   text: Text,

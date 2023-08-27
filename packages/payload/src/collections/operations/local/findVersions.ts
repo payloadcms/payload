@@ -1,13 +1,13 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Payload } from '../../../payload.js';
-import { Document, Where } from '../../../types.js';
+import { Document, Where } from '../../../types/index.js';
 import type { PaginatedDocs } from '../../../database/types.js';
 import { TypeWithVersion } from '../../../versions/types.js';
 import { PayloadRequest, RequestContext } from '../../../express/types.js';
 import findVersions from '../findVersions.js';
 import { getDataLoader } from '../../dataloader.js';
 import { i18nInit } from '../../../translations/init.js';
-import { APIError } from '../../../errors.js';
+import { APIError } from '../../../errors/index.js';
 import { setRequestContext } from '../../../express/setRequestContext.js';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {

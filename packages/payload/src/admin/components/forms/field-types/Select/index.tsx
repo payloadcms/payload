@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import withCondition from '../../withCondition.js';
-import useField from '../../useField.js';
+import withCondition from '../../withCondition/index.js';
+import useField from '../../useField/index.js';
 import { select } from '../../../../../fields/validations.js';
 import { Option, OptionObject } from '../../../../../fields/config/types.js';
 import { Props } from './types.js';

@@ -1,4 +1,4 @@
-import { docHasTimestamps, PayloadRequest } from '../types.js';
+import { docHasTimestamps, PayloadRequest } from '../types/index.js';
 import { Payload } from '../payload.js';
 import { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js';
 import { TypeWithVersion } from './types.js';

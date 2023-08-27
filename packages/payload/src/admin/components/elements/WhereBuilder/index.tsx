@@ -4,14 +4,14 @@ import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Props } from './types.js';
 import useThrottledEffect from '../../../hooks/useThrottledEffect.js';
-import Button from '../Button.js';
+import Button from '../Button/index.js';
 import reducer from './reducer.js';
-import Condition from './Condition.js';
+import Condition from './Condition/index.js';
 import fieldTypes from './field-types.js';
 import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields.js';
-import { useSearchParams } from '../../utilities/SearchParams.js';
+import { useSearchParams } from '../../utilities/SearchParams/index.js';
 import validateWhereQuery from './validateWhereQuery.js';
-import { Where } from '../../../../types.js';
+import { Where } from '../../../../types/index.js';
 import { getTranslation } from '../../../../utilities/getTranslation.js';
 import { transformWhereQuery } from './transformWhereQuery.js';
 

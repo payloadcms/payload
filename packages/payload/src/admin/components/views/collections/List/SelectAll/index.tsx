@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { SelectAllStatus, useSelection } from '../SelectionProvider.js';
+import { SelectAllStatus, useSelection } from '../SelectionProvider/index.js';
 
 import { CheckboxInput } from '../../../../forms/field-types/Checkbox/Input.js';
 

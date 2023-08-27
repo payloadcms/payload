@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider.js';
+import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider/index.js';
 
 import './index.scss';
 

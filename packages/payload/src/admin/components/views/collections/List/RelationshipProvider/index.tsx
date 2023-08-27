@@ -1,11 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react';
 import querystring from 'qs';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../utilities/Config.js';
+import { useConfig } from '../../../../utilities/Config/index.js';
 import { TypeWithID } from '../../../../../../collections/config/types.js';
 import { reducer } from './reducer.js';
 import useDebounce from '../../../../../hooks/useDebounce.js';
-import { useLocale } from '../../../../utilities/Locale.js';
+import { useLocale } from '../../../../utilities/Locale/index.js';
 
 // documents are first set to null when requested
 // set to false when no doc is returned

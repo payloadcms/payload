@@ -4,22 +4,22 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import { DocumentDrawerProps } from './types.js';
 import DefaultEdit from '../../views/collections/Edit/Default.js';
-import X from '../../icons/X.js';
+import X from '../../icons/X/index.js';
 import { Fields } from '../../forms/Form/types.js';
-import buildStateFromSchema from '../../forms/Form/buildStateFromSchema.js';
+import buildStateFromSchema from '../../forms/Form/buildStateFromSchema/index.js';
 import { getTranslation } from '../../../../utilities/getTranslation.js';
-import Button from '../Button.js';
-import { useConfig } from '../../utilities/Config.js';
-import { useLocale } from '../../utilities/Locale.js';
-import { useAuth } from '../../utilities/Auth.js';
-import { DocumentInfoProvider, useDocumentInfo } from '../../utilities/DocumentInfo.js';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
+import Button from '../Button/index.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import { useLocale } from '../../utilities/Locale/index.js';
+import { useAuth } from '../../utilities/Auth/index.js';
+import { DocumentInfoProvider, useDocumentInfo } from '../../utilities/DocumentInfo/index.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent/index.js';
 import usePayloadAPI from '../../../hooks/usePayloadAPI.js';
 import formatFields from '../../views/collections/Edit/formatFields.js';
 import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections.js';
-import IDLabel from '../IDLabel.js';
-import { baseClass } from '.';
-import { CollectionPermission } from '../../../../auth.js';
+import IDLabel from '../IDLabel/index.js';
+import { baseClass } from './index.js';
+import { CollectionPermission } from '../../../../auth/types.js';
 
 const Content: React.FC<DocumentDrawerProps> = ({
   collectionSlug,

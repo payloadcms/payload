@@ -1,5 +1,5 @@
 import { i18n as Ii18n } from 'i18next';
-import { Permissions } from '../../auth.js';
+import { Permissions } from '../../auth/types.js';
 import { SanitizedCollectionConfig } from '../../collections/config/types.js';
 import { SanitizedGlobalConfig } from '../../globals/config/types.js';
 import { getTranslation } from '../../utilities/getTranslation.js';

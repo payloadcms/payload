@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 
 import { SanitizedGlobalConfig } from '../../config/types.js';
-import { Document } from '../../../types.js';
+import { Document } from '../../../types/index.js';
 import findOne from '../../operations/findOne.js';
 
 export default function findOneResolver(globalConfig: SanitizedGlobalConfig): Document {

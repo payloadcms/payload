@@ -7,18 +7,18 @@ import { MarkOptional } from 'ts-essentials';
 import executeAccess from '../../auth/executeAccess.js';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js';
 
-import { ValidationError } from '../../errors.js';
+import { ValidationError } from '../../errors/index.js';
 
 import sendVerificationEmail from '../../auth/sendVerificationEmail.js';
 import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection } from '../config/types.js';
 import { PayloadRequest } from '../../express/types.js';
-import { Document } from '../../types.js';
+import { Document } from '../../types/index.js';
 import { fieldAffectsData } from '../../fields/config/types.js';
 import { uploadFiles } from '../../uploads/uploadFiles.js';
-import { beforeChange } from '../../fields/hooks/beforeChange.js';
-import { beforeValidate } from '../../fields/hooks/beforeValidate.js';
-import { afterChange } from '../../fields/hooks/afterChange.js';
-import { afterRead } from '../../fields/hooks/afterRead.js';
+import { beforeChange } from '../../fields/hooks/beforeChange/index.js';
+import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js';
+import { afterChange } from '../../fields/hooks/afterChange/index.js';
+import { afterRead } from '../../fields/hooks/afterRead/index.js';
 import { generateFileData } from '../../uploads/generateFileData.js';
 import { saveVersion } from '../../versions/saveVersion.js';
 import { mapAsync } from '../../utilities/mapAsync.js';

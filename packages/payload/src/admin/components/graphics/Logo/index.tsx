@@ -1,6 +1,6 @@
 import React from 'react';
-import { useConfig } from '../../utilities/Config.js';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent/index.js';
 
 const css = `
   .graphic-logo path {

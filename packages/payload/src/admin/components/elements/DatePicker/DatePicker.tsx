@@ -2,8 +2,8 @@ import React from 'react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import * as Locales from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
-import CalendarIcon from '../../icons/Calendar.js';
-import XIcon from '../../icons/X.js';
+import CalendarIcon from '../../icons/Calendar/index.js';
+import XIcon from '../../icons/X/index.js';
 import { Props } from './types.js';
 import { getSupportedDateLocale } from '../../../utilities/formatDate/getSupportedDateLocale.js';
 

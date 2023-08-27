@@ -2,16 +2,16 @@ import React from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Trans, useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config.js';
-import { useAuth } from '../../utilities/Auth.js';
-import MinimalTemplate from '../../templates/Minimal.js';
-import Form from '../../forms/Form.js';
-import Password from '../../forms/field-types/Password.js';
-import ConfirmPassword from '../../forms/field-types/ConfirmPassword.js';
-import FormSubmit from '../../forms/Submit.js';
-import Button from '../../elements/Button.js';
-import Meta from '../../utilities/Meta.js';
-import HiddenInput from '../../forms/field-types/HiddenInput.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import { useAuth } from '../../utilities/Auth/index.js';
+import MinimalTemplate from '../../templates/Minimal/index.js';
+import Form from '../../forms/Form/index.js';
+import Password from '../../forms/field-types/Password/index.js';
+import ConfirmPassword from '../../forms/field-types/ConfirmPassword/index.js';
+import FormSubmit from '../../forms/Submit/index.js';
+import Button from '../../elements/Button/index.js';
+import Meta from '../../utilities/Meta/index.js';
+import HiddenInput from '../../forms/field-types/HiddenInput/index.js';
 
 import './index.scss';
 

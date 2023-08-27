@@ -3,10 +3,10 @@ import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { useTranslation } from 'react-i18next';
 import { Props } from './types.js';
-import Search from '../../icons/Search.js';
+import Search from '../../icons/Search/index.js';
 import useDebounce from '../../../hooks/useDebounce.js';
-import { useSearchParams } from '../../utilities/SearchParams.js';
-import { Where, WhereField } from '../../../../types.js';
+import { useSearchParams } from '../../utilities/SearchParams/index.js';
+import { Where, WhereField } from '../../../../types/index.js';
 import { getTranslation } from '../../../../utilities/getTranslation.js';
 
 import './index.scss';

@@ -1,5 +1,5 @@
 import { Payload } from '../payload.js';
-import { docHasTimestamps, Document, PayloadRequest, Where } from '../types.js';
+import { docHasTimestamps, Document, PayloadRequest, Where } from '../types/index.js';
 import { SanitizedGlobalConfig } from '../globals/config/types.js';
 
 type Args = {

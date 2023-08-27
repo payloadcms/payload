@@ -1,5 +1,5 @@
-import { docHasTimestamps, PayloadRequest, Where } from '../../types.js';
-import { hasWhereAccessResult } from '../../auth.js';
+import { docHasTimestamps, PayloadRequest, Where } from '../../types/index.js';
+import { hasWhereAccessResult } from '../../auth/types.js';
 import { AccessResult } from '../../config/types.js';
 import { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js';

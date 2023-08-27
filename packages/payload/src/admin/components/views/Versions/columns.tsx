@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link, useRouteMatch } from 'react-router-dom';
 import { TFunction, useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config.js';
+import { useConfig } from '../../utilities/Config/index.js';
 import { Column } from '../../elements/Table/types.js';
-import SortColumn from '../../elements/SortColumn.js';
+import SortColumn from '../../elements/SortColumn/index.js';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
 import { SanitizedGlobalConfig } from '../../../../globals/config/types.js';
-import { Pill } from '../...js';
-import { formatDate } from '../../../utilities/formatDate.js';
+import { Pill } from '../../index.js';
+import { formatDate } from '../../../utilities/formatDate/index.js';
 
 type CreatedAtCellProps = {
   id: string

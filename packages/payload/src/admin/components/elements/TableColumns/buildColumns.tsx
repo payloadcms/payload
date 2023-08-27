@@ -1,13 +1,13 @@
 import React from 'react';
-import Cell from '../../views/collections/List/Cell.js';
-import SortColumn from '../SortColumn.js';
+import Cell from '../../views/collections/List/Cell/index.js';
+import SortColumn from '../SortColumn/index.js';
 import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
 import { Column } from '../Table/types.js';
 import { fieldIsPresentationalOnly } from '../../../../fields/config/types.js';
 import flattenFields from '../../../../utilities/flattenTopLevelFields.js';
 import { Props as CellProps } from '../../views/collections/List/Cell/types.js';
-import SelectAll from '../../views/collections/List/SelectAll.js';
-import SelectRow from '../../views/collections/List/SelectRow.js';
+import SelectAll from '../../views/collections/List/SelectAll/index.js';
+import SelectRow from '../../views/collections/List/SelectRow/index.js';
 
 const buildColumns = ({
   collection,

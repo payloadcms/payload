@@ -2,7 +2,7 @@ import React from 'react';
 import { DiffMethod } from 'react-diff-viewer-continued';
 import { Props } from './types.js';
 import { fieldAffectsData, fieldHasSubFields } from '../../../../../fields/config/types.js';
-import Nested from './fields/Nested.js';
+import Nested from './fields/Nested/index.js';
 import { diffMethods } from './fields/diffMethods.js';
 
 import './index.scss';

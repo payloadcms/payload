@@ -1,7 +1,7 @@
 import React from 'react';
 import { DeepRequired } from 'ts-essentials';
 import { GraphQLNonNull, GraphQLObjectType } from 'graphql';
-import type { Where } from '../../types.js';
+import type { Where } from '../../types/index.js';
 import { User } from '../../auth/types.js';
 import { PayloadRequest } from '../../express/types.js';
 import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types.js';

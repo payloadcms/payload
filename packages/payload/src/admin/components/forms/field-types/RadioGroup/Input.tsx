@@ -1,9 +1,9 @@
 import React from 'react';
 
-import Error from '../../Error.js';
-import Label from '../../Label.js';
-import FieldDescription from '../../FieldDescription.js';
-import RadioInput from './RadioInput.js';
+import Error from '../../Error/index.js';
+import Label from '../../Label/index.js';
+import FieldDescription from '../../FieldDescription/index.js';
+import RadioInput from './RadioInput/index.js';
 import { optionIsObject, RadioField } from '../../../../../fields/config/types.js';
 import { Description } from '../../FieldDescription/types.js';
 import { OnChange } from './types.js';

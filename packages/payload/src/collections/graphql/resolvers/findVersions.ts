@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 
 import { Response } from 'express';
-import { Where } from '../../../types.js';
+import { Where } from '../../../types/index.js';
 import type { PaginatedDocs } from '../../../database/types.js';
 import { PayloadRequest } from '../../../express/types.js';
 import { Collection } from '../../config/types.js';

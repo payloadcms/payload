@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDiffViewer from 'react-diff-viewer-continued';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../../utilities/Config.js';
-import { useLocale } from '../../../../../utilities/Locale.js';
+import { useConfig } from '../../../../../utilities/Config/index.js';
+import { useLocale } from '../../../../../utilities/Locale/index.js';
 import { SanitizedCollectionConfig } from '../../../../../../../collections/config/types.js';
 import { fieldAffectsData, fieldIsPresentationalOnly, RelationshipField } from '../../../../../../../fields/config/types.js';
-import Label from '../../Label.js';
+import Label from '../../Label/index.js';
 import { Props } from '../types.js';
 import { diffStyles } from '../styles.js';
 import { getTranslation } from '../../../../../../../utilities/getTranslation.js';

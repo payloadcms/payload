@@ -42,79 +42,79 @@ export {
   type UpdateVersion,
   type UpdateVersionArgs,
   type Webpack,
-} from '../database/types';
+} from '../database/types.js';
 
-export * from '../database/queryValidation/types'
+export * from '../database/queryValidation/types.js'
 
 export {
   combineQueries
-} from '../database/combineQueries'
+} from '../database/combineQueries.js'
 
 export {
   createDatabaseAdapter
-} from '../database/createAdapter'
+} from '../database/createAdapter.js'
 
 export {
   default as flattenWhereToOperators
-} from '../database/flattenWhereToOperators'
+} from '../database/flattenWhereToOperators.js'
 
 export {
   getLocalizedPaths
-} from '../database/getLocalizedPaths'
+} from '../database/getLocalizedPaths.js'
 
 export {
   transaction
-} from '../database/transaction'
+} from '../database/transaction.js'
 
 export {
   createMigration
-} from '../database/migrations/createMigration'
+} from '../database/migrations/createMigration.js'
 
 export {
   getMigrations
-} from '../database/migrations/getMigrations'
+} from '../database/migrations/getMigrations.js'
 
 export {
   migrate
-} from '../database/migrations/migrate'
+} from '../database/migrations/migrate.js'
 
 export {
   migrateDown
-} from '../database/migrations/migrateDown'
+} from '../database/migrations/migrateDown.js'
 
 export {
   migrateRefresh
-} from '../database/migrations/migrateRefresh'
+} from '../database/migrations/migrateRefresh.js'
 
 export {
   migrateReset
-} from '../database/migrations/migrateReset'
+} from '../database/migrations/migrateReset.js'
 
 export {
   migrateStatus
-} from '../database/migrations/migrateStatus'
+} from '../database/migrations/migrateStatus.js'
 
 export {
   migrationTemplate
-} from '../database/migrations/migrationTemplate'
+} from '../database/migrations/migrationTemplate.js'
 
 export {
   migrationsCollection
-} from '../database/migrations/migrationsCollection'
+} from '../database/migrations/migrationsCollection.js'
 
 export {
   readMigrationFiles
-} from '../database/migrations/readMigrationFiles'
+} from '../database/migrations/readMigrationFiles.js'
 
 export {
   type EntityPolicies,
   type PathToQuery
-} from '../database/queryValidation/types'
+} from '../database/queryValidation/types.js'
 
 export {
   validateQueryPaths
-} from '../database/queryValidation/validateQueryPaths'
+} from '../database/queryValidation/validateQueryPaths.js'
 
 export {
   validateSearchParam
-} from '../database/queryValidation/validateSearchParams'
+} from '../database/queryValidation/validateSearchParams.js'

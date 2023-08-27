@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import formatSuccessResponse from '../../express/responses/formatSuccess.js';
 import { PayloadRequest } from '../../express/types.js';
-import { Document } from '../../types.js';
+import { Document } from '../../types/index.js';
 import { SanitizedGlobalConfig } from '../config/types.js';
 import restoreVersion from '../operations/restoreVersion.js';
 

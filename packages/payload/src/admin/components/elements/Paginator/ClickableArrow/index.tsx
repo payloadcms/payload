@@ -1,7 +1,7 @@
 import React from 'react';
 import { Props } from './types.js';
 
-import Chevron from '../../../icons/Chevron.js';
+import Chevron from '../../../icons/Chevron/index.js';
 
 import './index.scss';
 

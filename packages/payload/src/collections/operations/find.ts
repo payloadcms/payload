@@ -1,10 +1,10 @@
-import { Where } from '../../types.js';
+import { Where } from '../../types/index.js';
 import { PayloadRequest } from '../../express/types.js';
 import executeAccess from '../../auth/executeAccess.js';
 import { Collection, TypeWithID } from '../config/types.js';
 import type { PaginatedDocs } from '../../database/types.js';
 import { AccessResult } from '../../config/types.js';
-import { afterRead } from '../../fields/hooks/afterRead.js';
+import { afterRead } from '../../fields/hooks/afterRead/index.js';
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js';
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js';
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js';

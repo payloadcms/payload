@@ -1,6 +1,6 @@
 import React from 'react';
 import ElementButton from '../Button.js';
-import H5Icon from '../../../../../icons/headings/H5.js';
+import H5Icon from '../../../../../icons/headings/H5/index.js';
 
 const H5 = ({ attributes, children }) => (
   <h5 {...attributes}>{children}</h5>

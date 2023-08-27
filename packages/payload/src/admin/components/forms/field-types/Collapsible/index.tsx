@@ -1,17 +1,17 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import RenderFields from '../../RenderFields.js';
-import withCondition from '../../withCondition.js';
+import RenderFields from '../../RenderFields/index.js';
+import withCondition from '../../withCondition/index.js';
 import { Props } from './types.js';
-import { Collapsible } from '../../../elements/Collapsible.js';
-import { usePreferences } from '../../../utilities/Preferences.js';
+import { Collapsible } from '../../../elements/Collapsible/index.js';
+import { usePreferences } from '../../../utilities/Preferences/index.js';
 import { DocumentPreferences } from '../../../../../preferences/types.js';
-import { useDocumentInfo } from '../../../utilities/DocumentInfo.js';
-import FieldDescription from '../../FieldDescription.js';
-import { RowLabel } from '../../RowLabel.js';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo/index.js';
+import FieldDescription from '../../FieldDescription/index.js';
+import { RowLabel } from '../../RowLabel/index.js';
 import { createNestedFieldPath } from '../../Form/createNestedFieldPath.js';
-import { WatchChildErrors } from '../../WatchChildErrors.js';
+import { WatchChildErrors } from '../../WatchChildErrors/index.js';
 import { useFormSubmitted } from '../../Form/context.js';
-import { ErrorPill } from '../../../elements/ErrorPill.js';
+import { ErrorPill } from '../../../elements/ErrorPill/index.js';
 
 import './index.scss';
 
