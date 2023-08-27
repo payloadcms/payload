@@ -2,9 +2,10 @@ import { CollectionConfig } from '../../../src/collections/config/types';
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
-  versions: {
-    drafts: true,
-  },
+  // TODO: wire up versions methods
+  // versions: {
+  //   drafts: true,
+  // },
   fields: [
     {
       name: 'slug',
