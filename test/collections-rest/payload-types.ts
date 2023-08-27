@@ -15,7 +15,7 @@ export interface Config {
     'custom-id': CustomId;
     'custom-id-number': CustomIdNumber;
     'error-on-hooks': ErrorOnHook;
-    'sort-by-multiple': SortByMultiple;
+    'sort-multiple': SortMultiple;
     users: User;
   };
   globals: {};
@@ -112,10 +112,10 @@ export interface ErrorOnHook {
   updatedAt: string;
   createdAt: string;
 }
-export interface SortByMultiple {
+export interface SortMultiple {
   id: string;
-  isFavorite?: boolean;
-  sortSecond?: number;
+  number?: number;
+  bool?: boolean;
   updatedAt: string;
   createdAt: string;
 }
