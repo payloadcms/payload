@@ -1,6 +1,6 @@
 {
   "name": "@alessiogr/payloadtest",
-  "version": "1.17.0",
+  "version": "1.18.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "type": "module",
@@ -71,8 +71,8 @@
     "payload": "bin.js"
   },
   "scripts": {
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
-    "copyfiles:new": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/esm/ && copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/cjs/",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "copyfiles:new": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/esm/ && copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/cjs/",
     "build:tsc": "tsc",
     "build:tsc:esm": "tsc --module NodeNext --target ESNext --emitDeclarationOnly --outDir dist/esm",
     "build:tsc:cjs": "tsc --module NodeNext --target ESNext --emitDeclarationOnly --outDir dist/cjs",
