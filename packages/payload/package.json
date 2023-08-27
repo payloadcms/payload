@@ -1,6 +1,6 @@
 {
   "name": "@alessiogr/payloadtest",
-  "version": "1.27.0",
+  "version": "1.28.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "type": "module",
@@ -30,19 +30,19 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "main": "./dist/cjs/index.js",
-    "types": "./dist/esm/index.d.ts",
+    "types": "./dist/types/index.d.ts",
     "module": "./dist/esm/index.js",
     "access": "public",
     "exports": {
       ".": {
-        "types": "./dist/esm/index.d.ts",
+        "types": "./dist/types/index.d.ts",
         "import": "./dist/esm/index.js",
         "default": "./dist/esm/index.js",
         "node": "./dist/esm/index.js",
         "require": "./dist/cjs/index.js"
       },
       "./*": {
-        "types": "./dist/esm/exports/*.d.ts",
+        "types": "./dist/types/exports/*.d.ts",
         "import": "./dist/esm/exports/*.js",
         "default": "./dist/esm/exports/*.js",
         "node": "./dist/esm/exports/*.js",
@@ -76,12 +76,14 @@
     "build:tsc": "tsc",
     "build:tsc:esm": "tsc --module NodeNext --target ESNext --emitDeclarationOnly --outDir dist/esm",
     "build:tsc:cjs": "tsc --module NodeNext --target ESNext --emitDeclarationOnly --outDir dist/cjs",
+    "build:tsc:both": "tsc --module NodeNext --target ESNext --emitDeclarationOnly --outDir dist/types",
     "build:swc:esm": "swc ./src -d ./dist/esm --config-file .swcrc-esm",
     "build:swc:cjs": "swc ./src -d ./dist/cjs --config-file .swcrc-cjs",
     "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
     "build:components:esm": "webpack --config dist/esm/bundlers/webpack/components.config.js",
     "build:components:cjs": "webpack --config webpack-config-wrapper.cjs",
-    "build": "pnpm copyfiles:new && pnpm build:swc:esm && pnpm build:swc:cjs && pnpm build:components:esm && pnpm build:components:cjs && pnpm build:tsc:esm && pnpm build:tsc:cjs",
+    "build": "pnpm copyfiles:new && pnpm build:swc:esm && pnpm build:swc:cjs && pnpm build:components:esm && pnpm build:components:cjs && pnpm build:tsc:both",
+    "buildworks": "pnpm copyfiles:new && pnpm build:swc:esm && pnpm build:swc:cjs && pnpm build:components:esm && pnpm build:components:cjs && pnpm build:tsc:esm && pnpm build:tsc:cjs",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
     "dev": "nodemon",
     "dev2": "tsx ./test/dev.ts _community",
