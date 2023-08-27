@@ -10,17 +10,15 @@
     "build": "tsc"
   },
   "devDependencies": {
-    "@types/mongoose-aggregate-paginate-v2": "^1.0.5",
     "mongodb-memory-server": "^8.13.0",
-    "typescript": "^4.9.4",
-    "payload": "payloadcms/payload#build/chore/update-2.0"
+    "payload": "payloadcms/payload#build/chore/update-2.0",
+    "typescript": "^4.9.4"
   },
   "dependencies": {
     "bson-objectid": "^2.0.4",
     "deepmerge": "^4.3.1",
     "get-port": "5.1.1",
     "mongoose": "6.11.4",
-    "mongoose-aggregate-paginate-v2": "^1.0.6",
     "mongoose-paginate-v2": "1.7.22",
     "uuid": "^9.0.0"
   }

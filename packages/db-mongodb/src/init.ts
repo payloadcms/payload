@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign */
 import mongoose, { PaginateOptions } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
 import { buildVersionCollectionFields } from 'payload/dist/versions/buildCollectionFields';
 import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
 import { getVersionsModelName } from 'payload/dist/versions/getVersionsModelName';
@@ -62,10 +61,6 @@ export const init: Init = async function init(
             }),
           );
 
-        if (collection.versions?.drafts) {
-          versionSchema.plugin(mongooseAggregatePaginate);
-        }
-
         const model = mongoose.model(
           versionModelName,
           versionSchema,
@@ -82,9 +77,6 @@ export const init: Init = async function init(
       ) as CollectionModel;
       this.collections[collection.slug] = model;
 
-      // TS expect error only needed until we launch 2.0.0
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
       this.payload.collections[collection.slug] = {
         config: collection,
       };
