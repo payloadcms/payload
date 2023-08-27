@@ -82,6 +82,12 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       dotenv: mockDotENVPath,
       [bundlerPath]: mockModulePath,
       [bundlerPath2]: mockModulePath,
+      [path.resolve(_dirname, '../../../../../db-postgres/src/index')]: path.resolve(_dirname, '../../../../../db-postgres/src/mock'),
+      [path.resolve(_dirname, '../../../../../db-mongodb/src/index')]: path.resolve(_dirname, '../../../../../db-mongodb/src/mock'),
+      [path.resolve(_dirname, '../../../../../db-mongodb/src/index.js')]: path.resolve(_dirname, '../../../../../db-mongodb/src/mock.js'),
+      [path.resolve(_dirname, '../../../../../db-postgres/src/index.js')]: path.resolve(_dirname, '../../../../../db-postgres/src/mock.js'),
+      [path.resolve(_dirname, '../../../../../db-mongodb/src/index.ts')]: path.resolve(_dirname, '../../../../../db-mongodb/src/mock.js'),
+      [path.resolve(_dirname, '../../../../../db-postgres/src/index.ts')]: path.resolve(_dirname, '../../../../../db-postgres/src/mock.js')
     },
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     // Add support for TypeScripts fully qualified ESM imports.
