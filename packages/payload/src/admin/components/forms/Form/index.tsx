@@ -425,7 +425,7 @@ const Form: React.FC<Props> = (props) => {
     });
 
     if (fieldConfig) {
-      const subFieldState = await buildStateFromSchema({ fieldSchema: fieldConfig, data, preferences, operation, id, user, locale, t });
+      const subFieldState = await buildStateFromSchema({ fieldSchema: fieldConfig, data, preferences, operation, id, user, locale, t: t as any });
       dispatchFields({ type: 'ADD_ROW', rowIndex: rowIndex - 1, path, blockType: data?.blockType, subFieldState });
     }
   }, [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath]);
@@ -442,7 +442,7 @@ const Form: React.FC<Props> = (props) => {
     });
 
     if (fieldConfig) {
-      const subFieldState = await buildStateFromSchema({ fieldSchema: fieldConfig, data, preferences, operation, id, user, locale, t });
+      const subFieldState = await buildStateFromSchema({ fieldSchema: fieldConfig, data, preferences, operation, id, user, locale, t: t as any });
       dispatchFields({ type: 'REPLACE_ROW', rowIndex: rowIndex - 1, path, blockType: data?.blockType, subFieldState });
     }
   }, [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath]);
@@ -479,7 +479,7 @@ const Form: React.FC<Props> = (props) => {
 
   const reset = useCallback(async (fieldSchema: Field[], data: unknown) => {
     const preferences = await getDocPreferences();
-    const state = await buildStateFromSchema({ fieldSchema, preferences, data, user, id, operation, locale, t });
+    const state = await buildStateFromSchema({ fieldSchema, preferences, data, user, id, operation, locale, t: t as any });
     contextRef.current = { ...initContextState } as FormContextType;
     setModified(false);
     dispatchFields({ type: 'REPLACE_STATE', state });

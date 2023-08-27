@@ -64,7 +64,7 @@ const AccountView: React.FC = () => {
   const onSave = React.useCallback(async (json: any) => {
     getDocPermissions();
     const preferences = await getDocPreferences();
-    const state = await buildStateFromSchema({ fieldSchema: collection.fields, preferences, data: json.doc, user, id, operation: 'update', locale, t });
+    const state = await buildStateFromSchema({ fieldSchema: collection.fields, preferences, data: json.doc, user, id, operation: 'update', locale, t: t as any });
     setInternalState(state);
   }, [collection, user, id, t, locale, getDocPermissions, getDocPreferences]);
 
@@ -88,7 +88,7 @@ const AccountView: React.FC = () => {
         id,
         user: userRef.current,
         locale,
-        t,
+        t: t as any,
       });
 
       await getPreference(preferencesKey);

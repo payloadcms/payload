@@ -24,6 +24,8 @@ const Text: React.FC<Props> = ({ field, locale, version, comparison, isRichText 
     if (typeof comparison === 'object') comparisonToRender = JSON.stringify(comparison, null, 2);
   }
 
+  const ReactDiffViewerToUse = ReactDiffViewer as any;
+
   return (
     <div className={baseClass}>
       <Label>
@@ -32,7 +34,7 @@ const Text: React.FC<Props> = ({ field, locale, version, comparison, isRichText 
         )}
         {getTranslation(field.label, i18n)}
       </Label>
-      <ReactDiffViewer
+      <ReactDiffViewerToUse
         styles={diffStyles}
         compareMethod={DiffMethod[diffMethod]}
         oldValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}

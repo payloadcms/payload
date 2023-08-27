@@ -8,6 +8,9 @@ import './index.scss';
 
 const baseClass = 'code-editor';
 
+const MonacoEditor = Editor as any;
+
+
 const CodeEditor: React.FC<Props> = (props) => {
   const { readOnly, className, options, height, ...rest } = props;
 
@@ -20,7 +23,7 @@ const CodeEditor: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   return (
-    <Editor
+    <MonacoEditor
       className={classes}
       theme={theme === 'dark' ? 'vs-dark' : 'vs'}
       loading={<ShimmerEffect height={height} />}

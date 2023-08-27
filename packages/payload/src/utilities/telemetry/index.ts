@@ -8,6 +8,7 @@ import { ServerInitEvent } from './events/serverInit.js';
 import { AdminInitEvent } from './events/adminInit.js';
 import { oneWayHash } from './oneWayHash.js';
 
+
 export type BaseEvent = {
   envID: string
   projectID: string

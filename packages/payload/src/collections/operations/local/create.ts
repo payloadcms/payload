@@ -67,7 +67,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
   req.locale = locale ?? req?.locale ?? defaultLocale;
   req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
   req.payload = payload;
-  req.i18n = i18nInit(payload.config.i18n);
+  req.i18n = i18nInit(payload.config.i18n as any);
   req.files = {
     file: (file ?? (await getFileByPath(filePath))) as UploadedFile,
   };

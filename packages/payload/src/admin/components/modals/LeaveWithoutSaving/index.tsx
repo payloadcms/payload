@@ -10,13 +10,15 @@ import './index.scss';
 
 const modalSlug = 'leave-without-saving';
 
+const NavigationPromptToUse = NavigationPrompt as any;
+
 const LeaveWithoutSaving: React.FC = () => {
   const modified = useFormModified();
   const { user } = useAuth();
   const { t } = useTranslation('general');
 
   return (
-    <NavigationPrompt when={Boolean(modified && user)}>
+    <NavigationPromptToUse when={Boolean(modified && user)}>
       {({ onConfirm, onCancel }) => (
         <div className={modalSlug}>
           <MinimalTemplate className={`${modalSlug}__template`}>
@@ -36,7 +38,7 @@ const LeaveWithoutSaving: React.FC = () => {
           </MinimalTemplate>
         </div>
       )}
-    </NavigationPrompt>
+    </NavigationPromptToUse>
   );
 };
 

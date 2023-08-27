@@ -34,6 +34,7 @@ const Select: React.FC<Props> = ({ field, locale, version, comparison, diffMetho
 
   const comparisonToRender = typeof comparison !== 'undefined' ? getTranslatedOptions(getOptionsToRender(comparison, field.options, field.hasMany), i18n) : placeholder;
   const versionToRender = typeof version !== 'undefined' ? getTranslatedOptions(getOptionsToRender(version, field.options, field.hasMany), i18n) : placeholder;
+  const ReactDiffViewerToUse = ReactDiffViewer as any;
 
   return (
     <div className={baseClass}>
@@ -43,7 +44,7 @@ const Select: React.FC<Props> = ({ field, locale, version, comparison, diffMetho
         )}
         {getTranslation(field.label, i18n)}
       </Label>
-      <ReactDiffViewer
+      <ReactDiffViewerToUse
         styles={diffStyles}
         compareMethod={DiffMethod[diffMethod]}
         oldValue={comparisonToRender}

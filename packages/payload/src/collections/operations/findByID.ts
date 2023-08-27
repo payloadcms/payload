@@ -110,7 +110,7 @@ async function findByID<T extends TypeWithID>(
     if (!req.findByID[transactionID][collectionConfig.slug]) {
       const nonMemoizedFindByID = async (query: FindOneArgs) => req.payload.db.findOne(query);
 
-      req.findByID[transactionID][collectionConfig.slug] = memoize(nonMemoizedFindByID, {
+      req.findByID[transactionID][collectionConfig.slug] = (memoize as any)(nonMemoizedFindByID, {
         isPromise: true,
         maxSize: 100,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

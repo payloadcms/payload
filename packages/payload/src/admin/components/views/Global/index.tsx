@@ -52,7 +52,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     getDocPermissions();
     setUpdatedAt(json?.result?.updatedAt);
     const preferences = await getDocPreferences();
-    const state = await buildStateFromSchema({ fieldSchema: fields, preferences, data: json.result, operation: 'update', user, locale, t });
+    const state = await buildStateFromSchema({ fieldSchema: fields, preferences, data: json.result, operation: 'update', user, locale, t: t as any });
     setInitialState(state);
   }, [getVersions, fields, user, locale, t, getDocPermissions, getDocPreferences]);
 
@@ -74,7 +74,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   useEffect(() => {
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences();
-      const state = await buildStateFromSchema({ fieldSchema: fields, preferences, data: dataToRender, user, operation: 'update', locale, t });
+      const state = await buildStateFromSchema({ fieldSchema: fields, preferences, data: dataToRender, user, operation: 'update', locale, t: t as any });
       await getPreference(preferencesKey);
       setInitialState(state);
     };

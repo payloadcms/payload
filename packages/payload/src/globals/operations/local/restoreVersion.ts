@@ -35,7 +35,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   } = options;
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
-  const i18n = i18nInit(payload.config.i18n);
+  const i18n = i18nInit(payload.config.i18n as any);
 
   if (!globalConfig) {
     throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`);

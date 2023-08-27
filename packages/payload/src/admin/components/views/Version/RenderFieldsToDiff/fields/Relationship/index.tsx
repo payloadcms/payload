@@ -79,6 +79,7 @@ const Relationship: React.FC<Props & { field: RelationshipField }> = ({ field, v
     versionToRender = generateLabelFromValue(collections, field, locale, version);
     comparisonToRender = generateLabelFromValue(collections, field, locale, comparison);
   }
+  const ReactDiffViewerToUse = ReactDiffViewer as any;
 
   return (
     <div className={baseClass}>
@@ -88,7 +89,7 @@ const Relationship: React.FC<Props & { field: RelationshipField }> = ({ field, v
         )}
         {getTranslation(field.label, i18n)}
       </Label>
-      <ReactDiffViewer
+      <ReactDiffViewerToUse
         styles={diffStyles}
         oldValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}
         newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}

@@ -49,7 +49,7 @@ async function localLogin<TSlug extends keyof GeneratedTypes['collections']>(
 
   req.payloadAPI = req.payloadAPI || 'local';
   req.payload = payload;
-  req.i18n = i18nInit(payload.config.i18n);
+  req.i18n = i18nInit(payload.config.i18n as any);
   req.locale = undefined;
   req.fallbackLocale = undefined;
 

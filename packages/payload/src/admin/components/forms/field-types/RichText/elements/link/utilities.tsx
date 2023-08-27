@@ -50,7 +50,7 @@ export function transformExtraFields(customFieldSchema: Field[] | ((args: {
   config: SanitizedConfig;
   i18n: i18n;
 }) => Field[]), config: SanitizedConfig, i18n: i18n): Field[] {
-  const baseFields: Field[] = getBaseFields(config);
+  const baseFields: Field[] = getBaseFields(config as any);
 
   const fields = typeof customFieldSchema === 'function' ? customFieldSchema({ defaultFields: baseFields, config, i18n }) : baseFields;
 

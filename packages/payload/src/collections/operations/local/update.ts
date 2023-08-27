@@ -70,7 +70,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
   } = options;
 
   const collection = payload.collections[collectionSlug];
-  const i18n = i18nInit(payload.config.i18n);
+  const i18n = i18nInit(payload.config.i18n as any);
   const defaultLocale = payload.config.localization ? payload.config.localization?.defaultLocale : null;
 
   if (!collection) {

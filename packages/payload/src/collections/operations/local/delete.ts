@@ -67,7 +67,7 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     locale: locale ?? defaultLocale,
     fallbackLocale: fallbackLocale ?? defaultLocale,
     payload,
-    i18n: i18nInit(payload.config.i18n),
+    i18n: i18nInit(payload.config.i18n as any),
   } as PayloadRequest;
   setRequestContext(req, context);
 

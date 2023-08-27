@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { type i18n } from 'i18next';
 import { SanitizedCollectionConfig } from '../../../../../collections/config/types.js';
 import { RelationshipField } from '../../../../../fields/config/types.js';
 import { Where } from '../../../../../types/index.js';
@@ -35,7 +35,7 @@ type UPDATE = {
   type: 'UPDATE'
   doc: any
   collection: SanitizedCollectionConfig
-  i18n: typeof i18n
+  i18n: i18n
   config: SanitizedConfig
 }
 
@@ -45,7 +45,7 @@ type ADD = {
   collection: SanitizedCollectionConfig
   sort?: boolean
   ids?: (string | number)[]
-  i18n: typeof i18n
+  i18n: i18n
   config: SanitizedConfig
 }
 

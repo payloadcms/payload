@@ -34,7 +34,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     sanitizedConfig.admin.bundler = getDefaultBundler();
   }
 
-  return sanitizedConfig as Partial<SanitizedConfig>;
+  return sanitizedConfig as unknown as Partial<SanitizedConfig>;
 };
 
 export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {

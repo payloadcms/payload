@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import isHotkey from 'is-hotkey';
+import {isHotkey} from 'is-hotkey';
 import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor, BaseOperation } from 'slate';
 import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
 import { HistoryEditor, withHistory } from 'slate-history';

@@ -61,7 +61,7 @@ const EditView: React.FC<IndexProps> = (props) => {
       id,
       operation: 'update',
       locale,
-      t,
+      t: t as any,
       ...overrides,
     });
 

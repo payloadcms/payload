@@ -43,9 +43,10 @@ const Meta: React.FC<Props> = ({
       faviconElement.remove();
     }
   });
+  const HelmetToUse = Helmet as any;
 
   return (
-    <Helmet
+    <HelmetToUse
       htmlAttributes={{
         lang: currentLanguage,
         dir: currentDirection,

@@ -66,7 +66,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
         operation: id ? 'update' : 'create',
         id,
         locale,
-        t,
+        t: t as any,
       });
       setInternalState(state);
     };

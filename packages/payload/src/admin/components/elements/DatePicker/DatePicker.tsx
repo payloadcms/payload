@@ -10,6 +10,9 @@ import { getSupportedDateLocale } from '../../../utilities/formatDate/getSupport
 import 'react-datepicker/dist/react-datepicker.css';
 import './index.scss';
 
+const ReactDatePicker = DatePicker as any;
+
+
 const baseClass = 'date-time-picker';
 
 const DateTime: React.FC<Props> = (props) => {
@@ -89,7 +92,7 @@ const DateTime: React.FC<Props> = (props) => {
         <CalendarIcon />
       </div>
       <div className={`${baseClass}__input-wrapper`}>
-        <DatePicker
+        <ReactDatePicker
           {...dateTimePickerProps}
           onChange={(val) => onChange(val as Date)}
           locale={locale}

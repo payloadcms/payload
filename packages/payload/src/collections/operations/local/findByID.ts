@@ -58,7 +58,7 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
   req.payloadAPI = req.payloadAPI || 'local';
   req.locale = locale ?? req?.locale ?? defaultLocale;
   req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
-  req.i18n = i18nInit(payload.config.i18n);
+  req.i18n = i18nInit(payload.config.i18n as any);
   req.payload = payload;
 
   if (typeof user !== 'undefined') req.user = user;

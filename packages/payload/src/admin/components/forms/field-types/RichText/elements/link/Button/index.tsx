@@ -99,7 +99,7 @@ export const LinkButton: React.FC<{
               };
 
               const preferences = await getDocPreferences();
-              const state = await buildStateFromSchema({ fieldSchema, preferences, data, user, operation: 'create', locale, t });
+              const state = await buildStateFromSchema({ fieldSchema, preferences, data, user, operation: 'create', locale, t: t as any });
               setInitialState(state);
             }
           }

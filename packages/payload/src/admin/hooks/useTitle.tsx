@@ -1,4 +1,4 @@
-import i18next from 'i18next';
+import i18next, { type i18n } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { SanitizedConfig } from '../../config/types.js';
 import { SanitizedCollectionConfig } from '../../collections/config/types.js';
@@ -14,7 +14,7 @@ export const formatUseAsTitle = (args: {
   field?: FormField
   doc?: Record<string, any>
   collection: SanitizedCollectionConfig
-  i18n: typeof i18next
+  i18n: i18n
   config: SanitizedConfig
 }): string => {
   const {

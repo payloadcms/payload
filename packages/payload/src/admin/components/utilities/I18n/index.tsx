@@ -10,18 +10,21 @@ import { getSupportedMonacoLocale } from '../../../utilities/getSupportedMonacoL
 
 export const I18n: React.FC = () => {
   const config = useConfig();
-
+  // @ts-ignore // TODO: Fix
   if (i18n.isInitialized) {
     return null;
   }
 
+  
   i18n
+  // @ts-ignore // TODO: Fix
     .use(new LanguageDetector(null, {
       lookupCookie: 'lng',
       lookupLocalStorage: 'lng',
     }))
     .use(initReactI18next)
     .init(deepmerge(defaultOptions, config.i18n || {}));
+      // @ts-ignore // TODO: Fix
   loader.config({ 'vs/nls': { availableLanguages: { '*': getSupportedMonacoLocale(i18n.language) } } });
   return null;
 };

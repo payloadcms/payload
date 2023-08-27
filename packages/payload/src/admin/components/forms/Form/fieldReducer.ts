@@ -119,7 +119,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         0,
         // new row
         {
-          id: new ObjectID().toHexString(),
+          id: new (ObjectID as any)().toHexString(),
           collapsed: false,
           blockType: blockType || undefined,
           childErrorPaths: new Set(),
@@ -160,7 +160,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
 
       const rowsMetadata = [...state[path]?.rows || []];
       rowsMetadata[rowIndex] = {
-        id: new ObjectID().toHexString(),
+        id: new (ObjectID as any)().toHexString(),
         collapsed: false,
         blockType: blockType || undefined,
         childErrorPaths: new Set(),
@@ -197,10 +197,10 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       const rowsMetadata = state[path]?.rows || [];
 
       const duplicateRowMetadata = deepCopyObject(rowsMetadata[rowIndex]);
-      if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectID().toHexString();
+      if (duplicateRowMetadata.id) duplicateRowMetadata.id = new (ObjectID as any)().toHexString();
 
       const duplicateRowState = deepCopyObject(rows[rowIndex]);
-      if (duplicateRowState.id) duplicateRowState.id = new ObjectID().toHexString();
+      if (duplicateRowState.id) duplicateRowState.id = new (ObjectID as any)().toHexString();
 
       // If there are subfields
       if (Object.keys(duplicateRowState).length > 0) {

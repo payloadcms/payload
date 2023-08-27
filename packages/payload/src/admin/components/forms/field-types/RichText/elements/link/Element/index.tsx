@@ -110,7 +110,7 @@ export const LinkElement: React.FC<{
       };
 
       const preferences = await getDocPreferences();
-      const state = await buildStateFromSchema({ fieldSchema, preferences, data, user, operation: 'update', locale, t });
+      const state = await buildStateFromSchema({ fieldSchema, preferences, data, user, operation: 'update', locale, t: t as any });
       setInitialState(state);
     };
 

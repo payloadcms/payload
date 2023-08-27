@@ -56,7 +56,7 @@ export const UploadDrawer: React.FC<ElementProps & {
   useEffect(() => {
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences();
-      const state = await buildStateFromSchema({ fieldSchema, preferences, data: deepCopyObject(element?.fields || {}), user, operation: 'update', locale, t });
+      const state = await buildStateFromSchema({ fieldSchema, preferences, data: deepCopyObject(element?.fields || {}), user, operation: 'update', locale, t: t as any });
       setInitialState(state);
     };
 

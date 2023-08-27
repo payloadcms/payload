@@ -108,6 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [serverURL, api, userSlug, i18n, redirectToInactivityRoute]);
 
   const setToken = useCallback((token: string) => {
+      // @ts-ignore // TODO: Fix
     const decoded = jwtDecode<User>(token);
     setUser(decoded);
     setTokenInMemory(token);

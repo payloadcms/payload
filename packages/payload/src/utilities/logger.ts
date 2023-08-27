@@ -1,4 +1,4 @@
-import pino from 'pino';
+import { pino } from 'pino';
 
 export type PayloadLogger = pino.Logger;
 

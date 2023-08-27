@@ -55,7 +55,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Find Versions Operation.`);
   }
 
-  const i18n = i18nInit(payload.config.i18n);
+  const i18n = i18nInit(payload.config.i18n as any);
   const req = {
     user,
     payloadAPI: 'local',

@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { type i18n } from 'i18next';
 import { RelationshipField } from '../../../../../../fields/config/types.js';
 import { SanitizedCollectionConfig } from '../../../../../../collections/config/types.js';
 import type { PaginatedDocs } from '../../../../../../database/types.js';
@@ -18,7 +18,7 @@ export type Option = {
 type CLEAR = {
   type: 'CLEAR'
   required: boolean
-  i18n: typeof i18n
+  i18n: i18n
 }
 
 type ADD = {
@@ -27,7 +27,7 @@ type ADD = {
   relation: string
   hasMultipleRelations: boolean
   collection: SanitizedCollectionConfig
-  i18n: typeof i18n
+  i18n: i18n
 }
 
 export type Action = CLEAR | ADD

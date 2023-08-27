@@ -1,4 +1,4 @@
-import PassportAPIKey from 'passport-headerapikey';
+import { HeaderAPIKeyStrategy as PassportAPIKey } from 'passport-headerapikey';
 import crypto from 'crypto';
 import { PayloadRequest } from '../../express/types.js';
 import { Payload } from '../../payload.js';
