@@ -64,7 +64,13 @@ const useHotkey = (options: {
   editDepth: number
 }, func: (e: KeyboardEvent) => void): void => {
   const { keyCodes, cmdCtrlKey, editDepth } = options;
-  const { useModal } = facelessui;
+
+  const useModalFunction: any = function() {
+    return {
+      modalState: {},
+    };
+  }
+  const useModal = facelessui ? facelessui.useModal : useModalFunction;
 
   const { modalState } = useModal();
 
