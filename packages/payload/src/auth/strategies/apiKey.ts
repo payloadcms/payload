@@ -7,7 +7,7 @@ import { SanitizedCollectionConfig } from '../../collections/config/types.js';
 
 const PassportAPIKey = 'default' in PassportAPIKeyImport ? PassportAPIKeyImport.default : PassportAPIKeyImport;
 
-export default (payload: Payload, config: SanitizedCollectionConfig): typeof PassportAPIKey => {
+export default (payload: Payload, config: SanitizedCollectionConfig): PassportAPIKeyImport => {
   const { secret } = payload;
   const opts = {
     header: 'Authorization',
