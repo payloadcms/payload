@@ -166,7 +166,8 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
         },
       };
     } else {
-      const loadConfig = (await import('./config/load.js')).default;
+      const loadConfigImport = (await import('./config/load.js'));
+      const loadConfig = 'default' in loadConfigImport ? loadConfigImport.default : loadConfigImport;
       this.config = await loadConfig(this.logger);
     }
 

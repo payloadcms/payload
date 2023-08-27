@@ -34,7 +34,7 @@ const Select: React.FC<Props> = ({ field, locale, version, comparison, diffMetho
 
   const comparisonToRender = typeof comparison !== 'undefined' ? getTranslatedOptions(getOptionsToRender(comparison, field.options, field.hasMany), i18n) : placeholder;
   const versionToRender = typeof version !== 'undefined' ? getTranslatedOptions(getOptionsToRender(version, field.options, field.hasMany), i18n) : placeholder;
-  const ReactDiffViewerToUse = ReactDiffViewer.default ? ReactDiffViewer.default : ReactDiffViewer as any;
+  const ReactDiffViewerToUse = 'default' in ReactDiffViewer ? ReactDiffViewer.default : ReactDiffViewer;
 
   return (
     <div className={baseClass}>

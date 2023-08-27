@@ -1,19 +1,22 @@
-import { HeaderAPIKeyStrategy as PassportAPIKey } from 'passport-headerapikey';
+import { HeaderAPIKeyStrategy as PassportAPIKeyImport } from 'passport-headerapikey';
 import crypto from 'crypto';
 import { PayloadRequest } from '../../express/types.js';
 import { Payload } from '../../payload.js';
 import find from '../../collections/operations/find.js';
 import { SanitizedCollectionConfig } from '../../collections/config/types.js';
 
-export default (payload: Payload, config: SanitizedCollectionConfig): PassportAPIKey => {
+const PassportAPIKey = 'default' in PassportAPIKeyImport ? PassportAPIKeyImport.default : PassportAPIKeyImport;
+
+export default (payload: Payload, config: SanitizedCollectionConfig): typeof PassportAPIKey => {
   const { secret } = payload;
   const opts = {
     header: 'Authorization',
     prefix: `${config.slug} API-Key `,
   };
 
+
   // @ts-ignore
-  return new (PassportAPIKey.default || PassportAPIKey)(opts, true, async (apiKey, done, req) => {
+  return new PassportAPIKey(opts, true, async (apiKey, done, req) => {
     const apiKeyIndex = crypto.createHmac('sha1', secret)
       .update(apiKey)
       .digest('hex');

@@ -1,10 +1,12 @@
 import graphQLPlayground from 'graphql-playground-middleware-express';
 import { Payload } from '../payload.js';
 
+const graphQLPlaygroundToUse = 'default' in graphQLPlayground ? graphQLPlayground.default : graphQLPlayground;
+
 function initPlayground(ctx: Payload): void {
   if ((!ctx.config.graphQL.disable && !ctx.config.graphQL.disablePlaygroundInProduction && process.env.NODE_ENV === 'production') || process.env.NODE_ENV !== 'production') {
     // @ts-ignore
-    ctx.router.get(ctx.config.routes.graphQLPlayground, (graphQLPlayground.default || graphQLPlayground)({
+    ctx.router.get(ctx.config.routes.graphQLPlayground, graphQLPlaygroundToUse({
       endpoint: `${ctx.config.routes.api}${ctx.config.routes.graphQL}`,
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore ISettings interface has all properties required for some reason

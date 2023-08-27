@@ -25,7 +25,7 @@ const loadConfig = async (logger?: pino.Logger): Promise<SanitizedConfig> => {
 
   let config = await configPromise;
 
-  if (config.default) config = await config.default;
+  if ('default' in config) config = await config.default;
 
   if (process.env.NODE_ENV !== 'production') {
     config = await validate(config, localLogger);

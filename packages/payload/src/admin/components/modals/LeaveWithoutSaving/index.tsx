@@ -15,7 +15,7 @@ const LeaveWithoutSaving: React.FC = () => {
   const modified = useFormModified();
   const { user } = useAuth();
   const { t } = useTranslation('general');
-  const NavigationPromptToUse = NavigationPrompt.default ? NavigationPrompt.default : NavigationPrompt as any;
+  const NavigationPromptToUse = 'default' in NavigationPrompt ? NavigationPrompt.default : NavigationPrompt;
 
   return (
     <NavigationPromptToUse when={Boolean(modified && user)}>
