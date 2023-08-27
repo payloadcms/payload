@@ -2,10 +2,14 @@
   "$schema": "https://json.schemastore.org/swcrc",
   "sourceMaps": "inline",
   "jsc": {
+    "experimental": {
+      "keepImportAssertions": true
+    },
     "parser": {
       "syntax": "typescript",
       "tsx": true,
-      "dts": true
+      "dts": true,
+      "importAssertions": true
     }
   },
   "module": {
