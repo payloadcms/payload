@@ -2,6 +2,8 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { LocalizedArrays } from './collections/LocalizedArrays';
 import { LocalizedBlocks } from './collections/LocalizedBlocks';
 import { LocalizedGroups } from './collections/LocalizedGroups';
+import { Pages } from './collections/Pages';
+import { People } from './collections/People';
 import { Posts } from './collections/Posts';
 import { MainMenu } from './globals/MainMenu';
 
@@ -10,26 +12,9 @@ const config = buildConfigWithDefaults({
     LocalizedArrays,
     LocalizedBlocks,
     LocalizedGroups,
+    Pages,
+    People,
     Posts,
-    {
-      slug: 'pages',
-      fields: [
-        {
-          name: 'slug',
-          type: 'text',
-          localized: true,
-        },
-      ],
-    },
-    {
-      slug: 'people',
-      fields: [
-        {
-          name: 'fullName',
-          type: 'text',
-        },
-      ],
-    },
   ],
   globals: [
     MainMenu,

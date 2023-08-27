@@ -43,7 +43,6 @@ export const buildTable = ({
   tableName,
   timestamps,
 }: Args): Result => {
-  const formattedTableName = toSnakeCase(tableName);
   const columns: Record<string, AnyPgColumnBuilder> = baseColumns;
   const indexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {};
 
@@ -84,8 +83,8 @@ export const buildTable = ({
     indexes,
     localesColumns,
     localesIndexes,
-    newTableName: formattedTableName,
-    parentTableName: formattedTableName,
+    newTableName: tableName,
+    parentTableName: tableName,
     relationships,
   }));
 
@@ -94,7 +93,7 @@ export const buildTable = ({
     columns.updatedAt = timestamp('updated_at').defaultNow().notNull();
   }
 
-  const table = pgTable(formattedTableName, columns, (cols) => {
+  const table = pgTable(tableName, columns, (cols) => {
     const extraConfig = Object.entries(baseExtraConfig).reduce((config, [key, func]) => {
       config[key] = func(cols);
       return config;
@@ -106,10 +105,10 @@ export const buildTable = ({
     }, extraConfig);
   });
 
-  adapter.tables[formattedTableName] = table;
+  adapter.tables[tableName] = table;
 
   if (hasLocalizedField) {
-    const localeTableName = `${formattedTableName}_locales`;
+    const localeTableName = `${tableName}_locales`;
     localesColumns.id = serial('id').primaryKey();
     localesColumns._locale = adapter.enums._locales('_locale').notNull();
     localesColumns._parentID = parentIDColumnMap[idColType]('_parent_id').references(() => table.id, { onDelete: 'cascade' }).notNull();
@@ -158,7 +157,7 @@ export const buildTable = ({
         relationshipColumns[`${relationTo}ID`] = parentIDColumnMap[colType](`${formattedRelationTo}_id`).references(() => adapter.tables[formattedRelationTo].id);
       });
 
-      const relationshipsTableName = `${formattedTableName}_relationships`;
+      const relationshipsTableName = `${tableName}_relationships`;
 
       relationshipsTable = pgTable(relationshipsTableName, relationshipColumns, (cols) => {
         const result: Record<string, unknown> = {};
@@ -220,7 +219,7 @@ export const buildTable = ({
     return result;
   });
 
-  adapter.relations[`relations_${formattedTableName}`] = tableRelations;
+  adapter.relations[`relations_${tableName}`] = tableRelations;
 
   return { arrayBlockRelations };
 };

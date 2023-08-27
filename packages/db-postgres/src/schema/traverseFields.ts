@@ -73,7 +73,7 @@ export const traverseFields = ({
         targetIndexes = localesIndexes;
       }
 
-      if (field.unique || field.index) {
+      if ((field.unique || field.index) && !['array', 'blocks', 'relationship', 'upload', 'group'].includes(field.type)) {
         targetIndexes[`${field.name}Idx`] = createIndex({ columnName, name: field.name, unique: field.unique });
       }
     }

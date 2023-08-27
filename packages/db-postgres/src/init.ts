@@ -1,7 +1,10 @@
 /* eslint-disable no-param-reassign */
 import { pgEnum } from 'drizzle-orm/pg-core';
+import toSnakeCase from 'to-snake-case';
 import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
 import type { Init } from 'payload/dist/database/types';
+import { buildVersionGlobalFields } from 'payload/dist/versions/buildGlobalFields';
+import { buildVersionCollectionFields } from 'payload/dist/versions/buildCollectionFields';
 import { buildTable } from './schema/build';
 import type { PostgresAdapter } from './types';
 
@@ -16,22 +19,52 @@ export const init: Init = async function init(this: PostgresAdapter) {
   }
 
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
+    const tableName = toSnakeCase(collection.slug);
+
     buildTable({
       adapter: this,
       buildRelationships: true,
       fields: collection.fields,
-      tableName: collection.slug,
+      tableName,
       timestamps: collection.timestamps,
     });
+
+    if (collection.versions) {
+      const versionsTableName = `_${tableName}_versions`;
+      const versionFields = buildVersionCollectionFields(collection);
+
+      buildTable({
+        adapter: this,
+        buildRelationships: true,
+        fields: versionFields,
+        tableName: versionsTableName,
+        timestamps: true,
+      });
+    }
   });
 
   this.payload.config.globals.forEach((global) => {
+    const tableName = toSnakeCase(global.slug);
+
     buildTable({
       adapter: this,
       buildRelationships: true,
       fields: global.fields,
-      tableName: global.slug,
+      tableName,
       timestamps: false,
     });
+
+    if (global.versions) {
+      const versionsTableName = `_${tableName}_versions`;
+      const versionFields = buildVersionGlobalFields(global);
+
+      buildTable({
+        adapter: this,
+        buildRelationships: true,
+        fields: versionFields,
+        tableName: versionsTableName,
+        timestamps: true,
+      });
+    }
   });
 };
