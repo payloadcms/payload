@@ -1,11 +1,11 @@
 import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
-import { Where } from '../../types';
-import { PayloadRequest } from '../../express/types';
-import { TypeWithID } from '../config/types';
-import type { PaginatedDocs } from '../../database/types';
-import { isNumber } from '../../utilities/isNumber';
-import findVersions from '../operations/findVersions';
+import { Where } from '../../types.js';
+import { PayloadRequest } from '../../express/types.js';
+import { TypeWithID } from '../config/types.js';
+import type { PaginatedDocs } from '../../database/types.js';
+import { isNumber } from '../../utilities/isNumber.js';
+import findVersions from '../operations/findVersions.js';
 
 export default async function findVersionsHandler<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
   try {

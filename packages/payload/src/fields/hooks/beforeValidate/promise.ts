@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign */
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { Field, fieldAffectsData, TabAsField, tabHasName, valueIsValueWithRelation } from '../../config/types';
-import getValueWithDefault from '../../getDefaultValue';
-import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc';
-import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc';
-import { traverseFields } from './traverseFields';
+import { PayloadRequest, RequestContext } from '../../../express/types.js';
+import { Field, fieldAffectsData, TabAsField, tabHasName, valueIsValueWithRelation } from '../../config/types.js';
+import getValueWithDefault from '../../getDefaultValue.js';
+import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc.js';
+import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js';
+import { traverseFields } from './traverseFields.js';
 
 type Args<T> = {
   data: T

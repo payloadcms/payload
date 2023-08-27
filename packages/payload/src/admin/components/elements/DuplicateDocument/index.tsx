@@ -3,13 +3,13 @@ import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { Props } from './types';
-import Button from '../Button';
-import { requests } from '../../../api';
-import { useForm, useFormModified } from '../../forms/Form/context';
-import MinimalTemplate from '../../templates/Minimal';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { useConfig } from '../../utilities/Config.js';
+import { Props } from './types.js';
+import Button from '../Button.js';
+import { requests } from '../../../api.js';
+import { useForm, useFormModified } from '../../forms/Form/context.js';
+import MinimalTemplate from '../../templates/Minimal.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
 import './index.scss';
 
 

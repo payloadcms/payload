@@ -2,10 +2,10 @@ import { Request } from 'express';
 import type { i18n as Ii18n, TFunction } from 'i18next';
 import DataLoader from 'dataloader';
 import { UploadedFile } from 'express-fileupload';
-import { Payload } from '../payload';
-import { Collection, TypeWithID } from '../collections/config/types';
-import { User } from '../auth/types';
-import type { FindOneArgs } from '../database/types';
+import { Payload } from '../payload.js';
+import { Collection, TypeWithID } from '../collections/config/types.js';
+import { User } from '../auth/types.js';
+import type { FindOneArgs } from '../database/types.js';
 
 /** Express request with some Payload related context added */
 export declare type PayloadRequest<U = any> = Request & {

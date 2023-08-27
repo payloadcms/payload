@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useDelay } from './useDelay';
+import { useDelay } from './useDelay.js';
 
 type DelayedRenderProps = {
   /** `true` starts the mount process.

@@ -1,6 +1,6 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
-import GlobalViewWithRefresh from './GlobalViewWithRefresh';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import { devUser } from '../credentials.js';
+import GlobalViewWithRefresh from './GlobalViewWithRefresh.js';
 
 export const pagesSlug = 'pages';
 

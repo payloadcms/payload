@@ -2,20 +2,20 @@ import React, { HTMLAttributes, useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate';
 import { ReactEditor, useSlateStatic, useFocused, useSelected } from 'slate-react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../../../utilities/Config';
-import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
-import FileGraphic from '../../../../../../graphics/File';
-import useThumbnail from '../../../../../../../hooks/useThumbnail';
-import Button from '../../../../../../elements/Button';
-import { getTranslation } from '../../../../../../../../utilities/getTranslation';
-import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
-import { useListDrawer } from '../../../../../../elements/ListDrawer';
-import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
-import { Props as RichTextProps } from '../../../types';
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
-import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
-import { UploadDrawer } from './UploadDrawer';
-import { DrawerToggler } from '../../../../../../elements/Drawer';
+import { useConfig } from '../../../../../../utilities/Config.js';
+import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI.js';
+import FileGraphic from '../../../../../../graphics/File.js';
+import useThumbnail from '../../../../../../../hooks/useThumbnail.js';
+import Button from '../../../../../../elements/Button.js';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation.js';
+import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer.js';
+import { useListDrawer } from '../../../../../../elements/ListDrawer.js';
+import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types.js';
+import { Props as RichTextProps } from '../../../types.js';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js';
+import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug.js';
+import { UploadDrawer } from './UploadDrawer.js';
+import { DrawerToggler } from '../../../../../../elements/Drawer.js';
 
 import './index.scss';
 

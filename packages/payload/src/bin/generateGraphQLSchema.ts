@@ -1,8 +1,8 @@
 /* eslint-disable no-nested-ternary */
 import fs from 'fs';
 import { printSchema } from 'graphql';
-import Logger from '../utilities/logger';
-import loadConfig from '../config/load';
+import Logger from '../utilities/logger.js';
+import loadConfig from '../config/load.js';
 import payload from '..';
 
 export async function generateGraphQLSchema(): Promise<void> {

@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
-import { PayloadRequest } from '../../../express/types';
-import type { PaginatedDocs } from '../../../database/types';
-import { Where } from '../../../types';
-import { Collection } from '../../config/types';
-import find from '../../operations/find';
+import { PayloadRequest } from '../../../express/types.js';
+import type { PaginatedDocs } from '../../../database/types.js';
+import { Where } from '../../../types.js';
+import { Collection } from '../../config/types.js';
+import find from '../../operations/find.js';
 
 export type Resolver = (_: unknown,
   args: {

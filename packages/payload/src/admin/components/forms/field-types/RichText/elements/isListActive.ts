@@ -1,5 +1,5 @@
 import { Editor, Element } from 'slate';
-import { getCommonBlock } from './getCommonBlock';
+import { getCommonBlock } from './getCommonBlock.js';
 
 const isListActive = (editor: Editor, format: string): boolean => {
   if (!editor.selection) return false;

@@ -1,4 +1,4 @@
-import { User, Permissions } from '../../../../auth/types';
+import { User, Permissions } from '../../../../auth/types.js';
 
 export type AuthContext<T = User> = {
   user?: T | null

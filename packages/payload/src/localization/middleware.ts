@@ -1,4 +1,4 @@
-import type { SanitizedLocalizationConfig } from '../config/types';
+import type { SanitizedLocalizationConfig } from '../config/types.js';
 
 /**
  * sets request locale

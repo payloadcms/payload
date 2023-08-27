@@ -3,21 +3,21 @@ import { DeepRequired } from 'ts-essentials';
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Response } from 'express';
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
-import { Field } from '../../fields/config/types';
-import { PayloadRequest, RequestContext } from '../../express/types';
-import { Auth, IncomingAuthType, User } from '../../auth/types';
-import { IncomingUploadType, Upload } from '../../uploads/types';
-import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types';
+import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types.js';
+import { Field } from '../../fields/config/types.js';
+import { PayloadRequest, RequestContext } from '../../express/types.js';
+import { Auth, IncomingAuthType, User } from '../../auth/types.js';
+import { IncomingUploadType, Upload } from '../../uploads/types.js';
+import { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types.js';
 import {
   CustomPreviewButtonProps,
   CustomPublishButtonProps,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
-} from '../../admin/components/elements/types';
-import { AfterOperationArg, AfterOperationMap } from '../operations/utils';
-import type { Props as ListProps } from '../../admin/components/views/collections/List/types';
-import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types';
+} from '../../admin/components/elements/types.js';
+import { AfterOperationArg, AfterOperationMap } from '../operations/utils.js';
+import type { Props as ListProps } from '../../admin/components/views/collections/List/types.js';
+import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types.js';
 
 export type HookOperationType =
   | 'create'
@@ -115,8 +115,8 @@ export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
 export type AfterOperationHook<
   T extends TypeWithID = any,
 > = (
-    arg: AfterOperationArg<T>,
-  ) => Promise<ReturnType<AfterOperationMap<T>[keyof AfterOperationMap<T>]>>;
+  arg: AfterOperationArg<T>,
+) => Promise<ReturnType<AfterOperationMap<T>[keyof AfterOperationMap<T>]>>;
 
 export type AfterErrorHook = (err: Error, res: unknown, context: RequestContext) => { response: any, status: number } | void;
 

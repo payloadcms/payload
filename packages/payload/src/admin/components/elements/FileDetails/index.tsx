@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
 import { useTranslation } from 'react-i18next';
-import Thumbnail from '../Thumbnail';
-import Button from '../Button';
-import Meta from './Meta';
-import Chevron from '../../icons/Chevron';
-import { Props } from './types';
-import { FileSizes, Upload } from '../../../../uploads/types';
+import Thumbnail from '../Thumbnail.js';
+import Button from '../Button.js';
+import Meta from './Meta.js';
+import Chevron from '../../icons/Chevron.js';
+import { Props } from './types.js';
+import { FileSizes, Upload } from '../../../../uploads/types.js';
 
 import './index.scss';
 

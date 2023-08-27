@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import queryString from 'qs';
 import { useTranslation } from 'react-i18next';
-import { useLocale } from '../components/utilities/Locale';
-import { requests } from '../api';
+import { useLocale } from '../components/utilities/Locale.js';
+import { requests } from '../api.js';
 
 type Result = [
   {

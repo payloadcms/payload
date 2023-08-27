@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useConfig } from '../../../utilities/Config';
-import CopyToClipboard from '../../CopyToClipboard';
-import formatFilesize from '../../../../../uploads/formatFilesize';
-import { Props } from './types';
-import { useDocumentDrawer } from '../../DocumentDrawer';
-import Edit from '../../../icons/Edit';
-import Tooltip from '../../Tooltip';
+import { useConfig } from '../../../utilities/Config.js';
+import CopyToClipboard from '../../CopyToClipboard.js';
+import formatFilesize from '../../../../../uploads/formatFilesize.js';
+import { Props } from './types.js';
+import { useDocumentDrawer } from '../../DocumentDrawer.js';
+import Edit from '../../../icons/Edit.js';
+import Tooltip from '../../Tooltip.js';
 
 import './index.scss';
 

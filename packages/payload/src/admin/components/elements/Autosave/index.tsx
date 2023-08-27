@@ -2,13 +2,13 @@ import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { useFormModified, useAllFormFields } from '../../forms/Form/context';
-import { useLocale } from '../../utilities/Locale';
-import { Props } from './types';
-import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import useDebounce from '../../../hooks/useDebounce';
+import { useConfig } from '../../utilities/Config.js';
+import { useFormModified, useAllFormFields } from '../../forms/Form/context.js';
+import { useLocale } from '../../utilities/Locale.js';
+import { Props } from './types.js';
+import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues.js';
+import { useDocumentInfo } from '../../utilities/DocumentInfo.js';
+import useDebounce from '../../../hooks/useDebounce.js';
 
 import './index.scss';
 

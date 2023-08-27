@@ -1,13 +1,13 @@
-import type { Payload } from '../index';
-import type { SanitizedCollectionConfig } from '../collections/config/types';
-import { PayloadRequest } from '../express/types';
+import type { Payload } from '../index.js';
+import type { SanitizedCollectionConfig } from '../collections/config/types.js';
+import { PayloadRequest } from '../express/types.js';
 
 type Args = {
   payload: Payload
   /**
    * User IDs to delete
    */
-  ids: (string|number)[]
+  ids: (string | number)[]
   collectionConfig: SanitizedCollectionConfig
   req: PayloadRequest
 }

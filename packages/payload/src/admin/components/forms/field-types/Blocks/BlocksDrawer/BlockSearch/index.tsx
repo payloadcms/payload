@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import SearchIcon from '../../../../../graphics/Search';
+import SearchIcon from '../../../../../graphics/Search.js';
 
 import './index.scss';
 

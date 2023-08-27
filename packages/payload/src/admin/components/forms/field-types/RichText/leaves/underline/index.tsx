@@ -1,6 +1,6 @@
 import React from 'react';
-import LeafButton from '../Button';
-import UnderlineIcon from '../../../../../icons/Underline';
+import LeafButton from '../Button.js';
+import UnderlineIcon from '../../../../../icons/Underline.js';
 
 const Underline = ({ attributes, children }) => (
   <u {...attributes}>{children}</u>

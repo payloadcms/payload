@@ -1,11 +1,11 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import AutosavePosts from './collections/Autosave';
-import DraftPosts from './collections/Drafts';
-import AutosaveGlobal from './globals/Autosave';
-import { devUser } from '../credentials';
-import DraftGlobal from './globals/Draft';
-import VersionPosts from './collections/Versions';
-import { draftSlug } from './shared';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import AutosavePosts from './collections/Autosave.js';
+import DraftPosts from './collections/Drafts.js';
+import AutosaveGlobal from './globals/Autosave.js';
+import { devUser } from '../credentials.js';
+import DraftGlobal from './globals/Draft.js';
+import VersionPosts from './collections/Versions.js';
+import { draftSlug } from './shared.js';
 
 export default buildConfigWithDefaults({
   collections: [

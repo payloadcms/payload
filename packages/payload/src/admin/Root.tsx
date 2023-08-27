@@ -9,17 +9,17 @@ import { ScrollInfoProvider } from '@faceless-ui/scroll-info';
 import { WindowInfoProvider } from '@faceless-ui/window-info';
 import { ModalProvider, ModalContainer } from '@faceless-ui/modal';
 import { ToastContainer, Slide } from 'react-toastify';
-import { AuthProvider } from './components/utilities/Auth';
-import { ConfigProvider } from './components/utilities/Config';
-import { PreferencesProvider } from './components/utilities/Preferences';
-import { CustomProvider } from './components/utilities/CustomProvider';
-import { SearchParamsProvider } from './components/utilities/SearchParams';
-import { LocaleProvider } from './components/utilities/Locale';
-import Routes from './components/Routes';
-import { StepNavProvider } from './components/elements/StepNav';
-import { ThemeProvider } from './components/utilities/Theme';
-import { I18n } from './components/utilities/I18n';
-import { LoadingOverlayProvider } from './components/utilities/LoadingOverlay';
+import { AuthProvider } from './components/utilities/Auth.js';
+import { ConfigProvider } from './components/utilities/Config.js';
+import { PreferencesProvider } from './components/utilities/Preferences.js';
+import { CustomProvider } from './components/utilities/CustomProvider.js';
+import { SearchParamsProvider } from './components/utilities/SearchParams.js';
+import { LocaleProvider } from './components/utilities/Locale.js';
+import Routes from './components/Routes.js';
+import { StepNavProvider } from './components/elements/StepNav.js';
+import { ThemeProvider } from './components/utilities/Theme.js';
+import { I18n } from './components/utilities/I18n.js';
+import { LoadingOverlayProvider } from './components/utilities/LoadingOverlay.js';
 
 import './scss/app.scss';
 

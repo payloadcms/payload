@@ -1,5 +1,5 @@
-import { Field } from '../fields/config/types';
-import { extractTranslations } from '../translations/extractTranslations';
+import { Field } from '../fields/config/types.js';
+import { extractTranslations } from '../translations/extractTranslations.js';
 
 const labels = extractTranslations(['version:draft', 'version:published', 'version:status']);
 

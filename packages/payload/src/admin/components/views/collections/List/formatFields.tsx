@@ -1,6 +1,6 @@
 import React from 'react';
-import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import { Field, fieldAffectsData, fieldIsPresentationalOnly } from '../../../../../fields/config/types';
+import { SanitizedCollectionConfig } from '../../../../../collections/config/types.js';
+import { Field, fieldAffectsData, fieldIsPresentationalOnly } from '../../../../../fields/config/types.js';
 
 const formatFields = (config: SanitizedCollectionConfig): Field[] => {
   const hasID = config.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') > -1;

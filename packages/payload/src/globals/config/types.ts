@@ -1,18 +1,18 @@
 import React from 'react';
 import { DeepRequired } from 'ts-essentials';
 import { GraphQLNonNull, GraphQLObjectType } from 'graphql';
-import type { Where } from '../../types';
-import { User } from '../../auth/types';
-import { PayloadRequest } from '../../express/types';
-import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types';
-import { Field } from '../../fields/config/types';
-import { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types';
+import type { Where } from '../../types.js';
+import { User } from '../../auth/types.js';
+import { PayloadRequest } from '../../express/types.js';
+import { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types.js';
+import { Field } from '../../fields/config/types.js';
+import { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js';
 import {
   CustomPreviewButtonProps,
   CustomPublishButtonProps,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
-} from '../../admin/components/elements/types';
+} from '../../admin/components/elements/types.js';
 
 export type TypeWithID = {
   id: string | number

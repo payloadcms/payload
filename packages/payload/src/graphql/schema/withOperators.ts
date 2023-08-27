@@ -2,10 +2,10 @@ import { GraphQLBoolean, GraphQLInputObjectType, GraphQLString, GraphQLList, Gra
 import type { GraphQLType } from 'graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { FieldAffectingData, NumberField, RadioField, RelationshipField, SelectField, optionIsObject } from '../../fields/config/types';
-import combineParentName from '../utilities/combineParentName';
-import formatName from '../utilities/formatName';
-import operators from './operators';
+import { FieldAffectingData, NumberField, RadioField, RelationshipField, SelectField, optionIsObject } from '../../fields/config/types.js';
+import combineParentName from '../utilities/combineParentName.js';
+import formatName from '../utilities/formatName.js';
+import operators from './operators.js';
 
 type staticTypes = 'number' | 'text' | 'email' | 'textarea' | 'richText' | 'json' | 'code' | 'checkbox' | 'date' | 'upload' | 'point' | 'relationship'
 
@@ -29,13 +29,13 @@ type DefaultsType = {
     }[];
   }
 } & {
-  [key in dynamicTypes]: {
-    operators: {
-      name: string;
-      type: ((field: FieldAffectingData, parentName: string) => GraphQLType);
-    }[];
+    [key in dynamicTypes]: {
+      operators: {
+        name: string;
+        type: ((field: FieldAffectingData, parentName: string) => GraphQLType);
+      }[];
+    }
   }
-}
 
 const defaults: DefaultsType = {
   number: {

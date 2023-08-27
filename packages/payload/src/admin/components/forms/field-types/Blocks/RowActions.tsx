@@ -1,9 +1,9 @@
 import React from 'react';
 import { useModal } from '@faceless-ui/modal';
-import { Block, Labels } from '../../../../../fields/config/types';
-import { ArrayAction } from '../../../elements/ArrayAction';
-import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug';
-import { BlocksDrawer } from './BlocksDrawer';
+import { Block, Labels } from '../../../../../fields/config/types.js';
+import { ArrayAction } from '../../../elements/ArrayAction.js';
+import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug.js';
+import { BlocksDrawer } from './BlocksDrawer.js';
 
 export const RowActions: React.FC<{
   addRow: (rowIndex: number, blockType: string) => void

@@ -1,6 +1,6 @@
 import React, { Dispatch } from 'react';
-import { Condition, Field as FieldConfig, Validate } from '../../../../fields/config/types';
-import { User } from '../../../../auth/types';
+import { Condition, Field as FieldConfig, Validate } from '../../../../fields/config/types.js';
+import { User } from '../../../../auth/types.js';
 
 export type Row = {
   id: string

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import { useStepNav } from '../../elements/StepNav';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import DefaultDashboard from './Default';
+import { useConfig } from '../../utilities/Config.js';
+import { useAuth } from '../../utilities/Auth.js';
+import { useStepNav } from '../../elements/StepNav.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
+import DefaultDashboard from './Default.js';
 
 const Dashboard: React.FC = () => {
   const { permissions, user } = useAuth();

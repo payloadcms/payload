@@ -3,10 +3,10 @@ import toSnakeCase from 'to-snake-case';
 import { SanitizedCollectionConfig } from 'payload/types';
 import { SanitizedConfig } from 'payload/config';
 import { DBQueryConfig } from 'drizzle-orm';
-import { traverseFields } from './traverseFields';
-import { buildWithFromDepth } from './buildWithFromDepth';
-import { createLocaleWhereQuery } from './createLocaleWhereQuery';
-import { PostgresAdapter } from '../types';
+import { traverseFields } from './traverseFields.js';
+import { buildWithFromDepth } from './buildWithFromDepth.js';
+import { createLocaleWhereQuery } from './createLocaleWhereQuery.js';
+import { PostgresAdapter } from '../types.js';
 
 type BuildFindQueryArgs = {
   adapter: PostgresAdapter

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Field, TabAsField, fieldAffectsData, fieldHasSubFields, tabHasName } from '../../../../fields/config/types';
-import { useAllFormFields, useFormSubmitted } from '../Form/context';
-import useThrottledEffect from '../../../hooks/useThrottledEffect';
+import { Field, TabAsField, fieldAffectsData, fieldHasSubFields, tabHasName } from '../../../../fields/config/types.js';
+import { useAllFormFields, useFormSubmitted } from '../Form/context.js';
+import useThrottledEffect from '../../../hooks/useThrottledEffect.js';
 
 const buildPathSegments = (parentPath: string, fieldSchema: Field[]): string[] => {
   const pathNames = fieldSchema.reduce((acc, subField) => {

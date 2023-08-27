@@ -1,8 +1,8 @@
-import { Payload } from '../payload';
-import { PayloadRequest } from '../express/types';
-import { SanitizedConfig, EmailOptions } from '../config/types';
-import { Collection } from '../collections/config/types';
-import { User, VerifyConfig } from './types';
+import { Payload } from '../payload.js';
+import { PayloadRequest } from '../express/types.js';
+import { SanitizedConfig, EmailOptions } from '../config/types.js';
+import { Collection } from '../collections/config/types.js';
+import { User, VerifyConfig } from './types.js';
 
 
 type Args = {

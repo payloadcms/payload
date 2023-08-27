@@ -1,10 +1,10 @@
-import { APIError } from '../../errors';
-import executeAccess from '../executeAccess';
-import { Collection } from '../../collections/config/types';
-import { PayloadRequest } from '../../express/types';
-import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import { APIError } from '../../errors.js';
+import executeAccess from '../executeAccess.js';
+import { Collection } from '../../collections/config/types.js';
+import { PayloadRequest } from '../../express/types.js';
+import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
 
 export type Args = {
   collection: Collection

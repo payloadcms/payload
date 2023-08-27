@@ -1,8 +1,8 @@
-import findOne from './findOne';
-import update from './update';
-import findVersionByID from './findVersionByID';
-import findVersions from './findVersions';
-import restoreVersion from './restoreVersion';
+import findOne from './findOne.js';
+import update from './update.js';
+import findVersionByID from './findVersionByID.js';
+import findVersions from './findVersions.js';
+import restoreVersion from './restoreVersion.js';
 
 export default {
   findOne,

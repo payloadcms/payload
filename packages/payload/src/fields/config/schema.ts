@@ -1,5 +1,5 @@
 import joi from 'joi';
-import { componentSchema } from '../../utilities/componentSchema';
+import { componentSchema } from '../../utilities/componentSchema.js';
 
 export const baseAdminComponentFields = joi.object().keys({
   Cell: componentSchema,

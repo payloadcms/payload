@@ -1,5 +1,5 @@
-import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
-import { VerifyConfig } from '../../../../../../auth/types';
+import { SanitizedCollectionConfig } from '../../../../../../collections/config/types.js';
+import { VerifyConfig } from '../../../../../../auth/types.js';
 
 export type Props = {
   useAPIKey?: boolean

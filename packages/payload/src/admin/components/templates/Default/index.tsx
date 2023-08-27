@@ -1,10 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import DefaultNav from '../../elements/Nav';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import Meta from '../../utilities/Meta';
-import { Props } from './types';
+import { useConfig } from '../../utilities/Config.js';
+import DefaultNav from '../../elements/Nav.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
+import Meta from '../../utilities/Meta.js';
+import { Props } from './types.js';
 
 import './index.scss';
 

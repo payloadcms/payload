@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import { SanitizedConfig } from '@alessiogr/payloadtest/config';
-import buildSchema from './buildSchema';
-import getBuildQueryPlugin from '../queries/buildQuery';
-import type { GlobalModel } from '../types';
+import buildSchema from './buildSchema.js';
+import getBuildQueryPlugin from '../queries/buildQuery.js';
+import type { GlobalModel } from '../types.js';
 
 export const buildGlobalModel = (config: SanitizedConfig): GlobalModel | null => {
   if (config.globals && config.globals.length > 0) {

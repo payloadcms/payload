@@ -10,8 +10,8 @@ import { SanitizedCollectionConfig } from 'payload/types';
 import type { DatabaseAdapter, Init } from 'payload/database';
 import { configToJSONSchema } from 'payload/utilities';
 import prompts from 'prompts';
-import { buildTable } from './schema/build';
-import type { GenericEnum, GenericRelation, GenericTable, PostgresAdapter } from './types';
+import { buildTable } from './schema/build.js';
+import type { GenericEnum, GenericRelation, GenericTable, PostgresAdapter } from './types.js';
 
 const migrationTemplate = (upSQL?: string) => `
 import payload, { Payload } from 'payload';

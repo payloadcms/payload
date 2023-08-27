@@ -2,9 +2,9 @@
 import { Response } from 'express';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { MarkOptional } from 'ts-essentials';
-import { PayloadRequest } from '../../../express/types';
-import { Collection } from '../../config/types';
-import create from '../../operations/create';
+import { PayloadRequest } from '../../../express/types.js';
+import { Collection } from '../../config/types.js';
+import create from '../../operations/create.js';
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (_: unknown, args: {
   data: MarkOptional<GeneratedTypes['collections'][TSlug], 'id' | 'updatedAt' | 'createdAt' | 'sizes'>,

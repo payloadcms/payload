@@ -1,23 +1,23 @@
 /* eslint-disable no-param-reassign */
 import express, { NextFunction, Response } from 'express';
-import { InitOptions } from './config/types';
+import { InitOptions } from './config/types.js';
 
-import authenticate from './express/middleware/authenticate';
-import expressMiddleware from './express/middleware';
-import initAdmin from './express/admin';
-import initAuth from './auth/init';
-import access from './auth/requestHandlers/access';
-import initCollectionsHTTP from './collections/initHTTP';
-import initGlobalsHTTP from './globals/initHTTP';
-import initGraphQLPlayground from './graphql/initPlayground';
-import initStatic from './express/static';
-import graphQLHandler from './graphql/graphQLHandler';
-import identifyAPI from './express/middleware/identifyAPI';
-import errorHandler from './express/middleware/errorHandler';
-import { PayloadRequest } from './express/types';
-import { getDataLoader } from './collections/dataloader';
-import mountEndpoints from './express/mountEndpoints';
-import { getPayload, Payload } from './payload';
+import authenticate from './express/middleware/authenticate.js';
+import expressMiddleware from './express/middleware/index.js';
+import initAdmin from './express/admin.js';
+import initAuth from './auth/init.js';
+import access from './auth/requestHandlers/access.js';
+import initCollectionsHTTP from './collections/initHTTP.js';
+import initGlobalsHTTP from './globals/initHTTP.js';
+import initGraphQLPlayground from './graphql/initPlayground.js';
+import initStatic from './express/static.js';
+import graphQLHandler from './graphql/graphQLHandler.js';
+import identifyAPI from './express/middleware/identifyAPI.js';
+import errorHandler from './express/middleware/errorHandler.js';
+import { PayloadRequest } from './express/types.js';
+import { getDataLoader } from './collections/dataloader.js';
+import mountEndpoints from './express/mountEndpoints.js';
+import { getPayload, Payload } from './payload.js';
 
 export const initHTTP = async (options: InitOptions): Promise<Payload> => {
   if (typeof options.local === 'undefined') options.local = false;

@@ -2,15 +2,15 @@ import React, { useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import Button from '../Button';
-import MinimalTemplate from '../../templates/Minimal';
-import { requests } from '../../../api';
-import { Props } from './types';
-import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider';
-import { getTranslation } from '../../../../utilities/getTranslation';
-import Pill from '../Pill';
-import { useAuth } from '../../utilities/Auth';
+import { useConfig } from '../../utilities/Config.js';
+import Button from '../Button.js';
+import MinimalTemplate from '../../templates/Minimal.js';
+import { requests } from '../../../api.js';
+import { Props } from './types.js';
+import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
+import Pill from '../Pill.js';
+import { useAuth } from '../../utilities/Auth.js';
 
 import './index.scss';
 

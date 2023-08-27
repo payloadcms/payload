@@ -1,5 +1,5 @@
 import React from 'react';
-import Thumbnail from '../../../../../../elements/Thumbnail';
+import Thumbnail from '../../../../../../elements/Thumbnail.js';
 
 import './index.scss';
 

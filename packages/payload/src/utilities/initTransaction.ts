@@ -1,4 +1,4 @@
-import { PayloadRequest } from '../express/types';
+import { PayloadRequest } from '../express/types.js';
 
 /**
  * Starts a new transaction using the db adapter with a random id and then assigns it to the req.transaction

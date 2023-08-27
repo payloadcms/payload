@@ -1,14 +1,14 @@
 import React, { forwardRef, Fragment, isValidElement } from 'react';
 import { Link } from 'react-router-dom';
-import { Props } from './types';
+import { Props } from './types.js';
 
-import plus from '../../icons/Plus';
-import x from '../../icons/X';
-import chevron from '../../icons/Chevron';
-import edit from '../../icons/Edit';
-import swap from '../../icons/Swap';
-import linkIcon from '../../icons/Link';
-import Tooltip from '../Tooltip';
+import plus from '../../icons/Plus.js';
+import x from '../../icons/X.js';
+import chevron from '../../icons/Chevron.js';
+import edit from '../../icons/Edit.js';
+import swap from '../../icons/Swap.js';
+import linkIcon from '../../icons/Link.js';
+import Tooltip from '../Tooltip.js';
 
 import './index.scss';
 

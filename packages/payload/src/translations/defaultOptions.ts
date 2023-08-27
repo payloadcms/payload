@@ -1,5 +1,5 @@
 import type { InitOptions } from 'i18next';
-import translations from './index';
+import translations from './index.js';
 
 export const defaultOptions: InitOptions = {
   fallbackLng: 'en',

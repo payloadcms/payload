@@ -2,14 +2,14 @@ import React, { HTMLAttributes, useCallback, useReducer, useState } from 'react'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react';
 import { useTranslation } from 'react-i18next';
 import { Transforms } from 'slate';
-import { useConfig } from '../../../../../../utilities/Config';
-import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
-import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
-import Button from '../../../../../../elements/Button';
-import { useListDrawer } from '../../../../../../elements/ListDrawer';
-import { Props as RichTextProps } from '../../../types';
-import { getTranslation } from '../../../../../../../../utilities/getTranslation';
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
+import { useConfig } from '../../../../../../utilities/Config.js';
+import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI.js';
+import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer.js';
+import Button from '../../../../../../elements/Button.js';
+import { useListDrawer } from '../../../../../../elements/ListDrawer.js';
+import { Props as RichTextProps } from '../../../types.js';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation.js';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js';
 
 import './index.scss';
 

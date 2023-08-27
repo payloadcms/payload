@@ -1,18 +1,18 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { PayloadRequest } from '../../express/types';
-import { Forbidden, NotFound } from '../../errors';
-import executeAccess from '../../auth/executeAccess';
-import { BeforeOperationHook, Collection } from '../config/types';
-import { Document } from '../../types';
-import { hasWhereAccessResult } from '../../auth/types';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
-import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
-import { combineQueries } from '../../database/combineQueries';
-import { deleteUserPreferences } from '../../preferences/deleteUserPreferences';
-import { killTransaction } from '../../utilities/killTransaction';
-import { initTransaction } from '../../utilities/initTransaction';
-import { buildAfterOperation } from './utils';
+import { PayloadRequest } from '../../express/types.js';
+import { Forbidden, NotFound } from '../../errors.js';
+import executeAccess from '../../auth/executeAccess.js';
+import { BeforeOperationHook, Collection } from '../config/types.js';
+import { Document } from '../../types.js';
+import { hasWhereAccessResult } from '../../auth/types.js';
+import { afterRead } from '../../fields/hooks/afterRead.js';
+import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js';
+import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js';
+import { combineQueries } from '../../database/combineQueries.js';
+import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { buildAfterOperation } from './utils.js';
 
 export type Arguments = {
   depth?: number

@@ -1,8 +1,8 @@
-import { docHasTimestamps, PayloadRequest } from '../types';
-import { Payload } from '../payload';
-import { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
-import { TypeWithVersion } from './types';
-import type { FindOneArgs } from '../database/types';
+import { docHasTimestamps, PayloadRequest } from '../types.js';
+import { Payload } from '../payload.js';
+import { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js';
+import { TypeWithVersion } from './types.js';
+import type { FindOneArgs } from '../database/types.js';
 
 type Args = {
   payload: Payload;

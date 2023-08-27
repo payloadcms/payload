@@ -1,5 +1,5 @@
-import { Field } from '../fields/config/types';
-import { SanitizedCollectionConfig } from '../collections/config/types';
+import { Field } from '../fields/config/types.js';
+import { SanitizedCollectionConfig } from '../collections/config/types.js';
 
 export const buildVersionCollectionFields = (collection: SanitizedCollectionConfig): Field[] => {
   const fields: Field[] = [

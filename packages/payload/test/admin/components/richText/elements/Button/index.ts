@@ -1,7 +1,7 @@
-import { RichTextCustomElement } from '../../../../../../src/fields/config/types';
-import Button from './Button';
-import Element from './Element';
-import plugin from './plugin';
+import { RichTextCustomElement } from '../../../../../../src/fields/config/types.js';
+import Button from './Button.js';
+import Element from './Element.js';
+import plugin from './plugin.js';
 
 const button: RichTextCustomElement = {
   name: 'button',

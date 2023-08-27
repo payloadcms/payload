@@ -1,11 +1,11 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { ReactEditor, useSlate } from 'slate-react';
 import { useTranslation } from 'react-i18next';
-import ElementButton from '../../Button';
-import RelationshipIcon from '../../../../../../icons/Relationship';
-import { injectVoidElement } from '../../injectVoid';
-import { useListDrawer } from '../../../../../../elements/ListDrawer';
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
+import ElementButton from '../../Button.js';
+import RelationshipIcon from '../../../../../../icons/Relationship.js';
+import { injectVoidElement } from '../../injectVoid.js';
+import { useListDrawer } from '../../../../../../elements/ListDrawer.js';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js';
 
 import './index.scss';
 

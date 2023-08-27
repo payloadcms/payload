@@ -1,14 +1,14 @@
 /* eslint-disable no-underscore-dangle */
-import { PayloadRequest } from '../../express/types';
-import { Forbidden, NotFound } from '../../errors';
-import executeAccess from '../../auth/executeAccess';
-import { TypeWithVersion } from '../../versions/types';
-import { SanitizedGlobalConfig } from '../config/types';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { combineQueries } from '../../database/combineQueries';
-import { FindGlobalVersionsArgs } from '../../database/types';
-import { killTransaction } from '../../utilities/killTransaction';
-import { initTransaction } from '../../utilities/initTransaction';
+import { PayloadRequest } from '../../express/types.js';
+import { Forbidden, NotFound } from '../../errors.js';
+import executeAccess from '../../auth/executeAccess.js';
+import { TypeWithVersion } from '../../versions/types.js';
+import { SanitizedGlobalConfig } from '../config/types.js';
+import { afterRead } from '../../fields/hooks/afterRead.js';
+import { combineQueries } from '../../database/combineQueries.js';
+import { FindGlobalVersionsArgs } from '../../database/types.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig

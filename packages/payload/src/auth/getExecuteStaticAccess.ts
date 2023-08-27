@@ -1,9 +1,9 @@
 import { NextFunction, Response } from 'express';
-import { Where } from '../types';
-import executeAccess from './executeAccess';
-import { Forbidden } from '../errors';
-import { PayloadRequest } from '../express/types';
-import { SanitizedCollectionConfig } from '../collections/config/types';
+import { Where } from '../types.js';
+import executeAccess from './executeAccess.js';
+import { Forbidden } from '../errors.js';
+import { PayloadRequest } from '../express/types.js';
+import { SanitizedCollectionConfig } from '../collections/config/types.js';
 
 const getExecuteStaticAccess = (config: SanitizedCollectionConfig) => async (req: PayloadRequest, res: Response, next: NextFunction) => {
   if (req.method === 'OPTIONS') {

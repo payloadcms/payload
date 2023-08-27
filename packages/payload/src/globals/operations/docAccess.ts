@@ -1,8 +1,8 @@
-import { AllOperations } from '../../types';
-import { GlobalPermission } from '../../auth';
-import type { PayloadRequest } from '../../express/types';
-import { getEntityPolicies } from '../../utilities/getEntityPolicies';
-import { SanitizedGlobalConfig } from '../config/types';
+import { AllOperations } from '../../types.js';
+import { GlobalPermission } from '../../auth.js';
+import type { PayloadRequest } from '../../express/types.js';
+import { getEntityPolicies } from '../../utilities/getEntityPolicies.js';
+import { SanitizedGlobalConfig } from '../config/types.js';
 
 type Arguments = {
   req: PayloadRequest

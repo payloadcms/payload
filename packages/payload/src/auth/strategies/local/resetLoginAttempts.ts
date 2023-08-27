@@ -1,6 +1,6 @@
-import { Payload } from '../../..';
-import { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types';
-import { PayloadRequest } from '../../../express/types';
+import { Payload } from '../../...js';
+import { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js';
+import { PayloadRequest } from '../../../express/types.js';
 
 type Args = {
   req: PayloadRequest,

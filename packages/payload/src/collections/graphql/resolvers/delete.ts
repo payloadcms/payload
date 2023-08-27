@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { Response } from 'express';
-import { PayloadRequest } from '../../../express/types';
-import { Collection } from '../../config/types';
-import deleteByID from '../../operations/deleteByID';
+import { PayloadRequest } from '../../../express/types.js';
+import { Collection } from '../../config/types.js';
+import deleteByID from '../../operations/deleteByID.js';
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
   _: unknown,

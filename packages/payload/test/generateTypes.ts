@@ -1,6 +1,6 @@
 import path, { dirname } from 'path';
 import fs from 'fs';
-import { generateTypes } from '../src/bin/generateTypes';
+import { generateTypes } from '../src/bin/generateTypes.js';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);

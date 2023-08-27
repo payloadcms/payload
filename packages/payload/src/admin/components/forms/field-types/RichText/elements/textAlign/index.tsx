@@ -1,8 +1,8 @@
 import React from 'react';
-import ElementButton from '../Button';
-import AlignLeftIcon from '../../../../../icons/AlignLeft';
-import AlignCenterIcon from '../../../../../icons/AlignCenter';
-import AlignRightIcon from '../../../../../icons/AlignRight';
+import ElementButton from '../Button.js';
+import AlignLeftIcon from '../../../../../icons/AlignLeft.js';
+import AlignCenterIcon from '../../../../../icons/AlignCenter.js';
+import AlignRightIcon from '../../../../../icons/AlignRight.js';
 
 export default {
   name: 'alignment',

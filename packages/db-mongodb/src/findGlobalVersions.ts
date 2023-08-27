@@ -3,10 +3,10 @@ import type { FindGlobalVersions } from '@alessiogr/payloadtest/database';
 import { flattenWhereToOperators } from '@alessiogr/payloadtest/database';
 import { buildVersionGlobalFields } from '@alessiogr/payloadtest/versions';
 import { PayloadRequest } from '@alessiogr/payloadtest/types';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
 import type { MongooseAdapter } from '.';
-import { buildSortParam } from './queries/buildSortParam';
-import { withSession } from './withSession';
+import { buildSortParam } from './queries/buildSortParam.js';
+import { withSession } from './withSession.js';
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: MongooseAdapter,

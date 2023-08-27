@@ -1,7 +1,7 @@
 import { DeleteMany } from '@alessiogr/payloadtest/database';
 import { PayloadRequest } from '@alessiogr/payloadtest/types';
 import type { MongooseAdapter } from '.';
-import { withSession } from './withSession';
+import { withSession } from './withSession.js';
 
 export const deleteMany: DeleteMany = async function deleteMany(this: MongooseAdapter,
   { collection, where, req = {} as PayloadRequest }) {

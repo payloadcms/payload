@@ -1,11 +1,11 @@
 /* eslint-disable no-param-reassign */
 
 import { Response } from 'express';
-import { Where } from '../../../types';
-import type { PaginatedDocs } from '../../../database/types';
-import { PayloadRequest } from '../../../express/types';
-import { Collection } from '../../config/types';
-import findVersions from '../../operations/findVersions';
+import { Where } from '../../../types.js';
+import type { PaginatedDocs } from '../../../database/types.js';
+import { PayloadRequest } from '../../../express/types.js';
+import { Collection } from '../../config/types.js';
+import findVersions from '../../operations/findVersions.js';
 
 export type Resolver = (
   _: unknown,

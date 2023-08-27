@@ -1,12 +1,12 @@
 import React, { useCallback } from 'react';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import { text } from '../../../../../fields/validations';
-import { Props } from './types';
-import TextInput from './Input';
-import { useLocale } from '../../../utilities/Locale';
-import { useConfig } from '../../../utilities/Config';
-import { isFieldRTL } from '../shared';
+import useField from '../../useField.js';
+import withCondition from '../../withCondition.js';
+import { text } from '../../../../../fields/validations.js';
+import { Props } from './types.js';
+import TextInput from './Input.js';
+import { useLocale } from '../../../utilities/Locale.js';
+import { useConfig } from '../../../utilities/Config.js';
+import { isFieldRTL } from '../shared.js';
 
 const Text: React.FC<Props> = (props) => {
   const {

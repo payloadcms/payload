@@ -1,8 +1,8 @@
 import { Strategy } from 'passport';
 import { DeepRequired } from 'ts-essentials';
-import { PayloadRequest } from '../express/types';
-import { Where } from '../types';
-import { Payload } from '../payload';
+import { PayloadRequest } from '../express/types.js';
+import { Where } from '../types.js';
+import { Payload } from '../payload.js';
 
 export type Permission = {
   permission: boolean

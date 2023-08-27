@@ -1,17 +1,17 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
-import type { Where } from '../../types';
-import { SanitizedGlobalConfig } from '../config/types';
-import executeAccess from '../../auth/executeAccess';
-import { beforeChange } from '../../fields/hooks/beforeChange';
-import { beforeValidate } from '../../fields/hooks/beforeValidate';
-import { afterChange } from '../../fields/hooks/afterChange';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { PayloadRequest } from '../../express/types';
-import { saveVersion } from '../../versions/saveVersion';
-import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import type { Where } from '../../types.js';
+import { SanitizedGlobalConfig } from '../config/types.js';
+import executeAccess from '../../auth/executeAccess.js';
+import { beforeChange } from '../../fields/hooks/beforeChange.js';
+import { beforeValidate } from '../../fields/hooks/beforeValidate.js';
+import { afterChange } from '../../fields/hooks/afterChange.js';
+import { afterRead } from '../../fields/hooks/afterRead.js';
+import { PayloadRequest } from '../../express/types.js';
+import { saveVersion } from '../../versions/saveVersion.js';
+import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
 
 type Args<T extends { [field: string | number | symbol]: unknown }> = {
   globalConfig: SanitizedGlobalConfig

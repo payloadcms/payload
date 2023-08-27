@@ -1,9 +1,9 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import { NotFound } from '../../errors';
-import { Document } from '../../types';
-import deleteByID from '../operations/deleteByID';
+import { PayloadRequest } from '../../express/types.js';
+import { NotFound } from '../../errors.js';
+import { Document } from '../../types.js';
+import deleteByID from '../operations/deleteByID.js';
 
 export type DeleteResult = {
   message: string;

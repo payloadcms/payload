@@ -1,5 +1,5 @@
-import { Collection } from '../../../collections/config/types';
-import forgotPassword from '../../operations/forgotPassword';
+import { Collection } from '../../../collections/config/types.js';
+import forgotPassword from '../../operations/forgotPassword.js';
 
 function forgotPasswordResolver(collection: Collection): any {
   async function resolver(_, args, context) {

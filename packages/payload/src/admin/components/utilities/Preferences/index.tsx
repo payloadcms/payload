@@ -1,9 +1,9 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../Config';
-import { useAuth } from '../Auth';
-import { requests } from '../../../api';
+import { useConfig } from '../Config.js';
+import { useAuth } from '../Auth.js';
+import { requests } from '../../../api.js';
 
 type PreferencesContext = {
   getPreference: <T = any>(key: string) => T | Promise<T>;

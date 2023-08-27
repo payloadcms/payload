@@ -1,5 +1,5 @@
 import path from 'path';
-import { CollectionConfig } from '../../../../src/collections/config/types';
+import { CollectionConfig } from '../../../../src/collections/config/types.js';
 
 const Uploads: CollectionConfig = {
   slug: 'uploads',

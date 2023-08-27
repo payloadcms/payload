@@ -1,6 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { UseDraggableArguments } from '@dnd-kit/core';
-import { UseDraggableSortableReturn } from './types';
+import { UseDraggableSortableReturn } from './types.js';
 
 export const useDraggableSortable = (props: UseDraggableArguments): UseDraggableSortableReturn => {
   const {

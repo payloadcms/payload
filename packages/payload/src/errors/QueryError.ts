@@ -1,6 +1,6 @@
 import httpStatus from 'http-status';
 import type { TFunction } from 'i18next';
-import APIError from './APIError';
+import APIError from './APIError.js';
 
 class QueryError extends APIError<{ path: string }[]> {
   constructor(results: { path: string }[], t?: TFunction) {

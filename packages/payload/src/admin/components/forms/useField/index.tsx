@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../utilities/Auth';
-import { useFormProcessing, useFormSubmitted, useForm, useFormFields } from '../Form/context';
-import { Options, FieldType } from './types';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import { useOperation } from '../../utilities/OperationProvider';
-import useThrottledEffect from '../../../hooks/useThrottledEffect';
-import type { UPDATE } from '../Form/types';
+import { useAuth } from '../../utilities/Auth.js';
+import { useFormProcessing, useFormSubmitted, useForm, useFormFields } from '../Form/context.js';
+import { Options, FieldType } from './types.js';
+import { useDocumentInfo } from '../../utilities/DocumentInfo.js';
+import { useOperation } from '../../utilities/OperationProvider.js';
+import useThrottledEffect from '../../../hooks/useThrottledEffect.js';
+import type { UPDATE } from '../Form/types.js';
 
 /**
  * Get and set the value of a form field.

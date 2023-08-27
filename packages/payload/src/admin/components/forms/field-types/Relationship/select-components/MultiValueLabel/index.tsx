@@ -1,11 +1,11 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { components, MultiValueProps } from 'react-select';
-import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer';
-import Tooltip from '../../../../../elements/Tooltip';
-import Edit from '../../../../../icons/Edit';
-import { useAuth } from '../../../../../utilities/Auth';
-import { Option } from '../../types';
+import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer.js';
+import Tooltip from '../../../../../elements/Tooltip.js';
+import Edit from '../../../../../icons/Edit.js';
+import { useAuth } from '../../../../../utilities/Auth.js';
+import { Option } from '../../types.js';
 
 import './index.scss';
 

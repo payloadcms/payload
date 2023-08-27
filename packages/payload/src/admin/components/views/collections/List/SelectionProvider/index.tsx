@@ -1,8 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
-import { Where } from '../../../../../../types';
-import { useLocale } from '../../../../utilities/Locale';
+import { Where } from '../../../../../../types.js';
+import { useLocale } from '../../../../utilities/Locale.js';
 
 export enum SelectAllStatus {
   AllAvailable = 'allAvailable',

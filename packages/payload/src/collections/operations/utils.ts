@@ -1,14 +1,14 @@
-import find from './find';
-import update from './update';
-import deleteOperation from './delete';
-import create from './create';
-import login from '../../auth/operations/login';
-import refresh from '../../auth/operations/refresh';
-import findByID from './findByID';
-import updateByID from './updateByID';
-import deleteByID from './deleteByID';
-import { AfterOperationHook, TypeWithID } from '../config/types';
-import forgotPassword from '../../auth/operations/forgotPassword';
+import find from './find.js';
+import update from './update.js';
+import deleteOperation from './delete.js';
+import create from './create.js';
+import login from '../../auth/operations/login.js';
+import refresh from '../../auth/operations/refresh.js';
+import findByID from './findByID.js';
+import updateByID from './updateByID.js';
+import deleteByID from './deleteByID.js';
+import { AfterOperationHook, TypeWithID } from '../config/types.js';
+import forgotPassword from '../../auth/operations/forgotPassword.js';
 
 export type AfterOperationMap<
   T extends TypeWithID,
@@ -42,9 +42,9 @@ export const buildAfterOperation = async <
   T extends TypeWithID = any,
   O extends keyof AfterOperationMap<T> = keyof AfterOperationMap<T>
 >
-(
-  operationArgs: AfterOperationArg<T> & { operation: O },
-): Promise<Awaited<ReturnType<AfterOperationMap<T>[O]>>> => {
+  (
+    operationArgs: AfterOperationArg<T> & { operation: O },
+  ): Promise<Awaited<ReturnType<AfterOperationMap<T>[O]>>> => {
   const {
     operation,
     args,

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import Button from '../Button';
-import { Props } from './types';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import { useConfig } from '../../utilities/Config.js';
+import Button from '../Button.js';
+import { Props } from './types.js';
+import { useDocumentInfo } from '../../utilities/DocumentInfo.js';
 
 import './index.scss';
 

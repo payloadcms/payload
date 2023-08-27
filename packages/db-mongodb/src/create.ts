@@ -2,7 +2,7 @@ import { Create } from '@alessiogr/payloadtest/database';
 import type { Document } from '@alessiogr/payloadtest/types';
 import { PayloadRequest } from '@alessiogr/payloadtest/types';
 import type { MongooseAdapter } from '.';
-import { withSession } from './withSession';
+import { withSession } from './withSession.js';
 
 export const create: Create = async function create(
   this: MongooseAdapter,

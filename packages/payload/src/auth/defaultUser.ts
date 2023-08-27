@@ -1,5 +1,5 @@
-import { CollectionConfig } from '../collections/config/types';
-import { extractTranslations } from '../translations/extractTranslations';
+import { CollectionConfig } from '../collections/config/types.js';
+import { extractTranslations } from '../translations/extractTranslations.js';
 
 const labels = extractTranslations(['general:user', 'general:users']);
 

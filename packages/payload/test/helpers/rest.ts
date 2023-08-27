@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import qs from 'qs';
 import fetch from 'node-fetch';
-import type { Config } from '../../src/config/types';
-import type { Where } from '../../src/types';
-import { devUser } from '../credentials';
-import type { PaginatedDocs } from '../../src/database/types';
+import type { Config } from '../../src/config/types.js';
+import type { Where } from '../../src/types.js';
+import { devUser } from '../credentials.js';
+import type { PaginatedDocs } from '../../src/database/types.js';
 
 type Args = {
   serverURL: string;

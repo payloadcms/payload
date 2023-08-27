@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import resetPassword from '../operations/resetPassword';
+import { PayloadRequest } from '../../express/types.js';
+import resetPassword from '../operations/resetPassword.js';
 
 async function resetPasswordHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {

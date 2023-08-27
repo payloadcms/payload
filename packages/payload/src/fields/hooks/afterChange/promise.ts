@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
-import { traverseFields } from './traverseFields';
+import { PayloadRequest, RequestContext } from '../../../express/types.js';
+import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types.js';
+import { traverseFields } from './traverseFields.js';
 
 type Args = {
   data: Record<string, unknown>

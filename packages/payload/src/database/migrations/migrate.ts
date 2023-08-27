@@ -1,8 +1,8 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import { DatabaseAdapter } from '../types';
-import { getMigrations } from './getMigrations';
-import { readMigrationFiles } from './readMigrationFiles';
-import { PayloadRequest } from '../../express/types';
+import { DatabaseAdapter } from '../types.js';
+import { getMigrations } from './getMigrations.js';
+import { readMigrationFiles } from './readMigrationFiles.js';
+import { PayloadRequest } from '../../express/types.js';
 
 export async function migrate(this: DatabaseAdapter): Promise<void> {
   const { payload } = this;

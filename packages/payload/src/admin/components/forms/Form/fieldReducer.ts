@@ -1,10 +1,10 @@
 import equal from 'deep-equal';
 import ObjectID from 'bson-objectid';
-import getSiblingData from './getSiblingData';
-import reduceFieldsToValues from './reduceFieldsToValues';
-import { FormField, FieldAction, Fields } from './types';
-import deepCopyObject from '../../../../utilities/deepCopyObject';
-import { flattenRows, separateRows } from './rows';
+import getSiblingData from './getSiblingData.js';
+import reduceFieldsToValues from './reduceFieldsToValues.js';
+import { FormField, FieldAction, Fields } from './types.js';
+import deepCopyObject from '../../../../utilities/deepCopyObject.js';
+import { flattenRows, separateRows } from './rows.js';
 
 export function fieldReducer(state: Fields, action: FieldAction): Fields {
   switch (action.type) {

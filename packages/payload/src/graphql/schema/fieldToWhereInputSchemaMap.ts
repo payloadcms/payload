@@ -15,11 +15,11 @@ import {
   TabsField,
   TextareaField,
   TextField, UploadField,
-} from '../../fields/config/types';
-import { withOperators } from './withOperators';
-import combineParentName from '../utilities/combineParentName';
-import formatName from '../utilities/formatName';
-import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths';
+} from '../../fields/config/types.js';
+import { withOperators } from './withOperators.js';
+import combineParentName from '../utilities/combineParentName.js';
+import formatName from '../utilities/formatName.js';
+import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths.js';
 
 const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => ({
   number: (field: NumberField) => ({

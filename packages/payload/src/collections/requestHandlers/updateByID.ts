@@ -1,8 +1,8 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import formatSuccessResponse from '../../express/responses/formatSuccess';
-import updateByID from '../operations/updateByID';
+import { PayloadRequest } from '../../express/types.js';
+import formatSuccessResponse from '../../express/responses/formatSuccess.js';
+import updateByID from '../operations/updateByID.js';
 
 export type UpdateResult = {
   message: string

@@ -10,8 +10,8 @@ import { configToJSONSchema } from 'payload/utilities';
 import prompts from 'prompts';
 
 import { jsonb, numeric, pgTable, varchar } from 'drizzle-orm/pg-core';
-import type { PostgresAdapter } from './types';
-import { DrizzleDB, GenericEnum, GenericRelation, GenericTable } from './types';
+import type { PostgresAdapter } from './types.js';
+import { DrizzleDB, GenericEnum, GenericRelation, GenericTable } from './types.js';
 
 // Migration table def in order to use query using drizzle
 const migrationsSchema = pgTable('payload_migrations', {

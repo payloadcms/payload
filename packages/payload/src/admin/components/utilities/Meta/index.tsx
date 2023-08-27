@@ -1,11 +1,11 @@
 import React from 'react';
 import Helmet from 'react-helmet';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../Config';
-import { Props } from './types';
+import { useConfig } from '../Config.js';
+import { Props } from './types.js';
 import payloadFavicon from '../../../assets/images/favicon.svg';
 import payloadOgImage from '../../../assets/images/og-image.png';
-import useMountEffect from '../../../hooks/useMountEffect';
+import useMountEffect from '../../../hooks/useMountEffect.js';
 
 const rtlLanguages = [
   'ar',

@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
-import { PayloadRequest } from '../../express/types';
-import getExtractJWT from '../getExtractJWT';
-import { User } from '../types';
-import { Collection } from '../../collections/config/types';
+import { PayloadRequest } from '../../express/types.js';
+import getExtractJWT from '../getExtractJWT.js';
+import { User } from '../types.js';
+import { Collection } from '../../collections/config/types.js';
 
 export type Result = {
   user?: User,

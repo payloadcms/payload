@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Trans, useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import MinimalTemplate from '../../templates/Minimal';
-import Form from '../../forms/Form';
-import Email from '../../forms/field-types/Email';
-import FormSubmit from '../../forms/Submit';
-import Button from '../../elements/Button';
-import Meta from '../../utilities/Meta';
+import { useConfig } from '../../utilities/Config.js';
+import { useAuth } from '../../utilities/Auth.js';
+import MinimalTemplate from '../../templates/Minimal.js';
+import Form from '../../forms/Form.js';
+import Email from '../../forms/field-types/Email.js';
+import FormSubmit from '../../forms/Submit.js';
+import Button from '../../elements/Button.js';
+import Meta from '../../utilities/Meta.js';
 
 import './index.scss';
 

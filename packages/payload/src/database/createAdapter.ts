@@ -1,14 +1,14 @@
 /* eslint-disable no-param-reassign */
 import { Configuration } from 'webpack';
 import { MarkOptional } from 'ts-essentials';
-import { transaction } from './transaction';
-import { migrate } from './migrations/migrate';
-import { migrateStatus } from './migrations/migrateStatus';
-import { migrateDown } from './migrations/migrateDown';
-import { migrateRefresh } from './migrations/migrateRefresh';
-import { migrateReset } from './migrations/migrateReset';
-import { BeginTransaction, CommitTransaction, DatabaseAdapter, RollbackTransaction } from './types';
-import { createMigration } from './migrations/createMigration';
+import { transaction } from './transaction.js';
+import { migrate } from './migrations/migrate.js';
+import { migrateStatus } from './migrations/migrateStatus.js';
+import { migrateDown } from './migrations/migrateDown.js';
+import { migrateRefresh } from './migrations/migrateRefresh.js';
+import { migrateReset } from './migrations/migrateReset.js';
+import { BeginTransaction, CommitTransaction, DatabaseAdapter, RollbackTransaction } from './types.js';
+import { createMigration } from './migrations/createMigration.js';
 
 const beginTransaction: BeginTransaction = async () => null;
 const rollbackTransaction: RollbackTransaction = async () => null;

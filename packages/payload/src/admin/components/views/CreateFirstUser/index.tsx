@@ -1,15 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import MinimalTemplate from '../../templates/Minimal';
-import Meta from '../../utilities/Meta';
-import Form from '../../forms/Form';
-import RenderFields from '../../forms/RenderFields';
-import fieldTypes from '../../forms/field-types';
-import FormSubmit from '../../forms/Submit';
-import { Props } from './types';
-import { Field } from '../../../../fields/config/types';
+import { useConfig } from '../../utilities/Config.js';
+import { useAuth } from '../../utilities/Auth.js';
+import MinimalTemplate from '../../templates/Minimal.js';
+import Meta from '../../utilities/Meta.js';
+import Form from '../../forms/Form.js';
+import RenderFields from '../../forms/RenderFields.js';
+import fieldTypes from '../../forms/field-types.js';
+import FormSubmit from '../../forms/Submit.js';
+import { Props } from './types.js';
+import { Field } from '../../../../fields/config/types.js';
 
 import './index.scss';
 

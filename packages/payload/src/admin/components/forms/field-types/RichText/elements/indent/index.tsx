@@ -1,15 +1,15 @@
 import React, { useCallback } from 'react';
 import { useSlate, ReactEditor } from 'slate-react';
 import { Editor, Element, Text, Transforms } from 'slate';
-import IndentLeft from '../../../../../icons/IndentLeft';
-import IndentRight from '../../../../../icons/IndentRight';
-import { baseClass } from '../Button';
-import isElementActive from '../isActive';
-import listTypes from '../listTypes';
-import { getCommonBlock } from '../getCommonBlock';
-import { unwrapList } from '../unwrapList';
-import { ElementNode } from '../../types';
-import { isBlockElement } from '../isBlockElement';
+import IndentLeft from '../../../../../icons/IndentLeft.js';
+import IndentRight from '../../../../../icons/IndentRight.js';
+import { baseClass } from '../Button.js';
+import isElementActive from '../isActive.js';
+import listTypes from '../listTypes.js';
+import { getCommonBlock } from '../getCommonBlock.js';
+import { unwrapList } from '../unwrapList.js';
+import { ElementNode } from '../../types.js';
+import { isBlockElement } from '../isBlockElement.js';
 
 const indentType = 'indent';
 

@@ -1,7 +1,7 @@
-import { Where } from '../../../../types';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import { Column } from '../Table/types';
-import type { Props as ListProps } from '../../views/collections/List/types';
+import { Where } from '../../../../types.js';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
+import { Column } from '../Table/types.js';
+import type { Props as ListProps } from '../../views/collections/List/types.js';
 
 export type Props = {
   enableColumns?: boolean

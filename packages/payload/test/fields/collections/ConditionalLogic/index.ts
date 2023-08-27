@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../src/collections/config/types.js';
 
 const ConditionalLogic: CollectionConfig = {
   slug: 'conditional-logic',

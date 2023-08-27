@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
 import { useTranslation } from 'react-i18next';
-import { Props } from './types';
-import { CollapsibleProvider, useCollapsible } from './provider';
-import Chevron from '../../icons/Chevron';
-import DragHandle from '../../icons/Drag';
+import { Props } from './types.js';
+import { CollapsibleProvider, useCollapsible } from './provider.js';
+import Chevron from '../../icons/Chevron.js';
+import DragHandle from '../../icons/Drag.js';
 
 import './index.scss';
 

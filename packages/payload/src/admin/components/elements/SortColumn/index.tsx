@@ -2,11 +2,11 @@ import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { useTranslation } from 'react-i18next';
-import { Props } from './types';
-import Chevron from '../../icons/Chevron';
-import Button from '../Button';
-import { useSearchParams } from '../../utilities/SearchParams';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { Props } from './types.js';
+import Chevron from '../../icons/Chevron.js';
+import Button from '../Button.js';
+import { useSearchParams } from '../../utilities/SearchParams.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
 
 import './index.scss';
 

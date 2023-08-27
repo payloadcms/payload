@@ -1,16 +1,16 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
-import { Operator, PayloadRequest, Where } from '../../types';
-import QueryError from '../../errors/QueryError';
-import { SanitizedCollectionConfig } from '../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../globals/config/types';
-import flattenFields from '../../utilities/flattenTopLevelFields';
-import { Field, FieldAffectingData } from '../../fields/config/types';
-import { validateSearchParam } from './validateSearchParams';
-import deepCopyObject from '../../utilities/deepCopyObject';
-import { EntityPolicies } from './types';
-import flattenWhereToOperators from '../flattenWhereToOperators';
-import { validOperators } from '../../types/constants';
+import { Operator, PayloadRequest, Where } from '../../types.js';
+import QueryError from '../../errors/QueryError.js';
+import { SanitizedCollectionConfig } from '../../collections/config/types.js';
+import { SanitizedGlobalConfig } from '../../globals/config/types.js';
+import flattenFields from '../../utilities/flattenTopLevelFields.js';
+import { Field, FieldAffectingData } from '../../fields/config/types.js';
+import { validateSearchParam } from './validateSearchParams.js';
+import deepCopyObject from '../../utilities/deepCopyObject.js';
+import { EntityPolicies } from './types.js';
+import flattenWhereToOperators from '../flattenWhereToOperators.js';
+import { validOperators } from '../../types/constants.js';
 
 type Args = {
   where: Where

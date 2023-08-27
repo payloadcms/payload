@@ -1,12 +1,12 @@
 import { randomBytes } from 'crypto';
 import mongoose from 'mongoose';
-import { initPayloadTest } from '../helpers/configHelpers';
-import type { Relation } from './config';
-import config, { customIdNumberSlug, customIdSlug, errorOnHookSlug, pointSlug, relationSlug, slug } from './config';
-import payload from '../../src';
-import { RESTClient } from '../helpers/rest';
-import type { ErrorOnHook, Post } from './payload-types';
-import { mapAsync } from '../../src/utilities/mapAsync';
+import { initPayloadTest } from '../helpers/configHelpers.js';
+import type { Relation } from './config.js';
+import config, { customIdNumberSlug, customIdSlug, errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js';
+import payload from '../../src.js';
+import { RESTClient } from '../helpers/rest.js';
+import type { ErrorOnHook, Post } from './payload-types.js';
+import { mapAsync } from '../../src/utilities/mapAsync.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { components as SelectComponents, ControlProps } from 'react-select';
-import type { Option } from '../types';
+import type { Option } from '../types.js';
 
 export const Control: React.FC<ControlProps<Option, any>> = (props) => {
   const {

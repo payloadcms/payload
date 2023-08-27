@@ -1,4 +1,4 @@
-import buildStateFromSchema from './index';
+import buildStateFromSchema from './index.js';
 
 describe('Form - buildStateFromSchema', () => {
   const defaultValue = 'Default';

@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import payload from '../../../src';
-import { devUser } from '../../credentials';
-import { initPayloadTest } from '../../helpers/configHelpers';
-import { RESTClient } from '../../helpers/rest';
-import { collectionSlug } from './config';
+import payload from '../../../src.js';
+import { devUser } from '../../credentials.js';
+import { initPayloadTest } from '../../helpers/configHelpers.js';
+import { RESTClient } from '../../helpers/rest.js';
+import { collectionSlug } from './config.js';
 
 require('isomorphic-fetch');
 

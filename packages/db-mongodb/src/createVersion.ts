@@ -2,7 +2,7 @@ import type { CreateVersion } from '@alessiogr/payloadtest/database';
 import { PayloadRequest } from '@alessiogr/payloadtest/types';
 import type { Document } from '@alessiogr/payloadtest/types';
 import type { MongooseAdapter } from '.';
-import { withSession } from './withSession';
+import { withSession } from './withSession.js';
 
 export const createVersion: CreateVersion = async function createVersion(
   this: MongooseAdapter,

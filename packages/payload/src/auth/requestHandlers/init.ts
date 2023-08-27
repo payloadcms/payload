@@ -1,6 +1,6 @@
 import { NextFunction, Response } from 'express';
-import { PayloadRequest } from '../../express/types';
-import init from '../operations/init';
+import { PayloadRequest } from '../../express/types.js';
+import init from '../operations/init.js';
 
 export default async function initHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {

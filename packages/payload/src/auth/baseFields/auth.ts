@@ -1,6 +1,6 @@
-import { email } from '../../fields/validations';
-import { Field } from '../../fields/config/types';
-import { extractTranslations } from '../../translations/extractTranslations';
+import { email } from '../../fields/validations.js';
+import { Field } from '../../fields/config/types.js';
+import { extractTranslations } from '../../translations/extractTranslations.js';
 
 const labels = extractTranslations(['general:email']);
 

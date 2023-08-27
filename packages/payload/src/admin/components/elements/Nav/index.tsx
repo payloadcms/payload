@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import Chevron from '../../icons/Chevron';
-import Menu from '../../icons/Menu';
-import CloseMenu from '../../icons/CloseMenu';
-import Icon from '../../graphics/Icon';
-import Account from '../../graphics/Account';
-import Localizer from '../Localizer';
-import NavGroup from '../NavGroup';
-import Logout from '../Logout';
-import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilities/groupNavItems';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { useConfig } from '../../utilities/Config.js';
+import { useAuth } from '../../utilities/Auth.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
+import Chevron from '../../icons/Chevron.js';
+import Menu from '../../icons/Menu.js';
+import CloseMenu from '../../icons/CloseMenu.js';
+import Icon from '../../graphics/Icon.js';
+import Account from '../../graphics/Account.js';
+import Localizer from '../Localizer.js';
+import NavGroup from '../NavGroup.js';
+import Logout from '../Logout.js';
+import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilities/groupNavItems.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
 
 import './index.scss';
 

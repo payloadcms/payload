@@ -1,6 +1,6 @@
 import path from 'path';
-import { initPayloadTest } from '../helpers/configHelpers';
-import { RESTClient } from '../helpers/rest';
+import { initPayloadTest } from '../helpers/configHelpers.js';
+import { RESTClient } from '../helpers/rest.js';
 import {
   applicationEndpoint,
   collectionSlug,
@@ -9,7 +9,7 @@ import {
   noEndpointsCollectionSlug,
   noEndpointsGlobalSlug,
   rootEndpoint,
-} from './config';
+} from './config.js';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 import 'isomorphic-fetch';

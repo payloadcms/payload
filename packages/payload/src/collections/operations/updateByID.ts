@@ -1,27 +1,27 @@
 import httpStatus from 'http-status';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
-import { Collection } from '../config/types';
-import executeAccess from '../../auth/executeAccess';
-import { APIError, Forbidden, NotFound } from '../../errors';
-import { PayloadRequest } from '../../express/types';
-import { hasWhereAccessResult } from '../../auth/types';
-import { saveVersion } from '../../versions/saveVersion';
-import { uploadFiles } from '../../uploads/uploadFiles';
-import { beforeChange } from '../../fields/hooks/beforeChange';
-import { beforeValidate } from '../../fields/hooks/beforeValidate';
-import { afterChange } from '../../fields/hooks/afterChange';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { generateFileData } from '../../uploads/generateFileData';
-import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
-import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
-import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
-import { buildAfterOperation } from './utils';
-import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
-import { combineQueries } from '../../database/combineQueries';
-import type { FindOneArgs } from '../../database/types';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import { Collection } from '../config/types.js';
+import executeAccess from '../../auth/executeAccess.js';
+import { APIError, Forbidden, NotFound } from '../../errors.js';
+import { PayloadRequest } from '../../express/types.js';
+import { hasWhereAccessResult } from '../../auth/types.js';
+import { saveVersion } from '../../versions/saveVersion.js';
+import { uploadFiles } from '../../uploads/uploadFiles.js';
+import { beforeChange } from '../../fields/hooks/beforeChange.js';
+import { beforeValidate } from '../../fields/hooks/beforeValidate.js';
+import { afterChange } from '../../fields/hooks/afterChange.js';
+import { afterRead } from '../../fields/hooks/afterRead.js';
+import { generateFileData } from '../../uploads/generateFileData.js';
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js';
+import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js';
+import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js';
+import { buildAfterOperation } from './utils.js';
+import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash.js';
+import { combineQueries } from '../../database/combineQueries.js';
+import type { FindOneArgs } from '../../database/types.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection

@@ -1,4 +1,4 @@
-import { PayloadRequest } from '../../express/types';
+import { PayloadRequest } from '../../express/types.js';
 
 async function init(args: { req: PayloadRequest, collection: string }): Promise<boolean> {
   const {

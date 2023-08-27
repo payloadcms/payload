@@ -3,8 +3,8 @@ import { pgEnum } from 'drizzle-orm/pg-core';
 // import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
 import { SanitizedCollectionConfig } from 'payload/types';
 import type { Init } from 'payload/database';
-import { buildTable } from './schema/build';
-import type { PostgresAdapter } from './types';
+import { buildTable } from './schema/build.js';
+import type { PostgresAdapter } from './types.js';
 
 export const init: Init = async function init(this: PostgresAdapter) {
   if (this.payload.config.localization) {

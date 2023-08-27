@@ -1,14 +1,14 @@
 import jwt from 'jsonwebtoken';
 import { Response } from 'express';
-import { Collection } from '../../collections/config/types';
-import { APIError } from '../../errors';
-import getCookieExpiration from '../../utilities/getCookieExpiration';
-import { getFieldsToSign } from './getFieldsToSign';
-import { PayloadRequest } from '../../express/types';
-import { authenticateLocalStrategy } from '../strategies/local/authenticate';
-import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import { Collection } from '../../collections/config/types.js';
+import { APIError } from '../../errors.js';
+import getCookieExpiration from '../../utilities/getCookieExpiration.js';
+import { getFieldsToSign } from './getFieldsToSign.js';
+import { PayloadRequest } from '../../express/types.js';
+import { authenticateLocalStrategy } from '../strategies/local/authenticate.js';
+import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
 
 export type Result = {
   token?: string

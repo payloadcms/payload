@@ -1,7 +1,7 @@
 import { Config as SchemaConfig } from 'payload/generated-types';
-import { PayloadRequest } from '../../../express/types';
-import { Collection } from '../../config/types';
-import findByID from '../../operations/findByID';
+import { PayloadRequest } from '../../../express/types.js';
+import { Collection } from '../../config/types.js';
+import findByID from '../../operations/findByID.js';
 
 export type Resolver<T> = (_: unknown, args: {
   locale?: string

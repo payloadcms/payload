@@ -1,5 +1,5 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
-import { CodeField } from '../../payload-types';
+import type { CollectionConfig } from '../../../../src/collections/config/types.js';
+import { CodeField } from '../../payload-types.js';
 
 const Code: CollectionConfig = {
   slug: 'code-fields',

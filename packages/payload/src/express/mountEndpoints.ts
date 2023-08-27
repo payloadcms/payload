@@ -1,5 +1,5 @@
 import { Express, Router } from 'express';
-import { Endpoint } from '../config/types';
+import { Endpoint } from '../config/types.js';
 
 function mountEndpoints(express: Express, router: Router, endpoints: Endpoint[]): void {
   endpoints.forEach((endpoint) => {

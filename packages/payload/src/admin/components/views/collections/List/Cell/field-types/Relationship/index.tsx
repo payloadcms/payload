@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../../../utilities/Config';
-import useIntersect from '../../../../../../../hooks/useIntersect';
-import { useListRelationships } from '../../../RelationshipProvider';
-import { getTranslation } from '../../../../../../../../utilities/getTranslation';
-import { formatUseAsTitle } from '../../../../../../../hooks/useTitle';
-import { Props as DefaultCellProps } from '../../types';
+import { useConfig } from '../../../../../../utilities/Config.js';
+import useIntersect from '../../../../../../../hooks/useIntersect.js';
+import { useListRelationships } from '../../../RelationshipProvider.js';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation.js';
+import { formatUseAsTitle } from '../../../../../../../hooks/useTitle.js';
+import { Props as DefaultCellProps } from '../../types.js';
 
 import './index.scss';
 

@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import { radio } from '../../../../../fields/validations';
-import { Props } from './types';
-import RadioGroupInput from './Input';
+import useField from '../../useField.js';
+import withCondition from '../../withCondition.js';
+import { radio } from '../../../../../fields/validations.js';
+import { Props } from './types.js';
+import RadioGroupInput from './Input.js';
 
 const RadioGroup: React.FC<Props> = (props) => {
   const {

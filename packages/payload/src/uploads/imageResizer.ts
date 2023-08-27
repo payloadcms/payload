@@ -4,10 +4,10 @@ const { fromBuffer } = filetype;
 import fs from 'fs';
 import sanitize from 'sanitize-filename';
 import sharp from 'sharp';
-import { SanitizedCollectionConfig } from '../collections/config/types';
-import { PayloadRequest } from '../express/types';
-import fileExists from './fileExists';
-import { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types';
+import { SanitizedCollectionConfig } from '../collections/config/types.js';
+import { PayloadRequest } from '../express/types.js';
+import fileExists from './fileExists.js';
+import { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types.js';
 
 type ResizeArgs = {
   req: PayloadRequest;

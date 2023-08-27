@@ -1,6 +1,6 @@
 import { Field } from 'payload/types';
 import { SQL } from 'drizzle-orm';
-import { GenericColumn, PostgresAdapter } from '../types';
+import { GenericColumn, PostgresAdapter } from '../types.js';
 
 type BaseArgs = {
   adapter: PostgresAdapter

@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { generateGraphQLSchema } from '../src/bin/generateGraphQLSchema';
+import { generateGraphQLSchema } from '../src/bin/generateGraphQLSchema.js';
 
 const [testConfigDir] = process.argv.slice(2);
 

@@ -1,4 +1,4 @@
-import { Block, Labels } from '../../../../../../fields/config/types';
+import { Block, Labels } from '../../../../../../fields/config/types.js';
 
 export type Props = {
   drawerSlug: string

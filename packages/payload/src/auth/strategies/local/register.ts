@@ -1,8 +1,8 @@
-import { ValidationError } from '../../../errors';
-import { Payload } from '../../..';
-import { SanitizedCollectionConfig } from '../../../collections/config/types';
-import { generatePasswordSaltHash } from './generatePasswordSaltHash';
-import { PayloadRequest } from '../../../express/types';
+import { ValidationError } from '../../../errors.js';
+import { Payload } from '../../...js';
+import { SanitizedCollectionConfig } from '../../../collections/config/types.js';
+import { generatePasswordSaltHash } from './generatePasswordSaltHash.js';
+import { PayloadRequest } from '../../../express/types.js';
 
 type Args = {
   collection: SanitizedCollectionConfig

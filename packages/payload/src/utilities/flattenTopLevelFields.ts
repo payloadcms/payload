@@ -6,7 +6,7 @@ import {
   fieldIsPresentationalOnly,
   FieldPresentationalOnly,
   tabHasName,
-} from '../fields/config/types';
+} from '../fields/config/types.js';
 
 const flattenFields = (fields: Field[], keepPresentationalFields?: boolean): (FieldAffectingData | FieldPresentationalOnly)[] => {
   return fields.reduce((fieldsToUse, field) => {

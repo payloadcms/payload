@@ -1,8 +1,8 @@
 import React from 'react';
 import Editor from '@monaco-editor/react';
-import type { Props } from './types';
-import { useTheme } from '../../utilities/Theme';
-import { ShimmerEffect } from '../ShimmerEffect';
+import type { Props } from './types.js';
+import { useTheme } from '../../utilities/Theme.js';
+import { ShimmerEffect } from '../ShimmerEffect.js';
 
 import './index.scss';
 

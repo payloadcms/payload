@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../utilities/Config';
-import Email from '../../../../forms/field-types/Email';
-import Password from '../../../../forms/field-types/Password';
-import Checkbox from '../../../../forms/field-types/Checkbox';
-import Button from '../../../../elements/Button';
-import ConfirmPassword from '../../../../forms/field-types/ConfirmPassword';
-import { useFormModified, useFormFields } from '../../../../forms/Form/context';
-import { Props } from './types';
+import { useConfig } from '../../../../utilities/Config.js';
+import Email from '../../../../forms/field-types/Email.js';
+import Password from '../../../../forms/field-types/Password.js';
+import Checkbox from '../../../../forms/field-types/Checkbox.js';
+import Button from '../../../../elements/Button.js';
+import ConfirmPassword from '../../../../forms/field-types/ConfirmPassword.js';
+import { useFormModified, useFormFields } from '../../../../forms/Form/context.js';
+import { Props } from './types.js';
 
-import APIKey from './APIKey';
+import APIKey from './APIKey.js';
 
 import './index.scss';
 

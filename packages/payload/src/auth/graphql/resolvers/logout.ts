@@ -1,5 +1,5 @@
-import { Collection } from '../../../collections/config/types';
-import logout from '../../operations/logout';
+import { Collection } from '../../../collections/config/types.js';
+import logout from '../../operations/logout.js';
 
 function logoutResolver(collection: Collection): any {
   async function resolver(_, args, context) {

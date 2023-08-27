@@ -1,18 +1,18 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Button from '../../../../elements/Button';
-import { Props } from './types';
-import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
-import Popup from '../../../../elements/Popup';
-import { useRelatedCollections } from './useRelatedCollections';
-import { useAuth } from '../../../../utilities/Auth';
-import Plus from '../../../../icons/Plus';
-import { getTranslation } from '../../../../../../utilities/getTranslation';
-import Tooltip from '../../../../elements/Tooltip';
-import { useDocumentDrawer } from '../../../../elements/DocumentDrawer';
-import { useConfig } from '../../../../utilities/Config';
-import { Props as EditViewProps } from '../../../../views/collections/Edit/types';
-import { Value } from '../types';
+import Button from '../../../../elements/Button.js';
+import { Props } from './types.js';
+import { SanitizedCollectionConfig } from '../../../../../../collections/config/types.js';
+import Popup from '../../../../elements/Popup.js';
+import { useRelatedCollections } from './useRelatedCollections.js';
+import { useAuth } from '../../../../utilities/Auth.js';
+import Plus from '../../../../icons/Plus.js';
+import { getTranslation } from '../../../../../../utilities/getTranslation.js';
+import Tooltip from '../../../../elements/Tooltip.js';
+import { useDocumentDrawer } from '../../../../elements/DocumentDrawer.js';
+import { useConfig } from '../../../../utilities/Config.js';
+import { Props as EditViewProps } from '../../../../views/collections/Edit/types.js';
+import { Value } from '../types.js';
 
 import './index.scss';
 

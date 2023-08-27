@@ -1,11 +1,11 @@
 import path from 'path';
 import fs from 'fs';
 import type { TFunction } from 'i18next';
-import { ErrorDeletingFile } from '../errors';
-import type { FileData, FileToSave } from './types';
-import type { SanitizedConfig } from '../config/types';
-import type { SanitizedCollectionConfig } from '../collections/config/types';
-import fileExists from './fileExists';
+import { ErrorDeletingFile } from '../errors.js';
+import type { FileData, FileToSave } from './types.js';
+import type { SanitizedConfig } from '../config/types.js';
+import type { SanitizedCollectionConfig } from '../collections/config/types.js';
+import fileExists from './fileExists.js';
 
 type Args = {
   config: SanitizedConfig

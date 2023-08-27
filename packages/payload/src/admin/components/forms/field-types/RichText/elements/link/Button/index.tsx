@@ -3,20 +3,20 @@ import { useTranslation } from 'react-i18next';
 import { ReactEditor, useSlate } from 'slate-react';
 import { Transforms, Range, Editor } from 'slate';
 import { useModal } from '@faceless-ui/modal';
-import ElementButton from '../../Button';
-import LinkIcon from '../../../../../../icons/Link';
-import reduceFieldsToValues from '../../../../../Form/reduceFieldsToValues';
-import { useConfig } from '../../../../../../utilities/Config';
-import isElementActive from '../../isActive';
-import { transformExtraFields, unwrapLink } from '../utilities';
-import { LinkDrawer } from '../LinkDrawer';
-import { Props as RichTextFieldProps } from '../../../types';
-import buildStateFromSchema from '../../../../../Form/buildStateFromSchema';
-import { useAuth } from '../../../../../../utilities/Auth';
-import { Fields } from '../../../../../Form/types';
-import { useLocale } from '../../../../../../utilities/Locale';
-import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
-import { useDocumentInfo } from '../../../../../../utilities/DocumentInfo';
+import ElementButton from '../../Button.js';
+import LinkIcon from '../../../../../../icons/Link.js';
+import reduceFieldsToValues from '../../../../../Form/reduceFieldsToValues.js';
+import { useConfig } from '../../../../../../utilities/Config.js';
+import isElementActive from '../../isActive.js';
+import { transformExtraFields, unwrapLink } from '../utilities.js';
+import { LinkDrawer } from '../LinkDrawer.js';
+import { Props as RichTextFieldProps } from '../../../types.js';
+import buildStateFromSchema from '../../../../../Form/buildStateFromSchema.js';
+import { useAuth } from '../../../../../../utilities/Auth.js';
+import { Fields } from '../../../../../Form/types.js';
+import { useLocale } from '../../../../../../utilities/Locale.js';
+import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug.js';
+import { useDocumentInfo } from '../../../../../../utilities/DocumentInfo.js';
 
 /**
  * This function is called when an new link is created - not when an existing link is edited.

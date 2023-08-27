@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import { DatabaseAdapter } from '../types';
-import { readMigrationFiles } from './readMigrationFiles';
-import { PayloadRequest } from '../../express/types';
+import { DatabaseAdapter } from '../types.js';
+import { readMigrationFiles } from './readMigrationFiles.js';
+import { PayloadRequest } from '../../express/types.js';
 
 /**
  * Reset and re-run all migrations.

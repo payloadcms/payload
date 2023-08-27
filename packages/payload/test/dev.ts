@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import express from 'express';
 import { v4 as uuid } from 'uuid';
 import * as dotenv from 'dotenv';
-import payload from '../src';
+import payload from '../src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(__filename);

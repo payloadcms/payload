@@ -1,4 +1,4 @@
-import defaultAccess from '../../auth/defaultAccess';
+import defaultAccess from '../../auth/defaultAccess.js';
 
 export const defaults = {
   access: {

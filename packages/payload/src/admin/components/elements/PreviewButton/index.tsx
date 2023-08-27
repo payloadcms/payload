@@ -1,13 +1,13 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-import { GeneratePreviewURL } from '../../../../config/types';
-import { useAuth } from '../../utilities/Auth';
-import Button from '../Button';
-import { useLocale } from '../../utilities/Locale';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import { useConfig } from '../../utilities/Config';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import { GeneratePreviewURL } from '../../../../config/types.js';
+import { useAuth } from '../../utilities/Auth.js';
+import Button from '../Button.js';
+import { useLocale } from '../../utilities/Locale.js';
+import { useDocumentInfo } from '../../utilities/DocumentInfo.js';
+import { useConfig } from '../../utilities/Config.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
 
 const baseClass = 'preview-btn';
 

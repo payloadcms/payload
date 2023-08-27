@@ -1,5 +1,5 @@
-import { Action } from './types';
-import { Where } from '../../../../types';
+import { Action } from './types.js';
+import { Where } from '../../../../types.js';
 
 const reducer = (state: Where[], action: Action): Where[] => {
   const newState = [

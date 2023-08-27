@@ -1,11 +1,11 @@
 import { Response } from 'express';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { MarkOptional } from 'ts-essentials';
-import { Forbidden } from '../../errors';
-import { PayloadRequest } from '../../express/types';
-import { Collection } from '../../collections/config/types';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import { Forbidden } from '../../errors.js';
+import { PayloadRequest } from '../../express/types.js';
+import { Collection } from '../../collections/config/types.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
 
 export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
   collection: Collection

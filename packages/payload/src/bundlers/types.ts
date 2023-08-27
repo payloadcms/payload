@@ -1,5 +1,5 @@
 import type { PayloadHandler, SanitizedConfig } from 'payload/config';
-import type { Payload } from '../payload';
+import type { Payload } from '../payload.js';
 
 export interface PayloadBundler {
   dev: (payload: Payload) => Promise<PayloadHandler>, // this would be a typical Express middleware handler

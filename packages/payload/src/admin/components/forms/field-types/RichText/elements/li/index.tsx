@@ -1,5 +1,5 @@
 import React from 'react';
-import listTypes from '../listTypes';
+import listTypes from '../listTypes.js';
 
 const LI = (props) => {
   const { attributes, element, children } = props;

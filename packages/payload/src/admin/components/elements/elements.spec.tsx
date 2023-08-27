@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import Separator from './Paginator/Separator';
+import Separator from './Paginator/Separator.js';
 
 describe('Elements', () => {
   describe('Paginator', () => {

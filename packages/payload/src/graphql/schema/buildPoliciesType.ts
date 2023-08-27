@@ -1,11 +1,11 @@
 import { GraphQLJSONObject } from 'graphql-type-json';
 import { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } from 'graphql';
-import formatName from '../utilities/formatName';
-import { CollectionConfig, SanitizedCollectionConfig } from '../../collections/config/types';
-import { GlobalConfig, SanitizedGlobalConfig } from '../../globals/config/types';
-import { Field } from '../../fields/config/types';
-import { Payload } from '../../payload';
-import { toWords } from '../../utilities/formatLabels';
+import formatName from '../utilities/formatName.js';
+import { CollectionConfig, SanitizedCollectionConfig } from '../../collections/config/types.js';
+import { GlobalConfig, SanitizedGlobalConfig } from '../../globals/config/types.js';
+import { Field } from '../../fields/config/types.js';
+import { Payload } from '../../payload.js';
+import { toWords } from '../../utilities/formatLabels.js';
 
 type OperationType = 'create' | 'read' | 'update' | 'delete' | 'unlock' | 'readVersions';
 

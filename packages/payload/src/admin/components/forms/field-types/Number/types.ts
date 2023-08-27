@@ -1,4 +1,4 @@
-import { NumberField } from '../../../../../fields/config/types';
+import { NumberField } from '../../../../../fields/config/types.js';
 
 export type Props = Omit<NumberField, 'type'> & {
   path?: string

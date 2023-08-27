@@ -1,5 +1,5 @@
-import { Where } from '../../../../../types';
-import { Action, FieldCondition } from '../types';
+import { Where } from '../../../../../types.js';
+import { Action, FieldCondition } from '../types.js';
 
 export type Props = {
   fields: FieldCondition[],

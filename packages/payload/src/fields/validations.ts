@@ -1,4 +1,4 @@
-import defaultRichTextValue from './richText/defaultValue';
+import defaultRichTextValue from './richText/defaultValue.js';
 import {
   ArrayField,
   BlockField,
@@ -19,10 +19,10 @@ import {
   TextField,
   UploadField,
   Validate,
-} from './config/types';
-import canUseDOM from '../utilities/canUseDOM';
-import { isValidID } from '../utilities/isValidID';
-import { getIDType } from '../utilities/getIDType';
+} from './config/types.js';
+import canUseDOM from '../utilities/canUseDOM.js';
+import { isValidID } from '../utilities/isValidID.js';
+import { getIDType } from '../utilities/getIDType.js';
 
 export const number: Validate<unknown, unknown, NumberField> = (value: number | number[], { t, required, min, max, minRows, maxRows, hasMany }) => {
   const toValidate: number[] = Array.isArray(value) ? value : [value];

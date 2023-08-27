@@ -1,5 +1,5 @@
-import { Documents } from './index';
-import { TypeWithID } from '../../../../../../collections/config/types';
+import { Documents } from './index.js';
+import { TypeWithID } from '../../../../../../collections/config/types.js';
 
 type RequestDocuments = {
   type: 'REQUEST',

@@ -3,8 +3,8 @@ import {
   fieldIsPresentationalOnly,
   FieldWithSubFields,
   TabsField,
-} from '../../fields/config/types';
-import fieldToSchemaMap from './fieldToWhereInputSchemaMap';
+} from '../../fields/config/types.js';
+import fieldToSchemaMap from './fieldToWhereInputSchemaMap.js';
 
 const recursivelyBuildNestedPaths = (parentName: string, nestedFieldName2: string, field: FieldWithSubFields | TabsField) => {
   const fieldName = fieldAffectsData(field) ? field.name : undefined;

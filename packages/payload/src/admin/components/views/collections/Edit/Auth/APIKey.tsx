@@ -1,13 +1,13 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useTranslation } from 'react-i18next';
-import useField from '../../../../forms/useField';
-import Label from '../../../../forms/Label';
-import CopyToClipboard from '../../../../elements/CopyToClipboard';
-import { text } from '../../../../../../fields/validations';
-import { useFormFields } from '../../../../forms/Form/context';
+import useField from '../../../../forms/useField.js';
+import Label from '../../../../forms/Label.js';
+import CopyToClipboard from '../../../../elements/CopyToClipboard.js';
+import { text } from '../../../../../../fields/validations.js';
+import { useFormFields } from '../../../../forms/Form/context.js';
 
-import GenerateConfirmation from '../../../../elements/GenerateConfirmation';
+import GenerateConfirmation from '../../../../elements/GenerateConfirmation.js';
 
 const path = 'apiKey';
 const baseClass = 'api-key';

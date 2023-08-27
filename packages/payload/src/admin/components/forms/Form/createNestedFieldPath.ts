@@ -1,4 +1,4 @@
-import { Field, fieldAffectsData } from '../../../../fields/config/types';
+import { Field, fieldAffectsData } from '../../../../fields/config/types.js';
 
 export const createNestedFieldPath = (parentPath: string, field: Field): string => {
   if (parentPath) {

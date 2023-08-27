@@ -1,6 +1,6 @@
-import { initPayloadTest } from '../helpers/configHelpers';
-import payload from '../../src';
-import configPromise from './config';
+import { initPayloadTest } from '../helpers/configHelpers.js';
+import payload from '../../src.js';
+import configPromise from './config.js';
 import path from 'path';
 
 let collection: string;

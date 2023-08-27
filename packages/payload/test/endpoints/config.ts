@@ -1,9 +1,9 @@
 import express, { Response } from 'express';
-import { devUser } from '../credentials';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { openAccess } from '../helpers/configHelpers';
-import { PayloadRequest } from '../../src/express/types';
-import { Config } from '../../src/config/types';
+import { devUser } from '../credentials.js';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import { openAccess } from '../helpers/configHelpers.js';
+import { PayloadRequest } from '../../src/express/types.js';
+import { Config } from '../../src/config/types.js';
 
 export const collectionSlug = 'endpoints';
 export const globalSlug = 'global-endpoints';

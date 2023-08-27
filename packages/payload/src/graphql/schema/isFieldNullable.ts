@@ -1,4 +1,4 @@
-import { FieldAffectingData, fieldAffectsData } from '../../fields/config/types';
+import { FieldAffectingData, fieldAffectsData } from '../../fields/config/types.js';
 
 const isFieldNullable = (field: FieldAffectingData, force: boolean): boolean => {
   const hasReadAccessControl = field.access && field.access.read;

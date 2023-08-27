@@ -1,4 +1,4 @@
-import { OnChange } from '../types';
+import { OnChange } from '../types.js';
 
 export type Props = {
   isSelected: boolean

@@ -1,4 +1,4 @@
-import init from '../../operations/init';
+import init from '../../operations/init.js';
 
 function initResolver(collection: string) {
   async function resolver(_, args, context) {

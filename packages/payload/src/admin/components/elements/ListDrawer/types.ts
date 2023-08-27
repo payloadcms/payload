@@ -1,6 +1,6 @@
 import React, { HTMLAttributes } from 'react';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import { FilterOptionsResult } from '../../forms/field-types/Relationship/types';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
+import { FilterOptionsResult } from '../../forms/field-types/Relationship/types.js';
 
 export type ListDrawerProps = {
   onSelect?: (args: {

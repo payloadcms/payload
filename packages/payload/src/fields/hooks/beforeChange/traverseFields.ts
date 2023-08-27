@@ -1,7 +1,7 @@
-import { Field, TabAsField } from '../../config/types';
-import { promise } from './promise';
-import { Operation } from '../../../types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
+import { Field, TabAsField } from '../../config/types.js';
+import { promise } from './promise.js';
+import { Operation } from '../../../types.js';
+import { PayloadRequest, RequestContext } from '../../../express/types.js';
 
 type Args = {
   data: Record<string, unknown>

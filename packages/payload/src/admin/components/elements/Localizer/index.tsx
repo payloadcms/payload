@@ -2,10 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import qs from 'qs';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { useLocale } from '../../utilities/Locale';
-import { useSearchParams } from '../../utilities/SearchParams';
-import Popup from '../Popup';
+import { useConfig } from '../../utilities/Config.js';
+import { useLocale } from '../../utilities/Locale.js';
+import { useSearchParams } from '../../utilities/SearchParams.js';
+import Popup from '../Popup.js';
 
 
 import './index.scss';

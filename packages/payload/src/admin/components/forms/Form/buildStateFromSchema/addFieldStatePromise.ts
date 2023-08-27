@@ -1,16 +1,16 @@
 /* eslint-disable no-param-reassign */
 import ObjectID from 'bson-objectid';
 import type { TFunction } from 'i18next';
-import { User } from '../../../../../auth';
+import { User } from '../../../../../auth.js';
 import {
   NonPresentationalField,
   fieldAffectsData,
   fieldHasSubFields,
   tabHasName,
-} from '../../../../../fields/config/types';
-import getValueWithDefault from '../../../../../fields/getDefaultValue';
-import { Fields, FormField, Data } from '../types';
-import { iterateFields } from './iterateFields';
+} from '../../../../../fields/config/types.js';
+import getValueWithDefault from '../../../../../fields/getDefaultValue.js';
+import { Fields, FormField, Data } from '../types.js';
+import { iterateFields } from './iterateFields.js';
 
 type Args = {
   field: NonPresentationalField

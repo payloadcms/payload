@@ -11,7 +11,7 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 
-import { Props } from './types';
+import { Props } from './types.js';
 
 const DraggableSortable: React.FC<Props> = (props) => {
   const {

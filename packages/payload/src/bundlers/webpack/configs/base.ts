@@ -1,6 +1,6 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack, { Configuration } from 'webpack';
-import type { SanitizedConfig } from '../../../config/types';
+import type { SanitizedConfig } from '../../../config/types.js';
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 import { createRequire } from 'node:module';

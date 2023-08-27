@@ -1,16 +1,16 @@
 import path from 'path';
-import { mapAsync } from '../../src/utilities/mapAsync';
-import { devUser } from '../credentials';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import AfterDashboard from './components/AfterDashboard';
-import CustomMinimalRoute from './components/views/CustomMinimal';
-import CustomDefaultRoute from './components/views/CustomDefault';
-import BeforeLogin from './components/BeforeLogin';
-import AfterNavLinks from './components/AfterNavLinks';
-import { globalSlug, slug } from './shared';
-import Logout from './components/Logout';
-import DemoUIFieldField from './components/DemoUIField/Field';
-import DemoUIFieldCell from './components/DemoUIField/Cell';
+import { mapAsync } from '../../src/utilities/mapAsync.js';
+import { devUser } from '../credentials.js';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import AfterDashboard from './components/AfterDashboard.js';
+import CustomMinimalRoute from './components/views/CustomMinimal.js';
+import CustomDefaultRoute from './components/views/CustomDefault.js';
+import BeforeLogin from './components/BeforeLogin.js';
+import AfterNavLinks from './components/AfterNavLinks.js';
+import { globalSlug, slug } from './shared.js';
+import Logout from './components/Logout.js';
+import DemoUIFieldField from './components/DemoUIField/Field.js';
+import DemoUIFieldCell from './components/DemoUIField/Cell.js';
 
 export interface Post {
   id: string;

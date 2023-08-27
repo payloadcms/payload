@@ -1,6 +1,6 @@
 import React from 'react';
 import { components as SelectComponents, ValueContainerProps } from 'react-select';
-import { Option } from '../types';
+import { Option } from '../types.js';
 
 import './index.scss';
 

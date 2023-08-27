@@ -3,8 +3,8 @@ import {
   MultiValueProps,
   components as SelectComponents,
 } from 'react-select';
-import { useDraggableSortable } from '../../DraggableSortable/useDraggableSortable';
-import type { Option } from '../types';
+import { useDraggableSortable } from '../../DraggableSortable/useDraggableSortable.js';
+import type { Option } from '../types.js';
 
 import './index.scss';
 

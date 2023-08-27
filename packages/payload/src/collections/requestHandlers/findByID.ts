@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
-import { PayloadRequest } from '../../express/types';
-import { Document } from '../../types';
-import findByID from '../operations/findByID';
+import { PayloadRequest } from '../../express/types.js';
+import { Document } from '../../types.js';
+import findByID from '../operations/findByID.js';
 
 export type FindByIDResult = {
   message: string;

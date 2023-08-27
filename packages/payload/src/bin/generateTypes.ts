@@ -1,9 +1,9 @@
 /* eslint-disable no-nested-ternary */
 import fs from 'fs';
 import { compile } from 'json-schema-to-typescript';
-import Logger from '../utilities/logger';
-import loadConfig from '../config/load';
-import { configToJSONSchema } from '../utilities/configToJSONSchema';
+import Logger from '../utilities/logger.js';
+import loadConfig from '../config/load.js';
+import { configToJSONSchema } from '../utilities/configToJSONSchema.js';
 import * as url from 'node:url';
 
 export async function generateTypes(): Promise<void> {

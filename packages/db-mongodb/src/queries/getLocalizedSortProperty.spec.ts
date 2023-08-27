@@ -1,6 +1,6 @@
 import { sanitizeConfig } from '@alessiogr/payloadtest/config';
 import { Config } from '@alessiogr/payloadtest/config';
-import { getLocalizedSortProperty } from './getLocalizedSortProperty';
+import { getLocalizedSortProperty } from './getLocalizedSortProperty.js';
 
 const config = {
   localization: {

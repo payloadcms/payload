@@ -1,4 +1,4 @@
-import { PayloadRequest } from '../express/types';
+import { PayloadRequest } from '../express/types.js';
 
 /**
  * Rollback the transaction from the req using the db adapter and removes it from the req

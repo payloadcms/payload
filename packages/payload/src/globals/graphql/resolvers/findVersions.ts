@@ -1,8 +1,8 @@
 import { Response } from 'express';
-import { Document, Where } from '../../../types';
-import { SanitizedGlobalConfig } from '../../config/types';
-import { PayloadRequest } from '../../../express/types';
-import findVersions from '../../operations/findVersions';
+import { Document, Where } from '../../../types.js';
+import { SanitizedGlobalConfig } from '../../config/types.js';
+import { PayloadRequest } from '../../../express/types.js';
+import findVersions from '../../operations/findVersions.js';
 
 export type Resolver = (
   _: unknown,

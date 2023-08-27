@@ -1,12 +1,12 @@
-import find from './find';
-import findByID from './findByID';
-import create from './create';
-import update from './update';
-import deleteLocal from './delete';
-import auth from '../../../auth/operations/local';
-import findVersionByID from './findVersionByID';
-import findVersions from './findVersions';
-import restoreVersion from './restoreVersion';
+import find from './find.js';
+import findByID from './findByID.js';
+import create from './create.js';
+import update from './update.js';
+import deleteLocal from './delete.js';
+import auth from '../../../auth/operations/local.js';
+import findVersionByID from './findVersionByID.js';
+import findVersions from './findVersions.js';
+import restoreVersion from './restoreVersion.js';
 
 export default {
   find,

@@ -1,19 +1,19 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import payload from '../../src';
-import { mapAsync } from '../../src/utilities/mapAsync';
-import { AdminUrlUtil } from '../helpers/adminUrlUtil';
-import { initPayloadE2E } from '../helpers/configHelpers';
-import { saveDocAndAssert } from '../helpers';
+import payload from '../../src.js';
+import { mapAsync } from '../../src/utilities/mapAsync.js';
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js';
+import { initPayloadE2E } from '../helpers/configHelpers.js';
+import { saveDocAndAssert } from '../helpers.js';
 import type {
   FieldsRelationship as CollectionWithRelationships,
   RelationOne,
   RelationRestricted,
   RelationTwo,
   RelationWithTitle,
-} from './config';
-import { relationOneSlug, relationRestrictedSlug, relationTwoSlug, relationUpdatedExternallySlug, relationWithTitleSlug, slug } from './collectionSlugs';
-import wait from '../../src/utilities/wait';
+} from './config.js';
+import { relationOneSlug, relationRestrictedSlug, relationTwoSlug, relationUpdatedExternallySlug, relationWithTitleSlug, slug } from './collectionSlugs.js';
+import wait from '../../src/utilities/wait.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

@@ -1,6 +1,6 @@
 import httpStatus from 'http-status';
 import type { TFunction } from 'i18next';
-import APIError from './APIError';
+import APIError from './APIError.js';
 
 class ValidationError extends APIError<{ message: string; field: string }[]> {
   constructor(results: { message: string; field: string }[], t?: TFunction) {

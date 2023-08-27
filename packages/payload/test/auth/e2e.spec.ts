@@ -1,9 +1,9 @@
 import type { Page } from '@playwright/test';
 import { test, expect } from '@playwright/test';
-import { AdminUrlUtil } from '../helpers/adminUrlUtil';
-import { initPayloadE2E } from '../helpers/configHelpers';
-import { login, saveDocAndAssert } from '../helpers';
-import { slug } from './config';
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js';
+import { initPayloadE2E } from '../helpers/configHelpers.js';
+import { login, saveDocAndAssert } from '../helpers.js';
+import { slug } from './config.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

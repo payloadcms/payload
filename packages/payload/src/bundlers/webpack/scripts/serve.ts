@@ -1,8 +1,8 @@
 import express from 'express';
 import compression from 'compression';
 import history from 'connect-history-api-fallback';
-import type { PayloadHandler } from '../../../config/types';
-import { Payload } from '../../../payload';
+import type { PayloadHandler } from '../../../config/types.js';
+import { Payload } from '../../../payload.js';
 
 const router = express.Router();
 

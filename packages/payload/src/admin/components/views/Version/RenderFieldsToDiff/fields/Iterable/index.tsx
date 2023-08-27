@@ -1,11 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import RenderFieldsToDiff from '../..';
-import { Props } from '../types';
-import Label from '../../Label';
-import { ArrayField, BlockField, Field, fieldAffectsData } from '../../../../../../../fields/config/types';
-import getUniqueListBy from '../../../../../../../utilities/getUniqueListBy';
-import { getTranslation } from '../../../../../../../utilities/getTranslation';
+import RenderFieldsToDiff from '../...js';
+import { Props } from '../types.js';
+import Label from '../../Label.js';
+import { ArrayField, BlockField, Field, fieldAffectsData } from '../../../../../../../fields/config/types.js';
+import getUniqueListBy from '../../../../../../../utilities/getUniqueListBy.js';
+import { getTranslation } from '../../../../../../../utilities/getTranslation.js';
 
 import './index.scss';
 

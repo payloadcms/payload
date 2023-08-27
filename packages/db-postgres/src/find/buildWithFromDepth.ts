@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { SanitizedConfig } from 'payload/config';
-import { buildFindManyArgs } from './buildFindManyArgs';
-import { PostgresAdapter } from '../types';
+import { buildFindManyArgs } from './buildFindManyArgs.js';
+import { PostgresAdapter } from '../types.js';
 
 type BuildWithFromDepthArgs = {
   adapter: PostgresAdapter

@@ -1,14 +1,14 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Payload } from '../../../payload';
-import { Document, Where } from '../../../types';
-import type { PaginatedDocs } from '../../../database/types';
-import { TypeWithVersion } from '../../../versions/types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import findVersions from '../findVersions';
-import { getDataLoader } from '../../dataloader';
-import { i18nInit } from '../../../translations/init';
-import { APIError } from '../../../errors';
-import { setRequestContext } from '../../../express/setRequestContext';
+import { Payload } from '../../../payload.js';
+import { Document, Where } from '../../../types.js';
+import type { PaginatedDocs } from '../../../database/types.js';
+import { TypeWithVersion } from '../../../versions/types.js';
+import { PayloadRequest, RequestContext } from '../../../express/types.js';
+import findVersions from '../findVersions.js';
+import { getDataLoader } from '../../dataloader.js';
+import { i18nInit } from '../../../translations/init.js';
+import { APIError } from '../../../errors.js';
+import { setRequestContext } from '../../../express/setRequestContext.js';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T

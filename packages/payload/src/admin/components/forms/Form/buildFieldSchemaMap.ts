@@ -1,5 +1,5 @@
-import { Field } from '../../../../fields/config/types';
-import { createNestedFieldPath } from './createNestedFieldPath';
+import { Field } from '../../../../fields/config/types.js';
+import { createNestedFieldPath } from './createNestedFieldPath.js';
 
 /**
  * **Returns Map with array and block field schemas**

@@ -1,4 +1,4 @@
-import loadConfig from '../config/load';
+import loadConfig from '../config/load.js';
 
 export const build = async (): Promise<void> => {
   const config = await loadConfig(); // Will throw its own error if it fails

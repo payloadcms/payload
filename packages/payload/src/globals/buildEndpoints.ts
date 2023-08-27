@@ -1,11 +1,11 @@
-import { Endpoint } from '../config/types';
-import findVersions from './requestHandlers/findVersions';
-import findVersionByID from './requestHandlers/findVersionByID';
-import restoreVersion from './requestHandlers/restoreVersion';
-import { SanitizedGlobalConfig } from './config/types';
-import update from './requestHandlers/update';
-import findOne from './requestHandlers/findOne';
-import docAccessRequestHandler from './requestHandlers/docAccess';
+import { Endpoint } from '../config/types.js';
+import findVersions from './requestHandlers/findVersions.js';
+import findVersionByID from './requestHandlers/findVersionByID.js';
+import restoreVersion from './requestHandlers/restoreVersion.js';
+import { SanitizedGlobalConfig } from './config/types.js';
+import update from './requestHandlers/update.js';
+import findOne from './requestHandlers/findOne.js';
+import docAccessRequestHandler from './requestHandlers/docAccess.js';
 
 const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
   if (!global.endpoints) return [];

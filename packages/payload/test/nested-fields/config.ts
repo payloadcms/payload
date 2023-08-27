@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import { devUser } from '../credentials.js';
 
 // fields with fields
 // - array -> fields

@@ -1,6 +1,6 @@
 import httpStatus from 'http-status';
 import type { TFunction } from 'i18next';
-import APIError from './APIError';
+import APIError from './APIError.js';
 
 class NotFound extends APIError {
   constructor(t?: TFunction) {

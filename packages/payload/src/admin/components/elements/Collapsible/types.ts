@@ -1,5 +1,5 @@
 import React from 'react';
-import { DragHandleProps } from '../DraggableSortable/DraggableSortableItem/types';
+import { DragHandleProps } from '../DraggableSortable/DraggableSortableItem/types.js';
 
 export type Props = {
   collapsed?: boolean

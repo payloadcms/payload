@@ -1,8 +1,8 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { APIError } from '../../../errors';
-import { Payload } from '../../../payload';
-import verifyEmail from '../verifyEmail';
-import { PayloadRequest } from '../../../express/types';
+import { APIError } from '../../../errors.js';
+import { Payload } from '../../../payload.js';
+import verifyEmail from '../verifyEmail.js';
+import { PayloadRequest } from '../../../express/types.js';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   token: string,

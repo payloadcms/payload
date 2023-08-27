@@ -1,10 +1,10 @@
 import { request, GraphQLClient } from 'graphql-request';
-import { initPayloadTest } from '../helpers/configHelpers';
-import payload from '../../src';
-import configPromise from './config';
-import AutosavePosts from './collections/Autosave';
-import AutosaveGlobal from './globals/Autosave';
-import { devUser } from '../credentials';
+import { initPayloadTest } from '../helpers/configHelpers.js';
+import payload from '../../src.js';
+import configPromise from './config.js';
+import AutosavePosts from './collections/Autosave.js';
+import AutosaveGlobal from './globals/Autosave.js';
+import { devUser } from '../credentials.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

@@ -1,6 +1,6 @@
-import { Config } from '../../../../../../../../config/types';
-import { Field } from '../../../../../../../../fields/config/types';
-import { extractTranslations } from '../../../../../../../../translations/extractTranslations';
+import { Config } from '../../../../../../../../config/types.js';
+import { Field } from '../../../../../../../../fields/config/types.js';
+import { extractTranslations } from '../../../../../../../../translations/extractTranslations.js';
 
 const translations = extractTranslations([
   'fields:textToDisplay',

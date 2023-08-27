@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../src/collections/config/types';
-import { devUser } from '../credentials';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import type { CollectionConfig } from '../../src/collections/config/types.js';
+import { devUser } from '../credentials.js';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
 
 const openAccess = {
   create: () => true,

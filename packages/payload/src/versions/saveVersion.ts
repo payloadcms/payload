@@ -1,9 +1,9 @@
-import { Payload } from '../payload';
-import { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
-import { enforceMaxVersions } from './enforceMaxVersions';
-import { PayloadRequest } from '../express/types';
-import { SanitizedGlobalConfig } from '../globals/config/types';
-import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
+import { Payload } from '../payload.js';
+import { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js';
+import { enforceMaxVersions } from './enforceMaxVersions.js';
+import { PayloadRequest } from '../express/types.js';
+import { SanitizedGlobalConfig } from '../globals/config/types.js';
+import sanitizeInternalFields from '../utilities/sanitizeInternalFields.js';
 
 type Args = {
   payload: Payload

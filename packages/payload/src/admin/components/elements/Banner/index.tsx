@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Props, RenderedTypeProps } from './types';
+import { Props, RenderedTypeProps } from './types.js';
 
 import './index.scss';
 

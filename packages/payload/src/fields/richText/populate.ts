@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { Collection } from '../../collections/config/types';
-import { Field, RichTextField } from '../config/types';
-import { PayloadRequest } from '../../express/types';
+import { Collection } from '../../collections/config/types.js';
+import { Field, RichTextField } from '../config/types.js';
+import { PayloadRequest } from '../../express/types.js';
 
 type Arguments = {
   data: unknown

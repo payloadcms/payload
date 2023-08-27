@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
-import payload from '../../../../src';
-import { CollectionConfig } from '../../../../src/collections/config/types';
-import type { PayloadRequest } from '../../../../src/types';
+import payload from '../../../../src.js';
+import { CollectionConfig } from '../../../../src/collections/config/types.js';
+import type { PayloadRequest } from '../../../../src/types.js';
 
 export const contextHooksSlug = 'context-hooks';
 const ContextHooks: CollectionConfig = {

@@ -1,5 +1,5 @@
-import unlock from '../../operations/unlock';
-import { Collection } from '../../../collections/config/types';
+import unlock from '../../operations/unlock.js';
+import { Collection } from '../../../collections/config/types.js';
 
 function unlockResolver(collection: Collection) {
   async function resolver(_, args, context) {

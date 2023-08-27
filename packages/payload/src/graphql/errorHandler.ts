@@ -1,7 +1,7 @@
 import { GraphQLFormattedError } from 'graphql';
 import httpStatus from 'http-status';
-import { AfterErrorHook } from '../collections/config/types';
-import { Payload } from '../payload';
+import { AfterErrorHook } from '../collections/config/types.js';
+import { Payload } from '../payload.js';
 
 const errorHandler = async (
   payload: Payload,

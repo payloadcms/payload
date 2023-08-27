@@ -1,17 +1,17 @@
 import React from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import Logo from '../../graphics/Logo';
-import MinimalTemplate from '../../templates/Minimal';
-import Form from '../../forms/Form';
-import Email from '../../forms/field-types/Email';
-import Password from '../../forms/field-types/Password';
-import FormSubmit from '../../forms/Submit';
-import Button from '../../elements/Button';
-import Meta from '../../utilities/Meta';
-import { FormLoadingOverlayToggle } from '../../elements/Loading';
+import { useConfig } from '../../utilities/Config.js';
+import { useAuth } from '../../utilities/Auth.js';
+import Logo from '../../graphics/Logo.js';
+import MinimalTemplate from '../../templates/Minimal.js';
+import Form from '../../forms/Form.js';
+import Email from '../../forms/field-types/Email.js';
+import Password from '../../forms/field-types/Password.js';
+import FormSubmit from '../../forms/Submit.js';
+import Button from '../../elements/Button.js';
+import Meta from '../../utilities/Meta.js';
+import { FormLoadingOverlayToggle } from '../../elements/Loading.js';
 
 import './index.scss';
 

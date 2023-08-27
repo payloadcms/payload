@@ -26,10 +26,10 @@
 
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import { initPayloadE2E } from '../helpers/configHelpers';
-import { AdminUrlUtil } from '../helpers/adminUrlUtil';
-import { draftSlug, autosaveSlug } from './shared';
-import wait from '../../src/utilities/wait';
+import { initPayloadE2E } from '../helpers/configHelpers.js';
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js';
+import { draftSlug, autosaveSlug } from './shared.js';
+import wait from '../../src/utilities/wait.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

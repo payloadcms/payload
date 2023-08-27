@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { Props } from './types';
-import useIntersect from '../../../hooks/useIntersect';
+import { Props } from './types.js';
+import useIntersect from '../../../hooks/useIntersect.js';
 
 import './index.scss';
 

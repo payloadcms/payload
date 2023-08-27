@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react';
-import { useConfig } from '../../../utilities/Config';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import { upload } from '../../../../../fields/validations';
-import { Props } from './types';
-import UploadInput from './Input';
+import { useConfig } from '../../../utilities/Config.js';
+import useField from '../../useField.js';
+import withCondition from '../../withCondition.js';
+import { upload } from '../../../../../fields/validations.js';
+import { Props } from './types.js';
+import UploadInput from './Input.js';
 
 import './index.scss';
 

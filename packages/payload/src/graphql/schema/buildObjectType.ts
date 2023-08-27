@@ -40,16 +40,16 @@ import {
   TextareaField,
   TextField,
   UploadField,
-} from '../../fields/config/types';
-import formatName from '../utilities/formatName';
-import combineParentName from '../utilities/combineParentName';
-import withNullableType from './withNullableType';
-import { toWords } from '../../utilities/formatLabels';
-import createRichTextRelationshipPromise from '../../fields/richText/richTextRelationshipPromise';
-import formatOptions from '../utilities/formatOptions';
-import { Payload } from '../../payload';
-import buildWhereInputType from './buildWhereInputType';
-import isFieldNullable from './isFieldNullable';
+} from '../../fields/config/types.js';
+import formatName from '../utilities/formatName.js';
+import combineParentName from '../utilities/combineParentName.js';
+import withNullableType from './withNullableType.js';
+import { toWords } from '../../utilities/formatLabels.js';
+import createRichTextRelationshipPromise from '../../fields/richText/richTextRelationshipPromise.js';
+import formatOptions from '../utilities/formatOptions.js';
+import { Payload } from '../../payload.js';
+import buildWhereInputType from './buildWhereInputType.js';
+import isFieldNullable from './isFieldNullable.js';
 
 type LocaleInputType = {
   locale: {

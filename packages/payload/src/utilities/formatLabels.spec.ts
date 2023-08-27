@@ -1,4 +1,4 @@
-import { formatLabels, toWords } from './formatLabels';
+import { formatLabels, toWords } from './formatLabels.js';
 
 describe('formatLabels', () => {
   it('should format singular slug', () => {

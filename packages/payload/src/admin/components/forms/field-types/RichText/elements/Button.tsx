@@ -1,9 +1,9 @@
 import React, { ElementType, useCallback, useState } from 'react';
 import { useSlate } from 'slate-react';
-import isElementActive from './isActive';
-import toggleElement from './toggle';
-import { ButtonProps } from './types';
-import Tooltip from '../../../../elements/Tooltip';
+import isElementActive from './isActive.js';
+import toggleElement from './toggle.js';
+import { ButtonProps } from './types.js';
+import Tooltip from '../../../../elements/Tooltip.js';
 
 import '../buttons.scss';
 

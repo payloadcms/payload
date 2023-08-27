@@ -1,18 +1,18 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import RenderFields from '../../RenderFields';
-import withCondition from '../../withCondition';
-import FieldDescription from '../../FieldDescription';
-import { Props } from './types';
-import { useCollapsible } from '../../../elements/Collapsible/provider';
-import { GroupProvider, useGroup } from './provider';
-import { useRow } from '../Row/provider';
-import { useTabs } from '../Tabs/provider';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
-import { useFormSubmitted } from '../../Form/context';
-import { WatchChildErrors } from '../../WatchChildErrors';
-import { ErrorPill } from '../../../elements/ErrorPill';
+import RenderFields from '../../RenderFields.js';
+import withCondition from '../../withCondition.js';
+import FieldDescription from '../../FieldDescription.js';
+import { Props } from './types.js';
+import { useCollapsible } from '../../../elements/Collapsible/provider.js';
+import { GroupProvider, useGroup } from './provider.js';
+import { useRow } from '../Row/provider.js';
+import { useTabs } from '../Tabs/provider.js';
+import { getTranslation } from '../../../../../utilities/getTranslation.js';
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath.js';
+import { useFormSubmitted } from '../../Form/context.js';
+import { WatchChildErrors } from '../../WatchChildErrors.js';
+import { ErrorPill } from '../../../elements/ErrorPill.js';
 
 import './index.scss';
 

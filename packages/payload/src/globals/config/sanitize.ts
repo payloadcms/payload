@@ -1,12 +1,12 @@
-import { toWords } from '../../utilities/formatLabels';
-import { CollectionConfig } from '../../collections/config/types';
-import sanitizeFields from '../../fields/config/sanitize';
-import { GlobalConfig, SanitizedGlobalConfig } from './types';
-import defaultAccess from '../../auth/defaultAccess';
-import baseVersionFields from '../../versions/baseFields';
-import mergeBaseFields from '../../fields/mergeBaseFields';
-import translations from '../../translations';
-import { fieldAffectsData } from '../../fields/config/types';
+import { toWords } from '../../utilities/formatLabels.js';
+import { CollectionConfig } from '../../collections/config/types.js';
+import sanitizeFields from '../../fields/config/sanitize.js';
+import { GlobalConfig, SanitizedGlobalConfig } from './types.js';
+import defaultAccess from '../../auth/defaultAccess.js';
+import baseVersionFields from '../../versions/baseFields.js';
+import mergeBaseFields from '../../fields/mergeBaseFields.js';
+import translations from '../../translations.js';
+import { fieldAffectsData } from '../../fields/config/types.js';
 
 const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[]): SanitizedGlobalConfig[] => {
   const sanitizedGlobals = globals.map((global) => {

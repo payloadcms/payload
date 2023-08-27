@@ -1,14 +1,14 @@
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef, useState } from 'react';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import { usePreferences } from '../../utilities/Preferences';
-import { ListPreferences } from '../../views/collections/List/types';
-import { Column } from '../Table/types';
-import buildColumns from './buildColumns';
-import { Action, columnReducer } from './columnReducer';
-import getInitialColumnState from './getInitialColumns';
-import { Props as CellProps } from '../../views/collections/List/Cell/types';
-import formatFields from '../../views/collections/List/formatFields';
-import { Field } from '../../../../fields/config/types';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
+import { usePreferences } from '../../utilities/Preferences.js';
+import { ListPreferences } from '../../views/collections/List/types.js';
+import { Column } from '../Table/types.js';
+import buildColumns from './buildColumns.js';
+import { Action, columnReducer } from './columnReducer.js';
+import getInitialColumnState from './getInitialColumns.js';
+import { Props as CellProps } from '../../views/collections/List/Cell/types.js';
+import formatFields from '../../views/collections/List/formatFields.js';
+import { Field } from '../../../../fields/config/types.js';
 
 export interface ITableColumns {
   columns: Column[]

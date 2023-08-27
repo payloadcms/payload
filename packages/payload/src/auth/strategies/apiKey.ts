@@ -1,9 +1,9 @@
 import PassportAPIKey from 'passport-headerapikey';
 import crypto from 'crypto';
-import { PayloadRequest } from '../../express/types';
-import { Payload } from '../../payload';
-import find from '../../collections/operations/find';
-import { SanitizedCollectionConfig } from '../../collections/config/types';
+import { PayloadRequest } from '../../express/types.js';
+import { Payload } from '../../payload.js';
+import find from '../../collections/operations/find.js';
+import { SanitizedCollectionConfig } from '../../collections/config/types.js';
 
 export default (payload: Payload, config: SanitizedCollectionConfig): PassportAPIKey => {
   const { secret } = payload;

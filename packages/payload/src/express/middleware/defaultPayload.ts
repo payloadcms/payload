@@ -1,6 +1,6 @@
 import type { Response, NextFunction } from 'express';
-import type { PayloadRequest } from '../types';
-import { setRequestContext } from '../setRequestContext';
+import type { PayloadRequest } from '../types.js';
+import { setRequestContext } from '../setRequestContext.js';
 
 function defaultPayload(req: PayloadRequest, res: Response, next: NextFunction) {
   setRequestContext(req);

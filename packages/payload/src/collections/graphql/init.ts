@@ -1,35 +1,35 @@
 /* eslint-disable no-param-reassign */
 import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLString } from 'graphql';
 
-import formatName from '../../graphql/utilities/formatName';
-import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType';
-import buildMutationInputType, { getCollectionIDType } from '../../graphql/schema/buildMutationInputType';
-import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
-import createResolver from './resolvers/create';
-import updateResolver from './resolvers/update';
-import findResolver from './resolvers/find';
-import findByIDResolver from './resolvers/findByID';
-import findVersionByIDResolver from './resolvers/findVersionByID';
-import findVersionsResolver from './resolvers/findVersions';
-import restoreVersionResolver from './resolvers/restoreVersion';
-import me from '../../auth/graphql/resolvers/me';
-import init from '../../auth/graphql/resolvers/init';
-import login from '../../auth/graphql/resolvers/login';
-import logout from '../../auth/graphql/resolvers/logout';
-import forgotPassword from '../../auth/graphql/resolvers/forgotPassword';
-import resetPassword from '../../auth/graphql/resolvers/resetPassword';
-import verifyEmail from '../../auth/graphql/resolvers/verifyEmail';
-import unlock from '../../auth/graphql/resolvers/unlock';
-import refresh from '../../auth/graphql/resolvers/refresh';
-import { Payload } from '../../payload';
-import { Field, fieldAffectsData } from '../../fields/config/types';
-import buildObjectType, { ObjectTypeConfig } from '../../graphql/schema/buildObjectType';
-import buildWhereInputType from '../../graphql/schema/buildWhereInputType';
-import getDeleteResolver from './resolvers/delete';
-import { formatNames, toWords } from '../../utilities/formatLabels';
-import { Collection, SanitizedCollectionConfig } from '../config/types';
-import { buildPolicyType } from '../../graphql/schema/buildPoliciesType';
-import { docAccessResolver } from './resolvers/docAccess';
+import formatName from '../../graphql/utilities/formatName.js';
+import buildPaginatedListType from '../../graphql/schema/buildPaginatedListType.js';
+import buildMutationInputType, { getCollectionIDType } from '../../graphql/schema/buildMutationInputType.js';
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js';
+import createResolver from './resolvers/create.js';
+import updateResolver from './resolvers/update.js';
+import findResolver from './resolvers/find.js';
+import findByIDResolver from './resolvers/findByID.js';
+import findVersionByIDResolver from './resolvers/findVersionByID.js';
+import findVersionsResolver from './resolvers/findVersions.js';
+import restoreVersionResolver from './resolvers/restoreVersion.js';
+import me from '../../auth/graphql/resolvers/me.js';
+import init from '../../auth/graphql/resolvers/init.js';
+import login from '../../auth/graphql/resolvers/login.js';
+import logout from '../../auth/graphql/resolvers/logout.js';
+import forgotPassword from '../../auth/graphql/resolvers/forgotPassword.js';
+import resetPassword from '../../auth/graphql/resolvers/resetPassword.js';
+import verifyEmail from '../../auth/graphql/resolvers/verifyEmail.js';
+import unlock from '../../auth/graphql/resolvers/unlock.js';
+import refresh from '../../auth/graphql/resolvers/refresh.js';
+import { Payload } from '../../payload.js';
+import { Field, fieldAffectsData } from '../../fields/config/types.js';
+import buildObjectType, { ObjectTypeConfig } from '../../graphql/schema/buildObjectType.js';
+import buildWhereInputType from '../../graphql/schema/buildWhereInputType.js';
+import getDeleteResolver from './resolvers/delete.js';
+import { formatNames, toWords } from '../../utilities/formatLabels.js';
+import { Collection, SanitizedCollectionConfig } from '../config/types.js';
+import { buildPolicyType } from '../../graphql/schema/buildPoliciesType.js';
+import { docAccessResolver } from './resolvers/docAccess.js';
 
 function initCollectionsGraphQL(payload: Payload): void {
   Object.keys(payload.collections).forEach((slug) => {

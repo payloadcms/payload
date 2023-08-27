@@ -4,18 +4,18 @@ import { ReactEditor, useSlateStatic } from 'slate-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ElementProps } from '..';
-import fieldTypes from '../../../../..';
-import { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types';
-import { Drawer } from '../../../../../../../elements/Drawer';
-import { useAuth } from '../../../../../../../utilities/Auth';
-import { useLocale } from '../../../../../../../utilities/Locale';
-import Form from '../../../../../../Form';
-import RenderFields from '../../../../../../RenderFields';
-import FormSubmit from '../../../../../../Submit';
-import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema';
-import { getTranslation } from '../../../../../../../../../utilities/getTranslation';
-import deepCopyObject from '../../../../../../../../../utilities/deepCopyObject';
-import { useDocumentInfo } from '../../../../../../../utilities/DocumentInfo';
+import fieldTypes from '../../../../...js';
+import { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types.js';
+import { Drawer } from '../../../../../../../elements/Drawer.js';
+import { useAuth } from '../../../../../../../utilities/Auth.js';
+import { useLocale } from '../../../../../../../utilities/Locale.js';
+import Form from '../../../../../../Form.js';
+import RenderFields from '../../../../../../RenderFields.js';
+import FormSubmit from '../../../../../../Submit.js';
+import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema.js';
+import { getTranslation } from '../../../../../../../../../utilities/getTranslation.js';
+import deepCopyObject from '../../../../../../../../../utilities/deepCopyObject.js';
+import { useDocumentInfo } from '../../../../../../../utilities/DocumentInfo.js';
 
 export const UploadDrawer: React.FC<ElementProps & {
   drawerSlug: string

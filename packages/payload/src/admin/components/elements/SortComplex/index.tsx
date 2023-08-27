@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import queryString from 'qs';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Props } from './types';
-import ReactSelect from '../ReactSelect';
-import sortableFieldTypes from '../../../../fields/sortableFieldTypes';
-import { useSearchParams } from '../../utilities/SearchParams';
-import { fieldAffectsData, OptionObject } from '../../../../fields/config/types';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { Props } from './types.js';
+import ReactSelect from '../ReactSelect.js';
+import sortableFieldTypes from '../../../../fields/sortableFieldTypes.js';
+import { useSearchParams } from '../../utilities/SearchParams.js';
+import { fieldAffectsData, OptionObject } from '../../../../fields/config/types.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
 
 import './index.scss';
 

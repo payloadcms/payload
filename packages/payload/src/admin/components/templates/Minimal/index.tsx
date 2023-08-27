@@ -1,5 +1,5 @@
 import React from 'react';
-import { Props } from './types';
+import { Props } from './types.js';
 
 import './index.scss';
 

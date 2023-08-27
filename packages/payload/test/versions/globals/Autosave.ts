@@ -1,5 +1,5 @@
-import { GlobalConfig } from '../../../src/globals/config/types';
-import { autoSaveGlobalSlug } from '../shared';
+import { GlobalConfig } from '../../../src/globals/config/types.js';
+import { autoSaveGlobalSlug } from '../shared.js';
 
 const AutosaveGlobal: GlobalConfig = {
   slug: autoSaveGlobalSlug,

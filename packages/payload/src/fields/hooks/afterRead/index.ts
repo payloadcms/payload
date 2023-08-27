@@ -1,8 +1,8 @@
-import { SanitizedCollectionConfig } from '../../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../../globals/config/types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { traverseFields } from './traverseFields';
-import deepCopyObject from '../../../utilities/deepCopyObject';
+import { SanitizedCollectionConfig } from '../../../collections/config/types.js';
+import { SanitizedGlobalConfig } from '../../../globals/config/types.js';
+import { PayloadRequest, RequestContext } from '../../../express/types.js';
+import { traverseFields } from './traverseFields.js';
+import deepCopyObject from '../../../utilities/deepCopyObject.js';
 
 type Args = {
   currentDepth?: number

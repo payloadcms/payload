@@ -1,11 +1,11 @@
-import { Field, fieldAffectsData } from '../../fields/config/types';
-import { PayloadRequest } from '../../express/types';
-import { getEntityPolicies } from '../../utilities/getEntityPolicies';
-import { SanitizedCollectionConfig } from '../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../globals/config/types';
-import { validateQueryPaths } from './validateQueryPaths';
-import { EntityPolicies, PathToQuery } from './types';
-import { getLocalizedPaths } from '../getLocalizedPaths';
+import { Field, fieldAffectsData } from '../../fields/config/types.js';
+import { PayloadRequest } from '../../express/types.js';
+import { getEntityPolicies } from '../../utilities/getEntityPolicies.js';
+import { SanitizedCollectionConfig } from '../../collections/config/types.js';
+import { SanitizedGlobalConfig } from '../../globals/config/types.js';
+import { validateQueryPaths } from './validateQueryPaths.js';
+import { EntityPolicies, PathToQuery } from './types.js';
+import { getLocalizedPaths } from '../getLocalizedPaths.js';
 
 type Args = {
   fields: Field[]

@@ -4,15 +4,15 @@ import React, {
 import qs from 'qs';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { useConfig } from '../Config';
-import type { PaginatedDocs } from '../../../../database/types';
-import { ContextType, DocumentPermissions, Props, Version } from './types';
-import { TypeWithID } from '../../../../globals/config/types';
-import { TypeWithTimestamps } from '../../../../collections/config/types';
-import { Where } from '../../../../types';
-import { DocumentPreferences } from '../../../../preferences/types';
-import { usePreferences } from '../Preferences';
-import { useAuth } from '../Auth';
+import { useConfig } from '../Config.js';
+import type { PaginatedDocs } from '../../../../database/types.js';
+import { ContextType, DocumentPermissions, Props, Version } from './types.js';
+import { TypeWithID } from '../../../../globals/config/types.js';
+import { TypeWithTimestamps } from '../../../../collections/config/types.js';
+import { Where } from '../../../../types.js';
+import { DocumentPreferences } from '../../../../preferences/types.js';
+import { usePreferences } from '../Preferences.js';
+import { useAuth } from '../Auth.js';
 
 const Context = createContext({} as ContextType);
 

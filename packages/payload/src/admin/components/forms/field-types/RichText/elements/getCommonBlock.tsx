@@ -1,6 +1,6 @@
 import { Editor, Node, NodeEntry, NodeMatch } from 'slate';
-import { ElementNode } from '../types';
-import { isBlockElement } from './isBlockElement';
+import { ElementNode } from '../types.js';
+import { isBlockElement } from './isBlockElement.js';
 
 export const getCommonBlock = (editor: Editor, match?: NodeMatch<Node>): NodeEntry<Node> => {
   const range = Editor.unhangRange(editor, editor.selection, { voids: true });

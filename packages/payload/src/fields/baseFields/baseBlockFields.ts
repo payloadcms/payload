@@ -1,5 +1,5 @@
-import { Field } from '../config/types';
-import { baseIDField } from './baseIDField';
+import { Field } from '../config/types.js';
+import { baseIDField } from './baseIDField.js';
 
 export const baseBlockFields: Field[] = [
   baseIDField,

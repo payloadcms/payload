@@ -1,20 +1,20 @@
 import merge from 'deepmerge';
 import { isPlainObject } from 'is-plain-object';
-import { CollectionConfig, SanitizedCollectionConfig } from './types';
-import sanitizeFields from '../../fields/config/sanitize';
-import baseAuthFields from '../../auth/baseFields/auth';
-import baseAPIKeyFields from '../../auth/baseFields/apiKey';
-import baseVerificationFields from '../../auth/baseFields/verification';
-import baseAccountLockFields from '../../auth/baseFields/accountLock';
-import getBaseUploadFields from '../../uploads/getBaseFields';
-import { formatLabels } from '../../utilities/formatLabels';
-import { authDefaults, defaults } from './defaults';
-import { Config } from '../../config/types';
-import baseVersionFields from '../../versions/baseFields';
-import TimestampsRequired from '../../errors/TimestampsRequired';
-import mergeBaseFields from '../../fields/mergeBaseFields';
-import { extractTranslations } from '../../translations/extractTranslations';
-import { fieldAffectsData } from '../../fields/config/types';
+import { CollectionConfig, SanitizedCollectionConfig } from './types.js';
+import sanitizeFields from '../../fields/config/sanitize.js';
+import baseAuthFields from '../../auth/baseFields/auth.js';
+import baseAPIKeyFields from '../../auth/baseFields/apiKey.js';
+import baseVerificationFields from '../../auth/baseFields/verification.js';
+import baseAccountLockFields from '../../auth/baseFields/accountLock.js';
+import getBaseUploadFields from '../../uploads/getBaseFields.js';
+import { formatLabels } from '../../utilities/formatLabels.js';
+import { authDefaults, defaults } from './defaults.js';
+import { Config } from '../../config/types.js';
+import baseVersionFields from '../../versions/baseFields.js';
+import TimestampsRequired from '../../errors/TimestampsRequired.js';
+import mergeBaseFields from '../../fields/mergeBaseFields.js';
+import { extractTranslations } from '../../translations/extractTranslations.js';
+import { fieldAffectsData } from '../../fields/config/types.js';
 
 const translations = extractTranslations([
   'general:createdAt',

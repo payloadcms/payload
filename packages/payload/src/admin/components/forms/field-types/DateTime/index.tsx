@@ -1,15 +1,15 @@
 import React, { useCallback } from 'react';
 
 import { useTranslation } from 'react-i18next';
-import DatePicker from '../../../elements/DatePicker';
-import withCondition from '../../withCondition';
-import useField from '../../useField';
-import Label from '../../Label';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import { date as dateValidation } from '../../../../../fields/validations';
-import { Props } from './types';
-import { getTranslation } from '../../../../../utilities/getTranslation';
+import DatePicker from '../../../elements/DatePicker.js';
+import withCondition from '../../withCondition.js';
+import useField from '../../useField.js';
+import Label from '../../Label.js';
+import Error from '../../Error.js';
+import FieldDescription from '../../FieldDescription.js';
+import { date as dateValidation } from '../../../../../fields/validations.js';
+import { Props } from './types.js';
+import { getTranslation } from '../../../../../utilities/getTranslation.js';
 
 import './index.scss';
 

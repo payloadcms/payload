@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-nested-ternary */
-import { Config, SanitizedConfig } from './types';
-import { sanitizeConfig } from './sanitize';
+import { Config, SanitizedConfig } from './types.js';
+import { sanitizeConfig } from './sanitize.js';
 
 /**
  * @description Builds and validates Payload configuration

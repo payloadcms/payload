@@ -1,11 +1,11 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { InitOptions } from './config/types';
-import { initHTTP } from './initHTTP';
-import { Payload as LocalPayload, BasePayload } from './payload';
+import { InitOptions } from './config/types.js';
+import { initHTTP } from './initHTTP.js';
+import { Payload as LocalPayload, BasePayload } from './payload.js';
 import 'isomorphic-fetch'
-export type { RequestContext } from './express/types';
+export type { RequestContext } from './express/types.js';
 
-export { getPayload } from './payload';
+export { getPayload } from './payload.js';
 
 
 export class Payload extends BasePayload<GeneratedTypes> {

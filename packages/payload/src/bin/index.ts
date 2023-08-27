@@ -3,10 +3,10 @@ import path from 'path';
 import minimist from 'minimist';
 import swcRegister from '@swc/register';
 import { getTsconfig as getTSconfig } from 'get-tsconfig';
-import { generateTypes } from './generateTypes';
-import { generateGraphQLSchema } from './generateGraphQLSchema';
-import { migrate } from './migrate';
-import { build } from "./build";
+import { generateTypes } from './generateTypes.js';
+import { generateGraphQLSchema } from './generateGraphQLSchema.js';
+import { migrate } from './migrate.js';
+import { build } from "./build.js";
 
 const tsConfig = getTSconfig();
 

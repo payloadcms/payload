@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import fs from 'fs';
-import { migrationTemplate } from './migrationTemplate';
-import { CreateMigration } from '../types';
+import { migrationTemplate } from './migrationTemplate.js';
+import { CreateMigration } from '../types.js';
 
 export const createMigration: CreateMigration = async function createMigration(
   payload,

@@ -1,16 +1,16 @@
-import { Where } from '../../types';
-import { PayloadRequest } from '../../express/types';
-import executeAccess from '../../auth/executeAccess';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import type { PaginatedDocs } from '../../database/types';
-import { SanitizedGlobalConfig } from '../config/types';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { buildVersionGlobalFields } from '../../versions/buildGlobalFields';
-import { TypeWithVersion } from '../../versions/types';
-import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
-import { combineQueries } from '../../database/combineQueries';
-import { killTransaction } from '../../utilities/killTransaction';
-import { initTransaction } from '../../utilities/initTransaction';
+import { Where } from '../../types.js';
+import { PayloadRequest } from '../../express/types.js';
+import executeAccess from '../../auth/executeAccess.js';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js';
+import type { PaginatedDocs } from '../../database/types.js';
+import { SanitizedGlobalConfig } from '../config/types.js';
+import { afterRead } from '../../fields/hooks/afterRead.js';
+import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js';
+import { TypeWithVersion } from '../../versions/types.js';
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js';
+import { combineQueries } from '../../database/combineQueries.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig

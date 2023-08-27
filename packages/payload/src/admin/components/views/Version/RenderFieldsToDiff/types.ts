@@ -1,6 +1,6 @@
-import { FieldPermissions } from '../../../../../auth';
-import { Field } from '../../../../../fields/config/types';
-import { FieldComponents } from './fields/types';
+import { FieldPermissions } from '../../../../../auth.js';
+import { Field } from '../../../../../fields/config/types.js';
+import { FieldComponents } from './fields/types.js';
 
 export type Props = {
   fields: Field[]

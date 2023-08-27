@@ -1,4 +1,4 @@
-import { CollectionConfig } from './types';
+import { CollectionConfig } from './types.js';
 
 const buildCollection = (collection: CollectionConfig): CollectionConfig => collection;
 

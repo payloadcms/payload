@@ -2,14 +2,14 @@ import React, {
   useState, useRef, useEffect, useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDocumentInfo } from '../../../../utilities/DocumentInfo';
-import useField from '../../../../forms/useField';
-import Button from '../../../../elements/Button';
-import FileDetails from '../../../../elements/FileDetails';
-import Error from '../../../../forms/Error';
-import { Props } from './types';
-import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues';
-import Label from '../../../../forms/Label';
+import { useDocumentInfo } from '../../../../utilities/DocumentInfo.js';
+import useField from '../../../../forms/useField.js';
+import Button from '../../../../elements/Button.js';
+import FileDetails from '../../../../elements/FileDetails.js';
+import Error from '../../../../forms/Error.js';
+import { Props } from './types.js';
+import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues.js';
+import Label from '../../../../forms/Label.js';
 
 import './index.scss';
 

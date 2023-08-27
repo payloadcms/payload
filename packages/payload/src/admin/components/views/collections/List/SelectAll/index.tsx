@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { SelectAllStatus, useSelection } from '../SelectionProvider';
+import { SelectAllStatus, useSelection } from '../SelectionProvider.js';
 
-import { CheckboxInput } from '../../../../forms/field-types/Checkbox/Input';
+import { CheckboxInput } from '../../../../forms/field-types/Checkbox/Input.js';
 
 const SelectAll: React.FC = () => {
   const { t } = useTranslation('general');

@@ -1,8 +1,8 @@
 import { GraphQLClient } from 'graphql-request';
-import payload from '../../src';
-import { devUser } from '../credentials';
-import { initPayloadTest } from '../helpers/configHelpers';
-import { postDoc } from './config';
+import payload from '../../src.js';
+import { devUser } from '../credentials.js';
+import { initPayloadTest } from '../helpers/configHelpers.js';
+import { postDoc } from './config.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

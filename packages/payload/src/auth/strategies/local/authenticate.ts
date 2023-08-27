@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import scmp from 'scmp';
-import { TypeWithID } from '../../../collections/config/types';
+import { TypeWithID } from '../../../collections/config/types.js';
 
 type Doc = TypeWithID & Record<string, unknown>
 

@@ -1,6 +1,6 @@
-import { FieldPermissions } from '../../../../auth/types';
-import { FieldWithPath, Field } from '../../../../fields/config/types';
-import { FieldTypes } from '../field-types';
+import { FieldPermissions } from '../../../../auth/types.js';
+import { FieldWithPath, Field } from '../../../../fields/config/types.js';
+import { FieldTypes } from '../field-types.js';
 
 export type Props = {
   className?: string

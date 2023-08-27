@@ -1,6 +1,6 @@
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import { Fields, Data } from '../../forms/Form/types';
-import { CollectionPermission } from '../../../../auth/types';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
+import { Fields, Data } from '../../forms/Form/types.js';
+import { CollectionPermission } from '../../../../auth/types.js';
 
 export type Props = {
   hasSavePermission: boolean

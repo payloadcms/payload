@@ -7,12 +7,12 @@ import { SanitizedCollectionConfig } from '@alessiogr/payloadtest/types';
 import { getVersionsModelName } from '@alessiogr/payloadtest/versions';
 import { buildVersionGlobalFields } from '@alessiogr/payloadtest/versions';
 import type { Init } from '@alessiogr/payloadtest/database';
-import getBuildQueryPlugin from './queries/buildQuery';
-import buildCollectionSchema from './models/buildCollectionSchema';
-import buildSchema from './models/buildSchema';
+import getBuildQueryPlugin from './queries/buildQuery.js';
+import buildCollectionSchema from './models/buildCollectionSchema.js';
+import buildSchema from './models/buildSchema.js';
 import type { MongooseAdapter } from '.';
-import { buildGlobalModel } from './models/buildGlobalModel';
-import { CollectionModel } from './types';
+import { buildGlobalModel } from './models/buildGlobalModel.js';
+import { CollectionModel } from './types.js';
 
 export const init: Init = async function init(
   this: MongooseAdapter,

@@ -1,17 +1,17 @@
 /* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import { Collection, TypeWithID } from '../config/types';
-import { APIError, Forbidden, NotFound } from '../../errors';
-import executeAccess from '../../auth/executeAccess';
-import { hasWhereAccessResult } from '../../auth/types';
-import { afterChange } from '../../fields/hooks/afterChange';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
-import { combineQueries } from '../../database/combineQueries';
-import type { FindOneArgs } from '../../database/types';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import { PayloadRequest } from '../../express/types.js';
+import { Collection, TypeWithID } from '../config/types.js';
+import { APIError, Forbidden, NotFound } from '../../errors.js';
+import executeAccess from '../../auth/executeAccess.js';
+import { hasWhereAccessResult } from '../../auth/types.js';
+import { afterChange } from '../../fields/hooks/afterChange.js';
+import { afterRead } from '../../fields/hooks/afterRead.js';
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js';
+import { combineQueries } from '../../database/combineQueries.js';
+import type { FindOneArgs } from '../../database/types.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
 
 export type Arguments = {
   collection: Collection

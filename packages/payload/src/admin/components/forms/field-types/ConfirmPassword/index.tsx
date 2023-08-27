@@ -1,11 +1,11 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import useField from '../../useField';
-import Label from '../../Label';
-import Error from '../../Error';
-import { useFormFields } from '../../Form/context';
-import { FormField } from '../../Form/types';
-import type { Props } from './types';
+import useField from '../../useField.js';
+import Label from '../../Label.js';
+import Error from '../../Error.js';
+import { useFormFields } from '../../Form/context.js';
+import { FormField } from '../../Form/types.js';
+import type { Props } from './types.js';
 
 import './index.scss';
 

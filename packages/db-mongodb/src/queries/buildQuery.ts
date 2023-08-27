@@ -1,7 +1,7 @@
 import { Where, Field } from '@alessiogr/payloadtest/types';
 import { QueryError } from '@alessiogr/payloadtest/errors';
 import { Payload } from '@alessiogr/payloadtest';
-import { parseParams } from './parseParams';
+import { parseParams } from './parseParams.js';
 
 type GetBuildQueryPluginArgs = {
   collectionSlug?: string

@@ -1,4 +1,4 @@
-import translations from './index';
+import translations from './index.js';
 
 export const extractTranslations = (keys: string[]): Record<string, Record<string, string>> => {
   const result = {};

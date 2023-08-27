@@ -4,9 +4,9 @@ import { loader } from '@monaco-editor/react';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 import deepmerge from 'deepmerge';
-import { defaultOptions } from '../../../../translations/defaultOptions';
-import { useConfig } from '../Config';
-import { getSupportedMonacoLocale } from '../../../utilities/getSupportedMonacoLocale';
+import { defaultOptions } from '../../../../translations/defaultOptions.js';
+import { useConfig } from '../Config.js';
+import { getSupportedMonacoLocale } from '../../../utilities/getSupportedMonacoLocale.js';
 
 export const I18n: React.FC = () => {
   const config = useConfig();

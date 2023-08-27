@@ -1,10 +1,10 @@
-import type { CollectionConfig } from '../../src/collections/config/types';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
-import { mapAsync } from '../../src/utilities/mapAsync';
-import { FilterOptionsProps } from '../../src/fields/config/types';
-import { PrePopulateFieldUI } from './PrePopulateFieldUI';
-import { relationOneSlug, relationTwoSlug, relationRestrictedSlug, relationWithTitleSlug, relationUpdatedExternallySlug, collection1Slug, collection2Slug, slug } from './collectionSlugs';
+import type { CollectionConfig } from '../../src/collections/config/types.js';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import { devUser } from '../credentials.js';
+import { mapAsync } from '../../src/utilities/mapAsync.js';
+import { FilterOptionsProps } from '../../src/fields/config/types.js';
+import { PrePopulateFieldUI } from './PrePopulateFieldUI.js';
+import { relationOneSlug, relationTwoSlug, relationRestrictedSlug, relationWithTitleSlug, relationUpdatedExternallySlug, collection1Slug, collection2Slug, slug } from './collectionSlugs.js';
 
 export interface FieldsRelationship {
   id: string;

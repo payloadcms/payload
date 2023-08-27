@@ -1,6 +1,6 @@
 import sanitize from 'sanitize-filename';
-import docWithFilenameExists from './docWithFilenameExists';
-import fileExists from './fileExists';
+import docWithFilenameExists from './docWithFilenameExists.js';
+import fileExists from './fileExists.js';
 import { Payload } from '..';
 
 const incrementName = (name: string) => {

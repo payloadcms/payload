@@ -3,18 +3,18 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../utilities/Config';
-import { useAuth } from '../../../utilities/Auth';
-import usePayloadAPI from '../../../../hooks/usePayloadAPI';
-import DefaultList from './Default';
-import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
-import { useStepNav } from '../../../elements/StepNav';
-import formatFields from './formatFields';
-import { ListIndexProps, ListPreferences, Props } from './types';
-import { usePreferences } from '../../../utilities/Preferences';
-import { useSearchParams } from '../../../utilities/SearchParams';
-import { TableColumnsProvider } from '../../../elements/TableColumns';
-import type { Field } from '../../../../../fields/config/types';
+import { useConfig } from '../../../utilities/Config.js';
+import { useAuth } from '../../../utilities/Auth.js';
+import usePayloadAPI from '../../../../hooks/usePayloadAPI.js';
+import DefaultList from './Default.js';
+import RenderCustomComponent from '../../../utilities/RenderCustomComponent.js';
+import { useStepNav } from '../../../elements/StepNav.js';
+import formatFields from './formatFields.js';
+import { ListIndexProps, ListPreferences, Props } from './types.js';
+import { usePreferences } from '../../../utilities/Preferences.js';
+import { useSearchParams } from '../../../utilities/SearchParams.js';
+import { TableColumnsProvider } from '../../../elements/TableColumns.js';
+import type { Field } from '../../../../../fields/config/types.js';
 
 /**
  * The ListView component is table which lists the collection's documents.

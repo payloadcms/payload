@@ -1,6 +1,6 @@
 import { NextFunction, Response } from 'express';
-import { PayloadRequest } from '../../express/types';
-import registerFirstUser from '../operations/registerFirstUser';
+import { PayloadRequest } from '../../express/types.js';
+import registerFirstUser from '../operations/registerFirstUser.js';
 
 export default async function registerFirstUserHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {

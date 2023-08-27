@@ -1,5 +1,5 @@
-import { PayloadRequest } from '../../../express/types';
-import { fieldHasMaxDepth, fieldSupportsMany, RelationshipField, UploadField } from '../../config/types';
+import { PayloadRequest } from '../../../express/types.js';
+import { fieldHasMaxDepth, fieldSupportsMany, RelationshipField, UploadField } from '../../config/types.js';
 
 type PopulateArgs = {
   depth: number

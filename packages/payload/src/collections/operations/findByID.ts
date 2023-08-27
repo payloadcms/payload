@@ -1,16 +1,16 @@
 /* eslint-disable no-underscore-dangle */
 import memoize from 'micro-memoize';
-import { PayloadRequest } from '../../express/types';
-import { Collection, TypeWithID } from '../config/types';
-import { NotFound } from '../../errors';
-import executeAccess from '../../auth/executeAccess';
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { combineQueries } from '../../database/combineQueries';
-import type { FindOneArgs } from '../../database/types';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
-import { buildAfterOperation } from './utils';
+import { PayloadRequest } from '../../express/types.js';
+import { Collection, TypeWithID } from '../config/types.js';
+import { NotFound } from '../../errors.js';
+import executeAccess from '../../auth/executeAccess.js';
+import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js';
+import { afterRead } from '../../fields/hooks/afterRead.js';
+import { combineQueries } from '../../database/combineQueries.js';
+import type { FindOneArgs } from '../../database/types.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
+import { buildAfterOperation } from './utils.js';
 
 export type Arguments = {
   collection: Collection

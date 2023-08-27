@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { SanitizedConfig } from '../../../../config/types';
+import { SanitizedConfig } from '../../../../config/types.js';
 
 const Context = createContext<SanitizedConfig>({} as SanitizedConfig);
 

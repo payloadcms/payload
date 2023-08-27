@@ -1,6 +1,6 @@
-import payload from '../../src';
-import { initPayloadTest } from '../helpers/configHelpers';
-import { devUser } from '../credentials';
+import payload from '../../src.js';
+import { initPayloadTest } from '../helpers/configHelpers.js';
+import { devUser } from '../credentials.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

@@ -1,7 +1,7 @@
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import { Column } from '../Table/types';
-import buildColumns from './buildColumns';
-import { Props as CellProps } from '../../views/collections/List/Cell/types';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
+import { Column } from '../Table/types.js';
+import buildColumns from './buildColumns.js';
+import { Props as CellProps } from '../../views/collections/List/Cell/types.js';
 
 
 type TOGGLE = {

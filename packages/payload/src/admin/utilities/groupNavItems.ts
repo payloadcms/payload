@@ -1,8 +1,8 @@
 import { i18n as Ii18n } from 'i18next';
-import { Permissions } from '../../auth';
-import { SanitizedCollectionConfig } from '../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../globals/config/types';
-import { getTranslation } from '../../utilities/getTranslation';
+import { Permissions } from '../../auth.js';
+import { SanitizedCollectionConfig } from '../../collections/config/types.js';
+import { SanitizedGlobalConfig } from '../../globals/config/types.js';
+import { getTranslation } from '../../utilities/getTranslation.js';
 
 export enum EntityType {
   collection = 'collections',

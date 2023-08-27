@@ -1,12 +1,12 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
-import { Props, Node } from './types';
+import { Props, Node } from './types.js';
 
-import Page from './Page';
-import Separator from './Separator';
-import ClickableArrow from './ClickableArrow';
-import { useSearchParams } from '../../utilities/SearchParams';
+import Page from './Page.js';
+import Separator from './Separator.js';
+import ClickableArrow from './ClickableArrow.js';
+import { useSearchParams } from '../../utilities/SearchParams.js';
 
 import './index.scss';
 

@@ -1,12 +1,12 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Payload } from '../../../payload';
-import { getDataLoader } from '../../../collections/dataloader';
-import { PayloadRequest } from '../../../express/types';
-import { Document } from '../../../types';
-import restoreVersion from '../restoreVersion';
-import { i18nInit } from '../../../translations/init';
-import { APIError } from '../../../errors';
-import { setRequestContext } from '../../../express/setRequestContext';
+import { Payload } from '../../../payload.js';
+import { getDataLoader } from '../../../collections/dataloader.js';
+import { PayloadRequest } from '../../../express/types.js';
+import { Document } from '../../../types.js';
+import restoreVersion from '../restoreVersion.js';
+import { i18nInit } from '../../../translations/init.js';
+import { APIError } from '../../../errors.js';
+import { setRequestContext } from '../../../express/setRequestContext.js';
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
   slug: string

@@ -1,13 +1,13 @@
 import { GraphQLClient } from 'graphql-request';
-import { initPayloadTest } from '../helpers/configHelpers';
-import payload from '../../src';
-import type { LocalizedPost, WithLocalizedRelationship } from './payload-types';
+import { initPayloadTest } from '../helpers/configHelpers.js';
+import payload from '../../src.js';
+import type { LocalizedPost, WithLocalizedRelationship } from './payload-types.js';
 import configPromise, {
   localizedPostsSlug,
   relationshipLocalizedSlug,
   withLocalizedRelSlug,
   withRequiredLocalizedFields,
-} from './config';
+} from './config.js';
 import {
   defaultLocale,
   englishTitle,
@@ -17,10 +17,10 @@ import {
   relationSpanishTitle2,
   spanishLocale,
   spanishTitle,
-} from './shared';
-import type { Where } from '../../src/types';
-import { arrayCollectionSlug } from './collections/Array';
-import type { Config } from '../../src/config/types';
+} from './shared.js';
+import type { Where } from '../../src/types.js';
+import { arrayCollectionSlug } from './collections/Array.js';
+import type { Config } from '../../src/config/types.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

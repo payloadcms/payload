@@ -1,8 +1,8 @@
 import { GraphQLClient } from 'graphql-request';
-import { initPayloadTest } from '../helpers/configHelpers';
-import configPromise, { accessControlSlug, arraySlug, englishLocale, slug, spanishLocale } from './config';
-import payload from '../../src';
-import { RESTClient } from '../helpers/rest';
+import { initPayloadTest } from '../helpers/configHelpers.js';
+import configPromise, { accessControlSlug, arraySlug, englishLocale, slug, spanishLocale } from './config.js';
+import payload from '../../src.js';
+import { RESTClient } from '../helpers/rest.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

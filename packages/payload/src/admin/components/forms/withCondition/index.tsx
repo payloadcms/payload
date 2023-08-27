@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { FieldBase } from '../../../../fields/config/types';
-import { WatchCondition } from './WatchCondition';
+import { FieldBase } from '../../../../fields/config/types.js';
+import { WatchCondition } from './WatchCondition.js';
 
 const withCondition = <P extends Record<string, unknown>>(Field: React.ComponentType<P>): React.FC<P> => {
   const CheckForCondition: React.FC<P> = (props) => {

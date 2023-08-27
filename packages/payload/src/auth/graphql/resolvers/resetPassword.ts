@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
-import { Collection } from '../../../collections/config/types';
-import resetPassword from '../../operations/resetPassword';
+import { Collection } from '../../../collections/config/types.js';
+import resetPassword from '../../operations/resetPassword.js';
 
 function resetPasswordResolver(collection: Collection) {
   async function resolver(_, args, context) {

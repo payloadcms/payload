@@ -1,26 +1,26 @@
 import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
-import { ListDrawerProps } from './types';
-import { getTranslation } from '../../../../utilities/getTranslation';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import { DocumentInfoProvider } from '../../utilities/DocumentInfo';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import usePayloadAPI from '../../../hooks/usePayloadAPI';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import DefaultList from '../../views/collections/List/Default';
-import Label from '../../forms/Label';
-import ReactSelect from '../ReactSelect';
-import { useDocumentDrawer } from '../DocumentDrawer';
-import Pill from '../Pill';
-import X from '../../icons/X';
-import ViewDescription from '../ViewDescription';
-import formatFields from '../../views/collections/List/formatFields';
-import { usePreferences } from '../../utilities/Preferences';
-import { Field } from '../../../../fields/config/types';
+import { ListDrawerProps } from './types.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
+import { useConfig } from '../../utilities/Config.js';
+import { useAuth } from '../../utilities/Auth.js';
+import { DocumentInfoProvider } from '../../utilities/DocumentInfo.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
+import usePayloadAPI from '../../../hooks/usePayloadAPI.js';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
+import DefaultList from '../../views/collections/List/Default.js';
+import Label from '../../forms/Label.js';
+import ReactSelect from '../ReactSelect.js';
+import { useDocumentDrawer } from '../DocumentDrawer.js';
+import Pill from '../Pill.js';
+import X from '../../icons/X.js';
+import ViewDescription from '../ViewDescription.js';
+import formatFields from '../../views/collections/List/formatFields.js';
+import { usePreferences } from '../../utilities/Preferences.js';
+import { Field } from '../../../../fields/config/types.js';
 import { baseClass } from '.';
-import { TableColumnsProvider } from '../TableColumns';
+import { TableColumnsProvider } from '../TableColumns.js';
 
 export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   drawerSlug,

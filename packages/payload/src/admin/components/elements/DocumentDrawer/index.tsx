@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
-import { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types';
-import { getTranslation } from '../../../../utilities/getTranslation';
-import { Drawer, DrawerToggler } from '../Drawer';
-import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections';
-import { useEditDepth } from '../../utilities/EditDepth';
-import { DocumentDrawerContent } from './DrawerContent';
+import { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
+import { Drawer, DrawerToggler } from '../Drawer.js';
+import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections.js';
+import { useEditDepth } from '../../utilities/EditDepth.js';
+import { DocumentDrawerContent } from './DrawerContent.js';
 
 import './index.scss';
 

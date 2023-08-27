@@ -1,7 +1,7 @@
 /* eslint-disable no-shadow */
 import { useCallback, useEffect } from 'react';
 import facelessui from '@faceless-ui/modal';
-import { setsAreEqual } from '../utilities/setsAreEqual';
+import { setsAreEqual } from '../utilities/setsAreEqual.js';
 
 // Required to be outside of hook, else debounce would be necessary
 // and then one could not prevent the default behaviour.

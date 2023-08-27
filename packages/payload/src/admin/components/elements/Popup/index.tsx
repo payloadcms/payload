@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useWindowInfo } from '@faceless-ui/window-info';
-import { Props } from './types';
-import PopupButton from './PopupButton';
-import useIntersect from '../../../hooks/useIntersect';
+import { Props } from './types.js';
+import PopupButton from './PopupButton.js';
+import useIntersect from '../../../hooks/useIntersect.js';
 
 import './index.scss';
 

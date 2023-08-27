@@ -10,10 +10,10 @@ import {
   fieldAffectsData,
   fieldHasSubFields,
   fieldIsPresentationalOnly,
-} from '../../fields/config/types';
-import formatName from '../utilities/formatName';
-import { withOperators } from './withOperators';
-import fieldToSchemaMap from './fieldToWhereInputSchemaMap';
+} from '../../fields/config/types.js';
+import formatName from '../utilities/formatName.js';
+import { withOperators } from './withOperators.js';
+import fieldToSchemaMap from './fieldToWhereInputSchemaMap.js';
 
 /** This does as the function name suggests. It builds a where GraphQL input type
  * for all the fields which are passed to the function.

@@ -1,6 +1,6 @@
 import { randomBytes } from 'crypto';
 import mongoose from 'mongoose';
-import { initPayloadTest } from '../helpers/configHelpers';
+import { initPayloadTest } from '../helpers/configHelpers.js';
 import config, {
   chainedRelSlug,
   customIdNumberSlug,
@@ -8,9 +8,9 @@ import config, {
   defaultAccessRelSlug,
   relationSlug,
   slug,
-} from './config';
-import payload from '../../src';
-import { RESTClient } from '../helpers/rest';
+} from './config.js';
+import payload from '../../src.js';
+import { RESTClient } from '../helpers/rest.js';
 import type {
   ChainedRelation,
   CustomIdNumberRelation,
@@ -18,8 +18,8 @@ import type {
   Director,
   Post,
   Relation,
-} from './payload-types';
-import { mapAsync } from '../../src/utilities/mapAsync';
+} from './payload-types.js';
+import { mapAsync } from '../../src/utilities/mapAsync.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

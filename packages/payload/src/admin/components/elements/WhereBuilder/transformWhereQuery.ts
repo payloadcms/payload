@@ -1,4 +1,4 @@
-import type { Where } from '../../../../types';
+import type { Where } from '../../../../types.js';
 
 /**
  * Something like [or][0][and][0][text][equals]=example%20post will work and pass through the validateWhereQuery check.
@@ -14,7 +14,7 @@ export const transformWhereQuery = (whereQuery): Where => {
     return {
       or: whereQuery.or.map((query) => {
         // ...but if the or query does not have an and, we need to add it
-        if(!query.and) {
+        if (!query.and) {
           return {
             and: [query]
           }

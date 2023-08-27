@@ -1,6 +1,6 @@
-import { Collection } from '../../../collections/config/types';
-import refresh from '../../operations/refresh';
-import getExtractJWT from '../../getExtractJWT';
+import { Collection } from '../../../collections/config/types.js';
+import refresh from '../../operations/refresh.js';
+import getExtractJWT from '../../getExtractJWT.js';
 
 function refreshResolver(collection: Collection) {
   async function resolver(_, args, context) {

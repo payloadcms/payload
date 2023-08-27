@@ -2,8 +2,8 @@ import paginate from 'mongoose-paginate-v2';
 import { PaginateOptions, Schema } from 'mongoose';
 import { SanitizedConfig } from '@alessiogr/payloadtest/config';
 import { SanitizedCollectionConfig } from '@alessiogr/payloadtest/types';
-import getBuildQueryPlugin from '../queries/buildQuery';
-import buildSchema from './buildSchema';
+import getBuildQueryPlugin from '../queries/buildQuery.js';
+import buildSchema from './buildSchema.js';
 
 const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: SanitizedConfig, schemaOptions = {}): Schema => {
   const schema = buildSchema(

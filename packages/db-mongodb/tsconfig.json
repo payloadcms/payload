@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "Bundler", /* Required for exports to work */
+    "moduleResolution": "NodeNext", /* Required for exports to work */
     "composite": true,
     "declaration": true, /* Generates corresponding '.d.ts' file. */
     "rootDir": "./src",                                  /* Specify the root folder within your source files. */

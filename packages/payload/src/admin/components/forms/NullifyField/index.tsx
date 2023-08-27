@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckboxInput } from '../field-types/Checkbox/Input';
-import { Banner } from '../../elements/Banner';
-import { useLocale } from '../../utilities/Locale';
-import { useConfig } from '../../utilities/Config';
-import { useForm } from '../Form/context';
+import { CheckboxInput } from '../field-types/Checkbox/Input.js';
+import { Banner } from '../../elements/Banner.js';
+import { useLocale } from '../../utilities/Locale.js';
+import { useConfig } from '../../utilities/Config.js';
+import { useForm } from '../Form/context.js';
 
 type NullifyLocaleFieldProps = {
   localized: boolean

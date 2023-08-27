@@ -1,9 +1,9 @@
-import { Where } from '../../../../../types';
-import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import type { PaginatedDocs } from '../../../../../database/types';
-import { Props as ListControlsProps } from '../../../elements/ListControls/types';
-import { Props as PerPageProps } from '../../../elements/PerPage';
-import { Props as PaginatorProps } from '../../../elements/Paginator/types';
+import { Where } from '../../../../../types.js';
+import { SanitizedCollectionConfig } from '../../../../../collections/config/types.js';
+import type { PaginatedDocs } from '../../../../../database/types.js';
+import { Props as ListControlsProps } from '../../../elements/ListControls/types.js';
+import { Props as PerPageProps } from '../../../elements/PerPage.js';
+import { Props as PaginatorProps } from '../../../elements/Paginator/types.js';
 
 export type Props = {
   collection: SanitizedCollectionConfig

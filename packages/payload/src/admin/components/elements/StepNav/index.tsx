@@ -3,10 +3,10 @@ import React, {
 } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import Chevron from '../../icons/Chevron';
-import { Context as ContextType } from './types';
-import { getTranslation } from '../../../../utilities/getTranslation';
-import { useConfig } from '../../utilities/Config';
+import Chevron from '../../icons/Chevron.js';
+import { Context as ContextType } from './types.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
+import { useConfig } from '../../utilities/Config.js';
 
 import './index.scss';
 

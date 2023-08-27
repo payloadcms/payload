@@ -1,13 +1,13 @@
 import React, { useCallback } from 'react';
 
-import { code } from '../../../../../fields/validations';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import Label from '../../Label';
-import { Props } from './types';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import { CodeEditor } from '../../../elements/CodeEditor';
+import { code } from '../../../../../fields/validations.js';
+import Error from '../../Error.js';
+import FieldDescription from '../../FieldDescription.js';
+import Label from '../../Label.js';
+import { Props } from './types.js';
+import useField from '../../useField.js';
+import withCondition from '../../withCondition.js';
+import { CodeEditor } from '../../../elements/CodeEditor.js';
 
 import './index.scss';
 

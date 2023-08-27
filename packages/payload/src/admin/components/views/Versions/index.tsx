@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import usePayloadAPI from '../../../hooks/usePayloadAPI';
-import Eyebrow from '../../elements/Eyebrow';
-import { LoadingOverlayToggle } from '../../elements/Loading';
-import { useStepNav } from '../../elements/StepNav';
-import { StepNavItem } from '../../elements/StepNav/types';
-import Meta from '../../utilities/Meta';
-import { Props } from './types';
-import IDLabel from '../../elements/IDLabel';
-import { Table } from '../../elements/Table';
-import Paginator from '../../elements/Paginator';
-import PerPage from '../../elements/PerPage';
-import { useSearchParams } from '../../utilities/SearchParams';
-import { Gutter } from '../../elements/Gutter';
-import { getTranslation } from '../../../../utilities/getTranslation';
-import { buildVersionColumns } from './columns';
+import { useConfig } from '../../utilities/Config.js';
+import usePayloadAPI from '../../../hooks/usePayloadAPI.js';
+import Eyebrow from '../../elements/Eyebrow.js';
+import { LoadingOverlayToggle } from '../../elements/Loading.js';
+import { useStepNav } from '../../elements/StepNav.js';
+import { StepNavItem } from '../../elements/StepNav/types.js';
+import Meta from '../../utilities/Meta.js';
+import { Props } from './types.js';
+import IDLabel from '../../elements/IDLabel.js';
+import { Table } from '../../elements/Table.js';
+import Paginator from '../../elements/Paginator.js';
+import PerPage from '../../elements/PerPage.js';
+import { useSearchParams } from '../../utilities/SearchParams.js';
+import { Gutter } from '../../elements/Gutter.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
+import { buildVersionColumns } from './columns.js';
 
 import './index.scss';
 

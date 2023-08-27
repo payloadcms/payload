@@ -1,7 +1,7 @@
-import { devUser } from '../credentials';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { FieldAccess } from '../../src/fields/config/types';
-import { firstArrayText, secondArrayText } from './shared';
+import { devUser } from '../credentials.js';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import { FieldAccess } from '../../src/fields/config/types.js';
+import { firstArrayText, secondArrayText } from './shared.js';
 
 export const slug = 'posts';
 export const unrestrictedSlug = 'unrestricted';

@@ -1,18 +1,18 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Collapsible } from '../../../elements/Collapsible';
-import RenderFields from '../../RenderFields';
-import { Props } from './types';
-import { ArrayAction } from '../../../elements/ArrayAction';
-import HiddenInput from '../HiddenInput';
-import { RowLabel } from '../../RowLabel';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
-import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types';
-import type { Row } from '../../Form/types';
-import type { RowLabel as RowLabelType } from '../../RowLabel/types';
-import { useFormSubmitted } from '../../Form/context';
-import { ErrorPill } from '../../../elements/ErrorPill';
+import { Collapsible } from '../../../elements/Collapsible.js';
+import RenderFields from '../../RenderFields.js';
+import { Props } from './types.js';
+import { ArrayAction } from '../../../elements/ArrayAction.js';
+import HiddenInput from '../HiddenInput.js';
+import { RowLabel } from '../../RowLabel.js';
+import { getTranslation } from '../../../../../utilities/getTranslation.js';
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath.js';
+import type { UseDraggableSortableReturn } from '../../../elements/DraggableSortable/useDraggableSortable/types.js';
+import type { Row } from '../../Form/types.js';
+import type { RowLabel as RowLabelType } from '../../RowLabel/types.js';
+import { useFormSubmitted } from '../../Form/context.js';
+import { ErrorPill } from '../../../elements/ErrorPill.js';
 
 import './index.scss';
 

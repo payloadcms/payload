@@ -1,5 +1,5 @@
-import { Collection } from '../../../collections/config/types';
-import login from '../../operations/login';
+import { Collection } from '../../../collections/config/types.js';
+import login from '../../operations/login.js';
 
 function loginResolver(collection: Collection) {
   async function resolver(_, args, context) {

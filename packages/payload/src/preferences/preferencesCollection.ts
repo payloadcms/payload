@@ -1,8 +1,8 @@
-import { CollectionConfig } from '../collections/config/types';
-import { Access, Config } from '../config/types';
-import findOne from './requestHandlers/findOne';
-import update from './requestHandlers/update';
-import deleteHandler from './requestHandlers/delete';
+import { CollectionConfig } from '../collections/config/types.js';
+import { Access, Config } from '../config/types.js';
+import findOne from './requestHandlers/findOne.js';
+import update from './requestHandlers/update.js';
+import deleteHandler from './requestHandlers/delete.js';
 
 const preferenceAccess: Access = ({ req }) => ({
   'user.value': {

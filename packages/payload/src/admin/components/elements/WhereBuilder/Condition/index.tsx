@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Props } from './types';
-import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
-import ReactSelect from '../../ReactSelect';
-import Button from '../../Button';
-import Date from './Date';
-import Number from './Number';
-import Text from './Text';
-import Relationship from './Relationship';
-import { Select } from './Select';
-import useDebounce from '../../../../hooks/useDebounce';
-import { FieldCondition } from '../types';
+import { Props } from './types.js';
+import RenderCustomComponent from '../../../utilities/RenderCustomComponent.js';
+import ReactSelect from '../../ReactSelect.js';
+import Button from '../../Button.js';
+import Date from './Date.js';
+import Number from './Number.js';
+import Text from './Text.js';
+import Relationship from './Relationship.js';
+import { Select } from './Select.js';
+import useDebounce from '../../../../hooks/useDebounce.js';
+import { FieldCondition } from '../types.js';
 
 import './index.scss';
 

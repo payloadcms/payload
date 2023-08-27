@@ -1,12 +1,12 @@
-import { PayloadRequest } from '../../express/types';
-import executeAccess from '../../auth/executeAccess';
-import { TypeWithVersion } from '../../versions/types';
-import { SanitizedGlobalConfig } from '../config/types';
-import { NotFound } from '../../errors';
-import { afterChange } from '../../fields/hooks/afterChange';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import { PayloadRequest } from '../../express/types.js';
+import executeAccess from '../../auth/executeAccess.js';
+import { TypeWithVersion } from '../../versions/types.js';
+import { SanitizedGlobalConfig } from '../config/types.js';
+import { NotFound } from '../../errors.js';
+import { afterChange } from '../../fields/hooks/afterChange.js';
+import { afterRead } from '../../fields/hooks/afterRead.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
 
 export type Arguments = {
   globalConfig: SanitizedGlobalConfig

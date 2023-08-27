@@ -1,8 +1,8 @@
-import type { PayloadRequest } from '../../express/types';
-import type { Permissions } from '../types';
-import type { AllOperations } from '../../types';
-import { adminInit as adminInitTelemetry } from '../../utilities/telemetry/events/adminInit';
-import { getEntityPolicies } from '../../utilities/getEntityPolicies';
+import type { PayloadRequest } from '../../express/types.js';
+import type { Permissions } from '../types.js';
+import type { AllOperations } from '../../types.js';
+import { adminInit as adminInitTelemetry } from '../../utilities/telemetry/events/adminInit.js';
+import { getEntityPolicies } from '../../utilities/getEntityPolicies.js';
 
 const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete'];
 

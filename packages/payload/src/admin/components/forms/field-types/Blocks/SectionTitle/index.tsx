@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import useField from '../../../useField';
-import { Props } from './types';
+import useField from '../../../useField.js';
+import { Props } from './types.js';
 
 import './index.scss';
 

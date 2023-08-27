@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import login, { Result } from '../operations/login';
+import { PayloadRequest } from '../../express/types.js';
+import login, { Result } from '../operations/login.js';
 
 export default async function loginHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<Result & { message: string }> | void> {
   try {

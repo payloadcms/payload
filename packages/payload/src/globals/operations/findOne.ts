@@ -1,12 +1,12 @@
-import type { Where } from '../../types';
-import executeAccess from '../../auth/executeAccess';
-import { AccessResult } from '../../config/types';
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { SanitizedGlobalConfig } from '../config/types';
-import { PayloadRequest } from '../../express/types';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import type { Where } from '../../types.js';
+import executeAccess from '../../auth/executeAccess.js';
+import { AccessResult } from '../../config/types.js';
+import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js';
+import { afterRead } from '../../fields/hooks/afterRead.js';
+import { SanitizedGlobalConfig } from '../config/types.js';
+import { PayloadRequest } from '../../express/types.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
 
 type Args = {
   globalConfig: SanitizedGlobalConfig

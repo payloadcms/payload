@@ -1,21 +1,21 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Label from '../../Label';
-import Error from '../../Error';
-import FileDetails from '../../../elements/FileDetails';
-import FieldDescription from '../../FieldDescription';
-import { FilterOptions, UploadField } from '../../../../../fields/config/types';
-import { Description } from '../../FieldDescription/types';
+import Label from '../../Label.js';
+import Error from '../../Error.js';
+import FileDetails from '../../../elements/FileDetails.js';
+import FieldDescription from '../../FieldDescription.js';
+import { FilterOptions, UploadField } from '../../../../../fields/config/types.js';
+import { Description } from '../../FieldDescription/types.js';
 import { FieldTypes } from '..';
-import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import { useDocumentDrawer } from '../../../elements/DocumentDrawer';
-import { useListDrawer } from '../../../elements/ListDrawer';
-import Button from '../../../elements/Button';
-import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
-import { ListDrawerProps } from '../../../elements/ListDrawer/types';
-import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
-import { FilterOptionsResult } from '../Relationship/types';
+import { SanitizedCollectionConfig } from '../../../../../collections/config/types.js';
+import { getTranslation } from '../../../../../utilities/getTranslation.js';
+import { useDocumentDrawer } from '../../../elements/DocumentDrawer.js';
+import { useListDrawer } from '../../../elements/ListDrawer.js';
+import Button from '../../../elements/Button.js';
+import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.js';
+import { ListDrawerProps } from '../../../elements/ListDrawer/types.js';
+import { GetFilterOptions } from '../../../utilities/GetFilterOptions.js';
+import { FilterOptionsResult } from '../Relationship/types.js';
 
 import './index.scss';
 

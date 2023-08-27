@@ -6,8 +6,8 @@ import { PathToQuery } from '@alessiogr/payloadtest/database';
 import { validOperators } from '@alessiogr/payloadtest/types';
 import { Payload } from '@alessiogr/payloadtest';
 import { Operator } from '@alessiogr/payloadtest/types';
-import { operatorMap } from './operatorMap';
-import { sanitizeQueryValue } from './sanitizeQueryValue';
+import { operatorMap } from './operatorMap.js';
+import { sanitizeQueryValue } from './sanitizeQueryValue.js';
 import { MongooseAdapter } from '..';
 
 type SearchParam = {

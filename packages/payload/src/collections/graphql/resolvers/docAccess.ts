@@ -1,6 +1,6 @@
-import { CollectionPermission, GlobalPermission } from '../../../auth';
-import { PayloadRequest } from '../../../express/types';
-import { docAccess } from '../../operations/docAccess';
+import { CollectionPermission, GlobalPermission } from '../../../auth.js';
+import { PayloadRequest } from '../../../express/types.js';
+import { docAccess } from '../../operations/docAccess.js';
 
 export type Resolver = (
   _: unknown,

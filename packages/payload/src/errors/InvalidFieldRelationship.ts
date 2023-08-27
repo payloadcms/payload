@@ -1,5 +1,5 @@
-import { RelationshipField, UploadField } from '../fields/config/types';
-import APIError from './APIError';
+import { RelationshipField, UploadField } from '../fields/config/types.js';
+import APIError from './APIError.js';
 
 class InvalidFieldRelationship extends APIError {
   constructor(field: RelationshipField | UploadField, relationship: string) {

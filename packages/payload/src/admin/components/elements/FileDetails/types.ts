@@ -1,6 +1,6 @@
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import { FileSizes } from '../../../../uploads/types';
-import { Data } from '../../forms/Form/types';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
+import { FileSizes } from '../../../../uploads/types.js';
+import { Data } from '../../forms/Form/types.js';
 
 export type Props = {
   collection: SanitizedCollectionConfig

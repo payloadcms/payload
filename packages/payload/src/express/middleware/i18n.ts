@@ -3,7 +3,7 @@ import type { InitOptions } from 'i18next';
 import i18nHTTPMiddleware from 'i18next-http-middleware';
 import deepmerge from 'deepmerge';
 import { Handler } from 'express';
-import { defaultOptions } from '../../translations/defaultOptions';
+import { defaultOptions } from '../../translations/defaultOptions.js';
 
 const i18nMiddleware = (options: InitOptions): Handler => {
   i18next.use(new i18nHTTPMiddleware.LanguageDetector(defaultOptions.detection))

@@ -1,8 +1,8 @@
 import { Editor, Transforms, Range, Element } from 'slate';
 import type { i18n } from 'i18next';
 import type { SanitizedConfig } from 'payload/config';
-import { getBaseFields } from './LinkDrawer/baseFields';
-import { Field } from '../../../../../../../fields/config/types';
+import { getBaseFields } from './LinkDrawer/baseFields.js';
+import { Field } from '../../../../../../../fields/config/types.js';
 
 export const unwrapLink = (editor: Editor): void => {
   Transforms.unwrapNodes(editor, { match: (n) => Element.isElement(n) && n.type === 'link' });

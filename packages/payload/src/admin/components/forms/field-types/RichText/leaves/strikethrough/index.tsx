@@ -1,6 +1,6 @@
 import React from 'react';
-import LeafButton from '../Button';
-import StrikethroughIcon from '../../../../../icons/Strikethrough';
+import LeafButton from '../Button.js';
+import StrikethroughIcon from '../../../../../icons/Strikethrough.js';
 
 const Strikethrough = ({ attributes, children }) => (
   <del {...attributes}>

@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
 import { Response } from 'express';
-import { Collection } from '../../config/types';
-import { PayloadRequest } from '../../../express/types';
-import restoreVersion from '../../operations/restoreVersion';
+import { Collection } from '../../config/types.js';
+import { PayloadRequest } from '../../../express/types.js';
+import restoreVersion from '../../operations/restoreVersion.js';
 
 export type Resolver = (
   _: unknown,

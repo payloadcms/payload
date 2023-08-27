@@ -1,17 +1,17 @@
 import React, { Fragment, lazy, Suspense, useEffect, useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from './utilities/Auth';
-import { useConfig } from './utilities/Config';
-import List from './views/collections/List';
-import DefaultTemplate from './templates/Default';
-import { requests } from '../api';
-import StayLoggedIn from './modals/StayLoggedIn';
-import Versions from './views/Versions';
-import Version from './views/Version';
-import { DocumentInfoProvider } from './utilities/DocumentInfo';
-import { useLocale } from './utilities/Locale';
-import { LoadingOverlayToggle } from './elements/Loading';
+import { useAuth } from './utilities/Auth.js';
+import { useConfig } from './utilities/Config.js';
+import List from './views/collections/List.js';
+import DefaultTemplate from './templates/Default.js';
+import { requests } from '../api.js';
+import StayLoggedIn from './modals/StayLoggedIn.js';
+import Versions from './views/Versions.js';
+import Version from './views/Version.js';
+import { DocumentInfoProvider } from './utilities/DocumentInfo.js';
+import { useLocale } from './utilities/Locale.js';
+import { LoadingOverlayToggle } from './elements/Loading.js';
 
 const Dashboard = lazy(() => import('./views/Dashboard'));
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'));

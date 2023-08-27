@@ -1,6 +1,6 @@
 import React from 'react';
-import Button from '../Button';
-import { Props } from './types';
+import Button from '../Button.js';
+import { Props } from './types.js';
 
 import './index.scss';
 

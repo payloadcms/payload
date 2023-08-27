@@ -1,7 +1,7 @@
 import flatley from 'flatley';
 const { unflatten } = flatley;
-import { Fields, Data } from './types';
-import reduceFieldsToValues from './reduceFieldsToValues';
+import { Fields, Data } from './types.js';
+import reduceFieldsToValues from './reduceFieldsToValues.js';
 
 const getSiblingData = (fields: Fields, path: string): Data => {
   if (path.indexOf('.') === -1) {

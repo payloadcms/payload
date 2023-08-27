@@ -1,6 +1,6 @@
-import { useConfig } from '../components/utilities/Config';
-import { SanitizedCollectionConfig } from '../../collections/config/types';
-import isImage from '../../uploads/isImage';
+import { useConfig } from '../components/utilities/Config.js';
+import { SanitizedCollectionConfig } from '../../collections/config/types.js';
+import isImage from '../../uploads/isImage.js';
 
 const absoluteURLPattern = new RegExp('^(?:[a-z]+:)?//', 'i');
 const base64Pattern = new RegExp(/^data:image\/[a-z]+;base64,/);

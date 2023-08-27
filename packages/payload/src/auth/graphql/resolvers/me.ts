@@ -1,5 +1,5 @@
-import me from '../../operations/me';
-import { Collection } from '../../../collections/config/types';
+import me from '../../operations/me.js';
+import { Collection } from '../../../collections/config/types.js';
 
 function meResolver(collection: Collection): any {
   async function resolver(_, args, context) {

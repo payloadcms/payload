@@ -4,11 +4,11 @@ import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
 import { fieldAffectsData } from 'payload/types';
 import { Relation, relations } from 'drizzle-orm';
-import { GenericColumns, PostgresAdapter } from '../types';
-import { createIndex } from './createIndex';
-import { buildTable } from './build';
-import { parentIDColumnMap } from './parentIDColumnMap';
-import { hasLocalesTable } from '../utilities/hasLocalesTable';
+import { GenericColumns, PostgresAdapter } from '../types.js';
+import { createIndex } from './createIndex.js';
+import { buildTable } from './build.js';
+import { parentIDColumnMap } from './parentIDColumnMap.js';
+import { hasLocalesTable } from '../utilities/hasLocalesTable.js';
 
 type AnyPgColumnBuilder = any; // TODO: Fix this
 

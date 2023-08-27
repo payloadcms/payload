@@ -1,7 +1,7 @@
-import { Payload } from '../../../../src/payload';
-import { BeforeLoginHook, CollectionConfig } from '../../../../src/collections/config/types';
-import { AuthenticationError } from '../../../../src/errors';
-import { devUser, regularUser } from '../../../credentials';
+import { Payload } from '../../../../src/payload.js';
+import { BeforeLoginHook, CollectionConfig } from '../../../../src/collections/config/types.js';
+import { AuthenticationError } from '../../../../src/errors.js';
+import { devUser, regularUser } from '../../../credentials.js';
 
 const beforeLoginHook: BeforeLoginHook = ({ user, req }) => {
   const isAdmin = user.roles.includes('admin') ? user : undefined;

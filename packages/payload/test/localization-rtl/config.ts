@@ -1,11 +1,11 @@
-import { devUser } from '../credentials';
-import { localization } from './localization';
-import { Users } from './collections/users';
-import { Posts } from './collections/posts';
+import { devUser } from '../credentials.js';
+import { localization } from './localization.js';
+import { Users } from './collections/users.js';
+import { Posts } from './collections/posts.js';
 import en from '../../src/translations/en.json';
-import { ar } from './ar';
-import deepMerge from './deepMerge';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import { ar } from './ar.js';
+import deepMerge from './deepMerge.js';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
 
 export default buildConfigWithDefaults({
   collections: [Users, Posts],

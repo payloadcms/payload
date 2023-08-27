@@ -1,5 +1,5 @@
-import { CollectionConfig } from '../../src/collections/config/types';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import { CollectionConfig } from '../../src/collections/config/types.js';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
 
 export const Posts: CollectionConfig = {
   slug: 'posts',

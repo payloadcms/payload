@@ -1,11 +1,11 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import payload from '../../src';
-import { AdminUrlUtil } from '../helpers/adminUrlUtil';
-import { initPayloadE2E } from '../helpers/configHelpers';
-import { restrictedVersionsSlug, readOnlySlug, restrictedSlug, slug, docLevelAccessSlug, unrestrictedSlug } from './config';
-import type { ReadOnlyCollection, RestrictedVersion } from './payload-types';
-import wait from '../../src/utilities/wait';
+import payload from '../../src.js';
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js';
+import { initPayloadE2E } from '../helpers/configHelpers.js';
+import { restrictedVersionsSlug, readOnlySlug, restrictedSlug, slug, docLevelAccessSlug, unrestrictedSlug } from './config.js';
+import type { ReadOnlyCollection, RestrictedVersion } from './payload-types.js';
+import wait from '../../src/utilities/wait.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

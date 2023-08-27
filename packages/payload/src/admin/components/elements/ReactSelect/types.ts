@@ -1,5 +1,5 @@
 import { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } from 'react-select';
-import { DocumentDrawerProps } from '../DocumentDrawer/types';
+import { DocumentDrawerProps } from '../DocumentDrawer/types.js';
 
 type CustomSelectProps = {
   disableMouseDown?: boolean

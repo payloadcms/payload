@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
 import { useTranslation } from 'react-i18next';
-import { Props } from './types';
-import Search from '../../icons/Search';
-import useDebounce from '../../../hooks/useDebounce';
-import { useSearchParams } from '../../utilities/SearchParams';
-import { Where, WhereField } from '../../../../types';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { Props } from './types.js';
+import Search from '../../icons/Search.js';
+import useDebounce from '../../../hooks/useDebounce.js';
+import { useSearchParams } from '../../utilities/SearchParams.js';
+import { Where, WhereField } from '../../../../types.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
 
 import './index.scss';
 

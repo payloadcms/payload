@@ -2,13 +2,13 @@
 import * as GraphQL from 'graphql';
 import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import queryComplexity, { fieldExtensionsEstimator, simpleEstimator } from 'graphql-query-complexity';
-import { Payload } from '../payload';
-import buildLocaleInputType from './schema/buildLocaleInputType';
-import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType';
-import initCollections from '../collections/graphql/init';
-import initGlobals from '../globals/graphql/init';
-import buildPoliciesType from './schema/buildPoliciesType';
-import accessResolver from '../auth/graphql/resolvers/access';
+import { Payload } from '../payload.js';
+import buildLocaleInputType from './schema/buildLocaleInputType.js';
+import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType.js';
+import initCollections from '../collections/graphql/init.js';
+import initGlobals from '../globals/graphql/init.js';
+import buildPoliciesType from './schema/buildPoliciesType.js';
+import accessResolver from '../auth/graphql/resolvers/access.js';
 
 export default function registerGraphQLSchema(payload: Payload): void {
   payload.types = {

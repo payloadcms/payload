@@ -1,16 +1,16 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import { textarea } from '../../../../../fields/validations';
-import { Props } from './types';
-import TextareaInput from './Input';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import { useLocale } from '../../../utilities/Locale';
+import useField from '../../useField.js';
+import withCondition from '../../withCondition.js';
+import { textarea } from '../../../../../fields/validations.js';
+import { Props } from './types.js';
+import TextareaInput from './Input.js';
+import { getTranslation } from '../../../../../utilities/getTranslation.js';
+import { useLocale } from '../../../utilities/Locale.js';
 
 import './index.scss';
-import { useConfig } from '../../../utilities/Config';
-import { isFieldRTL } from '../shared';
+import { useConfig } from '../../../utilities/Config.js';
+import { isFieldRTL } from '../shared.js';
 
 const Textarea: React.FC<Props> = (props) => {
   const {

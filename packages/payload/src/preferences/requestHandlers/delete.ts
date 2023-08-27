@@ -1,10 +1,10 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import formatSuccessResponse from '../../express/responses/formatSuccess';
-import deleteOperation from '../operations/delete';
+import { PayloadRequest } from '../../express/types.js';
+import formatSuccessResponse from '../../express/responses/formatSuccess.js';
+import deleteOperation from '../operations/delete.js';
 
-export default async function deleteHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<{message: string}> | void> {
+export default async function deleteHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<{ message: string }> | void> {
   try {
     await deleteOperation({
       req,

@@ -1,5 +1,5 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import { devUser } from '../credentials.js';
 
 export default buildConfigWithDefaults({
   collections: [

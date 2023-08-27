@@ -1,10 +1,10 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
-import { Document, Where } from '../../types';
-import { PayloadRequest } from '../../express/types';
-import formatSuccessResponse from '../../express/responses/formatSuccess';
-import update from '../operations/update';
-import { getTranslation } from '../../utilities/getTranslation';
+import { Document, Where } from '../../types.js';
+import { PayloadRequest } from '../../express/types.js';
+import formatSuccessResponse from '../../express/responses/formatSuccess.js';
+import update from '../operations/update.js';
+import { getTranslation } from '../../utilities/getTranslation.js';
 
 export type UpdateResult = {
   message: string

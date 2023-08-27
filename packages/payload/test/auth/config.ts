@@ -1,8 +1,8 @@
 import { v4 as uuid } from 'uuid';
-import { mapAsync } from '../../src/utilities/mapAsync';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
-import { AuthDebug } from './AuthDebug';
+import { mapAsync } from '../../src/utilities/mapAsync.js';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import { devUser } from '../credentials.js';
+import { AuthDebug } from './AuthDebug.js';
 
 export const slug = 'users';
 

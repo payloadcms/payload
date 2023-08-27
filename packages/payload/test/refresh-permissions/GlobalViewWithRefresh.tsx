@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
-import { useAuth } from '../../src/admin/components/utilities/Auth';
-import { Props } from '../../src/admin/components/views/Global/types';
-import DefaultGlobalView from '../../src/admin/components/views/Global/Default';
+import { useAuth } from '../../src/admin/components/utilities/Auth.js';
+import { Props } from '../../src/admin/components/views/Global/types.js';
+import DefaultGlobalView from '../../src/admin/components/views/Global/Default.js';
 
 const GlobalView: React.FC<Props> = (props) => {
   const { onSave } = props;

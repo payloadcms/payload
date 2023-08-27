@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { isComponent, Props } from './types';
-import { useWatchForm } from '../Form/context';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { isComponent, Props } from './types.js';
+import { useWatchForm } from '../Form/context.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
 
 const baseClass = 'row-label';
 

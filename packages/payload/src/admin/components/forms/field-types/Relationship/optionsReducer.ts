@@ -1,6 +1,6 @@
-import { Option, Action, OptionGroup } from './types';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import { formatUseAsTitle } from '../../../../hooks/useTitle';
+import { Option, Action, OptionGroup } from './types.js';
+import { getTranslation } from '../../../../../utilities/getTranslation.js';
+import { formatUseAsTitle } from '../../../../hooks/useTitle.js';
 
 const reduceToIDs = (options) => options.reduce((ids, option) => {
   if (option.options) {

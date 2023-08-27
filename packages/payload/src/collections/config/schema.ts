@@ -1,6 +1,6 @@
 import joi from 'joi';
-import { componentSchema } from '../../utilities/componentSchema';
-import { endpointsSchema } from '../../config/schema';
+import { componentSchema } from '../../utilities/componentSchema.js';
+import { endpointsSchema } from '../../config/schema.js';
 
 const strategyBaseSchema = joi.object().keys({
   refresh: joi.boolean(),

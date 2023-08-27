@@ -1,5 +1,5 @@
-import { AfterOperationHook, CollectionConfig } from '../../../../src/collections/config/types';
-import { AfterOperation } from '../../payload-types';
+import { AfterOperationHook, CollectionConfig } from '../../../../src/collections/config/types.js';
+import { AfterOperation } from '../../payload-types.js';
 
 export const afterOperationSlug = 'afterOperation';
 

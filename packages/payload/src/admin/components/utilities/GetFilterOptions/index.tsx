@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 import equal from 'deep-equal';
-import { FilterOptions } from '../../../../fields/config/types';
-import { useAuth } from '../Auth';
-import { useDocumentInfo } from '../DocumentInfo';
-import { useAllFormFields } from '../../forms/Form/context';
-import { getFilterOptionsQuery } from '../../forms/field-types/getFilterOptionsQuery';
-import { FilterOptionsResult } from '../../forms/field-types/Relationship/types';
-import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues';
-import getSiblingData from '../../forms/Form/getSiblingData';
+import { FilterOptions } from '../../../../fields/config/types.js';
+import { useAuth } from '../Auth.js';
+import { useDocumentInfo } from '../DocumentInfo.js';
+import { useAllFormFields } from '../../forms/Form/context.js';
+import { getFilterOptionsQuery } from '../../forms/field-types/getFilterOptionsQuery.js';
+import { FilterOptionsResult } from '../../forms/field-types/Relationship/types.js';
+import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues.js';
+import getSiblingData from '../../forms/Form/getSiblingData.js';
 
 type Args = {
   filterOptions: FilterOptions

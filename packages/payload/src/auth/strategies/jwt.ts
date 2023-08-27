@@ -1,8 +1,8 @@
 import url from 'url';
 import passportJwt, { StrategyOptions } from 'passport-jwt';
 import { Strategy as PassportStrategy } from 'passport-strategy';
-import { Payload } from '../../payload';
-import getExtractJWT from '../getExtractJWT';
+import { Payload } from '../../payload.js';
+import getExtractJWT from '../getExtractJWT.js';
 
 const JwtStrategy = passportJwt.Strategy;
 

@@ -1,6 +1,6 @@
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../../../globals/config/types';
-import { Permissions, User } from '../../../../auth/types';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
+import { SanitizedGlobalConfig } from '../../../../globals/config/types.js';
+import { Permissions, User } from '../../../../auth/types.js';
 
 export type Props = {
   collections: SanitizedCollectionConfig[],

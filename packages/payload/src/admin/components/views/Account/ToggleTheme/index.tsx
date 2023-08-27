@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import RadioGroupInput from '../../../forms/field-types/RadioGroup/Input';
-import { OnChange } from '../../../forms/field-types/RadioGroup/types';
-import { Theme, useTheme } from '../../../utilities/Theme';
+import RadioGroupInput from '../../../forms/field-types/RadioGroup/Input.js';
+import { OnChange } from '../../../forms/field-types/RadioGroup/types.js';
+import { Theme, useTheme } from '../../../utilities/Theme.js';
 
 export const ToggleTheme: React.FC = () => {
   const { theme, setTheme, autoMode } = useTheme();

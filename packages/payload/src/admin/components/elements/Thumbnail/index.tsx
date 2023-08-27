@@ -1,7 +1,7 @@
 import React from 'react';
-import { Props } from './types';
-import FileGraphic from '../../graphics/File';
-import useThumbnail from '../../../hooks/useThumbnail';
+import { Props } from './types.js';
+import FileGraphic from '../../graphics/File.js';
+import useThumbnail from '../../../hooks/useThumbnail.js';
 
 import './index.scss';
 

@@ -1,13 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import Label from '../../Label';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import { OptionObject, SelectField } from '../../../../../fields/config/types';
-import { Description } from '../../FieldDescription/types';
-import ReactSelect from '../../../elements/ReactSelect';
-import { Option } from '../../../elements/ReactSelect/types';
-import { getTranslation } from '../../../../../utilities/getTranslation';
+import Label from '../../Label.js';
+import Error from '../../Error.js';
+import FieldDescription from '../../FieldDescription.js';
+import { OptionObject, SelectField } from '../../../../../fields/config/types.js';
+import { Description } from '../../FieldDescription/types.js';
+import ReactSelect from '../../../elements/ReactSelect.js';
+import { Option } from '../../../elements/ReactSelect/types.js';
+import { getTranslation } from '../../../../../utilities/getTranslation.js';
 
 import './index.scss';
 

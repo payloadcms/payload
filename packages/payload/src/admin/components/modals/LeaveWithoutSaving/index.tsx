@@ -1,10 +1,10 @@
 import React from 'react';
 import NavigationPrompt from 'react-router-navigation-prompt';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../utilities/Auth';
-import { useFormModified } from '../../forms/Form/context';
-import MinimalTemplate from '../../templates/Minimal';
-import Button from '../../elements/Button';
+import { useAuth } from '../../utilities/Auth.js';
+import { useFormModified } from '../../forms/Form/context.js';
+import MinimalTemplate from '../../templates/Minimal.js';
+import Button from '../../elements/Button.js';
 
 import './index.scss';
 

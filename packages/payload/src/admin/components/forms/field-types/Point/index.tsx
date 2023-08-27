@@ -1,13 +1,13 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import useField from '../../useField';
-import Label from '../../Label';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import withCondition from '../../withCondition';
-import { point } from '../../../../../fields/validations';
-import { Props } from './types';
-import { getTranslation } from '../../../../../utilities/getTranslation';
+import useField from '../../useField.js';
+import Label from '../../Label.js';
+import Error from '../../Error.js';
+import FieldDescription from '../../FieldDescription.js';
+import withCondition from '../../withCondition.js';
+import { point } from '../../../../../fields/validations.js';
+import { Props } from './types.js';
+import { getTranslation } from '../../../../../utilities/getTranslation.js';
 
 import './index.scss';
 

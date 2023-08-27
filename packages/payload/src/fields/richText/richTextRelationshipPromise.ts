@@ -1,7 +1,7 @@
-import { RichTextField } from '../config/types';
-import { PayloadRequest } from '../../express/types';
-import { recurseNestedFields } from './recurseNestedFields';
-import { populate } from './populate';
+import { RichTextField } from '../config/types.js';
+import { PayloadRequest } from '../../express/types.js';
+import { recurseNestedFields } from './recurseNestedFields.js';
+import { populate } from './populate.js';
 
 type Args = {
   currentDepth?: number

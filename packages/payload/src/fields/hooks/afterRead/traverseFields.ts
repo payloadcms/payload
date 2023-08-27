@@ -1,6 +1,6 @@
-import { Field, TabAsField } from '../../config/types';
-import { promise } from './promise';
-import { PayloadRequest, RequestContext } from '../../../express/types';
+import { Field, TabAsField } from '../../config/types.js';
+import { promise } from './promise.js';
+import { PayloadRequest, RequestContext } from '../../../express/types.js';
 
 type Args = {
   currentDepth: number

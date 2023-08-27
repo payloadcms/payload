@@ -1,5 +1,5 @@
-import { User } from '../auth';
-import { PayloadRequest } from '../express/types';
+import { User } from '../auth.js';
+import { PayloadRequest } from '../express/types.js';
 
 export type PreferenceRequest = {
   overrideAccess?: boolean;
@@ -8,7 +8,7 @@ export type PreferenceRequest = {
   key: string;
 };
 
-export type PreferenceUpdateRequest = PreferenceRequest & {value: undefined};
+export type PreferenceUpdateRequest = PreferenceRequest & { value: undefined };
 
 export type CollapsedPreferences = string[]
 

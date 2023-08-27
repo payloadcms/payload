@@ -1,5 +1,5 @@
 import path from 'path';
-import { Config } from './types';
+import { Config } from './types.js';
 
 export const defaults: Omit<Config, 'db'> = {
   serverURL: '',

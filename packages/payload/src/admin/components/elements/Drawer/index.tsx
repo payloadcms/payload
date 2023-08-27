@@ -2,10 +2,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useWindowInfo } from '@faceless-ui/window-info';
 import { useTranslation } from 'react-i18next';
-import { Props, TogglerProps } from './types';
-import { EditDepthContext, useEditDepth } from '../../utilities/EditDepth';
-import { Gutter } from '../Gutter';
-import X from '../../icons/X';
+import { Props, TogglerProps } from './types.js';
+import { EditDepthContext, useEditDepth } from '../../utilities/EditDepth.js';
+import { Gutter } from '../Gutter.js';
+import X from '../../icons/X.js';
 
 import './index.scss';
 

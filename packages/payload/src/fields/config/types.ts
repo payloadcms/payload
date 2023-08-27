@@ -4,15 +4,15 @@ import { Editor } from 'slate';
 import type { i18n as Ii18n, TFunction } from 'i18next';
 import type { EditorProps } from '@monaco-editor/react';
 import monacoeditor from 'monaco-editor'; // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
-import { Operation, Where } from '../../types';
-import { SanitizedConfig } from '../../config/types';
-import { TypeWithID } from '../../collections/config/types';
-import { PayloadRequest, RequestContext } from '../../express/types';
-import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
-import { Description } from '../../admin/components/forms/FieldDescription/types';
-import { User } from '../../auth';
-import { Payload } from '../../payload';
-import { RowLabel } from '../../admin/components/forms/RowLabel/types';
+import { Operation, Where } from '../../types.js';
+import { SanitizedConfig } from '../../config/types.js';
+import { TypeWithID } from '../../collections/config/types.js';
+import { PayloadRequest, RequestContext } from '../../express/types.js';
+import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types.js';
+import { Description } from '../../admin/components/forms/FieldDescription/types.js';
+import { User } from '../../auth.js';
+import { Payload } from '../../payload.js';
+import { RowLabel } from '../../admin/components/forms/RowLabel/types.js';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */

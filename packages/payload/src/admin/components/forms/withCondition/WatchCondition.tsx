@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import { useAuth } from '../../utilities/Auth';
-import { useAllFormFields } from '../Form/context';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import reduceFieldsToValues from '../Form/reduceFieldsToValues';
-import getSiblingData from '../Form/getSiblingData';
-import { Condition } from '../../../../fields/config/types';
+import { useAuth } from '../../utilities/Auth.js';
+import { useAllFormFields } from '../Form/context.js';
+import { useDocumentInfo } from '../../utilities/DocumentInfo.js';
+import reduceFieldsToValues from '../Form/reduceFieldsToValues.js';
+import getSiblingData from '../Form/getSiblingData.js';
+import { Condition } from '../../../../fields/config/types.js';
 
 type Props = {
   path?: string

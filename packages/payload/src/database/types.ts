@@ -1,9 +1,9 @@
 import type { Configuration } from 'webpack';
-import type { TypeWithID } from '../collections/config/types';
-import type { TypeWithID as GlobalsTypeWithID } from '../globals/config/types';
-import type { Payload } from '../payload';
-import type { Document, PayloadRequest, Where } from '../types';
-import type { TypeWithVersion } from '../versions/types';
+import type { TypeWithID } from '../collections/config/types.js';
+import type { TypeWithID as GlobalsTypeWithID } from '../globals/config/types.js';
+import type { Payload } from '../payload.js';
+import type { Document, PayloadRequest, Where } from '../types.js';
+import type { TypeWithVersion } from '../versions/types.js';
 
 export interface DatabaseAdapter {
   /**

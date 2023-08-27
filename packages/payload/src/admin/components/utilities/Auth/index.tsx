@@ -4,11 +4,11 @@ import { useHistory, useLocation } from 'react-router-dom';
 import * as facelessui from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-import { Permissions, User } from '../../../../auth/types';
-import { useConfig } from '../Config';
-import { requests } from '../../../api';
-import useDebounce from '../../../hooks/useDebounce';
-import { AuthContext } from './types';
+import { Permissions, User } from '../../../../auth/types.js';
+import { useConfig } from '../Config.js';
+import { requests } from '../../../api.js';
+import useDebounce from '../../../hooks/useDebounce.js';
+import { AuthContext } from './types.js';
 
 const Context = createContext({} as AuthContext);
 

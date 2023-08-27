@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
-import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { traverseFields } from './traverseFields';
-import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise';
-import relationshipPopulationPromise from './relationshipPopulationPromise';
+import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types.js';
+import { PayloadRequest, RequestContext } from '../../../express/types.js';
+import { traverseFields } from './traverseFields.js';
+import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise.js';
+import relationshipPopulationPromise from './relationshipPopulationPromise.js';
 
 type Args = {
   currentDepth: number

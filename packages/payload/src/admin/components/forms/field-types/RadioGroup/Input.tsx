@@ -1,12 +1,12 @@
 import React from 'react';
 
-import Error from '../../Error';
-import Label from '../../Label';
-import FieldDescription from '../../FieldDescription';
-import RadioInput from './RadioInput';
-import { optionIsObject, RadioField } from '../../../../../fields/config/types';
-import { Description } from '../../FieldDescription/types';
-import { OnChange } from './types';
+import Error from '../../Error.js';
+import Label from '../../Label.js';
+import FieldDescription from '../../FieldDescription.js';
+import RadioInput from './RadioInput.js';
+import { optionIsObject, RadioField } from '../../../../../fields/config/types.js';
+import { Description } from '../../FieldDescription/types.js';
+import { OnChange } from './types.js';
 
 import './index.scss';
 

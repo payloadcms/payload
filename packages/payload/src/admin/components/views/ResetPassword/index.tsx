@@ -2,16 +2,16 @@ import React from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Trans, useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import MinimalTemplate from '../../templates/Minimal';
-import Form from '../../forms/Form';
-import Password from '../../forms/field-types/Password';
-import ConfirmPassword from '../../forms/field-types/ConfirmPassword';
-import FormSubmit from '../../forms/Submit';
-import Button from '../../elements/Button';
-import Meta from '../../utilities/Meta';
-import HiddenInput from '../../forms/field-types/HiddenInput';
+import { useConfig } from '../../utilities/Config.js';
+import { useAuth } from '../../utilities/Auth.js';
+import MinimalTemplate from '../../templates/Minimal.js';
+import Form from '../../forms/Form.js';
+import Password from '../../forms/field-types/Password.js';
+import ConfirmPassword from '../../forms/field-types/ConfirmPassword.js';
+import FormSubmit from '../../forms/Submit.js';
+import Button from '../../elements/Button.js';
+import Meta from '../../utilities/Meta.js';
+import HiddenInput from '../../forms/field-types/HiddenInput.js';
 
 import './index.scss';
 

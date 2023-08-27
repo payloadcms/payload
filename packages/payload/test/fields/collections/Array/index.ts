@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
-import { ArrayRowLabel } from './LabelComponent';
-import { AddCustomBlocks } from './components/AddCustomBlocks';
+import type { CollectionConfig } from '../../../../src/collections/config/types.js';
+import { ArrayRowLabel } from './LabelComponent.js';
+import { AddCustomBlocks } from './components/AddCustomBlocks.js';
 
 export const arrayDefaultValue = [
   { text: 'row one' },

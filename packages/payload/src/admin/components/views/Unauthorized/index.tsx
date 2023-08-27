@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import Button from '../../elements/Button';
-import Meta from '../../utilities/Meta';
-import MinimalTemplate from '../../templates/Minimal';
+import { useConfig } from '../../utilities/Config.js';
+import Button from '../../elements/Button.js';
+import Meta from '../../utilities/Meta.js';
+import MinimalTemplate from '../../templates/Minimal.js';
 
 const Unauthorized: React.FC = () => {
   const { t } = useTranslation('general');

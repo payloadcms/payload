@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 /* eslint-disable jest/prefer-strict-equal */
-import formatName from './formatName';
+import formatName from './formatName.js';
 
 describe('formatName', () => {
   it.each`

@@ -1,7 +1,7 @@
 import React from 'react';
-import { useAuth } from '../../utilities/Auth';
-import { useConfig } from '../../utilities/Config';
-import Gravatar from './Gravatar';
+import { useAuth } from '../../utilities/Auth.js';
+import { useConfig } from '../../utilities/Config.js';
+import Gravatar from './Gravatar.js';
 
 const css = `
   .graphic-account .circle1 {

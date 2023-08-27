@@ -3,11 +3,11 @@ import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../utilities/Config';
-import { Button, MinimalTemplate, Pill } from '../../..';
-import { Props } from './types';
-import { requests } from '../../../../api';
-import { getTranslation } from '../../../../../utilities/getTranslation';
+import { useConfig } from '../../../utilities/Config.js';
+import { Button, MinimalTemplate, Pill } from '../../...js';
+import { Props } from './types.js';
+import { requests } from '../../../../api.js';
+import { getTranslation } from '../../../../../utilities/getTranslation.js';
 
 import './index.scss';
 

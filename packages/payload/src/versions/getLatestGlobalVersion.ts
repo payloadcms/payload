@@ -1,6 +1,6 @@
-import { Payload } from '../payload';
-import { docHasTimestamps, Document, PayloadRequest, Where } from '../types';
-import { SanitizedGlobalConfig } from '../globals/config/types';
+import { Payload } from '../payload.js';
+import { docHasTimestamps, Document, PayloadRequest, Where } from '../types.js';
+import { SanitizedGlobalConfig } from '../globals/config/types.js';
 
 type Args = {
   payload: Payload
@@ -18,7 +18,7 @@ export const getLatestGlobalVersion = async ({
   where,
   locale,
   req,
-}: Args): Promise<{global: Document, globalExists: boolean}> => {
+}: Args): Promise<{ global: Document, globalExists: boolean }> => {
   let latestVersion;
 
   if (config.versions?.drafts) {

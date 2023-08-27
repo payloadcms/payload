@@ -1,7 +1,7 @@
 import { PaginateOptions } from 'mongoose';
 import { SanitizedConfig } from '@alessiogr/payloadtest/config';
 import { Field } from '@alessiogr/payloadtest/types';
-import { getLocalizedSortProperty } from './getLocalizedSortProperty';
+import { getLocalizedSortProperty } from './getLocalizedSortProperty.js';
 
 type Args = {
   sort: string

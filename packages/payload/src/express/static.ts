@@ -1,10 +1,10 @@
 import express from 'express';
 import passport from 'passport';
 import path from 'path';
-import getExecuteStaticAccess from '../auth/getExecuteStaticAccess';
-import authenticate from './middleware/authenticate';
-import { Payload } from '../payload';
-import corsHeaders from './middleware/corsHeaders';
+import getExecuteStaticAccess from '../auth/getExecuteStaticAccess.js';
+import authenticate from './middleware/authenticate.js';
+import { Payload } from '../payload.js';
+import corsHeaders from './middleware/corsHeaders.js';
 
 function initStatic(ctx: Payload): void {
   Object.entries(ctx.collections).forEach(([_, collection]) => {

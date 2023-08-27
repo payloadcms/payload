@@ -7,59 +7,59 @@ import { Config as GeneratedTypes } from 'payload/generated-types';
 // @ts-ignore // TODO: Broke with pnpm/workspaces/esm. Fix this
 import { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler';
 import { SendMailOptions } from 'nodemailer';
-import { BulkOperationResult, Collection } from './collections/config/types';
-import { EmailOptions, InitOptions, SanitizedConfig } from './config/types';
-import { TypeWithVersion } from './versions/types';
+import { BulkOperationResult, Collection } from './collections/config/types.js';
+import { EmailOptions, InitOptions, SanitizedConfig } from './config/types.js';
+import { TypeWithVersion } from './versions/types.js';
 
-import { PayloadAuthenticate } from './express/middleware/authenticate';
-import { Globals } from './globals/config/types';
-import { ErrorHandler } from './express/middleware/errorHandler';
-import localOperations from './collections/operations/local';
-import localGlobalOperations from './globals/operations/local';
-import { decrypt, encrypt } from './auth/crypto';
-import { BuildEmailResult } from './email/types';
+import { PayloadAuthenticate } from './express/middleware/authenticate.js';
+import { Globals } from './globals/config/types.js';
+import { ErrorHandler } from './express/middleware/errorHandler.js';
+import localOperations from './collections/operations/local/index.js';
+import localGlobalOperations from './globals/operations/local/index.js';
+import { decrypt, encrypt } from './auth/crypto.js';
+import { BuildEmailResult } from './email/types.js';
 
-import { Options as CreateOptions } from './collections/operations/local/create';
-import { Options as FindOptions } from './collections/operations/local/find';
+import { Options as CreateOptions } from './collections/operations/local/create.js';
+import { Options as FindOptions } from './collections/operations/local/find.js';
 import {
   ByIDOptions as UpdateByIDOptions,
   ManyOptions as UpdateManyOptions,
   Options as UpdateOptions,
-} from './collections/operations/local/update';
+} from './collections/operations/local/update.js';
 import {
   ByIDOptions as DeleteByIDOptions,
   ManyOptions as DeleteManyOptions,
   Options as DeleteOptions,
-} from './collections/operations/local/delete';
-import { Options as FindByIDOptions } from './collections/operations/local/findByID';
-import { Options as FindVersionsOptions } from './collections/operations/local/findVersions';
-import { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID';
-import { Options as RestoreVersionOptions } from './collections/operations/local/restoreVersion';
-import { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions';
-import { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID';
-import { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion';
-import { Options as ForgotPasswordOptions } from './auth/operations/local/forgotPassword';
-import { Options as LoginOptions } from './auth/operations/local/login';
-import { Options as ResetPasswordOptions } from './auth/operations/local/resetPassword';
-import { Options as UnlockOptions } from './auth/operations/local/unlock';
-import { Options as VerifyEmailOptions } from './auth/operations/local/verifyEmail';
-import { Result as ForgotPasswordResult } from './auth/operations/forgotPassword';
-import { Result as ResetPasswordResult } from './auth/operations/resetPassword';
-import { Result as LoginResult } from './auth/operations/login';
-import { Options as FindGlobalOptions } from './globals/operations/local/findOne';
-import { Options as UpdateGlobalOptions } from './globals/operations/local/update';
+} from './collections/operations/local/delete.js';
+import { Options as FindByIDOptions } from './collections/operations/local/findByID.js';
+import { Options as FindVersionsOptions } from './collections/operations/local/findVersions.js';
+import { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID.js';
+import { Options as RestoreVersionOptions } from './collections/operations/local/restoreVersion.js';
+import { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions.js';
+import { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID.js';
+import { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js';
+import { Options as ForgotPasswordOptions } from './auth/operations/local/forgotPassword.js';
+import { Options as LoginOptions } from './auth/operations/local/login.js';
+import { Options as ResetPasswordOptions } from './auth/operations/local/resetPassword.js';
+import { Options as UnlockOptions } from './auth/operations/local/unlock.js';
+import { Options as VerifyEmailOptions } from './auth/operations/local/verifyEmail.js';
+import { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js';
+import { Result as ResetPasswordResult } from './auth/operations/resetPassword.js';
+import { Result as LoginResult } from './auth/operations/login.js';
+import { Options as FindGlobalOptions } from './globals/operations/local/findOne.js';
+import { Options as UpdateGlobalOptions } from './globals/operations/local/update.js';
 
-import registerGraphQLSchema from './graphql/registerSchema';
-import buildEmail from './email/build';
-import sendEmail from './email/sendEmail';
+import registerGraphQLSchema from './graphql/registerSchema.js';
+import buildEmail from './email/build.js';
+import sendEmail from './email/sendEmail.js';
 
-import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit';
-import Logger from './utilities/logger';
-import findConfig from './config/find';
+import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js';
+import Logger from './utilities/logger.js';
+import findConfig from './config/find.js';
 
-import { defaults as emailDefaults } from './email/defaults';
-import type { PaginatedDocs } from './database/types';
-import { DatabaseAdapter } from './database/types';
+import { defaults as emailDefaults } from './email/defaults.js';
+import type { PaginatedDocs } from './database/types.js';
+import { DatabaseAdapter } from './database/types.js';
 
 /**
  * @description Payload
@@ -166,7 +166,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
         },
       };
     } else {
-      const loadConfig = (await import('./config/load')).default;
+      const loadConfig = (await import('./config/load.js')).default;
       this.config = await loadConfig(this.logger);
     }
 

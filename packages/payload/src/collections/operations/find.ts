@@ -1,17 +1,17 @@
-import { Where } from '../../types';
-import { PayloadRequest } from '../../express/types';
-import executeAccess from '../../auth/executeAccess';
-import { Collection, TypeWithID } from '../config/types';
-import type { PaginatedDocs } from '../../database/types';
-import { AccessResult } from '../../config/types';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
-import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey';
-import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
-import { combineQueries } from '../../database/combineQueries';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
-import { buildAfterOperation } from './utils';
+import { Where } from '../../types.js';
+import { PayloadRequest } from '../../express/types.js';
+import executeAccess from '../../auth/executeAccess.js';
+import { Collection, TypeWithID } from '../config/types.js';
+import type { PaginatedDocs } from '../../database/types.js';
+import { AccessResult } from '../../config/types.js';
+import { afterRead } from '../../fields/hooks/afterRead.js';
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js';
+import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js';
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js';
+import { combineQueries } from '../../database/combineQueries.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
+import { buildAfterOperation } from './utils.js';
 
 export type Arguments = {
   collection: Collection

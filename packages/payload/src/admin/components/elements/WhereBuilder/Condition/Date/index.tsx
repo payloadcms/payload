@@ -1,6 +1,6 @@
 import React from 'react';
-import { Props } from './types';
-import DatePicker from '../../../DatePicker';
+import { Props } from './types.js';
+import DatePicker from '../../../DatePicker.js';
 
 const baseClass = 'condition-value-date';
 

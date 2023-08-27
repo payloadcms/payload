@@ -1,6 +1,6 @@
 import React from 'react';
-import ElementButton from '../Button';
-import BlockquoteIcon from '../../../../../icons/Blockquote';
+import ElementButton from '../Button.js';
+import BlockquoteIcon from '../../../../../icons/Blockquote.js';
 
 import './index.scss';
 

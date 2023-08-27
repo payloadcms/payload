@@ -1,13 +1,13 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
-import { Payload } from '../../../payload';
-import { Document } from '../../../types';
-import { PayloadRequest } from '../../../express/types';
-import update from '../update';
-import { getDataLoader } from '../../../collections/dataloader';
-import { i18nInit } from '../../../translations/init';
-import { APIError } from '../../../errors';
-import { setRequestContext } from '../../../express/setRequestContext';
+import { Payload } from '../../../payload.js';
+import { Document } from '../../../types.js';
+import { PayloadRequest } from '../../../express/types.js';
+import update from '../update.js';
+import { getDataLoader } from '../../../collections/dataloader.js';
+import { i18nInit } from '../../../translations/init.js';
+import { APIError } from '../../../errors.js';
+import { setRequestContext } from '../../../express/setRequestContext.js';
 
 export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
   slug: TSlug

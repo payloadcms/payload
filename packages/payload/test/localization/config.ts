@@ -1,7 +1,7 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
-import { ArrayCollection } from './collections/Array';
-import { LocalizedPost } from './payload-types';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import { devUser } from '../credentials.js';
+import { ArrayCollection } from './collections/Array.js';
+import { LocalizedPost } from './payload-types.js';
 import {
   defaultLocale,
   englishTitle,
@@ -11,7 +11,7 @@ import {
   relationSpanishTitle2,
   spanishLocale,
   spanishTitle,
-} from './shared';
+} from './shared.js';
 
 export type LocalizedPostAllLocale = LocalizedPost & {
   title: {

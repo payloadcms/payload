@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../utilities/Config';
-import RenderCustomComponent from '../../../../utilities/RenderCustomComponent';
-import cellComponents from './field-types';
-import { Props } from './types';
-import { getTranslation } from '../../../../../../utilities/getTranslation';
-import { fieldAffectsData } from '../../../../../../fields/config/types';
+import { useConfig } from '../../../../utilities/Config.js';
+import RenderCustomComponent from '../../../../utilities/RenderCustomComponent.js';
+import cellComponents from './field-types.js';
+import { Props } from './types.js';
+import { getTranslation } from '../../../../../../utilities/getTranslation.js';
+import { fieldAffectsData } from '../../../../../../fields/config/types.js';
 
 const DefaultCell: React.FC<Props> = (props) => {
   const {

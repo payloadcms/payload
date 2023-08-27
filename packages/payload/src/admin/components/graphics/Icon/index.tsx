@@ -1,6 +1,6 @@
 import React from 'react';
-import { useConfig } from '../../utilities/Config';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import { useConfig } from '../../utilities/Config.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
 
 const css = `
   .graphic-icon path {

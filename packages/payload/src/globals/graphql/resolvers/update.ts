@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { DeepPartial } from 'ts-essentials';
-import { PayloadRequest } from '../../../express/types';
-import { SanitizedGlobalConfig } from '../../config/types';
-import update from '../../operations/update';
+import { PayloadRequest } from '../../../express/types.js';
+import { SanitizedGlobalConfig } from '../../config/types.js';
+import update from '../../operations/update.js';
 
 type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
   _: unknown,

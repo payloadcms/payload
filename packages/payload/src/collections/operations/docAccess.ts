@@ -1,7 +1,7 @@
-import { AllOperations } from '../../types';
-import { CollectionPermission } from '../../auth';
-import type { PayloadRequest } from '../../express/types';
-import { getEntityPolicies } from '../../utilities/getEntityPolicies';
+import { AllOperations } from '../../types.js';
+import { CollectionPermission } from '../../auth.js';
+import type { PayloadRequest } from '../../express/types.js';
+import { getEntityPolicies } from '../../utilities/getEntityPolicies.js';
 
 const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete'];
 

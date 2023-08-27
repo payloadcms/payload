@@ -1,6 +1,6 @@
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import { Field } from '../../../../fields/config/types';
-import { Operator, Where } from '../../../../types';
+import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
+import { Field } from '../../../../fields/config/types.js';
+import { Operator, Where } from '../../../../types.js';
 
 export type Props = {
   collection: SanitizedCollectionConfig,
@@ -30,9 +30,9 @@ export type ADD = {
 }
 
 export type REMOVE = {
- type: 'remove'
- andIndex: number
- orIndex: number
+  type: 'remove'
+  andIndex: number
+  orIndex: number
 }
 
 export type UPDATE = {

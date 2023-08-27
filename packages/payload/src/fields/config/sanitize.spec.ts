@@ -1,6 +1,6 @@
-import sanitizeFields from './sanitize';
-import { MissingFieldType, InvalidFieldRelationship, InvalidFieldName } from '../../errors';
-import { ArrayField, Block, BlockField, CheckboxField, Field, NumberField, TextField } from './types';
+import sanitizeFields from './sanitize.js';
+import { MissingFieldType, InvalidFieldRelationship, InvalidFieldName } from '../../errors.js';
+import { ArrayField, Block, BlockField, CheckboxField, Field, NumberField, TextField } from './types.js';
 
 describe('sanitizeFields', () => {
   it('should throw on missing type field', () => {

@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import unlock from '../operations/unlock';
+import { PayloadRequest } from '../../express/types.js';
+import unlock from '../operations/unlock.js';
 
 export default async function unlockHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {

@@ -1,20 +1,20 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import httpStatus from 'http-status';
-import { AccessResult } from '../../config/types';
-import { PayloadRequest } from '../../express/types';
-import { APIError } from '../../errors';
-import executeAccess from '../../auth/executeAccess';
-import { BeforeOperationHook, Collection } from '../config/types';
-import { Where } from '../../types';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
-import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
-import { deleteUserPreferences } from '../../preferences/deleteUserPreferences';
-import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
-import { combineQueries } from '../../database/combineQueries';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
-import { buildAfterOperation } from './utils';
+import { AccessResult } from '../../config/types.js';
+import { PayloadRequest } from '../../express/types.js';
+import { APIError } from '../../errors.js';
+import executeAccess from '../../auth/executeAccess.js';
+import { BeforeOperationHook, Collection } from '../config/types.js';
+import { Where } from '../../types.js';
+import { afterRead } from '../../fields/hooks/afterRead.js';
+import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js';
+import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js';
+import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js';
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js';
+import { combineQueries } from '../../database/combineQueries.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
+import { buildAfterOperation } from './utils.js';
 
 export type Arguments = {
   depth?: number

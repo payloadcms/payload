@@ -8,15 +8,15 @@ import GraphQL from 'graphql';
 import React from 'react';
 import { DestinationStream, LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
-import { Validate } from '../fields/config/types';
-import { Payload } from '../payload';
-import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types';
-import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
-import { PayloadRequest } from '../express/types';
-import { Where } from '../types';
-import { User } from '../auth/types';
-import { DatabaseAdapter } from '../database/types';
-import type { PayloadBundler } from '../bundlers/types';
+import { Validate } from '../fields/config/types.js';
+import { Payload } from '../payload.js';
+import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types.js';
+import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types.js';
+import { PayloadRequest } from '../express/types.js';
+import { Where } from '../types.js';
+import { User } from '../auth/types.js';
+import { DatabaseAdapter } from '../database/types.js';
+import type { PayloadBundler } from '../bundlers/types.js';
 
 type Prettify<T> = {
   [K in keyof T]: T[K];
@@ -265,13 +265,13 @@ export type LocalizationConfigWithLabels = Prettify<
 >;
 
 export type SanitizedLocalizationConfig = Prettify<
-LocalizationConfigWithLabels & {
-  /**
-   * List of supported locales
-   * @example `["en", "es", "fr", "nl", "de", "jp"]`
-   */
-  localeCodes: string[];
-}
+  LocalizationConfigWithLabels & {
+    /**
+     * List of supported locales
+     * @example `["en", "es", "fr", "nl", "de", "jp"]`
+     */
+    localeCodes: string[];
+  }
 >;
 
 /**

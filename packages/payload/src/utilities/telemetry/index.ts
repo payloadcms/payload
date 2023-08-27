@@ -3,10 +3,10 @@ import Conf from 'conf';
 import { randomBytes } from 'crypto';
 import findUp from 'find-up';
 import fs from 'fs';
-import { Payload } from '../../payload';
-import { ServerInitEvent } from './events/serverInit';
-import { AdminInitEvent } from './events/adminInit';
-import { oneWayHash } from './oneWayHash';
+import { Payload } from '../../payload.js';
+import { ServerInitEvent } from './events/serverInit.js';
+import { AdminInitEvent } from './events/adminInit.js';
+import { oneWayHash } from './oneWayHash.js';
 
 export type BaseEvent = {
   envID: string

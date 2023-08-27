@@ -1,7 +1,7 @@
 import React from 'react';
-import Check from '../../../icons/Check';
-import Label from '../../Label';
-import Line from '../../../icons/Line';
+import Check from '../../../icons/Check.js';
+import Label from '../../Label.js';
+import Line from '../../../icons/Line.js';
 
 import './index.scss';
 

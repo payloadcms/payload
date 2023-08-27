@@ -1,11 +1,11 @@
 import pluralize from 'pluralize-esm';
 import type { JSONSchema4 } from 'json-schema';
-import { Field, FieldAffectingData, fieldAffectsData, Option, tabHasName } from '../fields/config/types';
-import { SanitizedCollectionConfig } from '../collections/config/types';
-import { SanitizedGlobalConfig } from '../globals/config/types';
-import deepCopyObject from './deepCopyObject';
-import { toWords } from './formatLabels';
-import { SanitizedConfig } from '../config/types';
+import { Field, FieldAffectingData, fieldAffectsData, Option, tabHasName } from '../fields/config/types.js';
+import { SanitizedCollectionConfig } from '../collections/config/types.js';
+import { SanitizedGlobalConfig } from '../globals/config/types.js';
+import deepCopyObject from './deepCopyObject.js';
+import { toWords } from './formatLabels.js';
+import { SanitizedConfig } from '../config/types.js';
 
 const { singular } = pluralize;
 

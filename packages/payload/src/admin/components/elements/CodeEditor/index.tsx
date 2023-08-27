@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
-import { ShimmerEffect } from '../ShimmerEffect';
-import { Props } from './types';
+import { ShimmerEffect } from '../ShimmerEffect.js';
+import { Props } from './types.js';
 
 const LazyEditor = lazy(() => import('./CodeEditor'));
 

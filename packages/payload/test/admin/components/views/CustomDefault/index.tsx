@@ -2,13 +2,13 @@ import React, { useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 
 // As this is the demo project, we import our dependencies from the `src` directory.
-import DefaultTemplate from '../../../../../src/admin/components/templates/Default';
-import Button from '../../../../../src/admin/components/elements/Button';
-import Eyebrow from '../../../../../src/admin/components/elements/Eyebrow';
-import { AdminView } from '../../../../../src/config/types';
-import { useStepNav } from '../../../../../src/admin/components/elements/StepNav';
-import { useConfig } from '../../../../../src/admin/components/utilities/Config';
-import Meta from '../../../../../src/admin/components/utilities/Meta';
+import DefaultTemplate from '../../../../../src/admin/components/templates/Default.js';
+import Button from '../../../../../src/admin/components/elements/Button.js';
+import Eyebrow from '../../../../../src/admin/components/elements/Eyebrow.js';
+import { AdminView } from '../../../../../src/config/types.js';
+import { useStepNav } from '../../../../../src/admin/components/elements/StepNav.js';
+import { useConfig } from '../../../../../src/admin/components/utilities/Config.js';
+import Meta from '../../../../../src/admin/components/utilities/Meta.js';
 
 // In your projects, you can import as follows:
 // import { DefaultTemplate } from 'payload/components/templates';

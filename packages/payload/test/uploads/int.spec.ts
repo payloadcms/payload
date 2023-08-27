@@ -2,11 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import FormData from 'form-data';
-import payload from '../../src';
-import getFileByPath from '../../src/uploads/getFileByPath';
-import { initPayloadTest } from '../helpers/configHelpers';
-import { RESTClient } from '../helpers/rest';
-import configPromise, { enlargeSlug, mediaSlug, reduceSlug, relationSlug } from './config';
+import payload from '../../src.js';
+import getFileByPath from '../../src/uploads/getFileByPath.js';
+import { initPayloadTest } from '../helpers/configHelpers.js';
+import { RESTClient } from '../helpers/rest.js';
+import configPromise, { enlargeSlug, mediaSlug, reduceSlug, relationSlug } from './config.js';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const stat = promisify(fs.stat);

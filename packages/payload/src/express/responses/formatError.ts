@@ -1,4 +1,4 @@
-import APIError from '../../errors/APIError';
+import APIError from '../../errors/APIError.js';
 
 export type ErrorResponse = { errors: unknown[], data?: any, stack?: string };
 

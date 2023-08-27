@@ -1,6 +1,6 @@
 import React from 'react';
-import ULIcon from '../../../../../icons/UnorderedList';
-import ListButton from '../ListButton';
+import ULIcon from '../../../../../icons/UnorderedList.js';
+import ListButton from '../ListButton.js';
 
 import './index.scss';
 

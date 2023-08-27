@@ -1,7 +1,7 @@
 import i18n from 'i18next';
-import { RelationshipField } from '../../../../../../fields/config/types';
-import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
-import type { PaginatedDocs } from '../../../../../../database/types';
+import { RelationshipField } from '../../../../../../fields/config/types.js';
+import { SanitizedCollectionConfig } from '../../../../../../collections/config/types.js';
+import type { PaginatedDocs } from '../../../../../../database/types.js';
 
 export type Props = {
   onChange: (val: unknown) => void,

@@ -1,20 +1,20 @@
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useModal } from '@faceless-ui/modal';
-import { useConfig } from '../../utilities/Config';
-import { Drawer, DrawerToggler } from '../Drawer';
-import { Props } from './types';
-import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider';
-import { getTranslation } from '../../../../utilities/getTranslation';
-import { useAuth } from '../../utilities/Auth';
-import { FieldSelect } from '../FieldSelect';
-import FormSubmit from '../../forms/Submit';
-import Form from '../../forms/Form';
-import { useForm } from '../../forms/Form/context';
-import RenderFields from '../../forms/RenderFields';
-import { OperationContext } from '../../utilities/OperationProvider';
-import fieldTypes from '../../forms/field-types';
-import X from '../../icons/X';
+import { useConfig } from '../../utilities/Config.js';
+import { Drawer, DrawerToggler } from '../Drawer.js';
+import { Props } from './types.js';
+import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
+import { useAuth } from '../../utilities/Auth.js';
+import { FieldSelect } from '../FieldSelect.js';
+import FormSubmit from '../../forms/Submit.js';
+import Form from '../../forms/Form.js';
+import { useForm } from '../../forms/Form/context.js';
+import RenderFields from '../../forms/RenderFields.js';
+import { OperationContext } from '../../utilities/OperationProvider.js';
+import fieldTypes from '../../forms/field-types.js';
+import X from '../../icons/X.js';
 
 import './index.scss';
 

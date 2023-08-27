@@ -1,8 +1,8 @@
 import type { TFunction } from 'i18next';
-import { User } from '../../../../../auth';
-import { Field as FieldSchema } from '../../../../../fields/config/types';
-import { Fields, Data } from '../types';
-import { iterateFields } from './iterateFields';
+import { User } from '../../../../../auth.js';
+import { Field as FieldSchema } from '../../../../../fields/config/types.js';
+import { Fields, Data } from '../types.js';
+import { iterateFields } from './iterateFields.js';
 
 type Args = {
   fieldSchema: FieldSchema[]

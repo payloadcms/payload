@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
-import { Collection } from '../../../collections/config/types';
-import verifyEmail from '../../operations/verifyEmail';
+import { Collection } from '../../../collections/config/types.js';
+import verifyEmail from '../../operations/verifyEmail.js';
 
 function verifyEmailResolver(collection: Collection) {
   async function resolver(_, args, context) {

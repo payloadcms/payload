@@ -1,9 +1,9 @@
 import nodemailer, { Transporter } from 'nodemailer';
 import { Logger } from 'pino';
-import { EmailOptions, EmailTransport, hasTransport, hasTransportOptions } from '../config/types';
-import { InvalidConfiguration } from '../errors';
-import mockHandler from './mockHandler';
-import { BuildEmailResult, MockEmailHandler } from './types';
+import { EmailOptions, EmailTransport, hasTransport, hasTransportOptions } from '../config/types.js';
+import { InvalidConfiguration } from '../errors.js';
+import mockHandler from './mockHandler.js';
+import { BuildEmailResult, MockEmailHandler } from './types.js';
 
 async function handleTransport(transport: Transporter, email: EmailTransport, logger: Logger): BuildEmailResult {
   try {
@@ -48,7 +48,7 @@ export default async function buildEmail(emailConfig: EmailOptions | undefined, 
   if (hasTransport(emailConfig) && emailConfig.transport) {
     ensureConfigHasFrom(emailConfig);
     const email = { ...emailConfig };
-    const { transport } : {transport: Transporter} = emailConfig;
+    const { transport }: { transport: Transporter } = emailConfig;
     return handleTransport(transport, email, logger);
   }
 

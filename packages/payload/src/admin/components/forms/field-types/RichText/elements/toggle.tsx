@@ -1,7 +1,7 @@
 import { Editor, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
-import isElementActive from './isActive';
-import { isWithinListItem } from './isWithinListItem';
+import isElementActive from './isActive.js';
+import { isWithinListItem } from './isWithinListItem.js';
 
 const toggleElement = (editor: Editor, format: string, blockType = 'type'): void => {
   const isActive = isElementActive(editor, format, blockType);

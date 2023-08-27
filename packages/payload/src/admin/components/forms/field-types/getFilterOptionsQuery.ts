@@ -1,7 +1,7 @@
-import { Where } from '../../../../types';
-import { FilterOptions, FilterOptionsProps } from '../../../../fields/config/types';
+import { Where } from '../../../../types.js';
+import { FilterOptions, FilterOptionsProps } from '../../../../fields/config/types.js';
 
-export const getFilterOptionsQuery = async (filterOptions: FilterOptions, options: Omit<FilterOptionsProps, 'relationTo'> & { relationTo: string | string[] }): Promise<{[collection: string]: Where }> => {
+export const getFilterOptionsQuery = async (filterOptions: FilterOptions, options: Omit<FilterOptionsProps, 'relationTo'> & { relationTo: string | string[] }): Promise<{ [collection: string]: Where }> => {
   const { relationTo } = options;
   const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
   const query = {};

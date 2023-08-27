@@ -1,14 +1,14 @@
 /* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import { Collection, TypeWithID } from '../config/types';
-import { APIError, Forbidden, NotFound } from '../../errors';
-import executeAccess from '../../auth/executeAccess';
-import { TypeWithVersion } from '../../versions/types';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { combineQueries } from '../../database/combineQueries';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import { PayloadRequest } from '../../express/types.js';
+import { Collection, TypeWithID } from '../config/types.js';
+import { APIError, Forbidden, NotFound } from '../../errors.js';
+import executeAccess from '../../auth/executeAccess.js';
+import { TypeWithVersion } from '../../versions/types.js';
+import { afterRead } from '../../fields/hooks/afterRead.js';
+import { combineQueries } from '../../database/combineQueries.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
 
 export type Arguments = {
   collection: Collection

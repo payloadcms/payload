@@ -1,4 +1,4 @@
-import APIError from './APIError';
+import APIError from './APIError.js';
 
 class DuplicateCollection extends APIError {
   constructor(propertyName: string, duplicates: string[]) {

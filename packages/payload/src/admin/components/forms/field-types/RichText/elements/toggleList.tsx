@@ -1,9 +1,9 @@
 import { Editor, Element, Node, Text, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { getCommonBlock } from './getCommonBlock';
-import isListActive from './isListActive';
-import listTypes from './listTypes';
-import { unwrapList } from './unwrapList';
+import { getCommonBlock } from './getCommonBlock.js';
+import isListActive from './isListActive.js';
+import listTypes from './listTypes.js';
+import { unwrapList } from './unwrapList.js';
 
 const toggleList = (editor: Editor, format: string): void => {
   let currentListFormat: string;

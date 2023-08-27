@@ -4,9 +4,9 @@ import path from 'path';
 import { v4 as uuid } from 'uuid';
 import shelljs from 'shelljs';
 import express from 'express';
-import type { CollectionConfig } from '../../src/collections/config/types';
-import type { InitOptions } from '../../src/config/types';
-import payload from '../../src';
+import type { CollectionConfig } from '../../src/collections/config/types.js';
+import type { InitOptions } from '../../src/config/types.js';
+import payload from '../../src.js';
 
 type Options = {
   __dirname: string;

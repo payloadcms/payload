@@ -1,5 +1,5 @@
 import React from 'react';
-import { Data } from '../Form/types';
+import { Data } from '../Form/types.js';
 
 export type Props = {
   path: string;

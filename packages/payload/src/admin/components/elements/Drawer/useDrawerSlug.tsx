@@ -1,6 +1,6 @@
 import { useId } from 'react';
 import { formatDrawerSlug } from '.';
-import { useEditDepth } from '../../utilities/EditDepth';
+import { useEditDepth } from '../../utilities/EditDepth.js';
 
 export const useDrawerSlug = (slug: string): string => {
   const uuid = useId();

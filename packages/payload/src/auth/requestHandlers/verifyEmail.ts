@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import verifyEmail from '../operations/verifyEmail';
+import { PayloadRequest } from '../../express/types.js';
+import verifyEmail from '../operations/verifyEmail.js';
 
 async function verifyEmailHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
   try {

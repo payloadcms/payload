@@ -1,5 +1,5 @@
-import { Condition, Validate } from '../../../../fields/config/types';
-import { Row } from '../Form/types';
+import { Condition, Validate } from '../../../../fields/config/types.js';
+import { Row } from '../Form/types.js';
 
 export type Options = {
   path: string

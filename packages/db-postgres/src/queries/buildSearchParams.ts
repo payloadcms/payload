@@ -7,8 +7,8 @@ import { fieldAffectsData } from 'payload/types';
 import { PathToQuery } from 'payload/database';
 import { validOperators } from 'payload/types';
 import { Operator } from 'payload/types';
-import { operatorMap } from './operatorMap';
-import { PostgresAdapter } from '../types';
+import { operatorMap } from './operatorMap.js';
+import { PostgresAdapter } from '../types.js';
 
 type SearchParam = {
   path?: string,

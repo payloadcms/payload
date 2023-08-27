@@ -6,15 +6,15 @@ import methodOverride from 'method-override';
 import qsMiddleware from 'qs-middleware';
 import fileUpload from 'express-fileupload';
 import rateLimit from 'express-rate-limit';
-import localizationMiddleware from '../../localization/middleware';
-import authenticate from './authenticate';
-import identifyAPI from './identifyAPI';
-import { Payload } from '../../payload';
-import { PayloadRequest } from '../types';
-import corsHeaders from './corsHeaders';
-import convertPayload from './convertPayload';
-import { i18nMiddleware } from './i18n';
-import defaultPayload from './defaultPayload';
+import localizationMiddleware from '../../localization/middleware.js';
+import authenticate from './authenticate.js';
+import identifyAPI from './identifyAPI.js';
+import { Payload } from '../../payload.js';
+import { PayloadRequest } from '../types.js';
+import corsHeaders from './corsHeaders.js';
+import convertPayload from './convertPayload.js';
+import { i18nMiddleware } from './i18n.js';
+import defaultPayload from './defaultPayload.js';
 
 const middleware = (payload: Payload): any => {
   const rateLimitOptions: {

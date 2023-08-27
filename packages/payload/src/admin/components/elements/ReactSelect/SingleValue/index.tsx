@@ -1,6 +1,6 @@
 import React from 'react';
 import { components as SelectComponents, SingleValueProps } from 'react-select';
-import { Option } from '../types';
+import { Option } from '../types.js';
 
 const baseClass = 'react-select--single-value';
 

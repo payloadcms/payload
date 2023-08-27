@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
-import type { CollectionConfig } from '../../../../src/collections/config/types';
-import { blocksField, blocksFieldSeedData } from '../Blocks';
-import { UIField } from './UIField';
+import type { CollectionConfig } from '../../../../src/collections/config/types.js';
+import { blocksField, blocksFieldSeedData } from '../Blocks.js';
+import { UIField } from './UIField.js';
 
 export const tabsSlug = 'tabs-fields';
 

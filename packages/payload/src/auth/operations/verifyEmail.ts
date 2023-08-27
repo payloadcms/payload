@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
-import { APIError } from '../../errors';
-import { Collection } from '../../collections/config/types';
-import { PayloadRequest } from '../../express/types';
+import { APIError } from '../../errors.js';
+import { Collection } from '../../collections/config/types.js';
+import { PayloadRequest } from '../../express/types.js';
 
 export type Args = {
   req: PayloadRequest,

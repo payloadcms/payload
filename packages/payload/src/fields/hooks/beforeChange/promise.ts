@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign */
 import merge from 'deepmerge';
-import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
-import { Operation } from '../../../types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { traverseFields } from './traverseFields';
-import { getExistingRowDoc } from './getExistingRowDoc';
+import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types.js';
+import { Operation } from '../../../types.js';
+import { PayloadRequest, RequestContext } from '../../../express/types.js';
+import { traverseFields } from './traverseFields.js';
+import { getExistingRowDoc } from './getExistingRowDoc.js';
 
 type Args = {
   data: Record<string, unknown>

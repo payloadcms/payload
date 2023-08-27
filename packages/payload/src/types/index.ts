@@ -1,5 +1,5 @@
-import { TypeWithTimestamps } from '../collections/config/types';
-import { validOperators } from './constants';
+import { TypeWithTimestamps } from '../collections/config/types.js';
+import { validOperators } from './constants.js';
 
 export type { PayloadRequest } from '../express/types';
 

@@ -1,9 +1,9 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import { Document } from '../../types';
-import formatSuccessResponse from '../../express/responses/formatSuccess';
-import restoreVersion from '../operations/restoreVersion';
+import { PayloadRequest } from '../../express/types.js';
+import { Document } from '../../types.js';
+import formatSuccessResponse from '../../express/responses/formatSuccess.js';
+import restoreVersion from '../operations/restoreVersion.js';
 
 export type RestoreResult = {
   message: string

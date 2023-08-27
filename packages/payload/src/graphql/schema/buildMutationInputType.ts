@@ -13,14 +13,14 @@ import {
   GraphQLType,
 } from 'graphql';
 import { GraphQLJSON } from 'graphql-type-json';
-import withNullableType from './withNullableType';
-import formatName from '../utilities/formatName';
-import combineParentName from '../utilities/combineParentName';
-import { ArrayField, CodeField, JSONField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, CollapsibleField, TabsField, CheckboxField, BlockField, tabHasName } from '../../fields/config/types';
-import { toWords } from '../../utilities/formatLabels';
-import { Payload } from '../../payload';
-import { SanitizedCollectionConfig } from '../../collections/config/types';
-import { groupOrTabHasRequiredSubfield } from '../../utilities/groupOrTabHasRequiredSubfield';
+import withNullableType from './withNullableType.js';
+import formatName from '../utilities/formatName.js';
+import combineParentName from '../utilities/combineParentName.js';
+import { ArrayField, CodeField, JSONField, DateField, EmailField, Field, fieldAffectsData, GroupField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TextareaField, TextField, UploadField, CollapsibleField, TabsField, CheckboxField, BlockField, tabHasName } from '../../fields/config/types.js';
+import { toWords } from '../../utilities/formatLabels.js';
+import { Payload } from '../../payload.js';
+import { SanitizedCollectionConfig } from '../../collections/config/types.js';
+import { groupOrTabHasRequiredSubfield } from '../../utilities/groupOrTabHasRequiredSubfield.js';
 
 export const getCollectionIDType = (config: SanitizedCollectionConfig): GraphQLScalarType => {
   const idField = config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');

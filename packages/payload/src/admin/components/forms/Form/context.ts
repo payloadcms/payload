@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 import { useContextSelector, createContext as createSelectorContext, useContext as useFullContext } from 'use-context-selector';
-import { Context, FormFieldsContext as FormFieldsContextType } from './types';
+import { Context, FormFieldsContext as FormFieldsContextType } from './types.js';
 
 const FormContext = createContext({} as Context);
 const FormWatchContext = createContext({} as Context);

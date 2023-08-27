@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
-import { LoadingOverlayToggle } from '../../elements/Loading';
-import { Props } from './types';
+import { LoadingOverlayToggle } from '../../elements/Loading.js';
+import { Props } from './types.js';
 
 const VersionView = lazy(() => import('./Version'));
 

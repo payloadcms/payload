@@ -1,29 +1,29 @@
-import code from './Code';
-import json from './JSON';
-import email from './Email';
-import hidden from './HiddenInput';
-import text from './Text';
-import date from './DateTime';
+import code from './Code.js';
+import json from './JSON.js';
+import email from './Email.js';
+import hidden from './HiddenInput.js';
+import text from './Text.js';
+import date from './DateTime.js';
 
-import password from './Password';
-import confirmPassword from './ConfirmPassword';
-import relationship from './Relationship';
-import textarea from './Textarea';
-import select from './Select';
-import number from './Number';
-import checkbox from './Checkbox';
-import richText from './RichText';
-import radio from './RadioGroup';
-import point from './Point';
+import password from './Password.js';
+import confirmPassword from './ConfirmPassword.js';
+import relationship from './Relationship.js';
+import textarea from './Textarea.js';
+import select from './Select.js';
+import number from './Number.js';
+import checkbox from './Checkbox.js';
+import richText from './RichText.js';
+import radio from './RadioGroup.js';
+import point from './Point.js';
 
-import blocks from './Blocks';
-import group from './Group';
-import array from './Array';
-import row from './Row';
-import collapsible from './Collapsible';
-import tabs from './Tabs';
-import upload from './Upload';
-import ui from './UI';
+import blocks from './Blocks.js';
+import group from './Group.js';
+import array from './Array.js';
+import row from './Row.js';
+import collapsible from './Collapsible.js';
+import tabs from './Tabs.js';
+import upload from './Upload.js';
+import ui from './UI.js';
 
 export type FieldTypes = {
   code: React.ComponentType<any>

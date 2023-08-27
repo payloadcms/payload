@@ -1,7 +1,7 @@
-import payload from '../../src';
-import { Forbidden } from '../../src/errors';
-import type { PayloadRequest } from '../../src/types';
-import { initPayloadTest } from '../helpers/configHelpers';
+import payload from '../../src.js';
+import { Forbidden } from '../../src/errors.js';
+import type { PayloadRequest } from '../../src/types.js';
+import { initPayloadTest } from '../helpers/configHelpers.js';
 import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
@@ -11,9 +11,9 @@ import {
   restrictedVersionsSlug,
   siblingDataSlug,
   slug,
-} from './config';
-import type { Post, RelyOnRequestHeader, Restricted } from './payload-types';
-import { firstArrayText, secondArrayText } from './shared';
+} from './config.js';
+import type { Post, RelyOnRequestHeader, Restricted } from './payload-types.js';
+import { firstArrayText, secondArrayText } from './shared.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

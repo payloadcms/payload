@@ -4,16 +4,16 @@ import mkdirp from 'mkdirp';
 import path from 'path';
 import sanitize from 'sanitize-filename';
 import sharp, { Sharp } from 'sharp';
-import { Collection } from '../collections/config/types';
-import { SanitizedConfig } from '../config/types';
-import { FileUploadError, MissingFile } from '../errors';
-import { PayloadRequest } from '../express/types';
-import getImageSize from './getImageSize';
-import getSafeFileName from './getSafeFilename';
-import resizeAndTransformImageSizes from './imageResizer';
-import { FileData, FileToSave, ProbedImageSize } from './types';
-import canResizeImage from './canResizeImage';
-import isImage from './isImage';
+import { Collection } from '../collections/config/types.js';
+import { SanitizedConfig } from '../config/types.js';
+import { FileUploadError, MissingFile } from '../errors.js';
+import { PayloadRequest } from '../express/types.js';
+import getImageSize from './getImageSize.js';
+import getSafeFileName from './getSafeFilename.js';
+import resizeAndTransformImageSizes from './imageResizer.js';
+import { FileData, FileToSave, ProbedImageSize } from './types.js';
+import canResizeImage from './canResizeImage.js';
+import isImage from './isImage.js';
 
 type Args<T> = {
   config: SanitizedConfig,

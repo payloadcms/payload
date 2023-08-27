@@ -1,4 +1,4 @@
-import { RichTextField } from '../../../../../fields/config/types';
+import { RichTextField } from '../../../../../fields/config/types.js';
 
 export type Props = Omit<RichTextField, 'type'> & {
   path?: string

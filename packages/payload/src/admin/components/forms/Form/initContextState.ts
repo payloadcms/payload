@@ -12,7 +12,7 @@ import {
   SetProcessing,
   SetSubmitted,
   Reset,
-} from './types';
+} from './types.js';
 
 const submit: Submit = () => undefined;
 const getSiblingData: GetSiblingData = () => undefined;

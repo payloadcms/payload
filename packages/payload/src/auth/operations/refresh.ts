@@ -1,13 +1,13 @@
 import url from 'url';
 import jwt from 'jsonwebtoken';
 import { Response } from 'express';
-import { Collection, BeforeOperationHook } from '../../collections/config/types';
-import { Forbidden } from '../../errors';
-import getCookieExpiration from '../../utilities/getCookieExpiration';
-import { Document } from '../../types';
-import { PayloadRequest } from '../../express/types';
-import { buildAfterOperation } from '../../collections/operations/utils';
-import { getFieldsToSign } from './getFieldsToSign';
+import { Collection, BeforeOperationHook } from '../../collections/config/types.js';
+import { Forbidden } from '../../errors.js';
+import getCookieExpiration from '../../utilities/getCookieExpiration.js';
+import { Document } from '../../types.js';
+import { PayloadRequest } from '../../express/types.js';
+import { buildAfterOperation } from '../../collections/operations/utils.js';
+import { getFieldsToSign } from './getFieldsToSign.js';
 
 export type Result = {
   exp: number,

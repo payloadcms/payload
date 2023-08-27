@@ -1,4 +1,4 @@
-import APIError from './APIError';
+import APIError from './APIError.js';
 
 class MissingCollectionLabel extends APIError {
   constructor() {

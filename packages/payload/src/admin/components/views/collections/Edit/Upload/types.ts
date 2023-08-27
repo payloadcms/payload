@@ -1,5 +1,5 @@
-import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
-import { Fields } from '../../../../forms/Form/types';
+import { SanitizedCollectionConfig } from '../../../../../../collections/config/types.js';
+import { Fields } from '../../../../forms/Form/types.js';
 
 export type Props = {
   internalState?: Fields

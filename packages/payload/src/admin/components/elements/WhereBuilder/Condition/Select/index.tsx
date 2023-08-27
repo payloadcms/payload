@@ -1,10 +1,10 @@
 import React from 'react';
 
 import { useTranslation } from 'react-i18next';
-import ReactSelect from '../../../ReactSelect';
-import { getTranslation } from '../../../../../../utilities/getTranslation';
-import { Props } from './types';
-import { Option, OptionObject } from '../../../../../../fields/config/types';
+import ReactSelect from '../../../ReactSelect.js';
+import { getTranslation } from '../../../../../../utilities/getTranslation.js';
+import { Props } from './types.js';
+import { Option, OptionObject } from '../../../../../../fields/config/types.js';
 
 const formatOptions = (options: Option[]): OptionObject[] => options.map((option) => {
   if (typeof option === 'object' && (option.value || option.value === '')) {

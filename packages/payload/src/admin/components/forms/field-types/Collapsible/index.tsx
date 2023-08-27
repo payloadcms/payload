@@ -1,17 +1,17 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import RenderFields from '../../RenderFields';
-import withCondition from '../../withCondition';
-import { Props } from './types';
-import { Collapsible } from '../../../elements/Collapsible';
-import { usePreferences } from '../../../utilities/Preferences';
-import { DocumentPreferences } from '../../../../../preferences/types';
-import { useDocumentInfo } from '../../../utilities/DocumentInfo';
-import FieldDescription from '../../FieldDescription';
-import { RowLabel } from '../../RowLabel';
-import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
-import { WatchChildErrors } from '../../WatchChildErrors';
-import { useFormSubmitted } from '../../Form/context';
-import { ErrorPill } from '../../../elements/ErrorPill';
+import RenderFields from '../../RenderFields.js';
+import withCondition from '../../withCondition.js';
+import { Props } from './types.js';
+import { Collapsible } from '../../../elements/Collapsible.js';
+import { usePreferences } from '../../../utilities/Preferences.js';
+import { DocumentPreferences } from '../../../../../preferences/types.js';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo.js';
+import FieldDescription from '../../FieldDescription.js';
+import { RowLabel } from '../../RowLabel.js';
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath.js';
+import { WatchChildErrors } from '../../WatchChildErrors.js';
+import { useFormSubmitted } from '../../Form/context.js';
+import { ErrorPill } from '../../../elements/ErrorPill.js';
 
 import './index.scss';
 

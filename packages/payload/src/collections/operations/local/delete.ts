@@ -1,14 +1,14 @@
-import { Config as GeneratedTypes } from '../../../generated-types';
-import { Document, Where } from '../../../types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { Payload } from '../../../payload';
-import deleteOperation from '../delete';
-import deleteByID from '../deleteByID';
-import { getDataLoader } from '../../dataloader';
-import { i18nInit } from '../../../translations/init';
-import { APIError } from '../../../errors';
-import { BulkOperationResult } from '../../config/types';
-import { setRequestContext } from '../../../express/setRequestContext';
+import { Config as GeneratedTypes } from '../../../generated-types.js';
+import { Document, Where } from '../../../types.js';
+import { PayloadRequest, RequestContext } from '../../../express/types.js';
+import { Payload } from '../../../payload.js';
+import deleteOperation from '../delete.js';
+import deleteByID from '../deleteByID.js';
+import { getDataLoader } from '../../dataloader.js';
+import { i18nInit } from '../../../translations/init.js';
+import { APIError } from '../../../errors.js';
+import { BulkOperationResult } from '../../config/types.js';
+import { setRequestContext } from '../../../express/setRequestContext.js';
 
 export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
   req?: PayloadRequest,

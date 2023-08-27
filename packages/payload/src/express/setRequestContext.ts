@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { PayloadRequest, RequestContext } from './types';
+import type { PayloadRequest, RequestContext } from './types.js';
 
 /**
  * This makes sure that req.context always exists (is {}) and populates it with an optional default context.

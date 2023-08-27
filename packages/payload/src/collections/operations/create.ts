@@ -4,28 +4,28 @@ import { promisify } from 'util';
 import crypto from 'crypto';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { MarkOptional } from 'ts-essentials';
-import executeAccess from '../../auth/executeAccess';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
+import executeAccess from '../../auth/executeAccess.js';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js';
 
-import { ValidationError } from '../../errors';
+import { ValidationError } from '../../errors.js';
 
-import sendVerificationEmail from '../../auth/sendVerificationEmail';
-import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection } from '../config/types';
-import { PayloadRequest } from '../../express/types';
-import { Document } from '../../types';
-import { fieldAffectsData } from '../../fields/config/types';
-import { uploadFiles } from '../../uploads/uploadFiles';
-import { beforeChange } from '../../fields/hooks/beforeChange';
-import { beforeValidate } from '../../fields/hooks/beforeValidate';
-import { afterChange } from '../../fields/hooks/afterChange';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { generateFileData } from '../../uploads/generateFileData';
-import { saveVersion } from '../../versions/saveVersion';
-import { mapAsync } from '../../utilities/mapAsync';
-import { buildAfterOperation } from './utils';
-import { registerLocalStrategy } from '../../auth/strategies/local/register';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import sendVerificationEmail from '../../auth/sendVerificationEmail.js';
+import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection } from '../config/types.js';
+import { PayloadRequest } from '../../express/types.js';
+import { Document } from '../../types.js';
+import { fieldAffectsData } from '../../fields/config/types.js';
+import { uploadFiles } from '../../uploads/uploadFiles.js';
+import { beforeChange } from '../../fields/hooks/beforeChange.js';
+import { beforeValidate } from '../../fields/hooks/beforeValidate.js';
+import { afterChange } from '../../fields/hooks/afterChange.js';
+import { afterRead } from '../../fields/hooks/afterRead.js';
+import { generateFileData } from '../../uploads/generateFileData.js';
+import { saveVersion } from '../../versions/saveVersion.js';
+import { mapAsync } from '../../utilities/mapAsync.js';
+import { buildAfterOperation } from './utils.js';
+import { registerLocalStrategy } from '../../auth/strategies/local/register.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
 
 const unlinkFile = promisify(fs.unlink);
 

@@ -3,9 +3,9 @@ import express from 'express';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import history from 'connect-history-api-fallback';
-import type { PayloadHandler } from '../../../config/types';
-import { Payload } from '../../../payload';
-import { getDevConfig } from '../configs/dev';
+import type { PayloadHandler } from '../../../config/types.js';
+import { Payload } from '../../../payload.js';
+import { getDevConfig } from '../configs/dev.js';
 
 const router = express.Router();
 

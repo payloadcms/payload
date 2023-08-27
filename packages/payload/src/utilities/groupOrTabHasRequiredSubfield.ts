@@ -1,4 +1,4 @@
-import { Field, fieldAffectsData, Tab } from '../fields/config/types';
+import { Field, fieldAffectsData, Tab } from '../fields/config/types.js';
 
 export const groupOrTabHasRequiredSubfield = (entity: Field | Tab): boolean => {
   if ('type' in entity && entity.type === 'group') {

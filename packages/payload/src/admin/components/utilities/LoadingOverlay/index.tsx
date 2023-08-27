@@ -1,9 +1,9 @@
 import React, { createContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDelayedRender } from '../../../hooks/useDelayedRender';
-import { reducer, defaultLoadingOverlayState } from './reducer';
-import { LoadingOverlay } from '../../elements/Loading';
-import type { LoadingOverlayContext, ToggleLoadingOverlay } from './types';
+import { useDelayedRender } from '../../../hooks/useDelayedRender.js';
+import { reducer, defaultLoadingOverlayState } from './reducer.js';
+import { LoadingOverlay } from '../../elements/Loading.js';
+import type { LoadingOverlayContext, ToggleLoadingOverlay } from './types.js';
 
 const animatedDuration = 250;
 

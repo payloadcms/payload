@@ -1,5 +1,5 @@
 import React from 'react';
-import { FieldBase } from '../../../../fields/config/types';
+import { FieldBase } from '../../../../fields/config/types.js';
 
 export type Column = {
   accessor: string

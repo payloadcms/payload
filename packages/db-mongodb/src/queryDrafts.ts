@@ -1,11 +1,11 @@
 import type { PaginateOptions } from 'mongoose';
 import type { QueryDrafts } from '@alessiogr/payloadtest/database';
 import { flattenWhereToOperators } from '@alessiogr/payloadtest/database';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
 import { PayloadRequest } from '@alessiogr/payloadtest/types';
 import type { MongooseAdapter } from '.';
-import { buildSortParam } from './queries/buildSortParam';
-import { withSession } from './withSession';
+import { buildSortParam } from './queries/buildSortParam.js';
+import { withSession } from './withSession.js';
 
 type AggregateVersion<T> = {
   _id: string;

@@ -1,6 +1,6 @@
 import { GraphQLEnumType, GraphQLScalarType } from 'graphql';
-import type { SanitizedLocalizationConfig } from '../../config/types';
-import formatName from '../utilities/formatName';
+import type { SanitizedLocalizationConfig } from '../../config/types.js';
+import formatName from '../utilities/formatName.js';
 
 const buildLocaleInputType = (
   localization: SanitizedLocalizationConfig,

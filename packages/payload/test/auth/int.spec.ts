@@ -1,13 +1,13 @@
 import mongoose from 'mongoose';
 import jwtDecode from 'jwt-decode';
 import { GraphQLClient } from 'graphql-request';
-import payload from '../../src';
-import { initPayloadTest } from '../helpers/configHelpers';
-import { namedSaveToJWTValue, saveToJWTKey, slug } from './config';
-import { devUser } from '../credentials';
-import type { User } from '../../src/auth';
+import payload from '../../src.js';
+import { initPayloadTest } from '../helpers/configHelpers.js';
+import { namedSaveToJWTValue, saveToJWTKey, slug } from './config.js';
+import { devUser } from '../credentials.js';
+import type { User } from '../../src/auth.js';
 import path from 'path';
-import configPromise from '../collections-graphql/config';
+import configPromise from '../collections-graphql/config.js';
 
 import 'isomorphic-fetch';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);

@@ -4,12 +4,12 @@ import {
   Field, fieldAffectsData,
   fieldHasSubFields, FieldWithPath,
   tabHasName,
-} from '../../../../fields/config/types';
-import ReactSelect from '../ReactSelect';
-import { getTranslation } from '../../../../utilities/getTranslation';
-import Label from '../../forms/Label';
-import { useForm } from '../../forms/Form/context';
-import { createNestedFieldPath } from '../../forms/Form/createNestedFieldPath';
+} from '../../../../fields/config/types.js';
+import ReactSelect from '../ReactSelect.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
+import Label from '../../forms/Label.js';
+import { useForm } from '../../forms/Form/context.js';
+import { createNestedFieldPath } from '../../forms/Form/createNestedFieldPath.js';
 
 import './index.scss';
 

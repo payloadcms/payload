@@ -1,9 +1,9 @@
-import executeAccess from '../../auth/executeAccess';
-import defaultAccess from '../../auth/defaultAccess';
-import { Document, Where } from '../../types';
-import UnauthorizedError from '../../errors/UnathorizedError';
-import { PreferenceRequest } from '../types';
-import NotFound from '../../errors/NotFound';
+import executeAccess from '../../auth/executeAccess.js';
+import defaultAccess from '../../auth/defaultAccess.js';
+import { Document, Where } from '../../types.js';
+import UnauthorizedError from '../../errors/UnathorizedError.js';
+import { PreferenceRequest } from '../types.js';
+import NotFound from '../../errors/NotFound.js';
 
 async function deleteOperation(args: PreferenceRequest): Promise<Document> {
   const {

@@ -7,8 +7,8 @@ import { combineMerge } from '@alessiogr/payloadtest/utilities';
 import { Field } from '@alessiogr/payloadtest/types';
 import { validOperators } from '@alessiogr/payloadtest/types';
 import { Payload } from '@alessiogr/payloadtest';
-import { buildSearchParam } from './buildSearchParams';
-import { buildAndOrConditions } from './buildAndOrConditions';
+import { buildSearchParam } from './buildSearchParams.js';
+import { buildAndOrConditions } from './buildAndOrConditions.js';
 
 export async function parseParams({
   where,

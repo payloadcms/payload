@@ -2,10 +2,10 @@ import { PaginateOptions } from 'mongoose';
 import type { FindVersions } from '@alessiogr/payloadtest/database';
 import { flattenWhereToOperators } from '@alessiogr/payloadtest/database';
 import { PayloadRequest } from '@alessiogr/payloadtest/types';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
 import type { MongooseAdapter } from '.';
-import { buildSortParam } from './queries/buildSortParam';
-import { withSession } from './withSession';
+import { buildSortParam } from './queries/buildSortParam.js';
+import { withSession } from './withSession.js';
 
 export const findVersions: FindVersions = async function findVersions(
   this: MongooseAdapter,

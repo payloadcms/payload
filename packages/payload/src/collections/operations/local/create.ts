@@ -1,16 +1,16 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { UploadedFile } from 'express-fileupload';
 import { MarkOptional } from 'ts-essentials';
-import { Payload } from '../../../payload';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { Document } from '../../../types';
-import getFileByPath from '../../../uploads/getFileByPath';
-import create from '../create';
-import { getDataLoader } from '../../dataloader';
-import { File } from '../../../uploads/types';
-import { i18nInit } from '../../../translations/init';
-import { APIError } from '../../../errors';
-import { setRequestContext } from '../../../express/setRequestContext';
+import { Payload } from '../../../payload.js';
+import { PayloadRequest, RequestContext } from '../../../express/types.js';
+import { Document } from '../../../types.js';
+import getFileByPath from '../../../uploads/getFileByPath.js';
+import create from '../create.js';
+import { getDataLoader } from '../../dataloader.js';
+import { File } from '../../../uploads/types.js';
+import { i18nInit } from '../../../translations/init.js';
+import { APIError } from '../../../errors.js';
+import { setRequestContext } from '../../../express/setRequestContext.js';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug

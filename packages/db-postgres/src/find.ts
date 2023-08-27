@@ -3,7 +3,7 @@ import toSnakeCase from 'to-snake-case';
 import type { Find } from 'payload/database';
 import type { PayloadRequest } from 'payload/types';
 import type { SanitizedCollectionConfig } from 'payload/types';
-import buildQuery from './queries/buildQuery';
+import buildQuery from './queries/buildQuery.js';
 
 export const find: Find = async function find({
   collection,

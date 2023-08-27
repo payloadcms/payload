@@ -1,5 +1,5 @@
 import React from 'react';
-import { useConfig } from '../Config';
+import { useConfig } from '../Config.js';
 
 const NestProviders = ({ providers, children }) => {
   const Component = providers[0];

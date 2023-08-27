@@ -1,8 +1,8 @@
 import crypto from 'crypto';
-import { APIError } from '../../errors';
-import { PayloadRequest } from '../../express/types';
-import { Collection } from '../../collections/config/types';
-import { buildAfterOperation } from '../../collections/operations/utils';
+import { APIError } from '../../errors.js';
+import { PayloadRequest } from '../../express/types.js';
+import { Collection } from '../../collections/config/types.js';
+import { buildAfterOperation } from '../../collections/operations/utils.js';
 
 export type Arguments = {
   collection: Collection

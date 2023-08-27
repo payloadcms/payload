@@ -1,21 +1,21 @@
 import jwt from 'jsonwebtoken';
 import { Config as GeneratedTypes } from 'payload/generated-types';
 import { CookieOptions, Response } from 'express';
-import { AuthenticationError, LockedAuth } from '../../errors';
-import { PayloadRequest } from '../../express/types';
-import getCookieExpiration from '../../utilities/getCookieExpiration';
-import isLocked from '../isLocked';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { User } from '../types';
-import { Collection } from '../../collections/config/types';
-import { afterRead } from '../../fields/hooks/afterRead';
-import unlock from './unlock';
-import { buildAfterOperation } from '../../collections/operations/utils';
-import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts';
-import { authenticateLocalStrategy } from '../strategies/local/authenticate';
-import { getFieldsToSign } from './getFieldsToSign';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import { AuthenticationError, LockedAuth } from '../../errors.js';
+import { PayloadRequest } from '../../express/types.js';
+import getCookieExpiration from '../../utilities/getCookieExpiration.js';
+import isLocked from '../isLocked.js';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js';
+import { User } from '../types.js';
+import { Collection } from '../../collections/config/types.js';
+import { afterRead } from '../../fields/hooks/afterRead.js';
+import unlock from './unlock.js';
+import { buildAfterOperation } from '../../collections/operations/utils.js';
+import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js';
+import { authenticateLocalStrategy } from '../strategies/local/authenticate.js';
+import { getFieldsToSign } from './getFieldsToSign.js';
+import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
 
 export type Result = {
   user?: User,

@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
 import { Response } from 'express';
-import { Collection, TypeWithID } from '../../config/types';
-import { PayloadRequest } from '../../../express/types';
-import findVersionByID from '../../operations/findVersionByID';
-import type { TypeWithVersion } from '../../../versions/types';
+import { Collection, TypeWithID } from '../../config/types.js';
+import { PayloadRequest } from '../../../express/types.js';
+import findVersionByID from '../../operations/findVersionByID.js';
+import type { TypeWithVersion } from '../../../versions/types.js';
 
 export type Resolver<T extends TypeWithID = any> = (
   _: unknown,

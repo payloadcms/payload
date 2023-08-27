@@ -1,10 +1,10 @@
-import { SanitizedCollectionConfig } from '../../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../../globals/config/types';
-import { Operation } from '../../../types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { traverseFields } from './traverseFields';
-import { ValidationError } from '../../../errors';
-import deepCopyObject from '../../../utilities/deepCopyObject';
+import { SanitizedCollectionConfig } from '../../../collections/config/types.js';
+import { SanitizedGlobalConfig } from '../../../globals/config/types.js';
+import { Operation } from '../../../types.js';
+import { PayloadRequest, RequestContext } from '../../../express/types.js';
+import { traverseFields } from './traverseFields.js';
+import { ValidationError } from '../../../errors.js';
+import deepCopyObject from '../../../utilities/deepCopyObject.js';
 
 type Args<T> = {
   data: T | Record<string, unknown>

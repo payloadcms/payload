@@ -1,6 +1,6 @@
-import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import type { PaginatedDocs } from '../../../../../database/types';
-import { CompareOption } from '../types';
+import { SanitizedCollectionConfig } from '../../../../../collections/config/types.js';
+import type { PaginatedDocs } from '../../../../../database/types.js';
+import { CompareOption } from '../types.js';
 
 export type Props = {
   onChange: (val: CompareOption) => void,

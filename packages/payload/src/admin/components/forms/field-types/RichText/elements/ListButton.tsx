@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import { useSlate } from 'slate-react';
-import toggleList from './toggleList';
-import { ButtonProps } from './types';
-import isListActive from './isListActive';
+import toggleList from './toggleList.js';
+import { ButtonProps } from './types.js';
+import isListActive from './isListActive.js';
 
 import '../buttons.scss';
 

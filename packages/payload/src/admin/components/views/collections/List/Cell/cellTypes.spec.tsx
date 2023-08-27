@@ -1,11 +1,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { BlockField, DateField, SelectField } from '../../../../../../fields/config/types';
-import BlocksCell from './field-types/Blocks';
-import DateCell from './field-types/Date';
-import Checkbox from './field-types/Checkbox';
-import Textarea from './field-types/Textarea';
-import Select from './field-types/Select';
+import { BlockField, DateField, SelectField } from '../../../../../../fields/config/types.js';
+import BlocksCell from './field-types/Blocks.js';
+import DateCell from './field-types/Date.js';
+import Checkbox from './field-types/Checkbox.js';
+import Textarea from './field-types/Textarea.js';
+import Select from './field-types/Select.js';
 import { jest } from '@jest/globals';
 
 // unstable_mockModule is required for esm. See https://jestjs.io/docs/ecmascript-modules#module-mocking-in-esm

@@ -1,4 +1,4 @@
-import { Action, State } from './types';
+import { Action, State } from './types.js';
 
 export const defaultLoadingOverlayState = {
   isLoading: false,

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { Field, fieldHasSubFields, fieldIsArrayType, fieldAffectsData } from '../config/types';
-import { PayloadRequest } from '../../express/types';
-import { populate } from './populate';
-import { recurseRichText } from './richTextRelationshipPromise';
+import { Field, fieldHasSubFields, fieldIsArrayType, fieldAffectsData } from '../config/types.js';
+import { PayloadRequest } from '../../express/types.js';
+import { populate } from './populate.js';
+import { recurseRichText } from './richTextRelationshipPromise.js';
 
 type NestedRichTextFieldsArgs = {
   promises: Promise<void>[]

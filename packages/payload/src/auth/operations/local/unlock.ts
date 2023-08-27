@@ -1,11 +1,11 @@
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import { PayloadRequest } from '../../../express/types';
-import { Payload } from '../../../payload';
-import unlock from '../unlock';
-import { getDataLoader } from '../../../collections/dataloader';
-import { i18nInit } from '../../../translations/init';
-import { APIError } from '../../../errors';
-import { setRequestContext } from '../../../express/setRequestContext';
+import { PayloadRequest } from '../../../express/types.js';
+import { Payload } from '../../../payload.js';
+import unlock from '../unlock.js';
+import { getDataLoader } from '../../../collections/dataloader.js';
+import { i18nInit } from '../../../translations/init.js';
+import { APIError } from '../../../errors.js';
+import { setRequestContext } from '../../../express/setRequestContext.js';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T

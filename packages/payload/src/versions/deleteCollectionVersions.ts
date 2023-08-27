@@ -1,5 +1,5 @@
-import { Payload } from '../payload';
-import { PayloadRequest } from '../express/types';
+import { Payload } from '../payload.js';
+import { PayloadRequest } from '../express/types.js';
 
 type Args = {
   payload: Payload

@@ -1,11 +1,11 @@
-import { Access } from '../config/types';
-import { AllOperations, Document, Where } from '../types';
-import { FieldAccess, tabHasName } from '../fields/config/types';
-import type { SanitizedCollectionConfig } from '../collections/config/types';
-import { TypeWithID } from '../collections/config/types';
-import type { SanitizedGlobalConfig } from '../globals/config/types';
-import type { PayloadRequest } from '../express/types';
-import type { CollectionPermission, GlobalPermission } from '../auth/types';
+import { Access } from '../config/types.js';
+import { AllOperations, Document, Where } from '../types.js';
+import { FieldAccess, tabHasName } from '../fields/config/types.js';
+import type { SanitizedCollectionConfig } from '../collections/config/types.js';
+import { TypeWithID } from '../collections/config/types.js';
+import type { SanitizedGlobalConfig } from '../globals/config/types.js';
+import type { PayloadRequest } from '../express/types.js';
+import type { CollectionPermission, GlobalPermission } from '../auth/types.js';
 
 type Args = {
   req: PayloadRequest

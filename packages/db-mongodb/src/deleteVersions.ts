@@ -1,7 +1,7 @@
 import { DeleteVersions } from '@alessiogr/payloadtest/database';
 import { PayloadRequest } from '@alessiogr/payloadtest/types';
 import type { MongooseAdapter } from '.';
-import { withSession } from './withSession';
+import { withSession } from './withSession.js';
 
 export const deleteVersions: DeleteVersions = async function deleteVersions(this: MongooseAdapter,
   { collection, where, locale, req = {} as PayloadRequest }) {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Action, OptionGroup, Value } from '../types';
+import { Action, OptionGroup, Value } from '../types.js';
 
 export type Props = {
   hasMany: boolean

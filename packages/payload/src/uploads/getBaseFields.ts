@@ -1,9 +1,9 @@
-import { Field } from '../fields/config/types';
-import { Config } from '../config/types';
-import { CollectionConfig } from '../collections/config/types';
-import { mimeTypeValidator } from './mimeTypeValidator';
-import { IncomingUploadType } from './types';
-import { extractTranslations } from '../translations/extractTranslations';
+import { Field } from '../fields/config/types.js';
+import { Config } from '../config/types.js';
+import { CollectionConfig } from '../collections/config/types.js';
+import { mimeTypeValidator } from './mimeTypeValidator.js';
+import { IncomingUploadType } from './types.js';
+import { extractTranslations } from '../translations/extractTranslations.js';
 
 const labels = extractTranslations(['upload:width', 'upload:height', 'upload:fileSize', 'upload:fileName', 'upload:sizes']);
 

@@ -1,4 +1,4 @@
-import { TextField } from '../../../../../fields/config/types';
+import { TextField } from '../../../../../fields/config/types.js';
 
 export type Props = Omit<TextField, 'type'> & {
   path?: string

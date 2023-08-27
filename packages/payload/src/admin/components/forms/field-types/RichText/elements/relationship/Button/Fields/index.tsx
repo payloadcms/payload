@@ -1,10 +1,10 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../../../../utilities/Config';
-import { useAuth } from '../../../../../../../utilities/Auth';
-import { useFormFields } from '../../../../../../Form/context';
-import Relationship from '../../../../../Relationship';
-import Select from '../../../../../Select';
+import { useConfig } from '../../../../../../../utilities/Config.js';
+import { useAuth } from '../../../../../../../utilities/Auth.js';
+import { useFormFields } from '../../../../../../Form/context.js';
+import Relationship from '../../../../../Relationship.js';
+import Select from '../../../../../Select.js';
 
 const createOptions = (collections, permissions) => collections.reduce((options, collection) => {
   if (permissions?.collections?.[collection.slug]?.read?.permission && collection?.admin?.enableRichTextRelationship) {

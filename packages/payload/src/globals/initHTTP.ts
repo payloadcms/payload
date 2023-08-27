@@ -1,8 +1,8 @@
 import express from 'express';
-import mountEndpoints from '../express/mountEndpoints';
-import buildEndpoints from './buildEndpoints';
-import { SanitizedGlobalConfig } from './config/types';
-import { Payload } from '../payload';
+import mountEndpoints from '../express/mountEndpoints.js';
+import buildEndpoints from './buildEndpoints.js';
+import { SanitizedGlobalConfig } from './config/types.js';
+import { Payload } from '../payload.js';
 
 export default function initGlobals(ctx: Payload): void {
   if (ctx.config.globals) {

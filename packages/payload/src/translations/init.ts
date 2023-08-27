@@ -1,7 +1,7 @@
 import i18next from 'i18next';
 import type { i18n, InitOptions } from 'i18next';
 import deepmerge from 'deepmerge';
-import { defaultOptions } from './defaultOptions';
+import { defaultOptions } from './defaultOptions.js';
 
 export function i18nInit(options: InitOptions): i18n {
   if (i18next.isInitialized) {

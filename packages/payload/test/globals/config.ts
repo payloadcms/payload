@@ -1,5 +1,5 @@
-import { devUser } from '../credentials';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import { devUser } from '../credentials.js';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
 
 export const slug = 'global';
 export const arraySlug = 'array';

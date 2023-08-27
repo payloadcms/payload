@@ -1,12 +1,12 @@
 import { Response } from 'express';
 import { Config as GeneratedTypes } from 'payload/generated-types';
-import login, { Result } from '../login';
-import { PayloadRequest } from '../../../express/types';
-import { Payload } from '../../../payload';
-import { getDataLoader } from '../../../collections/dataloader';
-import { i18nInit } from '../../../translations/init';
-import { APIError } from '../../../errors';
-import { setRequestContext } from '../../../express/setRequestContext';
+import login, { Result } from '../login.js';
+import { PayloadRequest } from '../../../express/types.js';
+import { Payload } from '../../../payload.js';
+import { getDataLoader } from '../../../collections/dataloader.js';
+import { i18nInit } from '../../../translations/init.js';
+import { APIError } from '../../../errors.js';
+import { setRequestContext } from '../../../express/setRequestContext.js';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug

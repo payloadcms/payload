@@ -1,12 +1,12 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import TransformHooks from './collections/Transform';
-import Hooks, { hooksSlug } from './collections/Hook';
-import NestedAfterReadHooks from './collections/NestedAfterReadHooks';
-import ChainingHooks from './collections/ChainingHooks';
-import Relations from './collections/Relations';
-import AfterOperation from './collections/AfterOperation';
-import Users, { seedHooksUsers } from './collections/Users';
-import ContextHooks from './collections/ContextHooks';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import TransformHooks from './collections/Transform.js';
+import Hooks, { hooksSlug } from './collections/Hook.js';
+import NestedAfterReadHooks from './collections/NestedAfterReadHooks.js';
+import ChainingHooks from './collections/ChainingHooks.js';
+import Relations from './collections/Relations.js';
+import AfterOperation from './collections/AfterOperation.js';
+import Users, { seedHooksUsers } from './collections/Users.js';
+import ContextHooks from './collections/ContextHooks.js';
 
 export default buildConfigWithDefaults({
   collections: [

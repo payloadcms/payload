@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import withCondition from '../../withCondition';
-import useField from '../../useField';
-import { select } from '../../../../../fields/validations';
-import { Option, OptionObject } from '../../../../../fields/config/types';
-import { Props } from './types';
-import SelectInput from './Input';
+import withCondition from '../../withCondition.js';
+import useField from '../../useField.js';
+import { select } from '../../../../../fields/validations.js';
+import { Option, OptionObject } from '../../../../../fields/config/types.js';
+import { Props } from './types.js';
+import SelectInput from './Input.js';
 
 const formatOptions = (options: Option[]): OptionObject[] => options.map((option) => {
   if (typeof option === 'object' && (option.value || option.value === '')) {

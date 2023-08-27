@@ -1,4 +1,4 @@
-import { Field, FieldHook } from '../../fields/config/types';
+import { Field, FieldHook } from '../../fields/config/types.js';
 
 const autoRemoveVerificationToken: FieldHook = ({ originalDoc, data, value, operation }) => {
   // If a user manually sets `_verified` to true,

@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
 import { Response } from 'express';
-import { SanitizedGlobalConfig } from '../../config/types';
-import { Document } from '../../../types';
-import { PayloadRequest } from '../../../express/types';
-import findVersionByID from '../../operations/findVersionByID';
+import { SanitizedGlobalConfig } from '../../config/types.js';
+import { Document } from '../../../types.js';
+import { PayloadRequest } from '../../../express/types.js';
+import findVersionByID from '../../operations/findVersionByID.js';
 
 export type Resolver = (
   _: unknown,

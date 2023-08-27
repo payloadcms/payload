@@ -1,6 +1,6 @@
-import { sanitizeConfig } from '../config/sanitize';
-import { Config } from '../config/types';
-import { configToJSONSchema } from './configToJSONSchema';
+import { sanitizeConfig } from '../config/sanitize.js';
+import { Config } from '../config/types.js';
+import { configToJSONSchema } from './configToJSONSchema.js';
 
 describe('configToJSONSchema', () => {
   it('should handle optional arrays with required fields', () => {

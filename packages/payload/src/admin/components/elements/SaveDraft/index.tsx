@@ -1,13 +1,13 @@
 import React, { useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import FormSubmit from '../../forms/Submit';
-import { useForm, useFormModified } from '../../forms/Form/context';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import { useLocale } from '../../utilities/Locale';
-import useHotkey from '../../../hooks/useHotkey';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import { useEditDepth } from '../../utilities/EditDepth';
+import { useConfig } from '../../utilities/Config.js';
+import FormSubmit from '../../forms/Submit.js';
+import { useForm, useFormModified } from '../../forms/Form/context.js';
+import { useDocumentInfo } from '../../utilities/DocumentInfo.js';
+import { useLocale } from '../../utilities/Locale.js';
+import useHotkey from '../../../hooks/useHotkey.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent.js';
+import { useEditDepth } from '../../utilities/EditDepth.js';
 
 
 const baseClass = 'save-draft';

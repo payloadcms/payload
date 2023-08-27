@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
+import { useConfig } from '../../utilities/Config.js';
 
-import Eyebrow from '../../elements/Eyebrow';
-import Card from '../../elements/Card';
-import Button from '../../elements/Button';
-import { Props } from './types';
-import { Gutter } from '../../elements/Gutter';
-import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilities/groupNavItems';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import Eyebrow from '../../elements/Eyebrow.js';
+import Card from '../../elements/Card.js';
+import Button from '../../elements/Button.js';
+import { Props } from './types.js';
+import { Gutter } from '../../elements/Gutter.js';
+import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilities/groupNavItems.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
 
 import './index.scss';
 

@@ -1,9 +1,9 @@
 import { DeleteOne } from '@alessiogr/payloadtest/database';
 import type { Document } from '@alessiogr/payloadtest/types';
 import { PayloadRequest } from '@alessiogr/payloadtest/types';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
 import type { MongooseAdapter } from '.';
-import { withSession } from './withSession';
+import { withSession } from './withSession.js';
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: MongooseAdapter,

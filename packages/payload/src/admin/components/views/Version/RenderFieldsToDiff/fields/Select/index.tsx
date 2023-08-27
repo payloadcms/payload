@@ -2,11 +2,11 @@ import React from 'react';
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued';
 import { useTranslation } from 'react-i18next';
 import type { i18n as Ii18n } from 'i18next';
-import Label from '../../Label';
-import { diffStyles } from '../styles';
-import { Props } from '../types';
-import { getTranslation } from '../../../../../../../utilities/getTranslation';
-import { OptionObject, SelectField } from '../../../../../../../fields/config/types';
+import Label from '../../Label.js';
+import { diffStyles } from '../styles.js';
+import { Props } from '../types.js';
+import { getTranslation } from '../../../../../../../utilities/getTranslation.js';
+import { OptionObject, SelectField } from '../../../../../../../fields/config/types.js';
 
 import './index.scss';
 

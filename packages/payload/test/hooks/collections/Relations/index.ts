@@ -1,4 +1,4 @@
-import { CollectionConfig } from '../../../../src/collections/config/types';
+import { CollectionConfig } from '../../../../src/collections/config/types.js';
 
 export const relationsSlug = 'relations';
 

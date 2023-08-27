@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
-import Chevron from '../../icons/Chevron';
-import { usePreferences } from '../../utilities/Preferences';
+import Chevron from '../../icons/Chevron.js';
+import { usePreferences } from '../../utilities/Preferences.js';
 
 import './index.scss';
 

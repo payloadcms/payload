@@ -1,10 +1,10 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import { Document, Where } from '../../types';
-import deleteOperation from '../operations/delete';
-import formatSuccessResponse from '../../express/responses/formatSuccess';
-import { getTranslation } from '../../utilities/getTranslation';
+import { PayloadRequest } from '../../express/types.js';
+import { Document, Where } from '../../types.js';
+import deleteOperation from '../operations/delete.js';
+import formatSuccessResponse from '../../express/responses/formatSuccess.js';
+import { getTranslation } from '../../utilities/getTranslation.js';
 
 export type DeleteResult = {
   message: string;

@@ -1,12 +1,12 @@
 import i18next from 'i18next';
 import { useTranslation } from 'react-i18next';
-import { SanitizedConfig } from '../../config/types';
-import { SanitizedCollectionConfig } from '../../collections/config/types';
-import { useFormFields } from '../components/forms/Form/context';
-import { FormField } from '../components/forms/Form/types';
-import { useConfig } from '../components/utilities/Config';
-import { formatDate } from '../utilities/formatDate';
-import { getObjectDotNotation } from '../../utilities/getObjectDotNotation';
+import { SanitizedConfig } from '../../config/types.js';
+import { SanitizedCollectionConfig } from '../../collections/config/types.js';
+import { useFormFields } from '../components/forms/Form/context.js';
+import { FormField } from '../components/forms/Form/types.js';
+import { useConfig } from '../components/utilities/Config.js';
+import { formatDate } from '../utilities/formatDate.js';
+import { getObjectDotNotation } from '../../utilities/getObjectDotNotation.js';
 
 // either send the `useAsTitle` field itself
 // or an object to dynamically extract the `useAsTitle` field from

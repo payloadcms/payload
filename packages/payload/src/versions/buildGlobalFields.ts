@@ -1,5 +1,5 @@
-import { Field } from '../fields/config/types';
-import { SanitizedGlobalConfig } from '../globals/config/types';
+import { Field } from '../fields/config/types.js';
+import { SanitizedGlobalConfig } from '../globals/config/types.js';
 
 export const buildVersionGlobalFields = (global: SanitizedGlobalConfig): Field[] => {
   const fields: Field[] = [

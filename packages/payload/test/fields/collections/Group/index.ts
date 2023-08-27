@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../src/collections/config/types.js';
 
 export const groupDefaultValue = 'set from parent';
 export const groupDefaultChild = 'child takes priority';
