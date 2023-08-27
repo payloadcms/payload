@@ -13,8 +13,6 @@
       ".": {
         "types": "./dist/index.d.ts",
         "import": "./dist/index.js",
-        "default": "./dist/index.js",
-        "node": "./dist/index.js",
         "require": "./dist/index.js"
       }
     }
@@ -23,8 +21,6 @@
     ".": {
       "types": "./src/index.ts",
       "import": "./src/index.ts",
-      "default": "./src/index.ts",
-      "node": "./src/index.ts",
       "require": "./src/index.ts"
     }
   },

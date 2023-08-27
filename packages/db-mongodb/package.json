@@ -15,8 +15,6 @@
       ".": {
         "types": "./dist/esm/index.d.ts",
         "import": "./dist/esm/index.js",
-        "default": "./dist/esm/index.js",
-        "node": "./dist/esm/index.js",
         "require": "./dist/cjs/index.js"
       }
     }
@@ -25,8 +23,6 @@
     ".": {
       "types": "./src/index.ts",
       "import": "./src/index.ts",
-      "default": "./src/index.ts",
-      "node": "./src/index.ts",
       "require": "./src/index.ts"
     }
   },
