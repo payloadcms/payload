@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "nodenext",
+    "module": "NodeNext",
     "moduleResolution": "NodeNext", /* Required for exports to work */
     "composite": true,
     "declaration": true, /* Generates corresponding '.d.ts' file. */
