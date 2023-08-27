@@ -1,6 +1,6 @@
 import { PaginateOptions } from 'mongoose';
-import { SanitizedConfig } from 'payload/config';
-import { Field } from 'payload/types';
+import { SanitizedConfig } from '@alessiogr/payloadtest/config';
+import { Field } from '@alessiogr/payloadtest/types';
 import { getLocalizedSortProperty } from './getLocalizedSortProperty';
 
 type Args = {

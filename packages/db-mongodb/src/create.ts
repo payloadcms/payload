@@ -1,6 +1,6 @@
-import { Create } from 'payload/database';
-import type { Document } from 'payload/types';
-import { PayloadRequest } from 'payload/types';
+import { Create } from '@alessiogr/payloadtest/database';
+import type { Document } from '@alessiogr/payloadtest/types';
+import { PayloadRequest } from '@alessiogr/payloadtest/types';
 import type { MongooseAdapter } from '.';
 import { withSession } from './withSession';
 

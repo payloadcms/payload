@@ -1,6 +1,6 @@
-import { SanitizedConfig } from 'payload/config';
-import { Field, fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types';
-import { flattenTopLevelFields } from 'payload/utilities';
+import { SanitizedConfig } from '@alessiogr/payloadtest/config';
+import { Field, fieldAffectsData, fieldIsPresentationalOnly } from '@alessiogr/payloadtest/types';
+import { flattenTopLevelFields } from '@alessiogr/payloadtest/utilities';
 
 type Args = {
   segments: string[]

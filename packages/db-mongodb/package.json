@@ -1,5 +1,5 @@
 {
-  "name": "@payloadcms/db-mongodb",
+  "name": "@alessiogr/payloadtestdb-mongodb",
   "version": "0.0.1",
   "description": "The officially supported MongoDB database adapter for Payload",
   "main": "./src/index.ts",
@@ -42,7 +42,7 @@
     "@swc/cli": "^0.1.62",
     "@types/mongoose-aggregate-paginate-v2": "1.0.9",
     "mongodb-memory-server": "8.13.0",
-    "payload": "workspace:*"
+    "@alessiogr/payloadtest": "workspace:*"
   },
   "dependencies": {
     "bson-objectid": "2.0.4",

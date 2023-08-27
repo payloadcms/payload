@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { ConnectOptions } from 'mongoose';
 import mongoose from 'mongoose';
-import type { Connect } from 'payload/database';
+import type { Connect } from '@alessiogr/payloadtest/database';
 import type { MongooseAdapter } from '.';
 
 export const connect: Connect = async function connect(
@@ -29,7 +29,7 @@ export const connect: Connect = async function connect(
     if (process.env.PAYLOAD_TEST_MONGO_URL) {
       urlToConnect = process.env.PAYLOAD_TEST_MONGO_URL;
     } else {
-      connectionOptions.dbName = 'payloadmemory';
+      connectionOptions.dbName = '@alessiogr/payloadtestmemory';
 
       const { MongoMemoryServer } = (await import('mongodb-memory-server')).default;
       const getPort = (await import('get-port')).default;
@@ -37,7 +37,7 @@ export const connect: Connect = async function connect(
       const port = await getPort();
       this.mongoMemoryServer = await MongoMemoryServer.create({
         instance: {
-          dbName: 'payloadmemory',
+          dbName: '@alessiogr/payloadtestmemory',
           port,
         },
       });

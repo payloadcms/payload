@@ -1,6 +1,6 @@
-import { combineQueries } from 'payload/database';
-import type { FindGlobal } from 'payload/database';
-import { PayloadRequest } from 'payload/types';
+import { combineQueries } from '@alessiogr/payloadtest/database';
+import type { FindGlobal } from '@alessiogr/payloadtest/database';
+import { PayloadRequest } from '@alessiogr/payloadtest/types';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import type { MongooseAdapter } from '.';
 import { withSession } from './withSession';

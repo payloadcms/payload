@@ -1,5 +1,5 @@
-import type { UpdateVersion } from 'payload/database';
-import type { PayloadRequest } from 'payload/types';
+import type { UpdateVersion } from '@alessiogr/payloadtest/database';
+import type { PayloadRequest } from '@alessiogr/payloadtest/types';
 import type { MongooseAdapter } from '.';
 import { withSession } from './withSession';
 

@@ -2,11 +2,11 @@
 import mongoose, { PaginateOptions } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
-import { buildVersionCollectionFields } from 'payload/versions';
-import { SanitizedCollectionConfig } from 'payload/types';
-import { getVersionsModelName } from 'payload/versions';
-import { buildVersionGlobalFields } from 'payload/versions';
-import type { Init } from 'payload/database';
+import { buildVersionCollectionFields } from '@alessiogr/payloadtest/versions';
+import { SanitizedCollectionConfig } from '@alessiogr/payloadtest/types';
+import { getVersionsModelName } from '@alessiogr/payloadtest/versions';
+import { buildVersionGlobalFields } from '@alessiogr/payloadtest/versions';
+import type { Init } from '@alessiogr/payloadtest/database';
 import getBuildQueryPlugin from './queries/buildQuery';
 import buildCollectionSchema from './models/buildCollectionSchema';
 import buildSchema from './models/buildSchema';

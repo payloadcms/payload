@@ -1,7 +1,7 @@
-import { ValidationError } from 'payload/errors';
-import type { PayloadRequest } from 'payload/types';
-import type { UpdateOne } from 'payload/database';
-import { i18nInit } from 'payload/utilities';
+import { ValidationError } from '@alessiogr/payloadtest/errors';
+import type { PayloadRequest } from '@alessiogr/payloadtest/types';
+import type { UpdateOne } from '@alessiogr/payloadtest/database';
+import { i18nInit } from '@alessiogr/payloadtest/utilities';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import type { MongooseAdapter } from '.';
 import { withSession } from './withSession';

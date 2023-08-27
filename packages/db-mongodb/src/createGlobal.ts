@@ -1,5 +1,5 @@
-import { PayloadRequest } from 'payload/types';
-import { CreateGlobal } from 'payload/database';
+import { PayloadRequest } from '@alessiogr/payloadtest/types';
+import { CreateGlobal } from '@alessiogr/payloadtest/database';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import { withSession } from './withSession';
 import type { MongooseAdapter } from '.';

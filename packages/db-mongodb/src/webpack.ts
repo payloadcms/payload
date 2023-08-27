@@ -1,4 +1,4 @@
-import type { Webpack } from 'payload/database';
+import type { Webpack } from '@alessiogr/payloadtest/database';
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);

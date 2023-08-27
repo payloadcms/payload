@@ -1,7 +1,7 @@
 import { PaginateOptions } from 'mongoose';
-import type { FindVersions } from 'payload/database';
-import { flattenWhereToOperators } from 'payload/database';
-import { PayloadRequest } from 'payload/types';
+import type { FindVersions } from '@alessiogr/payloadtest/database';
+import { flattenWhereToOperators } from '@alessiogr/payloadtest/database';
+import { PayloadRequest } from '@alessiogr/payloadtest/types';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import type { MongooseAdapter } from '.';
 import { buildSortParam } from './queries/buildSortParam';

@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
 import { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose';
-import { SanitizedConfig, SanitizedLocalizationConfig } from 'payload/config';
+import { SanitizedConfig, SanitizedLocalizationConfig } from '@alessiogr/payloadtest/config';
 import {
   ArrayField,
   Block,
@@ -27,7 +27,7 @@ import {
   TextareaField,
   TextField,
   UploadField,
-} from 'payload/types';
+} from '@alessiogr/payloadtest/types';
 
 import {
   FieldAffectingData,
@@ -38,7 +38,7 @@ import {
   Tab,
   tabHasName,
   UnnamedTab
-} from 'payload/types'
+} from '@alessiogr/payloadtest/types'
 
 export type BuildSchemaOptions = {
   options?: SchemaOptions

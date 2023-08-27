@@ -1,5 +1,5 @@
-import { Where, Field } from 'payload/types';
-import { Payload } from 'payload';
+import { Where, Field } from '@alessiogr/payloadtest/types';
+import { Payload } from '@alessiogr/payloadtest';
 import { parseParams } from './parseParams';
 
 export async function buildAndOrConditions({

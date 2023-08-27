@@ -49,6 +49,9 @@ importers:
         specifier: 9.0.0
         version: 9.0.0
     devDependencies:
+      '@alessiogr/payloadtest':
+        specifier: workspace:*
+        version: link:../payload
       '@swc/cli':
         specifier: ^0.1.62
         version: 0.1.62(@swc/core@1.3.76)
@@ -58,9 +61,6 @@ importers:
       mongodb-memory-server:
         specifier: 8.13.0
         version: 8.13.0
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/db-postgres:
     dependencies:
@@ -83,6 +83,9 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
     devDependencies:
+      '@alessiogr/payloadtest':
+        specifier: workspace:*
+        version: link:../payload
       '@types/pg':
         specifier: 8.10.2
         version: 8.10.2
@@ -92,9 +95,6 @@ importers:
       better-sqlite3:
         specifier: ^8.5.0
         version: 8.5.0
-      payload:
-        specifier: workspace:*
-        version: link:../payload
 
   packages/payload:
     dependencies:

@@ -1,5 +1,5 @@
 {
-  "name": "payload",
+  "name": "@alessiogr/payloadtest",
   "version": "1.14.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",

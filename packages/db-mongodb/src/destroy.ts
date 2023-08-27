@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Destroy } from 'payload/database';
+import { Destroy } from '@alessiogr/payloadtest/database';
 import { MongooseAdapter } from './index';
 
 export const destroy: Destroy = async function destroy(
