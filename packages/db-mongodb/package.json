@@ -1,6 +1,6 @@
 {
   "name": "@alessiogr/payloadtestdb-mongodb",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The officially supported MongoDB database adapter for Payload",
   "main": "./src/index.ts",
   "type": "module",
