@@ -33,6 +33,9 @@
   "repository": "https://github.com/payloadcms/payload",
   "author": "Payload CMS, Inc.",
   "license": "MIT",
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "build:tsc": "tsc",
     "build": "pnpm build:swc:esm && pnpm build:swc:cjs",

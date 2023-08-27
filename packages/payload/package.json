@@ -333,9 +333,8 @@
   },
   "files": [
     "bin.js",
-    "dist",
-    "docs",
-    "components",
+    "dist/**/*",
+    "./dist/**/*",
     "scss",
     "*.js",
     "*.d.ts",
