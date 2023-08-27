@@ -1,6 +1,6 @@
 {
   "name": "@alessiogr/payloadtest",
-  "version": "1.30.0",
+  "version": "1.31.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "type": "module",
