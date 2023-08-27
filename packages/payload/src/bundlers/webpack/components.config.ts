@@ -18,7 +18,7 @@ export default {
     react: 'react',
   },
   output: {
-    path: path.resolve(_dirname, '../../../components'),
+    path: path.resolve(_dirname, '../../exports/components'),
     publicPath: '/',
     filename: 'index.js',
     libraryTarget: 'commonjs2',

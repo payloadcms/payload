@@ -45,7 +45,7 @@
       "src/**/*.ts",
       "src/**/*.tsx",
       "src/**/*.d.ts",
-      "src/**/*.json"
+      "src/**/*.json",
     ],
     "exclude": [
       "dist",
