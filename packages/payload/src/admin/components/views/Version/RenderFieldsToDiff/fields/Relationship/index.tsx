@@ -79,7 +79,7 @@ const Relationship: React.FC<Props & { field: RelationshipField }> = ({ field, v
     versionToRender = generateLabelFromValue(collections, field, locale, version);
     comparisonToRender = generateLabelFromValue(collections, field, locale, comparison);
   }
-  const ReactDiffViewerToUse = ReactDiffViewer as any;
+  const ReactDiffViewerToUse = ReactDiffViewer.default ? ReactDiffViewer.default : ReactDiffViewer as any;
 
   return (
     <div className={baseClass}>

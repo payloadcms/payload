@@ -24,7 +24,7 @@ const Text: React.FC<Props> = ({ field, locale, version, comparison, isRichText 
     if (typeof comparison === 'object') comparisonToRender = JSON.stringify(comparison, null, 2);
   }
 
-  const ReactDiffViewerToUse = ReactDiffViewer as any;
+  const ReactDiffViewerToUse = ReactDiffViewer.default ? ReactDiffViewer.default : ReactDiffViewer as any;
 
   return (
     <div className={baseClass}>
