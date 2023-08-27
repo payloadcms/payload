@@ -19,7 +19,12 @@
     position: absolute;
     z-index: 1;
     top: var(--toggle-pad-v);
+    right: auto;
     left: base(.5);
+    [dir = rtl] & {
+      left: auto;
+      right: base(.5);
+    }
   }
 
   &__toggle {
@@ -78,6 +83,11 @@
 
   &__header-wrap--has-drag-handle {
     left: base(.875);
+    right: auto;
+    [dir = rtl] & {
+      right: base(.875);
+      left: auto;
+    }
   }
 
   &--collapsed {
@@ -94,6 +104,12 @@
   &__actions-wrap {
     position: absolute;
     right: var(--toggle-pad-h);
+
+    [dir=rtl] & {
+    left: var(--toggle-pad-h);
+    right: auto;
+    }
+
     top: var(--toggle-pad-v);
     pointer-events: none;
     display: flex;

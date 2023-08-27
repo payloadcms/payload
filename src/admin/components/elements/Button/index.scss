@@ -165,6 +165,12 @@ a.btn {
 
     .btn__icon {
       margin-right: base(.5);
+        margin-left: 0;
+      [dir = rtl] & {
+        margin-left: base(.5);
+        margin-right: 0;
+
+      }
     }
   }
 
