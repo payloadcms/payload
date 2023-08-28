@@ -48,7 +48,6 @@ export const getPayloadClient = async ({ initOptions, seed }: Args = {}): Promis
     cached.client = await cached.promise
 
     if (seed) {
-      payload.logger.info('---- SEEDING DATABASE ----')
       await seedData(payload)
     }
   } catch (e: unknown) {

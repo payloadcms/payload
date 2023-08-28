@@ -22,7 +22,7 @@ const start = async (): Promise<void> => {
         newPayload.logger.info(`Payload Admin URL: ${newPayload.getAdminURL()}`)
       },
     },
-    seed: process.env.PAYLOAD_SEED === 'true',
+    seed: process.env.PAYLOAD_PUBLIC_SEED === 'true',
   })
 
   if (process.env.NEXT_BUILD) {
@@ -42,7 +42,7 @@ const start = async (): Promise<void> => {
 
   const nextHandler = nextApp.getRequestHandler()
 
-  app.get('*', (req, res) => nextHandler(req, res))
+  app.use((req, res) => nextHandler(req, res))
 
   nextApp.prepare().then(() => {
     payload.logger.info('Next.js started')
