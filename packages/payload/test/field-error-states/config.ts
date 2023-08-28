@@ -1,7 +1,7 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
-import { ErrorFieldsCollection } from './collections/ErrorFields.js';
+import { ErrorFieldsCollection } from './collections/ErrorFields/index.js';
 import { devUser } from '../credentials.js';
-import Uploads from './collections/Upload.js';
+import Uploads from './collections/Upload/index.js';
 
 export default buildConfigWithDefaults({
   collections: [
