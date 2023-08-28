@@ -46,9 +46,15 @@ export async function initPayloadTest(options: Options): Promise<{ serverURL: st
   swcRegister({
     sourceMaps: 'inline',
     jsc: {
+      target: 'esnext',
+      experimental: {
+        keepImportAssertions: true,
+      },
       parser: {
         syntax: 'typescript',
         tsx: true,
+        dts: true,
+        importAssertions: true
       },
     },
     module: {

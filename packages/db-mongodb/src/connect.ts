@@ -29,7 +29,7 @@ export const connect: Connect = async function connect(
     if (process.env.PAYLOAD_TEST_MONGO_URL) {
       urlToConnect = process.env.PAYLOAD_TEST_MONGO_URL;
     } else {
-      connectionOptions.dbName = '@alessiogr/payloadtestmemory';
+      connectionOptions.dbName = 'payloadmemory';
 
       const { MongoMemoryServer } = (await import('mongodb-memory-server')).default;
       const getPort = (await import('get-port')).default;
@@ -37,7 +37,7 @@ export const connect: Connect = async function connect(
       const port = await getPort();
       this.mongoMemoryServer = await MongoMemoryServer.create({
         instance: {
-          dbName: '@alessiogr/payloadtestmemory',
+          dbName: 'payloadmemory',
           port,
         },
       });
