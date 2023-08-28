@@ -48,6 +48,7 @@ const Form: React.FC<Props> = (props) => {
     initialState, // fully formed initial field state
     initialData, // values only, paths are required as key - form should build initial state as convenience
     waitForAutocomplete,
+    configFieldsSchema,
   } = props;
 
   const history = useHistory();
@@ -409,12 +410,14 @@ const Form: React.FC<Props> = (props) => {
     path: string,
     blockType?: string
   }) => {
-    const rowConfig = traverseRowConfigs({ path, fieldConfig: collection?.fields || global?.fields });
+    if (!configFieldsSchema) return null;
+
+    const rowConfig = traverseRowConfigs({ path, fieldConfig: configFieldsSchema });
     const rowFieldConfigs = buildFieldSchemaMap(rowConfig);
     const pathSegments = splitPathByArrayFields(path);
     const fieldKey = pathSegments.at(-1);
     return rowFieldConfigs.get(blockType ? `${fieldKey}.${blockType}` : fieldKey);
-  }, [traverseRowConfigs, collection?.fields, global?.fields]);
+  }, [traverseRowConfigs, configFieldsSchema]);
 
   // Array/Block row manipulation
   const addFieldRow: Context['addFieldRow'] = useCallback(async ({ path, rowIndex, data }) => {

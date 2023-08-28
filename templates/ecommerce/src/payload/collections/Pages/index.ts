@@ -1,5 +1,3 @@
-import dotenv from 'dotenv'
-import path from 'path'
 import type { CollectionConfig } from 'payload/types'
 
 import { admins } from '../../access/admins'
@@ -13,10 +11,6 @@ import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
 import { populatePublishedDate } from '../../hooks/populatePublishedDate'
 import { adminsOrPublished } from './access/adminsOrPublished'
 import { revalidatePage } from './hooks/revalidatePage'
-
-dotenv.config({
-  path: path.resolve(__dirname, '../.env'),
-})
 
 export const Pages: CollectionConfig = {
   slug: 'pages',

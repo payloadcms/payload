@@ -1407,16 +1407,16 @@
   integrity sha512-Il59+0C4E/bI6uM2hont3I+oABWkJZbfbItubje5SGMrXkymUq8jT/UZRk0eCt918bB7gihxDXx8guFnR/aNIw==
 
 "@payloadcms/plugin-cloud@^2.0.0":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@payloadcms/plugin-cloud/-/plugin-cloud-2.1.1.tgz#87643864a0dc50feb6831cca5323607e0fbf32d9"
-  integrity sha512-/sjqbU6H/AvDQ03PTmuwrJgwZUU1mfARkRjCvPbgkB7Pyo0iVy4wZNlPdnarqlZ/RR83T/Uwl/U1jl3YoQsBpw==
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/@payloadcms/plugin-cloud/-/plugin-cloud-2.2.1.tgz#765a800dfe5b5e0126a1c878df47855bdbcf060a"
+  integrity sha512-jOflGHygn6rarLt/GPdRzB8ob2FRJ2fUGqhbXoEqHcOeudbJGUY+cyYTQ8gxJMpSlSBZ4yY5ITHMECrGknUJCg==
   dependencies:
     "@aws-sdk/client-cognito-identity" "^3.289.0"
     "@aws-sdk/client-s3" "^3.142.0"
     "@aws-sdk/credential-providers" "^3.289.0"
     "@aws-sdk/lib-storage" "^3.267.0"
     amazon-cognito-identity-js "^6.1.2"
-    resend "^0.15.3"
+    resend "^0.17.2"
 
 "@payloadcms/plugin-nested-docs@^1.0.4":
   version "1.0.6"
@@ -1428,10 +1428,10 @@
   resolved "https://registry.yarnpkg.com/@payloadcms/plugin-seo/-/plugin-seo-1.0.13.tgz#b1d2f24f5cabf14e8ab7db6815b6fb41ee718557"
   integrity sha512-GPIyGTe6vU8GRFMYhNoUDrGWxm0uiqfIQQSsAuZjEM6YGFozo/AnpnjcT6VS/led/7HRFF8ijOy82l0VaLNC3w==
 
-"@payloadcms/plugin-stripe@^0.0.13":
-  version "0.0.13"
-  resolved "https://registry.yarnpkg.com/@payloadcms/plugin-stripe/-/plugin-stripe-0.0.13.tgz#95a28b1c9045ca6a424b4f3167859dca98541302"
-  integrity sha512-+clMwHmESEtV5xcO/BAyhCYYPznVkoekyFugJ4L+6/i+S9NKKCQ08+Sd/palonIgsFpeAVJ1sbOpaomXplPmhQ==
+"@payloadcms/plugin-stripe@^0.0.14":
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/@payloadcms/plugin-stripe/-/plugin-stripe-0.0.14.tgz#c74609ddc193e5e40b07a36ea7f5e485566b9c45"
+  integrity sha512-KFeyDNvt1Xvhp9mzxGqeQo9GjW52R1boyO1kYD+1c+4DAWWF9oXmf2OXXi1mbt2arSn+IBxcLnGE1EYPwT1nTA==
   dependencies:
     "@types/uuid" "^9.0.0"
     lodash.get "^4.4.2"
@@ -7468,13 +7468,14 @@ require-from-string@^2.0.2:
   resolved "https://registry.yarnpkg.com/require-from-string/-/require-from-string-2.0.2.tgz#89a7fdd938261267318eafe14f9c32e598c36909"
   integrity sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==
 
-resend@^0.15.3:
-  version "0.15.4"
-  resolved "https://registry.yarnpkg.com/resend/-/resend-0.15.4.tgz#4f4a67a01c15fd94aba4c79d7d7a59b10a6a9a96"
-  integrity sha512-QgQ1sMQ8CGtG5yWhPHUITsMmKxohoUiRo+s+8WpBbVhX3cJo87slUbDji2tqNgKz6Tza7fgd+cWNNQSYSeJDsA==
+resend@^0.17.2:
+  version "0.17.2"
+  resolved "https://registry.yarnpkg.com/resend/-/resend-0.17.2.tgz#52ab40cff8e998c2ca621eb298da38b4ab1e3eb3"
+  integrity sha512-lakm76u4MiIDeMF1s2tCmjtksOhwZOs4WcAXkA7aUTvl+63/h+0h6Q6WnkB8RGtj6GakUhQuUkiZshfXgtIrGw==
   dependencies:
     "@react-email/render" "0.0.7"
     axios "1.4.0"
+    type-fest "3.13.0"
 
 resolve-cwd@^3.0.0:
   version "3.0.0"
@@ -8337,6 +8338,11 @@ type-check@^0.4.0, type-check@~0.4.0:
   integrity sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==
   dependencies:
     prelude-ls "^1.2.1"
+
+type-fest@3.13.0:
+  version "3.13.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-3.13.0.tgz#b088347ae73779a750c461694b264340c4c8c0d7"
+  integrity sha512-Gur3yQGM9qiLNs0KPP7LPgeRbio2QTt4xXouobMCarR0/wyW3F+F/+OWwshg3NG0Adon7uQfSZBpB46NfhoF1A==
 
 type-fest@^0.20.2:
   version "0.20.2"

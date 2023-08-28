@@ -111,7 +111,7 @@ export const addFieldStatePromise = async ({
 
           acc.rowMetadata.push({
             id: row.id,
-            collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
+            collapsed: collapsedRowIDs === undefined ? Boolean(field?.admin?.initCollapsed) : collapsedRowIDs.includes(row.id),
             childErrorPaths: new Set(),
           });
 
@@ -191,7 +191,7 @@ export const addFieldStatePromise = async ({
 
             acc.rowMetadata.push({
               id: row.id,
-              collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
+              collapsed: collapsedRowIDs === undefined ? Boolean(field?.admin?.initCollapsed) : collapsedRowIDs.includes(row.id),
               blockType: row.blockType,
               childErrorPaths: new Set(),
             });
