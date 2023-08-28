@@ -405,7 +405,7 @@ const result = await payload.updateGlobal({
 
 ## Next.js Conflict with Local API
 
-There is a known issue when using the Local API with Next.js version `13.4.13` and higher. Next.js executes each operation in a child process. That means that unless you explicitly initialize Payload within your operation, it will return an empty object. 
+There is a known issue when using the Local API with Next.js version `13.4.13` and higher. Next.js executes within a separate child process, and Payload has not been initalized yet in these instances. That means that unless you explicitly initialize Payload within your operation, it will not be running and return no data / an empty object. 
 
 As a workaround, we recommend leveraging the following pattern to determine and ensure Payload is initalized:
 
@@ -456,13 +456,12 @@ export const getPayloadClient = async ({ initOptions, seed }: Args = {}): Promis
   }
 
   try {
+    process.env.PAYLOAD_DROP_DATABASE = seed ? 'true' : 'false'
     cached.client = await cached.promise
 
     if (seed) {
       payload.logger.info('---- SEEDING DATABASE ----')
-      process.env.PAYLOAD_DROP_DATABASE = 'true'
       await seedData(payload)
-      process.env.PAYLOAD_DROP_DATABASE = 'false'
     }
   } catch (e: unknown) {
     cached.promise = null
