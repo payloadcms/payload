@@ -39,6 +39,9 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   const configWithDefaults: Config = merge(defaults, incomingConfig, {
     isMergeableObject: isPlainObject,
   });
+  if (typeof configWithDefaults.serverURL === 'undefined') {
+    configWithDefaults.serverURL = '';
+  }
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults);
   config.collections = config.collections.map((collection) => sanitizeCollection(configWithDefaults, collection));
