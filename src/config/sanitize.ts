@@ -41,7 +41,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   });
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults);
-  config.collections = config.collections.map((collection) => sanitizeCollection(configWithDefaults, collection));
+  config.collections = config.collections.map((collection) => sanitizeCollection(config, collection));
 
   checkDuplicateCollections(config.collections);
 
