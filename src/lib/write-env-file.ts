@@ -43,11 +43,11 @@ export async function writeEnvFile(args: {
 
       // Write new .env file
       await fs.writeFile(path.join(projectDir, '.env'), envWithValues.join('\n'))
+    } else {
+      const content = `MONGODB_URI=${databaseUri}\nPAYLOAD_SECRET=${payloadSecret}`
+      await fs.outputFile(`${projectDir}/.env`, content)
     }
 
-    const content = `MONGODB_URI=${databaseUri}\nPAYLOAD_SECRET=${payloadSecret}`
-
-    await fs.outputFile(`${projectDir}/.env`, content)
     success('.env file created')
   } catch (err: unknown) {
     error('Unable to write .env file')
