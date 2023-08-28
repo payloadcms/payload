@@ -23,6 +23,7 @@ import type { Translation } from '../../../../translations/type';
 import { LoadingOverlayToggle } from '../../elements/Loading';
 import { formatDate } from '../../../utilities/formatDate';
 import { useAuth } from '../../utilities/Auth';
+import useLanguage from '../../../hooks/useLanguage';
 
 import './index.scss';
 
@@ -55,6 +56,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
   const { refreshCookieAsync } = useAuth();
   const { admin: { dateFormat }, routes: { admin } } = useConfig();
   const { t, i18n } = useTranslation('authentication');
+  const { setLanguage } = useLanguage();
 
   const languageOptions = Object.entries(i18n.options.resources).map(([language, resource]) => (
     { label: (resource as Translation).general.thisLanguage, value: language }
@@ -137,7 +139,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
                         inputId="language-select"
                         value={languageOptions.find((language) => (language.value === i18n.language))}
                         options={languageOptions}
-                        onChange={({ value }) => (i18n.changeLanguage(value))}
+                        onChange={({ value }) => (setLanguage(value))}
                       />
                     </div>
                     <ToggleTheme />
