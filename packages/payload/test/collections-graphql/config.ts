@@ -2,7 +2,7 @@ import path from 'path';
 import type { CollectionConfig } from '../../src/collections/config/types.js';
 import { devUser } from '../credentials.js';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+const _dirname = path.dirname(new URL(import.meta.url).pathname)
 
 export interface Relation {
   id: string;
@@ -36,7 +36,7 @@ export const pointSlug = 'point';
 
 export default buildConfigWithDefaults({
   graphQL: {
-    schemaOutputFile: path.resolve(__dirname, 'schema.graphql'),
+    schemaOutputFile: path.resolve(_dirname, 'schema.graphql'),
     queries: (GraphQL) => {
       return {
         QueryWithInternalError: {

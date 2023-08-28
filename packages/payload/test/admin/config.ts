@@ -19,10 +19,12 @@ export interface Post {
   createdAt: Date;
   updatedAt: Date;
 }
+const _dirname = path.dirname(new URL(import.meta.url).pathname)
+
 
 export default buildConfigWithDefaults({
   admin: {
-    css: path.resolve(__dirname, 'styles.scss'),
+    css: path.resolve(_dirname, 'styles.scss'),
     components: {
       // providers: [CustomProvider, CustomProvider],
       routes: [

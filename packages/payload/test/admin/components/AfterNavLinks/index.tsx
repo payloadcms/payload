@@ -2,8 +2,8 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 
 // As this is the demo project, we import our dependencies from the `src` directory.
-import Chevron from '../../../../src/admin/components/icons/Chevron.js';
-import { useConfig } from '../../../../src/admin/components/utilities/Config.js';
+import Chevron from '../../../../src/admin/components/icons/Chevron/index.js';
+import { useConfig } from '../../../../src/admin/components/utilities/Config/index.js';
 
 // In your projects, you can import as follows:
 // import { Chevron } from 'payload/components';

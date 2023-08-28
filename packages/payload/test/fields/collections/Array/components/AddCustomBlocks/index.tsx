@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useForm } from '../../../../../../src/admin/components/forms/Form/context.js';
-import useField from '../../../../../../src/admin/components/forms/useField.js';
+import useField from '../../../../../../src/admin/components/forms/useField/index.js';
 
 import './index.scss';
 

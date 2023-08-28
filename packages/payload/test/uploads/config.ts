@@ -6,7 +6,7 @@ import removeFiles from '../helpers/removeFiles.js';
 import { Uploads1 } from './collections/Upload1.js';
 import Uploads2 from './collections/Upload2.js';
 import AdminThumbnailCol from './collections/admin-thumbnail.js';
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+const _dirname = path.dirname(new URL(import.meta.url).pathname);
 
 export const mediaSlug = 'media';
 
@@ -20,7 +20,7 @@ export const reduceSlug = 'reduce';
 
 export const adminThumbnailSlug = 'admin-thumbnail';
 
-const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js');
+const mockModulePath = path.resolve(_dirname, './mocks/mockFSModule.js');
 
 export default buildConfigWithDefaults({
   admin: {
@@ -314,7 +314,7 @@ export default buildConfigWithDefaults({
     AdminThumbnailCol,
   ],
   onInit: async (payload) => {
-    const uploadsDir = path.resolve(__dirname, './media');
+    const uploadsDir = path.resolve(_dirname, './media');
     removeFiles(path.normalize(uploadsDir));
 
     await payload.create({
@@ -326,7 +326,7 @@ export default buildConfigWithDefaults({
     });
 
     // Create image
-    const imageFilePath = path.resolve(__dirname, './image.png');
+    const imageFilePath = path.resolve(_dirname, './image.png');
     const imageFile = await getFileByPath(imageFilePath);
 
     const { id: uploadedImage } = await payload.create({
@@ -343,7 +343,7 @@ export default buildConfigWithDefaults({
     });
 
     // Create audio
-    const audioFilePath = path.resolve(__dirname, './audio.mp3');
+    const audioFilePath = path.resolve(_dirname, './audio.mp3');
     const audioFile = await getFileByPath(audioFilePath);
 
     const file = await payload.create({

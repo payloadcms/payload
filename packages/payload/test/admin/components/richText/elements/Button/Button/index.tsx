@@ -2,16 +2,16 @@ import React, { Fragment, useCallback } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
 import { Transforms } from 'slate';
 import { useSlate, ReactEditor } from 'slate-react';
-import MinimalTemplate from '../../../../../../../src/admin/components/templates/Minimal.js';
+import MinimalTemplate from '../../../../../../../src/admin/components/templates/Minimal/index.js';
 import ElementButton from '../../../../../../../src/admin/components/forms/field-types/RichText/elements/Button.js';
-import X from '../../../../../../../src/admin/components/icons/X.js';
-import Button from '../../../../../../../src/admin/components/elements/Button.js';
-import Form from '../../../../../../../src/admin/components/forms/Form.js';
-import Submit from '../../../../../../../src/admin/components/forms/Submit.js';
+import X from '../../../../../../../src/admin/components/icons/X/index.js';
+import Button from '../../../../../../../src/admin/components/elements/Button/index.js';
+import Form from '../../../../../../../src/admin/components/forms/Form/index.js';
+import Submit from '../../../../../../../src/admin/components/forms/Submit/index.js';
 import reduceFieldsToValues from '../../../../../../../src/admin/components/forms/Form/reduceFieldsToValues.js';
-import Text from '../../../../../../../src/admin/components/forms/field-types/Text.js';
-import Checkbox from '../../../../../../../src/admin/components/forms/field-types/Checkbox.js';
-import Select from '../../../../../../../src/admin/components/forms/field-types/Select.js';
+import Text from '../../../../../../../src/admin/components/forms/field-types/Text/Input.js';
+import Checkbox from '../../../../../../../src/admin/components/forms/field-types/Checkbox/index.js';
+import Select from '../../../../../../../src/admin/components/forms/field-types/Select/index.js';
 
 import './index.scss';
 

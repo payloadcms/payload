@@ -1,5 +1,5 @@
-import Button from './Button.js';
-import Leaf from './Leaf.js';
+import Button from './Button/index.js';
+import Leaf from './Leaf/index.js';
 
 export default {
   name: 'purple-background',
