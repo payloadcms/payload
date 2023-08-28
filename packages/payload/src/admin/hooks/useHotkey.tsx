@@ -1,6 +1,6 @@
 /* eslint-disable no-shadow */
 import { useCallback, useEffect } from 'react';
-import facelessui from '@faceless-ui/modal';
+import * as facelessui from '@faceless-ui/modal';
 import { setsAreEqual } from '../utilities/setsAreEqual.js';
 
 // Required to be outside of hook, else debounce would be necessary
@@ -65,12 +65,7 @@ const useHotkey = (options: {
 }, func: (e: KeyboardEvent) => void): void => {
   const { keyCodes, cmdCtrlKey, editDepth } = options;
 
-  const useModalFunction: any = function() {
-    return {
-      modalState: {},
-    };
-  }
-  const useModal = facelessui ? facelessui.useModal : useModalFunction;
+  const { useModal } = facelessui;
 
   const { modalState } = useModal();
 
