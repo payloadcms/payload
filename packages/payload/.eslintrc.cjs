@@ -1,18 +1,14 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 2020,
+    ecmaVersion: 2020, // should try 'latest'
     sourceType: 'module',
     ecmaFeatures: {
       jsx: true,
     },
   },
-  plugins: [
-    '@typescript-eslint',
-  ],
-  extends: [
-    './eslint-config',
-  ],
+  plugins: ['@typescript-eslint'],
+  extends: ['./eslint-config/index.cjs', 'prettier'],
   settings: {
     'import/resolver': {
       node: {
@@ -27,13 +23,11 @@ module.exports = {
         '@typescript-eslint/no-use-before-define': 'off',
         '@typescript-eslint/consistent-type-imports': 'warn',
         'jest/prefer-strict-equal': 'off',
-      }
+      },
     },
     {
       files: ['test/**/e2e.spec.ts'],
-      extends: [
-        'plugin:playwright/playwright-test'
-      ],
+      extends: ['plugin:playwright/playwright-test'],
       rules: {
         'jest/consistent-test-it': 'off',
         'jest/require-top-level-describe': 'off',
@@ -41,24 +35,19 @@ module.exports = {
         'jest/prefer-strict-equal': 'off',
         'jest/expect-expect': 'off',
         'jest-dom/prefer-to-have-attribute': 'off',
-      }
+      },
     },
     {
       files: ['*.ts', '*.tsx'],
       parser: '@typescript-eslint/parser',
-      extends: [
-        'plugin:@typescript-eslint/recommended',
-      ],
+      extends: ['plugin:@typescript-eslint/recommended'],
       rules: {
         'no-shadow': 'off',
         '@typescript-eslint/no-shadow': ['error'],
         'import/no-unresolved': [
           2,
           {
-            ignore: [
-              'payload-config',
-              'payload/generated-types',
-            ],
+            ignore: ['payload-config', 'payload/generated-types'],
           },
         ],
       },

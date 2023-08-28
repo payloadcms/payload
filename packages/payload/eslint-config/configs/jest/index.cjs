@@ -7,8 +7,8 @@ module.exports = {
     'jest-dom',
   ],
   extends: [
-    './rules/jest',
-    './rules/jest-dom',
+    './rules/jest.cjs',
+    './rules/jest-dom.cjs',
   ].map(require.resolve),
   rules: {},
 };

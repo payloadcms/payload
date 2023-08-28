@@ -91,9 +91,9 @@
   },
   "devDependencies": {
     "@types/node": "20.5.6",
-    "typescript": "5.2.2",
     "copyfiles": "2.4.1",
-    "cross-env": "7.0.3"
+    "cross-env": "7.0.3",
+    "typescript": "5.2.2"
   },
   "files": [
     "bin.js",

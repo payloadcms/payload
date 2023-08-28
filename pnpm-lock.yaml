@@ -612,6 +612,9 @@ importers:
       eslint:
         specifier: 8.45.0
         version: 8.45.0
+      eslint-config-prettier:
+        specifier: ^9.0.0
+        version: 9.0.0(eslint@8.45.0)
       eslint-plugin-import:
         specifier: 2.27.5
         version: 2.27.5(@typescript-eslint/parser@5.62.0)(eslint@8.45.0)
@@ -672,6 +675,9 @@ importers:
       passport-strategy:
         specifier: 1.0.0
         version: 1.0.0
+      prettier:
+        specifier: ^3.0.2
+        version: 3.0.2
       release-it:
         specifier: 16.1.3
         version: 16.1.3
@@ -7147,6 +7153,15 @@ packages:
       source-map: 0.6.1
     dev: true
 
+  /eslint-config-prettier@9.0.0(eslint@8.45.0):
+    resolution: {integrity: sha512-IcJsTkJae2S35pRsRAwoCE+925rJJStOdkKnLVgtE+tEpqU0EVVM7OqrwxqgptKdX29NUwC82I5pXsGFIgSevw==}
+    hasBin: true
+    peerDependencies:
+      eslint: '>=7.0.0'
+    dependencies:
+      eslint: 8.45.0
+    dev: true
+
   /eslint-import-resolver-node@0.3.9:
     resolution: {integrity: sha512-WFj2isz22JahUv+B788TlO3N6zL3nNJGU8CcZbPZvVEkBPaJdCV4vy5wyghty5ROFbCRnm132v8BScu5/1BQ8g==}
     dependencies:
@@ -12012,6 +12027,12 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
     dev: false
+
+  /prettier@3.0.2:
+    resolution: {integrity: sha512-o2YR9qtniXvwEZlOKbveKfDQVyqxbEIWn48Z8m3ZJjBjcCmUy3xZGIv+7AkaeuaTr6yPXJjwv07ZWlsWbEy1rQ==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: true
 
   /pretty-error@4.0.0:
     resolution: {integrity: sha512-AoJ5YMAcXKYxKhuJGdcvse+Voc6v1RgnsR3nWcYU7q4t6z0Q6T86sv5Zq8VIRbOWWFpvdGE83LtdSMNd+6Y0xw==}
