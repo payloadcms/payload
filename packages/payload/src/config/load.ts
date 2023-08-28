@@ -3,12 +3,12 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import path from 'path';
 import pino from 'pino';
+import { createRequire } from 'module';
 import Logger from '../utilities/logger.js';
 import { SanitizedConfig } from './types.js';
 import findConfig from './find.js';
 import validate from './validate.js';
 import { clientFiles } from './clientFiles.js';
-import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 

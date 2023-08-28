@@ -1,4 +1,5 @@
 import type { i18n as Ii18n } from 'i18next';
+import type { JSX } from 'react';
 
 export const getTranslation = (label: Record<string, string> | string | JSX.Element, i18n: Ii18n): string => {
   if (typeof label === 'object') {

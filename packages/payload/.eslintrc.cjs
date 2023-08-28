@@ -1,7 +1,9 @@
+const path = require('path');
+
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 2020, // should try 'latest'
+    ecmaVersion: 'latest',
     sourceType: 'module',
     ecmaFeatures: {
       jsx: true,
@@ -10,10 +12,8 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   extends: ['./eslint-config/index.cjs', 'prettier'],
   settings: {
-    'import/resolver': {
-      node: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx'],
-      },
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts', '.tsx'],
     },
   },
   overrides: [
@@ -38,21 +38,6 @@ module.exports = {
       },
     },
     {
-      files: ['*.ts', '*.tsx'],
-      parser: '@typescript-eslint/parser',
-      extends: ['plugin:@typescript-eslint/recommended'],
-      rules: {
-        'no-shadow': 'off',
-        '@typescript-eslint/no-shadow': ['error'],
-        'import/no-unresolved': [
-          2,
-          {
-            ignore: ['payload-config', 'payload/generated-types'],
-          },
-        ],
-      },
-    },
-    {
       files: ['*.spec.ts'],
       rules: {
         '@typescript-eslint/no-use-before-define': 'off',
@@ -67,7 +52,6 @@ module.exports = {
     },
   ],
   rules: {
-    'import/no-extraneous-dependencies': ['error', { packageDir: './' }],
     'react/jsx-filename-extension': [2, { extensions: ['.js', '.jsx', '.ts', '.tsx'] }],
     'import/prefer-default-export': 'off',
     'react/prop-types': 'off',
@@ -79,15 +63,5 @@ module.exports = {
     'no-use-before-define': 'off',
     'arrow-body-style': 0,
     '@typescript-eslint/no-use-before-define': 'off',
-    'import/extensions': [
-      'error',
-      'ignorePackages',
-      {
-        js: 'never',
-        jsx: 'never',
-        ts: 'never',
-        tsx: 'never',
-      },
-    ],
   },
 };

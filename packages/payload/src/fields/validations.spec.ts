@@ -1,6 +1,6 @@
+import { jest } from '@jest/globals';
 import { text, textarea, password, select, point, number, relationship } from './validations.js';
 import { ValidateOptions } from './config/types.js';
-import { jest } from '@jest/globals';
 
 const t = jest.fn((string) => string);
 

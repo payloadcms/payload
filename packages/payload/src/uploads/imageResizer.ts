@@ -1,6 +1,5 @@
 import { UploadedFile } from 'express-fileupload';
 import filetype from 'file-type';
-const { fromBuffer } = filetype;
 import fs from 'fs';
 import sanitize from 'sanitize-filename';
 import sharp from 'sharp';
@@ -8,6 +7,8 @@ import { SanitizedCollectionConfig } from '../collections/config/types.js';
 import { PayloadRequest } from '../express/types.js';
 import fileExists from './fileExists.js';
 import { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types.js';
+
+const { fromBuffer } = filetype;
 
 type ResizeArgs = {
   req: PayloadRequest;

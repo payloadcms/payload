@@ -1,7 +1,7 @@
 import objectIDImp from 'bson-objectid';
+import { Field, FieldHook } from '../config/types.js';
 // Needed for ESM
 const ObjectID = 'default' in objectIDImp ? objectIDImp.default : objectIDImp;
-import { Field, FieldHook } from '../config/types.js';
 
 const generateID: FieldHook = ({ value }) => (value || new ObjectID().toHexString());
 

@@ -1,12 +1,12 @@
 import equal from 'deep-equal';
 import objectIDImp from 'bson-objectid';
-// Needed for ESM
-const ObjectID = 'default' in objectIDImp ? objectIDImp.default : objectIDImp;
 import getSiblingData from './getSiblingData.js';
 import reduceFieldsToValues from './reduceFieldsToValues.js';
 import { FormField, FieldAction, Fields } from './types.js';
 import deepCopyObject from '../../../../utilities/deepCopyObject.js';
 import { flattenRows, separateRows } from './rows.js';
+// Needed for ESM
+const ObjectID = 'default' in objectIDImp ? objectIDImp.default : objectIDImp;
 
 export function fieldReducer(state: Fields, action: FieldAction): Fields {
   switch (action.type) {

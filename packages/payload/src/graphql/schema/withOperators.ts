@@ -2,7 +2,13 @@ import { GraphQLBoolean, GraphQLInputObjectType, GraphQLString, GraphQLList, Gra
 import type { GraphQLType } from 'graphql';
 import { GraphQLJSON } from 'graphql-type-json';
 import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars';
-import { FieldAffectingData, NumberField, RadioField, RelationshipField, SelectField, optionIsObject } from '../../fields/config/types.js';
+import {
+  FieldAffectingData,
+  NumberField,
+  RadioField,
+  SelectField,
+  optionIsObject,
+} from '../../fields/config/types.js';
 import combineParentName from '../utilities/combineParentName.js';
 import formatName from '../utilities/formatName.js';
 import operators from './operators.js';

@@ -1,5 +1,4 @@
 import filetype from 'file-type';
-const { fromBuffer } = filetype;
 import mkdirp from 'mkdirp';
 import path from 'path';
 import sanitize from 'sanitize-filename';
@@ -15,25 +14,25 @@ import { FileData, FileToSave, ProbedImageSize } from './types.js';
 import canResizeImage from './canResizeImage.js';
 import isImage from './isImage.js';
 
+const { fromBuffer } = filetype;
+
 type Args<T> = {
-  config: SanitizedConfig,
-  collection: Collection
-  throwOnMissingFile?: boolean
-  req: PayloadRequest
-  data: T
-  overwriteExistingFiles?: boolean
-}
+  config: SanitizedConfig;
+  collection: Collection;
+  throwOnMissingFile?: boolean;
+  req: PayloadRequest;
+  data: T;
+  overwriteExistingFiles?: boolean;
+};
 
 type Result<T> = Promise<{
-  data: T
-  files: FileToSave[]
-}>
+  data: T;
+  files: FileToSave[];
+}>;
 
 export const generateFileData = async <T>({
   config,
-  collection: {
-    config: collectionConfig,
-  },
+  collection: { config: collectionConfig },
   req,
   data,
   throwOnMissingFile,
@@ -56,7 +55,8 @@ export const generateFileData = async <T>({
     };
   }
 
-  const { staticDir, imageSizes, disableLocalStorage, resizeOptions, formatOptions, trimOptions } = collectionConfig.upload;
+  const { staticDir, imageSizes, disableLocalStorage, resizeOptions, formatOptions, trimOptions } =
+    collectionConfig.upload;
 
   let staticPath = staticDir;
   if (staticDir.indexOf('/') !== 0) {
@@ -70,7 +70,7 @@ export const generateFileData = async <T>({
   let newData = data;
   const filesToSave: FileToSave[] = [];
   const fileData: Partial<FileData> = {};
-  const fileIsAnimated = (file.mimetype === 'image/gif') || (file.mimetype === 'image/webp');
+  const fileIsAnimated = file.mimetype === 'image/gif' || file.mimetype === 'image/webp';
 
   try {
     const fileSupportsResize = canResizeImage(file.mimetype);
@@ -93,8 +93,7 @@ export const generateFileData = async <T>({
       }
 
       if (resizeOptions) {
-        sharpFile = sharpFile
-          .resize(resizeOptions);
+        sharpFile = sharpFile.resize(resizeOptions);
       }
       if (formatOptions) {
         sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options);
@@ -142,7 +141,12 @@ export const generateFileData = async <T>({
     fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`;
 
     if (!overwriteExistingFiles) {
-      fsSafeName = await getSafeFileName(req.payload, collectionConfig.slug, staticPath, fsSafeName);
+      fsSafeName = await getSafeFileName(
+        req.payload,
+        collectionConfig.slug,
+        staticPath,
+        fsSafeName,
+      );
     }
 
     fileData.filename = fsSafeName;

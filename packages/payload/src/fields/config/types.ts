@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import { CSSProperties } from 'react';
+import React, { CSSProperties } from 'react';
 import { Editor } from 'slate';
 import type { i18n as Ii18n, TFunction } from 'i18next';
 import type { EditorProps } from '@monaco-editor/react';

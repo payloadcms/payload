@@ -3,7 +3,7 @@
 **/.hg
 **/node_modules
 build
-/dist*/
+**/dist/**
 **/.yarn/**
 **/.pnp.*
 .tmp

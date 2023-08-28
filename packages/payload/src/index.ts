@@ -3,6 +3,7 @@ import { InitOptions } from './config/types.js';
 import { initHTTP } from './initHTTP.js';
 import { Payload as LocalPayload, BasePayload } from './payload.js';
 import 'isomorphic-fetch'
+
 export type { RequestContext } from './express/types.js';
 
 export { getPayload } from './payload.js';

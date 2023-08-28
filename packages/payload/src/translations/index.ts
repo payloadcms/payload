@@ -24,6 +24,7 @@ import ua from './ua.json' assert { type: "json" };
 import vi from './vi.json' assert { type: "json" };
 import zh from './zh.json' assert { type: "json" };
 import hu from './hu.json' assert { type: "json" };
+
 export default {
   ar,
   az,

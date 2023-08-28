@@ -1,4 +1,5 @@
 import pluralize from 'pluralize-esm';
+
 const { singular, isPlural } = pluralize;
 
 const capitalizeFirstLetter = (string: string): string => string.charAt(0).toUpperCase() + string.slice(1);

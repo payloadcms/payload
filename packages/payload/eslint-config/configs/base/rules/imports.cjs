@@ -31,7 +31,7 @@ module.exports = {
 
     // ensure imports point to files/modules that can be resolved
     // https://github.com/benmosher/eslint-plugin-import/blob/master/docs/rules/no-unresolved.md
-    'import/no-unresolved': ['error', { commonjs: true, caseSensitive: true }],
+    // 'import/no-unresolved': ['error', { caseSensitive: true }],
 
     // ensure named imports coupled with named exports
     // https://github.com/benmosher/eslint-plugin-import/blob/master/docs/rules/named.md#when-not-to-use-it
@@ -75,7 +75,7 @@ module.exports = {
 
     // disallow require()
     // https://github.com/benmosher/eslint-plugin-import/blob/master/docs/rules/no-commonjs.md
-    'import/no-commonjs': 'off',
+    'import/no-commonjs': 'error',
 
     // disallow AMD require/define
     // https://github.com/benmosher/eslint-plugin-import/blob/master/docs/rules/no-amd.md
@@ -109,7 +109,7 @@ module.exports = {
     // Ensure consistent use of file extension within the import path
     // https://github.com/benmosher/eslint-plugin-import/blob/master/docs/rules/extensions.md
     'import/extensions': ['error', 'ignorePackages', {
-      js: 'never',
+      js: 'always',
       mjs: 'never',
       jsx: 'never',
     }],

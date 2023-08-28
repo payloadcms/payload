@@ -1,7 +1,5 @@
 /* eslint-disable no-param-reassign */
 import objectIDImp from 'bson-objectid';
-// Needed for ESM
-const ObjectID = 'default' in objectIDImp ? objectIDImp.default : objectIDImp;
 import type { TFunction } from 'i18next';
 import { User } from '../../../../../auth/types.js';
 import {
@@ -13,6 +11,8 @@ import {
 import getValueWithDefault from '../../../../../fields/getDefaultValue.js';
 import { Fields, FormField, Data } from '../types.js';
 import { iterateFields } from './iterateFields.js';
+// Needed for ESM
+const ObjectID = 'default' in objectIDImp ? objectIDImp.default : objectIDImp;
 
 type Args = {
   field: NonPresentationalField

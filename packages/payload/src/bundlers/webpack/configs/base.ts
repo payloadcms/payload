@@ -1,10 +1,10 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import webpack, { Configuration } from 'webpack';
-import type { SanitizedConfig } from '../../../config/types.js';
 import { fileURLToPath } from 'url';
 import path, { dirname, join, parse, resolve } from 'path';
 import { createRequire } from 'node:module';
 import { existsSync } from 'fs';
+import type { SanitizedConfig } from '../../../config/types.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(__filename);
@@ -117,10 +117,10 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
     new webpack.HotModuleReplacementPlugin(),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     // This fixes esm: https://github.com/vercel/next.js/issues/41961#issuecomment-1311091390
-    new webpack.NormalModuleReplacementPlugin(/\.js$/, function (
+    new webpack.NormalModuleReplacementPlugin(/\.js$/, ((
       /** @type {{ context: string, request: string }} */
       resource
-    ) {
+    ) => {
       // Skip a non relative import (e.g. a bare import specifier).
       if (resource.request.startsWith(".")) {
         const path = resolve(resource.context, resource.request);
@@ -144,6 +144,6 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
           }
         }
       }
-    })
+    }))
   ],
 });

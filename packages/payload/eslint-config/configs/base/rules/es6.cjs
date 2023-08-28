@@ -47,7 +47,10 @@ module.exports = {
 
     // disallow duplicate class members
     // https://eslint.org/docs/rules/no-dupe-class-members
-    'no-dupe-class-members': 'error',
+        'no-dupe-class-members': 'off',
+    '@typescript-eslint/no-dupe-class-members': 'error',
+
+    '@typescript-eslint/ban-ts-comment': 'off',
 
     // disallow importing from the same path more than once
     // https://eslint.org/docs/rules/no-duplicate-imports

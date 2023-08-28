@@ -1,4 +1,5 @@
 import objectIDImp from 'bson-objectid';
+
 const ObjectID = 'default' in objectIDImp ? objectIDImp.default : objectIDImp;
 
 export const isValidID = (value: string | number, type: 'text' | 'number' | 'ObjectID'): boolean => {
