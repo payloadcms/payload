@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers.js';
 import type { Relation } from './config.js';
 import config, { customIdNumberSlug, customIdSlug, errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js';
-import payload from '../../src.js';
+import payload from '../../src/index.js';
 import { RESTClient } from '../helpers/rest.js';
 import type { ErrorOnHook, Post } from './payload-types.js';
 import { mapAsync } from '../../src/utilities/mapAsync.js';

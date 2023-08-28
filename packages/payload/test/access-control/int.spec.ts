@@ -1,6 +1,6 @@
-import payload from '../../src.js';
-import { Forbidden } from '../../src/errors.js';
-import type { PayloadRequest } from '../../src/types.js';
+import payload from '../../src/index.js';
+import { Forbidden } from '../../src/errors/index.js';
+import type { PayloadRequest } from '../../src/types/index.js';
 import { initPayloadTest } from '../helpers/configHelpers.js';
 import {
   hiddenAccessSlug,
