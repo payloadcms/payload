@@ -12,6 +12,7 @@ import { initTransaction } from '../../utilities/initTransaction.js';
 import { killTransaction } from '../../utilities/killTransaction.js';
 import { buildAfterOperation } from './utils.js';
 
+// Needed for ESM/CJS compatibility
 const memoize = 'default' in memoizeImp ? memoizeImp.default : memoizeImp;
 
 export type Arguments = {
