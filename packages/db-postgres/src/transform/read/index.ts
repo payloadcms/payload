@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
-import { Field } from 'payload/types';
-import { TypeWithID } from 'payload/types';
-import { SanitizedConfig } from 'payload/config';
+import { Field } from '@alessiogr/payloadtest/types';
+import { TypeWithID } from '@alessiogr/payloadtest/types';
+import { SanitizedConfig } from '@alessiogr/payloadtest/config';
 import { traverseFields } from './traverseFields.js';
 import { createRelationshipMap } from '../../utilities/createRelationshipMap.js';
 import { mergeLocales } from './mergeLocales.js';

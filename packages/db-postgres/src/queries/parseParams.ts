@@ -1,8 +1,8 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
-import { Operator, Where } from 'payload/types';
-import { Field } from 'payload/types';
-import { validOperators } from 'payload/types';
+import { Operator, Where } from '@alessiogr/payloadtest/types';
+import { Field } from '@alessiogr/payloadtest/types';
+import { validOperators } from '@alessiogr/payloadtest/types';
 import { and, SQL } from 'drizzle-orm';
 import { buildSearchParam } from './buildSearchParams.js';
 import { buildAndOrConditions } from './buildAndOrConditions.js';

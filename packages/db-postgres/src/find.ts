@@ -1,8 +1,8 @@
 import { sql } from 'drizzle-orm';
 import toSnakeCase from 'to-snake-case';
-import type { Find } from 'payload/database';
-import type { PayloadRequest } from 'payload/types';
-import type { SanitizedCollectionConfig } from 'payload/types';
+import type { Find } from '@alessiogr/payloadtest/database';
+import type { PayloadRequest } from '@alessiogr/payloadtest/types';
+import type { SanitizedCollectionConfig } from '@alessiogr/payloadtest/types';
 import buildQuery from './queries/buildQuery.js';
 
 export const find: Find = async function find({

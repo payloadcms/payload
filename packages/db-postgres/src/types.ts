@@ -1,8 +1,8 @@
 import { ColumnBaseConfig, ColumnDataType, Relation, Relations } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { PgColumn, PgEnum, PgTableWithColumns } from 'drizzle-orm/pg-core';
-import { Payload } from 'payload';
-import { DatabaseAdapter } from 'payload/database';
+import { Payload } from '@alessiogr/payloadtest';
+import { DatabaseAdapter } from '@alessiogr/payloadtest/database';
 import { ClientConfig, PoolConfig } from 'pg';
 
 export type DrizzleDB = NodePgDatabase<Record<string, never>>

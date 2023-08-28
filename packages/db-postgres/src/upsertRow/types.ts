@@ -1,4 +1,4 @@
-import { Field } from 'payload/types';
+import { Field } from '@alessiogr/payloadtest/types';
 import { SQL } from 'drizzle-orm';
 import { GenericColumn, PostgresAdapter } from '../types.js';
 

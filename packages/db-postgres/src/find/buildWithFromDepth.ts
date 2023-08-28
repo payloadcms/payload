@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { SanitizedConfig } from 'payload/config';
+import { SanitizedConfig } from '@alessiogr/payloadtest/config';
 import { buildFindManyArgs } from './buildFindManyArgs.js';
 import { PostgresAdapter } from '../types.js';
 

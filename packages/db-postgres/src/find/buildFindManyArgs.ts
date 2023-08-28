@@ -1,7 +1,7 @@
-import { ArrayField, Block } from 'payload/types';
+import { ArrayField, Block } from '@alessiogr/payloadtest/types';
 import toSnakeCase from 'to-snake-case';
-import { SanitizedCollectionConfig } from 'payload/types';
-import { SanitizedConfig } from 'payload/config';
+import { SanitizedCollectionConfig } from '@alessiogr/payloadtest/types';
+import { SanitizedConfig } from '@alessiogr/payloadtest/config';
 import { DBQueryConfig } from 'drizzle-orm';
 import { traverseFields } from './traverseFields.js';
 import { buildWithFromDepth } from './buildWithFromDepth.js';

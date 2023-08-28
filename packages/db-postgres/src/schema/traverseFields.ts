@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
 import { integer, text, varchar, numeric, IndexBuilder, PgNumericBuilder, PgVarcharBuilder, jsonb } from 'drizzle-orm/pg-core';
-import { Field } from 'payload/types';
+import { Field } from '@alessiogr/payloadtest/types';
 import toSnakeCase from 'to-snake-case';
-import { fieldAffectsData } from 'payload/types';
+import { fieldAffectsData } from '@alessiogr/payloadtest/types';
 import { Relation, relations } from 'drizzle-orm';
 import { GenericColumns, PostgresAdapter } from '../types.js';
 import { createIndex } from './createIndex.js';

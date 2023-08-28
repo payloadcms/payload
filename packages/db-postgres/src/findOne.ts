@@ -1,10 +1,10 @@
 import toSnakeCase from 'to-snake-case';
-import type { FindOne } from 'payload/database';
-import type { PayloadRequest } from 'payload/types';
-import type { SanitizedCollectionConfig } from 'payload/types';
+import type { FindOne } from '@alessiogr/payloadtest/database';
+import type { PayloadRequest } from '@alessiogr/payloadtest/types';
+import type { SanitizedCollectionConfig } from '@alessiogr/payloadtest/types';
 import buildQuery from './queries/buildQuery.js';
 import { buildFindManyArgs } from './find/buildFindManyArgs.js';
-import { transform } from './transform/read.js';
+import { transform } from './transform/read/index.js';
 
 // @ts-ignore // TODO: Fix this
 export const findOne: FindOne = async function findOne({

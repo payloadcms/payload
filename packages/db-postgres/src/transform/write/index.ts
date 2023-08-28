@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { Field } from 'payload/types';
+import { Field } from '@alessiogr/payloadtest/types';
 import { traverseFields } from './traverseFields.js';
 import { RowToInsert } from './types.js';
 
