@@ -207,7 +207,8 @@ module.exports = {
     'no-proto': 'error',
 
     // disallow declaring the same variable more then once
-    'no-redeclare': 'error',
+    'no-redeclare': 'off',
+    '@typescript-eslint/no-redeclare': 'error',
 
     // disallow certain object properties
     // https://eslint.org/docs/rules/no-restricted-properties
