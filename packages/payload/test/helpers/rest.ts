@@ -2,9 +2,11 @@
 import qs from 'qs';
 import fetch from 'node-fetch';
 import type { Config } from '../../src/config/types.js';
-import type { Where } from '../../src/types.js';
+import type { Where } from '../../src/types/index.js';
 import { devUser } from '../credentials.js';
 import type { PaginatedDocs } from '../../src/database/types.js';
+
+const fetchToUse = 'default' in fetch ? fetch.default : fetch;
 
 type Args = {
   serverURL: string;
@@ -131,7 +133,7 @@ export class RESTClient {
       collection: 'users',
     };
 
-    const response = await fetch(`${this.serverURL}/api/${args.collection}/login`, {
+    const response = await fetchToUse(`${this.serverURL}/api/${args.collection}/login`, {
       body: JSON.stringify({
         email: args.email,
         password: args.password,
@@ -159,7 +161,7 @@ export class RESTClient {
       collection: 'users',
     };
 
-    await fetch(`${this.serverURL}/api/${args.collection}/logout`, {
+    await fetchToUse(`${this.serverURL}/api/${args.collection}/logout`, {
       headers,
       method: 'POST',
     });
@@ -182,7 +184,7 @@ export class RESTClient {
     }
 
     const slug = args.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/${slug}`, options);
+    const response = await fetchToUse(`${this.serverURL}/api/${slug}`, options);
     const { status } = response;
     const { doc } = await response.json();
     return { status, doc };
@@ -206,7 +208,7 @@ export class RESTClient {
     });
 
     const slug = args?.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/${slug}${whereQuery}`, options);
+    const response = await fetchToUse(`${this.serverURL}/api/${slug}${whereQuery}`, options);
     const { status } = response;
     const result = await response.json();
     if (result.errors) throw new Error(result.errors[0].message);
@@ -228,7 +230,7 @@ export class RESTClient {
 
     const formattedQs = qs.stringify(query);
     const slug = args.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/${slug}/${id}${formattedQs}`, options);
+    const response = await fetchToUse(`${this.serverURL}/api/${slug}/${id}${formattedQs}`, options);
     const { status } = response;
     const json = await response.json();
     return { status, doc: json.doc, errors: json.errors };
@@ -253,7 +255,7 @@ export class RESTClient {
     });
 
     const slug = args?.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/${slug}${formattedQs}`, options);
+    const response = await fetchToUse(`${this.serverURL}/api/${slug}${formattedQs}`, options);
     const { status } = response;
     const json = await response.json();
     return { status, docs: json.docs, errors: json.errors };
@@ -277,7 +279,7 @@ export class RESTClient {
     });
 
     const slug = args?.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/${slug}${formattedQs}`, options);
+    const response = await fetchToUse(`${this.serverURL}/api/${slug}${formattedQs}`, options);
     const { status } = response;
     const json = await response.json();
     return { status, docs: json.docs, errors: json.errors };
@@ -294,7 +296,7 @@ export class RESTClient {
 
     const slug = args?.slug || this.defaultSlug;
     const formattedOpts = qs.stringify(args?.options || {}, { addQueryPrefix: true });
-    const response = await fetch(`${this.serverURL}/api/${slug}/${args.id}${formattedOpts}`, options);
+    const response = await fetchToUse(`${this.serverURL}/api/${slug}/${args.id}${formattedOpts}`, options);
     const { status } = response;
     const doc = await response.json();
     return { status, doc };
@@ -311,7 +313,7 @@ export class RESTClient {
     }
 
     const slug = args?.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/${slug}/${id}`, options);
+    const response = await fetchToUse(`${this.serverURL}/api/${slug}/${id}`, options);
     const { status } = response;
     const doc = await response.json();
     return { status, doc };
@@ -327,7 +329,7 @@ export class RESTClient {
     }
 
     const slug = args?.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/globals/${slug}`, options);
+    const response = await fetchToUse(`${this.serverURL}/api/globals/${slug}`, options);
     const { status } = response;
     const doc = await response.json();
     return { status, doc };
@@ -346,7 +348,7 @@ export class RESTClient {
     }
 
     const slug = args?.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/globals/${slug}`, options);
+    const response = await fetchToUse(`${this.serverURL}/api/globals/${slug}`, options);
     const { status } = response;
     const { result } = await response.json();
     return { status, doc: result };
@@ -359,7 +361,7 @@ export class RESTClient {
       method,
     };
 
-    const response = await fetch(`${this.serverURL}${path}`, options);
+    const response = await fetchToUse(`${this.serverURL}${path}`, options);
     const { status } = response;
     const data = await response.json();
     return { status, data };
@@ -376,7 +378,7 @@ export class RESTClient {
       options.headers.Authorization = `JWT ${this.token}`;
     }
 
-    const response = await fetch(`${this.serverURL}${path}`, options);
+    const response = await fetchToUse(`${this.serverURL}${path}`, options);
     const { status } = response;
     const data = await response.json();
     return { status, data };

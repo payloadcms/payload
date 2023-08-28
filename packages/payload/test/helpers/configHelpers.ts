@@ -6,7 +6,7 @@ import shelljs from 'shelljs';
 import express from 'express';
 import type { CollectionConfig } from '../../src/collections/config/types.js';
 import type { InitOptions } from '../../src/config/types.js';
-import payload from '../../src.js';
+import payload from '../../src/index.js';
 
 type Options = {
   __dirname: string;
