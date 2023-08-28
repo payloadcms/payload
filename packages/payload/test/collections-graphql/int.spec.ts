@@ -1,7 +1,7 @@
 import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers.js';
 import configPromise, { pointSlug, slug } from './config.js';
-import payload from '../../src.js';
+import payload from '../../src/index.js';
 import type { Post } from './payload-types.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);

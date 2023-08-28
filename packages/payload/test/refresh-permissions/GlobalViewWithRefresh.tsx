@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { useAuth } from '../../src/admin/components/utilities/Auth.js';
+import { useAuth } from '../../src/admin/components/utilities/Auth/index.js';
 import { Props } from '../../src/admin/components/views/Global/types.js';
 import DefaultGlobalView from '../../src/admin/components/views/Global/Default.js';
 

@@ -1,6 +1,6 @@
 import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers.js';
-import payload from '../../src.js';
+import payload from '../../src/index.js';
 import type { LocalizedPost, WithLocalizedRelationship } from './payload-types.js';
 import configPromise, {
   localizedPostsSlug,
@@ -18,8 +18,8 @@ import {
   spanishLocale,
   spanishTitle,
 } from './shared.js';
-import type { Where } from '../../src/types.js';
-import { arrayCollectionSlug } from './collections/Array.js';
+import type { Where } from '../../src/types/index.js';
+import { arrayCollectionSlug } from './collections/Array/index.js';
 import type { Config } from '../../src/config/types.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);

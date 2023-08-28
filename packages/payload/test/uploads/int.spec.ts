@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import FormData from 'form-data';
-import payload from '../../src.js';
+import payload from '../../src/index.js';
 import getFileByPath from '../../src/uploads/getFileByPath.js';
 import { initPayloadTest } from '../helpers/configHelpers.js';
 import { RESTClient } from '../helpers/rest.js';

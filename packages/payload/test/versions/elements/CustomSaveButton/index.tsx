@@ -4,7 +4,7 @@ import { CustomPublishButtonProps } from '../../../../src/admin/components/eleme
 // In your projects, you can import as follows:
 // import { CustomPublishButtonProps } from 'payload/types';
 
-import classes from './index.module.scss.js';
+import classes from './index.module.scss';
 
 export const CustomPublishButton: CustomPublishButtonProps = ({ DefaultButton, ...rest }) => {
   return (

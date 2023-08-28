@@ -14,7 +14,6 @@ import { defaultNumber, numberDoc } from './collections/Number/index.js';
 import { dateDoc } from './collections/Date/index.js';
 import type { RichTextField } from './payload-types.js';
 import type { PaginatedDocs } from '../../src/database/types.js';
-import type { mongooseAdapter } from '../../../db-mongodb/src/index.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

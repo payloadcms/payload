@@ -2,12 +2,12 @@ import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { relationSlug, mediaSlug, audioSlug, adminThumbnailSlug } from './config.js';
 import type { Media } from './payload-types.js';
-import payload from '../../src.js';
+import payload from '../../src/index.js';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js';
 import { initPayloadE2E } from '../helpers/configHelpers.js';
 import { saveDocAndAssert } from '../helpers.js';
 import wait from '../../src/utilities/wait.js';
-import { adminThumbnailSrc } from './collections/admin-thumbnail.js';
+import { adminThumbnailSrc } from './collections/admin-thumbnail/index.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

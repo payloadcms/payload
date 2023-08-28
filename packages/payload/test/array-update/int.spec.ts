@@ -1,5 +1,5 @@
 import { initPayloadTest } from '../helpers/configHelpers.js';
-import payload from '../../src.js';
+import payload from '../../src/index.js';
 import configPromise from './config.js';
 import path from 'path';
 

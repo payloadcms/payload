@@ -1,6 +1,6 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
 import { devUser } from '../credentials.js';
-import { ArrayCollection } from './collections/Array.js';
+import { ArrayCollection } from './collections/Array/index.js';
 import { LocalizedPost } from './payload-types.js';
 import {
   defaultLocale,

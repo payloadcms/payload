@@ -1,5 +1,5 @@
 import sanitizeFields from './sanitize.js';
-import { MissingFieldType, InvalidFieldRelationship, InvalidFieldName } from '../../errors.js';
+import { MissingFieldType, InvalidFieldRelationship, InvalidFieldName } from '../../errors/index.js';
 import { ArrayField, Block, BlockField, CheckboxField, Field, NumberField, TextField } from './types.js';
 
 describe('sanitizeFields', () => {

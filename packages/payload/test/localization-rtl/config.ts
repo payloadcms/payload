@@ -1,9 +1,8 @@
 import { devUser } from '../credentials.js';
-import { localization } from './localization.js';
 import { Users } from './collections/users.js';
 import { Posts } from './collections/posts.js';
 import en from '../../src/translations/en.json';
-import { ar } from './ar.js';
+import { ar } from './ar.js' assert { type: "json" };
 import deepMerge from './deepMerge.js';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
 

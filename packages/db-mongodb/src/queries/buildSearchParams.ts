@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-import objectID from 'bson-objectid';
+import objectIDImp from 'bson-objectid';
+const ObjectID = 'default' in objectIDImp ? objectIDImp.default : objectIDImp;
 import { getLocalizedPaths } from '@alessiogr/payloadtest/database';
 import { Field, fieldAffectsData } from '@alessiogr/payloadtest/types';
 import { PathToQuery } from '@alessiogr/payloadtest/database';
@@ -197,7 +198,7 @@ export async function buildSearchParam({
 
         if (typeof formattedValue === 'string') {
           if (mongoose.Types.ObjectId.isValid(formattedValue)) {
-            result.value.$or.push({ [path]: { [operatorKey]: objectID(formattedValue) } });
+            result.value.$or.push({ [path]: { [operatorKey]: ObjectID(formattedValue) } });
           } else {
             (Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach((relationTo) => {
               const isRelatedToCustomNumberID = payload.collections[relationTo]?.config?.fields.find((relatedField) => {

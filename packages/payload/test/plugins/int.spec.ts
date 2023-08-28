@@ -1,7 +1,7 @@
 import { initPayloadTest } from '../helpers/configHelpers.js';
 import { RESTClient } from '../helpers/rest.js';
 import configPromise, { pagesSlug } from './config.js';
-import payload from '../../src.js';
+import payload from '../../src/index.js';
 import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

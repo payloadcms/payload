@@ -3,7 +3,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
 import { devUser } from '../credentials.js';
 import { mapAsync } from '../../src/utilities/mapAsync.js';
 import { FilterOptionsProps } from '../../src/fields/config/types.js';
-import { PrePopulateFieldUI } from './PrePopulateFieldUI.js';
+import { PrePopulateFieldUI } from './PrePopulateFieldUI/index.js';
 import { relationOneSlug, relationTwoSlug, relationRestrictedSlug, relationWithTitleSlug, relationUpdatedExternallySlug, collection1Slug, collection2Slug, slug } from './collectionSlugs.js';
 
 export interface FieldsRelationship {

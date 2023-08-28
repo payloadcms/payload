@@ -3,9 +3,9 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
 import { devUser } from '../credentials.js';
 import getFileByPath from '../../src/uploads/getFileByPath.js';
 import removeFiles from '../helpers/removeFiles.js';
-import { Uploads1 } from './collections/Upload1.js';
-import Uploads2 from './collections/Upload2.js';
-import AdminThumbnailCol from './collections/admin-thumbnail.js';
+import { Uploads1 } from './collections/Upload1/index.js';
+import Uploads2 from './collections/Upload2/index.js';
+import AdminThumbnailCol from './collections/admin-thumbnail/index.js'
 const _dirname = path.dirname(new URL(import.meta.url).pathname);
 
 export const mediaSlug = 'media';

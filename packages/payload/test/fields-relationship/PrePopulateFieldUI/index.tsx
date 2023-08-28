@@ -1,5 +1,5 @@
 import * as React from 'react';
-import useField from '../../../src/admin/components/forms/useField.js';
+import useField from '../../../src/admin/components/forms/useField/index.js';
 import { collection1Slug } from '../collectionSlugs.js';
 
 export const PrePopulateFieldUI: React.FC<{ path: string, hasMany?: boolean, hasMultipleRelations?: boolean }> = ({ path, hasMany = true, hasMultipleRelations = false }) => {

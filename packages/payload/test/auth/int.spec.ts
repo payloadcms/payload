@@ -1,11 +1,10 @@
-import mongoose from 'mongoose';
 import jwtDecode from 'jwt-decode';
 import { GraphQLClient } from 'graphql-request';
-import payload from '../../src.js';
+import payload from '../../src/index.js';
 import { initPayloadTest } from '../helpers/configHelpers.js';
 import { namedSaveToJWTValue, saveToJWTKey, slug } from './config.js';
 import { devUser } from '../credentials.js';
-import type { User } from '../../src/auth.js';
+import type { User } from '../../src/auth/types.js';
 import path from 'path';
 import configPromise from '../collections-graphql/config.js';
 

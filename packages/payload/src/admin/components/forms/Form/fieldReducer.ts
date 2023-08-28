@@ -1,5 +1,7 @@
 import equal from 'deep-equal';
-import ObjectID from 'bson-objectid';
+import objectIDImp from 'bson-objectid';
+// Needed for ESM
+const ObjectID = 'default' in objectIDImp ? objectIDImp.default : objectIDImp;
 import getSiblingData from './getSiblingData.js';
 import reduceFieldsToValues from './reduceFieldsToValues.js';
 import { FormField, FieldAction, Fields } from './types.js';
@@ -119,7 +121,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         0,
         // new row
         {
-          id: new (ObjectID as any)().toHexString(),
+          id: new ObjectID().toHexString(),
           collapsed: false,
           blockType: blockType || undefined,
           childErrorPaths: new Set(),
@@ -160,7 +162,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
 
       const rowsMetadata = [...state[path]?.rows || []];
       rowsMetadata[rowIndex] = {
-        id: new (ObjectID as any)().toHexString(),
+        id: new ObjectID().toHexString(),
         collapsed: false,
         blockType: blockType || undefined,
         childErrorPaths: new Set(),
@@ -197,10 +199,10 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       const rowsMetadata = state[path]?.rows || [];
 
       const duplicateRowMetadata = deepCopyObject(rowsMetadata[rowIndex]);
-      if (duplicateRowMetadata.id) duplicateRowMetadata.id = new (ObjectID as any)().toHexString();
+      if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectID().toHexString();
 
       const duplicateRowState = deepCopyObject(rows[rowIndex]);
-      if (duplicateRowState.id) duplicateRowState.id = new (ObjectID as any)().toHexString();
+      if (duplicateRowState.id) duplicateRowState.id = new ObjectID().toHexString();
 
       // If there are subfields
       if (Object.keys(duplicateRowState).length > 0) {

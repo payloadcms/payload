@@ -1,6 +1,6 @@
 import type { UpdateVersion } from '@alessiogr/payloadtest/database';
 import type { PayloadRequest } from '@alessiogr/payloadtest/types';
-import type { MongooseAdapter } from '.';
+import type { MongooseAdapter } from './index.js';
 import { withSession } from './withSession.js';
 
 export const updateVersion: UpdateVersion = async function updateVersion(

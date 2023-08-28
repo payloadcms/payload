@@ -1,6 +1,6 @@
 import { request, GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers.js';
-import payload from '../../src.js';
+import payload from '../../src/index.js';
 import configPromise from './config.js';
 import AutosavePosts from './collections/Autosave.js';
 import AutosaveGlobal from './globals/Autosave.js';

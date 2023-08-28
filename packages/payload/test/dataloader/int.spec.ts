@@ -1,5 +1,5 @@
 import { GraphQLClient } from 'graphql-request';
-import payload from '../../src.js';
+import payload from '../../src/index.js';
 import { devUser } from '../credentials.js';
 import { initPayloadTest } from '../helpers/configHelpers.js';
 import { postDoc } from './config.js';

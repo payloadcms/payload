@@ -1,5 +1,7 @@
 /* eslint-disable no-param-reassign */
-import ObjectID from 'bson-objectid';
+import objectIDImp from 'bson-objectid';
+// Needed for ESM
+const ObjectID = 'default' in objectIDImp ? objectIDImp.default : objectIDImp;
 import type { TFunction } from 'i18next';
 import { User } from '../../../../../auth/types.js';
 import {
@@ -84,7 +86,7 @@ export const addFieldStatePromise = async ({
         const arrayValue = Array.isArray(valueWithDefault) ? valueWithDefault : [];
         const { promises, rowMetadata } = arrayValue.reduce((acc, row, i) => {
           const rowPath = `${path}${field.name}.${i}.`;
-          row.id = row?.id || new (ObjectID as any)().toHexString();
+          row.id = row?.id || new ObjectID().toHexString();
 
           state[`${rowPath}id`] = {
             value: row.id,
@@ -152,7 +154,7 @@ export const addFieldStatePromise = async ({
           const rowPath = `${path}${field.name}.${i}.`;
 
           if (block) {
-            row.id = row?.id || new (ObjectID as any)().toHexString();
+            row.id = row?.id || new ObjectID().toHexString();
 
             state[`${rowPath}id`] = {
               value: row.id,

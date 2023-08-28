@@ -1,5 +1,4 @@
 import { randomBytes } from 'crypto';
-import mongoose from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers.js';
 import type { Relation } from './config.js';
 import config, { customIdNumberSlug, customIdSlug, errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js';

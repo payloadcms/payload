@@ -1,5 +1,4 @@
 import { randomBytes } from 'crypto';
-import mongoose from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers.js';
 import config, {
   chainedRelSlug,
@@ -9,7 +8,7 @@ import config, {
   relationSlug,
   slug,
 } from './config.js';
-import payload from '../../src.js';
+import payload from '../../src/index.js';
 import { RESTClient } from '../helpers/rest.js';
 import type {
   ChainedRelation,
