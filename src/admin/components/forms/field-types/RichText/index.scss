@@ -84,6 +84,11 @@
     .rich-text__editor {
       padding-left: $baseline;
       border-left: 1px solid var(--theme-elevation-100);
+      [dir = rtl] & {
+        border-left: none;
+        border-right: 1px solid var(--theme-elevation-100);
+
+      }
     }
   }
 
