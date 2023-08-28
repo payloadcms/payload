@@ -403,6 +403,78 @@ const result = await payload.updateGlobal({
 });
 ```
 
+## Next.js Conflict with Local API
+
+There is a known issue when using the Local API with Next.js version `13.4.13` and higher. Next.js executes each operation in a child process. That means that unless you explicitly initialize Payload within your operation, it will return an empty object. 
+
+As a workaround, we recommend leveraging the following pattern to determine and ensure Payload is initalized:
+
+```
+import dotenv from 'dotenv'
+import path from 'path'
+import type { Payload } from 'payload'
+import payload from 'payload'
+import type { InitOptions } from 'payload/config'
+
+import { seed as seedData } from './seed'
+
+dotenv.config({
+  path: path.resolve(__dirname, '../.env'),
+})
+
+let cached = (global as any).payload
+
+if (!cached) {
+  cached = (global as any).payload = { client: null, promise: null }
+}
+
+interface Args {
+  initOptions?: Partial<InitOptions>
+  seed?: boolean
+}
+
+export const getPayloadClient = async ({ initOptions, seed }: Args = {}): Promise<Payload> => {
+  if (!process.env.MONGODB_URI) {
+    throw new Error('MONGODB_URI environment variable is missing')
+  }
+
+  if (!process.env.PAYLOAD_SECRET) {
+    throw new Error('PAYLOAD_SECRET environment variable is missing')
+  }
+
+  if (cached.client) {
+    return cached.client
+  }
+
+  if (!cached.promise) {
+    cached.promise = payload.init({
+      mongoURL: process.env.MONGODB_URI,
+      secret: process.env.PAYLOAD_SECRET,
+      local: initOptions?.express ? false : true,
+      ...(initOptions || {}),
+    })
+  }
+
+  try {
+    cached.client = await cached.promise
+
+    if (seed) {
+      payload.logger.info('---- SEEDING DATABASE ----')
+      process.env.PAYLOAD_DROP_DATABASE = 'true'
+      await seedData(payload)
+      process.env.PAYLOAD_DROP_DATABASE = 'false'
+    }
+  } catch (e: unknown) {
+    cached.promise = null
+    throw e
+  }
+
+  return cached.client
+}
+```
+
+To checkout how this works in a project, take a look at our [custom server example](https://github.com/payloadcms/payload/blob/master/examples/custom-server/src/getPayload.ts).
+
 ## Example Script using Local API
 
 The Local API is especially useful for running scripts
