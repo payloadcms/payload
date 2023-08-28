@@ -22,62 +22,60 @@ const sendEmail = async (beforeChangeData: any, formConfig: PluginConfig): Promi
         locale,
       })
 
-      if (form) {
-        const { emails } = form
+      const { emails } = form
 
-        if (emails) {
-          const formattedEmails: FormattedEmail[] = emails.map(
-            (email: Email): FormattedEmail | null => {
-              const {
-                message,
-                subject,
-                emailTo,
-                cc: emailCC,
-                bcc: emailBCC,
-                emailFrom,
-                replyTo: emailReplyTo,
-              } = email
+      if (emails && emails.length) {
+        const formattedEmails: FormattedEmail[] = emails.map(
+          (email: Email): FormattedEmail | null => {
+            const {
+              message,
+              subject,
+              emailTo,
+              cc: emailCC,
+              bcc: emailBCC,
+              emailFrom,
+              replyTo: emailReplyTo,
+            } = email
 
-              const to = replaceDoubleCurlys(emailTo, submissionData)
-              const cc = emailCC ? replaceDoubleCurlys(emailCC, submissionData) : ''
-              const bcc = emailBCC ? replaceDoubleCurlys(emailBCC, submissionData) : ''
-              const from = replaceDoubleCurlys(emailFrom, submissionData)
-              const replyTo = replaceDoubleCurlys(emailReplyTo || emailFrom, submissionData)
+            const to = replaceDoubleCurlys(emailTo, submissionData)
+            const cc = emailCC ? replaceDoubleCurlys(emailCC, submissionData) : ''
+            const bcc = emailBCC ? replaceDoubleCurlys(emailBCC, submissionData) : ''
+            const from = replaceDoubleCurlys(emailFrom, submissionData)
+            const replyTo = replaceDoubleCurlys(emailReplyTo || emailFrom, submissionData)
 
-              return {
-                to,
-                from,
-                cc,
-                bcc,
-                replyTo,
-                subject: replaceDoubleCurlys(subject, submissionData),
-                html: `<div>${serialize(message, submissionData)}</div>`,
-              }
-            },
-          )
+            return {
+              to,
+              from,
+              cc,
+              bcc,
+              replyTo,
+              subject: replaceDoubleCurlys(subject, submissionData),
+              html: `<div>${serialize(message, submissionData)}</div>`,
+            }
+          },
+        )
 
-          let emailsToSend = formattedEmails
+        let emailsToSend = formattedEmails
 
-          if (typeof beforeEmail === 'function') {
-            emailsToSend = await beforeEmail(formattedEmails)
-          }
-
-          // const log = emailsToSend.map(({ html, ...rest }) => ({ ...rest }))
-
-          await Promise.all(
-            emailsToSend.map(async email => {
-              const { to } = email
-              try {
-                const emailPromise = await payload.sendEmail(email)
-                return emailPromise
-              } catch (err: unknown) {
-                payload.logger.error({
-                  err: `Error while sending email to address: ${to}. Email not sent: ${err}`,
-                })
-              }
-            }),
-          )
+        if (typeof beforeEmail === 'function') {
+          emailsToSend = await beforeEmail(formattedEmails)
         }
+
+        // const log = emailsToSend.map(({ html, ...rest }) => ({ ...rest }))
+
+        await Promise.all(
+          emailsToSend.map(async email => {
+            const { to } = email
+            try {
+              const emailPromise = await payload.sendEmail(email)
+              return emailPromise
+            } catch (err: unknown) {
+              payload.logger.error({
+                err: `Error while sending email to address: ${to}. Email not sent: ${err}`,
+              })
+            }
+          }),
+        )
       } else {
         payload.logger.info({ msg: 'No emails to send.' })
       }
