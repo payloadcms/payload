@@ -14,7 +14,7 @@ describe('Postgres', () => {
     let person1;
     let person2;
 
-    it('creates a complex doc', async () => {
+    beforeAll(async () => {
       page1 = await payload.create({
         collection: 'pages',
         data: {
@@ -42,7 +42,9 @@ describe('Postgres', () => {
           fullName: 'Elliot DeNolf',
         },
       });
+    });
 
+    it('creates a complex doc', async () => {
       const postTitleEN = 'hello';
 
       post = await payload.create({
@@ -322,6 +324,24 @@ describe('Postgres', () => {
       expect(postAllLocales.relationHasMany.es[1]).toStrictEqual(page1.id);
       expect(postAllLocales.relationHasManyPoly.es[0].value).toStrictEqual(page1.id);
       expect(postAllLocales.relationHasManyPoly.es[1].value).toStrictEqual(person1.id);
+    });
+
+    it('sort asc', async () => {
+      const { docs: people } = await payload.find({
+        collection: 'people',
+        sort: 'fullName',
+      });
+      expect(people[0].fullName).toEqual('Dan Ribbens');
+      expect(people[1].fullName).toEqual('Elliot DeNolf');
+    });
+
+    it('sort desc', async () => {
+      const { docs: people } = await payload.find({
+        collection: 'people',
+        sort: '-fullName',
+      });
+      expect(people[0].fullName).toEqual('Elliot DeNolf');
+      expect(people[1].fullName).toEqual('Dan Ribbens');
     });
   });
 
