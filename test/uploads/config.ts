@@ -22,6 +22,7 @@ export const adminThumbnailSlug = 'admin-thumbnail';
 const mockModulePath = path.resolve(__dirname, './mocks/mockFSModule.js');
 
 export default buildConfigWithDefaults({
+  serverURL: undefined,
   admin: {
     webpack: (config) => ({
       ...config,
