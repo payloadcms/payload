@@ -1,3 +1,4 @@
+/** @type {import('jest').Config} */
 export default {
   verbose: true,
   testTimeout: 15000,
@@ -11,7 +12,7 @@ export default {
     'node_modules',
     'dist',
   ],
-  extensionsToTreatAsEsm: [".ts", ".tsx"],
+  extensionsToTreatAsEsm: [".ts", ".tsx", '.js', '.jsx'],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/src/bundlers/mocks/fileMock.js',
