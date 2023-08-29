@@ -18,6 +18,8 @@ module.exports = {
     'plugin:perfectionist/recommended-natural',
     'plugin:@typescript-eslint/strict',
     'plugin:regexp/recommended',
+    'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
     './configs/jest/index.cjs',
     './configs/react/index.cjs',
     'prettier',

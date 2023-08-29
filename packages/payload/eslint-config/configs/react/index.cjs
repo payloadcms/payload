@@ -19,7 +19,6 @@ module.exports = {
   },
   extends: [
     './rules/react-a11y.cjs',
-    './rules/react-hooks.cjs',
     './rules/react.cjs',
   ].map(require.resolve),
   rules: {},
