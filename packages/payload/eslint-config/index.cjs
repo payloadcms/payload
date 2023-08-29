@@ -14,9 +14,11 @@ module.exports = {
     },
   },
   extends: [
+    'eslint:recommended',
+    'plugin:perfectionist/recommended-natural',
+    'plugin:@typescript-eslint/strict',
     './configs/jest/index.cjs',
     './configs/react/index.cjs',
-    'plugin:@typescript-eslint/strict',
     'prettier',
   ],
   rules: {
@@ -33,6 +35,7 @@ module.exports = {
     '@typescript-eslint/no-use-before-define': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/consistent-type-imports': 'warn',
   },
   overrides: [
     {
