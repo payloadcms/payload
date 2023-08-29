@@ -21,7 +21,6 @@ if (testConfigDir) {
     .filter((f) => f.isDirectory())
     .forEach((dir) => {
       const suiteDir = path.resolve(testDir, dir.name);
-      console.log({ testDir, suiteDir, dirName: dir.name })
       const configFound = setPaths(suiteDir);
       if (configFound) generateTypes();
     });
