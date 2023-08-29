@@ -1,17 +1,19 @@
 /* eslint-disable no-param-reassign */
-import { Response } from 'express';
-import { SanitizedGlobalConfig } from '../../config/types.js';
-import { Document } from '../../../types/index.js';
-import { PayloadRequest } from '../../../express/types.js';
+import type { Response } from 'express';
+
+import type { PayloadRequest } from '../../../express/types.js';
+import type { Document } from '../../../types/index.js';
+import type { SanitizedGlobalConfig } from '../../config/types.js';
+
 import findVersionByID from '../../operations/findVersionByID.js';
 
 export type Resolver = (
   _: unknown,
   args: {
-    id: string | number
-    locale?: string
     draft?: boolean
     fallbackLocale?: string
+    id: number | string
+    locale?: string
   },
   context: {
     req: PayloadRequest,
@@ -25,11 +27,11 @@ export default function findVersionByIDResolver(globalConfig: SanitizedGlobalCon
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
     const options = {
-      id: args.id,
-      globalConfig,
-      req: context.req,
-      draft: args.draft,
       depth: 0,
+      draft: args.draft,
+      globalConfig,
+      id: args.id,
+      req: context.req,
     };
 
     const result = await findVersionByID(options);

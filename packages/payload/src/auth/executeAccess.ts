@@ -1,5 +1,6 @@
+import type { Access, AccessResult } from '../config/types.js';
+
 import { Forbidden } from '../errors/index.js';
-import { Access, AccessResult } from '../config/types.js';
 
 const executeAccess = async (operation, access: Access): Promise<AccessResult> => {
   if (access) {

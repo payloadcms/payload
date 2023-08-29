@@ -1,7 +1,7 @@
-import { Value } from './types.js';
+import type { Value } from './types.js';
 
 type RelationMap = {
-  [relation: string]: (string | number)[]
+  [relation: string]: (number | string)[]
 }
 
 type CreateRelationMap = (args: {

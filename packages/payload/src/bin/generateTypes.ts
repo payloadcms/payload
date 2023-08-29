@@ -2,9 +2,10 @@
 import fs from 'fs';
 import { compile } from 'json-schema-to-typescript';
 import * as url from 'node:url';
-import Logger from '../utilities/logger.js';
+
 import loadConfig from '../config/load.js';
 import { configToJSONSchema } from '../utilities/configToJSONSchema.js';
+import Logger from '../utilities/logger.js';
 
 export async function generateTypes(): Promise<void> {
   const logger = Logger();

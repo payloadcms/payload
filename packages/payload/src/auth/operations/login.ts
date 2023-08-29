@@ -1,26 +1,29 @@
+import type { CookieOptions, Response } from 'express';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+
 import jwt from 'jsonwebtoken';
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { CookieOptions, Response } from 'express';
-import { AuthenticationError, LockedAuth } from '../../errors/index.js';
-import { PayloadRequest } from '../../express/types.js';
-import getCookieExpiration from '../../utilities/getCookieExpiration.js';
-import isLocked from '../isLocked.js';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js';
-import { User } from '../types.js';
-import { Collection } from '../../collections/config/types.js';
-import { afterRead } from '../../fields/hooks/afterRead/index.js';
-import unlock from './unlock.js';
+
+import type { Collection } from '../../collections/config/types.js';
+import type { PayloadRequest } from '../../express/types.js';
+import type { User } from '../types.js';
+
 import { buildAfterOperation } from '../../collections/operations/utils.js';
-import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js';
-import { authenticateLocalStrategy } from '../strategies/local/authenticate.js';
-import { getFieldsToSign } from './getFieldsToSign.js';
+import { AuthenticationError, LockedAuth } from '../../errors/index.js';
+import { afterRead } from '../../fields/hooks/afterRead/index.js';
+import getCookieExpiration from '../../utilities/getCookieExpiration.js';
 import { initTransaction } from '../../utilities/initTransaction.js';
 import { killTransaction } from '../../utilities/killTransaction.js';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js';
+import isLocked from '../isLocked.js';
+import { authenticateLocalStrategy } from '../strategies/local/authenticate.js';
+import { incrementLoginAttempts } from '../strategies/local/incrementLoginAttempts.js';
+import { getFieldsToSign } from './getFieldsToSign.js';
+import unlock from './unlock.js';
 
 export type Result = {
-  user?: User,
-  token?: string,
   exp?: number,
+  token?: string,
+  user?: User,
 }
 
 export type Arguments = {
@@ -29,10 +32,10 @@ export type Arguments = {
     email: string
     password: string
   }
-  req: PayloadRequest
-  res?: Response
   depth?: number
   overrideAccess?: boolean
+  req: PayloadRequest
+  res?: Response
   showHiddenFields?: boolean
 }
 
@@ -50,8 +53,8 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
     args = (await hook({
       args,
-      operation: 'login',
       context: args.req.context,
+      operation: 'login',
     })) || args;
   }, Promise.resolve());
 
@@ -60,16 +63,16 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       config: collectionConfig,
     },
     data,
+    depth,
+    overrideAccess,
+    req,
     req: {
       payload,
       payload: {
-        secret,
         config,
+        secret,
       },
     },
-    req,
-    depth,
-    overrideAccess,
     showHiddenFields,
   } = args;
 
@@ -85,8 +88,8 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
       args = (await hook({
         args,
-        operation: 'login',
         context: args.req.context,
+        operation: 'login',
       })) || args;
     }, Promise.resolve());
 
@@ -100,8 +103,8 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
     let user = await payload.db.findOne<any>({
       collection: collectionConfig.slug,
-      where: { email: { equals: email.toLowerCase() } },
       req,
+      where: { email: { equals: email.toLowerCase() } },
     });
 
     if (!user || (args.collection.config.auth.verify && user._verified === false)) {
@@ -112,7 +115,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       throw new LockedAuth(req.t);
     }
 
-    const authResult = await authenticateLocalStrategy({ password, doc: user });
+    const authResult = await authenticateLocalStrategy({ doc: user, password });
 
     user = sanitizeInternalFields(user);
 
@@ -121,10 +124,10 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     if (!authResult) {
       if (maxLoginAttemptsEnabled) {
         await incrementLoginAttempts({
-          req,
-          payload: req.payload,
-          doc: user,
           collection: collectionConfig,
+          doc: user,
+          payload: req.payload,
+          req,
         });
       }
 
@@ -136,16 +139,16 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
         collection: {
           config: collectionConfig,
         },
-        req,
         data,
         overrideAccess: true,
+        req,
       });
     }
 
     const fieldsToSign = getFieldsToSign({
       collectionConfig,
-      user,
       email,
+      user,
 
     });
 
@@ -153,9 +156,9 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       await priorHook;
 
       user = (await hook({
-        user,
-        req: args.req,
         context: args.req.context,
+        req: args.req,
+        user,
       })) || user;
     }, Promise.resolve());
 
@@ -169,12 +172,12 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
     if (args.res) {
       const cookieOptions: CookieOptions = {
-        path: '/',
-        httpOnly: true,
-        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-        secure: collectionConfig.auth.cookies.secure,
-        sameSite: collectionConfig.auth.cookies.sameSite,
         domain: undefined,
+        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
+        httpOnly: true,
+        path: '/',
+        sameSite: collectionConfig.auth.cookies.sameSite,
+        secure: collectionConfig.auth.cookies.secure,
       };
 
       if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
@@ -192,10 +195,10 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       await priorHook;
 
       user = await hook({
-        user,
+        context: args.req.context,
         req: args.req,
         token,
-        context: args.req.context,
+        user,
       }) || user;
     }, Promise.resolve());
 
@@ -204,13 +207,13 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     user = await afterRead({
+      context: req.context,
       depth,
       doc: user,
       entityConfig: collectionConfig,
       overrideAccess,
       req,
       showHiddenFields,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -221,9 +224,9 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       await priorHook;
 
       user = await hook({
-        req,
-        doc: user,
         context: req.context,
+        doc: user,
+        req,
       }) || user;
     }, Promise.resolve());
 
@@ -235,16 +238,16 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
       await priorHook;
 
       user = await hook({
-        req,
-        doc: user,
         context: req.context,
+        doc: user,
+        req,
       }) || user;
     }, Promise.resolve());
 
     let result: Result & { user: GeneratedTypes['collections'][TSlug] } = {
+      exp: (jwt.decode(token) as jwt.JwtPayload).exp,
       token,
       user,
-      exp: (jwt.decode(token) as jwt.JwtPayload).exp,
     };
 
     // /////////////////////////////////////
@@ -252,8 +255,8 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
-      operation: 'login',
       args,
+      operation: 'login',
       result,
     });
 

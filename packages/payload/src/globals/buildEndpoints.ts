@@ -1,11 +1,12 @@
-import { Endpoint } from '../config/types.js';
-import findVersions from './requestHandlers/findVersions.js';
-import findVersionByID from './requestHandlers/findVersionByID.js';
-import restoreVersion from './requestHandlers/restoreVersion.js';
-import { SanitizedGlobalConfig } from './config/types.js';
-import update from './requestHandlers/update.js';
-import findOne from './requestHandlers/findOne.js';
+import type { Endpoint } from '../config/types.js';
+import type { SanitizedGlobalConfig } from './config/types.js';
+
 import docAccessRequestHandler from './requestHandlers/docAccess.js';
+import findOne from './requestHandlers/findOne.js';
+import findVersionByID from './requestHandlers/findVersionByID.js';
+import findVersions from './requestHandlers/findVersions.js';
+import restoreVersion from './requestHandlers/restoreVersion.js';
+import update from './requestHandlers/update.js';
 
 const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
   if (!global.endpoints) return [];
@@ -14,38 +15,38 @@ const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
   if (global.versions) {
     endpoints.push(
       {
-        path: '/versions',
-        method: 'get',
         handler: findVersions(global),
-      },
-      {
-        path: '/versions/:id',
         method: 'get',
-        handler: findVersionByID(global),
+        path: '/versions',
       },
       {
+        handler: findVersionByID(global),
+        method: 'get',
         path: '/versions/:id',
-        method: 'post',
+      },
+      {
         handler: restoreVersion(global),
+        method: 'post',
+        path: '/versions/:id',
       },
     );
   }
 
   endpoints.push(
     {
-      path: '/access',
-      method: 'get',
       handler: async (req, res, next) => docAccessRequestHandler(req, res, next, global),
-    },
-    {
-      path: '/',
       method: 'get',
-      handler: findOne(global),
+      path: '/access',
     },
     {
+      handler: findOne(global),
+      method: 'get',
       path: '/',
-      method: 'post',
+    },
+    {
       handler: update(global),
+      method: 'post',
+      path: '/',
     },
   );
 

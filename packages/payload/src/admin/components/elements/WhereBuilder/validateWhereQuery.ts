@@ -1,4 +1,5 @@
 import type { Operator, Where } from '../../../../types/index.js';
+
 import { validOperators } from '../../../../types/constants.js';
 
 const validateWhereQuery = (whereQuery): whereQuery is Where => {

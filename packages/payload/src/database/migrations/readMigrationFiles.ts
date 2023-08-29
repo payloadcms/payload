@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import { Migration } from '../types.js';
-import { Payload } from '../../index.js';
+
+import type { Payload } from '../../index.js';
+import type { Migration } from '../types.js';
 
 /**
  * Read the migration files from disk

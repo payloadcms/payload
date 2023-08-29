@@ -1,9 +1,11 @@
-import equal from 'deep-equal';
 import objectIDImp from 'bson-objectid';
+import equal from 'deep-equal';
+
+import type { FieldAction, Fields, FormField } from './types.js';
+
+import deepCopyObject from '../../../../utilities/deepCopyObject.js';
 import getSiblingData from './getSiblingData.js';
 import reduceFieldsToValues from './reduceFieldsToValues.js';
-import { FormField, FieldAction, Fields } from './types.js';
-import deepCopyObject from '../../../../utilities/deepCopyObject.js';
 import { flattenRows, separateRows } from './rows.js';
 // Needed for ESM
 const ObjectID = 'default' in objectIDImp ? objectIDImp.default : objectIDImp;
@@ -74,7 +76,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
 
     case 'UPDATE': {
       const newField = Object.entries(action).reduce((field, [key, value]) => {
-        if (['value', 'valid', 'errorMessage', 'disableFormData', 'initialValue', 'validate', 'condition', 'passesCondition', 'rows'].includes(key)) {
+        if (['condition', 'disableFormData', 'errorMessage', 'initialValue', 'passesCondition', 'rows', 'valid', 'validate', 'value'].includes(key)) {
           return {
             ...field,
             [key]: value,
@@ -91,7 +93,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'REMOVE_ROW': {
-      const { rowIndex, path } = action;
+      const { path, rowIndex } = action;
       const { remainingFields, rows } = separateRows(path, state);
       const rowsMetadata = [...state[path]?.rows || []];
 
@@ -102,9 +104,9 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         ...remainingFields,
         [path]: {
           ...state[path],
-          value: rows.length,
           disableFormData: rows.length > 0,
           rows: rowsMetadata,
+          value: rows.length,
         },
         ...flattenRows(path, rows),
       };
@@ -113,7 +115,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'ADD_ROW': {
-      const { rowIndex, path, subFieldState, blockType } = action;
+      const { blockType, path, rowIndex, subFieldState } = action;
 
       const rowsMetadata = [...state[path]?.rows || []];
       rowsMetadata.splice(
@@ -121,18 +123,18 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         0,
         // new row
         {
-          id: new ObjectID().toHexString(),
-          collapsed: false,
           blockType: blockType || undefined,
           childErrorPaths: new Set(),
+          collapsed: false,
+          id: new ObjectID().toHexString(),
         },
       );
 
       if (blockType) {
         subFieldState.blockType = {
-          value: blockType,
           initialValue: blockType,
           valid: true,
+          value: blockType,
         };
       }
 
@@ -146,9 +148,9 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         ...flattenRows(path, rows),
         [path]: {
           ...state[path],
-          value: rows.length,
           disableFormData: true,
           rows: rowsMetadata,
+          value: rows.length,
         },
       };
 
@@ -156,23 +158,23 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'REPLACE_ROW': {
-      const { rowIndex: rowIndexArg, path, blockType, subFieldState } = action;
+      const { blockType, path, rowIndex: rowIndexArg, subFieldState } = action;
       const { remainingFields, rows } = separateRows(path, state);
       const rowIndex = Math.max(0, Math.min(rowIndexArg, rows?.length - 1 || 0));
 
       const rowsMetadata = [...state[path]?.rows || []];
       rowsMetadata[rowIndex] = {
-        id: new ObjectID().toHexString(),
-        collapsed: false,
         blockType: blockType || undefined,
         childErrorPaths: new Set(),
+        collapsed: false,
+        id: new ObjectID().toHexString(),
       };
 
       if (blockType) {
         subFieldState.blockType = {
-          value: blockType,
           initialValue: blockType,
           valid: true,
+          value: blockType,
         };
       }
 
@@ -184,9 +186,9 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         ...flattenRows(path, rows),
         [path]: {
           ...state[path],
-          value: rows.length,
           disableFormData: true,
           rows: rowsMetadata,
+          value: rows.length,
         },
       };
 
@@ -194,7 +196,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'DUPLICATE_ROW': {
-      const { rowIndex, path } = action;
+      const { path, rowIndex } = action;
       const { remainingFields, rows } = separateRows(path, state);
       const rowsMetadata = state[path]?.rows || [];
 
@@ -215,9 +217,9 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         ...remainingFields,
         [path]: {
           ...state[path],
-          value: rows.length,
           disableFormData: true,
           rows: rowsMetadata,
+          value: rows.length,
         },
         ...flattenRows(path, rows),
       };
@@ -255,11 +257,11 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     }
 
     case 'SET_ROW_COLLAPSED': {
-      const { rowID, path, collapsed, setDocFieldPreferences } = action;
+      const { collapsed, path, rowID, setDocFieldPreferences } = action;
 
       const arrayState = state[path];
 
-      const { matchedIndex, collapsedRowIDs } = state[path].rows.reduce((acc, row, index) => {
+      const { collapsedRowIDs, matchedIndex } = state[path].rows.reduce((acc, row, index) => {
         const isMatchingRow = row.id === rowID;
         if (isMatchingRow) acc.matchedIndex = index;
 
@@ -268,8 +270,8 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
 
         return acc;
       }, {
-        matchedIndex: undefined,
         collapsedRowIDs: [],
+        matchedIndex: undefined,
       });
 
       if (matchedIndex > -1) {
@@ -290,7 +292,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
     case 'SET_ALL_ROWS_COLLAPSED': {
       const { collapsed, path, setDocFieldPreferences } = action;
 
-      const { rows, collapsedRowIDs } = state[path].rows.reduce((acc, row) => {
+      const { collapsedRowIDs, rows } = state[path].rows.reduce((acc, row) => {
         if (collapsed) acc.collapsedRowIDs.push(row.id);
 
         acc.rows.push({
@@ -300,8 +302,8 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
 
         return acc;
       }, {
-        rows: [],
         collapsedRowIDs: [],
+        rows: [],
       });
 
       setDocFieldPreferences(path, { collapsed: collapsedRowIDs });

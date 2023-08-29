@@ -1,5 +1,6 @@
 import flatley from 'flatley';
-import { Data, Fields } from './types.js';
+
+import type { Data, Fields } from './types.js';
 
 const { unflatten: flatleyUnflatten } = flatley;
 

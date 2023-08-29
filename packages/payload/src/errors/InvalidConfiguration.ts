@@ -1,4 +1,5 @@
 import httpStatus from 'http-status';
+
 import APIError from './APIError.js';
 
 class InvalidConfiguration extends APIError {

@@ -1,4 +1,4 @@
-import { Fields } from './types.js';
+import type { Fields } from './types.js';
 
 type Result = {
   remainingFields: Fields

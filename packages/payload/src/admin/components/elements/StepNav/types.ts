@@ -4,6 +4,6 @@ export type StepNavItem = {
 }
 
 export type Context = {
-  stepNav: StepNavItem[]
   setStepNav: (items: StepNavItem[]) => void
+  stepNav: StepNavItem[]
 }

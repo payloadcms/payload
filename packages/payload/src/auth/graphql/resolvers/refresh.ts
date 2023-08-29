@@ -1,6 +1,7 @@
-import { Collection } from '../../../collections/config/types.js';
-import refresh from '../../operations/refresh.js';
+import type { Collection } from '../../../collections/config/types.js';
+
 import getExtractJWT from '../../getExtractJWT.js';
+import refresh from '../../operations/refresh.js';
 
 function refreshResolver(collection: Collection) {
   async function resolver(_, args, context) {
@@ -15,10 +16,10 @@ function refreshResolver(collection: Collection) {
 
     const options = {
       collection,
-      token,
+      depth: 0,
       req: context.req,
       res: context.res,
-      depth: 0,
+      token,
     };
 
     const result = await refresh(options);

@@ -1,28 +1,32 @@
+import type { Sharp } from 'sharp';
+
 import filetype from 'file-type';
 import mkdirp from 'mkdirp';
 import path from 'path';
 import sanitize from 'sanitize-filename';
-import sharp, { Sharp } from 'sharp';
-import { Collection } from '../collections/config/types.js';
-import { SanitizedConfig } from '../config/types.js';
+import sharp from 'sharp';
+
+import type { Collection } from '../collections/config/types.js';
+import type { SanitizedConfig } from '../config/types.js';
+import type { PayloadRequest } from '../express/types.js';
+import type { FileData, FileToSave, ProbedImageSize } from './types.js';
+
 import { FileUploadError, MissingFile } from '../errors/index.js';
-import { PayloadRequest } from '../express/types.js';
+import canResizeImage from './canResizeImage.js';
 import getImageSize from './getImageSize.js';
 import getSafeFileName from './getSafeFilename.js';
 import resizeAndTransformImageSizes from './imageResizer.js';
-import { FileData, FileToSave, ProbedImageSize } from './types.js';
-import canResizeImage from './canResizeImage.js';
 import isImage from './isImage.js';
 
 const { fromBuffer } = filetype;
 
 type Args<T> = {
-  config: SanitizedConfig;
   collection: Collection;
-  throwOnMissingFile?: boolean;
-  req: PayloadRequest;
+  config: SanitizedConfig;
   data: T;
   overwriteExistingFiles?: boolean;
+  req: PayloadRequest;
+  throwOnMissingFile?: boolean;
 };
 
 type Result<T> = Promise<{
@@ -31,12 +35,12 @@ type Result<T> = Promise<{
 }>;
 
 export const generateFileData = async <T>({
-  config,
   collection: { config: collectionConfig },
-  req,
+  config,
   data,
-  throwOnMissingFile,
   overwriteExistingFiles,
+  req,
+  throwOnMissingFile,
 }: Args<T>): Result<T> => {
   if (!collectionConfig.upload) {
     return {
@@ -55,7 +59,7 @@ export const generateFileData = async <T>({
     };
   }
 
-  const { staticDir, imageSizes, disableLocalStorage, resizeOptions, formatOptions, trimOptions } =
+  const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =
     collectionConfig.upload;
 
   let staticPath = staticDir;
@@ -112,7 +116,7 @@ export const generateFileData = async <T>({
     if (sharpFile) {
       const metadata = await sharpFile.metadata();
       fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true });
-      ({ mime, ext } = await fromBuffer(fileBuffer.data)); // This is getting an incorrect gif height back.
+      ({ ext, mime } = await fromBuffer(fileBuffer.data)); // This is getting an incorrect gif height back.
       fileData.width = fileBuffer.info.width;
       fileData.height = fileBuffer.info.height;
       fileData.filesize = fileBuffer.info.size;
@@ -153,21 +157,21 @@ export const generateFileData = async <T>({
 
     // Original file
     filesToSave.push({
-      path: `${staticPath}/${fsSafeName}`,
       buffer: fileBuffer?.data || file.data,
+      path: `${staticPath}/${fsSafeName}`,
     });
 
     if (Array.isArray(imageSizes) && fileSupportsResize) {
       req.payloadUploadSizes = {};
 
       const { sizeData, sizesToSave } = await resizeAndTransformImageSizes({
-        req,
-        file,
-        dimensions,
-        staticPath,
         config: collectionConfig,
-        savedFilename: fsSafeName || file.name,
+        dimensions,
+        file,
         mimeType: fileData.mimeType,
+        req,
+        savedFilename: fsSafeName || file.name,
+        staticPath,
       });
 
       fileData.sizes = sizeData;

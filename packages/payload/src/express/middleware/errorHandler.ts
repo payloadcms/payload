@@ -1,10 +1,14 @@
+import type { NextFunction, Response } from 'express';
+import type { Logger } from 'pino';
+
 import httpStatus from 'http-status';
-import { NextFunction, Response } from 'express';
-import { Logger } from 'pino';
-import { SanitizedConfig } from '../../config/types.js';
-import formatErrorResponse, { ErrorResponse } from '../responses/formatError.js';
-import { PayloadRequest } from '../types.js';
+
+import type { SanitizedConfig } from '../../config/types.js';
+import type { ErrorResponse } from '../responses/formatError.js';
+import type { PayloadRequest } from '../types.js';
+
 import APIError from '../../errors/APIError.js';
+import formatErrorResponse from '../responses/formatError.js';
 
 export type ErrorHandler = (err: APIError, req: PayloadRequest, res: Response, next: NextFunction) => Promise<Response<ErrorResponse> | void>
 

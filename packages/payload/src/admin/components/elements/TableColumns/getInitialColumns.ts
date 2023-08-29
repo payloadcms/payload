@@ -1,4 +1,6 @@
-import { Field, fieldHasSubFields, fieldAffectsData, tabHasName } from '../../../../fields/config/types.js';
+import type { Field} from '../../../../fields/config/types.js';
+
+import { fieldAffectsData, fieldHasSubFields, tabHasName } from '../../../../fields/config/types.js';
 
 const getRemainingColumns = (fields: Field[], useAsTitle: string): string[] => fields.reduce((remaining, field) => {
   if (fieldAffectsData(field) && field.name === useAsTitle) {

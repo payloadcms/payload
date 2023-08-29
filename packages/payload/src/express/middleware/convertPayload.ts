@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 export default (req: Request, _: Response, next: NextFunction): void => {
   if (req.body?._payload) {

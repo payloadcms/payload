@@ -1,11 +1,15 @@
-import pluralize from 'pluralize-esm';
 import type { JSONSchema4 } from 'json-schema';
-import { Field, FieldAffectingData, fieldAffectsData, Option, tabHasName } from '../fields/config/types.js';
-import { SanitizedCollectionConfig } from '../collections/config/types.js';
-import { SanitizedGlobalConfig } from '../globals/config/types.js';
+
+import pluralize from 'pluralize-esm';
+
+import type { SanitizedCollectionConfig } from '../collections/config/types.js';
+import type { SanitizedConfig } from '../config/types.js';
+import type { Field, FieldAffectingData, Option} from '../fields/config/types.js';
+import type { SanitizedGlobalConfig } from '../globals/config/types.js';
+
+import { fieldAffectsData, tabHasName } from '../fields/config/types.js';
 import deepCopyObject from './deepCopyObject.js';
 import { toWords } from './formatLabels.js';
-import { SanitizedConfig } from '../config/types.js';
 
 const { singular } = pluralize;
 
@@ -47,14 +51,14 @@ function generateEntitySchemas(entities: (SanitizedCollectionConfig | SanitizedG
   }, {});
 
   return {
-    type: 'object',
+    additionalProperties: false,
     properties,
     required: Object.keys(properties),
-    additionalProperties: false,
+    type: 'object',
   };
 }
 
-function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 'number' }, fields: Field[], interfaceNameDefinitions: Map<string, JSONSchema4>): {
+function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'number' | 'string' }, fields: Field[], interfaceNameDefinitions: Map<string, JSONSchema4>): {
   properties: {
     [k: string]: JSONSchema4;
   }
@@ -78,7 +82,7 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
 
         case 'number': {
           if (field.hasMany === true) {
-            fieldSchema = { type: 'array', items: { type: 'number' } };
+            fieldSchema = { items: { type: 'number' }, type: 'array' };
           } else {
             fieldSchema = { type: 'number' };
           }
@@ -107,10 +111,10 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
 
         case 'richText': {
           fieldSchema = {
-            type: 'array',
             items: {
               type: 'object',
             },
+            type: 'array',
           };
 
           break;
@@ -118,8 +122,8 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
 
         case 'radio': {
           fieldSchema = {
-            type: 'string',
             enum: returnOptionEnums(field.options),
+            type: 'string',
           };
 
           break;
@@ -127,14 +131,14 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
 
         case 'select': {
           const selectType: JSONSchema4 = {
-            type: 'string',
             enum: returnOptionEnums(field.options),
+            type: 'string',
           };
 
           if (field.hasMany) {
             fieldSchema = {
-              type: 'array',
               items: selectType,
+              type: 'array',
             };
           } else {
             fieldSchema = selectType;
@@ -145,9 +149,6 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
 
         case 'point': {
           fieldSchema = {
-            type: 'array',
-            minItems: 2,
-            maxItems: 2,
             items: [
               {
                 type: 'number',
@@ -156,6 +157,9 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
                 type: 'number',
               },
             ],
+            maxItems: 2,
+            minItems: 2,
+            type: 'array',
           };
           break;
         }
@@ -166,44 +170,44 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
               fieldSchema = {
                 oneOf: [
                   {
-                    type: 'array',
                     items: {
                       oneOf: field.relationTo.map((relation) => {
                         return {
-                          type: 'object',
                           additionalProperties: false,
                           properties: {
+                            relationTo: {
+                              const: relation,
+                            },
                             value: {
                               type: collectionIDFieldTypes[relation],
                             },
-                            relationTo: {
-                              const: relation,
-                            },
                           },
                           required: ['value', 'relationTo'],
+                          type: 'object',
                         };
                       }),
                     },
+                    type: 'array',
                   },
                   {
-                    type: 'array',
                     items: {
                       oneOf: field.relationTo.map((relation) => {
                         return {
-                          type: 'object',
                           additionalProperties: false,
                           properties: {
-                            value: {
-                              $ref: `#/definitions/${relation}`,
-                            },
                             relationTo: {
                               const: relation,
                             },
+                            value: {
+                              $ref: `#/definitions/${relation}`,
+                            },
                           },
                           required: ['value', 'relationTo'],
+                          type: 'object',
                         };
                       }),
                     },
+                    type: 'array',
                   },
                 ],
               };
@@ -211,9 +215,11 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
               fieldSchema = {
                 oneOf: field.relationTo.map((relation) => {
                   return {
-                    type: 'object',
                     additionalProperties: false,
                     properties: {
+                      relationTo: {
+                        const: relation,
+                      },
                       value: {
                         oneOf: [
                           {
@@ -224,11 +230,9 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
                           },
                         ],
                       },
-                      relationTo: {
-                        const: relation,
-                      },
                     },
                     required: ['value', 'relationTo'],
+                    type: 'object',
                   };
                 }),
               };
@@ -237,16 +241,16 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
             fieldSchema = {
               oneOf: [
                 {
-                  type: 'array',
                   items: {
                     type: collectionIDFieldTypes[field.relationTo],
                   },
+                  type: 'array',
                 },
                 {
-                  type: 'array',
                   items: {
                     $ref: `#/definitions/${field.relationTo}`,
                   },
+                  type: 'array',
                 },
               ],
             };
@@ -282,13 +286,11 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
 
         case 'blocks': {
           fieldSchema = {
-            type: 'array',
             items: {
               oneOf: field.blocks.map((block) => {
                 const blockFieldSchemas = fieldsToJSONSchema(collectionIDFieldTypes, block.fields, interfaceNameDefinitions);
 
                 const blockSchema: JSONSchema4 = {
-                  type: 'object',
                   additionalProperties: false,
                   properties: {
                     ...blockFieldSchemas.properties,
@@ -300,6 +302,7 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
                     'blockType',
                     ...blockFieldSchemas.required,
                   ],
+                  type: 'object',
                 };
 
                 if (block.interfaceName) {
@@ -313,18 +316,19 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
                 return blockSchema;
               }),
             },
+            type: 'array',
           };
           break;
         }
 
         case 'array': {
           fieldSchema = {
-            type: 'array',
             items: {
-              type: 'object',
               additionalProperties: false,
+              type: 'object',
               ...fieldsToJSONSchema(collectionIDFieldTypes, field.fields, interfaceNameDefinitions),
             },
+            type: 'array',
           };
 
           if (field.interfaceName) {
@@ -355,8 +359,8 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
             if (tabHasName(tab)) {
               // could have interface
               fieldSchemas.set(tab.name, {
-                type: 'object',
                 additionalProperties: false,
+                type: 'object',
                 ...childSchema,
               });
               requiredFields.add(tab.name);
@@ -374,8 +378,8 @@ function fieldsToJSONSchema(collectionIDFieldTypes: { [key: string]: 'string' | 
 
         case 'group': {
           fieldSchema = {
-            type: 'object',
             additionalProperties: false,
+            type: 'object',
             ...fieldsToJSONSchema(collectionIDFieldTypes, field.fields, interfaceNameDefinitions),
           };
 
@@ -409,7 +413,7 @@ export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: Sani
   const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity);
   const title = entity.typescript?.interface ? entity.typescript.interface : singular(toWords(entity.slug, true));
 
-  const idField: FieldAffectingData = { type: 'text', name: 'id', required: true };
+  const idField: FieldAffectingData = { name: 'id', required: true, type: 'text' };
   const customIdField = entity.fields.find((field) => fieldAffectsData(field) && field.name === 'id') as FieldAffectingData;
 
   if (customIdField && customIdField.type !== 'group' && customIdField.type !== 'tab') {
@@ -433,13 +437,13 @@ export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: Sani
 
   if ('auth' in entity && entity.auth && !entity.auth?.disableLocalStrategy) {
     entity.fields.push({
-      type: 'text',
       name: 'password',
+      type: 'text',
     });
   }
 
   // used for relationship fields, to determine whether to use a string or number type for the ID
-  const collectionIDFieldTypes: { [key: string]: 'string' | 'number' } = config.collections.reduce((acc, collection) => {
+  const collectionIDFieldTypes: { [key: string]: 'number' | 'string' } = config.collections.reduce((acc, collection) => {
     const customCollectionIdField = collection.fields.find((field) => 'name' in field && field.name === 'id');
 
     acc[collection.slug] = customCollectionIdField?.type === 'number'
@@ -450,9 +454,9 @@ export function entityToJSONSchema(config: SanitizedConfig, incomingEntity: Sani
   }, {});
 
   return {
+    additionalProperties: false,
     title,
     type: 'object',
-    additionalProperties: false,
     ...fieldsToJSONSchema(collectionIDFieldTypes, entity.fields, interfaceNameDefinitions),
   };
 }
@@ -466,14 +470,14 @@ export function configToJSONSchema(config: SanitizedConfig): JSONSchema4 {
   }, {});
 
   return {
-    title: 'Config',
-    type: 'object',
     additionalProperties: false,
+    definitions: { ...entityDefinitions, ...Object.fromEntries(interfaceNameDefinitions) },
     properties: {
       collections: generateEntitySchemas(config.collections),
       globals: generateEntitySchemas(config.globals),
     },
     required: ['collections', 'globals'],
-    definitions: { ...entityDefinitions, ...Object.fromEntries(interfaceNameDefinitions) },
+    title: 'Config',
+    type: 'object',
   };
 }

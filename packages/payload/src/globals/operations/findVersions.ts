@@ -1,46 +1,47 @@
-import { Where } from '../../types/index.js';
-import { PayloadRequest } from '../../express/types.js';
-import executeAccess from '../../auth/executeAccess.js';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js';
 import type { PaginatedDocs } from '../../database/types.js';
-import { SanitizedGlobalConfig } from '../config/types.js';
-import { afterRead } from '../../fields/hooks/afterRead/index.js';
-import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js';
-import { TypeWithVersion } from '../../versions/types.js';
-import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js';
+import type { PayloadRequest } from '../../express/types.js';
+import type { Where } from '../../types/index.js';
+import type { TypeWithVersion } from '../../versions/types.js';
+import type { SanitizedGlobalConfig } from '../config/types.js';
+
+import executeAccess from '../../auth/executeAccess.js';
 import { combineQueries } from '../../database/combineQueries.js';
-import { killTransaction } from '../../utilities/killTransaction.js';
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js';
+import { afterRead } from '../../fields/hooks/afterRead/index.js';
 import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js';
+import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js';
 
 export type Arguments = {
-  globalConfig: SanitizedGlobalConfig
-  where?: Where
-  page?: number
-  limit?: number
-  sort?: string
   depth?: number
-  req?: PayloadRequest
+  globalConfig: SanitizedGlobalConfig
+  limit?: number
   overrideAccess?: boolean
+  page?: number
+  req?: PayloadRequest
   showHiddenFields?: boolean
+  sort?: string
+  where?: Where
 }
 
 async function findVersions<T extends TypeWithVersion<T>>(
   args: Arguments,
 ): Promise<PaginatedDocs<T>> {
   const {
-    where,
-    page,
-    limit,
     depth,
     globalConfig,
-    sort,
-    req,
+    limit,
+    overrideAccess,
+    page,
     req: {
       locale,
       payload,
     },
-    overrideAccess,
+    req,
     showHiddenFields,
+    sort,
+    where,
   } = args;
 
   const versionFields = buildVersionGlobalFields(globalConfig);
@@ -56,10 +57,10 @@ async function findVersions<T extends TypeWithVersion<T>>(
 
     await validateQueryPaths({
       globalConfig,
+      overrideAccess,
+      req,
       versionFields,
       where,
-      req,
-      overrideAccess,
     });
 
     const fullWhere = combineQueries(where, accessResults);
@@ -69,13 +70,13 @@ async function findVersions<T extends TypeWithVersion<T>>(
     // /////////////////////////////////////
 
     const paginatedDocs = await payload.db.findGlobalVersions<T>({
-      where: fullWhere,
-      page: page || 1,
-      limit: limit ?? 10,
-      sort,
       global: globalConfig.slug,
+      limit: limit ?? 10,
       locale,
+      page: page || 1,
       req,
+      sort,
+      where: fullWhere,
     });
 
     // /////////////////////////////////////
@@ -87,14 +88,14 @@ async function findVersions<T extends TypeWithVersion<T>>(
       docs: await Promise.all(paginatedDocs.docs.map(async (data) => ({
         ...data,
         version: await afterRead({
+          context: req.context,
           depth,
           doc: data.version,
           entityConfig: globalConfig,
-          req,
-          overrideAccess,
-          showHiddenFields,
           findMany: true,
-          context: req.context,
+          overrideAccess,
+          req,
+          showHiddenFields,
         }),
       }))),
     } as PaginatedDocs<T>;
@@ -111,7 +112,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
         await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
           await priorHook;
 
-          docRef.version = await hook({ req, query: fullWhere, doc: doc.version, findMany: true }) || doc.version;
+          docRef.version = await hook({ doc: doc.version, findMany: true, query: fullWhere, req }) || doc.version;
         }, Promise.resolve());
 
         return docRef;

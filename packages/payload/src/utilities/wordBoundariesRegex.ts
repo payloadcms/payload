@@ -5,7 +5,7 @@ export default (input: string): RegExp => {
   const wordBoundaryBefore = '(?:(?:[^\\p{L}\\p{N}])|^)'; // Converted to a non-matching group instead of positive lookbehind for Safari
   const wordBoundaryAfter = '(?=[^\\p{L}\\p{N}]|$)';
   const regex = words.reduce((pattern, word, i) => {
-    const escapedWord = word.replace(/[\\^$*+?\\.()|[\]{}]/g, '\\$&');
+    const escapedWord = word.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
     return `${pattern}(?=.*${wordBoundaryBefore}.*${escapedWord}.*${wordBoundaryAfter})${i + 1 === words.length ? '.+' : ''}`;
   }, '');
   return new RegExp(regex, 'i');

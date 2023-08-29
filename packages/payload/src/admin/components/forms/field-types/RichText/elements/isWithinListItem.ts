@@ -1,4 +1,6 @@
-import { Editor, Element, Ancestor, NodeEntry } from 'slate';
+import type { Ancestor, NodeEntry } from 'slate';
+
+import { Editor, Element } from 'slate';
 
 export const isWithinListItem = (editor: Editor): boolean => {
   let parentLI: NodeEntry<Ancestor>;

@@ -1,4 +1,4 @@
-import { Payload } from '../index.js';
+import type { Payload } from '../index.js';
 
 const docWithFilenameExists = async (payload: Payload, collectionSlug: string, path: string, filename: string): Promise<boolean> => {
   const doc = await payload.db.findOne({

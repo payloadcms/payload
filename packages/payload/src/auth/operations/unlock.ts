@@ -1,18 +1,19 @@
+import type { Collection } from '../../collections/config/types.js';
+import type { PayloadRequest } from '../../express/types.js';
+
 import { APIError } from '../../errors/index.js';
-import executeAccess from '../executeAccess.js';
-import { Collection } from '../../collections/config/types.js';
-import { PayloadRequest } from '../../express/types.js';
-import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js';
 import { initTransaction } from '../../utilities/initTransaction.js';
 import { killTransaction } from '../../utilities/killTransaction.js';
+import executeAccess from '../executeAccess.js';
+import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts.js';
 
 export type Args = {
   collection: Collection
   data: {
     email: string
   }
-  req: PayloadRequest
   overrideAccess?: boolean
+  req: PayloadRequest
 }
 
 async function unlock(args: Args): Promise<boolean> {
@@ -24,12 +25,12 @@ async function unlock(args: Args): Promise<boolean> {
     collection: {
       config: collectionConfig,
     },
-    req,
-    req: {
-      payload,
-      locale,
-    },
     overrideAccess,
+    req: {
+      locale,
+      payload,
+    },
+    req,
   } = args;
 
   try {
@@ -57,19 +58,19 @@ async function unlock(args: Args): Promise<boolean> {
 
     const user = await req.payload.db.findOne({
       collection: collectionConfig.slug,
-      where: { email: { equals: data.email.toLowerCase() } },
       locale,
       req,
+      where: { email: { equals: data.email.toLowerCase() } },
     });
 
     let result;
 
     if (user) {
       await resetLoginAttempts({
-        req,
-        payload: req.payload,
         collection: collectionConfig,
         doc: user,
+        payload: req.payload,
+        req,
       });
       result = true;
     } else {

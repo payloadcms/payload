@@ -1,34 +1,35 @@
-import { SanitizedCollectionConfig } from '../../../collections/config/types.js';
-import { SanitizedGlobalConfig } from '../../../globals/config/types.js';
-import { PayloadRequest, RequestContext } from '../../../express/types.js';
-import { traverseFields } from './traverseFields.js';
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js';
+import type { PayloadRequest, RequestContext } from '../../../express/types.js';
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.js';
+
 import deepCopyObject from '../../../utilities/deepCopyObject.js';
+import { traverseFields } from './traverseFields.js';
 
 type Args = {
+  context: RequestContext
   currentDepth?: number
   depth: number
   doc: Record<string, unknown>
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
   findMany?: boolean
   flattenLocales?: boolean
-  req: PayloadRequest
   overrideAccess: boolean
+  req: PayloadRequest
   showHiddenFields: boolean
-  context: RequestContext
 }
 
 export async function afterRead<T = any>(args: Args): Promise<T> {
   const {
+    context,
     currentDepth: incomingCurrentDepth,
     depth: incomingDepth,
     doc: incomingDoc,
     entityConfig,
     findMany,
     flattenLocales = true,
-    req,
     overrideAccess,
+    req,
     showHiddenFields,
-    context,
   } = args;
 
   const doc = deepCopyObject(incomingDoc);
@@ -41,19 +42,19 @@ export async function afterRead<T = any>(args: Args): Promise<T> {
   const currentDepth = incomingCurrentDepth || 1;
 
   traverseFields({
+    context,
     currentDepth,
     depth,
     doc,
-    fields: entityConfig.fields,
     fieldPromises,
+    fields: entityConfig.fields,
     findMany,
     flattenLocales,
     overrideAccess,
     populationPromises,
     req,
-    siblingDoc: doc,
     showHiddenFields,
-    context,
+    siblingDoc: doc,
   });
 
   await Promise.all(fieldPromises);

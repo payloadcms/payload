@@ -1,5 +1,8 @@
 import merge from 'deepmerge';
-import { Field, fieldAffectsData, fieldHasSubFields, FieldWithSubFields } from './config/types.js';
+
+import type { Field, FieldWithSubFields } from './config/types.js';
+
+import { fieldAffectsData, fieldHasSubFields } from './config/types.js';
 
 const mergeBaseFields = (fields: Field[], baseFields: Field[]): Field[] => {
   const mergedFields = [...fields || []];

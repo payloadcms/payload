@@ -1,5 +1,6 @@
 import graphQLPlayground from 'graphql-playground-middleware-express';
-import { Payload } from '../payload.js';
+
+import type { Payload } from '../payload.js';
 
 const graphQLPlaygroundToUse = 'default' in graphQLPlayground ? graphQLPlayground.default : graphQLPlayground;
 

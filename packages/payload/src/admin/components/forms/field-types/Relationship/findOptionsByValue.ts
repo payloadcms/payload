@@ -1,12 +1,12 @@
-import { Option } from '../../../elements/ReactSelect/types.js';
-import { OptionGroup, Value } from './types.js';
+import type { Option } from '../../../elements/ReactSelect/types.js';
+import type { OptionGroup, Value } from './types.js';
 
 type Args = {
-  value: Value | Value[]
   options: OptionGroup[]
+  value: Value | Value[]
 }
 
-export const findOptionsByValue = ({ value, options }: Args): Option | Option[] => {
+export const findOptionsByValue = ({ options, value }: Args): Option | Option[] => {
   if (value) {
     if (Array.isArray(value)) {
       return value.map((val) => {

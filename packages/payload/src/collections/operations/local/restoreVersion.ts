@@ -1,27 +1,29 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Payload } from '../../../payload.js';
-import { PayloadRequest, RequestContext } from '../../../express/types.js';
-import { Document } from '../../../types/index.js';
-import { getDataLoader } from '../../dataloader.js';
-import restoreVersion from '../restoreVersion.js';
-import { i18nInit } from '../../../translations/init.js';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+
+import type { PayloadRequest, RequestContext } from '../../../express/types.js';
+import type { Payload } from '../../../payload.js';
+import type { Document } from '../../../types/index.js';
+
 import { APIError } from '../../../errors/index.js';
 import { setRequestContext } from '../../../express/setRequestContext.js';
+import { i18nInit } from '../../../translations/init.js';
+import { getDataLoader } from '../../dataloader.js';
+import restoreVersion from '../restoreVersion.js';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
-  id: string
-  depth?: number
-  locale?: string
-  fallbackLocale?: string
-  user?: Document
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
-  draft?: boolean
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext,
+  depth?: number
+  draft?: boolean
+  fallbackLocale?: string
+  id: string
+  locale?: string
+  overrideAccess?: boolean
+  showHiddenFields?: boolean
+  user?: Document
 }
 
 export default async function restoreVersionLocal<T extends keyof GeneratedTypes['collections']>(
@@ -30,14 +32,14 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
 ): Promise<GeneratedTypes['collections'][T]> {
   const {
     collection: collectionSlug,
+    context,
     depth,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     fallbackLocale = null,
     id,
-    user,
+    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
     showHiddenFields,
-    context,
+    user,
   } = options;
 
   const collection = payload.collections[collectionSlug];
@@ -48,26 +50,26 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
 
   const i18n = i18nInit(payload.config.i18n);
   const req = {
-    user,
-    payloadAPI: 'local',
-    locale,
     fallbackLocale,
-    payload,
     i18n,
+    locale,
+    payload,
+    payloadAPI: 'local',
     t: i18n.t,
+    user,
   } as PayloadRequest;
   setRequestContext(req, context);
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   const args = {
-    payload,
-    depth,
     collection,
-    overrideAccess,
+    depth,
     id,
-    showHiddenFields,
+    overrideAccess,
+    payload,
     req,
+    showHiddenFields,
   };
 
   return restoreVersion(args);

@@ -1,24 +1,24 @@
-import { Payload } from '../../../index.js';
-import { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js';
-import { PayloadRequest } from '../../../express/types.js';
+import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js';
+import type { PayloadRequest } from '../../../express/types.js';
+import type { Payload } from '../../../index.js';
 
 type Args = {
-  req: PayloadRequest,
-  payload: Payload
-  doc: TypeWithID & Record<string, unknown>
   collection: SanitizedCollectionConfig
+  doc: TypeWithID & Record<string, unknown>
+  payload: Payload
+  req: PayloadRequest,
 }
 
 export const incrementLoginAttempts = async ({
-  req,
-  payload,
-  doc,
   collection,
+  doc,
+  payload,
+  req,
 }: Args): Promise<void> => {
   const {
     auth: {
-      maxLoginAttempts,
       lockTime,
+      maxLoginAttempts,
     },
   } = collection;
 
@@ -28,13 +28,13 @@ export const incrementLoginAttempts = async ({
     // Expired lock, restart count at 1
     if (lockUntil < Date.now()) {
       await payload.update({
-        req,
         collection: collection.slug,
-        id: doc.id,
         data: {
-          loginAttempts: 1,
           lockUntil: null,
+          loginAttempts: 1,
         },
+        id: doc.id,
+        req,
       });
     }
 
@@ -54,7 +54,7 @@ export const incrementLoginAttempts = async ({
 
   await payload.update({
     collection: collection.slug,
-    id: doc.id,
     data,
+    id: doc.id,
   });
 };

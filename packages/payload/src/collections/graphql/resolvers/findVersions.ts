@@ -1,21 +1,23 @@
 /* eslint-disable no-param-reassign */
 
-import { Response } from 'express';
-import { Where } from '../../../types/index.js';
+import type { Response } from 'express';
+
 import type { PaginatedDocs } from '../../../database/types.js';
-import { PayloadRequest } from '../../../express/types.js';
-import { Collection } from '../../config/types.js';
+import type { PayloadRequest } from '../../../express/types.js';
+import type { Where } from '../../../types/index.js';
+import type { Collection } from '../../config/types.js';
+
 import findVersions from '../../operations/findVersions.js';
 
 export type Resolver = (
   _: unknown,
   args: {
-    locale?: string
     fallbackLocale?: string
-    where: Where
     limit?: number
+    locale?: string
     page?: number
     sort?: string
+    where: Where
   },
   context: {
     req: PayloadRequest,
@@ -30,12 +32,12 @@ export default function findVersionsResolver(collection: Collection): Resolver {
 
     const options = {
       collection,
-      where: args.where,
+      depth: 0,
       limit: args.limit,
       page: args.page,
-      sort: args.sort,
       req: context.req,
-      depth: 0,
+      sort: args.sort,
+      where: args.where,
     };
 
     const result = await findVersions(options);

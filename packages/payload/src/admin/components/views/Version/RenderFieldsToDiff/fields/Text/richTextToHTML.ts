@@ -6,12 +6,12 @@ export const richTextToHTML = (content: unknown): string => {
       const isTextNode = Text.isText(node);
 
       const {
-        text,
         bold,
         code,
         italic,
-        underline,
         strikethrough,
+        text,
+        underline,
       } = node;
 
       if (isTextNode) {

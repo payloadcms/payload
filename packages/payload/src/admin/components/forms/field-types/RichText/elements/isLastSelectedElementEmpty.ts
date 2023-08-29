@@ -1,4 +1,5 @@
 import { Editor, Element } from 'slate';
+
 import { nodeIsTextNode } from '../types.js';
 
 export const isLastSelectedElementEmpty = (editor: Editor): boolean => {

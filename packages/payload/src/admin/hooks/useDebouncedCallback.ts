@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 /**
  * Returns a memoized function that will only call the passed function when it hasn't been called for the wait period

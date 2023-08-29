@@ -1,29 +1,31 @@
 /* eslint-disable no-param-reassign */
-import { Configuration } from 'webpack';
-import { MarkOptional } from 'ts-essentials';
-import { transaction } from './transaction.js';
+import type { MarkOptional } from 'ts-essentials';
+import type { Configuration } from 'webpack';
+
+import type { BeginTransaction, CommitTransaction, DatabaseAdapter, RollbackTransaction } from './types.js';
+
+import { createMigration } from './migrations/createMigration.js';
 import { migrate } from './migrations/migrate.js';
-import { migrateStatus } from './migrations/migrateStatus.js';
 import { migrateDown } from './migrations/migrateDown.js';
 import { migrateRefresh } from './migrations/migrateRefresh.js';
 import { migrateReset } from './migrations/migrateReset.js';
-import { BeginTransaction, CommitTransaction, DatabaseAdapter, RollbackTransaction } from './types.js';
-import { createMigration } from './migrations/createMigration.js';
+import { migrateStatus } from './migrations/migrateStatus.js';
+import { transaction } from './transaction.js';
 
 const beginTransaction: BeginTransaction = async () => null;
 const rollbackTransaction: RollbackTransaction = async () => null;
 const commitTransaction: CommitTransaction = async () => null;
 
 export function createDatabaseAdapter<T extends DatabaseAdapter>(args: MarkOptional<T,
-  | 'transaction'
-  | 'migrate'
   | 'createMigration'
-  | 'migrateStatus'
+  | 'migrate'
   | 'migrateDown'
+  | 'migrateFresh'
   | 'migrateRefresh'
   | 'migrateReset'
-  | 'migrateFresh'
+  | 'migrateStatus'
   | 'migrationDir'
+  | 'transaction'
 >): T {
   // Need to implement DB Webpack config extensions here
   if (args.webpack) {
@@ -36,19 +38,19 @@ export function createDatabaseAdapter<T extends DatabaseAdapter>(args: MarkOptio
   }
 
   return {
-    transaction,
-    migrate,
-    createMigration,
-    migrateStatus,
-    migrateDown,
-    migrateRefresh,
-    migrateReset,
-    migrateFresh: async () => null,
-
     // Default 'null' transaction functions
     beginTransaction,
     commitTransaction,
+    createMigration,
+    migrate,
+    migrateDown,
+    migrateFresh: async () => null,
+    migrateRefresh,
+    migrateReset,
+
+    migrateStatus,
     rollbackTransaction,
+    transaction,
 
     ...args,
   } as T;

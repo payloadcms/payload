@@ -1,5 +1,6 @@
+import type { Where } from '../types/index.js';
+
 import { hasWhereAccessResult } from '../auth/types.js';
-import { Where } from '../types/index.js';
 
 export const combineQueries = (where: Where, access: Where | boolean): Where => {
   if (!where && !access) return {};

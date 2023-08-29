@@ -1,23 +1,27 @@
 /* eslint-disable no-param-reassign */
-import express, { NextFunction, Response } from 'express';
-import { InitOptions } from './config/types.js';
+import type { NextFunction, Response } from 'express';
 
-import authenticate from './express/middleware/authenticate.js';
-import expressMiddleware from './express/middleware/index.js';
-import initAdmin from './express/admin.js';
+import express from 'express';
+
+import type { InitOptions } from './config/types.js';
+import type { PayloadRequest } from './express/types.js';
+import type { Payload } from './payload.js';
+
 import initAuth from './auth/init.js';
 import access from './auth/requestHandlers/access.js';
-import initCollectionsHTTP from './collections/initHTTP.js';
-import initGlobalsHTTP from './globals/initHTTP.js';
-import initGraphQLPlayground from './graphql/initPlayground.js';
-import initStatic from './express/static.js';
-import graphQLHandler from './graphql/graphQLHandler.js';
-import identifyAPI from './express/middleware/identifyAPI.js';
-import errorHandler from './express/middleware/errorHandler.js';
-import { PayloadRequest } from './express/types.js';
 import { getDataLoader } from './collections/dataloader.js';
+import initCollectionsHTTP from './collections/initHTTP.js';
+import initAdmin from './express/admin.js';
+import authenticate from './express/middleware/authenticate.js';
+import errorHandler from './express/middleware/errorHandler.js';
+import identifyAPI from './express/middleware/identifyAPI.js';
+import expressMiddleware from './express/middleware/index.js';
 import mountEndpoints from './express/mountEndpoints.js';
-import { getPayload, Payload } from './payload.js';
+import initStatic from './express/static.js';
+import initGlobalsHTTP from './globals/initHTTP.js';
+import graphQLHandler from './graphql/graphQLHandler.js';
+import initGraphQLPlayground from './graphql/initPlayground.js';
+import { getPayload } from './payload.js';
 
 export const initHTTP = async (options: InitOptions): Promise<Payload> => {
   if (typeof options.local === 'undefined') options.local = false;

@@ -1,4 +1,6 @@
-import { optionIsObject, RadioField, SelectField } from '../../fields/config/types.js';
+import type { RadioField, SelectField } from '../../fields/config/types.js';
+
+import { optionIsObject } from '../../fields/config/types.js';
 import formatName from './formatName.js';
 
 const formatOptions = (field: RadioField | SelectField) => {

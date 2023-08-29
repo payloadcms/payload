@@ -1,7 +1,10 @@
 import React from 'react';
-import { Field, TabAsField, fieldAffectsData, fieldHasSubFields, tabHasName } from '../../../../fields/config/types.js';
-import { useAllFormFields, useFormSubmitted } from '../Form/context.js';
+
+import type { Field, TabAsField} from '../../../../fields/config/types.js';
+
+import { fieldAffectsData, fieldHasSubFields, tabHasName } from '../../../../fields/config/types.js';
 import useThrottledEffect from '../../../hooks/useThrottledEffect.js';
+import { useAllFormFields, useFormSubmitted } from '../Form/context.js';
 
 const buildPathSegments = (parentPath: string, fieldSchema: Field[]): string[] => {
   const pathNames = fieldSchema.reduce((acc, subField) => {
@@ -39,7 +42,7 @@ type TrackSubSchemaErrorCountProps = {
   path: string;
   setErrorCount: (count: number) => void;
 }
-export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({ path, fieldSchema, setErrorCount }) => {
+export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({ fieldSchema, path, setErrorCount }) => {
   const [fields] = useAllFormFields();
   const hasSubmitted = useFormSubmitted();
   const [pathSegments] = React.useState(() => {

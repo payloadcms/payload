@@ -1,24 +1,26 @@
 import jwt from 'jsonwebtoken';
-import { PayloadRequest } from '../../express/types.js';
+
+import type { Collection } from '../../collections/config/types.js';
+import type { PayloadRequest } from '../../express/types.js';
+import type { User } from '../types.js';
+
 import getExtractJWT from '../getExtractJWT.js';
-import { User } from '../types.js';
-import { Collection } from '../../collections/config/types.js';
 
 export type Result = {
-  user?: User,
   collection?: string,
-  token?: string,
   exp?: number,
+  token?: string,
+  user?: User,
 }
 
 export type Arguments = {
-  req: PayloadRequest
   collection: Collection
+  req: PayloadRequest
 }
 
 async function me({
-  req,
   collection,
+  req,
 }: Arguments): Promise<Result> {
   const extractJWT = getExtractJWT(req.payload.config);
   let response: Result = {
@@ -37,8 +39,8 @@ async function me({
     delete user.collection;
 
     response = {
-      user,
       collection: req.user.collection,
+      user,
     };
 
     const token = extractJWT(req);
@@ -58,9 +60,9 @@ async function me({
     await priorHook;
 
     response = await hook({
+      context: req.context,
       req,
       response,
-      context: req.context,
     }) || response;
   }, Promise.resolve());
 

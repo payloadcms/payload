@@ -1,10 +1,10 @@
-import { TabsField } from '../../../../../fields/config/types.js';
-import { FieldTypes } from '../index.js';
-import { FieldPermissions } from '../../../../../auth/types.js';
+import type { FieldPermissions } from '../../../../../auth/types.js';
+import type { TabsField } from '../../../../../fields/config/types.js';
+import type { FieldTypes } from '../index.js';
 
 export type Props = Omit<TabsField, 'type'> & {
-  path?: string
   fieldTypes: FieldTypes
-  permissions: FieldPermissions
   indexPath: string
+  path?: string
+  permissions: FieldPermissions
 }

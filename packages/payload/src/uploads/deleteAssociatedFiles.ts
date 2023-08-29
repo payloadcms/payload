@@ -1,28 +1,31 @@
-import path from 'path';
-import fs from 'fs';
 import type { TFunction } from 'i18next';
-import { ErrorDeletingFile } from '../errors/index.js';
-import type { FileData, FileToSave } from './types.js';
-import type { SanitizedConfig } from '../config/types.js';
+
+import fs from 'fs';
+import path from 'path';
+
 import type { SanitizedCollectionConfig } from '../collections/config/types.js';
+import type { SanitizedConfig } from '../config/types.js';
+import type { FileData, FileToSave } from './types.js';
+
+import { ErrorDeletingFile } from '../errors/index.js';
 import fileExists from './fileExists.js';
 
 type Args = {
-  config: SanitizedConfig
   collectionConfig: SanitizedCollectionConfig
-  files?: FileToSave[]
+  config: SanitizedConfig
   doc: Record<string, unknown>
-  t: TFunction
+  files?: FileToSave[]
   overrideDelete: boolean
+  t: TFunction
 }
 
 export const deleteAssociatedFiles: (args: Args) => Promise<void> = async ({
-  config,
   collectionConfig,
-  files = [],
+  config,
   doc,
-  t,
+  files = [],
   overrideDelete,
+  t,
 }) => {
   if (!collectionConfig.upload) return;
   if (overrideDelete || files.length > 0) {

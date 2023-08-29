@@ -1,5 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import { SanitizedConfig } from '../../config/types.js';
+import type { NextFunction, Request, Response } from 'express';
+
+import type { SanitizedConfig } from '../../config/types.js';
 
 export default (config: SanitizedConfig) => (
   (req: Request, res: Response, next: NextFunction) => {

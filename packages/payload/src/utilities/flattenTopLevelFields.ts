@@ -1,10 +1,12 @@
-import {
+import type {
   Field,
   FieldAffectingData,
+  FieldPresentationalOnly} from '../fields/config/types.js';
+
+import {
   fieldAffectsData,
   fieldHasSubFields,
   fieldIsPresentationalOnly,
-  FieldPresentationalOnly,
   tabHasName,
 } from '../fields/config/types.js';
 

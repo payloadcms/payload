@@ -1,4 +1,7 @@
-import { Path, Transforms, Editor, Element } from 'slate';
+import type { Path} from 'slate';
+
+import { Editor, Element, Transforms } from 'slate';
+
 import { areAllChildrenElements } from './areAllChildrenElements.js';
 import listTypes from './listTypes.js';
 

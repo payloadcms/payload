@@ -1,40 +1,41 @@
 /* eslint-disable no-underscore-dangle */
-import { PayloadRequest } from '../../express/types.js';
-import { Forbidden, NotFound } from '../../errors/index.js';
+import type { FindGlobalVersionsArgs } from '../../database/types.js';
+import type { PayloadRequest } from '../../express/types.js';
+import type { TypeWithVersion } from '../../versions/types.js';
+import type { SanitizedGlobalConfig } from '../config/types.js';
+
 import executeAccess from '../../auth/executeAccess.js';
-import { TypeWithVersion } from '../../versions/types.js';
-import { SanitizedGlobalConfig } from '../config/types.js';
-import { afterRead } from '../../fields/hooks/afterRead/index.js';
 import { combineQueries } from '../../database/combineQueries.js';
-import { FindGlobalVersionsArgs } from '../../database/types.js';
-import { killTransaction } from '../../utilities/killTransaction.js';
+import { Forbidden, NotFound } from '../../errors/index.js';
+import { afterRead } from '../../fields/hooks/afterRead/index.js';
 import { initTransaction } from '../../utilities/initTransaction.js';
+import { killTransaction } from '../../utilities/killTransaction.js';
 
 export type Arguments = {
-  globalConfig: SanitizedGlobalConfig
-  id: string | number
-  req: PayloadRequest
-  disableErrors?: boolean
   currentDepth?: number
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
   depth?: number
+  disableErrors?: boolean
+  globalConfig: SanitizedGlobalConfig
+  id: number | string
+  overrideAccess?: boolean
+  req: PayloadRequest
+  showHiddenFields?: boolean
 }
 
 async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<T> {
   const {
+    currentDepth,
     depth,
+    disableErrors,
     globalConfig,
     id,
-    req,
-    req: {
-      t,
-      payload,
-      locale,
-    },
-    disableErrors,
-    currentDepth,
     overrideAccess,
+    req: {
+      locale,
+      payload,
+      t,
+    },
+    req,
     showHiddenFields,
   } = args;
 
@@ -45,7 +46,7 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     // Access
     // /////////////////////////////////////
 
-    const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors, id }, globalConfig.access.readVersions) : true;
+    const accessResults = !overrideAccess ? await executeAccess({ disableErrors, id, req }, globalConfig.access.readVersions) : true;
 
     // If errors are disabled, and access returns false, return null
     if (accessResults === false) return null;
@@ -54,10 +55,10 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
 
     const findGlobalVersionsArgs: FindGlobalVersionsArgs = {
       global: globalConfig.slug,
-      where: combineQueries({ id: { equals: id } }, accessResults),
-      locale,
       limit: 1,
+      locale,
       req,
+      where: combineQueries({ id: { equals: id } }, accessResults),
     };
 
     // /////////////////////////////////////
@@ -89,8 +90,8 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
       await priorHook;
 
       result = await hook({
-        req,
         doc: result.version,
+        req,
       }) || result.version;
     }, Promise.resolve());
 
@@ -99,14 +100,14 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
     // /////////////////////////////////////
 
     result.version = await afterRead({
+      context: req.context,
       currentDepth,
       depth,
       doc: result.version,
       entityConfig: globalConfig,
-      req,
       overrideAccess,
+      req,
       showHiddenFields,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -117,9 +118,9 @@ async function findVersionByID<T extends TypeWithVersion<T> = any>(args: Argumen
       await priorHook;
 
       result.version = await hook({
-        req,
-        query: findGlobalVersionsArgs.where,
         doc: result.version,
+        query: findGlobalVersionsArgs.where,
+        req,
       }) || result.version;
     }, Promise.resolve());
 

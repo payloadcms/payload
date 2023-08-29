@@ -1,42 +1,44 @@
 /* eslint-disable no-underscore-dangle */
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types.js';
-import { Collection, TypeWithID } from '../config/types.js';
-import { APIError, Forbidden, NotFound } from '../../errors/index.js';
+
+import type { PayloadRequest } from '../../express/types.js';
+import type { TypeWithVersion } from '../../versions/types.js';
+import type { Collection, TypeWithID } from '../config/types.js';
+
 import executeAccess from '../../auth/executeAccess.js';
-import { TypeWithVersion } from '../../versions/types.js';
-import { afterRead } from '../../fields/hooks/afterRead/index.js';
 import { combineQueries } from '../../database/combineQueries.js';
+import { APIError, Forbidden, NotFound } from '../../errors/index.js';
+import { afterRead } from '../../fields/hooks/afterRead/index.js';
 import { initTransaction } from '../../utilities/initTransaction.js';
 import { killTransaction } from '../../utilities/killTransaction.js';
 
 export type Arguments = {
   collection: Collection
-  id: string | number
-  req: PayloadRequest
-  disableErrors?: boolean
   currentDepth?: number
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
   depth?: number
+  disableErrors?: boolean
+  id: number | string
+  overrideAccess?: boolean
+  req: PayloadRequest
+  showHiddenFields?: boolean
 }
 
 async function findVersionByID<T extends TypeWithID = any>(args: Arguments): Promise<TypeWithVersion<T>> {
   const {
-    depth,
     collection: {
       config: collectionConfig,
     },
-    id,
-    req,
-    req: {
-      t,
-      payload,
-      locale,
-    },
-    disableErrors,
     currentDepth,
+    depth,
+    disableErrors,
+    id,
     overrideAccess,
+    req: {
+      locale,
+      payload,
+      t,
+    },
+    req,
     showHiddenFields,
   } = args;
 
@@ -51,7 +53,7 @@ async function findVersionByID<T extends TypeWithID = any>(args: Arguments): Pro
     // Access
     // /////////////////////////////////////
 
-    const accessResults = !overrideAccess ? await executeAccess({ req, disableErrors, id }, collectionConfig.access.readVersions) : true;
+    const accessResults = !overrideAccess ? await executeAccess({ disableErrors, id, req }, collectionConfig.access.readVersions) : true;
 
     // If errors are disabled, and access returns false, return null
     if (accessResults === false) return null;
@@ -65,12 +67,12 @@ async function findVersionByID<T extends TypeWithID = any>(args: Arguments): Pro
     // /////////////////////////////////////
 
     const versionsQuery = await payload.db.findVersions<T>({
-      locale,
       collection: collectionConfig.slug,
       limit: 1,
+      locale,
       pagination: false,
-      where: fullWhere,
       req,
+      where: fullWhere,
     });
 
     const result = versionsQuery.docs[0];
@@ -92,10 +94,10 @@ async function findVersionByID<T extends TypeWithID = any>(args: Arguments): Pro
       await priorHook;
 
       result.version = await hook({
-        req,
-        query: fullWhere,
-        doc: result.version,
         context: req.context,
+        doc: result.version,
+        query: fullWhere,
+        req,
       }) || result.version;
     }, Promise.resolve());
 
@@ -104,6 +106,7 @@ async function findVersionByID<T extends TypeWithID = any>(args: Arguments): Pro
     // /////////////////////////////////////
 
     result.version = await afterRead({
+      context: req.context,
       currentDepth,
       depth,
       doc: result.version,
@@ -111,7 +114,6 @@ async function findVersionByID<T extends TypeWithID = any>(args: Arguments): Pro
       overrideAccess,
       req,
       showHiddenFields,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -122,10 +124,10 @@ async function findVersionByID<T extends TypeWithID = any>(args: Arguments): Pro
       await priorHook;
 
       result.version = await hook({
-        req,
-        query: fullWhere,
-        doc: result.version,
         context: req.context,
+        doc: result.version,
+        query: fullWhere,
+        req,
       }) || result.version;
     }, Promise.resolve());
 

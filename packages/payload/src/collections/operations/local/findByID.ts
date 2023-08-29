@@ -1,30 +1,32 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { PayloadRequest, RequestContext } from '../../../express/types.js';
-import { Document } from '../../../types/index.js';
-import findByID from '../findByID.js';
-import { Payload } from '../../../payload.js';
-import { getDataLoader } from '../../dataloader.js';
-import { i18nInit } from '../../../translations/init.js';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+
+import type { PayloadRequest, RequestContext } from '../../../express/types.js';
+import type { Payload } from '../../../payload.js';
+import type { Document } from '../../../types/index.js';
+
 import { APIError } from '../../../errors/index.js';
 import { setRequestContext } from '../../../express/setRequestContext.js';
+import { i18nInit } from '../../../translations/init.js';
+import { getDataLoader } from '../../dataloader.js';
+import findByID from '../findByID.js';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
-  id: string | number
-  depth?: number
-  currentDepth?: number
-  locale?: string
-  fallbackLocale?: string
-  user?: Document
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
-  disableErrors?: boolean
-  req?: PayloadRequest
-  draft?: boolean
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext,
+  currentDepth?: number
+  depth?: number
+  disableErrors?: boolean
+  draft?: boolean
+  fallbackLocale?: string
+  id: number | string
+  locale?: string
+  overrideAccess?: boolean
+  req?: PayloadRequest
+  showHiddenFields?: boolean
+  user?: Document
 }
 
 export default async function findByIDLocal<T extends keyof GeneratedTypes['collections']>(
@@ -33,18 +35,18 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
 ): Promise<GeneratedTypes['collections'][T]> {
   const {
     collection: collectionSlug,
-    depth,
+    context,
     currentDepth,
+    depth,
+    disableErrors = false,
+    draft = false,
+    fallbackLocale = null,
     id,
     locale = null,
-    fallbackLocale = null,
-    user,
     overrideAccess = true,
-    disableErrors = false,
-    showHiddenFields,
     req = {} as PayloadRequest,
-    draft = false,
-    context,
+    showHiddenFields,
+    user,
   } = options;
   setRequestContext(options.req, context);
 
@@ -67,14 +69,14 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return findByID<GeneratedTypes['collections'][T]>({
-    depth,
-    currentDepth,
-    id,
     collection,
-    overrideAccess,
+    currentDepth,
+    depth,
     disableErrors,
-    showHiddenFields,
-    req,
     draft,
+    id,
+    overrideAccess,
+    req,
+    showHiddenFields,
   });
 }

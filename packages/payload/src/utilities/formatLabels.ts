@@ -1,6 +1,6 @@
 import pluralize from 'pluralize-esm';
 
-const { singular, isPlural } = pluralize;
+const { isPlural, singular } = pluralize;
 
 const capitalizeFirstLetter = (string: string): string => string.charAt(0).toUpperCase() + string.slice(1);
 
@@ -18,38 +18,38 @@ const toWords = (inputString: string, joinWords = false): string => {
   });
 
   return joinWords
-    ? splitStringsArray.join('').replace(/\s/gi, '')
+    ? splitStringsArray.join('').replace(/\s/g, '')
     : splitStringsArray.join(' ');
 };
 
-const formatLabels = ((slug: string): { singular: string, plural: string } => {
+const formatLabels = ((slug: string): { plural: string, singular: string } => {
   const words = toWords(slug);
   return (isPlural(slug))
     ? {
-      singular: singular(words),
       plural: words,
+      singular: singular(words),
     }
     : {
-      singular: words,
       plural: pluralize(words),
+      singular: words,
     };
 });
 
-const formatNames = ((slug: string): { singular: string, plural: string } => {
+const formatNames = ((slug: string): { plural: string, singular: string } => {
   const words = toWords(slug, true);
   return (isPlural(slug))
     ? {
-      singular: singular(words),
       plural: words,
+      singular: singular(words),
     }
     : {
-      singular: words,
       plural: pluralize(words),
+      singular: words,
     };
 });
 
 export {
-  formatNames,
   formatLabels,
+  formatNames,
   toWords,
 };

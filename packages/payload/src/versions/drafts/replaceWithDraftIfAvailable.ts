@@ -1,28 +1,30 @@
-import { docHasTimestamps, PayloadRequest, Where } from '../../types/index.js';
+import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js';
+import type { AccessResult } from '../../config/types.js';
+import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.js';
+import type { SanitizedGlobalConfig } from '../../globals/config/types.js';
+import type { PayloadRequest, Where } from '../../types/index.js';
+
 import { hasWhereAccessResult } from '../../auth/types.js';
-import { AccessResult } from '../../config/types.js';
-import { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js';
+import { combineQueries } from '../../database/combineQueries.js';
+import { docHasTimestamps } from '../../types/index.js';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey.js';
-import { SanitizedGlobalConfig } from '../../globals/config/types.js';
-import { combineQueries } from '../../database/combineQueries.js';
-import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types.js';
 
 type Arguments<T> = {
+  accessResult: AccessResult
+  doc: T
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   entityType: 'collection' | 'global'
-  doc: T
-  req: PayloadRequest
   overrideAccess: boolean
-  accessResult: AccessResult
+  req: PayloadRequest
 }
 
 const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
+  accessResult,
+  doc,
   entity,
   entityType,
-  doc,
   req,
-  accessResult,
 }: Arguments<T>): Promise<T> => {
   const {
     locale,
@@ -62,13 +64,13 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
 
 
   const findVersionsArgs: FindVersionsArgs & FindGlobalVersionsArgs = {
-    locale,
-    where: combineQueries(queryToBuild, versionAccessResult),
     collection: entity.slug,
     global: entity.slug,
     limit: 1,
-    sort: '-updatedAt',
+    locale,
     req,
+    sort: '-updatedAt',
+    where: combineQueries(queryToBuild, versionAccessResult),
   };
 
   let versionDocs;

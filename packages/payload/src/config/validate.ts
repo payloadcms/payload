@@ -1,13 +1,15 @@
-import { ValidationResult } from 'joi';
-import { Logger } from 'pino';
-import schema from './schema.js';
+import type { ValidationResult } from 'joi';
+import type { Logger } from 'pino';
+
+import type { SanitizedCollectionConfig } from '../collections/config/types.js';
+import type { SanitizedGlobalConfig } from '../globals/config/types.js';
+import type { SanitizedConfig } from './types.js';
+
 import collectionSchema from '../collections/config/schema.js';
-import { SanitizedConfig } from './types.js';
-import { SanitizedCollectionConfig } from '../collections/config/types.js';
 import fieldSchema, { idField } from '../fields/config/schema.js';
-import { SanitizedGlobalConfig } from '../globals/config/types.js';
-import globalSchema from '../globals/config/schema.js';
 import { fieldAffectsData } from '../fields/config/types.js';
+import globalSchema from '../globals/config/schema.js';
+import schema from './schema.js';
 
 const validateFields = (context: string, entity: SanitizedCollectionConfig | SanitizedGlobalConfig): string[] => {
   const errors: string[] = [];

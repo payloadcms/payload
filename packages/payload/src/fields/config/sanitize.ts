@@ -1,10 +1,12 @@
-import { formatLabels, toWords } from '../../utilities/formatLabels.js';
-import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors/index.js';
-import { baseBlockFields } from '../baseFields/baseBlockFields.js';
-import validations from '../validations.js';
-import { baseIDField } from '../baseFields/baseIDField.js';
-import { Field, fieldAffectsData, tabHasName } from './types.js';
+import type { Field} from './types.js';
+
 import withCondition from '../../admin/components/forms/withCondition/index.js';
+import { InvalidFieldName, InvalidFieldRelationship, MissingFieldType } from '../../errors/index.js';
+import { formatLabels, toWords } from '../../utilities/formatLabels.js';
+import { baseBlockFields } from '../baseFields/baseBlockFields.js';
+import { baseIDField } from '../baseFields/baseIDField.js';
+import validations from '../validations.js';
+import { fieldAffectsData, tabHasName } from './types.js';
 
 const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] => {
   if (!fields) return [];

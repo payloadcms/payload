@@ -1,19 +1,20 @@
-import executeAccess from '../../auth/executeAccess.js';
+import type { Document, Where } from '../../types/index.js';
+import type { PreferenceRequest } from '../types.js';
+
 import defaultAccess from '../../auth/defaultAccess.js';
-import { Document, Where } from '../../types/index.js';
-import UnauthorizedError from '../../errors/UnathorizedError.js';
-import { PreferenceRequest } from '../types.js';
+import executeAccess from '../../auth/executeAccess.js';
 import NotFound from '../../errors/NotFound.js';
+import UnauthorizedError from '../../errors/UnathorizedError.js';
 
 async function deleteOperation(args: PreferenceRequest): Promise<Document> {
   const {
+    key,
     overrideAccess,
-    req,
     req: {
       payload,
     },
+    req,
     user,
-    key,
   } = args;
 
   if (!user) {
@@ -34,9 +35,9 @@ async function deleteOperation(args: PreferenceRequest): Promise<Document> {
 
   const result = await payload.delete({
     collection: 'payload-preferences',
-    where,
     depth: 0,
     user,
+    where,
   });
 
   if (result.docs.length === 1) {

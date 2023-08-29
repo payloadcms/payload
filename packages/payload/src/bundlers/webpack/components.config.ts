@@ -1,10 +1,10 @@
-import path, { dirname } from 'path';
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
-import TerserJSPlugin from 'terser-webpack-plugin';
-import * as terser from 'terser'; // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
+import path, { dirname } from 'path';
+import * as terser from 'terser';
+import TerserJSPlugin from 'terser-webpack-plugin'; // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
 import OptimizeCSSAssetsPlugin from 'css-minimizer-webpack-plugin';
-import { fileURLToPath } from 'url';
 import { createRequire } from 'node:module';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(__filename);
@@ -17,27 +17,15 @@ export default {
   externals: {
     react: 'react',
   },
-  output: {
-    path: path.resolve(_dirname, '../../exports/components'),
-    publicPath: '/',
-    filename: 'index.js',
-    libraryTarget: 'commonjs2',
-  },
-  optimization: {
-    minimizer: [new TerserJSPlugin({
-      extractComments: false,
-    }), new OptimizeCSSAssetsPlugin({})],
-  },
   mode: 'production',
-  stats: 'errors-only',
   module: {
     rules: [
       {
-        test: /\.(t|j)sx?$/,
         exclude: /node_modules/,
         resolve: {
           fullySpecified: false
         },
+        test: /\.(t|j)sx?$/,
         use: [
           {
             loader: require.resolve('swc-loader'),
@@ -47,16 +35,16 @@ export default {
       {
         oneOf: [
           {
-            test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
             loader: require.resolve('url-loader'),
             options: {
               limit: 10000,
               name: 'static/media/[name].[hash:8].[ext]',
             },
+            test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
           },
           {
-            test: /\.(sa|sc|c)ss$/,
             sideEffects: true,
+            test: /\.(sa|sc|c)ss$/,
             use: [
               MiniCSSExtractPlugin.loader,
               'css-loader',
@@ -84,6 +72,17 @@ export default {
       },
     ],
   },
+  optimization: {
+    minimizer: [new TerserJSPlugin({
+      extractComments: false,
+    }), new OptimizeCSSAssetsPlugin({})],
+  },
+  output: {
+    filename: 'index.js',
+    libraryTarget: 'commonjs2',
+    path: path.resolve(_dirname, '../../exports/components'),
+    publicPath: '/',
+  },
   plugins: [
     new MiniCSSExtractPlugin({
       filename: 'styles.css',
@@ -91,10 +90,11 @@ export default {
     }),
   ],
   resolve: {
-    mainFiles: ['index'],
     alias: {
       'payload-scss-overrides': path.resolve(_dirname, '../../admin/scss/overrides.scss'),
     },
+    mainFiles: ['index'],
     modules: ['node_modules', path.resolve(_dirname, '../../../node_modules')],
   },
+  stats: 'errors-only',
 };

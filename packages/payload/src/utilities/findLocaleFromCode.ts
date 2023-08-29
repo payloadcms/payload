@@ -1,4 +1,4 @@
-import type { SanitizedLocalizationConfig, Locale } from '../config/types.js';
+import type { Locale, SanitizedLocalizationConfig } from '../config/types.js';
 /*
  return the Locale for given locale code, else return null
 */

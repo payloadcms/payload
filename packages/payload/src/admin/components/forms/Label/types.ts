@@ -1,5 +1,5 @@
 export type Props = {
-  label?: Record<string, string> | string | false | JSX.Element
-  required?: boolean
   htmlFor?: string
+  label?: JSX.Element | Record<string, string> | false | string
+  required?: boolean
 }

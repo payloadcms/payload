@@ -1,28 +1,31 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+
 import httpStatus from 'http-status';
-import { AccessResult } from '../../config/types.js';
-import { PayloadRequest } from '../../express/types.js';
-import { APIError } from '../../errors/index.js';
+
+import type { AccessResult } from '../../config/types.js';
+import type { PayloadRequest } from '../../express/types.js';
+import type { Where } from '../../types/index.js';
+import type { BeforeOperationHook, Collection } from '../config/types.js';
+
 import executeAccess from '../../auth/executeAccess.js';
-import { BeforeOperationHook, Collection } from '../config/types.js';
-import { Where } from '../../types/index.js';
-import { afterRead } from '../../fields/hooks/afterRead/index.js';
-import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js';
-import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js';
-import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js';
-import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js';
 import { combineQueries } from '../../database/combineQueries.js';
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js';
+import { APIError } from '../../errors/index.js';
+import { afterRead } from '../../fields/hooks/afterRead/index.js';
+import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js';
+import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js';
 import { initTransaction } from '../../utilities/initTransaction.js';
 import { killTransaction } from '../../utilities/killTransaction.js';
+import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js';
 import { buildAfterOperation } from './utils.js';
 
 export type Arguments = {
-  depth?: number
   collection: Collection
-  where: Where
-  req: PayloadRequest
+  depth?: number
   overrideAccess?: boolean
+  req: PayloadRequest
   showHiddenFields?: boolean
+  where: Where
 }
 
 async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']>(
@@ -30,8 +33,8 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 ): Promise<{
   docs: GeneratedTypes['collections'][TSlug][],
   errors: {
-    message: string
     id: GeneratedTypes['collections'][TSlug]['id']
+    message: string
   }[]
 }> {
   let args = incomingArgs;
@@ -45,28 +48,28 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
     args = (await hook({
       args,
-      operation: 'delete',
       context: args.req.context,
+      operation: 'delete',
     })) || args;
   }, Promise.resolve());
 
   const {
-    depth,
     collection: {
       config: collectionConfig,
     },
-    where,
-    req,
+    depth,
+    overrideAccess,
     req: {
-      t,
-      payload,
       locale,
       payload: {
         config,
       },
+      payload,
+      t,
     },
-    overrideAccess,
+    req,
     showHiddenFields,
+    where,
   } = args;
 
   try {
@@ -81,8 +84,8 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
       args = (await hook({
         args,
-        operation: 'delete',
         context: req.context,
+        operation: 'delete',
       })) || args;
     }, Promise.resolve());
 
@@ -102,9 +105,9 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
     await validateQueryPaths({
       collectionConfig,
-      where,
-      req,
       overrideAccess,
+      req,
+      where,
     });
 
     const fullWhere = combineQueries(where, accessResult);
@@ -114,10 +117,10 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     // /////////////////////////////////////
 
     const { docs } = await payload.db.find<GeneratedTypes['collections'][TSlug]>({
-      locale,
-      where: fullWhere,
       collection: collectionConfig.slug,
+      locale,
       req,
+      where: fullWhere,
     });
 
     const errors = [];
@@ -137,18 +140,18 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           await priorHook;
 
           return hook({
-            req,
-            id,
             context: req.context,
+            id,
+            req,
           });
         }, Promise.resolve());
 
         await deleteAssociatedFiles({
-          config,
           collectionConfig,
+          config,
           doc,
-          t,
           overrideDelete: true,
+          t,
         });
 
         // /////////////////////////////////////
@@ -157,12 +160,12 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
         await payload.db.deleteOne({
           collection: collectionConfig.slug,
+          req,
           where: {
             id: {
               equals: id,
             },
           },
-          req,
         });
 
         // /////////////////////////////////////
@@ -171,10 +174,10 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
         if (collectionConfig.versions) {
           deleteCollectionVersions({
-            payload,
             id,
-            slug: collectionConfig.slug,
+            payload,
             req,
+            slug: collectionConfig.slug,
           });
         }
 
@@ -183,13 +186,13 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         // /////////////////////////////////////
 
         result = await afterRead({
+          context: req.context,
           depth,
           doc: result || doc,
           entityConfig: collectionConfig,
           overrideAccess,
           req,
           showHiddenFields,
-          context: req.context,
         });
 
         // /////////////////////////////////////
@@ -200,9 +203,9 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           await priorHook;
 
           result = await hook({
-            req,
-            doc: result || doc,
             context: req.context,
+            doc: result || doc,
+            req,
           }) || result;
         }, Promise.resolve());
 
@@ -214,10 +217,10 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           await priorHook;
 
           result = await hook({
-            req,
-            id,
-            doc: result,
             context: req.context,
+            doc: result,
+            id,
+            req,
           }) || result;
         }, Promise.resolve());
 
@@ -228,8 +231,8 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
         return result;
       } catch (error) {
         errors.push({
-          message: error.message,
           id: doc.id,
+          message: error.message,
         });
       }
       return null;
@@ -242,9 +245,9 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     // /////////////////////////////////////
 
     deleteUserPreferences({
-      payload,
       collectionConfig,
       ids: docs.map(({ id }) => id),
+      payload,
       req,
     });
 
@@ -258,8 +261,8 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
     // /////////////////////////////////////
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
-      operation: 'delete',
       args,
+      operation: 'delete',
       result,
     });
 

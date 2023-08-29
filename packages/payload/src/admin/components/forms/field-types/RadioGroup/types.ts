@@ -1,4 +1,4 @@
-import { RadioField } from '../../../../../fields/config/types.js';
+import type { RadioField } from '../../../../../fields/config/types.js';
 
 export type Props = Omit<RadioField, 'type'> & {
   path?: string

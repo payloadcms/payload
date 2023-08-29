@@ -1,9 +1,11 @@
 /* eslint-disable react/destructuring-assignment */
-import { Request } from 'express';
-import { SanitizedConfig } from '../config/types.js';
+import type { Request } from 'express';
+
+import type { SanitizedConfig } from '../config/types.js';
+
 import parseCookies from '../utilities/parseCookies.js';
 
-const getExtractJWT = (config: SanitizedConfig) => (req: Request): string | null => {
+const getExtractJWT = (config: SanitizedConfig) => (req: Request): null | string => {
   if (req && req.get) {
     const jwtFromHeader = req.get('Authorization');
     const origin = req.get('Origin');

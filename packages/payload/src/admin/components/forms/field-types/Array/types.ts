@@ -1,11 +1,11 @@
-import { ArrayField } from '../../../../../fields/config/types.js';
-import { FieldTypes } from '../index.js';
-import { FieldPermissions } from '../../../../../auth/types.js';
+import type { FieldPermissions } from '../../../../../auth/types.js';
+import type { ArrayField } from '../../../../../fields/config/types.js';
+import type { FieldTypes } from '../index.js';
 
 export type Props = Omit<ArrayField, 'type'> & {
-  path?: string
   fieldTypes: FieldTypes
-  permissions: FieldPermissions
-  label: string | false
   indexPath: string
+  label: false | string
+  path?: string
+  permissions: FieldPermissions
 }

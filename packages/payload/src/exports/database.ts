@@ -1,5 +1,4 @@
 export {
-  type DatabaseAdapter,
   type BeginTransaction,
   type CommitTransaction,
   type Connect,
@@ -10,6 +9,7 @@ export {
   type CreateMigration,
   type CreateVersion,
   type CreateVersionArgs,
+  type DatabaseAdapter,
   type DeleteMany,
   type DeleteManyArgs,
   type DeleteOne,
@@ -63,10 +63,6 @@ export {
 } from '../database/getLocalizedPaths.js'
 
 export {
-  transaction
-} from '../database/transaction.js'
-
-export {
   createMigration
 } from '../database/migrations/createMigration.js'
 
@@ -118,3 +114,7 @@ export {
 export {
   validateSearchParam
 } from '../database/queryValidation/validateSearchParams.js'
+
+export {
+  transaction
+} from '../database/transaction.js'

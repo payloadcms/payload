@@ -1,7 +1,9 @@
-import { i18n as Ii18n } from 'i18next';
-import { Permissions } from '../../auth/types.js';
-import { SanitizedCollectionConfig } from '../../collections/config/types.js';
-import { SanitizedGlobalConfig } from '../../globals/config/types.js';
+import type { i18n as Ii18n } from 'i18next';
+
+import type { Permissions } from '../../auth/types.js';
+import type { SanitizedCollectionConfig } from '../../collections/config/types.js';
+import type { SanitizedGlobalConfig } from '../../globals/config/types.js';
+
 import { getTranslation } from '../../utilities/getTranslation.js';
 
 export enum EntityType {
@@ -10,16 +12,16 @@ export enum EntityType {
 }
 
 export type EntityToGroup = {
-  type: EntityType.collection
   entity: SanitizedCollectionConfig
+  type: EntityType.collection
 } | {
-  type: EntityType.global
   entity: SanitizedGlobalConfig
+  type: EntityType.global
 }
 
 export type Group = {
-  label: string
   entities: EntityToGroup[]
+  label: string
 }
 
 export function groupNavItems(entities: EntityToGroup[], permissions: Permissions, i18n: Ii18n): Group[] {
@@ -30,7 +32,7 @@ export function groupNavItems(entities: EntityToGroup[], permissions: Permission
         const existingGroup = groups.find((group) => getTranslation(group.label, i18n) === translatedGroup) as Group;
         let matchedGroup: Group = existingGroup;
         if (!existingGroup) {
-          matchedGroup = { label: translatedGroup, entities: [] };
+          matchedGroup = { entities: [], label: translatedGroup };
           groups.push(matchedGroup);
         }
 
@@ -44,12 +46,12 @@ export function groupNavItems(entities: EntityToGroup[], permissions: Permission
     return groups;
   }, [
     {
-      label: i18n.t('general:collections') as string,
       entities: [],
+      label: i18n.t('general:collections') as string,
     },
     {
-      label: i18n.t('general:globals') as string,
       entities: [],
+      label: i18n.t('general:globals') as string,
     },
   ]);
 

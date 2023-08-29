@@ -1,15 +1,17 @@
 import merge from 'deepmerge';
 import { isPlainObject } from 'is-plain-object';
+
 import type { Config, LocalizationConfigWithLabels, LocalizationConfigWithNoLabels, SanitizedConfig, SanitizedLocalizationConfig } from './types.js';
+
 import { defaultUserCollection } from '../auth/defaultUser.js';
+import getDefaultBundler from '../bundlers/webpack/bundler.js';
 import sanitizeCollection from '../collections/config/sanitize.js';
+import { migrationsCollection } from '../database/migrations/migrationsCollection.js';
 import { InvalidConfiguration } from '../errors/index.js';
 import sanitizeGlobals from '../globals/config/sanitize.js';
+import getPreferencesCollection from '../preferences/preferencesCollection.js';
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js';
 import { defaults } from './defaults.js';
-import getPreferencesCollection from '../preferences/preferencesCollection.js';
-import { migrationsCollection } from '../database/migrations/migrationsCollection.js';
-import getDefaultBundler from '../bundlers/webpack/bundler.js';
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize };
@@ -52,8 +54,8 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
       // is string[], so convert to Locale[]
       (config.localization as SanitizedLocalizationConfig).locales = (config.localization as unknown as LocalizationConfigWithNoLabels).locales.map((locale) => ({
-        label: locale,
         code: locale,
+        label: locale,
         rtl: false,
         toString: () => locale,
       }));

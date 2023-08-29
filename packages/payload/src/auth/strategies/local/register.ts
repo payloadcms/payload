@@ -1,8 +1,9 @@
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js';
+import type { PayloadRequest } from '../../../express/types.js';
+import type { Payload } from '../../../index.js';
+
 import { ValidationError } from '../../../errors/index.js';
-import { Payload } from '../../../index.js';
-import { SanitizedCollectionConfig } from '../../../collections/config/types.js';
 import { generatePasswordSaltHash } from './generatePasswordSaltHash.js';
-import { PayloadRequest } from '../../../express/types.js';
 
 type Args = {
   collection: SanitizedCollectionConfig
@@ -30,10 +31,10 @@ export const registerLocalStrategy = async ({
   });
 
   if (existingUser.docs.length > 0) {
-    throw new ValidationError([{ message: 'A user with the given email is already registered', field: 'email' }]);
+    throw new ValidationError([{ field: 'email', message: 'A user with the given email is already registered' }]);
   }
 
-  const { salt, hash } = await generatePasswordSaltHash({ password });
+  const { hash, salt } = await generatePasswordSaltHash({ password });
 
   const sanitizedDoc = { ...doc };
   if (sanitizedDoc.password) delete sanitizedDoc.password;
@@ -42,8 +43,8 @@ export const registerLocalStrategy = async ({
     collection: collection.slug,
     data: {
       ...sanitizedDoc,
-      salt,
       hash,
+      salt,
     },
     req,
   });

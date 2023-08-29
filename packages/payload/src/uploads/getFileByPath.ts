@@ -1,7 +1,8 @@
-import fs from 'fs';
 import filetype from 'file-type';
+import fs from 'fs';
 import path from 'path';
-import { File } from './types.js';
+
+import type { File } from './types.js';
 
 const { fromFile } = filetype;
 

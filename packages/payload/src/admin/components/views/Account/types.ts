@@ -1,15 +1,15 @@
-import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
-import { Fields, Data } from '../../forms/Form/types.js';
-import { CollectionPermission } from '../../../../auth/types.js';
+import type { CollectionPermission } from '../../../../auth/types.js';
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
+import type { Data, Fields } from '../../forms/Form/types.js';
 
 export type Props = {
-  hasSavePermission: boolean
+  action: string
   apiURL: string
   collection: SanitizedCollectionConfig
   data: Data
-  permissions: CollectionPermission
+  hasSavePermission: boolean
   initialState: Fields
   isLoading: boolean
-  action: string
   onSave?: () => void
+  permissions: CollectionPermission
 }

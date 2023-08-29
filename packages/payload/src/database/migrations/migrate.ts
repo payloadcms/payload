@@ -1,8 +1,9 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import { DatabaseAdapter } from '../types.js';
+import type { PayloadRequest } from '../../express/types.js';
+import type { DatabaseAdapter } from '../types.js';
+
 import { getMigrations } from './getMigrations.js';
 import { readMigrationFiles } from './readMigrationFiles.js';
-import { PayloadRequest } from '../../express/types.js';
 
 export async function migrate(this: DatabaseAdapter): Promise<void> {
   const { payload } = this;
@@ -21,7 +22,7 @@ export async function migrate(this: DatabaseAdapter): Promise<void> {
     }
 
     const start = Date.now();
-    let transactionID: string | number | undefined;
+    let transactionID: number | string | undefined;
 
     payload.logger.info({ msg: `Migrating: ${migration.name}` });
 
@@ -32,15 +33,15 @@ export async function migrate(this: DatabaseAdapter): Promise<void> {
       await payload.create({
         collection: 'payload-migrations',
         data: {
-          name: migration.name,
           batch: newBatch,
+          name: migration.name,
         },
         ...(transactionID && { req: { transactionID } as PayloadRequest }),
       });
       await this.commitTransaction(transactionID);
     } catch (err: unknown) {
       await this.rollbackTransaction(transactionID);
-      payload.logger.error({ msg: `Error running migration ${migration.name}`, err });
+      payload.logger.error({ err, msg: `Error running migration ${migration.name}` });
       throw err;
     }
   }

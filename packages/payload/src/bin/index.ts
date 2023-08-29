@@ -1,55 +1,56 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import path from 'path';
-import minimist from 'minimist';
 import swcRegister from '@swc/register';
 import { getTsconfig as getTSconfig } from 'get-tsconfig';
-import { generateTypes } from './generateTypes.js';
-import { generateGraphQLSchema } from './generateGraphQLSchema.js';
-import { migrate } from './migrate.js';
+import minimist from 'minimist';
+import path from 'path';
+
 import { build } from "./build.js";
+import { generateGraphQLSchema } from './generateGraphQLSchema.js';
+import { generateTypes } from './generateTypes.js';
+import { migrate } from './migrate.js';
 
 const tsConfig = getTSconfig();
 
 const swcOptions_cjs = {
-  sourceMaps: 'inline',
+  ignore: [
+    /.*\/node_modules\/.*/, // parse everything besides files within node_modules
+  ],
   jsc: {
+    baseUrl: path.resolve(),
     parser: {
+      dts: true,
       syntax: 'typescript',
       tsx: true,
-      dts: true,
     },
     paths: undefined,
-    baseUrl: path.resolve(),
   },
   module: {
     type: 'commonjs',
   },
-  ignore: [
-    /.*\/node_modules\/.*/, // parse everything besides files within node_modules
-  ],
+  sourceMaps: 'inline',
 };
 
 const swcOptions_esm = {
-  sourceMaps: 'inline',
+  ignore: [
+    /.*\/node_modules\/.*/, // parse everything besides files within node_modules
+  ],
   jsc: {
+    baseUrl: path.resolve(),
     experimental: {
       keepImportAssertions: true,
     },
     parser: {
-      syntax: 'typescript',
-      tsx: true,
       dts: true,
       importAssertions: true,
+      syntax: 'typescript',
+      tsx: true,
     },
     paths: undefined,
-    baseUrl: path.resolve(),
   },
   module: {
     type: 'es6',
   },
-  ignore: [
-    /.*\/node_modules\/.*/, // parse everything besides files within node_modules
-  ],
+  sourceMaps: 'inline',
 };
 
 if (tsConfig?.config?.compilerOptions?.paths) {

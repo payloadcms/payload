@@ -8,6 +8,7 @@ import es from './es.json' assert { type: "json" };
 import fa from './fa.json' assert { type: "json" };
 import fr from './fr.json' assert { type: "json" };
 import hr from './hr.json' assert { type: "json" };
+import hu from './hu.json' assert { type: "json" };
 import it from './it.json' assert { type: "json" };
 import ja from './ja.json' assert { type: "json" };
 import my from './my.json' assert { type: "json" };
@@ -23,7 +24,6 @@ import tr from './tr.json' assert { type: "json" };
 import ua from './ua.json' assert { type: "json" };
 import vi from './vi.json' assert { type: "json" };
 import zh from './zh.json' assert { type: "json" };
-import hu from './hu.json' assert { type: "json" };
 
 export default {
   ar,

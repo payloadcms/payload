@@ -1,13 +1,15 @@
-import { Config as SchemaConfig } from 'payload/generated-types';
-import { PayloadRequest } from '../../../express/types.js';
-import { Collection } from '../../config/types.js';
+import type { Config as SchemaConfig } from 'payload/generated-types';
+
+import type { PayloadRequest } from '../../../express/types.js';
+import type { Collection } from '../../config/types.js';
+
 import findByID from '../../operations/findByID.js';
 
 export type Resolver<T> = (_: unknown, args: {
-  locale?: string
   draft: boolean
-  id: string
   fallbackLocale?: string
+  id: string
+  locale?: string
 },
   context: {
     req: PayloadRequest,
@@ -23,10 +25,10 @@ export default function findByIDResolver<T extends keyof SchemaConfig['collectio
 
     const options = {
       collection,
+      depth: 0,
+      draft: args.draft,
       id: args.id,
       req,
-      draft: args.draft,
-      depth: 0,
     };
 
     const result = await findByID(options);

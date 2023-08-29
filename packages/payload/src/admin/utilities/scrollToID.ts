@@ -4,8 +4,8 @@ export const scrollToID = (id: string): void => {
   if (element) {
     const bounds = element.getBoundingClientRect();
     window.scrollBy({
-      top: bounds.top - 100,
       behavior: 'smooth',
+      top: bounds.top - 100,
     });
   }
 };

@@ -1,12 +1,13 @@
-import { toWords } from '../../utilities/formatLabels.js';
-import { CollectionConfig } from '../../collections/config/types.js';
-import sanitizeFields from '../../fields/config/sanitize.js';
-import { GlobalConfig, SanitizedGlobalConfig } from './types.js';
+import type { CollectionConfig } from '../../collections/config/types.js';
+import type { GlobalConfig, SanitizedGlobalConfig } from './types.js';
+
 import defaultAccess from '../../auth/defaultAccess.js';
-import baseVersionFields from '../../versions/baseFields.js';
+import sanitizeFields from '../../fields/config/sanitize.js';
+import { fieldAffectsData } from '../../fields/config/types.js';
 import mergeBaseFields from '../../fields/mergeBaseFields.js';
 import translations from '../../translations/index.js';
-import { fieldAffectsData } from '../../fields/config/types.js';
+import { toWords } from '../../utilities/formatLabels.js';
+import baseVersionFields from '../../versions/baseFields.js';
 
 const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[]): SanitizedGlobalConfig[] => {
   const sanitizedGlobals = globals.map((global) => {
@@ -68,24 +69,24 @@ const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[
     });
     if (!hasUpdatedAt) {
       sanitizedGlobal.fields.push({
-        name: 'updatedAt',
-        label: translations['general:updatedAt'],
-        type: 'date',
         admin: {
-          hidden: true,
           disableBulkEdit: true,
+          hidden: true,
         },
+        label: translations['general:updatedAt'],
+        name: 'updatedAt',
+        type: 'date',
       });
     }
     if (!hasCreatedAt) {
       sanitizedGlobal.fields.push({
-        name: 'createdAt',
-        label: translations['general:createdAt'],
-        type: 'date',
         admin: {
-          hidden: true,
           disableBulkEdit: true,
+          hidden: true,
         },
+        label: translations['general:createdAt'],
+        name: 'createdAt',
+        type: 'date',
       });
     }
 

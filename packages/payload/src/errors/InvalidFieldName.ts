@@ -1,4 +1,5 @@
-import { FieldAffectingData } from '../fields/config/types.js';
+import type { FieldAffectingData } from '../fields/config/types.js';
+
 import APIError from './APIError.js';
 
 class InvalidFieldName extends APIError {

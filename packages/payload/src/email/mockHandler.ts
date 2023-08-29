@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
-import { EmailOptions } from '../config/types.js';
-import { MockEmailHandler } from './types.js';
+
+import type { EmailOptions } from '../config/types.js';
+import type { MockEmailHandler } from './types.js';
 
 import { defaults as emailDefaults } from './defaults.js';
 
@@ -9,15 +10,15 @@ const mockEmailHandler = async (emailConfig: EmailOptions): Promise<MockEmailHan
 
   const smtpOptions = {
     ...emailConfig,
+    auth: {
+      pass: testAccount.pass,
+      user: testAccount.user,
+    },
+    fromAddress: emailConfig?.fromAddress || emailDefaults.fromAddress,
+    fromName: emailConfig?.fromName || emailDefaults.fromName,
     host: 'smtp.ethereal.email',
     port: 587,
     secure: false,
-    fromName: emailConfig?.fromName || emailDefaults.fromName,
-    fromAddress: emailConfig?.fromAddress || emailDefaults.fromAddress,
-    auth: {
-      user: testAccount.user,
-      pass: testAccount.pass,
-    },
   };
 
   return {

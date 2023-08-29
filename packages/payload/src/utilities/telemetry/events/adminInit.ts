@@ -1,15 +1,16 @@
-import { PayloadRequest } from '../../../express/types.js';
+import type { PayloadRequest } from '../../../express/types.js';
+
 import { sendEvent } from '../index.js';
 import { oneWayHash } from '../oneWayHash.js';
 
 export type AdminInitEvent = {
-  type: 'admin-init'
   domainID?: string
+  type: 'admin-init'
   userID?: string
 }
 
 export const adminInit = (req: PayloadRequest): void => {
-  const { user, payload } = req;
+  const { payload, user } = req;
   const { host } = req.headers;
 
   let domainID: string;
@@ -24,11 +25,11 @@ export const adminInit = (req: PayloadRequest): void => {
   }
 
   sendEvent({
-    payload,
     event: {
-      type: 'admin-init',
       domainID,
+      type: 'admin-init',
       userID,
     },
+    payload,
   });
 };

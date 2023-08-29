@@ -3,7 +3,8 @@ import {
   GraphQLInputObjectType,
   GraphQLString,
 } from 'graphql';
-import {
+
+import type {
   ArrayField,
   CheckboxField,
   CodeField,
@@ -20,47 +21,19 @@ import {
   RowField,
   SelectField,
   TabsField,
-  TextareaField,
   TextField,
+  TextareaField,
   UploadField,
 } from '../../fields/config/types.js';
-import { withOperators } from './withOperators.js';
+
 import combineParentName from '../utilities/combineParentName.js';
 import formatName from '../utilities/formatName.js';
 import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths.js';
+import { withOperators } from './withOperators.js';
 
 const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => ({
-  number: (field: NumberField) => ({
-    type: withOperators(
-      field,
-      parentName,
-    ),
-  }),
-  text: (field: TextField) => ({
-    type: withOperators(
-      field,
-      parentName,
-    ),
-  }),
-  email: (field: EmailField) => ({
-    type: withOperators(
-      field,
-      parentName,
-    ),
-  }),
-  textarea: (field: TextareaField) => ({
-    type: withOperators(
-      field,
-      parentName,
-    ),
-  }),
-  richText: (field: RichTextField) => ({
-    type: withOperators(
-      field,
-      parentName,
-    ),
-  }),
-  json: (field: JSONField) => ({
+  array: (field: ArrayField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
+  checkbox: (field: CheckboxField) => ({
     type: withOperators(
       field,
       parentName,
@@ -72,13 +45,27 @@ const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => 
       parentName,
     ),
   }),
-  radio: (field: RadioField) => ({
+  collapsible: (field: CollapsibleField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
+  date: (field: DateField) => ({
     type: withOperators(
       field,
       parentName,
     ),
   }),
-  date: (field: DateField) => ({
+  email: (field: EmailField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
+  group: (field: GroupField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
+  json: (field: JSONField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
+  number: (field: NumberField) => ({
     type: withOperators(
       field,
       parentName,
@@ -90,11 +77,16 @@ const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => 
       parentName,
     ),
   }),
+  radio: (field: RadioField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
   relationship: (field: RelationshipField) => {
     if (Array.isArray(field.relationTo)) {
       return {
         type: new GraphQLInputObjectType({
-          name: `${combineParentName(parentName, field.name)}_Relation`,
           fields: {
             relationTo: {
               type: new GraphQLEnumType({
@@ -109,6 +101,7 @@ const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => 
             },
             value: { type: GraphQLString },
           },
+          name: `${combineParentName(parentName, field.name)}_Relation`,
         }),
       };
     }
@@ -120,29 +113,38 @@ const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => 
       ),
     };
   },
-  upload: (field: UploadField) => ({
+  richText: (field: RichTextField) => ({
     type: withOperators(
       field,
       parentName,
     ),
   }),
-  checkbox: (field: CheckboxField) => ({
-    type: withOperators(
-      field,
-      parentName,
-    ),
-  }),
+  row: (field: RowField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
   select: (field: SelectField) => ({
     type: withOperators(
       field,
       parentName,
     ),
   }),
-  array: (field: ArrayField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
-  group: (field: GroupField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
-  row: (field: RowField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
-  collapsible: (field: CollapsibleField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
   tabs: (field: TabsField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
+  text: (field: TextField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
+  textarea: (field: TextareaField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
+  upload: (field: UploadField) => ({
+    type: withOperators(
+      field,
+      parentName,
+    ),
+  }),
 });
 
 export default fieldToSchemaMap;

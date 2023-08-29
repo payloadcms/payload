@@ -1,4 +1,4 @@
-import { Payload } from '../payload.js';
+import type { Payload } from '../payload.js';
 
 async function initAdmin(ctx: Payload): Promise<void> {
   if (!ctx.config.admin.disable) {

@@ -1,19 +1,21 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { PayloadRequest } from '../../../express/types.js';
-import { Payload } from '../../../payload.js';
-import unlock from '../unlock.js';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+
+import type { PayloadRequest } from '../../../express/types.js';
+import type { Payload } from '../../../payload.js';
+
 import { getDataLoader } from '../../../collections/dataloader.js';
-import { i18nInit } from '../../../translations/init.js';
 import { APIError } from '../../../errors/index.js';
 import { setRequestContext } from '../../../express/setRequestContext.js';
+import { i18nInit } from '../../../translations/init.js';
+import unlock from '../unlock.js';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
   data: {
     email
   }
-  req?: PayloadRequest
   overrideAccess: boolean
+  req?: PayloadRequest
 }
 
 async function localUnlock<T extends keyof GeneratedTypes['collections']>(
@@ -42,8 +44,8 @@ async function localUnlock<T extends keyof GeneratedTypes['collections']>(
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return unlock({
-    data,
     collection,
+    data,
     overrideAccess,
     req,
   });

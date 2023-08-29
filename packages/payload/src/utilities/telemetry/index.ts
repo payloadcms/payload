@@ -2,51 +2,53 @@ import { execSync } from 'child_process';
 import { randomBytes } from 'crypto';
 import findUp from 'find-up';
 import fs from 'fs';
-import { Payload } from '../../payload.js';
-import { ServerInitEvent } from './events/serverInit.js';
-import { AdminInitEvent } from './events/adminInit.js';
+
+import type { Payload } from '../../payload.js';
+import type { AdminInitEvent } from './events/adminInit.js';
+import type { ServerInitEvent } from './events/serverInit.js';
+
 import { oneWayHash } from './oneWayHash.js';
 
 
 export type BaseEvent = {
   envID: string
-  projectID: string
-  nodeVersion: string
   nodeEnv: string
+  nodeVersion: string
   payloadVersion: string
+  projectID: string
 };
 
 type PackageJSON = {
-  name: string
   dependencies: Record<string, string | undefined>
+  name: string
 }
 
-type TelemetryEvent = ServerInitEvent | AdminInitEvent
+type TelemetryEvent = AdminInitEvent | ServerInitEvent
 
 type Args = {
-  payload: Payload
   event: TelemetryEvent
+  payload: Payload
 }
 
-export const sendEvent = async ({ payload, event }: Args): Promise<void> => {
+export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
   if (payload.config.telemetry !== false) {
     try {
       const packageJSON = await getPackageJSON();
 
       const baseEvent: BaseEvent = {
         envID: await getEnvID(),
-        projectID: getProjectID(payload, packageJSON),
-        nodeVersion: process.version,
         nodeEnv: process.env.NODE_ENV || 'development',
+        nodeVersion: process.version,
         payloadVersion: getPayloadVersion(packageJSON),
+        projectID: getProjectID(payload, packageJSON),
       };
 
       await fetch('https://telemetry.payloadcms.com/events', {
-        method: 'post',
+        body: JSON.stringify({ ...baseEvent, ...event }),
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...baseEvent, ...event }),
+        method: 'post',
       });
     } catch (_) {
       // Eat any errors in sending telemetry event
@@ -84,8 +86,8 @@ const getProjectID = (payload: Payload, packageJSON: PackageJSON): string => {
 const getGitID = (payload: Payload) => {
   try {
     const originBuffer = execSync('git config --local --get remote.origin.url', {
-      timeout: 1000,
       stdio: 'pipe',
+      timeout: 1000,
     });
 
     return oneWayHash(String(originBuffer).trim(), payload.secret);

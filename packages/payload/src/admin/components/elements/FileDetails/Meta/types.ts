@@ -1,12 +1,12 @@
 export type Props = {
-  filename: string,
-  mimeType: string,
-  filesize: number,
-  staticURL: string,
-  width?: number,
-  height?: number,
-  sizes?: unknown,
-  url?: string,
-  id?: string,
   collection?: string
+  filename: string,
+  filesize: number,
+  height?: number,
+  id?: string,
+  mimeType: string,
+  sizes?: unknown,
+  staticURL: string,
+  url?: string,
+  width?: number,
 }

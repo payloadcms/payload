@@ -1,5 +1,6 @@
-import { NextFunction, Request, Response } from 'express';
-import { Collection } from './config/types.js';
+import type { NextFunction, Request, Response } from 'express';
+
+import type { Collection } from './config/types.js';
 
 const bindCollectionMiddleware = (collection: Collection) => (req: Request & { collection: Collection }, res: Response, next: NextFunction): void => {
   req.collection = collection;

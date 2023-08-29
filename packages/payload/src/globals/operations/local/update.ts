@@ -1,24 +1,26 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { DeepPartial } from 'ts-essentials';
-import { Payload } from '../../../payload.js';
-import { Document } from '../../../types/index.js';
-import { PayloadRequest } from '../../../express/types.js';
-import update from '../update.js';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+import type { DeepPartial } from 'ts-essentials';
+
+import type { PayloadRequest } from '../../../express/types.js';
+import type { Payload } from '../../../payload.js';
+import type { Document } from '../../../types/index.js';
+
 import { getDataLoader } from '../../../collections/dataloader.js';
-import { i18nInit } from '../../../translations/init.js';
 import { APIError } from '../../../errors/index.js';
 import { setRequestContext } from '../../../express/setRequestContext.js';
+import { i18nInit } from '../../../translations/init.js';
+import update from '../update.js';
 
 export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
-  slug: TSlug
-  depth?: number
-  locale?: string
-  fallbackLocale?: string
   data: DeepPartial<Omit<GeneratedTypes['globals'][TSlug], 'id'>>
-  user?: Document
+  depth?: number
+  draft?: boolean
+  fallbackLocale?: string
+  locale?: string
   overrideAccess?: boolean
   showHiddenFields?: boolean
-  draft?: boolean
+  slug: TSlug
+  user?: Document
 }
 
 export default async function updateLocal<TSlug extends keyof GeneratedTypes['globals']>(
@@ -26,15 +28,15 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
-    slug: globalSlug,
-    depth,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
-    fallbackLocale = null,
     data,
-    user,
+    depth,
+    draft,
+    fallbackLocale = null,
+    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
     showHiddenFields,
-    draft,
+    slug: globalSlug,
+    user,
   } = options;
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
@@ -44,26 +46,26 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   }
 
   const req = {
-    user,
-    payloadAPI: 'local',
-    locale,
     fallbackLocale,
-    payload,
     i18n,
+    locale,
+    payload,
+    payloadAPI: 'local',
     t: i18n.t,
+    user,
   } as PayloadRequest;
   setRequestContext(req);
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return update<TSlug>({
-    slug: globalSlug as string,
     data,
     depth,
+    draft,
     globalConfig,
     overrideAccess,
-    showHiddenFields,
-    draft,
     req,
+    showHiddenFields,
+    slug: globalSlug as string,
   });
 }

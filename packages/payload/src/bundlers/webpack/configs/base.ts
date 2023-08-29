@@ -1,9 +1,12 @@
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import webpack, { Configuration } from 'webpack';
-import { fileURLToPath } from 'url';
-import path, { dirname, join, parse, resolve } from 'path';
-import { createRequire } from 'node:module';
+import type { Configuration } from 'webpack';
+
 import { existsSync } from 'fs';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import { createRequire } from 'node:module';
+import path, { dirname, join, parse, resolve } from 'path';
+import { fileURLToPath } from 'url';
+import webpack from 'webpack';
+
 import type { SanitizedConfig } from '../../../config/types.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,17 +31,14 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       adminFolderPath,
     ],
   },
-  resolveLoader: {
-    modules: ['node_modules', path.join(_dirname, nodeModulesPath),],
-  },
   module: {
     rules: [
       {
-        test: /\.(t|j)sx?$/,
         exclude: /\/node_modules\/(?!.+\.tsx?$).*$/,
         resolve: {
           fullySpecified: false,
         },
+        test: /\.(t|j)sx?$/,
         use: [
           {
             loader: require.resolve('swc-loader'),
@@ -67,30 +67,6 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       },
     ],
   },
-  resolve: {
-    fallback: {
-      path: require.resolve('path-browserify'),
-      crypto: false,
-      https: false,
-      http: false,
-    },
-    modules: ['node_modules', path.resolve(_dirname, nodeModulesPath)],
-    alias: {
-      'payload-config': payloadConfig.paths.rawConfig,
-      payload$: mockModulePath,
-      'payload-user-css': payloadConfig.admin.css,
-      dotenv: mockDotENVPath,
-      [bundlerPath]: mockModulePath,
-      [bundlerPath2]: mockModulePath,
-    },
-    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
-    // Add support for TypeScripts fully qualified ESM imports.
-    extensionAlias: {
-      ".js": [".js", ".ts"],
-      ".cjs": [".cjs", ".cts"],
-      ".mjs": [".mjs", ".mts"]
-    }
-  },
   plugins: [
     new webpack.ProvidePlugin(
       { process: require.resolve('process/browser') },
@@ -111,8 +87,8 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       ),
     ),
     new HtmlWebpackPlugin({
-      template: payloadConfig.admin.indexHTML,
       filename: path.normalize('./index.html'),
+      template: payloadConfig.admin.indexHTML,
     }),
     new webpack.HotModuleReplacementPlugin(),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
@@ -146,4 +122,31 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       }
     }))
   ],
+  resolve: {
+    alias: {
+      [bundlerPath]: mockModulePath,
+      [bundlerPath2]: mockModulePath,
+      dotenv: mockDotENVPath,
+      payload$: mockModulePath,
+      'payload-config': payloadConfig.paths.rawConfig,
+      'payload-user-css': payloadConfig.admin.css,
+    },
+    // Add support for TypeScripts fully qualified ESM imports.
+    extensionAlias: {
+      ".cjs": [".cjs", ".cts"],
+      ".js": [".js", ".ts"],
+      ".mjs": [".mjs", ".mts"]
+    },
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+    fallback: {
+      crypto: false,
+      http: false,
+      https: false,
+      path: require.resolve('path-browserify'),
+    },
+    modules: ['node_modules', path.resolve(_dirname, nodeModulesPath)]
+  },
+  resolveLoader: {
+    modules: ['node_modules', path.join(_dirname, nodeModulesPath),],
+  },
 });

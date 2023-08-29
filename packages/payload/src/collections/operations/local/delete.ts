@@ -1,57 +1,58 @@
-import { Config as GeneratedTypes } from '../../../generated-types.js';
-import { Document, Where } from '../../../types/index.js';
-import { PayloadRequest, RequestContext } from '../../../express/types.js';
-import { Payload } from '../../../payload.js';
+import type { PayloadRequest, RequestContext } from '../../../express/types.js';
+import type { Config as GeneratedTypes } from '../../../generated-types.js';
+import type { Payload } from '../../../payload.js';
+import type { Document, Where } from '../../../types/index.js';
+import type { BulkOperationResult } from '../../config/types.js';
+
+import { APIError } from '../../../errors/index.js';
+import { setRequestContext } from '../../../express/setRequestContext.js';
+import { i18nInit } from '../../../translations/init.js';
+import { getDataLoader } from '../../dataloader.js';
 import deleteOperation from '../delete.js';
 import deleteByID from '../deleteByID.js';
-import { getDataLoader } from '../../dataloader.js';
-import { i18nInit } from '../../../translations/init.js';
-import { APIError } from '../../../errors/index.js';
-import { BulkOperationResult } from '../../config/types.js';
-import { setRequestContext } from '../../../express/setRequestContext.js';
 
 export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
-  req?: PayloadRequest,
   collection: T
-  depth?: number
-  locale?: string
-  fallbackLocale?: string
-  user?: Document
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
+  depth?: number
+  fallbackLocale?: string
+  locale?: string
+  overrideAccess?: boolean
+  req?: PayloadRequest,
+  showHiddenFields?: boolean
+  user?: Document
 }
 
 export type ByIDOptions<T extends keyof GeneratedTypes['collections']> = BaseOptions<T> & {
-  id: string | number
+  id: number | string
   where?: never
 }
 
 export type ManyOptions<T extends keyof GeneratedTypes['collections']> = BaseOptions<T> & {
-  where: Where
   id?: never
+  where: Where
 }
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = ByIDOptions<TSlug> | ManyOptions<TSlug>
 
 async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ByIDOptions<TSlug>): Promise<GeneratedTypes['collections'][TSlug]>
 async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ManyOptions<TSlug>): Promise<BulkOperationResult<TSlug>>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | BulkOperationResult<TSlug>>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | BulkOperationResult<TSlug>> {
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]>
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {
   const {
     collection: collectionSlug,
+    context,
     depth,
-    id,
-    where,
-    locale = null,
     fallbackLocale = null,
-    user,
+    id,
+    locale = null,
     overrideAccess = true,
     showHiddenFields,
-    context,
+    user,
+    where,
   } = options;
 
   const collection = payload.collections[collectionSlug];
@@ -62,12 +63,12 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
   }
 
   const req = {
-    user,
-    payloadAPI: 'local',
-    locale: locale ?? defaultLocale,
     fallbackLocale: fallbackLocale ?? defaultLocale,
-    payload,
     i18n: i18nInit(payload.config.i18n),
+    locale: locale ?? defaultLocale,
+    payload,
+    payloadAPI: 'local',
+    user,
   } as PayloadRequest;
   setRequestContext(req, context);
 
@@ -75,13 +76,13 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   const args = {
+    collection,
     depth,
     id,
-    where,
-    collection,
     overrideAccess,
-    showHiddenFields,
     req,
+    showHiddenFields,
+    where,
   };
 
   if (options.id) {

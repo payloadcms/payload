@@ -1,10 +1,10 @@
-import { FieldAffectingData } from '../../../../fields/config/types.js';
-import { Where } from '../../../../types/index.js';
+import type { FieldAffectingData } from '../../../../fields/config/types.js';
+import type { Where } from '../../../../types/index.js';
 
 export type Props = {
-  fieldName?: string,
   fieldLabel?: string,
-  modifySearchQuery?: boolean
-  listSearchableFields?: FieldAffectingData[]
+  fieldName?: string,
   handleChange?: (where: Where) => void
+  listSearchableFields?: FieldAffectingData[]
+  modifySearchQuery?: boolean
 }

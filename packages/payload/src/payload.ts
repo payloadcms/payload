@@ -1,68 +1,66 @@
 // BasePayload uses non-standard properties as functions
 /* eslint-disable perfectionist/sort-classes */
 
+import type { Express, Router } from 'express';
+import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql';
+// @ts-expect-error // TODO: Broke with pnpm/workspaces/esm. Fix this
+import type { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler';
+import type { SendMailOptions } from 'nodemailer';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+import type pino from 'pino';
+
 import crypto from 'crypto';
 import path from 'path';
-import pino from 'pino';
-import type { Express, Router } from 'express';
-import { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql';
-import { Config as GeneratedTypes } from 'payload/generated-types';
-// @ts-expect-error // TODO: Broke with pnpm/workspaces/esm. Fix this
-import { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler';
-import { SendMailOptions } from 'nodemailer';
-import { BulkOperationResult, Collection } from './collections/config/types.js';
-import { EmailOptions, InitOptions, SanitizedConfig } from './config/types.js';
-import { TypeWithVersion } from './versions/types.js';
 
-import { PayloadAuthenticate } from './express/middleware/authenticate.js';
-import { Globals } from './globals/config/types.js';
-import { ErrorHandler } from './express/middleware/errorHandler.js';
-import localOperations from './collections/operations/local/index.js';
-import localGlobalOperations from './globals/operations/local/index.js';
-import { decrypt, encrypt } from './auth/crypto.js';
-import { BuildEmailResult } from './email/types.js';
-
-import { Options as CreateOptions } from './collections/operations/local/create.js';
-import { Options as FindOptions } from './collections/operations/local/find.js';
-import {
-  ByIDOptions as UpdateByIDOptions,
-  ManyOptions as UpdateManyOptions,
-  Options as UpdateOptions,
-} from './collections/operations/local/update.js';
-import {
+import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js';
+import type { Options as ForgotPasswordOptions } from './auth/operations/local/forgotPassword.js';
+import type { Options as LoginOptions } from './auth/operations/local/login.js';
+import type { Options as ResetPasswordOptions } from './auth/operations/local/resetPassword.js';
+import type { Options as UnlockOptions } from './auth/operations/local/unlock.js';
+import type { Options as VerifyEmailOptions } from './auth/operations/local/verifyEmail.js';
+import type { Result as LoginResult } from './auth/operations/login.js';
+import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js';
+import type { BulkOperationResult, Collection } from './collections/config/types.js';
+import type { Options as CreateOptions } from './collections/operations/local/create.js';
+import type {
   ByIDOptions as DeleteByIDOptions,
   ManyOptions as DeleteManyOptions,
   Options as DeleteOptions,
 } from './collections/operations/local/delete.js';
-import { Options as FindByIDOptions } from './collections/operations/local/findByID.js';
-import { Options as FindVersionsOptions } from './collections/operations/local/findVersions.js';
-import { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID.js';
-import { Options as RestoreVersionOptions } from './collections/operations/local/restoreVersion.js';
-import { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions.js';
-import { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID.js';
-import { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js';
-import { Options as ForgotPasswordOptions } from './auth/operations/local/forgotPassword.js';
-import { Options as LoginOptions } from './auth/operations/local/login.js';
-import { Options as ResetPasswordOptions } from './auth/operations/local/resetPassword.js';
-import { Options as UnlockOptions } from './auth/operations/local/unlock.js';
-import { Options as VerifyEmailOptions } from './auth/operations/local/verifyEmail.js';
-import { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js';
-import { Result as ResetPasswordResult } from './auth/operations/resetPassword.js';
-import { Result as LoginResult } from './auth/operations/login.js';
-import { Options as FindGlobalOptions } from './globals/operations/local/findOne.js';
-import { Options as UpdateGlobalOptions } from './globals/operations/local/update.js';
-
-import registerGraphQLSchema from './graphql/registerSchema.js';
-import buildEmail from './email/build.js';
-import sendEmail from './email/sendEmail.js';
-
-import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js';
-import Logger from './utilities/logger.js';
-import findConfig from './config/find.js';
-
-import { defaults as emailDefaults } from './email/defaults.js';
+import type { Options as FindOptions } from './collections/operations/local/find.js';
+import type { Options as FindByIDOptions } from './collections/operations/local/findByID.js';
+import type { Options as FindVersionByIDOptions } from './collections/operations/local/findVersionByID.js';
+import type { Options as FindVersionsOptions } from './collections/operations/local/findVersions.js';
+import type { Options as RestoreVersionOptions } from './collections/operations/local/restoreVersion.js';
+import type {
+  ByIDOptions as UpdateByIDOptions,
+  ManyOptions as UpdateManyOptions,
+  Options as UpdateOptions,
+} from './collections/operations/local/update.js';
+import type { EmailOptions, InitOptions, SanitizedConfig } from './config/types.js';
+import type { DatabaseAdapter } from './database/types.js';
 import type { PaginatedDocs } from './database/types.js';
-import { DatabaseAdapter } from './database/types.js';
+import type { BuildEmailResult } from './email/types.js';
+import type { PayloadAuthenticate } from './express/middleware/authenticate.js';
+import type { ErrorHandler } from './express/middleware/errorHandler.js';
+import type { Globals } from './globals/config/types.js';
+import type { Options as FindGlobalOptions } from './globals/operations/local/findOne.js';
+import type { Options as FindGlobalVersionByIDOptions } from './globals/operations/local/findVersionByID.js';
+import type { Options as FindGlobalVersionsOptions } from './globals/operations/local/findVersions.js';
+import type { Options as RestoreGlobalVersionOptions } from './globals/operations/local/restoreVersion.js';
+import type { Options as UpdateGlobalOptions } from './globals/operations/local/update.js';
+import type { TypeWithVersion } from './versions/types.js';
+
+import { decrypt, encrypt } from './auth/crypto.js';
+import localOperations from './collections/operations/local/index.js';
+import findConfig from './config/find.js';
+import buildEmail from './email/build.js';
+import { defaults as emailDefaults } from './email/defaults.js';
+import sendEmail from './email/sendEmail.js';
+import localGlobalOperations from './globals/operations/local/index.js';
+import registerGraphQLSchema from './graphql/registerSchema.js';
+import Logger from './utilities/logger.js';
+import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js';
 
 /**
  * @description Payload
@@ -73,7 +71,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   db: DatabaseAdapter;
 
   collections: {
-    [slug: string | number | symbol]: Collection;
+    [slug: number | string | symbol]: Collection;
   } = {};
 
   versions: {
@@ -107,24 +105,24 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
   router?: Router;
 
   types: {
-    blockTypes: any;
-    blockInputTypes: any;
-    groupTypes: any;
     arrayTypes: any;
-    tabTypes: any;
-    localeInputType?: any;
+    blockInputTypes: any;
+    blockTypes: any;
     fallbackLocaleInputType?: any;
+    groupTypes: any;
+    localeInputType?: any;
+    tabTypes: any;
   };
 
-  Query: { name: string; fields: { [key: string]: any } } = { name: 'Query', fields: {} };
+  Query: { fields: { [key: string]: any }; name: string } = { fields: {}, name: 'Query' };
 
-  Mutation: { name: string; fields: { [key: string]: any } } = { name: 'Mutation', fields: {} };
+  Mutation: { fields: { [key: string]: any }; name: string } = { fields: {}, name: 'Mutation' };
 
   schema: GraphQLSchema;
 
   extensions: (args: {
-    req: graphQLRequest<unknown, unknown>,
     args: OperationArgs<any>,
+    req: graphQLRequest<unknown, unknown>,
     result: ExecutionResult
   }) => Promise<any>;
 
@@ -163,8 +161,8 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
       this.config = {
         ...this.config,
         paths: {
-          configDir: path.dirname(configPath),
           config: configPath,
+          configDir: path.dirname(configPath),
           rawConfig: configPath,
         },
       };
@@ -266,7 +264,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   update<T extends keyof TGeneratedTypes['collections']>(options: UpdateManyOptions<T>): Promise<BulkOperationResult<T>>
 
-  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateOptions<T>): Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
+  update<T extends keyof TGeneratedTypes['collections']>(options: UpdateOptions<T>): Promise<BulkOperationResult<T> | TGeneratedTypes['collections'][T]> {
     const { update } = localOperations;
     return update<T>(this, options);
   }
@@ -280,7 +278,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
 
   delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteManyOptions<T>): Promise<BulkOperationResult<T>>
 
-  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteOptions<T>): Promise<TGeneratedTypes['collections'][T] | BulkOperationResult<T>> {
+  delete<T extends keyof TGeneratedTypes['collections']>(options: DeleteOptions<T>): Promise<BulkOperationResult<T> | TGeneratedTypes['collections'][T]> {
     const { deleteLocal } = localOperations;
     return deleteLocal<T>(this, options);
   }

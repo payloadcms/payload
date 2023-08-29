@@ -1,23 +1,25 @@
-import { Payload } from '../payload.js';
-import { docHasTimestamps, Document, PayloadRequest, Where } from '../types/index.js';
-import { SanitizedGlobalConfig } from '../globals/config/types.js';
+import type { SanitizedGlobalConfig } from '../globals/config/types.js';
+import type { Payload } from '../payload.js';
+import type { Document, PayloadRequest, Where } from '../types/index.js';
+
+import { docHasTimestamps } from '../types/index.js';
 
 type Args = {
-  payload: Payload
-  where: Where
-  slug: string
   config: SanitizedGlobalConfig
   locale?: string
+  payload: Payload
   req?: PayloadRequest
+  slug: string
+  where: Where
 }
 
 export const getLatestGlobalVersion = async ({
-  payload,
   config,
+  locale,
+  payload,
+  req,
   slug,
   where,
-  locale,
-  req,
 }: Args): Promise<{ global: Document, globalExists: boolean }> => {
   let latestVersion;
 
@@ -26,17 +28,17 @@ export const getLatestGlobalVersion = async ({
     latestVersion = (await payload.db.findGlobalVersions({
       global: slug,
       limit: 1,
-      sort: '-updatedAt',
       locale,
       req,
+      sort: '-updatedAt',
     })).docs[0];
   }
 
   const global = await payload.db.findGlobal({
-    slug,
-    where,
     locale,
     req,
+    slug,
+    where,
   });
   const globalExists = Boolean(global);
 
@@ -50,8 +52,8 @@ export const getLatestGlobalVersion = async ({
   return {
     global: {
       ...latestVersion.version,
-      updatedAt: latestVersion.updatedAt,
       createdAt: latestVersion.createdAt,
+      updatedAt: latestVersion.updatedAt,
     },
     globalExists,
   };

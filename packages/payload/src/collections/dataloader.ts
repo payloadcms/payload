@@ -1,9 +1,13 @@
-import DataLoader, { BatchLoadFn } from 'dataloader';
-import { PayloadRequest } from '../express/types.js';
-import { TypeWithID } from './config/types.js';
-import { isValidID } from '../utilities/isValidID.js';
-import { getIDType } from '../utilities/getIDType.js';
+import type { BatchLoadFn } from 'dataloader';
+
+import DataLoader from 'dataloader';
+
+import type { PayloadRequest } from '../express/types.js';
+import type { TypeWithID } from './config/types.js';
+
 import { fieldAffectsData } from '../fields/config/types.js';
+import { getIDType } from '../utilities/getIDType.js';
+import { isValidID } from '../utilities/isValidID.js';
 
 // Payload uses `dataloader` to solve the classic GraphQL N+1 problem.
 
@@ -55,7 +59,7 @@ const batchAndLoadDocs = (req: PayloadRequest): BatchLoadFn<string, TypeWithID> 
 
     const idField = payload.collections?.[collection].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
 
-    let sanitizedID: string | number = id;
+    let sanitizedID: number | string = id;
 
     if (idField?.type === 'number') sanitizedID = parseFloat(id);
 
@@ -78,20 +82,20 @@ const batchAndLoadDocs = (req: PayloadRequest): BatchLoadFn<string, TypeWithID> 
 
     const result = await payload.find({
       collection,
-      locale,
-      fallbackLocale,
-      depth,
       currentDepth,
+      depth,
+      disableErrors: true,
+      fallbackLocale,
+      locale,
+      overrideAccess: Boolean(overrideAccess),
       pagination: false,
+      req,
+      showHiddenFields: Boolean(showHiddenFields),
       where: {
         id: {
           in: ids,
         },
       },
-      overrideAccess: Boolean(overrideAccess),
-      showHiddenFields: Boolean(showHiddenFields),
-      disableErrors: true,
-      req,
     });
 
     // For each returned doc, find index in original keys

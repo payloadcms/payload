@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import * as Locales from "date-fns/locale/index.js";
+
 import { getSupportedDateLocale } from './getSupportedDateLocale.js';
 
 export const formatDate = (date: Date | number | string | undefined, pattern: string, locale?: string): string => {

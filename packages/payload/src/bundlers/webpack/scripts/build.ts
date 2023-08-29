@@ -1,6 +1,8 @@
 import webpack from 'webpack';
+
+import type { SanitizedConfig } from '../../../config/types.js';
+
 import { getProdConfig } from '../configs/prod.js';
-import { SanitizedConfig } from '../../../config/types.js';
 
 type BuildAdminType = (options: { payloadConfig: SanitizedConfig }) => Promise<void>;
 export const buildAdmin: BuildAdminType = async ({ payloadConfig }) => {
