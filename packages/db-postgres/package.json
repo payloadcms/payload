@@ -45,6 +45,6 @@
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
     "better-sqlite3": "^8.5.0",
-    "@alessiogr/payloadtest": "workspace:*"
+    "payload": "workspace:*"
   }
 }

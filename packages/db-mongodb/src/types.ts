@@ -1,6 +1,6 @@
 import type { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateModel, SchemaOptions } from 'mongoose';
-import { SanitizedConfig } from '@alessiogr/payloadtest/config';
-import { ArrayField, BlockField, CheckboxField, CodeField, CollapsibleField, DateField, EmailField, Field, GroupField, JSONField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TabsField, TextField, TextareaField, UploadField } from '@alessiogr/payloadtest/types';
+import { SanitizedConfig } from 'payload/config';
+import { ArrayField, BlockField, CheckboxField, CodeField, CollapsibleField, DateField, EmailField, Field, GroupField, JSONField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TabsField, TextField, TextareaField, UploadField } from 'payload/types';
 import type { BuildQueryArgs } from './queries/buildQuery.js';
 
 export interface CollectionModel extends Model<any>, PaginateModel<any>, AggregatePaginateModel<any>, PassportLocalModel {

@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
-import { fieldAffectsData } from '@alessiogr/payloadtest/types';
-import { Field } from '@alessiogr/payloadtest/types';
-import { SanitizedConfig } from '@alessiogr/payloadtest/config';
+import { fieldAffectsData } from 'payload/types';
+import { Field } from 'payload/types';
+import { SanitizedConfig } from 'payload/config';
 import { mergeLocales } from './mergeLocales.js';
 import { BlocksMap } from '../../utilities/createBlocksMap.js';
 import { transform } from './index.js';

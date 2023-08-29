@@ -2,11 +2,11 @@
 /* eslint-disable no-await-in-loop */
 import { FilterQuery } from 'mongoose';
 import deepmerge from 'deepmerge';
-import { Operator, Where } from '@alessiogr/payloadtest/types';
-import { combineMerge } from '@alessiogr/payloadtest/utilities';
-import { Field } from '@alessiogr/payloadtest/types';
-import { validOperators } from '@alessiogr/payloadtest/types';
-import { Payload } from '@alessiogr/payloadtest';
+import { Operator, Where } from 'payload/types';
+import { combineMerge } from 'payload/utilities';
+import { Field } from 'payload/types';
+import { validOperators } from 'payload/types';
+import { Payload } from 'payload';
 import { buildSearchParam } from './buildSearchParams.js';
 import { buildAndOrConditions } from './buildAndOrConditions.js';
 

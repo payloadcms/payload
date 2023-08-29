@@ -1,12 +1,12 @@
 import toSnakeCase from 'to-snake-case';
 import { inArray } from 'drizzle-orm';
 import { SQL } from 'drizzle-orm';
-import { getLocalizedPaths } from '@alessiogr/payloadtest/database';
-import { Field } from '@alessiogr/payloadtest/types';
-import { fieldAffectsData } from '@alessiogr/payloadtest/types';
-import { PathToQuery } from '@alessiogr/payloadtest/database';
-import { validOperators } from '@alessiogr/payloadtest/types';
-import { Operator } from '@alessiogr/payloadtest/types';
+import { getLocalizedPaths } from 'payload/database';
+import { Field } from 'payload/types';
+import { fieldAffectsData } from 'payload/types';
+import { PathToQuery } from 'payload/database';
+import { validOperators } from 'payload/types';
+import { Operator } from 'payload/types';
 import { operatorMap } from './operatorMap.js';
 import { PostgresAdapter } from '../types.js';
 

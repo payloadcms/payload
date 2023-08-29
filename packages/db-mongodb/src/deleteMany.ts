@@ -1,5 +1,5 @@
-import { DeleteMany } from '@alessiogr/payloadtest/database';
-import { PayloadRequest } from '@alessiogr/payloadtest/types';
+import { DeleteMany } from 'payload/database';
+import { PayloadRequest } from 'payload/types';
 import type { MongooseAdapter } from './index.js';
 import { withSession } from './withSession.js';
 

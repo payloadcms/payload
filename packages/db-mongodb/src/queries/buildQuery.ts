@@ -1,6 +1,6 @@
-import { Where, Field } from '@alessiogr/payloadtest/types';
-import { QueryError } from '@alessiogr/payloadtest/errors';
-import { Payload } from '@alessiogr/payloadtest';
+import { Where, Field } from 'payload/types';
+import { QueryError } from 'payload/errors';
+import { Payload } from 'payload';
 import { parseParams } from './parseParams.js';
 
 type GetBuildQueryPluginArgs = {

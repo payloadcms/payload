@@ -1,9 +1,9 @@
 import type { ClientSession, Connection, ConnectOptions } from 'mongoose';
 import mongoose from 'mongoose';
-import { createMigration } from '@alessiogr/payloadtest/database';
-import type { Payload } from '@alessiogr/payloadtest';
-import type { DatabaseAdapter } from '@alessiogr/payloadtest/database';
-import { createDatabaseAdapter } from '@alessiogr/payloadtest/database';
+import { createMigration } from 'payload/database';
+import type { Payload } from 'payload';
+import type { DatabaseAdapter } from 'payload/database';
+import { createDatabaseAdapter } from 'payload/database';
 import { connect } from './connect.js';
 import { init } from './init.js';
 import { webpack } from './webpack.js';

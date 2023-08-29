@@ -1,5 +1,5 @@
-import { fieldAffectsData, fieldHasSubFields } from '@alessiogr/payloadtest/types';
-import { Field } from '@alessiogr/payloadtest/types';
+import { fieldAffectsData, fieldHasSubFields } from 'payload/types';
+import { Field } from 'payload/types';
 
 export const hasLocalesTable = (fields: Field[]): boolean => {
   return fields.some((field) => {

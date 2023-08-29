@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
-import { SanitizedConfig } from '@alessiogr/payloadtest/config';
+import { SanitizedConfig } from 'payload/config';
 import toSnakeCase from 'to-snake-case';
-import { fieldAffectsData } from '@alessiogr/payloadtest/types';
-import { ArrayField, Block, Field } from '@alessiogr/payloadtest/types';
+import { fieldAffectsData } from 'payload/types';
+import { ArrayField, Block, Field } from 'payload/types';
 import { Result } from './buildFindManyArgs.js';
 import { PostgresAdapter } from '../types.js';
 

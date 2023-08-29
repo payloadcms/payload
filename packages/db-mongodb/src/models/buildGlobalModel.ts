@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { SanitizedConfig } from '@alessiogr/payloadtest/config';
+import { SanitizedConfig } from 'payload/config';
 import buildSchema from './buildSchema.js';
 import getBuildQueryPlugin from '../queries/buildQuery.js';
 import type { GlobalModel } from '../types.js';

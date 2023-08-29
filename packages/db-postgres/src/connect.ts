@@ -1,12 +1,12 @@
 import fs from 'fs';
 import { sql, eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import type { Connect } from '@alessiogr/payloadtest/database';
+import type { Connect } from 'payload/database';
 import pkg from 'pg';
 const { Client, Pool } = pkg;
 import drizzleKit from 'drizzle-kit/utils.js';
 const { generateDrizzleJson, pushSchema } = drizzleKit;
-import { configToJSONSchema } from '@alessiogr/payloadtest/utilities';
+import { configToJSONSchema } from 'payload/utilities';
 import prompts from 'prompts';
 
 import { jsonb, numeric, pgTable, varchar } from 'drizzle-orm/pg-core';

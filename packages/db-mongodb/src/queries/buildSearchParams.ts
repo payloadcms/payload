@@ -1,12 +1,12 @@
 import mongoose from 'mongoose';
 import objectIDImp from 'bson-objectid';
 const ObjectID = 'default' in objectIDImp ? objectIDImp.default : objectIDImp;
-import { getLocalizedPaths } from '@alessiogr/payloadtest/database';
-import { Field, fieldAffectsData } from '@alessiogr/payloadtest/types';
-import { PathToQuery } from '@alessiogr/payloadtest/database';
-import { validOperators } from '@alessiogr/payloadtest/types';
-import { Payload } from '@alessiogr/payloadtest';
-import { Operator } from '@alessiogr/payloadtest/types';
+import { getLocalizedPaths } from 'payload/database';
+import { Field, fieldAffectsData } from 'payload/types';
+import { PathToQuery } from 'payload/database';
+import { validOperators } from 'payload/types';
+import { Payload } from 'payload';
+import { Operator } from 'payload/types';
 import { operatorMap } from './operatorMap.js';
 import { sanitizeQueryValue } from './sanitizeQueryValue.js';
 import { MongooseAdapter } from '../index.js';

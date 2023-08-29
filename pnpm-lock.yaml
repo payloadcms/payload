@@ -52,7 +52,7 @@ importers:
         specifier: 9.0.0
         version: 9.0.0
     devDependencies:
-      '@alessiogr/payloadtest':
+      'payload':
         specifier: workspace:*
         version: link:../payload
       '@swc/cli':
@@ -86,7 +86,7 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
     devDependencies:
-      '@alessiogr/payloadtest':
+      'payload':
         specifier: workspace:*
         version: link:../payload
       '@types/pg':

@@ -1,6 +1,6 @@
 {
-  "name": "@alessiogr/payloadtest",
-  "version": "1.34.0",
+  "name": "payload",
+  "version": "1.15.2",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "type": "module",
@@ -103,8 +103,7 @@
     "release:canary": "release-it pre --preReleaseId=canary --npm.tag=canary --config .release-it.pre.json",
     "fix": "eslint \"src/**/*.ts\" --fix",
     "lint": "eslint \"src/**/*.ts\"",
-    "style": "prettier \"src/**/*.ts\"",
-    "styletest": "prettier \"src/payload.ts\""
+    "style": "prettier \"src/**/*.ts\""
   },
   "bugs": {
     "url": "https://github.com/payloadcms/payload"

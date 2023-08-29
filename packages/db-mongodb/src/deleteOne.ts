@@ -1,6 +1,6 @@
-import { DeleteOne } from '@alessiogr/payloadtest/database';
-import type { Document } from '@alessiogr/payloadtest/types';
-import { PayloadRequest } from '@alessiogr/payloadtest/types';
+import { DeleteOne } from 'payload/database';
+import type { Document } from 'payload/types';
+import { PayloadRequest } from 'payload/types';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
 import type { MongooseAdapter } from './index.js';
 import { withSession } from './withSession.js';

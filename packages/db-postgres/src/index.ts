@@ -1,5 +1,5 @@
-import type { Payload } from '@alessiogr/payloadtest';
-import { createDatabaseAdapter } from '@alessiogr/payloadtest/database';
+import type { Payload } from 'payload';
+import { createDatabaseAdapter } from 'payload/database';
 import { connect } from './connect.js';
 import { init } from './init.js';
 import { createMigration } from './createMigration.js';

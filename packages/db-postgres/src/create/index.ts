@@ -1,4 +1,4 @@
-import { Create } from '@alessiogr/payloadtest/database';
+import { Create } from 'payload/database';
 import toSnakeCase from 'to-snake-case';
 import { upsertRow } from '../upsertRow/index.js';
 

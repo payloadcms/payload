@@ -1,7 +1,7 @@
 {
-  "name": "@alessiogr/payloadtestmonorepo",
-  "version": "1.14.0",
-  "description": "Node, React and MongoDB Headless CMS and Application Framework",
+  "name": "payload-monorepo",
+  "private": true,
+  "version": "0.0.0",
   "license": "MIT",
   "type": "module",
   "engines": {

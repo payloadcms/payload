@@ -1,4 +1,4 @@
-import { RollbackTransaction } from '@alessiogr/payloadtest/database';
+import { RollbackTransaction } from 'payload/database';
 
 
 export const rollbackTransaction: RollbackTransaction = async function rollbackTransaction(id = '') {

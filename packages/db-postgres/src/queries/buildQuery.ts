@@ -1,6 +1,6 @@
-import { Where } from '@alessiogr/payloadtest/types';
-import { Field } from '@alessiogr/payloadtest/types';
-import { QueryError } from '@alessiogr/payloadtest/errors';
+import { Where } from 'payload/types';
+import { Field } from 'payload/types';
+import { QueryError } from 'payload/errors';
 import { SQL } from 'drizzle-orm';
 import { parseParams } from './parseParams.js';
 import { PostgresAdapter } from '../types.js';

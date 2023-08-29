@@ -1,7 +1,7 @@
 import type { MongooseQueryOptions } from 'mongoose';
-import type { FindOne } from '@alessiogr/payloadtest/database';
-import type { Document } from '@alessiogr/payloadtest/types';
-import { PayloadRequest } from '@alessiogr/payloadtest/types';
+import type { FindOne } from 'payload/database';
+import type { Document } from 'payload/types';
+import { PayloadRequest } from 'payload/types';
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
 import type { MongooseAdapter } from './index.js';
 import { withSession } from './withSession.js';

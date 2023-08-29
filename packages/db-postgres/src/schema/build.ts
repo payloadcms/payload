@@ -10,10 +10,10 @@ import {
   IndexBuilder,
   unique,
 } from 'drizzle-orm/pg-core';
-import { Field } from '@alessiogr/payloadtest/types';
+import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
 import { Relation, relations } from 'drizzle-orm';
-import { fieldAffectsData } from '@alessiogr/payloadtest/types';
+import { fieldAffectsData } from 'payload/types';
 import { GenericColumns, GenericTable, PostgresAdapter } from '../types.js';
 import { traverseFields } from './traverseFields.js';
 import { parentIDColumnMap } from './parentIDColumnMap.js';
