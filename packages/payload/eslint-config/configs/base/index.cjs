@@ -6,6 +6,7 @@ module.exports = {
     node: true,
   },
   extends: [
+    '../../../../../.eslintrc.cjs',
     './rules/best-practices.cjs',
     './rules/errors.cjs',
     './rules/es6.cjs',
