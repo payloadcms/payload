@@ -37,7 +37,7 @@ const middleware = (payload: Payload): any => {
     ...(payload.config.express.preMiddleware || []),
     rateLimit(rateLimitOptions),
     passport.initialize(),
-    i18nMiddleware(payload.config.i18n as any),
+    i18nMiddleware(payload.config.i18n),
     identifyAPI('REST'),
     methodOverride('X-HTTP-Method-Override'),
     qsMiddleware({ depth: 10, arrayLimit: 1000 }),

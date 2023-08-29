@@ -9,7 +9,11 @@ import React, { JSX } from 'react';
 import { DestinationStream, LoggerOptions } from 'pino';
 import type { InitOptions as i18nInitOptions } from 'i18next';
 import { Payload } from '../payload.js';
-import { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types.js';
+import {
+  AfterErrorHook,
+  CollectionConfig,
+  SanitizedCollectionConfig,
+} from '../collections/config/types.js';
 import { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types.js';
 import { PayloadRequest } from '../express/types.js';
 import { Where } from '../types/index.js';
@@ -37,7 +41,7 @@ type GeneratePreviewURLOptions = {
 
 export type GeneratePreviewURL = (
   doc: Record<string, unknown>,
-  options: GeneratePreviewURLOptions
+  options: GeneratePreviewURLOptions,
 ) => Promise<string | null> | string | null;
 
 export type EmailTransport = Email & {
@@ -56,9 +60,7 @@ export type EmailOptions = EmailTransport | EmailTransportOptions | Email;
  * type guard for EmailOptions
  * @param emailConfig
  */
-export function hasTransport(
-  emailConfig: EmailOptions,
-): emailConfig is EmailTransport {
+export function hasTransport(emailConfig: EmailOptions): emailConfig is EmailTransport {
   return (emailConfig as EmailTransport).transport !== undefined;
 }
 
@@ -72,10 +74,7 @@ export function hasTransportOptions(
   return (emailConfig as EmailTransportOptions).transportOptions !== undefined;
 }
 
-export type GraphQLExtension = (
-  graphQL: typeof GraphQL,
-  payload: Payload
-) => Record<string, unknown>;
+export type GraphQLExtension = (graphQL: typeof GraphQL, payload: Payload) => Record<string, unknown>;
 
 export type InitOptions = {
   /** Express app for Payload to use */
@@ -154,9 +153,7 @@ export type AccessArgs<T = any, U = any> = {
  *
  * @see https://payloadcms.com/docs/access-control/overview
  */
-export type Access<T = any, U = any> = (
-  args: AccessArgs<T, U>
-) => AccessResult | Promise<AccessResult>;
+export type Access<T = any, U = any> = (args: AccessArgs<T, U>) => AccessResult | Promise<AccessResult>;
 
 /** Equivalent to express middleware, but with an enhanced request object */
 export interface PayloadHandler {
@@ -174,15 +171,7 @@ export type Endpoint = {
    */
   path: string;
   /** HTTP method (or "all") */
-  method:
-  | 'get'
-  | 'head'
-  | 'post'
-  | 'put'
-  | 'patch'
-  | 'delete'
-  | 'connect'
-  | 'options';
+  method: 'get' | 'head' | 'post' | 'put' | 'patch' | 'delete' | 'connect' | 'options';
   /**
    * Middleware that will be called when the path/method matches
    *
@@ -315,7 +304,7 @@ export type Config = {
      *
      * @default "/build"
      * */
-    buildPath?: string
+    buildPath?: string;
     /** If set to true, the entire Admin panel will be disabled. */
     disable?: boolean;
     /** Replace the entirety of the index.html file used by the Admin panel. Reference the base index.html file to ensure your replacement has the appropriate HTML elements. */
@@ -331,21 +320,23 @@ export type Config = {
     /** The route the user will be redirected to after being inactive for too long. */
     inactivityRoute?: string;
     /** Automatically log in as a user when visiting the admin dashboard. */
-    autoLogin?: false | {
-      /**
-       * The email address of the user to login as
-       *
-       */
-      email: string;
-      /** The password of the user to login as */
-      password: string;
-      /**
-       * If set to true, the login credentials will be prefilled but the user will still need to click the login button.
-       *
-       * @default false
-      */
-      prefillOnly?: boolean;
-    }
+    autoLogin?:
+      | false
+      | {
+          /**
+           * The email address of the user to login as
+           *
+           */
+          email: string;
+          /** The password of the user to login as */
+          password: string;
+          /**
+           * If set to true, the login credentials will be prefilled but the user will still need to click the login button.
+           *
+           * @default false
+           */
+          prefillOnly?: boolean;
+        };
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -603,13 +594,15 @@ export type Config = {
   /** Extension point to add your custom data. */
   custom?: Record<string, any>;
   /** Pass in a database adapter for use on this project. */
-  db: (args: { payload: Payload }) => DatabaseAdapter
+  db: (args: { payload: Payload }) => DatabaseAdapter;
 };
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
-  'collections' | 'globals' | 'endpoint' | 'localization'
+  'collections' | 'globals' | 'endpoint' | 'localization' | 'i18n'
 > & {
+  // Wrapping it in DeepRequired somehow breaks the type, so I had to define it here
+  i18n: i18nInitOptions;
   collections: SanitizedCollectionConfig[];
   globals: SanitizedGlobalConfig[];
   endpoints: Endpoint[];

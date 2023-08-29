@@ -67,7 +67,7 @@ export default async function findLocal<T extends keyof GeneratedTypes['collecti
   req.payloadAPI = req.payloadAPI || 'local';
   req.locale = locale ?? req?.locale ?? defaultLocale;
   req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
-  req.i18n = i18nInit(payload.config.i18n as any);
+  req.i18n = i18nInit(payload.config.i18n);
   req.payload = payload;
 
   if (!req.t) req.t = req.i18n.t;

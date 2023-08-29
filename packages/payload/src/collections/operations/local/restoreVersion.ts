@@ -46,7 +46,7 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
     throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Restore Version Operation.`);
   }
 
-  const i18n = i18nInit(payload.config.i18n as any);
+  const i18n = i18nInit(payload.config.i18n);
   const req = {
     user,
     payloadAPI: 'local',

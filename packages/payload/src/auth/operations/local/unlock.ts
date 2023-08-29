@@ -36,7 +36,7 @@ async function localUnlock<T extends keyof GeneratedTypes['collections']>(
 
   req.payload = payload;
   req.payloadAPI = req.payloadAPI || 'local';
-  req.i18n = i18nInit(payload.config.i18n as any);
+  req.i18n = i18nInit(payload.config.i18n);
 
   if (!req.t) req.t = req.i18n.t;
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);

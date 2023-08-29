@@ -14,42 +14,56 @@ import { BulkOperationResult } from '../../config/types.js';
 import { setRequestContext } from '../../../express/setRequestContext.js';
 
 export type BaseOptions<TSlug extends keyof GeneratedTypes['collections']> = {
-  req?: PayloadRequest,
-  collection: TSlug
-  data: DeepPartial<GeneratedTypes['collections'][TSlug]>
-  depth?: number
-  locale?: string
-  fallbackLocale?: string
-  user?: Document
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
-  filePath?: string
-  file?: File
-  overwriteExistingFiles?: boolean
-  draft?: boolean
-  autosave?: boolean
+  req?: PayloadRequest;
+  collection: TSlug;
+  data: DeepPartial<GeneratedTypes['collections'][TSlug]>;
+  depth?: number;
+  locale?: string;
+  fallbackLocale?: string;
+  user?: Document;
+  overrideAccess?: boolean;
+  showHiddenFields?: boolean;
+  filePath?: string;
+  file?: File;
+  overwriteExistingFiles?: boolean;
+  draft?: boolean;
+  autosave?: boolean;
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
-  context?: RequestContext
-}
+  context?: RequestContext;
+};
 
 export type ByIDOptions<TSlug extends keyof GeneratedTypes['collections']> = BaseOptions<TSlug> & {
-  id: string | number
-  where?: never
-}
+  id: string | number;
+  where?: never;
+};
 
 export type ManyOptions<TSlug extends keyof GeneratedTypes['collections']> = BaseOptions<TSlug> & {
-  where: Where
-  id?: never
-}
+  where: Where;
+  id?: never;
+};
 
-export type Options<TSlug extends keyof GeneratedTypes['collections']> = ByIDOptions<TSlug> | ManyOptions<TSlug>
+export type Options<TSlug extends keyof GeneratedTypes['collections']> =
+  | ByIDOptions<TSlug>
+  | ManyOptions<TSlug>;
 
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ByIDOptions<TSlug>): Promise<GeneratedTypes['collections'][TSlug]>
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ManyOptions<TSlug>): Promise<BulkOperationResult<TSlug>>
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | BulkOperationResult<TSlug>>
-async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<GeneratedTypes['collections'][TSlug] | BulkOperationResult<TSlug>> {
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: ByIDOptions<TSlug>,
+): Promise<GeneratedTypes['collections'][TSlug]>;
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: ManyOptions<TSlug>,
+): Promise<BulkOperationResult<TSlug>>;
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<TSlug>,
+): Promise<GeneratedTypes['collections'][TSlug] | BulkOperationResult<TSlug>>;
+async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<TSlug>,
+): Promise<GeneratedTypes['collections'][TSlug] | BulkOperationResult<TSlug>> {
   const {
     collection: collectionSlug,
     depth,
@@ -70,11 +84,16 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
   } = options;
 
   const collection = payload.collections[collectionSlug];
-  const i18n = i18nInit(payload.config.i18n as any);
-  const defaultLocale = payload.config.localization ? payload.config.localization?.defaultLocale : null;
+
+  const i18n = i18nInit(payload.config.i18n);
+  const defaultLocale = payload.config.localization
+    ? payload.config.localization?.defaultLocale
+    : null;
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Update Operation.`);
+    throw new APIError(
+      `The collection with slug ${String(collectionSlug)} can't be found. Update Operation.`,
+    );
   }
 
   const req = {
@@ -85,7 +104,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     payload,
     i18n,
     files: {
-      file: file ?? await getFileByPath(filePath),
+      file: file ?? (await getFileByPath(filePath)),
     },
   } as PayloadRequest;
   setRequestContext(req, context);
