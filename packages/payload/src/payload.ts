@@ -1,3 +1,6 @@
+// BasePayload uses non-standard properties as functions
+/* eslint-disable perfectionist/sort-classes */
+
 import crypto from 'crypto';
 import path from 'path';
 import pino from 'pino';
