@@ -71,12 +71,10 @@ if (tsConfig?.config?.compilerOptions?.paths) {
 const args = minimist(process.argv.slice(2));
 
 if (args._.includes('--cjs')) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore - bad @swc/register types
+  // @ts-expect-error - bad @swc/register types
   swcRegister(swcOptions_cjs);
 } else {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore - bad @swc/register types
+  // @ts-expect-error - bad @swc/register types
   swcRegister(swcOptions_esm);
 }
 

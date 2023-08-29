@@ -4,7 +4,7 @@ import pino from 'pino';
 import type { Express, Router } from 'express';
 import { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql';
 import { Config as GeneratedTypes } from 'payload/generated-types';
-// @ts-ignore // TODO: Broke with pnpm/workspaces/esm. Fix this
+// @ts-expect-error // TODO: Broke with pnpm/workspaces/esm. Fix this
 import { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler';
 import { SendMailOptions } from 'nodemailer';
 import { BulkOperationResult, Collection } from './collections/config/types.js';

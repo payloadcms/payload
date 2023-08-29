@@ -14,9 +14,9 @@ module.exports = {
     },
   },
   extends: [
-    './configs/base/index.cjs',
     './configs/jest/index.cjs',
     './configs/react/index.cjs',
+    'plugin:@typescript-eslint/strict',
     'prettier',
   ],
   rules: {
@@ -31,6 +31,8 @@ module.exports = {
     'no-use-before-define': 'off',
     'arrow-body-style': 0,
     '@typescript-eslint/no-use-before-define': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/no-explicit-any': 'warn',
   },
   overrides: [
     {
@@ -67,4 +69,4 @@ module.exports = {
       },
     },
   ],
-}
+};

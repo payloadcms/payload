@@ -4,15 +4,12 @@ import { ArrayField, Block, BlockField, CheckboxField, Field, NumberField, TextF
 
 describe('sanitizeFields', () => {
   it('should throw on missing type field', () => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-expect-error
     const fields: Field[] = [{
       label: 'some-collection',
       name: 'Some Collection',
     }];
     expect(() => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       sanitizeFields(fields, []);
     }).toThrow(MissingFieldType);
   });

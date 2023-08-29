@@ -1,5 +1,4 @@
 import { Response } from 'express';
-// @ts-ignore // TODO: Broke with pnpm/workspaces/esm. Fix this
 import { createHandler } from 'graphql-http/lib/use/express';
 import { GraphQLError } from 'graphql';
 import { PayloadRequest } from '../express/types.js';

@@ -14,8 +14,7 @@ export default (payload: Payload, config: SanitizedCollectionConfig): PassportAP
     prefix: `${config.slug} API-Key `,
   };
 
-
-  // @ts-ignore
+  // @ts-expect-error
   return new PassportAPIKey(opts, true, async (apiKey, done, req) => {
     const apiKeyIndex = crypto.createHmac('sha1', secret)
       .update(apiKey)
