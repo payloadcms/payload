@@ -402,8 +402,8 @@ importers:
         specifier: 5.3.9
         version: 5.3.9(@swc/core@1.3.76)(webpack@5.88.2)
       ts-essentials:
-        specifier: 7.0.3
-        version: 7.0.3(typescript@5.2.2)
+        specifier: 9.4.0
+        version: 9.4.0(typescript@5.2.2)
       ts-loader:
         specifier: ^9.4.4
         version: 9.4.4(typescript@5.2.2)(webpack@5.88.2)
@@ -13972,10 +13972,13 @@ packages:
       typescript: 5.2.2
     dev: true
 
-  /ts-essentials@7.0.3(typescript@5.2.2):
-    resolution: {integrity: sha512-8+gr5+lqO3G84KdiTSMRLtuyJ+nTBVRKuCrK4lidMPdVeEp0uqC875uE5NMcaA7YYMN7XsNiFQuMvasF8HT/xQ==}
+  /ts-essentials@9.4.0(typescript@5.2.2):
+    resolution: {integrity: sha512-s4BzWZmTh926caZO7XF7MMbwCn1BioT3s3r9hT8ARnwW//30OD0XioEsMyq3ORAHP/deN4Zkst2ZvxXmL+tG6g==}
     peerDependencies:
-      typescript: '>=3.7.0'
+      typescript: '>=4.1.0'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
     dependencies:
       typescript: 5.2.2
     dev: false
