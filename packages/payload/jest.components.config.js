@@ -12,7 +12,7 @@ export default {
     'node_modules',
     'dist',
   ],
-  extensionsToTreatAsEsm: [".ts", ".tsx", '.js', '.jsx'],
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/src/bundlers/mocks/fileMock.js',

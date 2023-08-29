@@ -84,7 +84,7 @@
     "dev": "nodemon",
     "dev2": "tsx ./test/dev.ts _community",
     "dev:postgres": "cross-env PAYLOAD_DATABASE=postgres nodemon",
-    "dev:generate-types": "node --no-warnings=ExperimentalWarning --loader ts-node/esm ./test/generateTypes.ts",
+    "dev:generate-types": "node --no-warnings=ExperimentalWarning --loader ts-node/esm --loader ./src/esm-loader.mjs ./test/generateTypes.ts",
     "dev:generate-graphql-schema": "node --no-warnings=ExperimentalWarning --loader ts-node/esm ./test/generateGraphQLSchema.ts",
     "pretest": "pnpm build",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
