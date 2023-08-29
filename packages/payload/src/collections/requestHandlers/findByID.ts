@@ -1,24 +1,30 @@
-import { Response, NextFunction } from 'express';
-import { PayloadRequest } from '../../express/types.js';
-import { Document } from '../../types/index.js';
-import findByID from '../operations/findByID.js';
+import type { NextFunction, Response } from 'express'
+
+import type { PayloadRequest } from '../../express/types.js'
+import type { Document } from '../../types/index.js'
+
+import findByID from '../operations/findByID.js'
 
 export type FindByIDResult = {
-  message: string;
-  doc: Document;
-};
+  doc: Document
+  message: string
+}
 
-export default async function findByIDHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<FindByIDResult> | void> {
+export default async function findByIDHandler(
+  req: PayloadRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<Response<FindByIDResult> | void> {
   try {
     const doc = await findByID({
-      req,
       collection: req.collection,
-      id: req.params.id,
       depth: Number(req.query.depth),
       draft: req.query.draft === 'true',
-    });
-    return res.json(doc);
+      id: req.params.id,
+      req,
+    })
+    return res.json(doc)
   } catch (error) {
-    return next(error);
+    return next(error)
   }
 }

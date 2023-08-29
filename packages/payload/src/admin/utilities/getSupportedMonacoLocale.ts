@@ -9,7 +9,7 @@ export const getSupportedMonacoLocale = (locale: string): string => {
     ru: 'ru',
     zh: 'zh-cn',
     'zh-tw': 'zh-tw',
-  };
+  }
 
-  return supportedLocales[locale];
-};
+  return supportedLocales[locale]
+}

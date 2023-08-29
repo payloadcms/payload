@@ -1,10 +1,10 @@
 const operators = {
-  equality: ['equals', 'not_equals'],
-  partial: ['like', 'contains'],
-  contains: ['in', 'not_in', 'all'],
   comparison: ['greater_than_equal', 'greater_than', 'less_than_equal', 'less_than'],
+  contains: ['in', 'not_in', 'all'],
+  equality: ['equals', 'not_equals'],
   geo: ['near'],
   geojson: ['within', 'intersects'],
-};
+  partial: ['like', 'contains'],
+}
 
-export default operators;
+export default operators

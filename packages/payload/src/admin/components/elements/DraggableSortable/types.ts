@@ -1,15 +1,11 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { DragEndEvent } from '@dnd-kit/core';
-import { Ref } from 'react';
+import type { DragEndEvent } from '@dnd-kit/core'
+import type { Ref } from 'react'
 
 export type Props = {
-  children: React.ReactNode;
-  className?: string;
-  ids: string[];
-  droppableRef?: Ref<HTMLElement>;
-  onDragEnd: (e: {
-    event: DragEndEvent,
-    moveFromIndex: number,
-    moveToIndex: number,
-  }) => void;
+  children: React.ReactNode
+  className?: string
+  droppableRef?: Ref<HTMLElement>
+  ids: string[]
+  onDragEnd: (e: { event: DragEndEvent; moveFromIndex: number; moveToIndex: number }) => void
 }

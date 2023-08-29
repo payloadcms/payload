@@ -3,37 +3,37 @@ export type Autosave = {
 }
 
 export type IncomingDrafts = {
-  autosave?: boolean | Autosave
+  autosave?: Autosave | boolean
 }
 
 export type SanitizedDrafts = {
-  autosave: false | Autosave
+  autosave: Autosave | false
 }
 
 export type IncomingCollectionVersions = {
+  drafts?: IncomingDrafts | boolean
   maxPerDoc?: number
-  drafts?: boolean | IncomingDrafts
 }
 
 export interface SanitizedCollectionVersions extends Omit<IncomingCollectionVersions, 'drafts'> {
-  maxPerDoc?: number
   drafts: SanitizedDrafts | false
+  maxPerDoc?: number
 }
 
 export type IncomingGlobalVersions = {
+  drafts?: IncomingDrafts | boolean
   max?: number
-  drafts?: boolean | IncomingDrafts
 }
 
 export type SanitizedGlobalVersions = {
-  max: number
   drafts: SanitizedDrafts | false
+  max: number
 }
 
 export type TypeWithVersion<T> = {
-  id: string
-  parent: string | number
-  version: T
   createdAt: string
+  id: string
+  parent: number | string
   updatedAt: string
+  version: T
 }

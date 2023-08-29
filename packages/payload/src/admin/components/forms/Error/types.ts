@@ -1,4 +1,4 @@
 export type Props = {
-  showError?: boolean
   message: string
+  showError?: boolean
 }

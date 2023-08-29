@@ -1,7 +1,7 @@
-import { UploadField } from '../../../../../fields/config/types.js';
-import { FieldTypes } from '../index.js';
+import type { UploadField } from '../../../../../fields/config/types.js'
+import type { FieldTypes } from '../index.js'
 
 export type Props = Omit<UploadField, 'type'> & {
-  path?: string
   fieldTypes: FieldTypes
+  path?: string
 }

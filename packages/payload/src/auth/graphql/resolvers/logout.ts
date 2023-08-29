@@ -1,20 +1,21 @@
-import { Collection } from '../../../collections/config/types.js';
-import logout from '../../operations/logout.js';
+import type { Collection } from '../../../collections/config/types.js'
+
+import logout from '../../operations/logout.js'
 
 function logoutResolver(collection: Collection): any {
   async function resolver(_, args, context) {
     const options = {
       collection,
-      res: context.res,
       req: context.req,
-    };
+      res: context.res,
+    }
 
-    const result = await logout(options);
+    const result = await logout(options)
 
-    return result;
+    return result
   }
 
-  return resolver;
+  return resolver
 }
 
-export default logoutResolver;
+export default logoutResolver

@@ -1,28 +1,32 @@
-import webpack, { Configuration } from 'webpack';
-import md5 from 'md5';
-import { fileURLToPath } from 'url';
-import { createRequire } from 'node:module';
-import { getBaseConfig } from './base.js';
-import { SanitizedConfig } from '../../../config/types.js';
+import type { Configuration } from 'webpack'
 
-const __filename = fileURLToPath(import.meta.url);
+import md5 from 'md5'
+import { createRequire } from 'node:module'
+import { fileURLToPath } from 'url'
+import webpack from 'webpack'
 
-const require = createRequire(import.meta.url);
+import type { SanitizedConfig } from '../../../config/types.js'
+
+import { getBaseConfig } from './base.js'
+
+const __filename = fileURLToPath(import.meta.url)
+
+const require = createRequire(import.meta.url)
 
 export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
-
-  const baseConfig = getBaseConfig(payloadConfig) as any;
+  const baseConfig = getBaseConfig(payloadConfig) as any
 
   let webpackConfig: Configuration = {
     ...baseConfig,
     cache: {
-      type: 'filesystem',
-      // version cache when there are changes to aliases
-      version: md5(Object.entries(baseConfig.resolve.alias).join()),
       buildDependencies: {
         config: [__filename],
       },
+      type: 'filesystem',
+      // version cache when there are changes to aliases
+      version: md5(Object.entries(baseConfig.resolve.alias).join()),
     },
+    devtool: 'inline-source-map',
     entry: {
       ...baseConfig.entry,
       main: [
@@ -30,23 +34,19 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
         ...(baseConfig.entry.main as string[]),
       ],
     },
-    output: {
-      publicPath: `${payloadConfig.routes.admin}/`,
-      path: '/',
-      filename: '[name].js',
-    },
-    devtool: 'inline-source-map',
     mode: 'development',
+    output: {
+      filename: '[name].js',
+      path: '/',
+      publicPath: `${payloadConfig.routes.admin}/`,
+    },
+    plugins: [...baseConfig.plugins, new webpack.HotModuleReplacementPlugin()],
     stats: 'errors-warnings',
-    plugins: [
-      ...baseConfig.plugins,
-      new webpack.HotModuleReplacementPlugin(),
-    ],
-  };
+  }
 
   webpackConfig.module.rules.push({
-    test: /\.(scss|css)$/,
     sideEffects: true,
+    test: /\.(scss|css)$/,
     /*
      * The loaders here are run in reverse order. Here is how your loaders are being processed:
      * 1. sass-loader: This loader compiles your SCSS into CSS.
@@ -59,7 +59,7 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
       {
         loader: require.resolve('css-loader'),
         options: {
-          url: (url) => (!url.startsWith('/')),
+          url: (url) => !url.startsWith('/'),
         },
       },
       {
@@ -72,11 +72,11 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
       },
       require.resolve('sass-loader'),
     ],
-  });
+  })
 
   if (payloadConfig.admin.webpack && typeof payloadConfig.admin.webpack === 'function') {
-    webpackConfig = payloadConfig.admin.webpack(webpackConfig);
+    webpackConfig = payloadConfig.admin.webpack(webpackConfig)
   }
 
-  return webpackConfig;
-};
+  return webpackConfig
+}

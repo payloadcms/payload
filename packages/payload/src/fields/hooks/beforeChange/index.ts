@@ -1,24 +1,26 @@
-import { SanitizedCollectionConfig } from '../../../collections/config/types.js';
-import { SanitizedGlobalConfig } from '../../../globals/config/types.js';
-import { Operation } from '../../../types/index.js';
-import { PayloadRequest, RequestContext } from '../../../express/types.js';
-import { traverseFields } from './traverseFields.js';
-import { ValidationError } from '../../../errors/index.js';
-import deepCopyObject from '../../../utilities/deepCopyObject.js';
+import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { PayloadRequest, RequestContext } from '../../../express/types.js'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
+import type { Operation } from '../../../types/index.js'
+
+import { ValidationError } from '../../../errors/index.js'
+import deepCopyObject from '../../../utilities/deepCopyObject.js'
+import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
-  data: T | Record<string, unknown>
-  doc: T | Record<string, unknown>
+  context: RequestContext
+  data: Record<string, unknown> | T
+  doc: Record<string, unknown> | T
   docWithLocales: Record<string, unknown>
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
-  id?: string | number
+  id?: number | string
   operation: Operation
   req: PayloadRequest
   skipValidation?: boolean
-  context: RequestContext
 }
 
 export const beforeChange = async <T extends Record<string, unknown>>({
+  context,
   data: incomingData,
   doc,
   docWithLocales,
@@ -27,35 +29,34 @@ export const beforeChange = async <T extends Record<string, unknown>>({
   operation,
   req,
   skipValidation,
-  context,
 }: Args<T>): Promise<T> => {
-  const data = deepCopyObject(incomingData);
-  const mergeLocaleActions = [];
-  const errors: { message: string, field: string }[] = [];
+  const data = deepCopyObject(incomingData)
+  const mergeLocaleActions = []
+  const errors: { field: string; message: string }[] = []
 
   await traverseFields({
+    context,
     data,
     doc,
     docWithLocales,
     errors,
+    fields: entityConfig.fields,
     id,
+    mergeLocaleActions,
     operation,
     path: '',
-    mergeLocaleActions,
     req,
     siblingData: data,
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,
-    fields: entityConfig.fields,
     skipValidation,
-    context,
-  });
+  })
 
   if (errors.length > 0) {
-    throw new ValidationError(errors, req.t);
+    throw new ValidationError(errors, req.t)
   }
 
-  mergeLocaleActions.forEach((action) => action());
+  mergeLocaleActions.forEach((action) => action())
 
-  return data;
-};
+  return data
+}

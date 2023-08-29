@@ -1,18 +1,25 @@
-import { Response, NextFunction } from 'express';
-import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types.js';
-import { docAccess } from '../operations/docAccess.js';
-import { CollectionPermission, GlobalPermission } from '../../auth/types.js';
+import type { NextFunction, Response } from 'express'
 
-export default async function docAccessRequestHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<CollectionPermission | GlobalPermission> | void> {
+import httpStatus from 'http-status'
+
+import type { CollectionPermission, GlobalPermission } from '../../auth/types.js'
+import type { PayloadRequest } from '../../express/types.js'
+
+import { docAccess } from '../operations/docAccess.js'
+
+export default async function docAccessRequestHandler(
+  req: PayloadRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<Response<CollectionPermission | GlobalPermission> | void> {
   try {
     const accessResults = await docAccess({
-      req,
       id: req.params.id,
-    });
+      req,
+    })
 
-    return res.status(httpStatus.OK).json(accessResults);
+    return res.status(httpStatus.OK).json(accessResults)
   } catch (error) {
-    return next(error);
+    return next(error)
   }
 }

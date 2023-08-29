@@ -1,108 +1,103 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import path from 'path';
-import minimist from 'minimist';
-import swcRegister from '@swc/register';
-import { getTsconfig as getTSconfig } from 'get-tsconfig';
-import { generateTypes } from './generateTypes.js';
-import { generateGraphQLSchema } from './generateGraphQLSchema.js';
-import { migrate } from './migrate.js';
-import { build } from "./build.js";
+import swcRegister from '@swc/register'
+import { getTsconfig as getTSconfig } from 'get-tsconfig'
+import minimist from 'minimist'
+import path from 'path'
 
-const tsConfig = getTSconfig();
+import { build } from './build.js'
+import { generateGraphQLSchema } from './generateGraphQLSchema.js'
+import { generateTypes } from './generateTypes.js'
+import { migrate } from './migrate.js'
+
+const tsConfig = getTSconfig()
 
 const swcOptions_cjs = {
-  sourceMaps: 'inline',
+  ignore: [
+    /.*\/node_modules\/.*/, // parse everything besides files within node_modules
+  ],
   jsc: {
+    baseUrl: path.resolve(),
     parser: {
+      dts: true,
       syntax: 'typescript',
       tsx: true,
-      dts: true,
     },
     paths: undefined,
-    baseUrl: path.resolve(),
   },
   module: {
     type: 'commonjs',
   },
+  sourceMaps: 'inline',
+}
+
+const swcOptions_esm = {
   ignore: [
     /.*\/node_modules\/.*/, // parse everything besides files within node_modules
   ],
-};
-
-const swcOptions_esm = {
-  sourceMaps: 'inline',
   jsc: {
+    baseUrl: path.resolve(),
     experimental: {
       keepImportAssertions: true,
     },
     parser: {
-      syntax: 'typescript',
-      tsx: true,
       dts: true,
       importAssertions: true,
+      syntax: 'typescript',
+      tsx: true,
     },
     paths: undefined,
-    baseUrl: path.resolve(),
   },
   module: {
     type: 'es6',
   },
-  ignore: [
-    /.*\/node_modules\/.*/, // parse everything besides files within node_modules
-  ],
-};
+  sourceMaps: 'inline',
+}
 
 if (tsConfig?.config?.compilerOptions?.paths) {
-  swcOptions_esm.jsc.paths = tsConfig.config.compilerOptions.paths;
-  swcOptions_cjs.jsc.paths = tsConfig.config.compilerOptions.paths;
+  swcOptions_esm.jsc.paths = tsConfig.config.compilerOptions.paths
+  swcOptions_cjs.jsc.paths = tsConfig.config.compilerOptions.paths
 
   if (tsConfig?.config?.compilerOptions?.baseUrl) {
-    swcOptions_esm.jsc.baseUrl = path.resolve(
-      tsConfig.config.compilerOptions.baseUrl,
-    );
-    swcOptions_cjs.jsc.baseUrl = path.resolve(
-      tsConfig.config.compilerOptions.baseUrl,
-    );
+    swcOptions_esm.jsc.baseUrl = path.resolve(tsConfig.config.compilerOptions.baseUrl)
+    swcOptions_cjs.jsc.baseUrl = path.resolve(tsConfig.config.compilerOptions.baseUrl)
   }
 }
 
-
-
-const args = minimist(process.argv.slice(2));
+const args = minimist(process.argv.slice(2))
 
 if (args._.includes('--cjs')) {
   // @ts-expect-error - bad @swc/register types
-  swcRegister(swcOptions_cjs);
+  swcRegister(swcOptions_cjs)
 } else {
   // @ts-expect-error - bad @swc/register types
-  swcRegister(swcOptions_esm);
+  swcRegister(swcOptions_esm)
 }
 
-const scriptIndex = args._.findIndex((x) => x === 'build');
+const scriptIndex = args._.findIndex((x) => x === 'build')
 
-const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex];
+const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex]
 
 if (script.startsWith('migrate')) {
-  migrate(args._).then(() => process.exit(0));
+  migrate(args._).then(() => process.exit(0))
 } else {
   switch (script.toLowerCase()) {
     case 'build': {
-      build();
-      break;
+      build()
+      break
     }
 
     case 'generate:types': {
-      generateTypes();
-      break;
+      generateTypes()
+      break
     }
 
     case 'generate:graphqlschema': {
-      generateGraphQLSchema();
-      break;
+      generateGraphQLSchema()
+      break
     }
 
     default:
-      console.log(`Unknown script "${script}".`);
-      break;
+      console.log(`Unknown script "${script}".`)
+      break
   }
 }

@@ -1,5 +1,5 @@
 export type Props = {
-  count: number,
-  className?: string,
-  withMessage?: boolean,
+  className?: string
+  count: number
+  withMessage?: boolean
 }

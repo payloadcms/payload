@@ -1,7 +1,7 @@
 export type Props = {
-    className?: string
-    buttonType: 'custom' | 'default' | 'none',
-    button: React.ReactNode,
-    setActive: (active: boolean) => void,
-    active: boolean,
+  active: boolean
+  button: React.ReactNode
+  buttonType: 'custom' | 'default' | 'none'
+  className?: string
+  setActive: (active: boolean) => void
 }

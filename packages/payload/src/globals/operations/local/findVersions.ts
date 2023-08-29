@@ -1,26 +1,28 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Document, Where } from '../../../types/index.js';
-import type { PaginatedDocs } from '../../../database/types.js';
-import { Payload } from '../../../payload.js';
-import { PayloadRequest } from '../../../express/types.js';
-import findVersions from '../findVersions.js';
-import { getDataLoader } from '../../../collections/dataloader.js';
-import { i18nInit } from '../../../translations/init.js';
-import { APIError } from '../../../errors/index.js';
-import { TypeWithVersion } from '../../../versions/types.js';
-import { setRequestContext } from '../../../express/setRequestContext.js';
+import type { Config as GeneratedTypes } from 'payload/generated-types'
+
+import type { PaginatedDocs } from '../../../database/types.js'
+import type { PayloadRequest } from '../../../express/types.js'
+import type { Payload } from '../../../payload.js'
+import type { Document, Where } from '../../../types/index.js'
+import type { TypeWithVersion } from '../../../versions/types.js'
+
+import { getDataLoader } from '../../../collections/dataloader.js'
+import { APIError } from '../../../errors/index.js'
+import { setRequestContext } from '../../../express/setRequestContext.js'
+import { i18nInit } from '../../../translations/init.js'
+import findVersions from '../findVersions.js'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
-  slug: T
   depth?: number
-  page?: number
+  fallbackLocale?: string
   limit?: number
   locale?: string
-  fallbackLocale?: string
-  user?: Document
   overrideAccess?: boolean
+  page?: number
   showHiddenFields?: boolean
+  slug: T
   sort?: string
+  user?: Document
   where?: Where
 }
 
@@ -29,48 +31,48 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   options: Options<T>,
 ): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['globals'][T]>>> {
   const {
-    slug: globalSlug,
     depth,
-    page,
-    limit,
-    where,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     fallbackLocale = null,
-    user,
+    limit,
+    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
+    page,
     showHiddenFields,
+    slug: globalSlug,
     sort,
-  } = options;
+    user,
+    where,
+  } = options
 
-  const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
-  const i18n = i18nInit(payload.config.i18n);
+  const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
+  const i18n = i18nInit(payload.config.i18n)
 
   if (!globalConfig) {
-    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`);
+    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
 
   const req = {
-    user,
-    payloadAPI: 'local',
-    locale,
     fallbackLocale,
-    payload,
     i18n,
+    locale,
+    payload,
+    payloadAPI: 'local',
     t: i18n.t,
-  } as PayloadRequest;
-  setRequestContext(req);
+    user,
+  } as PayloadRequest
+  setRequestContext(req)
 
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   return findVersions({
-    where,
-    page,
-    limit,
     depth,
     globalConfig,
-    sort,
+    limit,
     overrideAccess,
-    showHiddenFields,
+    page,
     req,
-  });
+    showHiddenFields,
+    sort,
+    where,
+  })
 }

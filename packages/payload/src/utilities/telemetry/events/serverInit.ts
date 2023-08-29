@@ -1,15 +1,16 @@
-import { sendEvent } from '../index.js';
-import { Payload } from '../../../payload.js';
+import type { Payload } from '../../../payload.js'
+
+import { sendEvent } from '../index.js'
 
 export type ServerInitEvent = {
   type: 'server-init'
-};
+}
 
 export const serverInit = (payload: Payload): void => {
   sendEvent({
-    payload,
     event: {
       type: 'server-init',
     },
-  });
-};
+    payload,
+  })
+}

@@ -1,55 +1,65 @@
 /* eslint-disable no-param-reassign */
-import { Configuration } from 'webpack';
-import { MarkOptional } from 'ts-essentials';
-import { transaction } from './transaction.js';
-import { migrate } from './migrations/migrate.js';
-import { migrateStatus } from './migrations/migrateStatus.js';
-import { migrateDown } from './migrations/migrateDown.js';
-import { migrateRefresh } from './migrations/migrateRefresh.js';
-import { migrateReset } from './migrations/migrateReset.js';
-import { BeginTransaction, CommitTransaction, DatabaseAdapter, RollbackTransaction } from './types.js';
-import { createMigration } from './migrations/createMigration.js';
+import type { MarkOptional } from 'ts-essentials'
+import type { Configuration } from 'webpack'
 
-const beginTransaction: BeginTransaction = async () => null;
-const rollbackTransaction: RollbackTransaction = async () => null;
-const commitTransaction: CommitTransaction = async () => null;
+import type {
+  BeginTransaction,
+  CommitTransaction,
+  DatabaseAdapter,
+  RollbackTransaction,
+} from './types.js'
 
-export function createDatabaseAdapter<T extends DatabaseAdapter>(args: MarkOptional<T,
-  | 'transaction'
-  | 'migrate'
-  | 'createMigration'
-  | 'migrateStatus'
-  | 'migrateDown'
-  | 'migrateRefresh'
-  | 'migrateReset'
-  | 'migrateFresh'
-  | 'migrationDir'
->): T {
+import { createMigration } from './migrations/createMigration.js'
+import { migrate } from './migrations/migrate.js'
+import { migrateDown } from './migrations/migrateDown.js'
+import { migrateRefresh } from './migrations/migrateRefresh.js'
+import { migrateReset } from './migrations/migrateReset.js'
+import { migrateStatus } from './migrations/migrateStatus.js'
+import { transaction } from './transaction.js'
+
+const beginTransaction: BeginTransaction = async () => null
+const rollbackTransaction: RollbackTransaction = async () => null
+const commitTransaction: CommitTransaction = async () => null
+
+export function createDatabaseAdapter<T extends DatabaseAdapter>(
+  args: MarkOptional<
+    T,
+    | 'createMigration'
+    | 'migrate'
+    | 'migrateDown'
+    | 'migrateFresh'
+    | 'migrateRefresh'
+    | 'migrateReset'
+    | 'migrateStatus'
+    | 'migrationDir'
+    | 'transaction'
+  >,
+): T {
   // Need to implement DB Webpack config extensions here
   if (args.webpack) {
-    const existingWebpackConfig = args.payload.config.admin.webpack ? args.payload.config.admin.webpack : (webpackConfig) => webpackConfig;
+    const existingWebpackConfig = args.payload.config.admin.webpack
+      ? args.payload.config.admin.webpack
+      : (webpackConfig) => webpackConfig
     args.payload.config.admin.webpack = (webpackConfig: Configuration) => {
-      return args.webpack(
-        existingWebpackConfig(webpackConfig),
-      );
-    };
+      return args.webpack(existingWebpackConfig(webpackConfig))
+    }
   }
 
   return {
-    transaction,
-    migrate,
-    createMigration,
-    migrateStatus,
-    migrateDown,
-    migrateRefresh,
-    migrateReset,
-    migrateFresh: async () => null,
-
     // Default 'null' transaction functions
     beginTransaction,
     commitTransaction,
+    createMigration,
+    migrate,
+    migrateDown,
+    migrateFresh: async () => null,
+    migrateRefresh,
+    migrateReset,
+
+    migrateStatus,
     rollbackTransaction,
+    transaction,
 
     ...args,
-  } as T;
+  } as T
 }

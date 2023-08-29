@@ -1,19 +1,19 @@
-import { Where } from '../../../../types/index.js';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
-import { Column } from '../Table/types.js';
-import type { Props as ListProps } from '../../views/collections/List/types.js';
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types.js'
+import type { Where } from '../../../../types/index.js'
+import type { Props as ListProps } from '../../views/collections/List/types.js'
+import type { Column } from '../Table/types.js'
 
 export type Props = {
+  collection: SanitizedCollectionConfig
   enableColumns?: boolean
   enableSort?: boolean
-  modifySearchQuery?: boolean
   handleSortChange?: (sort: string) => void
   handleWhereChange?: (where: Where) => void
-  collection: SanitizedCollectionConfig
+  modifySearchQuery?: boolean
   resetParams?: ListProps['resetParams']
 }
 
 export type ListControls = {
-  where?: unknown
   columns?: Partial<Column>[]
+  where?: unknown
 }

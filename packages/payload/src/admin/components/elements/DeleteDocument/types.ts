@@ -1,8 +1,8 @@
-import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types.js'
 
 export type Props = {
-  collection?: SanitizedCollectionConfig,
-  id?: string,
-  buttonId?: string,
-  title?: string,
+  buttonId?: string
+  collection?: SanitizedCollectionConfig
+  id?: string
+  title?: string
 }

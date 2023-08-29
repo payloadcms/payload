@@ -1,6 +1,6 @@
-import { EmailOptions } from '../config/types.js';
+import type { EmailOptions } from '../config/types.js'
 
 export const defaults: EmailOptions = {
-  fromName: 'Payload',
   fromAddress: 'info@payloadcms.com',
-};
+  fromName: 'Payload',
+}

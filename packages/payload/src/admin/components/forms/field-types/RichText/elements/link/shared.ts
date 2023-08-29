@@ -1,1 +1,1 @@
-export const modalSlug = 'rich-text-link-modal';
+export const modalSlug = 'rich-text-link-modal'

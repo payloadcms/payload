@@ -1,5 +1,5 @@
-import { CollectionConfig } from './types.js';
+import type { CollectionConfig } from './types.js'
 
-const buildCollection = (collection: CollectionConfig): CollectionConfig => collection;
+const buildCollection = (collection: CollectionConfig): CollectionConfig => collection
 
-export default buildCollection;
+export default buildCollection

@@ -1,62 +1,69 @@
-import { NextFunction, Response } from 'express';
-import { Where } from '../types/index.js';
-import executeAccess from './executeAccess.js';
-import { Forbidden } from '../errors/index.js';
-import { PayloadRequest } from '../express/types.js';
-import { SanitizedCollectionConfig } from '../collections/config/types.js';
+import type { NextFunction, Response } from 'express'
 
-const getExecuteStaticAccess = (config: SanitizedCollectionConfig) => async (req: PayloadRequest, res: Response, next: NextFunction) => {
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { PayloadRequest } from '../express/types.js'
+import type { Where } from '../types/index.js'
 
-  try {
-    if (req.path) {
-      const accessResult = await executeAccess({ req, isReadingStaticFile: true }, config.access.read);
+import { Forbidden } from '../errors/index.js'
+import executeAccess from './executeAccess.js'
 
-      if (typeof accessResult === 'object') {
-        const filename = decodeURI(req.path).replace(/^\/|\/$/g, '');
-
-        const queryToBuild: Where = {
-          and: [
-            {
-              or: [
-                {
-                  filename: {
-                    equals: filename,
-                  },
-                },
-              ],
-            },
-            accessResult,
-          ],
-        };
-
-        if (config.upload.imageSizes) {
-          config.upload.imageSizes.forEach(({ name }) => {
-            queryToBuild.and[0].or.push({
-              [`sizes.${name}.filename`]: {
-                equals: filename,
-              },
-            });
-          });
-        }
-
-        const doc = await req.payload.db.findOne({
-          collection: config.slug,
-          where: queryToBuild,
-        });
-
-        if (!doc) {
-          throw new Forbidden(req.t);
-        }
-      }
+const getExecuteStaticAccess =
+  (config: SanitizedCollectionConfig) =>
+  async (req: PayloadRequest, res: Response, next: NextFunction) => {
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200)
     }
 
-    return next();
-  } catch (error) {
-    return next(error);
-  }
-};
+    try {
+      if (req.path) {
+        const accessResult = await executeAccess(
+          { isReadingStaticFile: true, req },
+          config.access.read,
+        )
 
-export default getExecuteStaticAccess;
+        if (typeof accessResult === 'object') {
+          const filename = decodeURI(req.path).replace(/^\/|\/$/g, '')
+
+          const queryToBuild: Where = {
+            and: [
+              {
+                or: [
+                  {
+                    filename: {
+                      equals: filename,
+                    },
+                  },
+                ],
+              },
+              accessResult,
+            ],
+          }
+
+          if (config.upload.imageSizes) {
+            config.upload.imageSizes.forEach(({ name }) => {
+              queryToBuild.and[0].or.push({
+                [`sizes.${name}.filename`]: {
+                  equals: filename,
+                },
+              })
+            })
+          }
+
+          const doc = await req.payload.db.findOne({
+            collection: config.slug,
+            where: queryToBuild,
+          })
+
+          if (!doc) {
+            throw new Forbidden(req.t)
+          }
+        }
+      }
+
+      return next()
+    } catch (error) {
+      return next(error)
+    }
+  }
+
+export default getExecuteStaticAccess

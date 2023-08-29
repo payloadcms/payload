@@ -1,17 +1,21 @@
-import React from 'react';
+import React from 'react'
 
 export type DescriptionFunction = (value?: unknown) => string
 
 export type DescriptionComponent = React.ComponentType<{ value: unknown }>
 
-export type Description = Record<string, string> | string | DescriptionFunction | DescriptionComponent
+export type Description =
+  | DescriptionComponent
+  | DescriptionFunction
+  | Record<string, string>
+  | string
 
 export type Props = {
-  description?: Description
-  value?: unknown;
   className?: string
+  description?: Description
+  value?: unknown
 }
 
 export function isComponent(description: Description): description is DescriptionComponent {
-  return React.isValidElement(description);
+  return React.isValidElement(description)
 }
