@@ -1,5 +1,7 @@
 import { ArrayField, Block, Field } from 'payload/types';
 import { asc, DBQueryConfig, desc } from 'drizzle-orm';
+import { FieldAffectingData, fieldAffectsData } from 'payload/dist/fields/config/types';
+import flattenFields from 'payload/dist/utilities/flattenTopLevelFields';
 import { traverseFields } from './traverseFields';
 import { PostgresAdapter } from '../types';
 
@@ -26,12 +28,41 @@ export const buildFindManyArgs = ({
     with: {},
   };
 
+  // sorting
+  let sortField: FieldAffectingData;
+  let sortDirection: typeof asc | typeof desc;
+  let sortFieldName;
+  if (sort && typeof sort === 'string' && sort.length > 0) {
+    // asc or desc types
+    if (sort[0] === '-') {
+      sortDirection = desc;
+      sortFieldName = sort.substring(1);
+    } else {
+      sortDirection = asc;
+      sortFieldName = sort;
+    }
+    sortField = flattenFields(fields).find((field) => (fieldAffectsData(field) && field.name === sortFieldName)) as FieldAffectingData;
+    if (sortField) {
+      if (sortField.localized) {
+        // error: column pages.slug does not exist
+        // result.orderBy = sortDirection(adapter.tables[`${tableName}_locales`][sortField.name]);
+      } else {
+        result.orderBy = sortDirection(adapter.tables[tableName][sortField.name]);
+      }
+    }
+  }
+
   const _locales: Result = {
     columns: {
       id: false,
       _parentID: false,
     },
   };
+
+  if (sortField && sortField.localized) {
+    // TODO: this is not sorting the end results
+    _locales.orderBy = (table) => [sortDirection(table[sortField.name])];
+  }
 
   if (adapter.tables[`${tableName}_relationships`]) {
     result.with._relationships = {
@@ -45,14 +76,6 @@ export const buildFindManyArgs = ({
 
   if (adapter.tables[`${tableName}_locales`]) {
     result.with._locales = _locales;
-  }
-
-  if (sort) {
-    if (sort[0] === '-') {
-      result.orderBy = desc(adapter.tables[tableName][sort.substring(1)]);
-    } else {
-      result.orderBy = asc(adapter.tables[tableName][sort]);
-    }
   }
 
   const locatedBlocks: Block[] = [];

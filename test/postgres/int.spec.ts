@@ -343,6 +343,24 @@ describe('Postgres', () => {
       expect(people[0].fullName).toEqual('Elliot DeNolf');
       expect(people[1].fullName).toEqual('Dan Ribbens');
     });
+
+    it('sort asc localized', async () => {
+      const { docs: pages } = await payload.find({
+        collection: 'pages',
+        sort: 'slug',
+      });
+      expect(pages[0].slug).toEqual('first');
+      expect(pages[1].slug).toEqual('second');
+    });
+
+    it('sort desc localized', async () => {
+      const { docs: pages } = await payload.find({
+        collection: 'pages',
+        sort: '-slug',
+      });
+      expect(pages[0].slug).toEqual('second');
+      expect(pages[1].slug).toEqual('first');
+    });
   });
 
   describe('localized arrays', () => {
