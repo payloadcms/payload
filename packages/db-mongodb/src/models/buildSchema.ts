@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
 import { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mongoose';
-import { SanitizedConfig, SanitizedLocalizationConfig } from 'payload/dist/config/types';
+import { SanitizedConfig, SanitizedLocalizationConfig } from 'payload/config';
 import {
   ArrayField,
   Block,
@@ -14,13 +14,8 @@ import {
   DateField,
   EmailField,
   Field,
-  FieldAffectingData,
-  fieldAffectsData,
-  fieldIsLocalized,
-  fieldIsPresentationalOnly,
   GroupField,
   JSONField,
-  NonPresentationalField,
   NumberField,
   PointField,
   RadioField,
@@ -28,14 +23,22 @@ import {
   RichTextField,
   RowField,
   SelectField,
-  Tab,
-  tabHasName,
   TabsField,
   TextareaField,
   TextField,
-  UnnamedTab,
   UploadField,
-} from 'payload/dist/fields/config/types';
+} from 'payload/types';
+
+import {
+  FieldAffectingData,
+  fieldAffectsData,
+  fieldIsLocalized,
+  fieldIsPresentationalOnly,
+  NonPresentationalField,
+  Tab,
+  tabHasName,
+  UnnamedTab
+} from 'payload/types'
 
 export type BuildSchemaOptions = {
   options?: SchemaOptions

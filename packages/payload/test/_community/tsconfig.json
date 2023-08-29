@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "paths": {
+      "payload/generated-types": [
+        "./payload-types.ts"
+      ]
+    }
+  }
+}

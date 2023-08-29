@@ -1,0 +1,288 @@
+import path from 'path';
+import { mapAsync } from '../../src/utilities/mapAsync.js';
+import { devUser } from '../credentials.js';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import AfterDashboard from './components/AfterDashboard/index.js';
+import CustomMinimalRoute from './components/views/CustomMinimal/index.js';
+import CustomDefaultRoute from './components/views/CustomDefault/index.js';
+import BeforeLogin from './components/BeforeLogin/index.js';
+import AfterNavLinks from './components/AfterNavLinks/index.js';
+import { globalSlug, slug } from './shared.js';
+import Logout from './components/Logout/index.js';
+import DemoUIFieldField from './components/DemoUIField/Field.js';
+import DemoUIFieldCell from './components/DemoUIField/Cell.js';
+
+export interface Post {
+  id: string;
+  title: string;
+  description: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+const _dirname = path.dirname(new URL(import.meta.url).pathname)
+
+
+export default buildConfigWithDefaults({
+  admin: {
+    css: path.resolve(_dirname, 'styles.scss'),
+    components: {
+      // providers: [CustomProvider, CustomProvider],
+      routes: [
+        {
+          path: '/custom-minimal-route',
+          Component: CustomMinimalRoute,
+        },
+        {
+          path: '/custom-default-route',
+          Component: CustomDefaultRoute,
+        },
+      ],
+      afterDashboard: [
+        AfterDashboard,
+      ],
+      beforeLogin: [
+        BeforeLogin,
+      ],
+      logout: {
+        Button: Logout,
+      },
+      afterNavLinks: [
+        AfterNavLinks,
+      ],
+      views: {
+        // Dashboard: CustomDashboardView,
+        // Account: CustomAccountView,
+      },
+    },
+  },
+  i18n: {
+    resources: {
+      en: {
+        general: {
+          dashboard: 'Home',
+        },
+      },
+    },
+  },
+  collections: [
+    {
+      slug: 'users',
+      auth: true,
+      fields: [],
+    },
+    {
+      slug: 'hidden-collection',
+      admin: {
+        hidden: () => true,
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug,
+      labels: {
+        singular: {
+          en: 'Post en',
+          es: 'Post es',
+        },
+        plural: {
+          en: 'Posts en',
+          es: 'Posts es',
+        },
+      },
+      admin: {
+        description: { en: 'Description en', es: 'Description es' },
+        listSearchableFields: ['title', 'description', 'number'],
+        group: { en: 'One', es: 'Una' },
+        useAsTitle: 'title',
+        defaultColumns: ['id', 'number', 'title', 'description', 'demoUIField'],
+      },
+      fields: [
+        {
+          name: 'title',
+          label: {
+            en: 'Title en',
+            es: 'Title es',
+          },
+          type: 'text',
+        },
+        {
+          name: 'description',
+          type: 'text',
+        },
+        {
+          name: 'number',
+          type: 'number',
+        },
+        {
+          name: 'richText',
+          type: 'richText',
+          admin: {
+            elements: [
+              'relationship',
+            ],
+          },
+        },
+        {
+          type: 'ui',
+          name: 'demoUIField',
+          label: { en: 'Demo UI Field', de: 'Demo UI Field de' },
+          admin: {
+            components: {
+              Field: DemoUIFieldField,
+              Cell: DemoUIFieldCell,
+            },
+          },
+        },
+      ],
+    },
+    {
+      slug: 'group-one-collection-ones',
+      admin: {
+        group: { en: 'One', es: 'Una' },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'group-one-collection-twos',
+      admin: {
+        group: { en: 'One', es: 'Una' },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'group-two-collection-ones',
+      admin: {
+        group: 'Two',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'group-two-collection-twos',
+      admin: {
+        group: 'Two',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'geo',
+      fields: [
+        {
+          name: 'point',
+          type: 'point',
+        },
+      ],
+    },
+  ],
+  globals: [
+    {
+      slug: 'hidden-global',
+      admin: {
+        hidden: () => true,
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: globalSlug,
+      label: {
+        en: 'Global en',
+        es: 'Global es',
+      },
+      admin: {
+        group: 'Group',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'group-globals-one',
+      admin: {
+        group: 'Group',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'group-globals-two',
+      admin: {
+        group: 'Group',
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+  ],
+  onInit: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    });
+
+    await mapAsync([...Array(11)], async () => {
+      await payload.create({
+        collection: slug,
+        data: {
+          title: 'title',
+          description: 'description',
+        },
+      });
+    });
+
+    await payload.create({
+      collection: 'geo',
+      data: {
+        point: [7, -7],
+      },
+    });
+
+    await payload.create({
+      collection: 'geo',
+      data: {
+        point: [5, -5],
+      },
+    });
+  },
+});

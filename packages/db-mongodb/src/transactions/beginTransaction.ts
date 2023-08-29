@@ -1,6 +1,6 @@
 import type { TransactionOptions } from 'mongodb';
 import { v4 as uuid } from 'uuid';
-import { BeginTransaction } from 'payload/dist/database/types';
+import { BeginTransaction } from 'payload/database';
 import { APIError } from 'payload/errors';
 
 let transactionsNotAvailable: boolean;

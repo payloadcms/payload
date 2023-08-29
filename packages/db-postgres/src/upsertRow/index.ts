@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign */
 import { and, eq, inArray } from 'drizzle-orm';
-import { transform } from '../transform/read';
-import { BlockRowToInsert } from '../transform/write/types';
-import { insertArrays } from '../insertArrays';
-import { transformForWrite } from '../transform/write';
-import { Args } from './types';
+import { transform } from '../transform/read/index.js';
+import { BlockRowToInsert } from '../transform/write/types.js';
+import { insertArrays } from '../insertArrays.js';
+import { transformForWrite } from '../transform/write/index.js';
+import { Args } from './types.js';
 
 export const upsertRow = async ({
   adapter,

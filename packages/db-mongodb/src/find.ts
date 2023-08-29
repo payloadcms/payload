@@ -1,11 +1,11 @@
 import type { PaginateOptions } from 'mongoose';
-import type { Find } from 'payload/dist/database/types';
-import flattenWhereToOperators from 'payload/dist/database/flattenWhereToOperators';
-import { PayloadRequest } from 'payload/dist/express/types';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
-import { buildSortParam } from './queries/buildSortParam';
-import type { MongooseAdapter } from '.';
-import { withSession } from './withSession';
+import type { Find } from 'payload/database';
+import { flattenWhereToOperators } from 'payload/database';
+import { PayloadRequest } from 'payload/types';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
+import { buildSortParam } from './queries/buildSortParam.js';
+import type { MongooseAdapter } from './index.js';
+import { withSession } from './withSession.js';
 
 export const find: Find = async function find(
   this: MongooseAdapter,

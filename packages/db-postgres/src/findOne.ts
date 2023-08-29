@@ -1,11 +1,12 @@
 import toSnakeCase from 'to-snake-case';
-import type { FindOne } from 'payload/dist/database/types';
-import type { PayloadRequest } from 'payload/dist/express/types';
-import type { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
-import buildQuery from './queries/buildQuery';
-import { buildFindManyArgs } from './find/buildFindManyArgs';
-import { transform } from './transform/read';
+import type { FindOne } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
+import type { SanitizedCollectionConfig } from 'payload/types';
+import buildQuery from './queries/buildQuery.js';
+import { buildFindManyArgs } from './find/buildFindManyArgs.js';
+import { transform } from './transform/read/index.js';
 
+// @ts-ignore // TODO: Fix this
 export const findOne: FindOne = async function findOne({
   collection,
   where,

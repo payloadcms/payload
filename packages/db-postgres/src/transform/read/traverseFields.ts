@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign */
-import { fieldAffectsData } from 'payload/dist/fields/config/types';
+import { fieldAffectsData } from 'payload/types';
 import { Field } from 'payload/types';
 import { SanitizedConfig } from 'payload/config';
-import { mergeLocales } from './mergeLocales';
-import { BlocksMap } from '../utilities/createBlocksMap';
-import { transform } from '.';
+import { mergeLocales } from './mergeLocales.js';
+import { BlocksMap } from '../../utilities/createBlocksMap.js';
+import { transform } from './index.js';
 
 type TraverseFieldsArgs = {
   /**

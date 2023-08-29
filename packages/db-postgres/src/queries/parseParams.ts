@@ -1,12 +1,12 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 import { Operator, Where } from 'payload/types';
-import { Field } from 'payload/dist/fields/config/types';
-import { validOperators } from 'payload/dist/types/constants';
+import { Field } from 'payload/types';
+import { validOperators } from 'payload/types';
 import { and, SQL } from 'drizzle-orm';
-import { buildSearchParam } from './buildSearchParams';
-import { buildAndOrConditions } from './buildAndOrConditions';
-import { PostgresAdapter } from '../types';
+import { buildSearchParam } from './buildSearchParams.js';
+import { buildAndOrConditions } from './buildAndOrConditions.js';
+import { PostgresAdapter } from '../types.js';
 
 export async function parseParams({
   where,

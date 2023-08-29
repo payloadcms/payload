@@ -1,8 +1,7 @@
-import { Where } from 'payload/dist/types';
-import { Field } from 'payload/dist/fields/config/types';
-import QueryError from 'payload/dist/errors/QueryError';
+import { Where, Field } from 'payload/types';
+import { QueryError } from 'payload/errors';
 import { Payload } from 'payload';
-import { parseParams } from './parseParams';
+import { parseParams } from './parseParams.js';
 
 type GetBuildQueryPluginArgs = {
   collectionSlug?: string

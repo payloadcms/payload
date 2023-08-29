@@ -1,5 +1,8 @@
-import path from 'path';
-import type { Webpack } from 'payload/dist/database/types';
+import type { Webpack } from 'payload/database';
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const _dirname = dirname(__filename);
 
 export const webpack: Webpack = (config) => {
   return {
@@ -8,7 +11,7 @@ export const webpack: Webpack = (config) => {
       ...config.resolve || {},
       alias: {
         ...config.resolve?.alias || {},
-        [path.resolve(__dirname, './index')]: path.resolve(__dirname, 'mock'),
+        [path.resolve(_dirname, './index')]: path.resolve(_dirname, 'mock'),
       },
     },
   };

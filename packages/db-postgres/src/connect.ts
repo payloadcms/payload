@@ -1,15 +1,17 @@
 import fs from 'fs';
 import { sql, eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import type { Connect } from 'payload/dist/database/types';
-import { Client, Pool } from 'pg';
-import { generateDrizzleJson, pushSchema } from 'drizzle-kit/utils';
-import { configToJSONSchema } from 'payload/dist/utilities/configToJSONSchema';
+import type { Connect } from 'payload/database';
+import pkg from 'pg';
+const { Client, Pool } = pkg;
+import drizzleKit from 'drizzle-kit/utils.js';
+const { generateDrizzleJson, pushSchema } = drizzleKit;
+import { configToJSONSchema } from 'payload/utilities';
 import prompts from 'prompts';
 
 import { jsonb, numeric, pgTable, varchar } from 'drizzle-orm/pg-core';
-import type { PostgresAdapter } from './types';
-import { DrizzleDB, GenericEnum, GenericRelation, GenericTable } from './types';
+import type { PostgresAdapter } from './types.js';
+import { DrizzleDB, GenericEnum, GenericRelation, GenericTable } from './types.js';
 
 // Migration table def in order to use query using drizzle
 const migrationsSchema = pgTable('payload_migrations', {

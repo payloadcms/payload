@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
-import { PostgresAdapter } from './types';
-import { ArrayRowToInsert } from './transform/write/types';
+import { PostgresAdapter } from './types.js';
+import { ArrayRowToInsert } from './transform/write/types.js';
 
 type Args = {
   adapter: PostgresAdapter

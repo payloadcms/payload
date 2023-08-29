@@ -1,0 +1,13 @@
+{
+  "ignore": [
+    ".git",
+    "node_modules",
+    "node_modules/**/node_modules",
+    "src/admin",
+    "src/**/*.spec.ts",
+    "test/**/payload-types.ts"
+  ],
+  "watch": ["src/**/*.ts", "test/", "packages/**/*.ts"],
+  "ext": "ts,js,json",
+  "exec": "node --loader ts-node/esm --loader ./src/esm-loader.mjs ./test/dev.ts"
+}

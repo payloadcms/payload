@@ -3,6 +3,11 @@ package-lock.json
 dist
 .idea
 test-results
+temp
+
+.turbo
+
+.devcontainer
 
 # Created by https://www.gitignore.io/api/node,macos,windows,webstorm,sublimetext,visualstudiocode
 
@@ -137,6 +142,7 @@ GitHub.sublime-settings
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+!.vscode/settings.json
 .history
 
 ### WebStorm ###

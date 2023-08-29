@@ -2,13 +2,13 @@
 /* eslint-disable no-await-in-loop */
 import { FilterQuery } from 'mongoose';
 import deepmerge from 'deepmerge';
-import { Where } from 'payload/types';
-import { combineMerge } from 'payload/dist/utilities/combineMerge';
-import { Field } from 'payload/dist/fields/config/types';
-import { validOperators } from 'payload/dist/types/constants';
+import { Operator, Where } from 'payload/types';
+import { combineMerge } from 'payload/utilities';
+import { Field } from 'payload/types';
+import { validOperators } from 'payload/types';
 import { Payload } from 'payload';
-import { buildSearchParam } from './buildSearchParams';
-import { buildAndOrConditions } from './buildAndOrConditions';
+import { buildSearchParam } from './buildSearchParams.js';
+import { buildAndOrConditions } from './buildAndOrConditions.js';
 
 export async function parseParams({
   where,
@@ -54,7 +54,7 @@ export async function parseParams({
         const pathOperators = where[relationOrPath];
         if (typeof pathOperators === 'object') {
           for (const operator of Object.keys(pathOperators)) {
-            if (validOperators.includes(operator)) {
+            if (validOperators.includes(operator as Operator)) {
               const searchParam = await buildSearchParam({
                 collectionSlug,
                 globalSlug,

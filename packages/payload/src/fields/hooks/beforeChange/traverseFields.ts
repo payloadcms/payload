@@ -1,0 +1,64 @@
+import { Field, TabAsField } from '../../config/types.js';
+import { promise } from './promise.js';
+import { Operation } from '../../../types/index.js';
+import { PayloadRequest, RequestContext } from '../../../express/types.js';
+
+type Args = {
+  data: Record<string, unknown>
+  doc: Record<string, unknown>
+  docWithLocales: Record<string, unknown>
+  errors: { message: string, field: string }[]
+  fields: (Field | TabAsField)[]
+  id?: string | number
+  mergeLocaleActions: (() => void)[]
+  operation: Operation
+  path: string
+  req: PayloadRequest
+  siblingData: Record<string, unknown>
+  siblingDoc: Record<string, unknown>
+  siblingDocWithLocales: Record<string, unknown>
+  skipValidation?: boolean
+  context: RequestContext
+}
+
+export const traverseFields = async ({
+  data,
+  doc,
+  docWithLocales,
+  errors,
+  fields,
+  id,
+  mergeLocaleActions,
+  operation,
+  path,
+  req,
+  siblingData,
+  siblingDoc,
+  siblingDocWithLocales,
+  skipValidation,
+  context,
+}: Args): Promise<void> => {
+  const promises = [];
+
+  fields.forEach((field) => {
+    promises.push(promise({
+      data,
+      doc,
+      docWithLocales,
+      errors,
+      field,
+      id,
+      mergeLocaleActions,
+      operation,
+      path,
+      req,
+      siblingData,
+      siblingDoc,
+      siblingDocWithLocales,
+      skipValidation,
+      context,
+    }));
+  });
+
+  await Promise.all(promises);
+};

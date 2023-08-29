@@ -1,5 +1,5 @@
 import type { ClientSession } from 'mongoose';
-import { MongooseAdapter } from './index';
+import { MongooseAdapter } from './index.js';
 
 /**
  * returns the session belonging to the transaction of the req.session if exists
