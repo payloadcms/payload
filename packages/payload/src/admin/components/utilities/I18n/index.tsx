@@ -1,5 +1,8 @@
 import React from 'react';
-import i18n from 'i18next';
+import i18nextimp from 'i18next';
+// Needed for esm/cjs compatibility
+const i18n = 'default' in i18nextimp ? i18nextimp.default : i18nextimp;
+
 import { loader } from '@monaco-editor/react';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
