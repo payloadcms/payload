@@ -313,6 +313,7 @@
     "eslint-plugin-playwright": "0.12.0",
     "eslint-plugin-react": "7.33.0",
     "eslint-plugin-react-hooks": "4.6.0",
+    "eslint-plugin-regexp": "^1.15.0",
     "form-data": "3.0.1",
     "get-port": "5.1.1",
     "glob": "8.1.0",

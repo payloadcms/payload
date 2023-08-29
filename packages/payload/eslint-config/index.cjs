@@ -17,12 +17,12 @@ module.exports = {
     'eslint:recommended',
     'plugin:perfectionist/recommended-natural',
     'plugin:@typescript-eslint/strict',
+    'plugin:regexp/recommended',
     './configs/jest/index.cjs',
     './configs/react/index.cjs',
     'prettier',
   ],
   rules: {
-    'react/jsx-filename-extension': [2, { extensions: ['.js', '.jsx', '.ts', '.tsx'] }],
     'import/prefer-default-export': 'off',
     'react/prop-types': 'off',
     'react/require-default-props': 'off',
@@ -41,8 +41,6 @@ module.exports = {
     {
       files: ['test/**/int.spec.ts'],
       rules: {
-        '@typescript-eslint/no-use-before-define': 'off',
-        '@typescript-eslint/consistent-type-imports': 'warn',
         'jest/prefer-strict-equal': 'off',
       },
     },
@@ -59,15 +57,8 @@ module.exports = {
       },
     },
     {
-      files: ['*.spec.ts'],
-      rules: {
-        '@typescript-eslint/no-use-before-define': 'off',
-      },
-    },
-    {
       files: ['*.e2e.ts'],
       rules: {
-        '@typescript-eslint/no-use-before-define': 'off',
         'jest/expect-expect': 'off',
       },
     },
