@@ -1,9 +1,9 @@
-import type { GlobalPermission } from '../../auth/types.js';
-import type { PayloadRequest } from '../../express/types.js';
-import type { AllOperations } from '../../types/index.js';
-import type { SanitizedGlobalConfig } from '../config/types.js';
+import type { GlobalPermission } from '../../auth/types.js'
+import type { PayloadRequest } from '../../express/types.js'
+import type { AllOperations } from '../../types/index.js'
+import type { SanitizedGlobalConfig } from '../config/types.js'
 
-import { getEntityPolicies } from '../../utilities/getEntityPolicies.js';
+import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
 
 type Arguments = {
   globalConfig: SanitizedGlobalConfig
@@ -11,15 +11,12 @@ type Arguments = {
 }
 
 export async function docAccess(args: Arguments): Promise<GlobalPermission> {
-  const {
-    globalConfig,
-    req,
-  } = args;
+  const { globalConfig, req } = args
 
-  const globalOperations: AllOperations[] = ['read', 'update'];
+  const globalOperations: AllOperations[] = ['read', 'update']
 
   if (globalConfig.versions) {
-    globalOperations.push('readVersions');
+    globalOperations.push('readVersions')
   }
 
   return getEntityPolicies({
@@ -27,5 +24,5 @@ export async function docAccess(args: Arguments): Promise<GlobalPermission> {
     operations: globalOperations,
     req,
     type: 'global',
-  });
+  })
 }

@@ -1,9 +1,9 @@
-import type { Field } from '../../fields/config/types.js';
+import type { Field } from '../../fields/config/types.js'
 
-import { email } from '../../fields/validations.js';
-import { extractTranslations } from '../../translations/extractTranslations.js';
+import { email } from '../../fields/validations.js'
+import { extractTranslations } from '../../translations/extractTranslations.js'
 
-const labels = extractTranslations(['general:email']);
+const labels = extractTranslations(['general:email'])
 
 const baseAuthFields: Field[] = [
   {
@@ -39,6 +39,6 @@ const baseAuthFields: Field[] = [
     name: 'hash',
     type: 'text',
   },
-];
+]
 
-export default baseAuthFields;
+export default baseAuthFields

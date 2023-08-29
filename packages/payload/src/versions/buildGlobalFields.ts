@@ -1,5 +1,5 @@
-import type { Field } from '../fields/config/types.js';
-import type { SanitizedGlobalConfig } from '../globals/config/types.js';
+import type { Field } from '../fields/config/types.js'
+import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
 export const buildVersionGlobalFields = (global: SanitizedGlobalConfig): Field[] => {
   const fields: Field[] = [
@@ -22,15 +22,15 @@ export const buildVersionGlobalFields = (global: SanitizedGlobalConfig): Field[]
       name: 'updatedAt',
       type: 'date',
     },
-  ];
+  ]
 
   if (global?.versions?.drafts && global?.versions?.drafts?.autosave) {
     fields.push({
       index: true,
       name: 'autosave',
       type: 'checkbox',
-    });
+    })
   }
 
-  return fields;
-};
+  return fields
+}

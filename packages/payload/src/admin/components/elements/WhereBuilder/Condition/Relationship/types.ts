@@ -1,12 +1,12 @@
-import { type i18n } from 'i18next';
+import { type i18n } from 'i18next'
 
-import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types.js';
-import type { PaginatedDocs } from '../../../../../../database/types.js';
-import type { RelationshipField } from '../../../../../../fields/config/types.js';
+import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types.js'
+import type { PaginatedDocs } from '../../../../../../database/types.js'
+import type { RelationshipField } from '../../../../../../fields/config/types.js'
 
 export type Props = {
-  onChange: (val: unknown) => void,
-  value: unknown,
+  onChange: (val: unknown) => void
+  value: unknown
 } & RelationshipField
 
 export type Option = {
@@ -38,4 +38,8 @@ export type ValueWithRelation = {
   value: string
 }
 
-export type GetResults = (args: { lastFullyLoadedRelation?: number, lastLoadedPage?: number, search?: string }) => Promise<void>
+export type GetResults = (args: {
+  lastFullyLoadedRelation?: number
+  lastLoadedPage?: number
+  search?: string
+}) => Promise<void>

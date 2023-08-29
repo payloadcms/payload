@@ -2,8 +2,8 @@
 // It will not be used.
 // Instead, configure a path within your `tsconfig.json`'s `compilerOptions.paths` to point to your generated types.
 
-import type { TypeWithID } from './collections/config/types.js';
-import type { TypeWithID as GlobalTypeWithID } from './globals/config/types.js';
+import type { TypeWithID } from './collections/config/types.js'
+import type { TypeWithID as GlobalTypeWithID } from './globals/config/types.js'
 
 export type Config = {
   collections: {

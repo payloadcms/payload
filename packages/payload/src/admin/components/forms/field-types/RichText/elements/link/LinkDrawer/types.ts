@@ -1,5 +1,5 @@
-import type { Field } from '../../../../../../../../fields/config/types.js';
-import type { Fields } from '../../../../../Form/types.js';
+import type { Field } from '../../../../../../../../fields/config/types.js'
+import type { Fields } from '../../../../../Form/types.js'
 
 export type Props = {
   drawerSlug: string

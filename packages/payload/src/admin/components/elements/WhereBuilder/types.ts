@@ -1,9 +1,9 @@
-import type { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
-import type { Field } from '../../../../fields/config/types.js';
-import type { Operator, Where } from '../../../../types/index.js';
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types.js'
+import type { Field } from '../../../../fields/config/types.js'
+import type { Operator, Where } from '../../../../types/index.js'
 
 export type Props = {
-  collection: SanitizedCollectionConfig,
+  collection: SanitizedCollectionConfig
   handleChange?: (where: Where) => void
   modifySearchQuery?: boolean
 }

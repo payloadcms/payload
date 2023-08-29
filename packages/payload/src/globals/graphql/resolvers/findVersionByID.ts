@@ -1,11 +1,11 @@
 /* eslint-disable no-param-reassign */
-import type { Response } from 'express';
+import type { Response } from 'express'
 
-import type { PayloadRequest } from '../../../express/types.js';
-import type { Document } from '../../../types/index.js';
-import type { SanitizedGlobalConfig } from '../../config/types.js';
+import type { PayloadRequest } from '../../../express/types.js'
+import type { Document } from '../../../types/index.js'
+import type { SanitizedGlobalConfig } from '../../config/types.js'
 
-import findVersionByID from '../../operations/findVersionByID.js';
+import findVersionByID from '../../operations/findVersionByID.js'
 
 export type Resolver = (
   _: unknown,
@@ -16,15 +16,15 @@ export type Resolver = (
     locale?: string
   },
   context: {
-    req: PayloadRequest,
+    req: PayloadRequest
     res: Response
-  }
+  },
 ) => Promise<Document>
 
 export default function findVersionByIDResolver(globalConfig: SanitizedGlobalConfig): Resolver {
   return async function resolver(_, args, context) {
-    if (args.locale) context.req.locale = args.locale;
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
+    if (args.locale) context.req.locale = args.locale
+    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
 
     const options = {
       depth: 0,
@@ -32,9 +32,9 @@ export default function findVersionByIDResolver(globalConfig: SanitizedGlobalCon
       globalConfig,
       id: args.id,
       req: context.req,
-    };
+    }
 
-    const result = await findVersionByID(options);
-    return result;
-  };
+    const result = await findVersionByID(options)
+    return result
+  }
 }

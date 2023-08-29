@@ -1,6 +1,6 @@
-import type { Collection } from '../../../collections/config/types.js';
+import type { Collection } from '../../../collections/config/types.js'
 
-import login from '../../operations/login.js';
+import login from '../../operations/login.js'
 
 function loginResolver(collection: Collection) {
   async function resolver(_, args, context) {
@@ -13,13 +13,13 @@ function loginResolver(collection: Collection) {
       depth: 0,
       req: context.req,
       res: context.res,
-    };
+    }
 
-    const result = login(options);
-    return result;
+    const result = login(options)
+    return result
   }
 
-  return resolver;
+  return resolver
 }
 
-export default loginResolver;
+export default loginResolver

@@ -1,12 +1,12 @@
-import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js';
-import type { PayloadRequest } from '../../../express/types.js';
-import type { Payload } from '../../../index.js';
+import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js'
+import type { PayloadRequest } from '../../../express/types.js'
+import type { Payload } from '../../../index.js'
 
 type Args = {
   collection: SanitizedCollectionConfig
   doc: TypeWithID & Record<string, unknown>
   payload: Payload
-  req: PayloadRequest,
+  req: PayloadRequest
 }
 
 export const resetLoginAttempts = async ({
@@ -23,5 +23,5 @@ export const resetLoginAttempts = async ({
     },
     id: doc.id,
     req,
-  });
-};
+  })
+}

@@ -1,7 +1,7 @@
-import type { CollectionPermission, GlobalPermission } from '../../../auth/types.js';
-import type { PayloadRequest } from '../../../express/types.js';
+import type { CollectionPermission, GlobalPermission } from '../../../auth/types.js'
+import type { PayloadRequest } from '../../../express/types.js'
 
-import { docAccess } from '../../operations/docAccess.js';
+import { docAccess } from '../../operations/docAccess.js'
 
 export type Resolver = (
   _: unknown,
@@ -9,9 +9,9 @@ export type Resolver = (
     id: number | string
   },
   context: {
-    req: PayloadRequest,
+    req: PayloadRequest
     res: Response
-  }
+  },
 ) => Promise<CollectionPermission | GlobalPermission>
 
 export function docAccessResolver(): Resolver {
@@ -19,8 +19,8 @@ export function docAccessResolver(): Resolver {
     return docAccess({
       id: args.id,
       req: context.req,
-    });
+    })
   }
 
-  return resolver;
+  return resolver
 }

@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import swcRegister from '@swc/register';
-import { getTsconfig as getTSconfig } from 'get-tsconfig';
-import minimist from 'minimist';
-import path from 'path';
+import swcRegister from '@swc/register'
+import { getTsconfig as getTSconfig } from 'get-tsconfig'
+import minimist from 'minimist'
+import path from 'path'
 
-import { build } from "./build.js";
-import { generateGraphQLSchema } from './generateGraphQLSchema.js';
-import { generateTypes } from './generateTypes.js';
-import { migrate } from './migrate.js';
+import { build } from './build.js'
+import { generateGraphQLSchema } from './generateGraphQLSchema.js'
+import { generateTypes } from './generateTypes.js'
+import { migrate } from './migrate.js'
 
-const tsConfig = getTSconfig();
+const tsConfig = getTSconfig()
 
 const swcOptions_cjs = {
   ignore: [
@@ -28,7 +28,7 @@ const swcOptions_cjs = {
     type: 'commonjs',
   },
   sourceMaps: 'inline',
-};
+}
 
 const swcOptions_esm = {
   ignore: [
@@ -51,59 +51,53 @@ const swcOptions_esm = {
     type: 'es6',
   },
   sourceMaps: 'inline',
-};
+}
 
 if (tsConfig?.config?.compilerOptions?.paths) {
-  swcOptions_esm.jsc.paths = tsConfig.config.compilerOptions.paths;
-  swcOptions_cjs.jsc.paths = tsConfig.config.compilerOptions.paths;
+  swcOptions_esm.jsc.paths = tsConfig.config.compilerOptions.paths
+  swcOptions_cjs.jsc.paths = tsConfig.config.compilerOptions.paths
 
   if (tsConfig?.config?.compilerOptions?.baseUrl) {
-    swcOptions_esm.jsc.baseUrl = path.resolve(
-      tsConfig.config.compilerOptions.baseUrl,
-    );
-    swcOptions_cjs.jsc.baseUrl = path.resolve(
-      tsConfig.config.compilerOptions.baseUrl,
-    );
+    swcOptions_esm.jsc.baseUrl = path.resolve(tsConfig.config.compilerOptions.baseUrl)
+    swcOptions_cjs.jsc.baseUrl = path.resolve(tsConfig.config.compilerOptions.baseUrl)
   }
 }
 
-
-
-const args = minimist(process.argv.slice(2));
+const args = minimist(process.argv.slice(2))
 
 if (args._.includes('--cjs')) {
   // @ts-expect-error - bad @swc/register types
-  swcRegister(swcOptions_cjs);
+  swcRegister(swcOptions_cjs)
 } else {
   // @ts-expect-error - bad @swc/register types
-  swcRegister(swcOptions_esm);
+  swcRegister(swcOptions_esm)
 }
 
-const scriptIndex = args._.findIndex((x) => x === 'build');
+const scriptIndex = args._.findIndex((x) => x === 'build')
 
-const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex];
+const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex]
 
 if (script.startsWith('migrate')) {
-  migrate(args._).then(() => process.exit(0));
+  migrate(args._).then(() => process.exit(0))
 } else {
   switch (script.toLowerCase()) {
     case 'build': {
-      build();
-      break;
+      build()
+      break
     }
 
     case 'generate:types': {
-      generateTypes();
-      break;
+      generateTypes()
+      break
     }
 
     case 'generate:graphqlschema': {
-      generateGraphQLSchema();
-      break;
+      generateGraphQLSchema()
+      break
     }
 
     default:
-      console.log(`Unknown script "${script}".`);
-      break;
+      console.log(`Unknown script "${script}".`)
+      break
   }
 }

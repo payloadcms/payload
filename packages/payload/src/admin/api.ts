@@ -1,4 +1,4 @@
-import qs from 'qs';
+import qs from 'qs'
 
 type GetOptions = RequestInit & {
   params?: Record<string, unknown>
@@ -6,7 +6,7 @@ type GetOptions = RequestInit & {
 
 export const requests = {
   delete: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {
-    const headers = options && options.headers ? { ...options.headers } : {};
+    const headers = options && options.headers ? { ...options.headers } : {}
 
     const formattedOptions: RequestInit = {
       ...options,
@@ -15,24 +15,24 @@ export const requests = {
         ...headers,
       },
       method: 'delete',
-    };
+    }
 
-    return fetch(url, formattedOptions);
+    return fetch(url, formattedOptions)
   },
 
   get: (url: string, options: GetOptions = { headers: {} }): Promise<Response> => {
-    let query = '';
+    let query = ''
     if (options.params) {
-      query = qs.stringify(options.params, { addQueryPrefix: true });
+      query = qs.stringify(options.params, { addQueryPrefix: true })
     }
     return fetch(`${url}${query}`, {
       credentials: 'include',
       ...options,
-    });
+    })
   },
 
   patch: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {
-    const headers = options && options.headers ? { ...options.headers } : {};
+    const headers = options && options.headers ? { ...options.headers } : {}
 
     const formattedOptions: RequestInit = {
       ...options,
@@ -41,13 +41,13 @@ export const requests = {
         ...headers,
       },
       method: 'PATCH',
-    };
+    }
 
-    return fetch(url, formattedOptions);
+    return fetch(url, formattedOptions)
   },
 
   post: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {
-    const headers = options && options.headers ? { ...options.headers } : {};
+    const headers = options && options.headers ? { ...options.headers } : {}
 
     const formattedOptions: RequestInit = {
       ...options,
@@ -56,13 +56,13 @@ export const requests = {
         ...headers,
       },
       method: 'post',
-    };
+    }
 
-    return fetch(`${url}`, formattedOptions);
+    return fetch(`${url}`, formattedOptions)
   },
 
   put: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {
-    const headers = options && options.headers ? { ...options.headers } : {};
+    const headers = options && options.headers ? { ...options.headers } : {}
 
     const formattedOptions: RequestInit = {
       ...options,
@@ -71,8 +71,8 @@ export const requests = {
         ...headers,
       },
       method: 'put',
-    };
+    }
 
-    return fetch(url, formattedOptions);
+    return fetch(url, formattedOptions)
   },
-};
+}

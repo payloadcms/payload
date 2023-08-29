@@ -1,131 +1,110 @@
-import joi from 'joi';
+import joi from 'joi'
 
-const component = joi.alternatives().try(
-  joi.object().unknown(),
-  joi.func(),
-);
+const component = joi.alternatives().try(joi.object().unknown(), joi.func())
 
 export const endpointsSchema = joi.alternatives().try(
-  joi.array().items(joi.object({
-    custom: joi.object().pattern(joi.string(), joi.any()),
-    handler: joi.alternatives().try(
-      joi.array().items(joi.func()),
-      joi.func(),
-    ),
-    method: joi.string().valid('get', 'head', 'post', 'put', 'patch', 'delete', 'connect', 'options'),
-    path: joi.string(),
-    root: joi.bool(),
-  })),
+  joi.array().items(
+    joi.object({
+      custom: joi.object().pattern(joi.string(), joi.any()),
+      handler: joi.alternatives().try(joi.array().items(joi.func()), joi.func()),
+      method: joi
+        .string()
+        .valid('get', 'head', 'post', 'put', 'patch', 'delete', 'connect', 'options'),
+      path: joi.string(),
+      root: joi.bool(),
+    }),
+  ),
   joi.boolean(),
-);
+)
 
 export default joi.object({
   admin: joi.object({
-    autoLogin: joi.alternatives()
-      .try(
-        joi.object().keys({
-          email: joi.string(),
-          password: joi.string(),
-          prefillOnly: joi.boolean(),
-        }),
-        joi.boolean(),
-      ),
-    avatar: joi.alternatives()
-      .try(
-        joi.string(),
-        component,
-      ),
+    autoLogin: joi.alternatives().try(
+      joi.object().keys({
+        email: joi.string(),
+        password: joi.string(),
+        prefillOnly: joi.boolean(),
+      }),
+      joi.boolean(),
+    ),
+    avatar: joi.alternatives().try(joi.string(), component),
     buildPath: joi.string(),
     bundler: {
       build: joi.func(),
       dev: joi.func(),
       serve: joi.func(),
     },
-    components: joi.object()
-      .keys({
-        Nav: component,
-        afterDashboard: joi.array().items(component),
-        afterLogin: joi.array().items(component),
-        afterNavLinks: joi.array().items(component),
-        beforeDashboard: joi.array().items(component),
-        beforeLogin: joi.array().items(component),
-        beforeNavLinks: joi.array().items(component),
-        graphics: joi.object({
-          Icon: component,
-          Logo: component,
-        }),
-        logout: joi.object({
-          Button: component,
-        }),
-        providers: joi.array().items(component),
-        routes: joi.array()
-          .items(
-            joi.object().keys({
-              Component: component.required(),
-              exact: joi.bool(),
-              path: joi.string().required(),
-              sensitive: joi.bool(),
-              strict: joi.bool(),
-            }),
-          ),
-        views: joi.object({
-          Account: component,
-          Dashboard: component,
-        }),
+    components: joi.object().keys({
+      Nav: component,
+      afterDashboard: joi.array().items(component),
+      afterLogin: joi.array().items(component),
+      afterNavLinks: joi.array().items(component),
+      beforeDashboard: joi.array().items(component),
+      beforeLogin: joi.array().items(component),
+      beforeNavLinks: joi.array().items(component),
+      graphics: joi.object({
+        Icon: component,
+        Logo: component,
       }),
+      logout: joi.object({
+        Button: component,
+      }),
+      providers: joi.array().items(component),
+      routes: joi.array().items(
+        joi.object().keys({
+          Component: component.required(),
+          exact: joi.bool(),
+          path: joi.string().required(),
+          sensitive: joi.bool(),
+          strict: joi.bool(),
+        }),
+      ),
+      views: joi.object({
+        Account: component,
+        Dashboard: component,
+      }),
+    }),
     css: joi.string(),
     dateFormat: joi.string(),
     disable: joi.bool(),
     inactivityRoute: joi.string(),
     indexHTML: joi.string(),
     logoutRoute: joi.string(),
-    meta: joi.object()
-      .keys({
-        favicon: joi.string(),
-        ogImage: joi.string(),
-        titleSuffix: joi.string(),
-      }),
+    meta: joi.object().keys({
+      favicon: joi.string(),
+      ogImage: joi.string(),
+      titleSuffix: joi.string(),
+    }),
     user: joi.string(),
     webpack: joi.func(),
   }),
   collections: joi.array(),
   cookiePrefix: joi.string(),
-  cors: [
-    joi.string()
-      .valid('*'),
-    joi.array()
-      .items(joi.string()),
-  ],
-  csrf: joi.array()
-    .items(joi.string().allow(''))
-    .sparse(),
+  cors: [joi.string().valid('*'), joi.array().items(joi.string())],
+  csrf: joi.array().items(joi.string().allow('')).sparse(),
   custom: joi.object().pattern(joi.string(), joi.any()),
   db: joi.any(),
   debug: joi.boolean(),
-  defaultDepth: joi.number()
-    .min(0)
-    .max(30),
+  defaultDepth: joi.number().min(0).max(30),
   defaultMaxTextLength: joi.number(),
   email: joi.object(),
   endpoints: endpointsSchema,
-  express: joi.object()
-    .keys({
-      compression: joi.object(),
-      json: joi.object(),
-      middleware: joi.array().items(joi.func()),
-      postMiddleware: joi.array().items(joi.func()),
-      preMiddleware: joi.array().items(joi.func()),
-    }),
+  express: joi.object().keys({
+    compression: joi.object(),
+    json: joi.object(),
+    middleware: joi.array().items(joi.func()),
+    postMiddleware: joi.array().items(joi.func()),
+    preMiddleware: joi.array().items(joi.func()),
+  }),
   globals: joi.array(),
-  graphQL: joi.object()
-    .keys({
-      disable: joi.boolean(),
-      disablePlaygroundInProduction: joi.boolean(),
-      maxComplexity: joi.number(),
-      mutations: joi.function(),
-      queries: joi.function(),
-      schemaOutputFile: joi.string(),
-    }),
+  graphQL: joi.object().keys({
+    disable: joi.boolean(),
+    disablePlaygroundInProduction: joi.boolean(),
+    maxComplexity: joi.number(),
+    mutations: joi.function(),
+    queries: joi.function(),
+    schemaOutputFile: joi.string(),
+  }),
   hooks: joi.object().keys({
     afterError: joi.func(),
   }),
@@ -151,45 +130,46 @@ export default joi.object({
     }),
     joi.boolean(),
   ),
-  maxDepth: joi.number()
-    .min(0)
-    .max(100),
+  maxDepth: joi.number().min(0).max(100),
   onInit: joi.func(),
-  plugins: joi.array().items(
-    joi.func(),
-  ),
-  rateLimit: joi.object()
-    .keys({
-      max: joi.number(),
-      skip: joi.func(),
-      trustProxy: joi.boolean(),
-      window: joi.number(),
-    }),
+  plugins: joi.array().items(joi.func()),
+  rateLimit: joi.object().keys({
+    max: joi.number(),
+    skip: joi.func(),
+    trustProxy: joi.boolean(),
+    window: joi.number(),
+  }),
   routes: joi.object({
     admin: joi.string(),
     api: joi.string(),
     graphQL: joi.string(),
     graphQLPlayground: joi.string(),
   }),
-  serverURL: joi.string()
+  serverURL: joi
+    .string()
     .uri()
     .allow('')
     .custom((value, helper) => {
-      const urlWithoutProtocol = value.split('//')[1];
+      const urlWithoutProtocol = value.split('//')[1]
 
       if (!urlWithoutProtocol) {
-        return helper.message({ custom: 'You need to include either "https://" or "http://" in your serverURL.' });
+        return helper.message({
+          custom: 'You need to include either "https://" or "http://" in your serverURL.',
+        })
       }
 
       if (urlWithoutProtocol.indexOf('/') > -1) {
-        return helper.message({ custom: 'Your serverURL cannot have a path. It can only contain a protocol, a domain, and an optional port.' });
+        return helper.message({
+          custom:
+            'Your serverURL cannot have a path. It can only contain a protocol, a domain, and an optional port.',
+        })
       }
 
-      return value;
+      return value
     }),
   telemetry: joi.boolean(),
   typescript: joi.object({
     outputFile: joi.string(),
   }),
   upload: joi.object(),
-});
+})

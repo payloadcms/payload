@@ -1,6 +1,6 @@
-import type { SanitizedCollectionConfig } from '../collections/config/types.js';
-import type { PayloadRequest } from '../express/types.js';
-import type { Payload } from '../index.js';
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { PayloadRequest } from '../express/types.js'
+import type { Payload } from '../index.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
@@ -22,7 +22,7 @@ export const deleteUserPreferences = ({ collectionConfig, ids, payload, req }: A
           equals: 'collectionConfig.slug,',
         },
       },
-    });
+    })
   }
   payload.db.deleteMany({
     collection: 'payload-preferences',
@@ -30,5 +30,5 @@ export const deleteUserPreferences = ({ collectionConfig, ids, payload, req }: A
     where: {
       key: { in: ids.map((id) => `collection-${collectionConfig.slug}-${id}`) },
     },
-  });
-};
+  })
+}

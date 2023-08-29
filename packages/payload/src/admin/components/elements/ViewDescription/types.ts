@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 export type DescriptionFunction = () => string
 
@@ -11,5 +11,5 @@ export type Props = {
 }
 
 export function isComponent(description: Description): description is DescriptionComponent {
-  return React.isValidElement(description);
+  return React.isValidElement(description)
 }

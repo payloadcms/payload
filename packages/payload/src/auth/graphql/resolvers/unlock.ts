@@ -1,6 +1,6 @@
-import type { Collection } from '../../../collections/config/types.js';
+import type { Collection } from '../../../collections/config/types.js'
 
-import unlock from '../../operations/unlock.js';
+import unlock from '../../operations/unlock.js'
 
 function unlockResolver(collection: Collection) {
   async function resolver(_, args, context) {
@@ -8,12 +8,12 @@ function unlockResolver(collection: Collection) {
       collection,
       data: { email: args.email },
       req: context.req,
-    };
+    }
 
-    const result = await unlock(options);
-    return result;
+    const result = await unlock(options)
+    return result
   }
-  return resolver;
+  return resolver
 }
 
-export default unlockResolver;
+export default unlockResolver

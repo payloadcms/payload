@@ -1,9 +1,9 @@
-import type React from 'react';
+import type React from 'react'
 
-import type { CollectionPermission } from '../../../../../auth/types.js';
-import type { SanitizedCollectionConfig } from '../../../../../collections/config/types.js';
-import type { Document } from '../../../../../types/index.js';
-import type { Fields } from '../../../forms/Form/types.js';
+import type { CollectionPermission } from '../../../../../auth/types.js'
+import type { SanitizedCollectionConfig } from '../../../../../collections/config/types.js'
+import type { Document } from '../../../../../types/index.js'
+import type { Fields } from '../../../forms/Form/types.js'
 
 export type IndexProps = {
   collection: SanitizedCollectionConfig
@@ -23,12 +23,14 @@ export type Props = IndexProps & {
   id?: string
   internalState?: Fields
   isLoading: boolean
-  onSave?: (json: Record<string, unknown> & {
-    collectionConfig: SanitizedCollectionConfig
-    doc: Record<string, any>
-    message: string
-    operation: 'create' | 'update',
-  }) => void
+  onSave?: (
+    json: Record<string, unknown> & {
+      collectionConfig: SanitizedCollectionConfig
+      doc: Record<string, any>
+      message: string
+      operation: 'create' | 'update'
+    },
+  ) => void
   permissions: CollectionPermission
   updatedAt?: string
 }

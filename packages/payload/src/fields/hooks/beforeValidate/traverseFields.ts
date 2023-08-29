@@ -1,7 +1,7 @@
-import type { PayloadRequest, RequestContext } from '../../../express/types.js';
-import type { Field, TabAsField } from '../../config/types.js';
+import type { PayloadRequest, RequestContext } from '../../../express/types.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
-import { promise } from './promise.js';
+import { promise } from './promise.js'
 
 type Args<T> = {
   context: RequestContext
@@ -28,20 +28,22 @@ export const traverseFields = async <T>({
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
-  const promises = [];
+  const promises = []
   fields.forEach((field) => {
-    promises.push(promise({
-      context,
-      data,
-      doc,
-      field,
-      id,
-      operation,
-      overrideAccess,
-      req,
-      siblingData,
-      siblingDoc,
-    }));
-  });
-  await Promise.all(promises);
-};
+    promises.push(
+      promise({
+        context,
+        data,
+        doc,
+        field,
+        id,
+        operation,
+        overrideAccess,
+        req,
+        siblingData,
+        siblingDoc,
+      }),
+    )
+  })
+  await Promise.all(promises)
+}

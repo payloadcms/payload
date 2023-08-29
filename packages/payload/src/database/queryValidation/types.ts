@@ -1,14 +1,14 @@
-import type { CollectionPermission, GlobalPermission } from '../../auth/types.js';
-import type { Field, FieldAffectingData, TabAsField, UIField } from '../../fields/config/types.js';
+import type { CollectionPermission, GlobalPermission } from '../../auth/types.js'
+import type { Field, FieldAffectingData, TabAsField, UIField } from '../../fields/config/types.js'
 
 export type EntityPolicies = {
   collections?: {
-    [collectionSlug: string]: CollectionPermission;
-  };
+    [collectionSlug: string]: CollectionPermission
+  }
   globals?: {
-    [globalSlug: string]: GlobalPermission;
-  };
-};
+    [globalSlug: string]: GlobalPermission
+  }
+}
 
 export type PathToQuery = {
   collectionSlug?: string

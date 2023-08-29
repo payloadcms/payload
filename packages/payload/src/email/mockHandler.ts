@@ -1,12 +1,12 @@
-import nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer'
 
-import type { EmailOptions } from '../config/types.js';
-import type { MockEmailHandler } from './types.js';
+import type { EmailOptions } from '../config/types.js'
+import type { MockEmailHandler } from './types.js'
 
-import { defaults as emailDefaults } from './defaults.js';
+import { defaults as emailDefaults } from './defaults.js'
 
 const mockEmailHandler = async (emailConfig: EmailOptions): Promise<MockEmailHandler> => {
-  const testAccount = await nodemailer.createTestAccount();
+  const testAccount = await nodemailer.createTestAccount()
 
   const smtpOptions = {
     ...emailConfig,
@@ -19,12 +19,12 @@ const mockEmailHandler = async (emailConfig: EmailOptions): Promise<MockEmailHan
     host: 'smtp.ethereal.email',
     port: 587,
     secure: false,
-  };
+  }
 
   return {
     account: testAccount,
     transport: nodemailer.createTransport(smtpOptions),
-  };
-};
+  }
+}
 
-export default mockEmailHandler;
+export default mockEmailHandler

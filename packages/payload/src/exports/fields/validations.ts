@@ -1,1 +1,1 @@
-export * from '../../fields/validations.js';
+export * from '../../fields/validations.js'

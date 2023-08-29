@@ -1,4 +1,4 @@
-import type { Block, Labels } from '../../../../../../fields/config/types.js';
+import type { Block, Labels } from '../../../../../../fields/config/types.js'
 
 export type Props = {
   addRow: (index: number, blockType?: string) => void

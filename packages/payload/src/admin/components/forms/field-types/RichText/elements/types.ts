@@ -1,4 +1,4 @@
-import type { ElementType } from 'react';
+import type { ElementType } from 'react'
 
 export type ButtonProps = {
   children?: React.ReactNode

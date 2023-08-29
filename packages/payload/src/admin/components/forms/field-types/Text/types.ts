@@ -1,4 +1,4 @@
-import type { TextField } from '../../../../../fields/config/types.js';
+import type { TextField } from '../../../../../fields/config/types.js'
 
 export type Props = Omit<TextField, 'type'> & {
   inputRef?: React.MutableRefObject<HTMLInputElement>

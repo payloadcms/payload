@@ -1,1 +1,1 @@
-export { usePreferences } from '../../admin/components/utilities/Preferences/index.js';
+export { usePreferences } from '../../admin/components/utilities/Preferences/index.js'

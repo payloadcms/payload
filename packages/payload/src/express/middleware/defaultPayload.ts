@@ -1,12 +1,12 @@
-import type { NextFunction, Response } from 'express';
+import type { NextFunction, Response } from 'express'
 
-import type { PayloadRequest } from '../types.js';
+import type { PayloadRequest } from '../types.js'
 
-import { setRequestContext } from '../setRequestContext.js';
+import { setRequestContext } from '../setRequestContext.js'
 
 function defaultPayload(req: PayloadRequest, res: Response, next: NextFunction) {
-  setRequestContext(req);
-  next();
+  setRequestContext(req)
+  next()
 }
 
-export default defaultPayload;
+export default defaultPayload

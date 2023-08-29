@@ -1,6 +1,6 @@
-import type { FieldPermissions } from '../../../../auth/types.js';
-import type { Field, FieldWithPath } from '../../../../fields/config/types.js';
-import type { FieldTypes } from '../field-types/index.js';
+import type { FieldPermissions } from '../../../../auth/types.js'
+import type { Field, FieldWithPath } from '../../../../fields/config/types.js'
+import type { FieldTypes } from '../field-types/index.js'
 
 export type Props = {
   className?: string
@@ -9,8 +9,10 @@ export type Props = {
   filter?: (field: Field) => boolean
   forceRender?: boolean
   indexPath?: string
-  permissions?: {
-    [field: string]: FieldPermissions
-  } | FieldPermissions
+  permissions?:
+    | {
+        [field: string]: FieldPermissions
+      }
+    | FieldPermissions
   readOnly?: boolean
 }

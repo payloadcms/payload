@@ -14,4 +14,4 @@ export const validOperators = [
   'within',
   'intersects',
   'near',
-] as const;
+] as const

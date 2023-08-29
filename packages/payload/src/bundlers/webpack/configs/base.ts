@@ -1,35 +1,31 @@
-import type { Configuration } from 'webpack';
+import type { Configuration } from 'webpack'
 
-import { existsSync } from 'fs';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import { createRequire } from 'node:module';
-import path, { dirname, join, parse, resolve } from 'path';
-import { fileURLToPath } from 'url';
-import webpack from 'webpack';
+import { existsSync } from 'fs'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import { createRequire } from 'node:module'
+import path, { dirname, join, parse, resolve } from 'path'
+import { fileURLToPath } from 'url'
+import webpack from 'webpack'
 
-import type { SanitizedConfig } from '../../../config/types.js';
+import type { SanitizedConfig } from '../../../config/types.js'
 
-const __filename = fileURLToPath(import.meta.url);
-const _dirname = dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const _dirname = dirname(__filename)
 
-const mockModulePath = path.resolve(_dirname, '../../mocks/emptyModule.js');
-const mockDotENVPath = path.resolve(_dirname, '../../mocks/dotENV.js');
+const mockModulePath = path.resolve(_dirname, '../../mocks/emptyModule.js')
+const mockDotENVPath = path.resolve(_dirname, '../../mocks/dotENV.js')
 
-const nodeModulesPath = path.resolve(_dirname, '../../../../node_modules');
-const nodeModulesPath2 = path.resolve(_dirname, '../../../../../../node_modules');
-const adminFolderPath = path.resolve(_dirname, '../../../admin');
-const bundlerPath = path.resolve(_dirname, '../bundler.ts');
-const bundlerPath2 = path.resolve(_dirname, '../bundler.js');
+const nodeModulesPath = path.resolve(_dirname, '../../../../node_modules')
+const nodeModulesPath2 = path.resolve(_dirname, '../../../../../../node_modules')
+const adminFolderPath = path.resolve(_dirname, '../../../admin')
+const bundlerPath = path.resolve(_dirname, '../bundler.ts')
+const bundlerPath2 = path.resolve(_dirname, '../bundler.js')
 
-
-const require = createRequire(import.meta.url);
-
+const require = createRequire(import.meta.url)
 
 export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => ({
   entry: {
-    main: [
-      adminFolderPath,
-    ],
+    main: [adminFolderPath],
   },
   module: {
     rules: [
@@ -48,11 +44,11 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
                   syntax: 'typescript',
                   tsx: true,
                 },
-                target: "esnext"
+                target: 'esnext',
               },
               module: {
-                type: "es6"
-              }
+                type: 'es6',
+              },
             },
           },
         ],
@@ -68,23 +64,18 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
     ],
   },
   plugins: [
-    new webpack.ProvidePlugin(
-      { process: require.resolve('process/browser') },
-    ),
+    new webpack.ProvidePlugin({ process: require.resolve('process/browser') }),
     new webpack.DefinePlugin(
-      Object.entries(process.env).reduce(
-        (values, [key, val]) => {
-          if (key.indexOf('PAYLOAD_PUBLIC_') === 0) {
-            return ({
-              ...values,
-              [`process.env.${key}`]: `'${val}'`,
-            });
+      Object.entries(process.env).reduce((values, [key, val]) => {
+        if (key.indexOf('PAYLOAD_PUBLIC_') === 0) {
+          return {
+            ...values,
+            [`process.env.${key}`]: `'${val}'`,
           }
+        }
 
-          return values;
-        },
-        {},
-      ),
+        return values
+      }, {}),
     ),
     new HtmlWebpackPlugin({
       filename: path.normalize('./index.html'),
@@ -93,34 +84,34 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
     new webpack.HotModuleReplacementPlugin(),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     // This fixes esm: https://github.com/vercel/next.js/issues/41961#issuecomment-1311091390
-    new webpack.NormalModuleReplacementPlugin(/\.js$/, ((
-      /** @type {{ context: string, request: string }} */
-      resource
-    ) => {
-      // Skip a non relative import (e.g. a bare import specifier).
-      if (resource.request.startsWith(".")) {
-        const path = resolve(resource.context, resource.request);
+    new webpack.NormalModuleReplacementPlugin(
+      /\.js$/,
+      (
+        /** @type {{ context: string, request: string }} */
+        resource,
+      ) => {
+        // Skip a non relative import (e.g. a bare import specifier).
+        if (resource.request.startsWith('.')) {
+          const path = resolve(resource.context, resource.request)
 
-        if (
-          // Skip the relative import if it reaches into `node_modules`.
-          !path.includes("node_modules") &&
-          !existsSync(path)
-        ) {
-          const { dir, name } = parse(path);
-          const extensionlessPath = join(dir, name);
+          if (
+            // Skip the relative import if it reaches into `node_modules`.
+            !path.includes('node_modules') &&
+            !existsSync(path)
+          ) {
+            const { dir, name } = parse(path)
+            const extensionlessPath = join(dir, name)
 
-          for (const fallbackExtension of [".tsx", ".ts", ".js"]) {
-            if (existsSync(extensionlessPath + fallbackExtension)) {
-              resource.request = resource.request.replace(
-                /\.js$/,
-                fallbackExtension
-              );
-              break;
+            for (const fallbackExtension of ['.tsx', '.ts', '.js']) {
+              if (existsSync(extensionlessPath + fallbackExtension)) {
+                resource.request = resource.request.replace(/\.js$/, fallbackExtension)
+                break
+              }
             }
           }
         }
-      }
-    }))
+      },
+    ),
   ],
   resolve: {
     alias: {
@@ -133,9 +124,9 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
     },
     // Add support for TypeScripts fully qualified ESM imports.
     extensionAlias: {
-      ".cjs": [".cjs", ".cts"],
-      ".js": [".js", ".ts"],
-      ".mjs": [".mjs", ".mts"]
+      '.cjs': ['.cjs', '.cts'],
+      '.js': ['.js', '.ts'],
+      '.mjs': ['.mjs', '.mts'],
     },
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     fallback: {
@@ -144,9 +135,9 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       https: false,
       path: require.resolve('path-browserify'),
     },
-    modules: ['node_modules', path.resolve(_dirname, nodeModulesPath)]
+    modules: ['node_modules', path.resolve(_dirname, nodeModulesPath)],
   },
   resolveLoader: {
-    modules: ['node_modules', path.join(_dirname, nodeModulesPath),],
+    modules: ['node_modules', path.join(_dirname, nodeModulesPath)],
   },
-});
+})

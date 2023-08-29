@@ -1,22 +1,22 @@
-import bodyParser from 'body-parser';
-import compression from 'compression';
-import express from 'express';
-import fileUpload from 'express-fileupload';
-import rateLimit from 'express-rate-limit';
-import methodOverride from 'method-override';
-import passport from 'passport';
-import qsMiddleware from 'qs-middleware';
+import bodyParser from 'body-parser'
+import compression from 'compression'
+import express from 'express'
+import fileUpload from 'express-fileupload'
+import rateLimit from 'express-rate-limit'
+import methodOverride from 'method-override'
+import passport from 'passport'
+import qsMiddleware from 'qs-middleware'
 
-import type { Payload } from '../../payload.js';
-import type { PayloadRequest } from '../types.js';
+import type { Payload } from '../../payload.js'
+import type { PayloadRequest } from '../types.js'
 
-import localizationMiddleware from '../../localization/middleware.js';
-import authenticate from './authenticate.js';
-import convertPayload from './convertPayload.js';
-import corsHeaders from './corsHeaders.js';
-import defaultPayload from './defaultPayload.js';
-import { i18nMiddleware } from './i18n.js';
-import identifyAPI from './identifyAPI.js';
+import localizationMiddleware from '../../localization/middleware.js'
+import authenticate from './authenticate.js'
+import convertPayload from './convertPayload.js'
+import corsHeaders from './corsHeaders.js'
+import defaultPayload from './defaultPayload.js'
+import { i18nMiddleware } from './i18n.js'
+import identifyAPI from './identifyAPI.js'
 
 const middleware = (payload: Payload): any => {
   const rateLimitOptions: {
@@ -26,12 +26,15 @@ const middleware = (payload: Payload): any => {
   } = {
     max: payload.config.rateLimit.max,
     windowMs: payload.config.rateLimit.window,
-  };
+  }
 
-  if (typeof payload.config.rateLimit.skip === 'function') rateLimitOptions.skip = payload.config.rateLimit.skip;
+  if (typeof payload.config.rateLimit.skip === 'function')
+    rateLimitOptions.skip = payload.config.rateLimit.skip
 
   if (payload.config.express.middleware?.length) {
-    payload.logger.warn('express.middleware is deprecated. Please migrate to express.postMiddleware.');
+    payload.logger.warn(
+      'express.middleware is deprecated. Please migrate to express.postMiddleware.',
+    )
   }
 
   return [
@@ -56,7 +59,7 @@ const middleware = (payload: Payload): any => {
     authenticate(payload.config),
     ...(payload.config.express.middleware || []),
     ...(payload.config.express.postMiddleware || []),
-  ];
-};
+  ]
+}
 
-export default middleware;
+export default middleware

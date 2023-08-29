@@ -1,6 +1,6 @@
-import type { CollectionPermission } from '../../../../auth/types.js';
-import type { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
-import type { Data, Fields } from '../../forms/Form/types.js';
+import type { CollectionPermission } from '../../../../auth/types.js'
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types.js'
+import type { Data, Fields } from '../../forms/Form/types.js'
 
 export type Props = {
   action: string

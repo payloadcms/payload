@@ -1,21 +1,20 @@
-import type { Configuration } from 'webpack';
+import type { Configuration } from 'webpack'
 
-import md5 from 'md5';
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'url';
-import webpack from 'webpack';
+import md5 from 'md5'
+import { createRequire } from 'node:module'
+import { fileURLToPath } from 'url'
+import webpack from 'webpack'
 
-import type { SanitizedConfig } from '../../../config/types.js';
+import type { SanitizedConfig } from '../../../config/types.js'
 
-import { getBaseConfig } from './base.js';
+import { getBaseConfig } from './base.js'
 
-const __filename = fileURLToPath(import.meta.url);
+const __filename = fileURLToPath(import.meta.url)
 
-const require = createRequire(import.meta.url);
+const require = createRequire(import.meta.url)
 
 export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
-
-  const baseConfig = getBaseConfig(payloadConfig) as any;
+  const baseConfig = getBaseConfig(payloadConfig) as any
 
   let webpackConfig: Configuration = {
     ...baseConfig,
@@ -41,12 +40,9 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
       path: '/',
       publicPath: `${payloadConfig.routes.admin}/`,
     },
-    plugins: [
-      ...baseConfig.plugins,
-      new webpack.HotModuleReplacementPlugin(),
-    ],
+    plugins: [...baseConfig.plugins, new webpack.HotModuleReplacementPlugin()],
     stats: 'errors-warnings',
-  };
+  }
 
   webpackConfig.module.rules.push({
     sideEffects: true,
@@ -63,7 +59,7 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
       {
         loader: require.resolve('css-loader'),
         options: {
-          url: (url) => (!url.startsWith('/')),
+          url: (url) => !url.startsWith('/'),
         },
       },
       {
@@ -76,11 +72,11 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
       },
       require.resolve('sass-loader'),
     ],
-  });
+  })
 
   if (payloadConfig.admin.webpack && typeof payloadConfig.admin.webpack === 'function') {
-    webpackConfig = payloadConfig.admin.webpack(webpackConfig);
+    webpackConfig = payloadConfig.admin.webpack(webpackConfig)
   }
 
-  return webpackConfig;
-};
+  return webpackConfig
+}

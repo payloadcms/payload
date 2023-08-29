@@ -1,5 +1,5 @@
-import type { SanitizedCollectionConfig } from '../../../../../collections/config/types.js';
-import type { SanitizedGlobalConfig } from '../../../../../globals/config/types.js';
+import type { SanitizedCollectionConfig } from '../../../../../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../../../../../globals/config/types.js'
 
 export type Props = {
   className?: string

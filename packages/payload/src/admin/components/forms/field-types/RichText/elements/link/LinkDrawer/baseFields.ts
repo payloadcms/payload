@@ -1,7 +1,7 @@
-import type { Config } from '../../../../../../../../config/types.js';
-import type { Field } from '../../../../../../../../fields/config/types.js';
+import type { Config } from '../../../../../../../../config/types.js'
+import type { Field } from '../../../../../../../../fields/config/types.js'
 
-import { extractTranslations } from '../../../../../../../../translations/extractTranslations.js';
+import { extractTranslations } from '../../../../../../../../translations/extractTranslations.js'
 
 const translations = extractTranslations([
   'fields:textToDisplay',
@@ -12,7 +12,7 @@ const translations = extractTranslations([
   'fields:enterURL',
   'fields:chooseDocumentToLink',
   'fields:openInNewTab',
-]);
+])
 
 export const getBaseFields = (config: Config): Field[] => [
   {
@@ -53,12 +53,14 @@ export const getBaseFields = (config: Config): Field[] => [
   {
     admin: {
       condition: ({ linkType }) => {
-        return linkType === 'internal';
+        return linkType === 'internal'
       },
     },
     label: translations['fields:chooseDocumentToLink'],
     name: 'doc',
-    relationTo: config.collections.filter(({ admin: { enableRichTextLink } }) => enableRichTextLink).map(({ slug }) => slug),
+    relationTo: config.collections
+      .filter(({ admin: { enableRichTextLink } }) => enableRichTextLink)
+      .map(({ slug }) => slug),
     required: true,
     type: 'relationship',
   },
@@ -67,4 +69,4 @@ export const getBaseFields = (config: Config): Field[] => [
     name: 'newTab',
     type: 'checkbox',
   },
-];
+]

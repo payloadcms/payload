@@ -1,16 +1,16 @@
-import type { PayloadRequest } from '../../express/types.js';
+import type { PayloadRequest } from '../../express/types.js'
 
-async function init(args: { collection: string, req: PayloadRequest }): Promise<boolean> {
+async function init(args: { collection: string; req: PayloadRequest }): Promise<boolean> {
   const {
     collection: slug,
     req: { payload },
-  } = args;
+  } = args
 
   const doc = await payload.db.findOne({
     collection: slug,
-  });
+  })
 
-  return !!doc;
+  return !!doc
 }
 
-export default init;
+export default init

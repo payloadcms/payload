@@ -1,4 +1,4 @@
-import type { Where } from '../../../../types/index.js';
+import type { Where } from '../../../../types/index.js'
 
 /**
  * Something like [or][0][and][0][text][equals]=example%20post will work and pass through the validateWhereQuery check.
@@ -7,7 +7,7 @@ import type { Where } from '../../../../types/index.js';
  */
 export const transformWhereQuery = (whereQuery): Where => {
   if (!whereQuery) {
-    return {};
+    return {}
   }
   // Check if 'whereQuery' has 'or' field but no 'and'. This is the case for "correct" queries
   if (whereQuery.or && !whereQuery.and) {
@@ -16,12 +16,12 @@ export const transformWhereQuery = (whereQuery): Where => {
         // ...but if the or query does not have an and, we need to add it
         if (!query.and) {
           return {
-            and: [query]
+            and: [query],
           }
         }
-        return query;
+        return query
       }),
-    };
+    }
   }
 
   // Check if 'whereQuery' has 'and' field but no 'or'.
@@ -32,7 +32,7 @@ export const transformWhereQuery = (whereQuery): Where => {
           and: whereQuery.and,
         },
       ],
-    };
+    }
   }
 
   // Check if 'whereQuery' has neither 'or' nor 'and'.
@@ -43,9 +43,9 @@ export const transformWhereQuery = (whereQuery): Where => {
           and: [whereQuery], // top-level siblings are considered 'and'
         },
       ],
-    };
+    }
   }
 
   // If 'whereQuery' has 'or' and 'and', just return it as it is.
-  return whereQuery;
-};
+  return whereQuery
+}

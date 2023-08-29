@@ -1,31 +1,31 @@
-import type { Endpoint } from '../config/types.js';
-import type { SanitizedCollectionConfig } from './config/types.js';
+import type { Endpoint } from '../config/types.js'
+import type { SanitizedCollectionConfig } from './config/types.js'
 
-import forgotPasswordHandler from '../auth/requestHandlers/forgotPassword.js';
-import initHandler from '../auth/requestHandlers/init.js';
-import loginHandler from '../auth/requestHandlers/login.js';
-import logoutHandler from '../auth/requestHandlers/logout.js';
-import meHandler from '../auth/requestHandlers/me.js';
-import refreshHandler from '../auth/requestHandlers/refresh.js';
-import registerFirstUserHandler from '../auth/requestHandlers/registerFirstUser.js';
-import resetPassword from '../auth/requestHandlers/resetPassword.js';
-import unlock from '../auth/requestHandlers/unlock.js';
-import verifyEmail from '../auth/requestHandlers/verifyEmail.js';
-import create from './requestHandlers/create.js';
-import deleteHandler from './requestHandlers/delete.js';
-import deleteByID from './requestHandlers/deleteByID.js';
-import docAccessRequestHandler from './requestHandlers/docAccess.js';
-import find from './requestHandlers/find.js';
-import findByID from './requestHandlers/findByID.js';
-import findVersionByID from './requestHandlers/findVersionByID.js';
-import findVersions from './requestHandlers/findVersions.js';
-import restoreVersion from './requestHandlers/restoreVersion.js';
-import update from './requestHandlers/update.js';
-import updateByID, { deprecatedUpdate } from './requestHandlers/updateByID.js';
+import forgotPasswordHandler from '../auth/requestHandlers/forgotPassword.js'
+import initHandler from '../auth/requestHandlers/init.js'
+import loginHandler from '../auth/requestHandlers/login.js'
+import logoutHandler from '../auth/requestHandlers/logout.js'
+import meHandler from '../auth/requestHandlers/me.js'
+import refreshHandler from '../auth/requestHandlers/refresh.js'
+import registerFirstUserHandler from '../auth/requestHandlers/registerFirstUser.js'
+import resetPassword from '../auth/requestHandlers/resetPassword.js'
+import unlock from '../auth/requestHandlers/unlock.js'
+import verifyEmail from '../auth/requestHandlers/verifyEmail.js'
+import create from './requestHandlers/create.js'
+import deleteHandler from './requestHandlers/delete.js'
+import deleteByID from './requestHandlers/deleteByID.js'
+import docAccessRequestHandler from './requestHandlers/docAccess.js'
+import find from './requestHandlers/find.js'
+import findByID from './requestHandlers/findByID.js'
+import findVersionByID from './requestHandlers/findVersionByID.js'
+import findVersions from './requestHandlers/findVersions.js'
+import restoreVersion from './requestHandlers/restoreVersion.js'
+import update from './requestHandlers/update.js'
+import updateByID, { deprecatedUpdate } from './requestHandlers/updateByID.js'
 
 const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
-  if (!collection.endpoints) return [];
-  const endpoints = [...collection.endpoints];
+  if (!collection.endpoints) return []
+  const endpoints = [...collection.endpoints]
 
   if (collection.auth) {
     if (!collection.auth.disableLocalStrategy) {
@@ -34,7 +34,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
           handler: verifyEmail,
           method: 'post',
           path: '/verify/:token',
-        });
+        })
       }
 
       if (collection.auth.maxLoginAttempts > 0) {
@@ -42,7 +42,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
           handler: unlock,
           method: 'post',
           path: '/unlock',
-        });
+        })
       }
 
       endpoints.push(
@@ -66,7 +66,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
           method: 'post',
           path: '/reset-password',
         },
-      );
+      )
     }
 
     endpoints.push(
@@ -90,7 +90,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
         method: 'post',
         path: '/refresh-token',
       },
-    );
+    )
   }
 
   if (collection.versions) {
@@ -110,7 +110,7 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
         method: 'post',
         path: '/versions/:id',
       },
-    );
+    )
   }
 
   endpoints.push(
@@ -159,9 +159,9 @@ const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
       method: 'delete',
       path: '/',
     },
-  );
+  )
 
-  return endpoints;
-};
+  return endpoints
+}
 
-export default buildEndpoints;
+export default buildEndpoints

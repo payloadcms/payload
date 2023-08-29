@@ -1,15 +1,12 @@
-export * from '../types/index.js';
+export * from '../types/index.js'
 
 export {
   type CustomPublishButtonProps,
   type CustomSaveButtonProps,
   type CustomSaveDraftButtonProps,
-} from '../admin/components/elements/types.js';
+} from '../admin/components/elements/types.js'
 
-
-export {
-  type RowLabel,
-} from '../admin/components/forms/RowLabel/types.js';
+export { type RowLabel } from '../admin/components/forms/RowLabel/types.js'
 
 export {
   type AfterChangeHook as CollectionAfterChangeHook,
@@ -28,12 +25,9 @@ export {
   type CollectionConfig,
   type SanitizedCollectionConfig,
   type TypeWithID,
-} from '../collections/config/types.js';
+} from '../collections/config/types.js'
 
-export {
-  type Access,
-  type AccessArgs,
-} from '../config/types.js';
+export { type Access, type AccessArgs } from '../config/types.js'
 
 export {
   type ArrayField,
@@ -104,7 +98,7 @@ export {
   optionsAreObjects,
   tabHasName,
   valueIsValueWithRelation,
-} from '../fields/config/types.js';
+} from '../fields/config/types.js'
 
 export {
   type AfterChangeHook as GlobalAfterChangeHook,
@@ -114,8 +108,6 @@ export {
   type BeforeValidateHook as GlobalBeforeValidateHook,
   type GlobalConfig,
   type SanitizedGlobalConfig,
-} from '../globals/config/types.js';
+} from '../globals/config/types.js'
 
-export {
-  validOperators
-} from '../types/constants.js';
+export { validOperators } from '../types/constants.js'

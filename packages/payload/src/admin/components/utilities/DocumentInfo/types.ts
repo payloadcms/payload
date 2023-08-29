@@ -1,10 +1,14 @@
-import type React from 'react';
+import type React from 'react'
 
-import type { CollectionPermission, GlobalPermission } from '../../../../auth/types.js';
-import type { SanitizedCollectionConfig, TypeWithID, TypeWithTimestamps } from '../../../../collections/config/types.js';
-import type { PaginatedDocs } from '../../../../database/types.js';
-import type { SanitizedGlobalConfig } from '../../../../globals/config/types.js';
-import type { TypeWithVersion } from '../../../../versions/types.js';
+import type { CollectionPermission, GlobalPermission } from '../../../../auth/types.js'
+import type {
+  SanitizedCollectionConfig,
+  TypeWithID,
+  TypeWithTimestamps,
+} from '../../../../collections/config/types.js'
+import type { PaginatedDocs } from '../../../../database/types.js'
+import type { SanitizedGlobalConfig } from '../../../../globals/config/types.js'
+import type { TypeWithVersion } from '../../../../versions/types.js'
 
 export type Version = TypeWithVersion<any>
 

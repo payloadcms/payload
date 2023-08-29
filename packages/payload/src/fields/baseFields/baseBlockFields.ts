@@ -1,6 +1,6 @@
-import type { Field } from '../config/types.js';
+import type { Field } from '../config/types.js'
 
-import { baseIDField } from './baseIDField.js';
+import { baseIDField } from './baseIDField.js'
 
 export const baseBlockFields: Field[] = [
   baseIDField,
@@ -13,4 +13,4 @@ export const baseBlockFields: Field[] = [
     required: false,
     type: 'text',
   },
-];
+]
