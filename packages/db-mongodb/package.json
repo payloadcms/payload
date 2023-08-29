@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "0.0.6",
+  "version": "0.0.1",
   "description": "The officially supported MongoDB database adapter for Payload",
   "main": "./src/index.ts",
   "type": "module",
