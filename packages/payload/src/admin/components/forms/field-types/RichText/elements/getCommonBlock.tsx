@@ -11,8 +11,6 @@ export const getCommonBlock = (editor: Editor, match?: NodeMatch<Node>): NodeEnt
 
   const [common, path] = Node.common(editor, range.anchor.path, range.focus.path)
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
   if (isBlockElement(editor, common) || Editor.isEditor(common)) {
     return [common, path]
   }

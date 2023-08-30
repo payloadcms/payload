@@ -15,22 +15,20 @@ import { useConfig } from '../Config/index.js'
 
 export const I18n: React.FC = () => {
   const config = useConfig()
-  // @ts-expect-error // TODO: Fix
   if (i18n.isInitialized) {
     return null
   }
 
   i18n
-    // @ts-expect-error // TODO: Fix
     .use(
-      new LanguageDetector(null, {
+      /** @ts-expect-error */
+      LanguageDetector(null, {
         lookupCookie: 'lng',
         lookupLocalStorage: 'lng',
       }),
     )
     .use(initReactI18next)
     .init(deepmerge(defaultOptions, config.i18n || {}))
-  // @ts-expect-error // TODO: Fix
   loader.config({
     'vs/nls': { availableLanguages: { '*': getSupportedMonacoLocale(i18n.language) } },
   })

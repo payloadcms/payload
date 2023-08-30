@@ -25,7 +25,6 @@ export const Control: React.FC<ControlProps<Option, any>> = (props) => {
       {...props}
       innerProps={{
         ...innerProps,
-        // @ts-expect-error
         onKeyDown: (e) => {
           if (disableKeyDown) {
             e.stopPropagation()
