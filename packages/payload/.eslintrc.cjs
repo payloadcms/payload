@@ -1,6 +1,5 @@
 /** @type {import('prettier').Config} */
 module.exports = {
-  root: true,
   extends: ['@payloadcms'],
   ignorePatterns: ['**/payload-types.ts'],
   overrides: [
@@ -17,14 +16,14 @@ module.exports = {
       },
     },
     {
-      files: ['test/**/e2e.spec.ts'],
       extends: ['plugin:playwright/playwright-test'],
+      files: ['test/**/e2e.spec.ts'],
       rules: {
         'jest/consistent-test-it': 'off',
-        'jest/require-top-level-describe': 'off',
+        'jest/expect-expect': 'off',
         'jest/no-test-callback': 'off',
         'jest/prefer-strict-equal': 'off',
-        'jest/expect-expect': 'off',
+        'jest/require-top-level-describe': 'off',
         'jest-dom/prefer-to-have-attribute': 'off',
       },
     },
@@ -35,4 +34,5 @@ module.exports = {
       },
     },
   ],
+  root: true,
 }

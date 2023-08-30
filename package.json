@@ -95,7 +95,8 @@
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
     "prettier": "^3.0.3",
-    "typescript": "5.2.2"
+    "typescript": "5.2.2",
+    "@payloadcms/eslint-config": "workspace:*"
   },
   "files": [
     "bin.js",
