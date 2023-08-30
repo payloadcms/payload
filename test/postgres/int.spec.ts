@@ -323,6 +323,40 @@ describe('Postgres', () => {
       expect(postAllLocales.relationHasManyPoly.es[0].value).toStrictEqual(page1.id);
       expect(postAllLocales.relationHasManyPoly.es[1].value).toStrictEqual(person1.id);
     });
+
+    // it('queries complex docs', async () => {
+    //   const query = await payload.find({
+    //     collection: 'posts',
+    //   });
+
+    //   expect(query.docs[0].title).toStrictEqual('hello 3');
+    // });
+
+    // it('queries by normal field', async () => {
+    //   const queried = await payload.find({
+    //     collection: 'people',
+    //     where: {
+    //       fullName: {
+    //         equals: 'Dan Ribbens',
+    //       },
+    //     },
+    //   });
+
+    //   expect(queried.docs[0].fullName).toStrictEqual('Dan Ribbens');
+    // });
+
+    // it('queries by localized field', async () => {
+    //   const queried = await payload.find({
+    //     collection: 'posts',
+    //     where: {
+    //       title: {
+    //         equals: 'hello 3',
+    //       },
+    //     },
+    //   });
+
+    //   expect(queried.docs[0].title).toStrictEqual('hello 3');
+    // });
   });
 
   describe('localized arrays', () => {

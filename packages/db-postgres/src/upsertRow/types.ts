@@ -6,7 +6,6 @@ type BaseArgs = {
   adapter: PostgresAdapter
   data: Record<string, unknown>
   fields: Field[]
-  locale: string
   path?: string
   tableName: string
 }

@@ -14,7 +14,6 @@ export const upsertRow = async ({
   data,
   fields,
   id,
-  locale,
   operation,
   path = '',
   tableName,
@@ -26,7 +25,6 @@ export const upsertRow = async ({
   const rowToInsert = transformForWrite({
     data,
     fields,
-    locale,
     path,
     tableName,
   });
@@ -54,7 +52,7 @@ export const upsertRow = async ({
       .values(rowToInsert.row).returning();
   }
 
-  let localeToInsert: Record<string, unknown>;
+  const localesToInsert: Record<string, unknown>[] = [];
   const relationsToInsert: Record<string, unknown>[] = [];
   const blocksToInsert: { [blockType: string]: BlockRowToInsert[] } = {};
 
@@ -62,11 +60,13 @@ export const upsertRow = async ({
   // all in parallel
   const promises = [];
 
-  // If there is a locale row with data, add the parent and locale
-  if (rowToInsert.locales?.[locale] && Object.keys(rowToInsert.locales[locale]).length > 0) {
-    rowToInsert.locales[locale]._parentID = insertedRow.id;
-    rowToInsert.locales[locale]._locale = locale;
-    localeToInsert = rowToInsert.locales[locale];
+  // If there are locale rows with data, add the parent and locale to each
+  if (Object.keys(rowToInsert.locales).length > 0) {
+    Object.entries(rowToInsert.locales).forEach(([locale, localeRow]) => {
+      localeRow._parentID = insertedRow.id;
+      localeRow._locale = locale;
+      localesToInsert.push(localeRow);
+    });
   }
 
   // If there are relationships, add parent to each
@@ -91,21 +91,15 @@ export const upsertRow = async ({
   // INSERT LOCALES
   // //////////////////////////////////
 
-  if (localeToInsert) {
+  if (localesToInsert.length > 0) {
     const localeTable = adapter.tables[`${tableName}_locales`];
 
     promises.push(async () => {
       if (operation === 'update') {
-        await adapter.db.insert(localeTable)
-          .values(localeToInsert)
-          .onConflictDoUpdate({
-            target: [localeTable._locale, localeTable._parentID],
-            set: localeToInsert,
-          });
-      } else {
-        await adapter.db.insert(localeTable)
-          .values(localeToInsert);
+        await adapter.db.delete(localeTable).where(eq(localeTable._parentID, insertedRow.id));
       }
+
+      await adapter.db.insert(localeTable).values(localesToInsert);
     });
   }
 
@@ -119,7 +113,6 @@ export const upsertRow = async ({
       if (operation === 'update') {
         await deleteExistingRowsByPath({
           adapter,
-          locale,
           localeColumnName: 'locale',
           parentColumnName: 'parent',
           parentID: insertedRow.id,

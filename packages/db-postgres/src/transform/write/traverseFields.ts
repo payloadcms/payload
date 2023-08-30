@@ -1,11 +1,12 @@
 /* eslint-disable no-param-reassign */
 import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
-import { fieldAffectsData, valueIsValueWithRelation } from 'payload/dist/fields/config/types';
+import { fieldAffectsData } from 'payload/dist/fields/config/types';
 import { ArrayRowToInsert, BlockRowToInsert } from './types';
 import { isArrayOfRows } from '../../utilities/isArrayOfRows';
 import { transformArray } from './array';
 import { transformBlocks } from './blocks';
+import { transformRelationship } from './relationships';
 
 type Args = {
   arrays: {
@@ -18,8 +19,7 @@ type Args = {
   data: Record<string, unknown>
   existingLocales?: Record<string, unknown>[]
   fields: Field[]
-  forceLocalized?: boolean
-  locale: string
+  forcedLocale?: string
   locales: {
     [locale: string]: Record<string, unknown>
   }
@@ -37,8 +37,7 @@ export const traverseFields = ({
   data,
   existingLocales,
   fields,
-  forceLocalized,
-  locale,
+  forcedLocale,
   locales,
   newTableName,
   parentTableName,
@@ -85,7 +84,6 @@ export const traverseFields = ({
           columnName,
           data: data[field.name],
           field,
-          locale,
           path,
           relationships,
         });
@@ -118,7 +116,6 @@ export const traverseFields = ({
           blocks,
           data: fieldData,
           field,
-          locale,
           path,
           relationships,
           tableName: newTableName,
@@ -130,62 +127,72 @@ export const traverseFields = ({
 
     if (field.type === 'group') {
       if (typeof data[field.name] === 'object' && data[field.name] !== null) {
-        let targetData = data[field.name];
-        if (field.localized && typeof data[field.name][locale] === 'object' && data[field.name][locale] !== null) {
-          targetData = data[field.name][locale];
+        if (field.localized) {
+          Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
+            traverseFields({
+              arrays,
+              blocks,
+              columnPrefix: `${columnName}_`,
+              data: localeData as Record<string, unknown>,
+              existingLocales,
+              fields: field.fields,
+              forcedLocale: localeKey,
+              locales,
+              newTableName: `${parentTableName}_${toSnakeCase(field.name)}`,
+              parentTableName,
+              path: `${path || ''}${field.name}.`,
+              relationships,
+              row,
+            });
+          });
+        } else {
+          traverseFields({
+            arrays,
+            blocks,
+            columnPrefix: `${columnName}_`,
+            data: data[field.name] as Record<string, unknown>,
+            existingLocales,
+            fields: field.fields,
+            locales,
+            newTableName: `${parentTableName}_${toSnakeCase(field.name)}`,
+            parentTableName,
+            path: `${path || ''}${field.name}.`,
+            relationships,
+            row,
+          });
         }
-
-        traverseFields({
-          arrays,
-          blocks,
-          columnPrefix: `${columnName}_`,
-          data: targetData as Record<string, unknown>,
-          existingLocales,
-          fields: field.fields,
-          forceLocalized: field.localized,
-          locale,
-          locales,
-          newTableName: `${parentTableName}_${toSnakeCase(field.name)}`,
-          parentTableName,
-          path: `${path || ''}${field.name}.`,
-          relationships,
-          row,
-        });
       }
 
       return;
     }
 
     if (field.type === 'relationship') {
-      const baseRelationRow: Record<string, unknown> = {
-        path: `${path || ''}${field.name}`,
-      };
+      const relationshipPath = `${path || ''}${field.name}`;
 
-      if (field.localized && typeof fieldData === 'object') {
-        if (locale in fieldData) {
-          baseRelationRow.locale = locale;
-          fieldData = fieldData[locale];
-        } else {
-          return;
+      if (field.localized) {
+        if (typeof fieldData === 'object') {
+          Object.entries(fieldData).forEach(([localeKey, localeData]) => {
+            transformRelationship({
+              baseRow: {
+                path: relationshipPath,
+                locale: localeKey,
+              },
+              data: localeData,
+              field,
+              relationships,
+            });
+          });
         }
+      } else {
+        transformRelationship({
+          baseRow: {
+            path: relationshipPath,
+          },
+          data: fieldData,
+          field,
+          relationships,
+        });
       }
-
-      const relations = Array.isArray(fieldData) ? fieldData : [fieldData];
-
-      relations.forEach((relation, i) => {
-        if (relation) {
-          const relationRow = { ...baseRelationRow };
-          if ('hasMany' in field && field.hasMany) relationRow.order = i + 1;
-
-          if (Array.isArray(field.relationTo) && valueIsValueWithRelation(relation)) {
-            relationRow[`${relation.relationTo}ID`] = relation.value;
-            relationships.push(relationRow);
-          } else {
-            relationRow[`${field.relationTo}ID`] = relation;
-            if (relation) relationships.push(relationRow);
-          }
-        }
-      });
 
       return;
     }
@@ -208,9 +215,9 @@ export const traverseFields = ({
       } else {
         let ref = row;
 
-        if (forceLocalized) {
-          if (!locales[locale]) locales[locale] = {};
-          ref = locales[locale];
+        if (forcedLocale) {
+          if (!locales[forcedLocale]) locales[forcedLocale] = {};
+          ref = locales[forcedLocale];
         }
 
         valuesToTransform.push({ value: fieldData, ref });

@@ -3,7 +3,6 @@ import { PostgresAdapter } from '../types';
 
 type Args = {
   adapter: PostgresAdapter
-  locale?: string
   localeColumnName?: string
   parentColumnName?: string
   parentID: unknown
@@ -14,7 +13,6 @@ type Args = {
 
 export const deleteExistingRowsByPath = async ({
   adapter,
-  locale,
   localeColumnName = '_locale',
   parentColumnName = '_parentID',
   parentID,
@@ -42,10 +40,6 @@ export const deleteExistingRowsByPath = async ({
     const whereConstraints = [
       eq(table[parentColumnName], parentID),
     ];
-
-    if (locale) {
-      whereConstraints.push(eq(table[localeColumnName], locale));
-    }
 
     if (pathColumnName) whereConstraints.push(inArray(table[pathColumnName], Array.from(localizedPathsToDelete)));
 

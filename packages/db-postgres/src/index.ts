@@ -6,7 +6,7 @@ import { createMigration } from './createMigration';
 import { webpack } from './webpack';
 import { Args, PostgresAdapter, PostgresAdapterResult } from './types';
 import { createGlobal } from './createGlobal';
-// import { createVersion } from './createVersion';
+import { createVersion } from './createVersion';
 // import { beginTransaction } from './transactions/beginTransaction';
 // import { rollbackTransaction } from './transactions/rollbackTransaction';
 // import { commitTransaction } from './transactions/commitTransaction';
@@ -56,7 +56,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       updateGlobal,
       // findVersions,
       // findGlobalVersions,
-      // createVersion,
+      createVersion,
       // updateVersion,
       // deleteVersions,
     });

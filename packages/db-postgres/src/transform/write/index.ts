@@ -6,7 +6,6 @@ import { RowToInsert } from './types';
 type Args = {
   data: Record<string, unknown>
   fields: Field[]
-  locale: string
   path?: string
   tableName: string
 }
@@ -14,7 +13,6 @@ type Args = {
 export const transformForWrite = ({
   data,
   fields,
-  locale,
   path = '',
   tableName,
 }: Args): RowToInsert => {
@@ -36,7 +34,6 @@ export const transformForWrite = ({
     columnPrefix: '',
     data,
     fields,
-    locale,
     locales: rowToInsert.locales,
     newTableName: tableName,
     parentTableName: tableName,

@@ -34,15 +34,17 @@ export const transformArray = ({
       const newRow: ArrayRowToInsert = {
         arrays: {},
         columnName,
-        locales: {
-          [locale]: {
-            _locale: locale,
-          },
-        },
+        locales: {},
         row: {
           _order: i + 1,
         },
       };
+
+      if (locale) {
+        newRow.locales[locale] = {
+          _locale: locale,
+        };
+      }
 
       if (field.localized) {
         newRow.row._locale = locale;
@@ -54,7 +56,6 @@ export const transformArray = ({
         columnPrefix: '',
         data: arrayRow,
         fields: field.fields,
-        locale,
         locales: newRow.locales,
         newTableName: arrayTableName,
         parentTableName: arrayTableName,

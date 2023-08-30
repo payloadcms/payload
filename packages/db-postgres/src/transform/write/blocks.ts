@@ -10,7 +10,7 @@ type Args = {
   }
   data: Record<string, unknown>[]
   field: BlockField
-  locale: string
+  locale?: string
   path: string
   relationships: Record<string, unknown>[]
   tableName
@@ -40,7 +40,7 @@ export const transformBlocks = ({
       locales: {},
     };
 
-    if (field.localized) newRow.row._locale = locale;
+    if (field.localized && locale) newRow.row._locale = locale;
 
     const blockTableName = `${tableName}_${toSnakeCase(blockRow.blockType)}`;
 
@@ -50,7 +50,6 @@ export const transformBlocks = ({
       columnPrefix: '',
       data: blockRow,
       fields: matchedBlock.fields,
-      locale,
       locales: newRow.locales,
       newTableName: blockTableName,
       parentTableName: blockTableName,
