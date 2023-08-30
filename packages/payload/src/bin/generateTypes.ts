@@ -28,13 +28,26 @@ export async function generateTypes(): Promise<void> {
   })
 }
 
-// when generateTypes.js is launched directly
-// This is an ESM translation from Rich Harris https://2ality.com/2022/07/nodejs-esm-main.html
-if (import.meta.url.startsWith('file:')) {
-  // (A)
-  const modulePath = url.fileURLToPath(import.meta.url)
-  if (process.argv[1] === modulePath) {
-    // (B)
-    generateTypes()
+let isMainModule = false
+
+if (typeof module !== 'undefined' && module) {
+  //CJS
+  if (module.id === require.main.id) {
+    isMainModule = true
   }
+} else {
+  // ESM
+  // This is an ESM translation from Rich Harris https://2ality.com/2022/07/nodejs-esm-main.html
+  if (import.meta.url.startsWith('file:')) {
+    // (A)
+    const modulePath = url.fileURLToPath(import.meta.url)
+    if (process.argv[1] === modulePath) {
+      isMainModule = true
+    }
+  }
+}
+
+// when the generateTypes.js is launched directly
+if (isMainModule) {
+  generateTypes()
 }

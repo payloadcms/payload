@@ -1,3 +1,5 @@
+import * as url from 'node:url'
+
 import payload from '../index.js'
 
 export const migrate = async (args: string[]): Promise<void> => {
@@ -45,8 +47,26 @@ export const migrate = async (args: string[]): Promise<void> => {
   }
 }
 
+let isMainModule = false
+
+if (typeof module !== 'undefined' && module) {
+  //CJS
+  if (module.id === require.main.id) {
+    isMainModule = true
+  }
+} else {
+  // ESM
+  // This is an ESM translation from Rich Harris https://2ality.com/2022/07/nodejs-esm-main.html
+  if (import.meta.url.startsWith('file:')) {
+    // (A)
+    const modulePath = url.fileURLToPath(import.meta.url)
+    if (process.argv[1] === modulePath) {
+      isMainModule = true
+    }
+  }
+}
 // When launched directly call migrate
-if (module.id === require.main.id) {
+if (isMainModule) {
   const args = process.argv.slice(2)
   migrate(args).then(() => {
     process.exit(0)
