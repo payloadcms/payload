@@ -464,9 +464,6 @@ importers:
       ts-loader:
         specifier: ^9.4.4
         version: 9.4.4(typescript@5.2.2)(webpack@5.88.2)
-      tsx:
-        specifier: ^3.12.7
-        version: 3.12.7
       url-loader:
         specifier: 4.1.1
         version: 4.1.1(file-loader@6.2.0)(webpack@5.88.2)
@@ -2075,13 +2072,6 @@ packages:
 
   /@emotion/weak-memoize@0.3.1:
     resolution: {integrity: sha512-EsBwpc7hBUJWAsNPBmJy4hxWx12v6bshQsldrVmjxJoc3isbxhOrF2IcCpaXxfvq03NwkI7sbsOLXbYuqF/8Ww==}
-    dev: false
-
-  /@esbuild-kit/cjs-loader@2.4.2:
-    resolution: {integrity: sha512-BDXFbYOJzT/NBEtp71cvsrGPwGAMGRB/349rwKuoxNSiKjPraNNnlK6MIIabViCjqZugu6j+xeMDlEkWdHHJSg==}
-    dependencies:
-      '@esbuild-kit/core-utils': 3.1.0
-      get-tsconfig: 4.6.2
     dev: false
 
   /@esbuild-kit/core-utils@3.1.0:
@@ -14164,17 +14154,6 @@ packages:
     dependencies:
       tslib: 1.14.1
       typescript: 5.2.2
-    dev: false
-
-  /tsx@3.12.7:
-    resolution: {integrity: sha512-C2Ip+jPmqKd1GWVQDvz/Eyc6QJbGfE7NrR3fx5BpEHMZsEHoIxHL1j+lKdGobr8ovEyqeNkPLSKp6SCSOt7gmw==}
-    hasBin: true
-    dependencies:
-      '@esbuild-kit/cjs-loader': 2.4.2
-      '@esbuild-kit/core-utils': 3.1.0
-      '@esbuild-kit/esm-loader': 2.5.5
-    optionalDependencies:
-      fsevents: 2.3.3
     dev: false
 
   /tunnel-agent@0.6.0:
