@@ -1,4 +1,4 @@
-import pkg from '@faceless-ui/window-info'
+import * as pkg from '@faceless-ui/window-info'
 const { useWindowInfo } = pkg
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
