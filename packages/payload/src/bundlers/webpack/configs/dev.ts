@@ -57,9 +57,11 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
     use: [
       require.resolve('style-loader'),
       {
-        loader: require.resolve('css-loader'),
+        loader: 'css-loader',
         options: {
-          url: (url) => !url.startsWith('/'),
+          url: {
+            filter: (url, resourcePath) => !url.startsWith('/'),
+          },
         },
       },
       {
