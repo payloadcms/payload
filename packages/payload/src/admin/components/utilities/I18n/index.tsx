@@ -6,7 +6,10 @@ const i18n = 'default' in i18nextimp ? i18nextimp.default : i18nextimp
 
 import { loader } from '@monaco-editor/react'
 import deepmerge from 'deepmerge'
-import LanguageDetector from 'i18next-browser-languagedetector'
+import LanguageDetectorImp from 'i18next-browser-languagedetector'
+const LanguageDetector =
+  'default' in LanguageDetectorImp ? LanguageDetectorImp.default : LanguageDetectorImp
+
 import { initReactI18next } from 'react-i18next'
 
 import { defaultOptions } from '../../../../translations/defaultOptions.js'
@@ -21,8 +24,7 @@ export const I18n: React.FC = () => {
 
   i18n
     .use(
-      /** @ts-expect-error */
-      LanguageDetector(null, {
+      new LanguageDetector(null, {
         lookupCookie: 'lng',
         lookupLocalStorage: 'lng',
       }),
