@@ -14,57 +14,57 @@ export const mergeLocales = ({
 }: MergeLocalesArgs): Record<string, unknown> => {
   if (Array.isArray(data._locales)) {
     if (locale) {
-      const matchedLocale = data._locales.find((row) => row._locale === locale);
+      const matchedLocale = data._locales.find((row) => row._locale === locale)
 
       if (matchedLocale) {
         const merged = {
           ...data,
           ...matchedLocale,
-        };
+        }
 
-        delete merged._parentID;
-        delete merged._locales;
-        delete merged._locale;
-        return merged;
+        delete merged._parentID
+        delete merged._locales
+        delete merged._locale
+        return merged
       }
 
       if (fallbackLocale) {
-        const matchedFallbackLocale = data._locales.find((row) => row._locale === fallbackLocale);
+        const matchedFallbackLocale = data._locales.find((row) => row._locale === fallbackLocale)
 
         if (matchedFallbackLocale) {
           const merged = {
             ...data,
             ...matchedFallbackLocale,
-          };
-          delete merged._parentID;
-          delete merged._locales;
-          delete merged._locale;
-          return merged;
+          }
+          delete merged._parentID
+          delete merged._locales
+          delete merged._locale
+          return merged
         }
       }
     }
 
     const fieldLocales = data._locales.reduce((res, row) => {
-      const rowLocale = row._locale;
-      delete row._locale;
+      const rowLocale = row._locale
+      delete row._locale
 
       if (rowLocale) {
         Object.entries(row).forEach(([field, val]) => {
-          if (!res[field]) res[field] = {};
-          res[field][rowLocale] = val;
-        });
+          if (!res[field]) res[field] = {}
+          res[field][rowLocale] = val
+        })
       }
 
-      return res;
-    }, {});
+      return res
+    }, {})
 
-    delete data._locales;
+    delete data._locales
 
     return {
       ...data,
       ...fieldLocales,
-    };
+    }
   }
 
-  return data;
-};
+  return data
+}

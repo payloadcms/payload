@@ -1,15 +1,15 @@
-import type { DBQueryConfig } from 'drizzle-orm';
-import type { SanitizedConfig } from 'payload/config';
-import type { ArrayField, Block } from 'payload/types';
-import type { SanitizedCollectionConfig } from 'payload/types';
+import type { DBQueryConfig } from 'drizzle-orm'
+import type { SanitizedConfig } from 'payload/config'
+import type { ArrayField, Block } from 'payload/types'
+import type { SanitizedCollectionConfig } from 'payload/types'
 
-import toSnakeCase from 'to-snake-case';
+import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from '../types.js';
+import type { PostgresAdapter } from '../types.js'
 
-import { buildWithFromDepth } from './buildWithFromDepth.js';
-import { createLocaleWhereQuery } from './createLocaleWhereQuery.js';
-import { traverseFields } from './traverseFields.js';
+import { buildWithFromDepth } from './buildWithFromDepth.js'
+import { createLocaleWhereQuery } from './createLocaleWhereQuery.js'
+import { traverseFields } from './traverseFields.js'
 
 type BuildFindQueryArgs = {
   adapter: PostgresAdapter
@@ -34,7 +34,7 @@ export const buildFindManyArgs = ({
 }: BuildFindQueryArgs): Record<string, unknown> => {
   const result: Result = {
     with: {},
-  };
+  }
 
   const _locales: Result = {
     columns: {
@@ -42,9 +42,9 @@ export const buildFindManyArgs = ({
       id: false,
     },
     where: createLocaleWhereQuery({ fallbackLocale, locale }),
-  };
+  }
 
-  const tableName = toSnakeCase(collection.slug);
+  const tableName = toSnakeCase(collection.slug)
 
   if (adapter.tables[`${tableName}_relationships`]) {
     result.with._relationships = {
@@ -60,15 +60,15 @@ export const buildFindManyArgs = ({
         fallbackLocale,
         locale,
       }),
-    };
+    }
   }
 
   if (adapter.tables[`${tableName}_locales`]) {
-    result.with._locales = _locales;
+    result.with._locales = _locales
   }
 
-  const locatedBlocks: Block[] = [];
-  const locatedArrays: { [path: string]: ArrayField } = {};
+  const locatedBlocks: Block[] = []
+  const locatedArrays: { [path: string]: ArrayField } = {}
 
   traverseFields({
     _locales,
@@ -83,7 +83,7 @@ export const buildFindManyArgs = ({
     path: '',
     topLevelArgs: result,
     topLevelTableName: tableName,
-  });
+  })
 
-  return result;
-};
+  return result
+}

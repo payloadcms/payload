@@ -1,4 +1,4 @@
-import { and, eq, gt, gte, inArray, isNotNull, lt, lte, ne, notInArray, or } from 'drizzle-orm';
+import { and, eq, gt, gte, inArray, isNotNull, lt, lte, ne, notInArray, or } from 'drizzle-orm'
 
 export const operatorMap: any = {
   // near: near,
@@ -17,4 +17,4 @@ export const operatorMap: any = {
   // all: all,
   not_in: notInArray,
   or,
-};
+}
