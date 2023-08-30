@@ -1,10 +1,12 @@
 import fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
-export async function resolve(specifier, context, next) {
-  const nextResult = await next(specifier, context)
+const endsWith = ['scss', 'svg', 'png'];
 
-  if (!specifier.endsWith('.scss')) return nextResult
+export async function resolve(specifier, context, next) {
+  const nextResult = await next(specifier, context, next)
+
+  if (!specifier || !endsWith.some(e => specifier.endsWith(e))) return nextResult
 
   return {
     format: 'scss',
@@ -14,7 +16,7 @@ export async function resolve(specifier, context, next) {
 }
 
 export async function load(url, context, next) {
-  if (context.format !== 'scss') return next(url, context)
+  if (!context?.format || !endsWith.some(e => context.format === e)) return next(url, context, next)
 
   const rawSource = '' + (await fs.readFile(fileURLToPath(url)))
 
