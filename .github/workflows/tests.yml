@@ -52,19 +52,19 @@ jobs:
       - name: Component Tests
         run: pnpm --filter payload run test:components
 
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: E2E Tests
+        run: pnpm --filter payload test:e2e --bail
+
       - name: Integration Tests
-        run: pnpm --filter payload run test:components
+        run: pnpm --filter payload run test:int
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
 
       - name: Generate GraphQL schema file
         run: pnpm dev:generate-graphql-schema graphql-schema-gen
-
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-      - name: E2E Tests
-        run: pnpm --filter payload test:e2e --bail
 
       - uses: actions/upload-artifact@v3
         if: always()
