@@ -1,1 +1,1 @@
-export const mongooseAdapter = () => ({});
+export const mongooseAdapter = () => ({})

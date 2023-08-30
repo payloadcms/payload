@@ -1,24 +1,56 @@
-import type { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateModel, SchemaOptions } from 'mongoose';
-import type { SanitizedConfig } from 'payload/config';
-import type { ArrayField, BlockField, CheckboxField, CodeField, CollapsibleField, DateField, EmailField, Field, GroupField, JSONField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TabsField, TextField, TextareaField, UploadField } from 'payload/types';
+import type {
+  AggregatePaginateModel,
+  IndexDefinition,
+  IndexOptions,
+  Model,
+  PaginateModel,
+  SchemaOptions,
+} from 'mongoose'
+import type { SanitizedConfig } from 'payload/config'
+import type {
+  ArrayField,
+  BlockField,
+  CheckboxField,
+  CodeField,
+  CollapsibleField,
+  DateField,
+  EmailField,
+  Field,
+  GroupField,
+  JSONField,
+  NumberField,
+  PointField,
+  RadioField,
+  RelationshipField,
+  RichTextField,
+  RowField,
+  SelectField,
+  TabsField,
+  TextField,
+  TextareaField,
+  UploadField,
+} from 'payload/types'
 
-import type { BuildQueryArgs } from './queries/buildQuery.js';
+import type { BuildQueryArgs } from './queries/buildQuery.js'
 
-export interface CollectionModel extends Model<any>, PaginateModel<any>, AggregatePaginateModel<any>, PassportLocalModel {
+export interface CollectionModel
+  extends Model<any>,
+    PaginateModel<any>,
+    AggregatePaginateModel<any>,
+    PassportLocalModel {
   /** buildQuery is used to transform payload's where operator into what can be used by mongoose (e.g. id => _id) */
   buildQuery: (args: BuildQueryArgs) => Promise<Record<string, unknown>> // TODO: Delete this
 }
-type Register<T = any> = (doc: T, password: string) => T;
+type Register<T = any> = (doc: T, password: string) => T
 
 interface PassportLocalModel {
   authenticate: any
   register: Register
 }
 
-
 export interface AuthCollectionModel extends CollectionModel {
-  resetPasswordExpiration: Date;
-  resetPasswordToken: string;
+  resetPasswordExpiration: Date
+  resetPasswordToken: string
 }
 
 export type TypeOfIndex = {
@@ -26,15 +58,14 @@ export type TypeOfIndex = {
   options?: IndexOptions
 }
 
-
 export interface GlobalModel extends Model<Document> {
   buildQuery: (query: unknown, locale?: string) => Promise<Record<string, unknown>>
 }
 
 export type BuildSchema<TSchema> = (args: {
-  config: SanitizedConfig,
-  fields: Field[],
-  options: BuildSchemaOptions,
+  config: SanitizedConfig
+  fields: Field[]
+  options: BuildSchemaOptions
 }) => TSchema
 
 export type BuildSchemaOptions = {
@@ -46,16 +77,17 @@ export type BuildSchemaOptions = {
 }
 
 export type FieldGenerator<TSchema, TField> = {
-  config: SanitizedConfig,
-  field: TField,
-  options: BuildSchemaOptions,
-  schema: TSchema,
+  config: SanitizedConfig
+  field: TField
+  options: BuildSchemaOptions
+  schema: TSchema
 }
 
 /**
  * Field config types that need representation in the database
  */
-type FieldType = 'array'
+type FieldType =
+  | 'array'
   | 'blocks'
   | 'checkbox'
   | 'code'
@@ -76,7 +108,9 @@ type FieldType = 'array'
   | 'textarea'
   | 'upload'
 
-export type FieldGeneratorFunction<TSchema, TField extends Field> = (args: FieldGenerator<TSchema, TField>) => void
+export type FieldGeneratorFunction<TSchema, TField extends Field> = (
+  args: FieldGenerator<TSchema, TField>,
+) => void
 
 /**
  * Object mapping types to a schema based on TSchema
