@@ -1,25 +1,28 @@
-import { PaginateOptions } from 'mongoose';
+import type { PaginateOptions } from 'mongoose';
 import type { FindGlobalVersions } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
+
 import { flattenWhereToOperators } from 'payload/database';
 import { buildVersionGlobalFields } from 'payload/versions';
-import { PayloadRequest } from 'payload/types';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
+
 import type { MongooseAdapter } from './index.js';
+
 import { buildSortParam } from './queries/buildSortParam.js';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
 import { withSession } from './withSession.js';
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: MongooseAdapter,
   {
     global,
-    where,
-    page,
     limit,
-    sort: sortArg,
     locale,
+    page,
     pagination,
-    skip,
     req = {} as PayloadRequest,
+    skip,
+    sort: sortArg,
+    where,
   },
 ) {
   const Model = this.versions[global];
@@ -28,8 +31,8 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   );
   const options = {
     ...withSession(this, req.transactionID),
-    skip,
     limit,
+    skip,
   };
 
   let hasNearConstraint = false;
@@ -42,31 +45,31 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   let sort;
   if (!hasNearConstraint) {
     sort = buildSortParam({
-      sort: sortArg || '-updatedAt',
-      fields: versionFields,
-      timestamps: true,
       config: this.payload.config,
+      fields: versionFields,
       locale,
+      sort: sortArg || '-updatedAt',
+      timestamps: true,
     });
   }
 
   const query = await Model.buildQuery({
-    payload: this.payload,
-    locale,
-    where,
     globalSlug: global,
+    locale,
+    payload: this.payload,
+    where,
   });
 
   const paginationOptions: PaginateOptions = {
-    page,
-    sort,
+    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
-    pagination,
     offset: skip,
-    useEstimatedCount: hasNearConstraint,
-    forceCountFn: hasNearConstraint,
     options,
+    page,
+    pagination,
+    sort,
+    useEstimatedCount: hasNearConstraint,
   };
 
   if (limit > 0) {

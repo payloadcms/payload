@@ -1,7 +1,9 @@
-import { Create } from 'payload/database';
+import type { Create } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
 import type { Document } from 'payload/types';
-import { PayloadRequest } from 'payload/types';
+
 import type { MongooseAdapter } from './index.js';
+
 import { withSession } from './withSession.js';
 
 export const create: Create = async function create(

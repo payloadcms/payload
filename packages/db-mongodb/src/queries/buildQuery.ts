@@ -1,6 +1,8 @@
-import { Where, Field } from 'payload/types';
+import type { Payload } from 'payload';
+import type { Field, Where } from 'payload/types';
+
 import { QueryError } from 'payload/errors';
-import { Payload } from 'payload';
+
 import { parseParams } from './parseParams.js';
 
 type GetBuildQueryPluginArgs = {
@@ -9,10 +11,10 @@ type GetBuildQueryPluginArgs = {
 }
 
 export type BuildQueryArgs = {
-  payload: Payload
-  locale?: string
-  where: Where
   globalSlug?: string
+  locale?: string
+  payload: Payload
+  where: Where
 }
 
 // This plugin asynchronously builds a list of Mongoose query constraints
@@ -23,7 +25,7 @@ const getBuildQueryPlugin = ({
 }: GetBuildQueryPluginArgs = {}) => {
   return function buildQueryPlugin(schema) {
     const modifiedSchema = schema;
-    async function buildQuery({ payload, locale, where, globalSlug }: BuildQueryArgs): Promise<Record<string, unknown>> {
+    async function buildQuery({ globalSlug, locale, payload, where }: BuildQueryArgs): Promise<Record<string, unknown>> {
       let fields = versionsFields;
       if (!fields) {
         if (globalSlug) {
@@ -40,8 +42,8 @@ const getBuildQueryPlugin = ({
         collectionSlug,
         fields,
         globalSlug,
-        payload,
         locale,
+        payload,
         where,
       });
 

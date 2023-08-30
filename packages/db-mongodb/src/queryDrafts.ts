@@ -1,30 +1,33 @@
 import type { PaginateOptions } from 'mongoose';
 import type { QueryDrafts } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
+
 import { flattenWhereToOperators } from 'payload/database';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
-import { PayloadRequest } from 'payload/types';
+
 import type { MongooseAdapter } from './index.js';
+
 import { buildSortParam } from './queries/buildSortParam.js';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
 import { withSession } from './withSession.js';
 
 type AggregateVersion<T> = {
   _id: string;
-  version: T;
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
+  version: T;
 };
 
 export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
   this: MongooseAdapter,
   {
     collection,
-    where,
-    page,
     limit,
-    sort: sortArg,
     locale,
+    page,
     pagination,
     req = {} as PayloadRequest,
+    sort: sortArg,
+    where,
   },
 ) {
   const VersionModel = this.versions[collection];
@@ -32,9 +35,9 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
   const options = withSession(this, req.transactionID);
 
   const versionQuery = await VersionModel.buildQuery({
-    where,
     locale,
     payload: this.payload,
+    where,
   });
 
   let hasNearConstraint = false;
@@ -47,11 +50,11 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
   let sort;
   if (!hasNearConstraint) {
     sort = buildSortParam({
-      sort: sortArg || collectionConfig.defaultSort,
-      fields: collectionConfig.fields,
-      timestamps: true,
       config: this.payload.config,
+      fields: collectionConfig.fields,
       locale,
+      sort: sortArg || collectionConfig.defaultSort,
+      timestamps: true,
     });
   }
 
@@ -63,9 +66,9 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
       {
         $group: {
           _id: '$parent',
-          version: { $first: '$version' },
-          updatedAt: { $first: '$updatedAt' },
           createdAt: { $first: '$createdAt' },
+          updatedAt: { $first: '$updatedAt' },
+          version: { $first: '$version' },
         },
       },
       // Filter based on incoming query
@@ -88,19 +91,19 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
     }
 
     const aggregatePaginateOptions: PaginateOptions = {
-      page,
-      limit,
       lean: true,
       leanWithId: true,
-      useEstimatedCount,
-      pagination,
-      useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
-      useFacet: this.connectOptions.useFacet,
+      limit,
       options: {
         ...options,
         limit,
       },
+      page,
+      pagination,
       sort,
+      useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
+      useEstimatedCount,
+      useFacet: this.connectOptions.useFacet,
     };
 
     result = await VersionModel.aggregatePaginate(
@@ -121,8 +124,8 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
         _id: doc._id,
         id: doc._id,
         ...doc.version,
-        updatedAt: doc.updatedAt,
         createdAt: doc.createdAt,
+        updatedAt: doc.updatedAt,
       };
 
       return sanitizeInternalFields(doc);

@@ -1,10 +1,12 @@
-import { DeleteVersions } from 'payload/database';
-import { PayloadRequest } from 'payload/types';
+import type { DeleteVersions } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
+
 import type { MongooseAdapter } from './index.js';
+
 import { withSession } from './withSession.js';
 
 export const deleteVersions: DeleteVersions = async function deleteVersions(this: MongooseAdapter,
-  { collection, where, locale, req = {} as PayloadRequest }) {
+  { collection, locale, req = {} as PayloadRequest, where }) {
   const VersionsModel = this.versions[collection];
   const options = {
     ...withSession(this, req.transactionID),
@@ -12,8 +14,8 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(this
   };
 
   const query = await VersionsModel.buildQuery({
-    payload: this.payload,
     locale,
+    payload: this.payload,
     where,
   });
 

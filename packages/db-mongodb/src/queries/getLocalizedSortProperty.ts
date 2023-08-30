@@ -1,21 +1,23 @@
-import { SanitizedConfig } from 'payload/config';
-import { Field, fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types';
+import type { SanitizedConfig } from 'payload/config';
+import type { Field} from 'payload/types';
+
+import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types';
 import { flattenTopLevelFields } from 'payload/utilities';
 
 type Args = {
-  segments: string[]
   config: SanitizedConfig
   fields: Field[]
   locale: string
   result?: string
+  segments: string[]
 }
 
 export const getLocalizedSortProperty = ({
-  segments: incomingSegments,
   config,
   fields: incomingFields,
   locale,
   result: incomingResult,
+  segments: incomingSegments,
 }: Args): string => {
   // If localization is not enabled, accept exactly
   // what is sent in
@@ -74,11 +76,11 @@ export const getLocalizedSortProperty = ({
 
     if (nextFields) {
       return getLocalizedSortProperty({
-        segments: remainingSegments,
         config,
         fields: nextFields,
         locale,
         result,
+        segments: remainingSegments,
       });
     }
 

@@ -1,6 +1,7 @@
 import type { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateModel, SchemaOptions } from 'mongoose';
-import { SanitizedConfig } from 'payload/config';
-import { ArrayField, BlockField, CheckboxField, CodeField, CollapsibleField, DateField, EmailField, Field, GroupField, JSONField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TabsField, TextField, TextareaField, UploadField } from 'payload/types';
+import type { SanitizedConfig } from 'payload/config';
+import type { ArrayField, BlockField, CheckboxField, CodeField, CollapsibleField, DateField, EmailField, Field, GroupField, JSONField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TabsField, TextField, TextareaField, UploadField } from 'payload/types';
+
 import type { BuildQueryArgs } from './queries/buildQuery.js';
 
 export interface CollectionModel extends Model<any>, PaginateModel<any>, AggregatePaginateModel<any>, PassportLocalModel {
@@ -10,14 +11,14 @@ export interface CollectionModel extends Model<any>, PaginateModel<any>, Aggrega
 type Register<T = any> = (doc: T, password: string) => T;
 
 interface PassportLocalModel {
-  register: Register
   authenticate: any
+  register: Register
 }
 
 
 export interface AuthCollectionModel extends CollectionModel {
-  resetPasswordToken: string;
   resetPasswordExpiration: Date;
+  resetPasswordToken: string;
 }
 
 export type TypeOfIndex = {
@@ -37,43 +38,43 @@ export type BuildSchema<TSchema> = (args: {
 }) => TSchema
 
 export type BuildSchemaOptions = {
-  options?: SchemaOptions
   allowIDField?: boolean
   disableUnique?: boolean
   draftsEnabled?: boolean
   indexSortableFields?: boolean
+  options?: SchemaOptions
 }
 
 export type FieldGenerator<TSchema, TField> = {
-  field: TField,
-  schema: TSchema,
   config: SanitizedConfig,
+  field: TField,
   options: BuildSchemaOptions,
+  schema: TSchema,
 }
 
 /**
  * Field config types that need representation in the database
  */
-type FieldType = 'number'
-  | 'text'
-  | 'email'
-  | 'textarea'
-  | 'richText'
+type FieldType = 'array'
+  | 'blocks'
+  | 'checkbox'
   | 'code'
+  | 'collapsible'
+  | 'date'
+  | 'email'
+  | 'group'
   | 'json'
+  | 'number'
   | 'point'
   | 'radio'
-  | 'checkbox'
-  | 'date'
-  | 'upload'
   | 'relationship'
+  | 'richText'
   | 'row'
-  | 'collapsible'
-  | 'tabs'
-  | 'array'
-  | 'group'
   | 'select'
-  | 'blocks'
+  | 'tabs'
+  | 'text'
+  | 'textarea'
+  | 'upload'
 
 export type FieldGeneratorFunction<TSchema, TField extends Field> = (args: FieldGenerator<TSchema, TField>) => void
 
@@ -81,24 +82,24 @@ export type FieldGeneratorFunction<TSchema, TField extends Field> = (args: Field
  * Object mapping types to a schema based on TSchema
  */
 export type FieldToSchemaMap<TSchema> = {
-  number: FieldGeneratorFunction<TSchema, NumberField>
-  text: FieldGeneratorFunction<TSchema, TextField>
-  email: FieldGeneratorFunction<TSchema, EmailField>
-  textarea: FieldGeneratorFunction<TSchema, TextareaField>
-  richText: FieldGeneratorFunction<TSchema, RichTextField>
+  array: FieldGeneratorFunction<TSchema, ArrayField>
+  blocks: FieldGeneratorFunction<TSchema, BlockField>
+  checkbox: FieldGeneratorFunction<TSchema, CheckboxField>
   code: FieldGeneratorFunction<TSchema, CodeField>
+  collapsible: FieldGeneratorFunction<TSchema, CollapsibleField>
+  date: FieldGeneratorFunction<TSchema, DateField>
+  email: FieldGeneratorFunction<TSchema, EmailField>
+  group: FieldGeneratorFunction<TSchema, GroupField>
   json: FieldGeneratorFunction<TSchema, JSONField>
+  number: FieldGeneratorFunction<TSchema, NumberField>
   point: FieldGeneratorFunction<TSchema, PointField>
   radio: FieldGeneratorFunction<TSchema, RadioField>
-  checkbox: FieldGeneratorFunction<TSchema, CheckboxField>
-  date: FieldGeneratorFunction<TSchema, DateField>
-  upload: FieldGeneratorFunction<TSchema, UploadField>
   relationship: FieldGeneratorFunction<TSchema, RelationshipField>
+  richText: FieldGeneratorFunction<TSchema, RichTextField>
   row: FieldGeneratorFunction<TSchema, RowField>
-  collapsible: FieldGeneratorFunction<TSchema, CollapsibleField>
-  tabs: FieldGeneratorFunction<TSchema, TabsField>
-  array: FieldGeneratorFunction<TSchema, ArrayField>
-  group: FieldGeneratorFunction<TSchema, GroupField>
   select: FieldGeneratorFunction<TSchema, SelectField>
-  blocks: FieldGeneratorFunction<TSchema, BlockField>
+  tabs: FieldGeneratorFunction<TSchema, TabsField>
+  text: FieldGeneratorFunction<TSchema, TextField>
+  textarea: FieldGeneratorFunction<TSchema, TextareaField>
+  upload: FieldGeneratorFunction<TSchema, UploadField>
 }

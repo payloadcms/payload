@@ -1,12 +1,14 @@
-import { PayloadRequest } from 'payload/types';
-import { CreateGlobal } from 'payload/database';
+import type { CreateGlobal } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
+
+import type { MongooseAdapter } from './index.js';
+
 import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
 import { withSession } from './withSession.js';
-import type { MongooseAdapter } from './index.js';
 
 export const createGlobal: CreateGlobal = async function createGlobal(
   this: MongooseAdapter,
-  { data, slug, req = {} as PayloadRequest },
+  { data, req = {} as PayloadRequest, slug },
 ) {
   const Model = this.globals;
   const global = {

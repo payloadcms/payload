@@ -1,6 +1,7 @@
 import type { Webpack } from 'payload/database';
-import { fileURLToPath } from 'url';
+
 import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(__filename);
 

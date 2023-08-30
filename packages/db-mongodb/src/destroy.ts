@@ -1,6 +1,8 @@
+import type { Destroy } from 'payload/database';
+
 import mongoose from 'mongoose';
-import { Destroy } from 'payload/database';
-import { MongooseAdapter } from './index.js';
+
+import type { MongooseAdapter } from './index.js';
 
 export const destroy: Destroy = async function destroy(
   this: MongooseAdapter,

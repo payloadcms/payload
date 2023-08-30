@@ -1,18 +1,22 @@
 /* eslint-disable no-param-reassign */
-import mongoose, { PaginateOptions } from 'mongoose';
-import paginate from 'mongoose-paginate-v2';
-import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
-import { buildVersionCollectionFields } from 'payload/versions';
-import { SanitizedCollectionConfig } from 'payload/types';
-import { getVersionsModelName } from 'payload/versions';
-import { buildVersionGlobalFields } from 'payload/versions';
+import type { PaginateOptions } from 'mongoose';
 import type { Init } from 'payload/database';
-import getBuildQueryPlugin from './queries/buildQuery.js';
-import buildCollectionSchema from './models/buildCollectionSchema.js';
-import buildSchema from './models/buildSchema.js';
+import type { SanitizedCollectionConfig } from 'payload/types';
+
+import mongoose from 'mongoose';
+import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
+import paginate from 'mongoose-paginate-v2';
+import { buildVersionGlobalFields } from 'payload/versions';
+import { buildVersionCollectionFields } from 'payload/versions';
+import { getVersionsModelName } from 'payload/versions';
+
 import type { MongooseAdapter } from './index.js';
+import type { CollectionModel } from './types.js';
+
+import buildCollectionSchema from './models/buildCollectionSchema.js';
 import { buildGlobalModel } from './models/buildGlobalModel.js';
-import { CollectionModel } from './types.js';
+import buildSchema from './models/buildSchema.js';
+import getBuildQueryPlugin from './queries/buildQuery.js';
 
 export const init: Init = async function init(
   this: MongooseAdapter,
@@ -33,8 +37,8 @@ export const init: Init = async function init(
             disableUnique: true,
             draftsEnabled: true,
             options: {
-              timestamps: false,
               minimize: false,
+              timestamps: false,
             },
           },
         );
@@ -104,12 +108,12 @@ export const init: Init = async function init(
         this.payload.config,
         versionGlobalFields,
         {
-          indexSortableFields: this.payload.config.indexSortableFields,
           disableUnique: true,
           draftsEnabled: true,
+          indexSortableFields: this.payload.config.indexSortableFields,
           options: {
-            timestamps: false,
             minimize: false,
+            timestamps: false,
           },
         },
       );

@@ -1,29 +1,31 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
-import { FilterQuery } from 'mongoose';
+import type { FilterQuery } from 'mongoose';
+import type { Payload } from 'payload';
+import type { Operator, Where } from 'payload/types';
+import type { Field } from 'payload/types';
+
 import deepmerge from 'deepmerge';
-import { Operator, Where } from 'payload/types';
-import { combineMerge } from 'payload/utilities';
-import { Field } from 'payload/types';
 import { validOperators } from 'payload/types';
-import { Payload } from 'payload';
-import { buildSearchParam } from './buildSearchParams.js';
+import { combineMerge } from 'payload/utilities';
+
 import { buildAndOrConditions } from './buildAndOrConditions.js';
+import { buildSearchParam } from './buildSearchParams.js';
 
 export async function parseParams({
-  where,
   collectionSlug,
-  globalSlug,
-  payload,
-  locale,
   fields,
+  globalSlug,
+  locale,
+  payload,
+  where,
 }: {
-  where: Where,
   collectionSlug?: string,
-  globalSlug?: string,
-  payload: Payload,
-  locale: string,
   fields: Field[],
+  globalSlug?: string,
+  locale: string,
+  payload: Payload,
+  where: Where,
 }): Promise<Record<string, unknown>> {
   let result = {} as FilterQuery<any>;
 
@@ -42,8 +44,8 @@ export async function parseParams({
           collectionSlug,
           fields,
           globalSlug,
-          payload,
           locale,
+          payload,
           where: condition,
         });
         if (builtConditions.length > 0) result[conditionOperator] = builtConditions;
@@ -57,13 +59,13 @@ export async function parseParams({
             if (validOperators.includes(operator as Operator)) {
               const searchParam = await buildSearchParam({
                 collectionSlug,
-                globalSlug,
-                payload,
-                locale,
                 fields,
+                globalSlug,
                 incomingPath: relationOrPath,
-                val: pathOperators[operator],
+                locale,
                 operator,
+                payload,
+                val: pathOperators[operator],
               });
 
               if (searchParam?.value && searchParam?.path) {
