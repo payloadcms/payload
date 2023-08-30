@@ -39,12 +39,8 @@
           "name": "posts_my_array_my_sub_array__parent_id_posts_my_array_id_fk",
           "tableFrom": "posts_my_array_my_sub_array",
           "tableTo": "posts_my_array",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["_parent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -81,12 +77,8 @@
           "name": "posts_my_array__parent_id_posts_id_fk",
           "tableFrom": "posts_my_array",
           "tableTo": "posts",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["_parent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -129,12 +121,8 @@
           "name": "posts_my_array_locales__parent_id_posts_my_array_id_fk",
           "tableFrom": "posts_my_array_locales",
           "tableTo": "posts_my_array",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["_parent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -189,12 +177,8 @@
           "name": "posts_block1__parent_id_posts_id_fk",
           "tableFrom": "posts_block1",
           "tableTo": "posts",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["_parent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -237,12 +221,8 @@
           "name": "posts_block1_locales__parent_id_posts_block1_id_fk",
           "tableFrom": "posts_block1_locales",
           "tableTo": "posts_block1",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["_parent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -285,12 +265,8 @@
           "name": "posts_block2_block_array__parent_id_posts_block2_id_fk",
           "tableFrom": "posts_block2_block_array",
           "tableTo": "posts_block2",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["_parent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -345,12 +321,8 @@
           "name": "posts_block2__parent_id_posts_id_fk",
           "tableFrom": "posts_block2",
           "tableTo": "posts",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["_parent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -393,12 +365,8 @@
           "name": "posts_my_group_group_array__parent_id_posts_id_fk",
           "tableFrom": "posts_my_group_group_array",
           "tableTo": "posts",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["_parent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -501,12 +469,8 @@
           "name": "posts_locales__parent_id_posts_id_fk",
           "tableFrom": "posts_locales",
           "tableTo": "posts",
-          "columnsFrom": [
-            "_parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["_parent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -567,12 +531,8 @@
           "name": "posts_relationships_parent_id_posts_id_fk",
           "tableFrom": "posts_relationships",
           "tableTo": "posts",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -580,12 +540,8 @@
           "name": "posts_relationships_pages_id_pages_id_fk",
           "tableFrom": "posts_relationships",
           "tableTo": "pages",
-          "columnsFrom": [
-            "pages_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pages_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -593,12 +549,8 @@
           "name": "posts_relationships_people_id_people_id_fk",
           "tableFrom": "posts_relationships",
           "tableTo": "people",
-          "columnsFrom": [
-            "people_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["people_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -606,12 +558,8 @@
           "name": "posts_relationships_posts_id_posts_id_fk",
           "tableFrom": "posts_relationships",
           "tableTo": "posts",
-          "columnsFrom": [
-            "posts_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["posts_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -749,9 +697,7 @@
       "indexes": {
         "email_idx": {
           "name": "email_idx",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },
@@ -842,12 +788,8 @@
           "name": "payload_preferences_relationships_parent_id_payload_preferences_id_fk",
           "tableFrom": "payload_preferences_relationships",
           "tableTo": "payload_preferences",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parent_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -855,12 +797,8 @@
           "name": "payload_preferences_relationships_users_id_users_id_fk",
           "tableFrom": "payload_preferences_relationships",
           "tableTo": "users",
-          "columnsFrom": [
-            "users_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["users_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

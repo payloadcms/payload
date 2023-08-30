@@ -39,6 +39,7 @@
 </ul>
 
 ## ☁️ Deploy instantly with Payload Cloud.
+
 Create a cloud account, connect your GitHub, and [deploy in minutes](https://payloadcms.com/new).
 
 ## 🚀 Get started by self-hosting completely free, forever.
@@ -52,7 +53,9 @@ npx create-payload-app
 Alternatively, it only takes about five minutes to [create an app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
 
 ## 🖱️ One-click templates
+
 ### 🛒 [E-Commerce](https://github.com/payloadcms/payload/tree/master/templates/ecommerce)
+
 Eliminate the need to combine Shopify and a CMS, and instead do it all with Payload + Stripe. Best of all, you can extend it as much as you need.
 
 [All Official Templates](https://github.com/orgs/payloadcms/repositories?q=topic%3Apayload-template)&nbsp;·&nbsp;[Community Templates](https://github.com/topics/payload-template)
