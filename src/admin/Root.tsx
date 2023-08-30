@@ -9,6 +9,7 @@ import { ScrollInfoProvider } from '@faceless-ui/scroll-info';
 import { WindowInfoProvider } from '@faceless-ui/window-info';
 import { ModalProvider, ModalContainer } from '@faceless-ui/modal';
 import { ToastContainer, Slide } from 'react-toastify';
+import i18next from 'i18next';
 import { AuthProvider } from './components/utilities/Auth';
 import { ConfigProvider } from './components/utilities/Config';
 import { PreferencesProvider } from './components/utilities/Preferences';
@@ -68,7 +69,7 @@ const Root = () => (
       position="bottom-center"
       transition={Slide}
       icon={false}
-      rtl={document.documentElement.dir === 'rtl'}
+      rtl={i18next.dir() === 'rtl'}
     />
   </React.Fragment>
 );

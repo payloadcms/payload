@@ -1,5 +1,6 @@
 import React from 'react';
 import Helmet from 'react-helmet';
+import i18next from 'i18next';
 import { useConfig } from '../Config';
 import { Props } from './types';
 import payloadFavicon from '../../../assets/images/favicon.svg';
@@ -28,6 +29,10 @@ const Meta: React.FC<Props> = ({
 
   return (
     <Helmet
+      htmlAttributes={{
+        lang: i18next.language,
+        dir: i18next.dir(),
+      }}
       title={`${title} ${titleSuffix}`}
       meta={[
         {

@@ -20,8 +20,12 @@ const useLanguage = (): UseLanguageResult => {
     const updateLanguageSettings = () => {
       i18next.changeLanguage(language);
 
-      document.documentElement.lang = language;
-      document.documentElement.dir = dir(language);
+      if (!document.documentElement.lang) {
+        document.documentElement.lang = language;
+      }
+      if (!document.documentElement.dir) {
+        document.documentElement.dir = dir(language);
+      }
       setDirection(dir(language));
     };
 
