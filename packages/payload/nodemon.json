@@ -9,5 +9,5 @@
   ],
   "watch": ["src/**/*.ts", "test/", "packages/**/*.ts"],
   "ext": "ts,js,json",
-  "exec": "node --loader ts-node/esm --loader ./src/esm-loader.mjs ./test/dev.ts"
+  "exec": "node --no-warnings=ExperimentalWarning --loader ts-node/esm --loader ./src/esm-loader.mjs -- ./test/dev.ts"
 }
