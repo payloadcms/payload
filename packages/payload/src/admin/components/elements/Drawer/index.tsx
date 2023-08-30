@@ -1,5 +1,6 @@
 import { Modal, useModal } from '@faceless-ui/modal'
-import { useWindowInfo } from '@faceless-ui/window-info'
+import * as pkg from '@faceless-ui/window-info'
+const { useWindowInfo } = pkg
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 

@@ -5,7 +5,7 @@ module.exports = {
   overrides: [
     {
       extends: ['plugin:@typescript-eslint/disable-type-checked'],
-      files: ['*.js', '*.cjs', 'playwright.config.ts', 'playwright.bail.config.ts'],
+      files: ['*.js', '*.cjs', 'playwright.config.ts', 'playwright.bail.config.ts', 'bin-cks.cjs', 'bin-esm.mjs'],
     },
     {
       files: ['test/**/*.ts'],

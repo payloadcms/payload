@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
+
 const endsWith = ['scss', 'svg', 'png'];
 
 export async function resolve(specifier, context, next) {
@@ -16,7 +17,7 @@ export async function resolve(specifier, context, next) {
 }
 
 export async function load(url, context, next) {
-  if (!context?.format || !endsWith.some(e => context.format === e)) return next(url, context, next)
+    if (!context?.format || !endsWith.some(e => context.format === e)) return next(url, context, next)
 
   const rawSource = '' + (await fs.readFile(fileURLToPath(url)))
 

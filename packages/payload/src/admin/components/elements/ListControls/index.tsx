@@ -1,4 +1,5 @@
-import { useWindowInfo } from '@faceless-ui/window-info'
+import * as pkg from '@faceless-ui/window-info'
+const { useWindowInfo } = pkg
 import React, { useEffect, useState } from 'react'
 import AnimateHeight from 'react-animate-height'
 import { useTranslation } from 'react-i18next'
@@ -56,7 +57,6 @@ const ListControls: React.FC<Props> = (props) => {
     modifySearchQuery = true,
     resetParams,
   } = props
-
   const params = useSearchParams()
   const shouldInitializeWhereOpened = validateWhereQuery(params?.where)
 

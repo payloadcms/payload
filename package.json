@@ -91,12 +91,12 @@
     "turbo": "^1.10.13"
   },
   "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
     "@types/node": "20.5.6",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
     "prettier": "^3.0.3",
-    "typescript": "5.2.2",
-    "@payloadcms/eslint-config": "workspace:*"
+    "typescript": "5.2.2"
   },
   "files": [
     "bin.js",
@@ -111,5 +111,10 @@
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@playwright/test@1.37.1": "patches/@playwright__test@1.37.1.patch"
+    }
   }
 }

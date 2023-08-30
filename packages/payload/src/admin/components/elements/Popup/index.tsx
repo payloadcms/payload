@@ -1,4 +1,5 @@
-import { useWindowInfo } from '@faceless-ui/window-info'
+import * as pkg from '@faceless-ui/window-info'
+const { useWindowInfo } = pkg
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { Props } from './types.js'
@@ -29,7 +30,6 @@ const Popup: React.FC<Props> = (props) => {
     size = 'small',
     verticalAlign: verticalAlignFromProps = 'top',
   } = props
-
   const { height: windowHeight, width: windowWidth } = useWindowInfo()
   const [intersectionRef, intersectionEntry] = useIntersect({
     root: boundingRef?.current || null,

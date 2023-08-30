@@ -1,0 +1,20 @@
+diff --git a/lib/util.js b/lib/util.js
+index f238b90e411dd7772cb1b1ee9c876eef8a514352..7faf760610b90712800d792c0d444d9c7870921e 100644
+--- a/lib/util.js
++++ b/lib/util.js
+@@ -284,7 +284,14 @@ function folderIsModule(folder) {
+   return require(packageJsonPath).type === 'module';
+ }
+ function experimentalLoaderOption() {
+-  return ` --no-warnings --experimental-loader=${_url.default.pathToFileURL(require.resolve('@playwright/test/lib/transform/esmLoader')).toString()}`;
++  const absoluteCustomLoaderPath = _path.default.resolve(__dirname, '../../../../../../../packages/payload/src/esm-loader-playwright.mjs');
++
++  // check if the custom loader file exists
++  if (!_fs.default.existsSync(absoluteCustomLoaderPath)) {
++    throw new Error(`Could not find custom loader at path: ${absoluteCustomLoaderPath}. Please ensure that the path is correct and that the file exists - otherwise, playwright tests will not run correctly.`);
++  }
++
++  return ` --no-warnings --experimental-loader=${_url.default.pathToFileURL(require.resolve('@playwright/test/lib/transform/esmLoader')).toString()} --experimental-loader=${absoluteCustomLoaderPath}`;
+ }
+ function envWithoutExperimentalLoaderOptions() {
+   const substring = experimentalLoaderOption();
