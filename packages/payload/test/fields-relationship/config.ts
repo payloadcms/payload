@@ -22,9 +22,9 @@ export interface FieldsRelationship {
   relationship: RelationOne
   relationshipHasMany: RelationOne[]
   relationshipHasManyMultiple: Array<
-    { relationTo: string; value: string } | RelationOne | RelationTwo
+    { relationTo: string; value: string } | RelationOne  
   >
-  relationshipMultiple: Array<RelationOne | RelationTwo>
+  relationshipMultiple: Array<RelationOne  >
   relationshipRestricted: RelationRestricted
   relationshipWithTitle: RelationWithTitle
   updatedAt: Date

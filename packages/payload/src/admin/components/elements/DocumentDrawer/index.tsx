@@ -39,10 +39,10 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
 
   return (
     <DrawerToggler
-      className={[className, `${baseClass}__toggler`].filter(Boolean).join(' ')}
       aria-label={t(!id ? 'fields:addNewLabel' : 'general:editLabel', {
         label: getTranslation(collectionConfig.labels.singular, i18n),
       })}
+      className={[className, `${baseClass}__toggler`].filter(Boolean).join(' ')}
       disabled={disabled}
       slug={drawerSlug}
       {...rest}

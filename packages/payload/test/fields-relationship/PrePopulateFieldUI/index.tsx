@@ -46,7 +46,7 @@ export const PrePopulateFieldUI: React.FC<{
       }}
       className="pre-populate-field-ui"
     >
-      <button style={{}} onClick={addDefaults} type="button">
+      <button onClick={addDefaults} style={{}} type="button">
         Add default items
       </button>
     </div>

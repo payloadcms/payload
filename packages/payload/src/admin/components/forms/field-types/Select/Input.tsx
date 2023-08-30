@@ -86,15 +86,15 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
       <Error message={errorMessage} showError={showError} />
       <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <ReactSelect
+        options={options.map((option) => ({
+          ...option,
+          label: getTranslation(option.label, i18n),
+        }))}
         disabled={readOnly}
         isClearable={isClearable}
         isMulti={hasMany}
         isSortable={isSortable}
         onChange={onChange}
-        options={options.map((option) => ({
-          ...option,
-          label: getTranslation(option.label, i18n),
-        }))}
         showError={showError}
         value={valueToRender as Option}
       />

@@ -36,11 +36,11 @@ const Logout: React.FC<{ inactivity?: boolean }> = (props) => {
         {!inactivity && <h2>{t('loggedOutSuccessfully')}</h2>}
         <br />
         <Button
-          buttonStyle="secondary"
-          el="anchor"
           url={`${admin}/login${
             redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''
           }`}
+          buttonStyle="secondary"
+          el="anchor"
         >
           {t('logBackIn')}
         </Button>

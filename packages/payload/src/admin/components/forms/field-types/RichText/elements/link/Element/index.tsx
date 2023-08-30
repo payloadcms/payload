@@ -140,7 +140,6 @@ export const LinkElement: React.FC<{
             <div className={`${baseClass}__popup`}>
               {element.linkType === 'internal' && element.doc?.relationTo && element.doc?.value && (
                 <Trans
-                  i18nKey="fields:linkedTo"
                   values={{
                     label: getTranslation(
                       config.collections.find(({ slug }) => slug === element.doc.relationTo)?.labels
@@ -148,6 +147,7 @@ export const LinkElement: React.FC<{
                       i18n,
                     ),
                   }}
+                  i18nKey="fields:linkedTo"
                 >
                   <a
                     className={`${baseClass}__link-label`}
@@ -205,11 +205,11 @@ export const LinkElement: React.FC<{
         />
       </span>
       <span
-        className={[`${baseClass}__popup-toggler`].filter(Boolean).join(' ')}
-        onClick={() => setRenderPopup(true)}
         onKeyDown={(e) => {
           if (e.key === 'Enter') setRenderPopup(true)
         }}
+        className={[`${baseClass}__popup-toggler`].filter(Boolean).join(' ')}
+        onClick={() => setRenderPopup(true)}
         role="button"
         tabIndex={0}
       >

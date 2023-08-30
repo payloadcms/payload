@@ -41,8 +41,8 @@ const Tooltip: React.FC<Props> = (props) => {
   return (
     <React.Fragment>
       <aside
-        className={['tooltip', className, 'tooltip--position-top'].filter(Boolean).join(' ')}
         aria-hidden="true"
+        className={['tooltip', className, 'tooltip--position-top'].filter(Boolean).join(' ')}
         ref={ref}
       >
         {children}
