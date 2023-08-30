@@ -9,7 +9,9 @@ keywords: plugins, config, configuration, extensions, custom, documentation, Con
 Payload comes with a built-in Plugins infrastructure that allows developers to build their own modular and easily reusable sets of functionality.
 
 <Banner type="success">
-	Because we rely on a simple config-based structure, Payload plugins simply take in a user's existing config and return a modified config with new fields, hooks, collections, admin views, or anything else you can think of.
+  Because we rely on a simple config-based structure, Payload plugins simply take in a user's
+  existing config and return a modified config with new fields, hooks, collections, admin views, or
+  anything else you can think of.
 </Banner>
 
 Writing plugins is no more complex than writing regular JavaScript. If you know how [spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) works and are up to speed with Payload concepts, writing a plugin will be a breeze.
@@ -30,30 +32,30 @@ Writing plugins is no more complex than writing regular JavaScript. If you know 
 The base Payload config allows for a `plugins` property which takes an `array` of [`Plugins`](https://github.com/payloadcms/payload/blob/master/src/config/types.ts#L21).
 
 ```js
-import { buildConfig } from 'payload/config';
+import { buildConfig } from 'payload/config'
 
 // note: these plugins are not real (yet?)
-import addLastModified from 'payload-add-last-modified';
-import passwordProtect from 'payload-password-protect';
+import addLastModified from 'payload-add-last-modified'
+import passwordProtect from 'payload-password-protect'
 
 const config = buildConfig({
-	collections: [
-		{
-			slug: 'pages',
-			fields: [
-				{
-					name: 'title',
-					type: 'text',
-					required: true,
-				},
-				{
-					name: 'content',
-					type: 'richText',
-					required: true,
-				}
-			]
-		}
-	],
+  collections: [
+    {
+      slug: 'pages',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'content',
+          type: 'richText',
+          required: true,
+        },
+      ],
+    },
+  ],
   plugins: [
     // Many plugins require options to be passed.
     // In the following example, we call the function
@@ -67,10 +69,10 @@ const config = buildConfig({
     // ..
     // To understand how to use the plugins you're interested in,
     // consult their corresponding documentation
-  ]
-});
+  ],
+})
 
-export default config;
+export default config
 ```
 
 #### When Plugins are initialized
@@ -84,21 +86,20 @@ After all plugins are executed, the full config with all plugins will be sanitiz
 Here is an example for how to automatically add a `lastModifiedBy` field to all Payload collections using a Plugin written in TypeScript.
 
 ```ts
-import { Config, Plugin } from 'payload/config';
+import { Config, Plugin } from 'payload/config'
 
 const addLastModified: Plugin = (incomingConfig: Config): Config => {
   // Find all incoming auth-enabled collections
   // so we can create a lastModifiedBy relationship field
   // to all auth collections
-  const authEnabledCollections = incomingConfig.collections.filter(
-    collection => Boolean(collection.auth)
-  );
+  const authEnabledCollections = incomingConfig.collections.filter((collection) =>
+    Boolean(collection.auth),
+  )
 
   // Spread the existing config
   const config: Config = {
     ...incomingConfig,
     collections: incomingConfig.collections.map((collection) => {
-
       // Spread each item that we are modifying,
       // and add our new field - complete with
       // hooks and proper admin UI config
@@ -116,7 +117,7 @@ const addLastModified: Plugin = (incomingConfig: Config): Config => {
                   value: req?.user?.id,
                   relationTo: req?.user?.collection,
                 }),
-              ]
+              ],
             },
             admin: {
               position: 'sidebar',
@@ -124,14 +125,14 @@ const addLastModified: Plugin = (incomingConfig: Config): Config => {
             },
           },
         ],
-      };
+      }
     }),
-  };
+  }
 
-  return config;
-};
+  return config
+}
 
-export default addLastModified;
+export default addLastModified
 ```
 
 ### Available Plugins

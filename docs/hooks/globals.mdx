@@ -19,6 +19,7 @@ Globals feature the ability to define the following hooks:
 All Global Hook properties accept arrays of synchronous or asynchronous functions. Each Hook type receives specific arguments and has the ability to modify specific outputs.
 
 `globals/example-hooks.js`
+
 ```ts
 import { GlobalConfig } from 'payload/types';
 
@@ -49,7 +50,7 @@ const beforeValidateHook: GlobalBeforeValidateHook = async ({
   req, // full express request
   originalDoc, // original document
 }) => {
-  return data; // Return data to update the document with
+  return data // Return data to update the document with
 }
 ```
 
@@ -65,7 +66,7 @@ const beforeChangeHook: GlobalBeforeChangeHook = async ({
   req, // full express request
   originalDoc, // original document
 }) => {
-  return data; // Return data to update the document with
+  return data // Return data to update the document with
 }
 ```
 
@@ -81,7 +82,7 @@ const afterChangeHook: GlobalAfterChangeHook = async ({
   previousDoc, // document data before updating the collection
   req, // full express request
 }) => {
-  return data;
+  return data
 }
 ```
 
@@ -123,5 +124,5 @@ import type {
   GlobalAfterChangeHook,
   GlobalBeforeReadHook,
   GlobalAfterReadHook,
-} from 'payload/types';
+} from 'payload/types'
 ```

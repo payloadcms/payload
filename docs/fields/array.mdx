@@ -7,9 +7,8 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
 ---
 
 <Banner>
-  The Array field type is used when you need to have a set of "repeating"
-  fields. It stores an array of objects containing the fields that you define.
-  Its uses can be simple or highly complex.
+  The Array field type is used when you need to have a set of "repeating" fields. It stores an array
+  of objects containing the fields that you define. Its uses can be simple or highly complex.
 </Banner>
 
 <LightDarkImage
@@ -61,47 +60,47 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from "payload/types";
+import { CollectionConfig } from 'payload/types'
 
 export const ExampleCollection: CollectionConfig = {
-  slug: "example-collection",
+  slug: 'example-collection',
   fields: [
     {
-      name: "slider", // required
-      type: "array", // required
-      label: "Image Slider",
+      name: 'slider', // required
+      type: 'array', // required
+      label: 'Image Slider',
       minRows: 2,
       maxRows: 10,
-      interfaceName: "CardSlider", // optional
+      interfaceName: 'CardSlider', // optional
       labels: {
-        singular: "Slide",
-        plural: "Slides",
+        singular: 'Slide',
+        plural: 'Slides',
       },
       fields: [
         // required
         {
-          name: "title",
-          type: "text",
+          name: 'title',
+          type: 'text',
         },
         {
-          name: "image",
-          type: "upload",
-          relationTo: "media",
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
           required: true,
         },
         {
-          name: "caption",
-          type: "text",
+          name: 'caption',
+          type: 'text',
         },
       ],
       admin: {
         components: {
           RowLabel: ({ data, index }) => {
-            return data?.title || `Slide ${String(index).padStart(2, "0")}`;
+            return data?.title || `Slide ${String(index).padStart(2, '0')}`
           },
         },
       },
     },
   ],
-};
+}
 ```

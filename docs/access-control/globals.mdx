@@ -8,30 +8,35 @@ keywords: globals, access control, permissions, documentation, Content Managemen
 
 You can define Global-level Access Control within each Global's `access` property. All Access Control functions accept one `args` argument.
 
-**Available argument properties:
+\*\*Available argument properties:
 
 ## Available Controls
 
-| Function                 | Allows/Denies Access |
-| ------------------------ | -------------------- |
-| **[`read`](#read)**      | Used in the `findOne` Global operation |
-| **[`update`](#update)**  | Used in the `update` Global operation |
+| Function                | Allows/Denies Access                   |
+| ----------------------- | -------------------------------------- |
+| **[`read`](#read)**     | Used in the `findOne` Global operation |
+| **[`update`](#update)** | Used in the `update` Global operation  |
 
 **Example Global config:**
+
 ```ts
-import { GlobalConfig } from 'payload/types';
+import { GlobalConfig } from 'payload/types'
 
 const Header: GlobalConfig = {
-  slug: "header",
+  slug: 'header',
   // highlight-start
   access: {
-    read: ({ req: { user } }) => { /* */ },
-    update: ({ req: { user } }) => { /* */ },
+    read: ({ req: { user } }) => {
+      /* */
+    },
+    update: ({ req: { user } }) => {
+      /* */
+    },
   },
   // highlight-end
-};
+}
 
-export default Header;
+export default Header
 ```
 
 ### Read
@@ -40,8 +45,8 @@ Returns a boolean result or optionally a [query constraint](/docs/queries/overvi
 
 **Available argument properties:**
 
-| Option    | Description |
-| --------- | ----------- |
+| Option    | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
 | **`req`** | The Express `request` object containing the currently authenticated `user` |
 
 ### Update
@@ -50,7 +55,7 @@ Returns a boolean result or optionally a [query constraint](/docs/queries/overvi
 
 **Available argument properties:**
 
-| Option     | Description |
-| ---------- | ----------- |
+| Option     | Description                                                                |
+| ---------- | -------------------------------------------------------------------------- |
 | **`req`**  | The Express `request` object containing the currently authenticated `user` |
-| **`data`** | The data passed to update the global with. |
+| **`data`** | The data passed to update the global with.                                 |
