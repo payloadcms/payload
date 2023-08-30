@@ -1,4 +1,5 @@
-import { useWindowInfo } from '@faceless-ui/window-info'
+import pkg from '@faceless-ui/window-info'
+const { useWindowInfo } = pkg
 import React, { useEffect, useState } from 'react'
 import AnimateHeight from 'react-animate-height'
 import { useTranslation } from 'react-i18next'

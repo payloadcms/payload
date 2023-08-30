@@ -1,4 +1,5 @@
-import { useWindowInfo } from '@faceless-ui/window-info'
+import pkg from '@faceless-ui/window-info'
+const { useWindowInfo } = pkg
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { Props } from './types.js'
