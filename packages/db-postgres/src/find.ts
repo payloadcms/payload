@@ -21,13 +21,12 @@ export const find: Find = async function find({
   const tableName = toSnakeCase(collection);
   const table = this.tables[tableName];
   const limit = typeof limitArg === 'number' ? limitArg : collectionConfig.admin.pagination.defaultLimit;
-  // TODO: use sort
   const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort;
-  let totalDocs;
-  let totalPages;
-  let hasPrevPage;
-  let hasNextPage;
-  let pagingCounter;
+  let totalDocs: number;
+  let totalPages: number;
+  let hasPrevPage: boolean;
+  let hasNextPage: boolean;
+  let pagingCounter: number;
 
   const query = await buildQuery({
     collectionSlug: collection,
@@ -50,6 +49,7 @@ export const find: Find = async function find({
     depth: 0,
     fields: collectionConfig.fields,
     tableName,
+    sort,
   });
 
   findManyArgs.limit = limit === 0 ? undefined : limit;
@@ -67,15 +67,15 @@ export const find: Find = async function find({
   });
 
   return {
-    docs, // : T[]
-    totalDocs, // : number
-    limit, // : number
-    totalPages, // : number
-    page, // ?: number
-    pagingCounter, // : number
-    hasPrevPage, // : boolean
-    hasNextPage, // : boolean
-    prevPage: hasPrevPage ? page - 1 : null, // ?: number | null | undefined
-    nextPage: hasNextPage ? page + 1 : null, // ?: number | null | undefined
+    docs,
+    totalDocs,
+    limit,
+    totalPages,
+    page,
+    pagingCounter,
+    hasPrevPage,
+    hasNextPage,
+    prevPage: hasPrevPage ? page - 1 : null,
+    nextPage: hasNextPage ? page + 1 : null,
   };
 };
