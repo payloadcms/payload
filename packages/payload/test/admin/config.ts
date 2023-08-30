@@ -1,27 +1,26 @@
-import path from 'path';
+import path from 'path'
 
-import { mapAsync } from '../../src/utilities/mapAsync.js';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
-import { devUser } from '../credentials.js';
-import AfterDashboard from './components/AfterDashboard/index.js';
-import AfterNavLinks from './components/AfterNavLinks/index.js';
-import BeforeLogin from './components/BeforeLogin/index.js';
-import DemoUIFieldCell from './components/DemoUIField/Cell.js';
-import DemoUIFieldField from './components/DemoUIField/Field.js';
-import Logout from './components/Logout/index.js';
-import CustomDefaultRoute from './components/views/CustomDefault/index.js';
-import CustomMinimalRoute from './components/views/CustomMinimal/index.js';
-import { globalSlug, slug } from './shared.js';
+import { mapAsync } from '../../src/utilities/mapAsync.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import AfterDashboard from './components/AfterDashboard/index.js'
+import AfterNavLinks from './components/AfterNavLinks/index.js'
+import BeforeLogin from './components/BeforeLogin/index.js'
+import DemoUIFieldCell from './components/DemoUIField/Cell.js'
+import DemoUIFieldField from './components/DemoUIField/Field.js'
+import Logout from './components/Logout/index.js'
+import CustomDefaultRoute from './components/views/CustomDefault/index.js'
+import CustomMinimalRoute from './components/views/CustomMinimal/index.js'
+import { globalSlug, slug } from './shared.js'
 
 export interface Post {
-  createdAt: Date;
-  description: string;
-  id: string;
-  title: string;
-  updatedAt: Date;
+  createdAt: Date
+  description: string
+  id: string
+  title: string
+  updatedAt: Date
 }
 const _dirname = path.dirname(new URL(import.meta.url).pathname)
-
 
 export default buildConfigWithDefaults({
   admin: {
@@ -38,18 +37,12 @@ export default buildConfigWithDefaults({
           Component: CustomDefaultRoute,
         },
       ],
-      afterDashboard: [
-        AfterDashboard,
-      ],
-      beforeLogin: [
-        BeforeLogin,
-      ],
+      afterDashboard: [AfterDashboard],
+      beforeLogin: [BeforeLogin],
       logout: {
         Button: Logout,
       },
-      afterNavLinks: [
-        AfterNavLinks,
-      ],
+      afterNavLinks: [AfterNavLinks],
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
@@ -123,9 +116,7 @@ export default buildConfigWithDefaults({
           name: 'richText',
           type: 'richText',
           admin: {
-            elements: [
-              'relationship',
-            ],
+            elements: ['relationship'],
           },
         },
         {
@@ -260,7 +251,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
 
     await mapAsync([...Array(11)], async () => {
       await payload.create({
@@ -269,21 +260,21 @@ export default buildConfigWithDefaults({
           title: 'title',
           description: 'description',
         },
-      });
-    });
+      })
+    })
 
     await payload.create({
       collection: 'geo',
       data: {
         point: [7, -7],
       },
-    });
+    })
 
     await payload.create({
       collection: 'geo',
       data: {
         point: [5, -5],
       },
-    });
+    })
   },
-});
+})

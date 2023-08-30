@@ -1,34 +1,16 @@
-import React, { useState } from 'react';
-import { v4 as uuid } from 'uuid';
+import React, { useState } from 'react'
+import { v4 as uuid } from 'uuid'
 
 const DefaultBlockImage: React.FC = () => {
-  const [patternID] = useState(`pattern${uuid()}`);
-  const [imageID] = useState(`image${uuid()}`);
+  const [patternID] = useState(`pattern${uuid()}`)
+  const [imageID] = useState(`image${uuid()}`)
 
   return (
-    <svg
-      fill="none"
-      height="53"
-      viewBox="0 0 82 53"
-      width="82"
-    >
-      <rect
-        fill={`url(#${patternID})`}
-        height="52.7791"
-        width="80.574"
-        x="0.713013"
-      />
+    <svg fill="none" height="53" viewBox="0 0 82 53" width="82">
+      <rect fill={`url(#${patternID})`} height="52.7791" width="80.574" x="0.713013" />
       <defs>
-        <pattern
-          height="1"
-          id={`${patternID}`}
-          patternContentUnits="objectBoundingBox"
-          width="1"
-        >
-          <use
-            transform="scale(0.00387597 0.00591716)"
-            xlinkHref={`#${imageID}`}
-          />
+        <pattern height="1" id={`${patternID}`} patternContentUnits="objectBoundingBox" width="1">
+          <use transform="scale(0.00387597 0.00591716)" xlinkHref={`#${imageID}`} />
         </pattern>
         <image
           height="169"
@@ -38,7 +20,7 @@ const DefaultBlockImage: React.FC = () => {
         />
       </defs>
     </svg>
-  );
-};
+  )
+}
 
-export default DefaultBlockImage;
+export default DefaultBlockImage

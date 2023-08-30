@@ -1,35 +1,31 @@
-import React, { useId } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useId } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { Props } from './types.js';
+import type { Props } from './types.js'
 
-import { getTranslation } from '../../../../utilities/getTranslation.js';
-import Plus from '../../icons/Plus/index.js';
-import X from '../../icons/X/index.js';
-import { useEditDepth } from '../../utilities/EditDepth/index.js';
-import DraggableSortable from '../DraggableSortable/index.js';
-import Pill from '../Pill/index.js';
-import { useTableColumns } from '../TableColumns/index.js';
-import './index.scss';
+import { getTranslation } from '../../../../utilities/getTranslation.js'
+import Plus from '../../icons/Plus/index.js'
+import X from '../../icons/X/index.js'
+import { useEditDepth } from '../../utilities/EditDepth/index.js'
+import DraggableSortable from '../DraggableSortable/index.js'
+import Pill from '../Pill/index.js'
+import { useTableColumns } from '../TableColumns/index.js'
+import './index.scss'
 
-const baseClass = 'column-selector';
+const baseClass = 'column-selector'
 
 const ColumnSelector: React.FC<Props> = (props) => {
-  const {
-    collection,
-  } = props;
+  const { collection } = props
 
-  const {
-    columns,
-    moveColumn,
-    toggleColumn,
-  } = useTableColumns();
+  const { columns, moveColumn, toggleColumn } = useTableColumns()
 
-  const { i18n } = useTranslation();
-  const uuid = useId();
-  const editDepth = useEditDepth();
+  const { i18n } = useTranslation()
+  const uuid = useId()
+  const editDepth = useEditDepth()
 
-  if (!columns) { return null; }
+  if (!columns) {
+    return null
+  }
 
   return (
     <DraggableSortable
@@ -37,29 +33,23 @@ const ColumnSelector: React.FC<Props> = (props) => {
         moveColumn({
           fromIndex: moveFromIndex,
           toIndex: moveToIndex,
-        });
+        })
       }}
       className={baseClass}
       ids={columns.map((col) => col.accessor)}
     >
       {columns.map((col, i) => {
-        const {
-          accessor,
-          active,
-          label,
-          name,
-        } = col;
+        const { accessor, active, label, name } = col
 
-        if (col.accessor === '_select') return null;
+        if (col.accessor === '_select') return null
 
         return (
           <Pill
-            className={[
-              `${baseClass}__column`,
-              active && `${baseClass}__column--active`,
-            ].filter(Boolean).join(' ')}
+            className={[`${baseClass}__column`, active && `${baseClass}__column--active`]
+              .filter(Boolean)
+              .join(' ')}
             onClick={() => {
-              toggleColumn(accessor);
+              toggleColumn(accessor)
             }}
             alignIcon="left"
             aria-checked={active}
@@ -70,10 +60,10 @@ const ColumnSelector: React.FC<Props> = (props) => {
           >
             {getTranslation(label || name, i18n)}
           </Pill>
-        );
+        )
       })}
     </DraggableSortable>
-  );
-};
+  )
+}
 
-export default ColumnSelector;
+export default ColumnSelector

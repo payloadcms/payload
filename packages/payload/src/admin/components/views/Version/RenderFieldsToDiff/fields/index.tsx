@@ -1,9 +1,9 @@
-import Iterable from './Iterable/index.js';
-import Nested from './Nested/index.js';
-import Relationship from './Relationship/index.js';
-import Select from './Select/index.js';
-import Tabs from './Tabs/index.js';
-import Text from './Text/index.js';
+import Iterable from './Iterable/index.js'
+import Nested from './Nested/index.js'
+import Relationship from './Relationship/index.js'
+import Select from './Select/index.js'
+import Tabs from './Tabs/index.js'
+import Text from './Text/index.js'
 
 export default {
   array: Iterable,
@@ -26,4 +26,4 @@ export default {
   text: Text,
   textarea: Text,
   upload: Relationship,
-};
+}

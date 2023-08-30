@@ -1,13 +1,13 @@
-import type { MultiValueProps } from 'react-select';
+import type { MultiValueProps } from 'react-select'
 
-import React from 'react';
-import { components as SelectComponents } from 'react-select';
+import React from 'react'
+import { components as SelectComponents } from 'react-select'
 
-import type { Option } from '../types.js';
+import type { Option } from '../types.js'
 
-import './index.scss';
+import './index.scss'
 
-const baseClass = 'multi-value-label';
+const baseClass = 'multi-value-label'
 
 export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   const {
@@ -18,7 +18,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
         draggableProps,
       } = {},
     } = {},
-  } = props;
+  } = props
 
   return (
     <div className={baseClass}>
@@ -26,9 +26,9 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
         {...props}
         innerProps={{
           className: `${baseClass}__text`,
-          ...draggableProps || {},
+          ...(draggableProps || {}),
         }}
       />
     </div>
-  );
-};
+  )
+}

@@ -1,7 +1,7 @@
-import path from 'path';
+import path from 'path'
 
-import type { CollectionConfig } from '../../../../src/collections/config/types.js';
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+import type { CollectionConfig } from '../../../../src/collections/config/types.js'
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
 
 export const Uploads2: CollectionConfig = {
   slug: 'uploads-2',
@@ -17,10 +17,10 @@ export const Uploads2: CollectionConfig = {
       name: 'title',
     },
   ],
-};
+}
 
 export const uploadsDoc = {
   text: 'An upload here',
-};
+}
 
-export default Uploads2;
+export default Uploads2

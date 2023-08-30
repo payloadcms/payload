@@ -1,37 +1,40 @@
-import path from 'path';
+import path from 'path'
 
-import { AuthenticationError } from '../../src/errors/index.js';
-import payload from '../../src/index.js';
-import { devUser, regularUser } from '../credentials.js';
-import { initPayloadTest } from '../helpers/configHelpers.js';
-import { RESTClient } from '../helpers/rest.js';
-import { afterOperationSlug } from './collections/AfterOperation/index.js';
-import { chainingHooksSlug } from './collections/ChainingHooks/index.js';
-import { contextHooksSlug } from './collections/ContextHooks/index.js';
-import { hooksSlug } from './collections/Hook/index.js';
-import { generatedAfterReadText, nestedAfterReadHooksSlug } from './collections/NestedAfterReadHooks/index.js';
-import { relationsSlug } from './collections/Relations/index.js';
-import { transformSlug } from './collections/Transform/index.js';
-import { hooksUsersSlug } from './collections/Users/index.js';
-import configPromise from './config.js';
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+import { AuthenticationError } from '../../src/errors/index.js'
+import payload from '../../src/index.js'
+import { devUser, regularUser } from '../credentials.js'
+import { initPayloadTest } from '../helpers/configHelpers.js'
+import { RESTClient } from '../helpers/rest.js'
+import { afterOperationSlug } from './collections/AfterOperation/index.js'
+import { chainingHooksSlug } from './collections/ChainingHooks/index.js'
+import { contextHooksSlug } from './collections/ContextHooks/index.js'
+import { hooksSlug } from './collections/Hook/index.js'
+import {
+  generatedAfterReadText,
+  nestedAfterReadHooksSlug,
+} from './collections/NestedAfterReadHooks/index.js'
+import { relationsSlug } from './collections/Relations/index.js'
+import { transformSlug } from './collections/Transform/index.js'
+import { hooksUsersSlug } from './collections/Users/index.js'
+import configPromise from './config.js'
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
 
-let client: RESTClient;
-let apiUrl;
+let client: RESTClient
+let apiUrl
 
 describe('Hooks', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
-    const config = await configPromise;
-    client = new RESTClient(config, { serverURL, defaultSlug: transformSlug });
-    apiUrl = `${serverURL}/api`;
-  });
+    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
+    const config = await configPromise
+    client = new RESTClient(config, { serverURL, defaultSlug: transformSlug })
+    apiUrl = `${serverURL}/api`
+  })
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload);
+      await payload.db.destroy(payload)
     }
-  });
+  })
 
   describe('transform actions', () => {
     it('should create and not throw an error', async () => {
@@ -42,15 +45,15 @@ describe('Hooks', () => {
           transform: [2, 8],
           localizedTransform: [2, 8],
         },
-      });
+      })
 
-      expect(doc.transform).toBeDefined();
-      expect(doc.localizedTransform).toBeDefined();
-    });
-  });
+      expect(doc.transform).toBeDefined()
+      expect(doc.localizedTransform).toBeDefined()
+    })
+  })
 
   describe('hook execution', () => {
-    let doc;
+    let doc
     it('should execute hooks in correct order on create', async () => {
       doc = await payload.create({
         collection: hooksSlug,
@@ -65,16 +68,16 @@ describe('Hooks', () => {
           fieldAfterRead: false,
           collectionAfterRead: false,
         },
-      });
+      })
 
-      expect(doc.fieldBeforeValidate).toEqual(true);
-      expect(doc.collectionBeforeValidate).toEqual(true);
-      expect(doc.fieldBeforeChange).toEqual(true);
-      expect(doc.collectionBeforeChange).toEqual(true);
-      expect(doc.fieldAfterChange).toEqual(true);
-      expect(doc.collectionAfterChange).toEqual(true);
-      expect(doc.fieldAfterRead).toEqual(true);
-    });
+      expect(doc.fieldBeforeValidate).toEqual(true)
+      expect(doc.collectionBeforeValidate).toEqual(true)
+      expect(doc.fieldBeforeChange).toEqual(true)
+      expect(doc.collectionBeforeChange).toEqual(true)
+      expect(doc.fieldAfterChange).toEqual(true)
+      expect(doc.collectionAfterChange).toEqual(true)
+      expect(doc.fieldAfterRead).toEqual(true)
+    })
 
     it('should save data generated with afterRead hooks in nested field structures', async () => {
       const document = await payload.create({
@@ -82,16 +85,14 @@ describe('Hooks', () => {
         data: {
           text: 'ok',
           group: {
-            array: [
-              { input: 'input' },
-            ],
+            array: [{ input: 'input' }],
           },
         },
-      });
+      })
 
-      expect(document.group.subGroup.afterRead).toEqual(generatedAfterReadText);
-      expect(document.group.array[0].afterRead).toEqual(generatedAfterReadText);
-    });
+      expect(document.group.subGroup.afterRead).toEqual(generatedAfterReadText)
+      expect(document.group.array[0].afterRead).toEqual(generatedAfterReadText)
+    })
 
     it('should populate related docs within nested field structures', async () => {
       const relation = await payload.create({
@@ -99,7 +100,7 @@ describe('Hooks', () => {
         data: {
           title: 'Hello',
         },
-      });
+      })
 
       const document = await payload.create({
         collection: nestedAfterReadHooksSlug,
@@ -116,16 +117,16 @@ describe('Hooks', () => {
             },
           },
         },
-      });
+      })
 
       const retrievedDoc = await payload.findByID({
         collection: nestedAfterReadHooksSlug,
         id: document.id,
-      });
+      })
 
-      expect(retrievedDoc.group.array[0].shouldPopulate.title).toEqual(relation.title);
-      expect(retrievedDoc.group.subGroup.shouldPopulate.title).toEqual(relation.title);
-    });
+      expect(retrievedDoc.group.array[0].shouldPopulate.title).toEqual(relation.title)
+      expect(retrievedDoc.group.subGroup.shouldPopulate.title).toEqual(relation.title)
+    })
 
     it('should pass result from previous hook into next hook with findByID', async () => {
       const document = await payload.create({
@@ -133,15 +134,15 @@ describe('Hooks', () => {
         data: {
           text: 'ok',
         },
-      });
+      })
 
       const retrievedDoc = await payload.findByID({
         collection: chainingHooksSlug,
         id: document.id,
-      });
+      })
 
-      expect(retrievedDoc.text).toEqual('ok!!');
-    });
+      expect(retrievedDoc.text).toEqual('ok!!')
+    })
 
     it('should pass result from previous hook into next hook with find', async () => {
       const document = await payload.create({
@@ -149,14 +150,14 @@ describe('Hooks', () => {
         data: {
           text: 'ok',
         },
-      });
+      })
 
       const { docs: retrievedDocs } = await payload.find({
         collection: chainingHooksSlug,
-      });
+      })
 
-      expect(retrievedDocs[0].text).toEqual('ok!!');
-    });
+      expect(retrievedDocs[0].text).toEqual('ok!!')
+    })
 
     it('should execute collection afterOperation hook', async () => {
       const [doc1, doc2] = await Promise.all([
@@ -172,18 +173,18 @@ describe('Hooks', () => {
             title: 'Title',
           },
         }),
-      ]);
+      ])
 
-      expect(doc1.title === 'Title created').toBeTruthy();
-      expect(doc2.title === 'Title created').toBeTruthy();
+      expect(doc1.title === 'Title created').toBeTruthy()
+      expect(doc2.title === 'Title created').toBeTruthy()
 
       const findResult = await payload.find({
         collection: afterOperationSlug,
-      });
+      })
 
-      expect(findResult.docs).toHaveLength(2);
-      expect(findResult.docs[0].title === 'Title read').toBeTruthy();
-      expect(findResult.docs[1].title === 'Title').toBeTruthy();
+      expect(findResult.docs).toHaveLength(2)
+      expect(findResult.docs[0].title === 'Title read').toBeTruthy()
+      expect(findResult.docs[1].title === 'Title').toBeTruthy()
 
       const [updatedDoc1, updatedDoc2] = await Promise.all([
         await payload.update({
@@ -200,19 +201,19 @@ describe('Hooks', () => {
             title: 'Title',
           },
         }),
-      ]);
+      ])
 
-      expect(updatedDoc1.title === 'Title updated').toBeTruthy();
-      expect(updatedDoc2.title === 'Title updated').toBeTruthy();
+      expect(updatedDoc1.title === 'Title updated').toBeTruthy()
+      expect(updatedDoc2.title === 'Title updated').toBeTruthy()
 
       const findResult2 = await payload.find({
         collection: afterOperationSlug,
-      });
+      })
 
-      expect(findResult2.docs).toHaveLength(2);
-      expect(findResult2.docs[0].title === 'Title read').toBeTruthy();
-      expect(findResult2.docs[1].title === 'Title').toBeTruthy();
-    });
+      expect(findResult2.docs).toHaveLength(2)
+      expect(findResult2.docs[0].title === 'Title read').toBeTruthy()
+      expect(findResult2.docs[1].title === 'Title').toBeTruthy()
+    })
 
     it('should pass context from beforeChange to afterChange', async () => {
       const document = await payload.create({
@@ -220,15 +221,15 @@ describe('Hooks', () => {
         data: {
           value: 'wrongvalue',
         },
-      });
+      })
 
       const retrievedDoc = await payload.findByID({
         collection: contextHooksSlug,
         id: document.id,
-      });
+      })
 
-      expect(retrievedDoc.value).toEqual('secret');
-    });
+      expect(retrievedDoc.value).toEqual('secret')
+    })
 
     it('should pass context from local API to hooks', async () => {
       const document = await payload.create({
@@ -239,38 +240,38 @@ describe('Hooks', () => {
         context: {
           secretValue: 'data from local API',
         },
-      });
+      })
 
       const retrievedDoc = await payload.findByID({
         collection: contextHooksSlug,
         id: document.id,
-      });
+      })
 
-      expect(retrievedDoc.value).toEqual('data from local API');
-    });
+      expect(retrievedDoc.value).toEqual('data from local API')
+    })
 
     it('should pass context from rest API to hooks', async () => {
       const params = new URLSearchParams({
         context_secretValue: 'data from rest API',
-      });
+      })
       // send context as query params. It will be parsed by the beforeOperation hook
       const response = await fetch(`${apiUrl}/${contextHooksSlug}?${params.toString()}`, {
         body: JSON.stringify({
           value: 'wrongvalue',
         }),
         method: 'post',
-      });
+      })
 
-      const document = (await response.json()).doc;
+      const document = (await response.json()).doc
 
       const retrievedDoc = await payload.findByID({
         collection: contextHooksSlug,
         id: document.id,
-      });
+      })
 
-      expect(retrievedDoc.value).toEqual('data from rest API');
-    });
-  });
+      expect(retrievedDoc.value).toEqual('data from rest API')
+    })
+  })
 
   describe('auth collection hooks', () => {
     it('allow admin login', async () => {
@@ -280,12 +281,17 @@ describe('Hooks', () => {
           email: devUser.email,
           password: devUser.password,
         },
-      });
-      expect(user).toBeDefined();
-    });
+      })
+      expect(user).toBeDefined()
+    })
 
     it('deny user login', async () => {
-      await expect(() => payload.login({ collection: hooksUsersSlug, data: { email: regularUser.email, password: regularUser.password } })).rejects.toThrow(AuthenticationError);
-    });
-  });
-});
+      await expect(() =>
+        payload.login({
+          collection: hooksUsersSlug,
+          data: { email: regularUser.email, password: regularUser.password },
+        }),
+      ).rejects.toThrow(AuthenticationError)
+    })
+  })
+})

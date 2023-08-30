@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types.js';
+import type { CollectionConfig } from '../../../../src/collections/config/types.js'
 
-export const relationshipFieldsSlug = 'relationship-fields';
+export const relationshipFieldsSlug = 'relationship-fields'
 
 const RelationshipFields: CollectionConfig = {
   slug: relationshipFieldsSlug,
@@ -60,6 +60,6 @@ const RelationshipFields: CollectionConfig = {
       hasMany: true,
     },
   ],
-};
+}
 
-export default RelationshipFields;
+export default RelationshipFields

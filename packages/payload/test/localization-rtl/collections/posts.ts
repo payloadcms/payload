@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../src/collections/config/types.js';
+import type { CollectionConfig } from '../../../src/collections/config/types.js'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -44,4 +44,4 @@ export const Posts: CollectionConfig = {
       localized: true,
     },
   ],
-};
+}

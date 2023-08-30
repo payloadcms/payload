@@ -1,10 +1,10 @@
-import en from '../../src/translations/en.json';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
-import { devUser } from '../credentials.js';
-import { ar } from './ar.js' assert { type: "json" };
-import { Posts } from './collections/posts.js';
-import { Users } from './collections/users.js';
-import deepMerge from './deepMerge.js';
+import en from '../../src/translations/en.json'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { ar } from './ar.js' assert { type: 'json' }
+import { Posts } from './collections/posts.js'
+import { Users } from './collections/users.js'
+import deepMerge from './deepMerge.js'
 
 export default buildConfigWithDefaults({
   collections: [Users, Posts],
@@ -37,6 +37,6 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
   },
-});
+})

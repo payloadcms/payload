@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types.js';
+import type { CollectionConfig } from '../../../../src/collections/config/types.js'
 
-export const relationsSlug = 'relations';
+export const relationsSlug = 'relations'
 
 const Relations: CollectionConfig = {
   slug: relationsSlug,
@@ -11,6 +11,6 @@ const Relations: CollectionConfig = {
       required: true,
     },
   ],
-};
+}
 
-export default Relations;
+export default Relations

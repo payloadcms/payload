@@ -7,117 +7,117 @@
 
 export interface Config {
   collections: {
-    posts: Post;
-    point: Point;
-    relation: Relation;
-    dummy: Dummy;
-    'custom-id': CustomId;
-    'custom-id-number': CustomIdNumber;
-    'error-on-hooks': ErrorOnHook;
-    users: User;
-  };
-  globals: {};
+    posts: Post
+    point: Point
+    relation: Relation
+    dummy: Dummy
+    'custom-id': CustomId
+    'custom-id-number': CustomIdNumber
+    'error-on-hooks': ErrorOnHook
+    users: User
+  }
+  globals: {}
 }
 export interface Post {
-  id: string;
-  title?: string;
-  description?: string;
-  number?: number;
-  fakeLocalization?: string;
-  relationField?: string | Relation;
-  relationHasManyField?: string[] | Relation[];
+  id: string
+  title?: string
+  description?: string
+  number?: number
+  fakeLocalization?: string
+  relationField?: string | Relation
+  relationHasManyField?: string[] | Relation[]
   relationMultiRelationTo?:
     | {
-        value: string | Relation;
-        relationTo: 'relation';
+        value: string | Relation
+        relationTo: 'relation'
       }
     | {
-        value: string | Dummy;
-        relationTo: 'dummy';
-      };
+        value: string | Dummy
+        relationTo: 'dummy'
+      }
   relationMultiRelationToHasMany?:
     | (
         | {
-            value: string;
-            relationTo: 'relation';
+            value: string
+            relationTo: 'relation'
           }
         | {
-            value: string;
-            relationTo: 'dummy';
+            value: string
+            relationTo: 'dummy'
           }
       )[]
     | (
         | {
-            value: Relation;
-            relationTo: 'relation';
+            value: Relation
+            relationTo: 'relation'
           }
         | {
-            value: Dummy;
-            relationTo: 'dummy';
+            value: Dummy
+            relationTo: 'dummy'
           }
-      )[];
-  restrictedField?: string;
+      )[]
+  restrictedField?: string
   D1: {
     D2?: {
       D3?: {
-        D4?: string;
-      };
-    };
-  };
-  updatedAt: string;
-  createdAt: string;
+        D4?: string
+      }
+    }
+  }
+  updatedAt: string
+  createdAt: string
 }
 export interface Relation {
-  id: string;
-  name?: string;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string
+  updatedAt: string
+  createdAt: string
 }
 export interface Dummy {
-  id: string;
-  title?: string;
-  name?: string;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  title?: string
+  name?: string
+  updatedAt: string
+  createdAt: string
 }
 export interface Point {
-  id: string;
+  id: string
   /**
    * @minItems 2
    * @maxItems 2
    */
-  point?: [number, number];
-  updatedAt: string;
-  createdAt: string;
+  point?: [number, number]
+  updatedAt: string
+  createdAt: string
 }
 export interface CustomId {
-  id: string;
-  name?: string;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  name?: string
+  updatedAt: string
+  createdAt: string
 }
 export interface CustomIdNumber {
-  id: number;
-  name?: string;
-  updatedAt: string;
-  createdAt: string;
+  id: number
+  name?: string
+  updatedAt: string
+  createdAt: string
 }
 export interface ErrorOnHook {
-  id: string;
-  text?: string;
-  errorBeforeChange?: boolean;
-  errorAfterDelete?: boolean;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  text?: string
+  errorBeforeChange?: boolean
+  errorAfterDelete?: boolean
+  updatedAt: string
+  createdAt: string
 }
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  password?: string;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
+  password?: string
 }

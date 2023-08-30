@@ -11,170 +11,170 @@ export interface Config {}
  * via the `definition` "fields-relationship".
  */
 export interface FieldsRelationship {
-  id: string;
-  relationship?: string | RelationOne;
-  relationshipHasMany?: string[] | RelationOne[];
+  id: string
+  relationship?: string | RelationOne
+  relationshipHasMany?: string[] | RelationOne[]
   relationshipMultiple?:
     | {
-        value: string | RelationOne;
-        relationTo: 'relation-one';
+        value: string | RelationOne
+        relationTo: 'relation-one'
       }
     | {
-        value: string | RelationTwo;
-        relationTo: 'relation-two';
-      };
+        value: string | RelationTwo
+        relationTo: 'relation-two'
+      }
   relationshipHasManyMultiple?:
     | (
         | {
-            value: string;
-            relationTo: 'relation-one';
+            value: string
+            relationTo: 'relation-one'
           }
         | {
-            value: string;
-            relationTo: 'relation-two';
+            value: string
+            relationTo: 'relation-two'
           }
       )[]
     | (
         | {
-            value: RelationOne;
-            relationTo: 'relation-one';
+            value: RelationOne
+            relationTo: 'relation-one'
           }
         | {
-            value: RelationTwo;
-            relationTo: 'relation-two';
+            value: RelationTwo
+            relationTo: 'relation-two'
           }
-      )[];
-  relationshipRestricted?: string | RelationRestricted;
-  relationshipWithTitle?: string | RelationWithTitle;
-  relationshipFiltered?: string | RelationOne;
+      )[]
+  relationshipRestricted?: string | RelationRestricted
+  relationshipWithTitle?: string | RelationWithTitle
+  relationshipFiltered?: string | RelationOne
   relationshipManyFiltered?:
     | (
         | {
-            value: string;
-            relationTo: 'relation-with-title';
+            value: string
+            relationTo: 'relation-with-title'
           }
         | {
-            value: string;
-            relationTo: 'relation-one';
+            value: string
+            relationTo: 'relation-one'
           }
       )[]
     | (
         | {
-            value: RelationWithTitle;
-            relationTo: 'relation-with-title';
+            value: RelationWithTitle
+            relationTo: 'relation-with-title'
           }
         | {
-            value: RelationOne;
-            relationTo: 'relation-one';
+            value: RelationOne
+            relationTo: 'relation-one'
           }
-      )[];
-  filter?: string;
-  createdAt: string;
-  updatedAt: string;
+      )[]
+  filter?: string
+  createdAt: string
+  updatedAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-one".
  */
 export interface RelationOne {
-  id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name?: string
+  createdAt: string
+  updatedAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-two".
  */
 export interface RelationTwo {
-  id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name?: string
+  createdAt: string
+  updatedAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-restricted".
  */
 export interface RelationRestricted {
-  id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name?: string
+  createdAt: string
+  updatedAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-with-title".
  */
 export interface RelationWithTitle {
-  id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name?: string
+  createdAt: string
+  updatedAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "relation-updated-externally".
  */
 export interface RelationUpdatedExternally {
-  id: string;
-  relationPrePopulate?: string | Collection1;
-  relationHasMany?: string[] | Collection1[];
+  id: string
+  relationPrePopulate?: string | Collection1
+  relationHasMany?: string[] | Collection1[]
   relationToManyHasMany?:
     | (
         | {
-            value: string;
-            relationTo: 'collection-1';
+            value: string
+            relationTo: 'collection-1'
           }
         | {
-            value: string;
-            relationTo: 'collection-2';
+            value: string
+            relationTo: 'collection-2'
           }
       )[]
     | (
         | {
-            value: Collection1;
-            relationTo: 'collection-1';
+            value: Collection1
+            relationTo: 'collection-1'
           }
         | {
-            value: Collection2;
-            relationTo: 'collection-2';
+            value: Collection2
+            relationTo: 'collection-2'
           }
-      )[];
-  createdAt: string;
-  updatedAt: string;
+      )[]
+  createdAt: string
+  updatedAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-1".
  */
 export interface Collection1 {
-  id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name?: string
+  createdAt: string
+  updatedAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collection-2".
  */
 export interface Collection2 {
-  id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name?: string
+  createdAt: string
+  updatedAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
+  createdAt: string
+  updatedAt: string
 }

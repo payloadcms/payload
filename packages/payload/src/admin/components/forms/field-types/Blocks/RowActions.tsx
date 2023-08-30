@@ -1,11 +1,11 @@
-import { useModal } from '@faceless-ui/modal';
-import React from 'react';
+import { useModal } from '@faceless-ui/modal'
+import React from 'react'
 
-import type { Block, Labels } from '../../../../../fields/config/types.js';
+import type { Block, Labels } from '../../../../../fields/config/types.js'
 
-import { ArrayAction } from '../../../elements/ArrayAction/index.js';
-import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug.js';
-import { BlocksDrawer } from './BlocksDrawer/index.js';
+import { ArrayAction } from '../../../elements/ArrayAction/index.js'
+import { useDrawerSlug } from '../../../elements/Drawer/useDrawerSlug.js'
+import { BlocksDrawer } from './BlocksDrawer/index.js'
 
 export const RowActions: React.FC<{
   addRow: (rowIndex: number, blockType: string) => void
@@ -30,21 +30,21 @@ export const RowActions: React.FC<{
     removeRow,
     rowCount,
     rowIndex,
-  } = props;
+  } = props
 
-  const { closeModal, openModal } = useModal();
-  const drawerSlug = useDrawerSlug('blocks-drawer');
+  const { closeModal, openModal } = useModal()
+  const drawerSlug = useDrawerSlug('blocks-drawer')
 
-  const [indexToAdd, setIndexToAdd] = React.useState<null | number>(null);
+  const [indexToAdd, setIndexToAdd] = React.useState<null | number>(null)
 
   return (
     <React.Fragment>
       <BlocksDrawer
         addRow={(_, rowBlockType) => {
           if (typeof addRow === 'function') {
-            addRow(indexToAdd, rowBlockType);
+            addRow(indexToAdd, rowBlockType)
           }
-          closeModal(drawerSlug);
+          closeModal(drawerSlug)
         }}
         addRowIndex={rowIndex}
         blocks={blocks}
@@ -53,8 +53,8 @@ export const RowActions: React.FC<{
       />
       <ArrayAction
         addRow={(index) => {
-          setIndexToAdd(index);
-          openModal(drawerSlug);
+          setIndexToAdd(index)
+          openModal(drawerSlug)
         }}
         duplicateRow={() => duplicateRow(rowIndex, blockType)}
         hasMaxRows={hasMaxRows}
@@ -64,5 +64,5 @@ export const RowActions: React.FC<{
         rowCount={rowCount}
       />
     </React.Fragment>
-  );
-};
+  )
+}

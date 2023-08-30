@@ -1,11 +1,9 @@
-import React from 'react';
+import React from 'react'
 
-import ItalicIcon from '../../../../../icons/Italic/index.js';
-import LeafButton from '../Button.js';
+import ItalicIcon from '../../../../../icons/Italic/index.js'
+import LeafButton from '../Button.js'
 
-const Italic = ({ attributes, children }) => (
-  <em {...attributes}>{children}</em>
-);
+const Italic = ({ attributes, children }) => <em {...attributes}>{children}</em>
 
 const italic = {
   Button: () => (
@@ -14,6 +12,6 @@ const italic = {
     </LeafButton>
   ),
   Leaf: Italic,
-};
+}
 
-export default italic;
+export default italic

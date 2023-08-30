@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types.js';
+import type { CollectionConfig } from '../../../../src/collections/config/types.js'
 
 const RadioFields: CollectionConfig = {
   slug: 'radio-fields',
@@ -6,7 +6,8 @@ const RadioFields: CollectionConfig = {
     {
       name: 'radio',
       label: {
-        en: 'Radio en', es: 'Radio es',
+        en: 'Radio en',
+        es: 'Radio es',
       },
       type: 'radio',
       options: [
@@ -25,10 +26,10 @@ const RadioFields: CollectionConfig = {
       ],
     },
   ],
-};
+}
 
 export const radiosDoc = {
   radio: 'one',
-};
+}
 
-export default RadioFields;
+export default RadioFields

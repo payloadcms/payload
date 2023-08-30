@@ -1,23 +1,23 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 
-import LogOut from '../../icons/LogOut/index.js';
-import { useConfig } from '../../utilities/Config/index.js';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent/index.js';
+import LogOut from '../../icons/LogOut/index.js'
+import { useConfig } from '../../utilities/Config/index.js'
+import RenderCustomComponent from '../../utilities/RenderCustomComponent/index.js'
 
-const baseClass = 'nav';
+const baseClass = 'nav'
 
 const DefaultLogout = () => {
-  const { t } = useTranslation('authentication');
-  const config = useConfig();
+  const { t } = useTranslation('authentication')
+  const config = useConfig()
   const {
     admin: {
       components: { logout },
       logoutRoute,
     },
     routes: { admin },
-  } = config;
+  } = config
   return (
     <Link
       aria-label={t('logOut')}
@@ -26,8 +26,8 @@ const DefaultLogout = () => {
     >
       <LogOut />
     </Link>
-  );
-};
+  )
+}
 
 const Logout: React.FC = () => {
   const {
@@ -38,14 +38,9 @@ const Logout: React.FC = () => {
         },
       } = {},
     } = {},
-  } = useConfig();
+  } = useConfig()
 
-  return (
-    <RenderCustomComponent
-      CustomComponent={CustomLogout}
-      DefaultComponent={DefaultLogout}
-    />
-  );
-};
+  return <RenderCustomComponent CustomComponent={CustomLogout} DefaultComponent={DefaultLogout} />
+}
 
-export default Logout;
+export default Logout

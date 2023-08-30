@@ -1,22 +1,22 @@
-import path from 'path';
+import path from 'path'
 
-import payload from '../../src/index.js';
-import { initPayloadTest } from '../helpers/configHelpers.js';
-import { RESTClient } from '../helpers/rest.js';
-import configPromise, { pagesSlug } from './config.js';
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+import payload from '../../src/index.js'
+import { initPayloadTest } from '../helpers/configHelpers.js'
+import { RESTClient } from '../helpers/rest.js'
+import configPromise, { pagesSlug } from './config.js'
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
 
-import 'isomorphic-fetch';
+import 'isomorphic-fetch'
 
-let client;
+let client
 
 describe('Collections - Plugins', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
-    const config = await configPromise;
-    client = new RESTClient(config, { serverURL, defaultSlug: pagesSlug });
-    await client.login();
-  });
+    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
+    const config = await configPromise
+    client = new RESTClient(config, { serverURL, defaultSlug: pagesSlug })
+    await client.login()
+  })
 
   it('created pages collection', async () => {
     const { id } = await payload.create({
@@ -24,8 +24,8 @@ describe('Collections - Plugins', () => {
       data: {
         title: 'Test Page',
       },
-    });
+    })
 
-    expect(id).toEqual(expect.any(String));
-  });
-});
+    expect(id).toEqual(expect.any(String))
+  })
+})

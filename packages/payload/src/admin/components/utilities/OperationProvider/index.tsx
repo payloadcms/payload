@@ -1,7 +1,7 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext } from 'react'
 
-export const OperationContext = createContext(undefined);
+export const OperationContext = createContext(undefined)
 
 export type Operation = 'create' | 'update'
 
-export const useOperation = (): Operation | undefined => useContext(OperationContext);
+export const useOperation = (): Operation | undefined => useContext(OperationContext)

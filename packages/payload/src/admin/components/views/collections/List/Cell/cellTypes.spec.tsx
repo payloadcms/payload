@@ -1,23 +1,23 @@
-import { jest } from '@jest/globals';
-import { render } from '@testing-library/react';
-import React from 'react';
+import { jest } from '@jest/globals'
+import { render } from '@testing-library/react'
+import React from 'react'
 
-import type { BlockField, DateField, SelectField } from '../../../../../../fields/config/types.js';
+import type { BlockField, DateField, SelectField } from '../../../../../../fields/config/types.js'
 
-import BlocksCell from './field-types/Blocks/index.js';
-import Checkbox from './field-types/Checkbox/index.js';
-import DateCell from './field-types/Date/index.js';
-import Select from './field-types/Select/index.js';
-import Textarea from './field-types/Textarea/index.js';
+import BlocksCell from './field-types/Blocks/index.js'
+import Checkbox from './field-types/Checkbox/index.js'
+import DateCell from './field-types/Date/index.js'
+import Select from './field-types/Select/index.js'
+import Textarea from './field-types/Textarea/index.js'
 
 // unstable_mockModule is required for esm. See https://jestjs.io/docs/ecmascript-modules#module-mocking-in-esm
 jest.unstable_mockModule('../../../../utilities/Config', () => ({
-    useConfig: () => ({ admin: { dateFormat: 'MMMM do yyyy, h:mm a' } }),
-}));
+  useConfig: () => ({ admin: { dateFormat: 'MMMM do yyyy, h:mm a' } }),
+}))
 
 jest.unstable_mockModule('react-i18next', () => ({
   useTranslation: () => ({ t: (string) => string }),
-}));
+}))
 
 describe('Cell Types', () => {
   describe('Blocks', () => {
@@ -39,30 +39,21 @@ describe('Cell Types', () => {
       },
       name: 'blocks',
       type: 'blocks',
-    };
+    }
 
     it('renders multiple', () => {
-      const data = [
-        { blockType: 'number' },
-        { blockType: 'number' },
-      ];
-      const { container } = render(<BlocksCell
-        data={data}
-        field={field}
-      />);
-      const el = container.querySelector('span');
-      expect(el).toHaveTextContent('2 Blocks Content - Number, Number');
-    });
+      const data = [{ blockType: 'number' }, { blockType: 'number' }]
+      const { container } = render(<BlocksCell data={data} field={field} />)
+      const el = container.querySelector('span')
+      expect(el).toHaveTextContent('2 Blocks Content - Number, Number')
+    })
 
     it('renders zero', () => {
-      const data = [];
-      const { container } = render(<BlocksCell
-        data={data}
-        field={field}
-      />);
-      const el = container.querySelector('span');
-      expect(el).toHaveTextContent('0 Blocks Content');
-    });
+      const data = []
+      const { container } = render(<BlocksCell data={data} field={field} />)
+      const el = container.querySelector('span')
+      expect(el).toHaveTextContent('0 Blocks Content')
+    })
 
     it('renders "and X more" if over maximum of 5', () => {
       const data = [
@@ -72,19 +63,16 @@ describe('Cell Types', () => {
         { blockType: 'number' },
         { blockType: 'number' },
         { blockType: 'number' },
-      ];
+      ]
 
-      const { container } = render(<BlocksCell
-        data={data}
-        field={field}
-      />);
-      const el = container.querySelector('span');
-      expect(el).toHaveTextContent('fields:itemsAndMore');
-    });
-  });
+      const { container } = render(<BlocksCell data={data} field={field} />)
+      const el = container.querySelector('span')
+      expect(el).toHaveTextContent('fields:itemsAndMore')
+    })
+  })
 
-
-  describe.skip('Date', () => { // TODO: Fix this test. It's failing in esm because the mocking does not work.
+  describe.skip('Date', () => {
+    // TODO: Fix this test. It's failing in esm because the mocking does not work.
     const field: DateField = {
       admin: {
         date: {
@@ -93,106 +81,95 @@ describe('Cell Types', () => {
       },
       name: 'dayOnly',
       type: 'date',
-    };
+    }
 
     it('renders date', () => {
-      const timeStamp = '2020-10-06T14:07:39.033Z';
-      const { container } = render(<DateCell
-        data={timeStamp}
-        field={field}
-      />);
-      const dateMatch = /October\s6th\s2020,\s\d{1,2}:07\s[A|P]M/; // Had to account for timezones in CI
-      const el = container.querySelector('span');
-      expect(el.textContent).toMatch(dateMatch);
-    });
+      const timeStamp = '2020-10-06T14:07:39.033Z'
+      const { container } = render(<DateCell data={timeStamp} field={field} />)
+      const dateMatch = /October\s6th\s2020,\s\d{1,2}:07\s[A|P]M/ // Had to account for timezones in CI
+      const el = container.querySelector('span')
+      expect(el.textContent).toMatch(dateMatch)
+    })
 
     it('handles undefined', () => {
-      const timeStamp = undefined;
-      const { container } = render(<DateCell
-        data={timeStamp}
-        field={field}
-      />);
-      const el = container.querySelector('span');
-      expect(el.textContent).toBe('');
-    });
-  });
+      const timeStamp = undefined
+      const { container } = render(<DateCell data={timeStamp} field={field} />)
+      const el = container.querySelector('span')
+      expect(el.textContent).toBe('')
+    })
+  })
 
   describe('Checkbox', () => {
     it('renders true', () => {
-      const { container } = render(<Checkbox data />);
-      const el = container.querySelector('span');
-      expect(el).toHaveTextContent('true');
-    });
+      const { container } = render(<Checkbox data />)
+      const el = container.querySelector('span')
+      expect(el).toHaveTextContent('true')
+    })
     it('renders false', () => {
-      const { container } = render(<Checkbox data={false} />);
-      const el = container.querySelector('span');
-      expect(el).toHaveTextContent('false');
-    });
-  });
+      const { container } = render(<Checkbox data={false} />)
+      const el = container.querySelector('span')
+      expect(el).toHaveTextContent('false')
+    })
+  })
 
   describe('Textarea', () => {
     it('renders data', () => {
-      const { container } = render(<Textarea data="data" />);
-      const el = container.querySelector('span');
-      expect(el).toHaveTextContent('data');
-    });
+      const { container } = render(<Textarea data="data" />)
+      const el = container.querySelector('span')
+      expect(el).toHaveTextContent('data')
+    })
     it('handle undefined - bug/13', () => {
-      const { container } = render(<Textarea data={undefined} />);
-      const el = container.querySelector('span');
-      expect(el).toHaveTextContent('');
-    });
-  });
+      const { container } = render(<Textarea data={undefined} />)
+      const el = container.querySelector('span')
+      expect(el).toHaveTextContent('')
+    })
+  })
   describe('Select', () => {
     const fieldWithOptionsObject: SelectField = {
       name: 'selectObject',
-      options: [{
-        label: 'One',
-        value: 'one',
-      }, {
-        label: 'Two',
-        value: 'two',
-      }],
+      options: [
+        {
+          label: 'One',
+          value: 'one',
+        },
+        {
+          label: 'Two',
+          value: 'two',
+        },
+      ],
       type: 'select',
-    };
+    }
     const fieldWithStringsOptions: SelectField = {
       name: 'selectString',
       options: ['blue', 'green', 'yellow'],
       type: 'select',
-    };
+    }
     it('renders options objects', () => {
-      const { container } = render(<Select
-        data="one"
-        field={fieldWithOptionsObject}
-      />);
-      const el = container.querySelector('span');
-      expect(el).toHaveTextContent('One');
-    });
+      const { container } = render(<Select data="one" field={fieldWithOptionsObject} />)
+      const el = container.querySelector('span')
+      expect(el).toHaveTextContent('One')
+    })
     it('renders option strings', () => {
-      const { container } = render(<Select
-        data="blue"
-        field={fieldWithStringsOptions}
-      />);
-      const el = container.querySelector('span');
-      expect(el).toHaveTextContent('blue');
-    });
+      const { container } = render(<Select data="blue" field={fieldWithStringsOptions} />)
+      const el = container.querySelector('span')
+      expect(el).toHaveTextContent('blue')
+    })
 
     describe('HasMany', () => {
       it('renders options objects', () => {
-        const { container } = render(<Select
-          data={['one', 'two']}
-          field={fieldWithOptionsObject}
-        />);
-        const el = container.querySelector('span');
-        expect(el).toHaveTextContent('One, Two');
-      });
+        const { container } = render(
+          <Select data={['one', 'two']} field={fieldWithOptionsObject} />,
+        )
+        const el = container.querySelector('span')
+        expect(el).toHaveTextContent('One, Two')
+      })
       it('renders option strings', () => {
-        const { container } = render(<Select
-          data={['blue', 'green']}
-          field={fieldWithStringsOptions}
-        />);
-        const el = container.querySelector('span');
-        expect(el).toHaveTextContent('blue, green');
-      });
-    });
-  });
-});
+        const { container } = render(
+          <Select data={['blue', 'green']} field={fieldWithStringsOptions} />,
+        )
+        const el = container.querySelector('span')
+        expect(el).toHaveTextContent('blue, green')
+      })
+    })
+  })
+})

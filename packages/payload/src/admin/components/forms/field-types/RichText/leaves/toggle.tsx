@@ -1,15 +1,15 @@
-import { Editor } from 'slate';
+import { Editor } from 'slate'
 
-import isLeafActive from './isActive.js';
+import isLeafActive from './isActive.js'
 
 const toggleLeaf = (editor, format) => {
-  const isActive = isLeafActive(editor, format);
+  const isActive = isLeafActive(editor, format)
 
   if (isActive) {
-    Editor.removeMark(editor, format);
+    Editor.removeMark(editor, format)
   } else {
-    Editor.addMark(editor, format, true);
+    Editor.addMark(editor, format, true)
   }
-};
+}
 
-export default toggleLeaf;
+export default toggleLeaf

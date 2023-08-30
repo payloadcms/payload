@@ -1,27 +1,27 @@
-import path from 'path';
+import path from 'path'
 
-import getFileByPath from '../../src/uploads/getFileByPath.js';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
-import { devUser } from '../credentials.js';
-import removeFiles from '../helpers/removeFiles.js';
-import { Uploads1 } from './collections/Upload1/index.js';
-import Uploads2 from './collections/Upload2/index.js';
+import getFileByPath from '../../src/uploads/getFileByPath.js'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import removeFiles from '../helpers/removeFiles.js'
+import { Uploads1 } from './collections/Upload1/index.js'
+import Uploads2 from './collections/Upload2/index.js'
 import AdminThumbnailCol from './collections/admin-thumbnail/index.js'
-const _dirname = path.dirname(new URL(import.meta.url).pathname);
+const _dirname = path.dirname(new URL(import.meta.url).pathname)
 
-export const mediaSlug = 'media';
+export const mediaSlug = 'media'
 
-export const relationSlug = 'relation';
+export const relationSlug = 'relation'
 
-export const audioSlug = 'audio';
+export const audioSlug = 'audio'
 
-export const enlargeSlug = 'enlarge';
+export const enlargeSlug = 'enlarge'
 
-export const reduceSlug = 'reduce';
+export const reduceSlug = 'reduce'
 
-export const adminThumbnailSlug = 'admin-thumbnail';
+export const adminThumbnailSlug = 'admin-thumbnail'
 
-const mockModulePath = path.resolve(_dirname, './mocks/mockFSModule.js');
+const mockModulePath = path.resolve(_dirname, './mocks/mockFSModule.js')
 
 export default buildConfigWithDefaults({
   admin: {
@@ -315,8 +315,8 @@ export default buildConfigWithDefaults({
     AdminThumbnailCol,
   ],
   onInit: async (payload) => {
-    const uploadsDir = path.resolve(_dirname, './media');
-    removeFiles(path.normalize(uploadsDir));
+    const uploadsDir = path.resolve(_dirname, './media')
+    removeFiles(path.normalize(uploadsDir))
 
     await payload.create({
       collection: 'users',
@@ -324,41 +324,41 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
 
     // Create image
-    const imageFilePath = path.resolve(_dirname, './image.png');
-    const imageFile = await getFileByPath(imageFilePath);
+    const imageFilePath = path.resolve(_dirname, './image.png')
+    const imageFile = await getFileByPath(imageFilePath)
 
     const { id: uploadedImage } = await payload.create({
       collection: mediaSlug,
       data: {},
       file: imageFile,
-    });
+    })
 
     await payload.create({
       collection: relationSlug,
       data: {
         image: uploadedImage,
       },
-    });
+    })
 
     // Create audio
-    const audioFilePath = path.resolve(_dirname, './audio.mp3');
-    const audioFile = await getFileByPath(audioFilePath);
+    const audioFilePath = path.resolve(_dirname, './audio.mp3')
+    const audioFile = await getFileByPath(audioFilePath)
 
     const file = await payload.create({
       collection: mediaSlug,
       data: {},
       file: audioFile,
-    });
+    })
 
     await payload.create({
       collection: audioSlug,
       data: {
         audio: file.id,
       },
-    });
+    })
 
     // Create admin thumbnail media
     await payload.create({
@@ -368,7 +368,7 @@ export default buildConfigWithDefaults({
         ...audioFile,
         name: 'audio-thumbnail.mp3', // Override to avoid conflicts
       },
-    });
+    })
 
     await payload.create({
       collection: AdminThumbnailCol.slug,
@@ -377,6 +377,6 @@ export default buildConfigWithDefaults({
         ...imageFile,
         name: `thumb-${imageFile.name}`,
       },
-    });
+    })
   },
-});
+})

@@ -1,11 +1,11 @@
-import React, { useCallback } from 'react';
+import React, { useCallback } from 'react'
 
-import type { Props } from './types.js';
+import type { Props } from './types.js'
 
-import { radio } from '../../../../../fields/validations.js';
-import useField from '../../useField/index.js';
-import withCondition from '../../withCondition/index.js';
-import RadioGroupInput from './Input.js';
+import { radio } from '../../../../../fields/validations.js'
+import useField from '../../useField/index.js'
+import withCondition from '../../withCondition/index.js'
+import RadioGroupInput from './Input.js'
 
 const RadioGroup: React.FC<Props> = (props) => {
   const {
@@ -24,24 +24,22 @@ const RadioGroup: React.FC<Props> = (props) => {
     path: pathFromProps,
     required,
     validate = radio,
-  } = props;
+  } = props
 
-  const path = pathFromProps || name;
+  const path = pathFromProps || name
 
-  const memoizedValidate = useCallback((value, validationOptions) => {
-    return validate(value, { ...validationOptions, options, required });
-  }, [validate, options, required]);
+  const memoizedValidate = useCallback(
+    (value, validationOptions) => {
+      return validate(value, { ...validationOptions, options, required })
+    },
+    [validate, options, required],
+  )
 
-  const {
-    errorMessage,
-    setValue,
-    showError,
-    value,
-  } = useField<string>({
+  const { errorMessage, setValue, showError, value } = useField<string>({
     condition,
     path,
     validate: memoizedValidate,
-  });
+  })
 
   return (
     <RadioGroupInput
@@ -60,7 +58,7 @@ const RadioGroup: React.FC<Props> = (props) => {
       value={value}
       width={width}
     />
-  );
-};
+  )
+}
 
-export default withCondition(RadioGroup);
+export default withCondition(RadioGroup)

@@ -1,27 +1,27 @@
-import path from 'path';
+import path from 'path'
 
-import payload from '../../src/index.js';
-import { initPayloadTest } from '../helpers/configHelpers.js';
-import configPromise from './config.js';
+import payload from '../../src/index.js'
+import { initPayloadTest } from '../helpers/configHelpers.js'
+import configPromise from './config.js'
 
-let collection: string;
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+let collection: string
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
 
 describe('array-update', () => {
   beforeAll(async () => {
-    const config = await configPromise;
-    collection = config.collections[0]?.slug;
-    await initPayloadTest({ __dirname });
-  });
+    const config = await configPromise
+    collection = config.collections[0]?.slug
+    await initPayloadTest({ __dirname })
+  })
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload);
+      await payload.db.destroy(payload)
     }
-  });
+  })
 
   it('should persist existing array-based data while updating and passing row ID', async () => {
-    const originalText = 'some optional text';
+    const originalText = 'some optional text'
 
     const doc = await payload.create({
       collection,
@@ -37,16 +37,16 @@ describe('array-update', () => {
           },
         ],
       },
-    });
+    })
 
-    const arrayWithExistingValues = [...doc.arrayOfFields];
+    const arrayWithExistingValues = [...doc.arrayOfFields]
 
-    const updatedText = 'this is some new text for the first item in array';
+    const updatedText = 'this is some new text for the first item in array'
 
     arrayWithExistingValues[0] = {
       id: arrayWithExistingValues[0].id,
       required: updatedText,
-    };
+    }
 
     const updatedDoc = await payload.update({
       id: doc.id,
@@ -54,21 +54,21 @@ describe('array-update', () => {
       data: {
         arrayOfFields: arrayWithExistingValues,
       },
-    });
+    })
 
     expect(updatedDoc.arrayOfFields?.[0]).toMatchObject({
       required: updatedText,
       optional: originalText,
-    });
-  });
+    })
+  })
 
   it('should disregard existing array-based data while updating and NOT passing row ID', async () => {
-    const updatedText = 'here is some new text';
+    const updatedText = 'here is some new text'
 
     const secondArrayItem = {
       required: 'test',
       optional: 'optional test',
-    };
+    }
 
     const doc = await payload.create({
       collection,
@@ -81,7 +81,7 @@ describe('array-update', () => {
           secondArrayItem,
         ],
       },
-    });
+    })
 
     const updatedDoc = await payload.update({
       id: doc.id,
@@ -99,11 +99,11 @@ describe('array-update', () => {
           },
         ],
       },
-    });
+    })
 
-    expect(updatedDoc.arrayOfFields?.[0].required).toStrictEqual(updatedText);
-    expect(updatedDoc.arrayOfFields?.[0].optional).toBeUndefined();
+    expect(updatedDoc.arrayOfFields?.[0].required).toStrictEqual(updatedText)
+    expect(updatedDoc.arrayOfFields?.[0].optional).toBeUndefined()
 
-    expect(updatedDoc.arrayOfFields?.[1]).toMatchObject(secondArrayItem);
-  });
-});
+    expect(updatedDoc.arrayOfFields?.[1]).toMatchObject(secondArrayItem)
+  })
+})

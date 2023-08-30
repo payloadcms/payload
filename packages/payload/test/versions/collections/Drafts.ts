@@ -1,7 +1,7 @@
-import type { CollectionConfig } from '../../../src/collections/config/types.js';
+import type { CollectionConfig } from '../../../src/collections/config/types.js'
 
-import { CustomPublishButton } from '../elements/CustomSaveButton/index.js';
-import { draftSlug } from '../shared.js';
+import { CustomPublishButton } from '../elements/CustomSaveButton/index.js'
+import { draftSlug } from '../shared.js'
 
 const DraftPosts: CollectionConfig = {
   slug: draftSlug,
@@ -22,7 +22,7 @@ const DraftPosts: CollectionConfig = {
   access: {
     read: ({ req: { user } }) => {
       if (user) {
-        return true;
+        return true
       }
 
       return {
@@ -38,7 +38,7 @@ const DraftPosts: CollectionConfig = {
             },
           },
         ],
-      };
+      }
     },
     readVersions: ({ req: { user } }) => Boolean(user),
   },
@@ -83,6 +83,6 @@ const DraftPosts: CollectionConfig = {
       ],
     },
   ],
-};
+}
 
-export default DraftPosts;
+export default DraftPosts

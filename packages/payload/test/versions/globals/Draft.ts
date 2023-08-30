@@ -1,6 +1,6 @@
-import type { GlobalConfig } from '../../../src/globals/config/types.js';
+import type { GlobalConfig } from '../../../src/globals/config/types.js'
 
-import { draftGlobalSlug } from '../shared.js';
+import { draftGlobalSlug } from '../shared.js'
 
 const DraftGlobal: GlobalConfig = {
   slug: draftGlobalSlug,
@@ -15,7 +15,7 @@ const DraftGlobal: GlobalConfig = {
   access: {
     read: ({ req: { user } }) => {
       if (user) {
-        return true;
+        return true
       }
 
       return {
@@ -31,7 +31,7 @@ const DraftGlobal: GlobalConfig = {
             },
           },
         ],
-      };
+      }
     },
   },
   fields: [
@@ -42,6 +42,6 @@ const DraftGlobal: GlobalConfig = {
       localized: true,
     },
   ],
-};
+}
 
-export default DraftGlobal;
+export default DraftGlobal

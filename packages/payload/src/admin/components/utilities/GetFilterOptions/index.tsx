@@ -1,15 +1,15 @@
-import equal from 'deep-equal';
-import { useEffect } from 'react';
+import equal from 'deep-equal'
+import { useEffect } from 'react'
 
-import type { FilterOptions } from '../../../../fields/config/types.js';
-import type { FilterOptionsResult } from '../../forms/field-types/Relationship/types.js';
+import type { FilterOptions } from '../../../../fields/config/types.js'
+import type { FilterOptionsResult } from '../../forms/field-types/Relationship/types.js'
 
-import { useAllFormFields } from '../../forms/Form/context.js';
-import getSiblingData from '../../forms/Form/getSiblingData.js';
-import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues.js';
-import { getFilterOptionsQuery } from '../../forms/field-types/getFilterOptionsQuery.js';
-import { useAuth } from '../Auth/index.js';
-import { useDocumentInfo } from '../DocumentInfo/index.js';
+import { useAllFormFields } from '../../forms/Form/context.js'
+import getSiblingData from '../../forms/Form/getSiblingData.js'
+import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues.js'
+import { getFilterOptionsQuery } from '../../forms/field-types/getFilterOptionsQuery.js'
+import { useAuth } from '../Auth/index.js'
+import { useDocumentInfo } from '../DocumentInfo/index.js'
 
 type Args = {
   filterOptions: FilterOptions
@@ -26,13 +26,13 @@ export const GetFilterOptions = ({
   relationTo,
   setFilterOptionsResult,
 }: Args): null => {
-  const [fields] = useAllFormFields();
-  const { id } = useDocumentInfo();
-  const { user } = useAuth();
+  const [fields] = useAllFormFields()
+  const { id } = useDocumentInfo()
+  const { user } = useAuth()
 
   useEffect(() => {
-    const data = reduceFieldsToValues(fields, true);
-    const siblingData = getSiblingData(fields, path);
+    const data = reduceFieldsToValues(fields, true)
+    const siblingData = getSiblingData(fields, path)
 
     const getFilterOptions = async () => {
       const newFilterOptionsResult = await getFilterOptionsQuery(filterOptions, {
@@ -41,13 +41,13 @@ export const GetFilterOptions = ({
         relationTo,
         siblingData,
         user,
-      });
+      })
 
       if (!equal(newFilterOptionsResult, filterOptionsResult)) {
-        setFilterOptionsResult(newFilterOptionsResult);
+        setFilterOptionsResult(newFilterOptionsResult)
       }
-    };
-    getFilterOptions();
+    }
+    getFilterOptions()
   }, [
     fields,
     filterOptions,
@@ -57,7 +57,7 @@ export const GetFilterOptions = ({
     path,
     filterOptionsResult,
     setFilterOptionsResult,
-  ]);
+  ])
 
-  return null;
-};
+  return null
+}

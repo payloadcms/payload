@@ -1,12 +1,12 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
-import AfterOperation from './collections/AfterOperation/index.js';
-import ChainingHooks from './collections/ChainingHooks/index.js';
-import ContextHooks from './collections/ContextHooks/index.js';
-import Hooks, { hooksSlug } from './collections/Hook/index.js';
-import NestedAfterReadHooks from './collections/NestedAfterReadHooks/index.js';
-import Relations from './collections/Relations/index.js';
-import TransformHooks from './collections/Transform/index.js';
-import Users, { seedHooksUsers } from './collections/Users/index.js';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import AfterOperation from './collections/AfterOperation/index.js'
+import ChainingHooks from './collections/ChainingHooks/index.js'
+import ContextHooks from './collections/ContextHooks/index.js'
+import Hooks, { hooksSlug } from './collections/Hook/index.js'
+import NestedAfterReadHooks from './collections/NestedAfterReadHooks/index.js'
+import Relations from './collections/Relations/index.js'
+import TransformHooks from './collections/Transform/index.js'
+import Users, { seedHooksUsers } from './collections/Users/index.js'
 
 export default buildConfigWithDefaults({
   collections: [
@@ -20,7 +20,7 @@ export default buildConfigWithDefaults({
     Users,
   ],
   onInit: async (payload) => {
-    await seedHooksUsers(payload);
+    await seedHooksUsers(payload)
     await payload.create({
       collection: hooksSlug,
       data: {
@@ -35,6 +35,6 @@ export default buildConfigWithDefaults({
         fieldAfterRead: false,
         collectionAfterRead: false,
       },
-    });
+    })
   },
-});
+})

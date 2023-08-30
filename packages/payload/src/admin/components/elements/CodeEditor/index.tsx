@@ -1,20 +1,17 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy } from 'react'
 
-import type { Props } from './types.js';
+import type { Props } from './types.js'
 
-import { ShimmerEffect } from '../ShimmerEffect/index.js';
+import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
-const LazyEditor = lazy(() => import('./CodeEditor.js'));
+const LazyEditor = lazy(() => import('./CodeEditor.js'))
 
 export const CodeEditor: React.FC<Props> = (props) => {
-  const { height = '35vh' } = props;
+  const { height = '35vh' } = props
 
   return (
     <Suspense fallback={<ShimmerEffect height={height} />}>
-      <LazyEditor
-        {...props}
-        height={height}
-      />
+      <LazyEditor {...props} height={height} />
     </Suspense>
-  );
-};
+  )
+}

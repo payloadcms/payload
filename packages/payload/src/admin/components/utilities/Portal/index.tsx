@@ -1,7 +1,8 @@
-import type React from 'react';
+import type React from 'react'
 
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom'
 
-const Portal = ({ children }: { children: React.ReactNode}): React.ReactPortal => ReactDOM.createPortal(children, document.getElementById('portal'));
+const Portal = ({ children }: { children: React.ReactNode }): React.ReactPortal =>
+  ReactDOM.createPortal(children, document.getElementById('portal'))
 
-export default Portal;
+export default Portal

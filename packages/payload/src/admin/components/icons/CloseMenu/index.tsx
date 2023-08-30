@@ -1,6 +1,6 @@
-import React from 'react';
+import React from 'react'
 
-import './index.scss';
+import './index.scss'
 
 const CloseMenu: React.FC = () => (
   <svg
@@ -26,6 +26,6 @@ const CloseMenu: React.FC = () => (
       y="5.42892"
     />
   </svg>
-);
+)
 
-export default CloseMenu;
+export default CloseMenu

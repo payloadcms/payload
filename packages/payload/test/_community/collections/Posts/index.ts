@@ -1,8 +1,8 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types.js';
+import type { CollectionConfig } from '../../../../src/collections/config/types.js'
 
-import { mediaSlug } from '../Media/index.js';
+import { mediaSlug } from '../Media/index.js'
 
-export const postsSlug = 'posts';
+export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
@@ -21,4 +21,4 @@ export const PostsCollection: CollectionConfig = {
       },
     },
   ],
-};
+}

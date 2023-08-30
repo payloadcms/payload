@@ -1,6 +1,6 @@
-import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js';
+import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
 
-export const collectionSlug = 'users';
+export const collectionSlug = 'users'
 
 export default buildConfigWithDefaults({
   debug: true,
@@ -27,4 +27,4 @@ export default buildConfigWithDefaults({
       ],
     },
   ],
-});
+})

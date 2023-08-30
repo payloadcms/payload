@@ -1,12 +1,12 @@
-import React from 'react';
+import React from 'react'
 
-import type { TabsField } from '../../../../../../../fields/config/types.js';
-import type { Props } from '../types.js';
+import type { TabsField } from '../../../../../../../fields/config/types.js'
+import type { Props } from '../types.js'
 
-import RenderFieldsToDiff from '../../index.js';
-import Nested from '../Nested/index.js';
+import RenderFieldsToDiff from '../../index.js'
+import Nested from '../Nested/index.js'
 
-const baseClass = 'tabs-diff';
+const baseClass = 'tabs-diff'
 
 const Tabs: React.FC<Props & { field: TabsField }> = ({
   comparison,
@@ -30,7 +30,7 @@ const Tabs: React.FC<Props & { field: TabsField }> = ({
               permissions={permissions}
               version={version?.[tab.name]}
             />
-          );
+          )
         }
 
         return (
@@ -43,10 +43,10 @@ const Tabs: React.FC<Props & { field: TabsField }> = ({
             locales={locales}
             version={version}
           />
-        );
+        )
       })}
     </div>
   </div>
-);
+)
 
-export default Tabs;
+export default Tabs

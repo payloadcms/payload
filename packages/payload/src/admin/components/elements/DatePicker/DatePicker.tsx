@@ -1,20 +1,19 @@
-import * as Locales from "date-fns/locale/index.js";
-import React from 'react';
-import DatePicker, { registerLocale } from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { useTranslation } from 'react-i18next';
+import * as Locales from 'date-fns/locale/index.js'
+import React from 'react'
+import DatePicker, { registerLocale } from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import { useTranslation } from 'react-i18next'
 
-import type { Props } from './types.js';
+import type { Props } from './types.js'
 
-import { getSupportedDateLocale } from '../../../utilities/formatDate/getSupportedDateLocale.js';
-import CalendarIcon from '../../icons/Calendar/index.js';
-import XIcon from '../../icons/X/index.js';
-import './index.scss';
+import { getSupportedDateLocale } from '../../../utilities/formatDate/getSupportedDateLocale.js'
+import CalendarIcon from '../../icons/Calendar/index.js'
+import XIcon from '../../icons/X/index.js'
+import './index.scss'
 
-const ReactDatePicker = DatePicker as any;
+const ReactDatePicker = DatePicker as any
 
-
-const baseClass = 'date-time-picker';
+const baseClass = 'date-time-picker'
 
 const DateTime: React.FC<Props> = (props) => {
   const {
@@ -31,27 +30,27 @@ const DateTime: React.FC<Props> = (props) => {
     timeFormat = 'h:mm aa',
     timeIntervals = 30,
     value,
-  } = props;
+  } = props
 
   // Use the user's AdminUI language preference for the locale
-  const { i18n } = useTranslation();
-  const locale = getSupportedDateLocale(i18n.language);
+  const { i18n } = useTranslation()
+  const locale = getSupportedDateLocale(i18n.language)
 
   try {
-    registerLocale(locale, Locales[locale]);
+    registerLocale(locale, Locales[locale])
   } catch (e) {
-    console.warn(`Could not find DatePicker locale for ${locale}`);
+    console.warn(`Could not find DatePicker locale for ${locale}`)
   }
 
-  let dateFormat = customDisplayFormat;
+  let dateFormat = customDisplayFormat
 
   if (!customDisplayFormat) {
     // when no displayFormat is provided, determine format based on the picker appearance
-    if (pickerAppearance === 'default') dateFormat = 'MM/dd/yyyy';
-    else if (pickerAppearance === 'dayAndTime') dateFormat = 'MMM d, yyy h:mm a';
-    else if (pickerAppearance === 'timeOnly') dateFormat = 'h:mm a';
-    else if (pickerAppearance === 'dayOnly') dateFormat = 'MMM dd';
-    else if (pickerAppearance === 'monthOnly') dateFormat = 'MMMM';
+    if (pickerAppearance === 'default') dateFormat = 'MM/dd/yyyy'
+    else if (pickerAppearance === 'dayAndTime') dateFormat = 'MMM d, yyy h:mm a'
+    else if (pickerAppearance === 'timeOnly') dateFormat = 'h:mm a'
+    else if (pickerAppearance === 'dayOnly') dateFormat = 'MMM dd'
+    else if (pickerAppearance === 'monthOnly') dateFormat = 'MMMM'
   }
 
   const dateTimePickerProps = {
@@ -71,12 +70,11 @@ const DateTime: React.FC<Props> = (props) => {
     showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
     timeFormat,
     timeIntervals,
-  };
+  }
 
-  const classes = [
-    baseClass,
-    `${baseClass}__appearance--${pickerAppearance}`,
-  ].filter(Boolean).join(' ');
+  const classes = [baseClass, `${baseClass}__appearance--${pickerAppearance}`]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <div className={classes}>
@@ -109,7 +107,7 @@ const DateTime: React.FC<Props> = (props) => {
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DateTime;
+export default DateTime

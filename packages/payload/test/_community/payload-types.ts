@@ -7,44 +7,44 @@
 
 export interface Config {
   collections: {
-    posts: Post;
-    media: Media;
-    users: User;
-  };
+    posts: Post
+    media: Media
+    users: User
+  }
   globals: {
-    menu: Menu;
-  };
+    menu: Menu
+  }
 }
 export interface Post {
-  id: string;
-  text?: string;
-  associatedMedia?: string | Media;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  text?: string
+  associatedMedia?: string | Media
+  updatedAt: string
+  createdAt: string
 }
 export interface Media {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string;
-  filename?: string;
-  mimeType?: string;
-  filesize?: number;
-  width?: number;
-  height?: number;
+  id: string
+  updatedAt: string
+  createdAt: string
+  url?: string
+  filename?: string
+  mimeType?: string
+  filesize?: number
+  width?: number
+  height?: number
 }
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  password?: string;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
+  password?: string
 }
 export interface Menu {
-  id: string;
-  globalText?: string;
+  id: string
+  globalText?: string
 }

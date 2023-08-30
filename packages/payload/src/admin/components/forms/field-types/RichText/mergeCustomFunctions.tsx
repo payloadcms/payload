@@ -1,8 +1,8 @@
 export default (enabledFunctions, builtInFunctions) => {
-  const formattedEnabledFunctions = [...enabledFunctions];
+  const formattedEnabledFunctions = [...enabledFunctions]
 
   if (enabledFunctions.indexOf('ul') > -1 || enabledFunctions.indexOf('ol') > -1) {
-    formattedEnabledFunctions.push('li');
+    formattedEnabledFunctions.push('li')
   }
 
   return formattedEnabledFunctions.reduce((resultingFunctions, func) => {
@@ -10,16 +10,16 @@ export default (enabledFunctions, builtInFunctions) => {
       return {
         ...resultingFunctions,
         [func.name]: func,
-      };
+      }
     }
 
     if (typeof func === 'string' && builtInFunctions[func]) {
       return {
         ...resultingFunctions,
         [func]: builtInFunctions[func],
-      };
+      }
     }
 
-    return resultingFunctions;
-  }, {});
-};
+    return resultingFunctions
+  }, {})
+}
