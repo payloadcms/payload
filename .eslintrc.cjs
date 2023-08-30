@@ -1,5 +1,11 @@
 /** @type {import('prettier').Config} */
 module.exports = {
   extends: ['@payloadcms'],
-  root: true,
+  overrides: [
+    {
+      extends: ['plugin:@typescript-eslint/disable-type-checked'],
+      files: ['*.js', '*.cjs'],
+    },
+  ],
+  root: true
 }
