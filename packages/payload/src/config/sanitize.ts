@@ -58,12 +58,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     // clone localization config so to not break everything
     const firstLocale = config.localization.locales[0]
     if (typeof firstLocale === 'string') {
-      ;(config.localization as SanitizedLocalizationConfig).localeCodes = [
+      config.localization.localeCodes = [
         ...(config.localization as unknown as LocalizationConfigWithNoLabels).locales,
       ]
 
       // is string[], so convert to Locale[]
-      ;(config.localization as SanitizedLocalizationConfig).locales = (
+      config.localization.locales = (
         config.localization as unknown as LocalizationConfigWithNoLabels
       ).locales.map((locale) => ({
         code: locale,
@@ -73,13 +73,11 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       }))
     } else {
       // is Locale[], so convert to string[] for localeCodes
-      ;(config.localization as SanitizedLocalizationConfig).localeCodes = (
-        config.localization as SanitizedLocalizationConfig
-      ).locales.reduce((locales, locale) => {
+      config.localization.localeCodes = config.localization.locales.reduce((locales, locale) => {
         locales.push(locale.code)
         return locales
       }, [] as string[])
-      ;(config.localization as SanitizedLocalizationConfig).locales = (
+      config.localization.locales = (
         config.localization as LocalizationConfigWithLabels
       ).locales.map((locale) => ({
         ...locale,

@@ -1,7 +1,7 @@
 .nav__controls {
-    font-family: monospace;
-    background-image: url('/placeholder.png');
+  font-family: monospace;
+  background-image: url('/placeholder.png');
 }
 .nav__controls:before {
-    content: 'custom-css';
+  content: 'custom-css';
 }

@@ -224,12 +224,12 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
                   <div className={`${baseClass}__select-collection-wrap`}>
                     <Label label={t('selectCollectionToBrowse')} />
                     <ReactSelect
-                      className={`${baseClass}__select-collection`}
-                      onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
                       options={enabledCollectionConfigs.map((coll) => ({
                         label: getTranslation(coll.labels.singular, i18n),
                         value: coll.slug,
                       }))}
+                      className={`${baseClass}__select-collection`}
+                      onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
                       value={selectedOption}
                     />
                   </div>

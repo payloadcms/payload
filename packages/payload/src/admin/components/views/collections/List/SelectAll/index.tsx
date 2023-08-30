@@ -10,10 +10,10 @@ const SelectAll: React.FC = () => {
 
   return (
     <CheckboxInput
-      aria-label={selectAll === SelectAllStatus.None ? t('selectAllRows') : t('deselectAllRows')}
       checked={
         selectAll === SelectAllStatus.AllInPage || selectAll === SelectAllStatus.AllAvailable
       }
+      aria-label={selectAll === SelectAllStatus.None ? t('selectAllRows') : t('deselectAllRows')}
       id="select-all"
       onToggle={() => toggleAll()}
       partialChecked={selectAll === SelectAllStatus.Some}

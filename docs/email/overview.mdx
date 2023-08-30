@@ -57,15 +57,16 @@ payload.init({
         rejectUnauthorized: false,
       },
     },
-    fromName: "hello",
-    fromAddress: "hello@example.com",
+    fromName: 'hello',
+    fromAddress: 'hello@example.com',
   },
   // ...
-});
+})
 ```
 
 <Banner type="warning">
-  It is best practice to avoid saving credentials or API keys directly in your code, use [environment variables](/docs/configuration/overview#using-environment-variables-in-your-config).
+  It is best practice to avoid saving credentials or API keys directly in your code, use
+  [environment variables](/docs/configuration/overview#using-environment-variables-in-your-config).
 </Banner>
 
 ### Use an email service
@@ -73,10 +74,10 @@ payload.init({
 Many third party mail providers are available and offer benefits beyond basic SMTP. As an example your payload init could look this if you wanted to use SendGrid.com though the same approach would work for any other [NodeMailer transports](https://nodemailer.com/transports/) shown here or provided by another third party.
 
 ```ts
-import payload from "payload";
-import nodemailerSendgrid from "nodemailer-sendgrid";
+import payload from 'payload'
+import nodemailerSendgrid from 'nodemailer-sendgrid'
 
-const sendGridAPIKey = process.env.SENDGRID_API_KEY;
+const sendGridAPIKey = process.env.SENDGRID_API_KEY
 
 payload.init({
   ...(sendGridAPIKey
@@ -85,12 +86,12 @@ payload.init({
           transportOptions: nodemailerSendgrid({
             apiKey: sendGridAPIKey,
           }),
-          fromName: "Admin",
-          fromAddress: "admin@example.com",
+          fromName: 'Admin',
+          fromAddress: 'admin@example.com',
         },
       }
     : {}),
-});
+})
 ```
 
 ### Use a custom NodeMailer transport
@@ -98,11 +99,11 @@ payload.init({
 To take full control of the mail transport you may wish to use `nodemailer.createTransport()` on your server and provide it to Payload init.
 
 ```ts
-import payload from "payload";
-import nodemailer from "nodemailer";
+import payload from 'payload'
+import nodemailer from 'nodemailer'
 
-const payload = require("payload");
-const nodemailer = require("nodemailer");
+const payload = require('payload')
+const nodemailer = require('nodemailer')
 
 const transport = await nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -111,16 +112,16 @@ const transport = await nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-});
+})
 
 payload.init({
   email: {
-    fromName: "Admin",
-    fromAddress: "admin@example.com",
+    fromName: 'Admin',
+    fromAddress: 'admin@example.com',
     transport,
   },
   // ...
-});
+})
 ```
 
 ### Sending Mail
@@ -136,12 +137,12 @@ To see ethereal credentials, add `logMockCredentials: true` to the email options
 ```ts
 payload.init({
   email: {
-    fromName: "Admin",
-    fromAddress: "admin@example.com",
+    fromName: 'Admin',
+    fromAddress: 'admin@example.com',
     logMockCredentials: true, // Optional
   },
   // ...
-});
+})
 ```
 
 **Console output when starting payload with a mock email instance and logMockCredentials: true**
@@ -160,7 +161,8 @@ payload.init({
 The mock email handler is used when payload is started with neither `transport` or `transportOptions` to know how to deliver email.
 
 <Banner type="warning">
-  The randomly generated email account username and password will be different each time the Payload server starts.
+  The randomly generated email account username and password will be different each time the Payload
+  server starts.
 </Banner>
 
 ### Using multiple mail providers

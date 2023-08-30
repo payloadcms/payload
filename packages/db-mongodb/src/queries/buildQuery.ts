@@ -1,7 +1,9 @@
-import { Where, Field } from 'payload/types';
-import { QueryError } from 'payload/errors';
-import { Payload } from 'payload';
-import { parseParams } from './parseParams.js';
+import type { Payload } from 'payload'
+import type { Field, Where } from 'payload/types'
+
+import { QueryError } from 'payload/errors'
+
+import { parseParams } from './parseParams.js'
 
 type GetBuildQueryPluginArgs = {
   collectionSlug?: string
@@ -9,50 +11,52 @@ type GetBuildQueryPluginArgs = {
 }
 
 export type BuildQueryArgs = {
-  payload: Payload
-  locale?: string
-  where: Where
   globalSlug?: string
+  locale?: string
+  payload: Payload
+  where: Where
 }
 
 // This plugin asynchronously builds a list of Mongoose query constraints
 // which can then be used in subsequent Mongoose queries.
-const getBuildQueryPlugin = ({
-  collectionSlug,
-  versionsFields,
-}: GetBuildQueryPluginArgs = {}) => {
+const getBuildQueryPlugin = ({ collectionSlug, versionsFields }: GetBuildQueryPluginArgs = {}) => {
   return function buildQueryPlugin(schema) {
-    const modifiedSchema = schema;
-    async function buildQuery({ payload, locale, where, globalSlug }: BuildQueryArgs): Promise<Record<string, unknown>> {
-      let fields = versionsFields;
+    const modifiedSchema = schema
+    async function buildQuery({
+      globalSlug,
+      locale,
+      payload,
+      where,
+    }: BuildQueryArgs): Promise<Record<string, unknown>> {
+      let fields = versionsFields
       if (!fields) {
         if (globalSlug) {
-          const globalConfig = payload.globals.config.find(({ slug }) => slug === globalSlug);
-          fields = globalConfig.fields;
+          const globalConfig = payload.globals.config.find(({ slug }) => slug === globalSlug)
+          fields = globalConfig.fields
         }
         if (collectionSlug) {
-          const collectionConfig = payload.collections[collectionSlug].config;
-          fields = collectionConfig.fields;
+          const collectionConfig = payload.collections[collectionSlug].config
+          fields = collectionConfig.fields
         }
       }
-      const errors = [];
+      const errors = []
       const result = await parseParams({
         collectionSlug,
         fields,
         globalSlug,
-        payload,
         locale,
+        payload,
         where,
-      });
+      })
 
       if (errors.length > 0) {
-        throw new QueryError(errors);
+        throw new QueryError(errors)
       }
 
-      return result;
+      return result
     }
-    modifiedSchema.statics.buildQuery = buildQuery;
-  };
-};
+    modifiedSchema.statics.buildQuery = buildQuery
+  }
+}
 
-export default getBuildQueryPlugin;
+export default getBuildQueryPlugin

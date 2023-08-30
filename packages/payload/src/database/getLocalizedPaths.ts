@@ -116,8 +116,7 @@ export async function getLocalizedPaths({
                 .join('.')
 
               if (nestedPathToQuery) {
-                const relatedCollection =
-                  payload.collections[matchedField.relationTo as string].config
+                const relatedCollection = payload.collections[matchedField.relationTo].config
 
                 // eslint-disable-next-line no-await-in-loop
                 const remainingPaths = await getLocalizedPaths({

@@ -7,5 +7,5 @@ module.exports = {
       files: ['*.js', '*.cjs'],
     },
   ],
-  root: true
+  root: true,
 }

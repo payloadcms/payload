@@ -73,7 +73,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
 
   let user = await payload.db.findOne<UserDoc>({
     collection: collectionConfig.slug,
-    where: { email: { equals: (data.email as string).toLowerCase() } },
+    where: { email: { equals: data.email.toLowerCase() } },
   })
 
   if (!user) return null

@@ -392,7 +392,7 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
         .map((err, invalid) => {
           return `${err} ${JSON.stringify(invalid)}`
         })
-        .join(', ')}` as string
+        .join(', ')}`
     }
   }
 

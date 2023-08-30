@@ -31,24 +31,30 @@ For example:
 const Customer: CollectionConfig = {
   slug: 'customers',
   hooks: {
-    beforeChange: [async ({ context, data }) => {
-      // assign the customerData to context for use later
-      context.customerData = await fetchCustomerData(data.customerID);
-      return {
-        ...data,
-        // some data we use here
-        name: context.customerData.name
-      };
-    }],
-    afterChange: [async ({ context, doc, req }) => {
-      // use context.customerData without needing to fetch it again
-      if (context.customerData.contacted === false) {
-        createTodo('Call Customer', context.customerData)
-      }
-    }],
+    beforeChange: [
+      async ({ context, data }) => {
+        // assign the customerData to context for use later
+        context.customerData = await fetchCustomerData(data.customerID)
+        return {
+          ...data,
+          // some data we use here
+          name: context.customerData.name,
+        }
+      },
+    ],
+    afterChange: [
+      async ({ context, doc, req }) => {
+        // use context.customerData without needing to fetch it again
+        if (context.customerData.contacted === false) {
+          createTodo('Call Customer', context.customerData)
+        }
+      },
+    ],
   },
-  fields: [ /* ... */  ],
-};
+  fields: [
+    /* ... */
+  ],
+}
 ```
 
 ### Preventing infinite loops
@@ -61,19 +67,23 @@ Bad example:
 const Customer: CollectionConfig = {
   slug: 'customers',
   hooks: {
-    afterChange: [async ({ doc }) => {
-      await payload.update({
-        // DANGER: updating the same slug as the collection in an afterChange will create an infinite loop!
-        collection: 'customers',
-        id: doc.id,
-        data: {
-          ...(await fetchCustomerData(data.customerID))
-        },
-      });
-    }],
+    afterChange: [
+      async ({ doc }) => {
+        await payload.update({
+          // DANGER: updating the same slug as the collection in an afterChange will create an infinite loop!
+          collection: 'customers',
+          id: doc.id,
+          data: {
+            ...(await fetchCustomerData(data.customerID)),
+          },
+        })
+      },
+    ],
   },
-  fields: [ /* ... */ ],
-};
+  fields: [
+    /* ... */
+  ],
+}
 ```
 
 Instead of the above, we need to tell the `afterChange` hook to not run again if it performs the update (and thus not update itself again). We can solve that with context.
@@ -84,26 +94,30 @@ Fixed example:
 const MyCollection: CollectionConfig = {
   slug: 'slug',
   hooks: {
-    afterChange: [async ({ context, doc }) => {
-      // return if flag was previously set
-      if (context.triggerAfterChange === false) {
-        return;
-      }
-      await payload.update({
-        collection: contextHooksSlug,
-        id: doc.id,
-        data: {
-          ...(await fetchCustomerData(data.customerID))
-        },
-        context: {
-          // set a flag to prevent from running again
-          triggerAfterChange: false,
-        },
-      });
-    }],
+    afterChange: [
+      async ({ context, doc }) => {
+        // return if flag was previously set
+        if (context.triggerAfterChange === false) {
+          return
+        }
+        await payload.update({
+          collection: contextHooksSlug,
+          id: doc.id,
+          data: {
+            ...(await fetchCustomerData(data.customerID)),
+          },
+          context: {
+            // set a flag to prevent from running again
+            triggerAfterChange: false,
+          },
+        })
+      },
+    ],
   },
-  fields: [ /* ... */ ],
-};
+  fields: [
+    /* ... */
+  ],
+}
 ```
 
 ## Typing context
@@ -113,12 +127,12 @@ The default typescript interface for `context` is `{ [key: string]: unknown }`. 
 This is known as "type augmentation" - a TypeScript feature which allows us to add types to existing objects. Simply put this in any .ts or .d.ts file:
 
 ```ts
-import { RequestContext as OriginalRequestContext } from 'payload';
+import { RequestContext as OriginalRequestContext } from 'payload'
 
 declare module 'payload' {
   // Create a new interface that merges your additional fields with the original one
   export interface RequestContext extends OriginalRequestContext {
-    myObject?: string;
+    myObject?: string
     // ...
   }
 }

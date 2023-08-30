@@ -1,10 +1,14 @@
-import type { ClientSession } from 'mongoose';
-import { MongooseAdapter } from './index.js';
+import type { ClientSession } from 'mongoose'
+
+import type { MongooseAdapter } from './index.js'
 
 /**
  * returns the session belonging to the transaction of the req.session if exists
  * @returns ClientSession
  */
-export function withSession(db: MongooseAdapter, transactionID?: string | number): { session: ClientSession } | object {
-  return db.sessions[transactionID] ? { session: db.sessions[transactionID] } : {};
+export function withSession(
+  db: MongooseAdapter,
+  transactionID?: number | string,
+): { session: ClientSession } | object {
+  return db.sessions[transactionID] ? { session: db.sessions[transactionID] } : {}
 }

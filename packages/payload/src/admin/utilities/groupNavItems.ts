@@ -63,11 +63,11 @@ export function groupNavItems(
     [
       {
         entities: [],
-        label: i18n.t('general:collections') as string,
+        label: i18n.t('general:collections'),
       },
       {
         entities: [],
-        label: i18n.t('general:globals') as string,
+        label: i18n.t('general:globals'),
       },
     ],
   )

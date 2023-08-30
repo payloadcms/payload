@@ -49,7 +49,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
           preferenceLocale && localization.localeCodes.indexOf(preferenceLocale) > -1
         if (isPreferenceInConfig) {
           setLocaleCode(preferenceLocale)
-          setLocale(findLocaleFromCode(localization, preferenceLocale as string))
+          setLocale(findLocaleFromCode(localization, preferenceLocale))
           return
         }
         setPreference('locale', defaultLocale)

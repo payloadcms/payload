@@ -82,12 +82,12 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                     )}
                   </header>
                   <RenderFields
-                    fieldSchema={fields}
-                    fieldTypes={fieldTypes}
                     filter={(field) =>
                       !field.admin.position ||
                       (field.admin.position && field.admin.position !== 'sidebar')
                     }
+                    fieldSchema={fields}
+                    fieldTypes={fieldTypes}
                     permissions={permissions.fields}
                     readOnly={!hasSavePermission}
                   />
@@ -182,7 +182,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                       {updatedAt && (
                         <li>
                           <div className={`${baseClass}__label`}>{t('lastModified')}</div>
-                          <div>{formatDate(updatedAt as string, dateFormat, i18n?.language)}</div>
+                          <div>{formatDate(updatedAt, dateFormat, i18n?.language)}</div>
                         </li>
                       )}
                     </ul>

@@ -7,7 +7,8 @@ keywords: deployment, production, config, configuration, documentation, Content 
 ---
 
 <Banner type="success">
-  So you've developed a Payload app, it's fully tested, and running great locally. Now it's time to launch. <strong>Awesome! Great work!</strong> Now, what's next?
+  So you've developed a Payload app, it's fully tested, and running great locally. Now it's time to
+  launch. <strong>Awesome! Great work!</strong> Now, what's next?
 </Banner>
 
 There are many ways to deploy Payload to a production environment. When evaluating how you will deploy Payload, you need to consider these main aspects:
@@ -35,7 +36,13 @@ When you initialize Payload, you provide it with a `secret` property. This prope
 Because _**you**_ are in complete control of who can do what with your data, you should double and triple-check that you wield that power responsibly before deploying to Production.
 
 <Banner type="error">
-  <strong>By default, all Access Control functions require that a user is successfully logged in to Payload to create, read, update, or delete data.</strong> But, if you allow public user registration, for example, you will want to make sure that your access control functions are more strict - permitting <strong>only appropriate users</strong> to perform appropriate actions.
+  <strong>
+    By default, all Access Control functions require that a user is successfully logged in to
+    Payload to create, read, update, or delete data.
+  </strong>{' '}
+  But, if you allow public user registration, for example, you will want to make sure that your
+  access control functions are more strict - permitting <strong>only appropriate users</strong> to
+  perform appropriate actions.
 </Banner>
 
 ##### Building the Admin panel
@@ -83,8 +90,13 @@ If you are using a [persistent filesystem-based cloud host](#persistent-vs-ephem
 Alternatively, you can rely on a third-party MongoDB host such as [MongoDB Atlas](https://www.mongodb.com/). With Atlas or a similar cloud provider, you can trust them to take care of your database's availability, security, redundancy, and backups.
 
 <Banner type="warning">
-  <strong>Note:</strong><br />
-  If versions are enabled and a collection has many documents you may need a minimum of an m10 mongoDB atlas cluster if you reach a sorting `exceeded memory limit` error to view a collection list in the admin UI. The limitations of the m2 and m5 tier clusters are here: [Atlas M0 (Free Cluster), M2, and M5 Limitations](https://www.mongodb.com/docs/atlas/reference/free-shared-limitations/?_ga=2.176267877.1329169847.1677683154-860992573.1647438381#operational-limitations).
+  <strong>Note:</strong>
+  <br />
+  If versions are enabled and a collection has many documents you may need a minimum of an m10
+  mongoDB atlas cluster if you reach a sorting `exceeded memory limit` error to view a collection
+  list in the admin UI. The limitations of the m2 and m5 tier clusters are here: [Atlas M0 (Free
+  Cluster), M2, and M5
+  Limitations](https://www.mongodb.com/docs/atlas/reference/free-shared-limitations/?_ga=2.176267877.1329169847.1677683154-860992573.1647438381#operational-limitations).
 </Banner>
 
 ##### DocumentDB
@@ -118,8 +130,10 @@ Alternatively, persistent filesystems will never delete your files and can be tr
 - Many other more traditional web hosts
 
 <Banner type="error">
-  <strong>Warning:</strong><br />
-  If you rely on Payload's <strong>Upload</strong> functionality, make sure you either use a host with a persistent filesystem or have an integration with a third-party file host like Amazon S3.
+  <strong>Warning:</strong>
+  <br />
+  If you rely on Payload's <strong>Upload</strong> functionality, make sure you either use a host
+  with a persistent filesystem or have an integration with a third-party file host like Amazon S3.
 </Banner>
 
 ##### Using ephemeral filesystem providers like Heroku
@@ -184,13 +198,13 @@ CMD ["node", "dist/server.js"]
 Here is an example of a docker-compose.yml file that can be used for development
 
 ```yml
-version: "3"
+version: '3'
 
 services:
   payload:
     image: node:18-alpine
     ports:
-      - "3000:3000"
+      - '3000:3000'
     volumes:
       - .:/home/node/app
       - node_modules:/home/node/app/node_modules
@@ -207,7 +221,7 @@ services:
   mongo:
     image: mongo:latest
     ports:
-      - "27017:27017"
+      - '27017:27017'
     command:
       - --storageEngine=wiredTiger
     volumes:

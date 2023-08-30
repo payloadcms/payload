@@ -96,7 +96,7 @@ async function login<TSlug extends keyof GeneratedTypes['collections']>(
 
     const { email: unsanitizedEmail, password } = data
 
-    const email = unsanitizedEmail ? (unsanitizedEmail as string).toLowerCase().trim() : null
+    const email = unsanitizedEmail ? unsanitizedEmail.toLowerCase().trim() : null
 
     let user = await payload.db.findOne<any>({
       collection: collectionConfig.slug,

@@ -10,10 +10,10 @@ You can add your own GraphQL queries and mutations to Payload, making use of all
 
 To do so, add your queries and mutations to the main Payload config as follows:
 
-| Config Path          | Description  |
-| -------------------- | -------------|
-| `graphQL.queries`    | Function that returns an object containing keys to custom GraphQL queries |
-| `graphQL.mutations`  | Function that returns an object containing keys to custom GraphQL mutations |
+| Config Path         | Description                                                                 |
+| ------------------- | --------------------------------------------------------------------------- |
+| `graphQL.queries`   | Function that returns an object containing keys to custom GraphQL queries   |
+| `graphQL.mutations` | Function that returns an object containing keys to custom GraphQL mutations |
 
 The above properties each receive a function that is defined with the following arguments:
 
@@ -34,8 +34,8 @@ Both `graphQL.queries` and `graphQL.mutations` functions should return an object
 `payload.config.js`:
 
 ```ts
-import { buildConfig } from 'payload/config';
-import myCustomQueryResolver from './graphQL/resolvers/myCustomQueryResolver';
+import { buildConfig } from 'payload/config'
+import myCustomQueryResolver from './graphQL/resolvers/myCustomQueryResolver'
 
 export default buildConfig({
   graphQL: {
@@ -57,14 +57,14 @@ export default buildConfig({
           args: {
             argNameHere: {
               type: new GraphQL.GraphQLNonNull(GraphQLString),
-            }
+            },
           },
           resolve: myCustomQueryResolver,
-        }
+        },
       }
-    }
+    },
     // highlight-end
-  }
+  },
 })
 ```
 
@@ -77,10 +77,10 @@ Your function will receive four arguments you can make use of:
 Example
 
 ```ts
-async (obj, args, context, info) => { }
+;async (obj, args, context, info) => {}
 ```
 
-**`obj`** 
+**`obj`**
 
 The previous object. Not very often used and usually discarded.
 

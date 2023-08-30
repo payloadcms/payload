@@ -55,7 +55,7 @@ const FileDetails: React.FC<Props> = (props) => {
         <Thumbnail collection={collection} doc={doc} />
         <div className={`${baseClass}__main-detail`}>
           <Meta
-            collection={collectionSlug as string}
+            collection={collectionSlug}
             filename={filename as string}
             filesize={filesize as number}
             height={height as number}

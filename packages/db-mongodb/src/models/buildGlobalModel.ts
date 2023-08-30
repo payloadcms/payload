@@ -1,32 +1,34 @@
-import mongoose from 'mongoose';
-import { SanitizedConfig } from 'payload/config';
-import buildSchema from './buildSchema.js';
-import getBuildQueryPlugin from '../queries/buildQuery.js';
-import type { GlobalModel } from '../types.js';
+import type { SanitizedConfig } from 'payload/config'
+
+import mongoose from 'mongoose'
+
+import type { GlobalModel } from '../types.js'
+
+import getBuildQueryPlugin from '../queries/buildQuery.js'
+import buildSchema from './buildSchema.js'
 
 export const buildGlobalModel = (config: SanitizedConfig): GlobalModel | null => {
   if (config.globals && config.globals.length > 0) {
-    const globalsSchema = new mongoose.Schema({}, { discriminatorKey: 'globalType', timestamps: true, minimize: false });
+    const globalsSchema = new mongoose.Schema(
+      {},
+      { discriminatorKey: 'globalType', minimize: false, timestamps: true },
+    )
 
-    globalsSchema.plugin(getBuildQueryPlugin());
+    globalsSchema.plugin(getBuildQueryPlugin())
 
-    const Globals = mongoose.model('globals', globalsSchema, 'globals') as unknown as GlobalModel;
+    const Globals = mongoose.model('globals', globalsSchema, 'globals') as unknown as GlobalModel
 
     Object.values(config.globals).forEach((globalConfig) => {
-      const globalSchema = buildSchema(
-        config,
-        globalConfig.fields,
-        {
-          options: {
-            minimize: false,
-          },
+      const globalSchema = buildSchema(config, globalConfig.fields, {
+        options: {
+          minimize: false,
         },
-      );
-      Globals.discriminator(globalConfig.slug, globalSchema);
-    });
+      })
+      Globals.discriminator(globalConfig.slug, globalSchema)
+    })
 
-    return Globals;
+    return Globals
   }
 
-  return null;
-};
+  return null
+}

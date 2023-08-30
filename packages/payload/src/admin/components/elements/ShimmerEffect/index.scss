@@ -10,13 +10,15 @@
     height: 100%;
     transform: translateX(-100%);
     animation: shimmer 1.75s infinite;
-    opacity: .75;
-    background: linear-gradient(100deg,
-        var(--theme-elevation-50) 0%,
-        var(--theme-elevation-50) 15%,
-        var(--theme-elevation-150) 50%,
-        var(--theme-elevation-50) 85%,
-        var(--theme-elevation-50) 100%)
+    opacity: 0.75;
+    background: linear-gradient(
+      100deg,
+      var(--theme-elevation-50) 0%,
+      var(--theme-elevation-50) 15%,
+      var(--theme-elevation-150) 50%,
+      var(--theme-elevation-50) 85%,
+      var(--theme-elevation-50) 100%
+    );
   }
 }
 

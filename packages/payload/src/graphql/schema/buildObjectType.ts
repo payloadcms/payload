@@ -275,7 +275,7 @@ function buildObjectType({
           name: `${relationshipName}_Relationship`,
         })
       } else {
-        ;({ type } = payload.collections[relationTo as string].graphQL)
+        ;({ type } = payload.collections[relationTo].graphQL)
       }
 
       // If the relationshipType is undefined at this point,

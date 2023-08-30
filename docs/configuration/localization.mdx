@@ -22,15 +22,11 @@ export default buildConfig({
     // collections go here
   ],
   localization: {
-    locales: [
-      'en',
-      'es',
-      'de',
-    ],
+    locales: ['en', 'es', 'de'],
     defaultLocale: 'en',
     fallback: true,
   },
-});
+})
 ```
 
 **Example Payload config set up for localization with full locales objects:**
@@ -43,22 +39,22 @@ export default buildConfig({
     // collections go here
   ],
   localization: {
-  locales: [
-    {
-      label: "English",
-      code: "en",
-    },
-    {
-      label: "Arabic",
-      code: "ar",
-      // opt-in to setting default text-alignment on Input fields to rtl (right-to-left) when current locale is rtl
-      rtl: true,
-    },
-  ],
-  defaultLocale: "en",
-  fallback: true,
+    locales: [
+      {
+        label: 'English',
+        code: 'en',
+      },
+      {
+        label: 'Arabic',
+        code: 'ar',
+        // opt-in to setting default text-alignment on Input fields to rtl (right-to-left) when current locale is rtl
+        rtl: true,
+      },
+    ],
+    defaultLocale: 'en',
+    fallback: true,
   },
-});
+})
 ```
 
 **Here is a brief explanation of each of the options available within the `localization` property:**
@@ -96,17 +92,21 @@ With the above configuration, the `title` field will now be saved in the databas
 All field types with a `name` property support the `localized` property—even the more complex field types like `array`s and `block`s.
 
 <Banner>
-  <strong>Note:</strong><br/>
-  Enabling localization for field types that support nested fields will automatically create localized "sets" of all fields contained within the field. For example, if you have a page layout using a blocks field type, you have the choice of either localizing the full layout, by enabling localization on the top-level blocks field, or only certain fields within the layout.
+  <strong>Note:</strong>
+  <br />
+  Enabling localization for field types that support nested fields will automatically create
+  localized "sets" of all fields contained within the field. For example, if you have a page layout
+  using a blocks field type, you have the choice of either localizing the full layout, by enabling
+  localization on the top-level blocks field, or only certain fields within the layout.
 </Banner>
 
 <Banner type="warning">
   <strong>Important:</strong>
   <br />
-  When converting an existing field to or from `localized: true` the data
-  structure in the document will change for this field and so existing data for
-  this field will be lost. Before changing the localization setting on fields
-  with existing data, you may need to consider a field migration strategy.
+  When converting an existing field to or from `localized: true` the data structure in the document
+  will change for this field and so existing data for this field will be lost. Before changing the
+  localization setting on fields with existing data, you may need to consider a field migration
+  strategy.
 </Banner>
 
 ### Retrieving localized docs
@@ -152,7 +152,9 @@ query {
 ```
 
 <Banner>
-  In GraphQL, specifying the locale at the top level of a query will automatically apply it throughout all nested relationship fields. You can override this behavior by re-specifying locale arguments in nested related document queries.
+  In GraphQL, specifying the locale at the top level of a query will automatically apply it
+  throughout all nested relationship fields. You can override this behavior by re-specifying locale
+  arguments in nested related document queries.
 </Banner>
 
 ##### Local API
@@ -170,5 +172,9 @@ const posts = await payload.find({
 ```
 
 <Banner type="alert">
-  <strong>Tip:</strong><br/>The REST and Local APIs can return all localization data in one request by passing 'all' or '*' as the <strong>locale</strong> parameter. The response will be structured so that field values come back as the full objects keyed for each locale instead of the single, translated value.
+  <strong>Tip:</strong>
+  <br />
+  The REST and Local APIs can return all localization data in one request by passing 'all' or '*' as
+  the <strong>locale</strong> parameter. The response will be structured so that field values come
+  back as the full objects keyed for each locale instead of the single, translated value.
 </Banner>

@@ -272,7 +272,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
             icon="plus"
             iconPosition="left"
             iconStyle="with-border"
-            onClick={() => addRow(value as number)}
+            onClick={() => addRow(value)}
           >
             {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
           </Button>

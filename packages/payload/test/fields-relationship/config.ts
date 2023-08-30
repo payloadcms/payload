@@ -21,10 +21,8 @@ export interface FieldsRelationship {
   id: string
   relationship: RelationOne
   relationshipHasMany: RelationOne[]
-  relationshipHasManyMultiple: Array<
-    { relationTo: string; value: string } | RelationOne | RelationTwo
-  >
-  relationshipMultiple: Array<RelationOne | RelationTwo>
+  relationshipHasManyMultiple: Array<{ relationTo: string; value: string } | RelationOne>
+  relationshipMultiple: Array<RelationOne>
   relationshipRestricted: RelationRestricted
   relationshipWithTitle: RelationWithTitle
   updatedAt: Date
@@ -383,7 +381,6 @@ export default buildConfigWithDefaults({
         },
       })
     })
-
     ;[...Array(15)].forEach((_, i) => {
       payload.create({
         collection: collection1Slug,

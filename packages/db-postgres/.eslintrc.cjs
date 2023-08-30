@@ -11,5 +11,5 @@ module.exports = {
     project: ['./tsconfig.json'],
     tsconfigRootDir: __dirname,
   },
-  root: true
+  root: true,
 }

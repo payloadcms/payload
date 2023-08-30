@@ -437,7 +437,6 @@ describe('collections-rest', () => {
             name: nameToQuery,
           },
         }))
-
         ;({ doc: relation2 } = await client.create<Relation>({
           slug: relationSlug,
           data: {

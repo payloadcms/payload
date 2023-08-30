@@ -7,21 +7,21 @@ keywords: select, multi-select, fields, config, configuration, documentation, Co
 ---
 
 <Banner>
-  The Select field provides a dropdown-style interface for choosing options from
-  a predefined list as an enumeration.
+  The Select field provides a dropdown-style interface for choosing options from a predefined list
+  as an enumeration.
 </Banner>
 
-<LightDarkImage 
-  srcLight='https://payloadcms.com/images/docs/fields/select.png'
-  srcDark='https://payloadcms.com/images/docs/fields/select-dark.png'
-  alt='Shows a Select field in the Payload admin panel'
-  caption='Admin panel screenshot of a Select field'
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/select.png"
+  srcDark="https://payloadcms.com/images/docs/fields/select-dark.png"
+  alt="Shows a Select field in the Payload admin panel"
+  caption="Admin panel screenshot of a Select field"
 />
 
 ### Config
 
 | Option             | Description                                                                                                                                                                                         |
-| ------------------ |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`name`** \*      | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                              |
 | **`options`** \*   | Array of options to allow the field to store. Can either be an array of strings, or an array of objects containing a `label` string and a `value` string.                                           |
 | **`hasMany`**      | Boolean when, if set to `true`, allows this field to have many selections instead of only one.                                                                                                      |
@@ -44,11 +44,10 @@ _\* An asterisk denotes that a property is required._
 <Banner type="warning">
   <strong>Important:</strong>
   <br />
-  Option values should be strings that do not contain hyphens or special
-  characters due to GraphQL enumeration naming constraints. Underscores are
-  allowed. If you determine you need your option values to be non-strings or
-  contain special characters, they will be formatted accordingly before being
-  used as a GraphQL enum.
+  Option values should be strings that do not contain hyphens or special characters due to GraphQL
+  enumeration naming constraints. Underscores are allowed. If you determine you need your option
+  values to be non-strings or contain special characters, they will be formatted accordingly before
+  being used as a GraphQL enum.
 </Banner>
 
 ### Admin config
@@ -66,8 +65,9 @@ Set to `true` if you'd like this field to be sortable within the Admin UI using 
 ### Example
 
 `collections/ExampleCollection.ts`
+
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from 'payload/types'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -94,8 +94,7 @@ export const ExampleCollection: CollectionConfig = {
           value: 'carbon_fiber_dashboard',
         },
       ],
-    }
-  ]
+    },
+  ],
 }
-
 ```

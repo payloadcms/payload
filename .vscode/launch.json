@@ -39,10 +39,10 @@
       "name": "Migrate CLI - migrate",
       "env": {
         "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_DATABASE": "postgres",
+        "PAYLOAD_DATABASE": "postgres"
         // "PAYLOAD_DROP_DATABASE": "true",
       },
-      "outputCapture": "std",
+      "outputCapture": "std"
     },
     {
       "type": "node-terminal",
@@ -51,10 +51,10 @@
       "name": "Migrate CLI - status",
       "env": {
         "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_DATABASE": "postgres",
+        "PAYLOAD_DATABASE": "postgres"
         // "PAYLOAD_DROP_DATABASE": "true",
       },
-      "outputCapture": "std",
+      "outputCapture": "std"
     },
     {
       "type": "node-terminal",
@@ -64,10 +64,10 @@
       "env": {
         // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
         "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
-        "PAYLOAD_DATABASE": "postgres",
+        "PAYLOAD_DATABASE": "postgres"
         // "PAYLOAD_DROP_DATABASE": "true",
       },
-      "outputCapture": "std",
+      "outputCapture": "std"
     },
     {
       "type": "node-terminal",
@@ -77,10 +77,10 @@
       "env": {
         // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
         "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
-        "PAYLOAD_DATABASE": "postgres",
+        "PAYLOAD_DATABASE": "postgres"
         // "PAYLOAD_DROP_DATABASE": "true",
       },
-      "outputCapture": "std",
+      "outputCapture": "std"
     },
     {
       "type": "node-terminal",
@@ -90,10 +90,10 @@
       "env": {
         // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
         "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
-        "PAYLOAD_DATABASE": "postgres",
+        "PAYLOAD_DATABASE": "postgres"
         // "PAYLOAD_DROP_DATABASE": "true",
       },
-      "outputCapture": "std",
+      "outputCapture": "std"
     },
     {
       "type": "node-terminal",
@@ -103,10 +103,10 @@
       "env": {
         // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
         "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
-        "PAYLOAD_DATABASE": "postgres",
+        "PAYLOAD_DATABASE": "postgres"
         // "PAYLOAD_DROP_DATABASE": "true",
       },
-      "outputCapture": "std",
-    },
+      "outputCapture": "std"
+    }
   ]
 }

@@ -166,8 +166,8 @@ const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
   let ids: string[] = []
   if (value)
     ids = Array.isArray(value)
-      ? value.map((item) => item?.id ?? (`${item?.value}` as string))
-      : [value?.id || (`${value?.value}` as string)]
+      ? value.map((item) => item?.id ?? `${item?.value}`)
+      : [value?.id || `${value?.value}`]
 
   return (
     <DraggableSortable

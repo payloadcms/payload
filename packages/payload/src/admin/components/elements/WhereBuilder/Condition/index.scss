@@ -15,10 +15,10 @@
     }
   }
 
-  [dir=rtl] &__field,
+  [dir='rtl'] &__field,
   &__operator {
     margin-left: $baseline;
-    margin-right:0;
+    margin-right: 0;
   }
 
   &__field,
@@ -33,7 +33,7 @@
   .btn {
     vertical-align: middle;
     margin: 0 0 0 $baseline;
-    [dir=rtl] & {
+    [dir='rtl'] & {
       margin: 0 $baseline 0 0;
     }
   }
@@ -55,7 +55,7 @@
 
     &__field,
     &__operator {
-      margin: 0 0 base(.5);
+      margin: 0 0 base(0.5);
     }
   }
 }

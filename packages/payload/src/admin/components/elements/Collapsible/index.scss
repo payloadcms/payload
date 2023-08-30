@@ -1,8 +1,8 @@
 @import '../../../scss/styles.scss';
 
 .collapsible {
-  --toggle-pad-h: #{base(.75)};
-  --toggle-pad-v: #{base(.5)};
+  --toggle-pad-h: #{base(0.75)};
+  --toggle-pad-v: #{base(0.5)};
 
   border-radius: $style-radius-m;
 
@@ -15,11 +15,11 @@
   }
 
   &__drag {
-    opacity: .5;
+    opacity: 0.5;
     position: absolute;
     z-index: 1;
     top: var(--toggle-pad-v);
-    left: base(.5);
+    left: base(0.5);
   }
 
   &__toggle {
@@ -43,7 +43,7 @@
       border: 1px solid var(--theme-elevation-300);
     }
 
-    >.collapsible__toggle-wrap {
+    > .collapsible__toggle-wrap {
       .row-label {
         color: var(--theme-text);
       }
@@ -52,7 +52,7 @@
       }
     }
     &.collapsible--hovered {
-      >.collapsible__toggle-wrap .collapsible__toggle {
+      > .collapsible__toggle-wrap .collapsible__toggle {
         background: var(--theme-elevation-100);
       }
     }
@@ -71,13 +71,13 @@
     left: 0;
     pointer-events: none;
 
-    >* {
+    > * {
       pointer-events: all;
     }
   }
 
   &__header-wrap--has-drag-handle {
-    left: base(.875);
+    left: base(0.875);
   }
 
   &--collapsed {
@@ -104,7 +104,7 @@
   }
 
   &__indicator {
-    transform: rotate(.5turn);
+    transform: rotate(0.5turn);
   }
 
   &__content {
@@ -121,7 +121,7 @@
   }
 }
 
-html[data-theme=dark] {
+html[data-theme='dark'] {
   .collapsible {
     &--style-error {
       border: 1px solid var(--theme-error-400);
@@ -129,7 +129,7 @@ html[data-theme=dark] {
         border: 1px solid var(--theme-error-500);
       }
 
-      >.collapsible__toggle-wrap {
+      > .collapsible__toggle-wrap {
         .row-label {
           color: var(--theme-error-500);
         }
@@ -138,7 +138,7 @@ html[data-theme=dark] {
         }
       }
       &.collapsible--hovered {
-        >.collapsible__toggle-wrap .collapsible__toggle {
+        > .collapsible__toggle-wrap .collapsible__toggle {
           background: var(--theme-error-150);
         }
       }
@@ -146,7 +146,7 @@ html[data-theme=dark] {
   }
 }
 
-html[data-theme=light] {
+html[data-theme='light'] {
   .collapsible {
     &--style-error {
       border: 1px solid var(--theme-error-500);
@@ -154,7 +154,7 @@ html[data-theme=light] {
         border: 1px solid var(--theme-error-600);
       }
 
-      >.collapsible__toggle-wrap {
+      > .collapsible__toggle-wrap {
         .row-label {
           color: var(--theme-error-750);
         }
@@ -163,7 +163,7 @@ html[data-theme=light] {
         }
       }
       &.collapsible--hovered {
-        >.collapsible__toggle-wrap .collapsible__toggle {
+        > .collapsible__toggle-wrap .collapsible__toggle {
           background: var(--theme-error-100);
         }
       }

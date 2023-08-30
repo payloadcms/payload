@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-import './dist/esm/bin';
+import './dist/esm/bin'

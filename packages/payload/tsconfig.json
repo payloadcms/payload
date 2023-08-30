@@ -1,62 +1,49 @@
 {
   /* Like tsconfig.build.json, but includes test directory and doesnt emit anything */
-    "extends": "../../tsconfig.json",
-    "compilerOptions": {
-      "types": ["jest", "node", "@types/jest"],
-      "lib": ["dom", "dom.iterable", "esnext"],
-      "composite": true,
-      "target": "ESNext",
-      "sourceMap": true,
-      "module": "NodeNext",
-      "allowJs": true, /* Allow javascript files to be compiled. */
-      "checkJs": false, /* Report errors in .js files. */
-      "jsx": "react", /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
-      "declaration": true, /* Generates corresponding '.d.ts' file. */
-      /* Concatenate and emit output to single file. */
-      "outDir": "./dist", /* Redirect output structure to the directory. */
-      "rootDir": ".", /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
-      /* Do not emit comments to output. */
-      "noEmit": true, /* Do not emit outputs. */
-      "strict": false, /* Enable all strict type-checking options. */
-      "moduleResolution": "NodeNext", /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
-      "paths": {
-        "payload/generated-types": [
-          "./src/generated-types.ts",
-        ],
-        "payload/config": [
-          "./src/config/types.ts"
-        ],
-        "payload/auth": [
-          "./src/auth/types.ts"
-        ],
-        "payload/types": [
-          "./src/types/index.ts",
-        ],
-      },
-      "esModuleInterop": true, /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
-      "resolveJsonModule": true,
-      "skipLibCheck": true, /* Skip type checking of declaration files. */
-      "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["jest", "node", "@types/jest"],
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "composite": true,
+    "target": "ESNext",
+    "sourceMap": true,
+    "module": "NodeNext",
+    "allowJs": true /* Allow javascript files to be compiled. */,
+    "checkJs": false /* Report errors in .js files. */,
+    "jsx": "react" /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */,
+    "declaration": true /* Generates corresponding '.d.ts' file. */,
+    /* Concatenate and emit output to single file. */
+    "outDir": "./dist" /* Redirect output structure to the directory. */,
+    "rootDir": "." /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
+    /* Do not emit comments to output. */
+    "noEmit": true /* Do not emit outputs. */,
+    "strict": false /* Enable all strict type-checking options. */,
+    "moduleResolution": "NodeNext" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
+    "paths": {
+      "payload/generated-types": ["./src/generated-types.ts"],
+      "payload/config": ["./src/config/types.ts"],
+      "payload/auth": ["./src/auth/types.ts"],
+      "payload/types": ["./src/types/index.ts"]
     },
-    "ts-node": {
-      "swc": true,
-      "esm": true,
-      "experimentalSpecifierResolution": "node",
-    },
-    "include": [
-      "src/**/*.ts",
-      "src/**/*.tsx",
-      "src/**/*.d.ts",
-      "src/**/*.json",
-      "test/**/*.ts",
-      "test/**/*.tsx",
-      "test/**/*.d.ts",
-      "test/**/*.json",
-    ],
-    "exclude": [
-      "dist",
-      "build",
-      "temp",
-      "node_modules",
-    ],
-  }
+    "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
+    "resolveJsonModule": true,
+    "skipLibCheck": true /* Skip type checking of declaration files. */,
+    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
+  },
+  "ts-node": {
+    "swc": true,
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    "src/**/*.json",
+    "test/**/*.ts",
+    "test/**/*.tsx",
+    "test/**/*.d.ts",
+    "test/**/*.json"
+  ],
+  "exclude": ["dist", "build", "temp", "node_modules"]
+}

@@ -43,7 +43,7 @@ type SanitizedImageData = {
 const getSanitizedImageData = (sourceImage: string): SanitizedImageData => {
   const extension = sourceImage.split('.').pop()
   const name = sanitize(sourceImage.substring(0, sourceImage.lastIndexOf('.')) || sourceImage)
-  return { ext: extension!, name }
+  return { ext: extension, name }
 }
 
 /**

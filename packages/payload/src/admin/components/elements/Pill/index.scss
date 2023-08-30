@@ -12,7 +12,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   border: 0;
-  padding: 0 base(.25);
+  padding: 0 base(0.25);
   align-items: center;
   flex-shrink: 0;
 
@@ -47,13 +47,13 @@
     }
   }
 
-  [dir=rtl] &--align-icon-left {
+  [dir='rtl'] &--align-icon-left {
     padding-right: 0;
     padding-left: 10px;
   }
 
-  [dir=rtl] &--align-icon-right {
-    padding-right: 10px;  
+  [dir='rtl'] &--align-icon-right {
+    padding-right: 10px;
     padding-left: 0;
   }
 
@@ -125,21 +125,20 @@
   }
 }
 
-
-html[data-theme=dark] {
+html[data-theme='dark'] {
   .pill {
     &--style-error {
       background: var(--theme-error-500);
-      color: var(--color-base-1000)
+      color: var(--color-base-1000);
     }
   }
 }
 
-html[data-theme=light] {
+html[data-theme='light'] {
   .pill {
     &--style-error {
       background: var(--theme-error-250);
-      color: var(--theme-error-750)
+      color: var(--theme-error-750);
     }
   }
 }

@@ -2,13 +2,13 @@
 
 .nested-diff {
   &__wrap--gutter {
-    [dir=ltr] & {
+    [dir='ltr'] & {
       padding-left: base(1);
       border-left: $style-stroke-width-s solid var(--theme-elevation-150);
     }
-    [dir=rtl] & {
+    [dir='rtl'] & {
       padding-right: base(1);
       border-right: $style-stroke-width-s solid var(--theme-elevation-150);
-    } 
+    }
   }
 }

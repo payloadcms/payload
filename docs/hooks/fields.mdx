@@ -26,6 +26,7 @@ Field-level hooks offer incredible potential for encapsulating your logic. They 
 ## Config
 
 Example field configuration:
+
 ```ts
 import { Field } from 'payload/types';
 
@@ -48,8 +49,12 @@ const ExampleField: Field = {
 All field-level hooks are formatted to accept the same arguments, although some arguments may be `undefined` based on which field hook you are utilizing.
 
 <Banner type="success">
-  <strong>Tip:</strong><br />
-  It's a good idea to conditionally scope your logic based on which operation is executing. For example, if you are writing a <strong>beforeChange</strong> hook, you may want to perform different logic based on if the current <strong>operation</strong> is <strong>create</strong> or <strong>update</strong>.
+  <strong>Tip:</strong>
+  <br />
+  It's a good idea to conditionally scope your logic based on which operation is executing. For
+  example, if you are writing a <strong>beforeChange</strong> hook, you may want to perform
+  different logic based on if the current <strong>operation</strong> is <strong>create</strong> or{' '}
+  <strong>update</strong>.
 </Banner>
 
 #### Arguments
@@ -57,7 +62,7 @@ All field-level hooks are formatted to accept the same arguments, although some 
 Field Hooks receive one `args` argument that contains the following properties:
 
 | Option                   | Description                                                                                                                                                                                                           |
-|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`data`**               | The data passed to update the document within `create` and `update` operations, and the full document itself in the `afterRead` hook.                                                                                 |
 | **`siblingData`**        | The sibling data passed to a field that the hook is running against.                                                                                                                                                  |
 | **`findMany`**           | Boolean to denote if this hook is running against finding one, or finding many within the `afterRead` hook.                                                                                                           |
@@ -74,8 +79,11 @@ Field Hooks receive one `args` argument that contains the following properties:
 All field hooks can optionally modify the return value of the field before the operation continues. Field Hooks may optionally return the value that should be used within the field.
 
 <Banner type="warning">
-  <strong>Important</strong><br/>
-  Due to GraphQL's typed nature, you should never change the type of data that you return from a field, otherwise GraphQL will produce errors. If you need to change the shape or type of data, reconsider Field Hooks and instead evaluate if Collection / Global hooks might suit you better.
+  <strong>Important</strong>
+  <br />
+  Due to GraphQL's typed nature, you should never change the type of data that you return from a
+  field, otherwise GraphQL will produce errors. If you need to change the shape or type of data,
+  reconsider Field Hooks and instead evaluate if Collection / Global hooks might suit you better.
 </Banner>
 
 ## TypeScript
@@ -83,14 +91,14 @@ All field hooks can optionally modify the return value of the field before the o
 Payload exports a type for field hooks which can be accessed and used as follows:
 
 ```ts
-import type { FieldHook } from 'payload/types';
+import type { FieldHook } from 'payload/types'
 
 // Field hook type is a generic that takes three arguments:
 // 1: The document type
 // 2: The value type
 // 3: The sibling data type
 
-type ExampleFieldHook = FieldHook<ExampleDocumentType, string, SiblingDataType>;
+type ExampleFieldHook = FieldHook<ExampleDocumentType, string, SiblingDataType>
 
 const exampleFieldHook: ExampleFieldHook = (args) => {
   const {
@@ -100,10 +108,10 @@ const exampleFieldHook: ExampleFieldHook = (args) => {
     originalDoc, // Typed as ExampleDocumentType
     operation,
     req,
-  } = args;
+  } = args
 
   // Do something here...
 
-  return value; // should return a string as typed above, undefined, or null
+  return value // should return a string as typed above, undefined, or null
 }
 ```

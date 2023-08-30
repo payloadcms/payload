@@ -1,9 +1,21 @@
 type Query {
   Collection1(id: String!, draft: Boolean): Collection1
-  Collection1s(where: Collection1_where, draft: Boolean, page: Int, limit: Int, sort: String): Collection1s
+  Collection1s(
+    where: Collection1_where
+    draft: Boolean
+    page: Int
+    limit: Int
+    sort: String
+  ): Collection1s
   docAccessCollection1(id: String!): collection1DocAccess
   Collection2(id: String!, draft: Boolean): Collection2
-  Collection2s(where: Collection2_where, draft: Boolean, page: Int, limit: Int, sort: String): Collection2s
+  Collection2s(
+    where: Collection2_where
+    draft: Boolean
+    page: Int
+    limit: Int
+    sort: String
+  ): Collection2s
   docAccessCollection2(id: String!): collection2DocAccess
   User(id: String!, draft: Boolean): User
   Users(where: User_where, draft: Boolean, page: Int, limit: Int, sort: String): Users
@@ -11,7 +23,13 @@ type Query {
   meUser: usersMe
   initializedUser: Boolean
   PayloadPreference(id: String!, draft: Boolean): PayloadPreference
-  PayloadPreferences(where: PayloadPreference_where, draft: Boolean, page: Int, limit: Int, sort: String): PayloadPreferences
+  PayloadPreferences(
+    where: PayloadPreference_where
+    draft: Boolean
+    page: Int
+    limit: Int
+    sort: String
+  ): PayloadPreferences
   docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
   Access: Access
 }
@@ -876,7 +894,8 @@ type User {
 """
 A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
 """
-scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+scalar EmailAddress
+  @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
 
 type Users {
   docs: [User]
@@ -2182,10 +2201,20 @@ type PayloadPreferencesDeleteAccess {
 
 type Mutation {
   createCollection1(data: mutationCollection1Input!, draft: Boolean): Collection1
-  updateCollection1(id: String!, data: mutationCollection1UpdateInput!, draft: Boolean, autosave: Boolean): Collection1
+  updateCollection1(
+    id: String!
+    data: mutationCollection1UpdateInput!
+    draft: Boolean
+    autosave: Boolean
+  ): Collection1
   deleteCollection1(id: String!): Collection1
   createCollection2(data: mutationCollection2Input!, draft: Boolean): Collection2
-  updateCollection2(id: String!, data: mutationCollection2UpdateInput!, draft: Boolean, autosave: Boolean): Collection2
+  updateCollection2(
+    id: String!
+    data: mutationCollection2UpdateInput!
+    draft: Boolean
+    autosave: Boolean
+  ): Collection2
   deleteCollection2(id: String!): Collection2
   createUser(data: mutationUserInput!, draft: Boolean): User
   updateUser(id: String!, data: mutationUserUpdateInput!, draft: Boolean, autosave: Boolean): User
@@ -2198,7 +2227,12 @@ type Mutation {
   resetPasswordUser(token: String, password: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
   createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
-  updatePayloadPreference(id: String!, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean, autosave: Boolean): PayloadPreference
+  updatePayloadPreference(
+    id: String!
+    data: mutationPayloadPreferenceUpdateInput!
+    draft: Boolean
+    autosave: Boolean
+  ): PayloadPreference
   deletePayloadPreference(id: String!): PayloadPreference
 }
 

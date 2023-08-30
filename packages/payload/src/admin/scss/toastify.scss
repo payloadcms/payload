@@ -10,14 +10,14 @@
   }
 
   .Toastify__toast {
-    padding: base(.5);
+    padding: base(0.5);
     border-radius: $style-radius-m;
     font-weight: 600;
   }
 
   .Toastify__close-button {
     align-self: center;
-    opacity: .7;
+    opacity: 0.7;
 
     &:hover {
       opacity: 1;

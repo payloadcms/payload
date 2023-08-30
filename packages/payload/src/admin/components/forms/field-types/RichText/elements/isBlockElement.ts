@@ -24,4 +24,4 @@ const isElement = (node: any, specificType?: string | string[]): node is Element
  */
 
 export const isBlockElement = (editor: Editor, node: any): node is Element =>
-  Editor.isBlock(editor, node as any) && isElement(node)
+  Editor.isBlock(editor, node) && isElement(node)

@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('./dist/cjs/bin');
+require('./dist/cjs/bin')

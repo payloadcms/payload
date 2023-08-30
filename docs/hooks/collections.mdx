@@ -70,14 +70,14 @@ The `beforeOperation` hook can be used to modify the arguments that operations a
 Available Collection operations include `create`, `read`, `update`, `delete`, `login`, `refresh`, and `forgotPassword`.
 
 ```ts
-import { CollectionBeforeOperationHook } from "payload/types";
+import { CollectionBeforeOperationHook } from 'payload/types'
 
 const beforeOperationHook: CollectionBeforeOperationHook = async ({
   args, // original arguments passed into the operation
   operation, // name of the operation
 }) => {
-  return args; // return modified operation arguments as necessary
-};
+  return args // return modified operation arguments as necessary
+}
 ```
 
 ### beforeValidate
@@ -91,7 +91,7 @@ Please do note that this does not run before the client-side validation. If you 
 3. `validate` runs on the server
 
 ```ts
-import { CollectionBeforeOperationHook } from "payload/types";
+import { CollectionBeforeOperationHook } from 'payload/types'
 
 const beforeValidateHook: CollectionBeforeValidateHook = async ({
   data, // incoming data to update or create with
@@ -99,8 +99,8 @@ const beforeValidateHook: CollectionBeforeValidateHook = async ({
   operation, // name of the operation ie. 'create', 'update'
   originalDoc, // original document
 }) => {
-  return data; // Return data to either create or update a document with
-};
+  return data // Return data to either create or update a document with
+}
 ```
 
 ### beforeChange
@@ -108,7 +108,7 @@ const beforeValidateHook: CollectionBeforeValidateHook = async ({
 Immediately following validation, `beforeChange` hooks will run within `create` and `update` operations. At this stage, you can be confident that the data that will be saved to the document is valid in accordance to your field validations. You can optionally modify the shape of data to be saved.
 
 ```ts
-import { CollectionBeforeChangeHook } from "payload/types";
+import { CollectionBeforeChangeHook } from 'payload/types'
 
 const beforeChangeHook: CollectionBeforeChangeHook = async ({
   data, // incoming data to update or create with
@@ -116,8 +116,8 @@ const beforeChangeHook: CollectionBeforeChangeHook = async ({
   operation, // name of the operation ie. 'create', 'update'
   originalDoc, // original document
 }) => {
-  return data; // Return data to either create or update a document with
-};
+  return data // Return data to either create or update a document with
+}
 ```
 
 ### afterChange
@@ -125,7 +125,7 @@ const beforeChangeHook: CollectionBeforeChangeHook = async ({
 After a document is created or updated, the `afterChange` hook runs. This hook is helpful to recalculate statistics such as total sales within a global, syncing user profile changes to a CRM, and more.
 
 ```ts
-import { CollectionAfterChangeHook } from "payload/types";
+import { CollectionAfterChangeHook } from 'payload/types'
 
 const afterChangeHook: CollectionAfterChangeHook = async ({
   doc, // full document data
@@ -133,8 +133,8 @@ const afterChangeHook: CollectionAfterChangeHook = async ({
   previousDoc, // document data before updating the collection
   operation, // name of the operation ie. 'create', 'update'
 }) => {
-  return doc;
-};
+  return doc
+}
 ```
 
 ### beforeRead
@@ -142,15 +142,15 @@ const afterChangeHook: CollectionAfterChangeHook = async ({
 Runs before `find` and `findByID` operations are transformed for output by `afterRead`. This hook fires before hidden fields are removed and before localized fields are flattened into the requested locale. Using this Hook will provide you with all locales and all hidden fields via the `doc` argument.
 
 ```ts
-import { CollectionBeforeReadHook } from "payload/types";
+import { CollectionBeforeReadHook } from 'payload/types'
 
 const beforeReadHook: CollectionBeforeReadHook = async ({
   doc, // full document data
   req, // full express request
   query, // JSON formatted query
 }) => {
-  return doc;
-};
+  return doc
+}
 ```
 
 ### afterRead
@@ -158,7 +158,7 @@ const beforeReadHook: CollectionBeforeReadHook = async ({
 Runs as the last step before documents are returned. Flattens locales, hides protected fields, and removes fields that users do not have access to.
 
 ```ts
-import { CollectionAfterReadHook } from "payload/types";
+import { CollectionAfterReadHook } from 'payload/types'
 
 const afterReadHook: CollectionAfterReadHook = async ({
   doc, // full document data
@@ -166,8 +166,8 @@ const afterReadHook: CollectionAfterReadHook = async ({
   query, // JSON formatted query
   findMany, // boolean to denote if this hook is running against finding one, or finding many
 }) => {
-  return doc;
-};
+  return doc
+}
 ```
 
 ### beforeDelete
@@ -204,15 +204,15 @@ The `afterOperation` hook can be used to modify the result of operations or exec
 Available Collection operations include `create`, `find`, `findByID`, `update`, `updateByID`, `delete`, `deleteByID`, `login`, `refresh`, and `forgotPassword`.
 
 ```ts
-import { CollectionAfterOperationHook } from "payload/types";
+import { CollectionAfterOperationHook } from 'payload/types'
 
 const afterOperationHook: CollectionAfterOperationHook = async ({
   args, // arguments passed into the operation
   operation, // name of the operation
   result, // the result of the operation, before modifications
 }) => {
-  return result; // return modified result as necessary
-};
+  return result // return modified result as necessary
+}
 ```
 
 ### beforeLogin
@@ -220,14 +220,14 @@ const afterOperationHook: CollectionAfterOperationHook = async ({
 For auth-enabled Collections, this hook runs during `login` operations where a user with the provided credentials exist, but before a token is generated and added to the response. You can optionally modify the user that is returned, or throw an error in order to deny the login operation.
 
 ```ts
-import { CollectionBeforeLoginHook } from "payload/types";
+import { CollectionBeforeLoginHook } from 'payload/types'
 
 const beforeLoginHook: CollectionBeforeLoginHook = async ({
   req, // full express request
   user, // user being logged in
 }) => {
-  return user;
-};
+  return user
+}
 ```
 
 ### afterLogin
@@ -288,15 +288,15 @@ const afterMeHook: CollectionAfterMeHook = async ({
 For auth-enabled Collections, this hook runs after successful `forgotPassword` operations. Returned values are discarded.
 
 ```ts
-import { CollectionAfterForgotPasswordHook } from "payload/types";
+import { CollectionAfterForgotPasswordHook } from 'payload/types'
 
 const afterLoginHook: CollectionAfterForgotPasswordHook = async ({
   req, // full express request
   user, // user being logged in
   token, // user token
 }) => {
-  return user;
-};
+  return user
+}
 ```
 
 ## TypeScript
@@ -319,5 +319,5 @@ import type {
   CollectionAfterRefreshHook,
   CollectionAfterMeHook,
   CollectionAfterForgotPasswordHook,
-} from "payload/types";
+} from 'payload/types'
 ```

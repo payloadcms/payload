@@ -15,8 +15,10 @@ Out of the box, Payload handles the persistence of your users' preferences in a 
 1. The "collapsed" state of blocks, on a document level, as users edit or interact with documents
 
 <Banner type="warning">
-	<strong>Important:</strong><br/>
-	All preferences are stored on an individual user basis. Payload automatically recognizes the user that is reading or setting a preference via all provided authentication methods.
+  <strong>Important:</strong>
+  <br />
+  All preferences are stored on an individual user basis. Payload automatically recognizes the user
+  that is reading or setting a preference via all provided authentication methods.
 </Banner>
 
 ### Use cases
@@ -33,7 +35,7 @@ This API is used significantly for internal operations of the Admin panel, as me
 Payload automatically creates an internally used `payload-preferences` collection that stores user preferences. Each document in the `payload-preferences` collection contains the following shape:
 
 | Key               | Value                                                             |
-|-------------------|-------------------------------------------------------------------|
+| ----------------- | ----------------------------------------------------------------- |
 | `id`              | A unique ID for each preference stored.                           |
 | `key`             | A unique `key` that corresponds to the preference.                |
 | `user.value`      | The ID of the `user` that is storing its preference.              |

@@ -1,26 +1,29 @@
-import type { Payload } from 'payload';
-import { createDatabaseAdapter } from 'payload/database';
-import { connect } from './connect.js';
-import { init } from './init.js';
-import { createMigration } from './createMigration.js';
-import { webpack } from './webpack.js';
-import { Args, PostgresAdapter, PostgresAdapterResult } from './types.js';
+import type { Payload } from 'payload'
+
+import { createDatabaseAdapter } from 'payload/database'
+
+import type { Args, PostgresAdapter, PostgresAdapterResult } from './types.js'
+
+import { connect } from './connect.js'
+import { createMigration } from './createMigration.js'
+import { init } from './init.js'
+import { webpack } from './webpack.js'
 // import { createGlobal } from './createGlobal.js';
 // import { createVersion } from './createVersion.js';
 // import { beginTransaction } from './transactions/beginTransaction.js';
 // import { rollbackTransaction } from './transactions/rollbackTransaction.js';
 // import { commitTransaction } from './transactions/commitTransaction.js';
 // import { queryDrafts } from './queryDrafts.js';
-import { find } from './find.js';
+import { find } from './find.js'
 // import { findGlobalVersions } from './findGlobalVersions.js';
 // import { findVersions } from './findVersions.js';
-import { create } from './create/index.js';
+import { create } from './create/index.js'
 // import { deleteOne } from './deleteOne.js';
 // import { deleteVersions } from './deleteVersions.js';
 // import { findGlobal } from './findGlobal.js';
-import { findOne } from './findOne.js';
+import { findOne } from './findOne.js'
 // import { updateGlobal } from './updateGlobal.js';
-import { updateOne } from './update/index.js';
+import { updateOne } from './update/index.js'
 // import { updateVersion } from './updateVersion.js';
 // import { deleteMany } from './deleteMany.js';
 // import { destroy } from './destroy.js';
@@ -30,24 +33,24 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
-      enums: {},
-      relations: {},
-      tables: {},
-      payload,
       connect,
+      create,
+      createMigration,
       db: undefined,
+      enums: {},
+      find,
+      // queryDrafts,
+      findOne,
       // destroy,
       init,
-      webpack,
-      createMigration,
+      payload,
       // beginTransaction,
       // rollbackTransaction,
       // commitTransaction,
-      // queryDrafts,
-      findOne,
-      find,
-      create,
+      relations: {},
+      tables: {},
       updateOne,
+      webpack,
       // deleteOne,
       // deleteMany,
       // findGlobal,
@@ -58,8 +61,8 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       // createVersion,
       // updateVersion,
       // deleteVersions,
-    });
+    })
   }
 
-  return adapter;
+  return adapter
 }
