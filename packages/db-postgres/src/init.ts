@@ -1,10 +1,13 @@
 /* eslint-disable no-param-reassign */
-import { pgEnum } from 'drizzle-orm/pg-core';
-// import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
-import { SanitizedCollectionConfig } from 'payload/types';
 import type { Init } from 'payload/database';
-import { buildTable } from './schema/build.js';
+// import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
+import type { SanitizedCollectionConfig } from 'payload/types';
+
+import { pgEnum } from 'drizzle-orm/pg-core';
+
 import type { PostgresAdapter } from './types.js';
+
+import { buildTable } from './schema/build.js';
 
 export const init: Init = async function init(this: PostgresAdapter) {
   if (this.payload.config.localization) {

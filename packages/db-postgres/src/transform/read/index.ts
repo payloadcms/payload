@@ -1,16 +1,17 @@
 /* eslint-disable no-param-reassign */
-import { Field } from 'payload/types';
-import { TypeWithID } from 'payload/types';
-import { SanitizedConfig } from 'payload/config';
-import { traverseFields } from './traverseFields.js';
+import type { SanitizedConfig } from 'payload/config';
+import type { Field } from 'payload/types';
+import type { TypeWithID } from 'payload/types';
+
+import { createBlocksMap } from '../../utilities/createBlocksMap.js';
 import { createRelationshipMap } from '../../utilities/createRelationshipMap.js';
 import { mergeLocales } from './mergeLocales.js';
-import { createBlocksMap } from '../../utilities/createBlocksMap.js';
+import { traverseFields } from './traverseFields.js';
 
 type TransformArgs = {
   config: SanitizedConfig
   data: Record<string, unknown>
-  fallbackLocale?: string | false
+  fallbackLocale?: false | string
   fields: Field[]
   locale?: string
 }
@@ -33,7 +34,7 @@ export const transform = <T extends TypeWithID>({
 
   const blocks = createBlocksMap(data);
 
-  const dataWithLocales = mergeLocales({ data, locale, fallbackLocale });
+  const dataWithLocales = mergeLocales({ data, fallbackLocale, locale });
 
   return traverseFields<T>({
     blocks,

@@ -1,19 +1,21 @@
+import type { Find } from 'payload/database';
+import type { SanitizedCollectionConfig } from 'payload/types';
+import type { PayloadRequest } from 'payload/types';
+
 import { sql } from 'drizzle-orm';
 import toSnakeCase from 'to-snake-case';
-import type { Find } from 'payload/database';
-import type { PayloadRequest } from 'payload/types';
-import type { SanitizedCollectionConfig } from 'payload/types';
+
 import buildQuery from './queries/buildQuery.js';
 
 export const find: Find = async function find({
   collection,
-  where,
-  page = 1,
   limit: limitArg,
-  sort: sortArg,
   locale,
+  page = 1,
   pagination,
   req = {} as PayloadRequest,
+  sort: sortArg,
+  where,
 }) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config;
   const tableName = toSnakeCase(collection);
@@ -27,8 +29,8 @@ export const find: Find = async function find({
   let pagingCounter;
 
   const query = await buildQuery({
-    collectionSlug: collection,
     adapter: this,
+    collectionSlug: collection,
     locale,
     where,
   });
@@ -50,14 +52,14 @@ export const find: Find = async function find({
 
   return {
     docs, // : T[]
-    totalDocs, // : number
+    hasNextPage, // : boolean
+    hasPrevPage, // : boolean
     limit, // : number
-    totalPages, // : number
+    nextPage: hasNextPage ? page + 1 : null, // ?: number | null | undefined
     page, // ?: number
     pagingCounter, // : number
-    hasPrevPage, // : boolean
-    hasNextPage, // : boolean
     prevPage: hasPrevPage ? page - 1 : null, // ?: number | null | undefined
-    nextPage: hasNextPage ? page + 1 : null, // ?: number | null | undefined
+    totalDocs, // : number
+    totalPages, // : number
   };
 };

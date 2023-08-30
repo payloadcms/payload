@@ -1,6 +1,8 @@
-import { UpdateOne } from 'payload/database';
+import type { SQL } from 'drizzle-orm';
+import type { UpdateOne } from 'payload/database';
+
 import toSnakeCase from 'to-snake-case';
-import { SQL } from 'drizzle-orm';
+
 import buildQuery from '../queries/buildQuery.js';
 import { upsertRow } from '../upsertRow/index.js';
 

@@ -1,14 +1,19 @@
 /* eslint-disable no-param-reassign */
-import { integer, text, varchar, numeric, IndexBuilder, PgNumericBuilder, PgVarcharBuilder, jsonb } from 'drizzle-orm/pg-core';
-import { Field } from 'payload/types';
-import toSnakeCase from 'to-snake-case';
+import type { Relation} from 'drizzle-orm';
+import type { IndexBuilder} from 'drizzle-orm/pg-core';
+import type { Field } from 'payload/types';
+
+import { relations } from 'drizzle-orm';
+import { PgNumericBuilder, PgVarcharBuilder, integer, jsonb, numeric, text, varchar } from 'drizzle-orm/pg-core';
 import { fieldAffectsData } from 'payload/types';
-import { Relation, relations } from 'drizzle-orm';
-import { GenericColumns, PostgresAdapter } from '../types.js';
-import { createIndex } from './createIndex.js';
-import { buildTable } from './build.js';
-import { parentIDColumnMap } from './parentIDColumnMap.js';
+import toSnakeCase from 'to-snake-case';
+
+import type { GenericColumns, PostgresAdapter } from '../types.js';
+
 import { hasLocalesTable } from '../utilities/hasLocalesTable.js';
+import { buildTable } from './build.js';
+import { createIndex } from './createIndex.js';
+import { parentIDColumnMap } from './parentIDColumnMap.js';
 
 type AnyPgColumnBuilder = any; // TODO: Fix this
 
@@ -16,8 +21,8 @@ type Args = {
   adapter: PostgresAdapter
   arrayBlockRelations: Map<string, string>
   buildRelationships: boolean
-  columns: Record<string, any> // TODO: Type second generic. Previously, it was AnyPgColumnBuilder
   columnPrefix?: string
+  columns: Record<string, any> // TODO: Type second generic. Previously, it was AnyPgColumnBuilder
   fieldPrefix?: string
   fields: Field[]
   indexes: Record<string, (cols: GenericColumns) => IndexBuilder>
@@ -167,8 +172,8 @@ export const traverseFields = ({
         field.blocks.forEach((block) => {
           const baseColumns: Record<string, any> = { // TODO: Type second generic. Previously, it was AnyPgColumnBuilder
             _order: integer('_order').notNull(),
-            _path: text('_path').notNull(),
             _parentID: parentIDColumnMap[parentIDColType]('_parent_id').references(() => adapter.tables[parentTableName].id).notNull(),
+            _path: text('_path').notNull(),
           };
 
           if (field.localized && adapter.payload.config.localization) {

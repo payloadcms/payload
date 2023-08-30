@@ -1,10 +1,12 @@
 /* eslint-disable no-param-reassign */
 import { and, eq, inArray } from 'drizzle-orm';
-import { transform } from '../transform/read/index.js';
-import { BlockRowToInsert } from '../transform/write/types.js';
+
+import type { BlockRowToInsert } from '../transform/write/types.js';
+import type { Args } from './types.js';
+
 import { insertArrays } from '../insertArrays.js';
+import { transform } from '../transform/read/index.js';
 import { transformForWrite } from '../transform/write/index.js';
-import { Args } from './types.js';
 
 export const upsertRow = async ({
   adapter,
@@ -39,12 +41,12 @@ export const upsertRow = async ({
       rowToInsert.row.id = id;
       [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
         .values(rowToInsert.row)
-        .onConflictDoUpdate({ target, set: rowToInsert.row })
+        .onConflictDoUpdate({ set: rowToInsert.row, target })
         .returning();
     } else {
       [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
         .values(rowToInsert.row)
-        .onConflictDoUpdate({ target, set: rowToInsert.row, where })
+        .onConflictDoUpdate({ set: rowToInsert.row, target, where })
         .returning();
     }
   } else {
@@ -100,8 +102,8 @@ export const upsertRow = async ({
         [insertedLocaleRow] = await adapter.db.insert(localeTableName)
           .values(localeToInsert)
           .onConflictDoUpdate({
-            target: [localeTableName._locale, localeTableName._parentID],
             set: localeToInsert,
+            target: [localeTableName._locale, localeTableName._parentID],
           })
           .returning();
       } else {

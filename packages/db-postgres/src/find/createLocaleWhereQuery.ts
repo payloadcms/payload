@@ -1,12 +1,12 @@
 type CreateLocaleWhereQueryArgs = {
-  fallbackLocale?: string | false
+  fallbackLocale?: false | string
   locale?: string
 }
 
 export const createLocaleWhereQuery = ({ fallbackLocale, locale }: CreateLocaleWhereQueryArgs) => {
   if (!locale || locale === 'all') return undefined;
 
-  if (fallbackLocale) return ({ _locale }, { or, eq }) => or(eq(_locale, locale), eq(_locale, fallbackLocale));
+  if (fallbackLocale) return ({ _locale }, { eq, or }) => or(eq(_locale, locale), eq(_locale, fallbackLocale));
 
   return ({ _locale }, { eq }) => eq(_locale, locale);
 };

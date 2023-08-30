@@ -1,17 +1,20 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import fs from 'fs';
-import { CreateMigration } from 'payload/database';
+import type { CreateMigration } from 'payload/database';
 
 import drizzleKit from 'drizzle-kit/utils.js';
+import fs from 'fs';
 const { generateDrizzleJson, pushSchema } = drizzleKit;
+import type { DatabaseAdapter, Init } from 'payload/database';
+
 import { eq } from 'drizzle-orm';
 import { jsonb, numeric, pgEnum, pgTable, varchar } from 'drizzle-orm/pg-core';
 import { SanitizedCollectionConfig } from 'payload/types';
-import type { DatabaseAdapter, Init } from 'payload/database';
 import { configToJSONSchema } from 'payload/utilities';
 import prompts from 'prompts';
-import { buildTable } from './schema/build.js';
+
 import type { GenericEnum, GenericRelation, GenericTable, PostgresAdapter } from './types.js';
+
+import { buildTable } from './schema/build.js';
 
 const migrationTemplate = (upSQL?: string) => `
 import payload, { Payload } from 'payload';

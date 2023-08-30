@@ -1,27 +1,31 @@
 /* eslint-disable no-restricted-syntax */
+import type { SQL } from 'drizzle-orm';
 /* eslint-disable no-await-in-loop */
-import { Operator, Where } from 'payload/types';
-import { Field } from 'payload/types';
+import type { Operator, Where } from 'payload/types';
+import type { Field } from 'payload/types';
+
+import { and } from 'drizzle-orm';
 import { validOperators } from 'payload/types';
-import { and, SQL } from 'drizzle-orm';
-import { buildSearchParam } from './buildSearchParams.js';
+
+import type { PostgresAdapter } from '../types.js';
+
 import { buildAndOrConditions } from './buildAndOrConditions.js';
-import { PostgresAdapter } from '../types.js';
+import { buildSearchParam } from './buildSearchParams.js';
 
 export async function parseParams({
-  where,
-  collectionSlug,
-  globalSlug,
   adapter,
-  locale,
+  collectionSlug,
   fields,
+  globalSlug,
+  locale,
+  where,
 }: {
-  where: Where,
-  collectionSlug?: string,
-  globalSlug?: string,
   adapter: PostgresAdapter
-  locale: string,
+  collectionSlug?: string,
   fields: Field[],
+  globalSlug?: string,
+  locale: string,
+  where: Where,
 }): Promise<SQL> {
   let result: SQL;
 
@@ -37,10 +41,10 @@ export async function parseParams({
       }
       if (Array.isArray(condition)) {
         const builtConditions = await buildAndOrConditions({
+          adapter,
           collectionSlug,
           fields,
           globalSlug,
-          adapter,
           locale,
           where: condition,
         });
@@ -55,14 +59,14 @@ export async function parseParams({
           for (const operator of Object.keys(pathOperators)) {
             if (validOperators.includes(operator as Operator)) {
               const searchParam = await buildSearchParam({
-                collectionSlug,
-                globalSlug,
                 adapter,
-                locale,
+                collectionSlug,
                 fields,
+                globalSlug,
                 incomingPath: relationOrPath,
-                val: pathOperators[operator],
+                locale,
                 operator,
+                val: pathOperators[operator],
               });
 
               if (searchParam?.value && searchParam?.path) {
