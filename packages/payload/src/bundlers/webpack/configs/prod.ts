@@ -2,14 +2,21 @@ import type { Configuration, WebpackPluginInstance } from 'webpack'
 
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin'
 import { createRequire } from 'node:module'
+import path, { dirname } from 'path'
 import { SwcMinifyWebpackPlugin } from 'swc-minify-webpack-plugin'
+import { fileURLToPath } from 'url'
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 
 import type { SanitizedConfig } from '../../../config/types.js'
 
 import { getBaseConfig } from './base.js'
+const __filename = fileURLToPath(import.meta.url)
 
 const require = createRequire(import.meta.url)
+const _dirname = dirname(__filename)
+const nodeModulesPath = path.resolve(_dirname, '../../../../node_modules')
+const rootFolderPath = path.resolve(_dirname, '../../../')
+const exportsFolderPath = path.resolve(_dirname, '../../../exports')
 
 export const getProdConfig = (payloadConfig: SanitizedConfig): Configuration => {
   const baseConfig = getBaseConfig(payloadConfig) as any
@@ -54,7 +61,9 @@ export const getProdConfig = (payloadConfig: SanitizedConfig): Configuration => 
       {
         loader: require.resolve('css-loader'),
         options: {
-          url: (url) => !url.startsWith('/'),
+          url: {
+            filter: (url, resourcePath) => !url.startsWith('/'),
+          },
         },
       },
       {
@@ -65,7 +74,14 @@ export const getProdConfig = (payloadConfig: SanitizedConfig): Configuration => 
           },
         },
       },
-      require.resolve('sass-loader'),
+      {
+        loader: require.resolve('sass-loader'),
+        options: {
+          sassOptions: {
+            includePaths: [exportsFolderPath],
+          },
+        },
+      },
     ],
   })
 

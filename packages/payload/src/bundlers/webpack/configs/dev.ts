@@ -2,6 +2,7 @@ import type { Configuration } from 'webpack'
 
 import md5 from 'md5'
 import { createRequire } from 'node:module'
+import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import webpack from 'webpack'
 
@@ -9,9 +10,13 @@ import type { SanitizedConfig } from '../../../config/types.js'
 
 import { getBaseConfig } from './base.js'
 
-const __filename = fileURLToPath(import.meta.url)
-
 const require = createRequire(import.meta.url)
+
+const __filename = fileURLToPath(import.meta.url)
+const _dirname = dirname(__filename)
+const nodeModulesPath = path.resolve(_dirname, '../../../../node_modules')
+const rootFolderPath = path.resolve(_dirname, '../../../')
+const exportsFolderPath = path.resolve(_dirname, '../../../exports')
 
 export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
   const baseConfig = getBaseConfig(payloadConfig) as any
@@ -57,7 +62,7 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
     use: [
       require.resolve('style-loader'),
       {
-        loader: 'css-loader',
+        loader: require.resolve('css-loader'),
         options: {
           url: {
             filter: (url, resourcePath) => !url.startsWith('/'),
@@ -72,7 +77,14 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
           },
         },
       },
-      require.resolve('sass-loader'),
+      {
+        loader: require.resolve('sass-loader'),
+        options: {
+          sassOptions: {
+            includePaths: [exportsFolderPath],
+          },
+        },
+      },
     ],
   })
 
