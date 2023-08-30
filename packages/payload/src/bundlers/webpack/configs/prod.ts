@@ -1,12 +1,15 @@
 import type { Configuration, WebpackPluginInstance } from 'webpack'
 
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin'
+import { createRequire } from 'node:module'
 import { SwcMinifyWebpackPlugin } from 'swc-minify-webpack-plugin'
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 
 import type { SanitizedConfig } from '../../../config/types.js'
 
 import { getBaseConfig } from './base.js'
+
+const require = createRequire(import.meta.url)
 
 export const getProdConfig = (payloadConfig: SanitizedConfig): Configuration => {
   const baseConfig = getBaseConfig(payloadConfig) as any

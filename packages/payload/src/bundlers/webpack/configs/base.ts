@@ -16,7 +16,6 @@ const mockModulePath = path.resolve(_dirname, '../../mocks/emptyModule.js')
 const mockDotENVPath = path.resolve(_dirname, '../../mocks/dotENV.js')
 
 const nodeModulesPath = path.resolve(_dirname, '../../../../node_modules')
-const nodeModulesPath2 = path.resolve(_dirname, '../../../../../../node_modules')
 const adminFolderPath = path.resolve(_dirname, '../../../admin')
 const bundlerPath = path.resolve(_dirname, '../bundler.ts')
 const bundlerPath2 = path.resolve(_dirname, '../bundler.js')
