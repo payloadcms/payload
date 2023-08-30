@@ -1,2 +1,3 @@
 #!/usr/bin/env node
-import './dist/esm/bin'
+// @ts-expect-error
+import './dist/esm/bin/index.js'
