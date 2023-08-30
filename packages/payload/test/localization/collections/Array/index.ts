@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types.js';
+import type { CollectionConfig } from '../../../../src/collections/config/types.js'
 
-export const arrayCollectionSlug = 'array-fields';
+export const arrayCollectionSlug = 'array-fields'
 
 export const ArrayCollection: CollectionConfig = {
   slug: arrayCollectionSlug,
@@ -18,4 +18,4 @@ export const ArrayCollection: CollectionConfig = {
       ],
     },
   ],
-};
+}

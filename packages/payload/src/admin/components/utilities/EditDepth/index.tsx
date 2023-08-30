@@ -1,5 +1,5 @@
-import { useContext, createContext } from 'react';
+import { createContext, useContext } from 'react'
 
-export const EditDepthContext = createContext(0);
+export const EditDepthContext = createContext(0)
 
-export const useEditDepth = (): number => useContext(EditDepthContext);
+export const useEditDepth = (): number => useContext(EditDepthContext)

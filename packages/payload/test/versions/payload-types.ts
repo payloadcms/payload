@@ -7,59 +7,59 @@
 
 export interface Config {
   collections: {
-    'autosave-posts': AutosavePost;
-    'draft-posts': DraftPost;
-    'version-posts': VersionPost;
-    users: User;
-  };
+    'autosave-posts': AutosavePost
+    'draft-posts': DraftPost
+    'version-posts': VersionPost
+    users: User
+  }
   globals: {
-    'autosave-global': AutosaveGlobal;
-    'draft-global': DraftGlobal;
-  };
+    'autosave-global': AutosaveGlobal
+    'draft-global': DraftGlobal
+  }
 }
 export interface AutosavePost {
-  id: string;
-  title: string;
-  description: string;
-  _status?: 'draft' | 'published';
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  title: string
+  description: string
+  _status?: 'draft' | 'published'
+  createdAt: string
+  updatedAt: string
 }
 export interface DraftPost {
-  id: string;
-  title: string;
-  description: string;
-  radio?: 'test';
-  select?: ('test1' | 'test2')[];
-  _status?: 'draft' | 'published';
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  title: string
+  description: string
+  radio?: 'test'
+  select?: ('test1' | 'test2')[]
+  _status?: 'draft' | 'published'
+  createdAt: string
+  updatedAt: string
 }
 export interface VersionPost {
-  id: string;
-  title: string;
-  description: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  title: string
+  description: string
+  createdAt: string
+  updatedAt: string
 }
 export interface User {
-  id: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  createdAt: string;
-  updatedAt: string;
-  password?: string;
+  id: string
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
+  createdAt: string
+  updatedAt: string
+  password?: string
 }
 export interface AutosaveGlobal {
-  id: string;
-  title: string;
-  _status?: 'draft' | 'published';
+  id: string
+  title: string
+  _status?: 'draft' | 'published'
 }
 export interface DraftGlobal {
-  id: string;
-  title: string;
-  _status?: 'draft' | 'published';
+  id: string
+  title: string
+  _status?: 'draft' | 'published'
 }

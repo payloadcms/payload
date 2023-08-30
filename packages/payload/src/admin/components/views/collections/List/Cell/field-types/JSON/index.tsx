@@ -1,17 +1,15 @@
-import React from 'react';
+import React from 'react'
 
-import './index.scss';
+import './index.scss'
 
 const JSONCell = ({ data }) => {
-  const textToShow = data.length > 100 ? `${data.substring(0, 100)}\u2026` : data;
+  const textToShow = data.length > 100 ? `${data.substring(0, 100)}\u2026` : data
 
   return (
     <code className="json-cell">
-      <span>
-        {JSON.stringify(textToShow)}
-      </span>
+      <span>{JSON.stringify(textToShow)}</span>
     </code>
-  );
-};
+  )
+}
 
-export default JSONCell;
+export default JSONCell

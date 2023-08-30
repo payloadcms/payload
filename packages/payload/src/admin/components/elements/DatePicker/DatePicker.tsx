@@ -1,90 +1,89 @@
-import React from 'react';
-import DatePicker, { registerLocale } from 'react-datepicker';
-import * as Locales from "date-fns/locale/index.js";
-import { useTranslation } from 'react-i18next';
-import CalendarIcon from '../../icons/Calendar/index.js';
-import XIcon from '../../icons/X/index.js';
-import { Props } from './types.js';
-import { getSupportedDateLocale } from '../../../utilities/formatDate/getSupportedDateLocale.js';
+import * as Locales from 'date-fns/locale/index.js'
+import React from 'react'
+import DatePicker, { registerLocale } from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import { useTranslation } from 'react-i18next'
 
-import 'react-datepicker/dist/react-datepicker.css';
-import './index.scss';
+import type { Props } from './types.js'
 
-const ReactDatePicker = DatePicker as any;
+import { getSupportedDateLocale } from '../../../utilities/formatDate/getSupportedDateLocale.js'
+import CalendarIcon from '../../icons/Calendar/index.js'
+import XIcon from '../../icons/X/index.js'
+import './index.scss'
 
+const ReactDatePicker = DatePicker as any
 
-const baseClass = 'date-time-picker';
+const baseClass = 'date-time-picker'
 
 const DateTime: React.FC<Props> = (props) => {
   const {
-    value,
-    onChange,
     displayFormat: customDisplayFormat,
-    pickerAppearance = 'default',
-    minDate,
     maxDate,
-    monthsToShow = 1,
-    minTime,
     maxTime,
-    timeIntervals = 30,
-    timeFormat = 'h:mm aa',
-    readOnly,
+    minDate,
+    minTime,
+    monthsToShow = 1,
+    onChange,
+    pickerAppearance = 'default',
     placeholder: placeholderText,
-  } = props;
+    readOnly,
+    timeFormat = 'h:mm aa',
+    timeIntervals = 30,
+    value,
+  } = props
 
   // Use the user's AdminUI language preference for the locale
-  const { i18n } = useTranslation();
-  const locale = getSupportedDateLocale(i18n.language);
+  const { i18n } = useTranslation()
+  const locale = getSupportedDateLocale(i18n.language)
 
   try {
-    registerLocale(locale, Locales[locale]);
+    registerLocale(locale, Locales[locale])
   } catch (e) {
-    console.warn(`Could not find DatePicker locale for ${locale}`);
+    console.warn(`Could not find DatePicker locale for ${locale}`)
   }
 
-  let dateFormat = customDisplayFormat;
+  let dateFormat = customDisplayFormat
 
   if (!customDisplayFormat) {
     // when no displayFormat is provided, determine format based on the picker appearance
-    if (pickerAppearance === 'default') dateFormat = 'MM/dd/yyyy';
-    else if (pickerAppearance === 'dayAndTime') dateFormat = 'MMM d, yyy h:mm a';
-    else if (pickerAppearance === 'timeOnly') dateFormat = 'h:mm a';
-    else if (pickerAppearance === 'dayOnly') dateFormat = 'MMM dd';
-    else if (pickerAppearance === 'monthOnly') dateFormat = 'MMMM';
+    if (pickerAppearance === 'default') dateFormat = 'MM/dd/yyyy'
+    else if (pickerAppearance === 'dayAndTime') dateFormat = 'MMM d, yyy h:mm a'
+    else if (pickerAppearance === 'timeOnly') dateFormat = 'h:mm a'
+    else if (pickerAppearance === 'dayOnly') dateFormat = 'MMM dd'
+    else if (pickerAppearance === 'monthOnly') dateFormat = 'MMMM'
   }
 
   const dateTimePickerProps = {
-    minDate,
-    maxDate,
-    dateFormat,
-    monthsShown: Math.min(2, monthsToShow),
-    showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
-    minTime,
-    maxTime,
-    timeIntervals,
-    timeFormat,
-    placeholderText,
-    disabled: readOnly,
-    onChange,
-    showPopperArrow: false,
-    selected: value && new Date(value),
     customInputRef: 'ref',
+    dateFormat,
+    disabled: readOnly,
+    maxDate,
+    maxTime,
+    minDate,
+    minTime,
+    monthsShown: Math.min(2, monthsToShow),
+    onChange,
+    placeholderText,
+    selected: value && new Date(value),
     showMonthYearPicker: pickerAppearance === 'monthOnly',
-  };
+    showPopperArrow: false,
+    showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
+    timeFormat,
+    timeIntervals,
+  }
 
-  const classes = [
-    baseClass,
-    `${baseClass}__appearance--${pickerAppearance}`,
-  ].filter(Boolean).join(' ');
+  const classes = [baseClass, `${baseClass}__appearance--${pickerAppearance}`]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <div className={classes}>
       <div className={`${baseClass}__icon-wrap`}>
         {dateTimePickerProps.selected && (
           <button
-            type="button"
             className={`${baseClass}__clear-button`}
             onClick={() => onChange(null)}
+            type="button"
           >
             <XIcon />
           </button>
@@ -94,21 +93,21 @@ const DateTime: React.FC<Props> = (props) => {
       <div className={`${baseClass}__input-wrapper`}>
         <ReactDatePicker
           {...dateTimePickerProps}
-          onChange={(val) => onChange(val as Date)}
-          locale={locale}
           popperModifiers={[
             {
-              name: 'preventOverflow',
               enabled: true,
+              name: 'preventOverflow',
             },
           ]}
+          dropdownMode="select"
+          locale={locale}
+          onChange={(val) => onChange(val as Date)}
           showMonthDropdown
           showYearDropdown
-          dropdownMode="select"
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DateTime;
+export default DateTime

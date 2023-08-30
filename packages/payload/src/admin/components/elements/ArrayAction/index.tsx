@@ -1,44 +1,41 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import Popup from '../Popup/index.js';
-import More from '../../icons/More/index.js';
-import Chevron from '../../icons/Chevron/index.js';
-import { Props } from './types.js';
-import Plus from '../../icons/Plus/index.js';
-import X from '../../icons/X/index.js';
-import Copy from '../../icons/Copy/index.js';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-import './index.scss';
+import type { Props } from './types.js'
 
-const baseClass = 'array-actions';
+import Chevron from '../../icons/Chevron/index.js'
+import Copy from '../../icons/Copy/index.js'
+import More from '../../icons/More/index.js'
+import Plus from '../../icons/Plus/index.js'
+import X from '../../icons/X/index.js'
+import Popup from '../Popup/index.js'
+import './index.scss'
+
+const baseClass = 'array-actions'
 
 export const ArrayAction: React.FC<Props> = ({
-  moveRow,
-  index,
-  rowCount,
   addRow,
   duplicateRow,
-  removeRow,
   hasMaxRows,
+  index,
+  moveRow,
+  removeRow,
+  rowCount,
 }) => {
-  const { t } = useTranslation('general');
+  const { t } = useTranslation('general')
   return (
     <Popup
-      horizontalAlign="center"
-      className={baseClass}
-      buttonClassName={`${baseClass}__button`}
-      button={<More />}
       render={({ close }) => {
         return (
           <React.Fragment>
             {index !== 0 && (
               <button
+                onClick={() => {
+                  moveRow(index, index - 1)
+                  close()
+                }}
                 className={`${baseClass}__action ${baseClass}__move-up`}
                 type="button"
-                onClick={() => {
-                  moveRow(index, index - 1);
-                  close();
-                }}
               >
                 <Chevron />
                 {t('moveUp')}
@@ -46,12 +43,12 @@ export const ArrayAction: React.FC<Props> = ({
             )}
             {index < rowCount - 1 && (
               <button
+                onClick={() => {
+                  moveRow(index, index + 1)
+                  close()
+                }}
                 className={`${baseClass}__action ${baseClass}__move-down`}
                 type="button"
-                onClick={() => {
-                  moveRow(index, index + 1);
-                  close();
-                }}
               >
                 <Chevron />
                 {t('moveDown')}
@@ -60,23 +57,23 @@ export const ArrayAction: React.FC<Props> = ({
             {!hasMaxRows && (
               <React.Fragment>
                 <button
+                  onClick={() => {
+                    addRow(index + 1)
+                    close()
+                  }}
                   className={`${baseClass}__action ${baseClass}__add`}
                   type="button"
-                  onClick={() => {
-                    addRow(index + 1);
-                    close();
-                  }}
                 >
                   <Plus />
                   {t('addBelow')}
                 </button>
                 <button
+                  onClick={() => {
+                    duplicateRow(index)
+                    close()
+                  }}
                   className={`${baseClass}__action ${baseClass}__duplicate`}
                   type="button"
-                  onClick={() => {
-                    duplicateRow(index);
-                    close();
-                  }}
                 >
                   <Copy />
                   {t('duplicate')}
@@ -84,19 +81,23 @@ export const ArrayAction: React.FC<Props> = ({
               </React.Fragment>
             )}
             <button
+              onClick={() => {
+                removeRow(index)
+                close()
+              }}
               className={`${baseClass}__action ${baseClass}__remove`}
               type="button"
-              onClick={() => {
-                removeRow(index);
-                close();
-              }}
             >
               <X />
               {t('remove')}
             </button>
           </React.Fragment>
-        );
+        )
       }}
+      button={<More />}
+      buttonClassName={`${baseClass}__button`}
+      className={baseClass}
+      horizontalAlign="center"
     />
-  );
-};
+  )
+}

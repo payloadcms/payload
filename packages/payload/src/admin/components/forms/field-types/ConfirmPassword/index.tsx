@@ -1,73 +1,63 @@
-import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import useField from '../../useField/index.js';
-import Label from '../../Label/index.js';
-import Error from '../../Error/index.js';
-import { useFormFields } from '../../Form/context.js';
-import { FormField } from '../../Form/types.js';
-import type { Props } from './types.js';
+import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import './index.scss';
+import type { FormField } from '../../Form/types.js'
+import type { Props } from './types.js'
+
+import Error from '../../Error/index.js'
+import { useFormFields } from '../../Form/context.js'
+import Label from '../../Label/index.js'
+import useField from '../../useField/index.js'
+import './index.scss'
 
 const ConfirmPassword: React.FC<Props> = (props) => {
-  const {
-    disabled,
-  } = props;
+  const { disabled } = props
 
-  const password = useFormFields<FormField>(([fields]) => fields.password);
-  const { t } = useTranslation('fields');
+  const password = useFormFields<FormField>(([fields]) => fields.password)
+  const { t } = useTranslation('fields')
 
-  const validate = useCallback((value: string) => {
-    if (!value) {
-      return t('validation:required');
-    }
+  const validate = useCallback(
+    (value: string) => {
+      if (!value) {
+        return t('validation:required')
+      }
 
-    if (value === password?.value) {
-      return true;
-    }
+      if (value === password?.value) {
+        return true
+      }
 
-    return t('passwordsDoNotMatch');
-  }, [password, t]);
+      return t('passwordsDoNotMatch')
+    },
+    [password, t],
+  )
 
-  const {
-    value,
-    showError,
-    setValue,
-    errorMessage,
-  } = useField({
-    path: 'confirm-password',
+  const { errorMessage, setValue, showError, value } = useField({
     disableFormData: true,
+    path: 'confirm-password',
     validate,
-  });
+  })
 
-  const classes = [
-    'field-type',
-    'confirm-password',
-    showError && 'error',
-  ].filter(Boolean).join(' ');
+  const classes = ['field-type', 'confirm-password', showError && 'error'].filter(Boolean).join(' ')
 
   return (
     <div className={classes}>
-      <Error
-        showError={showError}
-        message={errorMessage}
-      />
+      <Error message={errorMessage} showError={showError} />
       <Label
         htmlFor="field-confirm-password"
         label={t('authentication:confirmPassword')}
         required
       />
       <input
-        value={value as string || ''}
-        onChange={setValue}
-        type="password"
         autoComplete="off"
+        disabled={!!disabled}
         id="field-confirm-password"
         name="confirm-password"
-        disabled={!!disabled}
+        onChange={setValue}
+        type="password"
+        value={(value as string) || ''}
       />
     </div>
-  );
-};
+  )
+}
 
-export default ConfirmPassword;
+export default ConfirmPassword

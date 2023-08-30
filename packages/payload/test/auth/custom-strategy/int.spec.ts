@@ -1,31 +1,32 @@
-import payload from '../../../src/index.js';
-import { initPayloadTest } from '../../helpers/configHelpers.js';
-import { slug } from './config.js';
-import path from 'path';
+import path from 'path'
 
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+import payload from '../../../src/index.js'
+import { initPayloadTest } from '../../helpers/configHelpers.js'
+import { slug } from './config.js'
 
-import 'isomorphic-fetch';
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
 
-let apiUrl;
+import 'isomorphic-fetch'
 
-const [code, secret, name] = ['test', 'strategy', 'Tester'];
+let apiUrl
+
+const [code, secret, name] = ['test', 'strategy', 'Tester']
 
 const headers = {
   'Content-Type': 'application/json',
-};
+}
 
 describe('AuthStrategies', () => {
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
-    apiUrl = `${serverURL}/api`;
-  });
+    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
+    apiUrl = `${serverURL}/api`
+  })
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload);
+      await payload.db.destroy(payload)
     }
-  });
+  })
 
   describe('create user', () => {
     beforeAll(async () => {
@@ -37,8 +38,8 @@ describe('AuthStrategies', () => {
         }),
         headers,
         method: 'post',
-      });
-    });
+      })
+    })
 
     it('should return a logged in user from /me', async () => {
       const response = await fetch(`${apiUrl}/${slug}/me`, {
@@ -47,12 +48,12 @@ describe('AuthStrategies', () => {
           code,
           secret,
         },
-      });
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
-      expect(response.status).toBe(200);
-      expect(data.user.name).toBe(name);
-    });
-  });
-});
+      expect(response.status).toBe(200)
+      expect(data.user.name).toBe(name)
+    })
+  })
+})

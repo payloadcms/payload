@@ -1,57 +1,53 @@
-import React, { useState, useEffect } from 'react';
-import { useModal } from '@faceless-ui/modal';
-import { useTranslation } from 'react-i18next';
-import type { i18n } from 'i18next';
-import BlockSearch from './BlockSearch/index.js';
-import { Props } from './types.js';
-import { Drawer } from '../../../../elements/Drawer/index.js';
-import { getTranslation } from '../../../../../../utilities/getTranslation.js';
-import { ThumbnailCard } from '../../../../elements/ThumbnailCard/index.js';
-import DefaultBlockImage from '../../../../graphics/DefaultBlockImage/index.js';
-import { Block } from '../../../../../../fields/config/types.js';
+import type { i18n } from 'i18next'
 
-import './index.scss';
+import { useModal } from '@faceless-ui/modal'
+import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
-const baseClass = 'blocks-drawer';
+import type { Block } from '../../../../../../fields/config/types.js'
+import type { Props } from './types.js'
+
+import { getTranslation } from '../../../../../../utilities/getTranslation.js'
+import { Drawer } from '../../../../elements/Drawer/index.js'
+import { ThumbnailCard } from '../../../../elements/ThumbnailCard/index.js'
+import DefaultBlockImage from '../../../../graphics/DefaultBlockImage/index.js'
+import BlockSearch from './BlockSearch/index.js'
+import './index.scss'
+
+const baseClass = 'blocks-drawer'
 
 const getBlockLabel = (block: Block, i18n: i18n) => {
-  if (typeof block.labels.singular === 'string') return block.labels.singular.toLowerCase();
+  if (typeof block.labels.singular === 'string') return block.labels.singular.toLowerCase()
   if (typeof block.labels.singular === 'object') {
-    return getTranslation(block.labels.singular, i18n).toLowerCase();
+    return getTranslation(block.labels.singular, i18n).toLowerCase()
   }
-  return '';
-};
+  return ''
+}
 
 export const BlocksDrawer: React.FC<Props> = (props) => {
-  const {
-    blocks,
-    addRow,
-    addRowIndex,
-    drawerSlug,
-    labels,
-  } = props;
+  const { addRow, addRowIndex, blocks, drawerSlug, labels } = props
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredBlocks, setFilteredBlocks] = useState(blocks);
-  const { closeModal, isModalOpen } = useModal();
-  const { t, i18n } = useTranslation('fields');
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filteredBlocks, setFilteredBlocks] = useState(blocks)
+  const { closeModal, isModalOpen } = useModal()
+  const { i18n, t } = useTranslation('fields')
 
   useEffect(() => {
     if (!isModalOpen) {
-      setSearchTerm('');
+      setSearchTerm('')
     }
-  }, [isModalOpen]);
+  }, [isModalOpen])
 
   useEffect(() => {
-    const searchTermToUse = searchTerm.toLowerCase();
+    const searchTermToUse = searchTerm.toLowerCase()
     const matchingBlocks = blocks.reduce((matchedBlocks, block) => {
-      const blockLabel = getBlockLabel(block, i18n);
-      if (blockLabel.includes(searchTermToUse)) matchedBlocks.push(block);
-      return matchedBlocks;
-    }, []);
+      const blockLabel = getBlockLabel(block, i18n)
+      if (blockLabel.includes(searchTermToUse)) matchedBlocks.push(block)
+      return matchedBlocks
+    }, [])
 
-    setFilteredBlocks(matchingBlocks);
-  }, [searchTerm, blocks, i18n]);
+    setFilteredBlocks(matchingBlocks)
+  }, [searchTerm, blocks, i18n])
 
   return (
     <Drawer
@@ -62,41 +58,32 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
       <div className={`${baseClass}__blocks-wrapper`}>
         <ul className={`${baseClass}__blocks`}>
           {filteredBlocks?.map((block, index) => {
-            const {
-              labels: blockLabels,
-              slug,
-              imageURL,
-              imageAltText,
-            } = block;
+            const { imageAltText, imageURL, labels: blockLabels, slug } = block
 
             return (
-              <li
-                key={index}
-                className={`${baseClass}__block`}
-              >
+              <li className={`${baseClass}__block`} key={index}>
                 <ThumbnailCard
                   onClick={() => {
-                    addRow(addRowIndex, slug);
-                    closeModal(drawerSlug);
+                    addRow(addRowIndex, slug)
+                    closeModal(drawerSlug)
                   }}
-                  thumbnail={imageURL ? (
-                    <img
-                      src={imageURL}
-                      alt={imageAltText}
-                    />
-                  ) : (
-                    <div className={`${baseClass}__default-image`}>
-                      <DefaultBlockImage />
-                    </div>
-                  )}
-                  label={getTranslation(blockLabels.singular, i18n)}
+                  thumbnail={
+                    imageURL ? (
+                      <img alt={imageAltText} src={imageURL} />
+                    ) : (
+                      <div className={`${baseClass}__default-image`}>
+                        <DefaultBlockImage />
+                      </div>
+                    )
+                  }
                   alignLabel="center"
+                  label={getTranslation(blockLabels.singular, i18n)}
                 />
               </li>
-            );
+            )
           })}
         </ul>
       </div>
     </Drawer>
-  );
-};
+  )
+}

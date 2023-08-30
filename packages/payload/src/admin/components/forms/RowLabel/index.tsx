@@ -1,58 +1,50 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { isComponent, Props } from './types.js';
-import { useWatchForm } from '../Form/context.js';
-import { getTranslation } from '../../../../utilities/getTranslation.js';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-const baseClass = 'row-label';
+import type { Props } from './types.js'
+
+import { getTranslation } from '../../../../utilities/getTranslation.js'
+import { useWatchForm } from '../Form/context.js'
+import { isComponent } from './types.js'
+
+const baseClass = 'row-label'
 
 export const RowLabel: React.FC<Props> = ({ className, ...rest }) => {
   return (
     <span
+      className={[baseClass, className].filter(Boolean).join(' ')}
       style={{
         pointerEvents: 'none',
       }}
-      className={[
-        baseClass,
-        className,
-      ].filter(Boolean).join(' ')}
     >
       <RowLabelContent {...rest} />
     </span>
-  );
-};
+  )
+}
 
 const RowLabelContent: React.FC<Omit<Props, 'className'>> = (props) => {
-  const {
-    path,
-    label,
-    rowNumber,
-  } = props;
+  const { label, path, rowNumber } = props
 
-  const { i18n } = useTranslation();
-  const { getDataByPath, getSiblingData } = useWatchForm();
-  const collapsibleData = getSiblingData(path);
-  const arrayData = getDataByPath(path);
-  const data = arrayData || collapsibleData;
+  const { i18n } = useTranslation()
+  const { getDataByPath, getSiblingData } = useWatchForm()
+  const collapsibleData = getSiblingData(path)
+  const arrayData = getDataByPath(path)
+  const data = arrayData || collapsibleData
 
   if (isComponent(label)) {
-    const Label = label;
-    return (
-      <Label
-        data={data}
-        path={path}
-        index={rowNumber}
-      />
-    );
+    const Label = label
+    return <Label data={data} index={rowNumber} path={path} />
   }
 
   return (
     <React.Fragment>
-      {typeof label === 'function' ? label({
-        data,
-        path,
-        index: rowNumber,
-      }) : getTranslation(label, i18n)}
+      {typeof label === 'function'
+        ? label({
+            data,
+            index: rowNumber,
+            path,
+          })
+        : getTranslation(label, i18n)}
     </React.Fragment>
-  );
-};
+  )
+}

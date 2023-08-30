@@ -79,7 +79,6 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
         locales.push(locale.code)
         return locales
       }, [] as string[])
-
       ;(config.localization as SanitizedLocalizationConfig).locales = (
         config.localization as LocalizationConfigWithLabels
       ).locales.map((locale) => ({

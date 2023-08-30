@@ -1,13 +1,15 @@
-import React, { Suspense, lazy } from 'react';
-import { ShimmerEffect } from '../ShimmerEffect/index.js';
-import { Props } from './types.js';
+import React, { Suspense, lazy } from 'react'
 
-const DatePicker = lazy(() => import('./DatePicker.js'));
+import type { Props } from './types.js'
+
+import { ShimmerEffect } from '../ShimmerEffect/index.js'
+
+const DatePicker = lazy(() => import('./DatePicker.js'))
 
 const DatePickerField: React.FC<Props> = (props) => (
   <Suspense fallback={<ShimmerEffect height={50} />}>
     <DatePicker {...props} />
   </Suspense>
-);
+)
 
-export default DatePickerField;
+export default DatePickerField

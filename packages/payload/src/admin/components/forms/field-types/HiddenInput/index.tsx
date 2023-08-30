@@ -1,37 +1,34 @@
-import React, { useEffect } from 'react';
-import useField from '../../useField/index.js';
-import withCondition from '../../withCondition/index.js';
-import { Props } from './types.js';
+import React, { useEffect } from 'react'
+
+import type { Props } from './types.js'
+
+import useField from '../../useField/index.js'
+import withCondition from '../../withCondition/index.js'
 
 const HiddenInput: React.FC<Props> = (props) => {
-  const {
-    name,
-    path: pathFromProps,
-    value: valueFromProps,
-    disableModifyingForm = true,
-  } = props;
+  const { disableModifyingForm = true, name, path: pathFromProps, value: valueFromProps } = props
 
-  const path = pathFromProps || name;
+  const path = pathFromProps || name
 
-  const { value, setValue } = useField({
+  const { setValue, value } = useField({
     path,
-  });
+  })
 
   useEffect(() => {
     if (valueFromProps !== undefined) {
-      setValue(valueFromProps, disableModifyingForm);
+      setValue(valueFromProps, disableModifyingForm)
     }
-  }, [valueFromProps, setValue, disableModifyingForm]);
+  }, [valueFromProps, setValue, disableModifyingForm])
 
   return (
     <input
-      id={`field-${path.replace(/\./gi, '__')}`}
-      type="hidden"
-      value={value as string || ''}
-      onChange={setValue}
+      id={`field-${path.replace(/\./g, '__')}`}
       name={path}
+      onChange={setValue}
+      type="hidden"
+      value={(value as string) || ''}
     />
-  );
-};
+  )
+}
 
-export default withCondition(HiddenInput);
+export default withCondition(HiddenInput)

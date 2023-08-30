@@ -1,10 +1,9 @@
-import React from 'react';
-import LeafButton from '../Button.js';
-import CodeIcon from '../../../../../icons/Code/index.js';
+import React from 'react'
 
-const Code = ({ attributes, children }) => (
-  <code {...attributes}>{children}</code>
-);
+import CodeIcon from '../../../../../icons/Code/index.js'
+import LeafButton from '../Button.js'
+
+const Code = ({ attributes, children }) => <code {...attributes}>{children}</code>
 
 const code = {
   Button: () => (
@@ -13,6 +12,6 @@ const code = {
     </LeafButton>
   ),
   Leaf: Code,
-};
+}
 
-export default code;
+export default code

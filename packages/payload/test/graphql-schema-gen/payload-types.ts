@@ -6,63 +6,63 @@
  */
 
 export type SharedMetaArray = {
-  title?: string;
-  description?: string;
-  id?: string;
-}[];
+  title?: string
+  description?: string
+  id?: string
+}[]
 
 export interface Config {
   collections: {
-    collection1: Collection1;
-    collection2: Collection2;
-    users: User;
-  };
-  globals: {};
+    collection1: Collection1
+    collection2: Collection2
+    users: User
+  }
+  globals: {}
 }
 export interface Collection1 {
-  id: string;
-  testing: string;
-  title: string;
-  meta?: SharedMetaArray;
-  blocks: (SharedMetaBlock | AnotherSharedBlock)[];
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  testing: string
+  title: string
+  meta?: SharedMetaArray
+  blocks: (SharedMetaBlock | AnotherSharedBlock)[]
+  updatedAt: string
+  createdAt: string
 }
 export interface SharedMetaBlock {
-  b1title: string;
-  b1description?: string;
-  id?: string;
-  blockName?: string;
-  blockType: 'block1';
+  b1title: string
+  b1description?: string
+  id?: string
+  blockName?: string
+  blockType: 'block1'
 }
 export interface AnotherSharedBlock {
-  b2title: string;
-  b2description?: string;
-  id?: string;
-  blockName?: string;
-  blockType: 'block2';
+  b2title: string
+  b2description?: string
+  id?: string
+  blockName?: string
+  blockType: 'block2'
 }
 export interface Collection2 {
-  id: string;
-  meta?: SharedMeta;
+  id: string
+  meta?: SharedMeta
   nestedGroup?: {
-    meta?: SharedMeta;
-  };
-  updatedAt: string;
-  createdAt: string;
+    meta?: SharedMeta
+  }
+  updatedAt: string
+  createdAt: string
 }
 export interface SharedMeta {
-  title?: string;
-  description?: string;
+  title?: string
+  description?: string
 }
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  password?: string;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
+  password?: string
 }

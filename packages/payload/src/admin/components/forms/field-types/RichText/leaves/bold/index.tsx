@@ -1,10 +1,9 @@
-import React from 'react';
-import LeafButton from '../Button.js';
-import BoldIcon from '../../../../../icons/Bold/index.js';
+import React from 'react'
 
-const Bold = ({ attributes, children }) => (
-  <strong {...attributes}>{children}</strong>
-);
+import BoldIcon from '../../../../../icons/Bold/index.js'
+import LeafButton from '../Button.js'
+
+const Bold = ({ attributes, children }) => <strong {...attributes}>{children}</strong>
 
 const bold = {
   Button: () => (
@@ -13,6 +12,6 @@ const bold = {
     </LeafButton>
   ),
   Leaf: Bold,
-};
+}
 
-export default bold;
+export default bold

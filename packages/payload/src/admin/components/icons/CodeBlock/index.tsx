@@ -1,13 +1,13 @@
-import React from 'react';
+import React from 'react'
 
 const CodeBlockIcon: React.FC = () => (
   <svg
-    viewBox="0 0 24 24"
     aria-hidden="true"
-    focusable="false"
-    fill="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
     className="graphic code-block-icon"
+    fill="currentColor"
+    focusable="false"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
   >
     <path
       className="fill"
@@ -18,6 +18,6 @@ const CodeBlockIcon: React.FC = () => (
       d="M9.293 9.293L5.586 13l3.707 3.707 1.414-1.414L8.414 13l2.293-2.293zm5.414 0l-1.414 1.414L15.586 13l-2.293 2.293 1.414 1.414L18.414 13z"
     />
   </svg>
-);
+)
 
-export default CodeBlockIcon;
+export default CodeBlockIcon

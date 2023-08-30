@@ -1,85 +1,75 @@
-import React, { useCallback } from 'react';
-import useField from '../../useField/index.js';
-import withCondition from '../../withCondition/index.js';
-import { text } from '../../../../../fields/validations.js';
-import { Props } from './types.js';
-import TextInput from './Input.js';
-import { useLocale } from '../../../utilities/Locale/index.js';
-import { useConfig } from '../../../utilities/Config/index.js';
-import { isFieldRTL } from '../shared.js';
+import React, { useCallback } from 'react'
+
+import type { Props } from './types.js'
+
+import { text } from '../../../../../fields/validations.js'
+import { useConfig } from '../../../utilities/Config/index.js'
+import { useLocale } from '../../../utilities/Locale/index.js'
+import useField from '../../useField/index.js'
+import withCondition from '../../withCondition/index.js'
+import { isFieldRTL } from '../shared.js'
+import TextInput from './Input.js'
 
 const Text: React.FC<Props> = (props) => {
   const {
-    path: pathFromProps,
+    admin: { className, condition, description, placeholder, readOnly, rtl, style, width } = {},
+    inputRef,
+    label,
+    localized,
+    maxLength,
+    minLength,
     name,
+    path: pathFromProps,
     required,
     validate = text,
-    label,
-    minLength,
-    maxLength,
-    localized,
-    admin: {
-      placeholder,
-      readOnly,
-      style,
-      className,
-      width,
-      description,
-      condition,
-      rtl,
-    } = {},
-    inputRef,
-  } = props;
+  } = props
 
-  const path = pathFromProps || name;
-  const locale = useLocale();
+  const path = pathFromProps || name
+  const locale = useLocale()
 
-  const { localization } = useConfig();
+  const { localization } = useConfig()
   const isRTL = isFieldRTL({
-    fieldRTL: rtl,
     fieldLocalized: localized,
+    fieldRTL: rtl,
     locale,
     localizationConfig: localization || undefined,
-  });
+  })
 
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      return validate(value, { ...options, maxLength, minLength, required })
+    },
+    [validate, minLength, maxLength, required],
+  )
 
-  const memoizedValidate = useCallback((value, options) => {
-    return validate(value, { ...options, minLength, maxLength, required });
-  }, [validate, minLength, maxLength, required]);
-
-  const {
-    value,
-    showError,
-    setValue,
-    errorMessage,
-  } = useField<string>({
+  const { errorMessage, setValue, showError, value } = useField<string>({
+    condition,
     path,
     validate: memoizedValidate,
-    condition,
-  });
+  })
 
   return (
     <TextInput
-      path={path}
-      name={name}
       onChange={(e) => {
-        setValue(e.target.value);
+        setValue(e.target.value)
       }}
-      showError={showError}
+      className={className}
+      description={description}
       errorMessage={errorMessage}
-      required={required}
+      inputRef={inputRef}
       label={label}
-      value={value}
+      name={name}
+      path={path}
       placeholder={placeholder}
       readOnly={readOnly}
-      style={style}
-      className={className}
-      width={width}
-      description={description}
-      inputRef={inputRef}
+      required={required}
       rtl={isRTL}
+      showError={showError}
+      style={style}
+      value={value}
+      width={width}
     />
-  );
-};
+  )
+}
 
-export default withCondition(Text);
+export default withCondition(Text)

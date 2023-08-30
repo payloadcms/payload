@@ -7,40 +7,40 @@
 
 export interface Config {
   collections: {
-    posts: Post;
-    users: User;
-  };
-  globals: {};
+    posts: Post
+    users: User
+  }
+  globals: {}
 }
 export interface Post {
-  id: string;
+  id: string
   arrayField?: {
     group23field: {
       arrayField: {
         group23field: {
           arrayField: {
-            textField: string;
-            id?: string;
-          }[];
-        };
-        id?: string;
-      }[];
-    };
-    id?: string;
-  }[];
-  updatedAt: string;
-  createdAt: string;
+            textField: string
+            id?: string
+          }[]
+        }
+        id?: string
+      }[]
+    }
+    id?: string
+  }[]
+  updatedAt: string
+  createdAt: string
 }
 export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  salt?: string;
-  hash?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  password?: string;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  salt?: string
+  hash?: string
+  loginAttempts?: number
+  lockUntil?: string
+  password?: string
 }

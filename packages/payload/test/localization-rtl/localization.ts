@@ -12,4 +12,4 @@ export const localization = {
   ],
   defaultLocale: 'en',
   fallback: true,
-};
+}

@@ -1,3 +1,3 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 
-export default buildConfigWithDefaults({});
+export default buildConfigWithDefaults({})

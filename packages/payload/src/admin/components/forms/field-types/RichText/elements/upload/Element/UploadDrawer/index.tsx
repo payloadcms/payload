@@ -1,86 +1,85 @@
-import { useModal } from '@faceless-ui/modal';
-import { Transforms } from 'slate';
-import { ReactEditor, useSlateStatic } from 'slate-react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { ElementProps } from '../index.js';
-import fieldTypes from '../../../../../index.js';
-import { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types.js';
-import { Drawer } from '../../../../../../../elements/Drawer/index.js';
-import { useAuth } from '../../../../../../../utilities/Auth/index.js';
-import { useLocale } from '../../../../../../../utilities/Locale/index.js';
-import Form from '../../../../../../Form/index.js';
-import RenderFields from '../../../../../../RenderFields/index.js';
-import FormSubmit from '../../../../../../Submit/index.js';
-import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema/index.js';
-import { getTranslation } from '../../../../../../../../../utilities/getTranslation.js';
-import deepCopyObject from '../../../../../../../../../utilities/deepCopyObject.js';
-import { useDocumentInfo } from '../../../../../../../utilities/DocumentInfo/index.js';
+import { useModal } from '@faceless-ui/modal'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Transforms } from 'slate'
+import { ReactEditor, useSlateStatic } from 'slate-react'
 
-export const UploadDrawer: React.FC<ElementProps & {
-  drawerSlug: string
-  relatedCollection: SanitizedCollectionConfig
-}> = (props) => {
-  const editor = useSlateStatic();
+import type { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types.js'
+import type { ElementProps } from '../index.js'
 
-  const {
-    fieldProps,
-    relatedCollection,
-    drawerSlug,
-    element,
-  } = props;
+import deepCopyObject from '../../../../../../../../../utilities/deepCopyObject.js'
+import { getTranslation } from '../../../../../../../../../utilities/getTranslation.js'
+import { Drawer } from '../../../../../../../elements/Drawer/index.js'
+import { useAuth } from '../../../../../../../utilities/Auth/index.js'
+import { useDocumentInfo } from '../../../../../../../utilities/DocumentInfo/index.js'
+import { useLocale } from '../../../../../../../utilities/Locale/index.js'
+import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema/index.js'
+import Form from '../../../../../../Form/index.js'
+import RenderFields from '../../../../../../RenderFields/index.js'
+import FormSubmit from '../../../../../../Submit/index.js'
+import fieldTypes from '../../../../../index.js'
 
-  const { t, i18n } = useTranslation();
-  const { code: locale } = useLocale();
-  const { user } = useAuth();
-  const { closeModal } = useModal();
-  const { getDocPreferences } = useDocumentInfo();
-  const [initialState, setInitialState] = useState({});
-  const fieldSchema = fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields;
+export const UploadDrawer: React.FC<
+  ElementProps & {
+    drawerSlug: string
+    relatedCollection: SanitizedCollectionConfig
+  }
+> = (props) => {
+  const editor = useSlateStatic()
 
-  const handleUpdateEditData = useCallback((_, data) => {
-    const newNode = {
-      fields: data,
-    };
+  const { drawerSlug, element, fieldProps, relatedCollection } = props
 
-    const elementPath = ReactEditor.findPath(editor, element);
+  const { i18n, t } = useTranslation()
+  const { code: locale } = useLocale()
+  const { user } = useAuth()
+  const { closeModal } = useModal()
+  const { getDocPreferences } = useDocumentInfo()
+  const [initialState, setInitialState] = useState({})
+  const fieldSchema = fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields
 
-    Transforms.setNodes(
-      editor,
-      newNode,
-      { at: elementPath },
-    );
-    closeModal(drawerSlug);
-  }, [closeModal, editor, element, drawerSlug]);
+  const handleUpdateEditData = useCallback(
+    (_, data) => {
+      const newNode = {
+        fields: data,
+      }
+
+      const elementPath = ReactEditor.findPath(editor, element)
+
+      Transforms.setNodes(editor, newNode, { at: elementPath })
+      closeModal(drawerSlug)
+    },
+    [closeModal, editor, element, drawerSlug],
+  )
 
   useEffect(() => {
     const awaitInitialState = async () => {
-      const preferences = await getDocPreferences();
-      const state = await buildStateFromSchema({ fieldSchema, preferences, data: deepCopyObject(element?.fields || {}), user, operation: 'update', locale, t: t as any });
-      setInitialState(state);
-    };
+      const preferences = await getDocPreferences()
+      const state = await buildStateFromSchema({
+        data: deepCopyObject(element?.fields || {}),
+        fieldSchema,
+        locale,
+        operation: 'update',
+        preferences,
+        t: t as any,
+        user,
+      })
+      setInitialState(state)
+    }
 
-    awaitInitialState();
-  }, [fieldSchema, element.fields, user, locale, t, getDocPreferences]);
+    awaitInitialState()
+  }, [fieldSchema, element.fields, user, locale, t, getDocPreferences])
 
   return (
     <Drawer
       slug={drawerSlug}
-      title={t('general:editLabel', { label: getTranslation(relatedCollection.labels.singular, i18n) })}
+      title={t('general:editLabel', {
+        label: getTranslation(relatedCollection.labels.singular, i18n),
+      })}
     >
-      <Form
-        onSubmit={handleUpdateEditData}
-        initialState={initialState}
-      >
-        <RenderFields
-          readOnly={false}
-          fieldTypes={fieldTypes}
-          fieldSchema={fieldSchema}
-        />
-        <FormSubmit>
-          {t('fields:saveChanges')}
-        </FormSubmit>
+      <Form initialState={initialState} onSubmit={handleUpdateEditData}>
+        <RenderFields fieldSchema={fieldSchema} fieldTypes={fieldTypes} readOnly={false} />
+        <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
       </Form>
     </Drawer>
-  );
-};
+  )
+}

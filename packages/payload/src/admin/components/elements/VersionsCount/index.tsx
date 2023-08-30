@@ -1,45 +1,45 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config/index.js';
-import Button from '../Button/index.js';
-import { Props } from './types.js';
-import { useDocumentInfo } from '../../utilities/DocumentInfo/index.js';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-import './index.scss';
+import type { Props } from './types.js'
 
-const baseClass = 'versions-count';
+import { useConfig } from '../../utilities/Config/index.js'
+import { useDocumentInfo } from '../../utilities/DocumentInfo/index.js'
+import Button from '../Button/index.js'
+import './index.scss'
+
+const baseClass = 'versions-count'
 
 const VersionsCount: React.FC<Props> = ({ collection, global, id }) => {
-  const { routes: { admin } } = useConfig();
-  const { versions } = useDocumentInfo();
-  const { t } = useTranslation('version');
+  const {
+    routes: { admin },
+  } = useConfig()
+  const { versions } = useDocumentInfo()
+  const { t } = useTranslation('version')
 
-  let versionsURL: string;
+  let versionsURL: string
 
   if (collection) {
-    versionsURL = `${admin}/collections/${collection.slug}/${id}/versions`;
+    versionsURL = `${admin}/collections/${collection.slug}/${id}/versions`
   }
 
   if (global) {
-    versionsURL = `${admin}/globals/${global.slug}/versions`;
+    versionsURL = `${admin}/globals/${global.slug}/versions`
   }
 
-  const versionCount = versions?.totalDocs || 0;
+  const versionCount = versions?.totalDocs || 0
 
   return (
     <div className={baseClass}>
       {versionCount === 0 && t('versionCount_none')}
       {versionCount > 0 && (
-        <Button
-          className={`${baseClass}__button`}
-          buttonStyle="none"
-          el="link"
-          to={versionsURL}
-        >
-          {t(versionCount === 1 ? 'versionCount_one' : 'versionCount_many', { count: versionCount })}
+        <Button buttonStyle="none" className={`${baseClass}__button`} el="link" to={versionsURL}>
+          {t(versionCount === 1 ? 'versionCount_one' : 'versionCount_many', {
+            count: versionCount,
+          })}
         </Button>
       )}
     </div>
-  );
-};
-export default VersionsCount;
+  )
+}
+export default VersionsCount

@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types.js';
+import type { CollectionConfig } from '../../../../src/collections/config/types.js'
 
 const SelectFields: CollectionConfig = {
   slug: 'select-fields',
@@ -123,11 +123,11 @@ const SelectFields: CollectionConfig = {
       options: ['One', 'Two', 'Three'],
     },
   ],
-};
+}
 
 export const selectsDoc = {
   select: 'one',
   selectHasMany: ['two', 'four'],
-};
+}
 
-export default SelectFields;
+export default SelectFields

@@ -1,21 +1,21 @@
-import React from 'react';
-import withCondition from '../../withCondition/index.js';
-import { UIField } from '../../../../../fields/config/types.js';
+import React from 'react'
+
+import type { UIField } from '../../../../../fields/config/types.js'
+
+import withCondition from '../../withCondition/index.js'
 
 const UI: React.FC<UIField> = (props) => {
   const {
     admin: {
-      components: {
-        Field,
-      },
+      components: { Field },
     },
-  } = props;
+  } = props
 
   if (Field) {
-    return <Field {...props} />;
+    return <Field {...props} />
   }
 
-  return null;
-};
+  return null
+}
 
-export default withCondition(UI);
+export default withCondition(UI)

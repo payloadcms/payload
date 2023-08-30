@@ -11,23 +11,23 @@ export interface Config {}
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
-  title: string;
-  owner?: string | User;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  title: string
+  owner?: string | User
+  createdAt: string
+  updatedAt: string
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
+  createdAt: string
+  updatedAt: string
 }

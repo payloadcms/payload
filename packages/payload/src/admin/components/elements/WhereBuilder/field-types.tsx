@@ -7,7 +7,7 @@ const boolean = [
     label: 'isNotEqualTo',
     value: 'not_equals',
   },
-];
+]
 
 const base = [
   ...boolean,
@@ -23,7 +23,7 @@ const base = [
     label: 'exists',
     value: 'exists',
   },
-];
+]
 
 const numeric = [
   ...base,
@@ -43,7 +43,7 @@ const numeric = [
     label: 'isGreaterThanOrEqualTo',
     value: 'greater_than_equals',
   },
-];
+]
 
 const geo = [
   ...boolean,
@@ -55,85 +55,85 @@ const geo = [
     label: 'near',
     value: 'near',
   },
-];
+]
 
 const within = {
   label: 'within',
   value: 'within',
-};
+}
 
 const intersects = {
   label: 'intersects',
   value: 'intersects',
-};
+}
 
 const like = {
   label: 'isLike',
   value: 'like',
-};
+}
 
 const contains = {
   label: 'contains',
   value: 'contains',
-};
+}
 
 const fieldTypeConditions = {
-  text: {
+  checkbox: {
     component: 'Text',
-    operators: [...base, like, contains],
-  },
-  email: {
-    component: 'Text',
-    operators: [...base, contains],
-  },
-  textarea: {
-    component: 'Text',
-    operators: [...base, like, contains],
+    operators: boolean,
   },
   code: {
     component: 'Text',
     operators: [...base, like, contains],
   },
+  date: {
+    component: 'Date',
+    operators: [...base, ...numeric],
+  },
+  email: {
+    component: 'Text',
+    operators: [...base, contains],
+  },
   json: {
     component: 'Text',
     operators: [...base, like, contains, within, intersects],
   },
-  richText: {
-    component: 'Text',
-    operators: [...base, like, contains],
-  },
   number: {
     component: 'Number',
-    operators: [...base, ...numeric],
-  },
-  date: {
-    component: 'Date',
     operators: [...base, ...numeric],
   },
   point: {
     component: 'Point',
     operators: [...geo, within, intersects],
   },
-  upload: {
-    component: 'Text',
+  radio: {
+    component: 'Select',
     operators: [...base],
   },
   relationship: {
     component: 'Relationship',
     operators: [...base],
   },
-  radio: {
-    component: 'Select',
-    operators: [...base],
+  richText: {
+    component: 'Text',
+    operators: [...base, like, contains],
   },
   select: {
     component: 'Select',
     operators: [...base],
   },
-  checkbox: {
+  text: {
     component: 'Text',
-    operators: boolean,
+    operators: [...base, like, contains],
   },
-};
+  textarea: {
+    component: 'Text',
+    operators: [...base, like, contains],
+  },
+  upload: {
+    component: 'Text',
+    operators: [...base],
+  },
+}
 
-export default fieldTypeConditions;
+export default fieldTypeConditions

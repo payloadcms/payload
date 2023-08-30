@@ -8,96 +8,96 @@
 
 export interface Config {
   collections: {
-    users: User;
-    'api-keys': ApiKey;
-    'public-users': PublicUser;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
-  };
-  globals: {};
+    users: User
+    'api-keys': ApiKey
+    'public-users': PublicUser
+    'payload-preferences': PayloadPreference
+    'payload-migrations': PayloadMigration
+  }
+  globals: {}
 }
 export interface User {
-  id: string;
-  roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
-  custom?: string;
-  updatedAt: string;
-  createdAt: string;
-  enableAPIKey?: boolean;
-  apiKey?: string;
-  apiKeyIndex?: string;
-  email: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  salt?: string;
-  hash?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  password?: string;
+  id: string
+  roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[]
+  custom?: string
+  updatedAt: string
+  createdAt: string
+  enableAPIKey?: boolean
+  apiKey?: string
+  apiKeyIndex?: string
+  email: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  salt?: string
+  hash?: string
+  loginAttempts?: number
+  lockUntil?: string
+  password?: string
 }
 export interface ApiKey {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  enableAPIKey?: boolean;
-  apiKey?: string;
-  apiKeyIndex?: string;
+  id: string
+  updatedAt: string
+  createdAt: string
+  enableAPIKey?: boolean
+  apiKey?: string
+  apiKeyIndex?: string
 }
 export interface PublicUser {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  salt?: string;
-  hash?: string;
-  _verified?: boolean;
-  _verificationToken?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  password?: string;
+  id: string
+  updatedAt: string
+  createdAt: string
+  email: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  salt?: string
+  hash?: string
+  _verified?: boolean
+  _verificationToken?: string
+  loginAttempts?: number
+  lockUntil?: string
+  password?: string
 }
 export interface PayloadPreference {
-  id: string;
+  id: string
   user:
     | {
-        value: string | User;
-        relationTo: 'users';
+        value: string | User
+        relationTo: 'users'
       }
     | {
-        value: string | ApiKey;
-        relationTo: 'api-keys';
+        value: string | ApiKey
+        relationTo: 'api-keys'
       }
     | {
-        value: string | PublicUser;
-        relationTo: 'public-users';
-      };
-  key?: string;
+        value: string | PublicUser
+        relationTo: 'public-users'
+      }
+  key?: string
   value?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }
 export interface PayloadMigration {
-  id: string;
-  name?: string;
-  batch?: number;
+  id: string
+  name?: string
+  batch?: number
   schema?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }

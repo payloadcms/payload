@@ -1,7 +1,7 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types.js';
-import { Field } from '../../../../src/fields/config/types.js';
+import type { CollectionConfig } from '../../../../src/collections/config/types.js'
+import type { Field } from '../../../../src/fields/config/types.js'
 
-export const errorFieldsSlug = 'error-fields';
+export const errorFieldsSlug = 'error-fields'
 
 const errorFields: Field[] = [
   {
@@ -62,9 +62,9 @@ const errorFields: Field[] = [
                 required: true,
                 validate: (value) => {
                   if (!value) {
-                    return 'This field is required';
+                    return 'This field is required'
                   }
-                  return true;
+                  return true
                 },
               },
             ],
@@ -155,7 +155,7 @@ const errorFields: Field[] = [
       },
     ],
   },
-];
+]
 
 export const ErrorFieldsCollection: CollectionConfig = {
   slug: errorFieldsSlug,
@@ -216,4 +216,4 @@ export const ErrorFieldsCollection: CollectionConfig = {
       ],
     },
   ],
-};
+}

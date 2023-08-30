@@ -1,25 +1,25 @@
-import React from 'react';
-import { components as SelectComponents, ValueContainerProps } from 'react-select';
-import { Option } from '../types.js';
+import type { ValueContainerProps } from 'react-select'
 
-import './index.scss';
+import React from 'react'
+import { components as SelectComponents } from 'react-select'
 
-const baseClass = 'value-container';
+import type { Option } from '../types.js'
+
+import './index.scss'
+
+const baseClass = 'value-container'
 
 export const ValueContainer: React.FC<ValueContainerProps<Option, any>> = (props) => {
   const {
     selectProps: {
-      // @ts-ignore // TODO: Fix types
+      // @ts-expect-error // TODO: Fix types
       customProps,
     } = {},
-  } = props;
+  } = props
 
   return (
-    <div
-      ref={customProps?.droppableRef}
-      className={baseClass}
-    >
+    <div className={baseClass} ref={customProps?.droppableRef}>
       <SelectComponents.ValueContainer {...props} />
     </div>
-  );
-};
+  )
+}
