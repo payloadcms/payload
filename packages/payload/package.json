@@ -104,7 +104,7 @@
     "lint": "eslint \"{src,test}/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"{src,test}/**/*.{ts,tsx}\" --fix",
     "style": "prettier \"{src,test}/**/*.{ts,tsx}\"",
-    "style:fix": "prettier \"{src,test}/**/*.{ts,tsx}\""
+    "style:fix": "prettier \"{src,test}/**/*.{ts,tsx}\" --write"
   },
   "bugs": {
     "url": "https://github.com/payloadcms/payload"
