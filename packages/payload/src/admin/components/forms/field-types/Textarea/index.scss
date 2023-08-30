@@ -1,4 +1,4 @@
-@import "../../../../scss/styles.scss";
+@import '../../../../scss/styles.scss';
 
 .field-type.textarea {
   position: relative;
@@ -66,7 +66,7 @@
     }
     &[data-rtl='true'] {
       direction: rtl;
-    } 
+    }
   }
 
   // Clone of textarea with same height
@@ -81,7 +81,7 @@
   }
 
   .textarea-clone::before {
-    content: attr(data-value) " ";
+    content: attr(data-value) ' ';
     visibility: hidden;
     opacity: 0;
     white-space: pre-wrap;
@@ -98,7 +98,7 @@
   }
 }
 
-html[data-theme=light] {
+html[data-theme='light'] {
   .field-type.textarea {
     &.error {
       .textarea-outer {
@@ -108,7 +108,7 @@ html[data-theme=light] {
   }
 }
 
-html[data-theme=dark] {
+html[data-theme='dark'] {
   .field-type.textarea {
     &.error {
       .textarea-outer {

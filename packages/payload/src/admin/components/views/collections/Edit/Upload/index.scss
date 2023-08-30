@@ -7,7 +7,7 @@
 
   .tooltip.error-message {
     z-index: 3;
-    bottom: calc(100% - #{base(.5)});
+    bottom: calc(100% - #{base(0.5)});
   }
 
   &__drag-label {
@@ -18,7 +18,7 @@
   &__upload {
     position: relative;
 
-    input[type=file] {
+    input[type='file'] {
       position: absolute;
       top: 0;
       z-index: -1;
@@ -45,7 +45,7 @@
   }
 
   &__file-selected {
-  gap: $baseline;
+    gap: $baseline;
     flex-direction: column;
     .btn {
       @include formInput;
@@ -78,8 +78,8 @@
 
   &__filename {
     @include formInput;
-    padding-top: base(.25);
-    padding-bottom: base(.25);
+    padding-top: base(0.25);
+    padding-bottom: base(0.25);
     flex-wrap: nowrap;
   }
 

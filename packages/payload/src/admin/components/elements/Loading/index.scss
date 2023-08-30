@@ -41,7 +41,7 @@
     width: 100%;
     height: 100%;
     background-color: var(--theme-elevation-0);
-    opacity: .85;
+    opacity: 0.85;
     z-index: -1;
   }
 
@@ -84,10 +84,10 @@
   }
 
   &__text {
-    margin-top: base(.75);
+    margin-top: base(0.75);
     text-transform: uppercase;
     font-family: var(--font-body);
-    font-size: base(.65);
+    font-size: base(0.65);
     letter-spacing: 3px;
   }
 }

@@ -5,8 +5,8 @@
   margin-bottom: $baseline;
 }
 
-html[data-theme=light] {
-  .field-type.select{
+html[data-theme='light'] {
+  .field-type.select {
     &.error {
       .rs__control {
         @include lightInputError;
@@ -15,7 +15,7 @@ html[data-theme=light] {
   }
 }
 
-html[data-theme=dark] {
+html[data-theme='dark'] {
   .field-type.select {
     &.error {
       .rs__control {

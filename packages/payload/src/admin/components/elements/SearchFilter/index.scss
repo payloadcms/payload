@@ -1,8 +1,8 @@
 @import '../../../scss/styles';
-[dir=rtl] .search-filter{
+[dir='rtl'] .search-filter {
   svg {
-    right: base(.5);
-    left:0
+    right: base(0.5);
+    left: 0;
   }
   &__input {
     padding-right: base(2);
@@ -16,7 +16,7 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    left: base(.5);
+    left: base(0.5);
   }
 
   &__input {
@@ -27,7 +27,8 @@
     border: none;
 
     &:not(:disabled) {
-        &:hover, &:focus {
+      &:hover,
+      &:focus {
         box-shadow: none;
       }
     }

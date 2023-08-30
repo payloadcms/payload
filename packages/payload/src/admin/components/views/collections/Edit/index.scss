@@ -26,16 +26,16 @@
   &__collection-actions {
     list-style: none;
     margin: 0;
-    padding: base(1.5) 0 base(.5);
+    padding: base(1.5) 0 base(0.5);
     display: flex;
 
     li {
-      [dir=ltr] & {
-        margin-right: base(.75);
+      [dir='ltr'] & {
+        margin-right: base(0.75);
       }
-      [dir=rtl] & {
-        margin-left: base(.75);
-      }  
+      [dir='rtl'] & {
+        margin-left: base(0.75);
+      }
     }
   }
 
@@ -50,12 +50,12 @@
     width: base(15);
     height: 100%;
     overflow: visible;
-    [dir=ltr] & {
+    [dir='ltr'] & {
       top: 0;
       right: 0;
       border-left: 1px solid var(--theme-elevation-100);
     }
-    [dir=rtl] & {
+    [dir='rtl'] & {
       top: 0;
       left: 0;
       border-right: 1px solid var(--theme-elevation-100);
@@ -78,21 +78,21 @@
   &__document-actions,
   &__meta,
   &__sidebar-fields {
-    [dir=ltr] & {
+    [dir='ltr'] & {
       padding-left: base(1.5);
     }
-    [dir=rtl] & {
+    [dir='rtl'] & {
       padding-right: base(1.5);
-    }  
+    }
   }
 
   &__document-actions {
-    [dir=ltr] & {
+    [dir='ltr'] & {
       padding-right: $baseline;
     }
-    [dir=rtl] & {
+    [dir='rtl'] & {
       padding-left: $baseline;
-    }  
+    }
     position: sticky;
     top: 0;
     z-index: var(--z-nav);
@@ -110,33 +110,33 @@
   &__document-actions--has-2 {
     display: flex;
 
-    >* {
-      width: calc(50% - #{base(.5)});
+    > * {
+      width: calc(50% - #{base(0.5)});
     }
 
-    >*:first-child {
-      [dir=ltr] & {
-        margin-right: base(.5);
+    > *:first-child {
+      [dir='ltr'] & {
+        margin-right: base(0.5);
       }
-      [dir=rtl] & {
-        margin-left: base(.5);
-      }  
+      [dir='rtl'] & {
+        margin-left: base(0.5);
+      }
     }
 
-    >*:last-child {
-      [dir=ltr] & {
-        margin-left: base(.5);
+    > *:last-child {
+      [dir='ltr'] & {
+        margin-left: base(0.5);
       }
-      [dir=rtl] & {
-        margin-right: base(.5);
-      }  
+      [dir='rtl'] & {
+        margin-right: base(0.5);
+      }
     }
 
     .form-submit {
       .btn {
         width: 100%;
-        padding-left: base(.5);
-        padding-right: base(.5);
+        padding-left: base(0.5);
+        padding-right: base(0.5);
       }
     }
   }
@@ -152,12 +152,12 @@
   }
 
   &__sidebar-fields {
-    [dir=ltr] & {
+    [dir='ltr'] & {
       padding-right: $baseline;
     }
-    [dir=rtl] & {
+    [dir='rtl'] & {
       padding-left: $baseline;
-    } 
+    }
     display: flex;
     flex-direction: column;
     gap: $baseline;
@@ -165,7 +165,7 @@
     .preview-btn {
       display: inline-block;
       margin: 0;
-      width: calc(50% - #{base(.5)});
+      width: calc(50% - #{base(0.5)});
     }
 
     .render-fields {
@@ -178,16 +178,16 @@
   &__meta {
     margin: auto 0 $baseline 0;
     padding-top: $baseline;
-    [dir=ltr] & {
+    [dir='ltr'] & {
       padding-right: $baseline;
     }
-    [dir=rtl] & {
+    [dir='rtl'] & {
       padding-left: $baseline;
-    } 
+    }
     list-style: none;
 
     li {
-      margin-bottom: base(.5);
+      margin-bottom: base(0.5);
 
       &:last-child {
         margin-bottom: 0;
@@ -201,14 +201,14 @@
 
   &__collection-actions,
   &__api-url {
-
     a,
     button {
       cursor: pointer;
       font-weight: 600;
       text-decoration: none;
 
-      &:hover, &:focus-visible {
+      &:hover,
+      &:focus-visible {
         text-decoration: underline;
       }
     }
@@ -234,12 +234,12 @@
 
     &__meta {
       border-top: 1px solid var(--theme-elevation-100);
-      [dir=ltr] & {
+      [dir='ltr'] & {
         padding-right: var(--gutter-h);
       }
-      [dir=rtl] & {
+      [dir='rtl'] & {
         padding-left: var(--gutter-h);
-      }  
+      }
     }
 
     &__form {
@@ -273,12 +273,12 @@
 
     &__sidebar-fields {
       padding-top: 0;
-      [dir=ltr] & {
+      [dir='ltr'] & {
         padding-right: var(--gutter-h);
       }
-      [dir=rtl] & {
+      [dir='rtl'] & {
         padding-left: var(--gutter-h);
-      }  
+      }
       gap: base(0.5);
 
       .preview-btn {
@@ -292,7 +292,7 @@
       order: 1;
 
       li {
-        margin: 0 base(.5) 0 0;
+        margin: 0 base(0.5) 0 0;
       }
     }
 

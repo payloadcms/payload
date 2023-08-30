@@ -24,7 +24,7 @@
 
   button.btn {
     margin: 0;
-    opacity: .3;
+    opacity: 0.3;
 
     &.sort-column--active {
       opacity: 1;
@@ -32,7 +32,7 @@
     }
 
     &:hover {
-      opacity: .7;
+      opacity: 0.7;
     }
   }
 
@@ -44,7 +44,7 @@
 
   &:hover {
     .btn {
-      opacity: .4;
+      opacity: 0.4;
       visibility: visible;
     }
   }

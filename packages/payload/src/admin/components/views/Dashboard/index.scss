@@ -9,7 +9,7 @@
 
   &__card-list {
     width: calc(100% + #{$baseline});
-    margin: 0 - base(.5);
+    margin: 0 - base(0.5);
     padding: 0;
     list-style: none;
     display: flex;
@@ -22,7 +22,7 @@
 
     .card {
       height: 100%;
-      margin: 0 base(.5);
+      margin: 0 base(0.5);
     }
   }
 
@@ -45,8 +45,8 @@
 
   @include small-break {
     &__card-list {
-      width: calc(100% + #{base(.5)});
-      margin: 0 - base(.25);
+      width: calc(100% + #{base(0.5)});
+      margin: 0 - base(0.25);
     }
 
     li {
@@ -54,7 +54,7 @@
     }
 
     .card {
-      margin: 0 base(.25) base(.5);
+      margin: 0 base(0.25) base(0.5);
     }
   }
 }

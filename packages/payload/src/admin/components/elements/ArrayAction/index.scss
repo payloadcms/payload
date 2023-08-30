@@ -34,7 +34,7 @@
     svg {
       position: relative;
       top: -1px;
-      margin-right: base(.25);
+      margin-right: base(0.25);
 
       .stroke {
         stroke-width: 1px;
@@ -42,7 +42,7 @@
     }
 
     &:hover {
-      opacity: .7;
+      opacity: 0.7;
     }
   }
 

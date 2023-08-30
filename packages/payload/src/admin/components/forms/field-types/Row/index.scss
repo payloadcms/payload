@@ -3,14 +3,14 @@
 .field-type.row {
   display: flex;
   flex-wrap: wrap;
-  margin-left: - base(.5);
-  margin-right: - base(.5);
+  margin-left: - base(0.5);
+  margin-right: - base(0.5);
   width: calc(100% + #{$baseline});
   margin-bottom: 0;
 
   > * {
-    padding-left: base(.5);
-    padding-right: base(.5);
+    padding-left: base(0.5);
+    padding-right: base(0.5);
     flex-grow: 1;
   }
 

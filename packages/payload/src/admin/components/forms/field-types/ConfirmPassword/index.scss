@@ -9,7 +9,7 @@
   }
 }
 
-html[data-theme=light] {
+html[data-theme='light'] {
   .field-type.field-type.confirm-password {
     &.error {
       input {
@@ -19,7 +19,7 @@ html[data-theme=light] {
   }
 }
 
-html[data-theme=dark] {
+html[data-theme='dark'] {
   .field-type.field-type.confirm-password {
     &.error {
       input {

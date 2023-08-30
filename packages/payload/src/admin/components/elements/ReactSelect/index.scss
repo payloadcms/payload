@@ -8,8 +8,8 @@
   .rs__control {
     @include formInput;
     height: auto;
-    padding-top: base(.25);
-    padding-bottom: base(.25);
+    padding-top: base(0.25);
+    padding-bottom: base(0.25);
     flex-wrap: nowrap;
   }
 
@@ -40,14 +40,14 @@
 
   .rs__group-heading {
     color: var(--theme-elevation-800);
-    padding-left: base(.5);
-    margin-bottom: base(.25);
+    padding-left: base(0.5);
+    margin-bottom: base(0.25);
   }
 
   .rs__option {
     font-family: var(--font-body);
     font-size: $baseline-body-size;
-    padding: base(.375) base(.75);
+    padding: base(0.375) base(0.75);
     color: var(--theme-elevation-800);
 
     &--is-focused {

@@ -3,7 +3,8 @@
 .versions-count__button {
   font-weight: 600;
 
-  &:hover, &:focus-visible {
+  &:hover,
+  &:focus-visible {
     text-decoration: underline;
   }
 }

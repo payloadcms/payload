@@ -5,32 +5,32 @@
 
   &__locale-label {
     background: var(--theme-elevation-100);
-    padding: base(.25);
+    padding: base(0.25);
     border-radius: $style-radius-m;
-    [dir=ltr] & {
-      margin-right: base(.25);
+    [dir='ltr'] & {
+      margin-right: base(0.25);
     }
-    [dir=rtl] & {
-      margin-left: base(.25);
-    }  
+    [dir='rtl'] & {
+      margin-left: base(0.25);
+    }
   }
 
   &__wrap {
-    margin: base(.5) 0;
-    [dir=ltr] & {
-      padding-left: base(.5);
+    margin: base(0.5) 0;
+    [dir='ltr'] & {
+      padding-left: base(0.5);
       border-left: $style-stroke-width-s solid var(--theme-elevation-150);
     }
-    [dir=rtl] & {
-      padding-right: base(.5);
+    [dir='rtl'] & {
+      padding-right: base(0.5);
       border-right: $style-stroke-width-s solid var(--theme-elevation-150);
-    }  
+    }
   }
 
   &__no-rows {
     font-family: monospace;
     background-color: var(--theme-elevation-50);
-    padding: base(.125) base(.5);
-    margin: base(.125) 0;
+    padding: base(0.125) base(0.5);
+    margin: base(0.125) 0;
   }
 }

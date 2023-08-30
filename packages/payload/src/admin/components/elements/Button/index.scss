@@ -50,11 +50,11 @@ a.btn {
   }
 
   &--size-medium {
-    padding: base(.5) $baseline;
+    padding: base(0.5) $baseline;
   }
 
   &--size-small {
-    padding: base(.25) base(.5);
+    padding: base(0.25) base(0.5);
   }
 
   &--style-primary {
@@ -66,7 +66,8 @@ a.btn {
     }
 
     &:not(.btn--disabled) {
-      &:hover, &:focus-visible {
+      &:hover,
+      &:focus-visible {
         background: var(--theme-elevation-750);
       }
 
@@ -79,7 +80,6 @@ a.btn {
       box-shadow: $focus-box-shadow;
       outline: none;
     }
-
   }
 
   &--style-secondary {
@@ -91,7 +91,8 @@ a.btn {
     background: none;
     backdrop-filter: blur(5px);
 
-    &:hover, &:focus-visible {
+    &:hover,
+    &:focus-visible {
       background: var(--theme-elevation-100);
       box-shadow: $hover-box-shadow;
     }
@@ -118,21 +119,21 @@ a.btn {
     border-radius: 0;
 
     &:focus {
-      opacity: .8;
+      opacity: 0.8;
     }
 
     &:active {
-      opacity: .7;
+      opacity: 0.7;
     }
   }
 
   &--round {
     border-radius: 100%;
   }
-  
-  [dir=rtl]  &--icon {
-    span{
-    margin-left: 5px;
+
+  [dir='rtl'] &--icon {
+    span {
+      margin-left: 5px;
     }
   }
 
@@ -164,13 +165,13 @@ a.btn {
     }
 
     .btn__icon {
-      margin-right: base(.5);
+      margin-right: base(0.5);
     }
   }
 
   &--icon-position-right {
     .btn__icon {
-      margin-left: base(.5);
+      margin-left: base(0.5);
     }
   }
 
@@ -185,7 +186,8 @@ a.btn {
     cursor: default;
   }
 
-  &:hover, &:focus-visible {
+  &:hover,
+  &:focus-visible {
     .btn__icon {
       @include color-svg(var(--theme-elevation-0));
       background: var(--theme-elevation-800);

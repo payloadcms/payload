@@ -783,7 +783,8 @@ type User {
 """
 A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
 """
-scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+scalar EmailAddress
+  @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
 
 type Users {
   docs: [User]
@@ -1604,7 +1605,12 @@ type Mutation {
   updatePost(id: String!, data: mutationPostUpdateInput!, draft: Boolean, autosave: Boolean): Post
   deletePost(id: String!): Post
   createMedia(data: mutationMediaInput!, draft: Boolean): Media
-  updateMedia(id: String!, data: mutationMediaUpdateInput!, draft: Boolean, autosave: Boolean): Media
+  updateMedia(
+    id: String!
+    data: mutationMediaUpdateInput!
+    draft: Boolean
+    autosave: Boolean
+  ): Media
   deleteMedia(id: String!): Media
   createUser(data: mutationUserInput!, draft: Boolean): User
   updateUser(id: String!, data: mutationUserUpdateInput!, draft: Boolean, autosave: Boolean): User

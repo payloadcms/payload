@@ -13,8 +13,6 @@
     margin: $baseline $baseline $baseline 0;
   }
 
-
-
   &__main-detail {
     padding: $baseline base(1.5);
     width: auto;
@@ -27,7 +25,8 @@
     font-weight: 600;
     text-decoration: none;
 
-    &:hover, &:focus-visible {
+    &:hover,
+    &:focus-visible {
       text-decoration: underline;
     }
   }
@@ -47,7 +46,7 @@
 
     li {
       width: 50%;
-      padding: 0 base(.5);
+      padding: 0 base(0.5);
       margin-bottom: $baseline;
     }
   }
@@ -63,7 +62,7 @@
 
     &__sizes {
       display: block;
-      padding: $baseline $baseline base(.5);
+      padding: $baseline $baseline base(0.5);
 
       li {
         padding: 0;

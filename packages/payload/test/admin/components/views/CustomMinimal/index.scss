@@ -1,4 +1,3 @@
-
 // As this is the demo folder, we import Payload SCSS functions relatively.
 @import '../../../../../scss';
 
@@ -7,6 +6,6 @@
 
 .custom-minimal-route {
   &__login-btn {
-    margin-right: base(.5);
+    margin-right: base(0.5);
   }
 }

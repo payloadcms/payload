@@ -11,7 +11,7 @@
     th {
       font-weight: normal;
       text-align: left;
-      [dir = rtl] & {
+      [dir='rtl'] & {
         text-align: right;
       }
     }
@@ -19,7 +19,7 @@
 
   th,
   td {
-    padding: base(.75);
+    padding: base(0.75);
     min-width: 150px;
   }
 
@@ -37,7 +37,6 @@
   }
 
   @include mid-break {
-
     th,
     td {
       max-width: 70vw;

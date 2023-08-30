@@ -2,10 +2,10 @@
 
 .where-builder {
   background: var(--theme-elevation-50);
-  padding: base(.5) $baseline $baseline;
+  padding: base(0.5) $baseline $baseline;
 
   &__label {
-    margin: base(.5) 0;
+    margin: base(0.5) 0;
   }
 
   &__or-filters,
@@ -17,7 +17,6 @@
 
   &__add-or,
   &__add-first-filter {
-
     &.btn {
       margin-bottom: 0;
     }

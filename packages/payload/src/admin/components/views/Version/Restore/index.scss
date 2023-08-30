@@ -14,12 +14,12 @@
     }
 
     .btn {
-      [dir=ltr] & {
+      [dir='ltr'] & {
         margin-right: $baseline;
       }
-      [dir=rtl] & {
+      [dir='rtl'] & {
         margin-left: $baseline;
-      }  
+      }
     }
   }
 

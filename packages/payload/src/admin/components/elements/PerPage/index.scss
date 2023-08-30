@@ -19,7 +19,8 @@
     text-align: left;
     width: 100%;
 
-    &:hover, &:focus-visible {
+    &:hover,
+    &:focus-visible {
       text-decoration: underline;
     }
   }
@@ -29,8 +30,8 @@
 
     svg {
       @include color-svg(var(--theme-elevation-1000));
-      margin-left: base(-.25);
-      margin-right: base(-.125);
+      margin-left: base(-0.25);
+      margin-right: base(-0.125);
       transform: rotate(-90deg);
     }
   }

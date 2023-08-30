@@ -20,20 +20,20 @@
   &__buttons-wrap {
     display: flex;
     align-items: center;
-    gap: base(.5);
+    gap: base(0.5);
 
-    [dir=ltr] & {
-      margin-right: base(.5);
+    [dir='ltr'] & {
+      margin-right: base(0.5);
     }
 
-    [dir=rtl] & {
-      margin-left: base(.5);
-    } 
+    [dir='rtl'] & {
+      margin-left: base(0.5);
+    }
 
     .btn {
       background-color: var(--theme-elevation-100);
       cursor: pointer;
-      padding: 0 base(.25);
+      padding: 0 base(0.25);
       border-radius: $style-radius-s;
 
       &:hover {
@@ -61,18 +61,18 @@
     }
 
     .search-filter {
-      margin-bottom: base(.5);
+      margin-bottom: base(0.5);
       width: 100%;
     }
 
     &__buttons-wrap {
-      margin-left: - base(.25);
-      margin-right: - base(.25);
+      margin-left: - base(0.25);
+      margin-right: - base(0.25);
       width: calc(100% + #{base(0.5)});
 
       .pill {
-        margin: 0 base(.25);
-        padding: base(.5) base(1);
+        margin: 0 base(0.25);
+        padding: base(0.5) base(1);
 
         svg {
           margin-left: auto;

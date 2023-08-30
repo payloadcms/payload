@@ -5,29 +5,30 @@
   margin-bottom: $baseline;
 }
 
-
-html[data-theme=light] {
-  .json-field{
-    &.error {
-      .code-editor {
-        border-color: var(--theme-error-500);
-      }
-
-      .monaco-editor-background, .margin {
-        background-color: var(--theme-error-50);
-      }
-    }
-  }
-}
-
-html[data-theme=dark] {
+html[data-theme='light'] {
   .json-field {
     &.error {
       .code-editor {
         border-color: var(--theme-error-500);
       }
 
-      .monaco-editor-background, .margin {
+      .monaco-editor-background,
+      .margin {
+        background-color: var(--theme-error-50);
+      }
+    }
+  }
+}
+
+html[data-theme='dark'] {
+  .json-field {
+    &.error {
+      .code-editor {
+        border-color: var(--theme-error-500);
+      }
+
+      .monaco-editor-background,
+      .margin {
         background-color: var(--theme-error-100);
       }
     }

@@ -69,7 +69,7 @@ const SearchFilter: React.FC<Props> = (props) => {
     })
 
     if (debouncedSearch !== previousSearch) {
-      if (handleChange) handleChange(newWhere )
+      if (handleChange) handleChange(newWhere)
 
       if (modifySearchQuery) {
         history.replace({

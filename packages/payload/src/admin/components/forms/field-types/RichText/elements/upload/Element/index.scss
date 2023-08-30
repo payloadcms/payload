@@ -15,8 +15,8 @@
     border: 1px solid var(--theme-elevation-150);
   }
 
-  &[data-slate-node=element] {
-    margin: base(.625) 0;
+  &[data-slate-node='element'] {
+    margin: base(0.625) 0;
   }
 
   &__card {
@@ -51,7 +51,7 @@
     flex-grow: 1;
     display: flex;
     align-items: center;
-    padding: base(.75);
+    padding: base(0.75);
     justify-content: space-between;
     max-width: calc(100% - #{base(3.25)});
   }
@@ -67,7 +67,7 @@
     }
 
     & > *:not(:last-child) {
-      margin-right: base(.25);
+      margin-right: base(0.25);
     }
   }
 
@@ -84,7 +84,7 @@
     }
   }
 
-  &__upload-drawer-toggler  {
+  &__upload-drawer-toggler {
     background-color: transparent;
     border: none;
     padding: 0;
@@ -117,7 +117,7 @@
   }
 
   &__bottomRow {
-    padding: base(.5);
+    padding: base(0.5);
     border-top: 1px solid var(--theme-elevation-100);
   }
 
@@ -128,7 +128,7 @@
   }
 
   &__wrap {
-    padding: base(.5) base(.5) base(.5) base(1);
+    padding: base(0.5) base(0.5) base(0.5) base(1);
     text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -141,7 +141,7 @@
 
   @include small-break {
     &__topRowRightPanel {
-      padding: base(.75) base(.5);
+      padding: base(0.75) base(0.5);
     }
   }
 }

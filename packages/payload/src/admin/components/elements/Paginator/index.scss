@@ -19,7 +19,7 @@
   }
 
   .clickable-arrow--right {
-    margin-right: base(.25);
+    margin-right: base(0.25);
   }
 
   .clickable-arrow,
@@ -31,12 +31,13 @@
     justify-content: center;
     align-content: center;
     outline: 0;
-    padding: base(.5);
+    padding: base(0.5);
     color: var(--theme-elevation-800);
     line-height: base(1);
 
     &:not(.clickable-arrow--is-disabled) {
-      &:hover, &:focus-visible {
+      &:hover,
+      &:focus-visible {
         background: var(--theme-elevation-100);
       }
     }
@@ -48,7 +49,7 @@
 
   &__page,
   &__separator {
-    margin-right: base(.25);
+    margin-right: base(0.25);
   }
 
   &__separator {

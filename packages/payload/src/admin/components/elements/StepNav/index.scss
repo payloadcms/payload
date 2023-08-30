@@ -9,12 +9,12 @@
   }
 
   a {
-    [dir=ltr] & {
-      margin-right: base(.25);
+    [dir='ltr'] & {
+      margin-right: base(0.25);
     }
-    [dir=rtl] & {
-      margin-left: base(.25);
-    }  
+    [dir='rtl'] & {
+      margin-left: base(0.25);
+    }
     border: 0;
     display: flex;
     align-items: center;
@@ -22,21 +22,22 @@
     text-decoration: none;
 
     svg {
-      [dir=ltr] & {
-        margin-left: base(.25);
+      [dir='ltr'] & {
+        margin-left: base(0.25);
         transform: rotate(-90deg);
       }
-      [dir=rtl] & {
-        margin-right: base(.25);
+      [dir='rtl'] & {
+        margin-right: base(0.25);
         transform: rotate(90deg);
-      }  
+      }
     }
 
     label {
       cursor: pointer;
     }
 
-    &:hover, &:focus-visible {
+    &:hover,
+    &:focus-visible {
       text-decoration: underline;
     }
   }

@@ -29,8 +29,7 @@ export const ar = {
     lockUntil: 'قفل حتى',
     logBackIn: 'تسجيل الدّخول من جديد',
     logOut: 'تسجيل الخروج',
-    loggedIn:
-      'لتسجيل الدّخول مع مستخدم آخر ، يجب عليك <0> تسجيل الخروج </0> أوّلاً.',
+    loggedIn: 'لتسجيل الدّخول مع مستخدم آخر ، يجب عليك <0> تسجيل الخروج </0> أوّلاً.',
     loggedInChangePassword:
       'لتغيير كلمة المرور الخاصّة بك ، انتقل إلى <0>حسابك</0> وقم بتعديل كلمة المرور هناك.',
     loggedOutInactivity: 'لقد تمّ تسجيل الخروج بسبب عدم النّشاط.',
@@ -38,8 +37,7 @@ export const ar = {
     login: 'تسجيل الدخول',
     loginAttempts: 'محاولات تسجيل الدخول',
     loginUser: 'تسجيل دخول المستخدم',
-    loginWithAnotherUser:
-      'لتسجيل الدخول مع مستخدم آخر ، يجب عليك <0> تسجيل الخروج </0> أوّلاً.',
+    loginWithAnotherUser: 'لتسجيل الدخول مع مستخدم آخر ، يجب عليك <0> تسجيل الخروج </0> أوّلاً.',
     logout: 'تسجيل الخروج',
     logoutUser: 'تسجيل خروج المستخدم',
     newAPIKeyGenerated: 'تمّ توليد مفتاح API جديد.',
@@ -70,8 +68,7 @@ export const ar = {
     autosaving: 'حدث خطأ أثناء الحفظ التّلقائي لهذا المستند.',
     correctInvalidFields: 'الرّجاء تصحيح الحقول الغير صالحة.',
     deletingFile: 'حدث خطأ أثناء حذف الملفّ.',
-    deletingTitle:
-      'حدث خطأ أثناء حذف {{title}}. يرجى التحقّق من اتّصالك والمحاولة مرة أخرى.',
+    deletingTitle: 'حدث خطأ أثناء حذف {{title}}. يرجى التحقّق من اتّصالك والمحاولة مرة أخرى.',
     emailOrPasswordIncorrect: 'البريد الإلكتروني أو كلمة المرور غير صحيح/ة.',
     followingFieldsInvalid_many: 'الحقول التّالية غير صالحة:',
     followingFieldsInvalid_one: 'الحقل التّالي غير صالح:',
@@ -95,12 +92,10 @@ export const ar = {
     unPublishingDocument: 'حدث خطأ أثناء إلغاء نشر هذا المستند.',
     unableToDeleteCount: 'يتعذّر حذف {{count}} من {{total}} {{label}}.',
     unableToUpdateCount: 'يتعذّر تحديث {{count}} من {{total}} {{label}}.',
-    unauthorized:
-      'غير مصرّح لك ، عليك أن تقوم بتسجيل الدّخول لتتمكّن من تقديم هذا الطّلب.',
+    unauthorized: 'غير مصرّح لك ، عليك أن تقوم بتسجيل الدّخول لتتمكّن من تقديم هذا الطّلب.',
     unknown: 'حدث خطأ غير معروف.',
     unspecific: 'حدث خطأ.',
-    userLocked:
-      'تمّ قفل هذا المستخدم نظرًا لوجود عدد كبير من محاولات تسجيل الدّخول الغير ناجحة.',
+    userLocked: 'تمّ قفل هذا المستخدم نظرًا لوجود عدد كبير من محاولات تسجيل الدّخول الغير ناجحة.',
     valueMustBeUnique: 'على القيمة أن تكون فريدة',
     verificationTokenInvalid: 'رمز التحقّق غير صالح.',
   },
@@ -114,8 +109,7 @@ export const ar = {
     block: 'وحدة محتوى',
     blockType: 'نوع وحدة المحتوى',
     blocks: 'وحدات المحتوى',
-    chooseBetweenCustomTextOrDocument:
-      'اختر بين إدخال عنوان URL نصّي مخصّص أو الرّبط بمستند آخر.',
+    chooseBetweenCustomTextOrDocument: 'اختر بين إدخال عنوان URL نصّي مخصّص أو الرّبط بمستند آخر.',
     chooseDocumentToLink: 'اختر مستندًا للربط',
     chooseFromExisting: 'اختر من القائمة',
     chooseLabel: 'اختر {{label}}',
@@ -246,8 +240,7 @@ export const ar = {
     thisLanguage: 'العربيّة',
     titleDeleted: 'تمّ حذف {{label}} "{{title}}" بنجاح.',
     unauthorized: 'غير مصرّح',
-    unsavedChangesDuplicate:
-      'لم تحفظ التّغييرات. هل ترغب في الاستمرار في التّكرار?',
+    unsavedChangesDuplicate: 'لم تحفظ التّغييرات. هل ترغب في الاستمرار في التّكرار?',
     untitled: 'غير مُعنوَن',
     updatedAt: 'تمّ التحديث في',
     updatedCountSuccessfully: 'تمّ تحديث {{count}} {{label}} بنجاح.',
@@ -294,30 +287,25 @@ export const ar = {
     invalidSelection: 'هذا الحقل يحتوي تحديد غير صالح.',
     invalidSelections: 'هذا الحقل يحتوي التّحديدات الغير صالحة التّلية:',
     lessThanMin: '"{{value}}" هو أصغر من القيمة الدنيا المسموحة {{min}}.',
-    longerThanMin:
-      'يجب أن تكون هذه القيمة أطول من الحدّ الأدنى للطول وهو {{minLength}} حرفًا.',
+    longerThanMin: 'يجب أن تكون هذه القيمة أطول من الحدّ الأدنى للطول وهو {{minLength}} حرفًا.',
     notValidDate: '"{{value}}" ليس تاريخًا صالحًا.',
     required: 'هذه الخانة مطلوبه.',
     requiresAtLeast: 'هذه الخانة تتطلب على الأقلّ {{count}} {{label}}.',
     requiresNoMoreThan: 'هذه الخانة تتطلّب ما لا يزيد عن {{count}} {{label}}.',
     requiresTwoNumbers: 'هذه الخانة تتطلّب رقمين.',
-    shorterThanMax:
-      'يجب أن تكون هذه القيمة أقصر من الحدّ الأقصى للطول وهو {{maxLength}} حرفًا.',
+    shorterThanMax: 'يجب أن تكون هذه القيمة أقصر من الحدّ الأقصى للطول وهو {{maxLength}} حرفًا.',
     trueOrFalse: 'هذه الخانة يجب أن تكون صحيح او خطأ.',
     validUploadID: 'هذه الخانة ليست معرّف تحميل صالح.',
   },
   version: {
-    aboutToPublishSelection:
-      'أنت على وشك نشر كلّ {{label}} في التّحديد. هل أنت متأكّد؟',
+    aboutToPublishSelection: 'أنت على وشك نشر كلّ {{label}} في التّحديد. هل أنت متأكّد؟',
     aboutToRestore:
       'أنت على وشك استرجاع هذا المستند {{label}} إلى الحالة التّي كان عليها في {{versionDate}}.',
     aboutToRestoreGlobal:
       'أنت على وشك استرجاع الاعداد العامّ {{label}} إلى الحالة التي كان عليها في {{versionDate}}.',
-    aboutToRevertToPublished:
-      'أنت على وشك إعادة هذا المستند إلى حالته المنشورة. هل أنت متأكّد؟',
+    aboutToRevertToPublished: 'أنت على وشك إعادة هذا المستند إلى حالته المنشورة. هل أنت متأكّد؟',
     aboutToUnpublish: 'أنت على وشك إلغاء نشر هذا المستند. هل أنت متأكّد؟',
-    aboutToUnpublishSelection:
-      'أنت على وشك إلغاء نشر كلّ {{label}} في التّحديد. هل أنت متأكّد؟',
+    aboutToUnpublishSelection: 'أنت على وشك إلغاء نشر كلّ {{label}} في التّحديد. هل أنت متأكّد؟',
     autosave: 'حفظ تلقائي',
     autosavedSuccessfully: 'تمّ الحفظ التّلقائي بنجاح.',
     autosavedVersion: 'النّسخة المحفوظة تلقائياً',
@@ -362,11 +350,9 @@ export const ar = {
     versions: 'النُّسَخ',
     viewingVersion: 'يتمّ استعراض نسخة ل {{entityLabel}} {{documentTitle}}',
     viewingVersionGlobal: 'يتمّ استعراض نسخة للاعداد العامّ {{entityLabel}}',
-    viewingVersions:
-      'يتمّ استعراض النُّسَخ ل {{entityLabel}} {{documentTitle}}',
-    viewingVersionsGlobal:
-      'يتمّ استعراض النُّسَخ للاعداد العامّ {{entityLabel}}',
+    viewingVersions: 'يتمّ استعراض النُّسَخ ل {{entityLabel}} {{documentTitle}}',
+    viewingVersionsGlobal: 'يتمّ استعراض النُّسَخ للاعداد العامّ {{entityLabel}}',
   },
-};
+}
 
-export default ar;
+export default ar

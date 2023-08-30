@@ -97,8 +97,8 @@
         width: base(2.75);
         height: base(2.75);
         position: relative;
-        left: base(-.825);
-        top: base(-.825);
+        left: base(-0.825);
+        top: base(-0.825);
 
         .stroke {
           stroke-width: 2px;
@@ -119,7 +119,7 @@
   }
 }
 
-html[data-theme=dark] {
+html[data-theme='dark'] {
   .drawer__close {
     background: rgba(0, 0, 0, 0.2);
   }

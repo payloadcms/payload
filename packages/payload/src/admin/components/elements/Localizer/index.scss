@@ -2,14 +2,14 @@
 
 .localizer {
   position: relative;
-  padding: base(.125) base(1.5) base(.125) 0;
-  [dir=rtl] & {
-    padding: base(.125) 0 base(.125) base(1.5);
-  } 
-  
+  padding: base(0.125) base(1.5) base(0.125) 0;
+  [dir='rtl'] & {
+    padding: base(0.125) 0 base(0.125) base(1.5);
+  }
+
   button {
     color: currentColor;
-    padding: base(.25) 0;
+    padding: base(0.25) 0;
     font-size: 1rem;
     line-height: base(1);
     background: transparent;
@@ -17,7 +17,8 @@
     font-weight: 600;
     cursor: pointer;
 
-    &:hover, &:focus-visible {
+    &:hover,
+    &:focus-visible {
       text-decoration: underline;
     }
 
@@ -42,7 +43,8 @@
       cursor: pointer;
       padding-right: 0;
 
-      &:hover, &:focus-visible {
+      &:hover,
+      &:focus-visible {
         text-decoration: underline;
       }
     }

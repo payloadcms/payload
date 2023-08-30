@@ -8,8 +8,8 @@
   }
 }
 
-html[data-theme=light] {
-  .date-time-field{
+html[data-theme='light'] {
+  .date-time-field {
     &--has-error {
       .react-datepicker__input-container input {
         @include lightInputError;
@@ -18,7 +18,7 @@ html[data-theme=light] {
   }
 }
 
-html[data-theme=dark] {
+html[data-theme='dark'] {
   .date-time-field {
     &--has-error {
       .react-datepicker__input-container input {
