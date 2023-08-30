@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
 import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
-import { fieldAffectsData, valueIsValueWithRelation } from 'payload/dist/fields/config/types';
-import { ArrayRowToInsert, BlockRowToInsert } from './types';
-import { isArrayOfRows } from '../../utilities/isArrayOfRows';
+import { fieldAffectsData, valueIsValueWithRelation } from 'payload/types';
+import { ArrayRowToInsert, BlockRowToInsert } from './types.js';
+import { isArrayOfRows } from '../../utilities/isArrayOfRows.js';
 
 type Args = {
   arrays: {

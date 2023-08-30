@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { Field } from 'payload/types';
-import { traverseFields } from './traverseFields';
-import { RowToInsert } from './types';
+import { traverseFields } from './traverseFields.js';
+import { RowToInsert } from './types.js';
 
 type Args = {
   data: Record<string, unknown>

@@ -1,12 +1,12 @@
 import { PaginateOptions } from 'mongoose';
-import type { FindGlobalVersions } from 'payload/dist/database/types';
-import flattenWhereToOperators from 'payload/dist/database/flattenWhereToOperators';
-import { buildVersionGlobalFields } from 'payload/dist/versions/buildGlobalFields';
-import { PayloadRequest } from 'payload/dist/express/types';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
-import type { MongooseAdapter } from '.';
-import { buildSortParam } from './queries/buildSortParam';
-import { withSession } from './withSession';
+import type { FindGlobalVersions } from 'payload/database';
+import { flattenWhereToOperators } from 'payload/database';
+import { buildVersionGlobalFields } from 'payload/versions';
+import { PayloadRequest } from 'payload/types';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
+import type { MongooseAdapter } from './index.js';
+import { buildSortParam } from './queries/buildSortParam.js';
+import { withSession } from './withSession.js';
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: MongooseAdapter,

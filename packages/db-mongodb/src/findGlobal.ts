@@ -1,9 +1,9 @@
-import { combineQueries } from 'payload/dist/database/combineQueries';
-import type { FindGlobal } from 'payload/dist/database/types';
-import { PayloadRequest } from 'payload/dist/express/types';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
-import type { MongooseAdapter } from '.';
-import { withSession } from './withSession';
+import { combineQueries } from 'payload/database';
+import type { FindGlobal } from 'payload/database';
+import { PayloadRequest } from 'payload/types';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
+import type { MongooseAdapter } from './index.js';
+import { withSession } from './withSession.js';
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: MongooseAdapter,

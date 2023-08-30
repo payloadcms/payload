@@ -1,14 +1,16 @@
 /* eslint-disable no-param-reassign */
 import { pgEnum } from 'drizzle-orm/pg-core';
-import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
-import type { Init } from 'payload/dist/database/types';
-import { buildTable } from './schema/build';
-import type { PostgresAdapter } from './types';
+// import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
+import { SanitizedCollectionConfig } from 'payload/types';
+import type { Init } from 'payload/database';
+import { buildTable } from './schema/build.js';
+import type { PostgresAdapter } from './types.js';
 
 export const init: Init = async function init(this: PostgresAdapter) {
   if (this.payload.config.localization) {
     this.enums._locales = pgEnum(
       '_locales',
+      // @ts-ignore // TODO: Fix this
       this.payload.config.localization.locales as [string, ...string[]],
     );
   }

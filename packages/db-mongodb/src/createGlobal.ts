@@ -1,8 +1,8 @@
 import { PayloadRequest } from 'payload/types';
-import { CreateGlobal } from 'payload/dist/database/types';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
-import { withSession } from './withSession';
-import type { MongooseAdapter } from '.';
+import { CreateGlobal } from 'payload/database';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
+import { withSession } from './withSession.js';
+import type { MongooseAdapter } from './index.js';
 
 export const createGlobal: CreateGlobal = async function createGlobal(
   this: MongooseAdapter,

@@ -1,14 +1,15 @@
 import mongoose from 'mongoose';
-import objectID from 'bson-objectid';
-import { getLocalizedPaths } from 'payload/dist/database/getLocalizedPaths';
-import { Field, fieldAffectsData } from 'payload/dist/fields/config/types';
-import { PathToQuery } from 'payload/dist/database/queryValidation/types';
-import { validOperators } from 'payload/dist/types/constants';
+import objectIDImp from 'bson-objectid';
+const ObjectID = 'default' in objectIDImp ? objectIDImp.default : objectIDImp;
+import { getLocalizedPaths } from 'payload/database';
+import { Field, fieldAffectsData } from 'payload/types';
+import { PathToQuery } from 'payload/database';
+import { validOperators } from 'payload/types';
 import { Payload } from 'payload';
 import { Operator } from 'payload/types';
-import { operatorMap } from './operatorMap';
-import { sanitizeQueryValue } from './sanitizeQueryValue';
-import { MongooseAdapter } from '..';
+import { operatorMap } from './operatorMap.js';
+import { sanitizeQueryValue } from './sanitizeQueryValue.js';
+import { MongooseAdapter } from '../index.js';
 
 type SearchParam = {
   path?: string,
@@ -197,7 +198,7 @@ export async function buildSearchParam({
 
         if (typeof formattedValue === 'string') {
           if (mongoose.Types.ObjectId.isValid(formattedValue)) {
-            result.value.$or.push({ [path]: { [operatorKey]: objectID(formattedValue) } });
+            result.value.$or.push({ [path]: { [operatorKey]: ObjectID(formattedValue) } });
           } else {
             (Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach((relationTo) => {
               const isRelatedToCustomNumberID = payload.collections[relationTo]?.config?.fields.find((relatedField) => {

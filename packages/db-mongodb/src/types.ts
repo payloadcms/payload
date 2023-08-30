@@ -1,7 +1,7 @@
 import type { AggregatePaginateModel, IndexDefinition, IndexOptions, Model, PaginateModel, SchemaOptions } from 'mongoose';
-import { SanitizedConfig } from 'payload/dist/config/types';
-import { ArrayField, BlockField, CheckboxField, CodeField, CollapsibleField, DateField, EmailField, Field, GroupField, JSONField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TabsField, TextField, TextareaField, UploadField } from 'payload/dist/fields/config/types';
-import type { BuildQueryArgs } from './queries/buildQuery';
+import { SanitizedConfig } from 'payload/config';
+import { ArrayField, BlockField, CheckboxField, CodeField, CollapsibleField, DateField, EmailField, Field, GroupField, JSONField, NumberField, PointField, RadioField, RelationshipField, RichTextField, RowField, SelectField, TabsField, TextField, TextareaField, UploadField } from 'payload/types';
+import type { BuildQueryArgs } from './queries/buildQuery.js';
 
 export interface CollectionModel extends Model<any>, PaginateModel<any>, AggregatePaginateModel<any>, PassportLocalModel {
   /** buildQuery is used to transform payload's where operator into what can be used by mongoose (e.g. id => _id) */

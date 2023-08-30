@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 import {
-  AnyPgColumnBuilder,
   integer,
   pgTable,
   serial,
@@ -14,14 +13,14 @@ import {
 import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
 import { Relation, relations } from 'drizzle-orm';
-import { fieldAffectsData } from 'payload/dist/fields/config/types';
-import { GenericColumns, GenericTable, PostgresAdapter } from '../types';
-import { traverseFields } from './traverseFields';
-import { parentIDColumnMap } from './parentIDColumnMap';
+import { fieldAffectsData } from 'payload/types';
+import { GenericColumns, GenericTable, PostgresAdapter } from '../types.js';
+import { traverseFields } from './traverseFields.js';
+import { parentIDColumnMap } from './parentIDColumnMap.js';
 
 type Args = {
   adapter: PostgresAdapter
-  baseColumns?: Record<string, AnyPgColumnBuilder>,
+  baseColumns?: Record<string, any>, // TODO: Type second generic. Previously, it was AnyPgColumnBuilder
   buildRelationships?: boolean
   fields: Field[]
   tableName: string
@@ -41,12 +40,12 @@ export const buildTable = ({
   timestamps,
 }: Args): Result => {
   const formattedTableName = toSnakeCase(tableName);
-  const columns: Record<string, AnyPgColumnBuilder> = baseColumns;
+  const columns: Record<string, any> = baseColumns; // TODO: Type second generic. Previously, it was AnyPgColumnBuilder
   const indexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {};
 
   let hasLocalizedField = false;
   let hasLocalizedRelationshipField = false;
-  const localesColumns: Record<string, AnyPgColumnBuilder> = {};
+  const localesColumns: Record<string, any> = {}; // TODO: Type second generic. Previously, it was AnyPgColumnBuilder
   const localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {};
   let localesTable: GenericTable;
 
@@ -120,6 +119,7 @@ export const buildTable = ({
     const localesTableRelations = relations(localesTable, ({ one }) => ({
       _parentID: one(table, {
         fields: [localesTable._parentID],
+        // @ts-ignore // TODO: Fix this
         references: [table.id],
       }),
     }));
@@ -129,7 +129,7 @@ export const buildTable = ({
 
   if (buildRelationships) {
     if (relationships.size) {
-      const relationshipColumns: Record<string, AnyPgColumnBuilder> = {
+      const relationshipColumns: Record<string, any> = { // TODO: Type second generic. Previously, it was AnyPgColumnBuilder
         id: serial('id').primaryKey(),
         parent: parentIDColumnMap[idColType]('parent_id').references(() => table.id).notNull(),
         path: varchar('path').notNull(),
@@ -165,6 +165,7 @@ export const buildTable = ({
           parent: one(table, {
             relationName: '_relationships',
             fields: [relationshipsTable.parent],
+            // @ts-ignore // TODO: Fix this
             references: [table.id],
           }),
         };

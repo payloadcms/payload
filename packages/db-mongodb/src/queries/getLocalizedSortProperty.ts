@@ -1,6 +1,6 @@
-import { SanitizedConfig } from 'payload/dist/config/types';
-import { Field, fieldAffectsData, fieldIsPresentationalOnly } from 'payload/dist/fields/config/types';
-import flattenTopLevelFields from 'payload/dist/utilities/flattenTopLevelFields';
+import { SanitizedConfig } from 'payload/config';
+import { Field, fieldAffectsData, fieldIsPresentationalOnly } from 'payload/types';
+import { flattenTopLevelFields } from 'payload/utilities';
 
 type Args = {
   segments: string[]

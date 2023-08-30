@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign */
 import { SanitizedConfig } from 'payload/config';
 import toSnakeCase from 'to-snake-case';
-import { fieldAffectsData } from 'payload/dist/fields/config/types';
+import { fieldAffectsData } from 'payload/types';
 import { ArrayField, Block, Field } from 'payload/types';
-import { Result } from './buildFindManyArgs';
-import { PostgresAdapter } from '../types';
+import { Result } from './buildFindManyArgs.js';
+import { PostgresAdapter } from '../types.js';
 
 type TraverseFieldArgs = {
   adapter: PostgresAdapter

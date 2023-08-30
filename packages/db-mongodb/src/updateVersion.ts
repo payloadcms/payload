@@ -1,7 +1,7 @@
-import type { UpdateVersion } from 'payload/dist/database/types';
-import type { PayloadRequest } from 'payload/dist/express/types';
-import type { MongooseAdapter } from '.';
-import { withSession } from './withSession';
+import type { UpdateVersion } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
+import type { MongooseAdapter } from './index.js';
+import { withSession } from './withSession.js';
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: MongooseAdapter,

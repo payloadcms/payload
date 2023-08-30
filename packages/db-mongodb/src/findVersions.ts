@@ -1,11 +1,11 @@
 import { PaginateOptions } from 'mongoose';
-import type { FindVersions } from 'payload/dist/database/types';
-import flattenWhereToOperators from 'payload/dist/database/flattenWhereToOperators';
-import { PayloadRequest } from 'payload/dist/express/types';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
-import type { MongooseAdapter } from '.';
-import { buildSortParam } from './queries/buildSortParam';
-import { withSession } from './withSession';
+import type { FindVersions } from 'payload/database';
+import { flattenWhereToOperators } from 'payload/database';
+import { PayloadRequest } from 'payload/types';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields.js';
+import type { MongooseAdapter } from './index.js';
+import { buildSortParam } from './queries/buildSortParam.js';
+import { withSession } from './withSession.js';
 
 export const findVersions: FindVersions = async function findVersions(
   this: MongooseAdapter,
