@@ -21,6 +21,7 @@ export const getMe = async (args?: {
       Authorization: `JWT ${token}`,
       'Content-Type': 'application/json',
     },
+    cache: 'no-store',
     body: JSON.stringify({
       query: ME_QUERY,
     }),

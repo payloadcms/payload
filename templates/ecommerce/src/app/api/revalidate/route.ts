@@ -7,8 +7,15 @@ export async function GET(request: NextRequest): Promise<unknown> {
   const slug = request.nextUrl.searchParams.get('slug')
   const secret = request.nextUrl.searchParams.get('secret')
 
-  if (secret !== process.env.NEXT_PRIVATE_REVALIDATION_KEY) {
-    return NextResponse.json({ revalidated: false, now: Date.now() })
+  if (
+    !secret ||
+    secret !== process.env.NEXT_PRIVATE_REVALIDATION_KEY ||
+    typeof collection !== 'string' ||
+    typeof slug !== 'string'
+  ) {
+    // Do not indicate that the revalidation key is incorrect in the response
+    // This will protect this API route from being exploited
+    return new Response('Invalid request', { status: 400 })
   }
 
   if (typeof collection === 'string' && typeof slug === 'string') {
