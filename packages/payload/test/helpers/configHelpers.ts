@@ -1,11 +1,13 @@
-import getPort from 'get-port';
 import swcRegister from '@swc/register';
-import path from 'path';
-import { v4 as uuid } from 'uuid';
-import shelljs from 'shelljs';
 import express from 'express';
+import getPort from 'get-port';
+import path from 'path';
+import shelljs from 'shelljs';
+import { v4 as uuid } from 'uuid';
+
 import type { CollectionConfig } from '../../src/collections/config/types.js';
 import type { InitOptions } from '../../src/config/types.js';
+
 import payload from '../../src/index.js';
 
 type Options = {
@@ -42,7 +44,7 @@ export async function initPayloadTest(options: Options): Promise<{ serverURL: st
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore - bad @swc/register types
+  // @ts-expect-error - bad @swc/register types
   swcRegister({
     sourceMaps: 'inline',
     jsc: {

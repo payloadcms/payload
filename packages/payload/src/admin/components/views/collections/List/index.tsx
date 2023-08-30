@@ -1,20 +1,22 @@
-import { v4 as uuid } from 'uuid';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../utilities/Config/index.js';
-import { useAuth } from '../../../utilities/Auth/index.js';
-import usePayloadAPI from '../../../../hooks/usePayloadAPI.js';
-import DefaultList from './Default.js';
-import RenderCustomComponent from '../../../utilities/RenderCustomComponent/index.js';
-import { useStepNav } from '../../../elements/StepNav/index.js';
-import formatFields from './formatFields.js';
-import { ListIndexProps, ListPreferences, Props } from './types.js';
-import { usePreferences } from '../../../utilities/Preferences/index.js';
-import { useSearchParams } from '../../../utilities/SearchParams/index.js';
-import { TableColumnsProvider } from '../../../elements/TableColumns/index.js';
+import { useHistory } from 'react-router-dom';
+import { v4 as uuid } from 'uuid';
+
 import type { Field } from '../../../../../fields/config/types.js';
+import type { ListIndexProps, ListPreferences, Props } from './types.js';
+
+import usePayloadAPI from '../../../../hooks/usePayloadAPI.js';
+import { useStepNav } from '../../../elements/StepNav/index.js';
+import { TableColumnsProvider } from '../../../elements/TableColumns/index.js';
+import { useAuth } from '../../../utilities/Auth/index.js';
+import { useConfig } from '../../../utilities/Config/index.js';
+import { usePreferences } from '../../../utilities/Preferences/index.js';
+import RenderCustomComponent from '../../../utilities/RenderCustomComponent/index.js';
+import { useSearchParams } from '../../../utilities/SearchParams/index.js';
+import DefaultList from './Default.js';
+import formatFields from './formatFields.js';
 
 /**
  * The ListView component is table which lists the collection's documents.
@@ -26,29 +28,29 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   const {
     collection,
     collection: {
-      slug,
-      labels: {
-        plural,
-      },
       admin: {
-        pagination: {
-          defaultLimit,
-        },
         components: {
           views: {
             List: CustomList,
           } = {},
         } = {},
+        pagination: {
+          defaultLimit,
+        },
       },
+      labels: {
+        plural,
+      },
+      slug,
     },
   } = props;
 
-  const { serverURL, routes: { api, admin } } = useConfig();
+  const { routes: { admin, api }, serverURL } = useConfig();
   const preferenceKey = `${collection.slug}-list`;
   const { permissions } = useAuth();
   const { setStepNav } = useStepNav();
   const { getPreference, setPreference } = usePreferences();
-  const { page, sort, limit, where } = useSearchParams();
+  const { limit, page, sort, where } = useSearchParams();
   const history = useHistory();
   const { t } = useTranslation('general');
   const [fetchURL, setFetchURL] = useState<string>('');
@@ -74,10 +76,10 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     const params: Record<string, unknown> = {
       depth: 0,
       draft: 'true',
+      limit,
       page: overrides?.page,
       sort: overrides?.sort,
       where: overrides?.where,
-      limit,
     };
 
     if (page) params.page = page;
@@ -104,12 +106,12 @@ const ListView: React.FC<ListIndexProps> = (props) => {
     (async () => {
       const currentPreferences = await getPreference<ListPreferences>(preferenceKey);
 
-      const params = queryString.parse(history.location.search, { ignoreQueryPrefix: true, depth: 0 });
+      const params = queryString.parse(history.location.search, { depth: 0, ignoreQueryPrefix: true });
 
       const search = {
         ...params,
-        sort: params?.sort || currentPreferences?.sort,
         limit: params?.limit || currentPreferences?.limit || defaultLimit,
+        sort: params?.sort || currentPreferences?.sort,
       };
 
       const newSearchQuery = queryString.stringify(search, { addQueryPrefix: true });
@@ -147,8 +149,8 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   useEffect(() => {
     if (data?.totalDocs && data.pagingCounter > data.totalDocs) {
       const params = queryString.parse(history.location.search, {
-        ignoreQueryPrefix: true,
         depth: 0,
+        ignoreQueryPrefix: true,
       });
       const newSearchQuery = queryString.stringify({
         ...params,
@@ -163,16 +165,16 @@ const ListView: React.FC<ListIndexProps> = (props) => {
   return (
     <TableColumnsProvider collection={collection}>
       <RenderCustomComponent
-        DefaultComponent={DefaultList}
-        CustomComponent={CustomList}
         componentProps={{
           collection: { ...collection, fields },
-          newDocumentURL,
-          hasCreatePermission,
           data,
+          hasCreatePermission,
           limit: limit || defaultLimit,
+          newDocumentURL,
           resetParams,
         }}
+        CustomComponent={CustomList}
+        DefaultComponent={DefaultList}
       />
     </TableColumnsProvider>
   );

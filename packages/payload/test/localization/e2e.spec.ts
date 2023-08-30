@@ -1,13 +1,16 @@
 import type { Page } from '@playwright/test';
+
 import { expect, test } from '@playwright/test';
+import path from 'path';
+
+import type { LocalizedPost } from './payload-types.js';
+
 import payload from '../../src/index.js';
+import { saveDocAndAssert } from '../helpers.js';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js';
 import { initPayloadTest } from '../helpers/configHelpers.js';
-import { saveDocAndAssert } from '../helpers.js';
-import type { LocalizedPost } from './payload-types.js';
 import { localizedPostsSlug } from './config.js';
 import { englishTitle, spanishLocale } from './shared.js';
-import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 /**

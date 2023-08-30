@@ -1,20 +1,23 @@
 import type { IndexDirection, IndexOptions } from 'mongoose';
+
 import { GraphQLClient } from 'graphql-request';
+import path from 'path';
+
+import type { PaginatedDocs } from '../../src/database/types.js';
+import type { RichTextField } from './payload-types.js';
+
+import payload from '../../src/index.js';
 import { initPayloadTest } from '../helpers/configHelpers.js';
 import { RESTClient } from '../helpers/rest.js';
 import configPromise from '../uploads/config.js';
-import payload from '../../src/index.js';
-import { pointDoc } from './collections/Point/index.js';
 import { arrayDefaultValue, arrayDoc, arrayFieldsSlug } from './collections/Array/index.js';
-import { groupDefaultChild, groupDefaultValue, groupDoc, groupFieldsSlug } from './collections/Group/index.js';
-import { defaultText } from './collections/Text/index.js';
 import { blocksFieldSeedData } from './collections/Blocks/index.js';
-import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs/index.js';
-import { defaultNumber, numberDoc } from './collections/Number/index.js';
 import { dateDoc } from './collections/Date/index.js';
-import type { RichTextField } from './payload-types.js';
-import type { PaginatedDocs } from '../../src/database/types.js';
-import path from 'path';
+import { groupDefaultChild, groupDefaultValue, groupDoc, groupFieldsSlug } from './collections/Group/index.js';
+import { defaultNumber, numberDoc } from './collections/Number/index.js';
+import { pointDoc } from './collections/Point/index.js';
+import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs/index.js';
+import { defaultText } from './collections/Text/index.js';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 let client;
@@ -228,7 +231,7 @@ describe('Fields', () => {
       });
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany);
     });
   });

@@ -12,8 +12,8 @@ const BeforeLogin: React.FC<{i18n}> = () => {
         {' '}
         <a
           href="https://demo.payloadcms.com"
-          target="_blank"
           rel="noreferrer"
+          target="_blank"
         >
           demo.payloadcms.com
         </a>

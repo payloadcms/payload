@@ -1,38 +1,39 @@
-import React, { useState, useCallback } from 'react';
-import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config/index.js';
-import Button from '../Button/index.js';
-import MinimalTemplate from '../../templates/Minimal/index.js';
-import { requests } from '../../../api.js';
-import { Props } from './types.js';
-import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider/index.js';
-import { getTranslation } from '../../../../utilities/getTranslation.js';
-import Pill from '../Pill/index.js';
-import { useAuth } from '../../utilities/Auth/index.js';
+import { toast } from 'react-toastify';
 
+import type { Props } from './types.js';
+
+import { getTranslation } from '../../../../utilities/getTranslation.js';
+import { requests } from '../../../api.js';
+import MinimalTemplate from '../../templates/Minimal/index.js';
+import { useAuth } from '../../utilities/Auth/index.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider/index.js';
+import Button from '../Button/index.js';
+import Pill from '../Pill/index.js';
 import './index.scss';
 
 const baseClass = 'unpublish-many';
 
 const UnpublishMany: React.FC<Props> = (props) => {
   const {
-    resetParams,
     collection: {
-      slug,
       labels: {
         plural,
       },
+      slug,
       versions,
     } = {},
+    resetParams,
   } = props;
 
-  const { serverURL, routes: { api } } = useConfig();
+  const { routes: { api }, serverURL } = useConfig();
   const { permissions } = useAuth();
   const { toggleModal } = useModal();
-  const { t, i18n } = useTranslation('version');
-  const { selectAll, count, getQueryParams } = useSelection();
+  const { i18n, t } = useTranslation('version');
+  const { count, getQueryParams, selectAll } = useSelection();
   const [submitted, setSubmitted] = useState(false);
 
   const collectionPermissions = permissions?.collections?.[slug];
@@ -51,8 +52,8 @@ const UnpublishMany: React.FC<Props> = (props) => {
         _status: 'draft',
       }),
       headers: {
-        'Content-Type': 'application/json',
         'Accept-Language': i18n.language,
+        'Content-Type': 'application/json',
       },
     }).then(async (res) => {
       try {
@@ -83,17 +84,17 @@ const UnpublishMany: React.FC<Props> = (props) => {
   return (
     <React.Fragment>
       <Pill
-        className={`${baseClass}__toggle`}
         onClick={() => {
           setSubmitted(false);
           toggleModal(modalSlug);
         }}
+        className={`${baseClass}__toggle`}
       >
         {t('unpublish')}
       </Pill>
       <Modal
-        slug={modalSlug}
         className={baseClass}
+        slug={modalSlug}
       >
         <MinimalTemplate className={`${baseClass}__template`}>
           <h1>{t('confirmUnpublish')}</h1>
@@ -101,16 +102,16 @@ const UnpublishMany: React.FC<Props> = (props) => {
             {t('aboutToUnpublishSelection', { label: getTranslation(plural, i18n) })}
           </p>
           <Button
-            id="confirm-cancel"
             buttonStyle="secondary"
-            type="button"
+            id="confirm-cancel"
             onClick={submitted ? undefined : () => toggleModal(modalSlug)}
+            type="button"
           >
             {t('general:cancel')}
           </Button>
           <Button
-            onClick={submitted ? undefined : handleUnpublish}
             id="confirm-unpublish"
+            onClick={submitted ? undefined : handleUnpublish}
           >
             {submitted ? t('unpublishing') : t('general:confirm')}
           </Button>

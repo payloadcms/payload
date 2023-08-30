@@ -1,9 +1,11 @@
 import { GraphQLClient } from 'graphql-request';
+import path from 'path';
+
+import type { Post } from './payload-types.js';
+
+import payload from '../../src/index.js';
 import { initPayloadTest } from '../helpers/configHelpers.js';
 import configPromise, { pointSlug, slug } from './config.js';
-import payload from '../../src/index.js';
-import type { Post } from './payload-types.js';
-import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 import { mapAsync } from '../../src/utilities/mapAsync.js';
 

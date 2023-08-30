@@ -1,10 +1,8 @@
 import type { Page } from '@playwright/test';
+
 import { expect, test } from '@playwright/test';
-import payload from '../../src/index.js';
-import { mapAsync } from '../../src/utilities/mapAsync.js';
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js';
-import { initPayloadE2E } from '../helpers/configHelpers.js';
-import { saveDocAndAssert } from '../helpers.js';
+import path from 'path';
+
 import type {
   FieldsRelationship as CollectionWithRelationships,
   RelationOne,
@@ -12,9 +10,14 @@ import type {
   RelationTwo,
   RelationWithTitle,
 } from './config.js';
-import { relationOneSlug, relationRestrictedSlug, relationTwoSlug, relationUpdatedExternallySlug, relationWithTitleSlug, slug } from './collectionSlugs.js';
+
+import payload from '../../src/index.js';
+import { mapAsync } from '../../src/utilities/mapAsync.js';
 import wait from '../../src/utilities/wait.js';
-import path from 'path';
+import { saveDocAndAssert } from '../helpers.js';
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js';
+import { initPayloadE2E } from '../helpers/configHelpers.js';
+import { relationOneSlug, relationRestrictedSlug, relationTwoSlug, relationUpdatedExternallySlug, relationWithTitleSlug, slug } from './collectionSlugs.js';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const { beforeAll, beforeEach, describe } = test;
@@ -255,7 +258,7 @@ describe('fields - relationship', () => {
     // select relationshipMany field that relies on siblingData field above
     await page.locator('#field-relationshipManyFiltered .rs__control').click();
 
-    const options = await page.locator('#field-relationshipManyFiltered .rs__menu');
+    const options = page.locator('#field-relationshipManyFiltered .rs__menu');
     await expect(options).toContainText(include);
     await expect(options).not.toContainText(exclude);
   });
@@ -276,7 +279,7 @@ describe('fields - relationship', () => {
     // select relationshipMany field that relies on siblingData field above
     await page.locator('#field-relationshipManyFiltered .rs__control').click();
 
-    const options = await page.locator('#field-relationshipManyFiltered .rs__menu');
+    const options = page.locator('#field-relationshipManyFiltered .rs__menu');
     await expect(options).not.toContainText('exclude');
   });
 
@@ -285,10 +288,10 @@ describe('fields - relationship', () => {
 
     const field = page.locator('#field-relationshipReadOnly');
 
-    const button = await field.locator('button.relationship--single-value__drawer-toggler.doc-drawer__toggler');
+    const button = field.locator('button.relationship--single-value__drawer-toggler.doc-drawer__toggler');
     await button.click();
 
-    const documentDrawer = await page.locator('[id^=doc-drawer_relation-one_1_]');
+    const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]');
     await expect(documentDrawer).toBeVisible();
   });
 
@@ -298,25 +301,25 @@ describe('fields - relationship', () => {
     const field = page.locator('#field-relationshipHasMany');
 
     // open the document drawer
-    const addNewButton = await field.locator('button.relationship-add-new__add-button.doc-drawer__toggler');
+    const addNewButton = field.locator('button.relationship-add-new__add-button.doc-drawer__toggler');
     await addNewButton.click();
-    const documentDrawer = await page.locator('[id^=doc-drawer_relation-one_1_]');
+    const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]');
     await expect(documentDrawer).toBeVisible();
 
     // fill in the field and save the document, keep the drawer open for further testing
-    const drawerField = await documentDrawer.locator('#field-name');
+    const drawerField = documentDrawer.locator('#field-name');
     await drawerField.fill('Newly created document');
-    const saveButton = await documentDrawer.locator('#action-save');
+    const saveButton = documentDrawer.locator('#action-save');
     await saveButton.click();
     await expect(page.locator('.Toastify')).toContainText('successfully');
 
     // count the number of values in the field to ensure only one was added
-    await expect(await page.locator('#field-relationshipHasMany .value-container .rs__multi-value')).toHaveCount(1);
+    await expect(page.locator('#field-relationshipHasMany .value-container .rs__multi-value')).toHaveCount(1);
 
     // save the same document again to ensure the relationship field doesn't receive duplicative values
     await saveButton.click();
     await expect(page.locator('.Toastify')).toContainText('successfully');
-    await expect(await page.locator('#field-relationshipHasMany .value-container .rs__multi-value')).toHaveCount(1);
+    await expect(page.locator('#field-relationshipHasMany .value-container .rs__multi-value')).toHaveCount(1);
   });
 
   describe('existing relationships', () => {

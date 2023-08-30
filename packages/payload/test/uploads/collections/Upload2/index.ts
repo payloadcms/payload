@@ -1,5 +1,6 @@
 import path from 'path';
-import { CollectionConfig } from '../../../../src/collections/config/types.js';
+
+import type { CollectionConfig } from '../../../../src/collections/config/types.js';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 export const Uploads2: CollectionConfig = {

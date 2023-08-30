@@ -1,10 +1,10 @@
-import { devUser } from '../credentials.js';
-import { Users } from './collections/users.js';
-import { Posts } from './collections/posts.js';
 import en from '../../src/translations/en.json';
-import { ar } from './ar.js' assert { type: "json" };
-import deepMerge from './deepMerge.js';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import { devUser } from '../credentials.js';
+import { ar } from './ar.js' assert { type: "json" };
+import { Posts } from './collections/posts.js';
+import { Users } from './collections/users.js';
+import deepMerge from './deepMerge.js';
 
 export default buildConfigWithDefaults({
   collections: [Users, Posts],

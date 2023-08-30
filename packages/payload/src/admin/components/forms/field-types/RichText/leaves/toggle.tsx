@@ -1,4 +1,5 @@
 import { Editor } from 'slate';
+
 import isLeafActive from './isActive.js';
 
 const toggleLeaf = (editor, format) => {

@@ -1,4 +1,5 @@
 import type { CollectionConfig } from '../../../src/collections/config/types.js';
+
 import { autosaveSlug } from '../shared.js';
 
 const AutosavePosts: CollectionConfig = {

@@ -1,28 +1,30 @@
-import { useEffect } from 'react';
 import equal from 'deep-equal';
-import { FilterOptions } from '../../../../fields/config/types.js';
+import { useEffect } from 'react';
+
+import type { FilterOptions } from '../../../../fields/config/types.js';
+import type { FilterOptionsResult } from '../../forms/field-types/Relationship/types.js';
+
+import { useAllFormFields } from '../../forms/Form/context.js';
+import getSiblingData from '../../forms/Form/getSiblingData.js';
+import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues.js';
+import { getFilterOptionsQuery } from '../../forms/field-types/getFilterOptionsQuery.js';
 import { useAuth } from '../Auth/index.js';
 import { useDocumentInfo } from '../DocumentInfo/index.js';
-import { useAllFormFields } from '../../forms/Form/context.js';
-import { getFilterOptionsQuery } from '../../forms/field-types/getFilterOptionsQuery.js';
-import { FilterOptionsResult } from '../../forms/field-types/Relationship/types.js';
-import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues.js';
-import getSiblingData from '../../forms/Form/getSiblingData.js';
 
 type Args = {
   filterOptions: FilterOptions
   filterOptionsResult: FilterOptionsResult
-  setFilterOptionsResult: (optionFilters: FilterOptionsResult) => void
-  relationTo: string | string[]
   path: string
+  relationTo: string | string[]
+  setFilterOptionsResult: (optionFilters: FilterOptionsResult) => void
 }
 
 export const GetFilterOptions = ({
   filterOptions,
   filterOptionsResult,
-  setFilterOptionsResult,
-  relationTo,
   path,
+  relationTo,
+  setFilterOptionsResult,
 }: Args): null => {
   const [fields] = useAllFormFields();
   const { id } = useDocumentInfo();
@@ -34,8 +36,8 @@ export const GetFilterOptions = ({
 
     const getFilterOptions = async () => {
       const newFilterOptionsResult = await getFilterOptionsQuery(filterOptions, {
-        id,
         data,
+        id,
         relationTo,
         siblingData,
         user,

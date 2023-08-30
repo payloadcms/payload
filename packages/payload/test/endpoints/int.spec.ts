@@ -1,4 +1,5 @@
 import path from 'path';
+
 import { initPayloadTest } from '../helpers/configHelpers.js';
 import { RESTClient } from '../helpers/rest.js';
 import {

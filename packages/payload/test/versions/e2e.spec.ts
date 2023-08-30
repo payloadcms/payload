@@ -25,12 +25,14 @@
 
 
 import type { Page } from '@playwright/test';
+
 import { expect, test } from '@playwright/test';
-import { initPayloadE2E } from '../helpers/configHelpers.js';
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js';
-import { draftSlug, autosaveSlug } from './shared.js';
-import wait from '../../src/utilities/wait.js';
 import path from 'path';
+
+import wait from '../../src/utilities/wait.js';
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js';
+import { initPayloadE2E } from '../helpers/configHelpers.js';
+import { autosaveSlug, draftSlug } from './shared.js';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const { beforeAll, describe } = test;
@@ -86,7 +88,7 @@ describe('versions', () => {
       await page.locator('.edit-many__toggle').click();
       await page.locator('.field-select .rs__control').click();
       const options = page.locator('.rs__option');
-      const field = await options.locator('text=description');
+      const field = options.locator('text=description');
       await field.click();
       await page.locator('#field-description').fill(description);
       await page.locator('.form-submit .edit-many__publish').click();
@@ -103,7 +105,7 @@ describe('versions', () => {
       await page.locator('.edit-many__toggle').click();
       await page.locator('.field-select .rs__control').click();
       const options = page.locator('.rs__option');
-      const field = await options.locator('text=description');
+      const field = options.locator('text=description');
       await field.click();
       await page.locator('#field-description').fill(description);
       await page.locator('.form-submit .edit-many__draft').click();

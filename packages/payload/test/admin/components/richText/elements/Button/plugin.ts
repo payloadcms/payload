@@ -1,4 +1,4 @@
-import { Editor } from 'slate';
+import type { Editor } from 'slate';
 
 const withButton = (incomingEditor: Editor): Editor => {
   const editor = incomingEditor;

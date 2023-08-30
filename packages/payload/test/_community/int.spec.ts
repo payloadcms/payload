@@ -1,7 +1,8 @@
-import payload from '../../src/index.js';
-import { initPayloadTest } from '../helpers/configHelpers.js';
-import { devUser } from '../credentials.js';
 import path from 'path';
+
+import payload from '../../src/index.js';
+import { devUser } from '../credentials.js';
+import { initPayloadTest } from '../helpers/configHelpers.js';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 import 'isomorphic-fetch';

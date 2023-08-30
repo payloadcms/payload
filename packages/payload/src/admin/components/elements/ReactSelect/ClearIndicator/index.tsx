@@ -1,7 +1,10 @@
+import type { ClearIndicatorProps } from 'react-select';
+
 import React from 'react';
-import { ClearIndicatorProps } from 'react-select';
+
+import type { Option as OptionType } from '../types.js';
+
 import X from '../../../icons/X/index.js';
-import { Option as OptionType } from '../types.js';
 import './index.scss';
 
 const baseClass = 'clear-indicator';

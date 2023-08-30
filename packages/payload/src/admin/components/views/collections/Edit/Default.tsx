@@ -1,36 +1,37 @@
 import React, { useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../utilities/Config/index.js';
-import Eyebrow from '../../../elements/Eyebrow/index.js';
-import Form from '../../../forms/Form/index.js';
-import PreviewButton from '../../../elements/PreviewButton/index.js';
-import RenderFields from '../../../forms/RenderFields/index.js';
-import CopyToClipboard from '../../../elements/CopyToClipboard/index.js';
-import DuplicateDocument from '../../../elements/DuplicateDocument/index.js';
-import DeleteDocument from '../../../elements/DeleteDocument/index.js';
-import Meta from '../../../utilities/Meta/index.js';
-import fieldTypes from '../../../forms/field-types/index.js';
-import RenderTitle from '../../../elements/RenderTitle/index.js';
-import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving/index.js';
-import Auth from './Auth/index.js';
-import VersionsCount from '../../../elements/VersionsCount/index.js';
-import Upload from './Upload/index.js';
-import { Props } from './types.js';
-import Autosave from '../../../elements/Autosave/index.js';
-import Status from '../../../elements/Status/index.js';
-import { Publish } from '../../../elements/Publish/index.js';
-import { SaveDraft } from '../../../elements/SaveDraft/index.js';
-import { Save } from '../../../elements/Save/index.js';
-import { useDocumentInfo } from '../../../utilities/DocumentInfo/index.js';
-import { OperationContext } from '../../../utilities/OperationProvider/index.js';
-import { Gutter } from '../../../elements/Gutter/index.js';
-import { getTranslation } from '../../../../../utilities/getTranslation.js';
-import { SetStepNav } from './SetStepNav.js';
-import { FormLoadingOverlayToggle } from '../../../elements/Loading/index.js';
-import { formatDate } from '../../../../utilities/formatDate/index.js';
-import { useAuth } from '../../../utilities/Auth/index.js';
+import { Link } from 'react-router-dom';
 
+import type { Props } from './types.js';
+
+import { getTranslation } from '../../../../../utilities/getTranslation.js';
+import { formatDate } from '../../../../utilities/formatDate/index.js';
+import Autosave from '../../../elements/Autosave/index.js';
+import CopyToClipboard from '../../../elements/CopyToClipboard/index.js';
+import DeleteDocument from '../../../elements/DeleteDocument/index.js';
+import DuplicateDocument from '../../../elements/DuplicateDocument/index.js';
+import Eyebrow from '../../../elements/Eyebrow/index.js';
+import { Gutter } from '../../../elements/Gutter/index.js';
+import { FormLoadingOverlayToggle } from '../../../elements/Loading/index.js';
+import PreviewButton from '../../../elements/PreviewButton/index.js';
+import { Publish } from '../../../elements/Publish/index.js';
+import RenderTitle from '../../../elements/RenderTitle/index.js';
+import { Save } from '../../../elements/Save/index.js';
+import { SaveDraft } from '../../../elements/SaveDraft/index.js';
+import Status from '../../../elements/Status/index.js';
+import VersionsCount from '../../../elements/VersionsCount/index.js';
+import Form from '../../../forms/Form/index.js';
+import RenderFields from '../../../forms/RenderFields/index.js';
+import fieldTypes from '../../../forms/field-types/index.js';
+import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving/index.js';
+import { useAuth } from '../../../utilities/Auth/index.js';
+import { useConfig } from '../../../utilities/Config/index.js';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo/index.js';
+import Meta from '../../../utilities/Meta/index.js';
+import { OperationContext } from '../../../utilities/OperationProvider/index.js';
+import Auth from './Auth/index.js';
+import { SetStepNav } from './SetStepNav.js';
+import Upload from './Upload/index.js';
 import './index.scss';
 
 const baseClass = 'collection-edit';
@@ -38,41 +39,41 @@ const baseClass = 'collection-edit';
 const DefaultEditView: React.FC<Props> = (props) => {
   const { admin: { dateFormat }, routes: { admin } } = useConfig();
   const { publishedDoc } = useDocumentInfo();
-  const { t, i18n } = useTranslation('general');
-  const { user, refreshCookieAsync } = useAuth();
+  const { i18n, t } = useTranslation('general');
+  const { refreshCookieAsync, user } = useAuth();
 
   const {
+    action,
+    apiURL,
     collection,
-    isEditing,
+    customHeader,
     data,
+    disableActions,
+    disableEyebrow,
+    disableLeaveWithoutSaving,
+    hasSavePermission,
+    id,
+    internalState,
+    isEditing,
+    isLoading,
     onSave: onSaveFromProps,
     permissions,
-    isLoading,
-    internalState,
-    apiURL,
-    action,
-    hasSavePermission,
-    disableEyebrow,
-    disableActions,
-    disableLeaveWithoutSaving,
-    customHeader,
-    id,
     updatedAt,
   } = props;
 
   const {
-    slug,
-    fields,
     admin: {
-      useAsTitle,
       disableDuplicate,
-      preview,
       hideAPIURL,
+      preview,
+      useAsTitle,
     },
-    versions,
-    timestamps,
     auth,
+    fields,
+    slug,
+    timestamps,
     upload,
+    versions,
   } = collection;
 
   const classes = [
@@ -100,18 +101,18 @@ const DefaultEditView: React.FC<Props> = (props) => {
       <div className={classes}>
         <OperationContext.Provider value={operation}>
           <Form
-            className={`${baseClass}__form`}
-            method={id ? 'patch' : 'post'}
             action={action}
-            onSuccess={onSave}
+            className={`${baseClass}__form`}
             disabled={!hasSavePermission}
             initialState={internalState}
+            method={id ? 'patch' : 'post'}
+            onSuccess={onSave}
           >
             <FormLoadingOverlayToggle
-              formIsLoading={isLoading}
               action={isLoading ? 'loading' : operation}
-              name={`collection-edit--${collection.labels.singular}`}
+              formIsLoading={isLoading}
               loadingSuffix={getTranslation(collection.labels.singular, i18n)}
+              name={`collection-edit--${collection.labels.singular}`}
               type="withoutNav"
             />
 
@@ -120,16 +121,16 @@ const DefaultEditView: React.FC<Props> = (props) => {
                 {!disableEyebrow && (
                   <SetStepNav
                     collection={collection}
-                    isEditing={isEditing}
                     id={data?.id}
+                    isEditing={isEditing}
                   />
                 )}
 
                 <div className={`${baseClass}__main`}>
                   <Meta
-                    title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(collection.labels.singular, i18n)}`}
                     description={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(collection.labels.singular, i18n)}`}
                     keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
+                    title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(collection.labels.singular, i18n)}`}
                   />
                   {!disableEyebrow && (
                     <Eyebrow />
@@ -145,10 +146,10 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       {!customHeader && (
                         <h1>
                           <RenderTitle
-                            data={data}
                             collection={collection}
-                            useAsTitle={useAsTitle}
+                            data={data}
                             fallback={`[${t('untitled')}]`}
+                            useAsTitle={useAsTitle}
                           />
                         </h1>
                       )}
@@ -156,30 +157,30 @@ const DefaultEditView: React.FC<Props> = (props) => {
 
                     {auth && (
                       <Auth
-                        useAPIKey={auth.useAPIKey}
-                        requirePassword={!isEditing}
-                        verify={auth.verify}
                         collection={collection}
                         email={data?.email}
                         operation={operation}
                         readOnly={!hasSavePermission}
+                        requirePassword={!isEditing}
+                        useAPIKey={auth.useAPIKey}
+                        verify={auth.verify}
                       />
                     )}
 
                     {upload && (
                       <Upload
-                        data={data}
                         collection={collection}
+                        data={data}
                         internalState={internalState}
                       />
                     )}
 
                     <RenderFields
-                      readOnly={!hasSavePermission}
-                      permissions={permissions.fields}
-                      filter={(field) => (!field?.admin?.position || (field?.admin?.position !== 'sidebar'))}
-                      fieldTypes={fieldTypes}
                       fieldSchema={fields}
+                      fieldTypes={fieldTypes}
+                      filter={(field) => (!field?.admin?.position || (field?.admin?.position !== 'sidebar'))}
+                      permissions={permissions.fields}
+                      readOnly={!hasSavePermission}
                     />
                   </Gutter>
                 </div>
@@ -214,9 +215,9 @@ const DefaultEditView: React.FC<Props> = (props) => {
                           {permissions?.delete?.permission && (
                             <li>
                               <DeleteDocument
+                                buttonId="action-delete"
                                 collection={collection}
                                 id={id}
-                                buttonId="action-delete"
                               />
                             </li>
                           )}
@@ -231,8 +232,8 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       >
                         {(isEditing && preview && (!collection.versions?.drafts || collection.versions?.drafts?.autosave)) && (
                           <PreviewButton
-                            generatePreviewURL={preview}
                             CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
+                            generatePreviewURL={preview}
                           />
                         )}
 
@@ -258,8 +259,8 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       <div className={`${baseClass}__sidebar-fields`}>
                         {(isEditing && preview && (collection.versions?.drafts && !collection.versions?.drafts?.autosave)) && (
                           <PreviewButton
-                            generatePreviewURL={preview}
                             CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
+                            generatePreviewURL={preview}
                           />
                         )}
 
@@ -268,20 +269,20 @@ const DefaultEditView: React.FC<Props> = (props) => {
                             <Status />
                             {(collection.versions?.drafts.autosave && hasSavePermission) && (
                               <Autosave
-                                publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
                                 collection={collection}
                                 id={id}
+                                publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
                               />
                             )}
                           </React.Fragment>
                         )}
 
                         <RenderFields
-                          readOnly={!hasSavePermission}
-                          permissions={permissions.fields}
-                          filter={(field) => field?.admin?.position === 'sidebar'}
-                          fieldTypes={fieldTypes}
                           fieldSchema={fields}
+                          fieldTypes={fieldTypes}
+                          filter={(field) => field?.admin?.position === 'sidebar'}
+                          permissions={permissions.fields}
+                          readOnly={!hasSavePermission}
                         />
                       </div>
 
@@ -297,8 +298,8 @@ const DefaultEditView: React.FC<Props> = (props) => {
                                 </span>
                                 <a
                                   href={apiURL}
-                                  target="_blank"
                                   rel="noopener noreferrer"
+                                  target="_blank"
                                 >
                                   {apiURL}
                                 </a>

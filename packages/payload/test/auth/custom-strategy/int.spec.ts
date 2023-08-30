@@ -1,7 +1,8 @@
+import path from 'path';
+
 import payload from '../../../src/index.js';
 import { initPayloadTest } from '../../helpers/configHelpers.js';
 import { slug } from './config.js';
-import path from 'path';
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

@@ -1,6 +1,7 @@
 import React from 'react';
-import ElementButton from '../Button.js';
+
 import H1Icon from '../../../../../icons/headings/H1/index.js';
+import ElementButton from '../Button.js';
 
 const H1 = ({ attributes, children }) => (
   <h1 {...attributes}>{children}</h1>

@@ -1,11 +1,12 @@
-import { request, GraphQLClient } from 'graphql-request';
-import { initPayloadTest } from '../helpers/configHelpers.js';
-import payload from '../../src/index.js';
-import configPromise from './config.js';
-import AutosavePosts from './collections/Autosave.js';
-import AutosaveGlobal from './globals/Autosave.js';
-import { devUser } from '../credentials.js';
+import { GraphQLClient, request } from 'graphql-request';
 import path from 'path';
+
+import payload from '../../src/index.js';
+import { devUser } from '../credentials.js';
+import { initPayloadTest } from '../helpers/configHelpers.js';
+import AutosavePosts from './collections/Autosave.js';
+import configPromise from './config.js';
+import AutosaveGlobal from './globals/Autosave.js';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 let collectionLocalPostID: string;
@@ -70,8 +71,8 @@ describe('Versions', () => {
     collectionLocalPostID = autosavePost.id;
 
     const updatedPost: {
-      title: string
       _status?: string
+      title: string
     } = await payload.update({
       id: collectionLocalPostID,
       collection,

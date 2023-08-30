@@ -1,5 +1,5 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types.js';
-import { Field } from '../../../../src/fields/config/types.js';
+import type { Field } from '../../../../src/fields/config/types.js';
 
 export const blocksFieldSeedData = [
   {

@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Link, NavLink, useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config/index.js';
-import { useAuth } from '../../utilities/Auth/index.js';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent/index.js';
-import Chevron from '../../icons/Chevron/index.js';
-import Menu from '../../icons/Menu/index.js';
-import CloseMenu from '../../icons/CloseMenu/index.js';
-import Icon from '../../graphics/Icon/index.js';
-import Account from '../../graphics/Account/index.js';
-import Localizer from '../Localizer/index.js';
-import NavGroup from '../NavGroup/index.js';
-import Logout from '../Logout/index.js';
-import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilities/groupNavItems.js';
-import { getTranslation } from '../../../../utilities/getTranslation.js';
+import { Link, NavLink, useHistory } from 'react-router-dom';
 
+import type { EntityToGroup, Group} from '../../../utilities/groupNavItems.js';
+
+import { getTranslation } from '../../../../utilities/getTranslation.js';
+import { EntityType, groupNavItems } from '../../../utilities/groupNavItems.js';
+import Account from '../../graphics/Account/index.js';
+import Icon from '../../graphics/Icon/index.js';
+import Chevron from '../../icons/Chevron/index.js';
+import CloseMenu from '../../icons/CloseMenu/index.js';
+import Menu from '../../icons/Menu/index.js';
+import { useAuth } from '../../utilities/Auth/index.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent/index.js';
+import Localizer from '../Localizer/index.js';
+import Logout from '../Logout/index.js';
+import NavGroup from '../NavGroup/index.js';
 import './index.scss';
 
 const baseClass = 'nav';
@@ -24,18 +26,18 @@ const DefaultNav = () => {
   const [menuActive, setMenuActive] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
   const history = useHistory();
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
   const {
+    admin: {
+      components: {
+        afterNavLinks,
+        beforeNavLinks,
+      },
+    },
     collections,
     globals,
     routes: {
       admin,
-    },
-    admin: {
-      components: {
-        beforeNavLinks,
-        afterNavLinks,
-      },
     },
   } = useConfig();
 
@@ -51,8 +53,8 @@ const DefaultNav = () => {
         .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
         .map((collection) => {
           const entityToGroup: EntityToGroup = {
-            type: EntityType.collection,
             entity: collection,
+            type: EntityType.collection,
           };
 
           return entityToGroup;
@@ -61,8 +63,8 @@ const DefaultNav = () => {
         .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
         .map((global) => {
           const entityToGroup: EntityToGroup = {
-            type: EntityType.global,
             entity: global,
+            type: EntityType.global,
           };
 
           return entityToGroup;
@@ -79,16 +81,16 @@ const DefaultNav = () => {
       <div className={`${baseClass}__scroll`}>
         <header>
           <Link
-            to={admin}
-            className={`${baseClass}__brand`}
             aria-label={t('dashboard')}
+            className={`${baseClass}__brand`}
+            to={admin}
           >
             <Icon />
           </Link>
           <button
-            type="button"
             className={`${baseClass}__mobile-menu-btn`}
             onClick={() => setMenuActive(!menuActive)}
+            type="button"
           >
             {menuActive && (
               <CloseMenu />
@@ -100,7 +102,7 @@ const DefaultNav = () => {
         </header>
         <nav className={`${baseClass}__wrap`}>
           {Array.isArray(beforeNavLinks) && beforeNavLinks.map((Component, i) => <Component key={i} />)}
-          {groups.map(({ label, entities }, key) => {
+          {groups.map(({ entities, label }, key) => {
             return (
               <NavGroup {...{ key, label }}>
                 {entities.map(({ entity, type }, i) => {
@@ -122,9 +124,9 @@ const DefaultNav = () => {
 
                   return (
                     <NavLink
-                      id={id}
-                      className={`${baseClass}__link`}
                       activeClassName="active"
+                      className={`${baseClass}__link`}
+                      id={id}
                       key={i}
                       to={href}
                     >
@@ -140,9 +142,9 @@ const DefaultNav = () => {
           <div className={`${baseClass}__controls`}>
             <Localizer />
             <Link
-              to={`${admin}/account`}
-              className={`${baseClass}__account`}
               aria-label={t('authentication:account')}
+              className={`${baseClass}__account`}
+              to={`${admin}/account`}
             >
               <Account />
             </Link>

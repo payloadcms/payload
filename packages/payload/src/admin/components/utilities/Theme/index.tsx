@@ -2,18 +2,18 @@ import React, {
   createContext, useCallback, useContext, useState,
 } from 'react';
 
-export type Theme = 'light' | 'dark';
+export type Theme = 'dark' | 'light';
 
 export type ThemeContext = {
-  theme: Theme
-  setTheme: (theme: Theme) => void
   autoMode: boolean
+  setTheme: (theme: Theme) => void
+  theme: Theme
 }
 
 const initialContext: ThemeContext = {
-  theme: 'light',
-  setTheme: () => null,
   autoMode: true,
+  setTheme: () => null,
+  theme: 'light',
 };
 
 const Context = createContext(initialContext);
@@ -41,7 +41,7 @@ export const ThemeProvider: React.FC<{ children?: React.ReactNode }> = ({ childr
     return !themeFromStorage;
   });
 
-  const setTheme = useCallback((themeToSet: Theme | 'auto') => {
+  const setTheme = useCallback((themeToSet: 'auto' | Theme) => {
     if (themeToSet === 'light' || themeToSet === 'dark') {
       setThemeState(themeToSet);
       setAutoMode(false);
@@ -58,7 +58,7 @@ export const ThemeProvider: React.FC<{ children?: React.ReactNode }> = ({ childr
   }, []);
 
   return (
-    <Context.Provider value={{ theme, setTheme, autoMode }}>
+    <Context.Provider value={{ autoMode, setTheme, theme }}>
       {children}
     </Context.Provider>
   );

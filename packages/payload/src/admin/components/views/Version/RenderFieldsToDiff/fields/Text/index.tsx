@@ -1,18 +1,19 @@
 import React from 'react';
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued';
 import { useTranslation } from 'react-i18next';
+
+import type { Props } from '../types.js';
+
+import { getTranslation } from '../../../../../../../utilities/getTranslation.js';
 import Label from '../../Label/index.js';
 import { diffStyles } from '../styles.js';
-import { Props } from '../types.js';
-import { getTranslation } from '../../../../../../../utilities/getTranslation.js';
-
 import './index.scss';
 
 const baseClass = 'text-diff';
 
-const Text: React.FC<Props> = ({ field, locale, version, comparison, isRichText = false, diffMethod }) => {
+const Text: React.FC<Props> = ({ comparison, diffMethod, field, isRichText = false, locale, version }) => {
   let placeholder = '';
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
 
   if (version === comparison) placeholder = `[${t('noValue')}]`;
 
@@ -35,13 +36,13 @@ const Text: React.FC<Props> = ({ field, locale, version, comparison, isRichText 
         {getTranslation(field.label, i18n)}
       </Label>
       <ReactDiffViewerToUse
-        styles={diffStyles}
         compareMethod={DiffMethod[diffMethod]}
-        oldValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}
-        newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
-        splitView
         hideLineNumbers
+        newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
+        oldValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}
         showDiffOnly={false}
+        splitView
+        styles={diffStyles}
       />
     </div>
   );

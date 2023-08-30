@@ -1,8 +1,9 @@
 import React from 'react';
-import StepNav from '../StepNav/index.js';
-import { Props } from './types.js';
-import { Gutter } from '../Gutter/index.js';
 
+import type { Props } from './types.js';
+
+import { Gutter } from '../Gutter/index.js';
+import StepNav from '../StepNav/index.js';
 import './index.scss';
 
 const baseClass = 'eyebrow';

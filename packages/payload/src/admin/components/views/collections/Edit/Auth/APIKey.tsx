@@ -1,13 +1,13 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import useField from '../../../../forms/useField/index.js';
-import Label from '../../../../forms/Label/index.js';
-import CopyToClipboard from '../../../../elements/CopyToClipboard/index.js';
-import { text } from '../../../../../../fields/validations.js';
-import { useFormFields } from '../../../../forms/Form/context.js';
+import { v4 as uuidv4 } from 'uuid';
 
+import { text } from '../../../../../../fields/validations.js';
+import CopyToClipboard from '../../../../elements/CopyToClipboard/index.js';
 import GenerateConfirmation from '../../../../elements/GenerateConfirmation/index.js';
+import { useFormFields } from '../../../../forms/Form/context.js';
+import Label from '../../../../forms/Label/index.js';
+import useField from '../../../../forms/useField/index.js';
 
 const path = 'apiKey';
 const baseClass = 'api-key';
@@ -18,7 +18,7 @@ const APIKey: React.FC<{readOnly?: boolean}> = ({ readOnly }) => {
   const { t } = useTranslation();
 
   const apiKey = useFormFields(([fields]) => fields[path]);
-  const validate = (val) => text(val, { minLength: 24, maxLength: 48, data: {}, siblingData: {}, t });
+  const validate = (val) => text(val, { data: {}, maxLength: 48, minLength: 24, siblingData: {}, t });
 
   const apiKeyValue = apiKey?.value;
 
@@ -46,8 +46,8 @@ const APIKey: React.FC<{readOnly?: boolean}> = ({ readOnly }) => {
   };
 
   const {
-    value,
     setValue,
+    value,
   } = fieldType;
 
   useEffect(() => {
@@ -82,18 +82,18 @@ const APIKey: React.FC<{readOnly?: boolean}> = ({ readOnly }) => {
           label={APIKeyLabel}
         />
         <input
-          value={value as string || ''}
           className={highlightedField ? 'highlight' : undefined}
           disabled
-          type="text"
           id="apiKey"
           name="apiKey"
+          type="text"
+          value={value as string || ''}
         />
       </div>
       {!readOnly && (
         <GenerateConfirmation
-          setKey={() => setValue(uuidv4())}
           highlightField={highlightField}
+          setKey={() => setValue(uuidv4())}
         />
       )}
     </React.Fragment>

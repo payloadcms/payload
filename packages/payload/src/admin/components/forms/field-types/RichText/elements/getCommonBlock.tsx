@@ -1,5 +1,9 @@
-import { Editor, Node, NodeEntry, NodeMatch } from 'slate';
-import { ElementNode } from '../types.js';
+import type { NodeEntry, NodeMatch } from 'slate';
+
+import { Editor, Node } from 'slate';
+
+import type { ElementNode } from '../types.js';
+
 import { isBlockElement } from './isBlockElement.js';
 
 export const getCommonBlock = (editor: Editor, match?: NodeMatch<Node>): NodeEntry<Node> => {
@@ -12,7 +16,7 @@ export const getCommonBlock = (editor: Editor, match?: NodeMatch<Node>): NodeEnt
   );
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // @ts-expect-error
   if (isBlockElement(editor, common) || Editor.isEditor(common)) {
     return [common, path];
   }

@@ -1,6 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { OptionObject, optionsAreObjects, SelectField } from '../../../../../../../../fields/config/types.js';
+
+import type { OptionObject, SelectField } from '../../../../../../../../fields/config/types.js';
+
+import { optionsAreObjects } from '../../../../../../../../fields/config/types.js';
 import { getTranslation } from '../../../../../../../../utilities/getTranslation.js';
 
 type Props = {

@@ -1,4 +1,5 @@
 import path from 'path';
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
 const _dirname = path.dirname(new URL(import.meta.url).pathname);
 export default buildConfigWithDefaults({

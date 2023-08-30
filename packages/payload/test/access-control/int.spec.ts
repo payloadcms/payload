@@ -1,6 +1,10 @@
-import payload from '../../src/index.js';
-import { Forbidden } from '../../src/errors/index.js';
+import path from 'path';
+
 import type { PayloadRequest } from '../../src/types/index.js';
+import type { Post, RelyOnRequestHeader, Restricted } from './payload-types.js';
+
+import { Forbidden } from '../../src/errors/index.js';
+import payload from '../../src/index.js';
 import { initPayloadTest } from '../helpers/configHelpers.js';
 import {
   hiddenAccessSlug,
@@ -12,9 +16,7 @@ import {
   siblingDataSlug,
   slug,
 } from './config.js';
-import type { Post, RelyOnRequestHeader, Restricted } from './payload-types.js';
 import { firstArrayText, secondArrayText } from './shared.js';
-import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 describe('Access Control', () => {

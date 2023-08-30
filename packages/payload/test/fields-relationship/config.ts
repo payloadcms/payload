@@ -1,20 +1,21 @@
 import type { CollectionConfig } from '../../src/collections/config/types.js';
+import type { FilterOptionsProps } from '../../src/fields/config/types.js';
+
+import { mapAsync } from '../../src/utilities/mapAsync.js';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
 import { devUser } from '../credentials.js';
-import { mapAsync } from '../../src/utilities/mapAsync.js';
-import { FilterOptionsProps } from '../../src/fields/config/types.js';
 import { PrePopulateFieldUI } from './PrePopulateFieldUI/index.js';
-import { relationOneSlug, relationTwoSlug, relationRestrictedSlug, relationWithTitleSlug, relationUpdatedExternallySlug, collection1Slug, collection2Slug, slug } from './collectionSlugs.js';
+import { collection1Slug, collection2Slug, relationOneSlug, relationRestrictedSlug, relationTwoSlug, relationUpdatedExternallySlug, relationWithTitleSlug, slug } from './collectionSlugs.js';
 
 export interface FieldsRelationship {
+  createdAt: Date;
   id: string;
   relationship: RelationOne;
   relationshipHasMany: RelationOne[];
-  relationshipHasManyMultiple: Array<RelationOne | RelationTwo | { relationTo: string; value: string }>;
+  relationshipHasManyMultiple: Array<{ relationTo: string; value: string } | RelationOne | RelationTwo>;
   relationshipMultiple: Array<RelationOne | RelationTwo>;
   relationshipRestricted: RelationRestricted;
   relationshipWithTitle: RelationWithTitle;
-  createdAt: Date;
   updatedAt: Date;
 }
 

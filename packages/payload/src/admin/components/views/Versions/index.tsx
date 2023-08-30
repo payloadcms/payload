@@ -1,34 +1,35 @@
 import React, { useEffect, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config/index.js';
+import { useRouteMatch } from 'react-router-dom';
+
+import type { StepNavItem } from '../../elements/StepNav/types.js';
+import type { Props } from './types.js';
+
+import { getTranslation } from '../../../../utilities/getTranslation.js';
 import usePayloadAPI from '../../../hooks/usePayloadAPI.js';
 import Eyebrow from '../../elements/Eyebrow/index.js';
-import { LoadingOverlayToggle } from '../../elements/Loading/index.js';
-import { useStepNav } from '../../elements/StepNav/index.js';
-import { StepNavItem } from '../../elements/StepNav/types.js';
-import Meta from '../../utilities/Meta/index.js';
-import { Props } from './types.js';
+import { Gutter } from '../../elements/Gutter/index.js';
 import IDLabel from '../../elements/IDLabel/index.js';
-import { Table } from '../../elements/Table/index.js';
+import { LoadingOverlayToggle } from '../../elements/Loading/index.js';
 import Paginator from '../../elements/Paginator/index.js';
 import PerPage from '../../elements/PerPage/index.js';
+import { useStepNav } from '../../elements/StepNav/index.js';
+import { Table } from '../../elements/Table/index.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import Meta from '../../utilities/Meta/index.js';
 import { useSearchParams } from '../../utilities/SearchParams/index.js';
-import { Gutter } from '../../elements/Gutter/index.js';
-import { getTranslation } from '../../../../utilities/getTranslation.js';
 import { buildVersionColumns } from './columns.js';
-
 import './index.scss';
 
 const baseClass = 'versions';
 
 const Versions: React.FC<Props> = ({ collection, global }) => {
-  const { serverURL, routes: { admin, api } } = useConfig();
+  const { routes: { admin, api }, serverURL } = useConfig();
   const { setStepNav } = useStepNav();
   const { params: { id } } = useRouteMatch<{ id: string }>();
-  const { t, i18n } = useTranslation('version');
+  const { i18n, t } = useTranslation('version');
   const [fetchURL, setFetchURL] = useState('');
-  const { page, sort, limit } = useSearchParams();
+  const { limit, page, sort } = useSearchParams();
 
   let docURL: string;
   let entityLabel: string;
@@ -73,8 +74,8 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
 
       nav = [
         {
-          url: `${admin}/collections/${collection.slug}`,
           label: getTranslation(collection.labels.plural, i18n),
+          url: `${admin}/collections/${collection.slug}`,
         },
         {
           label: docLabel,
@@ -89,8 +90,8 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
     if (global) {
       nav = [
         {
-          url: editURL,
           label: getTranslation(global.label, i18n),
+          url: editURL,
         },
         {
           label: t('versions'),
@@ -104,9 +105,9 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   useEffect(() => {
     const params = {
       depth: 1,
+      limit,
       page: undefined,
       sort: undefined,
-      limit,
       where: {},
     };
 
@@ -158,13 +159,13 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
   return (
     <React.Fragment>
       <LoadingOverlayToggle
-        show={isLoadingVersions}
         name="versions"
+        show={isLoadingVersions}
       />
       <div className={baseClass}>
         <Meta
-          title={metaTitle}
           description={metaDesc}
+          title={metaTitle}
         />
         <Eyebrow />
         <Gutter className={`${baseClass}__wrap`}>
@@ -183,23 +184,23 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
           {versionsData?.totalDocs > 0 && (
             <React.Fragment>
               <Table
-                data={versionsData?.docs}
                 columns={buildVersionColumns(
                   collection,
                   global,
                   t,
                 )}
+                data={versionsData?.docs}
               />
               <div className={`${baseClass}__page-controls`}>
                 <Paginator
-                  limit={versionsData.limit}
-                  totalPages={versionsData.totalPages}
-                  page={versionsData.page}
-                  hasPrevPage={versionsData.hasPrevPage}
                   hasNextPage={versionsData.hasNextPage}
-                  prevPage={versionsData.prevPage}
+                  hasPrevPage={versionsData.hasPrevPage}
+                  limit={versionsData.limit}
                   nextPage={versionsData.nextPage}
                   numberOfNeighbors={1}
+                  page={versionsData.page}
+                  prevPage={versionsData.prevPage}
+                  totalPages={versionsData.totalPages}
                 />
                 {versionsData?.totalDocs > 0 && (
                   <React.Fragment>
@@ -213,8 +214,8 @@ const Versions: React.FC<Props> = ({ collection, global }) => {
                       {versionsData.totalDocs}
                     </div>
                     <PerPage
-                      limits={collection?.admin?.pagination?.limits}
                       limit={limit ? Number(limit) : 10}
+                      limits={collection?.admin?.pagination?.limits}
                     />
                   </React.Fragment>
                 )}

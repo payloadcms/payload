@@ -1,10 +1,11 @@
 import React from 'react';
-
 import { useTranslation } from 'react-i18next';
-import ReactSelect from '../../../ReactSelect/index.js';
+
+import type { Option, OptionObject } from '../../../../../../fields/config/types.js';
+import type { Props } from './types.js';
+
 import { getTranslation } from '../../../../../../utilities/getTranslation.js';
-import { Props } from './types.js';
-import { Option, OptionObject } from '../../../../../../fields/config/types.js';
+import ReactSelect from '../../../ReactSelect/index.js';
 
 const formatOptions = (options: Option[]): OptionObject[] => options.map((option) => {
   if (typeof option === 'object' && (option.value || option.value === '')) {
@@ -17,7 +18,7 @@ const formatOptions = (options: Option[]): OptionObject[] => options.map((option
   } as OptionObject;
 });
 
-export const Select: React.FC<Props> = ({ onChange, value, options: optionsFromProps, operator }) => {
+export const Select: React.FC<Props> = ({ onChange, operator, options: optionsFromProps, value }) => {
   const { i18n } = useTranslation();
   const [options, setOptions] = React.useState(formatOptions(optionsFromProps));
 
@@ -72,10 +73,10 @@ export const Select: React.FC<Props> = ({ onChange, value, options: optionsFromP
 
   return (
     <ReactSelect
-      onChange={onSelect}
-      value={valueToRender}
-      options={options.map((option) => ({ ...option, label: getTranslation(option.label, i18n) }))}
       isMulti={isMulti}
+      onChange={onSelect}
+      options={options.map((option) => ({ ...option, label: getTranslation(option.label, i18n) }))}
+      value={valueToRender}
     />
   );
 };

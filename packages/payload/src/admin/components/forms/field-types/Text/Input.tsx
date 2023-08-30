@@ -1,50 +1,53 @@
-import React, { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import Label from '../../Label/index.js';
+
+import type { TextField } from '../../../../../fields/config/types.js';
+import type { Description } from '../../FieldDescription/types.js';
+
+import { getTranslation } from '../../../../../utilities/getTranslation.js';
 import Error from '../../Error/index.js';
 import FieldDescription from '../../FieldDescription/index.js';
-import { TextField } from '../../../../../fields/config/types.js';
-import { Description } from '../../FieldDescription/types.js';
-import { getTranslation } from '../../../../../utilities/getTranslation.js';
-
+import Label from '../../Label/index.js';
 import './index.scss';
 
 export type TextInputProps = Omit<TextField, 'type'> & {
-  showError?: boolean;
-  errorMessage?: string;
-  readOnly?: boolean;
-  path: string;
-  required?: boolean;
-  value?: string;
+  className?: string;
   description?: Description;
+  errorMessage?: string;
+  inputRef?: React.MutableRefObject<HTMLInputElement>;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
+  path: string;
   placeholder?: Record<string, string> | string;
-  style?: React.CSSProperties;
-  className?: string;
-  width?: string;
-  inputRef?: React.MutableRefObject<HTMLInputElement>;
+  readOnly?: boolean;
+  required?: boolean;
   rtl?: boolean;
+  showError?: boolean;
+  style?: React.CSSProperties;
+  value?: string;
+  width?: string;
 };
 
 const TextInput: React.FC<TextInputProps> = (props) => {
   const {
-    showError,
+    className,
+    description,
     errorMessage,
-    placeholder,
-    readOnly,
-    path,
+    inputRef,
     label,
-    required,
-    value,
     onChange,
     onKeyDown,
-    description,
-    style,
-    className,
-    width,
-    inputRef,
+    path,
+    placeholder,
+    readOnly,
+    required,
     rtl,
+    showError,
+    style,
+    value,
+    width,
   } = props;
 
   const { i18n } = useTranslation();
@@ -59,37 +62,37 @@ const TextInput: React.FC<TextInputProps> = (props) => {
 
   return (
     <div
-      className={classes}
       style={{
         ...style,
         width,
       }}
+      className={classes}
     >
       <Error
-        showError={showError}
         message={errorMessage}
+        showError={showError}
       />
       <Label
-        htmlFor={`field-${path.replace(/\./gi, '__')}`}
+        htmlFor={`field-${path.replace(/\./g, '__')}`}
         label={label}
         required={required}
       />
       <input
-        ref={inputRef}
-        id={`field-${path.replace(/\./gi, '__')}`}
-        value={value || ''}
+        data-rtl={rtl}
+        disabled={readOnly}
+        id={`field-${path.replace(/\./g, '__')}`}
+        name={path}
         onChange={onChange}
         onKeyDown={onKeyDown}
-        disabled={readOnly}
         placeholder={getTranslation(placeholder, i18n)}
+        ref={inputRef}
         type="text"
-        name={path}
-        data-rtl={rtl}
+        value={value || ''}
       />
       <FieldDescription
-        className={`field-description-${path.replace(/\./gi, '__')}`}
-        value={value}
+        className={`field-description-${path.replace(/\./g, '__')}`}
         description={description}
+        value={value}
       />
     </div>
   );

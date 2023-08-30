@@ -1,18 +1,19 @@
-import { initPayloadTest } from '../helpers/configHelpers.js';
-import configPromise from './config.js';
+import path from 'path';
+
+import { AuthenticationError } from '../../src/errors/index.js';
 import payload from '../../src/index.js';
+import { devUser, regularUser } from '../credentials.js';
+import { initPayloadTest } from '../helpers/configHelpers.js';
 import { RESTClient } from '../helpers/rest.js';
-import { transformSlug } from './collections/Transform/index.js';
-import { hooksSlug } from './collections/Hook/index.js';
+import { afterOperationSlug } from './collections/AfterOperation/index.js';
 import { chainingHooksSlug } from './collections/ChainingHooks/index.js';
+import { contextHooksSlug } from './collections/ContextHooks/index.js';
+import { hooksSlug } from './collections/Hook/index.js';
 import { generatedAfterReadText, nestedAfterReadHooksSlug } from './collections/NestedAfterReadHooks/index.js';
 import { relationsSlug } from './collections/Relations/index.js';
+import { transformSlug } from './collections/Transform/index.js';
 import { hooksUsersSlug } from './collections/Users/index.js';
-import { devUser, regularUser } from '../credentials.js';
-import { AuthenticationError } from '../../src/errors/index.js';
-import { afterOperationSlug } from './collections/AfterOperation/index.js';
-import { contextHooksSlug } from './collections/ContextHooks/index.js';
-import path from 'path';
+import configPromise from './config.js';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 let client: RESTClient;

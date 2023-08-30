@@ -1,66 +1,67 @@
+import { useWindowInfo } from '@faceless-ui/window-info';
 import React, { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useWindowInfo } from '@faceless-ui/window-info';
+
+import type { Props } from './types.js';
+
+import formatFilesize from '../../../../../uploads/formatFilesize.js';
+import { getTranslation } from '../../../../../utilities/getTranslation.js';
+import Button from '../../../elements/Button/index.js';
+import DeleteMany from '../../../elements/DeleteMany/index.js';
+import EditMany from '../../../elements/EditMany/index.js';
 import Eyebrow from '../../../elements/Eyebrow/index.js';
-import Paginator from '../../../elements/Paginator/index.js';
+import { Gutter } from '../../../elements/Gutter/index.js';
 import ListControls from '../../../elements/ListControls/index.js';
 import ListSelection from '../../../elements/ListSelection/index.js';
-import Pill from '../../../elements/Pill/index.js';
-import Button from '../../../elements/Button/index.js';
-import { Table } from '../../../elements/Table/index.js';
-import Meta from '../../../utilities/Meta/index.js';
-import { Props } from './types.js';
-import ViewDescription from '../../../elements/ViewDescription/index.js';
+import Paginator from '../../../elements/Paginator/index.js';
 import PerPage from '../../../elements/PerPage/index.js';
-import { Gutter } from '../../../elements/Gutter/index.js';
-import { RelationshipProvider } from './RelationshipProvider/index.js';
-import { getTranslation } from '../../../../../utilities/getTranslation.js';
-import { StaggeredShimmers } from '../../../elements/ShimmerEffect/index.js';
-import { SelectionProvider } from './SelectionProvider/index.js';
-import EditMany from '../../../elements/EditMany/index.js';
-import DeleteMany from '../../../elements/DeleteMany/index.js';
+import Pill from '../../../elements/Pill/index.js';
 import PublishMany from '../../../elements/PublishMany/index.js';
+import { StaggeredShimmers } from '../../../elements/ShimmerEffect/index.js';
+import { Table } from '../../../elements/Table/index.js';
 import UnpublishMany from '../../../elements/UnpublishMany/index.js';
-import formatFilesize from '../../../../../uploads/formatFilesize.js';
-
+import ViewDescription from '../../../elements/ViewDescription/index.js';
+import Meta from '../../../utilities/Meta/index.js';
+import { RelationshipProvider } from './RelationshipProvider/index.js';
+import { SelectionProvider } from './SelectionProvider/index.js';
 import './index.scss';
 
 const baseClass = 'collection-list';
 
 const DefaultList: React.FC<Props> = (props) => {
   const {
-    collection,
     collection: {
-      labels: {
-        singular: singularLabel,
-        plural: pluralLabel,
-      },
       admin: {
-        description,
         components: {
+          AfterList,
+          AfterListTable,
           BeforeList,
           BeforeListTable,
-          AfterListTable,
-          AfterList,
         } = {},
+        description,
       } = {},
+      labels: {
+        plural: pluralLabel,
+        singular: singularLabel,
+      },
     },
+    collection,
+    customHeader,
     data,
-    newDocumentURL,
-    limit,
-    hasCreatePermission,
     disableEyebrow,
-    modifySearchParams,
-    handleSortChange,
-    handleWhereChange,
     handlePageChange,
     handlePerPageChange,
-    customHeader,
+    handleSortChange,
+    handleWhereChange,
+    hasCreatePermission,
+    limit,
+    modifySearchParams,
+    newDocumentURL,
     resetParams,
   } = props;
 
   const { breakpoints: { s: smallBreak } } = useWindowInfo();
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
   let formattedDocs = data.docs || [];
 
   if (collection.upload) {
@@ -101,8 +102,8 @@ const DefaultList: React.FC<Props> = (props) => {
                 </h1>
                 {hasCreatePermission && (
                   <Pill
-                    to={newDocumentURL}
                     aria-label={t('createNewLabel', { label: getTranslation(singularLabel, i18n) })}
+                    to={newDocumentURL}
                   >
                     {t('createNew')}
                   </Pill>
@@ -122,9 +123,9 @@ const DefaultList: React.FC<Props> = (props) => {
           </header>
           <ListControls
             collection={collection}
-            modifySearchQuery={modifySearchParams}
             handleSortChange={handleSortChange}
             handleWhereChange={handleWhereChange}
+            modifySearchQuery={modifySearchParams}
             resetParams={resetParams}
           />
           {Array.isArray(BeforeListTable) && BeforeListTable.map((Component, i) => (
@@ -168,16 +169,16 @@ const DefaultList: React.FC<Props> = (props) => {
 
           <div className={`${baseClass}__page-controls`}>
             <Paginator
-              limit={data.limit}
-              totalPages={data.totalPages}
-              page={data.page}
-              hasPrevPage={data.hasPrevPage}
+              disableHistoryChange={modifySearchParams === false}
               hasNextPage={data.hasNextPage}
-              prevPage={data.prevPage}
+              hasPrevPage={data.hasPrevPage}
+              limit={data.limit}
               nextPage={data.nextPage}
               numberOfNeighbors={1}
-              disableHistoryChange={modifySearchParams === false}
               onChange={handlePageChange}
+              page={data.page}
+              prevPage={data.prevPage}
+              totalPages={data.totalPages}
             />
             {data?.totalDocs > 0 && (
               <Fragment>
@@ -191,10 +192,10 @@ const DefaultList: React.FC<Props> = (props) => {
                   {data.totalDocs}
                 </div>
                 <PerPage
-                  limits={collection?.admin?.pagination?.limits}
-                  limit={limit}
-                  modifySearchParams={modifySearchParams}
                   handleChange={handlePerPageChange}
+                  limit={limit}
+                  limits={collection?.admin?.pagination?.limits}
+                  modifySearchParams={modifySearchParams}
                   resetPage={data.totalDocs <= data.pagingCounter}
                 />
                 <div className={`${baseClass}__list-selection`}>

@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { CustomPublishButtonProps } from '../../../../src/admin/components/elements/types.js';
+
+import type { CustomPublishButtonProps } from '../../../../src/admin/components/elements/types.js';
 
 // In your projects, you can import as follows:
 // import { CustomPublishButtonProps } from 'payload/types';

@@ -1,5 +1,7 @@
 import React from 'react';
-import { Props } from './types.js';
+
+import type { Props } from './types.js';
+
 import useTitle from '../../../hooks/useTitle.js';
 import IDLabel from '../IDLabel/index.js';
 
@@ -8,9 +10,9 @@ const baseClass = 'render-title';
 const RenderTitle: React.FC<Props> = (props) => {
   const {
     collection,
-    title: titleFromProps,
     data,
     fallback = '[untitled]',
+    title: titleFromProps,
   } = props;
   const titleFromForm = useTitle(collection);
 

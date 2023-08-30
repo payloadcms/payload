@@ -1,6 +1,9 @@
-import { expect, Page, test } from '@playwright/test';
-import { initPayloadE2E } from '../helpers/configHelpers.js';
+import type { Page} from '@playwright/test';
+
+import { expect, test } from '@playwright/test';
 import path from 'path';
+
+import { initPayloadE2E } from '../helpers/configHelpers.js';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const { beforeAll, describe } = test;

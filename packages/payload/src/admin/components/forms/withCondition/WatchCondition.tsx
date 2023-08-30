@@ -1,22 +1,26 @@
-import React, { useEffect } from 'react';
+import type React from 'react';
+
+import { useEffect } from 'react';
+
+import type { Condition } from '../../../../fields/config/types.js';
+
 import { useAuth } from '../../utilities/Auth/index.js';
-import { useAllFormFields } from '../Form/context.js';
 import { useDocumentInfo } from '../../utilities/DocumentInfo/index.js';
-import reduceFieldsToValues from '../Form/reduceFieldsToValues.js';
+import { useAllFormFields } from '../Form/context.js';
 import getSiblingData from '../Form/getSiblingData.js';
-import { Condition } from '../../../../fields/config/types.js';
+import reduceFieldsToValues from '../Form/reduceFieldsToValues.js';
 
 type Props = {
-  path?: string
-  name: string
   condition: Condition
+  name: string
+  path?: string
   setShowField: (isVisible: boolean) => void
 }
 
 export const WatchCondition: React.FC<Props> = ({
-  path: pathFromProps,
-  name,
   condition,
+  name,
+  path: pathFromProps,
   setShowField,
 }) => {
   const path = typeof pathFromProps === 'string' ? pathFromProps : name;
@@ -40,11 +44,11 @@ export const WatchCondition: React.FC<Props> = ({
   useEffect(() => {
     if (hasCondition) {
       if (isPassingCondition && !wasPassingCondition) {
-        dispatchFields({ type: 'MODIFY_CONDITION', path, result: true, user });
+        dispatchFields({ path, result: true, type: 'MODIFY_CONDITION', user });
       }
 
       if (!isPassingCondition && (wasPassingCondition || typeof wasPassingCondition === 'undefined')) {
-        dispatchFields({ type: 'MODIFY_CONDITION', path, result: false, user });
+        dispatchFields({ path, result: false, type: 'MODIFY_CONDITION', user });
       }
     }
   }, [isPassingCondition, wasPassingCondition, dispatchFields, path, hasCondition, user, setShowField]);

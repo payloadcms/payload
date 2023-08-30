@@ -5,7 +5,7 @@ import './index.scss';
 const baseClass = 'rich-text-button';
 
 const ButtonElement: React.FC = ({ attributes, children, element }) => {
-  const { style = 'primary', label } = element;
+  const { label, style = 'primary' } = element;
 
   return (
     <div

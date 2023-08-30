@@ -1,22 +1,23 @@
 import path from 'path';
+
 import { mapAsync } from '../../src/utilities/mapAsync.js';
-import { devUser } from '../credentials.js';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import { devUser } from '../credentials.js';
 import AfterDashboard from './components/AfterDashboard/index.js';
-import CustomMinimalRoute from './components/views/CustomMinimal/index.js';
-import CustomDefaultRoute from './components/views/CustomDefault/index.js';
-import BeforeLogin from './components/BeforeLogin/index.js';
 import AfterNavLinks from './components/AfterNavLinks/index.js';
-import { globalSlug, slug } from './shared.js';
-import Logout from './components/Logout/index.js';
-import DemoUIFieldField from './components/DemoUIField/Field.js';
+import BeforeLogin from './components/BeforeLogin/index.js';
 import DemoUIFieldCell from './components/DemoUIField/Cell.js';
+import DemoUIFieldField from './components/DemoUIField/Field.js';
+import Logout from './components/Logout/index.js';
+import CustomDefaultRoute from './components/views/CustomDefault/index.js';
+import CustomMinimalRoute from './components/views/CustomMinimal/index.js';
+import { globalSlug, slug } from './shared.js';
 
 export interface Post {
+  createdAt: Date;
+  description: string;
   id: string;
   title: string;
-  description: string;
-  createdAt: Date;
   updatedAt: Date;
 }
 const _dirname = path.dirname(new URL(import.meta.url).pathname)

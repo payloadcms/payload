@@ -1,6 +1,9 @@
 import React from 'react';
-import { SanitizedCollectionConfig } from '../../../../../collections/config/types.js';
-import { Field, fieldAffectsData, fieldIsPresentationalOnly } from '../../../../../fields/config/types.js';
+
+import type { SanitizedCollectionConfig } from '../../../../../collections/config/types.js';
+import type { Field} from '../../../../../fields/config/types.js';
+
+import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../../fields/config/types.js';
 
 const formatFields = (config: SanitizedCollectionConfig): Field[] => {
   const hasID = config.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') > -1;
@@ -14,12 +17,12 @@ const formatFields = (config: SanitizedCollectionConfig): Field[] => {
       field,
     ];
   }, hasID ? [] : [{
-    name: 'id',
-    label: 'ID',
-    type: 'text',
     admin: {
       disableBulkEdit: true,
     },
+    label: 'ID',
+    name: 'id',
+    type: 'text',
   }]);
 
   return fields;

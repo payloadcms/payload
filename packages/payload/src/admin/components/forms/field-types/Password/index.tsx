@@ -1,25 +1,26 @@
 import React, { useCallback } from 'react';
-import useField from '../../useField/index.js';
-import Label from '../../Label/index.js';
-import Error from '../../Error/index.js';
-import withCondition from '../../withCondition/index.js';
-import { password } from '../../../../../fields/validations.js';
-import { Props } from './types.js';
 
+import type { Props } from './types.js';
+
+import { password } from '../../../../../fields/validations.js';
+import Error from '../../Error/index.js';
+import Label from '../../Label/index.js';
+import useField from '../../useField/index.js';
+import withCondition from '../../withCondition/index.js';
 import './index.scss';
 
 const Password: React.FC<Props> = (props) => {
   const {
-    path: pathFromProps,
-    name,
-    required,
-    validate = password,
-    style,
-    className,
-    width,
     autoComplete,
-    label,
+    className,
     disabled,
+    label,
+    name,
+    path: pathFromProps,
+    required,
+    style,
+    validate = password,
+    width,
   } = props;
 
   const path = pathFromProps || name;
@@ -30,11 +31,11 @@ const Password: React.FC<Props> = (props) => {
   }, [validate, required]);
 
   const {
-    value,
-    showError,
+    errorMessage,
     formProcessing,
     setValue,
-    errorMessage,
+    showError,
+    value,
   } = useField({
     path,
     validate: memoizedValidate,
@@ -49,29 +50,29 @@ const Password: React.FC<Props> = (props) => {
 
   return (
     <div
-      className={classes}
       style={{
         ...style,
         width,
       }}
+      className={classes}
     >
       <Error
-        showError={showError}
         message={errorMessage}
+        showError={showError}
       />
       <Label
-        htmlFor={`field-${path.replace(/\./gi, '__')}`}
+        htmlFor={`field-${path.replace(/\./g, '__')}`}
         label={label}
         required={required}
       />
       <input
-        id={`field-${path.replace(/\./gi, '__')}`}
-        value={value as string || ''}
-        onChange={setValue}
-        disabled={formProcessing || disabled}
-        type="password"
         autoComplete={autoComplete}
+        disabled={formProcessing || disabled}
+        id={`field-${path.replace(/\./g, '__')}`}
         name={path}
+        onChange={setValue}
+        type="password"
+        value={value as string || ''}
       />
     </div>
   );

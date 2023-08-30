@@ -1,7 +1,8 @@
-import path, { dirname } from 'path';
 import fs from 'fs';
-import { generateTypes } from '../src/bin/generateTypes.js';
+import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
+
+import { generateTypes } from '../src/bin/generateTypes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(__filename);

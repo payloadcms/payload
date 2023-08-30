@@ -1,60 +1,61 @@
 import React, { useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config/index.js';
-import Eyebrow from '../../elements/Eyebrow/index.js';
-import Form from '../../forms/Form/index.js';
-import PreviewButton from '../../elements/PreviewButton/index.js';
-import { Save } from '../../elements/Save/index.js';
-import RenderFields from '../../forms/RenderFields/index.js';
-import CopyToClipboard from '../../elements/CopyToClipboard/index.js';
-import fieldTypes from '../../forms/field-types/index.js';
-import RenderTitle from '../../elements/RenderTitle/index.js';
-import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving/index.js';
-import Meta from '../../utilities/Meta/index.js';
-import Auth from '../collections/Edit/Auth/index.js';
-import { Props } from './types.js';
-import { OperationContext } from '../../utilities/OperationProvider/index.js';
-import { ToggleTheme } from './ToggleTheme/index.js';
-import { Gutter } from '../../elements/Gutter/index.js';
-import ReactSelect from '../../elements/ReactSelect/index.js';
-import Label from '../../forms/Label/index.js';
-import type { Translation } from '../../../../translations/type.js';
-import { LoadingOverlayToggle } from '../../elements/Loading/index.js';
-import { formatDate } from '../../../utilities/formatDate/index.js';
-import { useAuth } from '../../utilities/Auth/index.js';
+import { Link } from 'react-router-dom';
 
+import type { Translation } from '../../../../translations/type.js';
+import type { Props } from './types.js';
+
+import { formatDate } from '../../../utilities/formatDate/index.js';
+import CopyToClipboard from '../../elements/CopyToClipboard/index.js';
+import Eyebrow from '../../elements/Eyebrow/index.js';
+import { Gutter } from '../../elements/Gutter/index.js';
+import { LoadingOverlayToggle } from '../../elements/Loading/index.js';
+import PreviewButton from '../../elements/PreviewButton/index.js';
+import ReactSelect from '../../elements/ReactSelect/index.js';
+import RenderTitle from '../../elements/RenderTitle/index.js';
+import { Save } from '../../elements/Save/index.js';
+import Form from '../../forms/Form/index.js';
+import Label from '../../forms/Label/index.js';
+import RenderFields from '../../forms/RenderFields/index.js';
+import fieldTypes from '../../forms/field-types/index.js';
+import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving/index.js';
+import { useAuth } from '../../utilities/Auth/index.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import Meta from '../../utilities/Meta/index.js';
+import { OperationContext } from '../../utilities/OperationProvider/index.js';
+import Auth from '../collections/Edit/Auth/index.js';
+import { ToggleTheme } from './ToggleTheme/index.js';
 import './index.scss';
 
 const baseClass = 'account';
 
 const DefaultAccount: React.FC<Props> = (props) => {
   const {
+    action,
+    apiURL,
     collection,
     data,
-    permissions,
     hasSavePermission,
-    apiURL,
     initialState,
     isLoading,
-    action,
     onSave: onSaveFromProps,
+    permissions,
   } = props;
 
   const {
-    slug,
-    fields,
     admin: {
-      useAsTitle,
       preview,
+      useAsTitle,
     },
-    timestamps,
     auth,
+    fields,
+    slug,
+    timestamps,
   } = collection;
 
   const { refreshCookieAsync } = useAuth();
   const { admin: { dateFormat }, routes: { admin } } = useConfig();
-  const { t, i18n } = useTranslation('authentication');
+  const { i18n, t } = useTranslation('authentication');
 
   const languageOptions = Object.entries(i18n.options.resources).map(([language, resource]) => (
     { label: (resource as Translation).general.thisLanguage, value: language }
@@ -82,18 +83,18 @@ const DefaultAccount: React.FC<Props> = (props) => {
         {!isLoading && (
           <OperationContext.Provider value="update">
             <Form
-              className={`${baseClass}__form`}
-              method="patch"
               action={action}
-              onSuccess={onSave}
-              initialState={initialState}
+              className={`${baseClass}__form`}
               disabled={!hasSavePermission}
+              initialState={initialState}
+              method="patch"
+              onSuccess={onSave}
             >
               <div className={`${baseClass}__main`}>
                 <Meta
-                  title={t('account')}
                   description={t('accountOfCurrentUser')}
                   keywords={t('account')}
+                  title={t('account')}
                 />
                 <Eyebrow />
                 {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) && (
@@ -103,25 +104,25 @@ const DefaultAccount: React.FC<Props> = (props) => {
                   <Gutter className={`${baseClass}__header`}>
                     <h1>
                       <RenderTitle
-                        data={data}
                         collection={collection}
-                        useAsTitle={useAsTitle}
+                        data={data}
                         fallback={`[${t('general:untitled')}]`}
+                        useAsTitle={useAsTitle}
                       />
                     </h1>
                     <Auth
-                      useAPIKey={auth.useAPIKey}
                       collection={collection}
                       email={data?.email}
                       operation="update"
                       readOnly={!hasSavePermission}
+                      useAPIKey={auth.useAPIKey}
                     />
                     <RenderFields
+                      fieldSchema={fields}
+                      fieldTypes={fieldTypes}
+                      filter={(field) => field?.admin?.position !== 'sidebar'}
                       permissions={permissions.fields}
                       readOnly={!hasSavePermission}
-                      filter={(field) => field?.admin?.position !== 'sidebar'}
-                      fieldTypes={fieldTypes}
-                      fieldSchema={fields}
                     />
                   </Gutter>
                   <Gutter
@@ -135,9 +136,9 @@ const DefaultAccount: React.FC<Props> = (props) => {
                       />
                       <ReactSelect
                         inputId="language-select"
-                        value={languageOptions.find((language) => (language.value === i18n.language))}
-                        options={languageOptions}
                         onChange={({ value }) => (i18n.changeLanguage(value))}
+                        options={languageOptions}
+                        value={languageOptions.find((language) => (language.value === i18n.language))}
                       />
                     </div>
                     <ToggleTheme />
@@ -157,8 +158,8 @@ const DefaultAccount: React.FC<Props> = (props) => {
                     <div className={`${baseClass}__document-actions${preview ? ` ${baseClass}__document-actions--with-preview` : ''}`}>
                       {(preview && (!collection.versions?.drafts || collection.versions?.drafts?.autosave)) && (
                         <PreviewButton
-                          generatePreviewURL={preview}
                           CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
+                          generatePreviewURL={preview}
                         />
                       )}
                       {hasSavePermission && (
@@ -169,11 +170,11 @@ const DefaultAccount: React.FC<Props> = (props) => {
                     </div>
                     <div className={`${baseClass}__sidebar-fields`}>
                       <RenderFields
+                        fieldSchema={fields}
+                        fieldTypes={fieldTypes}
+                        filter={(field) => field?.admin?.position === 'sidebar'}
                         permissions={permissions.fields}
                         readOnly={!hasSavePermission}
-                        filter={(field) => field?.admin?.position === 'sidebar'}
-                        fieldTypes={fieldTypes}
-                        fieldSchema={fields}
                       />
                     </div>
                     <ul className={`${baseClass}__meta`}>
@@ -185,8 +186,8 @@ const DefaultAccount: React.FC<Props> = (props) => {
                         </span>
                         <a
                           href={apiURL}
-                          target="_blank"
                           rel="noopener noreferrer"
+                          target="_blank"
                         >
                           {apiURL}
                         </a>

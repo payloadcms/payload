@@ -1,23 +1,24 @@
 import React from 'react';
+
+import type { Props } from './types.js';
+
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath.js';
 import RenderFields from '../../RenderFields/index.js';
 import withCondition from '../../withCondition/index.js';
-import { Props } from './types.js';
-import { createNestedFieldPath } from '../../Form/createNestedFieldPath.js';
-import { RowProvider } from './provider.js';
-
 import './index.scss';
+import { RowProvider } from './provider.js';
 
 const Row: React.FC<Props> = (props) => {
   const {
-    fields,
+    admin: {
+      className,
+      readOnly,
+    },
     fieldTypes,
+    fields,
+    indexPath,
     path,
     permissions,
-    admin: {
-      readOnly,
-      className,
-    },
-    indexPath,
   } = props;
 
   const classes = [
@@ -29,15 +30,15 @@ const Row: React.FC<Props> = (props) => {
   return (
     <RowProvider>
       <RenderFields
-        readOnly={readOnly}
-        className={classes}
-        permissions={permissions}
-        fieldTypes={fieldTypes}
-        indexPath={indexPath}
         fieldSchema={fields.map((field) => ({
           ...field,
           path: createNestedFieldPath(path, field),
         }))}
+        className={classes}
+        fieldTypes={fieldTypes}
+        indexPath={indexPath}
+        permissions={permissions}
+        readOnly={readOnly}
       />
     </RowProvider>
   );

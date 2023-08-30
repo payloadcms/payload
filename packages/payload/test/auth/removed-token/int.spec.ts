@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+
 import payload from '../../../src/index.js';
 import { devUser } from '../../credentials.js';
 import { initPayloadTest } from '../../helpers/configHelpers.js';

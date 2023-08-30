@@ -1,22 +1,24 @@
 import React from 'react';
-import Cell from '../../views/collections/List/Cell/index.js';
-import SortColumn from '../SortColumn/index.js';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
-import { Column } from '../Table/types.js';
+
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
+import type { Props as CellProps } from '../../views/collections/List/Cell/types.js';
+import type { Column } from '../Table/types.js';
+
 import { fieldIsPresentationalOnly } from '../../../../fields/config/types.js';
 import flattenFields from '../../../../utilities/flattenTopLevelFields.js';
-import { Props as CellProps } from '../../views/collections/List/Cell/types.js';
+import Cell from '../../views/collections/List/Cell/index.js';
 import SelectAll from '../../views/collections/List/SelectAll/index.js';
 import SelectRow from '../../views/collections/List/SelectRow/index.js';
+import SortColumn from '../SortColumn/index.js';
 
 const buildColumns = ({
+  cellProps,
   collection,
   columns,
-  cellProps,
 }: {
+  cellProps: Partial<CellProps>[]
   collection: SanitizedCollectionConfig,
   columns: Pick<Column, 'accessor' | 'active'>[],
-  cellProps: Partial<CellProps>[]
 }): Column[] => {
   // sort the fields to the order of activeColumns
   const sortedFields = flattenFields(collection.fields, true).sort((a, b) => {
@@ -39,46 +41,44 @@ const buildColumns = ({
     }
     const props = cellProps?.[colIndex] || {};
     return {
-      active: isActive,
       accessor: field.name,
-      name: field.name,
-      label: field.label,
+      active: isActive,
       components: {
         Heading: (
           <SortColumn
-            label={field.label || field.name}
-            name={field.name}
             disable={
               ('disableSort' in field && Boolean(field.disableSort))
               || fieldIsPresentationalOnly(field)
               || undefined
             }
+            label={field.label || field.name}
+            name={field.name}
           />
         ),
         renderCell: (rowData, cellData) => {
           return (
             <Cell
-              key={JSON.stringify(cellData)}
-              field={field}
+              cellData={cellData}
               colIndex={colIndex}
               collection={collection}
-              rowData={rowData}
-              cellData={cellData}
+              field={field}
+              key={JSON.stringify(cellData)}
               link={isFirstActive}
+              rowData={rowData}
               {...(props)}
             />
           );
         },
       },
+      label: field.label,
+      name: field.name,
     };
   });
 
   if (cellProps?.[0]?.link !== false) {
     cols.unshift({
-      active: true,
-      label: null,
-      name: '',
       accessor: '_select',
+      active: true,
       components: {
         Heading: (
           <SelectAll />
@@ -89,6 +89,8 @@ const buildColumns = ({
           />
         ),
       },
+      label: null,
+      name: '',
     });
   }
 

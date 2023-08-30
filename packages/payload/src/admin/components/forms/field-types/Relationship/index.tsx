@@ -1,32 +1,33 @@
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import qs from 'qs';
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../utilities/Config/index.js';
-import { useAuth } from '../../../utilities/Auth/index.js';
-import withCondition from '../../withCondition/index.js';
+
+import type { PaginatedDocs } from '../../../../../database/types.js';
+import type { Where } from '../../../../../types/index.js';
+import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.js';
+import type { FilterOptionsResult, GetResults, Option, Props, Value } from './types.js';
+
+import { relationship } from '../../../../../fields/validations.js';
+import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex.js';
+import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback.js';
 import ReactSelect from '../../../elements/ReactSelect/index.js';
-import useField from '../../useField/index.js';
-import Label from '../../Label/index.js';
+import { useAuth } from '../../../utilities/Auth/index.js';
+import { useConfig } from '../../../utilities/Config/index.js';
+import { GetFilterOptions } from '../../../utilities/GetFilterOptions/index.js';
+import { useLocale } from '../../../utilities/Locale/index.js';
 import Error from '../../Error/index.js';
 import FieldDescription from '../../FieldDescription/index.js';
-import { relationship } from '../../../../../fields/validations.js';
-import { Where } from '../../../../../types/index.js';
-import type { PaginatedDocs } from '../../../../../database/types.js';
 import { useFormProcessing } from '../../Form/context.js';
-import optionsReducer from './optionsReducer.js';
-import { FilterOptionsResult, GetResults, Option, Props, Value } from './types.js';
-import { createRelationMap } from './createRelationMap.js';
-import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback.js';
-import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex.js';
+import Label from '../../Label/index.js';
+import useField from '../../useField/index.js';
+import withCondition from '../../withCondition/index.js';
 import { AddNewRelation } from './AddNew/index.js';
+import { createRelationMap } from './createRelationMap.js';
 import { findOptionsByValue } from './findOptionsByValue.js';
-import { GetFilterOptions } from '../../../utilities/GetFilterOptions/index.js';
-import { SingleValue } from './select-components/SingleValue/index.js';
-import { MultiValueLabel } from './select-components/MultiValueLabel/index.js';
-import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types.js';
-import { useLocale } from '../../../utilities/Locale/index.js';
-
 import './index.scss';
+import optionsReducer from './optionsReducer.js';
+import { MultiValueLabel } from './select-components/MultiValueLabel/index.js';
+import { SingleValue } from './select-components/SingleValue/index.js';
 
 const maxResultsPerRequest = 10;
 
@@ -34,37 +35,37 @@ const baseClass = 'relationship';
 
 const Relationship: React.FC<Props> = (props) => {
   const {
-    relationTo,
-    validate = relationship,
-    path,
-    name,
-    required,
-    label,
-    hasMany,
-    filterOptions,
     admin: {
+      allowCreate = true,
+      className,
+      condition,
+      description,
+      isSortable = true,
       readOnly,
       style,
-      className,
       width,
-      description,
-      condition,
-      isSortable = true,
-      allowCreate = true,
     } = {},
+    filterOptions,
+    hasMany,
+    label,
+    name,
+    path,
+    relationTo,
+    required,
+    validate = relationship,
   } = props;
 
   const config = useConfig();
 
   const {
-    serverURL,
+    collections,
     routes: {
       api,
     },
-    collections,
+    serverURL,
   } = config;
 
-  const { t, i18n } = useTranslation('fields');
+  const { i18n, t } = useTranslation('fields');
   const { permissions } = useAuth();
   const { code: locale } = useLocale();
   const formProcessing = useFormProcessing();
@@ -86,15 +87,15 @@ const Relationship: React.FC<Props> = (props) => {
   }, [validate, required]);
 
   const {
-    value,
-    showError,
     errorMessage,
-    setValue,
     initialValue,
+    setValue,
+    showError,
+    value,
   } = useField<Value | Value[]>({
+    condition,
     path: pathOrName,
     validate: memoizedValidate,
-    condition,
   });
 
   const [drawerIsOpen, setDrawerIsOpen] = useState(false);
@@ -102,10 +103,10 @@ const Relationship: React.FC<Props> = (props) => {
   const getResults: GetResults = useCallback(
     async ({
       lastFullyLoadedRelation: lastFullyLoadedRelationArg,
-      search: searchArg,
-      value: valueArg,
-      sort,
       onSuccess,
+      search: searchArg,
+      sort,
+      value: valueArg,
     }) => {
       if (!permissions) {
         return;
@@ -146,6 +147,11 @@ const Relationship: React.FC<Props> = (props) => {
               [key: string]: unknown;
               where: Where;
             } = {
+              depth: 0,
+              limit: maxResultsPerRequest,
+              locale,
+              page: lastLoadedPageToUse,
+              sort: fieldToSearch,
               where: {
                 and: [
                   {
@@ -155,11 +161,6 @@ const Relationship: React.FC<Props> = (props) => {
                   },
                 ],
               },
-              limit: maxResultsPerRequest,
-              page: lastLoadedPageToUse,
-              sort: fieldToSearch,
-              locale,
-              depth: 0,
             };
 
             if (searchArg) {
@@ -201,24 +202,24 @@ const Relationship: React.FC<Props> = (props) => {
                 resultsFetched += data.docs.length;
 
                 dispatchOptions({
-                  type: 'ADD',
-                  docs: data.docs,
                   collection,
-                  sort,
-                  i18n,
                   config,
+                  docs: data.docs,
+                  i18n,
+                  sort,
+                  type: 'ADD',
                 });
               }
             } else if (response.status === 403) {
               setLastFullyLoadedRelation(relations.indexOf(relation));
               dispatchOptions({
-                type: 'ADD',
-                docs: [],
                 collection,
-                sort,
-                ids: relationMap[relation],
-                i18n,
                 config,
+                docs: [],
+                i18n,
+                ids: relationMap[relation],
+                sort,
+                type: 'ADD',
               });
             } else {
               setErrorLoading(t('error:unspecific'));
@@ -248,7 +249,7 @@ const Relationship: React.FC<Props> = (props) => {
   );
 
   const updateSearch = useDebouncedCallback((searchArg: string, valueArg: Value | Value[]) => {
-    getResults({ search: searchArg, value: valueArg, sort: true });
+    getResults({ search: searchArg, sort: true, value: valueArg });
     setSearch(searchArg);
   }, 300);
 
@@ -279,14 +280,14 @@ const Relationship: React.FC<Props> = (props) => {
 
       if (idsToLoad.length > 0) {
         const query = {
+          depth: 0,
+          limit: idsToLoad.length,
+          locale,
           where: {
             id: {
               in: idsToLoad,
             },
           },
-          depth: 0,
-          locale,
-          limit: idsToLoad.length,
         };
 
         if (!errorLoading) {
@@ -306,13 +307,13 @@ const Relationship: React.FC<Props> = (props) => {
           }
 
           dispatchOptions({
-            type: 'ADD',
-            docs,
             collection,
-            sort: true,
-            ids: idsToLoad,
-            i18n,
             config,
+            docs,
+            i18n,
+            ids: idsToLoad,
+            sort: true,
+            type: 'ADD',
           });
         }
       }
@@ -358,7 +359,7 @@ const Relationship: React.FC<Props> = (props) => {
   }, [relationTo, filterOptionsResult, locale]);
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
-    dispatchOptions({ type: 'UPDATE', doc: args.doc, collection: args.collectionConfig, i18n, config });
+    dispatchOptions({ collection: args.collectionConfig, config, doc: args.doc, i18n, type: 'UPDATE' });
   }, [i18n, config]);
 
   const filterOption = useCallback((item: Option, searchFilter: string) => {
@@ -390,34 +391,41 @@ const Relationship: React.FC<Props> = (props) => {
     readOnly && `${baseClass}--read-only`,
   ].filter(Boolean).join(' ');
 
-  const valueToRender = findOptionsByValue({ value, options });
+  const valueToRender = findOptionsByValue({ options, value });
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') valueToRender.value = null;
 
   return (
     <div
-      id={`field-${(pathOrName).replace(/\./gi, '__')}`}
-      className={classes}
       style={{
         ...style,
         width,
       }}
+      className={classes}
+      id={`field-${(pathOrName).replace(/\./g, '__')}`}
     >
       <Error
-        showError={showError}
         message={errorMessage}
+        showError={showError}
       />
       <Label
         htmlFor={pathOrName}
         label={label}
         required={required}
       />
-      <GetFilterOptions {...{ filterOptionsResult, setFilterOptionsResult, filterOptions, path: pathOrName, relationTo }} />
+      <GetFilterOptions {...{ filterOptions, filterOptionsResult, path: pathOrName, relationTo, setFilterOptionsResult }} />
       {!errorLoading && (
         <div className={`${baseClass}__wrap`}>
           <ReactSelect
-            backspaceRemovesValue={!drawerIsOpen}
-            disabled={readOnly || formProcessing}
-            onInputChange={(newSearch) => handleInputChange(newSearch, value)}
+            components={{
+              MultiValueLabel,
+              SingleValue,
+            }}
+            customProps={{
+              disableKeyDown: drawerIsOpen,
+              disableMouseDown: drawerIsOpen,
+              onSave,
+              setDrawerIsOpen,
+            }}
             onChange={!readOnly ? (selected) => {
               if (selected === null) {
                 setValue(hasMany ? [] : null);
@@ -441,47 +449,40 @@ const Relationship: React.FC<Props> = (props) => {
                 setValue(selected.value);
               }
             } : undefined}
-            onMenuScrollToBottom={() => {
-              getResults({
-                lastFullyLoadedRelation,
-                search,
-                value: initialValue,
-                sort: false,
-              });
-            }}
-            value={valueToRender ?? null}
-            showError={showError}
-            options={options}
-            isMulti={hasMany}
-            isSortable={isSortable}
-            isLoading={isLoading}
-            components={{
-              SingleValue,
-              MultiValueLabel,
-            }}
-            customProps={{
-              disableMouseDown: drawerIsOpen,
-              disableKeyDown: drawerIsOpen,
-              setDrawerIsOpen,
-              onSave,
-            }}
             onMenuOpen={() => {
               if (!hasLoadedFirstPage) {
                 setIsLoading(true);
                 getResults({
-                  value: initialValue,
                   onSuccess: () => {
                     setHasLoadedFirstPage(true);
                     setIsLoading(false);
                   },
+                  value: initialValue,
                 });
               }
             }}
+            onMenuScrollToBottom={() => {
+              getResults({
+                lastFullyLoadedRelation,
+                search,
+                sort: false,
+                value: initialValue,
+              });
+            }}
+            backspaceRemovesValue={!drawerIsOpen}
+            disabled={readOnly || formProcessing}
             filterOption={enableWordBoundarySearch ? filterOption : undefined}
+            isLoading={isLoading}
+            isMulti={hasMany}
+            isSortable={isSortable}
+            onInputChange={(newSearch) => handleInputChange(newSearch, value)}
+            options={options}
+            showError={showError}
+            value={valueToRender ?? null}
           />
           {!readOnly && allowCreate && (
             <AddNewRelation
-              {...{ path: pathOrName, hasMany, relationTo, value, setValue, dispatchOptions, options }}
+              {...{ dispatchOptions, hasMany, options, path: pathOrName, relationTo, setValue, value }}
             />
           )}
         </div>
@@ -492,8 +493,8 @@ const Relationship: React.FC<Props> = (props) => {
         </div>
       )}
       <FieldDescription
-        value={value}
         description={description}
+        value={value}
       />
     </div>
   );

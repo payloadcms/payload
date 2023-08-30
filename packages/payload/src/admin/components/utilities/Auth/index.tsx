@@ -1,14 +1,16 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import jwtDecode from 'jwt-decode';
-import { useHistory, useLocation } from 'react-router-dom';
 import * as facelessui from '@faceless-ui/modal';
+import jwtDecode from 'jwt-decode';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Permissions, User } from '../../../../auth/types.js';
-import { useConfig } from '../Config/index.js';
+
+import type { Permissions, User } from '../../../../auth/types.js';
+import type { AuthContext } from './types.js';
+
 import { requests } from '../../../api.js';
 import useDebounce from '../../../hooks/useDebounce.js';
-import { AuthContext } from './types.js';
+import { useConfig } from '../Config/index.js';
 
 const Context = createContext({} as AuthContext);
 
@@ -24,15 +26,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const {
     admin: {
-      user: userSlug,
-      inactivityRoute: logoutInactivityRoute,
       autoLogin,
+      inactivityRoute: logoutInactivityRoute,
+      user: userSlug,
     },
-    serverURL,
     routes: {
       admin,
       api,
     },
+    serverURL,
   } = config;
 
   const exp = user?.exp;
@@ -41,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { useModal } = facelessui;
 
   const { i18n } = useTranslation();
-  const { openModal, closeAllModals } = useModal();
+  const { closeAllModals, openModal } = useModal();
   const [lastLocationChange, setLastLocationChange] = useState(0);
   const debouncedLocationChange = useDebounce(lastLocationChange, 10000);
 
@@ -108,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [serverURL, api, userSlug, i18n, redirectToInactivityRoute]);
 
   const setToken = useCallback((token: string) => {
-      // @ts-ignore // TODO: Fix
+      // @ts-expect-error // TODO: Fix
     const decoded = jwtDecode<User>(token);
     setUser(decoded);
     setTokenInMemory(token);
@@ -243,15 +245,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <Context.Provider value={{
-      user,
-      setUser,
       logOut,
+      permissions,
       refreshCookie,
       refreshCookieAsync,
       refreshPermissions,
-      permissions,
       setToken,
+      setUser,
       token: tokenInMemory,
+      user,
     }}
     >
       {children}

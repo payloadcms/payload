@@ -1,24 +1,25 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import RenderFieldsToDiff from '../../index.js';
-import { Props } from '../types.js';
-import Label from '../../Label/index.js';
-import { FieldWithSubFields } from '../../../../../../../fields/config/types.js';
-import { getTranslation } from '../../../../../../../utilities/getTranslation.js';
 
+import type { FieldWithSubFields } from '../../../../../../../fields/config/types.js';
+import type { Props } from '../types.js';
+
+import { getTranslation } from '../../../../../../../utilities/getTranslation.js';
+import Label from '../../Label/index.js';
+import RenderFieldsToDiff from '../../index.js';
 import './index.scss';
 
 const baseClass = 'nested-diff';
 
 const Nested: React.FC<Props & { field: FieldWithSubFields}> = ({
-  version,
   comparison,
-  permissions,
+  disableGutter = false,
   field,
+  fieldComponents,
   locale,
   locales,
-  fieldComponents,
-  disableGutter = false,
+  permissions,
+  version,
 }) => {
   const { i18n } = useTranslation();
 
@@ -39,12 +40,12 @@ const Nested: React.FC<Props & { field: FieldWithSubFields}> = ({
         .join(' ')}
       >
         <RenderFieldsToDiff
-          locales={locales}
-          version={version}
           comparison={comparison}
+          fieldComponents={fieldComponents}
           fieldPermissions={permissions}
           fields={field.fields}
-          fieldComponents={fieldComponents}
+          locales={locales}
+          version={version}
         />
       </div>
     </div>

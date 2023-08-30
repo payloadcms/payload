@@ -1,16 +1,17 @@
 import React from 'react';
-import { useConfig } from '../../../../src/admin/components/utilities/Config/index.js';
+
 import LogOut from '../../../../src/admin/components/icons/LogOut/index.js';
+import { useConfig } from '../../../../src/admin/components/utilities/Config/index.js';
 
 
 const Logout: React.FC = () => {
   const config = useConfig();
   const {
-    routes: {
-      admin,
-    },
     admin: {
       logoutRoute
+    },
+    routes: {
+      admin,
     },
   } = config;
   return (

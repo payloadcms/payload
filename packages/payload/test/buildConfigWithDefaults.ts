@@ -1,7 +1,9 @@
 import path from 'path';
-import { Config, SanitizedConfig } from '../src/config/types.js';
-import { buildConfig as buildPayloadConfig } from '../src/config/build.js';
+
+import type { Config, SanitizedConfig } from '../src/config/types.js';
+
 import { mongooseAdapter } from '../../db-mongodb/src/index.js';
+import { buildConfig as buildPayloadConfig } from '../src/config/build.js';
 //import { postgresAdapter } from '../../db-postgres/src/index.js';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 

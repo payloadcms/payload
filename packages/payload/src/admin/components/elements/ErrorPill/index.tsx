@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Props } from './types.js';
+
+import type { Props } from './types.js';
 
 import './index.scss';
 

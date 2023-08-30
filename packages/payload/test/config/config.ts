@@ -1,6 +1,7 @@
+import type { Config } from '../../src/config/types.js';
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
 import { openAccess } from '../helpers/configHelpers.js';
-import { Config } from '../../src/config/types.js';
 
 const config: Config = {
   collections: [

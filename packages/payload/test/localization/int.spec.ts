@@ -1,7 +1,13 @@
 import { GraphQLClient } from 'graphql-request';
-import { initPayloadTest } from '../helpers/configHelpers.js';
-import payload from '../../src/index.js';
+import path from 'path';
+
+import type { Config } from '../../src/config/types.js';
+import type { Where } from '../../src/types/index.js';
 import type { LocalizedPost, WithLocalizedRelationship } from './payload-types.js';
+
+import payload from '../../src/index.js';
+import { initPayloadTest } from '../helpers/configHelpers.js';
+import { arrayCollectionSlug } from './collections/Array/index.js';
 import configPromise, {
   localizedPostsSlug,
   relationshipLocalizedSlug,
@@ -18,10 +24,6 @@ import {
   spanishLocale,
   spanishTitle,
 } from './shared.js';
-import type { Where } from '../../src/types/index.js';
-import { arrayCollectionSlug } from './collections/Array/index.js';
-import type { Config } from '../../src/config/types.js';
-import path from 'path';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const collection = localizedPostsSlug;
@@ -740,7 +742,7 @@ describe('Localization', () => {
 
       // should return the value of the fallback locale
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       expect(updatedSpanishDoc.items[0].text).toStrictEqual(englishTitle);
     });
   });

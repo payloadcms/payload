@@ -1,15 +1,6 @@
 import { randomBytes } from 'crypto';
-import { initPayloadTest } from '../helpers/configHelpers.js';
-import config, {
-  chainedRelSlug,
-  customIdNumberSlug,
-  customIdSlug,
-  defaultAccessRelSlug,
-  relationSlug,
-  slug,
-} from './config.js';
-import payload from '../../src/index.js';
-import { RESTClient } from '../helpers/rest.js';
+import path from 'path';
+
 import type {
   ChainedRelation,
   CustomIdNumberRelation,
@@ -18,13 +9,24 @@ import type {
   Post,
   Relation,
 } from './payload-types.js';
+
+import payload from '../../src/index.js';
 import { mapAsync } from '../../src/utilities/mapAsync.js';
-import path from 'path';
+import { initPayloadTest } from '../helpers/configHelpers.js';
+import { RESTClient } from '../helpers/rest.js';
+import config, {
+  chainedRelSlug,
+  customIdNumberSlug,
+  customIdSlug,
+  defaultAccessRelSlug,
+  relationSlug,
+  slug,
+} from './config.js';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 let client: RESTClient;
 
-type EasierChained = { relation: EasierChained, id: string }
+type EasierChained = { id: string, relation: EasierChained }
 
 describe('Relationships', () => {
   beforeAll(async () => {
@@ -187,7 +189,7 @@ describe('Relationships', () => {
         it('should validate the format of text id relationships', async () => {
           await expect(async () => createPost({
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore Sending bad data to test error handling
+            // @ts-expect-error Sending bad data to test error handling
             customIdRelation: 1234,
           })).rejects.toThrow('The following field is invalid: customIdRelation');
         });
@@ -195,7 +197,7 @@ describe('Relationships', () => {
         it('should validate the format of number id relationships', async () => {
           await expect(async () => createPost({
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore Sending bad data to test error handling
+            // @ts-expect-error Sending bad data to test error handling
             customIdNumberRelation: 'bad-input',
           })).rejects.toThrow('The following field is invalid: customIdNumberRelation');
         });

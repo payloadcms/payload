@@ -1,7 +1,7 @@
 import React from 'react';
-import ListButton from '../ListButton.js';
-import OLIcon from '../../../../../icons/OrderedList/index.js';
 
+import OLIcon from '../../../../../icons/OrderedList/index.js';
+import ListButton from '../ListButton.js';
 import './index.scss';
 
 const OL = ({ attributes, children }) => (

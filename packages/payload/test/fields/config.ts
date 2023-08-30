@@ -1,30 +1,31 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import fs from 'fs';
+import path from 'path';
+
+import getFileByPath from '../../src/uploads/getFileByPath.js';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
 import { devUser } from '../credentials.js';
 import ArrayFields, { arrayDoc } from './collections/Array/index.js';
 import BlockFields, { blocksDoc } from './collections/Blocks/index.js';
+import CodeFields, { codeDoc } from './collections/Code/index.js';
 import CollapsibleFields, { collapsibleDoc } from './collections/Collapsible/index.js';
 import ConditionalLogic, { conditionalLogicDoc } from './collections/ConditionalLogic/index.js';
 import DateFields, { dateDoc } from './collections/Date/index.js';
+import GroupFields, { groupDoc } from './collections/Group/index.js';
+import IndexedFields from './collections/Indexed/index.js';
+import JSONFields, { jsonDoc } from './collections/JSON/index.js';
+import NumberFields, { numberDoc } from './collections/Number/index.js';
+import PointFields, { pointDoc } from './collections/Point/index.js';
+import RadioFields, { radiosDoc } from './collections/Radio/index.js';
+import RelationshipFields from './collections/Relationship/index.js';
 import RichTextFields, { richTextBulletsDoc, richTextDoc } from './collections/RichText/index.js';
+import RowFields from './collections/Row/index.js';
 import SelectFields, { selectsDoc } from './collections/Select/index.js';
 import TabsFields, { tabsDoc } from './collections/Tabs/index.js';
 import TextFields, { textDoc, textFieldsSlug } from './collections/Text/index.js';
-import PointFields, { pointDoc } from './collections/Point/index.js';
-import GroupFields, { groupDoc } from './collections/Group/index.js';
-import getFileByPath from '../../src/uploads/getFileByPath.js';
 import Uploads, { uploadsDoc } from './collections/Upload/index.js';
-import IndexedFields from './collections/Indexed/index.js';
-import NumberFields, { numberDoc } from './collections/Number/index.js';
-import CodeFields, { codeDoc } from './collections/Code/index.js';
-import JSONFields, { jsonDoc } from './collections/JSON/index.js';
-import RelationshipFields from './collections/Relationship/index.js';
-import RadioFields, { radiosDoc } from './collections/Radio/index.js';
 import Uploads2 from './collections/Upload2/index.js';
 import Uploads3 from './collections/Uploads3/index.js';
-import RowFields from './collections/Row/index.js';
-import path from 'path';
 
 const _dirname = path.dirname(new URL(import.meta.url).pathname)
 
@@ -125,7 +126,7 @@ export default buildConfigWithDefaults({
       file: jpgFile,
     });
 
-    const richTextDocWithRelId = JSON.parse(JSON.stringify(richTextDoc).replace(/{{ARRAY_DOC_ID}}/g, createdArrayDoc.id));
+    const richTextDocWithRelId = JSON.parse(JSON.stringify(richTextDoc).replace(/\{\{ARRAY_DOC_ID\}\}/g, createdArrayDoc.id));
     const richTextDocWithRelationship = { ...richTextDocWithRelId };
 
     const richTextRelationshipIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'relationship');
@@ -143,9 +144,9 @@ export default buildConfigWithDefaults({
 
     const blocksDocWithRichText = { ...blocksDoc };
 
-    // @ts-ignore
+    // @ts-expect-error
     blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText;
-    // @ts-ignore
+    // @ts-expect-error
     blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText;
 
     await payload.create({ collection: 'block-fields', data: blocksDocWithRichText });

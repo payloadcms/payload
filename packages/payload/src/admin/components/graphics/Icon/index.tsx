@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { useConfig } from '../../utilities/Config/index.js';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent/index.js';
 
@@ -10,11 +11,11 @@ const css = `
 
 const PayloadIcon: React.FC = () => (
   <svg
-    width="25"
+    className="graphic-icon"
     height="25"
     viewBox="0 0 25 25"
+    width="25"
     xmlns="http://www.w3.org/2000/svg"
-    className="graphic-icon"
   >
     <style>
       {css}

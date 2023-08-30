@@ -1,4 +1,5 @@
 import type { CollectionConfig } from '../../../src/collections/config/types.js';
+
 import { versionSlug } from '../shared.js';
 
 const VersionPosts: CollectionConfig = {

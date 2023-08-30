@@ -1,5 +1,6 @@
 import React from 'react';
-import { Props } from './types.js';
+
+import type { Props } from './types.js';
 
 const RenderCustomComponent: React.FC<Props> = (props) => {
   const { CustomComponent, DefaultComponent, componentProps } = props;

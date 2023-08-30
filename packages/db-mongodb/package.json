@@ -42,6 +42,7 @@
     "build:tsc:cjs": "tsc --module NodeNext --target ESNext --emitDeclarationOnly --outDir dist/cjs"
   },
   "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
     "@swc/cli": "^0.1.62",
     "@types/mongoose-aggregate-paginate-v2": "1.0.9",
     "mongodb-memory-server": "8.13.0",

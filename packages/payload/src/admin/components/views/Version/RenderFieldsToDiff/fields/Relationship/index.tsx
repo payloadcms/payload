@@ -1,15 +1,17 @@
 import React from 'react';
 import ReactDiffViewer from 'react-diff-viewer-continued';
 import { useTranslation } from 'react-i18next';
+
+import type { SanitizedCollectionConfig } from '../../../../../../../collections/config/types.js';
+import type { RelationshipField } from '../../../../../../../fields/config/types.js';
+import type { Props } from '../types.js';
+
+import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../../../../fields/config/types.js';
+import { getTranslation } from '../../../../../../../utilities/getTranslation.js';
 import { useConfig } from '../../../../../utilities/Config/index.js';
 import { useLocale } from '../../../../../utilities/Locale/index.js';
-import { SanitizedCollectionConfig } from '../../../../../../../collections/config/types.js';
-import { fieldAffectsData, fieldIsPresentationalOnly, RelationshipField } from '../../../../../../../fields/config/types.js';
 import Label from '../../Label/index.js';
-import { Props } from '../types.js';
 import { diffStyles } from '../styles.js';
-import { getTranslation } from '../../../../../../../utilities/getTranslation.js';
-
 import './index.scss';
 
 const baseClass = 'relationship-diff';
@@ -20,7 +22,7 @@ const generateLabelFromValue = (
   collections: SanitizedCollectionConfig[],
   field: RelationshipField,
   locale: string,
-  value: RelationshipValue | { relationTo: string, value: RelationshipValue },
+  value: { relationTo: string, value: RelationshipValue } | RelationshipValue,
 ): string => {
   let relation: string;
   let relatedDoc: RelationshipValue;
@@ -60,9 +62,9 @@ const generateLabelFromValue = (
   return valueToReturn;
 };
 
-const Relationship: React.FC<Props & { field: RelationshipField }> = ({ field, version, comparison }) => {
+const Relationship: React.FC<Props & { field: RelationshipField }> = ({ comparison, field, version }) => {
   const { collections } = useConfig();
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
   const { code: locale } = useLocale();
 
   let placeholder = '';
@@ -90,12 +92,12 @@ const Relationship: React.FC<Props & { field: RelationshipField }> = ({ field, v
         {getTranslation(field.label, i18n)}
       </Label>
       <ReactDiffViewerToUse
-        styles={diffStyles}
-        oldValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}
-        newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
-        splitView
         hideLineNumbers
+        newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
+        oldValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}
         showDiffOnly={false}
+        splitView
+        styles={diffStyles}
       />
     </div>
   );

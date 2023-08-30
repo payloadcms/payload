@@ -1,17 +1,17 @@
 import React from 'react';
-import { Props } from './types.js';
+
+import type { Props } from './types.js';
 
 import Chevron from '../../../icons/Chevron/index.js';
-
 import './index.scss';
 
 const baseClass = 'clickable-arrow';
 
 const ClickableArrow: React.FC<Props> = (props) => {
   const {
-    updatePage,
-    isDisabled = false,
     direction = 'right',
+    isDisabled = false,
+    updatePage,
   } = props;
 
   const classes = [

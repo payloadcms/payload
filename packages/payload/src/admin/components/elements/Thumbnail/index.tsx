@@ -1,21 +1,22 @@
 import React from 'react';
-import { Props } from './types.js';
-import FileGraphic from '../../graphics/File/index.js';
-import useThumbnail from '../../../hooks/useThumbnail.js';
 
+import type { Props } from './types.js';
+
+import useThumbnail from '../../../hooks/useThumbnail.js';
+import FileGraphic from '../../graphics/File/index.js';
 import './index.scss';
 
 const baseClass = 'thumbnail';
 
 const Thumbnail: React.FC<Props> = (props) => {
   const {
-    doc,
+    className = '',
+    collection,
     doc: {
       filename,
     },
-    collection,
+    doc,
     size,
-    className = '',
   } = props;
 
   const thumbnailSRC = useThumbnail(collection, doc);
@@ -30,8 +31,8 @@ const Thumbnail: React.FC<Props> = (props) => {
     <div className={classes}>
       {thumbnailSRC && (
         <img
-          src={thumbnailSRC}
           alt={filename as string}
+          src={thumbnailSRC}
         />
       )}
       {!thumbnailSRC && (

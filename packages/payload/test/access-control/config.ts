@@ -1,6 +1,7 @@
-import { devUser } from '../credentials.js';
+import type { FieldAccess } from '../../src/fields/config/types.js';
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
-import { FieldAccess } from '../../src/fields/config/types.js';
+import { devUser } from '../credentials.js';
 import { firstArrayText, secondArrayText } from './shared.js';
 
 export const slug = 'posts';

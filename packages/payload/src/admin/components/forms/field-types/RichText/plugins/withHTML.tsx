@@ -2,7 +2,7 @@ import { Transforms } from 'slate';
 import { jsx } from 'slate-hyperscript';
 
 const ELEMENT_TAGS = {
-  A: (el) => ({ type: 'link', newTab: el.getAttribute('target') === '_blank', url: el.getAttribute('href') }),
+  A: (el) => ({ newTab: el.getAttribute('target') === '_blank', type: 'link', url: el.getAttribute('href') }),
   BLOCKQUOTE: () => ({ type: 'blockquote' }),
   H1: () => ({ type: 'h1' }),
   H2: () => ({ type: 'h2' }),

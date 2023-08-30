@@ -1,15 +1,17 @@
 import React, { createContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDelayedRender } from '../../../hooks/useDelayedRender.js';
-import { reducer, defaultLoadingOverlayState } from './reducer.js';
-import { LoadingOverlay } from '../../elements/Loading/index.js';
+
 import type { LoadingOverlayContext, ToggleLoadingOverlay } from './types.js';
+
+import { useDelayedRender } from '../../../hooks/useDelayedRender.js';
+import { LoadingOverlay } from '../../elements/Loading/index.js';
+import { defaultLoadingOverlayState, reducer } from './reducer.js';
 
 const animatedDuration = 250;
 
 const Context = createContext({
-  toggleLoadingOverlay: undefined,
   isOnScreen: false,
+  toggleLoadingOverlay: undefined,
 });
 
 export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
@@ -22,31 +24,31 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
     isUnmounting,
     triggerDelayedRender,
   } = useDelayedRender({
-    show: overlays.isLoading,
     delayBeforeShow: 1000,
     inTimeout: animatedDuration,
-    outTimeout: animatedDuration,
     minShowTime: 500,
+    outTimeout: animatedDuration,
+    show: overlays.isLoading,
   });
 
-  const toggleLoadingOverlay = React.useCallback<ToggleLoadingOverlay>(({ type, key, isLoading, loadingText = fallbackText }) => {
+  const toggleLoadingOverlay = React.useCallback<ToggleLoadingOverlay>(({ isLoading, key, loadingText = fallbackText, type }) => {
     if (isLoading) {
       triggerDelayedRender();
       dispatchOverlay({
-        type: 'add',
         payload: {
-          type,
           key,
           loadingText,
+          type,
         },
+        type: 'add',
       });
     } else {
       dispatchOverlay({
-        type: 'remove',
         payload: {
           key,
           type,
         },
+        type: 'remove',
       });
     }
   }, [triggerDelayedRender, fallbackText]);
@@ -54,16 +56,16 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
   return (
     <Context.Provider
       value={{
-        toggleLoadingOverlay,
         isOnScreen: isMounted,
+        toggleLoadingOverlay,
       }}
     >
       {isMounted && (
         <LoadingOverlay
-          show={!isUnmounting}
+          animationDuration={`${animatedDuration}ms`}
           loadingText={overlays.loadingText || fallbackText}
           overlayType={overlays.overlayType}
-          animationDuration={`${animatedDuration}ms`}
+          show={!isUnmounting}
         />
       )}
       {children}

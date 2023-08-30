@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
 import queryString from 'qs';
-import { useHistory } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Props } from './types.js';
-import ReactSelect from '../ReactSelect/index.js';
-import sortableFieldTypes from '../../../../fields/sortableFieldTypes.js';
-import { useSearchParams } from '../../utilities/SearchParams/index.js';
-import { fieldAffectsData, OptionObject } from '../../../../fields/config/types.js';
-import { getTranslation } from '../../../../utilities/getTranslation.js';
+import { useHistory } from 'react-router-dom';
 
+import type { OptionObject } from '../../../../fields/config/types.js';
+import type { Props } from './types.js';
+
+import { fieldAffectsData } from '../../../../fields/config/types.js';
+import sortableFieldTypes from '../../../../fields/sortableFieldTypes.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
+import { useSearchParams } from '../../utilities/SearchParams/index.js';
+import ReactSelect from '../ReactSelect/index.js';
 import './index.scss';
 
 const baseClass = 'sort-complex';
@@ -16,13 +18,13 @@ const baseClass = 'sort-complex';
 const SortComplex: React.FC<Props> = (props) => {
   const {
     collection,
-    modifySearchQuery = true,
     handleChange,
+    modifySearchQuery = true,
   } = props;
 
   const history = useHistory();
   const params = useSearchParams();
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
   const [sortOptions, setSortOptions] = useState<OptionObject[]>();
 
   const [sortFields] = useState(() => collection.fields.reduce((fields, field) => {
@@ -69,9 +71,9 @@ const SortComplex: React.FC<Props> = (props) => {
               {t('columnToSort')}
             </div>
             <ReactSelect
-              value={sortField}
-              options={sortFields}
               onChange={setSortField}
+              options={sortFields}
+              value={sortField}
             />
           </div>
           <div className={`${baseClass}__select`}>
@@ -79,11 +81,11 @@ const SortComplex: React.FC<Props> = (props) => {
               {t('order')}
             </div>
             <ReactSelect
-              value={sortOrder}
-              options={sortOptions}
               onChange={(incomingSort) => {
                 setSortOrder(incomingSort || initialSort);
               }}
+              options={sortOptions}
+              value={sortOrder}
             />
           </div>
         </div>

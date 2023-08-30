@@ -1,27 +1,28 @@
+import { useWindowInfo } from '@faceless-ui/window-info';
 import React, { useEffect, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
 import { useTranslation } from 'react-i18next';
-import { useWindowInfo } from '@faceless-ui/window-info';
-import { fieldAffectsData } from '../../../../fields/config/types.js';
-import SearchFilter from '../SearchFilter/index.js';
-import ColumnSelector from '../ColumnSelector/index.js';
-import WhereBuilder from '../WhereBuilder/index.js';
-import SortComplex from '../SortComplex/index.js';
-import Button from '../Button/index.js';
-import { Props } from './types.js';
-import { useSearchParams } from '../../utilities/SearchParams/index.js';
-import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js';
-import flattenFields from '../../../../utilities/flattenTopLevelFields.js';
-import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js';
-import { getTranslation } from '../../../../utilities/getTranslation.js';
-import Pill from '../Pill/index.js';
-import Chevron from '../../icons/Chevron/index.js';
-import EditMany from '../EditMany/index.js';
-import DeleteMany from '../DeleteMany/index.js';
-import PublishMany from '../PublishMany/index.js';
-import UnpublishMany from '../UnpublishMany/index.js';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
 
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types.js';
+import type { Props } from './types.js';
+
+import { fieldAffectsData } from '../../../../fields/config/types.js';
+import flattenFields from '../../../../utilities/flattenTopLevelFields.js';
+import { getTranslation } from '../../../../utilities/getTranslation.js';
+import Chevron from '../../icons/Chevron/index.js';
+import { useSearchParams } from '../../utilities/SearchParams/index.js';
+import Button from '../Button/index.js';
+import ColumnSelector from '../ColumnSelector/index.js';
+import DeleteMany from '../DeleteMany/index.js';
+import EditMany from '../EditMany/index.js';
+import Pill from '../Pill/index.js';
+import PublishMany from '../PublishMany/index.js';
+import SearchFilter from '../SearchFilter/index.js';
+import SortComplex from '../SortComplex/index.js';
+import UnpublishMany from '../UnpublishMany/index.js';
+import WhereBuilder from '../WhereBuilder/index.js';
+import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js';
+import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js';
 import './index.scss';
 
 const baseClass = 'list-controls';
@@ -45,6 +46,12 @@ const getUseAsTitle = (collection: SanitizedCollectionConfig) => {
  */
 const ListControls: React.FC<Props> = (props) => {
   const {
+    collection: {
+      admin: {
+        listSearchableFields,
+      },
+      fields,
+    },
     collection,
     enableColumns = true,
     enableSort = false,
@@ -52,12 +59,6 @@ const ListControls: React.FC<Props> = (props) => {
     handleWhereChange,
     modifySearchQuery = true,
     resetParams,
-    collection: {
-      fields,
-      admin: {
-        listSearchableFields,
-      },
-    },
   } = props;
 
   const params = useSearchParams();
@@ -69,19 +70,19 @@ const ListControls: React.FC<Props> = (props) => {
   }, [collection]);
 
   const [textFieldsToBeSearched] = useState(getTextFieldsToBeSearched(listSearchableFields, fields));
-  const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>(shouldInitializeWhereOpened ? 'where' : undefined);
-  const { t, i18n } = useTranslation('general');
+  const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(shouldInitializeWhereOpened ? 'where' : undefined);
+  const { i18n, t } = useTranslation('general');
   const { breakpoints: { s: smallBreak } } = useWindowInfo();
 
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <SearchFilter
+          fieldLabel={(titleField && fieldAffectsData(titleField) && getTranslation(titleField.label || titleField.name, i18n)) ?? undefined}
           fieldName={titleField && fieldAffectsData(titleField) ? titleField.name : undefined}
           handleChange={handleWhereChange}
-          modifySearchQuery={modifySearchQuery}
-          fieldLabel={(titleField && fieldAffectsData(titleField) && getTranslation(titleField.label || titleField.name, i18n)) ?? undefined}
           listSearchableFields={textFieldsToBeSearched}
+          modifySearchQuery={modifySearchQuery}
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
@@ -107,35 +108,35 @@ const ListControls: React.FC<Props> = (props) => {
             )}
             {enableColumns && (
               <Pill
-                pillStyle="light"
-                className={`${baseClass}__toggle-columns ${visibleDrawer === 'columns' ? `${baseClass}__buttons-active` : ''}`}
-                onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
-                aria-expanded={visibleDrawer === 'columns'}
                 aria-controls={`${baseClass}-columns`}
+                aria-expanded={visibleDrawer === 'columns'}
+                className={`${baseClass}__toggle-columns ${visibleDrawer === 'columns' ? `${baseClass}__buttons-active` : ''}`}
                 icon={<Chevron />}
+                onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
+                pillStyle="light"
               >
                 {t('columns')}
               </Pill>
             )}
             <Pill
-              pillStyle="light"
-              className={`${baseClass}__toggle-where ${visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''}`}
-              onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
-              aria-expanded={visibleDrawer === 'where'}
               aria-controls={`${baseClass}-where`}
+              aria-expanded={visibleDrawer === 'where'}
+              className={`${baseClass}__toggle-where ${visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''}`}
               icon={<Chevron />}
+              onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
+              pillStyle="light"
             >
               {t('filters')}
             </Pill>
             {enableSort && (
               <Button
-                className={`${baseClass}__toggle-sort`}
-                buttonStyle={visibleDrawer === 'sort' ? undefined : 'secondary'}
-                onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
-                aria-expanded={visibleDrawer === 'sort'}
                 aria-controls={`${baseClass}-sort`}
+                aria-expanded={visibleDrawer === 'sort'}
+                buttonStyle={visibleDrawer === 'sort' ? undefined : 'secondary'}
+                className={`${baseClass}__toggle-sort`}
                 icon="chevron"
                 iconStyle="none"
+                onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
               >
                 {t('sort')}
               </Button>
@@ -159,8 +160,8 @@ const ListControls: React.FC<Props> = (props) => {
       >
         <WhereBuilder
           collection={collection}
-          modifySearchQuery={modifySearchQuery}
           handleChange={handleWhereChange}
+          modifySearchQuery={modifySearchQuery}
         />
       </AnimateHeight>
       {enableSort && (
@@ -170,9 +171,9 @@ const ListControls: React.FC<Props> = (props) => {
           id={`${baseClass}-sort`}
         >
           <SortComplex
-            modifySearchQuery={modifySearchQuery}
             collection={collection}
             handleChange={handleSortChange}
+            modifySearchQuery={modifySearchQuery}
           />
         </AnimateHeight>
       )}

@@ -1,26 +1,27 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Props } from './types.js';
-import Thumbnail from '../Thumbnail/index.js';
-import { useConfig } from '../../utilities/Config/index.js';
-import { formatUseAsTitle } from '../../../hooks/useTitle.js';
 
+import type { Props } from './types.js';
+
+import { formatUseAsTitle } from '../../../hooks/useTitle.js';
+import { useConfig } from '../../utilities/Config/index.js';
+import Thumbnail from '../Thumbnail/index.js';
 import './index.scss';
 
 const baseClass = 'thumbnail-card';
 
 export const ThumbnailCard: React.FC<Props> = (props) => {
   const {
-    className,
-    onClick,
-    doc,
-    collection,
-    thumbnail,
-    label: labelFromProps,
     alignLabel,
+    className,
+    collection,
+    doc,
+    label: labelFromProps,
+    onClick,
+    thumbnail,
   } = props;
 
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
   const config = useConfig();
 
   const classes = [
@@ -34,27 +35,27 @@ export const ThumbnailCard: React.FC<Props> = (props) => {
 
   if (!title) {
     title = formatUseAsTitle({
-      doc,
       collection,
-      i18n,
       config,
+      doc,
+      i18n,
     }) || doc?.filename as string || `[${t('untitled')}]`;
   }
 
   return (
     <button
-      type="button"
-      title={title}
       className={classes}
       onClick={onClick}
+      title={title}
+      type="button"
     >
       <div className={`${baseClass}__thumbnail`}>
         {thumbnail && thumbnail}
         {!thumbnail && (collection && doc) && (
           <Thumbnail
-            size="expand"
-            doc={doc}
             collection={collection}
+            doc={doc}
+            size="expand"
           />
         )}
       </div>

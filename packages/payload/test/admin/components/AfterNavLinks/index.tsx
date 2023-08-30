@@ -20,16 +20,16 @@ const AfterNavLinks: React.FC = () => {
       <span className="nav__label">Custom Routes</span>
       <nav>
         <NavLink
-          className="nav__link"
           activeClassName="active"
+          className="nav__link"
           to={`${adminRoute}/custom-default-route`}
         >
           <Chevron />
           Default Template
         </NavLink>
         <NavLink
-          className="nav__link"
           activeClassName="active"
+          className="nav__link"
           to={`${adminRoute}/custom-minimal-route`}
         >
           <Chevron />

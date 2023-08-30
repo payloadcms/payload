@@ -1,12 +1,15 @@
+import type { MultiValueProps } from 'react-select';
+
 import React, { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { components, MultiValueProps } from 'react-select';
+import { components } from 'react-select';
+
+import type { Option } from '../../types.js';
+
 import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer/index.js';
 import Tooltip from '../../../../../elements/Tooltip/index.js';
 import Edit from '../../../../../icons/Edit/index.js';
 import { useAuth } from '../../../../../utilities/Auth/index.js';
-import { Option } from '../../types.js';
-
 import './index.scss';
 
 const baseClass = 'relationship--multi-value-label';
@@ -14,17 +17,17 @@ const baseClass = 'relationship--multi-value-label';
 export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   const {
     data: {
-      value,
-      relationTo,
       label,
+      relationTo,
+      value,
     },
     selectProps: {
-      // @ts-ignore // TODO: Fix types
+      // @ts-expect-error // TODO: Fix types
       customProps: {
-        // @ts-ignore // TODO: Fix types
-        setDrawerIsOpen,
-        // @ts-ignore // TODO: Fix types
+        // @ts-expect-error // TODO: Fix types
         draggableProps,
+        // @ts-expect-error // TODO: Fix types
+        setDrawerIsOpen,
         // onSave,
       } = {},
     } = {},
@@ -36,8 +39,8 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission);
 
   const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
-    id: value?.toString(),
     collectionSlug: relationTo,
+    id: value?.toString(),
   });
 
   useEffect(() => {
@@ -58,13 +61,13 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
       {relationTo && hasReadPermission && (
         <Fragment>
           <DocumentDrawerToggler
-            className={`${baseClass}__drawer-toggler`}
             aria-label={`Edit ${label}`}
-            onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
+            className={`${baseClass}__drawer-toggler`}
+            onClick={() => setShowTooltip(false)}
             onMouseDown={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
-            onClick={() => setShowTooltip(false)}
+            onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
           >
             <Tooltip
               className={`${baseClass}__tooltip`}

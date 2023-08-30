@@ -1,10 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Locale } from '../../../../config/types.js';
-import { useConfig } from '../Config/index.js';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+
+import type { Locale } from '../../../../config/types.js';
+
+import { findLocaleFromCode } from '../../../../utilities/findLocaleFromCode.js';
 import { useAuth } from '../Auth/index.js';
+import { useConfig } from '../Config/index.js';
 import { usePreferences } from '../Preferences/index.js';
 import { useSearchParams } from '../SearchParams/index.js';
-import { findLocaleFromCode } from '../../../../utilities/findLocaleFromCode.js';
 
 const LocaleContext = createContext(null);
 

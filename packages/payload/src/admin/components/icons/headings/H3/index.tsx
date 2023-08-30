@@ -2,16 +2,16 @@ import React from 'react';
 
 const H3Icon: React.FC = () => (
   <svg
-    viewBox="0 0 24 24"
     aria-hidden="true"
-    focusable="false"
-    fill="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
     className="graphic h3-icon"
+    fill="currentColor"
+    focusable="false"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      fill="none"
       d="M.01 0h24v24h-24z"
+      fill="none"
     />
     <path
       className="fill"

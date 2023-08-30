@@ -1,35 +1,37 @@
 import i18next, { type i18n } from 'i18next';
 import { useTranslation } from 'react-i18next';
-import { SanitizedConfig } from '../../config/types.js';
-import { SanitizedCollectionConfig } from '../../collections/config/types.js';
+
+import type { SanitizedCollectionConfig } from '../../collections/config/types.js';
+import type { SanitizedConfig } from '../../config/types.js';
+import type { FormField } from '../components/forms/Form/types.js';
+
+import { getObjectDotNotation } from '../../utilities/getObjectDotNotation.js';
 import { useFormFields } from '../components/forms/Form/context.js';
-import { FormField } from '../components/forms/Form/types.js';
 import { useConfig } from '../components/utilities/Config/index.js';
 import { formatDate } from '../utilities/formatDate/index.js';
-import { getObjectDotNotation } from '../../utilities/getObjectDotNotation.js';
 
 // either send the `useAsTitle` field itself
 // or an object to dynamically extract the `useAsTitle` field from
 export const formatUseAsTitle = (args: {
-  field?: FormField
-  doc?: Record<string, any>
   collection: SanitizedCollectionConfig
-  i18n: i18n
   config: SanitizedConfig
+  doc?: Record<string, any>
+  field?: FormField
+  i18n: i18n
 }): string => {
   const {
-    field: fieldFromProps,
-    doc,
-    collection,
     collection: {
       admin: { useAsTitle },
     },
-    i18n,
+    collection,
     config: {
       admin: {
         dateFormat: dateFormatFromConfig,
       },
     },
+    doc,
+    field: fieldFromProps,
+    i18n,
   } = args;
 
   if (!fieldFromProps && !doc) {
@@ -56,7 +58,7 @@ const useTitle = (collection: SanitizedCollectionConfig): string => {
   const field = useFormFields(([formFields]) => formFields[collection?.admin?.useAsTitle]);
   const config = useConfig();
 
-  return formatUseAsTitle({ field, collection, i18n, config });
+  return formatUseAsTitle({ collection, config, field, i18n });
 };
 
 export default useTitle;

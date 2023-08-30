@@ -1,26 +1,26 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../utilities/Config/index.js';
-import { useAuth } from '../../../utilities/Auth/index.js';
-import usePayloadAPI from '../../../../hooks/usePayloadAPI.js';
+import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 
+import type { CollectionPermission } from '../../../../../auth/types.js';
+import type { Fields } from '../../../forms/Form/types.js';
+import type { IndexProps } from './types.js';
+
+import usePayloadAPI from '../../../../hooks/usePayloadAPI.js';
+import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema/index.js';
+import { useAuth } from '../../../utilities/Auth/index.js';
+import { useConfig } from '../../../utilities/Config/index.js';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo/index.js';
+import { EditDepthContext } from '../../../utilities/EditDepth/index.js';
+import { useLocale } from '../../../utilities/Locale/index.js';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent/index.js';
 import DefaultEdit from './Default.js';
 import formatFields from './formatFields.js';
-import buildStateFromSchema from '../../../forms/Form/buildStateFromSchema/index.js';
-import { useLocale } from '../../../utilities/Locale/index.js';
-import { IndexProps } from './types.js';
-import { useDocumentInfo } from '../../../utilities/DocumentInfo/index.js';
-import { Fields } from '../../../forms/Form/types.js';
-import { EditDepthContext } from '../../../utilities/EditDepth/index.js';
-import { CollectionPermission } from '../../../../../auth/types.js';
 
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection: incomingCollection, isEditing } = props;
 
   const {
-    slug,
     admin: {
       components: {
         views: {
@@ -28,6 +28,7 @@ const EditView: React.FC<IndexProps> = (props) => {
         } = {},
       } = {},
     } = {},
+    slug,
   } = incomingCollection;
 
   const [fields] = useState(() => formatFields(incomingCollection, isEditing));
@@ -35,33 +36,33 @@ const EditView: React.FC<IndexProps> = (props) => {
   const [redirect, setRedirect] = useState<string>();
 
   const { code: locale } = useLocale();
-  const { serverURL, routes: { admin, api } } = useConfig();
+  const { routes: { admin, api }, serverURL } = useConfig();
   const { params: { id } = {} } = useRouteMatch<Record<string, string>>();
   const history = useHistory();
   const [internalState, setInternalState] = useState<Fields>();
   const [updatedAt, setUpdatedAt] = useState<string>();
   const { user } = useAuth();
   const userRef = useRef(user);
-  const { getVersions, getDocPermissions, docPermissions, getDocPreferences } = useDocumentInfo();
+  const { docPermissions, getDocPermissions, getDocPreferences, getVersions } = useDocumentInfo();
   const { t } = useTranslation('general');
 
-  const [{ data, isLoading: isLoadingData, isError }] = usePayloadAPI(
+  const [{ data, isError, isLoading: isLoadingData }] = usePayloadAPI(
     (isEditing ? `${serverURL}${api}/${slug}/${id}` : null),
-    { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' }, initialData: null },
+    { initialData: null, initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
   );
 
   const buildState = useCallback(async (doc, overrides?: Partial<Parameters<typeof buildStateFromSchema>[0]>) => {
     const preferences = await getDocPreferences();
 
     const state = await buildStateFromSchema({
-      fieldSchema: overrides.fieldSchema,
-      preferences,
       data: doc || {},
-      user: userRef.current,
+      fieldSchema: overrides.fieldSchema,
       id,
-      operation: 'update',
       locale,
+      operation: 'update',
+      preferences,
       t: t as any,
+      user: userRef.current,
       ...overrides,
     });
 
@@ -88,8 +89,8 @@ const EditView: React.FC<IndexProps> = (props) => {
       const awaitInternalState = async () => {
         setUpdatedAt(data?.updatedAt);
         buildState(data, {
-          operation: isEditing ? 'update' : 'create',
           fieldSchema: fields,
+          operation: isEditing ? 'update' : 'create',
         });
       };
 
@@ -117,22 +118,22 @@ const EditView: React.FC<IndexProps> = (props) => {
   return (
     <EditDepthContext.Provider value={1}>
       <RenderCustomComponent
-        DefaultComponent={DefaultEdit}
-        CustomComponent={CustomEdit}
         componentProps={{
-          id,
-          isLoading,
-          data,
-          collection,
-          permissions: docPermissions,
-          isEditing,
-          onSave,
-          internalState,
-          hasSavePermission,
-          apiURL,
           action,
+          apiURL,
+          collection,
+          data,
+          hasSavePermission,
+          id,
+          internalState,
+          isEditing,
+          isLoading,
+          onSave,
+          permissions: docPermissions,
           updatedAt: updatedAt || data?.updatedAt,
         }}
+        CustomComponent={CustomEdit}
+        DefaultComponent={DefaultEdit}
       />
     </EditDepthContext.Provider>
   );

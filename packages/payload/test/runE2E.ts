@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies, no-console */
+import glob from 'glob';
 import path from 'path';
 import shelljs from 'shelljs';
-import glob from 'glob';
 import slash from 'slash';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -9,7 +9,7 @@ shelljs.env.DISABLE_LOGGING = 'true';
 
 const playwrightBin = path.resolve(__dirname, '../node_modules/.bin/playwright');
 
-const testRunCodes: { suiteName: string; code: number }[] = [];
+const testRunCodes: { code: number; suiteName: string }[] = [];
 const args = process.argv.slice(2);
 const suiteName = args[0];
 

@@ -1,6 +1,8 @@
 import React, { Suspense, lazy } from 'react';
+
+import type { Props } from './types.js';
+
 import { ShimmerEffect } from '../ShimmerEffect/index.js';
-import { Props } from './types.js';
 
 const DatePicker = lazy(() => import('./DatePicker.js'));
 

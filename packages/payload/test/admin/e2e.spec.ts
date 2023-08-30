@@ -1,15 +1,18 @@
 import type { Page } from '@playwright/test';
+
 import { expect, test } from '@playwright/test';
+import path from 'path';
 import qs from 'qs';
-import payload from '../../src/index.js';
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js';
-import { initPayloadE2E } from '../helpers/configHelpers.js';
-import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers.js';
+
 import type { Post } from './config.js';
-import { globalSlug, slug } from './shared.js';
+
+import payload from '../../src/index.js';
 import { mapAsync } from '../../src/utilities/mapAsync.js';
 import wait from '../../src/utilities/wait.js';
-import path from 'path';
+import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers.js';
+import { AdminUrlUtil } from '../helpers/adminUrlUtil.js';
+import { initPayloadE2E } from '../helpers/configHelpers.js';
+import { globalSlug, slug } from './shared.js';
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const { afterEach, beforeAll, beforeEach, describe } = test;
@@ -622,7 +625,7 @@ describe('admin', () => {
 
         await page.locator('.delete-documents__toggle').click();
         await page.locator('#confirm-delete').click();
-        await expect(await page.locator('.cell-_select')).toHaveCount(1);
+        await expect(page.locator('.cell-_select')).toHaveCount(1);
       });
     });
 
@@ -678,14 +681,14 @@ describe('admin', () => {
         await upChevron.click({ delay: 200 });
 
         // Order should have swapped
-        expect(await page.locator('.row-1 .cell-id').innerText()).toEqual(secondId);
-        expect(await page.locator('.row-2 .cell-id').innerText()).toEqual(firstId);
+        await expect(page.locator('.row-1 .cell-id')).toHaveText(secondId);
+        await expect(page.locator('.row-2 .cell-id')).toHaveText(firstId);
 
         await downChevron.click({ delay: 200 });
 
         // Swap back
-        expect(await page.locator('.row-1 .cell-id').innerText()).toEqual(firstId);
-        expect(await page.locator('.row-2 .cell-id').innerText()).toEqual(secondId);
+        await expect(page.locator('.row-1 .cell-id')).toHaveText(firstId);
+        await expect(page.locator('.row-2 .cell-id')).toHaveText(secondId);
       });
     });
 

@@ -1,26 +1,26 @@
 import React, { Fragment, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactEditor, useSlate } from 'slate-react';
-import ElementButton from '../../Button.js';
-import UploadIcon from '../../../../../../icons/Upload/index.js';
-import { useListDrawer } from '../../../../../../elements/ListDrawer/index.js';
-import { injectVoidElement } from '../../injectVoid.js';
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js';
 
+import { useListDrawer } from '../../../../../../elements/ListDrawer/index.js';
+import UploadIcon from '../../../../../../icons/Upload/index.js';
+import ElementButton from '../../Button.js';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js';
+import { injectVoidElement } from '../../injectVoid.js';
 import './index.scss';
 
 const baseClass = 'upload-rich-text-button';
 
-const insertUpload = (editor, { value, relationTo }) => {
+const insertUpload = (editor, { relationTo, value }) => {
   const text = { text: ' ' };
 
   const upload = {
-    type: 'upload',
-    value,
-    relationTo,
     children: [
       text,
     ],
+    relationTo,
+    type: 'upload',
+    value,
   };
 
   injectVoidElement(editor, upload);
@@ -29,8 +29,8 @@ const insertUpload = (editor, { value, relationTo }) => {
 };
 
 type ButtonProps = {
-  path: string
   enabledCollectionSlugs: string[]
+  path: string
 }
 
 const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
@@ -44,16 +44,16 @@ const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
       closeDrawer,
     },
   ] = useListDrawer({
-    uploads: true,
     collectionSlugs: enabledCollectionSlugs,
+    uploads: true,
   });
 
-  const onSelect = useCallback(({ docID, collectionConfig }) => {
+  const onSelect = useCallback(({ collectionConfig, docID }) => {
     insertUpload(editor, {
+      relationTo: collectionConfig.slug,
       value: {
         id: docID,
       },
-      relationTo: collectionConfig.slug,
     });
     closeDrawer();
   }, [editor, closeDrawer]);
@@ -62,13 +62,13 @@ const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
     <Fragment>
       <ListDrawerToggler>
         <ElementButton
-          className={baseClass}
-          format="upload"
-          tooltip={t('fields:addUpload')}
-          el="div"
           onClick={() => {
             // do nothing
           }}
+          className={baseClass}
+          el="div"
+          format="upload"
+          tooltip={t('fields:addUpload')}
         >
           <UploadIcon />
         </ElementButton>

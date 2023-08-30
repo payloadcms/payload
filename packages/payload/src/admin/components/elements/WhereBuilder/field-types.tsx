@@ -78,61 +78,61 @@ const contains = {
 };
 
 const fieldTypeConditions = {
-  text: {
+  checkbox: {
     component: 'Text',
-    operators: [...base, like, contains],
-  },
-  email: {
-    component: 'Text',
-    operators: [...base, contains],
-  },
-  textarea: {
-    component: 'Text',
-    operators: [...base, like, contains],
+    operators: boolean,
   },
   code: {
     component: 'Text',
     operators: [...base, like, contains],
   },
+  date: {
+    component: 'Date',
+    operators: [...base, ...numeric],
+  },
+  email: {
+    component: 'Text',
+    operators: [...base, contains],
+  },
   json: {
     component: 'Text',
     operators: [...base, like, contains, within, intersects],
   },
-  richText: {
-    component: 'Text',
-    operators: [...base, like, contains],
-  },
   number: {
     component: 'Number',
-    operators: [...base, ...numeric],
-  },
-  date: {
-    component: 'Date',
     operators: [...base, ...numeric],
   },
   point: {
     component: 'Point',
     operators: [...geo, within, intersects],
   },
-  upload: {
-    component: 'Text',
+  radio: {
+    component: 'Select',
     operators: [...base],
   },
   relationship: {
     component: 'Relationship',
     operators: [...base],
   },
-  radio: {
-    component: 'Select',
-    operators: [...base],
+  richText: {
+    component: 'Text',
+    operators: [...base, like, contains],
   },
   select: {
     component: 'Select',
     operators: [...base],
   },
-  checkbox: {
+  text: {
     component: 'Text',
-    operators: boolean,
+    operators: [...base, like, contains],
+  },
+  textarea: {
+    component: 'Text',
+    operators: [...base, like, contains],
+  },
+  upload: {
+    component: 'Text',
+    operators: [...base],
   },
 };
 

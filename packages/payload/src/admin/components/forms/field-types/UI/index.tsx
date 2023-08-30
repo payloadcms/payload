@@ -1,6 +1,8 @@
 import React from 'react';
+
+import type { UIField } from '../../../../../fields/config/types.js';
+
 import withCondition from '../../withCondition/index.js';
-import { UIField } from '../../../../../fields/config/types.js';
 
 const UI: React.FC<UIField> = (props) => {
   const {

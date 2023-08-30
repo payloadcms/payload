@@ -1,7 +1,9 @@
 import path from 'path';
+
 import type { CollectionConfig } from '../../src/collections/config/types.js';
-import { devUser } from '../credentials.js';
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js';
+import { devUser } from '../credentials.js';
 const _dirname = path.dirname(new URL(import.meta.url).pathname)
 
 export interface Relation {

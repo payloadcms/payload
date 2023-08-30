@@ -1,9 +1,10 @@
-import React from 'react';
 import Editor from '@monaco-editor/react';
+import React from 'react';
+
 import type { Props } from './types.js';
+
 import { useTheme } from '../../utilities/Theme/index.js';
 import { ShimmerEffect } from '../ShimmerEffect/index.js';
-
 import './index.scss';
 
 const baseClass = 'code-editor';
@@ -12,7 +13,7 @@ const MonacoEditor = Editor as any;
 
 
 const CodeEditor: React.FC<Props> = (props) => {
-  const { readOnly, className, options, height, ...rest } = props;
+  const { className, height, options, readOnly, ...rest } = props;
 
   const { theme } = useTheme();
 
@@ -24,9 +25,6 @@ const CodeEditor: React.FC<Props> = (props) => {
 
   return (
     <MonacoEditor
-      className={classes}
-      theme={theme === 'dark' ? 'vs-dark' : 'vs'}
-      loading={<ShimmerEffect height={height} />}
       options={
         {
           detectIndentation: true,
@@ -40,7 +38,10 @@ const CodeEditor: React.FC<Props> = (props) => {
           ...options,
         }
       }
+      className={classes}
       height={height}
+      loading={<ShimmerEffect height={height} />}
+      theme={theme === 'dark' ? 'vs-dark' : 'vs'}
       {...rest}
     />
   );

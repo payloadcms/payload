@@ -1,5 +1,6 @@
-import { Payload } from '../../../../src/payload.js';
-import { BeforeLoginHook, CollectionConfig } from '../../../../src/collections/config/types.js';
+import type { BeforeLoginHook, CollectionConfig } from '../../../../src/collections/config/types.js';
+import type { Payload } from '../../../../src/payload.js';
+
 import { AuthenticationError } from '../../../../src/errors/index.js';
 import { devUser, regularUser } from '../../../credentials.js';
 

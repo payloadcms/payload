@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
+
+import type { Props } from './types.js';
+
+import formatFilesize from '../../../../../uploads/formatFilesize.js';
+import Edit from '../../../icons/Edit/index.js';
 import { useConfig } from '../../../utilities/Config/index.js';
 import CopyToClipboard from '../../CopyToClipboard/index.js';
-import formatFilesize from '../../../../../uploads/formatFilesize.js';
-import { Props } from './types.js';
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js';
-import Edit from '../../../icons/Edit/index.js';
 import Tooltip from '../../Tooltip/index.js';
-
 import './index.scss';
 
 const baseClass = 'file-meta';
 
 const Meta: React.FC<Props> = (props) => {
   const {
-    filename, filesize, width, height, mimeType, staticURL, url, id, collection,
+    collection, filename, filesize, height, id, mimeType, staticURL, url, width,
   } = props;
 
   const [hovered, setHovered] = useState(false);
@@ -23,7 +24,7 @@ const Meta: React.FC<Props> = (props) => {
     DocumentDrawer,
     DocumentDrawerToggler,
   ] = useDocumentDrawer({
-    id, collectionSlug: collection,
+    collectionSlug: collection, id,
   });
 
   const { serverURL } = useConfig();
@@ -36,14 +37,14 @@ const Meta: React.FC<Props> = (props) => {
         {openInDrawer && <DocumentDrawer />}
         <a
           href={fileURL}
-          target="_blank"
           rel="noopener noreferrer"
+          target="_blank"
         >
           {filename}
         </a>
         <CopyToClipboard
-          value={fileURL}
           defaultMessage="Copy URL"
+          value={fileURL}
         />
         {openInDrawer
           && (

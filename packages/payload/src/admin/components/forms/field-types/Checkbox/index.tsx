@@ -1,35 +1,36 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import type { Props } from './types.js';
+
+import { checkbox } from '../../../../../fields/validations.js';
+import { getTranslation } from '../../../../../utilities/getTranslation.js';
+import Error from '../../Error/index.js';
+import FieldDescription from '../../FieldDescription/index.js';
 import useField from '../../useField/index.js';
 import withCondition from '../../withCondition/index.js';
-import Error from '../../Error/index.js';
-import { checkbox } from '../../../../../fields/validations.js';
-import FieldDescription from '../../FieldDescription/index.js';
-import { Props } from './types.js';
-import { getTranslation } from '../../../../../utilities/getTranslation.js';
 import { CheckboxInput } from './Input.js';
-
 import './index.scss';
 
 const baseClass = 'checkbox';
 
 const Checkbox: React.FC<Props> = (props) => {
   const {
-    name,
-    path: pathFromProps,
-    validate = checkbox,
-    label,
-    onChange,
-    disableFormData,
-    required,
     admin: {
+      className,
+      condition,
+      description,
       readOnly,
       style,
-      className,
       width,
-      description,
-      condition,
     } = {},
+    disableFormData,
+    label,
+    name,
+    onChange,
+    path: pathFromProps,
+    required,
+    validate = checkbox,
   } = props;
 
   const { i18n } = useTranslation();
@@ -41,15 +42,15 @@ const Checkbox: React.FC<Props> = (props) => {
   }, [validate, required]);
 
   const {
-    value,
-    showError,
     errorMessage,
     setValue,
+    showError,
+    value,
   } = useField({
+    condition,
+    disableFormData,
     path,
     validate: memoizedValidate,
-    disableFormData,
-    condition,
   });
 
   const onToggle = useCallback(() => {
@@ -59,7 +60,7 @@ const Checkbox: React.FC<Props> = (props) => {
     }
   }, [onChange, readOnly, setValue, value]);
 
-  const fieldID = `field-${path.replace(/\./gi, '__')}`;
+  const fieldID = `field-${path.replace(/\./g, '__')}`;
 
   return (
     <div
@@ -78,21 +79,21 @@ const Checkbox: React.FC<Props> = (props) => {
     >
       <div className={`${baseClass}__error-wrap`}>
         <Error
-          showError={showError}
           message={errorMessage}
+          showError={showError}
         />
       </div>
       <CheckboxInput
-        onToggle={onToggle}
+        checked={Boolean(value)}
         id={fieldID}
         label={getTranslation(label || name, i18n)}
         name={path}
-        checked={Boolean(value)}
+        onToggle={onToggle}
         readOnly={readOnly}
       />
       <FieldDescription
-        value={value}
         description={description}
+        value={value}
       />
     </div>
   );

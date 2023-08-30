@@ -1,10 +1,10 @@
 import React from 'react';
-import { useSelection } from '../SelectionProvider/index.js';
-import { CheckboxInput } from '../../../../forms/field-types/Checkbox/Input.js';
 
+import { CheckboxInput } from '../../../../forms/field-types/Checkbox/Input.js';
+import { useSelection } from '../SelectionProvider/index.js';
 import './index.scss';
 
-const SelectRow: React.FC<{ id: string | number }> = ({ id }) => {
+const SelectRow: React.FC<{ id: number | string }> = ({ id }) => {
   const { selected, setSelection } = useSelection();
 
   return (
