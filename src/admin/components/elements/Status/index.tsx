@@ -48,6 +48,8 @@ const Status: React.FC = () => {
     statusToRender = 'published';
   }
 
+  if (global && ['published', 'draft'].includes(publishedDoc?._status)) statusToRender = publishedDoc._status;
+
   const performAction = useCallback(async (action: 'revert' | 'unpublish') => {
     let url;
     let method;
