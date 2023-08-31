@@ -199,9 +199,9 @@ describe('admin', () => {
     })
 
     test('should bulk delete', async () => {
-      createPost()
-      createPost()
-      createPost()
+      await createPost()
+      await createPost()
+      await createPost()
 
       await page.goto(url.list)
 
@@ -218,9 +218,9 @@ describe('admin', () => {
     })
 
     test('should bulk update', async () => {
-      createPost()
-      createPost()
-      createPost()
+      await createPost()
+      await createPost()
+      await createPost()
 
       const bulkTitle = 'Bulk update title'
       await page.goto(url.list)
@@ -352,7 +352,7 @@ describe('admin', () => {
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
         // toggle off the ID column
-        page.locator('.column-selector >> text=ID').click()
+        await page.locator('.column-selector >> text=ID').click()
         // wait until .cell-id is not present on the page:
         await page.locator('.cell-id').waitFor({ state: 'detached' })
 
@@ -814,14 +814,14 @@ describe('admin', () => {
 })
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
-  return payload.create({
+  return (await payload.create({
     collection: slug,
     data: {
       title,
       description,
       ...overrides,
     },
-  })
+  })) as unknown as Promise<Post>
 }
 
 async function clearDocs(): Promise<void> {

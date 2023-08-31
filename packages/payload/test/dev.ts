@@ -65,4 +65,4 @@ const startDev = async () => {
   })
 }
 
-startDev()
+await startDev()
