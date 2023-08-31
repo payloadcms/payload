@@ -73,36 +73,36 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       depth: 0,
     };
 
-    const publishedVersionParams: { where: Where, depth: number } = {
-      where: {
-        and: [
-          {
-            or: [
-              {
-                _status: {
-                  equals: 'published',
-                },
-              },
-              {
-                _status: {
-                  exists: false,
-                },
-              },
-            ],
-          },
-        ],
-      },
-      depth: 0,
-    };
-
     if (global) {
       draftsEnabled = Boolean(global?.versions?.drafts);
       shouldFetchVersions = Boolean(global?.versions);
       versionFetchURL = `${baseURL}/globals/${global.slug}/versions`;
-      publishedFetchURL = `${baseURL}/globals/${global.slug}?${qs.stringify(publishedVersionParams)}`;
+      publishedFetchURL = `${baseURL}/globals/${global.slug}?depth=0`;
     }
 
     if (collection) {
+      const publishedVersionParams: { where: Where, depth: number } = {
+        where: {
+          and: [
+            {
+              or: [
+                {
+                  _status: {
+                    equals: 'published',
+                  },
+                },
+                {
+                  _status: {
+                    exists: false,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        depth: 0,
+      };
+
       draftsEnabled = Boolean(collection?.versions?.drafts);
       shouldFetchVersions = Boolean(collection?.versions);
       versionFetchURL = `${baseURL}/${collection.slug}/versions`;
@@ -136,7 +136,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
             'Accept-Language': i18n.language,
           },
         }).then((res) => res.json());
-
+        console.log({ publishedJSON });
         if (collection) {
           publishedJSON = publishedJSON?.docs?.[0];
         }

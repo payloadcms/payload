@@ -79,10 +79,46 @@ export const saveVersion = async ({
       const data: Record<string, unknown> = {
         autosave: Boolean(autosave),
         version: versionData,
+        latest: true,
         createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
         updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
       };
-      if (collection) data.parent = id;
+
+      if (collection) {
+        data.parent = id;
+
+        await VersionModel.updateMany({
+          $and: [
+            // TODO: is this _id necessary? Is this when you publish from a version?
+            {
+              _id: {
+                $ne: doc._id,
+              },
+            },
+            {
+              parent: {
+                $eq: id,
+              },
+            },
+            {
+              latest: {
+                $eq: true,
+              },
+            },
+          ],
+        }, { $unset: { latest: 1 } });
+      } else if (global) {
+        await VersionModel.updateMany({
+          $and: [
+            {
+              latest: {
+                $eq: true,
+              },
+            },
+          ],
+        }, { $unset: { latest: 1 } });
+      }
+
       result = await VersionModel.create(data);
     }
   } catch (err) {

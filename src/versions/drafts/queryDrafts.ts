@@ -4,15 +4,7 @@ import { PayloadRequest, Where } from '../../types';
 import { Payload } from '../../payload';
 import { PaginatedDocs } from '../../mongoose/types';
 import { Collection, CollectionModel, TypeWithID } from '../../collections/config/types';
-import { hasWhereAccessResult } from '../../auth';
-import { appendVersionToQueryKey } from './appendVersionToQueryKey';
-
-type AggregateVersion<T> = {
-  _id: string
-  version: T
-  updatedAt: string
-  createdAt: string
-}
+import { combineQueries } from '../../database/combineQueries';
 
 type Args = {
   accessResult: AccessResult
@@ -31,48 +23,26 @@ export const queryDrafts = async <T extends TypeWithID>({
   overrideAccess,
   payload,
   paginationOptions,
-  where: incomingWhere,
+  where,
 }: Args): Promise<PaginatedDocs<T>> => {
   const VersionModel = payload.versions[collection.config.slug] as CollectionModel;
 
-  const where = appendVersionToQueryKey(incomingWhere || {});
+  const combinedQuery = combineQueries({ latest: { equals: true } }, where);
 
-  let versionAccessResult;
-
-  if (hasWhereAccessResult(accessResult)) {
-    versionAccessResult = appendVersionToQueryKey(accessResult);
-  }
-
-  const versionQuery = await VersionModel.buildQuery({
-    where,
-    access: versionAccessResult,
+  const versionsQuery = await VersionModel.buildQuery({
+    where: combinedQuery,
+    access: accessResult,
     req,
     overrideAccess,
-  });
-
-  const aggregate = VersionModel.aggregate<AggregateVersion<T>>([
-    // Sort so that newest are first
-    { $sort: { updatedAt: -1 } },
-    // Group by parent ID, and take the first of each
-    {
-      $group: {
-        _id: '$parent',
-        version: { $first: '$version' },
-        updatedAt: { $first: '$updatedAt' },
-        createdAt: { $first: '$createdAt' },
-      },
-    },
-    // Filter based on incoming query
-    { $match: versionQuery },
-  ], {
-    allowDiskUse: true,
   });
 
   let result;
 
   if (paginationOptions) {
-    const aggregatePaginateOptions = {
+    const paginationOptionsToUse: PaginateOptions = {
       ...paginationOptions,
+      lean: true,
+      leanWithId: true,
       useFacet: payload.mongoOptions?.useFacet,
       sort: Object.entries(paginationOptions.sort)
         .reduce((sort, [incomingSortKey, order]) => {
@@ -89,15 +59,16 @@ export const queryDrafts = async <T extends TypeWithID>({
         }, {}),
     };
 
-    result = await VersionModel.aggregatePaginate(aggregate, aggregatePaginateOptions);
+    result = await VersionModel.paginate(versionsQuery, paginationOptionsToUse);
   } else {
-    result = aggregate.exec();
+    result = await VersionModel.find(versionsQuery);
   }
 
   return {
     ...result,
     docs: result.docs.map((doc) => ({
-      _id: doc._id,
+      _id: doc.parent,
+      id: doc.parent,
       ...doc.version,
       updatedAt: doc.updatedAt,
       createdAt: doc.createdAt,
