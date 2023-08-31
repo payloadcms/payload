@@ -1,15 +1,5 @@
 /** @type {import('next').NextConfig} */
-
-const ContentSecurityPolicy = `
-  default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.stripe.com https://js.stripe.com https://maps.googleapis.com;
-  child-src 'self';
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  img-src 'self' https://*.stripe.com https://raw.githubusercontent.com;
-  font-src 'self';
-  frame-src 'self' https://checkout.stripe.com https://js.stripe.com https://hooks.stripe.com;
-  connect-src 'self' https://checkout.stripe.com https://api.stripe.com https://maps.googleapis.com;
-`
+const ContentSecurityPolicy = require('./csp')
 
 const nextConfig = {
   reactStrictMode: true,
@@ -22,6 +12,10 @@ const nextConfig = {
   async headers() {
     const headers = []
 
+    // Prevent search engines from indexing the site if it is not live
+    // This is useful for staging environments before they are ready to go live
+    // To allow robots to crawl the site, use the `NEXT_PUBLIC_IS_LIVE` env variable
+    // You may want to also use this variable to conditionally render any tracking scripts
     if (!process.env.NEXT_PUBLIC_IS_LIVE) {
       headers.push({
         headers: [
@@ -34,6 +28,9 @@ const nextConfig = {
       })
     }
 
+    // Set the `Content-Security-Policy` header as a security measure to prevent XSS attacks
+    // It works by explicitly whitelisting trusted sources of content for your website
+    // This will block all inline scripts and styles except for those that are allowed
     headers.push({
       source: '/(.*)',
       headers: [
