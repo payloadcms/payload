@@ -1,6 +1,8 @@
 import { GraphQLClient } from 'graphql-request'
 import 'isomorphic-fetch'
-import jwtDecode from 'jwt-decode'
+import jwtDecodeImp from 'jwt-decode'
+const jwtDecode = 'default' in jwtDecodeImp ? jwtDecodeImp.default : jwtDecodeImp
+
 import path from 'path'
 
 import type { User } from '../../src/auth/types.js'

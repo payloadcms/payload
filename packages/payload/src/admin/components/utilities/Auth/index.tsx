@@ -1,5 +1,6 @@
 import * as facelessui from '@faceless-ui/modal'
-import jwtDecode from 'jwt-decode'
+import jwtDecodeImp from 'jwt-decode'
+const jwtDecode = 'default' in jwtDecodeImp ? jwtDecodeImp.default : jwtDecodeImp
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useHistory, useLocation } from 'react-router-dom'
@@ -111,7 +112,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   )
 
   const setToken = useCallback((token: string) => {
-    // @ts-expect-error // TODO: Fix
     const decoded = jwtDecode<User>(token)
     setUser(decoded)
     setTokenInMemory(token)
