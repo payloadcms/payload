@@ -1,11 +1,17 @@
-/** @type {import('prettier').Config} */
 module.exports = {
   extends: ['@payloadcms'],
   ignorePatterns: ['**/payload-types.ts'],
   overrides: [
     {
       extends: ['plugin:@typescript-eslint/disable-type-checked'],
-      files: ['*.js', '*.cjs', 'playwright.config.ts', 'playwright.bail.config.ts', 'bin-cks.cjs', 'bin-esm.mjs'],
+      files: [
+        '*.js',
+        '*.cjs',
+        'playwright.config.ts',
+        'playwright.bail.config.ts',
+        'bin-cks.cjs',
+        'bin-esm.mjs',
+      ],
     },
     {
       files: ['test/**/*.ts'],

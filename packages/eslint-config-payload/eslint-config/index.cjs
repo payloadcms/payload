@@ -1,4 +1,9 @@
 module.exports = {
+  env: {
+    es6: true,
+    browser: true,
+    node: true,
+  },
   extends: [
     'eslint:recommended',
     'plugin:perfectionist/recommended-natural',
@@ -20,10 +25,10 @@ module.exports = {
   },
   plugins: ['@typescript-eslint'],
   overrides: [
-  {
-    files: ['*.js', '*.cjs'],
-    extends: ['plugin:@typescript-eslint/disable-type-checked'],
-  },
+    {
+      files: ['*.js', '*.cjs'],
+      extends: ['plugin:@typescript-eslint/disable-type-checked'],
+    },
   ],
   rules: {
     '@typescript-eslint/ban-ts-comment': 'off',
