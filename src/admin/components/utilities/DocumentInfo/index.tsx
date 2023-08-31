@@ -136,7 +136,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
             'Accept-Language': i18n.language,
           },
         }).then((res) => res.json());
-        console.log({ publishedJSON });
+
         if (collection) {
           publishedJSON = publishedJSON?.docs?.[0];
         }
