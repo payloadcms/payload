@@ -15,7 +15,7 @@ type Args = {
   user: User
 }
 
-async function sendVerificationEmail(args: Args): Promise<void> {
+export async function sendVerificationEmail(args: Args): Promise<void> {
   // Verify token from e-mail
   const {
     collection: { config: collectionConfig },
@@ -64,7 +64,7 @@ async function sendVerificationEmail(args: Args): Promise<void> {
       })
     }
 
-    sendEmail({
+    await sendEmail({
       from: `"${emailOptions.fromName}" <${emailOptions.fromAddress}>`,
       html,
       subject,
@@ -72,5 +72,3 @@ async function sendVerificationEmail(args: Args): Promise<void> {
     })
   }
 }
-
-export default sendVerificationEmail

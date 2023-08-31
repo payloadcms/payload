@@ -11,9 +11,9 @@ type Args = {
   payload: Payload
   req: PayloadRequest
 }
-export const deleteUserPreferences = ({ collectionConfig, ids, payload, req }: Args) => {
+export const deleteUserPreferences = async ({ collectionConfig, ids, payload, req }: Args) => {
   if (collectionConfig.auth) {
-    payload.db.deleteMany({
+    await payload.db.deleteMany({
       collection: 'payload-preferences',
       req,
       where: {
@@ -24,7 +24,7 @@ export const deleteUserPreferences = ({ collectionConfig, ids, payload, req }: A
       },
     })
   }
-  payload.db.deleteMany({
+  await payload.db.deleteMany({
     collection: 'payload-preferences',
     req,
     where: {
