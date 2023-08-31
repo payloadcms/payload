@@ -17,10 +17,33 @@ const mockDotENVPath = path.resolve(_dirname, '../../mocks/dotENV.js')
 
 const nodeModulesPath = path.resolve(_dirname, '../../../../node_modules')
 const adminFolderPath = path.resolve(_dirname, '../../../admin')
-const bundlerPath = path.resolve(_dirname, '../bundler.ts')
-const bundlerPath2 = path.resolve(_dirname, '../bundler.js')
+const bundlerPathJS = path.resolve(_dirname, '../bundler.ts')
+const bundlerPathTS = path.resolve(_dirname, '../bundler.js')
 
 const require = createRequire(import.meta.url)
+
+// If this file is in a cjs build, we need to alias the respective esm files, and vice-versa.
+// This is because if payload is installed in a cjs project, for some reason webpack will scream
+// if the esm bundler is not aliased as well.
+let bundlerPathTS_cjsesm: string | undefined;
+let bundlerPathJS__cjsesm: string | undefined;
+let mockModulePath_cjsesm: string | undefined;
+let extraAliases = {};
+if(bundlerPathTS.includes('/dist/esm/')) {
+  bundlerPathTS_cjsesm = bundlerPathTS.replace('/dist/esm/', '/dist/cjs/')
+  bundlerPathJS__cjsesm = bundlerPathJS.replace('/dist/esm/', '/dist/cjs/')
+  mockModulePath_cjsesm = mockModulePath.replace('/dist/esm/', '/dist/cjs/')
+} else if(bundlerPathTS.includes('/dist/cjs/')) {
+  bundlerPathTS_cjsesm = bundlerPathTS.replace('/dist/cjs/', '/dist/esm/')
+  bundlerPathJS__cjsesm = bundlerPathJS.replace('/dist/cjs/', '/dist/esm/')
+  mockModulePath_cjsesm = mockModulePath.replace('/dist/cjs/', '/dist/esm/')
+}
+if(bundlerPathTS_cjsesm) {
+  extraAliases = {
+    [bundlerPathTS_cjsesm]: mockModulePath_cjsesm,
+    [bundlerPathJS__cjsesm]: mockModulePath_cjsesm,
+  }
+}
 
 export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => ({
   entry: {
@@ -114,12 +137,13 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
   ],
   resolve: {
     alias: {
-      [bundlerPath]: mockModulePath,
-      [bundlerPath2]: mockModulePath,
+      [bundlerPathTS]: mockModulePath,
+      [bundlerPathJS]: mockModulePath,
       dotenv: mockDotENVPath,
       payload$: mockModulePath,
       'payload-config': payloadConfig.paths.rawConfig,
       'payload-user-css': payloadConfig.admin.css,
+      ...extraAliases
     },
     // Add support for TypeScripts fully qualified ESM imports.
     extensionAlias: {
