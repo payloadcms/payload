@@ -1,13 +1,13 @@
-import type { AccessResult } from '../../config/types';
-import type { PayloadRequest } from '../../express/types';
-import type { Where } from '../../types';
-import type { SanitizedGlobalConfig } from '../config/types';
+import type { AccessResult } from '../../config/types'
+import type { PayloadRequest } from '../../express/types'
+import type { Where } from '../../types'
+import type { SanitizedGlobalConfig } from '../config/types'
 
-import executeAccess from '../../auth/executeAccess';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
+import executeAccess from '../../auth/executeAccess'
+import { afterRead } from '../../fields/hooks/afterRead'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
+import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable'
 
 type Args = {
   depth?: number
@@ -26,26 +26,23 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     draft: draftEnabled = false,
     globalConfig,
     overrideAccess = false,
-    req: {
-      locale,
-      payload,
-    },
+    req: { locale, payload },
     req,
     showHiddenFields,
     slug,
-  } = args;
+  } = args
 
   try {
-    const shouldCommit = await initTransaction(req);
+    const shouldCommit = await initTransaction(req)
 
     // /////////////////////////////////////
     // Retrieve and execute access
     // /////////////////////////////////////
 
-    let accessResult: AccessResult;
+    let accessResult: AccessResult
 
     if (!overrideAccess) {
-      accessResult = await executeAccess({ req }, globalConfig.access.read);
+      accessResult = await executeAccess({ req }, globalConfig.access.read)
     }
 
     // /////////////////////////////////////
@@ -56,10 +53,10 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
       locale,
       req,
       slug,
-      where: overrideAccess ? undefined : accessResult as Where,
-    });
+      where: overrideAccess ? undefined : (accessResult as Where),
+    })
     if (!doc) {
-      doc = {};
+      doc = {}
     }
 
     // /////////////////////////////////////
@@ -74,7 +71,7 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
         entityType: 'global',
         overrideAccess,
         req,
-      });
+      })
     }
 
     // /////////////////////////////////////
@@ -82,13 +79,14 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     // /////////////////////////////////////
 
     await globalConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      doc = await hook({
-        doc,
-        req,
-      }) || doc;
-    }, Promise.resolve());
+      doc =
+        (await hook({
+          doc,
+          req,
+        })) || doc
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // Execute field-level hooks and access
@@ -102,36 +100,37 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
       overrideAccess,
       req,
       showHiddenFields,
-    });
+    })
 
     // /////////////////////////////////////
     // Execute after global hook
     // /////////////////////////////////////
 
     await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      doc = await hook({
-        doc,
-        req,
-      }) || doc;
-    }, Promise.resolve());
-
-    // /////////////////////////////////////
-    // Return results
-    // /////////////////////////////////////
-
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+      doc =
+        (await hook({
+          doc,
+          req,
+        })) || doc
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
 
-    return doc;
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+
+    // /////////////////////////////////////
+    // Return results
+    // /////////////////////////////////////
+
+    return doc
   } catch (error: unknown) {
-    await killTransaction(req);
-    throw error;
+    await killTransaction(req)
+    throw error
   }
 }
 
-export default findOne;
+export default findOne

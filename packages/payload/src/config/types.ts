@@ -1,68 +1,70 @@
-import type { Express, NextFunction, Response } from 'express';
-import type { Options as ExpressFileUploadOptions } from 'express-fileupload';
-import type GraphQL from 'graphql';
-import type { InitOptions as i18nInitOptions } from 'i18next';
-import type { Transporter } from 'nodemailer';
-import type SMTPConnection from 'nodemailer/lib/smtp-connection';
-import type { DestinationStream, LoggerOptions } from 'pino';
-import type React from 'react';
-import type { DeepRequired } from 'ts-essentials';
-import type { Configuration } from 'webpack';
+import type { Express, NextFunction, Response } from 'express'
+import type { Options as ExpressFileUploadOptions } from 'express-fileupload'
+import type GraphQL from 'graphql'
+import type { InitOptions as i18nInitOptions } from 'i18next'
+import type { Transporter } from 'nodemailer'
+import type SMTPConnection from 'nodemailer/lib/smtp-connection'
+import type { DestinationStream, LoggerOptions } from 'pino'
+import type React from 'react'
+import type { DeepRequired } from 'ts-essentials'
+import type { Configuration } from 'webpack'
 
-import type { User } from '../auth/types';
-import type { PayloadBundler } from '../bundlers/types';
-import type { AfterErrorHook, CollectionConfig, SanitizedCollectionConfig } from '../collections/config/types';
-import type { DatabaseAdapter } from '../database/types';
-import type { PayloadRequest } from '../express/types';
-import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types';
-import type { Payload } from '../payload';
-import type { Where } from '../types';
+import type { User } from '../auth/types'
+import type { PayloadBundler } from '../bundlers/types'
+import type {
+  AfterErrorHook,
+  CollectionConfig,
+  SanitizedCollectionConfig,
+} from '../collections/config/types'
+import type { DatabaseAdapter } from '../database/types'
+import type { PayloadRequest } from '../express/types'
+import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types'
+import type { Payload } from '../payload'
+import type { Where } from '../types'
 
-import { Validate } from '../fields/config/types';
+import { Validate } from '../fields/config/types'
 
 type Prettify<T> = {
-  [K in keyof T]: T[K];
-} & NonNullable<unknown>;
+  [K in keyof T]: T[K]
+} & NonNullable<unknown>
 
 type Email = {
-  fromAddress: string;
-  fromName: string;
-  logMockCredentials?: boolean;
-};
+  fromAddress: string
+  fromName: string
+  logMockCredentials?: boolean
+}
 
 // eslint-disable-next-line no-use-before-define
-export type Plugin = (config: Config) => Config | Promise<Config>;
+export type Plugin = (config: Config) => Config | Promise<Config>
 
 type GeneratePreviewURLOptions = {
-  locale: string;
-  token: string;
-};
+  locale: string
+  token: string
+}
 
 export type GeneratePreviewURL = (
   doc: Record<string, unknown>,
-  options: GeneratePreviewURLOptions
-) => Promise<null | string> | null | string;
+  options: GeneratePreviewURLOptions,
+) => Promise<null | string> | null | string
 
 export type EmailTransport = Email & {
-  transport: Transporter;
-  transportOptions?: SMTPConnection.Options;
-};
+  transport: Transporter
+  transportOptions?: SMTPConnection.Options
+}
 
 export type EmailTransportOptions = Email & {
-  transport?: Transporter;
-  transportOptions: SMTPConnection.Options;
-};
+  transport?: Transporter
+  transportOptions: SMTPConnection.Options
+}
 
-export type EmailOptions = Email | EmailTransport | EmailTransportOptions;
+export type EmailOptions = Email | EmailTransport | EmailTransportOptions
 
 /**
  * type guard for EmailOptions
  * @param emailConfig
  */
-export function hasTransport(
-  emailConfig: EmailOptions,
-): emailConfig is EmailTransport {
-  return (emailConfig as EmailTransport).transport !== undefined;
+export function hasTransport(emailConfig: EmailOptions): emailConfig is EmailTransport {
+  return (emailConfig as EmailTransport).transport !== undefined
 }
 
 /**
@@ -72,13 +74,13 @@ export function hasTransport(
 export function hasTransportOptions(
   emailConfig: EmailOptions,
 ): emailConfig is EmailTransportOptions {
-  return (emailConfig as EmailTransportOptions).transportOptions !== undefined;
+  return (emailConfig as EmailTransportOptions).transportOptions !== undefined
 }
 
 export type GraphQLExtension = (
   graphQL: typeof GraphQL,
-  payload: Payload
-) => Record<string, unknown>;
+  payload: Payload,
+) => Record<string, unknown>
 
 export type InitOptions = {
   /**
@@ -86,17 +88,17 @@ export type InitOptions = {
    * The passed config should match the config file, and if it doesn't, there could be mismatches between the admin UI
    * and the backend functionality
    */
-  config?: Promise<SanitizedConfig>;
+  config?: Promise<SanitizedConfig>
 
   /**
    * Configuration for Payload's email functionality
    *
    * @see https://payloadcms.com/docs/email/overview
    */
-  email?: EmailOptions;
+  email?: EmailOptions
 
   /** Express app for Payload to use */
-  express?: Express;
+  express?: Express
 
   /**
    * Make Payload start in local-only mode.
@@ -104,24 +106,24 @@ export type InitOptions = {
    * This will bypass setting up REST and GraphQL API routes.
    * Express will not be required if set to `true`.
    */
-  local?: boolean;
+  local?: boolean
 
-  loggerDestination?: DestinationStream;
+  loggerDestination?: DestinationStream
 
   /**
    * Specify options for the built-in Pino logger that Payload uses for internal logging.
    *
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
-  loggerOptions?: LoggerOptions;
+  loggerOptions?: LoggerOptions
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
-  onInit?: (payload: Payload) => Promise<void> | void;
+  onInit?: (payload: Payload) => Promise<void> | void
 
   /** Secure string that Payload will use for any encryption workflows */
-  secret: string;
-};
+  secret: string
+}
 
 /**
  * This result is calculated on the server
@@ -136,7 +138,7 @@ export type InitOptions = {
  *
  * @see https://payloadcms.com/docs/access-control/overview
  */
-export type AccessResult = Where | boolean;
+export type AccessResult = Where | boolean
 
 export type AccessArgs<T = any, U = any> = {
   /**
@@ -144,12 +146,12 @@ export type AccessArgs<T = any, U = any> = {
    *
    * `data` is null when a list is requested
    */
-  data?: T;
+  data?: T
   /** ID of the resource being accessed */
-  id?: number | string;
+  id?: number | string
   /** The original request that requires an access check */
-  req: PayloadRequest<U>;
-};
+  req: PayloadRequest<U>
+}
 
 /**
  * Access function runs on the server
@@ -158,12 +160,12 @@ export type AccessArgs<T = any, U = any> = {
  * @see https://payloadcms.com/docs/access-control/overview
  */
 export type Access<T = any, U = any> = (
-  args: AccessArgs<T, U>
-) => AccessResult | Promise<AccessResult>;
+  args: AccessArgs<T, U>,
+) => AccessResult | Promise<AccessResult>
 
 /** Equivalent to express middleware, but with an enhanced request object */
 export interface PayloadHandler {
-  (req: PayloadRequest, res: Response, next: NextFunction): void;
+  (req: PayloadRequest, res: Response, next: NextFunction): void
 }
 
 /**
@@ -171,76 +173,68 @@ export interface PayloadHandler {
  */
 export type Endpoint = {
   /** Extension point to add your custom data. */
-  custom?: Record<string, any>;
+  custom?: Record<string, any>
   /**
    * Middleware that will be called when the path/method matches
    *
    * Compatible with Express middleware
    */
-  handler: PayloadHandler | PayloadHandler[];
+  handler: PayloadHandler | PayloadHandler[]
   /** HTTP method (or "all") */
-  method:
-  | 'connect'
-  | 'delete'
-  | 'get'
-  | 'head'
-  | 'options'
-  | 'patch'
-  | 'post'
-  | 'put';
+  method: 'connect' | 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put'
   /**
    * Pattern that should match the path of the incoming request
    *
    * Compatible with the Express router
    */
-  path: string;
+  path: string
   /**
    * Set to `true` to disable the Payload middleware for this endpoint
    * @default false
    */
-  root?: boolean;
-};
+  root?: boolean
+}
 
 export type AdminView = React.ComponentType<{
-  canAccessAdmin: boolean;
-  user: User;
-}>;
+  canAccessAdmin: boolean
+  user: User
+}>
 
 export type AdminRoute = {
-  Component: AdminView;
+  Component: AdminView
   /** Whether the path should be matched exactly or as a prefix */
-  exact?: boolean;
-  path: string;
-  sensitive?: boolean;
-  strict?: boolean;
-};
+  exact?: boolean
+  path: string
+  sensitive?: boolean
+  strict?: boolean
+}
 
 export type Locale = {
   /**
    * value of supported locale
    * @example "en"
    */
-  code: string;
+  code: string
   /**
    * label of supported locale
    * @example "English"
    */
-  label: string;
+  label: string
   /**
    * if true, defaults textAligmnent on text fields to RTL
    */
-  rtl?: boolean;
-};
+  rtl?: boolean
+}
 
 export type BaseLocalizationConfig = {
   /**
    * Locale for users that have not expressed their preference for a specific locale
    * @example `"en"`
    */
-  defaultLocale: string;
+  defaultLocale: string
   /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale` */
-  fallback?: boolean;
-};
+  fallback?: boolean
+}
 
 export type LocalizationConfigWithNoLabels = Prettify<
   BaseLocalizationConfig & {
@@ -248,9 +242,9 @@ export type LocalizationConfigWithNoLabels = Prettify<
      * List of supported locales
      * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
-    locales: string[];
+    locales: string[]
   }
->;
+>
 
 export type LocalizationConfigWithLabels = Prettify<
   BaseLocalizationConfig & {
@@ -262,26 +256,26 @@ export type LocalizationConfigWithLabels = Prettify<
      *  rtl: false
      * }
      */
-    locales: Locale[];
+    locales: Locale[]
   }
->;
+>
 
 export type SanitizedLocalizationConfig = Prettify<
-LocalizationConfigWithLabels & {
-  /**
-   * List of supported locales
-   * @example `["en", "es", "fr", "nl", "de", "jp"]`
-   */
-  localeCodes: string[];
-}
->;
+  LocalizationConfigWithLabels & {
+    /**
+     * List of supported locales
+     * @example `["en", "es", "fr", "nl", "de", "jp"]`
+     */
+    localeCodes: string[]
+  }
+>
 
 /**
  * @see https://payloadcms.com/docs/configuration/localization#localization
  */
 export type LocalizationConfig = Prettify<
   LocalizationConfigWithLabels | LocalizationConfigWithNoLabels
->;
+>
 
 /**
  * This is the central configuration
@@ -292,23 +286,25 @@ export type Config = {
   /** Configure admin dashboard */
   admin?: {
     /** Automatically log in as a user when visiting the admin dashboard. */
-    autoLogin?: {
-      /**
-       * The email address of the user to login as
-       *
-       */
-      email: string;
-      /** The password of the user to login as */
-      password: string;
-      /**
-       * If set to true, the login credentials will be prefilled but the user will still need to click the login button.
-       *
-       * @default false
-      */
-      prefillOnly?: boolean;
-    } | false
+    autoLogin?:
+      | {
+          /**
+           * The email address of the user to login as
+           *
+           */
+          email: string
+          /** The password of the user to login as */
+          password: string
+          /**
+           * If set to true, the login credentials will be prefilled but the user will still need to click the login button.
+           *
+           * @default false
+           */
+          prefillOnly?: boolean
+        }
+      | false
     /** Set account profile picture. Options: gravatar, default or a custom React component. */
-    avatar?: 'default' | 'gravatar' | React.ComponentType<any>;
+    avatar?: 'default' | 'gravatar' | React.ComponentType<any>
     /**
      * Specify an absolute path for where to store the built Admin panel bundle used in production.
      *
@@ -316,7 +312,7 @@ export type Config = {
      * */
     buildPath?: string
     /** Customize the bundler used to run your admin panel. */
-    bundler?: PayloadBundler;
+    bundler?: PayloadBundler
     /**
      * Add extra and/or replace built-in components with custom components
      *
@@ -326,71 +322,71 @@ export type Config = {
       /**
        * Replace the navigation with a custom component
        */
-      Nav?: React.ComponentType<any>;
+      Nav?: React.ComponentType<any>
       /**
        * Add custom components after the collection overview
        */
-      afterDashboard?: React.ComponentType<any>[];
+      afterDashboard?: React.ComponentType<any>[]
       /**
        * Add custom components after the email/password field
        */
-      afterLogin?: React.ComponentType<any>[];
+      afterLogin?: React.ComponentType<any>[]
       /**
        * Add custom components after the navigation links
        */
-      afterNavLinks?: React.ComponentType<any>[];
+      afterNavLinks?: React.ComponentType<any>[]
       /**
        * Add custom components before the collection overview
        */
-      beforeDashboard?: React.ComponentType<any>[];
+      beforeDashboard?: React.ComponentType<any>[]
       /**
        * Add custom components before the email/password field
        */
-      beforeLogin?: React.ComponentType<any>[];
+      beforeLogin?: React.ComponentType<any>[]
       /**
        * Add custom components before the navigation links
        */
-      beforeNavLinks?: React.ComponentType<any>[];
+      beforeNavLinks?: React.ComponentType<any>[]
       /** Replace graphical components */
       graphics?: {
         /** Replace the icon in the navigation */
-        Icon?: React.ComponentType<any>;
+        Icon?: React.ComponentType<any>
         /** Replace the logo on the login page */
-        Logo?: React.ComponentType<any>;
-      };
+        Logo?: React.ComponentType<any>
+      }
       /** Replace logout related components */
       logout?: {
         /** Replace the logout button  */
-        Button?: React.ComponentType<any>;
-      };
+        Button?: React.ComponentType<any>
+      }
       /**
        * Wrap the admin dashboard in custom context providers
        */
-      providers?: React.ComponentType<{ children: React.ReactNode }>[];
+      providers?: React.ComponentType<{ children: React.ReactNode }>[]
       /**
        * Add custom routes in the admin dashboard
        */
-      routes?: AdminRoute[];
+      routes?: AdminRoute[]
       /* Replace complete pages */
       views?: {
         /** Replace the account screen */
-        Account?: React.ComponentType<any>;
+        Account?: React.ComponentType<any>
         /** Replace the admin homepage */
-        Dashboard?: React.ComponentType<any>;
-      };
-    };
+        Dashboard?: React.ComponentType<any>
+      }
+    }
     /** Absolute path to a stylesheet that you can use to override / customize the Admin panel styling. */
-    css?: string;
+    css?: string
     /** Global date format that will be used for all dates in the Admin panel. Any valid date-fns format pattern can be used. */
-    dateFormat?: string;
+    dateFormat?: string
     /** If set to true, the entire Admin panel will be disabled. */
-    disable?: boolean;
+    disable?: boolean
     /** The route the user will be redirected to after being inactive for too long. */
-    inactivityRoute?: string;
+    inactivityRoute?: string
     /** Replace the entirety of the index.html file used by the Admin panel. Reference the base index.html file to ensure your replacement has the appropriate HTML elements. */
-    indexHTML?: string;
+    indexHTML?: string
     /** The route for the logout page. */
-    logoutRoute?: string;
+    logoutRoute?: string
     /** Base meta data to use for the Admin panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: {
       /**
@@ -398,52 +394,52 @@ export type Config = {
        *
        * This image may be displayed in the browser next to the title of the page
        */
-      favicon?: string;
+      favicon?: string
       /**
        * Public path to an image
        *
        * This image may be displayed as preview when the link is shared on social media
        */
-      ogImage?: string;
+      ogImage?: string
       /**
        * String to append to the <title> of admin pages
        * @example `" - My Brand"`
        */
-      titleSuffix?: string;
-    };
+      titleSuffix?: string
+    }
     /** The slug of a Collection that you want be used to log in to the Admin dashboard. */
-    user?: string;
+    user?: string
     /** Customize the Webpack config that's used to generate the Admin panel. */
-    webpack?: (config: Configuration) => Configuration;
-  };
+    webpack?: (config: Configuration) => Configuration
+  }
   /**
    * Manage the datamodel of your application
    *
    * @see https://payloadcms.com/docs/configuration/collections#collection-configs
    */
-  collections?: CollectionConfig[];
+  collections?: CollectionConfig[]
   /**
    * Replace the built-in components with custom ones
    */
-  components?: { [key: string]: (() => JSX.Element) | JSX.Element };
+  components?: { [key: string]: (() => JSX.Element) | JSX.Element }
   /**
    * Prefix a string to all cookies that Payload sets.
    *
    * @default "payload"
    */
-  cookiePrefix?: string;
+  cookiePrefix?: string
 
   /** Either a whitelist array of URLS to allow CORS requests from, or a wildcard string ('*') to accept incoming requests from any domain. */
-  cors?: '*' | string[];
+  cors?: '*' | string[]
 
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
-  csrf?: string[];
+  csrf?: string[]
   /** Extension point to add your custom data. */
-  custom?: Record<string, any>;
+  custom?: Record<string, any>
   /** Pass in a database adapter for use on this project. */
   db: (args: { payload: Payload }) => DatabaseAdapter
   /** Enable to expose more detailed error information. */
-  debug?: boolean;
+  debug?: boolean
   /**
    * If a user does not specify `depth` while requesting a resource, this depth will be used.
    *
@@ -451,21 +447,21 @@ export type Config = {
    *
    * @default 2
    */
-  defaultDepth?: number;
+  defaultDepth?: number
   /**
    * The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries.
    *
    * @default 40000
    */
-  defaultMaxTextLength?: number;
+  defaultMaxTextLength?: number
   /**
    * Email configuration options. This value is overridden by `email` in Payload.init if passed.
    *
    * @see https://payloadcms.com/docs/email/overview
    */
-  email?: EmailOptions;
+  email?: EmailOptions
   /** Custom REST endpoints */
-  endpoints?: Endpoint[];
+  endpoints?: Endpoint[]
   /**
    * Express-specific middleware options such as compression and JSON parsing.
    *
@@ -474,24 +470,24 @@ export type Config = {
   express?: {
     /** Control the way responses are compressed */
     compression?: {
-      [key: string]: unknown;
-    };
+      [key: string]: unknown
+    }
     /** Control the way JSON is parsed */
     json?: {
       /** Defaults to 2MB  */
-      limit?: number;
-    };
+      limit?: number
+    }
     /**
      * @deprecated express.middleware will be removed in a future version. Please migrate to express.postMiddleware.
      */
-    middleware?: any[];
-    postMiddleware?: any[];
-    preMiddleware?: any[];
-  };
+    middleware?: any[]
+    postMiddleware?: any[]
+    preMiddleware?: any[]
+  }
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
-  globals?: GlobalConfig[];
+  globals?: GlobalConfig[]
   /**
    * Manage the GraphQL API
    *
@@ -500,31 +496,31 @@ export type Config = {
    * @see https://payloadcms.com/docs/access-control/overview
    */
   graphQL?: {
-    disable?: boolean;
-    disablePlaygroundInProduction?: boolean;
-    maxComplexity?: number;
+    disable?: boolean
+    disablePlaygroundInProduction?: boolean
+    maxComplexity?: number
     /**
      * Function that returns an object containing keys to custom GraphQL mutations
      *
      * @see https://payloadcms.com/docs/access-control/overview
      */
-    mutations?: GraphQLExtension;
+    mutations?: GraphQLExtension
     /**
      * Function that returns an object containing keys to custom GraphQL queries
      *
      * @see https://payloadcms.com/docs/access-control/overview
      */
-    queries?: GraphQLExtension;
-    schemaOutputFile?: string;
-  };
+    queries?: GraphQLExtension
+    schemaOutputFile?: string
+  }
   /**
    * Tap into Payload-wide hooks.
    *
    * @see https://payloadcms.com/docs/hooks/overview
    */
   hooks?: {
-    afterError?: AfterErrorHook;
-  };
+    afterError?: AfterErrorHook
+  }
   /**
    * Control the behaviour of the admin internationalisation.
    *
@@ -538,15 +534,15 @@ export type Config = {
    *   resources: translations,
    * }
    */
-  i18n?: i18nInitOptions;
+  i18n?: i18nInitOptions
   /** Automatically index all sortable top-level fields in the database to improve sort performance and add database compatibility for Azure Cosmos and similar. */
-  indexSortableFields?: boolean;
+  indexSortableFields?: boolean
   /**
    * Translate your content to different languages/locales.
    *
    * @default false // disable localization
    */
-  localization?: LocalizationConfig | false;
+  localization?: LocalizationConfig | false
   /**
    * The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries.
    *
@@ -554,15 +550,15 @@ export type Config = {
    *
    * @default 10
    */
-  maxDepth?: number;
+  maxDepth?: number
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
-  onInit?: (payload: Payload) => Promise<void> | void;
+  onInit?: (payload: Payload) => Promise<void> | void
   /**
    * An array of Payload plugins.
    *
    * @see https://payloadcms.com/docs/plugins/overview
    */
-  plugins?: Plugin[];
+  plugins?: Plugin[]
   /**
    * Limit heavy usage
    *
@@ -573,59 +569,59 @@ export type Config = {
    * }
    */
   rateLimit?: {
-    max?: number;
-    skip?: (req: PayloadRequest) => boolean;
-    trustProxy?: boolean;
-    window?: number;
-  };
+    max?: number
+    skip?: (req: PayloadRequest) => boolean
+    trustProxy?: boolean
+    window?: number
+  }
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
     /** @default "/admin" */
-    admin?: string;
+    admin?: string
     /** @default "/api"  */
-    api?: string;
+    api?: string
     /** @default "/graphql"  */
-    graphQL?: string;
+    graphQL?: string
     /** @default "/playground" */
-    graphQLPlayground?: string;
-  };
+    graphQLPlayground?: string
+  }
   /**
    * Define the absolute URL of your app including the protocol, for example `https://example.org`.
    * No paths allowed, only protocol, domain and (optionally) port.
    *
    * @see https://payloadcms.com/docs/configuration/overview#options
    */
-  serverURL?: string;
+  serverURL?: string
   /** Send anonymous telemetry data about general usage. */
-  telemetry?: boolean;
+  telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */
   typescript?: {
     /** Filename to write the generated types to */
-    outputFile?: string;
-  };
+    outputFile?: string
+  }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
    */
-  upload?: ExpressFileUploadOptions;
-};
+  upload?: ExpressFileUploadOptions
+}
 
 export type SanitizedConfig = Omit<
   DeepRequired<Config>,
   'collections' | 'endpoint' | 'globals' | 'localization'
 > & {
-  collections: SanitizedCollectionConfig[];
-  endpoints: Endpoint[];
-  globals: SanitizedGlobalConfig[];
-  localization: SanitizedLocalizationConfig | false;
+  collections: SanitizedCollectionConfig[]
+  endpoints: Endpoint[]
+  globals: SanitizedGlobalConfig[]
+  localization: SanitizedLocalizationConfig | false
   paths: {
-    config: string;
-    configDir: string;
-    rawConfig: string;
-  };
-};
+    config: string
+    configDir: string
+    rawConfig: string
+  }
+}
 
 export type EntityDescription =
   | (() => string)
   | React.ComponentType<any>
   | Record<string, string>
-  | string;
+  | string

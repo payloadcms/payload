@@ -1,10 +1,10 @@
-import type { PlaywrightTestConfig } from '@playwright/test';
+import type { PlaywrightTestConfig } from '@playwright/test'
 
-import baseConfig from './playwright.config';
+import baseConfig from './playwright.config'
 
 const config: PlaywrightTestConfig = {
   ...baseConfig,
   maxFailures: 1,
-};
+}
 
-export default config;
+export default config

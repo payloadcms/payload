@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 const Search: React.FC = () => (
   <svg
@@ -9,14 +9,7 @@ const Search: React.FC = () => (
     width="25"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <circle
-      className="stroke"
-      cx="11.2069"
-      cy="10.9135"
-      r="5"
-      stroke="#333333"
-      strokeWidth="2"
-    />
+    <circle className="stroke" cx="11.2069" cy="10.9135" r="5" stroke="#333333" strokeWidth="2" />
     <line
       className="stroke"
       stroke="#333333"
@@ -27,6 +20,6 @@ const Search: React.FC = () => (
       y2="19.7925"
     />
   </svg>
-);
+)
 
-export default Search;
+export default Search

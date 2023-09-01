@@ -1,13 +1,10 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
-import { ErrorFieldsCollection } from './collections/ErrorFields';
-import Uploads from './collections/Upload';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
+import { ErrorFieldsCollection } from './collections/ErrorFields'
+import Uploads from './collections/Upload'
 
 export default buildConfigWithDefaults({
-  collections: [
-    ErrorFieldsCollection,
-    Uploads,
-  ],
+  collections: [ErrorFieldsCollection, Uploads],
   graphQL: {
     schemaOutputFile: './test/field-error-states/schema.graphql',
   },
@@ -19,6 +16,6 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
   },
-});
+})

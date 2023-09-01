@@ -1,47 +1,57 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { toast } from 'react-toastify';
+import React, { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'react-toastify'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import Button from '../../../../elements/Button';
-import { useFormFields, useFormModified } from '../../../../forms/Form/context';
-import Checkbox from '../../../../forms/field-types/Checkbox';
-import ConfirmPassword from '../../../../forms/field-types/ConfirmPassword';
-import Email from '../../../../forms/field-types/Email';
-import Password from '../../../../forms/field-types/Password';
-import { useConfig } from '../../../../utilities/Config';
-import APIKey from './APIKey';
-import './index.scss';
+import Button from '../../../../elements/Button'
+import { useFormFields, useFormModified } from '../../../../forms/Form/context'
+import Checkbox from '../../../../forms/field-types/Checkbox'
+import ConfirmPassword from '../../../../forms/field-types/ConfirmPassword'
+import Email from '../../../../forms/field-types/Email'
+import Password from '../../../../forms/field-types/Password'
+import { useConfig } from '../../../../utilities/Config'
+import APIKey from './APIKey'
+import './index.scss'
 
-const baseClass = 'auth-fields';
+const baseClass = 'auth-fields'
 
 const Auth: React.FC<Props> = (props) => {
-  const { collection, collection: { slug }, email, operation, readOnly, requirePassword, useAPIKey, verify } = props;
-  const [changingPassword, setChangingPassword] = useState(requirePassword);
-  const enableAPIKey = useFormFields(([fields]) => fields.enableAPIKey);
-  const dispatchFields = useFormFields((reducer) => reducer[1]);
-  const modified = useFormModified();
-  const { i18n, t } = useTranslation('authentication');
+  const {
+    collection,
+    collection: { slug },
+    email,
+    operation,
+    readOnly,
+    requirePassword,
+    useAPIKey,
+    verify,
+  } = props
+  const [changingPassword, setChangingPassword] = useState(requirePassword)
+  const enableAPIKey = useFormFields(([fields]) => fields.enableAPIKey)
+  const dispatchFields = useFormFields((reducer) => reducer[1])
+  const modified = useFormModified()
+  const { i18n, t } = useTranslation('authentication')
 
   const {
-    routes: {
-      api,
-    },
+    routes: { api },
     serverURL,
-  } = useConfig();
+  } = useConfig()
 
-  const handleChangePassword = useCallback(async (state: boolean) => {
-    if (!state) {
-      dispatchFields({ path: 'password', type: 'REMOVE' });
-      dispatchFields({ path: 'confirm-password', type: 'REMOVE' });
-    }
+  const handleChangePassword = useCallback(
+    async (state: boolean) => {
+      if (!state) {
+        dispatchFields({ path: 'password', type: 'REMOVE' })
+        dispatchFields({ path: 'confirm-password', type: 'REMOVE' })
+      }
 
-    setChangingPassword(state);
-  }, [dispatchFields]);
+      setChangingPassword(state)
+    },
+    [dispatchFields],
+  )
 
   const unlock = useCallback(async () => {
-    const url = `${serverURL}${api}/${slug}/unlock`;
+    const url = `${serverURL}${api}/${slug}/unlock`
     const response = await fetch(url, {
       body: JSON.stringify({
         email,
@@ -52,23 +62,23 @@ const Auth: React.FC<Props> = (props) => {
         'Content-Type': 'application/json',
       },
       method: 'post',
-    });
+    })
 
     if (response.status === 200) {
-      toast.success(t('successfullyUnlocked'), { autoClose: 3000 });
+      toast.success(t('successfullyUnlocked'), { autoClose: 3000 })
     } else {
-      toast.error(t('failedToUnlock'));
+      toast.error(t('failedToUnlock'))
     }
-  }, [i18n, serverURL, api, slug, email, t]);
+  }, [i18n, serverURL, api, slug, email, t])
 
   useEffect(() => {
     if (!modified) {
-      setChangingPassword(false);
+      setChangingPassword(false)
     }
-  }, [modified]);
+  }, [modified])
 
   if (collection.auth.disableLocalStrategy && !collection.auth.useAPIKey) {
-    return null;
+    return null
   }
 
   return (
@@ -103,7 +113,7 @@ const Auth: React.FC<Props> = (props) => {
               )}
             </div>
           )}
-          {(!changingPassword && !requirePassword) && (
+          {!changingPassword && !requirePassword && (
             <Button
               buttonStyle="secondary"
               disabled={readOnly}
@@ -128,25 +138,13 @@ const Auth: React.FC<Props> = (props) => {
       )}
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
-          <Checkbox
-            admin={{ readOnly }}
-            label={t('enableAPIKey')}
-            name="enableAPIKey"
-          />
-          {enableAPIKey?.value && (
-            <APIKey readOnly={readOnly} />
-          )}
+          <Checkbox admin={{ readOnly }} label={t('enableAPIKey')} name="enableAPIKey" />
+          {enableAPIKey?.value && <APIKey readOnly={readOnly} />}
         </div>
       )}
-      {verify && (
-        <Checkbox
-          admin={{ readOnly }}
-          label={t('verified')}
-          name="_verified"
-        />
-      )}
+      {verify && <Checkbox admin={{ readOnly }} label={t('verified')} name="_verified" />}
     </div>
-  );
-};
+  )
+}
 
-export default Auth;
+export default Auth

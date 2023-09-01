@@ -1,29 +1,29 @@
-import type { BeforeLoginHook, CollectionConfig } from '../../../../src/collections/config/types';
-import type { Payload } from '../../../../src/payload';
+import type { BeforeLoginHook, CollectionConfig } from '../../../../src/collections/config/types'
+import type { Payload } from '../../../../src/payload'
 
-import { AuthenticationError } from '../../../../src/errors';
-import { devUser, regularUser } from '../../../credentials';
+import { AuthenticationError } from '../../../../src/errors'
+import { devUser, regularUser } from '../../../credentials'
 
 const beforeLoginHook: BeforeLoginHook = ({ user, req }) => {
-  const isAdmin = user.roles.includes('admin') ? user : undefined;
+  const isAdmin = user.roles.includes('admin') ? user : undefined
   if (!isAdmin) {
-    throw new AuthenticationError(req.t);
+    throw new AuthenticationError(req.t)
   }
-  return user;
-};
+  return user
+}
 
 export const seedHooksUsers = async (payload: Payload) => {
   await payload.create({
     collection: hooksUsersSlug,
     data: devUser,
-  });
+  })
   await payload.create({
     collection: hooksUsersSlug,
     data: regularUser,
-  });
-};
+  })
+}
 
-export const hooksUsersSlug = 'hooks-users';
+export const hooksUsersSlug = 'hooks-users'
 const Users: CollectionConfig = {
   slug: hooksUsersSlug,
   auth: true,
@@ -42,6 +42,6 @@ const Users: CollectionConfig = {
   hooks: {
     beforeLogin: [beforeLoginHook],
   },
-};
+}
 
-export default Users;
+export default Users

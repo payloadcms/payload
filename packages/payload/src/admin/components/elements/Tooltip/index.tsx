@@ -1,58 +1,47 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from 'react'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import useIntersect from '../../../hooks/useIntersect';
-import './index.scss';
+import useIntersect from '../../../hooks/useIntersect'
+import './index.scss'
 
 const Tooltip: React.FC<Props> = (props) => {
-  const {
-    boundingRef,
-    children,
-    className,
-    delay = 350,
-    show: showFromProps = true,
-  } = props;
+  const { boundingRef, children, className, delay = 350, show: showFromProps = true } = props
 
-  const [show, setShow] = React.useState(showFromProps);
-  const [position, setPosition] = React.useState<'bottom' | 'top'>('top');
+  const [show, setShow] = React.useState(showFromProps)
+  const [position, setPosition] = React.useState<'bottom' | 'top'>('top')
 
   const [ref, intersectionEntry] = useIntersect({
     root: boundingRef?.current || null,
     rootMargin: '-145px 0px 0px 100px',
     threshold: 0,
-  });
-
+  })
 
   useEffect(() => {
-    let timerId: NodeJS.Timeout;
+    let timerId: NodeJS.Timeout
 
     // do not use the delay on transition-out
     if (delay && showFromProps) {
       timerId = setTimeout(() => {
-        setShow(showFromProps);
-      }, delay);
+        setShow(showFromProps)
+      }, delay)
     } else {
-      setShow(showFromProps);
+      setShow(showFromProps)
     }
 
     return () => {
-      if (timerId) clearTimeout(timerId);
-    };
-  }, [showFromProps, delay]);
+      if (timerId) clearTimeout(timerId)
+    }
+  }, [showFromProps, delay])
 
   useEffect(() => {
-    setPosition(intersectionEntry?.isIntersecting ? 'top' : 'bottom');
-  }, [intersectionEntry]);
+    setPosition(intersectionEntry?.isIntersecting ? 'top' : 'bottom')
+  }, [intersectionEntry])
 
   return (
     <React.Fragment>
       <aside
-        className={[
-          'tooltip',
-          className,
-          'tooltip--position-top',
-        ].filter(Boolean).join(' ')}
+        className={['tooltip', className, 'tooltip--position-top'].filter(Boolean).join(' ')}
         aria-hidden="true"
         ref={ref}
       >
@@ -60,17 +49,14 @@ const Tooltip: React.FC<Props> = (props) => {
       </aside>
 
       <aside
-        className={[
-          'tooltip',
-          className,
-          show && 'tooltip--show',
-          `tooltip--position-${position}`,
-        ].filter(Boolean).join(' ')}
+        className={['tooltip', className, show && 'tooltip--show', `tooltip--position-${position}`]
+          .filter(Boolean)
+          .join(' ')}
       >
         {children}
       </aside>
     </React.Fragment>
-  );
-};
+  )
+}
 
-export default Tooltip;
+export default Tooltip

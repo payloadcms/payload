@@ -1,4 +1,4 @@
-import type { LocaleOption } from '../types';
+import type { LocaleOption } from '../types'
 
 export type Props = {
   onChange: (options: LocaleOption[]) => void

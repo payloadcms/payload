@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign */
-import type { Response } from 'express';
+import type { Response } from 'express'
 
-import type { PayloadRequest } from '../../../express/types';
-import type { Collection } from '../../config/types';
+import type { PayloadRequest } from '../../../express/types'
+import type { Collection } from '../../config/types'
 
-import restoreVersion from '../../operations/restoreVersion';
+import restoreVersion from '../../operations/restoreVersion'
 
 export type Resolver = (
   _: unknown,
@@ -12,9 +12,9 @@ export type Resolver = (
     id: number | string
   },
   context: {
-    req: PayloadRequest,
+    req: PayloadRequest
     res: Response
-  }
+  },
 ) => Promise<Document>
 
 export default function restoreVersionResolver(collection: Collection): Resolver {
@@ -24,11 +24,11 @@ export default function restoreVersionResolver(collection: Collection): Resolver
       depth: 0,
       id: args.id,
       req: context.req,
-    };
+    }
 
-    const result = await restoreVersion(options);
-    return result;
+    const result = await restoreVersion(options)
+    return result
   }
 
-  return resolver;
+  return resolver
 }

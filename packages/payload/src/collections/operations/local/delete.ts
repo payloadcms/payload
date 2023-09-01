@@ -1,15 +1,15 @@
-import type { PayloadRequest, RequestContext } from '../../../express/types';
-import type { Config as GeneratedTypes } from '../../../generated-types';
-import type { Payload } from '../../../payload';
-import type { Document, Where } from '../../../types';
-import type { BulkOperationResult } from '../../config/types';
+import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { Config as GeneratedTypes } from '../../../generated-types'
+import type { Payload } from '../../../payload'
+import type { Document, Where } from '../../../types'
+import type { BulkOperationResult } from '../../config/types'
 
-import { APIError } from '../../../errors';
-import { setRequestContext } from '../../../express/setRequestContext';
-import { i18nInit } from '../../../translations/init';
-import { getDataLoader } from '../../dataloader';
-import deleteOperation from '../delete';
-import deleteByID from '../deleteByID';
+import { APIError } from '../../../errors'
+import { setRequestContext } from '../../../express/setRequestContext'
+import { i18nInit } from '../../../translations/init'
+import { getDataLoader } from '../../dataloader'
+import deleteOperation from '../delete'
+import deleteByID from '../deleteByID'
 
 export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
   collection: T
@@ -21,7 +21,7 @@ export type BaseOptions<T extends keyof GeneratedTypes['collections']> = {
   fallbackLocale?: string
   locale?: string
   overrideAccess?: boolean
-  req?: PayloadRequest,
+  req?: PayloadRequest
   showHiddenFields?: boolean
   user?: Document
 }
@@ -36,12 +36,26 @@ export type ManyOptions<T extends keyof GeneratedTypes['collections']> = BaseOpt
   where: Where
 }
 
-export type Options<TSlug extends keyof GeneratedTypes['collections']> = ByIDOptions<TSlug> | ManyOptions<TSlug>
+export type Options<TSlug extends keyof GeneratedTypes['collections']> =
+  | ByIDOptions<TSlug>
+  | ManyOptions<TSlug>
 
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ByIDOptions<TSlug>): Promise<GeneratedTypes['collections'][TSlug]>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: ManyOptions<TSlug>): Promise<BulkOperationResult<TSlug>>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(payload: Payload, options: Options<TSlug>): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: ByIDOptions<TSlug>,
+): Promise<GeneratedTypes['collections'][TSlug]>
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: ManyOptions<TSlug>,
+): Promise<BulkOperationResult<TSlug>>
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<TSlug>,
+): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]>
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+  payload: Payload,
+  options: Options<TSlug>,
+): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {
   const {
     collection: collectionSlug,
     context,
@@ -53,13 +67,17 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     showHiddenFields,
     user,
     where,
-  } = options;
+  } = options
 
-  const collection = payload.collections[collectionSlug];
-  const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
+  const collection = payload.collections[collectionSlug]
+  const defaultLocale = payload?.config?.localization
+    ? payload?.config?.localization?.defaultLocale
+    : null
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Delete Operation.`);
+    throw new APIError(
+      `The collection with slug ${String(collectionSlug)} can't be found. Delete Operation.`,
+    )
   }
 
   const req = {
@@ -69,11 +87,11 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     payload,
     payloadAPI: 'local',
     user,
-  } as PayloadRequest;
-  setRequestContext(req, context);
+  } as PayloadRequest
+  setRequestContext(req, context)
 
-  if (!req.t) req.t = req.i18n.t;
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
+  if (!req.t) req.t = req.i18n.t
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   const args = {
     collection,
@@ -83,12 +101,12 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(pa
     req,
     showHiddenFields,
     where,
-  };
+  }
 
   if (options.id) {
-    return deleteByID<TSlug>(args);
+    return deleteByID<TSlug>(args)
   }
-  return deleteOperation<TSlug>(args);
+  return deleteOperation<TSlug>(args)
 }
 
-export default deleteLocal;
+export default deleteLocal

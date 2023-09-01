@@ -1,42 +1,35 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { Props} from './types';
+import type { Props } from './types'
 
-import { getTranslation } from '../../../../utilities/getTranslation';
-import './index.scss';
-import { isComponent } from './types';
+import { getTranslation } from '../../../../utilities/getTranslation'
+import './index.scss'
+import { isComponent } from './types'
 
-const baseClass = 'field-description';
+const baseClass = 'field-description'
 
 const FieldDescription: React.FC<Props> = (props) => {
-  const {
-    className,
-    description,
-    value,
-  } = props;
+  const { className, description, value } = props
 
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation()
 
   if (isComponent(description)) {
-    const Description = description;
-    return <Description value={value} />;
+    const Description = description
+    return <Description value={value} />
   }
 
   if (description) {
     return (
-      <div
-        className={[
-          baseClass,
-          className,
-        ].filter(Boolean).join(' ')}
-      >
-        {typeof description === 'function' ? description({ value }) : getTranslation(description, i18n)}
+      <div className={[baseClass, className].filter(Boolean).join(' ')}>
+        {typeof description === 'function'
+          ? description({ value })
+          : getTranslation(description, i18n)}
       </div>
-    );
+    )
   }
 
-  return null;
-};
+  return null
+}
 
-export default FieldDescription;
+export default FieldDescription

@@ -1,5 +1,5 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
-import type { CodeField } from '../../payload-types';
+import type { CollectionConfig } from '../../../../src/collections/config/types'
+import type { CodeField } from '../../payload-types'
 
 const Code: CollectionConfig = {
   fields: [
@@ -40,7 +40,7 @@ const Code: CollectionConfig = {
     },
   ],
   slug: 'code-fields',
-};
+}
 
 export const codeDoc: Partial<CodeField> = {
   css: `@import url(https://fonts.googleapis.com/css?family=Questrial);
@@ -121,6 +121,6 @@ section h1 {
 }
 
 let greeter = new Greeter("world");`,
-};
+}
 
-export default Code;
+export default Code

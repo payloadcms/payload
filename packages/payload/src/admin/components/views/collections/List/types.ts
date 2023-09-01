@@ -1,9 +1,9 @@
-import type { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import type { PaginatedDocs } from '../../../../../database/types';
-import type { Where } from '../../../../../types';
-import type { Props as ListControlsProps } from '../../../elements/ListControls/types';
-import type { Props as PaginatorProps } from '../../../elements/Paginator/types';
-import type { Props as PerPageProps } from '../../../elements/PerPage';
+import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
+import type { PaginatedDocs } from '../../../../../database/types'
+import type { Where } from '../../../../../types'
+import type { Props as ListControlsProps } from '../../../elements/ListControls/types'
+import type { Props as PaginatorProps } from '../../../elements/Paginator/types'
+import type { Props as PerPageProps } from '../../../elements/PerPage'
 
 export type Props = {
   collection: SanitizedCollectionConfig
@@ -20,7 +20,7 @@ export type Props = {
   modifySearchParams?: boolean
   newDocumentURL: string
   onCreateNewClick?: () => void
-  resetParams: (overrides?: { page?: number, sort?: string, where?: Where }) => void
+  resetParams: (overrides?: { page?: number; sort?: string; where?: Where }) => void
   setLimit: (limit: number) => void
   setListControls: (controls: unknown) => void
   setSort: (sort: string) => void

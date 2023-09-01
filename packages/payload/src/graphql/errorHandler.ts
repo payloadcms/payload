@@ -1,9 +1,9 @@
-import type { GraphQLFormattedError } from 'graphql';
+import type { GraphQLFormattedError } from 'graphql'
 
-import httpStatus from 'http-status';
+import httpStatus from 'http-status'
 
-import type { AfterErrorHook } from '../collections/config/types';
-import type { Payload } from '../payload';
+import type { AfterErrorHook } from '../collections/config/types'
+import type { Payload } from '../payload'
 
 const errorHandler = async (
   payload: Payload,
@@ -11,15 +11,15 @@ const errorHandler = async (
   debug: boolean,
   afterErrorHook: AfterErrorHook,
 ): Promise<GraphQLFormattedError> => {
-  const status = err.originalError.status || httpStatus.INTERNAL_SERVER_ERROR;
-  let errorMessage = err.message;
+  const status = err.originalError.status || httpStatus.INTERNAL_SERVER_ERROR
+  let errorMessage = err.message
 
-  payload.logger.error(err.stack);
+  payload.logger.error(err.stack)
 
   // Internal server errors can contain anything, including potentially sensitive data.
   // Therefore, error details will be hidden from the response unless `config.debug` is `true`
   if (!debug && status === httpStatus.INTERNAL_SERVER_ERROR) {
-    errorMessage = 'Something went wrong.';
+    errorMessage = 'Something went wrong.'
   }
 
   let response: GraphQLFormattedError = {
@@ -32,13 +32,13 @@ const errorHandler = async (
     locations: err.locations,
     message: errorMessage,
     path: err.path,
-  };
-
-  if (afterErrorHook) {
-    ({ response } = await afterErrorHook(err, response, null) || { response });
   }
 
-  return response;
-};
+  if (afterErrorHook) {
+    ;({ response } = (await afterErrorHook(err, response, null)) || { response })
+  }
 
-export default errorHandler;
+  return response
+}
+
+export default errorHandler

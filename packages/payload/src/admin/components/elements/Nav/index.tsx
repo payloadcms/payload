@@ -1,90 +1,93 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Link, NavLink, useHistory } from 'react-router-dom';
+import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Link, NavLink, useHistory } from 'react-router-dom'
 
-import type { EntityToGroup, Group} from '../../../utilities/groupNavItems';
+import type { EntityToGroup, Group } from '../../../utilities/groupNavItems'
 
-import { getTranslation } from '../../../../utilities/getTranslation';
-import { EntityType, groupNavItems } from '../../../utilities/groupNavItems';
-import Account from '../../graphics/Account';
-import Icon from '../../graphics/Icon';
-import Chevron from '../../icons/Chevron';
-import CloseMenu from '../../icons/CloseMenu';
-import Menu from '../../icons/Menu';
-import { useAuth } from '../../utilities/Auth';
-import { useConfig } from '../../utilities/Config';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import Localizer from '../Localizer';
-import Logout from '../Logout';
-import NavGroup from '../NavGroup';
-import './index.scss';
+import { getTranslation } from '../../../../utilities/getTranslation'
+import { EntityType, groupNavItems } from '../../../utilities/groupNavItems'
+import Account from '../../graphics/Account'
+import Icon from '../../graphics/Icon'
+import Chevron from '../../icons/Chevron'
+import CloseMenu from '../../icons/CloseMenu'
+import Menu from '../../icons/Menu'
+import { useAuth } from '../../utilities/Auth'
+import { useConfig } from '../../utilities/Config'
+import RenderCustomComponent from '../../utilities/RenderCustomComponent'
+import Localizer from '../Localizer'
+import Logout from '../Logout'
+import NavGroup from '../NavGroup'
+import './index.scss'
 
-const baseClass = 'nav';
+const baseClass = 'nav'
 
 const DefaultNav = () => {
-  const { permissions, user } = useAuth();
-  const [menuActive, setMenuActive] = useState(false);
-  const [groups, setGroups] = useState<Group[]>([]);
-  const history = useHistory();
-  const { i18n, t } = useTranslation('general');
+  const { permissions, user } = useAuth()
+  const [menuActive, setMenuActive] = useState(false)
+  const [groups, setGroups] = useState<Group[]>([])
+  const history = useHistory()
+  const { i18n, t } = useTranslation('general')
   const {
     admin: {
-      components: {
-        afterNavLinks,
-        beforeNavLinks,
-      },
+      components: { afterNavLinks, beforeNavLinks },
     },
     collections,
     globals,
-    routes: {
-      admin,
-    },
-  } = useConfig();
+    routes: { admin },
+  } = useConfig()
 
-  const classes = [
-    baseClass,
-    menuActive && `${baseClass}--menu-active`,
-  ].filter(Boolean)
-    .join(' ');
+  const classes = [baseClass, menuActive && `${baseClass}--menu-active`].filter(Boolean).join(' ')
 
   useEffect(() => {
-    setGroups(groupNavItems([
-      ...collections
-        .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
-        .map((collection) => {
-          const entityToGroup: EntityToGroup = {
-            entity: collection,
-            type: EntityType.collection,
-          };
+    setGroups(
+      groupNavItems(
+        [
+          ...collections
+            .filter(
+              ({ admin: { hidden } }) =>
+                !(typeof hidden === 'function' ? hidden({ user }) : hidden),
+            )
+            .map((collection) => {
+              const entityToGroup: EntityToGroup = {
+                entity: collection,
+                type: EntityType.collection,
+              }
 
-          return entityToGroup;
-        }),
-      ...globals
-        .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
-        .map((global) => {
-          const entityToGroup: EntityToGroup = {
-            entity: global,
-            type: EntityType.global,
-          };
+              return entityToGroup
+            }),
+          ...globals
+            .filter(
+              ({ admin: { hidden } }) =>
+                !(typeof hidden === 'function' ? hidden({ user }) : hidden),
+            )
+            .map((global) => {
+              const entityToGroup: EntityToGroup = {
+                entity: global,
+                type: EntityType.global,
+              }
 
-          return entityToGroup;
-        }),
-    ], permissions, i18n));
-  }, [collections, globals, permissions, i18n, i18n.language, user]);
+              return entityToGroup
+            }),
+        ],
+        permissions,
+        i18n,
+      ),
+    )
+  }, [collections, globals, permissions, i18n, i18n.language, user])
 
-  useEffect(() => history.listen(() => {
-    setMenuActive(false);
-  }), [history]);
+  useEffect(
+    () =>
+      history.listen(() => {
+        setMenuActive(false)
+      }),
+    [history],
+  )
 
   return (
     <aside className={classes}>
       <div className={`${baseClass}__scroll`}>
         <header>
-          <Link
-            aria-label={t('dashboard')}
-            className={`${baseClass}__brand`}
-            to={admin}
-          >
+          <Link aria-label={t('dashboard')} className={`${baseClass}__brand`} to={admin}>
             <Icon />
           </Link>
           <button
@@ -92,34 +95,31 @@ const DefaultNav = () => {
             onClick={() => setMenuActive(!menuActive)}
             type="button"
           >
-            {menuActive && (
-              <CloseMenu />
-            )}
-            {!menuActive && (
-              <Menu />
-            )}
+            {menuActive && <CloseMenu />}
+            {!menuActive && <Menu />}
           </button>
         </header>
         <nav className={`${baseClass}__wrap`}>
-          {Array.isArray(beforeNavLinks) && beforeNavLinks.map((Component, i) => <Component key={i} />)}
+          {Array.isArray(beforeNavLinks) &&
+            beforeNavLinks.map((Component, i) => <Component key={i} />)}
           {groups.map(({ entities, label }, key) => {
             return (
               <NavGroup {...{ key, label }}>
                 {entities.map(({ entity, type }, i) => {
-                  let entityLabel: string;
-                  let href: string;
-                  let id: string;
+                  let entityLabel: string
+                  let href: string
+                  let id: string
 
                   if (type === EntityType.collection) {
-                    href = `${admin}/collections/${entity.slug}`;
-                    entityLabel = getTranslation(entity.labels.plural, i18n);
-                    id = `nav-${entity.slug}`;
+                    href = `${admin}/collections/${entity.slug}`
+                    entityLabel = getTranslation(entity.labels.plural, i18n)
+                    id = `nav-${entity.slug}`
                   }
 
                   if (type === EntityType.global) {
-                    href = `${admin}/globals/${entity.slug}`;
-                    entityLabel = getTranslation(entity.label, i18n);
-                    id = `nav-global-${entity.slug}`;
+                    href = `${admin}/globals/${entity.slug}`
+                    entityLabel = getTranslation(entity.label, i18n)
+                    id = `nav-global-${entity.slug}`
                   }
 
                   return (
@@ -133,12 +133,13 @@ const DefaultNav = () => {
                       <Chevron />
                       {entityLabel}
                     </NavLink>
-                  );
+                  )
                 })}
               </NavGroup>
-            );
+            )
           })}
-          {Array.isArray(afterNavLinks) && afterNavLinks.map((Component, i) => <Component key={i} />)}
+          {Array.isArray(afterNavLinks) &&
+            afterNavLinks.map((Component, i) => <Component key={i} />)}
           <div className={`${baseClass}__controls`}>
             <Localizer />
             <Link
@@ -153,26 +154,19 @@ const DefaultNav = () => {
         </nav>
       </div>
     </aside>
-  );
-};
+  )
+}
 
 const Nav: React.FC = () => {
   const {
     admin: {
-      components: {
-        Nav: CustomNav,
-      } = {
+      components: { Nav: CustomNav } = {
         Nav: undefined,
       },
     } = {},
-  } = useConfig();
+  } = useConfig()
 
-  return (
-    <RenderCustomComponent
-      CustomComponent={CustomNav}
-      DefaultComponent={DefaultNav}
-    />
-  );
-};
+  return <RenderCustomComponent CustomComponent={CustomNav} DefaultComponent={DefaultNav} />
+}
 
-export default Nav;
+export default Nav

@@ -1,41 +1,40 @@
-import React, { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import React, { useState } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
 
-import Button from '../../elements/Button';
-import Form from '../../forms/Form';
-import FormSubmit from '../../forms/Submit';
-import Email from '../../forms/field-types/Email';
-import MinimalTemplate from '../../templates/Minimal';
-import { useAuth } from '../../utilities/Auth';
-import { useConfig } from '../../utilities/Config';
-import Meta from '../../utilities/Meta';
-import './index.scss';
+import Button from '../../elements/Button'
+import Form from '../../forms/Form'
+import FormSubmit from '../../forms/Submit'
+import Email from '../../forms/field-types/Email'
+import MinimalTemplate from '../../templates/Minimal'
+import { useAuth } from '../../utilities/Auth'
+import { useConfig } from '../../utilities/Config'
+import Meta from '../../utilities/Meta'
+import './index.scss'
 
-const baseClass = 'forgot-password';
+const baseClass = 'forgot-password'
 
 const ForgotPassword: React.FC = () => {
-  const [hasSubmitted, setHasSubmitted] = useState(false);
-  const { user } = useAuth();
-  const { t } = useTranslation('authentication');
+  const [hasSubmitted, setHasSubmitted] = useState(false)
+  const { user } = useAuth()
+  const { t } = useTranslation('authentication')
   const {
     admin: { user: userSlug },
-    routes: {
-      admin,
-      api,
-    },
+    routes: { admin, api },
     serverURL,
-  } = useConfig();
+  } = useConfig()
 
   const handleResponse = (res) => {
-    res.json()
-      .then(() => {
-        setHasSubmitted(true);
-      }, () => {
-        toast.error(t('emailNotValid'));
-      });
-  };
+    res.json().then(
+      () => {
+        setHasSubmitted(true)
+      },
+      () => {
+        toast.error(t('emailNotValid'))
+      },
+    )
+  }
 
   if (user) {
     return (
@@ -48,34 +47,25 @@ const ForgotPassword: React.FC = () => {
 
         <h1>{t('alreadyLoggedIn')}</h1>
         <p>
-          <Trans
-            i18nKey="loggedInChangePassword"
-            t={t}
-          >
+          <Trans i18nKey="loggedInChangePassword" t={t}>
             <Link to={`${admin}/account`}>account</Link>
           </Trans>
         </p>
         <br />
-        <Button
-          buttonStyle="secondary"
-          el="link"
-          to={admin}
-        >
+        <Button buttonStyle="secondary" el="link" to={admin}>
           {t('general:backToDashboard')}
         </Button>
       </MinimalTemplate>
-    );
+    )
   }
 
   if (hasSubmitted) {
     return (
       <MinimalTemplate className={baseClass}>
         <h1>{t('emailSent')}</h1>
-        <p>
-          {t('checkYourEmailForPasswordReset')}
-        </p>
+        <p>{t('checkYourEmailForPasswordReset')}</p>
       </MinimalTemplate>
-    );
+    )
   }
 
   return (
@@ -97,7 +87,7 @@ const ForgotPassword: React.FC = () => {
       </Form>
       <Link to={`${admin}/login`}>{t('backToLogin')}</Link>
     </MinimalTemplate>
-  );
-};
+  )
+}
 
-export default ForgotPassword;
+export default ForgotPassword

@@ -1,15 +1,15 @@
-import type { Configuration, WebpackPluginInstance } from 'webpack';
+import type { Configuration, WebpackPluginInstance } from 'webpack'
 
-import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
-import { SwcMinifyWebpackPlugin } from 'swc-minify-webpack-plugin';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+import MiniCSSExtractPlugin from 'mini-css-extract-plugin'
+import { SwcMinifyWebpackPlugin } from 'swc-minify-webpack-plugin'
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 
-import type { SanitizedConfig } from '../../../config/types';
+import type { SanitizedConfig } from '../../../config/types'
 
-import { getBaseConfig } from './base';
+import { getBaseConfig } from './base'
 
 export const getProdConfig = (payloadConfig: SanitizedConfig): Configuration => {
-  const baseConfig = getBaseConfig(payloadConfig) as any;
+  const baseConfig = getBaseConfig(payloadConfig) as any
 
   let webpackConfig: Configuration = {
     ...baseConfig,
@@ -41,7 +41,7 @@ export const getProdConfig = (payloadConfig: SanitizedConfig): Configuration => 
       }),
     ],
     stats: 'errors-only',
-  };
+  }
 
   webpackConfig.module.rules.push({
     sideEffects: true,
@@ -51,7 +51,7 @@ export const getProdConfig = (payloadConfig: SanitizedConfig): Configuration => 
       {
         loader: require.resolve('css-loader'),
         options: {
-          url: (url) => (!url.startsWith('/')),
+          url: (url) => !url.startsWith('/'),
         },
       },
       {
@@ -64,15 +64,15 @@ export const getProdConfig = (payloadConfig: SanitizedConfig): Configuration => 
       },
       require.resolve('sass-loader'),
     ],
-  });
+  })
 
   if (process.env.PAYLOAD_ANALYZE_BUNDLE) {
-    webpackConfig.plugins.push(new BundleAnalyzerPlugin() as unknown as WebpackPluginInstance);
+    webpackConfig.plugins.push(new BundleAnalyzerPlugin() as unknown as WebpackPluginInstance)
   }
 
   if (payloadConfig.admin.webpack && typeof payloadConfig.admin.webpack === 'function') {
-    webpackConfig = payloadConfig.admin.webpack(webpackConfig);
+    webpackConfig = payloadConfig.admin.webpack(webpackConfig)
   }
 
-  return webpackConfig;
-};
+  return webpackConfig
+}

@@ -1,8 +1,8 @@
-import type { Field } from '../fields/config/types';
+import type { Field } from '../fields/config/types'
 
-import { extractTranslations } from '../translations/extractTranslations';
+import { extractTranslations } from '../translations/extractTranslations'
 
-const labels = extractTranslations(['version:draft', 'version:published', 'version:status']);
+const labels = extractTranslations(['version:draft', 'version:published', 'version:status'])
 
 export const statuses = [
   {
@@ -13,7 +13,7 @@ export const statuses = [
     label: labels['version:published'],
     value: 'published',
   },
-];
+]
 
 const baseVersionFields: Field[] = [
   {
@@ -29,6 +29,6 @@ const baseVersionFields: Field[] = [
     options: statuses,
     type: 'select',
   },
-];
+]
 
-export default baseVersionFields;
+export default baseVersionFields

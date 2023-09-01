@@ -1,11 +1,11 @@
-import type { TFunction } from 'i18next';
+import type { TFunction } from 'i18next'
 
-import type { User } from '../../../../../auth';
-import type { Field as FieldSchema} from '../../../../../fields/config/types';
-import type { Data, Fields } from '../types';
+import type { User } from '../../../../../auth'
+import type { Field as FieldSchema } from '../../../../../fields/config/types'
+import type { Data, Fields } from '../types'
 
-import { fieldIsPresentationalOnly } from '../../../../../fields/config/types';
-import { addFieldStatePromise } from './addFieldStatePromise';
+import { fieldIsPresentationalOnly } from '../../../../../fields/config/types'
+import { addFieldStatePromise } from './addFieldStatePromise'
 
 type Args = {
   data: Data
@@ -38,27 +38,33 @@ export const iterateFields = async ({
   t,
   user,
 }: Args): Promise<void> => {
-  const promises = [];
+  const promises = []
   fields.forEach((field) => {
-    const initialData = data;
+    const initialData = data
     if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
-      const passesCondition = Boolean((field?.admin?.condition ? field.admin.condition(fullData || {}, initialData || {}, { user }) : true) && parentPassesCondition);
+      const passesCondition = Boolean(
+        (field?.admin?.condition
+          ? field.admin.condition(fullData || {}, initialData || {}, { user })
+          : true) && parentPassesCondition,
+      )
 
-      promises.push(addFieldStatePromise({
-        data,
-        field,
-        fullData,
-        id,
-        locale,
-        operation,
-        passesCondition,
-        path,
-        preferences,
-        state,
-        t,
-        user,
-      }));
+      promises.push(
+        addFieldStatePromise({
+          data,
+          field,
+          fullData,
+          id,
+          locale,
+          operation,
+          passesCondition,
+          path,
+          preferences,
+          state,
+          t,
+          user,
+        }),
+      )
     }
-  });
-  await Promise.all(promises);
-};
+  })
+  await Promise.all(promises)
+}

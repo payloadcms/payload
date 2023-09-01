@@ -1,34 +1,34 @@
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react'
 
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { TextField } from '../../../../../fields/config/types';
-import type { Description } from '../../FieldDescription/types';
+import type { TextField } from '../../../../../fields/config/types'
+import type { Description } from '../../FieldDescription/types'
 
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import Label from '../../Label';
-import './index.scss';
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import Error from '../../Error'
+import FieldDescription from '../../FieldDescription'
+import Label from '../../Label'
+import './index.scss'
 
 export type TextInputProps = Omit<TextField, 'type'> & {
-  className?: string;
-  description?: Description;
-  errorMessage?: string;
-  inputRef?: React.MutableRefObject<HTMLInputElement>;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
-  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
-  path: string;
-  placeholder?: Record<string, string> | string;
-  readOnly?: boolean;
-  required?: boolean;
-  rtl?: boolean;
-  showError?: boolean;
-  style?: React.CSSProperties;
-  value?: string;
-  width?: string;
-};
+  className?: string
+  description?: Description
+  errorMessage?: string
+  inputRef?: React.MutableRefObject<HTMLInputElement>
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
+  path: string
+  placeholder?: Record<string, string> | string
+  readOnly?: boolean
+  required?: boolean
+  rtl?: boolean
+  showError?: boolean
+  style?: React.CSSProperties
+  value?: string
+  width?: string
+}
 
 const TextInput: React.FC<TextInputProps> = (props) => {
   const {
@@ -48,17 +48,13 @@ const TextInput: React.FC<TextInputProps> = (props) => {
     style,
     value,
     width,
-  } = props;
+  } = props
 
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation()
 
-  const classes = [
-    'field-type',
-    'text',
-    className,
-    showError && 'error',
-    readOnly && 'read-only',
-  ].filter(Boolean).join(' ');
+  const classes = ['field-type', 'text', className, showError && 'error', readOnly && 'read-only']
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <div
@@ -68,15 +64,8 @@ const TextInput: React.FC<TextInputProps> = (props) => {
       }}
       className={classes}
     >
-      <Error
-        message={errorMessage}
-        showError={showError}
-      />
-      <Label
-        htmlFor={`field-${path.replace(/\./g, '__')}`}
-        label={label}
-        required={required}
-      />
+      <Error message={errorMessage} showError={showError} />
+      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <input
         data-rtl={rtl}
         disabled={readOnly}
@@ -95,7 +84,7 @@ const TextInput: React.FC<TextInputProps> = (props) => {
         value={value}
       />
     </div>
-  );
-};
+  )
+}
 
-export default TextInput;
+export default TextInput

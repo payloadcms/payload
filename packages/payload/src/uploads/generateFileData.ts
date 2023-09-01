@@ -1,26 +1,26 @@
-import type { Sharp } from 'sharp';
+import type { Sharp } from 'sharp'
 
-import { fromBuffer } from 'file-type';
-import mkdirp from 'mkdirp';
-import path from 'path';
-import sanitize from 'sanitize-filename';
-import sharp from 'sharp';
+import { fromBuffer } from 'file-type'
+import mkdirp from 'mkdirp'
+import path from 'path'
+import sanitize from 'sanitize-filename'
+import sharp from 'sharp'
 
-import type { Collection } from '../collections/config/types';
-import type { SanitizedConfig } from '../config/types';
-import type { PayloadRequest } from '../express/types';
-import type { FileData, FileToSave, ProbedImageSize } from './types';
+import type { Collection } from '../collections/config/types'
+import type { SanitizedConfig } from '../config/types'
+import type { PayloadRequest } from '../express/types'
+import type { FileData, FileToSave, ProbedImageSize } from './types'
 
-import { FileUploadError, MissingFile } from '../errors';
-import canResizeImage from './canResizeImage';
-import getImageSize from './getImageSize';
-import getSafeFileName from './getSafeFilename';
-import resizeAndTransformImageSizes from './imageResizer';
-import isImage from './isImage';
+import { FileUploadError, MissingFile } from '../errors'
+import canResizeImage from './canResizeImage'
+import getImageSize from './getImageSize'
+import getSafeFileName from './getSafeFilename'
+import resizeAndTransformImageSizes from './imageResizer'
+import isImage from './isImage'
 
 type Args<T> = {
   collection: Collection
-  config: SanitizedConfig,
+  config: SanitizedConfig
   data: T
   overwriteExistingFiles?: boolean
   req: PayloadRequest
@@ -33,9 +33,7 @@ type Result<T> = Promise<{
 }>
 
 export const generateFileData = async <T>({
-  collection: {
-    config: collectionConfig,
-  },
+  collection: { config: collectionConfig },
   config,
   data,
   overwriteExistingFiles,
@@ -46,118 +44,118 @@ export const generateFileData = async <T>({
     return {
       data,
       files: [],
-    };
+    }
   }
 
-  const { file } = req.files || {};
+  const { file } = req.files || {}
   if (!file) {
-    if (throwOnMissingFile) throw new MissingFile(req.t);
+    if (throwOnMissingFile) throw new MissingFile(req.t)
 
     return {
       data,
       files: [],
-    };
+    }
   }
 
-  const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } = collectionConfig.upload;
+  const { disableLocalStorage, formatOptions, imageSizes, resizeOptions, staticDir, trimOptions } =
+    collectionConfig.upload
 
-  let staticPath = staticDir;
+  let staticPath = staticDir
   if (staticDir.indexOf('/') !== 0) {
-    staticPath = path.resolve(config.paths.configDir, staticDir);
+    staticPath = path.resolve(config.paths.configDir, staticDir)
   }
 
   if (!disableLocalStorage) {
-    mkdirp.sync(staticPath);
+    mkdirp.sync(staticPath)
   }
 
-  let newData = data;
-  const filesToSave: FileToSave[] = [];
-  const fileData: Partial<FileData> = {};
-  const fileIsAnimated = (file.mimetype === 'image/gif') || (file.mimetype === 'image/webp');
+  let newData = data
+  const filesToSave: FileToSave[] = []
+  const fileData: Partial<FileData> = {}
+  const fileIsAnimated = file.mimetype === 'image/gif' || file.mimetype === 'image/webp'
 
   try {
-    const fileSupportsResize = canResizeImage(file.mimetype);
-    let fsSafeName: string;
-    let sharpFile: Sharp | undefined;
-    let dimensions: ProbedImageSize | undefined;
-    let fileBuffer;
-    let ext;
-    let mime: string;
+    const fileSupportsResize = canResizeImage(file.mimetype)
+    let fsSafeName: string
+    let sharpFile: Sharp | undefined
+    let dimensions: ProbedImageSize | undefined
+    let fileBuffer
+    let ext
+    let mime: string
 
-    const sharpOptions: sharp.SharpOptions = {};
+    const sharpOptions: sharp.SharpOptions = {}
 
-    if (fileIsAnimated) sharpOptions.animated = true;
+    if (fileIsAnimated) sharpOptions.animated = true
 
     if (fileSupportsResize && (resizeOptions || formatOptions || trimOptions)) {
       if (file.tempFilePath) {
-        sharpFile = sharp(file.tempFilePath, sharpOptions).rotate(); // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
+        sharpFile = sharp(file.tempFilePath, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       } else {
-        sharpFile = sharp(file.data, sharpOptions).rotate(); // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
+        sharpFile = sharp(file.data, sharpOptions).rotate() // pass rotate() to auto-rotate based on EXIF data. https://github.com/payloadcms/payload/pull/3081
       }
 
       if (resizeOptions) {
-        sharpFile = sharpFile
-          .resize(resizeOptions);
+        sharpFile = sharpFile.resize(resizeOptions)
       }
       if (formatOptions) {
-        sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options);
+        sharpFile = sharpFile.toFormat(formatOptions.format, formatOptions.options)
       }
       if (trimOptions) {
-        sharpFile = sharpFile.trim(trimOptions);
+        sharpFile = sharpFile.trim(trimOptions)
       }
     }
 
     if (isImage(file.mimetype)) {
-      dimensions = await getImageSize(file);
-      fileData.width = dimensions.width;
-      fileData.height = dimensions.height;
+      dimensions = await getImageSize(file)
+      fileData.width = dimensions.width
+      fileData.height = dimensions.height
     }
 
     if (sharpFile) {
-      const metadata = await sharpFile.metadata();
-      fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true });
-      ({ ext, mime } = await fromBuffer(fileBuffer.data)); // This is getting an incorrect gif height back.
-      fileData.width = fileBuffer.info.width;
-      fileData.height = fileBuffer.info.height;
-      fileData.filesize = fileBuffer.info.size;
+      const metadata = await sharpFile.metadata()
+      fileBuffer = await sharpFile.toBuffer({ resolveWithObject: true })
+      ;({ ext, mime } = await fromBuffer(fileBuffer.data)) // This is getting an incorrect gif height back.
+      fileData.width = fileBuffer.info.width
+      fileData.height = fileBuffer.info.height
+      fileData.filesize = fileBuffer.info.size
 
       // Animated GIFs + WebP aggregate the height from every frame, so we need to use divide by number of pages
       if (metadata.pages) {
-        fileData.height = fileBuffer.info.height / metadata.pages;
-        fileData.filesize = fileBuffer.data.length;
+        fileData.height = fileBuffer.info.height / metadata.pages
+        fileData.filesize = fileBuffer.data.length
       }
     } else {
-      mime = file.mimetype;
-      fileData.filesize = file.size;
+      mime = file.mimetype
+      fileData.filesize = file.size
 
       if (file.name.includes('.')) {
-        ext = file.name.split('.').pop();
+        ext = file.name.split('.').pop()
       } else {
-        ext = '';
+        ext = ''
       }
     }
 
     // Adust SVG mime type. fromBuffer modifies it.
-    if (mime === 'application/xml' && ext === 'svg') mime = 'image/svg+xml';
-    fileData.mimeType = mime;
+    if (mime === 'application/xml' && ext === 'svg') mime = 'image/svg+xml'
+    fileData.mimeType = mime
 
-    const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
-    fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`;
+    const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name)
+    fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`
 
     if (!overwriteExistingFiles) {
-      fsSafeName = await getSafeFileName(req.payload, collectionConfig.slug, staticPath, fsSafeName);
+      fsSafeName = await getSafeFileName(req.payload, collectionConfig.slug, staticPath, fsSafeName)
     }
 
-    fileData.filename = fsSafeName;
+    fileData.filename = fsSafeName
 
     // Original file
     filesToSave.push({
       buffer: fileBuffer?.data || file.data,
       path: `${staticPath}/${fsSafeName}`,
-    });
+    })
 
     if (Array.isArray(imageSizes) && fileSupportsResize) {
-      req.payloadUploadSizes = {};
+      req.payloadUploadSizes = {}
 
       const { sizeData, sizesToSave } = await resizeAndTransformImageSizes({
         config: collectionConfig,
@@ -167,23 +165,23 @@ export const generateFileData = async <T>({
         req,
         savedFilename: fsSafeName || file.name,
         staticPath,
-      });
+      })
 
-      fileData.sizes = sizeData;
-      filesToSave.push(...sizesToSave);
+      fileData.sizes = sizeData
+      filesToSave.push(...sizesToSave)
     }
   } catch (err) {
-    console.error(err);
-    throw new FileUploadError(req.t);
+    console.error(err)
+    throw new FileUploadError(req.t)
   }
 
   newData = {
     ...newData,
     ...fileData,
-  };
+  }
 
   return {
     data: newData,
     files: filesToSave,
-  };
-};
+  }
+}

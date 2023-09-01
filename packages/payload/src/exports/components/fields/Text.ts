@@ -1,1 +1,1 @@
-export type { Props } from '../../../admin/components/forms/field-types/Text/types';
+export type { Props } from '../../../admin/components/forms/field-types/Text/types'

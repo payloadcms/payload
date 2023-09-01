@@ -7,94 +7,94 @@
 
 export interface Config {
   collections: {
-    users: User;
-    posts: Post;
-    restricted: Restricted;
-    'read-only-collection': ReadOnlyCollection;
-    'restricted-versions': RestrictedVersion;
-    'sibling-data': SiblingDatum;
-    'rely-on-request-headers': RelyOnRequestHeader;
-    'doc-level-access': DocLevelAccess;
-    'hidden-fields': HiddenField;
-  };
-  globals: {};
+    users: User
+    posts: Post
+    restricted: Restricted
+    'read-only-collection': ReadOnlyCollection
+    'restricted-versions': RestrictedVersion
+    'sibling-data': SiblingDatum
+    'rely-on-request-headers': RelyOnRequestHeader
+    'doc-level-access': DocLevelAccess
+    'hidden-fields': HiddenField
+  }
+  globals: {}
 }
 export interface User {
-  id: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  createdAt: string;
-  updatedAt: string;
-  password?: string;
+  id: string
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
+  createdAt: string
+  updatedAt: string
+  password?: string
 }
 export interface Post {
-  id: string;
-  restrictedField?: string;
+  id: string
+  restrictedField?: string
   group?: {
-    restrictedGroupText?: string;
-  };
-  restrictedRowText?: string;
-  restrictedCollapsibleText?: string;
-  createdAt: string;
-  updatedAt: string;
+    restrictedGroupText?: string
+  }
+  restrictedRowText?: string
+  restrictedCollapsibleText?: string
+  createdAt: string
+  updatedAt: string
 }
 export interface Restricted {
-  id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name?: string
+  createdAt: string
+  updatedAt: string
 }
 export interface ReadOnlyCollection {
-  id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name?: string
+  createdAt: string
+  updatedAt: string
 }
 export interface RestrictedVersion {
-  id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name?: string
+  createdAt: string
+  updatedAt: string
 }
 export interface SiblingDatum {
-  id: string;
+  id: string
   array?: {
-    allowPublicReadability?: boolean;
-    text?: string;
-    id?: string;
-  }[];
-  createdAt: string;
-  updatedAt: string;
+    allowPublicReadability?: boolean
+    text?: string
+    id?: string
+  }[]
+  createdAt: string
+  updatedAt: string
 }
 export interface RelyOnRequestHeader {
-  id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name?: string
+  createdAt: string
+  updatedAt: string
 }
 export interface DocLevelAccess {
-  id: string;
-  approvedForRemoval?: boolean;
-  approvedTitle?: string;
-  lockTitle?: boolean;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  approvedForRemoval?: boolean
+  approvedTitle?: string
+  lockTitle?: boolean
+  createdAt: string
+  updatedAt: string
 }
 export interface HiddenField {
-  id: string;
-  title?: string;
+  id: string
+  title?: string
   partiallyHiddenGroup?: {
-    name?: string;
-    value?: string;
-  };
+    name?: string
+    value?: string
+  }
   partiallyHiddenArray?: {
-    name?: string;
-    value?: string;
-    id?: string;
-  }[];
-  createdAt: string;
-  updatedAt: string;
+    name?: string
+    value?: string
+    id?: string
+  }[]
+  createdAt: string
+  updatedAt: string
 }

@@ -1,8 +1,8 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
-import GlobalViewWithRefresh from './GlobalViewWithRefresh';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
+import GlobalViewWithRefresh from './GlobalViewWithRefresh'
 
-export const pagesSlug = 'pages';
+export const pagesSlug = 'pages'
 
 export default buildConfigWithDefaults({
   globals: [
@@ -28,8 +28,8 @@ export default buildConfigWithDefaults({
       fields: [],
       access: {
         read: async ({ req: { payload } }) => {
-          const access = await payload.findGlobal({ slug: 'settings' });
-          return access.test;
+          const access = await payload.findGlobal({ slug: 'settings' })
+          return access.test
         },
       },
     },
@@ -48,6 +48,6 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
   },
-});
+})

@@ -51,11 +51,11 @@
 
   &--size-small {
     .popup__scroll {
-      [dir=ltr] & {
-        padding: base(.75) calc(var(--scrollbar-width) + #{base(.75)}) base(.75) base(.75);
+      [dir='ltr'] & {
+        padding: base(0.75) calc(var(--scrollbar-width) + #{base(0.75)}) base(0.75) base(0.75);
       }
-      [dir=rtl] & {
-        padding: base(.75) base(.75) base(.75) calc(var(--scrollbar-width) + #{base(.75)});
+      [dir='rtl'] & {
+        padding: base(0.75) base(0.75) base(0.75) calc(var(--scrollbar-width) + #{base(0.75)});
       }
     }
 
@@ -65,10 +65,10 @@
 
     &.popup--h-align-left {
       .popup__content {
-        left: - base(.5);
+        left: - base(0.5);
 
         &:after {
-          left: base(.425);
+          left: base(0.425);
         }
       }
     }
@@ -95,15 +95,15 @@
     }
 
     .popup__scroll {
-      padding: base(.25) base(.5);
+      padding: base(0.25) base(0.5);
     }
 
     &.popup--align-left {
       .popup__content {
-        left: - base(.5);
+        left: - base(0.5);
 
         &:after {
-          left: base(.425);
+          left: base(0.425);
         }
       }
     }
@@ -138,12 +138,12 @@
   &--h-align-right {
     .popup__content {
       right: - base(1.75);
-      [dir=rtl] & {
+      [dir='rtl'] & {
         right: - base(0.75);
       }
       &:after {
         right: base(1.75);
-        [dir=rtl] & {
+        [dir='rtl'] & {
           right: base(0.75);
         }
       }
@@ -163,7 +163,7 @@
   &--v-align-bottom {
     .popup__content {
       @include shadow-lg-top;
-      top: calc(100% + #{base(.5)});
+      top: calc(100% + #{base(0.5)});
 
       &:after {
         top: unset;
@@ -210,19 +210,18 @@
   }
 
   @include mid-break {
-
     &__scroll,
     &--size-large .popup__scroll {
-      padding: base(.75);
-      padding-right: calc(var(--scrollbar-width) + #{base(.75)});
+      padding: base(0.75);
+      padding-right: calc(var(--scrollbar-width) + #{base(0.75)});
     }
 
     &--h-align-left {
       .popup__content {
-        left: - base(.5);
+        left: - base(0.5);
 
         &:after {
-          left: base(.5);
+          left: base(0.5);
         }
       }
     }
@@ -241,22 +240,22 @@
 
     &--h-align-right {
       .popup__content {
-        right: - base(.5);
+        right: - base(0.5);
 
         &:after {
-          right: base(.5);
+          right: base(0.5);
         }
       }
     }
 
     &--force-h-align-left {
       .popup__content {
-        left: - base(.5);
+        left: - base(0.5);
         right: unset;
         transform: unset;
 
         &:after {
-          left: base(.5);
+          left: base(0.5);
           right: unset;
           transform: unset;
         }
@@ -265,12 +264,12 @@
 
     &--force-h-align-right {
       .popup__content {
-        right: - base(.5);
+        right: - base(0.5);
         left: unset;
         transform: unset;
 
         &:after {
-          right: base(.5);
+          right: base(0.5);
           left: unset;
           transform: unset;
         }

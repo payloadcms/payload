@@ -1,32 +1,32 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types';
-import type { DeepPartial } from 'ts-essentials';
+import type { Config as GeneratedTypes } from 'payload/generated-types'
+import type { DeepPartial } from 'ts-essentials'
 
-import httpStatus from 'http-status';
+import httpStatus from 'http-status'
 
-import type { AccessResult } from '../../config/types';
-import type { PayloadRequest } from '../../express/types';
-import type { Where } from '../../types';
-import type { BulkOperationResult, Collection } from '../config/types';
-import type { CreateUpdateType } from './create';
+import type { AccessResult } from '../../config/types'
+import type { PayloadRequest } from '../../express/types'
+import type { Where } from '../../types'
+import type { BulkOperationResult, Collection } from '../config/types'
+import type { CreateUpdateType } from './create'
 
-import executeAccess from '../../auth/executeAccess';
-import { combineQueries } from '../../database/combineQueries';
-import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
-import { APIError } from '../../errors';
-import { afterChange } from '../../fields/hooks/afterChange';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { beforeChange } from '../../fields/hooks/beforeChange';
-import { beforeValidate } from '../../fields/hooks/beforeValidate';
-import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
-import { generateFileData } from '../../uploads/generateFileData';
-import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
-import { uploadFiles } from '../../uploads/uploadFiles';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
-import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
-import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey';
-import { saveVersion } from '../../versions/saveVersion';
-import { buildAfterOperation } from './utils';
+import executeAccess from '../../auth/executeAccess'
+import { combineQueries } from '../../database/combineQueries'
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths'
+import { APIError } from '../../errors'
+import { afterChange } from '../../fields/hooks/afterChange'
+import { afterRead } from '../../fields/hooks/afterRead'
+import { beforeChange } from '../../fields/hooks/beforeChange'
+import { beforeValidate } from '../../fields/hooks/beforeValidate'
+import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
+import { generateFileData } from '../../uploads/generateFileData'
+import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
+import { uploadFiles } from '../../uploads/uploadFiles'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields'
+import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey'
+import { saveVersion } from '../../versions/saveVersion'
+import { buildAfterOperation } from './utils'
 
 export type Arguments<T extends CreateUpdateType> = {
   collection: Collection
@@ -43,26 +43,25 @@ export type Arguments<T extends CreateUpdateType> = {
 async function update<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<BulkOperationResult<TSlug>> {
-  let args = incomingArgs;
+  let args = incomingArgs
 
   // /////////////////////////////////////
   // beforeOperation - Collection
   // /////////////////////////////////////
 
   await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook;
+    await priorHook
 
-    args = (await hook({
-      args,
-      context: args.req.context,
-      operation: 'update',
-    })) || args;
-  }, Promise.resolve());
+    args =
+      (await hook({
+        args,
+        context: args.req.context,
+        operation: 'update',
+      })) || args
+  }, Promise.resolve())
 
   const {
-    collection: {
-      config: collectionConfig,
-    },
+    collection: { config: collectionConfig },
     collection,
     depth,
     draft: draftArg = false,
@@ -70,48 +69,47 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     overwriteExistingFiles = false,
     req: {
       locale,
-      payload: {
-        config,
-      },
+      payload: { config },
       payload,
       t,
     },
     req,
     showHiddenFields,
     where,
-  } = args;
+  } = args
 
   try {
-    const shouldCommit = await initTransaction(req);
+    const shouldCommit = await initTransaction(req)
 
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
 
     await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      args = (await hook({
-        args,
-        context: req.context,
-        operation: 'update',
-      })) || args;
-    }, Promise.resolve());
+      args =
+        (await hook({
+          args,
+          context: req.context,
+          operation: 'update',
+        })) || args
+    }, Promise.resolve())
 
     if (!where) {
-      throw new APIError('Missing \'where\' query of documents to update.', httpStatus.BAD_REQUEST);
+      throw new APIError("Missing 'where' query of documents to update.", httpStatus.BAD_REQUEST)
     }
 
-    const { data: bulkUpdateData } = args;
-    const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
+    const { data: bulkUpdateData } = args
+    const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts)
 
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
-    let accessResult: AccessResult;
+    let accessResult: AccessResult
     if (!overrideAccess) {
-      accessResult = await executeAccess({ req }, collectionConfig.access.update);
+      accessResult = await executeAccess({ req }, collectionConfig.access.update)
     }
 
     await validateQueryPaths({
@@ -119,18 +117,18 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       overrideAccess,
       req,
       where,
-    });
+    })
 
     // /////////////////////////////////////
     // Retrieve documents
     // /////////////////////////////////////
 
-    const fullWhere = combineQueries(where, accessResult);
+    const fullWhere = combineQueries(where, accessResult)
 
-    let docs;
+    let docs
 
     if (collectionConfig.versions?.drafts && shouldSaveDraft) {
-      const versionsWhere = appendVersionToQueryKey(fullWhere);
+      const versionsWhere = appendVersionToQueryKey(fullWhere)
 
       await validateQueryPaths({
         collectionConfig: collection.config,
@@ -138,16 +136,16 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         req,
         versionFields: buildVersionCollectionFields(collection.config),
         where: versionsWhere,
-      });
+      })
 
       const query = await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>({
         collection: collectionConfig.slug,
         locale,
         req,
         where: versionsWhere,
-      });
+      })
 
-      docs = query.docs;
+      docs = query.docs
     } else {
       const query = await payload.db.find({
         collection: collectionConfig.slug,
@@ -156,35 +154,32 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         pagination: false,
         req,
         where: fullWhere,
-      });
+      })
 
-      docs = query.docs;
+      docs = query.docs
     }
 
     // /////////////////////////////////////
     // Generate data for all files and sizes
     // /////////////////////////////////////
 
-    const {
-      data: newFileData,
-      files: filesToUpload,
-    } = await generateFileData({
+    const { data: newFileData, files: filesToUpload } = await generateFileData({
       collection,
       config,
       data: bulkUpdateData,
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,
-    });
+    })
 
-    const errors = [];
+    const errors = []
 
     const promises = docs.map(async (doc) => {
-      const { id } = doc;
+      const { id } = doc
       let data = {
         ...newFileData,
         ...bulkUpdateData,
-      };
+      }
 
       try {
         const originalDoc = await afterRead({
@@ -195,9 +190,16 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           overrideAccess: true,
           req,
           showHiddenFields: true,
-        });
+        })
 
-        await deleteAssociatedFiles({ collectionConfig, config, doc, files: filesToUpload, overrideDelete: false, t });
+        await deleteAssociatedFiles({
+          collectionConfig,
+          config,
+          doc,
+          files: filesToUpload,
+          overrideDelete: false,
+          t,
+        })
 
         // /////////////////////////////////////
         // beforeValidate - Fields
@@ -212,30 +214,31 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           operation: 'update',
           overrideAccess,
           req,
-        });
+        })
 
         // /////////////////////////////////////
         // beforeValidate - Collection
         // /////////////////////////////////////
 
         await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-          await priorHook;
+          await priorHook
 
-          data = (await hook({
-            context: req.context,
-            data,
-            operation: 'update',
-            originalDoc,
-            req,
-          })) || data;
-        }, Promise.resolve());
+          data =
+            (await hook({
+              context: req.context,
+              data,
+              operation: 'update',
+              originalDoc,
+              req,
+            })) || data
+        }, Promise.resolve())
 
         // /////////////////////////////////////
         // Write files to local storage
         // /////////////////////////////////////
 
         if (!collectionConfig.upload.disableLocalStorage) {
-          await uploadFiles(payload, filesToUpload, t);
+          await uploadFiles(payload, filesToUpload, t)
         }
 
         // /////////////////////////////////////
@@ -243,16 +246,17 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // /////////////////////////////////////
 
         await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-          await priorHook;
+          await priorHook
 
-          data = (await hook({
-            context: req.context,
-            data,
-            operation: 'update',
-            originalDoc,
-            req,
-          })) || data;
-        }, Promise.resolve());
+          data =
+            (await hook({
+              context: req.context,
+              data,
+              operation: 'update',
+              originalDoc,
+              req,
+            })) || data
+        }, Promise.resolve())
 
         // /////////////////////////////////////
         // beforeChange - Fields
@@ -268,7 +272,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           operation: 'update',
           req,
           skipValidation: shouldSaveDraft || data._status === 'draft',
-        });
+        })
 
         // /////////////////////////////////////
         // Update
@@ -281,7 +285,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
             id,
             locale,
             req,
-          });
+          })
         }
 
         // /////////////////////////////////////
@@ -299,7 +303,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
             id,
             payload,
             req,
-          });
+          })
         }
 
         // /////////////////////////////////////
@@ -314,21 +318,22 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           overrideAccess,
           req,
           showHiddenFields,
-        });
+        })
 
         // /////////////////////////////////////
         // afterRead - Collection
         // /////////////////////////////////////
 
         await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-          await priorHook;
+          await priorHook
 
-          result = await hook({
-            context: req.context,
-            doc: result,
-            req,
-          }) || result;
-        }, Promise.resolve());
+          result =
+            (await hook({
+              context: req.context,
+              doc: result,
+              req,
+            })) || result
+        }, Promise.resolve())
 
         // /////////////////////////////////////
         // afterChange - Fields
@@ -342,51 +347,51 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           operation: 'update',
           previousDoc: originalDoc,
           req,
-        });
+        })
 
         // /////////////////////////////////////
         // afterChange - Collection
         // /////////////////////////////////////
 
         await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-          await priorHook;
+          await priorHook
 
-          result = await hook({
-            context: req.context,
-            doc: result,
-            operation: 'update',
-            previousDoc: originalDoc,
-            req,
-          }) || result;
-        }, Promise.resolve());
+          result =
+            (await hook({
+              context: req.context,
+              doc: result,
+              operation: 'update',
+              previousDoc: originalDoc,
+              req,
+            })) || result
+        }, Promise.resolve())
 
         await unlinkTempFiles({
           collectionConfig,
           config,
           req,
-        });
-
+        })
 
         // /////////////////////////////////////
         // Return results
         // /////////////////////////////////////
 
-        return result;
+        return result
       } catch (error) {
         errors.push({
           id,
           message: error.message,
-        });
+        })
       }
-      return null;
-    });
+      return null
+    })
 
-    const awaitedDocs = await Promise.all(promises);
+    const awaitedDocs = await Promise.all(promises)
 
     let result = {
       docs: awaitedDocs.filter(Boolean),
       errors,
-    };
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection
@@ -396,15 +401,15 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       args,
       operation: 'update',
       result,
-    });
+    })
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
-    return result;
+    return result
   } catch (error: unknown) {
-    await killTransaction(req);
-    throw error;
+    await killTransaction(req)
+    throw error
   }
 }
 
-export default update;
+export default update

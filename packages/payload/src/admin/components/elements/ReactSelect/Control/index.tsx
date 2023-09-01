@@ -1,21 +1,16 @@
-import type { ControlProps } from 'react-select';
+import type { ControlProps } from 'react-select'
 
-import React from 'react';
-import { components as SelectComponents } from 'react-select';
+import React from 'react'
+import { components as SelectComponents } from 'react-select'
 
-import type { Option } from '../types';
+import type { Option } from '../types'
 
 export const Control: React.FC<ControlProps<Option, any>> = (props) => {
   const {
     children,
     innerProps,
-    selectProps: {
-      customProps: {
-        disableKeyDown,
-        disableMouseDown,
-      } = {},
-    } = {},
-  } = props;
+    selectProps: { customProps: { disableKeyDown, disableMouseDown } = {} } = {},
+  } = props
 
   return (
     <SelectComponents.Control
@@ -25,10 +20,10 @@ export const Control: React.FC<ControlProps<Option, any>> = (props) => {
         // @ts-ignore
         onKeyDown: (e) => {
           if (disableKeyDown) {
-            e.stopPropagation();
+            e.stopPropagation()
             // Create event for keydown listeners which specifically want to bypass this stopPropagation
-            const bypassEvent = new CustomEvent('bypassKeyDown', { detail: e });
-            document.dispatchEvent(bypassEvent);
+            const bypassEvent = new CustomEvent('bypassKeyDown', { detail: e })
+            document.dispatchEvent(bypassEvent)
           }
         },
         // react-select has this typed incorrectly so we disable the linting rule
@@ -37,12 +32,12 @@ export const Control: React.FC<ControlProps<Option, any>> = (props) => {
         onMouseDown: (e) => {
           // we need to prevent react-select from hijacking the 'onMouseDown' event while modals are open (i.e. the 'Relationship' field component)
           if (!disableMouseDown) {
-            innerProps.onMouseDown(e);
+            innerProps.onMouseDown(e)
           }
         },
       }}
     >
       {children}
     </SelectComponents.Control>
-  );
-};
+  )
+}

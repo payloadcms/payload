@@ -1,46 +1,48 @@
-import type { Request } from 'express';
+import type { Request } from 'express'
 
-import { Strategy } from 'passport-strategy';
+import { Strategy } from 'passport-strategy'
 
-import type { Payload } from '../../../src/payload';
+import type { Payload } from '../../../src/payload'
 
-import { buildConfigWithDefaults } from '../../buildConfigWithDefaults';
+import { buildConfigWithDefaults } from '../../buildConfigWithDefaults'
 
-export const slug = 'users';
-export const strategyName = 'test-local';
+export const slug = 'users'
+export const strategyName = 'test-local'
 
 export class CustomStrategy extends Strategy {
-  ctx: Payload;
+  ctx: Payload
 
   constructor(ctx: Payload) {
-    super();
-    this.ctx = ctx;
+    super()
+    this.ctx = ctx
   }
 
   authenticate(req: Request, options?: any): void {
     if (!req.headers.code && !req.headers.secret) {
-      return this.success(null);
+      return this.success(null)
     }
-    this.ctx.find({
-      collection: slug,
-      where: {
-        code: {
-          equals: req.headers.code,
+    this.ctx
+      .find({
+        collection: slug,
+        where: {
+          code: {
+            equals: req.headers.code,
+          },
+          secret: {
+            equals: req.headers.secret,
+          },
         },
-        secret: {
-          equals: req.headers.secret,
-        },
-      },
-    }).then((users) => {
-      if (users.docs && users.docs.length) {
-        const user = users.docs[0];
-        user.collection = slug;
-        user._strategy = `${slug}-${strategyName}`;
-        this.success(user);
-      } else {
-        this.error(null);
-      }
-    });
+      })
+      .then((users) => {
+        if (users.docs && users.docs.length) {
+          const user = users.docs[0]
+          user.collection = slug
+          user._strategy = `${slug}-${strategyName}`
+          this.success(user)
+        } else {
+          this.error(null)
+        }
+      })
   }
 }
 
@@ -91,8 +93,7 @@ export default buildConfigWithDefaults({
           saveToJWT: true,
           hasMany: true,
         },
-
       ],
     },
   ],
-});
+})

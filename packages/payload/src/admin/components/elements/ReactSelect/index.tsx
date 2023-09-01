@@ -1,35 +1,34 @@
-import type { KeyboardEventHandler } from 'react';
+import type { KeyboardEventHandler } from 'react'
 
-import { arrayMove } from '@dnd-kit/sortable';
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import Select from 'react-select';
-import CreatableSelect from 'react-select/creatable';
+import { arrayMove } from '@dnd-kit/sortable'
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import Select from 'react-select'
+import CreatableSelect from 'react-select/creatable'
 
-import type { Option } from './types';
-import type { Props as ReactSelectAdapterProps } from './types';
+import type { Option } from './types'
+import type { Props as ReactSelectAdapterProps } from './types'
 
-import { getTranslation } from '../../../../utilities/getTranslation';
-import Chevron from '../../icons/Chevron';
-import DraggableSortable from '../DraggableSortable';
-import { ClearIndicator } from './ClearIndicator';
-import { Control } from './Control';
-import { MultiValue } from './MultiValue';
-import { MultiValueLabel } from './MultiValueLabel';
-import { MultiValueRemove } from './MultiValueRemove';
-import { SingleValue } from './SingleValue';
-import { ValueContainer } from './ValueContainer';
-import './index.scss';
+import { getTranslation } from '../../../../utilities/getTranslation'
+import Chevron from '../../icons/Chevron'
+import DraggableSortable from '../DraggableSortable'
+import { ClearIndicator } from './ClearIndicator'
+import { Control } from './Control'
+import { MultiValue } from './MultiValue'
+import { MultiValueLabel } from './MultiValueLabel'
+import { MultiValueRemove } from './MultiValueRemove'
+import { SingleValue } from './SingleValue'
+import { ValueContainer } from './ValueContainer'
+import './index.scss'
 
 const createOption = (label: string) => ({
   label,
   value: label,
-});
-
+})
 
 const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
-  const { i18n, t } = useTranslation();
-  const [inputValue, setInputValue] = React.useState(''); // for creatable select
+  const { i18n, t } = useTranslation()
+  const [inputValue, setInputValue] = React.useState('') // for creatable select
 
   const {
     className,
@@ -49,13 +48,11 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     selectProps,
     showError,
     value,
-  } = props;
+  } = props
 
-  const classes = [
-    className,
-    'react-select',
-    showError && 'react-select--error',
-  ].filter(Boolean).join(' ');
+  const classes = [className, 'react-select', showError && 'react-select--error']
+    .filter(Boolean)
+    .join(' ')
 
   if (!isCreatable) {
     return (
@@ -89,35 +86,43 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         options={options}
         value={value}
       />
-    );
+    )
   }
   const handleKeyDown: KeyboardEventHandler = (event) => {
     // eslint-disable-next-line no-restricted-globals
     if (numberOnly === true) {
-      const acceptableKeys = ['Tab', 'Escape', 'Backspace', 'Enter', 'ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'];
-      const isNumber = !/\D/.test(event.key);
-      const isActionKey = acceptableKeys.includes(event.key);
+      const acceptableKeys = [
+        'Tab',
+        'Escape',
+        'Backspace',
+        'Enter',
+        'ArrowRight',
+        'ArrowLeft',
+        'ArrowUp',
+        'ArrowDown',
+      ]
+      const isNumber = !/\D/.test(event.key)
+      const isActionKey = acceptableKeys.includes(event.key)
       if (!isNumber && !isActionKey) {
-        event.preventDefault();
-        return;
+        event.preventDefault()
+        return
       }
     }
-    if (!value || !inputValue || inputValue.trim() === '') return;
+    if (!value || !inputValue || inputValue.trim() === '') return
     if (filterOption && !filterOption(null, inputValue)) {
-      return;
+      return
     }
     switch (event.key) {
       case 'Enter':
       case 'Tab':
-        onChange([...value as Option[], createOption(inputValue)]);
-        setInputValue('');
-        event.preventDefault();
-        break;
+        onChange([...(value as Option[]), createOption(inputValue)])
+        setInputValue('')
+        event.preventDefault()
+        break
       default:
-        break;
+        break
     }
-  };
-
+  }
 
   return (
     <CreatableSelect
@@ -152,52 +157,43 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       options={options}
       value={value}
     />
-  );
-};
+  )
+}
 
 const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
-  const {
-    onChange,
-    value,
-  } = props;
+  const { onChange, value } = props
 
-
-  let ids: string[] = [];
-  if (value) ids = Array.isArray(value) ? value.map((item) => item?.id ?? `${item?.value}` ) : [value?.id || `${value?.value}` ];
-
+  let ids: string[] = []
+  if (value)
+    ids = Array.isArray(value)
+      ? value.map((item) => item?.id ?? `${item?.value}`)
+      : [value?.id || `${value?.value}`]
 
   return (
     <DraggableSortable
       onDragEnd={({ moveFromIndex, moveToIndex }) => {
-        let sorted = value;
+        let sorted = value
         if (value && Array.isArray(value)) {
-          sorted = arrayMove(value, moveFromIndex, moveToIndex);
+          sorted = arrayMove(value, moveFromIndex, moveToIndex)
         }
-        onChange(sorted);
+        onChange(sorted)
       }}
       className="react-select-container"
       ids={ids}
     >
       <SelectAdapter {...props} />
     </DraggableSortable>
-  );
-};
+  )
+}
 
 const ReactSelect: React.FC<ReactSelectAdapterProps> = (props) => {
-  const {
-    isMulti,
-    isSortable,
-  } = props;
+  const { isMulti, isSortable } = props
 
   if (isMulti && isSortable) {
-    return (
-      <SortableSelect {...props} />
-    );
+    return <SortableSelect {...props} />
   }
 
-  return (
-    <SelectAdapter {...props} />
-  );
-};
+  return <SelectAdapter {...props} />
+}
 
-export default ReactSelect;
+export default ReactSelect

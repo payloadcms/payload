@@ -1,6 +1,6 @@
-import type { GlobalConfig } from '../../../src/globals/config/types';
+import type { GlobalConfig } from '../../../src/globals/config/types'
 
-import { autoSaveGlobalSlug } from '../shared';
+import { autoSaveGlobalSlug } from '../shared'
 
 const AutosaveGlobal: GlobalConfig = {
   slug: autoSaveGlobalSlug,
@@ -17,7 +17,7 @@ const AutosaveGlobal: GlobalConfig = {
   access: {
     read: ({ req: { user } }) => {
       if (user) {
-        return true;
+        return true
       }
 
       return {
@@ -33,7 +33,7 @@ const AutosaveGlobal: GlobalConfig = {
             },
           },
         ],
-      };
+      }
     },
   },
   fields: [
@@ -44,6 +44,6 @@ const AutosaveGlobal: GlobalConfig = {
       localized: true,
     },
   ],
-};
+}
 
-export default AutosaveGlobal;
+export default AutosaveGlobal

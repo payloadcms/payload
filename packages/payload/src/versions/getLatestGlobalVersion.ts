@@ -1,8 +1,8 @@
-import type { SanitizedGlobalConfig } from '../globals/config/types';
-import type { Payload } from '../payload';
-import type { Document, PayloadRequest, Where } from '../types';
+import type { SanitizedGlobalConfig } from '../globals/config/types'
+import type { Payload } from '../payload'
+import type { Document, PayloadRequest, Where } from '../types'
 
-import { docHasTimestamps } from '../types';
+import { docHasTimestamps } from '../types'
 
 type Args = {
   config: SanitizedGlobalConfig
@@ -20,18 +20,20 @@ export const getLatestGlobalVersion = async ({
   req,
   slug,
   where,
-}: Args): Promise<{global: Document, globalExists: boolean}> => {
-  let latestVersion;
+}: Args): Promise<{ global: Document; globalExists: boolean }> => {
+  let latestVersion
 
   if (config.versions?.drafts) {
     // eslint-disable-next-line prefer-destructuring
-    latestVersion = (await payload.db.findGlobalVersions({
-      global: slug,
-      limit: 1,
-      locale,
-      req,
-      sort: '-updatedAt',
-    })).docs[0];
+    latestVersion = (
+      await payload.db.findGlobalVersions({
+        global: slug,
+        limit: 1,
+        locale,
+        req,
+        sort: '-updatedAt',
+      })
+    ).docs[0]
   }
 
   const global = await payload.db.findGlobal({
@@ -39,14 +41,14 @@ export const getLatestGlobalVersion = async ({
     req,
     slug,
     where,
-  });
-  const globalExists = Boolean(global);
+  })
+  const globalExists = Boolean(global)
 
   if (!latestVersion || (docHasTimestamps(global) && latestVersion.updatedAt < global.updatedAt)) {
     return {
       global,
       globalExists,
-    };
+    }
   }
 
   return {
@@ -56,5 +58,5 @@ export const getLatestGlobalVersion = async ({
       updatedAt: latestVersion.updatedAt,
     },
     globalExists,
-  };
-};
+  }
+}

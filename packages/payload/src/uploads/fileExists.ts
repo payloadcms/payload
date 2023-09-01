@@ -1,13 +1,13 @@
-import fs from 'fs';
+import fs from 'fs'
 
 const fileExists = async (filename: string): Promise<boolean> => {
   try {
-    await fs.promises.stat(filename);
+    await fs.promises.stat(filename)
 
-    return true;
+    return true
   } catch (err) {
-    return false;
+    return false
   }
-};
+}
 
-export default fileExists;
+export default fileExists

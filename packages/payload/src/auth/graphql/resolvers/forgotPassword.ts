@@ -1,6 +1,6 @@
-import type { Collection } from '../../../collections/config/types';
+import type { Collection } from '../../../collections/config/types'
 
-import forgotPassword from '../../operations/forgotPassword';
+import forgotPassword from '../../operations/forgotPassword'
 
 function forgotPasswordResolver(collection: Collection): any {
   async function resolver(_, args, context) {
@@ -12,13 +12,13 @@ function forgotPasswordResolver(collection: Collection): any {
       disableEmail: args.disableEmail,
       expiration: args.expiration,
       req: context.req,
-    };
+    }
 
-    await forgotPassword(options);
-    return true;
+    await forgotPassword(options)
+    return true
   }
 
-  return resolver;
+  return resolver
 }
 
-export default forgotPasswordResolver;
+export default forgotPasswordResolver

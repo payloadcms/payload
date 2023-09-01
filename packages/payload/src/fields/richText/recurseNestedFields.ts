@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import type { PayloadRequest } from '../../express/types';
-import type { Field} from '../config/types';
+import type { PayloadRequest } from '../../express/types'
+import type { Field } from '../config/types'
 
-import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from '../config/types';
-import { populate } from './populate';
-import { recurseRichText } from './richTextRelationshipPromise';
+import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from '../config/types'
+import { populate } from './populate'
+import { recurseRichText } from './richTextRelationshipPromise'
 
 type NestedRichTextFieldsArgs = {
   currentDepth?: number
@@ -33,71 +33,83 @@ export const recurseNestedFields = ({
         if (field.hasMany && Array.isArray(data[field.name])) {
           if (Array.isArray(field.relationTo)) {
             data[field.name].forEach(({ relationTo, value }, i) => {
-              const collection = req.payload.collections[relationTo];
+              const collection = req.payload.collections[relationTo]
               if (collection) {
-                promises.push(populate({
-                  collection,
-                  currentDepth,
-                  data: data[field.name],
-                  depth,
-                  field,
-                  id: value,
-                  key: i,
-                  overrideAccess,
-                  req,
-                  showHiddenFields,
-                }));
+                promises.push(
+                  populate({
+                    collection,
+                    currentDepth,
+                    data: data[field.name],
+                    depth,
+                    field,
+                    id: value,
+                    key: i,
+                    overrideAccess,
+                    req,
+                    showHiddenFields,
+                  }),
+                )
               }
-            });
+            })
           } else {
             data[field.name].forEach((id, i) => {
-              const collection = req.payload.collections[field.relationTo as string];
+              const collection = req.payload.collections[field.relationTo as string]
               if (collection) {
-                promises.push(populate({
-                  collection,
-                  currentDepth,
-                  data: data[field.name],
-                  depth,
-                  field,
-                  id,
-                  key: i,
-                  overrideAccess,
-                  req,
-                  showHiddenFields,
-                }));
+                promises.push(
+                  populate({
+                    collection,
+                    currentDepth,
+                    data: data[field.name],
+                    depth,
+                    field,
+                    id,
+                    key: i,
+                    overrideAccess,
+                    req,
+                    showHiddenFields,
+                  }),
+                )
               }
-            });
+            })
           }
-        } else if (Array.isArray(field.relationTo) && data[field.name]?.value && data[field.name]?.relationTo) {
-          const collection = req.payload.collections[data[field.name].relationTo];
-          promises.push(populate({
-            collection,
-            currentDepth,
-            data: data[field.name],
-            depth,
-            field,
-            id: data[field.name].value,
-            key: 'value',
-            overrideAccess,
-            req,
-            showHiddenFields,
-          }));
+        } else if (
+          Array.isArray(field.relationTo) &&
+          data[field.name]?.value &&
+          data[field.name]?.relationTo
+        ) {
+          const collection = req.payload.collections[data[field.name].relationTo]
+          promises.push(
+            populate({
+              collection,
+              currentDepth,
+              data: data[field.name],
+              depth,
+              field,
+              id: data[field.name].value,
+              key: 'value',
+              overrideAccess,
+              req,
+              showHiddenFields,
+            }),
+          )
         }
       }
       if (typeof data[field.name] !== 'undefined' && typeof field.relationTo === 'string') {
-        const collection = req.payload.collections[field.relationTo];
-        promises.push(populate({
-          collection,
-          currentDepth,
-          data,
-          depth,
-          field,
-          id: data[field.name],
-          key: field.name,
-          overrideAccess,
-          req,
-          showHiddenFields,
-        }));
+        const collection = req.payload.collections[field.relationTo]
+        promises.push(
+          populate({
+            collection,
+            currentDepth,
+            data,
+            depth,
+            field,
+            id: data[field.name],
+            key: field.name,
+            overrideAccess,
+            req,
+            showHiddenFields,
+          }),
+        )
       }
     } else if (fieldHasSubFields(field) && !fieldIsArrayType(field)) {
       if (fieldAffectsData(field) && typeof data[field.name] === 'object') {
@@ -110,7 +122,7 @@ export const recurseNestedFields = ({
           promises,
           req,
           showHiddenFields,
-        });
+        })
       } else {
         recurseNestedFields({
           currentDepth,
@@ -121,7 +133,7 @@ export const recurseNestedFields = ({
           promises,
           req,
           showHiddenFields,
-        });
+        })
       }
     } else if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
@@ -134,12 +146,12 @@ export const recurseNestedFields = ({
           promises,
           req,
           showHiddenFields,
-        });
-      });
+        })
+      })
     } else if (Array.isArray(data[field.name])) {
       if (field.type === 'blocks') {
         data[field.name].forEach((row, i) => {
-          const block = field.blocks.find(({ slug }) => slug === row?.blockType);
+          const block = field.blocks.find(({ slug }) => slug === row?.blockType)
           if (block) {
             recurseNestedFields({
               currentDepth,
@@ -150,9 +162,9 @@ export const recurseNestedFields = ({
               promises,
               req,
               showHiddenFields,
-            });
+            })
           }
-        });
+        })
       }
 
       if (field.type === 'array') {
@@ -166,8 +178,8 @@ export const recurseNestedFields = ({
             promises,
             req,
             showHiddenFields,
-          });
-        });
+          })
+        })
       }
     }
 
@@ -183,9 +195,9 @@ export const recurseNestedFields = ({
             promises,
             req,
             showHiddenFields,
-          });
+          })
         }
-      });
+      })
     }
-  });
-};
+  })
+}

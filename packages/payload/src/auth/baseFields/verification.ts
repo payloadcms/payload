@@ -1,4 +1,4 @@
-import type { Field, FieldHook } from '../../fields/config/types';
+import type { Field, FieldHook } from '../../fields/config/types'
 
 const autoRemoveVerificationToken: FieldHook = ({ data, operation, originalDoc, value }) => {
   // If a user manually sets `_verified` to true,
@@ -8,12 +8,12 @@ const autoRemoveVerificationToken: FieldHook = ({ data, operation, originalDoc, 
 
   if (operation === 'update') {
     if (data?._verified === true && originalDoc?._verified === false) {
-      return null;
+      return null
     }
   }
 
-  return value;
-};
+  return value
+}
 
 export default [
   {
@@ -33,11 +33,9 @@ export default [
   {
     hidden: true,
     hooks: {
-      beforeChange: [
-        autoRemoveVerificationToken,
-      ],
+      beforeChange: [autoRemoveVerificationToken],
     },
     name: '_verificationToken',
     type: 'text',
   },
-] as Field[];
+] as Field[]

@@ -1,11 +1,11 @@
-import type { CollectionConfig } from '../../src/collections/config/types';
+import type { CollectionConfig } from '../../src/collections/config/types'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
 
 export interface Relation {
-  id: string;
-  name: string;
+  id: string
+  name: string
 }
 
 const openAccess = {
@@ -13,7 +13,7 @@ const openAccess = {
   read: () => true,
   update: () => true,
   delete: () => true,
-};
+}
 
 const collectionWithName = (collectionSlug: string): CollectionConfig => {
   return {
@@ -25,15 +25,15 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
         type: 'text',
       },
     ],
-  };
-};
+  }
+}
 
-export const slug = 'posts';
-export const relationSlug = 'relation';
-export const pointSlug = 'point';
-export const customIdSlug = 'custom-id';
-export const customIdNumberSlug = 'custom-id-number';
-export const errorOnHookSlug = 'error-on-hooks';
+export const slug = 'posts'
+export const relationSlug = 'relation'
+export const pointSlug = 'point'
+export const customIdSlug = 'custom-id'
+export const customIdNumberSlug = 'custom-id-number'
+export const errorOnHookSlug = 'error-on-hooks'
 
 export default buildConfigWithDefaults({
   endpoints: [
@@ -53,9 +53,9 @@ export default buildConfigWithDefaults({
           //   host: 'smtp.ethereal.email',
           //   port: 587,
           // },
-        });
+        })
 
-        res.status(200).send('Email sent');
+        res.status(200).send('Email sent')
       },
     },
     {
@@ -64,9 +64,9 @@ export default buildConfigWithDefaults({
       handler: async (req, res, next) => {
         try {
           // Throwing an internal error with potentially sensitive data
-          throw new Error('Lost connection to the Pentagon. Secret data: ******');
+          throw new Error('Lost connection to the Pentagon. Secret data: ******')
         } catch (err) {
-          next(err);
+          next(err)
         }
       },
     },
@@ -253,16 +253,20 @@ export default buildConfigWithDefaults({
       slug: errorOnHookSlug,
       access: openAccess,
       hooks: {
-        beforeChange: [({ originalDoc }) => {
-          if (originalDoc?.errorBeforeChange) {
-            throw new Error('Error Before Change Thrown');
-          }
-        }],
-        afterDelete: [({ doc }) => {
-          if (doc?.errorAfterDelete) {
-            throw new Error('Error After Delete Thrown');
-          }
-        }],
+        beforeChange: [
+          ({ originalDoc }) => {
+            if (originalDoc?.errorBeforeChange) {
+              throw new Error('Error Before Change Thrown')
+            }
+          },
+        ],
+        afterDelete: [
+          ({ doc }) => {
+            if (doc?.errorAfterDelete) {
+              throw new Error('Error After Delete Thrown')
+            }
+          },
+        ],
       },
       fields: [
         {
@@ -287,27 +291,27 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
 
     const rel1 = await payload.create({
       collection: relationSlug,
       data: {
         name: 'name',
       },
-    });
+    })
     const rel2 = await payload.create({
       collection: relationSlug,
       data: {
         name: 'name2',
       },
-    });
+    })
 
     await payload.create({
       collection: pointSlug,
       data: {
         point: [10, 20],
       },
-    });
+    })
 
     // Relation - hasMany
     await payload.create({
@@ -316,14 +320,14 @@ export default buildConfigWithDefaults({
         title: 'rel to hasMany',
         relationHasManyField: rel1.id,
       },
-    });
+    })
     await payload.create({
       collection: slug,
       data: {
         title: 'rel to hasMany 2',
         relationHasManyField: rel2.id,
       },
-    });
+    })
 
     // Relation - relationTo multi
     await payload.create({
@@ -335,7 +339,7 @@ export default buildConfigWithDefaults({
           value: rel2.id,
         },
       },
-    });
+    })
 
     // Relation - relationTo multi hasMany
     await payload.create({
@@ -353,7 +357,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
-    });
+    })
 
     await payload.create({
       collection: customIdSlug,
@@ -361,7 +365,7 @@ export default buildConfigWithDefaults({
         id: 'test',
         name: 'inside row',
       },
-    });
+    })
 
     await payload.create({
       collection: customIdNumberSlug,
@@ -369,6 +373,6 @@ export default buildConfigWithDefaults({
         id: 123,
         name: 'name',
       },
-    });
+    })
   },
-});
+})

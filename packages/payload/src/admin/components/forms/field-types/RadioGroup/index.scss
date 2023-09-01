@@ -15,10 +15,10 @@
 
     li {
       flex-shrink: 0;
-      [dir=ltr] & {
+      [dir='ltr'] & {
         padding-right: $baseline;
       }
-      [dir=rtl] & {
+      [dir='rtl'] & {
         padding-left: $baseline;
       }
     }
@@ -31,9 +31,9 @@
   }
 }
 
-html[data-theme=light] {
+html[data-theme='light'] {
   .radio-group {
-   &.error {
+    &.error {
       .radio-input__styled-radio {
         @include lightInputError;
       }
@@ -41,9 +41,9 @@ html[data-theme=light] {
   }
 }
 
-html[data-theme=dark] {
+html[data-theme='dark'] {
   .radio-group {
-   &.error {
+    &.error {
       .radio-input__styled-radio {
         @include darkInputError;
       }

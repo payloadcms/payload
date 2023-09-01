@@ -1,61 +1,60 @@
-import type { Where } from '../../../../types';
-import type { Action } from './types';
+import type { Where } from '../../../../types'
+import type { Action } from './types'
 
 const reducer = (state: Where[], action: Action): Where[] => {
-  const newState = [
-    ...state,
-  ];
+  const newState = [...state]
 
-  const {
-    andIndex,
-    orIndex,
-  } = action;
+  const { andIndex, orIndex } = action
 
   switch (action.type) {
     case 'add': {
-      const { field, relation } = action;
+      const { field, relation } = action
 
       if (relation === 'and') {
-        newState[orIndex].and.splice(andIndex, 0, { [field]: {} });
-        return newState;
+        newState[orIndex].and.splice(andIndex, 0, { [field]: {} })
+        return newState
       }
 
       return [
         ...newState,
         {
-          and: [{
-            [field]: {},
-          }],
+          and: [
+            {
+              [field]: {},
+            },
+          ],
         },
-      ];
+      ]
     }
 
     case 'remove': {
-      newState[orIndex].and.splice(andIndex, 1);
+      newState[orIndex].and.splice(andIndex, 1)
 
       if (newState[orIndex].and.length === 0) {
-        newState.splice(orIndex, 1);
+        newState.splice(orIndex, 1)
       }
 
-      return newState;
+      return newState
     }
 
     case 'update': {
-      const { field, operator, value } = action;
+      const { field, operator, value } = action
 
       if (typeof newState[orIndex].and[andIndex] === 'object') {
         newState[orIndex].and[andIndex] = {
           ...newState[orIndex].and[andIndex],
-        };
+        }
 
-        const [existingFieldName, existingCondition] = Object.entries(newState[orIndex].and[andIndex])[0] || [undefined, undefined];
+        const [existingFieldName, existingCondition] = Object.entries(
+          newState[orIndex].and[andIndex],
+        )[0] || [undefined, undefined]
 
         if (operator) {
           newState[orIndex].and[andIndex] = {
             [existingFieldName]: {
               [operator]: Object.values(existingCondition)[0],
             },
-          };
+          }
         }
 
         if (field) {
@@ -63,7 +62,7 @@ const reducer = (state: Where[], action: Action): Where[] => {
             [field]: {
               [Object.keys(existingCondition)[0]]: Object.values(existingCondition)[0],
             },
-          };
+          }
         }
 
         if (value !== undefined) {
@@ -71,17 +70,17 @@ const reducer = (state: Where[], action: Action): Where[] => {
             [existingFieldName]: {
               [Object.keys(existingCondition)[0]]: value,
             },
-          };
+          }
         }
       }
 
-      return newState;
+      return newState
     }
 
     default: {
-      return newState;
+      return newState
     }
   }
-};
+}
 
-export default reducer;
+export default reducer

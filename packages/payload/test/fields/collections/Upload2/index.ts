@@ -1,6 +1,6 @@
-import path from 'path';
+import path from 'path'
 
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../src/collections/config/types'
 
 const Uploads2: CollectionConfig = {
   slug: 'uploads2',
@@ -22,10 +22,10 @@ const Uploads2: CollectionConfig = {
       relationTo: 'uploads2',
     },
   ],
-};
+}
 
 export const uploadsDoc = {
   text: 'An upload here',
-};
+}
 
-export default Uploads2;
+export default Uploads2

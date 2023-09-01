@@ -1,54 +1,54 @@
-import type { Field} from '../../../../fields/config/types';
+import type { Field } from '../../../../fields/config/types'
 
-import { fieldAffectsData, fieldHasSubFields, tabHasName } from '../../../../fields/config/types';
+import { fieldAffectsData, fieldHasSubFields, tabHasName } from '../../../../fields/config/types'
 
-const getRemainingColumns = (fields: Field[], useAsTitle: string): string[] => fields.reduce((remaining, field) => {
-  if (fieldAffectsData(field) && field.name === useAsTitle) {
-    return remaining;
-  }
+const getRemainingColumns = (fields: Field[], useAsTitle: string): string[] =>
+  fields.reduce((remaining, field) => {
+    if (fieldAffectsData(field) && field.name === useAsTitle) {
+      return remaining
+    }
 
-  if (!fieldAffectsData(field) && fieldHasSubFields(field)) {
-    return [
-      ...remaining,
-      ...getRemainingColumns(field.fields, useAsTitle),
-    ];
-  }
+    if (!fieldAffectsData(field) && fieldHasSubFields(field)) {
+      return [...remaining, ...getRemainingColumns(field.fields, useAsTitle)]
+    }
 
-  if (field.type === 'tabs') {
-    return [
-      ...remaining,
-      ...field.tabs.reduce((tabFieldColumns, tab) => [
-        ...tabFieldColumns,
-        ...(tabHasName(tab) ? [tab.name] : getRemainingColumns(tab.fields, useAsTitle)),
-      ], []),
-    ];
-  }
+    if (field.type === 'tabs') {
+      return [
+        ...remaining,
+        ...field.tabs.reduce(
+          (tabFieldColumns, tab) => [
+            ...tabFieldColumns,
+            ...(tabHasName(tab) ? [tab.name] : getRemainingColumns(tab.fields, useAsTitle)),
+          ],
+          [],
+        ),
+      ]
+    }
 
-  return [
-    ...remaining,
-    field.name,
-  ];
-}, []);
+    return [...remaining, field.name]
+  }, [])
 
-const getInitialColumnState = (fields: Field[], useAsTitle: string, defaultColumns: string[]): string[] => {
-  let initialColumns = [];
+const getInitialColumnState = (
+  fields: Field[],
+  useAsTitle: string,
+  defaultColumns: string[],
+): string[] => {
+  let initialColumns = []
 
   if (Array.isArray(defaultColumns) && defaultColumns.length >= 1) {
-    return defaultColumns;
+    return defaultColumns
   }
-
 
   if (useAsTitle) {
-    initialColumns.push(useAsTitle);
+    initialColumns.push(useAsTitle)
   }
 
-  const remainingColumns = getRemainingColumns(fields, useAsTitle);
+  const remainingColumns = getRemainingColumns(fields, useAsTitle)
 
-  initialColumns = initialColumns.concat(remainingColumns);
-  initialColumns = initialColumns.slice(0, 4);
+  initialColumns = initialColumns.concat(remainingColumns)
+  initialColumns = initialColumns.slice(0, 4)
 
-  return initialColumns;
-};
+  return initialColumns
+}
 
-
-export default getInitialColumnState;
+export default getInitialColumnState

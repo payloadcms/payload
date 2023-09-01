@@ -5,6 +5,6 @@ const operators = {
   geo: ['near'],
   geojson: ['within', 'intersects'],
   partial: ['like', 'contains'],
-};
+}
 
-export default operators;
+export default operators

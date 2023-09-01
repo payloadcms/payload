@@ -1,1 +1,1 @@
-export { usePreferences } from '../../admin/components/utilities/Preferences';
+export { usePreferences } from '../../admin/components/utilities/Preferences'

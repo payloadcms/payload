@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../collections/config/types';
+import type { CollectionConfig } from '../../collections/config/types'
 
 export const migrationsCollection: CollectionConfig = {
   admin: {
@@ -37,4 +37,4 @@ export const migrationsCollection: CollectionConfig = {
   ],
   graphQL: false,
   slug: 'payload-migrations',
-};
+}

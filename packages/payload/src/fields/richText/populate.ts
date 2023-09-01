@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import type { Collection } from '../../collections/config/types';
-import type { PayloadRequest } from '../../express/types';
-import type { Field, RichTextField } from '../config/types';
+import type { Collection } from '../../collections/config/types'
+import type { PayloadRequest } from '../../express/types'
+import type { Field, RichTextField } from '../config/types'
 
 type Arguments = {
   currentDepth?: number
@@ -27,25 +27,27 @@ export const populate = async ({
 }: Omit<Arguments, 'field'> & {
   collection: Collection
   field: Field
-  id: string,
+  id: string
 }): Promise<void> => {
-  const dataRef = data as Record<string, unknown>;
+  const dataRef = data as Record<string, unknown>
 
-  const doc = await req.payloadDataLoader.load(JSON.stringify([
-    req.transactionID,
-    collection.config.slug,
-    id,
-    depth,
-    currentDepth + 1,
-    req.locale,
-    req.fallbackLocale,
-    typeof overrideAccess === 'undefined' ? false : overrideAccess,
-    showHiddenFields,
-  ]));
+  const doc = await req.payloadDataLoader.load(
+    JSON.stringify([
+      req.transactionID,
+      collection.config.slug,
+      id,
+      depth,
+      currentDepth + 1,
+      req.locale,
+      req.fallbackLocale,
+      typeof overrideAccess === 'undefined' ? false : overrideAccess,
+      showHiddenFields,
+    ]),
+  )
 
   if (doc) {
-    dataRef[key] = doc;
+    dataRef[key] = doc
   } else {
-    dataRef[key] = null;
+    dataRef[key] = null
   }
-};
+}

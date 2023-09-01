@@ -1,8 +1,8 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../src/collections/config/types'
 
-import { CollapsibleLabelComponent } from './LabelComponent';
+import { CollapsibleLabelComponent } from './LabelComponent'
 
-export const collapsibleFieldsSlug = 'collapsible-fields';
+export const collapsibleFieldsSlug = 'collapsible-fields'
 
 const CollapsibleFields: CollectionConfig = {
   slug: collapsibleFieldsSlug,
@@ -132,7 +132,7 @@ const CollapsibleFields: CollectionConfig = {
       ],
     },
   ],
-};
+}
 
 export const collapsibleDoc = {
   text: 'Seeded collapsible doc',
@@ -147,6 +147,6 @@ export const collapsibleDoc = {
       innerCollapsible: '',
     },
   ],
-};
+}
 
-export default CollapsibleFields;
+export default CollapsibleFields

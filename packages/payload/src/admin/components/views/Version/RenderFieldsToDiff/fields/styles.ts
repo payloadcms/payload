@@ -23,4 +23,4 @@ export const diffStyles = {
       wordRemovedBackground: 'var(--theme-error-200)',
     },
   },
-};
+}

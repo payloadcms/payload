@@ -1,9 +1,9 @@
-import type { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import type { Field } from '../../../../fields/config/types';
-import type { Operator, Where } from '../../../../types';
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
+import type { Field } from '../../../../fields/config/types'
+import type { Operator, Where } from '../../../../types'
 
 export type Props = {
-  collection: SanitizedCollectionConfig,
+  collection: SanitizedCollectionConfig
   handleChange?: (where: Where) => void
   modifySearchQuery?: boolean
 }
@@ -30,9 +30,9 @@ export type ADD = {
 }
 
 export type REMOVE = {
- andIndex: number
- orIndex: number
- type: 'remove'
+  andIndex: number
+  orIndex: number
+  type: 'remove'
 }
 
 export type UPDATE = {

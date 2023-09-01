@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import swcRegister from '@swc/register';
-import { getTsconfig as getTSconfig } from 'get-tsconfig';
-import minimist from 'minimist';
-import path from 'path';
+import swcRegister from '@swc/register'
+import { getTsconfig as getTSconfig } from 'get-tsconfig'
+import minimist from 'minimist'
+import path from 'path'
 
-import { generateGraphQLSchema } from './generateGraphQLSchema';
-import { generateTypes } from './generateTypes';
-import { migrate } from './migrate';
+import { generateGraphQLSchema } from './generateGraphQLSchema'
+import { generateTypes } from './generateTypes'
+import { migrate } from './migrate'
 
-const tsConfig = getTSconfig();
+const tsConfig = getTSconfig()
 
 const swcOptions = {
   ignore: [
@@ -26,51 +26,49 @@ const swcOptions = {
     type: 'commonjs',
   },
   sourceMaps: 'inline',
-};
+}
 
 if (tsConfig?.config?.compilerOptions?.paths) {
-  swcOptions.jsc.paths = tsConfig.config.compilerOptions.paths;
+  swcOptions.jsc.paths = tsConfig.config.compilerOptions.paths
 
   if (tsConfig?.config?.compilerOptions?.baseUrl) {
-    swcOptions.jsc.baseUrl = path.resolve(
-      tsConfig.config.compilerOptions.baseUrl,
-    );
+    swcOptions.jsc.baseUrl = path.resolve(tsConfig.config.compilerOptions.baseUrl)
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - bad @swc/register types
-swcRegister(swcOptions);
+swcRegister(swcOptions)
 
-const { build } = require('./build');
+const { build } = require('./build')
 
-const args = minimist(process.argv.slice(2));
+const args = minimist(process.argv.slice(2))
 
-const scriptIndex = args._.findIndex((x) => x === 'build');
+const scriptIndex = args._.findIndex((x) => x === 'build')
 
-const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex];
+const script = scriptIndex === -1 ? args._[0] : args._[scriptIndex]
 
 if (script.startsWith('migrate')) {
-  migrate(args._).then(() => process.exit(0));
+  migrate(args._).then(() => process.exit(0))
 } else {
   switch (script.toLowerCase()) {
     case 'build': {
-      build();
-      break;
+      build()
+      break
     }
 
     case 'generate:types': {
-      generateTypes();
-      break;
+      generateTypes()
+      break
     }
 
     case 'generate:graphqlschema': {
-      generateGraphQLSchema();
-      break;
+      generateGraphQLSchema()
+      break
     }
 
     default:
-      console.log(`Unknown script "${script}".`);
-      break;
+      console.log(`Unknown script "${script}".`)
+      break
   }
 }

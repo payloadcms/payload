@@ -1,7 +1,7 @@
-import type { Config } from '../../src/config/types';
+import type { Config } from '../../src/config/types'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { openAccess } from '../helpers/configHelpers';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { openAccess } from '../helpers/configHelpers'
 
 const config: Config = {
   collections: [
@@ -13,7 +13,7 @@ const config: Config = {
           path: '/hello',
           method: 'get',
           handler: (_, res): void => {
-            res.json({ message: 'hi' });
+            res.json({ message: 'hi' })
           },
           custom: { examples: [{ type: 'response', value: { message: 'hi' } }] },
         },
@@ -31,20 +31,23 @@ const config: Config = {
   globals: [
     {
       slug: 'my-global',
-      endpoints: [{
-        path: '/greet',
-        method: 'get',
-        handler: (req, res): void => {
-          const { name } = req.query;
-          res.json({ message: `Hi ${name}!` });
+      endpoints: [
+        {
+          path: '/greet',
+          method: 'get',
+          handler: (req, res): void => {
+            const { name } = req.query
+            res.json({ message: `Hi ${name}!` })
+          },
+          custom: { params: [{ in: 'query', name: 'name', type: 'string' }] },
         },
-        custom: { params: [{ in: 'query', name: 'name', type: 'string' }] },
-      }],
-      fields: [{
-        name: 'title',
-        type: 'text',
-        custom: { description: 'The title of my global' },
-      },
+      ],
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          custom: { description: 'The title of my global' },
+        },
       ],
       custom: { foo: 'bar' },
     },
@@ -55,12 +58,12 @@ const config: Config = {
       method: 'get',
       root: true,
       handler: (req, res): void => {
-        res.json(req.payload.config);
+        res.json(req.payload.config)
       },
       custom: { description: 'Get the sanitized payload config' },
     },
   ],
   custom: { name: 'Customer portal' },
-};
+}
 
-export default buildConfigWithDefaults(config);
+export default buildConfigWithDefaults(config)

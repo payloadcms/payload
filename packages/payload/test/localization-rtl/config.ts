@@ -1,11 +1,11 @@
-import en from '../../src/translations/en.json';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
-import { ar } from './ar';
-import { Posts } from './collections/posts';
-import { Users } from './collections/users';
-import deepMerge from './deepMerge';
-import { localization } from './localization';
+import en from '../../src/translations/en.json'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
+import { ar } from './ar'
+import { Posts } from './collections/posts'
+import { Users } from './collections/users'
+import deepMerge from './deepMerge'
+import { localization } from './localization'
 
 export default buildConfigWithDefaults({
   collections: [Users, Posts],
@@ -38,6 +38,6 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
   },
-});
+})

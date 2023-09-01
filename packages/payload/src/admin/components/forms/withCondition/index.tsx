@@ -1,38 +1,34 @@
-'use client';
+'use client'
 
-import React from 'react';
+import React from 'react'
 
-import type { FieldBase } from '../../../../fields/config/types';
+import type { FieldBase } from '../../../../fields/config/types'
 
-import { WatchCondition } from './WatchCondition';
+import { WatchCondition } from './WatchCondition'
 
-const withCondition = <P extends Record<string, unknown>>(Field: React.ComponentType<P>): React.FC<P> => {
+const withCondition = <P extends Record<string, unknown>>(
+  Field: React.ComponentType<P>,
+): React.FC<P> => {
   const CheckForCondition: React.FC<P> = (props) => {
-    const {
-      admin: {
-        condition,
-      } = {},
-    } = props as Partial<FieldBase>;
+    const { admin: { condition } = {} } = props as Partial<FieldBase>
 
     if (condition) {
-      return <WithCondition {...props} />;
+      return <WithCondition {...props} />
     }
 
-    return <Field {...props} />;
-  };
+    return <Field {...props} />
+  }
 
   const WithCondition: React.FC<P> = (props) => {
     const {
-      admin: {
-        condition,
-      } = {},
+      admin: { condition } = {},
       name,
       path,
     } = props as Partial<FieldBase> & {
       path?: string
-    };
+    }
 
-    const [showField, setShowField] = React.useState(false);
+    const [showField, setShowField] = React.useState(false)
 
     if (showField) {
       return (
@@ -45,20 +41,15 @@ const withCondition = <P extends Record<string, unknown>>(Field: React.Component
           />
           <Field {...props} />
         </React.Fragment>
-      );
+      )
     }
 
     return (
-      <WatchCondition
-        condition={condition}
-        name={name}
-        path={path}
-        setShowField={setShowField}
-      />
-    );
-  };
+      <WatchCondition condition={condition} name={name} path={path} setShowField={setShowField} />
+    )
+  }
 
-  return CheckForCondition;
-};
+  return CheckForCondition
+}
 
-export default withCondition;
+export default withCondition

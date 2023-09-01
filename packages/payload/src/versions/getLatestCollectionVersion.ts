@@ -1,18 +1,18 @@
-import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
-import type { FindOneArgs } from '../database/types';
-import type { Payload } from '../payload';
-import type { PayloadRequest } from '../types';
-import type { TypeWithVersion } from './types';
+import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types'
+import type { FindOneArgs } from '../database/types'
+import type { Payload } from '../payload'
+import type { PayloadRequest } from '../types'
+import type { TypeWithVersion } from './types'
 
-import { docHasTimestamps } from '../types';
+import { docHasTimestamps } from '../types'
 
 type Args = {
-  config: SanitizedCollectionConfig;
-  id: number | string;
-  payload: Payload;
-  query: FindOneArgs;
+  config: SanitizedCollectionConfig
+  id: number | string
+  payload: Payload
+  query: FindOneArgs
   req?: PayloadRequest
-};
+}
 
 export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   config,
@@ -21,7 +21,7 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   query,
   req,
 }: Args): Promise<T> => {
-  let latestVersion: TypeWithVersion<T>;
+  let latestVersion: TypeWithVersion<T>
 
   if (config.versions?.drafts) {
     const { docs } = await payload.db.findVersions<T>({
@@ -29,17 +29,14 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
       req,
       sort: '-updatedAt',
       where: { parent: { equals: id } },
-    });
-    [latestVersion] = docs;
+    })
+    ;[latestVersion] = docs
   }
 
-  const doc = await payload.db.findOne<T>({ ...query, req });
+  const doc = await payload.db.findOne<T>({ ...query, req })
 
-  if (
-    !latestVersion
-    || (docHasTimestamps(doc) && latestVersion.updatedAt < doc.updatedAt)
-  ) {
-    return doc;
+  if (!latestVersion || (docHasTimestamps(doc) && latestVersion.updatedAt < doc.updatedAt)) {
+    return doc
   }
 
   return {
@@ -47,5 +44,5 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
     createdAt: latestVersion.createdAt,
     id,
     updatedAt: latestVersion.updatedAt,
-  };
-};
+  }
+}

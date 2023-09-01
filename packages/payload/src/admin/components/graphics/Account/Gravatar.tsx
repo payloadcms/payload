@@ -1,19 +1,19 @@
-import md5 from 'md5';
-import qs from 'qs';
-import React from 'react';
+import md5 from 'md5'
+import qs from 'qs'
+import React from 'react'
 
-import { useAuth } from '../../utilities/Auth';
+import { useAuth } from '../../utilities/Auth'
 
 const Gravatar: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useAuth()
 
-  const hash = md5(user.email.trim().toLowerCase());
+  const hash = md5(user.email.trim().toLowerCase())
 
   const query = qs.stringify({
     default: 'mp',
     r: 'g',
     s: 50,
-  });
+  })
 
   return (
     <img
@@ -24,7 +24,7 @@ const Gravatar: React.FC = () => {
       style={{ borderRadius: '50%' }}
       width={25}
     />
-  );
-};
+  )
+}
 
-export default Gravatar;
+export default Gravatar

@@ -1,47 +1,47 @@
-import Editor from '@monaco-editor/react';
-import React from 'react';
+import Editor from '@monaco-editor/react'
+import React from 'react'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import { useTheme } from '../../utilities/Theme';
-import { ShimmerEffect } from '../ShimmerEffect';
-import './index.scss';
+import { useTheme } from '../../utilities/Theme'
+import { ShimmerEffect } from '../ShimmerEffect'
+import './index.scss'
 
-const baseClass = 'code-editor';
+const baseClass = 'code-editor'
 
 const CodeEditor: React.FC<Props> = (props) => {
-  const { className, height, options, readOnly, ...rest } = props;
+  const { className, height, options, readOnly, ...rest } = props
 
-  const { theme } = useTheme();
+  const { theme } = useTheme()
 
   const classes = [
     baseClass,
     className,
     rest?.defaultLanguage ? `language--${rest.defaultLanguage}` : '',
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <Editor
-      options={
-        {
-          detectIndentation: true,
-          minimap: {
-            enabled: false,
-          },
-          readOnly: Boolean(readOnly),
-          scrollBeyondLastLine: false,
-          tabSize: 2,
-          wordWrap: 'on',
-          ...options,
-        }
-      }
+      options={{
+        detectIndentation: true,
+        minimap: {
+          enabled: false,
+        },
+        readOnly: Boolean(readOnly),
+        scrollBeyondLastLine: false,
+        tabSize: 2,
+        wordWrap: 'on',
+        ...options,
+      }}
       className={classes}
       height={height}
       loading={<ShimmerEffect height={height} />}
       theme={theme === 'dark' ? 'vs-dark' : 'vs'}
       {...rest}
     />
-  );
-};
+  )
+}
 
-export default CodeEditor;
+export default CodeEditor

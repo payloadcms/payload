@@ -1,17 +1,17 @@
-import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import { textarea } from '../../../../../fields/validations';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import { useConfig } from '../../../utilities/Config';
-import { useLocale } from '../../../utilities/Locale';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import { isFieldRTL } from '../shared';
-import TextareaInput from './Input';
-import './index.scss';
+import { textarea } from '../../../../../fields/validations'
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import { useConfig } from '../../../utilities/Config'
+import { useLocale } from '../../../utilities/Locale'
+import useField from '../../useField'
+import withCondition from '../../withCondition'
+import { isFieldRTL } from '../shared'
+import TextareaInput from './Input'
+import './index.scss'
 
 const Textarea: React.FC<Props> = (props) => {
   const {
@@ -34,40 +34,38 @@ const Textarea: React.FC<Props> = (props) => {
     path: pathFromProps,
     required,
     validate = textarea,
-  } = props;
+  } = props
 
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation()
 
-  const path = pathFromProps || name;
+  const path = pathFromProps || name
 
-  const locale = useLocale();
+  const locale = useLocale()
 
-  const { localization } = useConfig();
+  const { localization } = useConfig()
   const isRTL = isFieldRTL({
     fieldLocalized: localized,
     fieldRTL: rtl,
     locale,
     localizationConfig: localization || undefined,
-  });
-  const memoizedValidate = useCallback((value, options) => {
-    return validate(value, { ...options, maxLength, minLength, required });
-  }, [validate, required, maxLength, minLength]);
+  })
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      return validate(value, { ...options, maxLength, minLength, required })
+    },
+    [validate, required, maxLength, minLength],
+  )
 
-  const {
-    errorMessage,
-    setValue,
-    showError,
-    value,
-  } = useField({
+  const { errorMessage, setValue, showError, value } = useField({
     condition,
     path,
     validate: memoizedValidate,
-  });
+  })
 
   return (
     <TextareaInput
       onChange={(e) => {
-        setValue(e.target.value);
+        setValue(e.target.value)
       }}
       className={className}
       description={description}
@@ -85,6 +83,6 @@ const Textarea: React.FC<Props> = (props) => {
       value={value as string}
       width={width}
     />
-  );
-};
-export default withCondition(Textarea);
+  )
+}
+export default withCondition(Textarea)

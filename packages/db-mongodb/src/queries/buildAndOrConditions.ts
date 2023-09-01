@@ -1,7 +1,7 @@
-import type { Payload } from 'payload';
-import type { Field, Where } from 'payload/types';
+import type { Payload } from 'payload'
+import type { Field, Where } from 'payload/types'
 
-import { parseParams } from './parseParams';
+import { parseParams } from './parseParams'
 
 export async function buildAndOrConditions({
   collectionSlug,
@@ -11,14 +11,14 @@ export async function buildAndOrConditions({
   payload,
   where,
 }: {
-  collectionSlug?: string,
-  fields: Field[],
-  globalSlug?: string,
-  locale?: string,
-  payload: Payload,
-  where: Where[],
+  collectionSlug?: string
+  fields: Field[]
+  globalSlug?: string
+  locale?: string
+  payload: Payload
+  where: Where[]
 }): Promise<Record<string, unknown>[]> {
-  const completedConditions = [];
+  const completedConditions = []
   // Loop over all AND / OR operations and add them to the AND / OR query param
   // Operations should come through as an array
   // eslint-disable-next-line no-restricted-syntax
@@ -33,11 +33,11 @@ export async function buildAndOrConditions({
         locale,
         payload,
         where: condition,
-      });
+      })
       if (Object.keys(result).length > 0) {
-        completedConditions.push(result);
+        completedConditions.push(result)
       }
     }
   }
-  return completedConditions;
+  return completedConditions
 }

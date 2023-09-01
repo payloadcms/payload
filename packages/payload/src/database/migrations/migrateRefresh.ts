@@ -1,29 +1,29 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { PayloadRequest } from '../../express/types';
-import type { DatabaseAdapter } from '../types';
+import type { PayloadRequest } from '../../express/types'
+import type { DatabaseAdapter } from '../types'
 
-import { readMigrationFiles } from './readMigrationFiles';
+import { readMigrationFiles } from './readMigrationFiles'
 
 /**
  * Reset and re-run all migrations.
  */
 export async function migrateRefresh(this: DatabaseAdapter) {
-  const { payload } = this;
-  const migrationFiles = await readMigrationFiles({ payload });
+  const { payload } = this
+  const migrationFiles = await readMigrationFiles({ payload })
 
   // Clear all migrations
   await payload.delete({
     collection: 'payload-migrations',
     where: {}, // All migrations
-  });
-  let transactionID;
+  })
+  let transactionID
   // Run all migrations
   for (const migration of migrationFiles) {
-    payload.logger.info({ msg: `Migrating: ${migration.name}` });
+    payload.logger.info({ msg: `Migrating: ${migration.name}` })
     try {
-      const start = Date.now();
-      transactionID = await this.beginTransaction();
-      await migration.up({ payload });
+      const start = Date.now()
+      transactionID = await this.beginTransaction()
+      await migration.up({ payload })
       await payload.create({
         collection: 'payload-migrations',
         data: {
@@ -33,17 +33,17 @@ export async function migrateRefresh(this: DatabaseAdapter) {
         req: {
           transactionID,
         } as PayloadRequest,
-      });
-      await this.commitTransaction(transactionID);
+      })
+      await this.commitTransaction(transactionID)
 
-      payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` });
+      payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     } catch (err: unknown) {
-      await this.rollbackTransaction(transactionID);
+      await this.rollbackTransaction(transactionID)
       payload.logger.error({
         err,
         msg: `Error running migration ${migration.name}`,
-      });
-      throw err;
+      })
+      throw err
     }
   }
 }

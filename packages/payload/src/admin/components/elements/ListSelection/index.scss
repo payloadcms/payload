@@ -12,8 +12,7 @@
     cursor: pointer;
   }
 
-
   @include small-break {
-    margin-bottom: base(.5);
+    margin-bottom: base(0.5);
   }
 }

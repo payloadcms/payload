@@ -8,4 +8,4 @@ export async function up(payload: Payload): Promise<void> {
 export async function down(payload: Payload): Promise<void> {
   // Migration code
 };
-`;
+`

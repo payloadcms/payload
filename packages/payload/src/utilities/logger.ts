@@ -1,6 +1,6 @@
-import pino from 'pino';
+import pino from 'pino'
 
-export type PayloadLogger = pino.Logger;
+export type PayloadLogger = pino.Logger
 
 const defaultLoggerOptions: pino.LoggerOptions = {
   transport: {
@@ -11,12 +11,20 @@ const defaultLoggerOptions: pino.LoggerOptions = {
     },
     target: 'pino-pretty',
   },
-};
+}
 
-const getLogger = (name = 'payload', options?: pino.LoggerOptions, destination?: pino.DestinationStream): PayloadLogger => pino({
-  enabled: process.env.DISABLE_LOGGING !== 'true',
-  name: options?.name || name,
-  ...(options || defaultLoggerOptions),
-}, destination);
+const getLogger = (
+  name = 'payload',
+  options?: pino.LoggerOptions,
+  destination?: pino.DestinationStream,
+): PayloadLogger =>
+  pino(
+    {
+      enabled: process.env.DISABLE_LOGGING !== 'true',
+      name: options?.name || name,
+      ...(options || defaultLoggerOptions),
+    },
+    destination,
+  )
 
-export default getLogger;
+export default getLogger

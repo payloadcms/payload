@@ -1,53 +1,44 @@
-import type { PaginateOptions } from 'mongoose';
-import type { QueryDrafts } from 'payload/database';
-import type { PayloadRequest } from 'payload/types';
+import type { PaginateOptions } from 'mongoose'
+import type { QueryDrafts } from 'payload/database'
+import type { PayloadRequest } from 'payload/types'
 
-import { flattenWhereToOperators } from 'payload/database';
+import { flattenWhereToOperators } from 'payload/database'
 
-import type { MongooseAdapter } from '.';
+import type { MongooseAdapter } from '.'
 
-import { buildSortParam } from './queries/buildSortParam';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
-import { withSession } from './withSession';
+import { buildSortParam } from './queries/buildSortParam'
+import sanitizeInternalFields from './utilities/sanitizeInternalFields'
+import { withSession } from './withSession'
 
 type AggregateVersion<T> = {
-  _id: string;
-  createdAt: string;
-  updatedAt: string;
-  version: T;
-};
+  _id: string
+  createdAt: string
+  updatedAt: string
+  version: T
+}
 
 export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
   this: MongooseAdapter,
-  {
-    collection,
-    limit,
-    locale,
-    page,
-    pagination,
-    req = {} as PayloadRequest,
-    sort: sortArg,
-    where,
-  },
+  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
 ) {
-  const VersionModel = this.versions[collection];
-  const collectionConfig = this.payload.collections[collection].config;
-  const options = withSession(this, req.transactionID);
+  const VersionModel = this.versions[collection]
+  const collectionConfig = this.payload.collections[collection].config
+  const options = withSession(this, req.transactionID)
 
   const versionQuery = await VersionModel.buildQuery({
     locale,
     payload: this.payload,
     where,
-  });
+  })
 
-  let hasNearConstraint = false;
+  let hasNearConstraint = false
 
   if (where) {
-    const constraints = flattenWhereToOperators(where);
-    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+    const constraints = flattenWhereToOperators(where)
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
   }
 
-  let sort;
+  let sort
   if (!hasNearConstraint) {
     sort = buildSortParam({
       config: this.payload.config,
@@ -55,7 +46,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
       locale,
       sort: sortArg || collectionConfig.defaultSort,
       timestamps: true,
-    });
+    })
   }
 
   const aggregate = VersionModel.aggregate<AggregateVersion<T>>(
@@ -78,16 +69,18 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
       ...options,
       allowDiskUse: true,
     },
-  );
+  )
 
-  let result;
+  let result
 
   if (pagination) {
-    let useEstimatedCount;
+    let useEstimatedCount
 
     if (where) {
-      const constraints = flattenWhereToOperators(where);
-      useEstimatedCount = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+      const constraints = flattenWhereToOperators(where)
+      useEstimatedCount = constraints.some((prop) =>
+        Object.keys(prop).some((key) => key === 'near'),
+      )
     }
 
     const aggregatePaginateOptions: PaginateOptions = {
@@ -104,17 +97,14 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
       useCustomCountFn: pagination ? undefined : () => Promise.resolve(1),
       useEstimatedCount,
       useFacet: this.connectOptions.useFacet,
-    };
+    }
 
-    result = await VersionModel.aggregatePaginate(
-      aggregate,
-      aggregatePaginateOptions,
-    );
+    result = await VersionModel.aggregatePaginate(aggregate, aggregatePaginateOptions)
   } else {
-    result = aggregate.exec();
+    result = aggregate.exec()
   }
 
-  const docs = JSON.parse(JSON.stringify(result.docs));
+  const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
     ...result,
@@ -126,9 +116,9 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
         ...doc.version,
         createdAt: doc.createdAt,
         updatedAt: doc.updatedAt,
-      };
+      }
 
-      return sanitizeInternalFields(doc);
+      return sanitizeInternalFields(doc)
     }),
-  };
-};
+  }
+}

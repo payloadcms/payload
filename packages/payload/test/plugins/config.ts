@@ -1,7 +1,7 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
 
-export const pagesSlug = 'pages';
+export const pagesSlug = 'pages'
 
 export default buildConfigWithDefaults({
   collections: [
@@ -15,7 +15,7 @@ export default buildConfigWithDefaults({
     async (config) => ({
       ...config,
       collections: [
-        ...config.collections || [],
+        ...(config.collections || []),
         {
           slug: pagesSlug,
           fields: [
@@ -35,6 +35,6 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
   },
-});
+})

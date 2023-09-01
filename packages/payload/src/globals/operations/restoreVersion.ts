@@ -1,13 +1,13 @@
-import type { PayloadRequest } from '../../express/types';
-import type { TypeWithVersion } from '../../versions/types';
-import type { SanitizedGlobalConfig } from '../config/types';
+import type { PayloadRequest } from '../../express/types'
+import type { TypeWithVersion } from '../../versions/types'
+import type { SanitizedGlobalConfig } from '../config/types'
 
-import executeAccess from '../../auth/executeAccess';
-import { NotFound } from '../../errors';
-import { afterChange } from '../../fields/hooks/afterChange';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import executeAccess from '../../auth/executeAccess'
+import { NotFound } from '../../errors'
+import { afterChange } from '../../fields/hooks/afterChange'
+import { afterRead } from '../../fields/hooks/afterRead'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
 
 export type Arguments = {
   depth?: number
@@ -24,23 +24,20 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     globalConfig,
     id,
     overrideAccess,
-    req: {
-      payload,
-      t,
-    },
+    req: { payload, t },
     req,
     showHiddenFields,
-  } = args;
+  } = args
 
   try {
-    const shouldCommit = await initTransaction(req);
+    const shouldCommit = await initTransaction(req)
 
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
     if (!overrideAccess) {
-      await executeAccess({ req }, globalConfig.access.update);
+      await executeAccess({ req }, globalConfig.access.update)
     }
 
     // /////////////////////////////////////
@@ -52,14 +49,13 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
       limit: 1,
       req,
       where: { id: { equals: id } },
-    });
-
+    })
 
     if (!versionDocs || versionDocs.length === 0) {
-      throw new NotFound(t);
+      throw new NotFound(t)
     }
 
-    const rawVersion = versionDocs[0];
+    const rawVersion = versionDocs[0]
 
     // /////////////////////////////////////
     // fetch previousDoc
@@ -69,7 +65,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
       depth,
       req,
       slug: globalConfig.slug,
-    });
+    })
 
     // /////////////////////////////////////
     // Update global
@@ -77,20 +73,20 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
     const global = await payload.db.findGlobal({
       slug: globalConfig.slug,
-    });
+    })
 
-    let result = rawVersion.version;
+    let result = rawVersion.version
 
     if (global) {
       result = await payload.db.updateGlobal({
         data: result,
         slug: globalConfig.slug,
-      });
+      })
     } else {
       result = await payload.db.createGlobal({
         data: result,
         slug: globalConfig.slug,
-      });
+      })
     }
 
     // /////////////////////////////////////
@@ -105,20 +101,21 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
       overrideAccess,
       req,
       showHiddenFields,
-    });
+    })
 
     // /////////////////////////////////////
     // afterRead - Global
     // /////////////////////////////////////
 
     await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      result = await hook({
-        doc: result,
-        req,
-      }) || result;
-    }, Promise.resolve());
+      result =
+        (await hook({
+          doc: result,
+          req,
+        })) || result
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // afterChange - Fields
@@ -132,29 +129,30 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
       operation: 'update',
       previousDoc,
       req,
-    });
+    })
 
     // /////////////////////////////////////
     // afterChange - Global
     // /////////////////////////////////////
 
     await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      result = await hook({
-        doc: result,
-        previousDoc,
-        req,
-      }) || result;
-    }, Promise.resolve());
+      result =
+        (await hook({
+          doc: result,
+          previousDoc,
+          req,
+        })) || result
+    }, Promise.resolve())
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
-    return result;
+    return result
   } catch (error: unknown) {
-    await killTransaction(req);
-    throw error;
+    await killTransaction(req)
+    throw error
   }
 }
 
-export default restoreVersion;
+export default restoreVersion

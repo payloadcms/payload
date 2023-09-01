@@ -1,15 +1,15 @@
-import type { PaginateOptions } from 'mongoose';
-import type { FindGlobalVersions } from 'payload/database';
-import type { PayloadRequest } from 'payload/types';
+import type { PaginateOptions } from 'mongoose'
+import type { FindGlobalVersions } from 'payload/database'
+import type { PayloadRequest } from 'payload/types'
 
-import { flattenWhereToOperators } from 'payload/database';
-import { buildVersionGlobalFields } from 'payload/versions';
+import { flattenWhereToOperators } from 'payload/database'
+import { buildVersionGlobalFields } from 'payload/versions'
 
-import type { MongooseAdapter } from '.';
+import type { MongooseAdapter } from '.'
 
-import { buildSortParam } from './queries/buildSortParam';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
-import { withSession } from './withSession';
+import { buildSortParam } from './queries/buildSortParam'
+import sanitizeInternalFields from './utilities/sanitizeInternalFields'
+import { withSession } from './withSession'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: MongooseAdapter,
@@ -25,24 +25,24 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     where,
   },
 ) {
-  const Model = this.versions[global];
+  const Model = this.versions[global]
   const versionFields = buildVersionGlobalFields(
     this.payload.globals.config.find(({ slug }) => slug === global),
-  );
+  )
   const options = {
     ...withSession(this, req.transactionID),
     limit,
     skip,
-  };
-
-  let hasNearConstraint = false;
-
-  if (where) {
-    const constraints = flattenWhereToOperators(where);
-    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
   }
 
-  let sort;
+  let hasNearConstraint = false
+
+  if (where) {
+    const constraints = flattenWhereToOperators(where)
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
+  }
+
+  let sort
   if (!hasNearConstraint) {
     sort = buildSortParam({
       config: this.payload.config,
@@ -50,7 +50,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
       locale,
       sort: sortArg || '-updatedAt',
       timestamps: true,
-    });
+    })
   }
 
   const query = await Model.buildQuery({
@@ -58,7 +58,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     locale,
     payload: this.payload,
     where,
-  });
+  })
 
   const paginationOptions: PaginateOptions = {
     forceCountFn: hasNearConstraint,
@@ -70,23 +70,23 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     pagination,
     sort,
     useEstimatedCount: hasNearConstraint,
-  };
-
-  if (limit > 0) {
-    paginationOptions.limit = limit;
-    // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit;
   }
 
-  const result = await Model.paginate(query, paginationOptions);
-  const docs = JSON.parse(JSON.stringify(result.docs));
+  if (limit > 0) {
+    paginationOptions.limit = limit
+    // limit must also be set here, it's ignored when pagination is false
+    paginationOptions.options.limit = limit
+  }
+
+  const result = await Model.paginate(query, paginationOptions)
+  const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
     ...result,
     docs: docs.map((doc) => {
       // eslint-disable-next-line no-param-reassign
-      doc.id = doc._id;
-      return sanitizeInternalFields(doc);
+      doc.id = doc._id
+      return sanitizeInternalFields(doc)
     }),
-  };
-};
+  }
+}

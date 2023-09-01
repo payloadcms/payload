@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../src/collections/config/types'
 
-export const mediaSlug = 'media';
+export const mediaSlug = 'media'
 
 export const MediaCollection: CollectionConfig = {
   slug: mediaSlug,
@@ -10,4 +10,4 @@ export const MediaCollection: CollectionConfig = {
     create: () => true,
   },
   fields: [],
-};
+}

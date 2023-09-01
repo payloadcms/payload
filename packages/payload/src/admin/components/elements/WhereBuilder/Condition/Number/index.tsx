@@ -1,14 +1,14 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import './index.scss';
+import './index.scss'
 
-const baseClass = 'condition-value-number';
+const baseClass = 'condition-value-number'
 
 const NumberField: React.FC<Props> = ({ onChange, value }) => {
-  const { t } = useTranslation('general');
+  const { t } = useTranslation('general')
   return (
     <input
       className={baseClass}
@@ -17,7 +17,7 @@ const NumberField: React.FC<Props> = ({ onChange, value }) => {
       type="number"
       value={value}
     />
-  );
-};
+  )
+}
 
-export default NumberField;
+export default NumberField

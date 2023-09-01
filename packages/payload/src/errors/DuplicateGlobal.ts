@@ -1,11 +1,11 @@
-import type { GlobalConfig } from '../globals/config/types';
+import type { GlobalConfig } from '../globals/config/types'
 
-import APIError from './APIError';
+import APIError from './APIError'
 
 class DuplicateGlobal extends APIError {
   constructor(config: GlobalConfig) {
-    super(`Global label "${config.label}" is already in use`);
+    super(`Global label "${config.label}" is already in use`)
   }
 }
 
-export default DuplicateGlobal;
+export default DuplicateGlobal

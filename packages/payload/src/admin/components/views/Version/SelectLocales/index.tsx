@@ -1,21 +1,19 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import ReactSelect from '../../../elements/ReactSelect';
-import './index.scss';
+import ReactSelect from '../../../elements/ReactSelect'
+import './index.scss'
 
-const baseClass = 'select-version-locales';
+const baseClass = 'select-version-locales'
 
 const SelectLocales: React.FC<Props> = ({ onChange, options, value }) => {
-  const { t } = useTranslation('version');
+  const { t } = useTranslation('version')
 
   return (
     <div className={baseClass}>
-      <div className={`${baseClass}__label`}>
-        {t('showLocales')}
-      </div>
+      <div className={`${baseClass}__label`}>{t('showLocales')}</div>
       <ReactSelect
         isMulti
         onChange={onChange}
@@ -24,7 +22,7 @@ const SelectLocales: React.FC<Props> = ({ onChange, options, value }) => {
         value={value.map(({ code }) => ({ label: code, value: code }))}
       />
     </div>
-  );
-};
+  )
+}
 
-export default SelectLocales;
+export default SelectLocales

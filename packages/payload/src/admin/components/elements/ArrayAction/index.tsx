@@ -1,17 +1,17 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import Chevron from '../../icons/Chevron';
-import Copy from '../../icons/Copy';
-import More from '../../icons/More';
-import Plus from '../../icons/Plus';
-import X from '../../icons/X';
-import Popup from '../Popup';
-import './index.scss';
+import Chevron from '../../icons/Chevron'
+import Copy from '../../icons/Copy'
+import More from '../../icons/More'
+import Plus from '../../icons/Plus'
+import X from '../../icons/X'
+import Popup from '../Popup'
+import './index.scss'
 
-const baseClass = 'array-actions';
+const baseClass = 'array-actions'
 
 export const ArrayAction: React.FC<Props> = ({
   addRow,
@@ -22,7 +22,7 @@ export const ArrayAction: React.FC<Props> = ({
   removeRow,
   rowCount,
 }) => {
-  const { t } = useTranslation('general');
+  const { t } = useTranslation('general')
   return (
     <Popup
       render={({ close }) => {
@@ -31,8 +31,8 @@ export const ArrayAction: React.FC<Props> = ({
             {index !== 0 && (
               <button
                 onClick={() => {
-                  moveRow(index, index - 1);
-                  close();
+                  moveRow(index, index - 1)
+                  close()
                 }}
                 className={`${baseClass}__action ${baseClass}__move-up`}
                 type="button"
@@ -44,8 +44,8 @@ export const ArrayAction: React.FC<Props> = ({
             {index < rowCount - 1 && (
               <button
                 onClick={() => {
-                  moveRow(index, index + 1);
-                  close();
+                  moveRow(index, index + 1)
+                  close()
                 }}
                 className={`${baseClass}__action ${baseClass}__move-down`}
                 type="button"
@@ -58,8 +58,8 @@ export const ArrayAction: React.FC<Props> = ({
               <React.Fragment>
                 <button
                   onClick={() => {
-                    addRow(index + 1);
-                    close();
+                    addRow(index + 1)
+                    close()
                   }}
                   className={`${baseClass}__action ${baseClass}__add`}
                   type="button"
@@ -69,8 +69,8 @@ export const ArrayAction: React.FC<Props> = ({
                 </button>
                 <button
                   onClick={() => {
-                    duplicateRow(index);
-                    close();
+                    duplicateRow(index)
+                    close()
                   }}
                   className={`${baseClass}__action ${baseClass}__duplicate`}
                   type="button"
@@ -82,8 +82,8 @@ export const ArrayAction: React.FC<Props> = ({
             )}
             <button
               onClick={() => {
-                removeRow(index);
-                close();
+                removeRow(index)
+                close()
               }}
               className={`${baseClass}__action ${baseClass}__remove`}
               type="button"
@@ -92,12 +92,12 @@ export const ArrayAction: React.FC<Props> = ({
               {t('remove')}
             </button>
           </React.Fragment>
-        );
+        )
       }}
       button={<More />}
       buttonClassName={`${baseClass}__button`}
       className={baseClass}
       horizontalAlign="center"
     />
-  );
-};
+  )
+}

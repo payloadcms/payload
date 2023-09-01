@@ -1,4 +1,4 @@
-import type { OnChange } from '../types';
+import type { OnChange } from '../types'
 
 export type Props = {
   isSelected: boolean

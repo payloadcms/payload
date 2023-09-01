@@ -1,4 +1,4 @@
-import defaultAccess from '../../auth/defaultAccess';
+import defaultAccess from '../../auth/defaultAccess'
 
 export const defaults = {
   access: {
@@ -42,7 +42,7 @@ export const defaults = {
   timestamps: true,
   upload: false,
   versions: false,
-};
+}
 
 export const authDefaults = {
   cookies: {
@@ -54,4 +54,4 @@ export const authDefaults = {
   maxLoginAttempts: 5,
   tokenExpiration: 7200,
   verify: false,
-};
+}

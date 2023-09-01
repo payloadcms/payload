@@ -1,13 +1,11 @@
-import { LinkButton } from './Button';
-import { LinkElement } from './Element';
-import { withLinks } from './utilities';
+import { LinkButton } from './Button'
+import { LinkElement } from './Element'
+import { withLinks } from './utilities'
 
 const link = {
   Button: LinkButton,
   Element: LinkElement,
-  plugins: [
-    withLinks,
-  ],
-};
+  plugins: [withLinks],
+}
 
-export default link;
+export default link

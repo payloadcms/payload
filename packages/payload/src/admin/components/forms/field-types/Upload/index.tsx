@@ -1,32 +1,23 @@
-import React, { useCallback } from 'react';
+import React, { useCallback } from 'react'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import { upload } from '../../../../../fields/validations';
-import { useConfig } from '../../../utilities/Config';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import UploadInput from './Input';
-import './index.scss';
+import { upload } from '../../../../../fields/validations'
+import { useConfig } from '../../../utilities/Config'
+import useField from '../../useField'
+import withCondition from '../../withCondition'
+import UploadInput from './Input'
+import './index.scss'
 
 const Upload: React.FC<Props> = (props) => {
   const {
     collections,
-    routes: {
-      api,
-    },
+    routes: { api },
     serverURL,
-  } = useConfig();
+  } = useConfig()
 
   const {
-    admin: {
-      className,
-      condition,
-      description,
-      readOnly,
-      style,
-      width,
-    } = {},
+    admin: { className, condition, description, readOnly, style, width } = {},
     fieldTypes,
     filterOptions,
     label,
@@ -35,33 +26,32 @@ const Upload: React.FC<Props> = (props) => {
     relationTo,
     required,
     validate = upload,
-  } = props;
+  } = props
 
-  const collection = collections.find((coll) => coll.slug === relationTo);
+  const collection = collections.find((coll) => coll.slug === relationTo)
 
-  const memoizedValidate = useCallback((value, options) => {
-    return validate(value, { ...options, required });
-  }, [validate, required]);
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
 
   const field = useField({
     condition,
     path,
     validate: memoizedValidate,
-  });
+  })
 
-  const {
-    errorMessage,
-    setValue,
-    showError,
-    value,
-  } = field;
+  const { errorMessage, setValue, showError, value } = field
 
-  const onChange = useCallback((incomingValue) => {
-    const incomingID = incomingValue?.id || incomingValue;
-    setValue(incomingID);
-  }, [
-    setValue,
-  ]);
+  const onChange = useCallback(
+    (incomingValue) => {
+      const incomingID = incomingValue?.id || incomingValue
+      setValue(incomingID)
+    },
+    [setValue],
+  )
 
   if (collection.upload) {
     return (
@@ -86,9 +76,9 @@ const Upload: React.FC<Props> = (props) => {
         value={value as string}
         width={width}
       />
-    );
+    )
   }
 
-  return null;
-};
-export default withCondition(Upload);
+  return null
+}
+export default withCondition(Upload)

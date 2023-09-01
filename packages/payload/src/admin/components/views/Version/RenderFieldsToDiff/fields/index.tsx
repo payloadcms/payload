@@ -1,9 +1,9 @@
-import Iterable from './Iterable';
-import Nested from './Nested';
-import Relationship from './Relationship';
-import Select from './Select';
-import Tabs from './Tabs';
-import Text from './Text';
+import Iterable from './Iterable'
+import Nested from './Nested'
+import Relationship from './Relationship'
+import Select from './Select'
+import Tabs from './Tabs'
+import Text from './Text'
 
 export default {
   array: Iterable,
@@ -26,4 +26,4 @@ export default {
   text: Text,
   textarea: Text,
   upload: Relationship,
-};
+}

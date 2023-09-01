@@ -1,26 +1,22 @@
-import type { MultiValueProps } from 'react-select';
+import type { MultiValueProps } from 'react-select'
 
-import React, { Fragment, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { components } from 'react-select';
+import React, { Fragment, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { components } from 'react-select'
 
-import type { Option } from '../../types';
+import type { Option } from '../../types'
 
-import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer';
-import Tooltip from '../../../../../elements/Tooltip';
-import Edit from '../../../../../icons/Edit';
-import { useAuth } from '../../../../../utilities/Auth';
-import './index.scss';
+import { useDocumentDrawer } from '../../../../../elements/DocumentDrawer'
+import Tooltip from '../../../../../elements/Tooltip'
+import Edit from '../../../../../icons/Edit'
+import { useAuth } from '../../../../../utilities/Auth'
+import './index.scss'
 
-const baseClass = 'relationship--multi-value-label';
+const baseClass = 'relationship--multi-value-label'
 
 export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   const {
-    data: {
-      label,
-      relationTo,
-      value,
-    },
+    data: { label, relationTo, value },
     selectProps: {
       customProps: {
         draggableProps,
@@ -28,21 +24,21 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
         // onSave,
       } = {},
     } = {},
-  } = props;
+  } = props
 
-  const { permissions } = useAuth();
-  const [showTooltip, setShowTooltip] = useState(false);
-  const { t } = useTranslation('general');
-  const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission);
+  const { permissions } = useAuth()
+  const [showTooltip, setShowTooltip] = useState(false)
+  const { t } = useTranslation('general')
+  const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission)
 
   const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
     collectionSlug: relationTo,
     id: value?.toString(),
-  });
+  })
 
   useEffect(() => {
-    if (typeof setDrawerIsOpen === 'function') setDrawerIsOpen(isDrawerOpen);
-  }, [isDrawerOpen, setDrawerIsOpen]);
+    if (typeof setDrawerIsOpen === 'function') setDrawerIsOpen(isDrawerOpen)
+  }, [isDrawerOpen, setDrawerIsOpen])
 
   return (
     <div className={baseClass}>
@@ -51,7 +47,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
           {...props}
           innerProps={{
             className: `${baseClass}__text`,
-            ...draggableProps || {},
+            ...(draggableProps || {}),
           }}
         />
       </div>
@@ -66,17 +62,14 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
             onMouseLeave={() => setShowTooltip(false)}
             onTouchEnd={(e) => e.stopPropagation()} // prevents react-select dropdown from opening
           >
-            <Tooltip
-              className={`${baseClass}__tooltip`}
-              show={showTooltip}
-            >
+            <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
               {t('editLabel', { label: '' })}
             </Tooltip>
             <Edit />
           </DocumentDrawerToggler>
-          <DocumentDrawer onSave={/* onSave */null} />
+          <DocumentDrawer onSave={/* onSave */ null} />
         </Fragment>
       )}
     </div>
-  );
-};
+  )
+}

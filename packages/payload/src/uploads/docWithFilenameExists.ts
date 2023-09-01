@@ -1,6 +1,11 @@
-import type { Payload } from '..';
+import type { Payload } from '..'
 
-const docWithFilenameExists = async (payload: Payload, collectionSlug: string, path: string, filename: string): Promise<boolean> => {
+const docWithFilenameExists = async (
+  payload: Payload,
+  collectionSlug: string,
+  path: string,
+  filename: string,
+): Promise<boolean> => {
   const doc = await payload.db.findOne({
     collection: collectionSlug,
     where: {
@@ -8,10 +13,10 @@ const docWithFilenameExists = async (payload: Payload, collectionSlug: string, p
         equals: filename,
       },
     },
-  });
-  if (doc) return true;
+  })
+  if (doc) return true
 
-  return false;
-};
+  return false
+}
 
-export default docWithFilenameExists;
+export default docWithFilenameExists

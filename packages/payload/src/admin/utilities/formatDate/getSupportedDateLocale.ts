@@ -4,7 +4,7 @@ export const getSupportedDateLocale = (locale = 'enUS'): string => {
     my: 'enUS', // Burmese is not currently supported
     ua: 'uk',
     zh: 'zhCN',
-  };
+  }
 
-  return formattedLocales[locale] || locale;
-};
+  return formattedLocales[locale] || locale
+}

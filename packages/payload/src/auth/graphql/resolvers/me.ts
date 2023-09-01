@@ -1,6 +1,6 @@
-import type { Collection } from '../../../collections/config/types';
+import type { Collection } from '../../../collections/config/types'
 
-import me from '../../operations/me';
+import me from '../../operations/me'
 
 function meResolver(collection: Collection): any {
   async function resolver(_, args, context) {
@@ -8,10 +8,10 @@ function meResolver(collection: Collection): any {
       collection,
       depth: 0,
       req: context.req,
-    };
-    return me(options);
+    }
+    return me(options)
   }
-  return resolver;
+  return resolver
 }
 
-export default meResolver;
+export default meResolver

@@ -1,16 +1,16 @@
-import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import { email } from '../../../../../fields/validations';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import Label from '../../Label';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import './index.scss';
+import { email } from '../../../../../fields/validations'
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import Error from '../../Error'
+import FieldDescription from '../../FieldDescription'
+import Label from '../../Label'
+import useField from '../../useField'
+import withCondition from '../../withCondition'
+import './index.scss'
 
 const Email: React.FC<Props> = (props) => {
   const {
@@ -29,36 +29,30 @@ const Email: React.FC<Props> = (props) => {
     path: pathFromProps,
     required,
     validate = email,
-  } = props;
+  } = props
 
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation()
 
-  const path = pathFromProps || name;
+  const path = pathFromProps || name
 
-  const memoizedValidate = useCallback((value, options) => {
-    return validate(value, { ...options, required });
-  }, [validate, required]);
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
 
   const fieldType = useField({
     condition,
     path,
     validate: memoizedValidate,
-  });
+  })
 
-  const {
-    errorMessage,
-    setValue,
-    showError,
-    value,
-  } = fieldType;
+  const { errorMessage, setValue, showError, value } = fieldType
 
-  const classes = [
-    'field-type',
-    'email',
-    className,
-    showError && 'error',
-    readOnly && 'read-only',
-  ].filter(Boolean).join(' ');
+  const classes = ['field-type', 'email', className, showError && 'error', readOnly && 'read-only']
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <div
@@ -68,15 +62,8 @@ const Email: React.FC<Props> = (props) => {
       }}
       className={classes}
     >
-      <Error
-        message={errorMessage}
-        showError={showError}
-      />
-      <Label
-        htmlFor={`field-${path.replace(/\./g, '__')}`}
-        label={label}
-        required={required}
-      />
+      <Error message={errorMessage} showError={showError} />
+      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <input
         autoComplete={autoComplete}
         disabled={Boolean(readOnly)}
@@ -85,14 +72,11 @@ const Email: React.FC<Props> = (props) => {
         onChange={setValue}
         placeholder={getTranslation(placeholder, i18n)}
         type="email"
-        value={value as string || ''}
+        value={(value as string) || ''}
       />
-      <FieldDescription
-        description={description}
-        value={value}
-      />
+      <FieldDescription description={description} value={value} />
     </div>
-  );
-};
+  )
+}
 
-export default withCondition(Email);
+export default withCondition(Email)

@@ -1,9 +1,9 @@
-import type { Payload } from 'payload';
-import type { Field, Where } from 'payload/types';
+import type { Payload } from 'payload'
+import type { Field, Where } from 'payload/types'
 
-import { QueryError } from 'payload/errors';
+import { QueryError } from 'payload/errors'
 
-import { parseParams } from './parseParams';
+import { parseParams } from './parseParams'
 
 type GetBuildQueryPluginArgs = {
   collectionSlug?: string
@@ -19,25 +19,27 @@ export type BuildQueryArgs = {
 
 // This plugin asynchronously builds a list of Mongoose query constraints
 // which can then be used in subsequent Mongoose queries.
-const getBuildQueryPlugin = ({
-  collectionSlug,
-  versionsFields,
-}: GetBuildQueryPluginArgs = {}) => {
+const getBuildQueryPlugin = ({ collectionSlug, versionsFields }: GetBuildQueryPluginArgs = {}) => {
   return function buildQueryPlugin(schema) {
-    const modifiedSchema = schema;
-    async function buildQuery({ globalSlug, locale, payload, where }: BuildQueryArgs): Promise<Record<string, unknown>> {
-      let fields = versionsFields;
+    const modifiedSchema = schema
+    async function buildQuery({
+      globalSlug,
+      locale,
+      payload,
+      where,
+    }: BuildQueryArgs): Promise<Record<string, unknown>> {
+      let fields = versionsFields
       if (!fields) {
         if (globalSlug) {
-          const globalConfig = payload.globals.config.find(({ slug }) => slug === globalSlug);
-          fields = globalConfig.fields;
+          const globalConfig = payload.globals.config.find(({ slug }) => slug === globalSlug)
+          fields = globalConfig.fields
         }
         if (collectionSlug) {
-          const collectionConfig = payload.collections[collectionSlug].config;
-          fields = collectionConfig.fields;
+          const collectionConfig = payload.collections[collectionSlug].config
+          fields = collectionConfig.fields
         }
       }
-      const errors = [];
+      const errors = []
       const result = await parseParams({
         collectionSlug,
         fields,
@@ -45,16 +47,16 @@ const getBuildQueryPlugin = ({
         locale,
         payload,
         where,
-      });
+      })
 
       if (errors.length > 0) {
-        throw new QueryError(errors);
+        throw new QueryError(errors)
       }
 
-      return result;
+      return result
     }
-    modifiedSchema.statics.buildQuery = buildQuery;
-  };
-};
+    modifiedSchema.statics.buildQuery = buildQuery
+  }
+}
 
-export default getBuildQueryPlugin;
+export default getBuildQueryPlugin

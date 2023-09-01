@@ -29,7 +29,7 @@
     padding: 0;
 
     li:not(:last-child) {
-      margin-bottom: base(.375);
+      margin-bottom: base(0.375);
     }
   }
 
@@ -37,12 +37,12 @@
     @extend %btn-reset;
     cursor: pointer;
     display: block;
-    padding: base(.125) 0;
+    padding: base(0.125) 0;
     text-align: center;
     width: 100%;
 
     &:hover {
-      opacity: .7;
+      opacity: 0.7;
     }
   }
 }

@@ -1,7 +1,7 @@
-import type React from 'react';
-import type { DiffMethod } from 'react-diff-viewer-continued';
+import type React from 'react'
+import type { DiffMethod } from 'react-diff-viewer-continued'
 
-import type { FieldPermissions } from '../../../../../../auth';
+import type { FieldPermissions } from '../../../../../../auth'
 
 export type FieldComponents = Record<string, React.FC<Props>>
 

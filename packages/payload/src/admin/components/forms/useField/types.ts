@@ -1,5 +1,5 @@
-import type { Condition, Validate } from '../../../../fields/config/types';
-import type { Row } from '../Form/types';
+import type { Condition, Validate } from '../../../../fields/config/types'
+import type { Row } from '../Form/types'
 
 export type Options = {
   condition?: Condition

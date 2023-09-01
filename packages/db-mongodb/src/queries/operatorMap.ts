@@ -12,4 +12,4 @@ export const operatorMap = {
   not_equals: '$ne',
   not_in: '$nin',
   within: '$geoWithin',
-};
+}

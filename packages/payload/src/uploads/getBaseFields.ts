@@ -1,12 +1,18 @@
-import type { CollectionConfig } from '../collections/config/types';
-import type { Config } from '../config/types';
-import type { Field } from '../fields/config/types';
-import type { IncomingUploadType } from './types';
+import type { CollectionConfig } from '../collections/config/types'
+import type { Config } from '../config/types'
+import type { Field } from '../fields/config/types'
+import type { IncomingUploadType } from './types'
 
-import { extractTranslations } from '../translations/extractTranslations';
-import { mimeTypeValidator } from './mimeTypeValidator';
+import { extractTranslations } from '../translations/extractTranslations'
+import { mimeTypeValidator } from './mimeTypeValidator'
 
-const labels = extractTranslations(['upload:width', 'upload:height', 'upload:fileSize', 'upload:fileName', 'upload:sizes']);
+const labels = extractTranslations([
+  'upload:width',
+  'upload:height',
+  'upload:fileSize',
+  'upload:fileName',
+  'upload:sizes',
+])
 
 type Options = {
   collection: CollectionConfig
@@ -14,7 +20,8 @@ type Options = {
 }
 
 const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
-  const uploadOptions: IncomingUploadType = typeof collection.upload === 'object' ? collection.upload : {};
+  const uploadOptions: IncomingUploadType =
+    typeof collection.upload === 'object' ? collection.upload : {}
 
   const mimeType: Field = {
     admin: {
@@ -24,7 +31,7 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
     label: 'MIME Type',
     name: 'mimeType',
     type: 'text',
-  };
+  }
 
   const url: Field = {
     admin: {
@@ -34,7 +41,7 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
     label: 'URL',
     name: 'url',
     type: 'text',
-  };
+  }
 
   const width: Field = {
     admin: {
@@ -44,7 +51,7 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
     label: labels['upload:width'],
     name: 'width',
     type: 'number',
-  };
+  }
 
   const height: Field = {
     admin: {
@@ -54,7 +61,7 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
     label: labels['upload:height'],
     name: 'height',
     type: 'number',
-  };
+  }
 
   const filesize: Field = {
     admin: {
@@ -64,7 +71,7 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
     label: labels['upload:fileSize'],
     name: 'filesize',
     type: 'number',
-  };
+  }
 
   const filename: Field = {
     admin: {
@@ -77,7 +84,7 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
     name: 'filename',
     type: 'text',
     unique: true,
-  };
+  }
 
   let uploadFields: Field[] = [
     {
@@ -87,12 +94,12 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
           ({ data }) => {
             if (data?.filename) {
               if (uploadOptions.staticURL.startsWith('/')) {
-                return `${config.serverURL}${uploadOptions.staticURL}/${data.filename}`;
+                return `${config.serverURL}${uploadOptions.staticURL}/${data.filename}`
               }
-              return `${uploadOptions.staticURL}/${data.filename}`;
+              return `${uploadOptions.staticURL}/${data.filename}`
             }
 
-            return undefined;
+            return undefined
           },
         ],
       },
@@ -102,10 +109,10 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
     filesize,
     width,
     height,
-  ];
+  ]
 
   if (uploadOptions.mimeTypes) {
-    mimeType.validate = mimeTypeValidator(uploadOptions.mimeTypes);
+    mimeType.validate = mimeTypeValidator(uploadOptions.mimeTypes)
   }
 
   if (uploadOptions.imageSizes) {
@@ -124,16 +131,16 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
               hooks: {
                 afterRead: [
                   ({ data }) => {
-                    const sizeFilename = data?.sizes?.[size.name]?.filename;
+                    const sizeFilename = data?.sizes?.[size.name]?.filename
 
                     if (sizeFilename) {
                       if (uploadOptions.staticURL.startsWith('/')) {
-                        return `${config.serverURL}${uploadOptions.staticURL}/${sizeFilename}`;
+                        return `${config.serverURL}${uploadOptions.staticURL}/${sizeFilename}`
                       }
-                      return `${uploadOptions.staticURL}/${sizeFilename}`;
+                      return `${uploadOptions.staticURL}/${sizeFilename}`
                     }
 
-                    return undefined;
+                    return undefined
                   },
                 ],
               },
@@ -155,9 +162,9 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
         name: 'sizes',
         type: 'group',
       },
-    ]);
+    ])
   }
-  return uploadFields;
-};
+  return uploadFields
+}
 
-export default getBaseUploadFields;
+export default getBaseUploadFields

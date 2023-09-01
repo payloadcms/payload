@@ -1,25 +1,29 @@
-import type { NextFunction, Response } from 'express';
+import type { NextFunction, Response } from 'express'
 
-import httpStatus from 'http-status';
+import httpStatus from 'http-status'
 
-import type { PaginatedDocs } from '../../database/types';
-import type { PayloadRequest } from '../../express/types';
-import type { Where } from '../../types';
-import type { TypeWithID } from '../config/types';
+import type { PaginatedDocs } from '../../database/types'
+import type { PayloadRequest } from '../../express/types'
+import type { Where } from '../../types'
+import type { TypeWithID } from '../config/types'
 
-import { isNumber } from '../../utilities/isNumber';
-import find from '../operations/find';
+import { isNumber } from '../../utilities/isNumber'
+import find from '../operations/find'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default async function findHandler<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
+export default async function findHandler<T extends TypeWithID = any>(
+  req: PayloadRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<Response<PaginatedDocs<T>> | void> {
   try {
-    let page: number | undefined;
+    let page: number | undefined
 
     if (typeof req.query.page === 'string') {
-      const parsedPage = parseInt(req.query.page, 10);
+      const parsedPage = parseInt(req.query.page, 10)
 
       if (!Number.isNaN(parsedPage)) {
-        page = parsedPage;
+        page = parsedPage
       }
     }
 
@@ -32,10 +36,10 @@ export default async function findHandler<T extends TypeWithID = any>(req: Paylo
       req,
       sort: req.query.sort as string,
       where: req.query.where as Where, // This is a little shady
-    });
+    })
 
-    return res.status(httpStatus.OK).json(result);
+    return res.status(httpStatus.OK).json(result)
   } catch (error) {
-    return next(error);
+    return next(error)
   }
 }

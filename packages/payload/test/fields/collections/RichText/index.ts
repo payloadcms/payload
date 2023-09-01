@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../src/collections/config/types'
 
-import { loremIpsum } from './loremIpsum';
+import { loremIpsum } from './loremIpsum'
 
 const RichTextFields: CollectionConfig = {
   slug: 'rich-text-fields',
@@ -18,7 +18,8 @@ const RichTextFields: CollectionConfig = {
       hasMany: true,
       type: 'select',
       admin: {
-        description: 'This select field is rendered here to ensure its options dropdown renders above the rich text toolbar.',
+        description:
+          'This select field is rendered here to ensure its options dropdown renders above the rich text toolbar.',
       },
       options: [
         {
@@ -74,11 +75,10 @@ const RichTextFields: CollectionConfig = {
               label: 'Rel Attribute',
               type: 'select',
               hasMany: true,
-              options: [
-                'noopener', 'noreferrer', 'nofollow',
-              ],
+              options: ['noopener', 'noreferrer', 'nofollow'],
               admin: {
-                description: 'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
+                description:
+                  'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
               },
             },
           ],
@@ -124,7 +124,7 @@ const RichTextFields: CollectionConfig = {
                 name: 'customLinkField',
                 type: 'text',
               },
-            ];
+            ]
           },
         },
         upload: {
@@ -167,11 +167,10 @@ const RichTextFields: CollectionConfig = {
               label: 'Rel Attribute',
               type: 'select',
               hasMany: true,
-              options: [
-                'noopener', 'noreferrer', 'nofollow',
-              ],
+              options: ['noopener', 'noreferrer', 'nofollow'],
               admin: {
-                description: 'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
+                description:
+                  'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
               },
             },
           ],
@@ -215,7 +214,7 @@ const RichTextFields: CollectionConfig = {
       ],
     },
   ],
-};
+}
 
 function generateRichText() {
   return [
@@ -340,7 +339,7 @@ function generateRichText() {
                   text: loremIpsum,
                 },
               ],
-            };
+            }
           }),
         ],
       },
@@ -359,9 +358,9 @@ function generateRichText() {
             text: loremIpsum,
           },
         ],
-      };
+      }
     }),
-  ];
+  ]
 }
 
 export const richTextBulletsDoc = {
@@ -465,7 +464,7 @@ export const richTextBulletsDoc = {
       ],
     },
   ],
-};
+}
 
 export const richTextBlocks = [
   {
@@ -485,7 +484,7 @@ export const richTextBlocks = [
       },
     ],
   },
-];
+]
 export const richTextDoc = {
   title: 'Rich Text',
   selectHasMany: ['one', 'five'],
@@ -493,6 +492,6 @@ export const richTextDoc = {
   richTextReadOnly: generateRichText(),
   richTextCustomFields: generateRichText(),
   blocks: richTextBlocks,
-};
+}
 
-export default RichTextFields;
+export default RichTextFields

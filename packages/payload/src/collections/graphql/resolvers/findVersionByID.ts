@@ -1,11 +1,11 @@
 /* eslint-disable no-param-reassign */
-import type { Response } from 'express';
+import type { Response } from 'express'
 
-import type { PayloadRequest } from '../../../express/types';
-import type { TypeWithVersion } from '../../../versions/types';
-import type { Collection, TypeWithID } from '../../config/types';
+import type { PayloadRequest } from '../../../express/types'
+import type { TypeWithVersion } from '../../../versions/types'
+import type { Collection, TypeWithID } from '../../config/types'
 
-import findVersionByID from '../../operations/findVersionByID';
+import findVersionByID from '../../operations/findVersionByID'
 
 export type Resolver<T extends TypeWithID = any> = (
   _: unknown,
@@ -16,15 +16,15 @@ export type Resolver<T extends TypeWithID = any> = (
     locale?: string
   },
   context: {
-    req: PayloadRequest,
+    req: PayloadRequest
     res: Response
-  }
+  },
 ) => Promise<TypeWithVersion<T>>
 
 export default function findVersionByIDResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context) {
-    if (args.locale) context.req.locale = args.locale;
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
+    if (args.locale) context.req.locale = args.locale
+    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
 
     const options = {
       collection,
@@ -32,10 +32,10 @@ export default function findVersionByIDResolver(collection: Collection): Resolve
       draft: args.draft,
       id: args.id,
       req: context.req,
-    };
+    }
 
-    const result = await findVersionByID(options);
+    const result = await findVersionByID(options)
 
-    return result;
-  };
+    return result
+  }
 }

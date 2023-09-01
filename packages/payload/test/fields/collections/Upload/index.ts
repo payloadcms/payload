@@ -1,6 +1,6 @@
-import path from 'path';
+import path from 'path'
 
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../src/collections/config/types'
 
 const Uploads: CollectionConfig = {
   slug: 'uploads',
@@ -27,10 +27,10 @@ const Uploads: CollectionConfig = {
       name: 'richText',
     },
   ],
-};
+}
 
 export const uploadsDoc = {
   text: 'An upload here',
-};
+}
 
-export default Uploads;
+export default Uploads

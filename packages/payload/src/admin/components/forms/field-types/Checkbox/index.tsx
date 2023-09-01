@@ -1,29 +1,22 @@
-import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import { checkbox } from '../../../../../fields/validations';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import { CheckboxInput } from './Input';
-import './index.scss';
+import { checkbox } from '../../../../../fields/validations'
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import Error from '../../Error'
+import FieldDescription from '../../FieldDescription'
+import useField from '../../useField'
+import withCondition from '../../withCondition'
+import { CheckboxInput } from './Input'
+import './index.scss'
 
-const baseClass = 'checkbox';
+const baseClass = 'checkbox'
 
 const Checkbox: React.FC<Props> = (props) => {
   const {
-    admin: {
-      className,
-      condition,
-      description,
-      readOnly,
-      style,
-      width,
-    } = {},
+    admin: { className, condition, description, readOnly, style, width } = {},
     disableFormData,
     label,
     name,
@@ -31,36 +24,34 @@ const Checkbox: React.FC<Props> = (props) => {
     path: pathFromProps,
     required,
     validate = checkbox,
-  } = props;
+  } = props
 
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation()
 
-  const path = pathFromProps || name;
+  const path = pathFromProps || name
 
-  const memoizedValidate = useCallback((value, options) => {
-    return validate(value, { ...options, required });
-  }, [validate, required]);
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
 
-  const {
-    errorMessage,
-    setValue,
-    showError,
-    value,
-  } = useField({
+  const { errorMessage, setValue, showError, value } = useField({
     condition,
     disableFormData,
     path,
     validate: memoizedValidate,
-  });
+  })
 
   const onToggle = useCallback(() => {
     if (!readOnly) {
-      setValue(!value);
-      if (typeof onChange === 'function') onChange(!value);
+      setValue(!value)
+      if (typeof onChange === 'function') onChange(!value)
     }
-  }, [onChange, readOnly, setValue, value]);
+  }, [onChange, readOnly, setValue, value])
 
-  const fieldID = `field-${path.replace(/\./g, '__')}`;
+  const fieldID = `field-${path.replace(/\./g, '__')}`
 
   return (
     <div
@@ -71,17 +62,16 @@ const Checkbox: React.FC<Props> = (props) => {
         className,
         value && `${baseClass}--checked`,
         readOnly && `${baseClass}--read-only`,
-      ].filter(Boolean).join(' ')}
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={{
         ...style,
         width,
       }}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <Error
-          message={errorMessage}
-          showError={showError}
-        />
+        <Error message={errorMessage} showError={showError} />
       </div>
       <CheckboxInput
         checked={Boolean(value)}
@@ -91,12 +81,9 @@ const Checkbox: React.FC<Props> = (props) => {
         onToggle={onToggle}
         readOnly={readOnly}
       />
-      <FieldDescription
-        description={description}
-        value={value}
-      />
+      <FieldDescription description={description} value={value} />
     </div>
-  );
-};
+  )
+}
 
-export default withCondition(Checkbox);
+export default withCondition(Checkbox)

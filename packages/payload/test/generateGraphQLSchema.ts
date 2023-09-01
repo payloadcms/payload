@@ -1,35 +1,34 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'fs'
+import path from 'path'
 
-import { generateGraphQLSchema } from '../src/bin/generateGraphQLSchema';
+import { generateGraphQLSchema } from '../src/bin/generateGraphQLSchema'
 
-const [testConfigDir] = process.argv.slice(2);
+const [testConfigDir] = process.argv.slice(2)
 
-let testDir;
+let testDir
 if (testConfigDir) {
-  testDir = path.resolve(__dirname, testConfigDir);
-  setPaths(testDir);
-  generateGraphQLSchema();
+  testDir = path.resolve(__dirname, testConfigDir)
+  setPaths(testDir)
+  generateGraphQLSchema()
 } else {
   // Generate graphql schema for entire directory
-  testDir = __dirname;
+  testDir = __dirname
 
   fs.readdirSync(__dirname, { withFileTypes: true })
     .filter((f) => f.isDirectory())
     .forEach((dir) => {
-      const suiteDir = path.resolve(testDir, dir.name);
-      const configFound = setPaths(suiteDir);
-      if (configFound) generateGraphQLSchema();
-    });
+      const suiteDir = path.resolve(testDir, dir.name)
+      const configFound = setPaths(suiteDir)
+      if (configFound) generateGraphQLSchema()
+    })
 }
-
 
 // Set config path and TS output path using test dir
 function setPaths(dir) {
-  const configPath = path.resolve(dir, 'config.ts');
+  const configPath = path.resolve(dir, 'config.ts')
   if (fs.existsSync(configPath)) {
-    process.env.PAYLOAD_CONFIG_PATH = configPath;
-    return true;
+    process.env.PAYLOAD_CONFIG_PATH = configPath
+    return true
   }
-  return false;
+  return false
 }

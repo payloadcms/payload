@@ -17,7 +17,7 @@
     align-items: center;
 
     .btn {
-      margin: 0
+      margin: 0;
     }
   }
 
@@ -41,7 +41,7 @@
   }
 }
 
-html[data-theme=light] {
+html[data-theme='light'] {
   .upload {
     &.error {
       .upload__wrap {
@@ -56,7 +56,7 @@ html[data-theme=light] {
   }
 }
 
-html[data-theme=dark] {
+html[data-theme='dark'] {
   .upload {
     &.error {
       .upload__wrap {

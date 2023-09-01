@@ -1,37 +1,37 @@
-import qs from 'qs';
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import qs from 'qs'
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { PaginatedDocs } from '../../../../../database/types';
-import type { Where } from '../../../../../types';
-import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
-import type { FilterOptionsResult, GetResults, Option, Props, Value } from './types';
+import type { PaginatedDocs } from '../../../../../database/types'
+import type { Where } from '../../../../../types'
+import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types'
+import type { FilterOptionsResult, GetResults, Option, Props, Value } from './types'
 
-import { relationship } from '../../../../../fields/validations';
-import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex';
-import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
-import ReactSelect from '../../../elements/ReactSelect';
-import { useAuth } from '../../../utilities/Auth';
-import { useConfig } from '../../../utilities/Config';
-import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
-import { useLocale } from '../../../utilities/Locale';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import { useFormProcessing } from '../../Form/context';
-import Label from '../../Label';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import { AddNewRelation } from './AddNew';
-import { createRelationMap } from './createRelationMap';
-import { findOptionsByValue } from './findOptionsByValue';
-import './index.scss';
-import optionsReducer from './optionsReducer';
-import { MultiValueLabel } from './select-components/MultiValueLabel';
-import { SingleValue } from './select-components/SingleValue';
+import { relationship } from '../../../../../fields/validations'
+import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex'
+import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback'
+import ReactSelect from '../../../elements/ReactSelect'
+import { useAuth } from '../../../utilities/Auth'
+import { useConfig } from '../../../utilities/Config'
+import { GetFilterOptions } from '../../../utilities/GetFilterOptions'
+import { useLocale } from '../../../utilities/Locale'
+import Error from '../../Error'
+import FieldDescription from '../../FieldDescription'
+import { useFormProcessing } from '../../Form/context'
+import Label from '../../Label'
+import useField from '../../useField'
+import withCondition from '../../withCondition'
+import { AddNewRelation } from './AddNew'
+import { createRelationMap } from './createRelationMap'
+import { findOptionsByValue } from './findOptionsByValue'
+import './index.scss'
+import optionsReducer from './optionsReducer'
+import { MultiValueLabel } from './select-components/MultiValueLabel'
+import { SingleValue } from './select-components/SingleValue'
 
-const maxResultsPerRequest = 10;
+const maxResultsPerRequest = 10
 
-const baseClass = 'relationship';
+const baseClass = 'relationship'
 
 const Relationship: React.FC<Props> = (props) => {
   const {
@@ -53,52 +53,47 @@ const Relationship: React.FC<Props> = (props) => {
     relationTo,
     required,
     validate = relationship,
-  } = props;
+  } = props
 
-  const config = useConfig();
+  const config = useConfig()
 
   const {
     collections,
-    routes: {
-      api,
-    },
+    routes: { api },
     serverURL,
-  } = config;
+  } = config
 
-  const { i18n, t } = useTranslation('fields');
-  const { permissions } = useAuth();
-  const { code: locale } = useLocale();
-  const formProcessing = useFormProcessing();
-  const hasMultipleRelations = Array.isArray(relationTo);
-  const [options, dispatchOptions] = useReducer(optionsReducer, []);
-  const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1);
-  const [lastLoadedPage, setLastLoadedPage] = useState<Record<string, number>>({});
-  const [errorLoading, setErrorLoading] = useState('');
-  const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>();
-  const [search, setSearch] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasLoadedFirstPage, setHasLoadedFirstPage] = useState(false);
-  const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false);
-  const firstRun = useRef(true);
-  const pathOrName = path || name;
+  const { i18n, t } = useTranslation('fields')
+  const { permissions } = useAuth()
+  const { code: locale } = useLocale()
+  const formProcessing = useFormProcessing()
+  const hasMultipleRelations = Array.isArray(relationTo)
+  const [options, dispatchOptions] = useReducer(optionsReducer, [])
+  const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1)
+  const [lastLoadedPage, setLastLoadedPage] = useState<Record<string, number>>({})
+  const [errorLoading, setErrorLoading] = useState('')
+  const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>()
+  const [search, setSearch] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasLoadedFirstPage, setHasLoadedFirstPage] = useState(false)
+  const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false)
+  const firstRun = useRef(true)
+  const pathOrName = path || name
 
-  const memoizedValidate = useCallback((value, validationOptions) => {
-    return validate(value, { ...validationOptions, required });
-  }, [validate, required]);
+  const memoizedValidate = useCallback(
+    (value, validationOptions) => {
+      return validate(value, { ...validationOptions, required })
+    },
+    [validate, required],
+  )
 
-  const {
-    errorMessage,
-    initialValue,
-    setValue,
-    showError,
-    value,
-  } = useField<Value | Value[]>({
+  const { errorMessage, initialValue, setValue, showError, value } = useField<Value | Value[]>({
     condition,
     path: pathOrName,
     validate: memoizedValidate,
-  });
+  })
 
-  const [drawerIsOpen, setDrawerIsOpen] = useState(false);
+  const [drawerIsOpen, setDrawerIsOpen] = useState(false)
 
   const getResults: GetResults = useCallback(
     async ({
@@ -109,43 +104,41 @@ const Relationship: React.FC<Props> = (props) => {
       value: valueArg,
     }) => {
       if (!permissions) {
-        return;
+        return
       }
-      const lastFullyLoadedRelationToUse = typeof lastFullyLoadedRelationArg !== 'undefined'
-        ? lastFullyLoadedRelationArg
-        : -1;
+      const lastFullyLoadedRelationToUse =
+        typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1
 
-      const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
-      const relationsToFetch = lastFullyLoadedRelationToUse === -1
-        ? relations
-        : relations.slice(lastFullyLoadedRelationToUse + 1);
+      const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
+      const relationsToFetch =
+        lastFullyLoadedRelationToUse === -1
+          ? relations
+          : relations.slice(lastFullyLoadedRelationToUse + 1)
 
-      let resultsFetched = 0;
+      let resultsFetched = 0
       const relationMap = createRelationMap({
         hasMany,
         relationTo,
         value: valueArg,
-      });
+      })
 
       if (!errorLoading) {
         relationsToFetch.reduce(async (priorRelation, relation) => {
-          let lastLoadedPageToUse;
+          let lastLoadedPageToUse
           if (search !== searchArg) {
-            lastLoadedPageToUse = 1;
+            lastLoadedPageToUse = 1
           } else {
-            lastLoadedPageToUse = lastLoadedPage[relation] + 1;
+            lastLoadedPageToUse = lastLoadedPage[relation] + 1
           }
-          await priorRelation;
+          await priorRelation
 
           if (resultsFetched < 10) {
-            const collection = collections.find(
-              (coll) => coll.slug === relation,
-            );
-            const fieldToSearch = collection?.admin?.useAsTitle || 'id';
+            const collection = collections.find((coll) => coll.slug === relation)
+            const fieldToSearch = collection?.admin?.useAsTitle || 'id'
 
             const query: {
-              [key: string]: unknown;
-              where: Where;
+              [key: string]: unknown
+              where: Where
             } = {
               depth: 0,
               limit: maxResultsPerRequest,
@@ -161,45 +154,42 @@ const Relationship: React.FC<Props> = (props) => {
                   },
                 ],
               },
-            };
+            }
 
             if (searchArg) {
               query.where.and.push({
                 [fieldToSearch]: {
                   like: searchArg,
                 },
-              });
+              })
             }
 
             if (filterOptionsResult?.[relation]) {
-              query.where.and.push(filterOptionsResult[relation]);
+              query.where.and.push(filterOptionsResult[relation])
             }
 
-            const response = await fetch(
-              `${serverURL}${api}/${relation}?${qs.stringify(query)}`,
-              {
-                credentials: 'include',
-                headers: {
-                  'Accept-Language': i18n.language,
-                },
+            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
               },
-            );
+            })
 
             if (response.ok) {
-              const data: PaginatedDocs<unknown> = await response.json();
+              const data: PaginatedDocs<unknown> = await response.json()
               setLastLoadedPage((prevState) => {
                 return {
                   ...prevState,
                   [relation]: lastLoadedPageToUse,
-                };
-              });
+                }
+              })
 
               if (!data.nextPage) {
-                setLastFullyLoadedRelation(relations.indexOf(relation));
+                setLastFullyLoadedRelation(relations.indexOf(relation))
               }
 
               if (data.docs.length > 0) {
-                resultsFetched += data.docs.length;
+                resultsFetched += data.docs.length
 
                 dispatchOptions({
                   collection,
@@ -208,10 +198,10 @@ const Relationship: React.FC<Props> = (props) => {
                   i18n,
                   sort,
                   type: 'ADD',
-                });
+                })
               }
             } else if (response.status === 403) {
-              setLastFullyLoadedRelation(relations.indexOf(relation));
+              setLastFullyLoadedRelation(relations.indexOf(relation))
               dispatchOptions({
                 collection,
                 config,
@@ -220,14 +210,14 @@ const Relationship: React.FC<Props> = (props) => {
                 ids: relationMap[relation],
                 sort,
                 type: 'ADD',
-              });
+              })
             } else {
-              setErrorLoading(t('error:unspecific'));
+              setErrorLoading(t('error:unspecific'))
             }
           }
-        }, Promise.resolve());
+        }, Promise.resolve())
 
-        if (typeof onSuccess === 'function') onSuccess();
+        if (typeof onSuccess === 'function') onSuccess()
       }
     },
     [
@@ -246,19 +236,22 @@ const Relationship: React.FC<Props> = (props) => {
       config,
       t,
     ],
-  );
+  )
 
   const updateSearch = useDebouncedCallback((searchArg: string, valueArg: Value | Value[]) => {
-    getResults({ search: searchArg, sort: true, value: valueArg });
-    setSearch(searchArg);
-  }, 300);
+    getResults({ search: searchArg, sort: true, value: valueArg })
+    setSearch(searchArg)
+  }, 300)
 
-  const handleInputChange = useCallback((searchArg: string, valueArg: Value | Value[]) => {
-    if (search !== searchArg) {
-      setLastLoadedPage({});
-      updateSearch(searchArg, valueArg);
-    }
-  }, [search, updateSearch]);
+  const handleInputChange = useCallback(
+    (searchArg: string, valueArg: Value | Value[]) => {
+      if (search !== searchArg) {
+        setLastLoadedPage({})
+        updateSearch(searchArg, valueArg)
+      }
+    },
+    [search, updateSearch],
+  )
 
   // ///////////////////////////////////
   // Ensure we have an option for each value
@@ -269,14 +262,19 @@ const Relationship: React.FC<Props> = (props) => {
       hasMany,
       relationTo,
       value,
-    });
+    })
 
     Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
-      await priorRelation;
+      await priorRelation
 
       const idsToLoad = ids.filter((id) => {
-        return !options.find((optionGroup) => optionGroup?.options?.find((option) => option.value === id && option.relationTo === relation));
-      });
+        return !options.find(
+          (optionGroup) =>
+            optionGroup?.options?.find(
+              (option) => option.value === id && option.relationTo === relation,
+            ),
+        )
+      })
 
       if (idsToLoad.length > 0) {
         const query = {
@@ -288,7 +286,7 @@ const Relationship: React.FC<Props> = (props) => {
               in: idsToLoad,
             },
           },
-        };
+        }
 
         if (!errorLoading) {
           const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
@@ -296,14 +294,14 @@ const Relationship: React.FC<Props> = (props) => {
             headers: {
               'Accept-Language': i18n.language,
             },
-          });
+          })
 
-          const collection = collections.find((coll) => coll.slug === relation);
-          let docs = [];
+          const collection = collections.find((coll) => coll.slug === relation)
+          let docs = []
 
           if (response.ok) {
-            const data = await response.json();
-            docs = data.docs;
+            const data = await response.json()
+            docs = data.docs
           }
 
           dispatchOptions({
@@ -314,10 +312,10 @@ const Relationship: React.FC<Props> = (props) => {
             ids: idsToLoad,
             sort: true,
             type: 'ADD',
-          });
+          })
         }
       }
-    }, Promise.resolve());
+    }, Promise.resolve())
   }, [
     options,
     value,
@@ -331,56 +329,65 @@ const Relationship: React.FC<Props> = (props) => {
     relationTo,
     locale,
     config,
-  ]);
+  ])
 
   // Determine if we should switch to word boundary search
   useEffect(() => {
-    const relations = Array.isArray(relationTo) ? relationTo : [relationTo];
+    const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
     const isIdOnly = relations.reduce((idOnly, relation) => {
-      const collection = collections.find((coll) => coll.slug === relation);
-      const fieldToSearch = collection?.admin?.useAsTitle || 'id';
-      return fieldToSearch === 'id' && idOnly;
-    }, true);
-    setEnableWordBoundarySearch(!isIdOnly);
-  }, [relationTo, collections]);
+      const collection = collections.find((coll) => coll.slug === relation)
+      const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+      return fieldToSearch === 'id' && idOnly
+    }, true)
+    setEnableWordBoundarySearch(!isIdOnly)
+  }, [relationTo, collections])
 
   // When (`relationTo` || `filterOptionsResult` || `locale`) changes, reset component
   // Note - effect should not run on first run
   useEffect(() => {
     if (firstRun.current) {
-      firstRun.current = false;
-      return;
+      firstRun.current = false
+      return
     }
 
-    dispatchOptions({ type: 'CLEAR' });
-    setLastFullyLoadedRelation(-1);
-    setLastLoadedPage({});
-    setHasLoadedFirstPage(false);
-  }, [relationTo, filterOptionsResult, locale]);
+    dispatchOptions({ type: 'CLEAR' })
+    setLastFullyLoadedRelation(-1)
+    setLastLoadedPage({})
+    setHasLoadedFirstPage(false)
+  }, [relationTo, filterOptionsResult, locale])
 
-  const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
-    dispatchOptions({ collection: args.collectionConfig, config, doc: args.doc, i18n, type: 'UPDATE' });
-  }, [i18n, config]);
+  const onSave = useCallback<DocumentDrawerProps['onSave']>(
+    (args) => {
+      dispatchOptions({
+        collection: args.collectionConfig,
+        config,
+        doc: args.doc,
+        i18n,
+        type: 'UPDATE',
+      })
+    },
+    [i18n, config],
+  )
 
   const filterOption = useCallback((item: Option, searchFilter: string) => {
     if (!searchFilter) {
-      return true;
+      return true
     }
-    const r = wordBoundariesRegex(searchFilter || '');
+    const r = wordBoundariesRegex(searchFilter || '')
     // breaking the labels to search into smaller parts increases performance
-    const breakApartThreshold = 250;
-    let string = item.label;
+    const breakApartThreshold = 250
+    let string = item.label
     // strings less than breakApartThreshold length won't be chunked
     while (string.length > breakApartThreshold) {
       // slicing by the next space after the length of the search input prevents slicing the string up by partial words
-      const indexOfSpace = string.indexOf(' ', searchFilter.length);
+      const indexOfSpace = string.indexOf(' ', searchFilter.length)
       if (r.test(string.slice(0, indexOfSpace === -1 ? searchFilter.length : indexOfSpace + 1))) {
-        return true;
+        return true
       }
-      string = string.slice(indexOfSpace === -1 ? searchFilter.length : indexOfSpace + 1);
+      string = string.slice(indexOfSpace === -1 ? searchFilter.length : indexOfSpace + 1)
     }
-    return r.test(string.slice(-breakApartThreshold));
-  }, []);
+    return r.test(string.slice(-breakApartThreshold))
+  }, [])
 
   const classes = [
     'field-type',
@@ -389,10 +396,12 @@ const Relationship: React.FC<Props> = (props) => {
     showError && 'error',
     errorLoading && 'error-loading',
     readOnly && `${baseClass}--read-only`,
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ')
 
-  const valueToRender = findOptionsByValue({ options, value });
-  if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') valueToRender.value = null;
+  const valueToRender = findOptionsByValue({ options, value })
+  if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') valueToRender.value = null
 
   return (
     <div
@@ -401,18 +410,19 @@ const Relationship: React.FC<Props> = (props) => {
         width,
       }}
       className={classes}
-      id={`field-${(pathOrName).replace(/\./g, '__')}`}
+      id={`field-${pathOrName.replace(/\./g, '__')}`}
     >
-      <Error
-        message={errorMessage}
-        showError={showError}
+      <Error message={errorMessage} showError={showError} />
+      <Label htmlFor={pathOrName} label={label} required={required} />
+      <GetFilterOptions
+        {...{
+          filterOptions,
+          filterOptionsResult,
+          path: pathOrName,
+          relationTo,
+          setFilterOptionsResult,
+        }}
       />
-      <Label
-        htmlFor={pathOrName}
-        label={label}
-        required={required}
-      />
-      <GetFilterOptions {...{ filterOptions, filterOptionsResult, path: pathOrName, relationTo, setFilterOptionsResult }} />
       {!errorLoading && (
         <div className={`${baseClass}__wrap`}>
           <ReactSelect
@@ -426,39 +436,47 @@ const Relationship: React.FC<Props> = (props) => {
               onSave,
               setDrawerIsOpen,
             }}
-            onChange={!readOnly ? (selected) => {
-              if (selected === null) {
-                setValue(hasMany ? [] : null);
-              } else if (hasMany) {
-                setValue(selected ? selected.map((option) => {
-                  if (hasMultipleRelations) {
-                    return {
-                      relationTo: option.relationTo,
-                      value: option.value,
-                    };
-                  }
+            onChange={
+              !readOnly
+                ? (selected) => {
+                    if (selected === null) {
+                      setValue(hasMany ? [] : null)
+                    } else if (hasMany) {
+                      setValue(
+                        selected
+                          ? selected.map((option) => {
+                              if (hasMultipleRelations) {
+                                return {
+                                  relationTo: option.relationTo,
+                                  value: option.value,
+                                }
+                              }
 
-                  return option.value;
-                }) : null);
-              } else if (hasMultipleRelations) {
-                setValue({
-                  relationTo: selected.relationTo,
-                  value: selected.value,
-                });
-              } else {
-                setValue(selected.value);
-              }
-            } : undefined}
+                              return option.value
+                            })
+                          : null,
+                      )
+                    } else if (hasMultipleRelations) {
+                      setValue({
+                        relationTo: selected.relationTo,
+                        value: selected.value,
+                      })
+                    } else {
+                      setValue(selected.value)
+                    }
+                  }
+                : undefined
+            }
             onMenuOpen={() => {
               if (!hasLoadedFirstPage) {
-                setIsLoading(true);
+                setIsLoading(true)
                 getResults({
                   onSuccess: () => {
-                    setHasLoadedFirstPage(true);
-                    setIsLoading(false);
+                    setHasLoadedFirstPage(true)
+                    setIsLoading(false)
                   },
                   value: initialValue,
-                });
+                })
               }
             }}
             onMenuScrollToBottom={() => {
@@ -467,7 +485,7 @@ const Relationship: React.FC<Props> = (props) => {
                 search,
                 sort: false,
                 value: initialValue,
-              });
+              })
             }}
             backspaceRemovesValue={!drawerIsOpen}
             disabled={readOnly || formProcessing}
@@ -482,22 +500,23 @@ const Relationship: React.FC<Props> = (props) => {
           />
           {!readOnly && allowCreate && (
             <AddNewRelation
-              {...{ dispatchOptions, hasMany, options, path: pathOrName, relationTo, setValue, value }}
+              {...{
+                dispatchOptions,
+                hasMany,
+                options,
+                path: pathOrName,
+                relationTo,
+                setValue,
+                value,
+              }}
             />
           )}
         </div>
       )}
-      {errorLoading && (
-        <div className={`${baseClass}__error-loading`}>
-          {errorLoading}
-        </div>
-      )}
-      <FieldDescription
-        description={description}
-        value={value}
-      />
+      {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
+      <FieldDescription description={description} value={value} />
     </div>
-  );
-};
+  )
+}
 
-export default withCondition(Relationship);
+export default withCondition(Relationship)

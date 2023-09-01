@@ -1,17 +1,17 @@
-import ObjectID from 'bson-objectid';
-import equal from 'deep-equal';
+import ObjectID from 'bson-objectid'
+import equal from 'deep-equal'
 
-import type { FieldAction, Fields, FormField } from './types';
+import type { FieldAction, Fields, FormField } from './types'
 
-import deepCopyObject from '../../../../utilities/deepCopyObject';
-import getSiblingData from './getSiblingData';
-import reduceFieldsToValues from './reduceFieldsToValues';
-import { flattenRows, separateRows } from './rows';
+import deepCopyObject from '../../../../utilities/deepCopyObject'
+import getSiblingData from './getSiblingData'
+import reduceFieldsToValues from './reduceFieldsToValues'
+import { flattenRows, separateRows } from './rows'
 
 export function fieldReducer(state: Fields, action: FieldAction): Fields {
   switch (action.type) {
     case 'REPLACE_STATE': {
-      const newState = {};
+      const newState = {}
 
       // Only update fields that have changed
       // by comparing old value / initialValue to new
@@ -20,38 +20,42 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       // large documents with hundreds of fields
 
       Object.entries(action.state).forEach(([path, field]) => {
-        const oldField = state[path];
-        const newField = field;
+        const oldField = state[path]
+        const newField = field
 
         if (!equal(oldField, newField)) {
-          newState[path] = newField;
+          newState[path] = newField
         } else if (oldField) {
-          newState[path] = oldField;
+          newState[path] = oldField
         }
-      });
+      })
 
-      return newState;
+      return newState
     }
 
     case 'REMOVE': {
-      const newState = { ...state };
-      if (newState[action.path]) delete newState[action.path];
-      return newState;
+      const newState = { ...state }
+      if (newState[action.path]) delete newState[action.path]
+      return newState
     }
 
     case 'MODIFY_CONDITION': {
-      const { path, result, user } = action;
+      const { path, result, user } = action
 
       return Object.entries(state).reduce((newState, [fieldPath, field]) => {
         if (fieldPath === path || fieldPath.indexOf(`${path}.`) === 0) {
-          let passesCondition = result;
+          let passesCondition = result
 
           // If a condition is being set to true,
           // Set all conditions to true
           // Besides those who still fail their own conditions
 
           if (passesCondition && field.condition) {
-            passesCondition = field.condition(reduceFieldsToValues(state, true), getSiblingData(state, path), { user });
+            passesCondition = field.condition(
+              reduceFieldsToValues(state, true),
+              getSiblingData(state, path),
+              { user },
+            )
           }
 
           return {
@@ -60,7 +64,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
               ...field,
               passesCondition,
             },
-          };
+          }
         }
 
         return {
@@ -68,35 +72,50 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           [fieldPath]: {
             ...field,
           },
-        };
-      }, {});
+        }
+      }, {})
     }
 
     case 'UPDATE': {
-      const newField = Object.entries(action).reduce((field, [key, value]) => {
-        if (['condition', 'disableFormData', 'errorMessage', 'initialValue', 'passesCondition', 'rows', 'valid', 'validate', 'value'].includes(key)) {
-          return {
-            ...field,
-            [key]: value,
-          };
-        }
+      const newField = Object.entries(action).reduce(
+        (field, [key, value]) => {
+          if (
+            [
+              'condition',
+              'disableFormData',
+              'errorMessage',
+              'initialValue',
+              'passesCondition',
+              'rows',
+              'valid',
+              'validate',
+              'value',
+            ].includes(key)
+          ) {
+            return {
+              ...field,
+              [key]: value,
+            }
+          }
 
-        return field;
-      }, state[action.path] || {} as FormField);
+          return field
+        },
+        state[action.path] || ({} as FormField),
+      )
 
       return {
         ...state,
         [action.path]: newField,
-      };
+      }
     }
 
     case 'REMOVE_ROW': {
-      const { path, rowIndex } = action;
-      const { remainingFields, rows } = separateRows(path, state);
-      const rowsMetadata = [...state[path]?.rows || []];
+      const { path, rowIndex } = action
+      const { remainingFields, rows } = separateRows(path, state)
+      const rowsMetadata = [...(state[path]?.rows || [])]
 
-      rows.splice(rowIndex, 1);
-      rowsMetadata.splice(rowIndex, 1);
+      rows.splice(rowIndex, 1)
+      rowsMetadata.splice(rowIndex, 1)
 
       const newState: Fields = {
         ...remainingFields,
@@ -107,15 +126,15 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           value: rows.length,
         },
         ...flattenRows(path, rows),
-      };
+      }
 
-      return newState;
+      return newState
     }
 
     case 'ADD_ROW': {
-      const { blockType, path, rowIndex, subFieldState } = action;
+      const { blockType, path, rowIndex, subFieldState } = action
 
-      const rowsMetadata = [...state[path]?.rows || []];
+      const rowsMetadata = [...(state[path]?.rows || [])]
       rowsMetadata.splice(
         rowIndex + 1,
         0,
@@ -126,20 +145,20 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           collapsed: false,
           id: new ObjectID().toHexString(),
         },
-      );
+      )
 
       if (blockType) {
         subFieldState.blockType = {
           initialValue: blockType,
           valid: true,
           value: blockType,
-        };
+        }
       }
 
-      const { remainingFields, rows } = separateRows(path, state);
+      const { remainingFields, rows } = separateRows(path, state)
 
       // actual form state (value saved in db)
-      rows.splice(rowIndex + 1, 0, subFieldState);
+      rows.splice(rowIndex + 1, 0, subFieldState)
 
       const newState: Fields = {
         ...remainingFields,
@@ -150,34 +169,34 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           rows: rowsMetadata,
           value: rows.length,
         },
-      };
+      }
 
-      return newState;
+      return newState
     }
 
     case 'REPLACE_ROW': {
-      const { blockType, path, rowIndex: rowIndexArg, subFieldState } = action;
-      const { remainingFields, rows } = separateRows(path, state);
-      const rowIndex = Math.max(0, Math.min(rowIndexArg, rows?.length - 1 || 0));
+      const { blockType, path, rowIndex: rowIndexArg, subFieldState } = action
+      const { remainingFields, rows } = separateRows(path, state)
+      const rowIndex = Math.max(0, Math.min(rowIndexArg, rows?.length - 1 || 0))
 
-      const rowsMetadata = [...state[path]?.rows || []];
+      const rowsMetadata = [...(state[path]?.rows || [])]
       rowsMetadata[rowIndex] = {
         blockType: blockType || undefined,
         childErrorPaths: new Set(),
         collapsed: false,
         id: new ObjectID().toHexString(),
-      };
+      }
 
       if (blockType) {
         subFieldState.blockType = {
           initialValue: blockType,
           valid: true,
           value: blockType,
-        };
+        }
       }
 
       // replace form field state
-      rows[rowIndex] = subFieldState;
+      rows[rowIndex] = subFieldState
 
       const newState: Fields = {
         ...remainingFields,
@@ -188,27 +207,27 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           rows: rowsMetadata,
           value: rows.length,
         },
-      };
+      }
 
-      return newState;
+      return newState
     }
 
     case 'DUPLICATE_ROW': {
-      const { path, rowIndex } = action;
-      const { remainingFields, rows } = separateRows(path, state);
-      const rowsMetadata = state[path]?.rows || [];
+      const { path, rowIndex } = action
+      const { remainingFields, rows } = separateRows(path, state)
+      const rowsMetadata = state[path]?.rows || []
 
-      const duplicateRowMetadata = deepCopyObject(rowsMetadata[rowIndex]);
-      if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectID().toHexString();
+      const duplicateRowMetadata = deepCopyObject(rowsMetadata[rowIndex])
+      if (duplicateRowMetadata.id) duplicateRowMetadata.id = new ObjectID().toHexString()
 
-      const duplicateRowState = deepCopyObject(rows[rowIndex]);
-      if (duplicateRowState.id) duplicateRowState.id = new ObjectID().toHexString();
+      const duplicateRowState = deepCopyObject(rows[rowIndex])
+      if (duplicateRowState.id) duplicateRowState.id = new ObjectID().toHexString()
 
       // If there are subfields
       if (Object.keys(duplicateRowState).length > 0) {
         // Add new object containing subfield names to unflattenedRows array
-        rows.splice(rowIndex + 1, 0, duplicateRowState);
-        rowsMetadata.splice(rowIndex + 1, 0, duplicateRowMetadata);
+        rows.splice(rowIndex + 1, 0, duplicateRowState)
+        rowsMetadata.splice(rowIndex + 1, 0, duplicateRowMetadata)
       }
 
       const newState = {
@@ -220,27 +239,27 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           value: rows.length,
         },
         ...flattenRows(path, rows),
-      };
+      }
 
-      return newState;
+      return newState
     }
 
     case 'MOVE_ROW': {
-      const { moveFromIndex, moveToIndex, path } = action;
-      const { remainingFields, rows } = separateRows(path, state);
+      const { moveFromIndex, moveToIndex, path } = action
+      const { remainingFields, rows } = separateRows(path, state)
 
       // copy the row to move
-      const copyOfMovingRow = rows[moveFromIndex];
+      const copyOfMovingRow = rows[moveFromIndex]
       // delete the row by index
-      rows.splice(moveFromIndex, 1);
+      rows.splice(moveFromIndex, 1)
       // insert row copyOfMovingRow back in
-      rows.splice(moveToIndex, 0, copyOfMovingRow);
+      rows.splice(moveToIndex, 0, copyOfMovingRow)
 
       // modify array/block internal row state (i.e. collapsed, blockType)
-      const rowStateCopy = [...state[path]?.rows || []];
-      const movingRowState = { ...rowStateCopy[moveFromIndex] };
-      rowStateCopy.splice(moveFromIndex, 1);
-      rowStateCopy.splice(moveToIndex, 0, movingRowState);
+      const rowStateCopy = [...(state[path]?.rows || [])]
+      const movingRowState = { ...rowStateCopy[moveFromIndex] }
+      rowStateCopy.splice(moveFromIndex, 1)
+      rowStateCopy.splice(moveToIndex, 0, movingRowState)
 
       const newState = {
         ...remainingFields,
@@ -249,32 +268,35 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           ...state[path],
           rows: rowStateCopy,
         },
-      };
+      }
 
-      return newState;
+      return newState
     }
 
     case 'SET_ROW_COLLAPSED': {
-      const { collapsed, path, rowID, setDocFieldPreferences } = action;
+      const { collapsed, path, rowID, setDocFieldPreferences } = action
 
-      const arrayState = state[path];
+      const arrayState = state[path]
 
-      const { collapsedRowIDs, matchedIndex } = state[path].rows.reduce((acc, row, index) => {
-        const isMatchingRow = row.id === rowID;
-        if (isMatchingRow) acc.matchedIndex = index;
+      const { collapsedRowIDs, matchedIndex } = state[path].rows.reduce(
+        (acc, row, index) => {
+          const isMatchingRow = row.id === rowID
+          if (isMatchingRow) acc.matchedIndex = index
 
-        if (!isMatchingRow && row.collapsed) acc.collapsedRowIDs.push(row.id);
-        else if (isMatchingRow && collapsed) acc.collapsedRowIDs.push(row.id);
+          if (!isMatchingRow && row.collapsed) acc.collapsedRowIDs.push(row.id)
+          else if (isMatchingRow && collapsed) acc.collapsedRowIDs.push(row.id)
 
-        return acc;
-      }, {
-        collapsedRowIDs: [],
-        matchedIndex: undefined,
-      });
+          return acc
+        },
+        {
+          collapsedRowIDs: [],
+          matchedIndex: undefined,
+        },
+      )
 
       if (matchedIndex > -1) {
-        arrayState.rows[matchedIndex].collapsed = collapsed;
-        setDocFieldPreferences(path, { collapsed: collapsedRowIDs });
+        arrayState.rows[matchedIndex].collapsed = collapsed
+        setDocFieldPreferences(path, { collapsed: collapsedRowIDs })
       }
 
       const newState = {
@@ -282,29 +304,32 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
         [path]: {
           ...arrayState,
         },
-      };
+      }
 
-      return newState;
+      return newState
     }
 
     case 'SET_ALL_ROWS_COLLAPSED': {
-      const { collapsed, path, setDocFieldPreferences } = action;
+      const { collapsed, path, setDocFieldPreferences } = action
 
-      const { collapsedRowIDs, rows } = state[path].rows.reduce((acc, row) => {
-        if (collapsed) acc.collapsedRowIDs.push(row.id);
+      const { collapsedRowIDs, rows } = state[path].rows.reduce(
+        (acc, row) => {
+          if (collapsed) acc.collapsedRowIDs.push(row.id)
 
-        acc.rows.push({
-          ...row,
-          collapsed,
-        });
+          acc.rows.push({
+            ...row,
+            collapsed,
+          })
 
-        return acc;
-      }, {
-        collapsedRowIDs: [],
-        rows: [],
-      });
+          return acc
+        },
+        {
+          collapsedRowIDs: [],
+          rows: [],
+        },
+      )
 
-      setDocFieldPreferences(path, { collapsed: collapsedRowIDs });
+      setDocFieldPreferences(path, { collapsed: collapsedRowIDs })
 
       return {
         ...state,
@@ -312,11 +337,11 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
           ...state[path],
           rows,
         },
-      };
+      }
     }
 
     default: {
-      return state;
+      return state
     }
   }
 }

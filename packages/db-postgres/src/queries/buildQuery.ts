@@ -1,12 +1,12 @@
-import type { SQL } from 'drizzle-orm';
-import type { Where } from 'payload/types';
-import type { Field } from 'payload/types';
+import type { SQL } from 'drizzle-orm'
+import type { Where } from 'payload/types'
+import type { Field } from 'payload/types'
 
-import { QueryError } from 'payload/errors';
+import { QueryError } from 'payload/errors'
 
-import type { PostgresAdapter } from '../types';
+import type { PostgresAdapter } from '../types'
 
-import { parseParams } from './parseParams';
+import { parseParams } from './parseParams'
 
 type BuildQueryArgs = {
   adapter: PostgresAdapter
@@ -25,18 +25,18 @@ const buildQuery = async function buildQuery({
   versionsFields,
   where,
 }: BuildQueryArgs): Promise<SQL> {
-  let fields = versionsFields;
+  let fields = versionsFields
   if (!fields) {
     if (globalSlug) {
-      const globalConfig = adapter.payload.globals.config.find(({ slug }) => slug === globalSlug);
-      fields = globalConfig.fields;
+      const globalConfig = adapter.payload.globals.config.find(({ slug }) => slug === globalSlug)
+      fields = globalConfig.fields
     }
     if (collectionSlug) {
-      const collectionConfig = adapter.payload.collections[collectionSlug].config;
-      fields = collectionConfig.fields;
+      const collectionConfig = adapter.payload.collections[collectionSlug].config
+      fields = collectionConfig.fields
     }
   }
-  const errors = [];
+  const errors = []
   const result = await parseParams({
     adapter,
     collectionSlug,
@@ -44,13 +44,13 @@ const buildQuery = async function buildQuery({
     globalSlug,
     locale,
     where,
-  });
+  })
 
   if (errors.length > 0) {
-    throw new QueryError(errors);
+    throw new QueryError(errors)
   }
 
-  return result;
-};
+  return result
+}
 
-export default buildQuery;
+export default buildQuery

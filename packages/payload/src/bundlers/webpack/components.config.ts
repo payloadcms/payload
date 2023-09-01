@@ -1,8 +1,8 @@
-import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
-import path from 'path';
-import terser from 'terser';
-import TerserJSPlugin from 'terser-webpack-plugin'; // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
-import OptimizeCSSAssetsPlugin from 'css-minimizer-webpack-plugin';
+import MiniCSSExtractPlugin from 'mini-css-extract-plugin'
+import path from 'path'
+import terser from 'terser'
+import TerserJSPlugin from 'terser-webpack-plugin' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
+import OptimizeCSSAssetsPlugin from 'css-minimizer-webpack-plugin'
 
 export default {
   entry: {
@@ -43,9 +43,7 @@ export default {
                 loader: 'postcss-loader',
                 options: {
                   postcssOptions: {
-                    plugins: [
-                      'postcss-preset-env',
-                    ],
+                    plugins: ['postcss-preset-env'],
                   },
                 },
               },
@@ -64,9 +62,12 @@ export default {
     ],
   },
   optimization: {
-    minimizer: [new TerserJSPlugin({
-      extractComments: false,
-    }), new OptimizeCSSAssetsPlugin({})],
+    minimizer: [
+      new TerserJSPlugin({
+        extractComments: false,
+      }),
+      new OptimizeCSSAssetsPlugin({}),
+    ],
   },
   output: {
     filename: 'index.js',
@@ -87,4 +88,4 @@ export default {
     modules: ['node_modules', path.resolve(__dirname, '../../../node_modules')],
   },
   stats: 'errors-only',
-};
+}

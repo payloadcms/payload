@@ -1,33 +1,28 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import useField from '../../../useField';
-import './index.scss';
+import useField from '../../../useField'
+import './index.scss'
 
-const baseClass = 'section-title';
+const baseClass = 'section-title'
 
 const SectionTitle: React.FC<Props> = (props) => {
-  const { path, readOnly } = props;
+  const { path, readOnly } = props
 
-  const { setValue, value } = useField({ path });
-  const { t } = useTranslation('general');
+  const { setValue, value } = useField({ path })
+  const { t } = useTranslation('general')
 
-  const classes = [
-    baseClass,
-  ].filter(Boolean).join(' ');
+  const classes = [baseClass].filter(Boolean).join(' ')
 
   return (
-    <div
-      className={classes}
-      data-value={value}
-    >
+    <div className={classes} data-value={value}>
       <input
         onChange={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          setValue(e.target.value);
+          e.stopPropagation()
+          e.preventDefault()
+          setValue(e.target.value)
         }}
         className={`${baseClass}__input`}
         id={path}
@@ -35,10 +30,10 @@ const SectionTitle: React.FC<Props> = (props) => {
         placeholder={t('untitled')}
         readOnly={readOnly}
         type="text"
-        value={value as string || ''}
+        value={(value as string) || ''}
       />
     </div>
-  );
-};
+  )
+}
 
-export default SectionTitle;
+export default SectionTitle

@@ -4,10 +4,10 @@
   position: relative;
   margin-bottom: $baseline;
 
-  .tooltip:not([aria-hidden="true"]) {
+  .tooltip:not([aria-hidden='true']) {
     right: auto;
     position: relative;
-    margin-bottom: .2em;
+    margin-bottom: 0.2em;
     max-width: fit-content;
   }
 
@@ -16,17 +16,16 @@
   }
 }
 
-
 .custom-checkbox {
   display: inline-flex;
-  
+
   label {
     padding-bottom: 0;
-    padding-left: base(.5);
+    padding-left: base(0.5);
   }
-  [dir=rtl] &__input {
+  [dir='rtl'] &__input {
     margin-right: 0;
-    margin-left: base(.5);
+    margin-left: base(0.5);
   }
 
   &__input {
@@ -38,7 +37,7 @@
     width: $baseline;
     height: $baseline;
 
-    & input[type="checkbox"] {
+    & input[type='checkbox'] {
       position: absolute;
       // Without the extra 4px, there is an uncheckable area due to the border of the parent element
       width: calc(100% + 4px);
@@ -61,28 +60,29 @@
       opacity: 0;
     }
   }
-  
- 
+
   &:not(&--read-only) {
     &:active,
     &:focus-within,
     &:focus {
-      .custom-checkbox__input, & input[type="checkbox"] {
+      .custom-checkbox__input,
+      & input[type='checkbox'] {
         @include inputShadowActive;
 
         outline: 0;
-        box-shadow: 0 0 3px 3px var(--theme-success-400)!important;
+        box-shadow: 0 0 3px 3px var(--theme-success-400) !important;
         border: 1px solid var(--theme-elevation-150);
       }
     }
 
     &:hover {
-      .custom-checkbox__input, & input[type="checkbox"] {
+      .custom-checkbox__input,
+      & input[type='checkbox'] {
         border-color: var(--theme-elevation-250);
       }
     }
   }
-  
+
   &:not(&--read-only):not(&--checked) {
     &:hover {
       cursor: pointer;
@@ -112,17 +112,17 @@
   }
 }
 
-html[data-theme=light] {
+html[data-theme='light'] {
   .checkbox {
     &.error {
-       .custom-checkbox__input {
+      .custom-checkbox__input {
         @include lightInputError;
       }
     }
   }
 }
 
-html[data-theme=dark] {
+html[data-theme='dark'] {
   .checkbox {
     &.error {
       .custom-checkbox__input {

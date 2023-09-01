@@ -1,15 +1,15 @@
-import type { CollectionConfig } from '../collections/config/types';
-import type { Access, Config } from '../config/types';
+import type { CollectionConfig } from '../collections/config/types'
+import type { Access, Config } from '../config/types'
 
-import deleteHandler from './requestHandlers/delete';
-import findOne from './requestHandlers/findOne';
-import update from './requestHandlers/update';
+import deleteHandler from './requestHandlers/delete'
+import findOne from './requestHandlers/findOne'
+import update from './requestHandlers/update'
 
 const preferenceAccess: Access = ({ req }) => ({
   'user.value': {
     equals: req?.user?.id,
   },
-});
+})
 
 const getPreferencesCollection = (config: Config): CollectionConfig => ({
   access: {
@@ -40,15 +40,15 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
     {
       hooks: {
         beforeValidate: [
-          (({ req }) => {
+          ({ req }) => {
             if (!req?.user) {
-              return null;
+              return null
             }
             return {
               relationTo: req?.user.collection,
               value: req?.user.id,
-            };
-          }),
+            }
+          },
         ],
       },
       name: 'user',
@@ -80,6 +80,6 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
     },
   ],
   slug: 'payload-preferences',
-});
+})
 
-export default getPreferencesCollection;
+export default getPreferencesCollection

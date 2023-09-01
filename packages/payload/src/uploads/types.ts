@@ -1,35 +1,35 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import type express from 'express';
-import type serveStatic from 'serve-static';
-import type { ResizeOptions, Sharp } from 'sharp';
+import type express from 'express'
+import type serveStatic from 'serve-static'
+import type { ResizeOptions, Sharp } from 'sharp'
 
 export type FileSize = {
-  filename: null | string;
-  filesize: null | number;
-  height: null | number;
-  mimeType: null | string;
-  width: null | number;
-};
+  filename: null | string
+  filesize: null | number
+  height: null | number
+  mimeType: null | string
+  width: null | number
+}
 
 export type FileSizes = {
   [size: string]: FileSize
 }
 
 export type FileData = {
-  filename: string;
-  filesize: number;
-  height: number;
-  mimeType: string;
-  sizes: FileSizes;
-  tempFilePath?: string;
-  width: number;
-};
+  filename: string
+  filesize: number
+  height: number
+  mimeType: string
+  sizes: FileSizes
+  tempFilePath?: string
+  width: number
+}
 
 export type ProbedImageSize = {
-  height: number,
-  mime: string,
-  type: string,
-  width: number,
+  height: number
+  mime: string
+  type: string
+  width: number
 }
 
 /**
@@ -55,7 +55,7 @@ export type ImageSize = ResizeOptions & {
   formatOptions?: ImageUploadFormatOptions
   name: string
   trimOptions?: ImageUploadTrimOptions
-};
+}
 
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => false | null | string
 
@@ -81,7 +81,7 @@ export type Upload = {
   handlers?: any[]
   imageSizes?: ImageSize[]
   mimeTypes?: string[]
-  resizeOptions?: ResizeOptions;
+  resizeOptions?: ResizeOptions
   staticDir: string
   staticOptions?: serveStatic.ServeStaticOptions<express.Response<any, Record<string, any>>>
   staticURL: string

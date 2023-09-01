@@ -1,26 +1,26 @@
-import type { HTMLAttributes} from 'react';
+import type { HTMLAttributes } from 'react'
 
-import React, { useCallback, useReducer, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Transforms } from 'slate';
-import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react';
+import React, { useCallback, useReducer, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Transforms } from 'slate'
+import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
 
-import type { Props as RichTextProps } from '../../../types';
+import type { Props as RichTextProps } from '../../../types'
 
-import { getTranslation } from '../../../../../../../../utilities/getTranslation';
-import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
-import Button from '../../../../../../elements/Button';
-import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
-import { useListDrawer } from '../../../../../../elements/ListDrawer';
-import { useConfig } from '../../../../../../utilities/Config';
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
-import './index.scss';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation'
+import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI'
+import Button from '../../../../../../elements/Button'
+import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer'
+import { useListDrawer } from '../../../../../../elements/ListDrawer'
+import { useConfig } from '../../../../../../utilities/Config'
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition'
+import './index.scss'
 
-const baseClass = 'rich-text-relationship';
+const baseClass = 'rich-text-relationship'
 
 const initialParams = {
   depth: 0,
-};
+}
 
 type Props = {
   attributes: HTMLAttributes<HTMLDivElement>
@@ -33,121 +33,116 @@ const Element: React.FC<Props> = (props) => {
     attributes,
     children,
     element,
-    element: {
-      relationTo,
-      value,
-    },
+    element: { relationTo, value },
     fieldProps,
-  } = props;
+  } = props
 
-  const { collections, routes: { api }, serverURL } = useConfig();
-  const [enabledCollectionSlugs] = useState(() => collections.filter(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship).map(({ slug }) => slug));
-  const [relatedCollection, setRelatedCollection] = useState(() => collections.find((coll) => coll.slug === relationTo));
-  const selected = useSelected();
-  const focused = useFocused();
-  const { i18n, t } = useTranslation(['fields', 'general']);
-  const editor = useSlateStatic();
-  const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
+  const {
+    collections,
+    routes: { api },
+    serverURL,
+  } = useConfig()
+  const [enabledCollectionSlugs] = useState(() =>
+    collections
+      .filter(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship)
+      .map(({ slug }) => slug),
+  )
+  const [relatedCollection, setRelatedCollection] = useState(() =>
+    collections.find((coll) => coll.slug === relationTo),
+  )
+  const selected = useSelected()
+  const focused = useFocused()
+  const { i18n, t } = useTranslation(['fields', 'general'])
+  const editor = useSlateStatic()
+  const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [{ data }, { setParams }] = usePayloadAPI(
     `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
     { initialParams },
-  );
+  )
 
-  const [
-    DocumentDrawer,
-    DocumentDrawerToggler,
-    {
-      closeDrawer,
-    },
-  ] = useDocumentDrawer({
+  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     collectionSlug: relatedCollection.slug,
     id: value?.id,
-  });
+  })
 
-  const [
-    ListDrawer,
-    ListDrawerToggler,
-    {
-      closeDrawer: closeListDrawer,
-    },
-  ] = useListDrawer({
+  const [ListDrawer, ListDrawerToggler, { closeDrawer: closeListDrawer }] = useListDrawer({
     collectionSlugs: enabledCollectionSlugs,
     selectedCollection: relatedCollection.slug,
-  });
+  })
 
   const removeRelationship = useCallback(() => {
-    const elementPath = ReactEditor.findPath(editor, element);
+    const elementPath = ReactEditor.findPath(editor, element)
 
-    Transforms.removeNodes(
-      editor,
-      { at: elementPath },
-    );
-  }, [editor, element]);
+    Transforms.removeNodes(editor, { at: elementPath })
+  }, [editor, element])
 
-  const updateRelationship = React.useCallback(({ doc }) => {
-    const elementPath = ReactEditor.findPath(editor, element);
+  const updateRelationship = React.useCallback(
+    ({ doc }) => {
+      const elementPath = ReactEditor.findPath(editor, element)
 
-    Transforms.setNodes(
-      editor,
-      {
-        children: [
-          { text: ' ' },
-        ],
-        relationTo: relatedCollection.slug,
-        type: 'relationship',
-        value: { id: doc.id },
-      },
-      { at: elementPath },
-    );
+      Transforms.setNodes(
+        editor,
+        {
+          children: [{ text: ' ' }],
+          relationTo: relatedCollection.slug,
+          type: 'relationship',
+          value: { id: doc.id },
+        },
+        { at: elementPath },
+      )
 
-    setParams({
-      ...initialParams,
-      cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
-    });
+      setParams({
+        ...initialParams,
+        cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
+      })
 
-    closeDrawer();
-    dispatchCacheBust();
-  }, [editor, element, relatedCollection, cacheBust, setParams, closeDrawer]);
+      closeDrawer()
+      dispatchCacheBust()
+    },
+    [editor, element, relatedCollection, cacheBust, setParams, closeDrawer],
+  )
 
-  const swapRelationship = React.useCallback(({ collectionConfig, docID }) => {
-    const elementPath = ReactEditor.findPath(editor, element);
+  const swapRelationship = React.useCallback(
+    ({ collectionConfig, docID }) => {
+      const elementPath = ReactEditor.findPath(editor, element)
 
-    Transforms.setNodes(
-      editor,
-      {
-        children: [
-          { text: ' ' },
-        ],
-        relationTo: collectionConfig.slug,
-        type: 'relationship',
-        value: { id: docID },
-      },
-      { at: elementPath },
-    );
+      Transforms.setNodes(
+        editor,
+        {
+          children: [{ text: ' ' }],
+          relationTo: collectionConfig.slug,
+          type: 'relationship',
+          value: { id: docID },
+        },
+        { at: elementPath },
+      )
 
-    setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug));
+      setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug))
 
-    setParams({
-      ...initialParams,
-      cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
-    });
+      setParams({
+        ...initialParams,
+        cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
+      })
 
-    closeListDrawer();
-    dispatchCacheBust();
-  }, [closeListDrawer, editor, element, cacheBust, setParams, collections]);
+      closeListDrawer()
+      dispatchCacheBust()
+    },
+    [closeListDrawer, editor, element, cacheBust, setParams, collections],
+  )
 
   return (
     <div
-      className={[
-        baseClass,
-        (selected && focused) && `${baseClass}--selected`,
-      ].filter(Boolean).join(' ')}
+      className={[baseClass, selected && focused && `${baseClass}--selected`]
+        .filter(Boolean)
+        .join(' ')}
       contentEditable={false}
       {...attributes}
     >
       <div className={`${baseClass}__wrap`}>
         <p className={`${baseClass}__label`}>
-          {t('labelRelationship', { label: getTranslation(relatedCollection.labels.singular, i18n) })}
+          {t('labelRelationship', {
+            label: getTranslation(relatedCollection.labels.singular, i18n),
+          })}
         </p>
         <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
           <p className={`${baseClass}__title`}>
@@ -174,8 +169,8 @@ const Element: React.FC<Props> = (props) => {
         </ListDrawerToggler>
         <Button
           onClick={(e) => {
-            e.preventDefault();
-            removeRelationship();
+            e.preventDefault()
+            removeRelationship()
           }}
           buttonStyle="icon-label"
           className={`${baseClass}__removeButton`}
@@ -185,19 +180,17 @@ const Element: React.FC<Props> = (props) => {
           tooltip={t('fields:removeRelationship')}
         />
       </div>
-      {value?.id && (
-        <DocumentDrawer onSave={updateRelationship} />
-      )}
+      {value?.id && <DocumentDrawer onSave={updateRelationship} />}
       <ListDrawer onSelect={swapRelationship} />
       {children}
     </div>
-  );
-};
+  )
+}
 
 export default (props: Props): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props}>
       <Element {...props} />
     </EnabledRelationshipsCondition>
-  );
-};
+  )
+}

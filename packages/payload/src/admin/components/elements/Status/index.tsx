@@ -1,121 +1,132 @@
-import { Modal, useModal } from '@faceless-ui/modal';
-import React, { useCallback, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { toast } from 'react-toastify';
+import { Modal, useModal } from '@faceless-ui/modal'
+import React, { useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'react-toastify'
 
-import type { Field } from '../../../../fields/config/types';
+import type { Field } from '../../../../fields/config/types'
 
-import { MinimalTemplate } from '../..';
-import { requests } from '../../../api';
-import { useForm } from '../../forms/Form/context';
-import { useConfig } from '../../utilities/Config';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import { useLocale } from '../../utilities/Locale';
-import Button from '../Button';
-import './index.scss';
+import { MinimalTemplate } from '../..'
+import { requests } from '../../../api'
+import { useForm } from '../../forms/Form/context'
+import { useConfig } from '../../utilities/Config'
+import { useDocumentInfo } from '../../utilities/DocumentInfo'
+import { useLocale } from '../../utilities/Locale'
+import Button from '../Button'
+import './index.scss'
 
-const baseClass = 'status';
+const baseClass = 'status'
 
 const Status: React.FC = () => {
-  const {
-    collection,
-    docPermissions,
-    getVersions,
-    global,
-    id,
-    publishedDoc,
-    unpublishedVersions,
-  } = useDocumentInfo();
-  const { toggleModal } = useModal();
+  const { collection, docPermissions, getVersions, global, id, publishedDoc, unpublishedVersions } =
+    useDocumentInfo()
+  const { toggleModal } = useModal()
   const {
     routes: { api },
     serverURL,
-  } = useConfig();
-  const [processing, setProcessing] = useState(false);
-  const { reset: resetForm } = useForm();
-  const { code: locale } = useLocale();
-  const { i18n, t } = useTranslation('version');
+  } = useConfig()
+  const [processing, setProcessing] = useState(false)
+  const { reset: resetForm } = useForm()
+  const { code: locale } = useLocale()
+  const { i18n, t } = useTranslation('version')
 
-  const unPublishModalSlug = `confirm-un-publish-${id}`;
-  const revertModalSlug = `confirm-revert-${id}`;
+  const unPublishModalSlug = `confirm-un-publish-${id}`
+  const revertModalSlug = `confirm-revert-${id}`
 
-  let statusToRender;
+  let statusToRender
 
   if (unpublishedVersions?.docs?.length > 0 && publishedDoc) {
-    statusToRender = 'changed';
+    statusToRender = 'changed'
   } else if (!publishedDoc) {
-    statusToRender = 'draft';
+    statusToRender = 'draft'
   } else if (publishedDoc && unpublishedVersions?.docs?.length <= 1) {
-    statusToRender = 'published';
+    statusToRender = 'published'
   }
 
-  const performAction = useCallback(async (action: 'revert' | 'unpublish') => {
-    let url;
-    let method;
-    let body;
+  const performAction = useCallback(
+    async (action: 'revert' | 'unpublish') => {
+      let url
+      let method
+      let body
 
-    setProcessing(true);
+      setProcessing(true)
 
-    if (action === 'unpublish') {
-      body = {
-        _status: 'draft',
-      };
-    }
+      if (action === 'unpublish') {
+        body = {
+          _status: 'draft',
+        }
+      }
 
-    if (action === 'revert') {
-      body = publishedDoc;
-    }
-
-    if (collection) {
-      url = `${serverURL}${api}/${collection.slug}/${id}?depth=0&locale=${locale}&fallback-locale=null`;
-      method = 'patch';
-    }
-    if (global) {
-      url = `${serverURL}${api}/globals/${global.slug}?depth=0&locale=${locale}&fallback-locale=null`;
-      method = 'post';
-    }
-
-    const res = await requests[method](url, {
-      body: JSON.stringify(body),
-      headers: {
-        'Accept-Language': i18n.language,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (res.status === 200) {
-      let data;
-      let fields: Field[];
-      const json = await res.json();
-
-      if (global) {
-        data = json.result;
-        fields = global.fields;
+      if (action === 'revert') {
+        body = publishedDoc
       }
 
       if (collection) {
-        data = json.doc;
-        fields = collection.fields;
+        url = `${serverURL}${api}/${collection.slug}/${id}?depth=0&locale=${locale}&fallback-locale=null`
+        method = 'patch'
+      }
+      if (global) {
+        url = `${serverURL}${api}/globals/${global.slug}?depth=0&locale=${locale}&fallback-locale=null`
+        method = 'post'
       }
 
-      resetForm(fields, data);
-      toast.success(json.message);
-      getVersions();
-    } else {
-      toast.error(t('error:unPublishingDocument'));
-    }
+      const res = await requests[method](url, {
+        body: JSON.stringify(body),
+        headers: {
+          'Accept-Language': i18n.language,
+          'Content-Type': 'application/json',
+        },
+      })
 
-    setProcessing(false);
-    if (action === 'revert') {
-      toggleModal(revertModalSlug);
-    }
+      if (res.status === 200) {
+        let data
+        let fields: Field[]
+        const json = await res.json()
 
-    if (action === 'unpublish') {
-      toggleModal(unPublishModalSlug);
-    }
-  }, [collection, global, publishedDoc, serverURL, api, id, i18n, locale, resetForm, getVersions, t, toggleModal, revertModalSlug, unPublishModalSlug]);
+        if (global) {
+          data = json.result
+          fields = global.fields
+        }
 
-  const canUpdate = docPermissions?.update?.permission;
+        if (collection) {
+          data = json.doc
+          fields = collection.fields
+        }
+
+        resetForm(fields, data)
+        toast.success(json.message)
+        getVersions()
+      } else {
+        toast.error(t('error:unPublishingDocument'))
+      }
+
+      setProcessing(false)
+      if (action === 'revert') {
+        toggleModal(revertModalSlug)
+      }
+
+      if (action === 'unpublish') {
+        toggleModal(unPublishModalSlug)
+      }
+    },
+    [
+      collection,
+      global,
+      publishedDoc,
+      serverURL,
+      api,
+      id,
+      i18n,
+      locale,
+      resetForm,
+      getVersions,
+      t,
+      toggleModal,
+      revertModalSlug,
+      unPublishModalSlug,
+    ],
+  )
+
+  const canUpdate = docPermissions?.update?.permission
 
   if (statusToRender) {
     return (
@@ -132,10 +143,7 @@ const Status: React.FC = () => {
               >
                 {t('unpublish')}
               </Button>
-              <Modal
-                className={`${baseClass}__modal`}
-                slug={unPublishModalSlug}
-              >
+              <Modal className={`${baseClass}__modal`} slug={unPublishModalSlug}>
                 <MinimalTemplate className={`${baseClass}__modal-template`}>
                   <h1>{t('confirmUnpublish')}</h1>
                   <p>{t('aboutToUnpublish')}</p>
@@ -146,9 +154,7 @@ const Status: React.FC = () => {
                   >
                     {t('general:cancel')}
                   </Button>
-                  <Button
-                    onClick={processing ? undefined : () => performAction('unpublish')}
-                  >
+                  <Button onClick={processing ? undefined : () => performAction('unpublish')}>
                     {t(processing ? 'unpublishing' : 'general:confirm')}
                   </Button>
                 </MinimalTemplate>
@@ -165,10 +171,7 @@ const Status: React.FC = () => {
               >
                 {t('revertToPublished')}
               </Button>
-              <Modal
-                className={`${baseClass}__modal`}
-                slug={revertModalSlug}
-              >
+              <Modal className={`${baseClass}__modal`} slug={revertModalSlug}>
                 <MinimalTemplate className={`${baseClass}__modal-template`}>
                   <h1>{t('confirmRevertToSaved')}</h1>
                   <p>{t('aboutToRevertToPublished')}</p>
@@ -179,9 +182,7 @@ const Status: React.FC = () => {
                   >
                     {t('general:cancel')}
                   </Button>
-                  <Button
-                    onClick={processing ? undefined : () => performAction('revert')}
-                  >
+                  <Button onClick={processing ? undefined : () => performAction('revert')}>
                     {t(processing ? 'reverting' : 'general:confirm')}
                   </Button>
                 </MinimalTemplate>
@@ -190,10 +191,10 @@ const Status: React.FC = () => {
           )}
         </div>
       </div>
-    );
+    )
   }
 
-  return null;
-};
+  return null
+}
 
-export default Status;
+export default Status

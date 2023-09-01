@@ -1,26 +1,26 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { FieldTypes } from '..';
-import type { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import type { FilterOptions, UploadField } from '../../../../../fields/config/types';
-import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
-import type { ListDrawerProps } from '../../../elements/ListDrawer/types';
-import type { Description } from '../../FieldDescription/types';
-import type { FilterOptionsResult } from '../Relationship/types';
+import type { FieldTypes } from '..'
+import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
+import type { FilterOptions, UploadField } from '../../../../../fields/config/types'
+import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types'
+import type { ListDrawerProps } from '../../../elements/ListDrawer/types'
+import type { Description } from '../../FieldDescription/types'
+import type { FilterOptionsResult } from '../Relationship/types'
 
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import Button from '../../../elements/Button';
-import { useDocumentDrawer } from '../../../elements/DocumentDrawer';
-import FileDetails from '../../../elements/FileDetails';
-import { useListDrawer } from '../../../elements/ListDrawer';
-import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import Label from '../../Label';
-import './index.scss';
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import Button from '../../../elements/Button'
+import { useDocumentDrawer } from '../../../elements/DocumentDrawer'
+import FileDetails from '../../../elements/FileDetails'
+import { useListDrawer } from '../../../elements/ListDrawer'
+import { GetFilterOptions } from '../../../utilities/GetFilterOptions'
+import Error from '../../Error'
+import FieldDescription from '../../FieldDescription'
+import Label from '../../Label'
+import './index.scss'
 
-const baseClass = 'upload';
+const baseClass = 'upload'
 
 export type UploadInputProps = Omit<UploadField, 'type'> & {
   api?: string
@@ -61,35 +61,23 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     style,
     value,
     width,
-  } = props;
+  } = props
 
-  const { i18n, t } = useTranslation('fields');
+  const { i18n, t } = useTranslation('fields')
 
-  const [file, setFile] = useState(undefined);
-  const [missingFile, setMissingFile] = useState(false);
-  const [collectionSlugs] = useState([collection?.slug]);
-  const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>();
+  const [file, setFile] = useState(undefined)
+  const [missingFile, setMissingFile] = useState(false)
+  const [collectionSlugs] = useState([collection?.slug])
+  const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>()
 
-  const [
-    DocumentDrawer,
-    DocumentDrawerToggler,
-    {
-      closeDrawer,
-    },
-  ] = useDocumentDrawer({
+  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     collectionSlug: collectionSlugs[0],
-  });
+  })
 
-  const [
-    ListDrawer,
-    ListDrawerToggler,
-    {
-      closeDrawer: closeListDrawer,
-    },
-  ] = useListDrawer({
+  const [ListDrawer, ListDrawerToggler, { closeDrawer: closeListDrawer }] = useListDrawer({
     collectionSlugs,
     filterOptions: filterOptionsResult,
-  });
+  })
 
   const classes = [
     'field-type',
@@ -97,7 +85,9 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     className,
     showError && 'error',
     readOnly && 'read-only',
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   useEffect(() => {
     if (typeof value === 'string' && value !== '') {
@@ -107,41 +97,41 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
           headers: {
             'Accept-Language': i18n.language,
           },
-        });
+        })
         if (response.ok) {
-          const json = await response.json();
-          setFile(json);
+          const json = await response.json()
+          setFile(json)
         } else {
-          setMissingFile(true);
-          setFile(undefined);
+          setMissingFile(true)
+          setFile(undefined)
         }
-      };
+      }
 
-      fetchFile();
+      fetchFile()
     } else {
-      setFile(undefined);
+      setFile(undefined)
     }
-  }, [
-    value,
-    relationTo,
-    api,
-    serverURL,
-    i18n,
-  ]);
+  }, [value, relationTo, api, serverURL, i18n])
 
-  const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
-    setMissingFile(false);
-    onChange(args.doc);
-    closeDrawer();
-  }, [onChange, closeDrawer]);
+  const onSave = useCallback<DocumentDrawerProps['onSave']>(
+    (args) => {
+      setMissingFile(false)
+      onChange(args.doc)
+      closeDrawer()
+    },
+    [onChange, closeDrawer],
+  )
 
-  const onSelect = useCallback<ListDrawerProps['onSelect']>((args) => {
-    setMissingFile(false);
-    onChange({
-      id: args.docID,
-    });
-    closeListDrawer();
-  }, [onChange, closeListDrawer]);
+  const onSelect = useCallback<ListDrawerProps['onSelect']>(
+    (args) => {
+      setMissingFile(false)
+      onChange({
+        id: args.docID,
+      })
+      closeListDrawer()
+    },
+    [onChange, closeListDrawer],
+  )
 
   return (
     <div
@@ -160,22 +150,19 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
           setFilterOptionsResult,
         }}
       />
-      <Error
-        message={errorMessage}
-        showError={showError}
-      />
-      <Label
-        htmlFor={`field-${path.replace(/\./g, '__')}`}
-        label={label}
-        required={required}
-      />
+      <Error message={errorMessage} showError={showError} />
+      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       {collection?.upload && (
         <React.Fragment>
-          {(file && !missingFile) && (
+          {file && !missingFile && (
             <FileDetails
-              handleRemove={readOnly ? undefined : () => {
-                onChange(null);
-              }}
+              handleRemove={
+                readOnly
+                  ? undefined
+                  : () => {
+                      onChange(null)
+                    }
+              }
               collection={collection}
               doc={file}
             />
@@ -183,43 +170,28 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
           {(!file || missingFile) && (
             <div className={`${baseClass}__wrap`}>
               <div className={`${baseClass}__buttons`}>
-                <DocumentDrawerToggler
-                  className={`${baseClass}__toggler`}
-                  disabled={readOnly}
-                >
-                  <Button
-                    buttonStyle="secondary"
-                    disabled={readOnly}
-                    el="div"
-                  >
-                    {t('uploadNewLabel', { label: getTranslation(collection.labels.singular, i18n) })}
+                <DocumentDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
+                  <Button buttonStyle="secondary" disabled={readOnly} el="div">
+                    {t('uploadNewLabel', {
+                      label: getTranslation(collection.labels.singular, i18n),
+                    })}
                   </Button>
                 </DocumentDrawerToggler>
-                <ListDrawerToggler
-                  className={`${baseClass}__toggler`}
-                  disabled={readOnly}
-                >
-                  <Button
-                    buttonStyle="secondary"
-                    disabled={readOnly}
-                    el="div"
-                  >
+                <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
+                  <Button buttonStyle="secondary" disabled={readOnly} el="div">
                     {t('chooseFromExisting')}
                   </Button>
                 </ListDrawerToggler>
               </div>
             </div>
           )}
-          <FieldDescription
-            description={description}
-            value={file}
-          />
+          <FieldDescription description={description} value={file} />
         </React.Fragment>
       )}
       {!readOnly && <DocumentDrawer onSave={onSave} />}
       {!readOnly && <ListDrawer onSelect={onSelect} />}
     </div>
-  );
-};
+  )
+}
 
-export default UploadInput;
+export default UploadInput

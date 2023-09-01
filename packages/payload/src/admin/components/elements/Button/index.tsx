@@ -1,16 +1,16 @@
-import React, { Fragment, forwardRef, isValidElement } from 'react';
-import { Link } from 'react-router-dom';
+import React, { Fragment, forwardRef, isValidElement } from 'react'
+import { Link } from 'react-router-dom'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import chevron from '../../icons/Chevron';
-import edit from '../../icons/Edit';
-import linkIcon from '../../icons/Link';
-import plus from '../../icons/Plus';
-import swap from '../../icons/Swap';
-import x from '../../icons/X';
-import Tooltip from '../Tooltip';
-import './index.scss';
+import chevron from '../../icons/Chevron'
+import edit from '../../icons/Edit'
+import linkIcon from '../../icons/Link'
+import plus from '../../icons/Plus'
+import swap from '../../icons/Swap'
+import x from '../../icons/X'
+import Tooltip from '../Tooltip'
+import './index.scss'
 
 const icons = {
   chevron,
@@ -19,29 +19,22 @@ const icons = {
   plus,
   swap,
   x,
-};
+}
 
-const baseClass = 'btn';
+const baseClass = 'btn'
 
 const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
-  const BuiltInIcon = icons[icon];
+  const BuiltInIcon = icons[icon]
 
   return (
     <Fragment>
       {tooltip && (
-        <Tooltip
-          className={`${baseClass}__tooltip`}
-          show={showTooltip}
-        >
+        <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
           {tooltip}
         </Tooltip>
       )}
       <span className={`${baseClass}__content`}>
-        {children && (
-          <span className={`${baseClass}__label`}>
-            {children}
-          </span>
-        )}
+        {children && <span className={`${baseClass}__label`}>{children}</span>}
         {icon && (
           <span className={`${baseClass}__icon`}>
             {isValidElement(icon) && icon}
@@ -50,8 +43,8 @@ const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
         )}
       </span>
     </Fragment>
-  );
-};
+  )
+}
 
 const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, ref) => {
   const {
@@ -73,9 +66,9 @@ const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, 
     tooltip,
     type = 'button',
     url,
-  } = props;
+  } = props
 
-  const [showTooltip, setShowTooltip] = React.useState(false);
+  const [showTooltip, setShowTooltip] = React.useState(false)
 
   const classes = [
     baseClass,
@@ -83,18 +76,20 @@ const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, 
     buttonStyle && `${baseClass}--style-${buttonStyle}`,
     icon && `${baseClass}--icon`,
     iconStyle && `${baseClass}--icon-style-${iconStyle}`,
-    (icon && !children) && `${baseClass}--icon-only`,
+    icon && !children && `${baseClass}--icon-only`,
     disabled && `${baseClass}--disabled`,
     round && `${baseClass}--round`,
     size && `${baseClass}--size-${size}`,
     iconPosition && `${baseClass}--icon-position-${iconPosition}`,
     tooltip && `${baseClass}--has-tooltip`,
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   function handleClick(event) {
-    setShowTooltip(false);
-    if (type !== 'submit' && onClick) event.preventDefault();
-    if (onClick) onClick(event);
+    setShowTooltip(false)
+    if (type !== 'submit' && onClick) event.preventDefault()
+    if (onClick) onClick(event)
   }
 
   const buttonProps = {
@@ -109,61 +104,38 @@ const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, 
     rel: newTab ? 'noopener noreferrer' : undefined,
     target: newTab ? '_blank' : undefined,
     type,
-  };
+  }
 
   switch (el) {
     case 'link':
       return (
-        <Link
-          {...buttonProps}
-          to={to || url}
-        >
-          <ButtonContents
-            icon={icon}
-            showTooltip={showTooltip}
-            tooltip={tooltip}
-          >
+        <Link {...buttonProps} to={to || url}>
+          <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
         </Link>
-      );
+      )
 
     case 'anchor':
       return (
-        <a
-          {...buttonProps}
-          href={url}
-          ref={ref as React.LegacyRef<HTMLAnchorElement>}
-        >
-          <ButtonContents
-            icon={icon}
-            showTooltip={showTooltip}
-            tooltip={tooltip}
-          >
+        <a {...buttonProps} href={url} ref={ref as React.LegacyRef<HTMLAnchorElement>}>
+          <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
         </a>
-      );
+      )
 
     default:
-      const Tag = el; // eslint-disable-line no-case-declarations
+      const Tag = el // eslint-disable-line no-case-declarations
 
       return (
-        <Tag
-          ref={ref}
-          type="submit"
-          {...buttonProps}
-        >
-          <ButtonContents
-            icon={icon}
-            showTooltip={showTooltip}
-            tooltip={tooltip}
-          >
+        <Tag ref={ref} type="submit" {...buttonProps}>
+          <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
         </Tag>
-      );
+      )
   }
-});
+})
 
-export default Button;
+export default Button

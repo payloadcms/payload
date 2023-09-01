@@ -1,5 +1,5 @@
 export type Translation = {
   general: {
-    thisLanguage: string,
-  },
-};
+    thisLanguage: string
+  }
+}

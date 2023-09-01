@@ -12,18 +12,18 @@ import type {
   SetSubmitted,
   Submit,
   ValidateForm,
-} from './types';
+} from './types'
 
-const submit: Submit = () => undefined;
-const getSiblingData: GetSiblingData = () => undefined;
-const dispatchFields: DispatchFields = () => undefined;
-const validateForm: ValidateForm = () => undefined;
-const createFormData: CreateFormData = () => undefined;
+const submit: Submit = () => undefined
+const getSiblingData: GetSiblingData = () => undefined
+const dispatchFields: DispatchFields = () => undefined
+const validateForm: ValidateForm = () => undefined
+const createFormData: CreateFormData = () => undefined
 
-const setModified: SetModified = () => undefined;
-const setProcessing: SetProcessing = () => undefined;
-const setSubmitted: SetSubmitted = () => undefined;
-const reset: Reset = () => undefined;
+const setModified: SetModified = () => undefined
+const setProcessing: SetProcessing = () => undefined
+const setSubmitted: SetSubmitted = () => undefined
+const reset: Reset = () => undefined
 
 const initialContextState: Context = {
   addFieldRow: () => undefined,
@@ -47,6 +47,6 @@ const initialContextState: Context = {
   setSubmitted,
   submit,
   validateForm,
-};
+}
 
-export default initialContextState;
+export default initialContextState

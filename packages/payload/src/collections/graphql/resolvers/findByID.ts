@@ -1,27 +1,31 @@
-import type { Config as SchemaConfig } from 'payload/generated-types';
+import type { Config as SchemaConfig } from 'payload/generated-types'
 
-import type { PayloadRequest } from '../../../express/types';
-import type { Collection } from '../../config/types';
+import type { PayloadRequest } from '../../../express/types'
+import type { Collection } from '../../config/types'
 
-import findByID from '../../operations/findByID';
+import findByID from '../../operations/findByID'
 
-export type Resolver<T> = (_: unknown, args: {
-  draft: boolean
-  fallbackLocale?: string
-  id: string
-  locale?: string
-},
+export type Resolver<T> = (
+  _: unknown,
+  args: {
+    draft: boolean
+    fallbackLocale?: string
+    id: string
+    locale?: string
+  },
   context: {
-    req: PayloadRequest,
+    req: PayloadRequest
     res: Response
-  }
+  },
 ) => Promise<T>
 
-export default function findByIDResolver<T extends keyof SchemaConfig['collections']>(collection: Collection): Resolver<SchemaConfig['collections'][T]> {
+export default function findByIDResolver<T extends keyof SchemaConfig['collections']>(
+  collection: Collection,
+): Resolver<SchemaConfig['collections'][T]> {
   return async function resolver(_, args, context) {
-    const { req } = context;
-    if (args.locale) req.locale = args.locale;
-    if (args.fallbackLocale) req.fallbackLocale = args.fallbackLocale;
+    const { req } = context
+    if (args.locale) req.locale = args.locale
+    if (args.fallbackLocale) req.fallbackLocale = args.fallbackLocale
 
     const options = {
       collection,
@@ -29,10 +33,10 @@ export default function findByIDResolver<T extends keyof SchemaConfig['collectio
       draft: args.draft,
       id: args.id,
       req,
-    };
+    }
 
-    const result = await findByID(options);
+    const result = await findByID(options)
 
-    return result;
-  };
+    return result
+  }
 }

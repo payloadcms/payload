@@ -1,7 +1,7 @@
-import type React from 'react';
+import type React from 'react'
 
-import type { Validate } from '../../../../../fields/config/types';
-import type { Description } from '../../FieldDescription/types';
+import type { Validate } from '../../../../../fields/config/types'
+import type { Description } from '../../FieldDescription/types'
 
 export type Props = {
   autoComplete?: string

@@ -1,12 +1,12 @@
-import React from 'react';
+import React from 'react'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import { Gutter } from '../Gutter';
-import StepNav from '../StepNav';
-import './index.scss';
+import { Gutter } from '../Gutter'
+import StepNav from '../StepNav'
+import './index.scss'
 
-const baseClass = 'eyebrow';
+const baseClass = 'eyebrow'
 
 const Eyebrow: React.FC<Props> = ({ actions }) => (
   <div className={baseClass}>
@@ -15,6 +15,6 @@ const Eyebrow: React.FC<Props> = ({ actions }) => (
       {actions}
     </Gutter>
   </div>
-);
+)
 
-export default Eyebrow;
+export default Eyebrow

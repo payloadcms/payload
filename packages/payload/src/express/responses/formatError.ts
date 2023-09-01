@@ -1,37 +1,40 @@
-import APIError from '../../errors/APIError';
+import APIError from '../../errors/APIError'
 
-export type ErrorResponse = { data?: any, errors: unknown[], stack?: string };
+export type ErrorResponse = { data?: any; errors: unknown[]; stack?: string }
 
-const formatErrorResponse = (incoming: { [key: string]: unknown } | APIError | Error): ErrorResponse => {
+const formatErrorResponse = (
+  incoming: { [key: string]: unknown } | APIError | Error,
+): ErrorResponse => {
   if (incoming) {
     if (incoming instanceof APIError && incoming.data) {
       return {
-        errors: [{
-          data: incoming.data,
-          message: incoming.message,
-          name: incoming.name,
-        }],
-      };
+        errors: [
+          {
+            data: incoming.data,
+            message: incoming.message,
+            name: incoming.name,
+          },
+        ],
+      }
     }
 
     // mongoose
     if (!(incoming instanceof APIError || incoming instanceof Error) && incoming.errors) {
       return {
-        errors: Object.keys(incoming.errors)
-          .reduce((acc, key) => {
-            acc.push({
-              field: incoming.errors[key].path,
-              message: incoming.errors[key].message,
-            });
-            return acc;
-          }, []),
-      };
+        errors: Object.keys(incoming.errors).reduce((acc, key) => {
+          acc.push({
+            field: incoming.errors[key].path,
+            message: incoming.errors[key].message,
+          })
+          return acc
+        }, []),
+      }
     }
 
     if (Array.isArray(incoming.message)) {
       return {
         errors: incoming.message,
-      };
+      }
     }
 
     if (incoming.name) {
@@ -41,7 +44,7 @@ const formatErrorResponse = (incoming: { [key: string]: unknown } | APIError | E
             message: incoming.message,
           },
         ],
-      };
+      }
     }
   }
 
@@ -51,7 +54,7 @@ const formatErrorResponse = (incoming: { [key: string]: unknown } | APIError | E
         message: 'An unknown error occurred.',
       },
     ],
-  };
-};
+  }
+}
 
-export default formatErrorResponse;
+export default formatErrorResponse

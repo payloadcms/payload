@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
-import type { PayloadRequest, RequestContext } from '../../../express/types';
-import type { Field, TabAsField} from '../../config/types';
+import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { Field, TabAsField } from '../../config/types'
 
-import { fieldAffectsData, tabHasName } from '../../config/types';
-import { traverseFields } from './traverseFields';
+import { fieldAffectsData, tabHasName } from '../../config/types'
+import { traverseFields } from './traverseFields'
 
 type Args = {
   context: RequestContext
@@ -37,7 +37,7 @@ export const promise = async ({
     // Execute hooks
     if (field.hooks?.afterChange) {
       await field.hooks.afterChange.reduce(async (priorHook, currentHook) => {
-        await priorHook;
+        await priorHook
 
         const hookedValue = await currentHook({
           context,
@@ -50,12 +50,12 @@ export const promise = async ({
           req,
           siblingData,
           value: siblingData[field.name],
-        });
+        })
 
         if (hookedValue !== undefined) {
-          siblingDoc[field.name] = hookedValue;
+          siblingDoc[field.name] = hookedValue
         }
-      }, Promise.resolve());
+      }, Promise.resolve())
     }
   }
 
@@ -71,64 +71,69 @@ export const promise = async ({
         previousDoc,
         previousSiblingDoc: previousDoc[field.name] as Record<string, unknown>,
         req,
-        siblingData: siblingData?.[field.name] as Record<string, unknown> || {},
+        siblingData: (siblingData?.[field.name] as Record<string, unknown>) || {},
         siblingDoc: siblingDoc[field.name] as Record<string, unknown>,
-      });
+      })
 
-      break;
+      break
     }
 
     case 'array': {
-      const rows = siblingDoc[field.name];
+      const rows = siblingDoc[field.name]
 
       if (Array.isArray(rows)) {
-        const promises = [];
+        const promises = []
         rows.forEach((row, i) => {
-          promises.push(traverseFields({
-            context,
-            data,
-            doc,
-            fields: field.fields,
-            operation,
-            previousDoc,
-            previousSiblingDoc: previousDoc?.[field.name]?.[i] || {} as Record<string, unknown>,
-            req,
-            siblingData: siblingData?.[field.name]?.[i] || {},
-            siblingDoc: { ...row } || {},
-          }));
-        });
-        await Promise.all(promises);
-      }
-      break;
-    }
-
-    case 'blocks': {
-      const rows = siblingDoc[field.name];
-
-      if (Array.isArray(rows)) {
-        const promises = [];
-        rows.forEach((row, i) => {
-          const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
-
-          if (block) {
-            promises.push(traverseFields({
+          promises.push(
+            traverseFields({
               context,
               data,
               doc,
-              fields: block.fields,
+              fields: field.fields,
               operation,
               previousDoc,
-              previousSiblingDoc: previousDoc?.[field.name]?.[i] || {} as Record<string, unknown>,
+              previousSiblingDoc: previousDoc?.[field.name]?.[i] || ({} as Record<string, unknown>),
               req,
               siblingData: siblingData?.[field.name]?.[i] || {},
               siblingDoc: { ...row } || {},
-            }));
+            }),
+          )
+        })
+        await Promise.all(promises)
+      }
+      break
+    }
+
+    case 'blocks': {
+      const rows = siblingDoc[field.name]
+
+      if (Array.isArray(rows)) {
+        const promises = []
+        rows.forEach((row, i) => {
+          const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
+
+          if (block) {
+            promises.push(
+              traverseFields({
+                context,
+                data,
+                doc,
+                fields: block.fields,
+                operation,
+                previousDoc,
+                previousSiblingDoc:
+                  previousDoc?.[field.name]?.[i] || ({} as Record<string, unknown>),
+                req,
+                siblingData: siblingData?.[field.name]?.[i] || {},
+                siblingDoc: { ...row } || {},
+              }),
+            )
           }
-        });
-        await Promise.all(promises);
+        })
+        await Promise.all(promises)
       }
 
-      break;
+      break
     }
 
     case 'row':
@@ -144,20 +149,20 @@ export const promise = async ({
         req,
         siblingData: siblingData || {},
         siblingDoc: { ...siblingDoc },
-      });
+      })
 
-      break;
+      break
     }
 
     case 'tab': {
-      let tabSiblingData = siblingData;
-      let tabSiblingDoc = siblingDoc;
-      let tabPreviousSiblingDoc = siblingDoc;
+      let tabSiblingData = siblingData
+      let tabSiblingDoc = siblingDoc
+      let tabPreviousSiblingDoc = siblingDoc
 
       if (tabHasName(field)) {
-        tabSiblingData = siblingData[field.name] as Record<string, unknown>;
-        tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>;
-        tabPreviousSiblingDoc = previousDoc[field.name] as Record<string, unknown>;
+        tabSiblingData = siblingData[field.name] as Record<string, unknown>
+        tabSiblingDoc = siblingDoc[field.name] as Record<string, unknown>
+        tabPreviousSiblingDoc = previousDoc[field.name] as Record<string, unknown>
       }
 
       await traverseFields({
@@ -171,9 +176,9 @@ export const promise = async ({
         req,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
-      });
+      })
 
-      break;
+      break
     }
 
     case 'tabs': {
@@ -188,12 +193,12 @@ export const promise = async ({
         req,
         siblingData: siblingData || {},
         siblingDoc: { ...siblingDoc },
-      });
-      break;
+      })
+      break
     }
 
     default: {
-      break;
+      break
     }
   }
-};
+}

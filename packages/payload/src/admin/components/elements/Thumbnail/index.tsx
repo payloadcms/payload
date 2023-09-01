@@ -1,44 +1,31 @@
-import React from 'react';
+import React from 'react'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import useThumbnail from '../../../hooks/useThumbnail';
-import FileGraphic from '../../graphics/File';
-import './index.scss';
+import useThumbnail from '../../../hooks/useThumbnail'
+import FileGraphic from '../../graphics/File'
+import './index.scss'
 
-const baseClass = 'thumbnail';
+const baseClass = 'thumbnail'
 
 const Thumbnail: React.FC<Props> = (props) => {
   const {
     className = '',
     collection,
-    doc: {
-      filename,
-    },
+    doc: { filename },
     doc,
     size,
-  } = props;
+  } = props
 
-  const thumbnailSRC = useThumbnail(collection, doc);
+  const thumbnailSRC = useThumbnail(collection, doc)
 
-  const classes = [
-    baseClass,
-    `${baseClass}--size-${size || 'medium'}`,
-    className,
-  ].join(' ');
+  const classes = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
   return (
     <div className={classes}>
-      {thumbnailSRC && (
-        <img
-          alt={filename as string}
-          src={thumbnailSRC}
-        />
-      )}
-      {!thumbnailSRC && (
-        <FileGraphic />
-      )}
+      {thumbnailSRC && <img alt={filename as string} src={thumbnailSRC} />}
+      {!thumbnailSRC && <FileGraphic />}
     </div>
-  );
-};
-export default Thumbnail;
+  )
+}
+export default Thumbnail

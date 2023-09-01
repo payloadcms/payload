@@ -1,4 +1,4 @@
-import type { Field } from '../../fields/config/types';
+import type { Field } from '../../fields/config/types'
 
 export default [
   {
@@ -12,4 +12,4 @@ export default [
     name: 'lockUntil',
     type: 'date',
   },
-] as Field[];
+] as Field[]

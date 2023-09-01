@@ -1,11 +1,9 @@
-import React from 'react';
+import React from 'react'
 
-import H4Icon from '../../../../../icons/headings/H4';
-import ElementButton from '../Button';
+import H4Icon from '../../../../../icons/headings/H4'
+import ElementButton from '../Button'
 
-const H4 = ({ attributes, children }) => (
-  <h4 {...attributes}>{children}</h4>
-);
+const H4 = ({ attributes, children }) => <h4 {...attributes}>{children}</h4>
 
 const h4 = {
   Button: () => (
@@ -14,6 +12,6 @@ const h4 = {
     </ElementButton>
   ),
   Element: H4,
-};
+}
 
-export default h4;
+export default h4

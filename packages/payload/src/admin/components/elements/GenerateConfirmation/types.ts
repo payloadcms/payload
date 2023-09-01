@@ -1,4 +1,4 @@
 export type Props = {
-  highlightField: (Boolean) => void,
-  setKey: () => void,
+  highlightField: (Boolean) => void
+  setKey: () => void
 }

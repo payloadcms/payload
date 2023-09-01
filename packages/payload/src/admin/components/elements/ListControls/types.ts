@@ -1,7 +1,7 @@
-import type { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import type { Where } from '../../../../types';
-import type { Props as ListProps } from '../../views/collections/List/types';
-import type { Column } from '../Table/types';
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
+import type { Where } from '../../../../types'
+import type { Props as ListProps } from '../../views/collections/List/types'
+import type { Column } from '../Table/types'
 
 export type Props = {
   collection: SanitizedCollectionConfig

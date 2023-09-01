@@ -1,19 +1,17 @@
-import ObjectID from 'bson-objectid';
+import ObjectID from 'bson-objectid'
 
-import type { Field, FieldHook } from '../config/types';
+import type { Field, FieldHook } from '../config/types'
 
-const generateID: FieldHook = ({ value }) => (value || new ObjectID().toHexString());
+const generateID: FieldHook = ({ value }) => value || new ObjectID().toHexString()
 
 export const baseIDField: Field = {
   admin: {
     disabled: true,
   },
   hooks: {
-    beforeChange: [
-      generateID,
-    ],
+    beforeChange: [generateID],
   },
   label: 'ID',
   name: 'id',
   type: 'text',
-};
+}

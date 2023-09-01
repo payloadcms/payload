@@ -1,19 +1,23 @@
-import type { NextFunction, Response } from 'express';
+import type { NextFunction, Response } from 'express'
 
-import type { PayloadRequest } from '../../express/types';
+import type { PayloadRequest } from '../../express/types'
 
-import getExtractJWT from '../getExtractJWT';
-import refresh from '../operations/refresh';
+import getExtractJWT from '../getExtractJWT'
+import refresh from '../operations/refresh'
 
-export default async function refreshHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
+export default async function refreshHandler(
+  req: PayloadRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<any> {
   try {
-    let token;
+    let token
 
-    const extractJWT = getExtractJWT(req.payload.config);
-    token = extractJWT(req);
+    const extractJWT = getExtractJWT(req.payload.config)
+    token = extractJWT(req)
 
     if (req.body.token) {
-      token = req.body.token;
+      token = req.body.token
     }
 
     const result = await refresh({
@@ -21,13 +25,13 @@ export default async function refreshHandler(req: PayloadRequest, res: Response,
       req,
       res,
       token,
-    });
+    })
 
     return res.status(200).json({
       message: 'Token refresh successful',
       ...result,
-    });
+    })
   } catch (error) {
-    return next(error);
+    return next(error)
   }
 }

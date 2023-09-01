@@ -1,7 +1,6 @@
 @import '../../../scss/styles.scss';
 
 .duplicate {
-
   &__modal {
     @include blur-bg;
     display: flex;
@@ -17,6 +16,4 @@
     z-index: 1;
     position: relative;
   }
-
-
 }

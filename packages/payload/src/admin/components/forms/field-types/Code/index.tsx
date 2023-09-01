@@ -1,22 +1,22 @@
-import React, { useCallback } from 'react';
+import React, { useCallback } from 'react'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import { code } from '../../../../../fields/validations';
-import { CodeEditor } from '../../../elements/CodeEditor';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import Label from '../../Label';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import './index.scss';
+import { code } from '../../../../../fields/validations'
+import { CodeEditor } from '../../../elements/CodeEditor'
+import Error from '../../Error'
+import FieldDescription from '../../FieldDescription'
+import Label from '../../Label'
+import useField from '../../useField'
+import withCondition from '../../withCondition'
+import './index.scss'
 
 const prismToMonacoLanguageMap = {
   js: 'javascript',
   ts: 'typescript',
-};
+}
 
-const baseClass = 'code-field';
+const baseClass = 'code-field'
 
 const Code: React.FC<Props> = (props) => {
   const {
@@ -35,24 +35,22 @@ const Code: React.FC<Props> = (props) => {
     path: pathFromProps,
     required,
     validate = code,
-  } = props;
+  } = props
 
-  const path = pathFromProps || name;
+  const path = pathFromProps || name
 
-  const memoizedValidate = useCallback((value, options) => {
-    return validate(value, { ...options, required });
-  }, [validate, required]);
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
 
-  const {
-    errorMessage,
-    setValue,
-    showError,
-    value,
-  } = useField({
+  const { errorMessage, setValue, showError, value } = useField({
     condition,
     path,
     validate: memoizedValidate,
-  });
+  })
 
   const classes = [
     baseClass,
@@ -60,7 +58,9 @@ const Code: React.FC<Props> = (props) => {
     className,
     showError && 'error',
     readOnly && 'read-only',
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <div
@@ -70,28 +70,18 @@ const Code: React.FC<Props> = (props) => {
       }}
       className={classes}
     >
-      <Error
-        message={errorMessage}
-        showError={showError}
-      />
-      <Label
-        htmlFor={`field-${path}`}
-        label={label}
-        required={required}
-      />
+      <Error message={errorMessage} showError={showError} />
+      <Label htmlFor={`field-${path}`} label={label} required={required} />
       <CodeEditor
         defaultLanguage={prismToMonacoLanguageMap[language] || language}
         onChange={readOnly ? () => null : (val) => setValue(val)}
         options={editorOptions}
         readOnly={readOnly}
-        value={value as string || ''}
+        value={(value as string) || ''}
       />
-      <FieldDescription
-        description={description}
-        value={value}
-      />
+      <FieldDescription description={description} value={value} />
     </div>
-  );
-};
+  )
+}
 
-export default withCondition(Code);
+export default withCondition(Code)

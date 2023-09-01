@@ -1,32 +1,23 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { Option } from '../../../elements/ReactSelect/types';
-import type { Props } from './types';
+import type { Option } from '../../../elements/ReactSelect/types'
+import type { Props } from './types'
 
-import { number } from '../../../../../fields/validations';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import { isNumber } from '../../../../../utilities/isNumber';
-import ReactSelect from '../../../elements/ReactSelect';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import Label from '../../Label';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import './index.scss';
+import { number } from '../../../../../fields/validations'
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import { isNumber } from '../../../../../utilities/isNumber'
+import ReactSelect from '../../../elements/ReactSelect'
+import Error from '../../Error'
+import FieldDescription from '../../FieldDescription'
+import Label from '../../Label'
+import useField from '../../useField'
+import withCondition from '../../withCondition'
+import './index.scss'
 
 const NumberField: React.FC<Props> = (props) => {
   const {
-    admin: {
-      className,
-      condition,
-      description,
-      placeholder,
-      readOnly,
-      step,
-      style,
-      width,
-    } = {},
+    admin: { className, condition, description, placeholder, readOnly, step, style, width } = {},
     hasMany,
     label,
     max,
@@ -37,36 +28,37 @@ const NumberField: React.FC<Props> = (props) => {
     path: pathFromProps,
     required,
     validate = number,
-  } = props;
+  } = props
 
-  const { i18n, t } = useTranslation();
+  const { i18n, t } = useTranslation()
 
-  const path = pathFromProps || name;
+  const path = pathFromProps || name
 
-  const memoizedValidate = useCallback((value, options) => {
-    return validate(value, { ...options, max, min, required });
-  }, [validate, min, max, required]);
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      return validate(value, { ...options, max, min, required })
+    },
+    [validate, min, max, required],
+  )
 
-  const {
-    errorMessage,
-    setValue,
-    showError,
-    value,
-  } = useField<number | number[]>({
+  const { errorMessage, setValue, showError, value } = useField<number | number[]>({
     condition,
     path,
     validate: memoizedValidate,
-  });
+  })
 
-  const handleChange = useCallback((e) => {
-    const val = parseFloat(e.target.value);
+  const handleChange = useCallback(
+    (e) => {
+      const val = parseFloat(e.target.value)
 
-    if (Number.isNaN(val)) {
-      setValue('');
-    } else {
-      setValue(val);
-    }
-  }, [setValue]);
+      if (Number.isNaN(val)) {
+        setValue('')
+      } else {
+        setValue(val)
+      }
+    },
+    [setValue],
+  )
 
   const classes = [
     'field-type',
@@ -75,44 +67,49 @@ const NumberField: React.FC<Props> = (props) => {
     showError && 'error',
     readOnly && 'read-only',
     hasMany && 'has-many',
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ')
 
-  const [valueToRender, setValueToRender] = useState<{id: string, label: string, value: {value: number}}[]>([]); // Only for hasMany
+  const [valueToRender, setValueToRender] = useState<
+    { id: string; label: string; value: { value: number } }[]
+  >([]) // Only for hasMany
 
-  const handleHasManyChange = useCallback((selectedOption) => {
-    if (!readOnly) {
-      let newValue;
-      if (!selectedOption) {
-        newValue = [];
-      } else if (Array.isArray(selectedOption)) {
-        newValue = selectedOption.map((option) => Number(option.value?.value || option.value));
-      } else {
-        newValue = [Number(selectedOption.value?.value || selectedOption.value)];
+  const handleHasManyChange = useCallback(
+    (selectedOption) => {
+      if (!readOnly) {
+        let newValue
+        if (!selectedOption) {
+          newValue = []
+        } else if (Array.isArray(selectedOption)) {
+          newValue = selectedOption.map((option) => Number(option.value?.value || option.value))
+        } else {
+          newValue = [Number(selectedOption.value?.value || selectedOption.value)]
+        }
+
+        setValue(newValue)
       }
-
-      setValue(newValue);
-    }
-  }, [
-    readOnly,
-    setValue,
-  ]);
+    },
+    [readOnly, setValue],
+  )
 
   // useeffect update valueToRender:
   useEffect(() => {
     if (hasMany && Array.isArray(value)) {
-      setValueToRender(value.map((val, index) => {
-        return {
-          id: `${val}${index}`, // append index to avoid duplicate keys but allow duplicate numbers
-          label: `${val}`,
-          value: {
-            toString: () => `${val}${index}`,
-            value: (val as any)?.value || val,
-          }, // You're probably wondering, why the hell is this done that way? Well, React-select automatically uses "label-value" as a key, so we will get that react duplicate key warning if we just pass in the value as multiple values can be the same. So we need to append the index to the toString() of the value to avoid that warning, as it uses that as the key.
-        };
-      }));
+      setValueToRender(
+        value.map((val, index) => {
+          return {
+            id: `${val}${index}`, // append index to avoid duplicate keys but allow duplicate numbers
+            label: `${val}`,
+            value: {
+              toString: () => `${val}${index}`,
+              value: (val as any)?.value || val,
+            }, // You're probably wondering, why the hell is this done that way? Well, React-select automatically uses "label-value" as a key, so we will get that react duplicate key warning if we just pass in the value as multiple values can be the same. So we need to append the index to the toString() of the value to avoid that warning, as it uses that as the key.
+          }
+        }),
+      )
     }
-  }, [value, hasMany]);
-
+  }, [value, hasMany])
 
   return (
     <div
@@ -122,28 +119,21 @@ const NumberField: React.FC<Props> = (props) => {
       }}
       className={classes}
     >
-      <Error
-        message={errorMessage}
-        showError={showError}
-      />
-      <Label
-        htmlFor={`field-${path.replace(/\./g, '__')}`}
-        label={label}
-        required={required}
-      />
+      <Error message={errorMessage} showError={showError} />
+      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       {hasMany ? (
         <ReactSelect
           filterOption={(option, rawInput) => {
             // eslint-disable-next-line no-restricted-globals
-            const isOverHasMany = Array.isArray(value) && value.length >= maxRows;
-            return isNumber(rawInput) && !isOverHasMany;
+            const isOverHasMany = Array.isArray(value) && value.length >= maxRows
+            return isNumber(rawInput) && !isOverHasMany
           }}
           noOptionsMessage={({ inputValue }) => {
-            const isOverHasMany = Array.isArray(value) && value.length >= maxRows;
+            const isOverHasMany = Array.isArray(value) && value.length >= maxRows
             if (isOverHasMany) {
-              return t('validation:limitReached', { max: maxRows, value: value.length + 1 });
+              return t('validation:limitReached', { max: maxRows, value: value.length + 1 })
             }
-            return t('general:noOptions');
+            return t('general:noOptions')
           }}
           className={`field-${path.replace(/\./g, '__')}`}
           disabled={readOnly}
@@ -163,7 +153,7 @@ const NumberField: React.FC<Props> = (props) => {
           onWheel={(e) => {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            e.target.blur();
+            e.target.blur()
           }}
           disabled={readOnly}
           id={`field-${path.replace(/\./g, '__')}`}
@@ -176,12 +166,9 @@ const NumberField: React.FC<Props> = (props) => {
         />
       )}
 
-      <FieldDescription
-        description={description}
-        value={value}
-      />
+      <FieldDescription description={description} value={value} />
     </div>
-  );
-};
+  )
+}
 
-export default withCondition(NumberField);
+export default withCondition(NumberField)

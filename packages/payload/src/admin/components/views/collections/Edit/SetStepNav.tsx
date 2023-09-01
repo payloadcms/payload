@@ -1,13 +1,13 @@
-import { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import type { StepNavItem } from '../../../elements/StepNav/types';
+import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
+import type { StepNavItem } from '../../../elements/StepNav/types'
 
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import useTitle from '../../../../hooks/useTitle';
-import { useStepNav } from '../../../elements/StepNav';
-import { useConfig } from '../../../utilities/Config';
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import useTitle from '../../../../hooks/useTitle'
+import { useStepNav } from '../../../elements/StepNav'
+import { useConfig } from '../../../utilities/Config'
 
 export const SetStepNav: React.FC<{
   collection: SanitizedCollectionConfig
@@ -15,39 +15,39 @@ export const SetStepNav: React.FC<{
   isEditing: boolean
 }> = ({ collection, id, isEditing }) => {
   const {
-    admin: {
-      useAsTitle,
-    },
-    labels: {
-      plural: pluralLabel,
-    },
+    admin: { useAsTitle },
+    labels: { plural: pluralLabel },
     slug,
-  } = collection;
+  } = collection
 
-  const { setStepNav } = useStepNav();
-  const { i18n, t } = useTranslation('general');
-  const { routes: { admin } } = useConfig();
+  const { setStepNav } = useStepNav()
+  const { i18n, t } = useTranslation('general')
+  const {
+    routes: { admin },
+  } = useConfig()
 
-  const title = useTitle(collection);
+  const title = useTitle(collection)
 
   useEffect(() => {
-    const nav: StepNavItem[] = [{
-      label: getTranslation(pluralLabel, i18n),
-      url: `${admin}/collections/${slug}`,
-    }];
+    const nav: StepNavItem[] = [
+      {
+        label: getTranslation(pluralLabel, i18n),
+        url: `${admin}/collections/${slug}`,
+      },
+    ]
 
     if (isEditing) {
       nav.push({
-        label: (useAsTitle && useAsTitle !== 'id') ? title || `[${t('untitled')}]` : id,
-      });
+        label: useAsTitle && useAsTitle !== 'id' ? title || `[${t('untitled')}]` : id,
+      })
     } else {
       nav.push({
         label: t('createNew'),
-      });
+      })
     }
 
-    setStepNav(nav);
-  }, [setStepNav, isEditing, pluralLabel, id, slug, useAsTitle, admin, t, i18n, title]);
+    setStepNav(nav)
+  }, [setStepNav, isEditing, pluralLabel, id, slug, useAsTitle, admin, t, i18n, title])
 
-  return null;
-};
+  return null
+}

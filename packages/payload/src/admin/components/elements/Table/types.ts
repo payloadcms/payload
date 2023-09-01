@@ -1,6 +1,6 @@
-import type React from 'react';
+import type React from 'react'
 
-import type { FieldBase } from '../../../../fields/config/types';
+import type { FieldBase } from '../../../../fields/config/types'
 
 export type Column = {
   accessor: string
@@ -8,7 +8,7 @@ export type Column = {
   components: {
     Heading: React.ReactNode
     renderCell: (row: any, data: any) => React.ReactNode
-  },
+  }
   label: FieldBase['label']
   name: FieldBase['name']
 }

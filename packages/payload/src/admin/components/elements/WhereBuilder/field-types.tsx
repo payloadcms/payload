@@ -7,7 +7,7 @@ const boolean = [
     label: 'isNotEqualTo',
     value: 'not_equals',
   },
-];
+]
 
 const base = [
   ...boolean,
@@ -23,7 +23,7 @@ const base = [
     label: 'exists',
     value: 'exists',
   },
-];
+]
 
 const numeric = [
   ...base,
@@ -43,7 +43,7 @@ const numeric = [
     label: 'isGreaterThanOrEqualTo',
     value: 'greater_than_equals',
   },
-];
+]
 
 const geo = [
   ...boolean,
@@ -55,27 +55,27 @@ const geo = [
     label: 'near',
     value: 'near',
   },
-];
+]
 
 const within = {
   label: 'within',
   value: 'within',
-};
+}
 
 const intersects = {
   label: 'intersects',
   value: 'intersects',
-};
+}
 
 const like = {
   label: 'isLike',
   value: 'like',
-};
+}
 
 const contains = {
   label: 'contains',
   value: 'contains',
-};
+}
 
 const fieldTypeConditions = {
   checkbox: {
@@ -134,6 +134,6 @@ const fieldTypeConditions = {
     component: 'Text',
     operators: [...base],
   },
-};
+}
 
-export default fieldTypeConditions;
+export default fieldTypeConditions

@@ -1,21 +1,21 @@
-import { unflatten as flatleyUnflatten } from 'flatley';
+import { unflatten as flatleyUnflatten } from 'flatley'
 
-import type { Data, Fields } from './types';
+import type { Data, Fields } from './types'
 
 const reduceFieldsToValues = (fields: Fields, unflatten?: boolean): Data => {
-  const data = {};
+  const data = {}
 
   Object.keys(fields).forEach((key) => {
     if (!fields[key].disableFormData) {
-      data[key] = fields[key].value;
+      data[key] = fields[key].value
     }
-  });
+  })
 
   if (unflatten) {
-    return flatleyUnflatten(data, { safe: true });
+    return flatleyUnflatten(data, { safe: true })
   }
 
-  return data;
-};
+  return data
+}
 
-export default reduceFieldsToValues;
+export default reduceFieldsToValues

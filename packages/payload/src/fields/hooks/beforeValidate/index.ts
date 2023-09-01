@@ -1,9 +1,9 @@
-import type { SanitizedCollectionConfig } from '../../../collections/config/types';
-import type { PayloadRequest, RequestContext } from '../../../express/types';
-import type { SanitizedGlobalConfig } from '../../../globals/config/types';
+import type { SanitizedCollectionConfig } from '../../../collections/config/types'
+import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types'
 
-import deepCopyObject from '../../../utilities/deepCopyObject';
-import { traverseFields } from './traverseFields';
+import deepCopyObject from '../../../utilities/deepCopyObject'
+import { traverseFields } from './traverseFields'
 
 type Args<T> = {
   context: RequestContext
@@ -26,7 +26,7 @@ export const beforeValidate = async <T extends Record<string, unknown>>({
   overrideAccess,
   req,
 }: Args<T>): Promise<T> => {
-  const data = deepCopyObject(incomingData);
+  const data = deepCopyObject(incomingData)
 
   await traverseFields({
     context,
@@ -39,7 +39,7 @@ export const beforeValidate = async <T extends Record<string, unknown>>({
     req,
     siblingData: data,
     siblingDoc: doc,
-  });
+  })
 
-  return data;
-};
+  return data
+}

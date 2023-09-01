@@ -1,24 +1,28 @@
-import type { NextFunction, Response } from 'express';
+import type { NextFunction, Response } from 'express'
 
-import httpStatus from 'http-status';
+import httpStatus from 'http-status'
 
-import type { PaginatedDocs } from '../../database/types';
-import type { PayloadRequest } from '../../express/types';
-import type { Where } from '../../types';
-import type { TypeWithID } from '../config/types';
+import type { PaginatedDocs } from '../../database/types'
+import type { PayloadRequest } from '../../express/types'
+import type { Where } from '../../types'
+import type { TypeWithID } from '../config/types'
 
-import { isNumber } from '../../utilities/isNumber';
-import findVersions from '../operations/findVersions';
+import { isNumber } from '../../utilities/isNumber'
+import findVersions from '../operations/findVersions'
 
-export default async function findVersionsHandler<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
+export default async function findVersionsHandler<T extends TypeWithID = any>(
+  req: PayloadRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<Response<PaginatedDocs<T>> | void> {
   try {
-    let page;
+    let page
 
     if (typeof req.query.page === 'string') {
-      const parsedPage = parseInt(req.query.page, 10);
+      const parsedPage = parseInt(req.query.page, 10)
 
       if (!Number.isNaN(parsedPage)) {
-        page = parsedPage;
+        page = parsedPage
       }
     }
 
@@ -31,12 +35,12 @@ export default async function findVersionsHandler<T extends TypeWithID = any>(re
       req,
       sort: req.query.sort as string,
       where: req.query.where as Where, // This is a little shady,
-    };
+    }
 
-    const result = await findVersions(options);
+    const result = await findVersions(options)
 
-    return res.status(httpStatus.OK).json(result);
+    return res.status(httpStatus.OK).json(result)
   } catch (error) {
-    return next(error);
+    return next(error)
   }
 }

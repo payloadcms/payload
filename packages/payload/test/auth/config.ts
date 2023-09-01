@@ -1,15 +1,15 @@
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from 'uuid'
 
-import { mapAsync } from '../../src/utilities/mapAsync';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
-import { AuthDebug } from './AuthDebug';
+import { mapAsync } from '../../src/utilities/mapAsync'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
+import { AuthDebug } from './AuthDebug'
 
-export const slug = 'users';
+export const slug = 'users'
 
-export const namedSaveToJWTValue = 'namedSaveToJWT value';
+export const namedSaveToJWTValue = 'namedSaveToJWT value'
 
-export const saveToJWTKey = 'x-custom-jwt-property-name';
+export const saveToJWTKey = 'x-custom-jwt-property-name'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -161,9 +161,9 @@ export default buildConfigWithDefaults({
               id: {
                 equals: user.id,
               },
-            };
+            }
           }
-          return true;
+          return true
         },
       },
       auth: {
@@ -188,7 +188,7 @@ export default buildConfigWithDefaults({
         password: devUser.password,
         custom: 'Hello, world!',
       },
-    });
+    })
 
     await mapAsync([...Array(2)], async () => {
       await payload.create({
@@ -197,7 +197,7 @@ export default buildConfigWithDefaults({
           apiKey: uuid(),
           enableAPIKey: true,
         },
-      });
-    });
+      })
+    })
   },
-});
+})

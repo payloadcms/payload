@@ -1,13 +1,13 @@
-import React from 'react';
+import React from 'react'
 
-import { useConfig } from '../../utilities/Config';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import { useConfig } from '../../utilities/Config'
+import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 
 const css = `
   .graphic-icon path {
     fill: var(--theme-elevation-1000);
   }
-`;
+`
 
 const PayloadIcon: React.FC = () => (
   <svg
@@ -17,37 +17,24 @@ const PayloadIcon: React.FC = () => (
     width="25"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <style>
-      {css}
-    </style>
-    <path
-      d="M11.5293 0L23 6.90096V19.9978L14.3608 25V11.9032L2.88452 5.00777L11.5293 0Z"
-    />
-    <path
-      d="M10.6559 24.2727V14.0518L2 19.0651L10.6559 24.2727Z"
-    />
+    <style>{css}</style>
+    <path d="M11.5293 0L23 6.90096V19.9978L14.3608 25V11.9032L2.88452 5.00777L11.5293 0Z" />
+    <path d="M10.6559 24.2727V14.0518L2 19.0651L10.6559 24.2727Z" />
   </svg>
-);
+)
 
 const Icon: React.FC = () => {
   const {
     admin: {
       components: {
-        graphics: {
-          Icon: CustomIcon,
-        } = {
+        graphics: { Icon: CustomIcon } = {
           Icon: undefined,
         },
       } = {},
     } = {},
-  } = useConfig();
+  } = useConfig()
 
-  return (
-    <RenderCustomComponent
-      CustomComponent={CustomIcon}
-      DefaultComponent={PayloadIcon}
-    />
-  );
-};
+  return <RenderCustomComponent CustomComponent={CustomIcon} DefaultComponent={PayloadIcon} />
+}
 
-export default Icon;
+export default Icon

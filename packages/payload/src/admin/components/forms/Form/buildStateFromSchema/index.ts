@@ -1,39 +1,30 @@
-import type { TFunction } from 'i18next';
+import type { TFunction } from 'i18next'
 
-import type { User } from '../../../../../auth';
-import type { Field as FieldSchema } from '../../../../../fields/config/types';
-import type { Data, Fields } from '../types';
+import type { User } from '../../../../../auth'
+import type { Field as FieldSchema } from '../../../../../fields/config/types'
+import type { Data, Fields } from '../types'
 
-import { iterateFields } from './iterateFields';
+import { iterateFields } from './iterateFields'
 
 type Args = {
-  data?: Data,
+  data?: Data
   fieldSchema: FieldSchema[]
-  id?: number | string,
+  id?: number | string
   locale: string
   operation?: 'create' | 'update'
   preferences: {
     [key: string]: unknown
   }
-  siblingData?: Data,
+  siblingData?: Data
   t: TFunction
-  user?: User,
+  user?: User
 }
 
 const buildStateFromSchema = async (args: Args): Promise<Fields> => {
-  const {
-    data: fullData = {},
-    fieldSchema,
-    id,
-    locale,
-    operation,
-    preferences,
-    t,
-    user,
-  } = args;
+  const { data: fullData = {}, fieldSchema, id, locale, operation, preferences, t, user } = args
 
   if (fieldSchema) {
-    const state: Fields = {};
+    const state: Fields = {}
 
     await iterateFields({
       data: fullData,
@@ -48,13 +39,12 @@ const buildStateFromSchema = async (args: Args): Promise<Fields> => {
       state,
       t,
       user,
-    });
+    })
 
-    return state;
+    return state
   }
 
-  return {};
-};
+  return {}
+}
 
-
-export default buildStateFromSchema;
+export default buildStateFromSchema

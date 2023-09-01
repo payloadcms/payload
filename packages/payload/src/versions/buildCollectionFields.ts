@@ -1,5 +1,5 @@
-import type { SanitizedCollectionConfig } from '../collections/config/types';
-import type { Field } from '../fields/config/types';
+import type { SanitizedCollectionConfig } from '../collections/config/types'
+import type { Field } from '../fields/config/types'
 
 export const buildVersionCollectionFields = (collection: SanitizedCollectionConfig): Field[] => {
   const fields: Field[] = [
@@ -30,15 +30,15 @@ export const buildVersionCollectionFields = (collection: SanitizedCollectionConf
       name: 'updatedAt',
       type: 'date',
     },
-  ];
+  ]
 
   if (collection?.versions?.drafts && collection?.versions?.drafts?.autosave) {
     fields.push({
       index: true,
       name: 'autosave',
       type: 'checkbox',
-    });
+    })
   }
 
-  return fields;
-};
+  return fields
+}

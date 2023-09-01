@@ -1,21 +1,21 @@
-import { Editor, Element, Node, Text, Transforms } from 'slate';
-import { ReactEditor } from 'slate-react';
+import { Editor, Element, Node, Text, Transforms } from 'slate'
+import { ReactEditor } from 'slate-react'
 
-import { getCommonBlock } from './getCommonBlock';
-import isListActive from './isListActive';
-import listTypes from './listTypes';
-import { unwrapList } from './unwrapList';
+import { getCommonBlock } from './getCommonBlock'
+import isListActive from './isListActive'
+import listTypes from './listTypes'
+import { unwrapList } from './unwrapList'
 
 const toggleList = (editor: Editor, format: string): void => {
-  let currentListFormat: string;
+  let currentListFormat: string
 
-  if (isListActive(editor, 'ol')) currentListFormat = 'ol';
-  if (isListActive(editor, 'ul')) currentListFormat = 'ul';
+  if (isListActive(editor, 'ol')) currentListFormat = 'ol'
+  if (isListActive(editor, 'ul')) currentListFormat = 'ul'
 
   // If the format is currently active,
   // remove the list
   if (currentListFormat === format) {
-    const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path);
+    const selectedLeaf = Node.descendant(editor, editor.selection.anchor.path)
 
     // If on an empty bullet, leave the above list alone
     // and unwrap only the active bullet
@@ -24,14 +24,14 @@ const toggleList = (editor: Editor, format: string): void => {
         match: (n) => Element.isElement(n) && listTypes.includes(n.type),
         mode: 'lowest',
         split: true,
-      });
+      })
 
-      Transforms.setNodes(editor, { type: undefined });
+      Transforms.setNodes(editor, { type: undefined })
     } else {
       // Otherwise, we need to unset li on all lis in the parent list
       // and unwrap the parent list itself
-      const [, listPath] = getCommonBlock(editor, (n) => Element.isElement(n) && n.type === format);
-      unwrapList(editor, listPath);
+      const [, listPath] = getCommonBlock(editor, (n) => Element.isElement(n) && n.type === format)
+      unwrapList(editor, listPath)
     }
 
     // Otherwise, if a list is active and we are changing it,
@@ -46,44 +46,55 @@ const toggleList = (editor: Editor, format: string): void => {
         match: (node) => Element.isElement(node) && listTypes.includes(node.type),
         mode: 'lowest',
       },
-    );
+    )
     // Otherwise we can assume that we should just activate the list
   } else {
-    Transforms.wrapNodes(editor, { children: [], type: format });
+    Transforms.wrapNodes(editor, { children: [], type: format })
 
-    const [, parentNodePath] = getCommonBlock(editor, (node) => Element.isElement(node) && node.type === format);
+    const [, parentNodePath] = getCommonBlock(
+      editor,
+      (node) => Element.isElement(node) && node.type === format,
+    )
 
     // Only set li on nodes that don't have type
-    Transforms.setNodes(editor, { type: 'li' }, {
-      match: (node, path) => {
-        const match = Element.isElement(node)
-          && typeof node.type === 'undefined'
-          && path.length === parentNodePath.length + 1;
+    Transforms.setNodes(
+      editor,
+      { type: 'li' },
+      {
+        match: (node, path) => {
+          const match =
+            Element.isElement(node) &&
+            typeof node.type === 'undefined' &&
+            path.length === parentNodePath.length + 1
 
-        return match;
+          return match
+        },
+        voids: true,
       },
-      voids: true,
-    });
+    )
 
     // Wrap nodes that do have a type with an li
     // so as to not lose their existing formatting
-    const nodesToWrap = Array.from(Editor.nodes(editor, {
-      match: (node, path) => {
-        const match = Element.isElement(node)
-          && typeof node.type !== 'undefined'
-          && node.type !== 'li'
-          && path.length === parentNodePath.length + 1;
+    const nodesToWrap = Array.from(
+      Editor.nodes(editor, {
+        match: (node, path) => {
+          const match =
+            Element.isElement(node) &&
+            typeof node.type !== 'undefined' &&
+            node.type !== 'li' &&
+            path.length === parentNodePath.length + 1
 
-        return match;
-      },
-    }));
+          return match
+        },
+      }),
+    )
 
     nodesToWrap.forEach(([, path]) => {
-      Transforms.wrapNodes(editor, { children: [], type: 'li' }, { at: path });
-    });
+      Transforms.wrapNodes(editor, { children: [], type: 'li' }, { at: path })
+    })
   }
 
-  ReactEditor.focus(editor);
-};
+  ReactEditor.focus(editor)
+}
 
-export default toggleList;
+export default toggleList

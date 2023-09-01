@@ -1,15 +1,15 @@
-import type { PayloadRequest, RequestContext } from '../../../express/types';
-import type { Operation } from '../../../types';
-import type { Field, TabAsField } from '../../config/types';
+import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { Operation } from '../../../types'
+import type { Field, TabAsField } from '../../config/types'
 
-import { promise } from './promise';
+import { promise } from './promise'
 
 type Args = {
   context: RequestContext
   data: Record<string, unknown>
   doc: Record<string, unknown>
   docWithLocales: Record<string, unknown>
-  errors: { field: string, message: string }[]
+  errors: { field: string; message: string }[]
   fields: (Field | TabAsField)[]
   id?: number | string
   mergeLocaleActions: (() => void)[]
@@ -39,27 +39,29 @@ export const traverseFields = async ({
   siblingDocWithLocales,
   skipValidation,
 }: Args): Promise<void> => {
-  const promises = [];
+  const promises = []
 
   fields.forEach((field) => {
-    promises.push(promise({
-      context,
-      data,
-      doc,
-      docWithLocales,
-      errors,
-      field,
-      id,
-      mergeLocaleActions,
-      operation,
-      path,
-      req,
-      siblingData,
-      siblingDoc,
-      siblingDocWithLocales,
-      skipValidation,
-    }));
-  });
+    promises.push(
+      promise({
+        context,
+        data,
+        doc,
+        docWithLocales,
+        errors,
+        field,
+        id,
+        mergeLocaleActions,
+        operation,
+        path,
+        req,
+        siblingData,
+        siblingDoc,
+        siblingDocWithLocales,
+        skipValidation,
+      }),
+    )
+  })
 
-  await Promise.all(promises);
-};
+  await Promise.all(promises)
+}

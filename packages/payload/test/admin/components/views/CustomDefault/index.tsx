@@ -1,15 +1,15 @@
-import React, { useEffect } from 'react';
-import { Redirect } from 'react-router-dom';
+import React, { useEffect } from 'react'
+import { Redirect } from 'react-router-dom'
 
-import type { AdminView } from '../../../../../src/config/types';
+import type { AdminView } from '../../../../../src/config/types'
 
-import Button from '../../../../../src/admin/components/elements/Button';
-import Eyebrow from '../../../../../src/admin/components/elements/Eyebrow';
-import { useStepNav } from '../../../../../src/admin/components/elements/StepNav';
+import Button from '../../../../../src/admin/components/elements/Button'
+import Eyebrow from '../../../../../src/admin/components/elements/Eyebrow'
+import { useStepNav } from '../../../../../src/admin/components/elements/StepNav'
 // As this is the demo project, we import our dependencies from the `src` directory.
-import DefaultTemplate from '../../../../../src/admin/components/templates/Default';
-import { useConfig } from '../../../../../src/admin/components/utilities/Config';
-import Meta from '../../../../../src/admin/components/utilities/Meta';
+import DefaultTemplate from '../../../../../src/admin/components/templates/Default'
+import { useConfig } from '../../../../../src/admin/components/utilities/Config'
+import Meta from '../../../../../src/admin/components/utilities/Meta'
 
 // In your projects, you can import as follows:
 // import { DefaultTemplate } from 'payload/components/templates';
@@ -19,8 +19,10 @@ import Meta from '../../../../../src/admin/components/utilities/Meta';
 // import { useConfig, Meta } from 'payload/components/utilities';
 
 const CustomDefaultRoute: AdminView = ({ canAccessAdmin, user }) => {
-  const { routes: { admin: adminRoute } } = useConfig();
-  const { setStepNav } = useStepNav();
+  const {
+    routes: { admin: adminRoute },
+  } = useConfig()
+  const { setStepNav } = useStepNav()
 
   // This effect will only run one time and will allow us
   // to set the step nav to display our custom route name
@@ -30,15 +32,13 @@ const CustomDefaultRoute: AdminView = ({ canAccessAdmin, user }) => {
       {
         label: 'Custom Route with Default Template',
       },
-    ]);
-  }, [setStepNav]);
+    ])
+  }, [setStepNav])
 
   // If an unauthorized user tries to navigate straight to this page,
   // Boot 'em out
   if (!user || (user && !canAccessAdmin)) {
-    return (
-      <Redirect to={`${adminRoute}/unauthorized`} />
-    );
+    return <Redirect to={`${adminRoute}/unauthorized`} />
   }
 
   return (
@@ -50,16 +50,15 @@ const CustomDefaultRoute: AdminView = ({ canAccessAdmin, user }) => {
       />
       <Eyebrow />
       <h1>Custom Route</h1>
-      <p>Here is a custom route that was added in the Payload config. It uses the Default Template, so the sidebar is rendered.</p>
-      <Button
-        buttonStyle="secondary"
-        el="link"
-        to={`${adminRoute}`}
-      >
+      <p>
+        Here is a custom route that was added in the Payload config. It uses the Default Template,
+        so the sidebar is rendered.
+      </p>
+      <Button buttonStyle="secondary" el="link" to={`${adminRoute}`}>
         Go to Dashboard
       </Button>
     </DefaultTemplate>
-  );
-};
+  )
+}
 
-export default CustomDefaultRoute;
+export default CustomDefaultRoute

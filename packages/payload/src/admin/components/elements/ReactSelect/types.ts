@@ -1,6 +1,6 @@
-import type { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } from 'react-select';
+import type { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } from 'react-select'
 
-import type { DocumentDrawerProps } from '../DocumentDrawer/types';
+import type { DocumentDrawerProps } from '../DocumentDrawer/types'
 
 type CustomSelectProps = {
   disableKeyDown?: boolean
@@ -14,11 +14,7 @@ type CustomSelectProps = {
 // augment the types for the `Select` component from `react-select`
 // this is to include the `selectProps` prop at the top-level `Select` component
 declare module 'react-select/dist/declarations/src/Select' {
-  export interface Props<
-    Option,
-    IsMulti extends boolean,
-    Group extends GroupBase<Option>
-  > {
+  export interface Props<Option, IsMulti extends boolean, Group extends GroupBase<Option>> {
     customProps?: CustomSelectProps
   }
 }
@@ -26,7 +22,11 @@ declare module 'react-select/dist/declarations/src/Select' {
 // augment the types for the `CommonPropsAndClassName` from `react-select`
 // this will include the `selectProps` prop to every `react-select` component automatically
 declare module 'react-select/dist/declarations/src' {
-  export interface CommonPropsAndClassName<Option, IsMulti extends boolean, Group extends GroupBase<Option>> extends CommonProps<Option, IsMulti, Group> {
+  export interface CommonPropsAndClassName<
+    Option,
+    IsMulti extends boolean,
+    Group extends GroupBase<Option>,
+  > extends CommonProps<Option, IsMulti, Group> {
     customProps?: ReactSelectStateManagerProps<Option, IsMulti, Group> & CustomSelectProps
   }
 }
@@ -51,32 +51,35 @@ export type Props = {
     [key: string]: React.FC<any>
   }
   customProps?: CustomSelectProps
-  disabled?: boolean,
+  disabled?: boolean
   filterOption?:
-  | (({ data, label, value }: { data: Option, label: string, value: string }, search: string) => boolean)
-  | undefined,
+    | ((
+        { data, label, value }: { data: Option; label: string; value: string },
+        search: string,
+      ) => boolean)
+    | undefined
   inputId?: string
   isClearable?: boolean
   /** Allows you to create own values in the UI despite them not being pre-specified */
-  isCreatable?: boolean,
+  isCreatable?: boolean
   isLoading?: boolean
   /** Allows you to specify multiple values instead of just one */
-  isMulti?: boolean,
+  isMulti?: boolean
   isOptionSelected?: any
   isSearchable?: boolean
-  isSortable?: boolean,
+  isSortable?: boolean
   noOptionsMessage?: (obj: { inputValue: string }) => string
-  numberOnly?: boolean,
-  onChange?: (value: any) => void, // eslint-disable-line @typescript-eslint/no-explicit-any
+  numberOnly?: boolean
+  onChange?: (value: any) => void // eslint-disable-line @typescript-eslint/no-explicit-any
   onInputChange?: (val: string) => void
   onMenuOpen?: () => void
   onMenuScrollToBottom?: () => void
   options: Option[] | OptionGroup[]
   placeholder?: string
   /**
-  * @deprecated Since version 1.0. Will be deleted in version 2.0. Use customProps instead.
-  */
+   * @deprecated Since version 1.0. Will be deleted in version 2.0. Use customProps instead.
+   */
   selectProps?: CustomSelectProps
-  showError?: boolean,
-  value?: Option | Option[],
+  showError?: boolean
+  value?: Option | Option[]
 }

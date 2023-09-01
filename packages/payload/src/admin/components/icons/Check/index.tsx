@@ -1,13 +1,9 @@
-import React from 'react';
+import React from 'react'
 
-import './index.scss';
+import './index.scss'
 
 const Check: React.FC = () => (
-  <svg
-    className="icon icon--check"
-    viewBox="0 0 25 25"
-    xmlns="http://www.w3.org/2000/svg"
-  >
+  <svg className="icon icon--check" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
     <path
       className="stroke"
       d="M10.6092 16.0192L17.6477 8.98076"
@@ -21,6 +17,6 @@ const Check: React.FC = () => (
       strokeLinejoin="bevel"
     />
   </svg>
-);
+)
 
-export default Check;
+export default Check

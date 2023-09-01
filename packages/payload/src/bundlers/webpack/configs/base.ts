@@ -1,23 +1,21 @@
-import type { Configuration } from 'webpack';
+import type { Configuration } from 'webpack'
 
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import path from 'path';
-import webpack from 'webpack';
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import path from 'path'
+import webpack from 'webpack'
 
-import type { SanitizedConfig } from '../../../config/types';
+import type { SanitizedConfig } from '../../../config/types'
 
-const mockModulePath = path.resolve(__dirname, '../../mocks/emptyModule.js');
-const mockDotENVPath = path.resolve(__dirname, '../../mocks/dotENV.js');
+const mockModulePath = path.resolve(__dirname, '../../mocks/emptyModule.js')
+const mockDotENVPath = path.resolve(__dirname, '../../mocks/dotENV.js')
 
-const nodeModulesPath = path.resolve(__dirname, '../../../../node_modules');
-const adminFolderPath = path.resolve(__dirname, '../../../admin');
-const bundlerPath = path.resolve(__dirname, '../bundler');
+const nodeModulesPath = path.resolve(__dirname, '../../../../node_modules')
+const adminFolderPath = path.resolve(__dirname, '../../../admin')
+const bundlerPath = path.resolve(__dirname, '../bundler')
 
 export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => ({
   entry: {
-    main: [
-      adminFolderPath,
-    ],
+    main: [adminFolderPath],
   },
   module: {
     rules: [
@@ -49,23 +47,18 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
     ],
   },
   plugins: [
-    new webpack.ProvidePlugin(
-      { process: require.resolve('process/browser') },
-    ),
+    new webpack.ProvidePlugin({ process: require.resolve('process/browser') }),
     new webpack.DefinePlugin(
-      Object.entries(process.env).reduce(
-        (values, [key, val]) => {
-          if (key.indexOf('PAYLOAD_PUBLIC_') === 0) {
-            return ({
-              ...values,
-              [`process.env.${key}`]: `'${val}'`,
-            });
+      Object.entries(process.env).reduce((values, [key, val]) => {
+        if (key.indexOf('PAYLOAD_PUBLIC_') === 0) {
+          return {
+            ...values,
+            [`process.env.${key}`]: `'${val}'`,
           }
+        }
 
-          return values;
-        },
-        {},
-      ),
+        return values
+      }, {}),
     ),
     new HtmlWebpackPlugin({
       filename: path.normalize('./index.html'),
@@ -93,4 +86,4 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
   resolveLoader: {
     modules: ['node_modules', path.join(__dirname, nodeModulesPath)],
   },
-});
+})

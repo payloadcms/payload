@@ -1,10 +1,10 @@
-import type { CollectionPermission } from '../../auth';
-import type { PayloadRequest } from '../../express/types';
-import type { AllOperations } from '../../types';
+import type { CollectionPermission } from '../../auth'
+import type { PayloadRequest } from '../../express/types'
+import type { AllOperations } from '../../types'
 
-import { getEntityPolicies } from '../../utilities/getEntityPolicies';
+import { getEntityPolicies } from '../../utilities/getEntityPolicies'
 
-const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete'];
+const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete']
 
 type Arguments = {
   id: string
@@ -16,20 +16,22 @@ export async function docAccess(args: Arguments): Promise<CollectionPermission> 
     id,
     req,
     req: {
-      collection: {
-        config,
-      },
+      collection: { config },
     },
-  } = args;
+  } = args
 
-  const collectionOperations = [...allOperations];
+  const collectionOperations = [...allOperations]
 
-  if (config.auth && (typeof config.auth.maxLoginAttempts !== 'undefined' && config.auth.maxLoginAttempts !== 0)) {
-    collectionOperations.push('unlock');
+  if (
+    config.auth &&
+    typeof config.auth.maxLoginAttempts !== 'undefined' &&
+    config.auth.maxLoginAttempts !== 0
+  ) {
+    collectionOperations.push('unlock')
   }
 
   if (config.versions) {
-    collectionOperations.push('readVersions');
+    collectionOperations.push('readVersions')
   }
 
   return getEntityPolicies({
@@ -38,5 +40,5 @@ export async function docAccess(args: Arguments): Promise<CollectionPermission> 
     operations: collectionOperations,
     req,
     type: 'collection',
-  });
+  })
 }

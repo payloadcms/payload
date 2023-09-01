@@ -7,12 +7,12 @@
 
   .btn {
     margin-top: 0;
-    [dir=ltr] & {
-      margin-right: base(.5);
+    [dir='ltr'] & {
+      margin-right: base(0.5);
     }
-    [dir=rtl] & {
-      margin-left: base(.5);
-    }  
+    [dir='rtl'] & {
+      margin-left: base(0.5);
+    }
   }
 
   &__api-key-label {

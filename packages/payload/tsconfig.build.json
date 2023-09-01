@@ -1,18 +1,18 @@
 {
   "compilerOptions": {
-    "allowJs": true, /* Allow javascript files to be compiled. */
-    "checkJs": false, /* Report errors in .js files. */
+    "allowJs": true /* Allow javascript files to be compiled. */,
+    "checkJs": false /* Report errors in .js files. */,
     "composite": true,
-    "declaration": true, /* Generates corresponding '.d.ts' file. */
-    "esModuleInterop": true, /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
-    "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
-    "jsx": "react", /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
+    "declaration": true /* Generates corresponding '.d.ts' file. */,
+    "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
+    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
+    "jsx": "react" /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */,
     "module": "NodeNext",
-    "moduleResolution": "NodeNext", /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
+    "moduleResolution": "NodeNext" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
     /* Do not emit comments to output. */
-    "noEmit": false, /* Do not emit outputs. */
+    "noEmit": false /* Do not emit outputs. */,
     /* Concatenate and emit output to single file. */
-    "outDir": "./dist", /* Redirect output structure to the directory. */
+    "outDir": "./dist" /* Redirect output structure to the directory. */,
     "paths": {
       "payload/auth": ["./src/auth/types.ts"],
       "payload/config": ["./src/config/types.ts"],
@@ -20,10 +20,10 @@
       "payload/types": ["./src/types/index.ts"]
     },
     "resolveJsonModule": true,
-    "rootDir": "./src", /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
-    "skipLibCheck": true, /* Skip type checking of declaration files. */
+    "rootDir": "./src" /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
+    "skipLibCheck": true /* Skip type checking of declaration files. */,
     "sourceMap": true,
-    "strict": false, /* Enable all strict type-checking options. */
+    "strict": false /* Enable all strict type-checking options. */,
     "target": "ESNext",
     "types": ["node"]
   },

@@ -1,8 +1,8 @@
-import type React from 'react';
-import type { Dispatch } from 'react';
+import type React from 'react'
+import type { Dispatch } from 'react'
 
-import type { User } from '../../../../auth/types';
-import type { Condition, Field as FieldConfig, Validate } from '../../../../fields/config/types';
+import type { User } from '../../../../auth/types'
+import type { Condition, Field as FieldConfig, Validate } from '../../../../fields/config/types'
 
 export type Row = {
   blockType?: string
@@ -61,17 +61,20 @@ export type SubmitOptions = {
 }
 
 export type DispatchFields = React.Dispatch<any>
-export type Submit = (options?: SubmitOptions, e?: React.FormEvent<HTMLFormElement>) => Promise<void>;
-export type ValidateForm = () => Promise<boolean>;
-export type CreateFormData = (overrides?: any) => FormData;
-export type GetFields = () => Fields;
-export type GetField = (path: string) => FormField;
-export type GetData = () => Data;
-export type GetSiblingData = (path: string) => Data;
-export type GetDataByPath = <T = unknown>(path: string) => T;
-export type SetModified = (modified: boolean) => void;
-export type SetSubmitted = (submitted: boolean) => void;
-export type SetProcessing = (processing: boolean) => void;
+export type Submit = (
+  options?: SubmitOptions,
+  e?: React.FormEvent<HTMLFormElement>,
+) => Promise<void>
+export type ValidateForm = () => Promise<boolean>
+export type CreateFormData = (overrides?: any) => FormData
+export type GetFields = () => Fields
+export type GetField = (path: string) => FormField
+export type GetData = () => Data
+export type GetSiblingData = (path: string) => Data
+export type GetDataByPath = <T = unknown>(path: string) => T
+export type SetModified = (modified: boolean) => void
+export type SetSubmitted = (submitted: boolean) => void
+export type SetProcessing = (processing: boolean) => void
 
 export type Reset = (fieldSchema: FieldConfig[], data: unknown) => Promise<void>
 
@@ -163,7 +166,15 @@ export type FieldAction =
 export type FormFieldsContext = [Fields, Dispatch<FieldAction>]
 
 export type Context = {
-  addFieldRow: ({ data, path, rowIndex }: { data?: Data, path: string, rowIndex: number }) => Promise<void>
+  addFieldRow: ({
+    data,
+    path,
+    rowIndex,
+  }: {
+    data?: Data
+    path: string
+    rowIndex: number
+  }) => Promise<void>
   buildRowErrors: () => void
   createFormData: CreateFormData
   disabled: boolean
@@ -178,8 +189,16 @@ export type Context = {
   getField: GetField
   getFields: GetFields
   getSiblingData: GetSiblingData
-  removeFieldRow: ({ path, rowIndex }: { path: string, rowIndex: number }) => Promise<void>
-  replaceFieldRow: ({ data, path, rowIndex }: { data?: Data, path: string, rowIndex: number }) => Promise<void>
+  removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => Promise<void>
+  replaceFieldRow: ({
+    data,
+    path,
+    rowIndex,
+  }: {
+    data?: Data
+    path: string
+    rowIndex: number
+  }) => Promise<void>
   replaceState: (state: Fields) => void
   reset: Reset
   setModified: SetModified

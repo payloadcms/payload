@@ -1,6 +1,6 @@
-import path from 'path';
+import path from 'path'
 
-import type { Config } from './types';
+import type { Config } from './types'
 
 export const defaults: Omit<Config, 'db'> = {
   admin: {
@@ -57,4 +57,4 @@ export const defaults: Omit<Config, 'db'> = {
     outputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/payload-types.ts`,
   },
   upload: {},
-};
+}

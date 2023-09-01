@@ -1,32 +1,22 @@
-import React from 'react';
+import React from 'react'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import './index.scss';
+import './index.scss'
 
-const baseClass = 'popup-button';
+const baseClass = 'popup-button'
 
 const PopupButton: React.FC<Props> = (props) => {
-  const {
-    active,
-    button,
-    buttonType,
-    className,
-    setActive,
-  } = props;
+  const { active, button, buttonType, className, setActive } = props
 
-  const classes = [
-    baseClass,
-    className,
-    `${baseClass}--${buttonType}`,
-  ].filter(Boolean).join(' ');
+  const classes = [baseClass, className, `${baseClass}--${buttonType}`].filter(Boolean).join(' ')
 
   const handleClick = () => {
-    setActive(!active);
-  };
+    setActive(!active)
+  }
 
   if (buttonType === 'none') {
-    return null;
+    return null
   }
 
   if (buttonType === 'custom') {
@@ -34,24 +24,22 @@ const PopupButton: React.FC<Props> = (props) => {
       <div
         className={classes}
         onClick={handleClick}
-        onKeyDown={(e) => { if (e.key === 'Enter') handleClick(); }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') handleClick()
+        }}
         role="button"
         tabIndex={0}
       >
         {button}
       </div>
-    );
+    )
   }
 
   return (
-    <button
-      className={classes}
-      onClick={() => setActive(!active)}
-      type="button"
-    >
+    <button className={classes} onClick={() => setActive(!active)} type="button">
       {button}
     </button>
-  );
-};
+  )
+}
 
-export default PopupButton;
+export default PopupButton

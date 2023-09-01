@@ -1,22 +1,22 @@
-import type { Response } from 'express';
+import type { Response } from 'express'
 
-import express from 'express';
+import express from 'express'
 
-import type { Config } from '../../src/config/types';
-import type { PayloadRequest } from '../../src/express/types';
+import type { Config } from '../../src/config/types'
+import type { PayloadRequest } from '../../src/express/types'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
-import { openAccess } from '../helpers/configHelpers';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
+import { openAccess } from '../helpers/configHelpers'
 
-export const collectionSlug = 'endpoints';
-export const globalSlug = 'global-endpoints';
+export const collectionSlug = 'endpoints'
+export const globalSlug = 'global-endpoints'
 
-export const globalEndpoint = 'global';
-export const applicationEndpoint = 'path';
-export const rootEndpoint = 'root';
-export const noEndpointsCollectionSlug = 'no-endpoints';
-export const noEndpointsGlobalSlug = 'global-no-endpoints';
+export const globalEndpoint = 'global'
+export const applicationEndpoint = 'path'
+export const rootEndpoint = 'root'
+export const noEndpointsCollectionSlug = 'no-endpoints'
+export const noEndpointsGlobalSlug = 'global-no-endpoints'
 
 const MyConfig: Config = {
   collections: [
@@ -28,21 +28,21 @@ const MyConfig: Config = {
           path: '/say-hello/joe-bloggs',
           method: 'get',
           handler: (req: PayloadRequest, res: Response): void => {
-            res.json({ message: 'Hey Joey!' });
+            res.json({ message: 'Hey Joey!' })
           },
         },
         {
           path: '/say-hello/:group/:name',
           method: 'get',
           handler: (req: PayloadRequest, res: Response): void => {
-            res.json({ message: `Hello ${req.params.name} @ ${req.params.group}` });
+            res.json({ message: `Hello ${req.params.name} @ ${req.params.group}` })
           },
         },
         {
           path: '/say-hello/:name',
           method: 'get',
           handler: (req: PayloadRequest, res: Response): void => {
-            res.json({ message: `Hello ${req.params.name}!` });
+            res.json({ message: `Hello ${req.params.name}!` })
           },
         },
         {
@@ -52,7 +52,7 @@ const MyConfig: Config = {
             res.json({
               name: req.body.name,
               age: req.body.age,
-            });
+            })
           },
         },
       ],
@@ -78,13 +78,15 @@ const MyConfig: Config = {
   globals: [
     {
       slug: globalSlug,
-      endpoints: [{
-        path: `/${globalEndpoint}`,
-        method: 'post',
-        handler: (req: PayloadRequest, res: Response): void => {
-          res.json(req.body);
+      endpoints: [
+        {
+          path: `/${globalEndpoint}`,
+          method: 'post',
+          handler: (req: PayloadRequest, res: Response): void => {
+            res.json(req.body)
+          },
         },
-      }],
+      ],
       fields: [],
     },
     {
@@ -104,21 +106,21 @@ const MyConfig: Config = {
       path: `/${applicationEndpoint}`,
       method: 'post',
       handler: (req: PayloadRequest, res: Response): void => {
-        res.json(req.body);
+        res.json(req.body)
       },
     },
     {
       path: `/${applicationEndpoint}`,
       method: 'get',
       handler: (req: PayloadRequest, res: Response): void => {
-        res.json({ message: 'Hello, world!' });
+        res.json({ message: 'Hello, world!' })
       },
     },
     {
       path: `/${applicationEndpoint}/i18n`,
       method: 'get',
       handler: (req: PayloadRequest, res: Response): void => {
-        res.json({ message: req.t('general:backToDashboard') });
+        res.json({ message: req.t('general:backToDashboard') })
       },
     },
     {
@@ -126,7 +128,7 @@ const MyConfig: Config = {
       method: 'get',
       root: true,
       handler: (req: PayloadRequest, res: Response): void => {
-        res.json({ message: 'Hello, world!' });
+        res.json({ message: 'Hello, world!' })
       },
     },
     {
@@ -136,7 +138,7 @@ const MyConfig: Config = {
       handler: [
         express.json({ type: 'application/json' }),
         (req: PayloadRequest, res: Response): void => {
-          res.json(req.body);
+          res.json(req.body)
         },
       ],
     },
@@ -148,8 +150,8 @@ const MyConfig: Config = {
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
   },
-};
+}
 
-export default buildConfigWithDefaults(MyConfig);
+export default buildConfigWithDefaults(MyConfig)

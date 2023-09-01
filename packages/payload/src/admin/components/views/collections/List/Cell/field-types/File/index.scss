@@ -3,7 +3,7 @@
 .file {
   display: flex;
   flex-wrap: nowrap;
-  margin: base(-.25) 0;
+  margin: base(-0.25) 0;
 
   &__thumbnail {
     display: inline-block;
@@ -13,11 +13,11 @@
 
   &__filename {
     align-self: center;
-    [dir=ltr] & {
+    [dir='ltr'] & {
       margin-left: base(1);
     }
-    [dir=rtl] & {
+    [dir='rtl'] & {
       margin-right: base(1);
-    }  
+    }
   }
 }

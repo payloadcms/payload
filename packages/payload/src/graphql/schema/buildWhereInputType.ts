@@ -1,21 +1,17 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
-import {
-  GraphQLInputObjectType, GraphQLList,
-} from 'graphql';
+import { GraphQLInputObjectType, GraphQLList } from 'graphql'
 
-import type {
-  Field,
-  FieldAffectingData} from '../../fields/config/types';
+import type { Field, FieldAffectingData } from '../../fields/config/types'
 
 import {
   fieldAffectsData,
   fieldHasSubFields,
   fieldIsPresentationalOnly,
-} from '../../fields/config/types';
-import formatName from '../utilities/formatName';
-import fieldToSchemaMap from './fieldToWhereInputSchemaMap';
-import { withOperators } from './withOperators';
+} from '../../fields/config/types'
+import formatName from '../utilities/formatName'
+import fieldToSchemaMap from './fieldToWhereInputSchemaMap'
+import { withOperators } from './withOperators'
 
 /** This does as the function name suggests. It builds a where GraphQL input type
  * for all the fields which are passed to the function.
@@ -31,70 +27,78 @@ import { withOperators } from './withOperators';
  *    directly searchable. Instead, we need to build a chained pathname
  *    using dot notation so MongoDB can properly search nested paths.
  */
-const buildWhereInputType = (name: string, fields: Field[], parentName: string): GraphQLInputObjectType => {
+const buildWhereInputType = (
+  name: string,
+  fields: Field[],
+  parentName: string,
+): GraphQLInputObjectType => {
   // This is the function that builds nested paths for all
   // field types with nested paths.
 
-  let idField: FieldAffectingData | undefined;
+  let idField: FieldAffectingData | undefined
 
   const fieldTypes = fields.reduce((schema, field) => {
-    if (fieldAffectsData(field) && field.name === 'id') idField = field;
+    if (fieldAffectsData(field) && field.name === 'id') idField = field
 
     if (!fieldIsPresentationalOnly(field) && !field.hidden) {
-      const getFieldSchema = fieldToSchemaMap(parentName)[field.type];
+      const getFieldSchema = fieldToSchemaMap(parentName)[field.type]
 
       if (getFieldSchema) {
-        const fieldSchema = getFieldSchema(field);
+        const fieldSchema = getFieldSchema(field)
 
         if (fieldHasSubFields(field) || field.type === 'tabs') {
           return {
             ...schema,
-            ...(fieldSchema.reduce((subFields, subField) => ({
-              ...subFields,
-              [formatName(subField.key)]: subField.type,
-            }), {})),
-          };
+            ...fieldSchema.reduce(
+              (subFields, subField) => ({
+                ...subFields,
+                [formatName(subField.key)]: subField.type,
+              }),
+              {},
+            ),
+          }
         }
 
         return {
           ...schema,
           [formatName(field.name)]: fieldSchema,
-        };
+        }
       }
     }
 
-    return schema;
-  }, {});
+    return schema
+  }, {})
 
   if (!idField) {
     fieldTypes.id = {
-      type: withOperators(
-        { name: 'id', type: 'text' } as FieldAffectingData,
-        parentName,
-      ),
-    };
+      type: withOperators({ name: 'id', type: 'text' } as FieldAffectingData, parentName),
+    }
   }
 
-  const fieldName = formatName(name);
+  const fieldName = formatName(name)
 
   return new GraphQLInputObjectType({
     fields: {
       ...fieldTypes,
       AND: {
-        type: new GraphQLList(new GraphQLInputObjectType({
-          fields: fieldTypes,
-          name: `${fieldName}_where_and`,
-        })),
+        type: new GraphQLList(
+          new GraphQLInputObjectType({
+            fields: fieldTypes,
+            name: `${fieldName}_where_and`,
+          }),
+        ),
       },
       OR: {
-        type: new GraphQLList(new GraphQLInputObjectType({
-          fields: fieldTypes,
-          name: `${fieldName}_where_or`,
-        })),
+        type: new GraphQLList(
+          new GraphQLInputObjectType({
+            fields: fieldTypes,
+            name: `${fieldName}_where_or`,
+          }),
+        ),
       },
     },
     name: `${fieldName}_where`,
-  });
-};
+  })
+}
 
-export default buildWhereInputType;
+export default buildWhereInputType

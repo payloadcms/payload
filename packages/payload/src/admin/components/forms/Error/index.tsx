@@ -1,30 +1,24 @@
-import React from 'react';
+import React from 'react'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import Tooltip from '../../elements/Tooltip';
-import './index.scss';
+import Tooltip from '../../elements/Tooltip'
+import './index.scss'
 
-const baseClass = 'field-error';
+const baseClass = 'field-error'
 
 const Error: React.FC<Props> = (props) => {
-  const {
-    message,
-    showError = false,
-  } = props;
+  const { message, showError = false } = props
 
   if (showError) {
     return (
-      <Tooltip
-        className={baseClass}
-        delay={0}
-      >
+      <Tooltip className={baseClass} delay={0}>
         {message}
       </Tooltip>
-    );
+    )
   }
 
-  return null;
-};
+  return null
+}
 
-export default Error;
+export default Error

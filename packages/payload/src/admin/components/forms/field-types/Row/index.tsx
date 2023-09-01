@@ -1,31 +1,24 @@
-import React from 'react';
+import React from 'react'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
-import RenderFields from '../../RenderFields';
-import withCondition from '../../withCondition';
-import './index.scss';
-import { RowProvider } from './provider';
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath'
+import RenderFields from '../../RenderFields'
+import withCondition from '../../withCondition'
+import './index.scss'
+import { RowProvider } from './provider'
 
 const Row: React.FC<Props> = (props) => {
   const {
-    admin: {
-      className,
-      readOnly,
-    },
+    admin: { className, readOnly },
     fieldTypes,
     fields,
     indexPath,
     path,
     permissions,
-  } = props;
+  } = props
 
-  const classes = [
-    'field-type',
-    'row',
-    className,
-  ].filter(Boolean).join(' ');
+  const classes = ['field-type', 'row', className].filter(Boolean).join(' ')
 
   return (
     <RowProvider>
@@ -41,6 +34,6 @@ const Row: React.FC<Props> = (props) => {
         readOnly={readOnly}
       />
     </RowProvider>
-  );
-};
-export default withCondition(Row);
+  )
+}
+export default withCondition(Row)

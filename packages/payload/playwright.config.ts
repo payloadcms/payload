@@ -1,4 +1,4 @@
-import type { PlaywrightTestConfig } from '@playwright/test';
+import type { PlaywrightTestConfig } from '@playwright/test'
 
 const config: PlaywrightTestConfig = {
   // Look for test files in the "test" directory, relative to this configuration file
@@ -11,5 +11,5 @@ const config: PlaywrightTestConfig = {
     video: 'retain-on-failure',
   },
   workers: 999,
-};
-export default config;
+}
+export default config

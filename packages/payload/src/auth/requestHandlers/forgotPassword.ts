@@ -1,12 +1,16 @@
-import type { NextFunction, Response } from 'express';
+import type { NextFunction, Response } from 'express'
 
-import httpStatus from 'http-status';
+import httpStatus from 'http-status'
 
-import type { PayloadRequest } from '../../express/types';
+import type { PayloadRequest } from '../../express/types'
 
-import forgotPassword from '../operations/forgotPassword';
+import forgotPassword from '../operations/forgotPassword'
 
-export default async function forgotPasswordHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
+export default async function forgotPasswordHandler(
+  req: PayloadRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<any> {
   try {
     await forgotPassword({
       collection: req.collection,
@@ -14,13 +18,12 @@ export default async function forgotPasswordHandler(req: PayloadRequest, res: Re
       disableEmail: req.body.disableEmail,
       expiration: req.body.expiration,
       req,
-    });
+    })
 
-    return res.status(httpStatus.OK)
-      .json({
-        message: 'Success',
-      });
+    return res.status(httpStatus.OK).json({
+      message: 'Success',
+    })
   } catch (error) {
-    return next(error);
+    return next(error)
   }
 }

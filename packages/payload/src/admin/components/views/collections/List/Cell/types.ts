@@ -1,5 +1,5 @@
-import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
-import type { FieldAffectingData, UIField } from '../../../../../../fields/config/types';
+import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types'
+import type { FieldAffectingData, UIField } from '../../../../../../fields/config/types'
 
 export type Props = {
   cellData: unknown

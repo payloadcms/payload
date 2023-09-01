@@ -1,19 +1,19 @@
 /* eslint-disable no-underscore-dangle */
-import httpStatus from 'http-status';
+import httpStatus from 'http-status'
 
-import type { FindOneArgs } from '../../database/types';
-import type { PayloadRequest } from '../../express/types';
-import type { Collection, TypeWithID } from '../config/types';
+import type { FindOneArgs } from '../../database/types'
+import type { PayloadRequest } from '../../express/types'
+import type { Collection, TypeWithID } from '../config/types'
 
-import executeAccess from '../../auth/executeAccess';
-import { hasWhereAccessResult } from '../../auth/types';
-import { combineQueries } from '../../database/combineQueries';
-import { APIError, Forbidden, NotFound } from '../../errors';
-import { afterChange } from '../../fields/hooks/afterChange';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
-import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
+import executeAccess from '../../auth/executeAccess'
+import { hasWhereAccessResult } from '../../auth/types'
+import { combineQueries } from '../../database/combineQueries'
+import { APIError, Forbidden, NotFound } from '../../errors'
+import { afterChange } from '../../fields/hooks/afterChange'
+import { afterRead } from '../../fields/hooks/afterRead'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion'
 
 export type Arguments = {
   collection: Collection
@@ -28,26 +28,20 @@ export type Arguments = {
 
 async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Promise<T> {
   const {
-    collection: {
-      config: collectionConfig,
-    },
+    collection: { config: collectionConfig },
     depth,
     id,
     overrideAccess = false,
     req,
-    req: {
-      locale,
-      payload,
-      t,
-    },
+    req: { locale, payload, t },
     showHiddenFields,
-  } = args;
+  } = args
 
   try {
-    const shouldCommit = await initTransaction(req);
+    const shouldCommit = await initTransaction(req)
 
     if (!id) {
-      throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST);
+      throw new APIError('Missing ID of version to restore.', httpStatus.BAD_REQUEST)
     }
 
     // /////////////////////////////////////
@@ -60,22 +54,24 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       locale,
       req,
       where: { id: { equals: id } },
-    });
+    })
 
-    const [rawVersion] = versionDocs;
+    const [rawVersion] = versionDocs
 
     if (!rawVersion) {
-      throw new NotFound(t);
+      throw new NotFound(t)
     }
 
-    const parentDocID = rawVersion.parent;
+    const parentDocID = rawVersion.parent
 
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
-    const accessResults = !overrideAccess ? await executeAccess({ id: parentDocID, req }, collectionConfig.access.update) : true;
-    const hasWherePolicy = hasWhereAccessResult(accessResults);
+    const accessResults = !overrideAccess
+      ? await executeAccess({ id: parentDocID, req }, collectionConfig.access.update)
+      : true
+    const hasWherePolicy = hasWhereAccessResult(accessResults)
 
     // /////////////////////////////////////
     // Retrieve document
@@ -86,13 +82,12 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       locale,
       req,
       where: combineQueries({ id: { equals: parentDocID } }, accessResults),
-    };
+    }
 
-    const doc = await req.payload.db.findOne(findOneArgs);
+    const doc = await req.payload.db.findOne(findOneArgs)
 
-
-    if (!doc && !hasWherePolicy) throw new NotFound(t);
-    if (!doc && hasWherePolicy) throw new Forbidden(t);
+    if (!doc && !hasWherePolicy) throw new NotFound(t)
+    if (!doc && hasWherePolicy) throw new Forbidden(t)
 
     // /////////////////////////////////////
     // fetch previousDoc
@@ -104,7 +99,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       payload,
       query: findOneArgs,
       req,
-    });
+    })
 
     // /////////////////////////////////////
     // Update
@@ -115,15 +110,15 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       data: rawVersion.version,
       id: parentDocID,
       req,
-    });
+    })
 
     // /////////////////////////////////////
     // Save `previousDoc` as a version after restoring
     // /////////////////////////////////////
 
-    const prevVersion = { ...prevDocWithLocales };
+    const prevVersion = { ...prevDocWithLocales }
 
-    delete prevVersion.id;
+    delete prevVersion.id
 
     await payload.db.createVersion({
       autosave: false,
@@ -133,7 +128,7 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       req,
       updatedAt: new Date().toISOString(),
       versionData: rawVersion.version,
-    });
+    })
 
     // /////////////////////////////////////
     // afterRead - Fields
@@ -147,21 +142,22 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       overrideAccess,
       req,
       showHiddenFields,
-    });
+    })
 
     // /////////////////////////////////////
     // afterRead - Collection
     // /////////////////////////////////////
 
     await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      result = await hook({
-        context: req.context,
-        doc: result,
-        req,
-      }) || result;
-    }, Promise.resolve());
+      result =
+        (await hook({
+          context: req.context,
+          doc: result,
+          req,
+        })) || result
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // afterChange - Fields
@@ -175,31 +171,32 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
       operation: 'update',
       previousDoc: prevDocWithLocales,
       req,
-    });
+    })
 
     // /////////////////////////////////////
     // afterChange - Collection
     // /////////////////////////////////////
 
     await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      result = await hook({
-        context: req.context,
-        doc: result,
-        operation: 'update',
-        previousDoc: prevDocWithLocales,
-        req,
-      }) || result;
-    }, Promise.resolve());
+      result =
+        (await hook({
+          context: req.context,
+          doc: result,
+          operation: 'update',
+          previousDoc: prevDocWithLocales,
+          req,
+        })) || result
+    }, Promise.resolve())
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
-    return result;
+    return result
   } catch (error: unknown) {
-    await killTransaction(req);
-    throw error;
+    await killTransaction(req)
+    throw error
   }
 }
 
-export default restoreVersion;
+export default restoreVersion

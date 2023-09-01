@@ -1,15 +1,15 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types';
-import type { DeepPartial } from 'ts-essentials';
+import type { Config as GeneratedTypes } from 'payload/generated-types'
+import type { DeepPartial } from 'ts-essentials'
 
-import type { PayloadRequest } from '../../../express/types';
-import type { Payload } from '../../../payload';
-import type { Document } from '../../../types';
+import type { PayloadRequest } from '../../../express/types'
+import type { Payload } from '../../../payload'
+import type { Document } from '../../../types'
 
-import { getDataLoader } from '../../../collections/dataloader';
-import { APIError } from '../../../errors';
-import { setRequestContext } from '../../../express/setRequestContext';
-import { i18nInit } from '../../../translations/init';
-import update from '../update';
+import { getDataLoader } from '../../../collections/dataloader'
+import { APIError } from '../../../errors'
+import { setRequestContext } from '../../../express/setRequestContext'
+import { i18nInit } from '../../../translations/init'
+import update from '../update'
 
 export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
   data: DeepPartial<Omit<GeneratedTypes['globals'][TSlug], 'id'>>
@@ -37,13 +37,13 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
     showHiddenFields,
     slug: globalSlug,
     user,
-  } = options;
+  } = options
 
-  const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
-  const i18n = i18nInit(payload.config.i18n);
+  const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
+  const i18n = i18nInit(payload.config.i18n)
 
   if (!globalConfig) {
-    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`);
+    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
 
   const req = {
@@ -54,10 +54,10 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
     payloadAPI: 'local',
     t: i18n.t,
     user,
-  } as PayloadRequest;
-  setRequestContext(req);
+  } as PayloadRequest
+  setRequestContext(req)
 
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   return update<TSlug>({
     data,
@@ -68,5 +68,5 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
     req,
     showHiddenFields,
     slug: globalSlug as string,
-  });
+  })
 }

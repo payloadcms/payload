@@ -1,7 +1,7 @@
-import type { Config } from '../config/types';
+import type { Config } from '../config/types'
 
-import { sanitizeConfig } from '../config/sanitize';
-import { configToJSONSchema } from './configToJSONSchema';
+import { sanitizeConfig } from '../config/sanitize'
+import { configToJSONSchema } from './configToJSONSchema'
 
 describe('configToJSONSchema', () => {
   it('should handle optional arrays with required fields', () => {
@@ -25,10 +25,10 @@ describe('configToJSONSchema', () => {
           timestamps: false,
         },
       ],
-    };
+    }
 
-    const sanitizedConfig = sanitizeConfig(config);
-    const schema = configToJSONSchema(sanitizedConfig);
+    const sanitizedConfig = sanitizeConfig(config)
+    const schema = configToJSONSchema(sanitizedConfig)
     expect(schema?.definitions?.test).toStrictEqual({
       additionalProperties: false,
       properties: {
@@ -55,6 +55,6 @@ describe('configToJSONSchema', () => {
       required: ['id'],
       title: 'Test',
       type: 'object',
-    });
-  });
-});
+    })
+  })
+})

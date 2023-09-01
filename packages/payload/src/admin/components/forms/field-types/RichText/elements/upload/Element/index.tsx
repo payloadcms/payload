@@ -1,32 +1,32 @@
-import type { HTMLAttributes} from 'react';
+import type { HTMLAttributes } from 'react'
 
-import React, { useCallback, useReducer, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Transforms } from 'slate';
-import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react';
+import React, { useCallback, useReducer, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Transforms } from 'slate'
+import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
 
-import type { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
-import type { Props as RichTextProps } from '../../../types';
+import type { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types'
+import type { Props as RichTextProps } from '../../../types'
 
-import { getTranslation } from '../../../../../../../../utilities/getTranslation';
-import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
-import useThumbnail from '../../../../../../../hooks/useThumbnail';
-import Button from '../../../../../../elements/Button';
-import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
-import { DrawerToggler } from '../../../../../../elements/Drawer';
-import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
-import { useListDrawer } from '../../../../../../elements/ListDrawer';
-import FileGraphic from '../../../../../../graphics/File';
-import { useConfig } from '../../../../../../utilities/Config';
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
-import { UploadDrawer } from './UploadDrawer';
-import './index.scss';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation'
+import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI'
+import useThumbnail from '../../../../../../../hooks/useThumbnail'
+import Button from '../../../../../../elements/Button'
+import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer'
+import { DrawerToggler } from '../../../../../../elements/Drawer'
+import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug'
+import { useListDrawer } from '../../../../../../elements/ListDrawer'
+import FileGraphic from '../../../../../../graphics/File'
+import { useConfig } from '../../../../../../utilities/Config'
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition'
+import { UploadDrawer } from './UploadDrawer'
+import './index.scss'
 
-const baseClass = 'rich-text-upload';
+const baseClass = 'rich-text-upload'
 
 const initialParams = {
   depth: 0,
-};
+}
 
 export type ElementProps = {
   attributes: HTMLAttributes<HTMLDivElement>
@@ -40,138 +40,113 @@ const Element: React.FC<ElementProps> = (props) => {
   const {
     attributes,
     children,
-    element: {
-      relationTo,
-      value,
-    },
+    element: { relationTo, value },
     element,
     enabledCollectionSlugs,
     fieldProps,
-  } = props;
+  } = props
 
-  const { collections, routes: { api }, serverURL } = useConfig();
-  const { i18n, t } = useTranslation('fields');
-  const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
-  const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
+  const {
+    collections,
+    routes: { api },
+    serverURL,
+  } = useConfig()
+  const { i18n, t } = useTranslation('fields')
+  const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
+  const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() =>
+    collections.find((coll) => coll.slug === relationTo),
+  )
 
-  const drawerSlug = useDrawerSlug('upload-drawer');
+  const drawerSlug = useDrawerSlug('upload-drawer')
 
-  const [
-    ListDrawer,
-    ListDrawerToggler,
-    {
-      closeDrawer: closeListDrawer,
-    },
-  ] = useListDrawer({
+  const [ListDrawer, ListDrawerToggler, { closeDrawer: closeListDrawer }] = useListDrawer({
     collectionSlugs: enabledCollectionSlugs,
     selectedCollection: relatedCollection.slug,
-  });
+  })
 
-  const [
-    DocumentDrawer,
-    DocumentDrawerToggler,
-    {
-      closeDrawer,
-    },
-  ] = useDocumentDrawer({
+  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     collectionSlug: relatedCollection.slug,
     id: value?.id,
-  });
+  })
 
-  const editor = useSlateStatic();
-  const selected = useSelected();
-  const focused = useFocused();
+  const editor = useSlateStatic()
+  const selected = useSelected()
+  const focused = useFocused()
 
   // Get the referenced document
   const [{ data }, { setParams }] = usePayloadAPI(
     `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
     { initialParams },
-  );
+  )
 
-  const thumbnailSRC = useThumbnail(relatedCollection, data);
+  const thumbnailSRC = useThumbnail(relatedCollection, data)
 
   const removeUpload = useCallback(() => {
-    const elementPath = ReactEditor.findPath(editor, element);
+    const elementPath = ReactEditor.findPath(editor, element)
 
-    Transforms.removeNodes(
-      editor,
-      { at: elementPath },
-    );
-  }, [editor, element]);
+    Transforms.removeNodes(editor, { at: elementPath })
+  }, [editor, element])
 
+  const updateUpload = useCallback(
+    (json) => {
+      const { doc } = json
 
-  const updateUpload = useCallback((json) => {
-    const { doc } = json;
+      const newNode = {
+        fields: doc,
+      }
 
-    const newNode = {
-      fields: doc,
-    };
+      const elementPath = ReactEditor.findPath(editor, element)
 
-    const elementPath = ReactEditor.findPath(editor, element);
+      Transforms.setNodes(editor, newNode, { at: elementPath })
 
-    Transforms.setNodes(
-      editor,
-      newNode,
-      { at: elementPath },
-    );
+      // setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug));
 
-    // setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug));
+      setParams({
+        ...initialParams,
+        cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
+      })
 
-    setParams({
-      ...initialParams,
-      cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
-    });
+      dispatchCacheBust()
+      closeDrawer()
+    },
+    [editor, element, setParams, cacheBust, closeDrawer],
+  )
 
-    dispatchCacheBust();
-    closeDrawer();
-  }, [editor, element, setParams, cacheBust, closeDrawer]);
+  const swapUpload = React.useCallback(
+    ({ collectionConfig, docID }) => {
+      const newNode = {
+        children: [{ text: ' ' }],
+        relationTo: collectionConfig.slug,
+        type: 'upload',
+        value: { id: docID },
+      }
 
-  const swapUpload = React.useCallback(({ collectionConfig, docID }) => {
-    const newNode = {
-      children: [
-        { text: ' ' },
-      ],
-      relationTo: collectionConfig.slug,
-      type: 'upload',
-      value: { id: docID },
-    };
+      const elementPath = ReactEditor.findPath(editor, element)
 
-    const elementPath = ReactEditor.findPath(editor, element);
+      setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug))
 
-    setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug));
+      Transforms.setNodes(editor, newNode, { at: elementPath })
 
-    Transforms.setNodes(
-      editor,
-      newNode,
-      { at: elementPath },
-    );
+      dispatchCacheBust()
+      closeListDrawer()
+    },
+    [closeListDrawer, editor, element, collections],
+  )
 
-    dispatchCacheBust();
-    closeListDrawer();
-  }, [closeListDrawer, editor, element, collections]);
-
-  const customFields = fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields;
+  const customFields = fieldProps?.admin?.upload?.collections?.[relatedCollection.slug]?.fields
 
   return (
     <div
-      className={[
-        baseClass,
-        (selected && focused) && `${baseClass}--selected`,
-      ].filter(Boolean).join(' ')}
+      className={[baseClass, selected && focused && `${baseClass}--selected`]
+        .filter(Boolean)
+        .join(' ')}
       contentEditable={false}
       {...attributes}
     >
       <div className={`${baseClass}__card`}>
         <div className={`${baseClass}__topRow`}>
           <div className={`${baseClass}__thumbnail`}>
-            {thumbnailSRC ? (
-              <img
-                alt={data?.filename}
-                src={thumbnailSRC}
-              />
-            ) : (
-              <FileGraphic />
-            )}
+            {thumbnailSRC ? <img alt={data?.filename} src={thumbnailSRC} /> : <FileGraphic />}
           </div>
           <div className={`${baseClass}__topRowRightPanel`}>
             <div className={`${baseClass}__collectionLabel`}>
@@ -186,7 +161,7 @@ const Element: React.FC<ElementProps> = (props) => {
                 >
                   <Button
                     onClick={(e) => {
-                      e.preventDefault();
+                      e.preventDefault()
                     }}
                     buttonStyle="icon-label"
                     el="div"
@@ -214,8 +189,8 @@ const Element: React.FC<ElementProps> = (props) => {
               </ListDrawerToggler>
               <Button
                 onClick={(e) => {
-                  e.preventDefault();
-                  removeUpload();
+                  e.preventDefault()
+                  removeUpload()
                 }}
                 buttonStyle="icon-label"
                 className={`${baseClass}__removeButton`}
@@ -229,33 +204,22 @@ const Element: React.FC<ElementProps> = (props) => {
         </div>
         <div className={`${baseClass}__bottomRow`}>
           <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
-            <strong>
-              {data?.filename}
-            </strong>
+            <strong>{data?.filename}</strong>
           </DocumentDrawerToggler>
         </div>
       </div>
       {children}
-      {value?.id && (
-        <DocumentDrawer onSave={updateUpload} />
-      )}
+      {value?.id && <DocumentDrawer onSave={updateUpload} />}
       <ListDrawer onSelect={swapUpload} />
-      <UploadDrawer
-        drawerSlug={drawerSlug}
-        relatedCollection={relatedCollection}
-        {...props}
-      />
+      <UploadDrawer drawerSlug={drawerSlug} relatedCollection={relatedCollection} {...props} />
     </div>
-  );
-};
+  )
+}
 
 export default (props: ElementProps): React.ReactNode => {
   return (
-    <EnabledRelationshipsCondition
-      {...props}
-      uploads
-    >
+    <EnabledRelationshipsCondition {...props} uploads>
       <Element {...props} />
     </EnabledRelationshipsCondition>
-  );
-};
+  )
+}

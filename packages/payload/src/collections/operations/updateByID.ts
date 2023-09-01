@@ -1,30 +1,30 @@
-import type { Config as GeneratedTypes } from 'payload/generated-types';
-import type { DeepPartial } from 'ts-essentials';
+import type { Config as GeneratedTypes } from 'payload/generated-types'
+import type { DeepPartial } from 'ts-essentials'
 
-import httpStatus from 'http-status';
+import httpStatus from 'http-status'
 
-import type { FindOneArgs } from '../../database/types';
-import type { PayloadRequest } from '../../express/types';
-import type { Collection } from '../config/types';
+import type { FindOneArgs } from '../../database/types'
+import type { PayloadRequest } from '../../express/types'
+import type { Collection } from '../config/types'
 
-import executeAccess from '../../auth/executeAccess';
-import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
-import { hasWhereAccessResult } from '../../auth/types';
-import { combineQueries } from '../../database/combineQueries';
-import { APIError, Forbidden, NotFound } from '../../errors';
-import { afterChange } from '../../fields/hooks/afterChange';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { beforeChange } from '../../fields/hooks/beforeChange';
-import { beforeValidate } from '../../fields/hooks/beforeValidate';
-import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
-import { generateFileData } from '../../uploads/generateFileData';
-import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
-import { uploadFiles } from '../../uploads/uploadFiles';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
-import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
-import { saveVersion } from '../../versions/saveVersion';
-import { buildAfterOperation } from './utils';
+import executeAccess from '../../auth/executeAccess'
+import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash'
+import { hasWhereAccessResult } from '../../auth/types'
+import { combineQueries } from '../../database/combineQueries'
+import { APIError, Forbidden, NotFound } from '../../errors'
+import { afterChange } from '../../fields/hooks/afterChange'
+import { afterRead } from '../../fields/hooks/afterRead'
+import { beforeChange } from '../../fields/hooks/beforeChange'
+import { beforeValidate } from '../../fields/hooks/beforeValidate'
+import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
+import { generateFileData } from '../../uploads/generateFileData'
+import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
+import { uploadFiles } from '../../uploads/uploadFiles'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion'
+import { saveVersion } from '../../versions/saveVersion'
+import { buildAfterOperation } from './utils'
 
 export type Arguments<T extends { [field: number | string | symbol]: unknown }> = {
   autosave?: boolean
@@ -43,27 +43,26 @@ export type Arguments<T extends { [field: number | string | symbol]: unknown }> 
 async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
 ): Promise<GeneratedTypes['collections'][TSlug]> {
-  let args = incomingArgs;
+  let args = incomingArgs
 
   // /////////////////////////////////////
   // beforeOperation - Collection
   // /////////////////////////////////////
 
   await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook;
+    await priorHook
 
-    args = (await hook({
-      args,
-      context: args.req.context,
-      operation: 'update',
-    })) || args;
-  }, Promise.resolve());
+    args =
+      (await hook({
+        args,
+        context: args.req.context,
+        operation: 'update',
+      })) || args
+  }, Promise.resolve())
 
   const {
     autosave = false,
-    collection: {
-      config: collectionConfig,
-    },
+    collection: { config: collectionConfig },
     collection,
     depth,
     draft: draftArg = false,
@@ -72,59 +71,59 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     overwriteExistingFiles = false,
     req: {
       locale,
-      payload: {
-        config,
-      },
+      payload: { config },
       payload,
       t,
     },
     req,
     showHiddenFields,
-  } = args;
+  } = args
 
   try {
-    const shouldCommit = await initTransaction(req);
+    const shouldCommit = await initTransaction(req)
 
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
 
     await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      args = (await hook({
-        args,
-        context: req.context,
-        operation: 'update',
-      })) || args;
-    }, Promise.resolve());
+      args =
+        (await hook({
+          args,
+          context: req.context,
+          operation: 'update',
+        })) || args
+    }, Promise.resolve())
 
     if (!id) {
-      throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST);
+      throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST)
     }
 
-    let { data } = args;
-    const { password } = data;
-    const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts);
-    const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft);
+    let { data } = args
+    const { password } = data
+    const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts)
+    const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft)
 
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
-    const accessResults = !overrideAccess ? await executeAccess({ data, id, req }, collectionConfig.access.update) : true;
-    const hasWherePolicy = hasWhereAccessResult(accessResults);
+    const accessResults = !overrideAccess
+      ? await executeAccess({ data, id, req }, collectionConfig.access.update)
+      : true
+    const hasWherePolicy = hasWhereAccessResult(accessResults)
 
     // /////////////////////////////////////
     // Retrieve document
     // /////////////////////////////////////
 
-
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
       locale,
       where: combineQueries({ id: { equals: id } }, accessResults),
-    };
+    }
 
     const docWithLocales = await getLatestCollectionVersion({
       config: collectionConfig,
@@ -132,11 +131,10 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       payload,
       query: findOneArgs,
       req,
-    });
+    })
 
-    if (!docWithLocales && !hasWherePolicy) throw new NotFound(t);
-    if (!docWithLocales && hasWherePolicy) throw new Forbidden(t);
-
+    if (!docWithLocales && !hasWherePolicy) throw new NotFound(t)
+    if (!docWithLocales && hasWherePolicy) throw new Forbidden(t)
 
     const originalDoc = await afterRead({
       context: req.context,
@@ -146,7 +144,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       overrideAccess: true,
       req,
       showHiddenFields: true,
-    });
+    })
 
     // /////////////////////////////////////
     // Generate data for all files and sizes
@@ -159,15 +157,22 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,
-    });
+    })
 
-    data = newFileData;
+    data = newFileData
 
     // /////////////////////////////////////
     // Delete any associated files
     // /////////////////////////////////////
 
-    await deleteAssociatedFiles({ collectionConfig, config, doc: docWithLocales, files: filesToUpload, overrideDelete: false, t });
+    await deleteAssociatedFiles({
+      collectionConfig,
+      config,
+      doc: docWithLocales,
+      files: filesToUpload,
+      overrideDelete: false,
+      t,
+    })
 
     // /////////////////////////////////////
     // beforeValidate - Fields
@@ -182,30 +187,31 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       operation: 'update',
       overrideAccess,
       req,
-    });
+    })
 
     // /////////////////////////////////////
     // beforeValidate - Collection
     // /////////////////////////////////////
 
     await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      data = (await hook({
-        context: req.context,
-        data,
-        operation: 'update',
-        originalDoc,
-        req,
-      })) || data;
-    }, Promise.resolve());
+      data =
+        (await hook({
+          context: req.context,
+          data,
+          operation: 'update',
+          originalDoc,
+          req,
+        })) || data
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // Write files to local storage
     // /////////////////////////////////////
 
     if (!collectionConfig.upload.disableLocalStorage) {
-      await uploadFiles(payload, filesToUpload, t);
+      await uploadFiles(payload, filesToUpload, t)
     }
 
     // /////////////////////////////////////
@@ -213,16 +219,17 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      data = (await hook({
-        context: req.context,
-        data,
-        operation: 'update',
-        originalDoc,
-        req,
-      })) || data;
-    }, Promise.resolve());
+      data =
+        (await hook({
+          context: req.context,
+          data,
+          operation: 'update',
+          originalDoc,
+          req,
+        })) || data
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // beforeChange - Fields
@@ -238,20 +245,20 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       operation: 'update',
       req,
       skipValidation: shouldSaveDraft || data._status === 'draft',
-    });
+    })
 
     // /////////////////////////////////////
     // Handle potential password update
     // /////////////////////////////////////
 
-    const dataToUpdate: Record<string, unknown> = { ...result };
+    const dataToUpdate: Record<string, unknown> = { ...result }
 
     if (shouldSavePassword && typeof password === 'string') {
-      const { hash, salt } = await generatePasswordSaltHash({ password });
-      dataToUpdate.salt = salt;
-      dataToUpdate.hash = hash;
-      delete data.password;
-      delete result.password;
+      const { hash, salt } = await generatePasswordSaltHash({ password })
+      dataToUpdate.salt = salt
+      dataToUpdate.hash = hash
+      delete data.password
+      delete result.password
     }
 
     // /////////////////////////////////////
@@ -265,7 +272,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
         id,
         locale,
         req,
-      });
+      })
     }
 
     // /////////////////////////////////////
@@ -284,7 +291,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
         id,
         payload,
         req,
-      });
+      })
     }
 
     // /////////////////////////////////////
@@ -299,21 +306,22 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       overrideAccess,
       req,
       showHiddenFields,
-    });
+    })
 
     // /////////////////////////////////////
     // afterRead - Collection
     // /////////////////////////////////////
 
     await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      result = await hook({
-        context: req.context,
-        doc: result,
-        req,
-      }) || result;
-    }, Promise.resolve());
+      result =
+        (await hook({
+          context: req.context,
+          doc: result,
+          req,
+        })) || result
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // afterChange - Fields
@@ -327,23 +335,24 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       operation: 'update',
       previousDoc: originalDoc,
       req,
-    });
+    })
 
     // /////////////////////////////////////
     // afterChange - Collection
     // /////////////////////////////////////
 
     await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      result = await hook({
-        context: req.context,
-        doc: result,
-        operation: 'update',
-        previousDoc: originalDoc,
-        req,
-      }) || result;
-    }, Promise.resolve());
+      result =
+        (await hook({
+          context: req.context,
+          doc: result,
+          operation: 'update',
+          previousDoc: originalDoc,
+          req,
+        })) || result
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // afterOperation - Collection
@@ -353,25 +362,25 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       args,
       operation: 'updateByID',
       result,
-    });
+    })
 
     await unlinkTempFiles({
       collectionConfig,
       config,
       req,
-    });
+    })
 
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
-    return result;
+    return result
   } catch (error: unknown) {
-    await killTransaction(req);
-    throw error;
+    await killTransaction(req)
+    throw error
   }
 }
 
-export default updateByID;
+export default updateByID

@@ -1,15 +1,15 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy } from 'react'
 
-import type { Props } from './types';
+import type { Props } from './types'
 
-import { ShimmerEffect } from '../../../elements/ShimmerEffect';
+import { ShimmerEffect } from '../../../elements/ShimmerEffect'
 
-const RichText = lazy(() => import('./RichText'));
+const RichText = lazy(() => import('./RichText'))
 
 const RichTextField: React.FC<Props> = (props) => (
   <Suspense fallback={<ShimmerEffect height="35vh" />}>
     <RichText {...props} />
   </Suspense>
-);
+)
 
-export default RichTextField;
+export default RichTextField

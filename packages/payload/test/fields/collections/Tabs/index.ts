@@ -1,14 +1,14 @@
 /* eslint-disable no-param-reassign */
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../src/collections/config/types'
 
-import { blocksField, blocksFieldSeedData } from '../Blocks';
-import { UIField } from './UIField';
+import { blocksField, blocksFieldSeedData } from '../Blocks'
+import { UIField } from './UIField'
 
-export const tabsSlug = 'tabs-fields';
+export const tabsSlug = 'tabs-fields'
 
-export const namedTabText = 'Some text in a named tab';
-export const namedTabDefaultValue = 'default text inside of a named tab';
-export const localizedTextValue = 'localized text';
+export const namedTabText = 'Some text in a named tab'
+export const namedTabDefaultValue = 'default text inside of a named tab'
+export const localizedTextValue = 'localized text'
 
 const TabsFields: CollectionConfig = {
   slug: tabsSlug,
@@ -176,29 +176,29 @@ const TabsFields: CollectionConfig = {
           hooks: {
             beforeValidate: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {};
-                data.hooksTab.beforeValidate = true;
-                return data.hooksTab;
+                if (!data.hooksTab) data.hooksTab = {}
+                data.hooksTab.beforeValidate = true
+                return data.hooksTab
               },
             ],
             beforeChange: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {};
-                data.hooksTab.beforeChange = true;
-                return data.hooksTab;
+                if (!data.hooksTab) data.hooksTab = {}
+                data.hooksTab.beforeChange = true
+                return data.hooksTab
               },
             ],
             afterChange: [
               ({ originalDoc }) => {
-                originalDoc.hooksTab.afterChange = true;
-                return originalDoc.hooksTab;
+                originalDoc.hooksTab.afterChange = true
+                return originalDoc.hooksTab
               },
             ],
             afterRead: [
               ({ data = {} }) => {
-                if (!data.hooksTab) data.hooksTab = {};
-                data.hooksTab.afterRead = true;
-                return data.hooksTab;
+                if (!data.hooksTab) data.hooksTab = {}
+                data.hooksTab.afterRead = true
+                return data.hooksTab
               },
             ],
           },
@@ -268,7 +268,7 @@ const TabsFields: CollectionConfig = {
       ],
     },
   ],
-};
+}
 
 export const tabsDoc = {
   array: [
@@ -320,6 +320,6 @@ export const tabsDoc = {
   anotherText: 'Super tired of writing this text',
   textInRow: 'hello',
   numberInRow: 235,
-};
+}
 
-export default TabsFields;
+export default TabsFields

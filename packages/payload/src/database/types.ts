@@ -1,142 +1,150 @@
-import type { Configuration } from 'webpack';
+import type { Configuration } from 'webpack'
 
-import type { TypeWithID } from '../collections/config/types';
-import type { TypeWithID as GlobalsTypeWithID } from '../globals/config/types';
-import type { Payload } from '../payload';
-import type { Document, PayloadRequest, Where } from '../types';
-import type { TypeWithVersion } from '../versions/types';
+import type { TypeWithID } from '../collections/config/types'
+import type { TypeWithID as GlobalsTypeWithID } from '../globals/config/types'
+import type { Payload } from '../payload'
+import type { Document, PayloadRequest, Where } from '../types'
+import type { TypeWithVersion } from '../versions/types'
 
 export interface DatabaseAdapter {
   /**
    * Start a transaction, requiring commitTransaction() to be called for any changes to be made.
    * @returns an identifier for the transaction or null if one cannot be established
    */
-  beginTransaction?: BeginTransaction;
+  beginTransaction?: BeginTransaction
   /**
    * Persist the changes made since the start of the transaction.
    */
-  commitTransaction?: CommitTransaction;
+  commitTransaction?: CommitTransaction
 
   /**
    * Open the connection to the database
    */
-  connect?: Connect;
+  connect?: Connect
 
-  create: Create;
+  create: Create
 
-  createGlobal: CreateGlobal;
+  createGlobal: CreateGlobal
 
   // migrations
   /**
    * Output a migration file
    */
-  createMigration: CreateMigration;
+  createMigration: CreateMigration
 
-  createVersion: CreateVersion;
+  createVersion: CreateVersion
 
-  deleteMany: DeleteMany;
+  deleteMany: DeleteMany
 
-  deleteOne: DeleteOne;
+  deleteOne: DeleteOne
 
-  deleteVersions: DeleteVersions;
+  deleteVersions: DeleteVersions
 
   /**
    * Terminate the connection with the database
    */
-  destroy?: Destroy;
+  destroy?: Destroy
 
   // operations
-  find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>;
+  find: <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
 
   // operations - globals
-  findGlobal: FindGlobal;
+  findGlobal: FindGlobal
 
   // transactions
-  findGlobalVersions: FindGlobalVersions;
+  findGlobalVersions: FindGlobalVersions
 
-  findOne: FindOne;
+  findOne: FindOne
 
   // versions
-  findVersions: FindVersions;
+  findVersions: FindVersions
 
   /**
    * Perform startup tasks required to interact with the database such as building Schema and models
    */
-  init?: Init;
+  init?: Init
 
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
-  migrate: () => Promise<void>;
+  migrate: () => Promise<void>
 
   /**
    * Run any migration down functions that have been performed
    */
-  migrateDown: () => Promise<void>;
+  migrateDown: () => Promise<void>
 
   /**
    * Drop the current database and run all migrate up functions
    */
-  migrateFresh: () => Promise<void>;
+  migrateFresh: () => Promise<void>
   /**
    * Run all migration down functions before running up
    */
-  migrateRefresh: () => Promise<void>;
+  migrateRefresh: () => Promise<void>
 
   /**
    * Run all migrate down functions
    */
-  migrateReset: () => Promise<void>;
+  migrateReset: () => Promise<void>
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
-  migrateStatus: () => Promise<void>;
+  migrateStatus: () => Promise<void>
   /**
    * Path to read and write migration files from
    */
-  migrationDir?: string;
+  migrationDir?: string
   /**
    * reference to the instance of payload
    */
-  payload: Payload;
+  payload: Payload
 
-  queryDrafts: QueryDrafts;
+  queryDrafts: QueryDrafts
   /**
    * Abort any changes since the start of the transaction.
    */
-  rollbackTransaction?: RollbackTransaction;
+  rollbackTransaction?: RollbackTransaction
   /**
    * Perform many database interactions in a single, all-or-nothing operation.
    */
-  transaction?: Transaction;
+  transaction?: Transaction
 
-
-  updateGlobal: UpdateGlobal;
-  updateOne: UpdateOne;
-  updateVersion: UpdateVersion;
+  updateGlobal: UpdateGlobal
+  updateOne: UpdateOne
+  updateVersion: UpdateVersion
   /**
    * assign the transaction to use when making queries, defaults to the last started transaction
    */
-  useTransaction?: (id: number | string) => void;
+  useTransaction?: (id: number | string) => void
   /**
    * Used to alias server only modules or make other changes to webpack configuration
    */
-  webpack?: Webpack;
+  webpack?: Webpack
 }
 
-export type Init = (payload: Payload) => Promise<void>;
+export type Init = (payload: Payload) => Promise<void>
 
 export type Connect = (payload: Payload) => Promise<void>
 
 export type Destroy = (payload: Payload) => Promise<void>
 
-export type Webpack = (config: Configuration) => Configuration;
+export type Webpack = (config: Configuration) => Configuration
 
-export type CreateMigration = (payload: Payload, migrationDir?: string, migrationName?: string) => Promise<void>
+export type CreateMigration = (
+  payload: Payload,
+  migrationDir?: string,
+  migrationName?: string,
+) => Promise<void>
 
-export type Transaction = (callback: () => Promise<void>, options?: Record<string, unknown>) => Promise<void>
+export type Transaction = (
+  callback: () => Promise<void>,
+  options?: Record<string, unknown>,
+) => Promise<void>
 
-export type BeginTransaction = (options?: Record<string, unknown>) => Promise<null | number | string>
+export type BeginTransaction = (
+  options?: Record<string, unknown>,
+) => Promise<null | number | string>
 
 export type RollbackTransaction = (id: number | string) => Promise<void>
 
@@ -153,7 +161,7 @@ export type QueryDraftsArgs = {
   where?: Where
 }
 
-export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>;
+export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<PaginatedDocs<T>>
 
 export type FindOneArgs = {
   collection: string
@@ -161,7 +169,6 @@ export type FindOneArgs = {
   req?: PayloadRequest
   where?: Where
 }
-
 
 export type FindOne = <T = TypeWithID>(args: FindOneArgs) => Promise<T | null>
 
@@ -179,7 +186,7 @@ export type FindArgs = {
   where?: Where
 }
 
-export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>;
+export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
 
 export type FindVersionsArgs = {
   collection: string
@@ -194,8 +201,9 @@ export type FindVersionsArgs = {
   where?: Where
 }
 
-export type FindVersions = <T = TypeWithID>(args: FindVersionsArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
-
+export type FindVersions = <T = TypeWithID>(
+  args: FindVersionsArgs,
+) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
 export type FindGlobalVersionsArgs = {
   global: string
@@ -219,24 +227,28 @@ export type FindGlobalArgs = {
 
 export type FindGlobal = <T extends GlobalsTypeWithID = any>(args: FindGlobalArgs) => Promise<T>
 
-
 export type CreateGlobalArgs<T extends GlobalsTypeWithID = any> = {
   data: T
   req?: PayloadRequest
   slug: string
 }
-export type CreateGlobal = <T extends GlobalsTypeWithID = any>(args: CreateGlobalArgs<T>) => Promise<T>
-
+export type CreateGlobal = <T extends GlobalsTypeWithID = any>(
+  args: CreateGlobalArgs<T>,
+) => Promise<T>
 
 export type UpdateGlobalArgs<T extends GlobalsTypeWithID = any> = {
   data: T
   req?: PayloadRequest
   slug: string
 }
-export type UpdateGlobal = <T extends GlobalsTypeWithID = any>(args: UpdateGlobalArgs<T>) => Promise<T>
+export type UpdateGlobal = <T extends GlobalsTypeWithID = any>(
+  args: UpdateGlobalArgs<T>,
+) => Promise<T>
 // export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
-export type FindGlobalVersions = <T = TypeWithID>(args: FindGlobalVersionsArgs) => Promise<PaginatedDocs<TypeWithVersion<T>>>;
+export type FindGlobalVersions = <T = TypeWithID>(
+  args: FindGlobalVersionsArgs,
+) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
 export type DeleteVersionsArgs = {
   collection: string
@@ -246,7 +258,7 @@ export type DeleteVersionsArgs = {
     [key: string]: string
   }
   where: Where
-};
+}
 
 export type CreateVersionArgs<T = TypeWithID> = {
   autosave: boolean
@@ -259,26 +271,31 @@ export type CreateVersionArgs<T = TypeWithID> = {
   versionData: T
 }
 
-export type CreateVersion = <T = TypeWithID>(args: CreateVersionArgs<T>) => Promise<TypeWithVersion<T>>;
+export type CreateVersion = <T = TypeWithID>(
+  args: CreateVersionArgs<T>,
+) => Promise<TypeWithVersion<T>>
 
-export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>;
-
+export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>
 
 export type UpdateVersionArgs<T = TypeWithID> = {
   collectionSlug: string
   locale?: string
   req?: PayloadRequest
   versionData: T
-} & ({
-  id: number | string
-  where?: never
-} | {
-  id?: never
-  where: Where
-})
+} & (
+  | {
+      id: number | string
+      where?: never
+    }
+  | {
+      id?: never
+      where: Where
+    }
+)
 
-export type UpdateVersion = <T = TypeWithID>(args: UpdateVersionArgs<T>) => Promise<TypeWithVersion<T>>
-
+export type UpdateVersion = <T = TypeWithID>(
+  args: UpdateVersionArgs<T>,
+) => Promise<TypeWithVersion<T>>
 
 export type CreateArgs = {
   collection: string
@@ -296,13 +313,16 @@ export type UpdateOneArgs = {
   draft?: boolean
   locale?: string
   req?: PayloadRequest
-} & ({
-  id: number | string
-  where?: never
-} | {
-  id?: never
-  where: Where
-})
+} & (
+  | {
+      id: number | string
+      where?: never
+    }
+  | {
+      id?: never
+      where: Where
+    }
+)
 
 export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
@@ -322,11 +342,10 @@ export type DeleteManyArgs = {
 
 export type DeleteMany = (args: DeleteManyArgs) => Promise<void>
 
-
 export type Migration = MigrationData & {
   down: ({ payload }: { payload }) => Promise<boolean>
   up: ({ payload }: { payload }) => Promise<boolean>
-};
+}
 
 export type MigrationData = {
   batch: number

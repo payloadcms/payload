@@ -1,17 +1,17 @@
-import React from 'react';
+import React from 'react'
 
-import type { RadioField } from '../../../../../fields/config/types';
-import type { Description } from '../../FieldDescription/types';
-import type { OnChange } from './types';
+import type { RadioField } from '../../../../../fields/config/types'
+import type { Description } from '../../FieldDescription/types'
+import type { OnChange } from './types'
 
-import { optionIsObject } from '../../../../../fields/config/types';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import Label from '../../Label';
-import RadioInput from './RadioInput';
-import './index.scss';
+import { optionIsObject } from '../../../../../fields/config/types'
+import Error from '../../Error'
+import FieldDescription from '../../FieldDescription'
+import Label from '../../Label'
+import RadioInput from './RadioInput'
+import './index.scss'
 
-const baseClass = 'radio-group';
+const baseClass = 'radio-group'
 
 export type RadioGroupInputProps = Omit<RadioField, 'type'> & {
   className?: string
@@ -46,9 +46,9 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
     style,
     value,
     width,
-  } = props;
+  } = props
 
-  const path = pathFromProps || name;
+  const path = pathFromProps || name
 
   const classes = [
     'field-type',
@@ -57,7 +57,9 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
     `${baseClass}--layout-${layout}`,
     showError && 'error',
     readOnly && `${baseClass}--read-only`,
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <div
@@ -68,30 +70,20 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
       className={classes}
     >
       <div className={`${baseClass}__error-wrap`}>
-        <Error
-          message={errorMessage}
-          showError={showError}
-        />
+        <Error message={errorMessage} showError={showError} />
       </div>
-      <Label
-        htmlFor={`field-${path}`}
-        label={label}
-        required={required}
-      />
-      <ul
-        className={`${baseClass}--group`}
-        id={`field-${path.replace(/\./g, '__')}`}
-      >
+      <Label htmlFor={`field-${path}`} label={label} required={required} />
+      <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
         {options.map((option) => {
-          let optionValue = '';
+          let optionValue = ''
 
           if (optionIsObject(option)) {
-            optionValue = option.value;
+            optionValue = option.value
           } else {
-            optionValue = option;
+            optionValue = option
           }
 
-          const isSelected = String(optionValue) === String(value);
+          const isSelected = String(optionValue) === String(value)
 
           return (
             <li key={`${path} - ${optionValue}`}>
@@ -102,15 +94,12 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
                 path={path}
               />
             </li>
-          );
+          )
         })}
       </ul>
-      <FieldDescription
-        description={description}
-        value={value}
-      />
+      <FieldDescription description={description} value={value} />
     </div>
-  );
-};
+  )
+}
 
-export default RadioGroupInput;
+export default RadioGroupInput

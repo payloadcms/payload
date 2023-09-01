@@ -1,6 +1,6 @@
-import type React from 'react';
+import type React from 'react'
 
-import type { DragHandleProps } from '../DraggableSortable/DraggableSortableItem/types';
+import type { DragHandleProps } from '../DraggableSortable/DraggableSortableItem/types'
 
 export type Props = {
   actions?: React.ReactNode

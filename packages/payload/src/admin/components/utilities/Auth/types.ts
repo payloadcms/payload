@@ -1,4 +1,4 @@
-import type { Permissions, User } from '../../../../auth/types';
+import type { Permissions, User } from '../../../../auth/types'
 
 export type AuthContext<T = User> = {
   logOut: () => void

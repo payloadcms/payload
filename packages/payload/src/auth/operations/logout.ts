@@ -1,11 +1,11 @@
-import type { Response } from 'express';
+import type { Response } from 'express'
 
-import httpStatus from 'http-status';
+import httpStatus from 'http-status'
 
-import type { Collection } from '../../collections/config/types';
-import type { PayloadRequest } from '../../express/types';
+import type { Collection } from '../../collections/config/types'
+import type { PayloadRequest } from '../../express/types'
 
-import { APIError } from '../../errors';
+import { APIError } from '../../errors'
 
 export type Arguments = {
   collection: Collection
@@ -14,24 +14,21 @@ export type Arguments = {
 }
 
 async function logout(incomingArgs: Arguments): Promise<string> {
-  let args = incomingArgs;
+  let args = incomingArgs
   const {
     collection,
-    collection: {
-      config: collectionConfig,
-    },
+    collection: { config: collectionConfig },
     req,
     req: {
-      payload: {
-        config,
-      },
+      payload: { config },
       user,
     },
     res,
-  } = incomingArgs;
+  } = incomingArgs
 
-  if (!user) throw new APIError('No User', httpStatus.BAD_REQUEST);
-  if (user.collection !== collectionConfig.slug) throw new APIError('Incorrect collection', httpStatus.FORBIDDEN);
+  if (!user) throw new APIError('No User', httpStatus.BAD_REQUEST)
+  if (user.collection !== collectionConfig.slug)
+    throw new APIError('Incorrect collection', httpStatus.FORBIDDEN)
 
   const cookieOptions = {
     domain: undefined,
@@ -39,23 +36,25 @@ async function logout(incomingArgs: Arguments): Promise<string> {
     path: '/',
     sameSite: collectionConfig.auth.cookies.sameSite,
     secure: collectionConfig.auth.cookies.secure,
-  };
+  }
 
-  if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
+  if (collectionConfig.auth.cookies.domain)
+    cookieOptions.domain = collectionConfig.auth.cookies.domain
 
   await collection.config.hooks.afterLogout.reduce(async (priorHook, hook) => {
-    await priorHook;
+    await priorHook
 
-    args = (await hook({
-      context: req.context,
-      req,
-      res,
-    })) || args;
-  }, Promise.resolve());
+    args =
+      (await hook({
+        context: req.context,
+        req,
+        res,
+      })) || args
+  }, Promise.resolve())
 
-  res.clearCookie(`${config.cookiePrefix}-token`, cookieOptions);
+  res.clearCookie(`${config.cookiePrefix}-token`, cookieOptions)
 
-  return req.t('authentication:loggedOutSuccessfully');
+  return req.t('authentication:loggedOutSuccessfully')
 }
 
-export default logout;
+export default logout

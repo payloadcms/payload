@@ -1,16 +1,16 @@
-import type { Endpoint } from '../config/types';
-import type { SanitizedGlobalConfig } from './config/types';
+import type { Endpoint } from '../config/types'
+import type { SanitizedGlobalConfig } from './config/types'
 
-import docAccessRequestHandler from './requestHandlers/docAccess';
-import findOne from './requestHandlers/findOne';
-import findVersionByID from './requestHandlers/findVersionByID';
-import findVersions from './requestHandlers/findVersions';
-import restoreVersion from './requestHandlers/restoreVersion';
-import update from './requestHandlers/update';
+import docAccessRequestHandler from './requestHandlers/docAccess'
+import findOne from './requestHandlers/findOne'
+import findVersionByID from './requestHandlers/findVersionByID'
+import findVersions from './requestHandlers/findVersions'
+import restoreVersion from './requestHandlers/restoreVersion'
+import update from './requestHandlers/update'
 
 const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
-  if (!global.endpoints) return [];
-  const endpoints = [...global.endpoints];
+  if (!global.endpoints) return []
+  const endpoints = [...global.endpoints]
 
   if (global.versions) {
     endpoints.push(
@@ -29,7 +29,7 @@ const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
         method: 'post',
         path: '/versions/:id',
       },
-    );
+    )
   }
 
   endpoints.push(
@@ -48,9 +48,9 @@ const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
       method: 'post',
       path: '/',
     },
-  );
+  )
 
-  return endpoints;
-};
+  return endpoints
+}
 
-export default buildEndpoints;
+export default buildEndpoints

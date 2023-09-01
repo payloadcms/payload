@@ -1,15 +1,12 @@
-export * from './../types';
+export * from './../types'
 
 export {
   CustomPublishButtonProps,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
-} from './../admin/components/elements/types';
+} from './../admin/components/elements/types'
 
-
-export {
-  RowLabel,
-} from './../admin/components/forms/RowLabel/types';
+export { RowLabel } from './../admin/components/forms/RowLabel/types'
 
 export {
   AfterChangeHook as CollectionAfterChangeHook,
@@ -28,14 +25,11 @@ export {
   CollectionConfig,
   SanitizedCollectionConfig,
   TypeWithID,
-} from './../collections/config/types';
+} from './../collections/config/types'
 
-export {
-  Access,
-  AccessArgs,
-} from './../config/types';
+export { Access, AccessArgs } from './../config/types'
 
-export { DatabaseAdapter } from './../database/types';
+export { DatabaseAdapter } from './../database/types'
 
 export {
   ArrayField,
@@ -106,7 +100,7 @@ export {
   optionsAreObjects,
   tabHasName,
   valueIsValueWithRelation,
-} from './../fields/config/types';
+} from './../fields/config/types'
 
 export {
   AfterChangeHook as GlobalAfterChangeHook,
@@ -116,8 +110,6 @@ export {
   BeforeValidateHook as GlobalBeforeValidateHook,
   GlobalConfig,
   SanitizedGlobalConfig,
-} from './../globals/config/types';
+} from './../globals/config/types'
 
-export {
-  validOperators
-} from './../types/constants';
+export { validOperators } from './../types/constants'

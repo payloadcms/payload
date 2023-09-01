@@ -1,58 +1,47 @@
-import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { FormField } from '../../Form/types';
-import type { Props } from './types';
+import type { FormField } from '../../Form/types'
+import type { Props } from './types'
 
-import Error from '../../Error';
-import { useFormFields } from '../../Form/context';
-import Label from '../../Label';
-import useField from '../../useField';
-import './index.scss';
+import Error from '../../Error'
+import { useFormFields } from '../../Form/context'
+import Label from '../../Label'
+import useField from '../../useField'
+import './index.scss'
 
 const ConfirmPassword: React.FC<Props> = (props) => {
-  const {
-    disabled,
-  } = props;
+  const { disabled } = props
 
-  const password = useFormFields<FormField>(([fields]) => fields.password);
-  const { t } = useTranslation('fields');
+  const password = useFormFields<FormField>(([fields]) => fields.password)
+  const { t } = useTranslation('fields')
 
-  const validate = useCallback((value: string) => {
-    if (!value) {
-      return t('validation:required');
-    }
+  const validate = useCallback(
+    (value: string) => {
+      if (!value) {
+        return t('validation:required')
+      }
 
-    if (value === password?.value) {
-      return true;
-    }
+      if (value === password?.value) {
+        return true
+      }
 
-    return t('passwordsDoNotMatch');
-  }, [password, t]);
+      return t('passwordsDoNotMatch')
+    },
+    [password, t],
+  )
 
-  const {
-    errorMessage,
-    setValue,
-    showError,
-    value,
-  } = useField({
+  const { errorMessage, setValue, showError, value } = useField({
     disableFormData: true,
     path: 'confirm-password',
     validate,
-  });
+  })
 
-  const classes = [
-    'field-type',
-    'confirm-password',
-    showError && 'error',
-  ].filter(Boolean).join(' ');
+  const classes = ['field-type', 'confirm-password', showError && 'error'].filter(Boolean).join(' ')
 
   return (
     <div className={classes}>
-      <Error
-        message={errorMessage}
-        showError={showError}
-      />
+      <Error message={errorMessage} showError={showError} />
       <Label
         htmlFor="field-confirm-password"
         label={t('authentication:confirmPassword')}
@@ -65,10 +54,10 @@ const ConfirmPassword: React.FC<Props> = (props) => {
         name="confirm-password"
         onChange={setValue}
         type="password"
-        value={value as string || ''}
+        value={(value as string) || ''}
       />
     </div>
-  );
-};
+  )
+}
 
-export default ConfirmPassword;
+export default ConfirmPassword

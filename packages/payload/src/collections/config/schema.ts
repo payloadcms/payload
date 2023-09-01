@@ -1,12 +1,12 @@
-import joi from 'joi';
+import joi from 'joi'
 
-import { endpointsSchema } from '../../config/schema';
-import { componentSchema } from '../../utilities/componentSchema';
+import { endpointsSchema } from '../../config/schema'
+import { componentSchema } from '../../utilities/componentSchema'
 
 const strategyBaseSchema = joi.object().keys({
   logout: joi.boolean(),
   refresh: joi.boolean(),
-});
+})
 
 const collectionSchema = joi.object().keys({
   access: joi.object({
@@ -36,21 +36,12 @@ const collectionSchema = joi.object().keys({
       }),
     }),
     defaultColumns: joi.array().items(joi.string()),
-    description: joi.alternatives().try(
-      joi.string(),
-      componentSchema,
-    ),
+    description: joi.alternatives().try(joi.string(), componentSchema),
     disableDuplicate: joi.bool(),
     enableRichTextLink: joi.boolean(),
     enableRichTextRelationship: joi.boolean(),
-    group: joi.alternatives().try(
-      joi.string(),
-      joi.object().pattern(joi.string(), [joi.string()]),
-    ),
-    hidden: joi.alternatives().try(
-      joi.boolean(),
-      joi.func(),
-    ),
+    group: joi.alternatives().try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
+    hidden: joi.alternatives().try(joi.boolean(), joi.func()),
     hideAPIURL: joi.bool(),
     hooks: joi.object({
       beforeDuplicate: joi.func(),
@@ -79,18 +70,18 @@ const collectionSchema = joi.object().keys({
       lockTime: joi.number(),
       maxLoginAttempts: joi.number(),
       removeTokenFromResponses: joi.boolean().valid(true),
-      strategies: joi.array().items(joi.alternatives().try(
-        strategyBaseSchema.keys({
-          name: joi.string().required(),
-          strategy: joi.func()
-            .maxArity(1)
-            .required(),
-        }),
-        strategyBaseSchema.keys({
-          name: joi.string(),
-          strategy: joi.object().required(),
-        }),
-      )),
+      strategies: joi.array().items(
+        joi.alternatives().try(
+          strategyBaseSchema.keys({
+            name: joi.string().required(),
+            strategy: joi.func().maxArity(1).required(),
+          }),
+          strategyBaseSchema.keys({
+            name: joi.string(),
+            strategy: joi.object().required(),
+          }),
+        ),
+      ),
       tokenExpiration: joi.number(),
       useAPIKey: joi.boolean(),
       verify: joi.alternatives().try(
@@ -108,12 +99,10 @@ const collectionSchema = joi.object().keys({
   endpoints: endpointsSchema,
   fields: joi.array(),
   graphQL: joi.alternatives().try(
-    joi.object().keys(
-      {
-        pluralName: joi.string(),
-        singularName: joi.string(),
-      },
-    ),
+    joi.object().keys({
+      pluralName: joi.string(),
+      singularName: joi.string(),
+    }),
     joi.boolean(),
   ),
   hooks: joi.object({
@@ -140,14 +129,12 @@ const collectionSchema = joi.object().keys({
     }),
   ),
   labels: joi.object({
-    plural: joi.alternatives().try(
-      joi.string(),
-      joi.object().pattern(joi.string(), [joi.string()]),
-    ),
-    singular: joi.alternatives().try(
-      joi.string(),
-      joi.object().pattern(joi.string(), [joi.string()]),
-    ),
+    plural: joi
+      .alternatives()
+      .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
+    singular: joi
+      .alternatives()
+      .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
   }),
   slug: joi.string().required(),
   timestamps: joi.boolean(),
@@ -156,10 +143,7 @@ const collectionSchema = joi.object().keys({
   }),
   upload: joi.alternatives().try(
     joi.object({
-      adminThumbnail: joi.alternatives().try(
-        joi.string(),
-        joi.func(),
-      ),
+      adminThumbnail: joi.alternatives().try(joi.string(), joi.func()),
       disableLocalStorage: joi.bool(),
       formatOptions: joi.object().keys({
         format: joi.string(),
@@ -167,27 +151,30 @@ const collectionSchema = joi.object().keys({
       }),
       handlers: joi.array().items(joi.func()),
       imageSizes: joi.array().items(
-        joi.object().keys({
-          crop: joi.string(), // TODO: add further specificity with joi.xor
-          height: joi.number().integer().allow(null),
-          name: joi.string(),
-          width: joi.number().integer().allow(null),
-        }).unknown(),
+        joi
+          .object()
+          .keys({
+            crop: joi.string(), // TODO: add further specificity with joi.xor
+            height: joi.number().integer().allow(null),
+            name: joi.string(),
+            width: joi.number().integer().allow(null),
+          })
+          .unknown(),
       ),
       mimeTypes: joi.array().items(joi.string()),
-      resizeOptions: joi.object().keys({
-        background: joi.string(),
-        fastShrinkOnLoad: joi.bool(),
-        fit: joi.string(),
-        height: joi.number().allow(null),
-        kernel: joi.string(),
-        position: joi.alternatives().try(
-          joi.string(),
-          joi.number(),
-        ),
-        width: joi.number().allow(null),
-        withoutEnlargement: joi.bool(),
-      }).allow(null),
+      resizeOptions: joi
+        .object()
+        .keys({
+          background: joi.string(),
+          fastShrinkOnLoad: joi.bool(),
+          fit: joi.string(),
+          height: joi.number().allow(null),
+          kernel: joi.string(),
+          position: joi.alternatives().try(joi.string(), joi.number()),
+          width: joi.number().allow(null),
+          withoutEnlargement: joi.bool(),
+        })
+        .allow(null),
       staticDir: joi.string(),
       staticOptions: joi.object(),
       staticURL: joi.string(),
@@ -221,6 +208,6 @@ const collectionSchema = joi.object().keys({
     }),
     joi.boolean(),
   ),
-});
+})
 
-export default collectionSchema;
+export default collectionSchema

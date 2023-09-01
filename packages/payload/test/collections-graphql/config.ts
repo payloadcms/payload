@@ -1,13 +1,13 @@
-import path from 'path';
+import path from 'path'
 
-import type { CollectionConfig } from '../../src/collections/config/types';
+import type { CollectionConfig } from '../../src/collections/config/types'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
 
 export interface Relation {
-  id: string;
-  name: string;
+  id: string
+  name: string
 }
 
 const openAccess = {
@@ -15,7 +15,7 @@ const openAccess = {
   read: () => true,
   update: () => true,
   delete: () => true,
-};
+}
 
 const collectionWithName = (collectionSlug: string): CollectionConfig => {
   return {
@@ -27,13 +27,13 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
         type: 'text',
       },
     ],
-  };
-};
+  }
+}
 
-export const slug = 'posts';
-export const relationSlug = 'relation';
+export const slug = 'posts'
+export const relationSlug = 'relation'
 
-export const pointSlug = 'point';
+export const pointSlug = 'point'
 
 export default buildConfigWithDefaults({
   graphQL: {
@@ -51,10 +51,10 @@ export default buildConfigWithDefaults({
           }),
           resolve: () => {
             // Throwing an internal error with potentially sensitive data
-            throw new Error('Lost connection to the Pentagon. Secret data: ******');
+            throw new Error('Lost connection to the Pentagon. Secret data: ******')
           },
         },
-      };
+      }
     },
   },
   collections: [
@@ -285,9 +285,7 @@ export default buildConfigWithDefaults({
           name: 'payloadAPI',
           type: 'text',
           hooks: {
-            afterRead: [
-              ({ req }) => req.payloadAPI,
-            ],
+            afterRead: [({ req }) => req.payloadAPI],
           },
         },
       ],
@@ -302,9 +300,7 @@ export default buildConfigWithDefaults({
           name: 'payloadAPI',
           type: 'text',
           hooks: {
-            afterRead: [
-              ({ req }) => req.payloadAPI,
-            ],
+            afterRead: [({ req }) => req.payloadAPI],
           },
         },
         {
@@ -322,7 +318,7 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
 
     await payload.create({
       collection: 'custom-ids',
@@ -330,7 +326,7 @@ export default buildConfigWithDefaults({
         id: 1,
         title: 'hello',
       },
-    });
+    })
 
     await payload.create({
       collection: slug,
@@ -338,21 +334,21 @@ export default buildConfigWithDefaults({
         title: 'has custom ID relation',
         relationToCustomID: 1,
       },
-    });
+    })
 
     await payload.create({
       collection: slug,
       data: {
         title: 'post1',
       },
-    });
+    })
 
     await payload.create({
       collection: slug,
       data: {
         title: 'post2',
       },
-    });
+    })
 
     await payload.create({
       collection: slug,
@@ -360,7 +356,7 @@ export default buildConfigWithDefaults({
         title: 'with-description',
         description: 'description',
       },
-    });
+    })
 
     await payload.create({
       collection: slug,
@@ -368,27 +364,27 @@ export default buildConfigWithDefaults({
         title: 'numPost1',
         number: 1,
       },
-    });
+    })
     await payload.create({
       collection: slug,
       data: {
         title: 'numPost2',
         number: 2,
       },
-    });
+    })
 
     const rel1 = await payload.create({
       collection: relationSlug,
       data: {
         name: 'name',
       },
-    });
+    })
     const rel2 = await payload.create({
       collection: relationSlug,
       data: {
         name: 'name2',
       },
-    });
+    })
 
     // Relation - hasMany
     await payload.create({
@@ -397,14 +393,14 @@ export default buildConfigWithDefaults({
         title: 'rel to hasMany',
         relationHasManyField: rel1.id,
       },
-    });
+    })
     await payload.create({
       collection: slug,
       data: {
         title: 'rel to hasMany 2',
         relationHasManyField: rel2.id,
       },
-    });
+    })
 
     // Relation - relationTo multi
     await payload.create({
@@ -416,7 +412,7 @@ export default buildConfigWithDefaults({
           value: rel2.id,
         },
       },
-    });
+    })
 
     // Relation - relationTo multi hasMany
     await payload.create({
@@ -434,25 +430,25 @@ export default buildConfigWithDefaults({
           },
         ],
       },
-    });
+    })
 
     const payloadAPITest1 = await payload.create({
       collection: 'payload-api-test-ones',
       data: {},
-    });
+    })
 
     await payload.create({
       collection: 'payload-api-test-twos',
       data: {
         relation: payloadAPITest1.id,
       },
-    });
+    })
 
     await payload.create({
       collection: pointSlug,
       data: {
         point: [10, 20],
       },
-    });
+    })
   },
-});
+})

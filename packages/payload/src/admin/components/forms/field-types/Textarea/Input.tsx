@@ -1,16 +1,16 @@
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react'
 
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-import type { TextareaField } from '../../../../../fields/config/types';
-import type { Description } from '../../FieldDescription/types';
+import type { TextareaField } from '../../../../../fields/config/types'
+import type { Description } from '../../FieldDescription/types'
 
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import Label from '../../Label';
-import './index.scss';
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import Error from '../../Error'
+import FieldDescription from '../../FieldDescription'
+import Label from '../../Label'
+import './index.scss'
 
 export type TextAreaInputProps = Omit<TextareaField, 'type'> & {
   className?: string
@@ -22,7 +22,7 @@ export type TextAreaInputProps = Omit<TextareaField, 'type'> & {
   readOnly?: boolean
   required?: boolean
   rows?: number
-  rtl?: boolean;
+  rtl?: boolean
   showError?: boolean
   style?: React.CSSProperties
   value?: string
@@ -46,9 +46,9 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
     style,
     value,
     width,
-  } = props;
+  } = props
 
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation()
 
   const classes = [
     'field-type',
@@ -56,7 +56,9 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
     className,
     showError && 'error',
     readOnly && 'read-only',
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <div
@@ -66,24 +68,11 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
       }}
       className={classes}
     >
-      <Error
-        message={errorMessage}
-        showError={showError}
-      />
-      <Label
-        htmlFor={`field-${path.replace(/\./g, '__')}`}
-        label={label}
-        required={required}
-      />
-      <label
-        className="textarea-outer"
-        htmlFor={`field-${path.replace(/\./g, '__')}`}
-      >
+      <Error message={errorMessage} showError={showError} />
+      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
         <div className="textarea-inner">
-          <div
-            className="textarea-clone"
-            data-value={value || placeholder || ''}
-          />
+          <div className="textarea-clone" data-value={value || placeholder || ''} />
           <textarea
             className="textarea-element"
             data-rtl={rtl}
@@ -97,12 +86,9 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
           />
         </div>
       </label>
-      <FieldDescription
-        description={description}
-        value={value}
-      />
+      <FieldDescription description={description} value={value} />
     </div>
-  );
-};
+  )
+}
 
-export default TextareaInput;
+export default TextareaInput

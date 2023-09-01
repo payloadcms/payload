@@ -1,9 +1,9 @@
-import type { Strategy } from 'passport';
-import type { DeepRequired } from 'ts-essentials';
+import type { Strategy } from 'passport'
+import type { DeepRequired } from 'ts-essentials'
 
-import type { PayloadRequest } from '../express/types';
-import type { Payload } from '../payload';
-import type { Where } from '../types';
+import type { PayloadRequest } from '../express/types'
+import type { Payload } from '../payload'
+import type { Where } from '../types'
 
 export type Permission = {
   permission: boolean
@@ -69,47 +69,63 @@ export type User = {
   id: string
 }
 
-type GenerateVerifyEmailHTML = (args: { req: PayloadRequest, token: string, user: any }) => Promise<string> | string
-type GenerateVerifyEmailSubject = (args: { req: PayloadRequest, token: string, user: any }) => Promise<string> | string
+type GenerateVerifyEmailHTML = (args: {
+  req: PayloadRequest
+  token: string
+  user: any
+}) => Promise<string> | string
+type GenerateVerifyEmailSubject = (args: {
+  req: PayloadRequest
+  token: string
+  user: any
+}) => Promise<string> | string
 
-type GenerateForgotPasswordEmailHTML = (args?: { req?: PayloadRequest, token?: string, user?: unknown }) => Promise<string> | string
-type GenerateForgotPasswordEmailSubject = (args?: { req?: PayloadRequest, token?: string, user?: any }) => Promise<string> | string
+type GenerateForgotPasswordEmailHTML = (args?: {
+  req?: PayloadRequest
+  token?: string
+  user?: unknown
+}) => Promise<string> | string
+type GenerateForgotPasswordEmailSubject = (args?: {
+  req?: PayloadRequest
+  token?: string
+  user?: any
+}) => Promise<string> | string
 
-type AuthStrategy = ((ctx: Payload) => Strategy) | Strategy;
+type AuthStrategy = ((ctx: Payload) => Strategy) | Strategy
 
 export interface IncomingAuthType {
   cookies?: {
-    domain?: string;
-    sameSite?: 'lax' | 'none' | 'strict' | boolean;
-    secure?: boolean;
+    domain?: string
+    sameSite?: 'lax' | 'none' | 'strict' | boolean
+    secure?: boolean
   }
   depth?: number
   disableLocalStrategy?: true
   forgotPassword?: {
-    generateEmailHTML?: GenerateForgotPasswordEmailHTML,
-    generateEmailSubject?: GenerateForgotPasswordEmailSubject,
+    generateEmailHTML?: GenerateForgotPasswordEmailHTML
+    generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
-  lockTime?: number;
-  maxLoginAttempts?: number;
+  lockTime?: number
+  maxLoginAttempts?: number
   removeTokenFromResponses?: true
   strategies?: {
     name?: string
     strategy: AuthStrategy
   }[]
-  tokenExpiration?: number;
-  useAPIKey?: boolean;
+  tokenExpiration?: number
+  useAPIKey?: boolean
   verify?:
-  | {
-    generateEmailHTML?: GenerateVerifyEmailHTML;
-    generateEmailSubject?: GenerateVerifyEmailSubject;
-  }
-  | boolean;
+    | {
+        generateEmailHTML?: GenerateVerifyEmailHTML
+        generateEmailSubject?: GenerateVerifyEmailSubject
+      }
+    | boolean
 }
 
 export type VerifyConfig = {
   generateEmailHTML?: GenerateVerifyEmailHTML
   generateEmailSubject?: GenerateVerifyEmailSubject
-};
+}
 
 export interface Auth extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'verify'> {
   forgotPassword?: {
@@ -120,5 +136,5 @@ export interface Auth extends Omit<DeepRequired<IncomingAuthType>, 'forgotPasswo
 }
 
 export function hasWhereAccessResult(result: Where | boolean): result is Where {
-  return result && typeof result === 'object';
+  return result && typeof result === 'object'
 }

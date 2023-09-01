@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../src/collections/config/types'
 
-export const defaultText = 'default-text';
+export const defaultText = 'default-text'
 
 const DateFields: CollectionConfig = {
   slug: 'date-fields',
@@ -60,7 +60,7 @@ const DateFields: CollectionConfig = {
       },
     },
   ],
-};
+}
 
 export const dateDoc = {
   default: '2022-08-12T10:00:00.000+00:00',
@@ -69,6 +69,6 @@ export const dateDoc = {
   dayOnly: '2022-08-11T22:00:00.000+00:00',
   dayAndTime: '2022-08-12T10:00:00.052+00:00',
   monthOnly: '2022-07-31T22:00:00.000+00:00',
-};
+}
 
-export default DateFields;
+export default DateFields

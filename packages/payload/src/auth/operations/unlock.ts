@@ -1,11 +1,11 @@
-import type { Collection } from '../../collections/config/types';
-import type { PayloadRequest } from '../../express/types';
+import type { Collection } from '../../collections/config/types'
+import type { PayloadRequest } from '../../express/types'
 
-import { APIError } from '../../errors';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
-import executeAccess from '../executeAccess';
-import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts';
+import { APIError } from '../../errors'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
+import executeAccess from '../executeAccess'
+import { resetLoginAttempts } from '../strategies/local/resetLoginAttempts'
 
 export type Args = {
   collection: Collection
@@ -18,42 +18,37 @@ export type Args = {
 
 async function unlock(args: Args): Promise<boolean> {
   if (!Object.prototype.hasOwnProperty.call(args.data, 'email')) {
-    throw new APIError('Missing email.');
+    throw new APIError('Missing email.')
   }
 
   const {
-    collection: {
-      config: collectionConfig,
-    },
+    collection: { config: collectionConfig },
     overrideAccess,
-    req: {
-      locale,
-      payload,
-    },
+    req: { locale, payload },
     req,
-  } = args;
+  } = args
 
   try {
-    const shouldCommit = await initTransaction(req);
+    const shouldCommit = await initTransaction(req)
 
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
     if (!overrideAccess) {
-      await executeAccess({ req }, collectionConfig.access.unlock);
+      await executeAccess({ req }, collectionConfig.access.unlock)
     }
 
-    const options = { ...args };
+    const options = { ...args }
 
-    const { data } = options;
+    const { data } = options
 
     // /////////////////////////////////////
     // Unlock
     // /////////////////////////////////////
 
     if (!data.email) {
-      throw new APIError('Missing email.');
+      throw new APIError('Missing email.')
     }
 
     const user = await req.payload.db.findOne({
@@ -61,9 +56,9 @@ async function unlock(args: Args): Promise<boolean> {
       locale,
       req,
       where: { email: { equals: data.email.toLowerCase() } },
-    });
+    })
 
-    let result;
+    let result
 
     if (user) {
       await resetLoginAttempts({
@@ -71,19 +66,19 @@ async function unlock(args: Args): Promise<boolean> {
         doc: user,
         payload: req.payload,
         req,
-      });
-      result = true;
+      })
+      result = true
     } else {
-      result = null;
+      result = null
     }
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
-    return result;
+    return result
   } catch (error: unknown) {
-    await killTransaction(req);
-    throw error;
+    await killTransaction(req)
+    throw error
   }
 }
 
-export default unlock;
+export default unlock

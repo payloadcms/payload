@@ -1,14 +1,14 @@
-import type { Configuration } from 'webpack';
+import type { Configuration } from 'webpack'
 
-import md5 from 'md5';
-import webpack from 'webpack';
+import md5 from 'md5'
+import webpack from 'webpack'
 
-import type { SanitizedConfig } from '../../../config/types';
+import type { SanitizedConfig } from '../../../config/types'
 
-import { getBaseConfig } from './base';
+import { getBaseConfig } from './base'
 
 export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
-  const baseConfig = getBaseConfig(payloadConfig) as any;
+  const baseConfig = getBaseConfig(payloadConfig) as any
 
   let webpackConfig: Configuration = {
     ...baseConfig,
@@ -34,12 +34,9 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
       path: '/',
       publicPath: `${payloadConfig.routes.admin}/`,
     },
-    plugins: [
-      ...baseConfig.plugins,
-      new webpack.HotModuleReplacementPlugin(),
-    ],
+    plugins: [...baseConfig.plugins, new webpack.HotModuleReplacementPlugin()],
     stats: 'errors-warnings',
-  };
+  }
 
   webpackConfig.module.rules.push({
     sideEffects: true,
@@ -56,7 +53,7 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
       {
         loader: require.resolve('css-loader'),
         options: {
-          url: (url) => (!url.startsWith('/')),
+          url: (url) => !url.startsWith('/'),
         },
       },
       {
@@ -69,11 +66,11 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
       },
       require.resolve('sass-loader'),
     ],
-  });
+  })
 
   if (payloadConfig.admin.webpack && typeof payloadConfig.admin.webpack === 'function') {
-    webpackConfig = payloadConfig.admin.webpack(webpackConfig);
+    webpackConfig = payloadConfig.admin.webpack(webpackConfig)
   }
 
-  return webpackConfig;
-};
+  return webpackConfig
+}

@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../src/collections/config/types'
 
-export const hooksSlug = 'hooks';
+export const hooksSlug = 'hooks'
 const Hooks: CollectionConfig = {
   slug: hooksSlug,
   access: {
@@ -13,12 +13,14 @@ const Hooks: CollectionConfig = {
   hooks: {
     beforeValidate: [({ data }) => validateHookOrder('collectionBeforeValidate', data)],
     beforeChange: [({ data }) => validateHookOrder('collectionBeforeChange', data)],
-    afterChange: [({ doc, previousDoc }) => {
-      if (!previousDoc) {
-        throw new Error('previousDoc is missing in afterChange hook');
-      }
-      return validateHookOrder('collectionAfterChange', doc);
-    }],
+    afterChange: [
+      ({ doc, previousDoc }) => {
+        if (!previousDoc) {
+          throw new Error('previousDoc is missing in afterChange hook')
+        }
+        return validateHookOrder('collectionAfterChange', doc)
+      },
+    ],
     beforeRead: [({ doc }) => validateHookOrder('collectionBeforeRead', doc)],
     afterRead: [({ doc }) => validateHookOrder('collectionAfterRead', doc)],
   },
@@ -29,9 +31,9 @@ const Hooks: CollectionConfig = {
       hooks: {
         beforeValidate: [
           ({ data }) => {
-            data.fieldBeforeValidate = true;
-            validateHookOrder('fieldBeforeValidate', data);
-            return true;
+            data.fieldBeforeValidate = true
+            validateHookOrder('fieldBeforeValidate', data)
+            return true
           },
         ],
       },
@@ -42,9 +44,9 @@ const Hooks: CollectionConfig = {
       hooks: {
         beforeChange: [
           ({ data }) => {
-            data.fieldBeforeChange = true;
-            validateHookOrder('fieldBeforeChange', data);
-            return true;
+            data.fieldBeforeChange = true
+            validateHookOrder('fieldBeforeChange', data)
+            return true
           },
         ],
       },
@@ -55,15 +57,15 @@ const Hooks: CollectionConfig = {
       hooks: {
         afterChange: [
           ({ data, previousDoc, previousSiblingDoc }) => {
-            data.fieldAfterChange = true;
+            data.fieldAfterChange = true
             if (!previousDoc) {
-              throw new Error('previousDoc is missing in afterChange hook');
+              throw new Error('previousDoc is missing in afterChange hook')
             }
             if (!previousSiblingDoc) {
-              throw new Error('previousSiblingDoc is missing in afterChange hook');
+              throw new Error('previousSiblingDoc is missing in afterChange hook')
             }
-            validateHookOrder('fieldAfterChange', data);
-            return true;
+            validateHookOrder('fieldAfterChange', data)
+            return true
           },
         ],
       },
@@ -74,9 +76,9 @@ const Hooks: CollectionConfig = {
       hooks: {
         afterRead: [
           ({ data }) => {
-            data.fieldAfterRead = true;
-            validateHookOrder('fieldAfterRead', data);
-            return true;
+            data.fieldAfterRead = true
+            validateHookOrder('fieldAfterRead', data)
+            return true
           },
         ],
       },
@@ -102,7 +104,7 @@ const Hooks: CollectionConfig = {
       type: 'checkbox',
     },
   ],
-};
+}
 
 const createHookOrder = [
   'fieldBeforeValidate',
@@ -113,21 +115,21 @@ const createHookOrder = [
   'collectionAfterRead',
   'fieldAfterChange',
   'collectionAfterChange',
-];
+]
 
 const validateHookOrder = (check: string, data) => {
-  let hasMatched;
+  let hasMatched
   createHookOrder.forEach((hook) => {
     if (check === 'collectionBeforeRead' && !data.id) {
-      data[check] = true;
+      data[check] = true
     } else if (hook === check) {
-      data[check] = true;
-      hasMatched = true;
+      data[check] = true
+      hasMatched = true
     } else if ((!hasMatched && !data[hook]) || (hasMatched && data[hook])) {
       // throw new Error(`${check} called before ${hook}`);
     }
-  });
-  return data;
-};
+  })
+  return data
+}
 
-export default Hooks;
+export default Hooks
