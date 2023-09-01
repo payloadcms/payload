@@ -36,7 +36,10 @@ describe('admin', () => {
   afterEach(async () => {
     await clearDocs()
     // clear preferences
-    await payload.preferences.Model.deleteMany()
+    await payload.db.deleteMany({
+      collection: 'payload-preferences',
+      where: {},
+    })
   })
 
   describe('Nav', () => {

@@ -19,7 +19,7 @@ export const deleteUserPreferences = ({ collectionConfig, ids, payload, req }: A
       where: {
         user: { in: ids },
         userCollection: {
-          equals: 'collectionConfig.slug,',
+          equals: collectionConfig.slug,
         },
       },
     })
