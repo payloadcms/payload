@@ -32,7 +32,6 @@ export const buildVersionGlobalFields = (global: SanitizedGlobalConfig): Field[]
     });
   }
 
-  // TODO: behind feature flag
   if (global?.versions?.drafts) {
     fields.push({
       name: 'latest',

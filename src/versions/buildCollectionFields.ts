@@ -40,7 +40,6 @@ export const buildVersionCollectionFields = (collection: SanitizedCollectionConf
     });
   }
 
-  // TODO: behind feature flag
   if (collection?.versions?.drafts) {
     fields.push({
       name: 'latest',
