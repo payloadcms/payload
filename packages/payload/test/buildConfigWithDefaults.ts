@@ -52,8 +52,14 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
           ...existingConfig.resolve,
           alias: {
             ...existingConfig.resolve?.alias,
-            //[path.resolve(__dirname, '../../../packages/db-postgres/src/index')]: path.resolve(__dirname, '../../../packages/db-postgres/src/mock'),
-            //[path.resolve(__dirname, '../../../packages/db-mongodb/src/index')]: path.resolve(__dirname, '../../../packages/db-mongodb/src/mock'),
+            [path.resolve(__dirname, '../../db-postgres/src/index')]: path.resolve(
+              __dirname,
+              '../../db-postgres/src/mock',
+            ),
+            [path.resolve(__dirname, '../../db-mongodb/src/index')]: path.resolve(
+              __dirname,
+              '../../db-mongodb/src/mock',
+            ),
             '@payloadcms/db-mongodb': path.resolve(
               __dirname,
               '../../../packages/db-mongodb/src/mock',
