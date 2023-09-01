@@ -37,9 +37,13 @@ See the [collections documentation](https://payloadcms.com/docs/configuration/co
 
   All posts are layout-builder enabled so you can generate unique layouts for each post using layout-building blocks, see [Layout Builder](#layout-builder) for more details. They can also be nested inside of one another, for example "News > World". See [Nested Docs](#nested-docs) for more details.
 
+- #### Projects
+
+  All projects are layout-builder enabled so you can generate unique layouts for each project using layout-building blocks, see [Layout Builder](#layout-builder) for more details. They can also be nested inside of one another, for example "Software > Web Development". See [Nested Docs](#nested-docs) for more details.
+
 - #### Media
 
-  This is the uploads-enabled collection used by pages and products to contain media, etc.
+  This is the uploads-enabled collection used by pages, posts, and projects to contain media, etc.
 
 - #### Categories
 
