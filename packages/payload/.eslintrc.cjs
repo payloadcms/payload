@@ -13,6 +13,8 @@ module.exports = {
         'bin-esm.mjs',
         'esm-loader.mjs',
         'esm-loader-playwright.mjs',
+        '*.json',
+        '*.md',
       ],
     },
     {
