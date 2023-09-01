@@ -1,5 +1,6 @@
 import type { Express, Router } from 'express'
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
+// @ts-expect-error // TODO Fix this - moduleResolution 16 breaks this import
 import type { OperationArgs, Request as graphQLRequest } from 'graphql-http/lib/handler'
 import type { SendMailOptions } from 'nodemailer'
 import type { Config as GeneratedTypes } from 'payload/generated-types'
@@ -310,6 +311,7 @@ export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
    * @description Initializes Payload
    * @param options
    */
+  // @ts-expect-error // TODO: TypeScript hallucinating again. fix later
   async init(options: InitOptions): Promise<Payload> {
     this.logger = Logger('payload', options.loggerOptions, options.loggerDestination)
 

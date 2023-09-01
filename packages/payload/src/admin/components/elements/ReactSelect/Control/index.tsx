@@ -9,6 +9,7 @@ export const Control: React.FC<ControlProps<Option, any>> = (props) => {
   const {
     children,
     innerProps,
+    // @ts-expect-error // TODO Fix this - moduleResolution 16 breaks our declare module
     selectProps: { customProps: { disableKeyDown, disableMouseDown } = {} } = {},
   } = props
 

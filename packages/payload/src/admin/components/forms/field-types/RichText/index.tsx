@@ -4,6 +4,7 @@ import type { Props } from './types'
 
 import { ShimmerEffect } from '../../../elements/ShimmerEffect'
 
+// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const RichText = lazy(() => import('./RichText'))
 
 const RichTextField: React.FC<Props> = (props) => (

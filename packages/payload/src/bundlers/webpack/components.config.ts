@@ -1,8 +1,9 @@
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin'
 import path from 'path'
-import terser from 'terser'
-import TerserJSPlugin from 'terser-webpack-plugin' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
+const terser = import('terser') // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
 import OptimizeCSSAssetsPlugin from 'css-minimizer-webpack-plugin'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const TerserPlugin = require('terser-webpack-plugin') // Needs to be require. TypeScript is too dumb to make it an import
 
 export default {
   entry: {
@@ -63,7 +64,7 @@ export default {
   },
   optimization: {
     minimizer: [
-      new TerserJSPlugin({
+      new TerserPlugin({
         extractComments: false,
       }),
       new OptimizeCSSAssetsPlugin({}),

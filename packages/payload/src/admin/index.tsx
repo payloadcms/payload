@@ -10,6 +10,13 @@ const root = createRoot(container) // createRoot(container!) if you use TypeScri
 root.render(<Root />)
 
 // Needed for Hot Module Replacement
-if (typeof module.hot !== 'undefined') {
+if (
+  typeof module !== 'undefined' &&
+  module &&
+  'hot' in module &&
+  typeof module.hot === 'object' &&
+  'accept' in module.hot &&
+  typeof module.hot.accept === 'function'
+) {
   module.hot.accept()
 }

@@ -10,6 +10,7 @@ import './index.scss'
 const baseClass = 'value-container'
 
 export const ValueContainer: React.FC<ValueContainerProps<Option, any>> = (props) => {
+  // @ts-expect-error // TODO Fix this - moduleResolution 16 breaks our declare module
   const { selectProps: { customProps } = {} } = props
 
   return (

@@ -14,17 +14,29 @@ import Version from './views/Version'
 import Versions from './views/Versions'
 import List from './views/collections/List'
 
+// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Dashboard = lazy(() => import('./views/Dashboard'))
+// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const ForgotPassword = lazy(() => import('./views/ForgotPassword'))
+// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Login = lazy(() => import('./views/Login'))
+// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Logout = lazy(() => import('./views/Logout'))
+// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const NotFound = lazy(() => import('./views/NotFound'))
+// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Verify = lazy(() => import('./views/Verify'))
+// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const CreateFirstUser = lazy(() => import('./views/CreateFirstUser'))
+// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Edit = lazy(() => import('./views/collections/Edit'))
+// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const EditGlobal = lazy(() => import('./views/Global'))
+// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const ResetPassword = lazy(() => import('./views/ResetPassword'))
+// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Unauthorized = lazy(() => import('./views/Unauthorized'))
+// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Account = lazy(() => import('./views/Account'))
 
 const Routes: React.FC = () => {

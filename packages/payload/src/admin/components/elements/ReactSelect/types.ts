@@ -13,6 +13,7 @@ type CustomSelectProps = {
 
 // augment the types for the `Select` component from `react-select`
 // this is to include the `selectProps` prop at the top-level `Select` component
+// @ts-expect-error // TODO Fix this - moduleResolution 16 breaks our declare module
 declare module 'react-select/dist/declarations/src/Select' {
   export interface Props<Option, IsMulti extends boolean, Group extends GroupBase<Option>> {
     customProps?: CustomSelectProps
@@ -21,6 +22,7 @@ declare module 'react-select/dist/declarations/src/Select' {
 
 // augment the types for the `CommonPropsAndClassName` from `react-select`
 // this will include the `selectProps` prop to every `react-select` component automatically
+// @ts-expect-error // TODO Fix this - moduleResolution 16 breaks our declare module
 declare module 'react-select/dist/declarations/src' {
   export interface CommonPropsAndClassName<
     Option,

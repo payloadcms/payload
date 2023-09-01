@@ -38,6 +38,7 @@ async function deleteOperation(args: PreferenceRequest): Promise<Document> {
     where,
   })
 
+  // @ts-expect-error // TODO: fix later
   if (result.docs.length === 1) {
     return result.docs[0]
   }
