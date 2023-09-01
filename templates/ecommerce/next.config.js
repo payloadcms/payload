@@ -36,7 +36,7 @@ const nextConfig = {
       headers: [
         {
           key: 'Content-Security-Policy',
-          value: ContentSecurityPolicy.replace(/\s{2,}/g, ' ').trim(),
+          value: ContentSecurityPolicy,
         },
       ],
     })
