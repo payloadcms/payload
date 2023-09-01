@@ -179,15 +179,15 @@ const TabsField: React.FC<Props> = (props) => {
                       path: createNestedFieldPath(pathSegments.join('.'), field),
                     }
                   })}
-                  fieldTypes={fieldTypes}
-                  forceRender
-                  indexPath={indexPath}
-                  key={String(activeTabConfig.label)}
                   permissions={
                     tabHasName(activeTabConfig)
                       ? permissions[activeTabConfig.name].fields
                       : permissions
                   }
+                  fieldTypes={fieldTypes}
+                  forceRender
+                  indexPath={indexPath}
+                  key={String(activeTabConfig.label)}
                   readOnly={readOnly}
                 />
               </div>

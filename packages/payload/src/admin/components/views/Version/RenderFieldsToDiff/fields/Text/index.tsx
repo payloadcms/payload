@@ -39,12 +39,12 @@ const Text: React.FC<Props> = ({
         {getTranslation(field.label, i18n)}
       </Label>
       <ReactDiffViewer
-        compareMethod={DiffMethod[diffMethod]}
-        hideLineNumbers
-        newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
         oldValue={
           typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder
         }
+        compareMethod={DiffMethod[diffMethod]}
+        hideLineNumbers
+        newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
         showDiffOnly={false}
         splitView
         styles={diffStyles}

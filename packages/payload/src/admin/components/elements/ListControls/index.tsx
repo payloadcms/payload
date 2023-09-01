@@ -101,26 +101,26 @@ const ListControls: React.FC<Props> = (props) => {
             )}
             {enableColumns && (
               <Pill
-                aria-controls={`${baseClass}-columns`}
-                aria-expanded={visibleDrawer === 'columns'}
                 className={`${baseClass}__toggle-columns ${
                   visibleDrawer === 'columns' ? `${baseClass}__buttons-active` : ''
                 }`}
-                icon={<Chevron />}
                 onClick={() =>
                   setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
                 }
+                aria-controls={`${baseClass}-columns`}
+                aria-expanded={visibleDrawer === 'columns'}
+                icon={<Chevron />}
                 pillStyle="light"
               >
                 {t('columns')}
               </Pill>
             )}
             <Pill
-              aria-controls={`${baseClass}-where`}
-              aria-expanded={visibleDrawer === 'where'}
               className={`${baseClass}__toggle-where ${
                 visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''
               }`}
+              aria-controls={`${baseClass}-where`}
+              aria-expanded={visibleDrawer === 'where'}
               icon={<Chevron />}
               onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
               pillStyle="light"

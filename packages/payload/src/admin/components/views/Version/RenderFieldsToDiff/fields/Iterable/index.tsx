@@ -77,12 +77,12 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
             return (
               <div className={`${baseClass}__wrap`} key={i}>
                 <RenderFieldsToDiff
-                  comparison={comparisonRow}
-                  fieldComponents={fieldComponents}
-                  fieldPermissions={permissions}
                   fields={subFields.filter(
                     (subField) => !(fieldAffectsData(subField) && subField.name === 'id'),
                   )}
+                  comparison={comparisonRow}
+                  fieldComponents={fieldComponents}
+                  fieldPermissions={permissions}
                   locales={locales}
                   version={versionRow}
                 />
