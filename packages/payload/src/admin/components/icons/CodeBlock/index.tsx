@@ -2,12 +2,12 @@ import React from 'react';
 
 const CodeBlockIcon: React.FC = () => (
   <svg
-    viewBox="0 0 24 24"
     aria-hidden="true"
-    focusable="false"
-    fill="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
     className="graphic code-block-icon"
+    fill="currentColor"
+    focusable="false"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
   >
     <path
       className="fill"

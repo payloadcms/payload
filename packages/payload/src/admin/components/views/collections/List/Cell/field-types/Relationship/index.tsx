@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../../../utilities/Config';
-import useIntersect from '../../../../../../../hooks/useIntersect';
-import { useListRelationships } from '../../../RelationshipProvider';
-import { getTranslation } from '../../../../../../../../utilities/getTranslation';
-import { formatUseAsTitle } from '../../../../../../../hooks/useTitle';
-import { Props as DefaultCellProps } from '../../types';
 
+import type { Props as DefaultCellProps } from '../../types';
+
+import { getTranslation } from '../../../../../../../../utilities/getTranslation';
+import useIntersect from '../../../../../../../hooks/useIntersect';
+import { formatUseAsTitle } from '../../../../../../../hooks/useTitle';
+import { useConfig } from '../../../../../../utilities/Config';
+import { useListRelationships } from '../../../RelationshipProvider';
 import './index.scss';
 
 type Value = { relationTo: string, value: number | string };
@@ -14,17 +15,17 @@ const baseClass = 'relationship-cell';
 const totalToShow = 3;
 
 const RelationshipCell: React.FC<{
-  field: DefaultCellProps['field']
   data: DefaultCellProps['cellData']
+  field: DefaultCellProps['field']
 }> = (props) => {
-  const { field, data: cellData } = props;
+  const { data: cellData, field } = props;
   const config = useConfig();
   const { collections, routes } = config;
   const [intersectionRef, entry] = useIntersect();
   const [values, setValues] = useState<Value[]>([]);
-  const { getRelationships, documents } = useListRelationships();
+  const { documents, getRelationships } = useListRelationships();
   const [hasRequested, setHasRequested] = useState(false);
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
 
   const isAboveViewport = entry?.boundingClientRect?.top < window.innerHeight;
 
@@ -39,8 +40,8 @@ const RelationshipCell: React.FC<{
         }
         if ((typeof cell === 'number' || typeof cell === 'string') && 'relationTo' in field && typeof field.relationTo === 'string') {
           formattedValues.push({
-            value: cell,
             relationTo: field.relationTo,
+            value: cell,
           });
         }
       });
@@ -60,10 +61,10 @@ const RelationshipCell: React.FC<{
         const relatedCollection = collections.find(({ slug }) => slug === relationTo);
 
         const label = formatUseAsTitle({
-          doc: document === false ? null : document,
           collection: relatedCollection,
-          i18n,
           config,
+          doc: document === false ? null : document,
+          i18n,
         });
 
         return (
@@ -77,7 +78,7 @@ const RelationshipCell: React.FC<{
       })}
       {
         Array.isArray(cellData) && cellData.length > totalToShow
-        && t('fields:itemsAndMore', { items: '', count: cellData.length - totalToShow })
+        && t('fields:itemsAndMore', { count: cellData.length - totalToShow, items: '' })
       }
       {values.length === 0 && t('noLabel', { label: getTranslation(field?.label || '', i18n) })}
     </div>

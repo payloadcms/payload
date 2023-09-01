@@ -1,31 +1,36 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import type { BaseEditor, BaseOperation } from 'slate';
+import type { HistoryEditor} from 'slate-history';
+import type { ReactEditor} from 'slate-react';
+
 import isHotkey from 'is-hotkey';
-import { createEditor, Transforms, Node, Element as SlateElement, Text, BaseEditor, BaseOperation } from 'slate';
-import { ReactEditor, Editable, withReact, Slate } from 'slate-react';
-import { HistoryEditor, withHistory } from 'slate-history';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { richText } from '../../../../../fields/validations';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import Label from '../../Label';
-import Error from '../../Error';
-import leafTypes from './leaves';
-import elementTypes from './elements';
-import toggleLeaf from './leaves/toggle';
-import hotkeys from './hotkeys';
-import enablePlugins from './enablePlugins';
+import { Node, Element as SlateElement, Text, Transforms, createEditor } from 'slate';
+import { withHistory } from 'slate-history';
+import { Editable, Slate, withReact } from 'slate-react';
+
+import type { RichTextElement, RichTextLeaf } from '../../../../../fields/config/types';
+import type { ElementNode, Props, TextNode } from './types';
+
 import defaultValue from '../../../../../fields/richText/defaultValue';
-import FieldDescription from '../../FieldDescription';
-import withHTML from './plugins/withHTML';
-import { ElementNode, TextNode, Props } from './types';
-import { RichTextElement, RichTextLeaf } from '../../../../../fields/config/types';
-import listTypes from './elements/listTypes';
-import mergeCustomFunctions from './mergeCustomFunctions';
-import withEnterBreakOut from './plugins/withEnterBreakOut';
+import { richText } from '../../../../../fields/validations';
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { useEditDepth } from '../../../utilities/EditDepth';
-
+import Error from '../../Error';
+import FieldDescription from '../../FieldDescription';
+import Label from '../../Label';
+import useField from '../../useField';
+import withCondition from '../../withCondition';
+import elementTypes from './elements';
+import listTypes from './elements/listTypes';
+import enablePlugins from './enablePlugins';
+import hotkeys from './hotkeys';
 import './index.scss';
+import leafTypes from './leaves';
+import toggleLeaf from './leaves/toggle';
+import mergeCustomFunctions from './mergeCustomFunctions';
+import withEnterBreakOut from './plugins/withEnterBreakOut';
+import withHTML from './plugins/withHTML';
 
 const defaultElements: RichTextElement[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'indent', 'link', 'relationship', 'upload'];
 const defaultLeaves: RichTextLeaf[] = ['bold', 'italic', 'underline', 'strikethrough', 'code'];
@@ -42,23 +47,23 @@ declare module 'slate' {
 
 const RichText: React.FC<Props> = (props) => {
   const {
-    path: pathFromProps,
-    name,
-    required,
-    validate = richText,
-    label,
-    defaultValue: defaultValueFromProps,
-    admin,
     admin: {
+      className,
+      condition,
+      description,
+      hideGutter,
+      placeholder,
       readOnly,
       style,
-      className,
       width,
-      placeholder,
-      description,
-      condition,
-      hideGutter,
     } = {},
+    admin,
+    defaultValue: defaultValueFromProps,
+    label,
+    name,
+    path: pathFromProps,
+    required,
+    validate = richText,
   } = props;
 
   const elements: RichTextElement[] = admin?.elements || defaultElements;
@@ -102,14 +107,14 @@ const RichText: React.FC<Props> = (props) => {
       } else if (element.type === 'li') {
         switch (element.textAlign) {
           case 'right':
-            attr = { ...attr, style: { textAlign: 'right', listStylePosition: 'inside' } };
+            attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'right' } };
             break;
           case 'center':
-            attr = { ...attr, style: { textAlign: 'center', listStylePosition: 'inside' } };
+            attr = { ...attr, style: { listStylePosition: 'inside', textAlign: 'center' } };
             break;
           case 'left':
           default:
-            attr = { ...attr, style: { textAlign: 'left', listStylePosition: 'outside' } };
+            attr = { ...attr, style: { listStylePosition: 'outside', textAlign: 'left' } };
             break;
         }
       } else {
@@ -121,10 +126,10 @@ const RichText: React.FC<Props> = (props) => {
       const el = (
         <Element
           attributes={attr}
-          element={element}
-          path={path}
-          fieldProps={props}
           editorRef={editorRef}
+          element={element}
+          fieldProps={props}
+          path={path}
         >
           {children}
         </Element>
@@ -151,11 +156,11 @@ const RichText: React.FC<Props> = (props) => {
           const Leaf = enabledLeaves[leafName]?.Leaf;
           return (
             <Leaf
+              editorRef={editorRef}
+              fieldProps={props}
               key={i}
               leaf={leaf}
               path={path}
-              fieldProps={props}
-              editorRef={editorRef}
             >
               {result}
             </Leaf>
@@ -176,17 +181,17 @@ const RichText: React.FC<Props> = (props) => {
   }, [validate, required]);
 
   const fieldType = useField({
+    condition,
     path,
     validate: memoizedValidate,
-    condition,
   });
 
   const {
-    value,
-    showError,
-    setValue,
     errorMessage,
     initialValue,
+    setValue,
+    showError,
+    value,
   } = fieldType;
 
   const classes = [
@@ -249,7 +254,7 @@ const RichText: React.FC<Props> = (props) => {
   useEffect(() => {
     function setClickableState(clickState: 'disabled' | 'enabled') {
       const selectors = 'button, a, [role="button"]';
-      const toolbarButtons: (HTMLButtonElement | HTMLAnchorElement)[] = toolbarRef.current?.querySelectorAll(selectors);
+      const toolbarButtons: (HTMLAnchorElement | HTMLButtonElement)[] = toolbarRef.current?.querySelectorAll(selectors);
 
       (toolbarButtons || []).forEach((child) => {
         const isButton = child.tagName === 'BUTTON';
@@ -299,27 +304,27 @@ const RichText: React.FC<Props> = (props) => {
 
   return (
     <div
-      className={classes}
       style={{
         ...style,
         width,
       }}
+      className={classes}
     >
       <div className={`${baseClass}__wrap`}>
         <Error
-          showError={showError}
           message={errorMessage}
+          showError={showError}
         />
         <Label
-          htmlFor={`field-${path.replace(/\./gi, '__')}`}
+          htmlFor={`field-${path.replace(/\./g, '__')}`}
           label={label}
           required={required}
         />
         <Slate
-          key={JSON.stringify({ initialValue, path })}
           editor={editor}
-          value={valueToRender as any[]}
+          key={JSON.stringify({ initialValue, path })}
           onChange={handleChange}
+          value={valueToRender as any[]}
         >
           <div className={`${baseClass}__wrapper`}>
             <div
@@ -377,13 +382,6 @@ const RichText: React.FC<Props> = (props) => {
               ref={editorRef}
             >
               <Editable
-                id={`field-${path.replace(/\./gi, '__')}`}
-                className={`${baseClass}__input`}
-                renderElement={renderElement}
-                renderLeaf={renderLeaf}
-                placeholder={getTranslation(placeholder, i18n)}
-                spellCheck
-                readOnly={readOnly}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     if (event.shiftKey) {
@@ -418,8 +416,8 @@ const RichText: React.FC<Props> = (props) => {
                         event.preventDefault();
                         Transforms.unwrapNodes(editor, {
                           match: (n) => SlateElement.isElement(n) && listTypes.includes(n.type),
-                          split: true,
                           mode: 'lowest',
+                          split: true,
                         });
 
                         Transforms.setNodes(editor, { type: undefined });
@@ -437,13 +435,20 @@ const RichText: React.FC<Props> = (props) => {
                     }
                   });
                 }}
+                className={`${baseClass}__input`}
+                id={`field-${path.replace(/\./g, '__')}`}
+                placeholder={getTranslation(placeholder, i18n)}
+                readOnly={readOnly}
+                renderElement={renderElement}
+                renderLeaf={renderLeaf}
+                spellCheck
               />
             </div>
           </div>
         </Slate>
         <FieldDescription
-          value={value}
           description={description}
+          value={value}
         />
       </div>
     </div>

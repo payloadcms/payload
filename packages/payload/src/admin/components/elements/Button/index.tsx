@@ -1,29 +1,29 @@
-import React, { forwardRef, Fragment, isValidElement } from 'react';
+import React, { Fragment, forwardRef, isValidElement } from 'react';
 import { Link } from 'react-router-dom';
-import { Props } from './types';
 
-import plus from '../../icons/Plus';
-import x from '../../icons/X';
+import type { Props } from './types';
+
 import chevron from '../../icons/Chevron';
 import edit from '../../icons/Edit';
-import swap from '../../icons/Swap';
 import linkIcon from '../../icons/Link';
+import plus from '../../icons/Plus';
+import swap from '../../icons/Swap';
+import x from '../../icons/X';
 import Tooltip from '../Tooltip';
-
 import './index.scss';
 
 const icons = {
-  plus,
-  x,
   chevron,
   edit,
-  swap,
   link: linkIcon,
+  plus,
+  swap,
+  x,
 };
 
 const baseClass = 'btn';
 
-const ButtonContents = ({ children, icon, tooltip, showTooltip }) => {
+const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
   const BuiltInIcon = icons[icon];
 
   return (
@@ -53,26 +53,26 @@ const ButtonContents = ({ children, icon, tooltip, showTooltip }) => {
   );
 };
 
-const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, Props>((props, ref) => {
+const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, ref) => {
   const {
-    className,
-    id,
-    type = 'button',
-    el = 'button',
-    to,
-    url,
-    children,
-    onClick,
-    disabled,
-    icon,
-    iconStyle = 'without-border',
+    'aria-label': ariaLabel,
     buttonStyle = 'primary',
+    children,
+    className,
+    disabled,
+    el = 'button',
+    icon,
+    iconPosition = 'right',
+    iconStyle = 'without-border',
+    id,
+    newTab,
+    onClick,
     round,
     size = 'medium',
-    iconPosition = 'right',
-    newTab,
+    to,
     tooltip,
-    'aria-label': ariaLabel,
+    type = 'button',
+    url,
   } = props;
 
   const [showTooltip, setShowTooltip] = React.useState(false);
@@ -98,17 +98,17 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, Props>((props, 
   }
 
   const buttonProps = {
-    id,
-    type,
-    className: classes,
-    disabled,
     'aria-disabled': disabled,
     'aria-label': ariaLabel,
+    className: classes,
+    disabled,
+    id,
+    onClick: !disabled ? handleClick : undefined,
     onMouseEnter: tooltip ? () => setShowTooltip(true) : undefined,
     onMouseLeave: tooltip ? () => setShowTooltip(false) : undefined,
-    onClick: !disabled ? handleClick : undefined,
     rel: newTab ? 'noopener noreferrer' : undefined,
     target: newTab ? '_blank' : undefined,
+    type,
   };
 
   switch (el) {
@@ -120,8 +120,8 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, Props>((props, 
         >
           <ButtonContents
             icon={icon}
-            tooltip={tooltip}
             showTooltip={showTooltip}
+            tooltip={tooltip}
           >
             {children}
           </ButtonContents>
@@ -132,13 +132,13 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, Props>((props, 
       return (
         <a
           {...buttonProps}
-          ref={ref as React.LegacyRef<HTMLAnchorElement>}
           href={url}
+          ref={ref as React.LegacyRef<HTMLAnchorElement>}
         >
           <ButtonContents
             icon={icon}
-            tooltip={tooltip}
             showTooltip={showTooltip}
+            tooltip={tooltip}
           >
             {children}
           </ButtonContents>
@@ -150,14 +150,14 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, Props>((props, 
 
       return (
         <Tag
-          type="submit"
           ref={ref}
+          type="submit"
           {...buttonProps}
         >
           <ButtonContents
             icon={icon}
-            tooltip={tooltip}
             showTooltip={showTooltip}
+            tooltip={tooltip}
           >
             {children}
           </ButtonContents>

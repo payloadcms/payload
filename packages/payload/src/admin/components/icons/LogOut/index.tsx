@@ -5,25 +5,25 @@ import './index.scss';
 const LogOut: React.FC = () => (
   <svg
     className="icon icon--logout"
-    viewBox="0 0 25 25"
     fill="none"
+    viewBox="0 0 25 25"
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      d="M10 5H18V19H10"
       className="stroke"
+      d="M10 5H18V19H10"
     />
     <g>
       <path
-        d="M8 8.5L4.46447 12.0355L8 15.5711"
         className="stroke"
+        d="M8 8.5L4.46447 12.0355L8 15.5711"
       />
       <line
-        x1="5"
-        y1="12"
-        x2="13"
-        y2="12"
         className="stroke"
+        x1="5"
+        x2="13"
+        y1="12"
+        y2="12"
       />
     </g>
   </svg>

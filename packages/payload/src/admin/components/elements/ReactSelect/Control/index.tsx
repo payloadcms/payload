@@ -1,5 +1,8 @@
+import type { ControlProps } from 'react-select';
+
 import React from 'react';
-import { components as SelectComponents, ControlProps } from 'react-select';
+import { components as SelectComponents } from 'react-select';
+
 import type { Option } from '../types';
 
 export const Control: React.FC<ControlProps<Option, any>> = (props) => {
@@ -8,8 +11,8 @@ export const Control: React.FC<ControlProps<Option, any>> = (props) => {
     innerProps,
     selectProps: {
       customProps: {
-        disableMouseDown,
         disableKeyDown,
+        disableMouseDown,
       } = {},
     } = {},
   } = props;
@@ -19,15 +22,6 @@ export const Control: React.FC<ControlProps<Option, any>> = (props) => {
       {...props}
       innerProps={{
         ...innerProps,
-        onMouseDown: (e) => {
-          // we need to prevent react-select from hijacking the 'onMouseDown' event while modals are open (i.e. the 'Relationship' field component)
-          if (!disableMouseDown) {
-            innerProps.onMouseDown(e);
-          }
-        },
-        // react-select has this typed incorrectly so we disable the linting rule
-        // we need to prevent react-select from hijacking the 'onKeyDown' event while modals are open (i.e. the 'Relationship' field component)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         onKeyDown: (e) => {
           if (disableKeyDown) {
@@ -35,6 +29,15 @@ export const Control: React.FC<ControlProps<Option, any>> = (props) => {
             // Create event for keydown listeners which specifically want to bypass this stopPropagation
             const bypassEvent = new CustomEvent('bypassKeyDown', { detail: e });
             document.dispatchEvent(bypassEvent);
+          }
+        },
+        // react-select has this typed incorrectly so we disable the linting rule
+        // we need to prevent react-select from hijacking the 'onKeyDown' event while modals are open (i.e. the 'Relationship' field component)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        onMouseDown: (e) => {
+          // we need to prevent react-select from hijacking the 'onMouseDown' event while modals are open (i.e. the 'Relationship' field component)
+          if (!disableMouseDown) {
+            innerProps.onMouseDown(e);
           }
         },
       }}

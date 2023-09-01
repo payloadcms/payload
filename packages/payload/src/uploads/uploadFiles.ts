@@ -1,8 +1,10 @@
 import type { TFunction } from 'i18next';
+
+import type { Payload } from '../payload';
+import type { FileToSave } from './types';
+
 import { FileUploadError } from '../errors';
 import saveBufferToFile from './saveBufferToFile';
-import { FileToSave } from './types';
-import { Payload } from '../payload';
 
 export const uploadFiles = async (payload: Payload, files: FileToSave[], t: TFunction): Promise<void> => {
   try {

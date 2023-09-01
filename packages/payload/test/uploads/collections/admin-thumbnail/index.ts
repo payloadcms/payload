@@ -1,10 +1,11 @@
 import path from 'path';
-import { CollectionConfig } from '../../../../src/collections/config/types';
+
+import type { CollectionConfig } from '../../../../src/collections/config/types';
 
 type TypeWithFile = {
   filename: string;
-  mimeType: string;
   filesize: number;
+  mimeType: string;
 } & Record<string, unknown>
 
 function docHasFilename(doc: Record<string, unknown>): doc is TypeWithFile {

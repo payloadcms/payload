@@ -1,17 +1,18 @@
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import type { Props } from './types';
+
 import Copy from '../../icons/Copy';
 import Tooltip from '../Tooltip';
-import { Props } from './types';
-
 import './index.scss';
 
 const baseClass = 'copy-to-clipboard';
 
 const CopyToClipboard: React.FC<Props> = ({
-  value,
   defaultMessage,
   successMessage,
+  value,
 }) => {
   const ref = useRef(null);
   const [copied, setCopied] = useState(false);
@@ -21,16 +22,6 @@ const CopyToClipboard: React.FC<Props> = ({
   if (value) {
     return (
       <button
-        onMouseEnter={() => {
-          setHovered(true);
-          setCopied(false);
-        }}
-        onMouseLeave={() => {
-          setHovered(false);
-          setCopied(false);
-        }}
-        type="button"
-        className={baseClass}
         onClick={() => {
           if (ref && ref.current) {
             ref.current.select();
@@ -39,20 +30,30 @@ const CopyToClipboard: React.FC<Props> = ({
             setCopied(true);
           }
         }}
+        onMouseEnter={() => {
+          setHovered(true);
+          setCopied(false);
+        }}
+        onMouseLeave={() => {
+          setHovered(false);
+          setCopied(false);
+        }}
+        className={baseClass}
+        type="button"
       >
         <Copy />
         <Tooltip
-          show={hovered || copied}
           delay={copied ? 0 : undefined}
+          show={hovered || copied}
         >
           {copied && (successMessage ?? t('copied'))}
           {!copied && (defaultMessage ?? t('copy'))}
         </Tooltip>
         <textarea
           readOnly
+          ref={ref}
           tabIndex={-1}
           value={value}
-          ref={ref}
         />
       </button>
     );

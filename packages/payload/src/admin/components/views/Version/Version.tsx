@@ -1,34 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import { useRouteMatch } from 'react-router-dom';
+
+import type { FieldPermissions } from '../../../../auth';
+import type { Field, FieldAffectingData} from '../../../../fields/config/types';
+import type { StepNavItem } from '../../elements/StepNav/types';
+import type { CompareOption, LocaleOption, Props } from './types';
+
+import { fieldAffectsData } from '../../../../fields/config/types';
+import { getTranslation } from '../../../../utilities/getTranslation';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
+import { formatDate } from '../../../utilities/formatDate';
 import Eyebrow from '../../elements/Eyebrow';
+import { Gutter } from '../../elements/Gutter';
 import { useStepNav } from '../../elements/StepNav';
-import { StepNavItem } from '../../elements/StepNav/types';
+import { useAuth } from '../../utilities/Auth';
+import { useConfig } from '../../utilities/Config';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import { useLocale } from '../../utilities/Locale';
 import Meta from '../../utilities/Meta';
-import { LocaleOption, CompareOption, Props } from './types';
 import CompareVersion from './Compare';
-import { mostRecentVersionOption } from './shared';
-import Restore from './Restore';
-import SelectLocales from './SelectLocales';
 import RenderFieldsToDiff from './RenderFieldsToDiff';
 import fieldComponents from './RenderFieldsToDiff/fields';
-import { getTranslation } from '../../../../utilities/getTranslation';
-import { Field, FieldAffectingData, fieldAffectsData } from '../../../../fields/config/types';
-import { FieldPermissions } from '../../../../auth';
-import { useLocale } from '../../utilities/Locale';
-import { Gutter } from '../../elements/Gutter';
-import { formatDate } from '../../../utilities/formatDate';
-
+import Restore from './Restore';
+import SelectLocales from './SelectLocales';
 import './index.scss';
+import { mostRecentVersionOption } from './shared';
 
 const baseClass = 'view-version';
 
 const VersionView: React.FC<Props> = ({ collection, global }) => {
-  const { serverURL, routes: { admin, api }, admin: { dateFormat }, localization } = useConfig();
+  const { admin: { dateFormat }, localization, routes: { admin, api }, serverURL } = useConfig();
   const { setStepNav } = useStepNav();
   const { params: { id, versionID } } = useRouteMatch<{ id?: string, versionID: string }>();
   const [compareValue, setCompareValue] = useState<CompareOption>(mostRecentVersionOption);
@@ -36,7 +38,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   const [locales, setLocales] = useState<LocaleOption[]>(localeOptions);
   const { permissions } = useAuth();
   const { code: locale } = useLocale();
-  const { t, i18n } = useTranslation('version');
+  const { i18n, t } = useTranslation('version');
   const { docPermissions } = useDocumentInfo();
 
   let originalDocFetchURL: string;
@@ -71,10 +73,10 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
   const compareFetchURL = compareValue?.value === 'mostRecent' || compareValue?.value === 'published' ? originalDocFetchURL : `${compareBaseURL}/${compareValue.value}`;
 
-  const [{ data: doc, isLoading: isLoadingData }] = usePayloadAPI(versionFetchURL, { initialParams: { locale: '*', depth: 1 } });
-  const [{ data: publishedDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { locale: '*', depth: 1 } });
-  const [{ data: mostRecentDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { locale: '*', depth: 1, draft: true } });
-  const [{ data: compareDoc }] = usePayloadAPI(compareFetchURL, { initialParams: { locale: '*', depth: 1, draft: 'true' } });
+  const [{ data: doc, isLoading: isLoadingData }] = usePayloadAPI(versionFetchURL, { initialParams: { depth: 1, locale: '*' } });
+  const [{ data: publishedDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { depth: 1, locale: '*' } });
+  const [{ data: mostRecentDoc }] = usePayloadAPI(originalDocFetchURL, { initialParams: { depth: 1, draft: true, locale: '*' } });
+  const [{ data: compareDoc }] = usePayloadAPI(compareFetchURL, { initialParams: { depth: 1, draft: 'true', locale: '*' } });
 
   useEffect(() => {
     let nav: StepNavItem[] = [];
@@ -104,8 +106,8 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
       nav = [
         {
-          url: `${admin}/collections/${collection.slug}`,
           label: getTranslation(collection.labels.plural, i18n),
+          url: `${admin}/collections/${collection.slug}`,
         },
         {
           label: docLabel,
@@ -124,8 +126,8 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     if (global) {
       nav = [
         {
-          url: `${admin}/globals/${global.slug}`,
           label: global.label,
+          url: `${admin}/globals/${global.slug}`,
         },
         {
           label: 'Versions',
@@ -171,8 +173,8 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     <React.Fragment>
       <div className={baseClass}>
         <Meta
-          title={metaTitle}
           description={metaDesc}
+          title={metaTitle}
         />
         <Eyebrow />
         <Gutter className={`${baseClass}__wrap`}>
@@ -189,19 +191,19 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
                 collection={collection}
                 global={global}
                 originalDocID={id}
-                versionID={versionID}
                 versionDate={formattedCreatedAt}
+                versionID={versionID}
               />
             )}
           </header>
           <div className={`${baseClass}__controls`}>
             <CompareVersion
-              publishedDoc={publishedDoc}
-              versionID={versionID}
               baseURL={compareBaseURL}
-              parentID={parentID}
-              value={compareValue}
               onChange={setCompareValue}
+              parentID={parentID}
+              publishedDoc={publishedDoc}
+              value={compareValue}
+              versionID={versionID}
             />
             {localization && (
               <SelectLocales
@@ -214,12 +216,12 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
 
           {doc?.version && (
             <RenderFieldsToDiff
-              locales={locales ? locales.map(({ code }) => code) : []}
-              fields={fields}
+              comparison={comparison}
               fieldComponents={fieldComponents}
               fieldPermissions={fieldPermissions}
+              fields={fields}
+              locales={locales ? locales.map(({ code }) => code) : []}
               version={doc?.version}
-              comparison={comparison}
             />
           )}
         </Gutter>

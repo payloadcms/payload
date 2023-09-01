@@ -1,21 +1,23 @@
+import type { DiffMethod } from 'react-diff-viewer-continued';
+
 import React from 'react';
-import { DiffMethod } from 'react-diff-viewer-continued';
-import { Props } from './types';
+
+import type { Props } from './types';
+
 import { fieldAffectsData, fieldHasSubFields } from '../../../../../fields/config/types';
 import Nested from './fields/Nested';
 import { diffMethods } from './fields/diffMethods';
-
 import './index.scss';
 
 const baseClass = 'render-field-diffs';
 
 const RenderFieldsToDiff: React.FC<Props> = ({
-  fields,
+  comparison,
   fieldComponents,
   fieldPermissions,
-  version,
-  comparison,
+  fields,
   locales,
+  version,
 }) => (
   <div className={baseClass}>
     {fields.map((field, i) => {
@@ -50,15 +52,15 @@ const RenderFieldsToDiff: React.FC<Props> = ({
                     >
                       <div className={`${baseClass}__locale-value`}>
                         <Component
+                          comparison={comparisonLocaleValue}
                           diffMethod={diffMethod}
-                          locale={locale}
-                          locales={locales}
                           field={field}
                           fieldComponents={fieldComponents}
-                          version={versionLocaleValue}
-                          comparison={comparisonLocaleValue}
-                          permissions={subFieldPermissions}
                           isRichText={isRichText}
+                          locale={locale}
+                          locales={locales}
+                          permissions={subFieldPermissions}
+                          version={versionLocaleValue}
                         />
                       </div>
                     </div>
@@ -74,14 +76,14 @@ const RenderFieldsToDiff: React.FC<Props> = ({
               key={i}
             >
               <Component
+                comparison={comparisonValue}
                 diffMethod={diffMethod}
-                locales={locales}
                 field={field}
                 fieldComponents={fieldComponents}
-                version={versionValue}
-                comparison={comparisonValue}
-                permissions={subFieldPermissions}
                 isRichText={isRichText}
+                locales={locales}
+                permissions={subFieldPermissions}
+                version={versionValue}
               />
             </div>
           );
@@ -92,12 +94,12 @@ const RenderFieldsToDiff: React.FC<Props> = ({
 
           return (
             <Tabs
-              key={i}
-              version={version}
               comparison={comparison}
               field={field}
-              locales={locales}
               fieldComponents={fieldComponents}
+              key={i}
+              locales={locales}
+              version={version}
             />
           );
         }
@@ -106,14 +108,14 @@ const RenderFieldsToDiff: React.FC<Props> = ({
         if (fieldHasSubFields(field)) {
           return (
             <Nested
-              key={i}
-              locales={locales}
+              comparison={comparison}
               disableGutter
               field={field}
               fieldComponents={fieldComponents}
-              version={version}
-              comparison={comparison}
+              key={i}
+              locales={locales}
               permissions={fieldPermissions}
+              version={version}
             />
           );
         }

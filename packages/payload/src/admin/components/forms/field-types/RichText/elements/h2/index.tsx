@@ -1,6 +1,7 @@
 import React from 'react';
-import ElementButton from '../Button';
+
 import H2Icon from '../../../../../icons/headings/H2';
+import ElementButton from '../Button';
 
 const H2 = ({ attributes, children }) => (
   <h2 {...attributes}>{children}</h2>

@@ -1,30 +1,31 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Props } from './types';
-import Search from '../../icons/Search';
-import useDebounce from '../../../hooks/useDebounce';
-import { useSearchParams } from '../../utilities/SearchParams';
-import { Where, WhereField } from '../../../../types';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { useHistory } from 'react-router-dom';
 
+import type { Where, WhereField } from '../../../../types';
+import type { Props } from './types';
+
+import { getTranslation } from '../../../../utilities/getTranslation';
+import useDebounce from '../../../hooks/useDebounce';
+import Search from '../../icons/Search';
+import { useSearchParams } from '../../utilities/SearchParams';
 import './index.scss';
 
 const baseClass = 'search-filter';
 
 const SearchFilter: React.FC<Props> = (props) => {
   const {
-    fieldName = 'id',
     fieldLabel = 'ID',
-    modifySearchQuery = true,
-    listSearchableFields,
+    fieldName = 'id',
     handleChange,
+    listSearchableFields,
+    modifySearchQuery = true,
   } = props;
 
   const params = useSearchParams();
   const history = useHistory();
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
 
   const [search, setSearch] = useState('');
   const [previousSearch, setPreviousSearch] = useState('');
@@ -60,7 +61,7 @@ const SearchFilter: React.FC<Props> = (props) => {
     });
 
     if (debouncedSearch !== previousSearch) {
-      if (handleChange) handleChange(newWhere as Where);
+      if (handleChange) handleChange(newWhere );
 
       if (modifySearchQuery) {
         history.replace({
@@ -96,10 +97,10 @@ const SearchFilter: React.FC<Props> = (props) => {
     <div className={baseClass}>
       <input
         className={`${baseClass}__input`}
+        onChange={(e) => setSearch(e.target.value)}
         placeholder={placeholder.current}
         type="text"
         value={search || ''}
-        onChange={(e) => setSearch(e.target.value)}
       />
       <Search />
     </div>

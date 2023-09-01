@@ -1,11 +1,11 @@
-import { ElementType } from 'react';
+import type { ElementType } from 'react';
 
 export type ButtonProps = {
+  children?: React.ReactNode
+  className?: string
+  el?: ElementType
   format: string
   onClick?: (e: React.MouseEvent) => void
-  className?: string
-  children?: React.ReactNode
   tooltip?: string
   type?: string
-  el?: ElementType
 }

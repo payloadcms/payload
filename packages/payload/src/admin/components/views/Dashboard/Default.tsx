@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
+import { useHistory } from 'react-router-dom';
 
-import Eyebrow from '../../elements/Eyebrow';
-import Card from '../../elements/Card';
-import Button from '../../elements/Button';
-import { Props } from './types';
-import { Gutter } from '../../elements/Gutter';
-import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilities/groupNavItems';
+import type { EntityToGroup, Group} from '../../../utilities/groupNavItems';
+import type { Props } from './types';
+
 import { getTranslation } from '../../../../utilities/getTranslation';
-
+import { EntityType, groupNavItems } from '../../../utilities/groupNavItems';
+import Button from '../../elements/Button';
+import Card from '../../elements/Card';
+import Eyebrow from '../../elements/Eyebrow';
+import { Gutter } from '../../elements/Gutter';
+import { useConfig } from '../../utilities/Config';
 import './index.scss';
 
 const baseClass = 'dashboard';
@@ -24,17 +25,17 @@ const Dashboard: React.FC<Props> = (props) => {
   } = props;
 
   const { push } = useHistory();
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
 
   const {
-    routes: {
-      admin,
-    },
     admin: {
       components: {
         afterDashboard,
         beforeDashboard,
       },
+    },
+    routes: {
+      admin,
     },
   } = useConfig();
 
@@ -46,8 +47,8 @@ const Dashboard: React.FC<Props> = (props) => {
         .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
         .map((collection) => {
           const entityToGroup: EntityToGroup = {
-            type: EntityType.collection,
             entity: collection,
+            type: EntityType.collection,
           };
 
           return entityToGroup;
@@ -56,8 +57,8 @@ const Dashboard: React.FC<Props> = (props) => {
         .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
         .map((global) => {
           const entityToGroup: EntityToGroup = {
-            type: EntityType.global,
             entity: global,
+            type: EntityType.global,
           };
 
           return entityToGroup;
@@ -70,7 +71,7 @@ const Dashboard: React.FC<Props> = (props) => {
       <Eyebrow />
       <Gutter className={`${baseClass}__wrap`}>
         {Array.isArray(beforeDashboard) && beforeDashboard.map((Component, i) => <Component key={i} />)}
-        {groups.map(({ label, entities }, groupIndex) => {
+        {groups.map(({ entities, label }, groupIndex) => {
           return (
             <React.Fragment key={groupIndex}>
               <h2 className={`${baseClass}__label`}>{label}</h2>
@@ -99,22 +100,22 @@ const Dashboard: React.FC<Props> = (props) => {
                   return (
                     <li key={entityIndex}>
                       <Card
-                        title={title}
-                        titleAs="h3"
-                        id={`card-${entity.slug}`}
-                        onClick={onClick}
-                        buttonAriaLabel={buttonAriaLabel}
                         actions={(hasCreatePermission && type === EntityType.collection) ? (
                           <Button
-                            el="link"
-                            to={createHREF}
-                            icon="plus"
-                            round
-                            buttonStyle="icon-label"
-                            iconStyle="with-border"
                             aria-label={t('createNewLabel', { label: getTranslation(entity.labels.singular, i18n) })}
+                            buttonStyle="icon-label"
+                            el="link"
+                            icon="plus"
+                            iconStyle="with-border"
+                            round
+                            to={createHREF}
                           />
                         ) : undefined}
+                        buttonAriaLabel={buttonAriaLabel}
+                        id={`card-${entity.slug}`}
+                        onClick={onClick}
+                        title={title}
+                        titleAs="h3"
                       />
                     </li>
                   );

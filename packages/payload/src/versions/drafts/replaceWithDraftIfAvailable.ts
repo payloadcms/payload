@@ -1,28 +1,30 @@
-import { docHasTimestamps, PayloadRequest, Where } from '../../types';
+import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types';
+import type { AccessResult } from '../../config/types';
+import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types';
+import type { SanitizedGlobalConfig } from '../../globals/config/types';
+import type { PayloadRequest, Where } from '../../types';
+
 import { hasWhereAccessResult } from '../../auth';
-import { AccessResult } from '../../config/types';
-import { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types';
+import { combineQueries } from '../../database/combineQueries';
+import { docHasTimestamps } from '../../types';
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
-import { SanitizedGlobalConfig } from '../../globals/config/types';
-import { combineQueries } from '../../database/combineQueries';
-import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types';
 
 type Arguments<T> = {
+  accessResult: AccessResult
+  doc: T
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   entityType: 'collection' | 'global'
-  doc: T
-  req: PayloadRequest
   overrideAccess: boolean
-  accessResult: AccessResult
+  req: PayloadRequest
 }
 
 const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
+  accessResult,
+  doc,
   entity,
   entityType,
-  doc,
   req,
-  accessResult,
 }: Arguments<T>): Promise<T> => {
   const {
     locale,
@@ -62,13 +64,13 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
 
 
   const findVersionsArgs: FindVersionsArgs & FindGlobalVersionsArgs = {
-    locale,
-    where: combineQueries(queryToBuild, versionAccessResult),
     collection: entity.slug,
     global: entity.slug,
     limit: 1,
-    sort: '-updatedAt',
+    locale,
     req,
+    sort: '-updatedAt',
+    where: combineQueries(queryToBuild, versionAccessResult),
   };
 
   let versionDocs;

@@ -1,54 +1,55 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import useField from '../../useField';
-import Label from '../../Label';
+
+import type { Props } from './types';
+
+import { point } from '../../../../../fields/validations';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
+import Label from '../../Label';
+import useField from '../../useField';
 import withCondition from '../../withCondition';
-import { point } from '../../../../../fields/validations';
-import { Props } from './types';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-
 import './index.scss';
 
 const baseClass = 'point';
 
 const PointField: React.FC<Props> = (props) => {
   const {
+    admin: {
+      className,
+      condition,
+      description,
+      placeholder,
+      readOnly,
+      step,
+      style,
+      width,
+    } = {},
+    label,
     name,
     path: pathFromProps,
     required,
     validate = point,
-    label,
-    admin: {
-      readOnly,
-      style,
-      className,
-      width,
-      step,
-      placeholder,
-      description,
-      condition,
-    } = {},
   } = props;
 
   const path = pathFromProps || name;
 
-  const { t, i18n } = useTranslation('fields');
+  const { i18n, t } = useTranslation('fields');
 
   const memoizedValidate = useCallback((value, options) => {
     return validate(value, { ...options, required });
   }, [validate, required]);
 
   const {
-    value = [null, null],
-    showError,
-    setValue,
     errorMessage,
+    setValue,
+    showError,
+    value = [null, null],
   } = useField<[number, number]>({
+    condition,
     path,
     validate: memoizedValidate,
-    condition,
   });
 
   const handleChange = useCallback((e, index: 0 | 1) => {
@@ -71,55 +72,55 @@ const PointField: React.FC<Props> = (props) => {
 
   return (
     <div
-      className={classes}
       style={{
         ...style,
         width,
       }}
+      className={classes}
     >
       <Error
-        showError={showError}
         message={errorMessage}
+        showError={showError}
       />
       <ul className={`${baseClass}__wrap`}>
         <li>
           <Label
-            htmlFor={`field-longitude-${path.replace(/\./gi, '__')}`}
+            htmlFor={`field-longitude-${path.replace(/\./g, '__')}`}
             label={`${getTranslation(label || name, i18n)} - ${t('longitude')}`}
             required={required}
           />
           <input
-            id={`field-longitude-${path.replace(/\./gi, '__')}`}
-            value={(value && typeof value[0] === 'number') ? value[0] : ''}
-            onChange={(e) => handleChange(e, 0)}
             disabled={readOnly}
-            placeholder={getTranslation(placeholder, i18n)}
-            type="number"
+            id={`field-longitude-${path.replace(/\./g, '__')}`}
             name={`${path}.longitude`}
+            onChange={(e) => handleChange(e, 0)}
+            placeholder={getTranslation(placeholder, i18n)}
             step={step}
+            type="number"
+            value={(value && typeof value[0] === 'number') ? value[0] : ''}
           />
         </li>
         <li>
           <Label
-            htmlFor={`field-latitude-${path.replace(/\./gi, '__')}`}
+            htmlFor={`field-latitude-${path.replace(/\./g, '__')}`}
             label={`${getTranslation(label || name, i18n)} - ${t('latitude')}`}
             required={required}
           />
           <input
-            id={`field-latitude-${path.replace(/\./gi, '__')}`}
-            value={(value && typeof value[1] === 'number') ? value[1] : ''}
-            onChange={(e) => handleChange(e, 1)}
             disabled={readOnly}
-            placeholder={getTranslation(placeholder, i18n)}
-            type="number"
+            id={`field-latitude-${path.replace(/\./g, '__')}`}
             name={`${path}.latitude`}
+            onChange={(e) => handleChange(e, 1)}
+            placeholder={getTranslation(placeholder, i18n)}
             step={step}
+            type="number"
+            value={(value && typeof value[1] === 'number') ? value[1] : ''}
           />
         </li>
       </ul>
       <FieldDescription
-        value={value}
         description={description}
+        value={value}
       />
     </div>
   );

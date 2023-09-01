@@ -1,7 +1,8 @@
 import React from 'react';
+
 import { useConfig } from '../Config';
 
-const NestProviders = ({ providers, children }) => {
+const NestProviders = ({ children, providers }) => {
   const Component = providers[0];
   if (providers.length > 1) {
     return (

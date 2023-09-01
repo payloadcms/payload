@@ -1,37 +1,38 @@
-import React, { useState, useCallback } from 'react';
-import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import Button from '../Button';
-import MinimalTemplate from '../../templates/Minimal';
-import { requests } from '../../../api';
-import { Props } from './types';
-import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider';
-import { getTranslation } from '../../../../utilities/getTranslation';
-import Pill from '../Pill';
-import { useAuth } from '../../utilities/Auth';
+import { toast } from 'react-toastify';
 
+import type { Props } from './types';
+
+import { getTranslation } from '../../../../utilities/getTranslation';
+import { requests } from '../../../api';
+import MinimalTemplate from '../../templates/Minimal';
+import { useAuth } from '../../utilities/Auth';
+import { useConfig } from '../../utilities/Config';
+import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider';
+import Button from '../Button';
+import Pill from '../Pill';
 import './index.scss';
 
 const baseClass = 'delete-documents';
 
 const DeleteMany: React.FC<Props> = (props) => {
   const {
-    resetParams,
     collection: {
-      slug,
       labels: {
         plural,
       },
+      slug,
     } = {},
+    resetParams,
   } = props;
 
   const { permissions } = useAuth();
-  const { serverURL, routes: { api } } = useConfig();
+  const { routes: { api }, serverURL } = useConfig();
   const { toggleModal } = useModal();
-  const { selectAll, count, getQueryParams, toggleAll } = useSelection();
-  const { t, i18n } = useTranslation('general');
+  const { count, getQueryParams, selectAll, toggleAll } = useSelection();
+  const { i18n, t } = useTranslation('general');
   const [deleting, setDeleting] = useState(false);
 
   const collectionPermissions = permissions?.collections?.[slug];
@@ -47,8 +48,8 @@ const DeleteMany: React.FC<Props> = (props) => {
     setDeleting(true);
     requests.delete(`${serverURL}${api}/${slug}${getQueryParams()}`, {
       headers: {
-        'Content-Type': 'application/json',
         'Accept-Language': i18n.language,
+        'Content-Type': 'application/json',
       },
     }).then(async (res) => {
       try {
@@ -80,34 +81,34 @@ const DeleteMany: React.FC<Props> = (props) => {
   return (
     <React.Fragment>
       <Pill
-        className={`${baseClass}__toggle`}
         onClick={() => {
           setDeleting(false);
           toggleModal(modalSlug);
         }}
+        className={`${baseClass}__toggle`}
       >
         {t('delete')}
       </Pill>
       <Modal
-        slug={modalSlug}
         className={baseClass}
+        slug={modalSlug}
       >
         <MinimalTemplate className={`${baseClass}__template`}>
           <h1>{t('confirmDeletion')}</h1>
           <p>
-            {t('aboutToDeleteCount', { label: getTranslation(plural, i18n), count })}
+            {t('aboutToDeleteCount', { count, label: getTranslation(plural, i18n) })}
           </p>
           <Button
-            id="confirm-cancel"
             buttonStyle="secondary"
-            type="button"
+            id="confirm-cancel"
             onClick={deleting ? undefined : () => toggleModal(modalSlug)}
+            type="button"
           >
             {t('cancel')}
           </Button>
           <Button
-            onClick={deleting ? undefined : handleDelete}
             id="confirm-delete"
+            onClick={deleting ? undefined : handleDelete}
           >
             {deleting ? t('deleting') : t('confirm')}
           </Button>

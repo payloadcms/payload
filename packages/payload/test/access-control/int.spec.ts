@@ -1,6 +1,8 @@
+import type { PayloadRequest } from '../../src/types';
+import type { Post, RelyOnRequestHeader, Restricted } from './payload-types';
+
 import payload from '../../src';
 import { Forbidden } from '../../src/errors';
-import type { PayloadRequest } from '../../src/types';
 import { initPayloadTest } from '../helpers/configHelpers';
 import {
   hiddenAccessSlug,
@@ -12,7 +14,6 @@ import {
   siblingDataSlug,
   slug,
 } from './config';
-import type { Post, RelyOnRequestHeader, Restricted } from './payload-types';
 import { firstArrayText, secondArrayText } from './shared';
 
 describe('Access Control', () => {

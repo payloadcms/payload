@@ -1,11 +1,14 @@
 /* eslint-disable no-param-reassign */
-import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { traverseFields } from './traverseFields';
+import type { PayloadRequest, RequestContext } from '../../../express/types';
+import type { Field, TabAsField} from '../../config/types';
+
+import { fieldAffectsData, tabHasName } from '../../config/types';
 import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise';
 import relationshipPopulationPromise from './relationshipPopulationPromise';
+import { traverseFields } from './traverseFields';
 
 type Args = {
+  context: RequestContext
   currentDepth: number
   depth: number
   doc: Record<string, unknown>
@@ -13,12 +16,11 @@ type Args = {
   fieldPromises: Promise<void>[]
   findMany: boolean
   flattenLocales: boolean
+  overrideAccess: boolean
   populationPromises: Promise<void>[]
   req: PayloadRequest
-  overrideAccess: boolean
-  siblingDoc: Record<string, unknown>
   showHiddenFields: boolean
-  context: RequestContext
+  siblingDoc: Record<string, unknown>
 }
 
 // This function is responsible for the following actions, in order:
@@ -30,6 +32,7 @@ type Args = {
 // - Populate relationships
 
 export const promise = async ({
+  context,
   currentDepth,
   depth,
   doc,
@@ -40,9 +43,8 @@ export const promise = async ({
   overrideAccess,
   populationPromises,
   req,
-  siblingDoc,
   showHiddenFields,
-  context,
+  siblingDoc,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field) && field.hidden && typeof siblingDoc[field.name] !== 'undefined' && !showHiddenFields) {
     delete siblingDoc[field.name];
@@ -120,8 +122,8 @@ export const promise = async ({
           field,
           overrideAccess,
           req,
-          siblingDoc,
           showHiddenFields,
+          siblingDoc,
         }));
       }
 
@@ -157,13 +159,13 @@ export const promise = async ({
         if (shouldRunHookOnAllLocales) {
           const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) => (async () => {
             const hookedValue = await currentHook({
-              value,
-              originalDoc: doc,
-              data: doc,
-              siblingData: siblingDoc,
-              operation: 'read',
-              req,
               context,
+              data: doc,
+              operation: 'read',
+              originalDoc: doc,
+              req,
+              siblingData: siblingDoc,
+              value,
             });
 
             if (hookedValue !== undefined) {
@@ -174,14 +176,14 @@ export const promise = async ({
           await Promise.all(hookPromises);
         } else {
           const hookedValue = await currentHook({
+            context,
             data: doc,
             findMany,
-            originalDoc: doc,
             operation: 'read',
-            siblingData: siblingDoc,
+            originalDoc: doc,
             req,
+            siblingData: siblingDoc,
             value: siblingDoc[field.name],
-            context,
           });
 
           if (hookedValue !== undefined) {
@@ -193,7 +195,7 @@ export const promise = async ({
 
     // Execute access control
     if (field.access && field.access.read) {
-      const result = overrideAccess ? true : await field.access.read({ req, id: doc.id as string | number, siblingData: siblingDoc, data: doc, doc });
+      const result = overrideAccess ? true : await field.access.read({ data: doc, doc, id: doc.id as number | string, req, siblingData: siblingDoc });
 
       if (!result) {
         delete siblingDoc[field.name];
@@ -219,6 +221,7 @@ export const promise = async ({
       if (typeof siblingDoc[field.name] !== 'object') groupDoc = {};
 
       traverseFields({
+        context,
         currentDepth,
         depth,
         doc,
@@ -229,9 +232,8 @@ export const promise = async ({
         overrideAccess,
         populationPromises,
         req,
-        siblingDoc: groupDoc,
         showHiddenFields,
-        context,
+        siblingDoc: groupDoc,
       });
 
       break;
@@ -243,19 +245,19 @@ export const promise = async ({
       if (Array.isArray(rows)) {
         rows.forEach((row) => {
           traverseFields({
+            context,
             currentDepth,
             depth,
             doc,
-            fields: field.fields,
             fieldPromises,
+            fields: field.fields,
             findMany,
             flattenLocales,
             overrideAccess,
             populationPromises,
             req,
-            siblingDoc: row || {},
             showHiddenFields,
-            context,
+            siblingDoc: row || {},
           });
         });
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
@@ -263,19 +265,19 @@ export const promise = async ({
           if (Array.isArray(localeRows)) {
             localeRows.forEach((row) => {
               traverseFields({
+                context,
                 currentDepth,
                 depth,
                 doc,
-                fields: field.fields,
                 fieldPromises,
+                fields: field.fields,
                 findMany,
                 flattenLocales,
                 overrideAccess,
                 populationPromises,
                 req,
-                siblingDoc: row || {},
                 showHiddenFields,
-                context,
+                siblingDoc: row || {},
               });
             });
           }
@@ -293,19 +295,19 @@ export const promise = async ({
 
           if (block) {
             traverseFields({
+              context,
               currentDepth,
               depth,
               doc,
-              fields: block.fields,
               fieldPromises,
+              fields: block.fields,
               findMany,
               flattenLocales,
               overrideAccess,
               populationPromises,
               req,
-              siblingDoc: row || {},
               showHiddenFields,
-              context,
+              siblingDoc: row || {},
             });
           }
         });
@@ -317,19 +319,19 @@ export const promise = async ({
 
               if (block) {
                 traverseFields({
+                  context,
                   currentDepth,
                   depth,
                   doc,
-                  fields: block.fields,
                   fieldPromises,
+                  fields: block.fields,
                   findMany,
                   flattenLocales,
                   overrideAccess,
                   populationPromises,
                   req,
-                  siblingDoc: row || {},
                   showHiddenFields,
-                  context,
+                  siblingDoc: row || {},
                 });
               }
             });
@@ -343,6 +345,7 @@ export const promise = async ({
     case 'row':
     case 'collapsible': {
       traverseFields({
+        context,
         currentDepth,
         depth,
         doc,
@@ -353,9 +356,8 @@ export const promise = async ({
         overrideAccess,
         populationPromises,
         req,
-        siblingDoc,
         showHiddenFields,
-        context,
+        siblingDoc,
       });
 
       break;
@@ -369,6 +371,7 @@ export const promise = async ({
       }
 
       await traverseFields({
+        context,
         currentDepth,
         depth,
         doc,
@@ -379,9 +382,8 @@ export const promise = async ({
         overrideAccess,
         populationPromises,
         req,
-        siblingDoc: tabDoc,
         showHiddenFields,
-        context,
+        siblingDoc: tabDoc,
       });
 
       break;
@@ -389,6 +391,7 @@ export const promise = async ({
 
     case 'tabs': {
       traverseFields({
+        context,
         currentDepth,
         depth,
         doc,
@@ -399,9 +402,8 @@ export const promise = async ({
         overrideAccess,
         populationPromises,
         req,
-        siblingDoc,
         showHiddenFields,
-        context,
+        siblingDoc,
       });
       break;
     }

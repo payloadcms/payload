@@ -1,20 +1,20 @@
-import { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 
 type onClick = (event: MouseEvent) => void
 
 export type Props = {
+  alignIcon?: 'left' | 'right',
   children?: React.ReactNode,
   className?: string,
   icon?: React.ReactNode,
-  alignIcon?: 'left' | 'right',
   onClick?: onClick
   to?: string,
-  type?: 'error' | 'success' | 'info' | 'default',
+  type?: 'default' | 'error' | 'info' | 'success',
 }
 
 export type RenderedTypeProps = {
+  children?: React.ReactNode
   className?: string
   onClick?: onClick
   to: string
-  children?: React.ReactNode
 }

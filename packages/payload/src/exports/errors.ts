@@ -15,6 +15,6 @@ export {
   MissingFieldType,
   MissingFile,
   NotFound,
-  ValidationError,
-  QueryError
+  QueryError,
+  ValidationError
 } from '../errors'

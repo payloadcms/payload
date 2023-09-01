@@ -1,4 +1,6 @@
-import { Field, FieldAffectingData, fieldAffectsData } from '../../../../fields/config/types';
+import type { Field, FieldAffectingData} from '../../../../fields/config/types';
+
+import { fieldAffectsData } from '../../../../fields/config/types';
 import flattenFields from '../../../../utilities/flattenTopLevelFields';
 
 export const getTextFieldsToBeSearched = (listSearchableFields: string[], fields: Field[]) => (): FieldAffectingData[] => {

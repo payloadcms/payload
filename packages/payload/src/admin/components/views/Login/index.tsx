@@ -1,18 +1,18 @@
 import React from 'react';
-import { Link, useHistory, useLocation } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import Logo from '../../graphics/Logo';
-import MinimalTemplate from '../../templates/Minimal';
+import { Link, useHistory, useLocation } from 'react-router-dom';
+
+import Button from '../../elements/Button';
+import { FormLoadingOverlayToggle } from '../../elements/Loading';
 import Form from '../../forms/Form';
+import FormSubmit from '../../forms/Submit';
 import Email from '../../forms/field-types/Email';
 import Password from '../../forms/field-types/Password';
-import FormSubmit from '../../forms/Submit';
-import Button from '../../elements/Button';
+import Logo from '../../graphics/Logo';
+import MinimalTemplate from '../../templates/Minimal';
+import { useAuth } from '../../utilities/Auth';
+import { useConfig } from '../../utilities/Config';
 import Meta from '../../utilities/Meta';
-import { FormLoadingOverlayToggle } from '../../elements/Loading';
-
 import './index.scss';
 
 const baseClass = 'login';
@@ -20,24 +20,24 @@ const baseClass = 'login';
 const Login: React.FC = () => {
   const history = useHistory();
   const { t } = useTranslation('authentication');
-  const { user, setToken } = useAuth();
+  const { setToken, user } = useAuth();
   const config = useConfig();
   const {
     admin: {
-      user: userSlug,
-      logoutRoute,
       autoLogin,
       components: {
-        beforeLogin,
         afterLogin,
+        beforeLogin,
       } = {},
+      logoutRoute,
+      user: userSlug,
     },
-    serverURL,
+    collections,
     routes: {
       admin,
       api,
     },
-    collections,
+    serverURL,
   } = config;
 
   const collection = collections.find(({ slug }) => slug === userSlug);
@@ -62,9 +62,9 @@ const Login: React.FC = () => {
         // Logout
         <MinimalTemplate className={baseClass}>
           <Meta
-            title={t('login')}
             description={t('loginUser')}
             keywords={t('login')}
+            title={t('login')}
           />
           <div className={`${baseClass}__wrap`}>
             <h1>{t('alreadyLoggedIn')}</h1>
@@ -78,8 +78,8 @@ const Login: React.FC = () => {
             </p>
             <br />
             <Button
-              el="link"
               buttonStyle="secondary"
+              el="link"
               to={admin}
             >
               {t('general:backToDashboard')}
@@ -90,9 +90,9 @@ const Login: React.FC = () => {
         // Login
         <MinimalTemplate className={baseClass}>
           <Meta
-            title={t('login')}
             description={t('loginUser')}
             keywords={t('login')}
+            title={t('login')}
           />
           <div className={`${baseClass}__brand`}>
             <Logo />
@@ -100,30 +100,30 @@ const Login: React.FC = () => {
           {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
           {!collection.auth.disableLocalStrategy && (
             <Form
-              disableSuccessStatus
-              waitForAutocomplete
-              onSuccess={onSuccess}
-              method="post"
-              action={`${serverURL}${api}/${userSlug}/login`}
               initialData={{
                 email: autoLogin && autoLogin.prefillOnly ? autoLogin.email : undefined,
                 password: autoLogin && autoLogin.prefillOnly ? autoLogin.password : undefined,
               }}
+              action={`${serverURL}${api}/${userSlug}/login`}
+              disableSuccessStatus
+              method="post"
+              onSuccess={onSuccess}
+              waitForAutocomplete
             >
               <FormLoadingOverlayToggle
                 action="loading"
                 name="login-form"
               />
               <Email
+                admin={{ autoComplete: 'email' }}
                 label={t('general:email')}
                 name="email"
-                admin={{ autoComplete: 'email' }}
                 required
               />
               <Password
+                autoComplete="off"
                 label={t('general:password')}
                 name="password"
-                autoComplete="off"
                 required
               />
               <Link to={`${admin}/forgot`}>

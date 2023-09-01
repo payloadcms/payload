@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
+
 import Chevron from '../../icons/Chevron';
 import { usePreferences } from '../../utilities/Preferences';
-
 import './index.scss';
 
 const baseClass = 'nav-group';
@@ -47,22 +47,22 @@ const NavGroup: React.FC<Props> = ({
 
     return (
       <div
-        id={`nav-group-${label}`}
         className={[
           `${baseClass}`,
           `${label}`,
           collapsed && `${baseClass}--collapsed`,
         ].filter(Boolean)
           .join(' ')}
+        id={`nav-group-${label}`}
       >
         <button
-          type="button"
           className={[
             `${baseClass}__toggle`,
             `${baseClass}__toggle--${collapsed ? 'collapsed' : 'open'}`,
           ].filter(Boolean)
             .join(' ')}
           onClick={toggleCollapsed}
+          type="button"
         >
           <div className={`${baseClass}__label`}>
             {label}
@@ -70,8 +70,8 @@ const NavGroup: React.FC<Props> = ({
           <Chevron className={`${baseClass}__indicator`} />
         </button>
         <AnimateHeight
-          height={collapsed ? 0 : 'auto'}
           duration={animate ? 200 : 0}
+          height={collapsed ? 0 : 'auto'}
         >
           <div className={`${baseClass}__content`}>
             {children}

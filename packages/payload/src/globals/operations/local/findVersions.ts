@@ -1,26 +1,28 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Document, Where } from '../../../types';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+
 import type { PaginatedDocs } from '../../../database/types';
-import { Payload } from '../../../payload';
-import { PayloadRequest } from '../../../express/types';
-import findVersions from '../findVersions';
+import type { PayloadRequest } from '../../../express/types';
+import type { Payload } from '../../../payload';
+import type { Document, Where } from '../../../types';
+import type { TypeWithVersion } from '../../../versions/types';
+
 import { getDataLoader } from '../../../collections/dataloader';
-import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
-import { TypeWithVersion } from '../../../versions/types';
 import { setRequestContext } from '../../../express/setRequestContext';
+import { i18nInit } from '../../../translations/init';
+import findVersions from '../findVersions';
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
-  slug: T
   depth?: number
-  page?: number
+  fallbackLocale?: string
   limit?: number
   locale?: string
-  fallbackLocale?: string
-  user?: Document
   overrideAccess?: boolean
+  page?: number
   showHiddenFields?: boolean
+  slug: T
   sort?: string
+  user?: Document
   where?: Where
 }
 
@@ -29,17 +31,17 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   options: Options<T>,
 ): Promise<PaginatedDocs<TypeWithVersion<GeneratedTypes['globals'][T]>>> {
   const {
-    slug: globalSlug,
     depth,
-    page,
-    limit,
-    where,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     fallbackLocale = null,
-    user,
+    limit,
+    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
+    page,
     showHiddenFields,
+    slug: globalSlug,
     sort,
+    user,
+    where,
   } = options;
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
@@ -50,27 +52,27 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
   }
 
   const req = {
-    user,
-    payloadAPI: 'local',
-    locale,
     fallbackLocale,
-    payload,
     i18n,
+    locale,
+    payload,
+    payloadAPI: 'local',
     t: i18n.t,
+    user,
   } as PayloadRequest;
   setRequestContext(req);
 
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return findVersions({
-    where,
-    page,
-    limit,
     depth,
     globalConfig,
-    sort,
+    limit,
     overrideAccess,
-    showHiddenFields,
+    page,
     req,
+    showHiddenFields,
+    sort,
+    where,
   });
 }

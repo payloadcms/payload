@@ -1,41 +1,42 @@
-import React, { useState, useCallback } from 'react';
-import { toast } from 'react-toastify';
-import { useHistory } from 'react-router-dom';
 import { Modal, useModal } from '@faceless-ui/modal';
+import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
+import type { Props } from './types';
+
+import { getTranslation } from '../../../../utilities/getTranslation';
+import { requests } from '../../../api';
+import useTitle from '../../../hooks/useTitle';
+import { useForm } from '../../forms/Form/context';
+import MinimalTemplate from '../../templates/Minimal';
 import { useConfig } from '../../utilities/Config';
 import Button from '../Button';
-import MinimalTemplate from '../../templates/Minimal';
-import { useForm } from '../../forms/Form/context';
-import useTitle from '../../../hooks/useTitle';
-import { requests } from '../../../api';
-import { Props } from './types';
-import { getTranslation } from '../../../../utilities/getTranslation';
-
 import './index.scss';
 
 const baseClass = 'delete-document';
 
 const DeleteDocument: React.FC<Props> = (props) => {
   const {
-    title: titleFromProps,
-    id,
     buttonId,
-    collection,
     collection: {
-      slug,
       labels: {
         singular,
       } = {},
+      slug,
     } = {},
+    collection,
+    id,
+    title: titleFromProps,
   } = props;
 
-  const { serverURL, routes: { api, admin } } = useConfig();
+  const { routes: { admin, api }, serverURL } = useConfig();
   const { setModified } = useForm();
   const [deleting, setDeleting] = useState(false);
   const { toggleModal } = useModal();
   const history = useHistory();
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
   const title = useTitle(collection);
   const titleToRender = titleFromProps || title;
 
@@ -50,8 +51,8 @@ const DeleteDocument: React.FC<Props> = (props) => {
     setModified(false);
     requests.delete(`${serverURL}${api}/${slug}/${id}`, {
       headers: {
-        'Content-Type': 'application/json',
         'Accept-Language': i18n.language,
+        'Content-Type': 'application/json',
       },
     }).then(async (res) => {
       try {
@@ -80,27 +81,27 @@ const DeleteDocument: React.FC<Props> = (props) => {
     return (
       <React.Fragment>
         <Button
-          buttonStyle="none"
-          id={buttonId}
-          className={`${baseClass}__toggle`}
           onClick={() => {
             setDeleting(false);
             toggleModal(modalSlug);
           }}
+          buttonStyle="none"
+          className={`${baseClass}__toggle`}
+          id={buttonId}
         >
           {t('delete')}
         </Button>
         <Modal
-          slug={modalSlug}
           className={baseClass}
+          slug={modalSlug}
         >
           <MinimalTemplate className={`${baseClass}__template`}>
             <h1>{t('confirmDeletion')}</h1>
             <p>
               <Trans
                 i18nKey="aboutToDelete"
-                values={{ label: getTranslation(singular, i18n), title: titleToRender }}
                 t={t}
+                values={{ label: getTranslation(singular, i18n), title: titleToRender }}
               >
                 aboutToDelete
                 <strong>
@@ -110,16 +111,16 @@ const DeleteDocument: React.FC<Props> = (props) => {
             </p>
             <div className={`${baseClass}__actions`}>
               <Button
-                id="confirm-cancel"
                 buttonStyle="secondary"
-                type="button"
+                id="confirm-cancel"
                 onClick={deleting ? undefined : () => toggleModal(modalSlug)}
+                type="button"
               >
                 {t('cancel')}
               </Button>
               <Button
-                onClick={deleting ? undefined : handleDelete}
                 id="confirm-delete"
+                onClick={deleting ? undefined : handleDelete}
               >
                 {deleting ? t('deleting') : t('confirm')}
               </Button>

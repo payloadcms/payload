@@ -1,20 +1,21 @@
-import React from 'react';
-import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
+import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import Button from '../Button';
-import MinimalTemplate from '../../templates/Minimal';
-import { Props } from './types';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import { toast } from 'react-toastify';
 
+import type { Props } from './types';
+
+import MinimalTemplate from '../../templates/Minimal';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import Button from '../Button';
 import './index.scss';
 
 const baseClass = 'generate-confirmation';
 
 const GenerateConfirmation: React.FC<Props> = (props) => {
   const {
-    setKey,
     highlightField,
+    setKey,
   } = props;
 
   const { id } = useDocumentInfo();
@@ -33,17 +34,17 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
   return (
     <React.Fragment>
       <Button
-        size="small"
-        buttonStyle="secondary"
         onClick={() => {
           toggleModal(modalSlug);
         }}
+        buttonStyle="secondary"
+        size="small"
       >
         {t('generateNewAPIKey')}
       </Button>
       <Modal
-        slug={modalSlug}
         className={baseClass}
+        slug={modalSlug}
       >
         <MinimalTemplate className={`${baseClass}__template`}>
           <h1>{t('confirmGeneration')}</h1>
@@ -58,11 +59,11 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
           </p>
 
           <Button
-            buttonStyle="secondary"
-            type="button"
             onClick={() => {
               toggleModal(modalSlug);
             }}
+            buttonStyle="secondary"
+            type="button"
           >
             {t('general:cancel')}
           </Button>

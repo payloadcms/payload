@@ -1,6 +1,7 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-nested-ternary */
-import { Config, SanitizedConfig } from './types';
+import type { Config, SanitizedConfig } from './types';
+
 import { sanitizeConfig } from './sanitize';
 
 /**

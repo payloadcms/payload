@@ -1,4 +1,5 @@
-import { Option, Action } from './types';
+import type { Action, Option } from './types';
+
 import { getTranslation } from '../../../../../../utilities/getTranslation';
 
 const reduceToIDs = (options) => options.reduce((ids, option) => {
@@ -18,11 +19,11 @@ const reduceToIDs = (options) => options.reduce((ids, option) => {
 const optionsReducer = (state: Option[], action: Action): Option[] => {
   switch (action.type) {
     case 'CLEAR': {
-      return action.required ? [] : [{ value: 'null', label: action.i18n.t('general:none') }];
+      return action.required ? [] : [{ label: action.i18n.t('general:none'), value: 'null' }];
     }
 
     case 'ADD': {
-      const { hasMultipleRelations, collection, relation, data, i18n } = action;
+      const { collection, data, hasMultipleRelations, i18n, relation } = action;
 
       const labelKey = collection.admin.useAsTitle || 'id';
 

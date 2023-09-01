@@ -1,9 +1,12 @@
-import { Response, NextFunction } from 'express';
+import type { NextFunction, Response } from 'express';
+
 import httpStatus from 'http-status';
-import { Where } from '../../types';
-import { PayloadRequest } from '../../express/types';
-import { TypeWithID } from '../config/types';
+
 import type { PaginatedDocs } from '../../database/types';
+import type { PayloadRequest } from '../../express/types';
+import type { Where } from '../../types';
+import type { TypeWithID } from '../config/types';
+
 import { isNumber } from '../../utilities/isNumber';
 import findVersions from '../operations/findVersions';
 
@@ -20,14 +23,14 @@ export default async function findVersionsHandler<T extends TypeWithID = any>(re
     }
 
     const options = {
-      req,
       collection: req.collection,
-      where: req.query.where as Where, // This is a little shady,
-      page,
-      limit: isNumber(req.query.limit) ? Number(req.query.limit) : undefined,
-      sort: req.query.sort as string,
       depth: isNumber(req.query.depth) ? Number(req.query.depth) : undefined,
+      limit: isNumber(req.query.limit) ? Number(req.query.limit) : undefined,
+      page,
       payload: req.payload,
+      req,
+      sort: req.query.sort as string,
+      where: req.query.where as Where, // This is a little shady,
     };
 
     const result = await findVersions(options);

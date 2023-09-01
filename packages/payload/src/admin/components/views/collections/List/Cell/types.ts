@@ -1,15 +1,15 @@
-import { FieldAffectingData, UIField } from '../../../../../../fields/config/types';
-import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
+import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
+import type { FieldAffectingData, UIField } from '../../../../../../fields/config/types';
 
 export type Props = {
-  field: UIField | FieldAffectingData
+  cellData: unknown
+  className?: string
   colIndex: number
   collection: SanitizedCollectionConfig
-  cellData: unknown
+  field: FieldAffectingData | UIField
+  link?: boolean
+  onClick?: (Props) => void
   rowData: {
     [path: string]: unknown
   }
-  link?: boolean
-  onClick?: (Props) => void
-  className?: string
 }

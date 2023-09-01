@@ -1,14 +1,15 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { PreferenceRequest } from '../types';
-import { Where } from '../../types';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+
+import type { Where } from '../../types';
+import type { PreferenceRequest } from '../types';
 
 async function findOne(args: PreferenceRequest): Promise<GeneratedTypes['collections']['_preference']> {
   const {
+    key,
     req: {
       payload,
     },
     user,
-    key,
   } = args;
 
   const where: Where = {
@@ -21,10 +22,10 @@ async function findOne(args: PreferenceRequest): Promise<GeneratedTypes['collect
 
   const { docs } = await payload.find({
     collection: 'payload-preferences',
-    where,
     depth: 0,
     pagination: false,
     user,
+    where,
   });
 
   if (docs.length === 0) return null;

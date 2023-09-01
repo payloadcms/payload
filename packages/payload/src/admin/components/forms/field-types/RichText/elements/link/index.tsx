@@ -1,6 +1,6 @@
-import { withLinks } from './utilities';
 import { LinkButton } from './Button';
 import { LinkElement } from './Element';
+import { withLinks } from './utilities';
 
 const link = {
   Button: LinkButton,

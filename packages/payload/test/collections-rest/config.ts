@@ -1,6 +1,7 @@
 import type { CollectionConfig } from '../../src/collections/config/types';
-import { devUser } from '../credentials';
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import { devUser } from '../credentials';
 
 export interface Relation {
   id: string;

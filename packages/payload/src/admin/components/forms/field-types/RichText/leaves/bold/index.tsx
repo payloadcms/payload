@@ -1,6 +1,7 @@
 import React from 'react';
-import LeafButton from '../Button';
+
 import BoldIcon from '../../../../../icons/Bold';
+import LeafButton from '../Button';
 
 const Bold = ({ attributes, children }) => (
   <strong {...attributes}>{children}</strong>

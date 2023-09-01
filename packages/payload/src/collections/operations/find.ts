@@ -1,32 +1,33 @@
-import { Where } from '../../types';
-import { PayloadRequest } from '../../express/types';
-import executeAccess from '../../auth/executeAccess';
-import { Collection, TypeWithID } from '../config/types';
+import type { AccessResult } from '../../config/types';
 import type { PaginatedDocs } from '../../database/types';
-import { AccessResult } from '../../config/types';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
-import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey';
-import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
+import type { PayloadRequest } from '../../express/types';
+import type { Where } from '../../types';
+import type { Collection, TypeWithID } from '../config/types';
+
+import executeAccess from '../../auth/executeAccess';
 import { combineQueries } from '../../database/combineQueries';
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
+import { afterRead } from '../../fields/hooks/afterRead';
 import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
+import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey';
 import { buildAfterOperation } from './utils';
 
 export type Arguments = {
   collection: Collection
-  where?: Where
-  page?: number
-  limit?: number
-  sort?: string
-  depth?: number
   currentDepth?: number
-  req?: PayloadRequest
-  overrideAccess?: boolean
+  depth?: number
   disableErrors?: boolean
-  pagination?: boolean
-  showHiddenFields?: boolean
   draft?: boolean
+  limit?: number
+  overrideAccess?: boolean
+  page?: number
+  pagination?: boolean
+  req?: PayloadRequest
+  showHiddenFields?: boolean
+  sort?: string
+  where?: Where
 }
 
 async function find<T extends TypeWithID & Record<string, unknown>>(
@@ -43,32 +44,32 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
     args = (await hook({
       args,
-      operation: 'read',
       context: args.req.context,
+      operation: 'read',
     })) || args;
   }, Promise.resolve());
 
   const {
-    where,
-    page,
-    limit,
-    depth,
-    currentDepth,
-    draft: draftsEnabled,
-    collection,
     collection: {
       config: collectionConfig,
     },
-    sort,
-    req,
+    collection,
+    currentDepth,
+    depth,
+    disableErrors,
+    draft: draftsEnabled,
+    limit,
+    overrideAccess,
+    page,
+    pagination = true,
     req: {
       locale,
       payload,
     },
-    overrideAccess,
-    disableErrors,
+    req,
     showHiddenFields,
-    pagination = true,
+    sort,
+    where,
   } = args;
 
   try {
@@ -83,8 +84,8 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
       args = (await hook({
         args,
-        operation: 'read',
         context: req.context,
+        operation: 'read',
       })) || args;
     }, Promise.resolve());
 
@@ -95,21 +96,21 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     let accessResult: AccessResult;
 
     if (!overrideAccess) {
-      accessResult = await executeAccess({ req, disableErrors }, collectionConfig.access.read);
+      accessResult = await executeAccess({ disableErrors, req }, collectionConfig.access.read);
 
       // If errors are disabled, and access returns false, return empty results
       if (accessResult === false) {
         return {
           docs: [],
-          totalDocs: 0,
-          totalPages: 1,
+          hasNextPage: false,
+          hasPrevPage: false,
+          limit,
+          nextPage: null,
           page: 1,
           pagingCounter: 1,
-          hasPrevPage: false,
-          hasNextPage: false,
           prevPage: null,
-          nextPage: null,
-          limit,
+          totalDocs: 0,
+          totalPages: 1,
         };
       }
     }
@@ -131,39 +132,39 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
 
       await validateQueryPaths({
         collectionConfig: collection.config,
-        where: fullWhere,
-        req,
         overrideAccess,
+        req,
         versionFields: buildVersionCollectionFields(collection.config),
+        where: fullWhere,
       });
 
       result = await payload.db.queryDrafts<T>({
         collection: collectionConfig.slug,
-        where: fullWhere,
-        page: sanitizedPage,
         limit: sanitizedLimit,
-        sort,
-        pagination: usePagination,
         locale,
+        page: sanitizedPage,
+        pagination: usePagination,
         req,
+        sort,
+        where: fullWhere,
       });
     } else {
       await validateQueryPaths({
         collectionConfig,
-        where,
-        req,
         overrideAccess,
+        req,
+        where,
       });
 
       result = await payload.db.find<T>({
         collection: collectionConfig.slug,
-        where: fullWhere,
-        page: sanitizedPage,
         limit: sanitizedLimit,
-        sort,
         locale,
+        page: sanitizedPage,
         pagination,
         req,
+        sort,
+        where: fullWhere,
       });
     }
 
@@ -180,10 +181,10 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
           await priorHook;
 
           docRef = await hook({
-            req,
-            query: fullWhere,
-            doc: docRef,
             context: req.context,
+            doc: docRef,
+            query: fullWhere,
+            req,
           }) || docRef;
         }, Promise.resolve());
 
@@ -198,15 +199,15 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     result = {
       ...result,
       docs: await Promise.all(result.docs.map(async (doc) => afterRead<T>({
-        depth,
+        context: req.context,
         currentDepth,
+        depth,
         doc,
         entityConfig: collectionConfig,
+        findMany: true,
         overrideAccess,
         req,
         showHiddenFields,
-        findMany: true,
-        context: req.context,
       }))),
     };
 
@@ -223,11 +224,11 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
           await priorHook;
 
           docRef = await hook({
-            req,
-            query: fullWhere,
+            context: req.context,
             doc: docRef,
             findMany: true,
-            context: req.context,
+            query: fullWhere,
+            req,
           }) || doc;
         }, Promise.resolve());
 
@@ -240,8 +241,8 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
     // /////////////////////////////////////
 
     result = await buildAfterOperation<T>({
-      operation: 'find',
       args,
+      operation: 'find',
       result,
     });
 

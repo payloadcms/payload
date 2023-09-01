@@ -1,39 +1,40 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useWindowInfo } from '@faceless-ui/window-info';
-import { Props } from './types';
-import PopupButton from './PopupButton';
-import useIntersect from '../../../hooks/useIntersect';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import type { Props } from './types';
+
+import useIntersect from '../../../hooks/useIntersect';
+import PopupButton from './PopupButton';
 import './index.scss';
 
 const baseClass = 'popup';
 
 const Popup: React.FC<Props> = (props) => {
   const {
-    className,
-    buttonClassName,
-    render,
-    size = 'small',
-    color = 'light',
+    boundingRef,
     button,
+    buttonClassName,
     buttonType = 'default',
     children,
-    showOnHover = false,
+    className,
+    color = 'light',
+    forceOpen,
     horizontalAlign: horizontalAlignFromProps = 'left',
-    verticalAlign: verticalAlignFromProps = 'top',
     initActive = false,
     onToggleOpen,
     padding,
-    forceOpen,
-    boundingRef,
+    render,
+    showOnHover = false,
     showScrollbar = false,
+    size = 'small',
+    verticalAlign: verticalAlignFromProps = 'top',
   } = props;
 
-  const { width: windowWidth, height: windowHeight } = useWindowInfo();
+  const { height: windowHeight, width: windowWidth } = useWindowInfo();
   const [intersectionRef, intersectionEntry] = useIntersect({
-    threshold: 1,
-    rootMargin: '-100px 0px 0px 0px',
     root: boundingRef?.current || null,
+    rootMargin: '-100px 0px 0px 0px',
+    threshold: 1,
   });
 
   const buttonRef = useRef(null);
@@ -47,10 +48,10 @@ const Popup: React.FC<Props> = (props) => {
       const bounds = contentRef.current.getBoundingClientRect();
 
       const {
+        bottom: contentBottomPos,
         left: contentLeftPos,
         right: contentRightPos,
         top: contentTopPos,
-        bottom: contentBottomPos,
       } = bounds;
 
       let boundingTopPos = 100;
@@ -60,10 +61,10 @@ const Popup: React.FC<Props> = (props) => {
 
       if (boundingRef?.current) {
         ({
-          top: boundingTopPos,
-          right: boundingRightPos,
           bottom: boundingBottomPos,
           left: boundingLeftPos,
+          right: boundingRightPos,
+          top: boundingTopPos,
         } = boundingRef.current.getBoundingClientRect());
       }
 
@@ -135,8 +136,8 @@ const Popup: React.FC<Props> = (props) => {
       className={classes}
     >
       <div
-        ref={buttonRef}
         className={`${baseClass}__wrapper`}
+        ref={buttonRef}
       >
         {showOnHover
           ? (
@@ -145,11 +146,11 @@ const Popup: React.FC<Props> = (props) => {
               onMouseEnter={() => setActive(true)}
               onMouseLeave={() => setActive(false)}
             >
-              <PopupButton {...{ className: buttonClassName, buttonType, button, setActive, active }} />
+              <PopupButton {...{ active, button, buttonType, className: buttonClassName, setActive }} />
             </div>
           )
           : (
-            <PopupButton {...{ className: buttonClassName, buttonType, button, setActive, active }} />
+            <PopupButton {...{ active, button, buttonType, className: buttonClassName, setActive }} />
           )}
       </div>
 
@@ -162,10 +163,10 @@ const Popup: React.FC<Props> = (props) => {
           ref={intersectionRef}
         >
           <div
-            className={`${baseClass}__scroll`}
             style={{
               padding,
             }}
+            className={`${baseClass}__scroll`}
           >
             {render && render({ close: () => setActive(false) })}
             {children && children}

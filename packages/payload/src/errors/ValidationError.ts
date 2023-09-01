@@ -1,9 +1,11 @@
-import httpStatus from 'http-status';
 import type { TFunction } from 'i18next';
+
+import httpStatus from 'http-status';
+
 import APIError from './APIError';
 
-class ValidationError extends APIError<{ message: string; field: string }[]> {
-  constructor(results: { message: string; field: string }[], t?: TFunction) {
+class ValidationError extends APIError<{ field: string; message: string }[]> {
+  constructor(results: { field: string; message: string }[], t?: TFunction) {
     const message = t
       ? t('error:followingFieldsInvalid', { count: results.length })
       : `The following field${results.length === 1 ? ' is' : 's are'} invalid:`;

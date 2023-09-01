@@ -1,5 +1,5 @@
-import { Payload } from '../..';
-import { MigrationData } from '../types';
+import type { Payload } from '../..';
+import type { MigrationData } from '../types';
 
 export async function getMigrations({
   payload,

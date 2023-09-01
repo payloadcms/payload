@@ -1,12 +1,15 @@
-import { Response, NextFunction } from 'express';
+import type { NextFunction, Response } from 'express';
+
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import { TypeWithID } from '../../collections/config/types';
+
+import type { TypeWithID } from '../../collections/config/types';
 import type { PaginatedDocs } from '../../database/types';
-import { SanitizedGlobalConfig } from '../config/types';
-import findVersions from '../operations/findVersions';
-import { Where } from '../../types';
+import type { PayloadRequest } from '../../express/types';
+import type { Where } from '../../types';
+import type { SanitizedGlobalConfig } from '../config/types';
+
 import { isNumber } from '../../utilities/isNumber';
+import findVersions from '../operations/findVersions';
 
 export default function findVersionsHandler(global: SanitizedGlobalConfig) {
   return async function handler<T extends TypeWithID = any>(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<PaginatedDocs<T>> | void> {
@@ -22,13 +25,13 @@ export default function findVersionsHandler(global: SanitizedGlobalConfig) {
       }
 
       const options = {
-        req,
-        globalConfig: global,
-        where: req.query.where as Where,
-        page,
-        limit: isNumber(req.query.limit) ? Number(req.query.limit) : undefined,
-        sort: req.query.sort as string,
         depth: isNumber(req.query.depth) ? Number(req.query.depth) : undefined,
+        globalConfig: global,
+        limit: isNumber(req.query.limit) ? Number(req.query.limit) : undefined,
+        page,
+        req,
+        sort: req.query.sort as string,
+        where: req.query.where as Where,
       };
 
       const result = await findVersions(options);

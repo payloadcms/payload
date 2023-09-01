@@ -1,29 +1,30 @@
-import { Payload } from '../payload';
-import { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
-import { enforceMaxVersions } from './enforceMaxVersions';
-import { PayloadRequest } from '../express/types';
-import { SanitizedGlobalConfig } from '../globals/config/types';
+import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
+import type { PayloadRequest } from '../express/types';
+import type { SanitizedGlobalConfig } from '../globals/config/types';
+import type { Payload } from '../payload';
+
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields';
+import { enforceMaxVersions } from './enforceMaxVersions';
 
 type Args = {
-  payload: Payload
-  global?: SanitizedGlobalConfig
+  autosave?: boolean
   collection?: SanitizedCollectionConfig
   docWithLocales: any
-  id?: string | number
-  autosave?: boolean
   draft?: boolean
+  global?: SanitizedGlobalConfig
+  id?: number | string
+  payload: Payload
   req?: PayloadRequest
 }
 
 export const saveVersion = async ({
-  payload,
+  autosave,
   collection,
+  docWithLocales: doc,
+  draft,
   global,
   id,
-  docWithLocales: doc,
-  autosave,
-  draft,
+  payload,
   req,
 }: Args): Promise<TypeWithID> => {
   let result;
@@ -48,13 +49,13 @@ export const saveVersion = async ({
       const { docs } = await payload.db.findVersions({
         collection: entityConfig.slug,
         limit: 1,
+        req,
+        sort: '-updatedAt',
         where: {
           parent: {
             equals: id,
           },
         },
-        sort: '-updatedAt',
-        req,
       });
       const [latestVersion] = docs;
 
@@ -64,29 +65,29 @@ export const saveVersion = async ({
         createNewVersion = false;
 
         const data: Record<string, unknown> = {
-          version: versionData,
           createdAt: new Date(latestVersion.createdAt).toISOString(),
           updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
+          version: versionData,
         };
 
         result = await payload.db.updateVersion({
           collectionSlug: entityConfig.slug,
-          versionData: data,
           id: latestVersion.id,
           req,
+          versionData: data,
         });
       }
     }
 
     if (createNewVersion) {
       result = await payload.db.createVersion({
-        collectionSlug: entityConfig.slug,
-        parent: collection ? id : undefined,
         autosave: Boolean(autosave),
+        collectionSlug: entityConfig.slug,
         createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
+        parent: collection ? id : undefined,
+        req,
         updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
         versionData,
-        req,
       });
     }
   } catch (err) {
@@ -105,11 +106,11 @@ export const saveVersion = async ({
 
   if (max > 0) {
     await enforceMaxVersions({
-      id,
-      payload,
       collection,
       global,
+      id,
       max,
+      payload,
       req,
     });
   }

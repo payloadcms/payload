@@ -1,10 +1,10 @@
-import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
-import { Fields } from '../../../../forms/Form/types';
+import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
+import type { Fields } from '../../../../forms/Form/types';
 
 export type Props = {
-  internalState?: Fields
-  data?: Fields
-  collection: SanitizedCollectionConfig
   adminThumbnail?: string
+  collection: SanitizedCollectionConfig
+  data?: Fields
+  internalState?: Fields
   mimeTypes?: string[];
 }

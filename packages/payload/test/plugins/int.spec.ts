@@ -1,7 +1,7 @@
+import payload from '../../src';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
 import configPromise, { pagesSlug } from './config';
-import payload from '../../src';
 
 require('isomorphic-fetch');
 

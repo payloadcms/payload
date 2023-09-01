@@ -1,16 +1,19 @@
-import React, { HTMLAttributes, useCallback, useReducer, useState } from 'react';
-import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react';
+import type { HTMLAttributes} from 'react';
+
+import React, { useCallback, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Transforms } from 'slate';
-import { useConfig } from '../../../../../../utilities/Config';
-import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
-import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
-import Button from '../../../../../../elements/Button';
-import { useListDrawer } from '../../../../../../elements/ListDrawer';
-import { Props as RichTextProps } from '../../../types';
-import { getTranslation } from '../../../../../../../../utilities/getTranslation';
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
+import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react';
 
+import type { Props as RichTextProps } from '../../../types';
+
+import { getTranslation } from '../../../../../../../../utilities/getTranslation';
+import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
+import Button from '../../../../../../elements/Button';
+import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
+import { useListDrawer } from '../../../../../../elements/ListDrawer';
+import { useConfig } from '../../../../../../utilities/Config';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
 import './index.scss';
 
 const baseClass = 'rich-text-relationship';
@@ -37,12 +40,12 @@ const Element: React.FC<Props> = (props) => {
     fieldProps,
   } = props;
 
-  const { collections, serverURL, routes: { api } } = useConfig();
+  const { collections, routes: { api }, serverURL } = useConfig();
   const [enabledCollectionSlugs] = useState(() => collections.filter(({ admin: { enableRichTextRelationship } }) => enableRichTextRelationship).map(({ slug }) => slug));
   const [relatedCollection, setRelatedCollection] = useState(() => collections.find((coll) => coll.slug === relationTo));
   const selected = useSelected();
   const focused = useFocused();
-  const { t, i18n } = useTranslation(['fields', 'general']);
+  const { i18n, t } = useTranslation(['fields', 'general']);
   const editor = useSlateStatic();
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
   const [{ data }, { setParams }] = usePayloadAPI(
@@ -87,12 +90,12 @@ const Element: React.FC<Props> = (props) => {
     Transforms.setNodes(
       editor,
       {
-        type: 'relationship',
-        value: { id: doc.id },
-        relationTo: relatedCollection.slug,
         children: [
           { text: ' ' },
         ],
+        relationTo: relatedCollection.slug,
+        type: 'relationship',
+        value: { id: doc.id },
       },
       { at: elementPath },
     );
@@ -106,18 +109,18 @@ const Element: React.FC<Props> = (props) => {
     dispatchCacheBust();
   }, [editor, element, relatedCollection, cacheBust, setParams, closeDrawer]);
 
-  const swapRelationship = React.useCallback(({ docID, collectionConfig }) => {
+  const swapRelationship = React.useCallback(({ collectionConfig, docID }) => {
     const elementPath = ReactEditor.findPath(editor, element);
 
     Transforms.setNodes(
       editor,
       {
-        type: 'relationship',
-        value: { id: docID },
-        relationTo: collectionConfig.slug,
         children: [
           { text: ' ' },
         ],
+        relationTo: collectionConfig.slug,
+        type: 'relationship',
+        value: { id: docID },
       },
       { at: elementPath },
     );
@@ -154,32 +157,32 @@ const Element: React.FC<Props> = (props) => {
       </div>
       <div className={`${baseClass}__actions`}>
         <ListDrawerToggler
-          disabled={fieldProps?.admin?.readOnly}
           className={`${baseClass}__list-drawer-toggler`}
+          disabled={fieldProps?.admin?.readOnly}
         >
           <Button
-            icon="swap"
-            round
-            buttonStyle="icon-label"
             onClick={() => {
               // do nothing
             }}
-            el="div"
-            tooltip={t('swapRelationship')}
+            buttonStyle="icon-label"
             disabled={fieldProps?.admin?.readOnly}
+            el="div"
+            icon="swap"
+            round
+            tooltip={t('swapRelationship')}
           />
         </ListDrawerToggler>
         <Button
-          icon="x"
-          round
-          buttonStyle="icon-label"
-          className={`${baseClass}__removeButton`}
           onClick={(e) => {
             e.preventDefault();
             removeRelationship();
           }}
-          tooltip={t('fields:removeRelationship')}
+          buttonStyle="icon-label"
+          className={`${baseClass}__removeButton`}
           disabled={fieldProps?.admin?.readOnly}
+          icon="x"
+          round
+          tooltip={t('fields:removeRelationship')}
         />
       </div>
       {value?.id && (

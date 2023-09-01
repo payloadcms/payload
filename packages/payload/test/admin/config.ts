@@ -1,22 +1,23 @@
 import path from 'path';
+
 import { mapAsync } from '../../src/utilities/mapAsync';
-import { devUser } from '../credentials';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import { devUser } from '../credentials';
 import AfterDashboard from './components/AfterDashboard';
-import CustomMinimalRoute from './components/views/CustomMinimal';
-import CustomDefaultRoute from './components/views/CustomDefault';
-import BeforeLogin from './components/BeforeLogin';
 import AfterNavLinks from './components/AfterNavLinks';
-import { globalSlug, slug } from './shared';
-import Logout from './components/Logout';
-import DemoUIFieldField from './components/DemoUIField/Field';
+import BeforeLogin from './components/BeforeLogin';
 import DemoUIFieldCell from './components/DemoUIField/Cell';
+import DemoUIFieldField from './components/DemoUIField/Field';
+import Logout from './components/Logout';
+import CustomDefaultRoute from './components/views/CustomDefault';
+import CustomMinimalRoute from './components/views/CustomMinimal';
+import { globalSlug, slug } from './shared';
 
 export interface Post {
+  createdAt: Date;
+  description: string;
   id: string;
   title: string;
-  description: string;
-  createdAt: Date;
   updatedAt: Date;
 }
 

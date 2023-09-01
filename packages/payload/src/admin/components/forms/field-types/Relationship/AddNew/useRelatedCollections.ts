@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
+
+import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
+
 import { useConfig } from '../../../../utilities/Config';
 
 export const useRelatedCollections = (relationTo: string | string[]): SanitizedCollectionConfig[] => {

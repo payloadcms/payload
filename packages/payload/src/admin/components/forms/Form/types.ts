@@ -1,24 +1,26 @@
-import React, { Dispatch } from 'react';
-import { Condition, Field as FieldConfig, Validate } from '../../../../fields/config/types';
-import { User } from '../../../../auth/types';
+import type React from 'react';
+import type { Dispatch } from 'react';
+
+import type { User } from '../../../../auth/types';
+import type { Condition, Field as FieldConfig, Validate } from '../../../../fields/config/types';
 
 export type Row = {
-  id: string
-  collapsed?: boolean
   blockType?: string
   childErrorPaths?: Set<string>
+  collapsed?: boolean
+  id: string
 }
 
 export type FormField = {
-  value: unknown
-  initialValue: unknown
-  errorMessage?: string
-  valid: boolean
-  validate?: Validate
-  disableFormData?: boolean
   condition?: Condition
+  disableFormData?: boolean
+  errorMessage?: string
+  initialValue: unknown
   passesCondition?: boolean
   rows?: Row[]
+  valid: boolean
+  validate?: Validate
+  value: unknown
 }
 
 export type Fields = {
@@ -34,21 +36,21 @@ export type Preferences = {
 }
 
 export type Props = {
-  disabled?: boolean
-  onSubmit?: (fields: Fields, data: Data) => void
-  method?: 'get' | 'patch' | 'delete' | 'post'
-  handleResponse?: (res: Response) => void
-  onSuccess?: (json: unknown) => void
-  className?: string
-  redirect?: string
-  disableSuccessStatus?: boolean
-  initialState?: Fields
-  initialData?: Data
-  waitForAutocomplete?: boolean
-  log?: boolean
-  validationOperation?: 'create' | 'update'
-  children?: React.ReactNode
   action?: string
+  children?: React.ReactNode
+  className?: string
+  disableSuccessStatus?: boolean
+  disabled?: boolean
+  handleResponse?: (res: Response) => void
+  initialData?: Data
+  initialState?: Fields
+  log?: boolean
+  method?: 'delete' | 'get' | 'patch' | 'post'
+  onSubmit?: (fields: Fields, data: Data) => void
+  onSuccess?: (json: unknown) => void
+  redirect?: string
+  validationOperation?: 'create' | 'update'
+  waitForAutocomplete?: boolean
 }
 
 export type SubmitOptions = {
@@ -74,115 +76,115 @@ export type SetProcessing = (processing: boolean) => void;
 export type Reset = (fieldSchema: FieldConfig[], data: unknown) => Promise<void>
 
 export type REPLACE_STATE = {
-  type: 'REPLACE_STATE'
   state: Fields
+  type: 'REPLACE_STATE'
 }
 
 export type REMOVE = {
-  type: 'REMOVE'
   path: string
+  type: 'REMOVE'
 }
 
 export type MODIFY_CONDITION = {
-  type: 'MODIFY_CONDITION'
   path: string
   result: boolean
+  type: 'MODIFY_CONDITION'
   user: User
 }
 
 export type UPDATE = {
-  type: 'UPDATE'
   path: string
+  type: 'UPDATE'
 } & Partial<FormField>
 
 export type REMOVE_ROW = {
-  type: 'REMOVE_ROW'
-  rowIndex: number
   path: string
+  rowIndex: number
+  type: 'REMOVE_ROW'
 }
 
 export type ADD_ROW = {
-  type: 'ADD_ROW'
-  rowIndex?: number
-  path: string
-  subFieldState?: Fields
   blockType?: string
+  path: string
+  rowIndex?: number
+  subFieldState?: Fields
+  type: 'ADD_ROW'
 }
 
 export type REPLACE_ROW = {
-  type: 'REPLACE_ROW'
-  rowIndex: number
-  path: string
-  subFieldState?: Fields
   blockType?: string
+  path: string
+  rowIndex: number
+  subFieldState?: Fields
+  type: 'REPLACE_ROW'
 }
 
 export type DUPLICATE_ROW = {
-  type: 'DUPLICATE_ROW'
-  rowIndex: number
   path: string
+  rowIndex: number
+  type: 'DUPLICATE_ROW'
 }
 
 export type MOVE_ROW = {
-  type: 'MOVE_ROW'
   moveFromIndex: number
   moveToIndex: number
   path: string
+  type: 'MOVE_ROW'
 }
 
 export type SET_ROW_COLLAPSED = {
-  type: 'SET_ROW_COLLAPSED'
+  collapsed: boolean
   path: string
   rowID: string
-  collapsed: boolean
   setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
+  type: 'SET_ROW_COLLAPSED'
 }
 
 export type SET_ALL_ROWS_COLLAPSED = {
-  type: 'SET_ALL_ROWS_COLLAPSED'
-  path: string
   collapsed: boolean
+  path: string
   setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
+  type: 'SET_ALL_ROWS_COLLAPSED'
 }
 
 export type FieldAction =
-  | REPLACE_STATE
-  | REMOVE
-  | MODIFY_CONDITION
-  | UPDATE
-  | REMOVE_ROW
   | ADD_ROW
-  | REPLACE_ROW
   | DUPLICATE_ROW
+  | MODIFY_CONDITION
   | MOVE_ROW
-  | SET_ROW_COLLAPSED
+  | REMOVE
+  | REMOVE_ROW
+  | REPLACE_ROW
+  | REPLACE_STATE
   | SET_ALL_ROWS_COLLAPSED
+  | SET_ROW_COLLAPSED
+  | UPDATE
 
 export type FormFieldsContext = [Fields, Dispatch<FieldAction>]
 
 export type Context = {
+  addFieldRow: ({ data, path, rowIndex }: { data?: Data, path: string, rowIndex: number }) => Promise<void>
+  buildRowErrors: () => void
+  createFormData: CreateFormData
+  disabled: boolean
+  dispatchFields: Dispatch<FieldAction>
   /**
    * @deprecated Form context fields may be outdated and should not be relied on. Instead, prefer `useFormFields`.
    */
   fields: Fields
-  submit: Submit
-  dispatchFields: Dispatch<FieldAction>
-  validateForm: ValidateForm
-  createFormData: CreateFormData
-  disabled: boolean
-  getFields: GetFields
-  getField: GetField
+  formRef: React.MutableRefObject<HTMLFormElement>
   getData: GetData
-  getSiblingData: GetSiblingData
   getDataByPath: GetDataByPath
+  getField: GetField
+  getFields: GetFields
+  getSiblingData: GetSiblingData
+  removeFieldRow: ({ path, rowIndex }: { path: string, rowIndex: number }) => Promise<void>
+  replaceFieldRow: ({ data, path, rowIndex }: { data?: Data, path: string, rowIndex: number }) => Promise<void>
+  replaceState: (state: Fields) => void
+  reset: Reset
   setModified: SetModified
   setProcessing: SetProcessing
   setSubmitted: SetSubmitted
-  formRef: React.MutableRefObject<HTMLFormElement>
-  reset: Reset
-  replaceState: (state: Fields) => void
-  buildRowErrors: () => void
-  addFieldRow: ({ path, rowIndex, data }: { path: string, rowIndex: number, data?: Data }) => Promise<void>
-  removeFieldRow: ({ path, rowIndex }: { path: string, rowIndex: number }) => Promise<void>
-  replaceFieldRow: ({ path, rowIndex, data }: { path: string, rowIndex: number, data?: Data }) => Promise<void>
+  submit: Submit
+  validateForm: ValidateForm
 }

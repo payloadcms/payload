@@ -1,12 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react';
-
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../Config';
-import { useAuth } from '../Auth';
+
 import { requests } from '../../../api';
+import { useAuth } from '../Auth';
+import { useConfig } from '../Config';
 
 type PreferencesContext = {
-  getPreference: <T = any>(key: string) => T | Promise<T>;
+  getPreference: <T = any>(key: string) => Promise<T> | T;
   setPreference: <T = any>(key: string, value: T) => Promise<void>;
 }
 
@@ -15,8 +15,8 @@ const Context = createContext({} as PreferencesContext);
 const requestOptions = (value, language) => ({
   body: JSON.stringify({ value }),
   headers: {
-    'Content-Type': 'application/json',
     'Accept-Language': language,
+    'Content-Type': 'application/json',
   },
 });
 
@@ -26,7 +26,7 @@ export const PreferencesProvider: React.FC<{children?: React.ReactNode}> = ({ ch
   const config = useConfig();
   const { user } = useAuth();
   const { i18n } = useTranslation();
-  const { serverURL, routes: { api } } = config;
+  const { routes: { api }, serverURL } = config;
 
   useEffect(() => {
     if (!user) {

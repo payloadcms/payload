@@ -1,13 +1,15 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-import { GeneratePreviewURL } from '../../../../config/types';
+
+import type { GeneratePreviewURL } from '../../../../config/types';
+
 import { useAuth } from '../../utilities/Auth';
-import Button from '../Button';
-import { useLocale } from '../../utilities/Locale';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useConfig } from '../../utilities/Config';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import { useLocale } from '../../utilities/Locale';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import Button from '../Button';
 
 const baseClass = 'preview-btn';
 
@@ -15,17 +17,17 @@ export type CustomPreviewButtonProps = React.ComponentType<DefaultPreviewButtonP
   DefaultButton: React.ComponentType<DefaultPreviewButtonProps>;
 }>
 export type DefaultPreviewButtonProps = {
-  preview: () => void;
   disabled: boolean;
   label: string;
+  preview: () => void;
 };
-const DefaultPreviewButton: React.FC<DefaultPreviewButtonProps> = ({ preview, disabled, label }) => {
+const DefaultPreviewButton: React.FC<DefaultPreviewButtonProps> = ({ disabled, label, preview }) => {
   return (
     <Button
-      className={baseClass}
       buttonStyle="secondary"
-      onClick={preview}
+      className={baseClass}
       disabled={disabled}
+      onClick={preview}
     >
       {label}
     </Button>
@@ -40,12 +42,12 @@ const PreviewButton: React.FC<Props> = ({
   CustomComponent,
   generatePreviewURL,
 }) => {
-  const { id, collection, global } = useDocumentInfo();
+  const { collection, global, id } = useDocumentInfo();
 
   const [isLoading, setIsLoading] = useState(false);
   const { code: locale } = useLocale();
   const { token } = useAuth();
-  const { serverURL, routes: { api } } = useConfig();
+  const { routes: { api }, serverURL } = useConfig();
   const { t } = useTranslation('version');
   const isGeneratingPreviewURL = useRef(false);
 
@@ -78,14 +80,14 @@ const PreviewButton: React.FC<Props> = ({
 
   return (
     <RenderCustomComponent
-      CustomComponent={CustomComponent}
-      DefaultComponent={DefaultPreviewButton}
       componentProps={{
-        preview,
+        DefaultButton: DefaultPreviewButton,
         disabled: isLoading || !generatePreviewURL,
         label: isLoading ? t('general:loading') : t('preview'),
-        DefaultButton: DefaultPreviewButton,
+        preview,
       }}
+      CustomComponent={CustomComponent}
+      DefaultComponent={DefaultPreviewButton}
     />
   );
 };

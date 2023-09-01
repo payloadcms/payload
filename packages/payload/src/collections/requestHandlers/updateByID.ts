@@ -1,12 +1,15 @@
-import { NextFunction, Response } from 'express';
+import type { NextFunction, Response } from 'express';
+
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
+
+import type { PayloadRequest } from '../../express/types';
+
 import formatSuccessResponse from '../../express/responses/formatSuccess';
 import updateByID from '../operations/updateByID';
 
 export type UpdateResult = {
-  message: string
   doc: Document
+  message: string
 };
 
 export async function deprecatedUpdate(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<UpdateResult> | void> {
@@ -21,13 +24,13 @@ export default async function updateByIDHandler(req: PayloadRequest, res: Respon
     const autosave = req.query.autosave === 'true';
 
     const doc = await updateByID({
-      req,
+      autosave,
       collection: req.collection,
-      id: req.params.id,
       data: req.body,
       depth: parseInt(String(req.query.depth), 10),
       draft,
-      autosave,
+      id: req.params.id,
+      req,
     });
 
     let message = req.t('general:updatedSuccessfully');

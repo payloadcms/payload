@@ -1,24 +1,26 @@
-import { SanitizedCollectionConfig } from '../../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../../globals/config/types';
-import { Operation } from '../../../types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { traverseFields } from './traverseFields';
+import type { SanitizedCollectionConfig } from '../../../collections/config/types';
+import type { PayloadRequest, RequestContext } from '../../../express/types';
+import type { SanitizedGlobalConfig } from '../../../globals/config/types';
+import type { Operation } from '../../../types';
+
 import { ValidationError } from '../../../errors';
 import deepCopyObject from '../../../utilities/deepCopyObject';
+import { traverseFields } from './traverseFields';
 
 type Args<T> = {
-  data: T | Record<string, unknown>
-  doc: T | Record<string, unknown>
+  context: RequestContext
+  data: Record<string, unknown> | T
+  doc: Record<string, unknown> | T
   docWithLocales: Record<string, unknown>
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
-  id?: string | number
+  id?: number | string
   operation: Operation
   req: PayloadRequest
   skipValidation?: boolean
-  context: RequestContext
 }
 
 export const beforeChange = async <T extends Record<string, unknown>>({
+  context,
   data: incomingData,
   doc,
   docWithLocales,
@@ -27,28 +29,27 @@ export const beforeChange = async <T extends Record<string, unknown>>({
   operation,
   req,
   skipValidation,
-  context,
 }: Args<T>): Promise<T> => {
   const data = deepCopyObject(incomingData);
   const mergeLocaleActions = [];
-  const errors: { message: string, field: string }[] = [];
+  const errors: { field: string, message: string }[] = [];
 
   await traverseFields({
+    context,
     data,
     doc,
     docWithLocales,
     errors,
+    fields: entityConfig.fields,
     id,
+    mergeLocaleActions,
     operation,
     path: '',
-    mergeLocaleActions,
     req,
     siblingData: data,
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,
-    fields: entityConfig.fields,
     skipValidation,
-    context,
   });
 
   if (errors.length > 0) {

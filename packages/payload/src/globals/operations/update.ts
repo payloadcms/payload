@@ -1,46 +1,48 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { DeepPartial } from 'ts-essentials';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+import type { DeepPartial } from 'ts-essentials';
+
+import type { PayloadRequest } from '../../express/types';
 import type { Where } from '../../types';
-import { SanitizedGlobalConfig } from '../config/types';
+import type { SanitizedGlobalConfig } from '../config/types';
+
 import executeAccess from '../../auth/executeAccess';
-import { beforeChange } from '../../fields/hooks/beforeChange';
-import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { PayloadRequest } from '../../express/types';
-import { saveVersion } from '../../versions/saveVersion';
-import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion';
+import { beforeChange } from '../../fields/hooks/beforeChange';
+import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
+import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion';
+import { saveVersion } from '../../versions/saveVersion';
 
-type Args<T extends { [field: string | number | symbol]: unknown }> = {
-  globalConfig: SanitizedGlobalConfig
-  slug: string
-  req: PayloadRequest
-  depth?: number
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
-  draft?: boolean
+type Args<T extends { [field: number | string | symbol]: unknown }> = {
   autosave?: boolean
   data: DeepPartial<Omit<T, 'id'>>
+  depth?: number
+  draft?: boolean
+  globalConfig: SanitizedGlobalConfig
+  overrideAccess?: boolean
+  req: PayloadRequest
+  showHiddenFields?: boolean
+  slug: string
 }
 
 async function update<TSlug extends keyof GeneratedTypes['globals']>(
   args: Args<GeneratedTypes['globals'][TSlug]>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
-    globalConfig,
-    slug,
-    req,
-    req: {
-      payload,
-      locale,
-    },
-    depth,
-    overrideAccess,
-    showHiddenFields,
-    draft: draftArg,
     autosave,
+    depth,
+    draft: draftArg,
+    globalConfig,
+    overrideAccess,
+    req: {
+      locale,
+      payload,
+    },
+    req,
+    showHiddenFields,
+    slug,
   } = args;
 
   try {
@@ -55,8 +57,8 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess ? await executeAccess({
-      req,
       data,
+      req,
     }, globalConfig.access.update) : true;
 
     // /////////////////////////////////////
@@ -72,12 +74,12 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
       global,
       globalExists,
     } = await getLatestGlobalVersion({
-      payload,
       config: globalConfig,
+      locale,
+      payload,
+      req,
       slug,
       where: query,
-      locale,
-      req,
     });
 
     let globalJSON: Record<string, unknown> = {};
@@ -91,13 +93,13 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     }
 
     const originalDoc = await afterRead({
+      context: req.context,
       depth: 0,
       doc: globalJSON,
       entityConfig: globalConfig,
-      req,
       overrideAccess: true,
+      req,
       showHiddenFields,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -105,13 +107,13 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     // /////////////////////////////////////
 
     data = await beforeValidate({
+      context: req.context,
       data,
       doc: originalDoc,
       entityConfig: globalConfig,
       operation: 'update',
       overrideAccess,
       req,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -123,8 +125,8 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 
       data = (await hook({
         data,
-        req,
         originalDoc,
+        req,
       })) || data;
     }, Promise.resolve());
 
@@ -137,8 +139,8 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 
       data = (await hook({
         data,
-        req,
         originalDoc,
+        req,
       })) || data;
     }, Promise.resolve());
 
@@ -147,6 +149,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     // /////////////////////////////////////
 
     let result = await beforeChange({
+      context: req.context,
       data,
       doc: originalDoc,
       docWithLocales: globalJSON,
@@ -154,7 +157,6 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
       operation: 'update',
       req,
       skipValidation: shouldSaveDraft,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -164,15 +166,15 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     if (!shouldSaveDraft) {
       if (globalExists) {
         result = await payload.db.updateGlobal({
-          slug,
           data: result,
           req,
+          slug,
         });
       } else {
         result = await payload.db.createGlobal({
-          slug,
           data: result,
           req,
+          slug,
         });
       }
     }
@@ -183,16 +185,16 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 
     if (globalConfig.versions) {
       result = await saveVersion({
-        payload,
-        global: globalConfig,
-        req,
+        autosave,
         docWithLocales: {
           ...result,
           createdAt: result.createdAt,
           updatedAt: result.updatedAt,
         },
-        autosave,
         draft: shouldSaveDraft,
+        global: globalConfig,
+        payload,
+        req,
       });
     }
 
@@ -201,13 +203,13 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     // /////////////////////////////////////
 
     result = await afterRead({
+      context: req.context,
       depth,
       doc: result,
       entityConfig: globalConfig,
-      req,
       overrideAccess,
+      req,
       showHiddenFields,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -228,13 +230,13 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     // /////////////////////////////////////
 
     result = await afterChange({
+      context: req.context,
       data,
       doc: result,
-      previousDoc: originalDoc,
       entityConfig: globalConfig,
       operation: 'update',
+      previousDoc: originalDoc,
       req,
-      context: req.context,
     });
 
     // /////////////////////////////////////

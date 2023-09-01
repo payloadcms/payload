@@ -1,14 +1,14 @@
 import React, { useCallback } from 'react';
 
+import type { Props } from './types';
+
 import { code } from '../../../../../fields/validations';
+import { CodeEditor } from '../../../elements/CodeEditor';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
 import Label from '../../Label';
-import { Props } from './types';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
-import { CodeEditor } from '../../../elements/CodeEditor';
-
 import './index.scss';
 
 const prismToMonacoLanguageMap = {
@@ -20,21 +20,21 @@ const baseClass = 'code-field';
 
 const Code: React.FC<Props> = (props) => {
   const {
-    path: pathFromProps,
-    name,
-    required,
-    validate = code,
     admin: {
+      className,
+      condition,
+      description,
+      editorOptions,
+      language,
       readOnly,
       style,
-      className,
       width,
-      language,
-      description,
-      condition,
-      editorOptions,
     } = {},
     label,
+    name,
+    path: pathFromProps,
+    required,
+    validate = code,
   } = props;
 
   const path = pathFromProps || name;
@@ -44,14 +44,14 @@ const Code: React.FC<Props> = (props) => {
   }, [validate, required]);
 
   const {
-    value,
-    showError,
-    setValue,
     errorMessage,
+    setValue,
+    showError,
+    value,
   } = useField({
+    condition,
     path,
     validate: memoizedValidate,
-    condition,
   });
 
   const classes = [
@@ -64,15 +64,15 @@ const Code: React.FC<Props> = (props) => {
 
   return (
     <div
-      className={classes}
       style={{
         ...style,
         width,
       }}
+      className={classes}
     >
       <Error
-        showError={showError}
         message={errorMessage}
+        showError={showError}
       />
       <Label
         htmlFor={`field-${path}`}
@@ -80,15 +80,15 @@ const Code: React.FC<Props> = (props) => {
         required={required}
       />
       <CodeEditor
-        options={editorOptions}
         defaultLanguage={prismToMonacoLanguageMap[language] || language}
-        value={value as string || ''}
         onChange={readOnly ? () => null : (val) => setValue(val)}
+        options={editorOptions}
         readOnly={readOnly}
+        value={value as string || ''}
       />
       <FieldDescription
-        value={value}
         description={description}
+        value={value}
       />
     </div>
   );

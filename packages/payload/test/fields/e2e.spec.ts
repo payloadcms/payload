@@ -1,19 +1,21 @@
 import type { Page } from '@playwright/test';
+
 import { expect, test } from '@playwright/test';
 import path from 'path';
+
 import payload from '../../src';
+import { mapAsync } from '../../src/utilities/mapAsync';
+import wait from '../../src/utilities/wait';
+import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers';
-import { textDoc, textFieldsSlug } from './collections/Text';
-import { pointFieldsSlug } from './collections/Point';
-import { tabsSlug } from './collections/Tabs';
 import { collapsibleFieldsSlug } from './collections/Collapsible';
-import wait from '../../src/utilities/wait';
 import { jsonDoc } from './collections/JSON';
 import { numberDoc } from './collections/Number';
+import { pointFieldsSlug } from './collections/Point';
 import { relationshipFieldsSlug } from './collections/Relationship';
-import { mapAsync } from '../../src/utilities/mapAsync';
+import { tabsSlug } from './collections/Tabs';
+import { textDoc, textFieldsSlug } from './collections/Text';
 
 const { afterEach, beforeAll, describe } = test;
 
@@ -57,7 +59,7 @@ describe('fields', () => {
 
     test('should show i18n placeholder', async () => {
       await page.goto(url.create);
-      await expect(await page.locator('#field-i18nText')).toHaveAttribute('placeholder', 'en placeholder');
+      await expect(page.locator('#field-i18nText')).toHaveAttribute('placeholder', 'en placeholder');
     });
 
     test('should show i18n descriptions', async () => {
@@ -87,7 +89,7 @@ describe('fields', () => {
       const field = page.locator('#field-number');
       await field.fill(String(input));
       await saveDocAndAssert(page);
-      await expect(await field.inputValue()).toEqual(String(input));
+      await await expect(field).toHaveValue(String(input));
     });
 
     test('should create hasMany', async () => {
@@ -146,7 +148,7 @@ describe('fields', () => {
 
     test('should show i18n radio labels', async () => {
       await page.goto(url.create);
-      await expect(await page.locator('label[for="field-radio-one"] .radio-input__label'))
+      await expect(page.locator('label[for="field-radio-one"] .radio-input__label'))
         .toHaveText('Value One');
     });
   });
@@ -216,12 +218,12 @@ describe('fields', () => {
       await groupLatField.fill('-8');
 
       await saveDocAndAssert(page);
-      await expect(await longField.getAttribute('value')).toEqual('9');
-      await expect(await latField.getAttribute('value')).toEqual('-2');
-      await expect(await localizedLongField.getAttribute('value')).toEqual('1');
-      await expect(await localizedLatField.getAttribute('value')).toEqual('-1');
-      await expect(await groupLongitude.getAttribute('value')).toEqual('3');
-      await expect(await groupLatField.getAttribute('value')).toEqual('-8');
+      await await expect(longField).toHaveAttribute('value', '9');
+      await await expect(latField).toHaveAttribute('value', '-2');
+      await await expect(localizedLongField).toHaveAttribute('value', '1');
+      await await expect(localizedLatField).toHaveAttribute('value', '-1');
+      await await expect(groupLongitude).toHaveAttribute('value', '3');
+      await await expect(groupLatField).toHaveAttribute('value', '-8');
     });
 
     test('should update point', async () => {
@@ -246,12 +248,12 @@ describe('fields', () => {
 
       await saveDocAndAssert(page);
 
-      await expect(await longField.getAttribute('value')).toEqual('9');
-      await expect(await latField.getAttribute('value')).toEqual('-2');
-      await expect(await localizedLongField.getAttribute('value')).toEqual('2');
-      await expect(await localizedLatField.getAttribute('value')).toEqual('-2');
-      await expect(await groupLongitude.getAttribute('value')).toEqual('3');
-      await expect(await groupLatField.getAttribute('value')).toEqual('-8');
+      await await expect(longField).toHaveAttribute('value', '9');
+      await await expect(latField).toHaveAttribute('value', '-2');
+      await await expect(localizedLongField).toHaveAttribute('value', '2');
+      await await expect(localizedLatField).toHaveAttribute('value', '-2');
+      await await expect(groupLongitude).toHaveAttribute('value', '3');
+      await await expect(groupLatField).toHaveAttribute('value', '-8');
     });
 
     test('should be able to clear a value point', async () => {
@@ -265,8 +267,8 @@ describe('fields', () => {
 
       await saveDocAndAssert(page);
 
-      await expect(await groupLongitude.getAttribute('value')).toEqual('');
-      await expect(await groupLatField.getAttribute('value')).toEqual('');
+      await await expect(groupLongitude).toHaveAttribute('value', '');
+      await await expect(groupLatField).toHaveAttribute('value', '');
     });
   });
 
@@ -281,7 +283,7 @@ describe('fields', () => {
       await page.goto(url.create);
       await page.locator('#field-collapsible-3__1 >> #field-nestedTitle').fill(label);
       await wait(100);
-      const customCollapsibleLabel = await page.locator('#field-collapsible-3__1 >> .row-label');
+      const customCollapsibleLabel = page.locator('#field-collapsible-3__1 >> .row-label');
       await expect(customCollapsibleLabel).toContainText(label);
     });
 
@@ -292,7 +294,7 @@ describe('fields', () => {
 
       await page.locator('#field-collapsible-4__0-arrayWithCollapsibles__0 >> #field-arrayWithCollapsibles__0__innerCollapsible').fill(label);
       await wait(100);
-      const customCollapsibleLabel = await page.locator(`#field-collapsible-4__0-arrayWithCollapsibles__0 >> .row-label :text("${label}")`);
+      const customCollapsibleLabel = page.locator(`#field-collapsible-4__0-arrayWithCollapsibles__0 >> .row-label :text("${label}")`);
       await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase');
     });
   });
@@ -309,32 +311,32 @@ describe('fields', () => {
       await expect(addButton).toContainText('Add Block');
       await addButton.click();
 
-      const blocksDrawer = await page.locator('[id^=drawer_1_blocks-drawer-]');
+      const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]');
       await expect(blocksDrawer).toBeVisible();
 
       // select the first block in the drawer
-      const firstBlockSelector = await blocksDrawer.locator('.blocks-drawer__blocks .blocks-drawer__block').first();
+      const firstBlockSelector = blocksDrawer.locator('.blocks-drawer__blocks .blocks-drawer__block').first();
       await expect(firstBlockSelector).toContainText('Text');
       await firstBlockSelector.click();
 
       // ensure the block was appended to the rows
-      const addedRow = await page.locator('#field-blocks .blocks-field__row').last();
+      const addedRow = page.locator('#field-blocks .blocks-field__row').last();
       await expect(addedRow).toBeVisible();
       await expect(addedRow.locator('.blocks-field__block-pill-text')).toContainText('Text');
     });
 
     test('should open blocks drawer from block row and add below', async () => {
       await page.goto(url.create);
-      const firstRow = await page.locator('#field-blocks #blocks-row-0');
-      const rowActions = await firstRow.locator('.collapsible__actions');
+      const firstRow = page.locator('#field-blocks #blocks-row-0');
+      const rowActions = firstRow.locator('.collapsible__actions');
       await expect(rowActions).toBeVisible();
 
       await rowActions.locator('.array-actions__button').click();
-      const addBelowButton = await rowActions.locator('.array-actions__action.array-actions__add');
+      const addBelowButton = rowActions.locator('.array-actions__action.array-actions__add');
       await expect(addBelowButton).toBeVisible();
       addBelowButton.click();
 
-      const blocksDrawer = await page.locator('[id^=drawer_1_blocks-drawer-]');
+      const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]');
       await expect(blocksDrawer).toBeVisible();
 
       // select the first block in the drawer
@@ -356,7 +358,7 @@ describe('fields', () => {
       await expect(addButton).toContainText('Add Block en');
       await addButton.click();
 
-      const blocksDrawer = await page.locator('[id^=drawer_1_blocks-drawer-]');
+      const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]');
       await expect(blocksDrawer).toBeVisible();
 
       // select the first block in the drawer
@@ -383,14 +385,14 @@ describe('fields', () => {
       await page.locator('#blocksWithSimilarConfigs-row-0').getByRole('button', { name: 'Add Item' }).click();
       await page.locator('input[name="blocksWithSimilarConfigs.0.items.0.title"]').fill('items>0>title');
 
-      expect(await page.locator('input[name="blocksWithSimilarConfigs.0.items.0.title"]').inputValue()).toEqual('items>0>title');
+      await expect(page.locator('input[name="blocksWithSimilarConfigs.0.items.0.title"]')).toHaveValue('items>0>title');
 
       await addBlock('Block 2');
 
       await page.locator('#blocksWithSimilarConfigs-row-1').getByRole('button', { name: 'Add Item' }).click();
       await page.locator('input[name="blocksWithSimilarConfigs.1.items.0.title2"]').fill('items>1>title');
 
-      expect(await page.locator('input[name="blocksWithSimilarConfigs.1.items.0.title2"]').inputValue()).toEqual('items>1>title');
+      await expect(page.locator('input[name="blocksWithSimilarConfigs.1.items.0.title2"]')).toHaveValue('items>1>title');
     });
   });
 
@@ -420,7 +422,7 @@ describe('fields', () => {
 
       await page.locator('#field-rowLabelAsFunction__0__title').fill(label);
       await wait(100);
-      const customRowLabel = await page.locator('#rowLabelAsFunction-row-0 >> .row-label');
+      const customRowLabel = page.locator('#rowLabelAsFunction-row-0 >> .row-label');
       await expect(customRowLabel).toContainText(label);
     });
 
@@ -431,7 +433,7 @@ describe('fields', () => {
 
       await page.locator('#field-rowLabelAsComponent__0__title').fill(label);
       await wait(100);
-      const customRowLabel = await page.locator('#rowLabelAsComponent-row-0 >> .row-label :text("custom row label")');
+      const customRowLabel = page.locator('#rowLabelAsComponent-row-0 >> .row-label :text("custom row label")');
       await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase');
     });
 
@@ -460,7 +462,7 @@ describe('fields', () => {
         await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click();
         await page.locator('#potentiallyEmptyArray-row-0 .popup__scroll .array-actions__remove').click();
 
-        const rowsContainer = await page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
+        const rowsContainer = page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
         const directChildDivCount = await rowsContainer.evaluate((element) => {
           const childDivCount = element.querySelectorAll(':scope > div');
           return childDivCount.length;
@@ -480,7 +482,7 @@ describe('fields', () => {
         await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click();
         await page.locator('#potentiallyEmptyArray-row-0 .popup__scroll .array-actions__action.array-actions__remove').click();
 
-        const rowsContainer = await page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
+        const rowsContainer = page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
         const directChildDivCount = await rowsContainer.evaluate((element) => {
           const childDivCount = element.querySelectorAll(':scope > div');
           return childDivCount.length;
@@ -507,7 +509,7 @@ describe('fields', () => {
 
         await saveDocAndAssert(page);
 
-        const rowsContainer = await page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
+        const rowsContainer = page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows');
         const directChildDivCount = await rowsContainer.evaluate((element) => {
           const childDivCount = element.querySelectorAll(':scope > div');
           return childDivCount.length;
@@ -522,13 +524,13 @@ describe('fields', () => {
         await page.goto(url.create);
 
         await page.locator('.custom-blocks-field-management').getByRole('button', { name: 'Add Block 1' }).click();
-        expect(await page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]').inputValue()).toEqual('Block 1: Prefilled Title');
+        await expect(page.locator('#field-customBlocks input[name="customBlocks.0.block1Title"]')).toHaveValue('Block 1: Prefilled Title');
 
         await page.locator('.custom-blocks-field-management').getByRole('button', { name: 'Add Block 2' }).click();
-        expect(await page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]').inputValue()).toEqual('Block 2: Prefilled Title');
+        await expect(page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]')).toHaveValue('Block 2: Prefilled Title');
 
         await page.locator('.custom-blocks-field-management').getByRole('button', { name: 'Replace Block 2' }).click();
-        expect(await page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]').inputValue()).toEqual('REPLACED BLOCK');
+        await expect(page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]')).toHaveValue('REPLACED BLOCK');
       });
     });
   });
@@ -604,7 +606,7 @@ describe('fields', () => {
         await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
 
         // find the drawer
-        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
+        const editLinkModal = page.locator('[id^=drawer_1_rich-text-link-]');
         await expect(editLinkModal).toBeVisible();
 
         // Fill values and click Confirm
@@ -613,7 +615,7 @@ describe('fields', () => {
         await editLinkModal.locator('#field-url').fill('');
         await wait(200);
         await editLinkModal.locator('button[type="submit"]').click();
-        const errorField = await page.locator('[id^=drawer_1_rich-text-link-] .render-fields > :nth-child(3)');
+        const errorField = page.locator('[id^=drawer_1_rich-text-link-] .render-fields > :nth-child(3)');
         const hasErrorClass = await errorField.evaluate((el) => el.classList.contains('error'));
         expect(hasErrorClass).toBe(true);
       });
@@ -625,7 +627,7 @@ describe('fields', () => {
         await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
 
         // find the drawer
-        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
+        const editLinkModal = page.locator('[id^=drawer_1_rich-text-link-]');
         await expect(editLinkModal).toBeVisible();
 
         // Fill values and click Confirm
@@ -651,7 +653,7 @@ describe('fields', () => {
         await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
 
         // find the drawer
-        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
+        const editLinkModal = page.locator('[id^=drawer_1_rich-text-link-]');
         await expect(editLinkModal).toBeVisible();
 
         // Fill values and click Confirm
@@ -691,13 +693,13 @@ describe('fields', () => {
         await navigateToRichTextFields();
 
         // open link drawer
-        const field = await page.locator('#field-richText');
-        const button = await field.locator('button.rich-text-relationship__list-drawer-toggler.list-drawer__toggler');
+        const field = page.locator('#field-richText');
+        const button = field.locator('button.rich-text-relationship__list-drawer-toggler.list-drawer__toggler');
         button.click();
 
         // check that the search is on the `name` field of the `text-fields` collection
-        const drawer = await page.locator('[id^=list-drawer_1_]');
-        await expect(await drawer.locator('.search-filter__input')).toHaveAttribute('placeholder', 'Search by Text');
+        const drawer = page.locator('[id^=list-drawer_1_]');
+        await expect(drawer.locator('.search-filter__input')).toHaveAttribute('placeholder', 'Search by Text');
 
         // change the selected collection to `array-fields`
         await page.locator('.list-drawer__select-collection-wrap .rs__control').click();
@@ -705,7 +707,7 @@ describe('fields', () => {
         await menu.locator('.rs__option').getByText('Array Field').click();
 
         // check that `id` is now the default search field
-        await expect(await drawer.locator('.search-filter__input')).toHaveAttribute('placeholder', 'Search by ID');
+        await expect(drawer.locator('.search-filter__input')).toHaveAttribute('placeholder', 'Search by ID');
       });
 
       test('should only list RTE enabled collections in link drawer', async () => {
@@ -713,7 +715,7 @@ describe('fields', () => {
 
         await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
 
-        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
+        const editLinkModal = page.locator('[id^=drawer_1_rich-text-link-]');
         await expect(editLinkModal).toBeVisible();
 
         await editLinkModal.locator('label[for="field-linkType-internal"]').click();
@@ -744,15 +746,15 @@ describe('fields', () => {
         await navigateToRichTextFields();
         const field = page.locator('.rich-text', { has: page.locator('#field-richTextCustomFields') });
         // open link drawer
-        const button = await field.locator('button.rich-text__button.link');
+        const button = field.locator('button.rich-text__button.link');
         await button.click();
 
         // fill link fields
-        const linkDrawer = await page.locator('[id^=drawer_1_rich-text-link-]');
-        const fields = await linkDrawer.locator('.render-fields > .field-type');
+        const linkDrawer = page.locator('[id^=drawer_1_rich-text-link-]');
+        const fields = linkDrawer.locator('.render-fields > .field-type');
         await fields.locator('#field-text').fill(linkText);
         await fields.locator('#field-url').fill('https://payloadcms.com');
-        const input = await fields.locator('#field-fields__customLinkField');
+        const input = fields.locator('#field-fields__customLinkField');
         await input.fill(value);
 
         // submit link closing drawer
@@ -768,9 +770,9 @@ describe('fields', () => {
 
         await popup.locator('.rich-text-link__link-edit').click();
 
-        const linkDrawer2 = await page.locator('[id^=drawer_1_rich-text-link-]');
-        const fields2 = await linkDrawer2.locator('.render-fields > .field-type');
-        const input2 = await fields2.locator('#field-fields__customLinkField');
+        const linkDrawer2 = page.locator('[id^=drawer_1_rich-text-link-]');
+        const fields2 = linkDrawer2.locator('.render-fields > .field-type');
+        const input2 = fields2.locator('#field-fields__customLinkField');
 
 
         await expect(input2).toHaveValue(value);
@@ -793,7 +795,7 @@ describe('fields', () => {
         await expect(editLinkModal).toBeVisible();
 
         // Check the drawer values
-        const textField = await editLinkModal.locator('#field-text');
+        const textField = editLinkModal.locator('#field-text');
         await expect(textField).toHaveValue('render links');
 
         // Close the drawer
@@ -816,7 +818,7 @@ describe('fields', () => {
         await expect(editLinkModal).toBeVisible();
 
         // Check the drawer values
-        const textField = await editLinkModal.locator('#field-text');
+        const textField = editLinkModal.locator('#field-text');
         await expect(textField).toHaveValue('link to relationships');
 
         // Close the drawer
@@ -826,36 +828,36 @@ describe('fields', () => {
 
       test('should open upload drawer and render custom relationship fields', async () => {
         await navigateToRichTextFields();
-        const field = await page.locator('#field-richText');
-        const button = await field.locator('button.rich-text-upload__upload-drawer-toggler');
+        const field = page.locator('#field-richText');
+        const button = field.locator('button.rich-text-upload__upload-drawer-toggler');
 
         await button.click();
 
-        const documentDrawer = await page.locator('[id^=drawer_1_upload-drawer-]');
+        const documentDrawer = page.locator('[id^=drawer_1_upload-drawer-]');
         await expect(documentDrawer).toBeVisible();
-        const caption = await documentDrawer.locator('#field-caption');
+        const caption = documentDrawer.locator('#field-caption');
         await expect(caption).toBeVisible();
       });
 
       test('should open upload document drawer from read-only field', async () => {
         await navigateToRichTextFields();
-        const field = await page.locator('#field-richTextReadOnly');
-        const button = await field.locator('button.rich-text-upload__doc-drawer-toggler.doc-drawer__toggler');
+        const field = page.locator('#field-richTextReadOnly');
+        const button = field.locator('button.rich-text-upload__doc-drawer-toggler.doc-drawer__toggler');
 
         await button.click();
 
-        const documentDrawer = await page.locator('[id^=doc-drawer_uploads_1_]');
+        const documentDrawer = page.locator('[id^=doc-drawer_uploads_1_]');
         await expect(documentDrawer).toBeVisible();
       });
 
       test('should open relationship document drawer from read-only field', async () => {
         await navigateToRichTextFields();
-        const field = await page.locator('#field-richTextReadOnly');
-        const button = await field.locator('button.rich-text-relationship__doc-drawer-toggler.doc-drawer__toggler');
+        const field = page.locator('#field-richTextReadOnly');
+        const button = field.locator('button.rich-text-relationship__doc-drawer-toggler.doc-drawer__toggler');
 
         await button.click();
 
-        const documentDrawer = await page.locator('[id^=doc-drawer_text-fields_1_]');
+        const documentDrawer = page.locator('[id^=doc-drawer_text-fields_1_]');
         await expect(documentDrawer).toBeVisible();
       });
 
@@ -863,34 +865,34 @@ describe('fields', () => {
         await navigateToRichTextFields();
 
         // Highlight existing text
-        const headingElement = await page.locator('#field-richText h1 >> text="Hello, I\'m a rich text field."');
+        const headingElement = page.locator('#field-richText h1 >> text="Hello, I\'m a rich text field."');
         await headingElement.selectText();
 
         // click the toolbar link button
         await page.locator('.rich-text__toolbar button:not([disabled]) .link').first().click();
 
         // find the drawer and confirm the values
-        const editLinkModal = await page.locator('[id^=drawer_1_rich-text-link-]');
+        const editLinkModal = page.locator('[id^=drawer_1_rich-text-link-]');
         await expect(editLinkModal).toBeVisible();
-        const textField = await editLinkModal.locator('#field-text');
+        const textField = editLinkModal.locator('#field-text');
         await expect(textField).toHaveValue('Hello, I\'m a rich text field.');
       });
       test('should not take value from previous block', async () => {
         await navigateToRichTextFields();
 
         // check first block value
-        const textField = await page.locator('#field-blocks__0__text');
+        const textField = page.locator('#field-blocks__0__text');
         await expect(textField).toHaveValue('Regular text');
 
         // remove the first block
-        const editBlock = await page.locator('#blocks-row-0 .popup-button');
+        const editBlock = page.locator('#blocks-row-0 .popup-button');
         await editBlock.click();
-        const removeButton = await page.locator('#blocks-row-0').getByRole('button', { name: 'Remove' });
+        const removeButton = page.locator('#blocks-row-0').getByRole('button', { name: 'Remove' });
         await expect(removeButton).toBeVisible();
         await removeButton.click();
 
         // check new first block value
-        const richTextField = await page.locator('#field-blocks__0__text');
+        const richTextField = page.locator('#field-blocks__0__text');
         const richTextValue = await richTextField.innerText();
         await expect(richTextValue).toContain('Rich text');
       });
@@ -920,12 +922,12 @@ describe('fields', () => {
 
     test('should clear date', async () => {
       await page.goto(url.create);
-      const dateField = await page.locator('#field-default input');
+      const dateField = page.locator('#field-default input');
       await expect(dateField).toBeVisible();
       await dateField.fill('02/07/2023');
       await expect(dateField).toHaveValue('02/07/2023');
       await wait(1000);
-      const clearButton = await page.locator('#field-default .date-time-picker__clear-button');
+      const clearButton = page.locator('#field-default .date-time-picker__clear-button');
       await expect(clearButton).toBeVisible();
       await clearButton.click();
       await expect(dateField).toHaveValue('');
@@ -1023,7 +1025,7 @@ describe('fields', () => {
     test('should clear relationship values', async () => {
       await page.goto(url.create);
 
-      const field = await page.locator('#field-relationship');
+      const field = page.locator('#field-relationship');
       await field.click();
       await page.locator('.rs__option:has-text("Seeded text document")').click();
       await field.locator('.clear-indicator').click();
@@ -1078,10 +1080,10 @@ describe('fields', () => {
       await page.locator('[id^=doc-drawer_text-fields_1_] #field-text').click();
       await page.keyboard.down('1');
       await page.keyboard.type('23');
-      await expect(await page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(`${value}123`);
+      await expect(page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(`${value}123`);
       await page.keyboard.type('4567');
       await page.keyboard.press('Backspace');
-      await expect(await page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(`${value}123456`);
+      await expect(page.locator('[id^=doc-drawer_text-fields_1_] #field-text')).toHaveValue(`${value}123456`);
 
       // save drawer
       await page.locator('[id^=doc-drawer_text-fields_1_] #action-save').click();
@@ -1183,7 +1185,7 @@ describe('fields', () => {
     test('should select using the list drawer and restrict mimetype based on filterOptions', async () => {
       await page.locator('.field-type.upload .upload__toggler.list-drawer__toggler').click();
       await wait(200);
-      const jpgImages = await page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]');
+      const jpgImages = page.locator('[id^=list-drawer_1_] .upload-gallery img[src$=".jpg"]');
       expect(await jpgImages.count()).toEqual(0);
     });
 

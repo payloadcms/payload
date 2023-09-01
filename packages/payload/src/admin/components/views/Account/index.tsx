@@ -1,17 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import { useStepNav } from '../../elements/StepNav';
+import { useLocation } from 'react-router-dom';
+
+import type { Fields } from '../../forms/Form/types';
+
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
-import { useLocale } from '../../utilities/Locale';
-import DefaultAccount from './Default';
+import { useStepNav } from '../../elements/StepNav';
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import { useAuth } from '../../utilities/Auth';
+import { useConfig } from '../../utilities/Config';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import { Fields } from '../../forms/Form/types';
+import { useLocale } from '../../utilities/Locale';
 import { usePreferences } from '../../utilities/Preferences';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import DefaultAccount from './Default';
 
 const AccountView: React.FC = () => {
   const { state: locationState } = useLocation<{ data: unknown }>();
@@ -20,13 +22,10 @@ const AccountView: React.FC = () => {
   const { user } = useAuth();
   const userRef = useRef(user);
   const [internalState, setInternalState] = useState<Fields>();
-  const { id, preferencesKey, docPermissions, getDocPermissions, slug, getDocPreferences } = useDocumentInfo();
+  const { docPermissions, getDocPermissions, getDocPreferences, id, preferencesKey, slug } = useDocumentInfo();
   const { getPreference } = usePreferences();
 
   const {
-    serverURL,
-    routes: { api },
-    collections,
     admin: {
       components: {
         views: {
@@ -36,6 +35,9 @@ const AccountView: React.FC = () => {
         },
       } = {},
     },
+    collections,
+    routes: { api },
+    serverURL,
   } = useConfig();
 
   const { t } = useTranslation('authentication');
@@ -47,11 +49,11 @@ const AccountView: React.FC = () => {
   const [{ data, isLoading: isLoadingData }] = usePayloadAPI(
     `${serverURL}${api}/${slug}/${id}`,
     {
-      initialParams: {
-        'fallback-locale': 'null',
-        depth: 0,
-      },
       initialData: null,
+      initialParams: {
+        depth: 0,
+        'fallback-locale': 'null',
+      },
     },
   );
 
@@ -64,7 +66,7 @@ const AccountView: React.FC = () => {
   const onSave = React.useCallback(async (json: any) => {
     getDocPermissions();
     const preferences = await getDocPreferences();
-    const state = await buildStateFromSchema({ fieldSchema: collection.fields, preferences, data: json.doc, user, id, operation: 'update', locale, t });
+    const state = await buildStateFromSchema({ data: json.doc, fieldSchema: collection.fields, id, locale, operation: 'update', preferences, t, user });
     setInternalState(state);
   }, [collection, user, id, t, locale, getDocPermissions, getDocPreferences]);
 
@@ -81,14 +83,14 @@ const AccountView: React.FC = () => {
       const preferences = await getDocPreferences();
 
       const state = await buildStateFromSchema({
-        fieldSchema: fields,
-        preferences,
         data: dataToRender,
-        operation: 'update',
+        fieldSchema: fields,
         id,
-        user: userRef.current,
         locale,
+        operation: 'update',
+        preferences,
         t,
+        user: userRef.current,
       });
 
       await getPreference(preferencesKey);
@@ -102,19 +104,19 @@ const AccountView: React.FC = () => {
 
   return (
     <RenderCustomComponent
-      DefaultComponent={DefaultAccount}
-      CustomComponent={CustomAccount}
       componentProps={{
         action,
-        data,
+        apiURL,
         collection,
-        permissions: docPermissions,
+        data,
         hasSavePermission,
         initialState: internalState,
-        apiURL,
         isLoading,
         onSave,
+        permissions: docPermissions,
       }}
+      CustomComponent={CustomAccount}
+      DefaultComponent={DefaultAccount}
     />
   );
 };

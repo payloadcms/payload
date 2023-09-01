@@ -1,4 +1,7 @@
-import { expect, Page, test } from '@playwright/test';
+import type { Page} from '@playwright/test';
+
+import { expect, test } from '@playwright/test';
+
 import { initPayloadE2E } from '../helpers/configHelpers';
 
 const { beforeAll, describe } = test;

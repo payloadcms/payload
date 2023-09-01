@@ -1,38 +1,39 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import type { Props } from './types';
+
+import { textarea } from '../../../../../fields/validations';
+import { getTranslation } from '../../../../../utilities/getTranslation';
+import { useConfig } from '../../../utilities/Config';
+import { useLocale } from '../../../utilities/Locale';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
-import { textarea } from '../../../../../fields/validations';
-import { Props } from './types';
-import TextareaInput from './Input';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import { useLocale } from '../../../utilities/Locale';
-
-import './index.scss';
-import { useConfig } from '../../../utilities/Config';
 import { isFieldRTL } from '../shared';
+import TextareaInput from './Input';
+import './index.scss';
 
 const Textarea: React.FC<Props> = (props) => {
   const {
-    path: pathFromProps,
-    name,
-    required,
-    validate = textarea,
-    maxLength,
-    minLength,
-    localized,
     admin: {
-      readOnly,
-      style,
       className,
-      width,
-      placeholder,
-      rows,
-      description,
       condition,
+      description,
+      placeholder,
+      readOnly,
+      rows,
       rtl,
+      style,
+      width,
     } = {},
     label,
+    localized,
+    maxLength,
+    minLength,
+    name,
+    path: pathFromProps,
+    required,
+    validate = textarea,
   } = props;
 
   const { i18n } = useTranslation();
@@ -43,46 +44,46 @@ const Textarea: React.FC<Props> = (props) => {
 
   const { localization } = useConfig();
   const isRTL = isFieldRTL({
-    fieldRTL: rtl,
     fieldLocalized: localized,
+    fieldRTL: rtl,
     locale,
     localizationConfig: localization || undefined,
   });
   const memoizedValidate = useCallback((value, options) => {
-    return validate(value, { ...options, required, maxLength, minLength });
+    return validate(value, { ...options, maxLength, minLength, required });
   }, [validate, required, maxLength, minLength]);
 
   const {
-    value,
-    showError,
-    setValue,
     errorMessage,
+    setValue,
+    showError,
+    value,
   } = useField({
+    condition,
     path,
     validate: memoizedValidate,
-    condition,
   });
 
   return (
     <TextareaInput
-      path={path}
-      name={name}
       onChange={(e) => {
         setValue(e.target.value);
       }}
-      showError={showError}
+      className={className}
+      description={description}
       errorMessage={errorMessage}
-      required={required}
       label={label}
-      value={value as string}
+      name={name}
+      path={path}
       placeholder={getTranslation(placeholder, i18n)}
       readOnly={readOnly}
-      style={style}
-      className={className}
-      width={width}
-      description={description}
+      required={required}
       rows={rows}
       rtl={isRTL}
+      showError={showError}
+      style={style}
+      value={value as string}
+      width={width}
     />
   );
 };

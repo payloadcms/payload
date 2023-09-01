@@ -1,4 +1,5 @@
-import { GlobalConfig } from '../../../src/globals/config/types';
+import type { GlobalConfig } from '../../../src/globals/config/types';
+
 import { draftGlobalSlug } from '../shared';
 
 const DraftGlobal: GlobalConfig = {

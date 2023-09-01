@@ -1,30 +1,31 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Button from '../../../../elements/Button';
-import { Props } from './types';
-import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
-import Popup from '../../../../elements/Popup';
-import { useRelatedCollections } from './useRelatedCollections';
-import { useAuth } from '../../../../utilities/Auth';
-import Plus from '../../../../icons/Plus';
-import { getTranslation } from '../../../../../../utilities/getTranslation';
-import Tooltip from '../../../../elements/Tooltip';
-import { useDocumentDrawer } from '../../../../elements/DocumentDrawer';
-import { useConfig } from '../../../../utilities/Config';
-import { Props as EditViewProps } from '../../../../views/collections/Edit/types';
-import { Value } from '../types';
 
+import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
+import type { Props as EditViewProps } from '../../../../views/collections/Edit/types';
+import type { Value } from '../types';
+import type { Props } from './types';
+
+import { getTranslation } from '../../../../../../utilities/getTranslation';
+import Button from '../../../../elements/Button';
+import { useDocumentDrawer } from '../../../../elements/DocumentDrawer';
+import Popup from '../../../../elements/Popup';
+import Tooltip from '../../../../elements/Tooltip';
+import Plus from '../../../../icons/Plus';
+import { useAuth } from '../../../../utilities/Auth';
+import { useConfig } from '../../../../utilities/Config';
 import './index.scss';
+import { useRelatedCollections } from './useRelatedCollections';
 
 const baseClass = 'relationship-add-new';
 
 export const AddNewRelation: React.FC<Props> = ({
-  path,
-  hasMany,
-  relationTo,
-  value,
-  setValue,
   dispatchOptions,
+  hasMany,
+  path,
+  relationTo,
+  setValue,
+  value,
 }) => {
   const relatedCollections = useRelatedCollections(relationTo);
   const { permissions } = useAuth();
@@ -33,21 +34,21 @@ export const AddNewRelation: React.FC<Props> = ({
   const relatedToMany = relatedCollections.length > 1;
   const [collectionConfig, setCollectionConfig] = useState<SanitizedCollectionConfig>(() => (!relatedToMany ? relatedCollections[0] : undefined));
   const [popupOpen, setPopupOpen] = useState(false);
-  const { t, i18n } = useTranslation('fields');
+  const { i18n, t } = useTranslation('fields');
   const [showTooltip, setShowTooltip] = useState(false);
   const config = useConfig();
 
   const [
     DocumentDrawer,
     DocumentDrawerToggler,
-    { toggleDrawer, isDrawerOpen },
+    { isDrawerOpen, toggleDrawer },
   ] = useDocumentDrawer({
     collectionSlug: collectionConfig?.slug,
   });
 
   const onSave: EditViewProps['onSave'] = useCallback(({
-    operation,
     doc,
+    operation,
   }) => {
     if (operation === 'create') {
       const newValue: Value = Array.isArray(relationTo) ? {
@@ -62,14 +63,14 @@ export const AddNewRelation: React.FC<Props> = ({
 
       if (isNewValue) {
         dispatchOptions({
-          type: 'ADD',
           collection: collectionConfig,
+          config,
           docs: [
             doc,
           ],
-          sort: true,
           i18n,
-          config,
+          sort: true,
+          type: 'ADD',
         });
 
 
@@ -129,9 +130,9 @@ export const AddNewRelation: React.FC<Props> = ({
           <Fragment>
             <DocumentDrawerToggler
               className={`${baseClass}__add-button`}
+              onClick={() => setShowTooltip(false)}
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
-              onClick={() => setShowTooltip(false)}
             >
               <Tooltip
                 className={`${baseClass}__tooltip`}
@@ -147,13 +148,10 @@ export const AddNewRelation: React.FC<Props> = ({
         {relatedCollections.length > 1 && (
           <Fragment>
             <Popup
-              buttonType="custom"
-              horizontalAlign="center"
-              onToggleOpen={onPopopToggle}
               button={(
                 <Button
-                  className={`${baseClass}__add-button`}
                   buttonStyle="none"
+                  className={`${baseClass}__add-button`}
                   tooltip={popupOpen ? undefined : t('addNew')}
                 >
                   <Plus />
@@ -166,12 +164,12 @@ export const AddNewRelation: React.FC<Props> = ({
                       return (
                         <li key={relatedCollection.slug}>
                           <button
-                            type="button"
-                            className={`${baseClass}__relation-button ${baseClass}__relation-button--${relatedCollection.slug}`}
                             onClick={() => {
                               closePopup();
                               setSelectedCollection(relatedCollection.slug);
                             }}
+                            className={`${baseClass}__relation-button ${baseClass}__relation-button--${relatedCollection.slug}`}
+                            type="button"
                           >
                             {getTranslation(relatedCollection.labels.singular, i18n)}
                           </button>
@@ -183,6 +181,9 @@ export const AddNewRelation: React.FC<Props> = ({
                   })}
                 </ul>
               )}
+              buttonType="custom"
+              horizontalAlign="center"
+              onToggleOpen={onPopopToggle}
             />
             {collectionConfig && permissions.collections[collectionConfig.slug].create.permission && (
               <DocumentDrawer

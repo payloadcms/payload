@@ -1,21 +1,23 @@
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { Field, TabAsField } from '../../config/types';
+import type { PayloadRequest, RequestContext } from '../../../express/types';
+import type { Field, TabAsField } from '../../config/types';
+
 import { promise } from './promise';
 
 type Args<T> = {
+  context: RequestContext
   data: T
   doc: T
   fields: (Field | TabAsField)[]
-  id?: string | number
+  id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
-  context: RequestContext
 }
 
 export const traverseFields = async <T>({
+  context,
   data,
   doc,
   fields,
@@ -25,11 +27,11 @@ export const traverseFields = async <T>({
   req,
   siblingData,
   siblingDoc,
-  context,
 }: Args<T>): Promise<void> => {
   const promises = [];
   fields.forEach((field) => {
     promises.push(promise({
+      context,
       data,
       doc,
       field,
@@ -39,7 +41,6 @@ export const traverseFields = async <T>({
       req,
       siblingData,
       siblingDoc,
-      context,
     }));
   });
   await Promise.all(promises);

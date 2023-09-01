@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { useAuth } from '../../utilities/Auth';
 import { useConfig } from '../../utilities/Config';
 import Gravatar from './Gravatar';
@@ -16,10 +17,10 @@ const css = `
 const Default: React.FC = () => (
   <svg
     className="graphic-account"
-    width="25"
     height="25"
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 25 25"
+    width="25"
+    xmlns="http://www.w3.org/2000/svg"
   >
     <style>
       {css}

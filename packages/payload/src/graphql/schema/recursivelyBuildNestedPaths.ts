@@ -1,8 +1,10 @@
+import type {
+  FieldWithSubFields,
+  TabsField} from '../../fields/config/types';
+
 import {
   fieldAffectsData,
-  fieldIsPresentationalOnly,
-  FieldWithSubFields,
-  TabsField,
+  fieldIsPresentationalOnly
 } from '../../fields/config/types';
 import fieldToSchemaMap from './fieldToWhereInputSchemaMap';
 

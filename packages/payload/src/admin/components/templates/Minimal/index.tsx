@@ -1,5 +1,6 @@
 import React from 'react';
-import { Props } from './types';
+
+import type { Props } from './types';
 
 import './index.scss';
 
@@ -7,9 +8,9 @@ const baseClass = 'template-minimal';
 
 const Minimal: React.FC<Props> = (props) => {
   const {
+    children,
     className,
     style = {},
-    children,
     width = 'normal',
   } = props;
 

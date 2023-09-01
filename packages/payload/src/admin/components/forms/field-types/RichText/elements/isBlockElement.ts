@@ -23,4 +23,4 @@ const isElement = (node: any, specificType?: string | string[]): node is Element
  * Related Issue: https://github.com/ianstormtaylor/slate/issues/5287
  */
 
-export const isBlockElement = (editor: Editor, node: any): node is Element => Editor.isBlock(editor, node as any) && isElement(node);
+export const isBlockElement = (editor: Editor, node: any): node is Element => Editor.isBlock(editor, node ) && isElement(node);

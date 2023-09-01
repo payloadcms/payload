@@ -18,6 +18,6 @@ const convertArrayToHash = (arr, key) => arr.reduce((obj, item, i) => {
 
 export {
   convertArrayToHash,
-  convertObjectToArray,
   convertArrayToObject,
+  convertObjectToArray,
 };

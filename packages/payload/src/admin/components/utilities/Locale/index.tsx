@@ -1,10 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Locale } from '../../../../config/types';
-import { useConfig } from '../Config';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+
+import type { Locale } from '../../../../config/types';
+
+import { findLocaleFromCode } from '../../../../utilities/findLocaleFromCode';
 import { useAuth } from '../Auth';
+import { useConfig } from '../Config';
 import { usePreferences } from '../Preferences';
 import { useSearchParams } from '../SearchParams';
-import { findLocaleFromCode } from '../../../../utilities/findLocaleFromCode';
 
 const LocaleContext = createContext(null);
 
@@ -56,7 +58,7 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({
         if (isPreferenceInConfig) {
           setLocaleCode(preferenceLocale);
           setLocale(
-            findLocaleFromCode(localization, preferenceLocale as string),
+            findLocaleFromCode(localization, preferenceLocale ),
           );
           return;
         }

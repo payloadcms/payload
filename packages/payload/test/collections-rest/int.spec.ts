@@ -1,12 +1,14 @@
 import { randomBytes } from 'crypto';
 import mongoose from 'mongoose';
-import { initPayloadTest } from '../helpers/configHelpers';
+
 import type { Relation } from './config';
-import config, { customIdNumberSlug, customIdSlug, errorOnHookSlug, pointSlug, relationSlug, slug } from './config';
-import payload from '../../src';
-import { RESTClient } from '../helpers/rest';
 import type { ErrorOnHook, Post } from './payload-types';
+
+import payload from '../../src';
 import { mapAsync } from '../../src/utilities/mapAsync';
+import { initPayloadTest } from '../helpers/configHelpers';
+import { RESTClient } from '../helpers/rest';
+import config, { customIdNumberSlug, customIdSlug, errorOnHookSlug, pointSlug, relationSlug, slug } from './config';
 
 let client: RESTClient;
 

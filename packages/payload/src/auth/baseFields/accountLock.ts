@@ -1,15 +1,15 @@
-import { Field } from '../../fields/config/types';
+import type { Field } from '../../fields/config/types';
 
 export default [
   {
+    defaultValue: 0,
+    hidden: true,
     name: 'loginAttempts',
     type: 'number',
-    hidden: true,
-    defaultValue: 0,
   },
   {
+    hidden: true,
     name: 'lockUntil',
     type: 'date',
-    hidden: true,
   },
 ] as Field[];

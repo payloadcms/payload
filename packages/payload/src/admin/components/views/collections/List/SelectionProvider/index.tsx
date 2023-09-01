@@ -1,24 +1,26 @@
+import queryString from 'qs';
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import queryString from 'qs';
-import { Where } from '../../../../../../types';
+
+import type { Where } from '../../../../../../types';
+
 import { useLocale } from '../../../../utilities/Locale';
 
 export enum SelectAllStatus {
   AllAvailable = 'allAvailable',
   AllInPage = 'allInPage',
-  Some = 'some',
   None = 'none',
+  Some = 'some',
 }
 
 type SelectionContext = {
-  selected: Record<string | number, boolean>
-  setSelection: (id: string | number) => void
-  selectAll: SelectAllStatus
-  toggleAll: (allAvailable?: boolean) => void
-  totalDocs: number
   count: number
   getQueryParams: (additionalParams?: Where) => string
+  selectAll: SelectAllStatus
+  selected: Record<number | string, boolean>
+  setSelection: (id: number | string) => void
+  toggleAll: (allAvailable?: boolean) => void
+  totalDocs: number
 }
 
 const Context = createContext({} as SelectionContext);
@@ -92,8 +94,8 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       };
     }
     return queryString.stringify({
-      where,
       locale,
+      where,
     }, { addQueryPrefix: true });
   }, [history.location.search, selectAll, selected, locale]);
 
@@ -134,13 +136,13 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   }, [selectAll, selected, totalDocs]);
 
   contextRef.current = {
-    selectAll,
-    toggleAll,
-    selected,
-    setSelection,
-    totalDocs,
     count,
     getQueryParams,
+    selectAll,
+    selected,
+    setSelection,
+    toggleAll,
+    totalDocs,
   };
 
   return (

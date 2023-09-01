@@ -1,26 +1,26 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
-import { ReactEditor, useSlate } from 'slate-react';
 import { useTranslation } from 'react-i18next';
-import ElementButton from '../../Button';
-import RelationshipIcon from '../../../../../../icons/Relationship';
-import { injectVoidElement } from '../../injectVoid';
-import { useListDrawer } from '../../../../../../elements/ListDrawer';
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
+import { ReactEditor, useSlate } from 'slate-react';
 
+import { useListDrawer } from '../../../../../../elements/ListDrawer';
+import RelationshipIcon from '../../../../../../icons/Relationship';
+import ElementButton from '../../Button';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
+import { injectVoidElement } from '../../injectVoid';
 import './index.scss';
 
 const baseClass = 'relationship-rich-text-button';
 
-const insertRelationship = (editor, { value, relationTo }) => {
+const insertRelationship = (editor, { relationTo, value }) => {
   const text = { text: ' ' };
 
   const relationship = {
-    type: 'relationship',
-    value,
-    relationTo,
     children: [
       text,
     ],
+    relationTo,
+    type: 'relationship',
+    value,
   };
 
   injectVoidElement(editor, relationship);
@@ -29,8 +29,8 @@ const insertRelationship = (editor, { value, relationTo }) => {
 };
 
 type Props = {
-  path: string
   enabledCollectionSlugs: string[]
+  path: string
 }
 const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   const { t } = useTranslation('fields');
@@ -48,12 +48,12 @@ const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
     selectedCollection: selectedCollectionSlug,
   });
 
-  const onSelect = useCallback(({ docID, collectionConfig }) => {
+  const onSelect = useCallback(({ collectionConfig, docID }) => {
     insertRelationship(editor, {
+      relationTo: collectionConfig.slug,
       value: {
         id: docID,
       },
-      relationTo: collectionConfig.slug,
     });
     closeDrawer();
   }, [editor, closeDrawer]);
@@ -68,13 +68,13 @@ const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
     <Fragment>
       <ListDrawerToggler>
         <ElementButton
-          className={baseClass}
-          format="relationship"
-          tooltip={t('addRelationship')}
-          el="div"
           onClick={() => {
             // do nothing
           }}
+          className={baseClass}
+          el="div"
+          format="relationship"
+          tooltip={t('addRelationship')}
         >
           <RelationshipIcon />
         </ElementButton>

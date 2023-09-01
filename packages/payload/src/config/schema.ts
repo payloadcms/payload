@@ -7,19 +7,170 @@ const component = joi.alternatives().try(
 
 export const endpointsSchema = joi.alternatives().try(
   joi.array().items(joi.object({
-    path: joi.string(),
-    method: joi.string().valid('get', 'head', 'post', 'put', 'patch', 'delete', 'connect', 'options'),
-    root: joi.bool(),
+    custom: joi.object().pattern(joi.string(), joi.any()),
     handler: joi.alternatives().try(
       joi.array().items(joi.func()),
       joi.func(),
     ),
-    custom: joi.object().pattern(joi.string(), joi.any()),
+    method: joi.string().valid('get', 'head', 'post', 'put', 'patch', 'delete', 'connect', 'options'),
+    path: joi.string(),
+    root: joi.bool(),
   })),
   joi.boolean(),
 );
 
 export default joi.object({
+  admin: joi.object({
+    autoLogin: joi.alternatives()
+      .try(
+        joi.object().keys({
+          email: joi.string(),
+          password: joi.string(),
+          prefillOnly: joi.boolean(),
+        }),
+        joi.boolean(),
+      ),
+    avatar: joi.alternatives()
+      .try(
+        joi.string(),
+        component,
+      ),
+    buildPath: joi.string(),
+    bundler: {
+      build: joi.func(),
+      dev: joi.func(),
+      serve: joi.func(),
+    },
+    components: joi.object()
+      .keys({
+        Nav: component,
+        afterDashboard: joi.array().items(component),
+        afterLogin: joi.array().items(component),
+        afterNavLinks: joi.array().items(component),
+        beforeDashboard: joi.array().items(component),
+        beforeLogin: joi.array().items(component),
+        beforeNavLinks: joi.array().items(component),
+        graphics: joi.object({
+          Icon: component,
+          Logo: component,
+        }),
+        logout: joi.object({
+          Button: component,
+        }),
+        providers: joi.array().items(component),
+        routes: joi.array()
+          .items(
+            joi.object().keys({
+              Component: component.required(),
+              exact: joi.bool(),
+              path: joi.string().required(),
+              sensitive: joi.bool(),
+              strict: joi.bool(),
+            }),
+          ),
+        views: joi.object({
+          Account: component,
+          Dashboard: component,
+        }),
+      }),
+    css: joi.string(),
+    dateFormat: joi.string(),
+    disable: joi.bool(),
+    inactivityRoute: joi.string(),
+    indexHTML: joi.string(),
+    logoutRoute: joi.string(),
+    meta: joi.object()
+      .keys({
+        favicon: joi.string(),
+        ogImage: joi.string(),
+        titleSuffix: joi.string(),
+      }),
+    user: joi.string(),
+    webpack: joi.func(),
+  }),
+  collections: joi.array(),
+  cookiePrefix: joi.string(),
+  cors: [
+    joi.string()
+      .valid('*'),
+    joi.array()
+      .items(joi.string()),
+  ],
+  csrf: joi.array()
+    .items(joi.string().allow(''))
+    .sparse(),
+  custom: joi.object().pattern(joi.string(), joi.any()),
+  db: joi.any(),
+  debug: joi.boolean(),
+  defaultDepth: joi.number()
+    .min(0)
+    .max(30),
+  defaultMaxTextLength: joi.number(),
+  email: joi.object(),
+  endpoints: endpointsSchema,
+  express: joi.object()
+    .keys({
+      compression: joi.object(),
+      json: joi.object(),
+      middleware: joi.array().items(joi.func()),
+      postMiddleware: joi.array().items(joi.func()),
+      preMiddleware: joi.array().items(joi.func()),
+    }),
+  globals: joi.array(),
+  graphQL: joi.object()
+    .keys({
+      disable: joi.boolean(),
+      disablePlaygroundInProduction: joi.boolean(),
+      maxComplexity: joi.number(),
+      mutations: joi.function(),
+      queries: joi.function(),
+      schemaOutputFile: joi.string(),
+    }),
+  hooks: joi.object().keys({
+    afterError: joi.func(),
+  }),
+  i18n: joi.object(),
+  indexSortableFields: joi.boolean(),
+  local: joi.boolean(),
+  localization: joi.alternatives().try(
+    joi.object().keys({
+      defaultLocale: joi.string(),
+      fallback: joi.boolean(),
+      localeCodes: joi.array().items(joi.string()),
+      locales: joi.alternatives().try(
+        joi.array().items(
+          joi.object().keys({
+            code: joi.string(),
+            label: joi.string(),
+            rtl: joi.boolean(),
+            toString: joi.func(),
+          }),
+        ),
+        joi.array().items(joi.string()),
+      ),
+    }),
+    joi.boolean(),
+  ),
+  maxDepth: joi.number()
+    .min(0)
+    .max(100),
+  onInit: joi.func(),
+  plugins: joi.array().items(
+    joi.func(),
+  ),
+  rateLimit: joi.object()
+    .keys({
+      max: joi.number(),
+      skip: joi.func(),
+      trustProxy: joi.boolean(),
+      window: joi.number(),
+    }),
+  routes: joi.object({
+    admin: joi.string(),
+    api: joi.string(),
+    graphQL: joi.string(),
+    graphQLPlayground: joi.string(),
+  }),
   serverURL: joi.string()
     .uri()
     .allow('')
@@ -36,160 +187,9 @@ export default joi.object({
 
       return value;
     }),
-  cookiePrefix: joi.string(),
-  db: joi.any(),
-  routes: joi.object({
-    admin: joi.string(),
-    api: joi.string(),
-    graphQL: joi.string(),
-    graphQLPlayground: joi.string(),
-  }),
+  telemetry: joi.boolean(),
   typescript: joi.object({
     outputFile: joi.string(),
   }),
-  collections: joi.array(),
-  endpoints: endpointsSchema,
-  globals: joi.array(),
-  admin: joi.object({
-    user: joi.string(),
-    buildPath: joi.string(),
-    meta: joi.object()
-      .keys({
-        titleSuffix: joi.string(),
-        ogImage: joi.string(),
-        favicon: joi.string(),
-      }),
-    disable: joi.bool(),
-    indexHTML: joi.string(),
-    css: joi.string(),
-    dateFormat: joi.string(),
-    avatar: joi.alternatives()
-      .try(
-        joi.string(),
-        component,
-      ),
-    logoutRoute: joi.string(),
-    inactivityRoute: joi.string(),
-    autoLogin: joi.alternatives()
-      .try(
-        joi.object().keys({
-          email: joi.string(),
-          password: joi.string(),
-          prefillOnly: joi.boolean(),
-        }),
-        joi.boolean(),
-      ),
-    components: joi.object()
-      .keys({
-        routes: joi.array()
-          .items(
-            joi.object().keys({
-              Component: component.required(),
-              path: joi.string().required(),
-              exact: joi.bool(),
-              strict: joi.bool(),
-              sensitive: joi.bool(),
-            }),
-          ),
-        providers: joi.array().items(component),
-        beforeDashboard: joi.array().items(component),
-        afterDashboard: joi.array().items(component),
-        beforeLogin: joi.array().items(component),
-        afterLogin: joi.array().items(component),
-        beforeNavLinks: joi.array().items(component),
-        afterNavLinks: joi.array().items(component),
-        Nav: component,
-        logout: joi.object({
-          Button: component,
-        }),
-        views: joi.object({
-          Dashboard: component,
-          Account: component,
-        }),
-        graphics: joi.object({
-          Icon: component,
-          Logo: component,
-        }),
-      }),
-    webpack: joi.func(),
-    bundler: {
-      dev: joi.func(),
-      build: joi.func(),
-      serve: joi.func(),
-    },
-  }),
-  email: joi.object(),
-  i18n: joi.object(),
-  defaultDepth: joi.number()
-    .min(0)
-    .max(30),
-  maxDepth: joi.number()
-    .min(0)
-    .max(100),
-  defaultMaxTextLength: joi.number(),
-  csrf: joi.array()
-    .items(joi.string().allow(''))
-    .sparse(),
-  cors: [
-    joi.string()
-      .valid('*'),
-    joi.array()
-      .items(joi.string()),
-  ],
-  express: joi.object()
-    .keys({
-      json: joi.object(),
-      compression: joi.object(),
-      middleware: joi.array().items(joi.func()),
-      preMiddleware: joi.array().items(joi.func()),
-      postMiddleware: joi.array().items(joi.func()),
-    }),
-  local: joi.boolean(),
   upload: joi.object(),
-  indexSortableFields: joi.boolean(),
-  rateLimit: joi.object()
-    .keys({
-      window: joi.number(),
-      max: joi.number(),
-      trustProxy: joi.boolean(),
-      skip: joi.func(),
-    }),
-  graphQL: joi.object()
-    .keys({
-      mutations: joi.function(),
-      queries: joi.function(),
-      maxComplexity: joi.number(),
-      disablePlaygroundInProduction: joi.boolean(),
-      disable: joi.boolean(),
-      schemaOutputFile: joi.string(),
-    }),
-  localization: joi.alternatives().try(
-    joi.object().keys({
-      locales: joi.alternatives().try(
-        joi.array().items(
-          joi.object().keys({
-            label: joi.string(),
-            code: joi.string(),
-            rtl: joi.boolean(),
-            toString: joi.func(),
-          }),
-        ),
-        joi.array().items(joi.string()),
-      ),
-      localeCodes: joi.array().items(joi.string()),
-      defaultLocale: joi.string(),
-      fallback: joi.boolean(),
-    }),
-    joi.boolean(),
-  ),
-  hooks: joi.object().keys({
-    afterError: joi.func(),
-  }),
-  telemetry: joi.boolean(),
-  plugins: joi.array().items(
-    joi.func(),
-  ),
-  onInit: joi.func(),
-  debug: joi.boolean(),
-  custom: joi.object().pattern(joi.string(), joi.any()),
 });

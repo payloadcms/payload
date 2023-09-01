@@ -1,5 +1,5 @@
-import { TypeWithTimestamps } from '../collections/config/types';
-import { validOperators } from './constants';
+import type { TypeWithTimestamps } from '../collections/config/types';
+import type { validOperators } from './constants';
 
 export { PayloadRequest } from '../express/types';
 
@@ -10,18 +10,18 @@ export type WhereField = {
 };
 
 export type Where = {
-  [key: string]: WhereField | Where[];
-  or?: Where[];
+  [key: string]: Where[] | WhereField;
   and?: Where[];
+  or?: Where[];
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any;
 
-export type Operation = 'create' | 'read' | 'update' | 'delete';
+export type Operation = 'create' | 'delete' | 'read' | 'update';
 export type VersionOperations = 'readVersions';
 export type AuthOperations = 'unlock';
-export type AllOperations = Operation | VersionOperations | AuthOperations;
+export type AllOperations = AuthOperations | Operation | VersionOperations;
 
 export function docHasTimestamps(doc: any): doc is TypeWithTimestamps {
   return doc?.createdAt && doc?.updatedAt;

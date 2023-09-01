@@ -1,5 +1,6 @@
-import { Payload } from '../../../../src/payload';
-import { BeforeLoginHook, CollectionConfig } from '../../../../src/collections/config/types';
+import type { BeforeLoginHook, CollectionConfig } from '../../../../src/collections/config/types';
+import type { Payload } from '../../../../src/payload';
+
 import { AuthenticationError } from '../../../../src/errors';
 import { devUser, regularUser } from '../../../credentials';
 

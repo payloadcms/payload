@@ -1,17 +1,20 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Payload } from '../../../payload';
-import resetPassword, { Result } from '../resetPassword';
-import { PayloadRequest } from '../../../express/types';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+
+import type { PayloadRequest } from '../../../express/types';
+import type { Payload } from '../../../payload';
+import type { Result } from '../resetPassword';
+
 import { getDataLoader } from '../../../collections/dataloader';
-import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { setRequestContext } from '../../../express/setRequestContext';
+import { i18nInit } from '../../../translations/init';
+import resetPassword from '../resetPassword';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
   data: {
-    token: string
     password: string
+    token: string
   }
   overrideAccess: boolean
   req?: PayloadRequest

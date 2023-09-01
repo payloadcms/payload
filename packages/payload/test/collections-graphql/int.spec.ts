@@ -1,9 +1,11 @@
 import { GraphQLClient } from 'graphql-request';
+
+import type { Post } from './payload-types';
+
+import payload from '../../src';
+import { mapAsync } from '../../src/utilities/mapAsync';
 import { initPayloadTest } from '../helpers/configHelpers';
 import configPromise, { pointSlug, slug } from './config';
-import payload from '../../src';
-import type { Post } from './payload-types';
-import { mapAsync } from '../../src/utilities/mapAsync';
 
 const title = 'title';
 

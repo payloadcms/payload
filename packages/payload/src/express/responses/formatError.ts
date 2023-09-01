@@ -1,15 +1,15 @@
 import APIError from '../../errors/APIError';
 
-export type ErrorResponse = { errors: unknown[], data?: any, stack?: string };
+export type ErrorResponse = { data?: any, errors: unknown[], stack?: string };
 
-const formatErrorResponse = (incoming: Error | APIError | { [key: string]: unknown }): ErrorResponse => {
+const formatErrorResponse = (incoming: { [key: string]: unknown } | APIError | Error): ErrorResponse => {
   if (incoming) {
     if (incoming instanceof APIError && incoming.data) {
       return {
         errors: [{
-          name: incoming.name,
-          message: incoming.message,
           data: incoming.data,
+          message: incoming.message,
+          name: incoming.name,
         }],
       };
     }

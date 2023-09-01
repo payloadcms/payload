@@ -1,27 +1,29 @@
 /* eslint-disable no-underscore-dangle */
 import memoize from 'micro-memoize';
-import { PayloadRequest } from '../../express/types';
-import { Collection, TypeWithID } from '../config/types';
-import { NotFound } from '../../errors';
-import executeAccess from '../../auth/executeAccess';
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { combineQueries } from '../../database/combineQueries';
+
 import type { FindOneArgs } from '../../database/types';
+import type { PayloadRequest } from '../../express/types';
+import type { Collection, TypeWithID } from '../config/types';
+
+import executeAccess from '../../auth/executeAccess';
+import { combineQueries } from '../../database/combineQueries';
+import { NotFound } from '../../errors';
+import { afterRead } from '../../fields/hooks/afterRead';
 import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
+import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { buildAfterOperation } from './utils';
 
 export type Arguments = {
   collection: Collection
-  id: string | number
-  req: PayloadRequest
-  disableErrors?: boolean
   currentDepth?: number
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
   depth?: number
+  disableErrors?: boolean
   draft?: boolean
+  id: number | string
+  overrideAccess?: boolean
+  req: PayloadRequest
+  showHiddenFields?: boolean
 }
 
 async function findByID<T extends TypeWithID>(
@@ -38,28 +40,28 @@ async function findByID<T extends TypeWithID>(
 
     args = (await hook({
       args,
-      operation: 'read',
       context: args.req.context,
+      operation: 'read',
     })) || args;
   }, Promise.resolve());
 
   const {
-    depth,
     collection: {
       config: collectionConfig,
     },
+    currentDepth,
+    depth,
+    disableErrors,
+    draft: draftEnabled = false,
     id,
-    req,
+    overrideAccess = false,
     req: {
+      locale,
       payload,
       t,
-      locale,
     },
-    disableErrors,
-    currentDepth,
-    overrideAccess = false,
+    req,
     showHiddenFields,
-    draft: draftEnabled = false,
   } = args;
 
   try {
@@ -75,8 +77,8 @@ async function findByID<T extends TypeWithID>(
 
       args = (await hook({
         args,
-        operation: 'read',
         context: req.context,
+        operation: 'read',
       })) || args;
     }, Promise.resolve());
 
@@ -84,7 +86,7 @@ async function findByID<T extends TypeWithID>(
     // Access
     // /////////////////////////////////////
 
-    const accessResult = !overrideAccess ? await executeAccess({ req, disableErrors, id }, collectionConfig.access.read) : true;
+    const accessResult = !overrideAccess ? await executeAccess({ disableErrors, id, req }, collectionConfig.access.read) : true;
 
     // If errors are disabled, and access returns false, return null
     if (accessResult === false) return null;
@@ -92,11 +94,11 @@ async function findByID<T extends TypeWithID>(
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
-      where: combineQueries({ id: { equals: id } }, accessResult),
       locale,
       req: {
         transactionID: req.transactionID,
       } as PayloadRequest,
+      where: combineQueries({ id: { equals: id } }, accessResult),
     };
 
     // /////////////////////////////////////
@@ -139,12 +141,12 @@ async function findByID<T extends TypeWithID>(
 
     if (collectionConfig.versions?.drafts && draftEnabled) {
       result = await replaceWithDraftIfAvailable({
+        accessResult,
+        doc: result,
         entity: collectionConfig,
         entityType: 'collection',
-        doc: result,
-        accessResult,
-        req,
         overrideAccess,
+        req,
       });
     }
 
@@ -156,10 +158,10 @@ async function findByID<T extends TypeWithID>(
       await priorHook;
 
       result = await hook({
-        req,
-        query: findOneArgs.where,
-        doc: result,
         context: req.context,
+        doc: result,
+        query: findOneArgs.where,
+        req,
       }) || result;
     }, Promise.resolve());
 
@@ -168,14 +170,14 @@ async function findByID<T extends TypeWithID>(
     // /////////////////////////////////////
 
     result = await afterRead({
+      context: req.context,
       currentDepth,
-      doc: result,
       depth,
+      doc: result,
       entityConfig: collectionConfig,
       overrideAccess,
       req,
       showHiddenFields,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -186,10 +188,10 @@ async function findByID<T extends TypeWithID>(
       await priorHook;
 
       result = await hook({
-        req,
-        query: findOneArgs.where,
-        doc: result,
         context: req.context,
+        doc: result,
+        query: findOneArgs.where,
+        req,
       }) || result;
     }, Promise.resolve());
 
@@ -198,8 +200,8 @@ async function findByID<T extends TypeWithID>(
     // /////////////////////////////////////
 
     result = await buildAfterOperation<T>({
-      operation: 'findByID',
       args,
+      operation: 'findByID',
       result: result as any,
     }); // TODO: fix this typing
 

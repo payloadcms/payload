@@ -3,9 +3,9 @@ const buildInitialState = (data) => {
     return Object.entries(data).reduce((state, [path, value]) => ({
       ...state,
       [path]: {
-        value,
         initialValue: value,
         valid: true,
+        value,
       },
     }), {});
   }

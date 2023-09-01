@@ -1,18 +1,20 @@
+import qs from 'qs';
 import React, {
   createContext, useCallback, useContext, useEffect, useState,
 } from 'react';
-import qs from 'qs';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { useConfig } from '../Config';
+
+import type { TypeWithTimestamps } from '../../../../collections/config/types';
 import type { PaginatedDocs } from '../../../../database/types';
-import { ContextType, DocumentPermissions, Props, Version } from './types';
-import { TypeWithID } from '../../../../globals/config/types';
-import { TypeWithTimestamps } from '../../../../collections/config/types';
-import { Where } from '../../../../types';
-import { DocumentPreferences } from '../../../../preferences/types';
-import { usePreferences } from '../Preferences';
+import type { TypeWithID } from '../../../../globals/config/types';
+import type { DocumentPreferences } from '../../../../preferences/types';
+import type { Where } from '../../../../types';
+import type { ContextType, DocumentPermissions, Props, Version } from './types';
+
 import { useAuth } from '../Auth';
+import { useConfig } from '../Config';
+import { usePreferences } from '../Preferences';
 
 const Context = createContext({} as ContextType);
 
@@ -20,15 +22,15 @@ export const useDocumentInfo = (): ContextType => useContext(Context);
 
 export const DocumentInfoProvider: React.FC<Props> = ({
   children,
-  global,
   collection,
+  global,
   id: idFromProps,
   idFromParams: getIDFromParams,
 }) => {
   const { id: idFromParams } = useParams<{id: string}>();
   const id = idFromProps || (getIDFromParams ? idFromParams : null);
 
-  const { serverURL, routes: { api } } = useConfig();
+  const { routes: { api }, serverURL } = useConfig();
   const { getPreference, setPreference } = usePreferences();
   const { i18n } = useTranslation();
   const { permissions } = useAuth();
@@ -39,7 +41,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
 
   const baseURL = `${serverURL}${api}`;
   let slug: string;
-  let pluralType: 'globals' | 'collections';
+  let pluralType: 'collections' | 'globals';
   let preferencesKey: string;
 
   if (global) {
@@ -67,13 +69,14 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     let shouldFetch = true;
 
     const versionParams = {
+      depth: 0,
       where: {
         and: [],
       },
-      depth: 0,
     };
 
-    const publishedVersionParams: { where: Where, depth: number } = {
+    const publishedVersionParams: { depth: number, where: Where } = {
+      depth: 0,
       where: {
         and: [
           {
@@ -92,7 +95,6 @@ export const DocumentInfoProvider: React.FC<Props> = ({
           },
         ],
       },
-      depth: 0,
     };
 
     if (global) {
@@ -240,19 +242,19 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   }, [getDocPermissions]);
 
   const value: ContextType = {
-    slug,
-    preferencesKey,
-    global,
     collection,
-    versions,
-    unpublishedVersions,
-    getVersions,
-    publishedDoc,
-    id,
-    getDocPermissions,
     docPermissions,
-    setDocFieldPreferences,
+    getDocPermissions,
     getDocPreferences,
+    getVersions,
+    global,
+    id,
+    preferencesKey,
+    publishedDoc,
+    setDocFieldPreferences,
+    slug,
+    unpublishedVersions,
+    versions,
   };
 
   return (

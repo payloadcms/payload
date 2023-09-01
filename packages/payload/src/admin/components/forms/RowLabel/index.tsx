@@ -1,21 +1,24 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { isComponent, Props } from './types';
-import { useWatchForm } from '../Form/context';
+
+import type { Props } from './types';
+
 import { getTranslation } from '../../../../utilities/getTranslation';
+import { useWatchForm } from '../Form/context';
+import { isComponent } from './types';
 
 const baseClass = 'row-label';
 
 export const RowLabel: React.FC<Props> = ({ className, ...rest }) => {
   return (
     <span
-      style={{
-        pointerEvents: 'none',
-      }}
       className={[
         baseClass,
         className,
       ].filter(Boolean).join(' ')}
+      style={{
+        pointerEvents: 'none',
+      }}
     >
       <RowLabelContent {...rest} />
     </span>
@@ -24,8 +27,8 @@ export const RowLabel: React.FC<Props> = ({ className, ...rest }) => {
 
 const RowLabelContent: React.FC<Omit<Props, 'className'>> = (props) => {
   const {
-    path,
     label,
+    path,
     rowNumber,
   } = props;
 
@@ -40,8 +43,8 @@ const RowLabelContent: React.FC<Omit<Props, 'className'>> = (props) => {
     return (
       <Label
         data={data}
-        path={path}
         index={rowNumber}
+        path={path}
       />
     );
   }
@@ -50,8 +53,8 @@ const RowLabelContent: React.FC<Omit<Props, 'className'>> = (props) => {
     <React.Fragment>
       {typeof label === 'function' ? label({
         data,
-        path,
         index: rowNumber,
+        path,
       }) : getTranslation(label, i18n)}
     </React.Fragment>
   );

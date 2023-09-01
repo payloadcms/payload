@@ -1,8 +1,10 @@
-import i18next from 'i18next';
+import type { Handler } from 'express';
 import type { InitOptions } from 'i18next';
-import i18nHTTPMiddleware from 'i18next-http-middleware';
+
 import deepmerge from 'deepmerge';
-import { Handler } from 'express';
+import i18next from 'i18next';
+import i18nHTTPMiddleware from 'i18next-http-middleware';
+
 import { defaultOptions } from '../../translations/defaultOptions';
 
 const i18nMiddleware = (options: InitOptions): Handler => {

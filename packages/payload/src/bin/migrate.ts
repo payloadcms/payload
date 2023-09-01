@@ -3,8 +3,8 @@ import payload from '..';
 export const migrate = async (args: string[]): Promise<void> => {
   // Barebones instance to access database adapter
   await payload.init({
-    secret: '--unused--',
     local: true,
+    secret: '--unused--',
   });
 
   const adapter = payload.db;

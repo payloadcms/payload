@@ -1,22 +1,25 @@
-import { NextFunction, Response } from 'express';
+import type { NextFunction, Response } from 'express';
+
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
+
+import type { PayloadRequest } from '../../express/types';
+import type { Document } from '../../types';
+
 import { NotFound } from '../../errors';
-import { Document } from '../../types';
 import deleteByID from '../operations/deleteByID';
 
 export type DeleteResult = {
-  message: string;
   doc: Document;
+  message: string;
 }
 
 export default async function deleteByIDHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<DeleteResult> | void> {
   try {
     const doc = await deleteByID({
-      req,
       collection: req.collection,
-      id: req.params.id,
       depth: parseInt(String(req.query.depth), 10),
+      id: req.params.id,
+      req,
     });
 
     if (!doc) {

@@ -1,4 +1,5 @@
-import { Collection } from '../../../collections/config/types';
+import type { Collection } from '../../../collections/config/types';
+
 import login from '../../operations/login';
 
 function loginResolver(collection: Collection) {
@@ -9,9 +10,9 @@ function loginResolver(collection: Collection) {
         email: args.email,
         password: args.password,
       },
+      depth: 0,
       req: context.req,
       res: context.res,
-      depth: 0,
     };
 
     const result = login(options);

@@ -1,21 +1,21 @@
 import React from 'react';
-import Thumbnail from '../../../../../../elements/Thumbnail';
 
+import Thumbnail from '../../../../../../elements/Thumbnail';
 import './index.scss';
 
 const baseClass = 'file';
 
-const File = ({ rowData, data, collection }) => {
+const File = ({ collection, data, rowData }) => {
   return (
     <div className={baseClass}>
       <Thumbnail
-        size="small"
-        className={`${baseClass}__thumbnail`}
         doc={{
           ...rowData,
           filename: data,
         }}
+        className={`${baseClass}__thumbnail`}
         collection={collection}
+        size="small"
       />
       <span className={`${baseClass}__filename`}>{ String(data) }</span>
     </div>

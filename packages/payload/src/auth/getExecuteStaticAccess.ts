@@ -1,9 +1,11 @@
-import { NextFunction, Response } from 'express';
-import { Where } from '../types';
-import executeAccess from './executeAccess';
+import type { NextFunction, Response } from 'express';
+
+import type { SanitizedCollectionConfig } from '../collections/config/types';
+import type { PayloadRequest } from '../express/types';
+import type { Where } from '../types';
+
 import { Forbidden } from '../errors';
-import { PayloadRequest } from '../express/types';
-import { SanitizedCollectionConfig } from '../collections/config/types';
+import executeAccess from './executeAccess';
 
 const getExecuteStaticAccess = (config: SanitizedCollectionConfig) => async (req: PayloadRequest, res: Response, next: NextFunction) => {
   if (req.method === 'OPTIONS') {
@@ -12,7 +14,7 @@ const getExecuteStaticAccess = (config: SanitizedCollectionConfig) => async (req
 
   try {
     if (req.path) {
-      const accessResult = await executeAccess({ req, isReadingStaticFile: true }, config.access.read);
+      const accessResult = await executeAccess({ isReadingStaticFile: true, req }, config.access.read);
 
       if (typeof accessResult === 'object') {
         const filename = decodeURI(req.path).replace(/^\/|\/$/g, '');

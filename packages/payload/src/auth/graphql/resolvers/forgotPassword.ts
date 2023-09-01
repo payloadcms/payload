@@ -1,4 +1,5 @@
-import { Collection } from '../../../collections/config/types';
+import type { Collection } from '../../../collections/config/types';
+
 import forgotPassword from '../../operations/forgotPassword';
 
 function forgotPasswordResolver(collection: Collection): any {
@@ -8,9 +9,9 @@ function forgotPasswordResolver(collection: Collection): any {
       data: {
         email: args.email,
       },
-      req: context.req,
       disableEmail: args.disableEmail,
       expiration: args.expiration,
+      req: context.req,
     };
 
     await forgotPassword(options);

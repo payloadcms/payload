@@ -1,4 +1,4 @@
-import { Validate } from '../fields/config/types';
+import type { Validate } from '../fields/config/types';
 
 export const mimeTypeValidator = (mimeTypes: string[]): Validate => (val: string, { siblingData }) => {
   if (!siblingData.filename) {

@@ -1,7 +1,8 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import { DatabaseAdapter } from '../types';
+import type { PayloadRequest } from '../../express/types';
+import type { DatabaseAdapter } from '../types';
+
 import { readMigrationFiles } from './readMigrationFiles';
-import { PayloadRequest } from '../../express/types';
 
 /**
  * Reset and re-run all migrations.
@@ -26,8 +27,8 @@ export async function migrateRefresh(this: DatabaseAdapter) {
       await payload.create({
         collection: 'payload-migrations',
         data: {
-          name: migration.name,
           executed: true,
+          name: migration.name,
         },
         req: {
           transactionID,
@@ -39,8 +40,8 @@ export async function migrateRefresh(this: DatabaseAdapter) {
     } catch (err: unknown) {
       await this.rollbackTransaction(transactionID);
       payload.logger.error({
-        msg: `Error running migration ${migration.name}`,
         err,
+        msg: `Error running migration ${migration.name}`,
       });
       throw err;
     }

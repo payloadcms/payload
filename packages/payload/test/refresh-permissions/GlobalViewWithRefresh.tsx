@@ -1,6 +1,8 @@
 import React, { useCallback } from 'react';
+
+import type { Props } from '../../src/admin/components/views/Global/types';
+
 import { useAuth } from '../../src/admin/components/utilities/Auth';
-import { Props } from '../../src/admin/components/views/Global/types';
 import DefaultGlobalView from '../../src/admin/components/views/Global/Default';
 
 const GlobalView: React.FC<Props> = (props) => {

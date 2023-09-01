@@ -1,5 +1,6 @@
-import { Config } from '../../../../../../../../config/types';
-import { Field } from '../../../../../../../../fields/config/types';
+import type { Config } from '../../../../../../../../config/types';
+import type { Field } from '../../../../../../../../fields/config/types';
+
 import { extractTranslations } from '../../../../../../../../translations/extractTranslations';
 
 const translations = extractTranslations([
@@ -15,20 +16,18 @@ const translations = extractTranslations([
 
 export const getBaseFields = (config: Config): Field[] => [
   {
-    name: 'text',
     label: translations['fields:textToDisplay'],
-    type: 'text',
+    name: 'text',
     required: true,
+    type: 'text',
   },
   {
-    name: 'linkType',
-    label: translations['fields:linkType'],
-    type: 'radio',
-    required: true,
     admin: {
       description: translations['fields:chooseBetweenCustomTextOrDocument'],
     },
     defaultValue: 'custom',
+    label: translations['fields:linkType'],
+    name: 'linkType',
     options: [
       {
         label: translations['fields:customURL'],
@@ -39,31 +38,33 @@ export const getBaseFields = (config: Config): Field[] => [
         value: 'internal',
       },
     ],
+    required: true,
+    type: 'radio',
   },
   {
-    name: 'url',
-    label: translations['fields:enterURL'],
-    type: 'text',
-    required: true,
     admin: {
       condition: ({ linkType }) => linkType !== 'internal',
     },
+    label: translations['fields:enterURL'],
+    name: 'url',
+    required: true,
+    type: 'text',
   },
   {
-    name: 'doc',
-    label: translations['fields:chooseDocumentToLink'],
-    type: 'relationship',
-    required: true,
-    relationTo: config.collections.filter(({ admin: { enableRichTextLink } }) => enableRichTextLink).map(({ slug }) => slug),
     admin: {
       condition: ({ linkType }) => {
         return linkType === 'internal';
       },
     },
+    label: translations['fields:chooseDocumentToLink'],
+    name: 'doc',
+    relationTo: config.collections.filter(({ admin: { enableRichTextLink } }) => enableRichTextLink).map(({ slug }) => slug),
+    required: true,
+    type: 'relationship',
   },
   {
-    name: 'newTab',
     label: translations['fields:openInNewTab'],
+    name: 'newTab',
     type: 'checkbox',
   },
 ];

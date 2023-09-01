@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import Minimal from '../../templates/Minimal';
-import Button from '../../elements/Button';
-import Meta from '../../utilities/Meta';
 
+import Button from '../../elements/Button';
+import Minimal from '../../templates/Minimal';
+import { useAuth } from '../../utilities/Auth';
+import { useConfig } from '../../utilities/Config';
+import Meta from '../../utilities/Meta';
 import './index.scss';
 
 const baseClass = 'logout';
@@ -29,9 +29,9 @@ const Logout: React.FC<{inactivity?: boolean}> = (props) => {
   return (
     <Minimal className={baseClass}>
       <Meta
-        title={t('logout')}
         description={t('logoutUser')}
         keywords={t('logout')}
+        title={t('logout')}
       />
       <div className={`${baseClass}__wrap`}>
         {inactivity && (
@@ -42,8 +42,8 @@ const Logout: React.FC<{inactivity?: boolean}> = (props) => {
         )}
         <br />
         <Button
-          el="anchor"
           buttonStyle="secondary"
+          el="anchor"
           url={`${admin}/login${redirect && redirect.length > 0 ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}
         >
           {t('logBackIn')}

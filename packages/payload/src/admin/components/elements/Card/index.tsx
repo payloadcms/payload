@@ -1,13 +1,14 @@
 import React from 'react';
-import Button from '../Button';
-import { Props } from './types';
 
+import type { Props } from './types';
+
+import Button from '../Button';
 import './index.scss';
 
 const baseClass = 'card';
 
 const Card: React.FC<Props> = (props) => {
-  const { id, title, titleAs, buttonAriaLabel, actions, onClick } = props;
+  const { actions, buttonAriaLabel, id, onClick, title, titleAs } = props;
 
   const classes = [
     baseClass,
@@ -33,8 +34,8 @@ const Card: React.FC<Props> = (props) => {
       {onClick && (
         <Button
           aria-label={buttonAriaLabel}
-          className={`${baseClass}__click`}
           buttonStyle="none"
+          className={`${baseClass}__click`}
           onClick={onClick}
         />
       )}

@@ -1,7 +1,8 @@
-import { PayloadRequest } from '../../express/types';
+import type { PayloadRequest } from '../../express/types';
+import type { TypeWithVersion } from '../../versions/types';
+import type { SanitizedGlobalConfig } from '../config/types';
+
 import executeAccess from '../../auth/executeAccess';
-import { TypeWithVersion } from '../../versions/types';
-import { SanitizedGlobalConfig } from '../config/types';
 import { NotFound } from '../../errors';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
@@ -9,25 +10,25 @@ import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
 
 export type Arguments = {
-  globalConfig: SanitizedGlobalConfig
-  id: string | number
   depth?: number
-  req?: PayloadRequest
+  globalConfig: SanitizedGlobalConfig
+  id: number | string
   overrideAccess?: boolean
+  req?: PayloadRequest
   showHiddenFields?: boolean
 }
 
 async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Arguments): Promise<T> {
   const {
-    id,
     depth,
     globalConfig,
-    req,
-    req: {
-      t,
-      payload,
-    },
+    id,
     overrideAccess,
+    req: {
+      payload,
+      t,
+    },
+    req,
     showHiddenFields,
   } = args;
 
@@ -48,9 +49,9 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
     const { docs: versionDocs } = await payload.db.findGlobalVersions<any>({
       global: globalConfig.slug,
-      where: { id: { equals: id } },
       limit: 1,
       req,
+      where: { id: { equals: id } },
     });
 
 
@@ -65,9 +66,9 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     // /////////////////////////////////////
 
     const previousDoc = await payload.findGlobal({
-      slug: globalConfig.slug,
       depth,
       req,
+      slug: globalConfig.slug,
     });
 
     // /////////////////////////////////////
@@ -82,13 +83,13 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
     if (global) {
       result = await payload.db.updateGlobal({
-        slug: globalConfig.slug,
         data: result,
+        slug: globalConfig.slug,
       });
     } else {
       result = await payload.db.createGlobal({
-        slug: globalConfig.slug,
         data: result,
+        slug: globalConfig.slug,
       });
     }
 
@@ -97,13 +98,13 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     // /////////////////////////////////////
 
     result = await afterRead({
+      context: req.context,
       depth,
       doc: result,
       entityConfig: globalConfig,
-      req,
       overrideAccess,
+      req,
       showHiddenFields,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -124,13 +125,13 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     // /////////////////////////////////////
 
     result = await afterChange({
+      context: req.context,
       data: result,
       doc: result,
-      previousDoc,
       entityConfig: globalConfig,
       operation: 'update',
+      previousDoc,
       req,
-      context: req.context,
     });
 
     // /////////////////////////////////////

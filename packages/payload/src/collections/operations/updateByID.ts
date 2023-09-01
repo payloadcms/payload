@@ -1,40 +1,43 @@
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+import type { DeepPartial } from 'ts-essentials';
+
 import httpStatus from 'http-status';
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { DeepPartial } from 'ts-essentials';
-import { Collection } from '../config/types';
+
+import type { FindOneArgs } from '../../database/types';
+import type { PayloadRequest } from '../../express/types';
+import type { Collection } from '../config/types';
+
 import executeAccess from '../../auth/executeAccess';
-import { APIError, Forbidden, NotFound } from '../../errors';
-import { PayloadRequest } from '../../express/types';
+import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
 import { hasWhereAccessResult } from '../../auth/types';
-import { saveVersion } from '../../versions/saveVersion';
-import { uploadFiles } from '../../uploads/uploadFiles';
-import { beforeChange } from '../../fields/hooks/beforeChange';
-import { beforeValidate } from '../../fields/hooks/beforeValidate';
+import { combineQueries } from '../../database/combineQueries';
+import { APIError, Forbidden, NotFound } from '../../errors';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { generateFileData } from '../../uploads/generateFileData';
-import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
+import { beforeChange } from '../../fields/hooks/beforeChange';
+import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
+import { generateFileData } from '../../uploads/generateFileData';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
-import { buildAfterOperation } from './utils';
-import { generatePasswordSaltHash } from '../../auth/strategies/local/generatePasswordSaltHash';
-import { combineQueries } from '../../database/combineQueries';
-import type { FindOneArgs } from '../../database/types';
+import { uploadFiles } from '../../uploads/uploadFiles';
 import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
+import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion';
+import { saveVersion } from '../../versions/saveVersion';
+import { buildAfterOperation } from './utils';
 
-export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
+export type Arguments<T extends { [field: number | string | symbol]: unknown }> = {
+  autosave?: boolean
   collection: Collection
-  req: PayloadRequest
-  id: string | number
   data: DeepPartial<T>
   depth?: number
   disableVerificationEmail?: boolean
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
-  overwriteExistingFiles?: boolean
   draft?: boolean
-  autosave?: boolean
+  id: number | string
+  overrideAccess?: boolean
+  overwriteExistingFiles?: boolean
+  req: PayloadRequest
+  showHiddenFields?: boolean
 }
 
 async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
@@ -51,32 +54,32 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
     args = (await hook({
       args,
-      operation: 'update',
       context: args.req.context,
+      operation: 'update',
     })) || args;
   }, Promise.resolve());
 
   const {
-    depth,
-    collection,
+    autosave = false,
     collection: {
       config: collectionConfig,
     },
+    collection,
+    depth,
+    draft: draftArg = false,
     id,
-    req,
+    overrideAccess,
+    overwriteExistingFiles = false,
     req: {
-      t,
       locale,
-      payload,
       payload: {
         config,
       },
+      payload,
+      t,
     },
-    overrideAccess,
+    req,
     showHiddenFields,
-    overwriteExistingFiles = false,
-    draft: draftArg = false,
-    autosave = false,
   } = args;
 
   try {
@@ -91,8 +94,8 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
       args = (await hook({
         args,
-        operation: 'update',
         context: req.context,
+        operation: 'update',
       })) || args;
     }, Promise.resolve());
 
@@ -109,7 +112,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // Access
     // /////////////////////////////////////
 
-    const accessResults = !overrideAccess ? await executeAccess({ req, id, data }, collectionConfig.access.update) : true;
+    const accessResults = !overrideAccess ? await executeAccess({ data, id, req }, collectionConfig.access.update) : true;
     const hasWherePolicy = hasWhereAccessResult(accessResults);
 
     // /////////////////////////////////////
@@ -119,14 +122,14 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
-      where: combineQueries({ id: { equals: id } }, accessResults),
       locale,
+      where: combineQueries({ id: { equals: id } }, accessResults),
     };
 
     const docWithLocales = await getLatestCollectionVersion({
-      payload,
       config: collectionConfig,
       id,
+      payload,
       query: findOneArgs,
       req,
     });
@@ -136,13 +139,13 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
 
     const originalDoc = await afterRead({
+      context: req.context,
       depth: 0,
       doc: docWithLocales,
       entityConfig: collectionConfig,
-      req,
       overrideAccess: true,
+      req,
       showHiddenFields: true,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -150,12 +153,12 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     const { data: newFileData, files: filesToUpload } = await generateFileData({
-      config,
       collection,
-      req,
+      config,
       data,
-      throwOnMissingFile: false,
       overwriteExistingFiles,
+      req,
+      throwOnMissingFile: false,
     });
 
     data = newFileData;
@@ -164,13 +167,14 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // Delete any associated files
     // /////////////////////////////////////
 
-    await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc: docWithLocales, t, overrideDelete: false });
+    await deleteAssociatedFiles({ collectionConfig, config, doc: docWithLocales, files: filesToUpload, overrideDelete: false, t });
 
     // /////////////////////////////////////
     // beforeValidate - Fields
     // /////////////////////////////////////
 
     data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+      context: req.context,
       data,
       doc: originalDoc,
       entityConfig: collectionConfig,
@@ -178,7 +182,6 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       operation: 'update',
       overrideAccess,
       req,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -189,11 +192,11 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       await priorHook;
 
       data = (await hook({
+        context: req.context,
         data,
-        req,
         operation: 'update',
         originalDoc,
-        context: req.context,
+        req,
       })) || data;
     }, Promise.resolve());
 
@@ -213,11 +216,11 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       await priorHook;
 
       data = (await hook({
-        data,
-        req,
-        originalDoc,
-        operation: 'update',
         context: req.context,
+        data,
+        operation: 'update',
+        originalDoc,
+        req,
       })) || data;
     }, Promise.resolve());
 
@@ -226,6 +229,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+      context: req.context,
       data,
       doc: originalDoc,
       docWithLocales,
@@ -234,7 +238,6 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       operation: 'update',
       req,
       skipValidation: shouldSaveDraft || data._status === 'draft',
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -258,9 +261,9 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     if (!shouldSaveDraft) {
       result = await req.payload.db.updateOne({
         collection: collectionConfig.slug,
-        locale,
-        id,
         data: dataToUpdate,
+        id,
+        locale,
         req,
       });
     }
@@ -271,16 +274,16 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
     if (collectionConfig.versions) {
       result = await saveVersion({
-        payload,
+        autosave,
         collection: collectionConfig,
-        req,
         docWithLocales: {
           ...result,
           createdAt: docWithLocales.createdAt,
         },
-        id,
-        autosave,
         draft: shouldSaveDraft,
+        id,
+        payload,
+        req,
       });
     }
 
@@ -289,13 +292,13 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await afterRead({
+      context: req.context,
       depth,
       doc: result,
       entityConfig: collectionConfig,
-      req,
       overrideAccess,
+      req,
       showHiddenFields,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -306,9 +309,9 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       await priorHook;
 
       result = await hook({
-        req,
-        doc: result,
         context: req.context,
+        doc: result,
+        req,
       }) || result;
     }, Promise.resolve());
 
@@ -317,13 +320,13 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await afterChange<GeneratedTypes['collections'][TSlug]>({
+      context: req.context,
       data,
       doc: result,
-      previousDoc: originalDoc,
       entityConfig: collectionConfig,
       operation: 'update',
+      previousDoc: originalDoc,
       req,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -334,11 +337,11 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       await priorHook;
 
       result = await hook({
+        context: req.context,
         doc: result,
+        operation: 'update',
         previousDoc: originalDoc,
         req,
-        operation: 'update',
-        context: req.context,
       }) || result;
     }, Promise.resolve());
 
@@ -347,15 +350,15 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
-      operation: 'updateByID',
       args,
+      operation: 'updateByID',
       result,
     });
 
     await unlinkTempFiles({
-      req,
-      config,
       collectionConfig,
+      config,
+      req,
     });
 
     // /////////////////////////////////////

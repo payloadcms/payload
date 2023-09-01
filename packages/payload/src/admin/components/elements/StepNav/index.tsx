@@ -1,13 +1,14 @@
 import React, {
-  useState, createContext, useContext,
+  createContext, useContext, useState,
 } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import Chevron from '../../icons/Chevron';
-import { Context as ContextType } from './types';
-import { getTranslation } from '../../../../utilities/getTranslation';
-import { useConfig } from '../../utilities/Config';
+import { Link } from 'react-router-dom';
 
+import type { Context as ContextType } from './types';
+
+import { getTranslation } from '../../../../utilities/getTranslation';
+import Chevron from '../../icons/Chevron';
+import { useConfig } from '../../utilities/Config';
 import './index.scss';
 
 const Context = createContext({} as ContextType);
@@ -17,8 +18,8 @@ const StepNavProvider: React.FC<{children?: React.ReactNode}> = ({ children }) =
 
   return (
     <Context.Provider value={{
-      stepNav,
       setStepNav,
+      stepNav,
     }}
     >
       {children}
@@ -29,7 +30,7 @@ const StepNavProvider: React.FC<{children?: React.ReactNode}> = ({ children }) =
 const useStepNav = (): ContextType => useContext(Context);
 
 const StepNav: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const dashboardLabel = <span>{t('general:dashboard')}</span>;
   const { stepNav } = useStepNav();
   const config = useConfig();
@@ -52,8 +53,8 @@ const StepNav: React.FC = () => {
           ? StepLabel
           : (
             <Link
-              to={item.url}
               key={i}
+              to={item.url}
             >
               {StepLabel}
               <Chevron />

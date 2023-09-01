@@ -1,9 +1,11 @@
-import PassportAPIKey from 'passport-headerapikey';
 import crypto from 'crypto';
-import { PayloadRequest } from '../../express/types';
-import { Payload } from '../../payload';
+import PassportAPIKey from 'passport-headerapikey';
+
+import type { SanitizedCollectionConfig } from '../../collections/config/types';
+import type { PayloadRequest } from '../../express/types';
+import type { Payload } from '../../payload';
+
 import find from '../../collections/operations/find';
-import { SanitizedCollectionConfig } from '../../collections/config/types';
 
 export default (payload: Payload, config: SanitizedCollectionConfig): PassportAPIKey => {
   const { secret } = payload;
@@ -39,13 +41,13 @@ export default (payload: Payload, config: SanitizedCollectionConfig): PassportAP
         };
       }
       const userQuery = await find({
-        where,
         collection: {
           config,
         },
-        req: req as PayloadRequest,
-        overrideAccess: true,
         depth: config.auth.depth,
+        overrideAccess: true,
+        req: req as PayloadRequest,
+        where,
       });
 
       if (userQuery.docs && userQuery.docs.length > 0) {

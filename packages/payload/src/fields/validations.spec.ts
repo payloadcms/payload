@@ -1,11 +1,12 @@
-import { text, textarea, password, select, point, number, relationship } from './validations';
-import { ValidateOptions } from './config/types';
+import type { ValidateOptions } from './config/types';
+
+import { number, password, point, relationship, select, text, textarea } from './validations';
 
 const t = jest.fn((string) => string);
 
 let options: ValidateOptions<any, any, any> = {
-  operation: 'create',
   data: undefined,
+  operation: 'create',
   siblingData: undefined,
   t,
 };
@@ -50,7 +51,7 @@ describe('Field Validations', () => {
   });
 
   describe('textarea', () => {
-    options = { ...options, field: { type: 'textarea', name: 'test' } };
+    options = { ...options, field: { name: 'test', type: 'textarea' } };
     it('should validate', () => {
       const val = 'test';
       const result = textarea(val, options);
@@ -93,8 +94,8 @@ describe('Field Validations', () => {
   describe('password', () => {
     const passwordOptions = {
       ...options,
-      type: 'password',
       name: 'test',
+      type: 'password',
     };
     it('should validate', () => {
       const val = 'test';
@@ -136,8 +137,8 @@ describe('Field Validations', () => {
   describe('point', () => {
     const pointOptions = {
       ...options,
-      type: 'point',
       name: 'point',
+      type: 'point',
     };
     it('should validate numbers', () => {
       const val = ['0.1', '0.2'];
@@ -194,20 +195,20 @@ describe('Field Validations', () => {
   describe('relationship', () => {
     const relationshipOptions = {
       ...options,
-      relationTo: 'relation',
       payload: {
         collections: {
           relation: {
             config: {
-              slug: 'relation',
               fields: [{
                 name: 'id',
                 type: 'text',
               }],
+              slug: 'relation',
             },
           },
         },
       },
+      relationTo: 'relation',
     };
     it('should handle required', async () => {
       const val = undefined;
@@ -216,7 +217,7 @@ describe('Field Validations', () => {
     });
     it('should handle required with hasMany', async () => {
       const val = [];
-      const result = await relationship(val, { ...relationshipOptions, required: true, hasMany: true });
+      const result = await relationship(val, { ...relationshipOptions, hasMany: true, required: true });
       expect(result).not.toBe(true);
     });
     it('should enforce hasMany min', async () => {
@@ -237,8 +238,8 @@ describe('Field Validations', () => {
     it('should enforce hasMany max', async () => {
       const maxOptions = {
         ...relationshipOptions,
-        maxRows: 2,
         hasMany: true,
+        maxRows: 2,
       };
       let val = ['a', 'b', 'c'];
 
@@ -254,31 +255,31 @@ describe('Field Validations', () => {
   describe('select', () => {
     const selectOptions = {
       ...options,
-      type: 'select',
       options: ['one', 'two', 'three'],
+      type: 'select',
     };
     const optionsRequired = {
       ...selectOptions,
-      required: true,
       options: [{
-        value: 'one',
         label: 'One',
+        value: 'one',
       }, {
-        value: 'two',
         label: 'two',
+        value: 'two',
       }, {
-        value: 'three',
         label: 'three',
+        value: 'three',
       }],
+      required: true,
     };
     const optionsWithEmptyString = {
       ...selectOptions,
       options: [{
-        value: '',
         label: 'None',
+        value: '',
       }, {
-        value: 'option',
         label: 'Option',
+        value: 'option',
       }],
     };
     it('should allow valid input', () => {
@@ -386,8 +387,8 @@ describe('Field Validations', () => {
   describe('number', () => {
     const numberOptions = {
       ...options,
-      type: 'number',
       name: 'test',
+      type: 'number',
     };
     it('should validate', () => {
       const val = 1;

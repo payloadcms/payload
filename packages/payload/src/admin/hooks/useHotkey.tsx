@@ -1,6 +1,7 @@
 /* eslint-disable no-shadow */
-import { useCallback, useEffect } from 'react';
 import { useModal } from '@faceless-ui/modal';
+import { useCallback, useEffect } from 'react';
+
 import { setsAreEqual } from '../utilities/setsAreEqual';
 
 // Required to be outside of hook, else debounce would be necessary
@@ -8,19 +9,19 @@ import { setsAreEqual } from '../utilities/setsAreEqual';
 const pressedKeys = new Set<string>([]);
 
 const map = {
+  altleft: 'alt',
+  altright: 'alt',
+  controlleft: 'ctrl',
+  controlright: 'ctrl',
+  ctrlleft: 'ctrl',
+  ctrlright: 'ctrl',
+  escape: 'esc',
   metaleft: 'meta',
   metaright: 'meta',
   osleft: 'meta',
   osright: 'meta',
   shiftleft: 'shift',
   shiftright: 'shift',
-  ctrlleft: 'ctrl',
-  ctrlright: 'ctrl',
-  controlleft: 'ctrl',
-  controlright: 'ctrl',
-  altleft: 'alt',
-  altright: 'alt',
-  escape: 'esc',
 };
 
 const stripKey = (key: string) => {
@@ -59,16 +60,16 @@ const removeFromKeys = (code: string) => {
  * @param func The callback function
  */
 const useHotkey = (options: {
-  keyCodes: string[]
   cmdCtrlKey: boolean
   editDepth: number
+  keyCodes: string[]
 }, func: (e: KeyboardEvent) => void): void => {
-  const { keyCodes, cmdCtrlKey, editDepth } = options;
+  const { cmdCtrlKey, editDepth, keyCodes } = options;
 
   const { modalState } = useModal();
 
 
-  const keydown = useCallback((event: KeyboardEvent | CustomEvent) => {
+  const keydown = useCallback((event: CustomEvent | KeyboardEvent) => {
     const e: KeyboardEvent = event.detail?.key ? event.detail : event;
     if (e.key === undefined) {
       // Autofill events, or other synthetic events, can be ignored
@@ -78,7 +79,7 @@ const useHotkey = (options: {
 
     // Check for Mac and iPad
     const hasCmd = window.navigator.userAgent.includes('Mac OS X');
-    const pressedWithoutModifier = [...pressedKeys].filter((key) => !['meta', 'ctrl', 'alt', 'shift'].includes(key));
+    const pressedWithoutModifier = [...pressedKeys].filter((key) => !['alt', 'ctrl', 'meta', 'shift'].includes(key));
 
     // Check whether arrays contain the same values (regardless of number of occurrences)
     if (

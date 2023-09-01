@@ -1,7 +1,9 @@
-import { GraphQLFormattedError } from 'graphql';
+import type { GraphQLFormattedError } from 'graphql';
+
 import httpStatus from 'http-status';
-import { AfterErrorHook } from '../collections/config/types';
-import { Payload } from '../payload';
+
+import type { AfterErrorHook } from '../collections/config/types';
+import type { Payload } from '../payload';
 
 const errorHandler = async (
   payload: Payload,
@@ -21,15 +23,15 @@ const errorHandler = async (
   }
 
   let response: GraphQLFormattedError = {
-    message: errorMessage,
-    locations: err.locations,
-    path: err.path,
     extensions: {
-      statusCode: status,
-      name: err?.originalError?.name || undefined,
       data: (err && err.originalError && err.originalError.data) || undefined,
+      name: err?.originalError?.name || undefined,
       stack: debug ? err.stack : undefined,
+      statusCode: status,
     },
+    locations: err.locations,
+    message: errorMessage,
+    path: err.path,
   };
 
   if (afterErrorHook) {

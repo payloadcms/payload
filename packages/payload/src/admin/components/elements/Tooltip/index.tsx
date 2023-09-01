@@ -1,25 +1,26 @@
 import React, { useEffect } from 'react';
-import { Props } from './types';
-import useIntersect from '../../../hooks/useIntersect';
 
+import type { Props } from './types';
+
+import useIntersect from '../../../hooks/useIntersect';
 import './index.scss';
 
 const Tooltip: React.FC<Props> = (props) => {
   const {
-    className,
-    children,
-    show: showFromProps = true,
-    delay = 350,
     boundingRef,
+    children,
+    className,
+    delay = 350,
+    show: showFromProps = true,
   } = props;
 
   const [show, setShow] = React.useState(showFromProps);
-  const [position, setPosition] = React.useState<'top' | 'bottom'>('top');
+  const [position, setPosition] = React.useState<'bottom' | 'top'>('top');
 
   const [ref, intersectionEntry] = useIntersect({
-    threshold: 0,
-    rootMargin: '-145px 0px 0px 100px',
     root: boundingRef?.current || null,
+    rootMargin: '-145px 0px 0px 100px',
+    threshold: 0,
   });
 
 
@@ -47,13 +48,13 @@ const Tooltip: React.FC<Props> = (props) => {
   return (
     <React.Fragment>
       <aside
-        ref={ref}
         className={[
           'tooltip',
           className,
           'tooltip--position-top',
         ].filter(Boolean).join(' ')}
         aria-hidden="true"
+        ref={ref}
       >
         {children}
       </aside>

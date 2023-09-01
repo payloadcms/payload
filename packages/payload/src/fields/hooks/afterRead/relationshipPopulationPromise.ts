@@ -1,29 +1,31 @@
-import { PayloadRequest } from '../../../express/types';
-import { fieldHasMaxDepth, fieldSupportsMany, RelationshipField, UploadField } from '../../config/types';
+import type { PayloadRequest } from '../../../express/types';
+import type { RelationshipField, UploadField } from '../../config/types';
+
+import { fieldHasMaxDepth, fieldSupportsMany } from '../../config/types';
 
 type PopulateArgs = {
-  depth: number
   currentDepth: number
-  req: PayloadRequest
-  overrideAccess: boolean
-  dataReference: Record<string, any>
   data: Record<string, unknown>
+  dataReference: Record<string, any>
+  depth: number
   field: RelationshipField | UploadField
   index?: number
   key?: string
+  overrideAccess: boolean
+  req: PayloadRequest
   showHiddenFields: boolean
 }
 
 const populate = async ({
-  depth,
   currentDepth,
-  req,
-  overrideAccess,
-  dataReference,
   data,
+  dataReference,
+  depth,
   field,
   index,
   key,
+  overrideAccess,
+  req,
   showHiddenFields,
 }: PopulateArgs) => {
   const dataToUpdate = dataReference;
@@ -79,23 +81,23 @@ const populate = async ({
 };
 
 type PromiseArgs = {
-  siblingDoc: Record<string, any>
-  field: RelationshipField | UploadField
-  depth: number
   currentDepth: number
-  req: PayloadRequest
+  depth: number
+  field: RelationshipField | UploadField
   overrideAccess: boolean
+  req: PayloadRequest
   showHiddenFields: boolean
+  siblingDoc: Record<string, any>
 }
 
 const relationshipPopulationPromise = async ({
-  siblingDoc,
-  field,
-  depth,
   currentDepth,
-  req,
+  depth,
+  field,
   overrideAccess,
+  req,
   showHiddenFields,
+  siblingDoc,
 }: PromiseArgs): Promise<void> => {
   const resultingDoc = siblingDoc;
   const populateDepth = fieldHasMaxDepth(field) && field.maxDepth < depth ? field.maxDepth : depth;
@@ -108,15 +110,15 @@ const relationshipPopulationPromise = async ({
           siblingDoc[field.name][key].forEach((relatedDoc, index) => {
             const rowPromise = async () => {
               await populate({
-                depth: populateDepth,
                 currentDepth,
-                req,
-                overrideAccess,
                 data: siblingDoc[field.name][key][index],
                 dataReference: resultingDoc,
+                depth: populateDepth,
                 field,
                 index,
                 key,
+                overrideAccess,
+                req,
                 showHiddenFields,
               });
             };
@@ -129,14 +131,14 @@ const relationshipPopulationPromise = async ({
         const rowPromise = async () => {
           if (relatedDoc) {
             await populate({
-              depth: populateDepth,
               currentDepth,
-              req,
-              overrideAccess,
               data: relatedDoc,
               dataReference: resultingDoc,
+              depth: populateDepth,
               field,
               index,
+              overrideAccess,
+              req,
               showHiddenFields,
             });
           }
@@ -149,14 +151,14 @@ const relationshipPopulationPromise = async ({
     Object.keys(siblingDoc[field.name]).forEach((key) => {
       const rowPromise = async () => {
         await populate({
-          depth: populateDepth,
           currentDepth,
-          req,
-          overrideAccess,
           data: siblingDoc[field.name][key],
           dataReference: resultingDoc,
+          depth: populateDepth,
           field,
           key,
+          overrideAccess,
+          req,
           showHiddenFields,
         });
       };
@@ -166,13 +168,13 @@ const relationshipPopulationPromise = async ({
     await Promise.all(rowPromises);
   } else if (siblingDoc[field.name]) {
     await populate({
-      depth: populateDepth,
       currentDepth,
-      req,
-      overrideAccess,
-      dataReference: resultingDoc,
       data: siblingDoc[field.name],
+      dataReference: resultingDoc,
+      depth: populateDepth,
       field,
+      overrideAccess,
+      req,
       showHiddenFields,
     });
   }

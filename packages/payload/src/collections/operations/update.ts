@@ -1,41 +1,44 @@
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+import type { DeepPartial } from 'ts-essentials';
+
 import httpStatus from 'http-status';
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { DeepPartial } from 'ts-essentials';
-import { Where } from '../../types';
-import { BulkOperationResult, Collection } from '../config/types';
+
+import type { AccessResult } from '../../config/types';
+import type { PayloadRequest } from '../../express/types';
+import type { Where } from '../../types';
+import type { BulkOperationResult, Collection } from '../config/types';
+import type { CreateUpdateType } from './create';
+
 import executeAccess from '../../auth/executeAccess';
+import { combineQueries } from '../../database/combineQueries';
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
 import { APIError } from '../../errors';
-import { PayloadRequest } from '../../express/types';
-import { saveVersion } from '../../versions/saveVersion';
-import { uploadFiles } from '../../uploads/uploadFiles';
-import { beforeChange } from '../../fields/hooks/beforeChange';
-import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { generateFileData } from '../../uploads/generateFileData';
-import { AccessResult } from '../../config/types';
+import { beforeChange } from '../../fields/hooks/beforeChange';
+import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
+import { generateFileData } from '../../uploads/generateFileData';
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles';
-import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
-import { combineQueries } from '../../database/combineQueries';
-import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey';
-import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
+import { uploadFiles } from '../../uploads/uploadFiles';
 import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
-import { CreateUpdateType } from './create';
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
+import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey';
+import { saveVersion } from '../../versions/saveVersion';
 import { buildAfterOperation } from './utils';
 
 export type Arguments<T extends CreateUpdateType> = {
   collection: Collection
-  req: PayloadRequest
-  where: Where
   data: DeepPartial<T>
   depth?: number
   disableVerificationEmail?: boolean
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
-  overwriteExistingFiles?: boolean
   draft?: boolean
+  overrideAccess?: boolean
+  overwriteExistingFiles?: boolean
+  req: PayloadRequest
+  showHiddenFields?: boolean
+  where: Where
 }
 async function update<TSlug extends keyof GeneratedTypes['collections']>(
   incomingArgs: Arguments<GeneratedTypes['collections'][TSlug]>,
@@ -51,31 +54,31 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
     args = (await hook({
       args,
-      operation: 'update',
       context: args.req.context,
+      operation: 'update',
     })) || args;
   }, Promise.resolve());
 
   const {
-    depth,
-    collection,
     collection: {
       config: collectionConfig,
     },
-    where,
-    req,
+    collection,
+    depth,
+    draft: draftArg = false,
+    overrideAccess,
+    overwriteExistingFiles = false,
     req: {
-      t,
       locale,
-      payload,
       payload: {
         config,
       },
+      payload,
+      t,
     },
-    overrideAccess,
+    req,
     showHiddenFields,
-    overwriteExistingFiles = false,
-    draft: draftArg = false,
+    where,
   } = args;
 
   try {
@@ -90,8 +93,8 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
       args = (await hook({
         args,
-        operation: 'update',
         context: req.context,
+        operation: 'update',
       })) || args;
     }, Promise.resolve());
 
@@ -113,9 +116,9 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
     await validateQueryPaths({
       collectionConfig,
-      where,
-      req,
       overrideAccess,
+      req,
+      where,
     });
 
     // /////////////////////////////////////
@@ -131,28 +134,28 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
       await validateQueryPaths({
         collectionConfig: collection.config,
-        where: versionsWhere,
-        req,
         overrideAccess,
+        req,
         versionFields: buildVersionCollectionFields(collection.config),
+        where: versionsWhere,
       });
 
       const query = await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>({
         collection: collectionConfig.slug,
-        where: versionsWhere,
         locale,
         req,
+        where: versionsWhere,
       });
 
       docs = query.docs;
     } else {
       const query = await payload.db.find({
-        locale,
         collection: collectionConfig.slug,
-        where: fullWhere,
-        pagination: false,
         limit: 0,
+        locale,
+        pagination: false,
         req,
+        where: fullWhere,
       });
 
       docs = query.docs;
@@ -166,12 +169,12 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       data: newFileData,
       files: filesToUpload,
     } = await generateFileData({
-      config,
       collection,
-      req,
+      config,
       data: bulkUpdateData,
-      throwOnMissingFile: false,
       overwriteExistingFiles,
+      req,
+      throwOnMissingFile: false,
     });
 
     const errors = [];
@@ -185,22 +188,23 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
       try {
         const originalDoc = await afterRead({
+          context: req.context,
           depth: 0,
           doc,
           entityConfig: collectionConfig,
-          req,
           overrideAccess: true,
+          req,
           showHiddenFields: true,
-          context: req.context,
         });
 
-        await deleteAssociatedFiles({ config, collectionConfig, files: filesToUpload, doc, t, overrideDelete: false });
+        await deleteAssociatedFiles({ collectionConfig, config, doc, files: filesToUpload, overrideDelete: false, t });
 
         // /////////////////////////////////////
         // beforeValidate - Fields
         // /////////////////////////////////////
 
         data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+          context: req.context,
           data,
           doc: originalDoc,
           entityConfig: collectionConfig,
@@ -208,7 +212,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           operation: 'update',
           overrideAccess,
           req,
-          context: req.context,
         });
 
         // /////////////////////////////////////
@@ -219,11 +222,11 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           await priorHook;
 
           data = (await hook({
+            context: req.context,
             data,
-            req,
             operation: 'update',
             originalDoc,
-            context: req.context,
+            req,
           })) || data;
         }, Promise.resolve());
 
@@ -243,11 +246,11 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           await priorHook;
 
           data = (await hook({
-            data,
-            req,
-            originalDoc,
-            operation: 'update',
             context: req.context,
+            data,
+            operation: 'update',
+            originalDoc,
+            req,
           })) || data;
         }, Promise.resolve());
 
@@ -256,6 +259,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // /////////////////////////////////////
 
         let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+          context: req.context,
           data,
           doc: originalDoc,
           docWithLocales: doc,
@@ -264,7 +268,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           operation: 'update',
           req,
           skipValidation: shouldSaveDraft || data._status === 'draft',
-          context: req.context,
         });
 
         // /////////////////////////////////////
@@ -274,9 +277,9 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         if (!shouldSaveDraft) {
           result = await req.payload.db.updateOne({
             collection: collectionConfig.slug,
-            locale,
-            id,
             data: result,
+            id,
+            locale,
             req,
           });
         }
@@ -287,15 +290,15 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
         if (collectionConfig.versions) {
           result = await saveVersion({
-            payload,
             collection: collectionConfig,
-            req,
             docWithLocales: {
               ...result,
               createdAt: doc.createdAt,
             },
-            id,
             draft: shouldSaveDraft,
+            id,
+            payload,
+            req,
           });
         }
 
@@ -304,13 +307,13 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // /////////////////////////////////////
 
         result = await afterRead({
+          context: req.context,
           depth,
           doc: result,
           entityConfig: collectionConfig,
-          req,
           overrideAccess,
+          req,
           showHiddenFields,
-          context: req.context,
         });
 
         // /////////////////////////////////////
@@ -321,9 +324,9 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           await priorHook;
 
           result = await hook({
-            req,
-            doc: result,
             context: req.context,
+            doc: result,
+            req,
           }) || result;
         }, Promise.resolve());
 
@@ -332,12 +335,12 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // /////////////////////////////////////
 
         result = await afterChange<GeneratedTypes['collections'][TSlug]>({
+          context: req.context,
           data,
           doc: result,
-          previousDoc: originalDoc,
           entityConfig: collectionConfig,
           operation: 'update',
-          context: req.context,
+          previousDoc: originalDoc,
           req,
         });
 
@@ -349,18 +352,18 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
           await priorHook;
 
           result = await hook({
+            context: req.context,
             doc: result,
+            operation: 'update',
             previousDoc: originalDoc,
             req,
-            operation: 'update',
-            context: req.context,
           }) || result;
         }, Promise.resolve());
 
         await unlinkTempFiles({
-          req,
-          config,
           collectionConfig,
+          config,
+          req,
         });
 
 
@@ -371,8 +374,8 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         return result;
       } catch (error) {
         errors.push({
-          message: error.message,
           id,
+          message: error.message,
         });
       }
       return null;
@@ -390,8 +393,8 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
-      operation: 'update',
       args,
+      operation: 'update',
       result,
     });
 

@@ -1,7 +1,8 @@
 import path from 'path';
+
+import getFileByPath from '../../src/uploads/getFileByPath';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
-import getFileByPath from '../../src/uploads/getFileByPath';
 import removeFiles from '../helpers/removeFiles';
 import { Uploads1 } from './collections/Upload1';
 import Uploads2 from './collections/Upload2';

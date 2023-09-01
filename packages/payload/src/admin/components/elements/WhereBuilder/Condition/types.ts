@@ -1,10 +1,10 @@
-import { Where } from '../../../../../types';
-import { Action, FieldCondition } from '../types';
+import type { Where } from '../../../../../types';
+import type { Action, FieldCondition } from '../types';
 
 export type Props = {
-  fields: FieldCondition[],
-  value: Where,
-  dispatch: (action: Action) => void
-  orIndex: number,
   andIndex: number,
+  dispatch: (action: Action) => void
+  fields: FieldCondition[],
+  orIndex: number,
+  value: Where,
 }

@@ -1,4 +1,5 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
+
 import { CollapsibleLabelComponent } from './LabelComponent';
 
 export const collapsibleFieldsSlug = 'collapsible-fields';

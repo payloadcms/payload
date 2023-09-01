@@ -1,8 +1,8 @@
-import React from 'react';
+import type React from 'react';
 
 export type Props = {
-  className?: string,
-  width?: 'normal' | 'wide'
-  style?: React.CSSProperties
   children?: React.ReactNode
+  className?: string,
+  style?: React.CSSProperties
+  width?: 'normal' | 'wide'
 };

@@ -1,12 +1,13 @@
+import { Modal, useModal } from '@faceless-ui/modal';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
-import { useModal, Modal } from '@faceless-ui/modal';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import MinimalTemplate from '../../templates/Minimal';
-import Button from '../../elements/Button';
-import { Props } from './types';
+import { useHistory } from 'react-router-dom';
 
+import type { Props } from './types';
+
+import Button from '../../elements/Button';
+import MinimalTemplate from '../../templates/Minimal';
+import { useConfig } from '../../utilities/Config';
 import './index.scss';
 
 const baseClass = 'stay-logged-in';
@@ -18,10 +19,10 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
   const history = useHistory();
   const config = useConfig();
   const {
-    routes: { admin },
     admin: {
       logoutRoute,
     },
+    routes: { admin },
   } = config;
   const { toggleModal } = useModal();
   const { t } = useTranslation('authentication');
@@ -36,11 +37,11 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
         <p>{t('youAreInactive')}</p>
         <div className={`${baseClass}__actions`}>
           <Button
-            buttonStyle="secondary"
             onClick={() => {
               toggleModal(modalSlug);
               history.push(`${admin}${logoutRoute}`);
             }}
+            buttonStyle="secondary"
           >
             {t('logOut')}
           </Button>

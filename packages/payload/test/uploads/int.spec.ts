@@ -1,7 +1,8 @@
+import FormData from 'form-data';
 import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
-import FormData from 'form-data';
+
 import payload from '../../src';
 import getFileByPath from '../../src/uploads/getFileByPath';
 import { initPayloadTest } from '../helpers/configHelpers';

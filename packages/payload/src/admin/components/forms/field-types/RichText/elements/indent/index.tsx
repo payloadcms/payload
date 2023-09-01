@@ -1,15 +1,17 @@
 import React, { useCallback } from 'react';
-import { useSlate, ReactEditor } from 'slate-react';
 import { Editor, Element, Text, Transforms } from 'slate';
+import { ReactEditor, useSlate } from 'slate-react';
+
+import type { ElementNode } from '../../types';
+
 import IndentLeft from '../../../../../icons/IndentLeft';
 import IndentRight from '../../../../../icons/IndentRight';
 import { baseClass } from '../Button';
-import isElementActive from '../isActive';
-import listTypes from '../listTypes';
 import { getCommonBlock } from '../getCommonBlock';
-import { unwrapList } from '../unwrapList';
-import { ElementNode } from '../../types';
+import isElementActive from '../isActive';
 import { isBlockElement } from '../isBlockElement';
+import listTypes from '../listTypes';
+import { unwrapList } from '../unwrapList';
 
 const indentType = 'indent';
 
@@ -107,8 +109,8 @@ const indent = {
         } else {
           Transforms.unwrapNodes(editor, {
             match: (n) => Element.isElement(n) && n.type === indentType,
-            split: true,
             mode: 'lowest',
+            split: true,
           });
         }
       }
@@ -122,8 +124,8 @@ const indent = {
           // Multiple lis could be selected
           // and the selection may start in the middle of the first li
           const [[, firstSelectedLIPath]] = Array.from(Editor.nodes(editor, {
-            mode: 'lowest',
             match: (node) => Element.isElement(node) && node.type === 'li',
+            mode: 'lowest',
           }));
 
           // Is the first selected li the first in its list?
@@ -146,16 +148,16 @@ const indent = {
 
             // Move the selected lis after the prior li contents
             Transforms.moveNodes(editor, {
-              to: [...precedingLIPath, 1],
               match: (node) => Element.isElement(node) && node.type === 'li',
               mode: 'lowest',
+              to: [...precedingLIPath, 1],
             });
 
             // Wrap the selected lis in a new list
             Transforms.wrapNodes(
               editor,
               {
-                type: isCurrentlyOL ? 'ol' : 'ul', children: [],
+                children: [], type: isCurrentlyOL ? 'ol' : 'ul',
               },
               {
                 match: (node) => Element.isElement(node) && node.type === 'li',
@@ -167,7 +169,7 @@ const indent = {
             Transforms.wrapNodes(
               editor,
               {
-                type: isCurrentlyOL ? 'ol' : 'ul', children: [{ type: 'li', children: [] }],
+                children: [{ children: [], type: 'li' }], type: isCurrentlyOL ? 'ol' : 'ul',
               },
               {
                 match: (node) => Element.isElement(node) && node.type === 'li',
@@ -176,7 +178,7 @@ const indent = {
             );
           }
         } else {
-          Transforms.wrapNodes(editor, { type: indentType, children: [] });
+          Transforms.wrapNodes(editor, { children: [], type: indentType });
         }
       }
 
@@ -188,19 +190,19 @@ const indent = {
     return (
       <React.Fragment>
         <button
-          type="button"
           className={[
             baseClass,
             !canDeIndent && `${baseClass}--disabled`,
           ].filter(Boolean).join(' ')}
           onClick={canDeIndent ? (e) => handleIndent(e, 'left') : undefined}
+          type="button"
         >
           <IndentLeft />
         </button>
         <button
-          type="button"
           className={baseClass}
           onClick={(e) => handleIndent(e, 'right')}
+          type="button"
         >
           <IndentRight />
         </button>

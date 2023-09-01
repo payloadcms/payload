@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
-import { Collection } from '../../../collections/config/types';
+import type { Collection } from '../../../collections/config/types';
+
 import verifyEmail from '../../operations/verifyEmail';
 
 function verifyEmailResolver(collection: Collection) {
@@ -8,11 +9,11 @@ function verifyEmailResolver(collection: Collection) {
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
     const options = {
+      api: 'GraphQL',
       collection,
-      token: args.token,
       req: context.req,
       res: context.res,
-      api: 'GraphQL',
+      token: args.token,
     };
 
     const success = await verifyEmail(options);

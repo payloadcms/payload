@@ -1,19 +1,19 @@
+import queryString from 'qs';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import queryString from 'qs';
-import { Props, Node } from './types';
 
+import type { Node, Props } from './types';
+
+import { useSearchParams } from '../../utilities/SearchParams';
+import ClickableArrow from './ClickableArrow';
 import Page from './Page';
 import Separator from './Separator';
-import ClickableArrow from './ClickableArrow';
-import { useSearchParams } from '../../utilities/SearchParams';
-
 import './index.scss';
 
 const nodeTypes = {
+  ClickableArrow,
   Page,
   Separator,
-  ClickableArrow,
 };
 
 const baseClass = 'paginator';
@@ -23,15 +23,15 @@ const Pagination: React.FC<Props> = (props) => {
   const params = useSearchParams();
 
   const {
-    totalPages = null,
-    page: currentPage,
-    hasPrevPage = false,
+    disableHistoryChange = false,
     hasNextPage = false,
-    prevPage = null,
+    hasPrevPage = false,
     nextPage = null,
     numberOfNeighbors = 1,
-    disableHistoryChange = false,
     onChange,
+    page: currentPage,
+    prevPage = null,
+    totalPages = null,
   } = props;
 
   if (!totalPages || totalPages <= 1) return null;
@@ -69,12 +69,12 @@ const Pagination: React.FC<Props> = (props) => {
   // Add first page if necessary
   if (currentPage > numberOfNeighbors + 1) {
     nodes.unshift({
-      type: 'Page',
       props: {
+        isFirstPage: true,
         page: 1,
         updatePage,
-        isFirstPage: true,
       },
+      type: 'Page',
     });
   }
 
@@ -83,32 +83,32 @@ const Pagination: React.FC<Props> = (props) => {
   // Add last page if necessary
   if (rangeEndIndex < totalPages) {
     nodes.push({
-      type: 'Page',
       props: {
+        isLastPage: true,
         page: totalPages,
         updatePage,
-        isLastPage: true,
       },
+      type: 'Page',
     });
   }
 
   // Add prev and next arrows based on necessity
   nodes.unshift({
-    type: 'ClickableArrow',
     props: {
-      updatePage: () => updatePage(nextPage),
-      isDisabled: !hasNextPage,
       direction: 'right',
+      isDisabled: !hasNextPage,
+      updatePage: () => updatePage(nextPage),
     },
+    type: 'ClickableArrow',
   });
 
   nodes.unshift({
-    type: 'ClickableArrow',
     props: {
-      updatePage: () => updatePage(prevPage),
-      isDisabled: !hasPrevPage,
       direction: 'left',
+      isDisabled: !hasPrevPage,
+      updatePage: () => updatePage(prevPage),
     },
+    type: 'ClickableArrow',
   });
 
   return (
@@ -117,10 +117,10 @@ const Pagination: React.FC<Props> = (props) => {
         if (typeof node === 'number') {
           return (
             <Page
+              isCurrent={currentPage === node}
               key={i}
               page={node}
               updatePage={updatePage}
-              isCurrent={currentPage === node}
             />
           );
         }

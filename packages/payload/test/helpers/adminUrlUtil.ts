@@ -3,9 +3,9 @@ export class AdminUrlUtil {
 
   admin: string;
 
-  list: string;
-
   create: string;
+
+  list: string;
 
   constructor(serverURL: string, slug: string) {
     this.account = `${serverURL}/admin/account`;
@@ -14,12 +14,12 @@ export class AdminUrlUtil {
     this.create = `${this.list}/create`;
   }
 
-  edit(id: string): string {
-    return `${this.list}/${id}`;
-  }
-
   collection(slug: string): string {
     return `${this.admin}/collections/${slug}`;
+  }
+
+  edit(id: string): string {
+    return `${this.list}/${id}`;
   }
 
   global(slug: string): string {

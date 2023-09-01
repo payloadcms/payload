@@ -1,15 +1,17 @@
-import { Response } from 'express';
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { MarkOptional } from 'ts-essentials';
+import type { Response } from 'express';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+import type { MarkOptional } from 'ts-essentials';
+
+import type { Collection } from '../../collections/config/types';
+import type { PayloadRequest } from '../../express/types';
+
 import { Forbidden } from '../../errors';
-import { PayloadRequest } from '../../express/types';
-import { Collection } from '../../collections/config/types';
 import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
 
-export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
+export type Arguments<T extends { [field: number | string | symbol]: unknown }> = {
   collection: Collection
-  data: MarkOptional<T, 'id' | 'updatedAt' | 'createdAt' | 'sizes'> & {
+  data: MarkOptional<T, 'createdAt' | 'id' | 'sizes' | 'updatedAt'> & {
     email: string
     password: string
   }
@@ -29,17 +31,17 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     collection: {
       config,
       config: {
-        slug,
         auth: {
           verify,
         },
+        slug,
       },
     },
+    data,
+    req,
     req: {
       payload,
     },
-    req,
-    data,
   } = args;
 
   try {
@@ -57,20 +59,20 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     // /////////////////////////////////////
 
     const result = await payload.create<TSlug>({
-      req,
       collection: slug as TSlug,
       data,
       overrideAccess: true,
+      req,
     });
 
     // auto-verify (if applicable)
     if (verify) {
       await payload.update({
-        id: result.id,
         collection: slug,
         data: {
           _verified: true,
         },
+        id: result.id,
       });
     }
 

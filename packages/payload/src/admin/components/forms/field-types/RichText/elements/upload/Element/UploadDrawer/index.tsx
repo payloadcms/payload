@@ -1,21 +1,23 @@
 import { useModal } from '@faceless-ui/modal';
-import { Transforms } from 'slate';
-import { ReactEditor, useSlateStatic } from 'slate-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ElementProps } from '..';
+import { Transforms } from 'slate';
+import { ReactEditor, useSlateStatic } from 'slate-react';
+
+import type { ElementProps } from '..';
+import type { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types';
+
 import fieldTypes from '../../../../..';
-import { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types';
+import deepCopyObject from '../../../../../../../../../utilities/deepCopyObject';
+import { getTranslation } from '../../../../../../../../../utilities/getTranslation';
 import { Drawer } from '../../../../../../../elements/Drawer';
 import { useAuth } from '../../../../../../../utilities/Auth';
+import { useDocumentInfo } from '../../../../../../../utilities/DocumentInfo';
 import { useLocale } from '../../../../../../../utilities/Locale';
 import Form from '../../../../../../Form';
+import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema';
 import RenderFields from '../../../../../../RenderFields';
 import FormSubmit from '../../../../../../Submit';
-import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema';
-import { getTranslation } from '../../../../../../../../../utilities/getTranslation';
-import deepCopyObject from '../../../../../../../../../utilities/deepCopyObject';
-import { useDocumentInfo } from '../../../../../../../utilities/DocumentInfo';
 
 export const UploadDrawer: React.FC<ElementProps & {
   drawerSlug: string
@@ -24,13 +26,13 @@ export const UploadDrawer: React.FC<ElementProps & {
   const editor = useSlateStatic();
 
   const {
-    fieldProps,
-    relatedCollection,
     drawerSlug,
     element,
+    fieldProps,
+    relatedCollection,
   } = props;
 
-  const { t, i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const { code: locale } = useLocale();
   const { user } = useAuth();
   const { closeModal } = useModal();
@@ -56,7 +58,7 @@ export const UploadDrawer: React.FC<ElementProps & {
   useEffect(() => {
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences();
-      const state = await buildStateFromSchema({ fieldSchema, preferences, data: deepCopyObject(element?.fields || {}), user, operation: 'update', locale, t });
+      const state = await buildStateFromSchema({ data: deepCopyObject(element?.fields || {}), fieldSchema, locale, operation: 'update', preferences, t, user });
       setInitialState(state);
     };
 
@@ -69,13 +71,13 @@ export const UploadDrawer: React.FC<ElementProps & {
       title={t('general:editLabel', { label: getTranslation(relatedCollection.labels.singular, i18n) })}
     >
       <Form
-        onSubmit={handleUpdateEditData}
         initialState={initialState}
+        onSubmit={handleUpdateEditData}
       >
         <RenderFields
-          readOnly={false}
-          fieldTypes={fieldTypes}
           fieldSchema={fieldSchema}
+          fieldTypes={fieldTypes}
+          readOnly={false}
         />
         <FormSubmit>
           {t('fields:saveChanges')}

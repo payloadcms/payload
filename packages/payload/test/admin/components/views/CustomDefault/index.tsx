@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 
-// As this is the demo project, we import our dependencies from the `src` directory.
-import DefaultTemplate from '../../../../../src/admin/components/templates/Default';
+import type { AdminView } from '../../../../../src/config/types';
+
 import Button from '../../../../../src/admin/components/elements/Button';
 import Eyebrow from '../../../../../src/admin/components/elements/Eyebrow';
-import { AdminView } from '../../../../../src/config/types';
 import { useStepNav } from '../../../../../src/admin/components/elements/StepNav';
+// As this is the demo project, we import our dependencies from the `src` directory.
+import DefaultTemplate from '../../../../../src/admin/components/templates/Default';
 import { useConfig } from '../../../../../src/admin/components/utilities/Config';
 import Meta from '../../../../../src/admin/components/utilities/Meta';
 
@@ -17,7 +18,7 @@ import Meta from '../../../../../src/admin/components/utilities/Meta';
 // import { useStepNav } from 'payload/components/hooks';
 // import { useConfig, Meta } from 'payload/components/utilities';
 
-const CustomDefaultRoute: AdminView = ({ user, canAccessAdmin }) => {
+const CustomDefaultRoute: AdminView = ({ canAccessAdmin, user }) => {
   const { routes: { admin: adminRoute } } = useConfig();
   const { setStepNav } = useStepNav();
 
@@ -43,17 +44,17 @@ const CustomDefaultRoute: AdminView = ({ user, canAccessAdmin }) => {
   return (
     <DefaultTemplate>
       <Meta
-        title="Custom Route with Default Template"
         description="Building custom routes into Payload is easy."
         keywords="Custom React Components, Payload, CMS"
+        title="Custom Route with Default Template"
       />
       <Eyebrow />
       <h1>Custom Route</h1>
       <p>Here is a custom route that was added in the Payload config. It uses the Default Template, so the sidebar is rendered.</p>
       <Button
+        buttonStyle="secondary"
         el="link"
         to={`${adminRoute}`}
-        buttonStyle="secondary"
       >
         Go to Dashboard
       </Button>

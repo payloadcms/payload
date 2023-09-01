@@ -1,59 +1,63 @@
 /* eslint-disable no-param-reassign */
-import ObjectID from 'bson-objectid';
 import type { TFunction } from 'i18next';
-import { User } from '../../../../../auth';
+
+import ObjectID from 'bson-objectid';
+
+import type { User } from '../../../../../auth';
+import type {
+  NonPresentationalField} from '../../../../../fields/config/types';
+import type { Data, Fields, FormField } from '../types';
+
 import {
-  NonPresentationalField,
   fieldAffectsData,
   fieldHasSubFields,
   tabHasName,
 } from '../../../../../fields/config/types';
 import getValueWithDefault from '../../../../../fields/getDefaultValue';
-import { Fields, FormField, Data } from '../types';
 import { iterateFields } from './iterateFields';
 
 type Args = {
-  field: NonPresentationalField
-  locale: string
-  user: User
-  state: Fields
-  path: string
-  passesCondition: boolean
-  id: string | number
-  operation: 'create' | 'update'
   data: Data
+  field: NonPresentationalField
   fullData: Data
-  t: TFunction
+  id: number | string
+  locale: string
+  operation: 'create' | 'update'
+  passesCondition: boolean
+  path: string
   preferences: {
     [key: string]: unknown
   }
+  state: Fields
+  t: TFunction
+  user: User
 }
 
 export const addFieldStatePromise = async ({
-  field,
-  locale,
-  user,
-  state,
-  path,
-  passesCondition,
-  fullData,
   data,
+  field,
+  fullData,
   id,
+  locale,
   operation,
-  t,
+  passesCondition,
+  path,
   preferences,
+  state,
+  t,
+  user,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
     const fieldState: FormField = {
-      valid: true,
-      value: undefined,
-      initialValue: undefined,
-      validate: field.validate,
       condition: field.admin?.condition,
+      initialValue: undefined,
       passesCondition,
+      valid: true,
+      validate: field.validate,
+      value: undefined,
     };
 
-    const valueWithDefault = await getValueWithDefault({ value: data?.[field.name], defaultValue: field.defaultValue, locale, user });
+    const valueWithDefault = await getValueWithDefault({ defaultValue: field.defaultValue, locale, user, value: data?.[field.name] });
     if (data?.[field.name]) {
       data[field.name] = valueWithDefault;
     }
@@ -64,11 +68,11 @@ export const addFieldStatePromise = async ({
       validationResult = await fieldState.validate(data?.[field.name], {
         ...field,
         data: fullData,
-        user,
-        siblingData: data,
         id,
         operation,
+        siblingData: data,
         t,
+        user,
       });
     }
 
@@ -87,32 +91,32 @@ export const addFieldStatePromise = async ({
           row.id = row?.id || new ObjectID().toHexString();
 
           state[`${rowPath}id`] = {
-            value: row.id,
             initialValue: row.id,
             valid: true,
+            value: row.id,
           };
 
           acc.promises.push(iterateFields({
-            state,
-            fields: field.fields,
             data: row,
-            parentPassesCondition: passesCondition,
-            path: rowPath,
-            user,
+            fields: field.fields,
             fullData,
             id,
             locale,
             operation,
-            t,
+            parentPassesCondition: passesCondition,
+            path: rowPath,
             preferences,
+            state,
+            t,
+            user,
           }));
 
           const collapsedRowIDs = preferences?.fields?.[`${path}${field.name}`]?.collapsed;
 
           acc.rowMetadata.push({
-            id: row.id,
-            collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
             childErrorPaths: new Set(),
+            collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
+            id: row.id,
           });
 
           return acc;
@@ -155,45 +159,45 @@ export const addFieldStatePromise = async ({
             row.id = row?.id || new ObjectID().toHexString();
 
             state[`${rowPath}id`] = {
-              value: row.id,
               initialValue: row.id,
               valid: true,
+              value: row.id,
             };
 
             state[`${rowPath}blockType`] = {
-              value: row.blockType,
               initialValue: row.blockType,
               valid: true,
+              value: row.blockType,
             };
 
             state[`${rowPath}blockName`] = {
-              value: row.blockName,
               initialValue: row.blockName,
               valid: true,
+              value: row.blockName,
             };
 
             acc.promises.push(iterateFields({
-              state,
-              fields: block.fields,
               data: row,
+              fields: block.fields,
               fullData,
-              parentPassesCondition: passesCondition,
-              path: rowPath,
-              user,
+              id,
               locale,
               operation,
-              id,
-              t,
+              parentPassesCondition: passesCondition,
+              path: rowPath,
               preferences,
+              state,
+              t,
+              user,
             }));
 
             const collapsedRowIDs = preferences?.fields?.[`${path}${field.name}`]?.collapsed;
 
             acc.rowMetadata.push({
-              id: row.id,
-              collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
               blockType: row.blockType,
               childErrorPaths: new Set(),
+              collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
+              id: row.id,
             });
           }
 
@@ -228,18 +232,18 @@ export const addFieldStatePromise = async ({
 
       case 'group': {
         await iterateFields({
-          state,
-          id,
-          operation,
-          fields: field.fields,
           data: data?.[field.name] || {},
+          fields: field.fields,
           fullData,
+          id,
+          locale,
+          operation,
           parentPassesCondition: passesCondition,
           path: `${path}${field.name}.`,
-          locale,
-          user,
-          t,
           preferences,
+          state,
+          t,
+          user,
         });
 
         break;
@@ -258,33 +262,33 @@ export const addFieldStatePromise = async ({
   } else if (fieldHasSubFields(field)) {
     // Handle field types that do not use names (row, etc)
     await iterateFields({
-      state,
-      fields: field.fields,
       data,
-      parentPassesCondition: passesCondition,
-      path,
-      user,
+      fields: field.fields,
       fullData,
       id,
       locale,
       operation,
-      t,
+      parentPassesCondition: passesCondition,
+      path,
       preferences,
+      state,
+      t,
+      user,
     });
   } else if (field.type === 'tabs') {
     const promises = field.tabs.map((tab) => iterateFields({
-      state,
-      fields: tab.fields,
       data: tabHasName(tab) ? data?.[tab.name] : data,
-      parentPassesCondition: passesCondition,
-      path: tabHasName(tab) ? `${path}${tab.name}.` : path,
-      user,
+      fields: tab.fields,
       fullData,
       id,
       locale,
       operation,
-      t,
+      parentPassesCondition: passesCondition,
+      path: tabHasName(tab) ? `${path}${tab.name}.` : path,
       preferences,
+      state,
+      t,
+      user,
     }));
 
     await Promise.all(promises);

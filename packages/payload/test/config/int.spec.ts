@@ -1,5 +1,5 @@
-import { initPayloadTest } from '../helpers/configHelpers';
 import payload from '../../src';
+import { initPayloadTest } from '../helpers/configHelpers';
 
 require('isomorphic-fetch');
 

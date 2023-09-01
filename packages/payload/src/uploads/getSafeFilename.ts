@@ -1,7 +1,9 @@
 import sanitize from 'sanitize-filename';
+
+import type { Payload } from '..';
+
 import docWithFilenameExists from './docWithFilenameExists';
 import fileExists from './fileExists';
-import { Payload } from '..';
 
 const incrementName = (name: string) => {
   const extension = name.split('.').pop();

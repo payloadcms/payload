@@ -2,20 +2,22 @@
 import * as GraphQL from 'graphql';
 import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import queryComplexity, { fieldExtensionsEstimator, simpleEstimator } from 'graphql-query-complexity';
-import { Payload } from '../payload';
-import buildLocaleInputType from './schema/buildLocaleInputType';
-import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType';
+
+import type { Payload } from '../payload';
+
+import accessResolver from '../auth/graphql/resolvers/access';
 import initCollections from '../collections/graphql/init';
 import initGlobals from '../globals/graphql/init';
+import buildFallbackLocaleInputType from './schema/buildFallbackLocaleInputType';
+import buildLocaleInputType from './schema/buildLocaleInputType';
 import buildPoliciesType from './schema/buildPoliciesType';
-import accessResolver from '../auth/graphql/resolvers/access';
 
 export default function registerGraphQLSchema(payload: Payload): void {
   payload.types = {
-    blockTypes: {},
-    blockInputTypes: {},
-    groupTypes: {},
     arrayTypes: {},
+    blockInputTypes: {},
+    blockTypes: {},
+    groupTypes: {},
     tabTypes: {},
   };
 
@@ -25,21 +27,21 @@ export default function registerGraphQLSchema(payload: Payload): void {
   }
 
   payload.Query = {
-    name: 'Query',
     fields: {},
+    name: 'Query',
   };
 
   payload.Mutation = {
-    name: 'Mutation',
     fields: {},
+    name: 'Mutation',
   };
 
   initCollections(payload);
   initGlobals(payload);
 
   payload.Query.fields.Access = {
-    type: buildPoliciesType(payload),
     resolve: accessResolver(payload),
+    type: buildPoliciesType(payload),
   };
 
   if (typeof payload.config.graphQL.queries === 'function') {
@@ -68,8 +70,8 @@ export default function registerGraphQLSchema(payload: Payload): void {
   const mutation = new GraphQLObjectType(payload.Mutation);
 
   const schema = {
-    query,
     mutation,
+    query,
   };
 
   payload.schema = new GraphQLSchema(schema);

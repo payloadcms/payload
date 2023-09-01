@@ -1,7 +1,12 @@
 import { GraphQLClient } from 'graphql-request';
-import { initPayloadTest } from '../helpers/configHelpers';
-import payload from '../../src';
+
+import type { Config } from '../../src/config/types';
+import type { Where } from '../../src/types';
 import type { LocalizedPost, WithLocalizedRelationship } from './payload-types';
+
+import payload from '../../src';
+import { initPayloadTest } from '../helpers/configHelpers';
+import { arrayCollectionSlug } from './collections/Array';
 import configPromise, {
   localizedPostsSlug,
   relationshipLocalizedSlug,
@@ -18,9 +23,6 @@ import {
   spanishLocale,
   spanishTitle,
 } from './shared';
-import type { Where } from '../../src/types';
-import { arrayCollectionSlug } from './collections/Array';
-import type { Config } from '../../src/config/types';
 
 const collection = localizedPostsSlug;
 let config: Config;

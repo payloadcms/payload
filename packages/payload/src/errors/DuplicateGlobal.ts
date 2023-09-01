@@ -1,4 +1,5 @@
-import { GlobalConfig } from '../globals/config/types';
+import type { GlobalConfig } from '../globals/config/types';
+
 import APIError from './APIError';
 
 class DuplicateGlobal extends APIError {

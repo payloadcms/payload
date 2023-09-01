@@ -1,25 +1,26 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
+
 import Button from '../../elements/Button';
-import Meta from '../../utilities/Meta';
 import MinimalTemplate from '../../templates/Minimal';
+import { useConfig } from '../../utilities/Config';
+import Meta from '../../utilities/Meta';
 
 const Unauthorized: React.FC = () => {
   const { t } = useTranslation('general');
   const config = useConfig();
   const {
-    routes: { admin },
     admin: {
       logoutRoute,
     },
+    routes: { admin },
   } = config;
   return (
     <MinimalTemplate className="unauthorized">
       <Meta
-        title={t('error:unauthorized')}
         description={t('error:unauthorized')}
         keywords={t('error:unauthorized')}
+        title={t('error:unauthorized')}
       />
       <h2>{t('error:unauthorized')}</h2>
       <p>{t('error:notAllowedToAccessPage')}</p>

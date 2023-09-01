@@ -4,16 +4,16 @@ import './index.scss';
 
 const LinkIcon: React.FC = () => (
   <svg
-    viewBox="0 0 24 24"
     aria-hidden="true"
-    focusable="false"
-    fill="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
     className="graphic link icon icon--link"
+    fill="currentColor"
+    focusable="false"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      fill="none"
       d="M0 0h24v24H0z"
+      fill="none"
     />
     <path
       className="fill"

@@ -1,8 +1,8 @@
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types';
 
 export type Props = {
+  buttonId?: string,
   collection?: SanitizedCollectionConfig,
   id?: string,
-  buttonId?: string,
   title?: string,
 }

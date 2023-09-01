@@ -1,14 +1,16 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import jwtDecode from 'jwt-decode';
-import { useHistory, useLocation } from 'react-router-dom';
 import { useModal } from '@faceless-ui/modal';
+import jwtDecode from 'jwt-decode';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Permissions, User } from '../../../../auth/types';
-import { useConfig } from '../Config';
+
+import type { Permissions, User } from '../../../../auth/types';
+import type { AuthContext } from './types';
+
 import { requests } from '../../../api';
 import useDebounce from '../../../hooks/useDebounce';
-import { AuthContext } from './types';
+import { useConfig } from '../Config';
 
 const Context = createContext({} as AuthContext);
 
@@ -24,15 +26,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const {
     admin: {
-      user: userSlug,
-      inactivityRoute: logoutInactivityRoute,
       autoLogin,
+      inactivityRoute: logoutInactivityRoute,
+      user: userSlug,
     },
-    serverURL,
     routes: {
       admin,
       api,
     },
+    serverURL,
   } = config;
 
   const exp = user?.exp;
@@ -40,7 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [permissions, setPermissions] = useState<Permissions>();
 
   const { i18n } = useTranslation();
-  const { openModal, closeAllModals } = useModal();
+  const { closeAllModals, openModal } = useModal();
   const [lastLocationChange, setLastLocationChange] = useState(0);
   const debouncedLocationChange = useDebounce(lastLocationChange, 10000);
 
@@ -241,15 +243,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <Context.Provider value={{
-      user,
-      setUser,
       logOut,
+      permissions,
       refreshCookie,
       refreshCookieAsync,
       refreshPermissions,
-      permissions,
       setToken,
+      setUser,
       token: tokenInMemory,
+      user,
     }}
     >
       {children}

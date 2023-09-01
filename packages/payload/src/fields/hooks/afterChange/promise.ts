@@ -1,35 +1,37 @@
 /* eslint-disable no-param-reassign */
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
+import type { PayloadRequest, RequestContext } from '../../../express/types';
+import type { Field, TabAsField} from '../../config/types';
+
+import { fieldAffectsData, tabHasName } from '../../config/types';
 import { traverseFields } from './traverseFields';
 
 type Args = {
+  context: RequestContext
   data: Record<string, unknown>
   doc: Record<string, unknown>
-  previousDoc: Record<string, unknown>
-  previousSiblingDoc: Record<string, unknown>
   field: Field | TabAsField
   operation: 'create' | 'update'
+  previousDoc: Record<string, unknown>
+  previousSiblingDoc: Record<string, unknown>
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
-  context: RequestContext
 }
 
 // This function is responsible for the following actions, in order:
 // - Execute field hooks
 
 export const promise = async ({
+  context,
   data,
   doc,
-  previousDoc,
-  previousSiblingDoc,
   field,
   operation,
+  previousDoc,
+  previousSiblingDoc,
   req,
   siblingData,
   siblingDoc,
-  context,
 }: Args): Promise<void> => {
   if (fieldAffectsData(field)) {
     // Execute hooks
@@ -38,16 +40,16 @@ export const promise = async ({
         await priorHook;
 
         const hookedValue = await currentHook({
-          value: siblingData[field.name],
+          context,
+          data,
+          operation,
           originalDoc: doc,
           previousDoc,
           previousSiblingDoc,
           previousValue: previousDoc[field.name],
-          data,
-          siblingData,
-          operation,
           req,
-          context,
+          siblingData,
+          value: siblingData[field.name],
         });
 
         if (hookedValue !== undefined) {
@@ -61,16 +63,16 @@ export const promise = async ({
   switch (field.type) {
     case 'group': {
       await traverseFields({
+        context,
         data,
         doc,
-        previousDoc,
-        previousSiblingDoc: previousDoc[field.name] as Record<string, unknown>,
         fields: field.fields,
         operation,
+        previousDoc,
+        previousSiblingDoc: previousDoc[field.name] as Record<string, unknown>,
         req,
         siblingData: siblingData?.[field.name] as Record<string, unknown> || {},
         siblingDoc: siblingDoc[field.name] as Record<string, unknown>,
-        context,
       });
 
       break;
@@ -83,16 +85,16 @@ export const promise = async ({
         const promises = [];
         rows.forEach((row, i) => {
           promises.push(traverseFields({
+            context,
             data,
             doc,
-            previousDoc,
-            previousSiblingDoc: previousDoc?.[field.name]?.[i] || {} as Record<string, unknown>,
             fields: field.fields,
             operation,
+            previousDoc,
+            previousSiblingDoc: previousDoc?.[field.name]?.[i] || {} as Record<string, unknown>,
             req,
             siblingData: siblingData?.[field.name]?.[i] || {},
             siblingDoc: { ...row } || {},
-            context,
           }));
         });
         await Promise.all(promises);
@@ -110,16 +112,16 @@ export const promise = async ({
 
           if (block) {
             promises.push(traverseFields({
+              context,
               data,
               doc,
-              previousDoc,
-              previousSiblingDoc: previousDoc?.[field.name]?.[i] || {} as Record<string, unknown>,
               fields: block.fields,
               operation,
+              previousDoc,
+              previousSiblingDoc: previousDoc?.[field.name]?.[i] || {} as Record<string, unknown>,
               req,
               siblingData: siblingData?.[field.name]?.[i] || {},
               siblingDoc: { ...row } || {},
-              context,
             }));
           }
         });
@@ -132,16 +134,16 @@ export const promise = async ({
     case 'row':
     case 'collapsible': {
       await traverseFields({
+        context,
         data,
         doc,
-        previousDoc,
-        previousSiblingDoc: { ...previousSiblingDoc },
         fields: field.fields,
         operation,
+        previousDoc,
+        previousSiblingDoc: { ...previousSiblingDoc },
         req,
         siblingData: siblingData || {},
         siblingDoc: { ...siblingDoc },
-        context,
       });
 
       break;
@@ -159,16 +161,16 @@ export const promise = async ({
       }
 
       await traverseFields({
+        context,
         data,
         doc,
         fields: field.fields,
         operation,
-        req,
-        previousSiblingDoc: tabPreviousSiblingDoc,
         previousDoc,
+        previousSiblingDoc: tabPreviousSiblingDoc,
+        req,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
-        context,
       });
 
       break;
@@ -176,16 +178,16 @@ export const promise = async ({
 
     case 'tabs': {
       await traverseFields({
+        context,
         data,
         doc,
-        previousDoc,
-        previousSiblingDoc: { ...previousSiblingDoc },
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         operation,
+        previousDoc,
+        previousSiblingDoc: { ...previousSiblingDoc },
         req,
         siblingData: siblingData || {},
         siblingDoc: { ...siblingDoc },
-        context,
       });
       break;
     }

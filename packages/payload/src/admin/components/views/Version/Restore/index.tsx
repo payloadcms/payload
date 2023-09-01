@@ -1,25 +1,26 @@
-import React, { Fragment, useCallback, useState } from 'react';
-import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
-import { useHistory } from 'react-router-dom';
+import React, { Fragment, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../utilities/Config';
-import { Button, MinimalTemplate, Pill } from '../../..';
-import { Props } from './types';
-import { requests } from '../../../../api';
-import { getTranslation } from '../../../../../utilities/getTranslation';
+import { useHistory } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
+import type { Props } from './types';
+
+import { Button, MinimalTemplate, Pill } from '../../..';
+import { getTranslation } from '../../../../../utilities/getTranslation';
+import { requests } from '../../../../api';
+import { useConfig } from '../../../utilities/Config';
 import './index.scss';
 
 const baseClass = 'restore-version';
 const modalSlug = 'restore-version';
 
-const Restore: React.FC<Props> = ({ collection, global, className, versionID, originalDocID, versionDate }) => {
-  const { serverURL, routes: { api, admin } } = useConfig();
+const Restore: React.FC<Props> = ({ className, collection, global, originalDocID, versionDate, versionID }) => {
+  const { routes: { admin, api }, serverURL } = useConfig();
   const history = useHistory();
   const { toggleModal } = useModal();
   const [processing, setProcessing] = useState(false);
-  const { t, i18n } = useTranslation('version');
+  const { i18n, t } = useTranslation('version');
 
   let fetchURL = `${serverURL}${api}`;
   let redirectURL: string;
@@ -58,22 +59,22 @@ const Restore: React.FC<Props> = ({ collection, global, className, versionID, or
   return (
     <Fragment>
       <Pill
-        onClick={() => toggleModal(modalSlug)}
         className={[baseClass, className].filter(Boolean).join(' ')}
+        onClick={() => toggleModal(modalSlug)}
       >
         {t('restoreThisVersion')}
       </Pill>
       <Modal
-        slug={modalSlug}
         className={`${baseClass}__modal`}
+        slug={modalSlug}
       >
         <MinimalTemplate className={`${baseClass}__modal-template`}>
           <h1>{t('confirmVersionRestoration')}</h1>
           <p>{restoreMessage}</p>
           <Button
             buttonStyle="secondary"
-            type="button"
             onClick={processing ? undefined : () => toggleModal(modalSlug)}
+            type="button"
           >
             {t('general:cancel')}
           </Button>

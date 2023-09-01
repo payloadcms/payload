@@ -1,8 +1,9 @@
-import { Strategy } from 'passport';
-import { DeepRequired } from 'ts-essentials';
-import { PayloadRequest } from '../express/types';
-import { Where } from '../types';
-import { Payload } from '../payload';
+import type { Strategy } from 'passport';
+import type { DeepRequired } from 'ts-essentials';
+
+import type { PayloadRequest } from '../express/types';
+import type { Payload } from '../payload';
+import type { Where } from '../types';
 
 export type Permission = {
   permission: boolean
@@ -10,18 +11,6 @@ export type Permission = {
 }
 
 export type FieldPermissions = {
-  create: {
-    permission: boolean
-  }
-  read: {
-    permission: boolean
-  }
-  update: {
-    permission: boolean
-  }
-  fields?: {
-    [fieldName: string]: FieldPermissions
-  }
   blocks?: {
     [blockSlug: string]: {
       fields: {
@@ -29,26 +18,38 @@ export type FieldPermissions = {
       }
     }
   }
+  create: {
+    permission: boolean
+  }
+  fields?: {
+    [fieldName: string]: FieldPermissions
+  }
+  read: {
+    permission: boolean
+  }
+  update: {
+    permission: boolean
+  }
 }
 
 export type CollectionPermission = {
   create: Permission
-  read: Permission
-  update: Permission
   delete: Permission
-  readVersions?: Permission
   fields: {
     [fieldName: string]: FieldPermissions
   }
+  read: Permission
+  readVersions?: Permission
+  update: Permission
 }
 
 export type GlobalPermission = {
-  read: Permission
-  update: Permission
-  readVersions?: Permission
   fields: {
     [fieldName: string]: FieldPermissions
   }
+  read: Permission
+  readVersions?: Permission
+  update: Permission
 }
 
 export type Permissions = {
@@ -62,10 +63,10 @@ export type Permissions = {
 }
 
 export type User = {
-  id: string
-  email: string
-  collection: string
   [key: string]: unknown
+  collection: string
+  email: string
+  id: string
 }
 
 type GenerateVerifyEmailHTML = (args: { req: PayloadRequest, token: string, user: any }) => Promise<string> | string
@@ -77,32 +78,32 @@ type GenerateForgotPasswordEmailSubject = (args?: { req?: PayloadRequest, token?
 type AuthStrategy = ((ctx: Payload) => Strategy) | Strategy;
 
 export interface IncomingAuthType {
-  tokenExpiration?: number;
-  verify?:
-  | boolean
-  | {
-    generateEmailHTML?: GenerateVerifyEmailHTML;
-    generateEmailSubject?: GenerateVerifyEmailSubject;
-  };
-  maxLoginAttempts?: number;
-  lockTime?: number;
-  useAPIKey?: boolean;
-  depth?: number
   cookies?: {
-    secure?: boolean;
-    sameSite?: boolean | 'none' | 'strict' | 'lax';
     domain?: string;
+    sameSite?: 'lax' | 'none' | 'strict' | boolean;
+    secure?: boolean;
   }
+  depth?: number
+  disableLocalStrategy?: true
   forgotPassword?: {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML,
     generateEmailSubject?: GenerateForgotPasswordEmailSubject,
   }
-  disableLocalStrategy?: true
+  lockTime?: number;
+  maxLoginAttempts?: number;
   removeTokenFromResponses?: true
   strategies?: {
     name?: string
     strategy: AuthStrategy
   }[]
+  tokenExpiration?: number;
+  useAPIKey?: boolean;
+  verify?:
+  | {
+    generateEmailHTML?: GenerateVerifyEmailHTML;
+    generateEmailSubject?: GenerateVerifyEmailSubject;
+  }
+  | boolean;
 }
 
 export type VerifyConfig = {
@@ -110,14 +111,14 @@ export type VerifyConfig = {
   generateEmailSubject?: GenerateVerifyEmailSubject
 };
 
-export interface Auth extends Omit<DeepRequired<IncomingAuthType>, 'verify' | 'forgotPassword'> {
-  verify?: VerifyConfig | boolean
+export interface Auth extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'verify'> {
   forgotPassword?: {
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
+  verify?: VerifyConfig | boolean
 }
 
-export function hasWhereAccessResult(result: boolean | Where): result is Where {
+export function hasWhereAccessResult(result: Where | boolean): result is Where {
   return result && typeof result === 'object';
 }

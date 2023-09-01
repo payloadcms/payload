@@ -1,7 +1,8 @@
-import i18n from 'i18next';
-import { RelationshipField } from '../../../../../../fields/config/types';
-import { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
+import type i18n from 'i18next';
+
+import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types';
 import type { PaginatedDocs } from '../../../../../../database/types';
+import type { RelationshipField } from '../../../../../../fields/config/types';
 
 export type Props = {
   onChange: (val: unknown) => void,
@@ -10,27 +11,27 @@ export type Props = {
 
 export type Option = {
   label: string
-  value: string
-  relationTo?: string
   options?: Option[]
+  relationTo?: string
+  value: string
 }
 
 type CLEAR = {
-  type: 'CLEAR'
-  required: boolean
   i18n: typeof i18n
+  required: boolean
+  type: 'CLEAR'
 }
 
 type ADD = {
-  type: 'ADD'
-  data: PaginatedDocs<any>
-  relation: string
-  hasMultipleRelations: boolean
   collection: SanitizedCollectionConfig
+  data: PaginatedDocs<any>
+  hasMultipleRelations: boolean
   i18n: typeof i18n
+  relation: string
+  type: 'ADD'
 }
 
-export type Action = CLEAR | ADD
+export type Action = ADD | CLEAR
 
 export type ValueWithRelation = {
   relationTo: string

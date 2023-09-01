@@ -1,9 +1,11 @@
 import express from 'express';
 import passport from 'passport';
 import path from 'path';
+
+import type { Payload } from '../payload';
+
 import getExecuteStaticAccess from '../auth/getExecuteStaticAccess';
 import authenticate from './middleware/authenticate';
-import { Payload } from '../payload';
 import corsHeaders from './middleware/corsHeaders';
 
 function initStatic(ctx: Payload): void {

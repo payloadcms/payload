@@ -1,16 +1,6 @@
 import { randomBytes } from 'crypto';
 import mongoose from 'mongoose';
-import { initPayloadTest } from '../helpers/configHelpers';
-import config, {
-  chainedRelSlug,
-  customIdNumberSlug,
-  customIdSlug,
-  defaultAccessRelSlug,
-  relationSlug,
-  slug,
-} from './config';
-import payload from '../../src';
-import { RESTClient } from '../helpers/rest';
+
 import type {
   ChainedRelation,
   CustomIdNumberRelation,
@@ -19,11 +9,23 @@ import type {
   Post,
   Relation,
 } from './payload-types';
+
+import payload from '../../src';
 import { mapAsync } from '../../src/utilities/mapAsync';
+import { initPayloadTest } from '../helpers/configHelpers';
+import { RESTClient } from '../helpers/rest';
+import config, {
+  chainedRelSlug,
+  customIdNumberSlug,
+  customIdSlug,
+  defaultAccessRelSlug,
+  relationSlug,
+  slug,
+} from './config';
 
 let client: RESTClient;
 
-type EasierChained = { relation: EasierChained, id: string }
+type EasierChained = { id: string, relation: EasierChained }
 
 describe('Relationships', () => {
   beforeAll(async () => {

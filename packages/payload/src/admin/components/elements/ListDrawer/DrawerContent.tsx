@@ -1,44 +1,46 @@
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ListDrawerProps } from './types';
+
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import type { Field } from '../../../../fields/config/types';
+import type { ListDrawerProps } from './types';
+
+import { baseClass } from '.';
 import { getTranslation } from '../../../../utilities/getTranslation';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import { DocumentInfoProvider } from '../../utilities/DocumentInfo';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import usePayloadAPI from '../../../hooks/usePayloadAPI';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import DefaultList from '../../views/collections/List/Default';
 import Label from '../../forms/Label';
-import ReactSelect from '../ReactSelect';
+import X from '../../icons/X';
+import { useAuth } from '../../utilities/Auth';
+import { useConfig } from '../../utilities/Config';
+import { DocumentInfoProvider } from '../../utilities/DocumentInfo';
+import { usePreferences } from '../../utilities/Preferences';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import DefaultList from '../../views/collections/List/Default';
+import formatFields from '../../views/collections/List/formatFields';
 import { useDocumentDrawer } from '../DocumentDrawer';
 import Pill from '../Pill';
-import X from '../../icons/X';
-import ViewDescription from '../ViewDescription';
-import formatFields from '../../views/collections/List/formatFields';
-import { usePreferences } from '../../utilities/Preferences';
-import { Field } from '../../../../fields/config/types';
-import { baseClass } from '.';
+import ReactSelect from '../ReactSelect';
 import { TableColumnsProvider } from '../TableColumns';
+import ViewDescription from '../ViewDescription';
 
 export const ListDrawerContent: React.FC<ListDrawerProps> = ({
-  drawerSlug,
-  onSelect,
-  customHeader,
   collectionSlugs,
-  selectedCollection,
+  customHeader,
+  drawerSlug,
   filterOptions,
+  onSelect,
+  selectedCollection,
 }) => {
-  const { t, i18n } = useTranslation(['upload', 'general']);
+  const { i18n, t } = useTranslation(['upload', 'general']);
   const { permissions } = useAuth();
   const { setPreference } = usePreferences();
-  const { isModalOpen, closeModal } = useModal();
+  const { closeModal, isModalOpen } = useModal();
   const [limit, setLimit] = useState<number>();
   const [sort, setSort] = useState(null);
   const [page, setPage] = useState(1);
   const [where, setWhere] = useState(null);
-  const { serverURL, routes: { api }, collections } = useConfig();
+  const { collections, routes: { api }, serverURL } = useConfig();
 
   const enabledCollectionConfigs = collections.filter(({ slug }) => {
     return collectionSlugs.includes(slug);
@@ -96,11 +98,11 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   useEffect(() => {
     const params: {
+      cacheBust?: number
+      limit?: number
       page?: number
       sort?: string
       where?: unknown
-      limit?: number
-      cacheBust?: number
     } = {};
 
     if (page) params.page = page;
@@ -131,8 +133,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const onCreateNew = useCallback(({ doc }) => {
     if (typeof onSelect === 'function') {
       onSelect({
-        docID: doc.id,
         collectionConfig: selectedCollectionConfig,
+        docID: doc.id,
       });
     }
     dispatchCacheBust();
@@ -146,24 +148,22 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   return (
     <TableColumnsProvider
-      collection={selectedCollectionConfig}
       cellProps={[{
+        className: `${baseClass}__first-cell`,
         link: false,
         onClick: ({ collection: rowColl, rowData }) => {
           if (typeof onSelect === 'function') {
             onSelect({
-              docID: rowData.id,
               collectionConfig: rowColl,
+              docID: rowData.id,
             });
           }
         },
-        className: `${baseClass}__first-cell`,
       }]}
+      collection={selectedCollectionConfig}
     >
       <DocumentInfoProvider collection={selectedCollectionConfig}>
         <RenderCustomComponent
-          DefaultComponent={DefaultList}
-          CustomComponent={selectedCollectionConfig?.admin?.components?.views?.List}
           componentProps={{
             collection: {
               ...selectedCollectionConfig,
@@ -187,11 +187,11 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
                     )}
                   </div>
                   <button
-                    type="button"
                     onClick={() => {
                       closeModal(drawerSlug);
                     }}
                     className={`${baseClass}__header-close`}
+                    type="button"
                   >
                     <X />
                   </button>
@@ -206,27 +206,29 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
                     <Label label={t('selectCollectionToBrowse')} />
                     <ReactSelect
                       className={`${baseClass}__select-collection`}
-                      value={selectedOption}
                       onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
                       options={enabledCollectionConfigs.map((coll) => ({ label: getTranslation(coll.labels.singular, i18n), value: coll.slug }))}
+                      value={selectedOption}
                     />
                   </div>
                 )}
               </header>
             ),
             data,
-            limit: limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit,
-            setLimit,
-            setSort,
-            newDocumentURL: null,
-            hasCreatePermission,
             disableEyebrow: true,
-            modifySearchParams: false,
-            handleSortChange: setSort,
-            handleWhereChange: setWhere,
             handlePageChange: setPage,
             handlePerPageChange: setLimit,
+            handleSortChange: setSort,
+            handleWhereChange: setWhere,
+            hasCreatePermission,
+            limit: limit || selectedCollectionConfig?.admin?.pagination?.defaultLimit,
+            modifySearchParams: false,
+            newDocumentURL: null,
+            setLimit,
+            setSort,
           }}
+          CustomComponent={selectedCollectionConfig?.admin?.components?.views?.List}
+          DefaultComponent={DefaultList}
         />
       </DocumentInfoProvider>
       <DocumentDrawer onSave={onCreateNew} />

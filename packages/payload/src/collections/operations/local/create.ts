@@ -1,36 +1,38 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { UploadedFile } from 'express-fileupload';
-import { MarkOptional } from 'ts-essentials';
-import { Payload } from '../../../payload';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { Document } from '../../../types';
-import getFileByPath from '../../../uploads/getFileByPath';
-import create from '../create';
-import { getDataLoader } from '../../dataloader';
-import { File } from '../../../uploads/types';
-import { i18nInit } from '../../../translations/init';
+import type { UploadedFile } from 'express-fileupload';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+import type { MarkOptional } from 'ts-essentials';
+
+import type { PayloadRequest, RequestContext } from '../../../express/types';
+import type { Payload } from '../../../payload';
+import type { Document } from '../../../types';
+import type { File } from '../../../uploads/types';
+
 import { APIError } from '../../../errors';
 import { setRequestContext } from '../../../express/setRequestContext';
+import { i18nInit } from '../../../translations/init';
+import getFileByPath from '../../../uploads/getFileByPath';
+import { getDataLoader } from '../../dataloader';
+import create from '../create';
 
 export type Options<TSlug extends keyof GeneratedTypes['collections']> = {
   collection: TSlug
-  data: MarkOptional<GeneratedTypes['collections'][TSlug], 'id' | 'updatedAt' | 'createdAt' | 'sizes'>
-  depth?: number
-  locale?: string
-  fallbackLocale?: string
-  user?: Document
-  overrideAccess?: boolean
-  disableVerificationEmail?: boolean
-  showHiddenFields?: boolean
-  filePath?: string
-  file?: File
-  overwriteExistingFiles?: boolean
-  req?: PayloadRequest
-  draft?: boolean
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext
+  data: MarkOptional<GeneratedTypes['collections'][TSlug], 'createdAt' | 'id' | 'sizes' | 'updatedAt'>
+  depth?: number
+  disableVerificationEmail?: boolean
+  draft?: boolean
+  fallbackLocale?: string
+  file?: File
+  filePath?: string
+  locale?: string
+  overrideAccess?: boolean
+  overwriteExistingFiles?: boolean
+  req?: PayloadRequest
+  showHiddenFields?: boolean
+  user?: Document
 }
 
 export default async function createLocal<TSlug extends keyof GeneratedTypes['collections']>(
@@ -39,20 +41,20 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   const {
     collection: collectionSlug,
-    depth,
-    locale = null,
-    fallbackLocale = null,
+    context,
     data,
-    user,
-    overrideAccess = true,
+    depth,
     disableVerificationEmail,
-    showHiddenFields,
-    filePath,
+    draft,
+    fallbackLocale = null,
     file,
+    filePath,
+    locale = null,
+    overrideAccess = true,
     overwriteExistingFiles = false,
     req = {} as PayloadRequest,
-    draft,
-    context,
+    showHiddenFields,
+    user,
   } = options;
   setRequestContext(req, context);
 
@@ -78,14 +80,14 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return create<TSlug>({
-    depth,
-    data,
     collection,
-    overrideAccess,
+    data,
+    depth,
     disableVerificationEmail,
-    showHiddenFields,
-    overwriteExistingFiles,
     draft,
+    overrideAccess,
+    overwriteExistingFiles,
     req,
+    showHiddenFields,
   });
 }

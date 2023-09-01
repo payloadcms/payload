@@ -1,11 +1,13 @@
 import express from 'express';
 import passport from 'passport';
+
+import type { Payload } from '../payload';
+import type { SanitizedCollectionConfig } from './config/types';
+
 import apiKeyStrategy from '../auth/strategies/apiKey';
-import bindCollectionMiddleware from './bindCollection';
-import { SanitizedCollectionConfig } from './config/types';
 import mountEndpoints from '../express/mountEndpoints';
+import bindCollectionMiddleware from './bindCollection';
 import buildEndpoints from './buildEndpoints';
-import { Payload } from '../payload';
 
 export default function initCollectionsHTTP(ctx: Payload): void {
   ctx.config.collections = ctx.config.collections.map((collection: SanitizedCollectionConfig) => {

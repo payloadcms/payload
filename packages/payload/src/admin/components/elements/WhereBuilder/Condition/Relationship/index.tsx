@@ -1,28 +1,29 @@
-import React, { useReducer, useState, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../utilities/Config';
-import { Props, ValueWithRelation, GetResults } from './types';
-import optionsReducer from './optionsReducer';
-import useDebounce from '../../../../../hooks/useDebounce';
-import ReactSelect from '../../../ReactSelect';
-import { Option } from '../../../ReactSelect/types';
-import type { PaginatedDocs } from '../../../../../../database/types';
 
+import type { PaginatedDocs } from '../../../../../../database/types';
+import type { Option } from '../../../ReactSelect/types';
+import type { GetResults, Props, ValueWithRelation } from './types';
+
+import useDebounce from '../../../../../hooks/useDebounce';
+import { useConfig } from '../../../../utilities/Config';
+import ReactSelect from '../../../ReactSelect';
 import './index.scss';
+import optionsReducer from './optionsReducer';
 
 const baseClass = 'condition-value-relationship';
 
 const maxResultsPerRequest = 10;
 
 const RelationshipField: React.FC<Props> = (props) => {
-  const { onChange, value, relationTo, hasMany, admin: { isSortable } = {} } = props;
+  const { admin: { isSortable } = {}, hasMany, onChange, relationTo, value } = props;
 
   const {
-    serverURL,
+    collections,
     routes: {
       api,
     },
-    collections,
+    serverURL,
   } = useConfig();
 
   const hasMultipleRelations = Array.isArray(relationTo);
@@ -33,11 +34,11 @@ const RelationshipField: React.FC<Props> = (props) => {
   const [errorLoading, setErrorLoading] = useState('');
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false);
   const debouncedSearch = useDebounce(search, 300);
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
 
   const addOptions = useCallback((data, relation) => {
     const collection = collections.find((coll) => coll.slug === relation);
-    dispatchOptions({ type: 'ADD', data, relation, hasMultipleRelations, collection, i18n });
+    dispatchOptions({ collection, data, hasMultipleRelations, i18n, relation, type: 'ADD' });
   }, [collections, hasMultipleRelations, i18n]);
 
   const getResults = useCallback<GetResults>(async ({
@@ -181,9 +182,9 @@ const RelationshipField: React.FC<Props> = (props) => {
 
   useEffect(() => {
     dispatchOptions({
-      type: 'CLEAR',
-      required: true,
       i18n,
+      required: true,
+      type: 'CLEAR',
     });
 
     setHasLoadedFirstOptions(true);
@@ -237,8 +238,6 @@ const RelationshipField: React.FC<Props> = (props) => {
     <div className={classes}>
       {!errorLoading && (
         <ReactSelect
-          placeholder={t('selectValue')}
-          onInputChange={handleInputChange}
           onChange={(selected) => {
             if (hasMany) {
               onChange(selected ? selected.map((option) => {
@@ -263,10 +262,12 @@ const RelationshipField: React.FC<Props> = (props) => {
           onMenuScrollToBottom={() => {
             getResults({ lastFullyLoadedRelation, lastLoadedPage: lastLoadedPage + 1 });
           }}
-          value={valueToRender}
-          options={options}
           isMulti={hasMany}
           isSortable={isSortable}
+          onInputChange={handleInputChange}
+          options={options}
+          placeholder={t('selectValue')}
+          value={valueToRender}
         />
       )}
       {errorLoading && (

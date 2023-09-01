@@ -1,4 +1,5 @@
 import type { CollectionConfig } from '../../../src/collections/config/types';
+
 import { CustomPublishButton } from '../elements/CustomSaveButton';
 import { draftSlug } from '../shared';
 

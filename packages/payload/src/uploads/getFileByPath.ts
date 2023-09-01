@@ -1,7 +1,8 @@
-import fs from 'fs';
 import { fromFile } from 'file-type';
+import fs from 'fs';
 import path from 'path';
-import { File } from './types';
+
+import type { File } from './types';
 
 const getFileByPath = async (filePath: string): Promise<File> => {
   if (typeof filePath === 'string') {

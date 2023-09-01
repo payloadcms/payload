@@ -1,8 +1,9 @@
+import * as dotenv from 'dotenv';
+import express from 'express';
 import fs from 'fs';
 import path from 'path';
-import express from 'express';
 import { v4 as uuid } from 'uuid';
-import * as dotenv from 'dotenv';
+
 import payload from '../src';
 
 dotenv.config();

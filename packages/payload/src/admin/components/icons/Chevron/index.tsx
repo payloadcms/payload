@@ -8,8 +8,8 @@ const Chevron: React.FC<{ className?: string }> = ({ className }) => (
       'icon icon--chevron',
       className,
     ].filter(Boolean).join(' ')}
-    xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 25 25"
+    xmlns="http://www.w3.org/2000/svg"
   >
     <path
       className="stroke"

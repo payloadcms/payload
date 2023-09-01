@@ -1,20 +1,21 @@
 /* eslint-disable no-param-reassign */
-import { PayloadRequest } from '../../../express/types';
 import type { PaginatedDocs } from '../../../database/types';
-import { Where } from '../../../types';
-import { Collection } from '../../config/types';
+import type { PayloadRequest } from '../../../express/types';
+import type { Where } from '../../../types';
+import type { Collection } from '../../config/types';
+
 import find from '../../operations/find';
 
 export type Resolver = (_: unknown,
   args: {
     data: Record<string, unknown>,
-    locale?: string
     draft: boolean
-    where?: Where
+    fallbackLocale?: string
     limit?: number,
+    locale?: string
     page?: number,
     sort?: string
-    fallbackLocale?: string
+    where?: Where
   },
   context: {
     req: PayloadRequest,
@@ -30,13 +31,13 @@ export default function findResolver(collection: Collection): Resolver {
 
     const options = {
       collection,
-      where: args.where,
+      depth: 0,
+      draft: args.draft,
       limit: args.limit,
       page: args.page,
-      sort: args.sort,
       req: context.req,
-      draft: args.draft,
-      depth: 0,
+      sort: args.sort,
+      where: args.where,
     };
 
     const results = await find(options);

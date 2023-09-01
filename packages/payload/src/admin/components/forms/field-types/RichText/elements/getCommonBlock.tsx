@@ -1,5 +1,9 @@
-import { Editor, Node, NodeEntry, NodeMatch } from 'slate';
-import { ElementNode } from '../types';
+import type { NodeEntry, NodeMatch } from 'slate';
+
+import { Editor, Node } from 'slate';
+
+import type { ElementNode } from '../types';
+
 import { isBlockElement } from './isBlockElement';
 
 export const getCommonBlock = (editor: Editor, match?: NodeMatch<Node>): NodeEntry<Node> => {

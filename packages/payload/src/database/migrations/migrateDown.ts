@@ -1,8 +1,9 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import { DatabaseAdapter } from '../types';
+import type { PayloadRequest } from '../../express/types';
+import type { DatabaseAdapter } from '../types';
+
 import { getMigrations } from './getMigrations';
 import { readMigrationFiles } from './readMigrationFiles';
-import { PayloadRequest } from '../../express/types';
 
 export async function migrateDown(this: DatabaseAdapter): Promise<void> {
   const { payload } = this;
@@ -49,8 +50,8 @@ export async function migrateDown(this: DatabaseAdapter): Promise<void> {
     } catch (err: unknown) {
       await this.rollbackTransaction(transactionID);
       payload.logger.error({
-        msg: `Error running migration ${migrationFile.name}`,
         err,
+        msg: `Error running migration ${migrationFile.name}`,
       });
       throw err;
     }

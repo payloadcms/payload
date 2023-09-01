@@ -1,4 +1,5 @@
 import path from 'path';
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 
 export default buildConfigWithDefaults({

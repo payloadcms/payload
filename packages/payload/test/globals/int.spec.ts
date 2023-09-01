@@ -1,8 +1,9 @@
 import { GraphQLClient } from 'graphql-request';
-import { initPayloadTest } from '../helpers/configHelpers';
-import configPromise, { accessControlSlug, arraySlug, englishLocale, slug, spanishLocale } from './config';
+
 import payload from '../../src';
+import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
+import configPromise, { accessControlSlug, arraySlug, englishLocale, slug, spanishLocale } from './config';
 
 describe('globals', () => {
   let serverURL;

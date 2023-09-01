@@ -1,34 +1,34 @@
-import { Payload } from '../payload';
-import { PayloadRequest } from '../express/types';
-import { SanitizedConfig, EmailOptions } from '../config/types';
-import { Collection } from '../collections/config/types';
-import { User, VerifyConfig } from './types';
+import type { Collection } from '../collections/config/types';
+import type { EmailOptions, SanitizedConfig } from '../config/types';
+import type { PayloadRequest } from '../express/types';
+import type { Payload } from '../payload';
+import type { User, VerifyConfig } from './types';
 
 
 type Args = {
-  config: SanitizedConfig,
   collection: Collection,
-  user: User
+  config: SanitizedConfig,
   disableEmail: boolean
-  req: PayloadRequest
-  token: string
-  sendEmail: Payload['sendEmail']
   emailOptions: EmailOptions
+  req: PayloadRequest
+  sendEmail: Payload['sendEmail']
+  token: string
+  user: User
 }
 
 async function sendVerificationEmail(args: Args): Promise<void> {
   // Verify token from e-mail
   const {
-    config,
-    emailOptions,
-    sendEmail,
     collection: {
       config: collectionConfig,
     },
-    user,
+    config,
     disableEmail,
+    emailOptions,
     req,
+    sendEmail,
     token,
+    user,
   } = args;
 
   if (!disableEmail) {
@@ -62,9 +62,9 @@ async function sendVerificationEmail(args: Args): Promise<void> {
 
     sendEmail({
       from: `"${emailOptions.fromName}" <${emailOptions.fromAddress}>`,
-      to: user.email,
-      subject,
       html,
+      subject,
+      to: user.email,
     });
   }
 }

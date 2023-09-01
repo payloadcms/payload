@@ -1,5 +1,7 @@
 import type { Page } from '@playwright/test';
+
 import { expect, test } from '@playwright/test';
+
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
 

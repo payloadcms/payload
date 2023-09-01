@@ -1,11 +1,14 @@
 import type { Page } from '@playwright/test';
+
 import { expect, test } from '@playwright/test';
+
+import type { ReadOnlyCollection, RestrictedVersion } from './payload-types';
+
 import payload from '../../src';
+import wait from '../../src/utilities/wait';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { restrictedVersionsSlug, readOnlySlug, restrictedSlug, slug, docLevelAccessSlug, unrestrictedSlug } from './config';
-import type { ReadOnlyCollection, RestrictedVersion } from './payload-types';
-import wait from '../../src/utilities/wait';
+import { docLevelAccessSlug, readOnlySlug, restrictedSlug, restrictedVersionsSlug, slug, unrestrictedSlug } from './config';
 
 /**
  * TODO: Access Control
@@ -226,9 +229,9 @@ describe('access control', () => {
     const unrestrictedURL = new AdminUrlUtil(serverURL, unrestrictedSlug);
     await page.goto(unrestrictedURL.edit(unrestrictedDoc.id));
 
-    const button = await page.locator('#userRestrictedDocs-add-new button.relationship-add-new__add-button.doc-drawer__toggler');
+    const button = page.locator('#userRestrictedDocs-add-new button.relationship-add-new__add-button.doc-drawer__toggler');
     await button.click();
-    const documentDrawer = await page.locator('[id^=doc-drawer_user-restricted_1_]');
+    const documentDrawer = page.locator('[id^=doc-drawer_user-restricted_1_]');
     await expect(documentDrawer).toBeVisible();
     await documentDrawer.locator('#field-name').fill('anonymous@email.com');
     await documentDrawer.locator('#action-save').click();
@@ -236,12 +239,12 @@ describe('access control', () => {
     await expect(page.locator('.Toastify')).toContainText('successfully');
 
     // ensure user is not allowed to edit this document
-    await expect(await documentDrawer.locator('#field-name')).toBeDisabled();
+    await expect(documentDrawer.locator('#field-name')).toBeDisabled();
     await documentDrawer.locator('button.doc-drawer__header-close').click();
     await wait(200);
 
     await button.click();
-    const documentDrawer2 = await page.locator('[id^=doc-drawer_user-restricted_1_]');
+    const documentDrawer2 = page.locator('[id^=doc-drawer_user-restricted_1_]');
     await expect(documentDrawer2).toBeVisible();
     await documentDrawer2.locator('#field-name').fill('dev@payloadcms.com');
     await documentDrawer2.locator('#action-save').click();
@@ -249,7 +252,7 @@ describe('access control', () => {
     await expect(page.locator('.Toastify')).toContainText('successfully');
 
     // ensure user is allowed to edit this document
-    await expect(await documentDrawer2.locator('#field-name')).toBeEnabled();
+    await expect(documentDrawer2.locator('#field-name')).toBeEnabled();
   });
 });
 

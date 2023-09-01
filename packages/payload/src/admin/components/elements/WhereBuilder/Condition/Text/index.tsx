@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Props } from './types';
+
+import type { Props } from './types';
 
 import './index.scss';
 
@@ -10,10 +11,10 @@ const Text: React.FC<Props> = ({ onChange, value }) => {
   const { t } = useTranslation('general');
   return (
     <input
-      placeholder={t('enterAValue')}
       className={baseClass}
-      type="text"
       onChange={(e) => onChange(e.target.value)}
+      placeholder={t('enterAValue')}
+      type="text"
       value={value || ''}
     />
   );

@@ -1,22 +1,23 @@
-import { useConfig } from '../components/utilities/Config';
-import { SanitizedCollectionConfig } from '../../collections/config/types';
+import type { SanitizedCollectionConfig } from '../../collections/config/types';
+
 import isImage from '../../uploads/isImage';
+import { useConfig } from '../components/utilities/Config';
 
 const absoluteURLPattern = new RegExp('^(?:[a-z]+:)?//', 'i');
 const base64Pattern = new RegExp(/^data:image\/[a-z]+;base64,/);
 
-const useThumbnail = (collection: SanitizedCollectionConfig, doc: Record<string, unknown>): string | false => {
+const useThumbnail = (collection: SanitizedCollectionConfig, doc: Record<string, unknown>): false | string => {
   const {
     upload: {
-      staticURL,
       adminThumbnail,
+      staticURL,
     },
   } = collection;
 
   const {
+    filename,
     mimeType,
     sizes,
-    filename,
     url,
   } = doc;
 

@@ -1,27 +1,28 @@
-import { useHistory } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { useFormModified, useAllFormFields } from '../../forms/Form/context';
-import { useLocale } from '../../utilities/Locale';
-import { Props } from './types';
-import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import useDebounce from '../../../hooks/useDebounce';
+import { useHistory } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
+import type { Props } from './types';
+
+import useDebounce from '../../../hooks/useDebounce';
+import { useAllFormFields, useFormModified } from '../../forms/Form/context';
+import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues';
+import { useConfig } from '../../utilities/Config';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import { useLocale } from '../../utilities/Locale';
 import './index.scss';
 
 const baseClass = 'autosave';
 
 const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdatedAt }) => {
-  const { serverURL, routes: { api, admin } } = useConfig();
-  const { versions, getVersions } = useDocumentInfo();
+  const { routes: { admin, api }, serverURL } = useConfig();
+  const { getVersions, versions } = useDocumentInfo();
   const [fields] = useAllFormFields();
   const modified = useFormModified();
   const { code: locale } = useLocale();
   const { replace } = useHistory();
-  const { t, i18n } = useTranslation('version');
+  const { i18n, t } = useTranslation('version');
 
   let interval = 800;
   if (collection?.versions.drafts && collection.versions?.drafts?.autosave) interval = collection.versions.drafts.autosave.interval;
@@ -46,13 +47,13 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
 
   const createCollectionDoc = useCallback(async () => {
     const res = await fetch(`${serverURL}${api}/${collection.slug}?locale=${locale}&fallback-locale=null&depth=0&draft=true&autosave=true`, {
-      method: 'POST',
+      body: JSON.stringify({}),
       credentials: 'include',
       headers: {
-        'Content-Type': 'application/json',
         'Accept-Language': i18n.language,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({}),
+      method: 'POST',
     });
 
     if (res.status === 201) {
@@ -104,13 +105,13 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
               };
 
               const res = await fetch(url, {
-                method,
+                body: JSON.stringify(body),
                 credentials: 'include',
                 headers: {
-                  'Content-Type': 'application/json',
                   'Accept-Language': i18n.language,
+                  'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(body),
+                method,
               });
 
               if (res.status === 200) {

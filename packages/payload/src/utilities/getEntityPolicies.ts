@@ -1,34 +1,36 @@
-import { Access } from '../config/types';
-import { AllOperations, Document, Where } from '../types';
-import { FieldAccess, tabHasName } from '../fields/config/types';
-import type { SanitizedCollectionConfig } from '../collections/config/types';
-import { TypeWithID } from '../collections/config/types';
-import type { SanitizedGlobalConfig } from '../globals/config/types';
-import type { PayloadRequest } from '../express/types';
 import type { CollectionPermission, GlobalPermission } from '../auth/types';
+import type { SanitizedCollectionConfig } from '../collections/config/types';
+import type { TypeWithID } from '../collections/config/types';
+import type { Access } from '../config/types';
+import type { PayloadRequest } from '../express/types';
+import type { FieldAccess} from '../fields/config/types';
+import type { SanitizedGlobalConfig } from '../globals/config/types';
+import type { AllOperations, Document, Where } from '../types';
+
+import { tabHasName } from '../fields/config/types';
 
 type Args = {
-  req: PayloadRequest
-  operations: AllOperations[]
-  id?: string
-  type: 'collection' | 'global'
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
+  id?: string
+  operations: AllOperations[]
+  req: PayloadRequest
+  type: 'collection' | 'global'
 }
 
 type ReturnType<T extends Args> = T['type'] extends 'global' ? GlobalPermission : CollectionPermission
 
 type CreateAccessPromise = (args: {
+  access: Access | FieldAccess,
   accessLevel: 'entity' | 'field',
+  disableWhere?: boolean,
+  operation: AllOperations,
   policiesObj: {
     [key: string]: any
   }
-  access: Access | FieldAccess,
-  operation: AllOperations,
-  disableWhere?: boolean,
 }) => Promise<void>
 
 export async function getEntityPolicies<T extends Args>(args: T): Promise<ReturnType<T>> {
-  const { req, entity, operations, id, type } = args;
+  const { entity, id, operations, req, type } = args;
   const isLoggedIn = !!(req.user);
   // ---- ---- ---- ---- ---- ---- ---- ---- ----
   // `policies` and `promises` get mutated in
@@ -52,8 +54,9 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
       if (type === 'collection' && id) {
         if (typeof where === 'object') {
           const paginatedRes = await req.payload.find({
-            overrideAccess: true,
             collection: entity.slug,
+            limit: 1,
+            overrideAccess: true,
             where: {
               ...where,
               and: [
@@ -65,16 +68,15 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
                 },
               ],
             },
-            limit: 1,
           });
 
           return paginatedRes?.docs?.[0] || undefined;
         }
 
         return req.payload.findByID({
-          overrideAccess: true,
           collection: entity.slug,
           id,
+          overrideAccess: true,
         });
       }
     }
@@ -83,18 +85,18 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
   }
 
   const createAccessPromise: CreateAccessPromise = async ({
-    policiesObj,
     access,
-    operation,
-    disableWhere = false,
     accessLevel,
+    disableWhere = false,
+    operation,
+    policiesObj,
   }) => {
     const mutablePolicies = policiesObj;
 
     if (accessLevel === 'field' && docBeingAccessed === undefined) {
       docBeingAccessed = await getEntityDoc();
     }
-    const accessResult = await access({ req, id, doc: docBeingAccessed });
+    const accessResult = await access({ doc: docBeingAccessed, id, req });
 
     if (typeof accessResult === 'object' && !disableWhere) {
       mutablePolicies[operation] = {
@@ -109,10 +111,10 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
   };
 
   const executeFieldPolicies = async ({
-    policiesObj,
+    entityPermission,
     fields,
     operation,
-    entityPermission,
+    policiesObj,
   }) => {
     const mutablePolicies = policiesObj.fields;
 
@@ -122,11 +124,11 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
 
         if (field.access && typeof field.access[operation] === 'function') {
           await createAccessPromise({
-            policiesObj: mutablePolicies[field.name],
             access: field.access[operation],
-            operation,
-            disableWhere: true,
             accessLevel: 'field',
+            disableWhere: true,
+            operation,
+            policiesObj: mutablePolicies[field.name],
           });
         } else {
           mutablePolicies[field.name][operation] = {
@@ -138,10 +140,10 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           if (!mutablePolicies[field.name].fields) mutablePolicies[field.name].fields = {};
 
           await executeFieldPolicies({
-            policiesObj: mutablePolicies[field.name],
+            entityPermission,
             fields: field.fields,
             operation,
-            entityPermission,
+            policiesObj: mutablePolicies[field.name],
           });
         }
 
@@ -159,19 +161,19 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
             }
 
             await executeFieldPolicies({
-              policiesObj: mutablePolicies[field.name].blocks[block.slug],
+              entityPermission,
               fields: block.fields,
               operation,
-              entityPermission,
+              policiesObj: mutablePolicies[field.name].blocks[block.slug],
             });
           }));
         }
       } else if (field.fields) {
         await executeFieldPolicies({
-          policiesObj,
+          entityPermission,
           fields: field.fields,
           operation,
-          entityPermission,
+          policiesObj,
         });
       } else if (field.type === 'tabs') {
         await Promise.all(field.tabs.map(async (tab) => {
@@ -185,17 +187,17 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
               mutablePolicies[tab.name][operation] = { permission: entityPermission };
             }
             await executeFieldPolicies({
-              policiesObj: mutablePolicies[tab.name],
+              entityPermission,
               fields: tab.fields,
               operation,
-              entityPermission,
+              policiesObj: mutablePolicies[tab.name],
             });
           } else {
             await executeFieldPolicies({
-              policiesObj,
+              entityPermission,
               fields: tab.fields,
               operation,
-              entityPermission,
+              policiesObj,
             });
           }
         }));
@@ -208,10 +210,10 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
 
     if (typeof entity.access[operation] === 'function') {
       entityAccessPromise = createAccessPromise({
-        policiesObj: policies,
         access: entity.access[operation],
-        operation,
         accessLevel: 'entity',
+        operation,
+        policiesObj: policies,
       });
     } else {
       policies[operation] = {
@@ -222,10 +224,10 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     await entityAccessPromise;
 
     await executeFieldPolicies({
-      policiesObj: policies,
+      entityPermission: policies[operation].permission,
       fields: entity.fields,
       operation,
-      entityPermission: policies[operation].permission,
+      policiesObj: policies,
     });
   }));
 

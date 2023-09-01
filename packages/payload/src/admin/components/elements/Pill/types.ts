@@ -1,29 +1,29 @@
-import { HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
 
 export type Props = {
+  alignIcon?: 'left' | 'right',
+  'aria-checked'?: boolean,
+  'aria-controls'?: string,
+  'aria-expanded'?: boolean,
+  'aria-label'?: string,
   children?: React.ReactNode,
   className?: string,
-  to?: string,
-  icon?: React.ReactNode,
-  alignIcon?: 'left' | 'right',
-  onClick?: () => void,
-  pillStyle?: 'white' | 'light' | 'dark' | 'light-gray' | 'warning' | 'success' | 'error',
   draggable?: boolean,
-  rounded?: boolean
-  id?: string
-  'aria-label'?: string,
-  'aria-expanded'?: boolean,
-  'aria-controls'?: string,
-  'aria-checked'?: boolean,
   elementProps?: HTMLAttributes<HTMLElement> & {
     ref: React.RefCallback<HTMLElement>
   }
+  icon?: React.ReactNode,
+  id?: string
+  onClick?: () => void,
+  pillStyle?: 'dark' | 'error' | 'light' | 'light-gray' | 'success' | 'warning' | 'white',
+  rounded?: boolean
+  to?: string,
 }
 
 export type RenderedTypeProps = {
   children: React.ReactNode
   className?: string,
-  to: string,
   onClick?: () => void,
+  to: string,
   type?: 'button'
 }

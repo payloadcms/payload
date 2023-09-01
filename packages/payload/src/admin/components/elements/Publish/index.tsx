@@ -1,24 +1,25 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { useForm, useFormModified } from '../../forms/Form/context';
 import FormSubmit from '../../forms/Submit';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import { useForm, useFormModified } from '../../forms/Form/context';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
 export type CustomPublishButtonProps = React.ComponentType<DefaultPublishButtonProps & {
   DefaultButton: React.ComponentType<DefaultPublishButtonProps>;
 }>
 export type DefaultPublishButtonProps = {
-  publish: () => void;
   disabled: boolean;
   label: string;
+  publish: () => void;
 };
-const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({ disabled, publish, label }) => {
+const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({ disabled, label, publish }) => {
   return (
     <FormSubmit
-      type="button"
-      onClick={publish}
       disabled={disabled}
+      onClick={publish}
+      type="button"
     >
       {label}
     </FormSubmit>
@@ -29,7 +30,7 @@ type Props = {
   CustomComponent?: CustomPublishButtonProps
 }
 export const Publish: React.FC<Props> = ({ CustomComponent }) => {
-  const { unpublishedVersions, publishedDoc } = useDocumentInfo();
+  const { publishedDoc, unpublishedVersions } = useDocumentInfo();
   const { submit } = useForm();
   const modified = useFormModified();
   const { t } = useTranslation('version');
@@ -47,14 +48,14 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
 
   return (
     <RenderCustomComponent
-      CustomComponent={CustomComponent}
-      DefaultComponent={DefaultPublishButton}
       componentProps={{
-        publish,
+        DefaultButton: DefaultPublishButton,
         disabled: !canPublish,
         label: t('publishChanges'),
-        DefaultButton: DefaultPublishButton,
+        publish,
       }}
+      CustomComponent={CustomComponent}
+      DefaultComponent={DefaultPublishButton}
     />
   );
 };

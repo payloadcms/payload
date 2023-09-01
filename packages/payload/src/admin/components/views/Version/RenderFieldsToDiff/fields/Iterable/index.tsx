@@ -1,29 +1,31 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import RenderFieldsToDiff from '../..';
-import { Props } from '../types';
-import Label from '../../Label';
-import { ArrayField, BlockField, Field, fieldAffectsData } from '../../../../../../../fields/config/types';
-import getUniqueListBy from '../../../../../../../utilities/getUniqueListBy';
-import { getTranslation } from '../../../../../../../utilities/getTranslation';
 
+import type { ArrayField, BlockField, Field} from '../../../../../../../fields/config/types';
+import type { Props } from '../types';
+
+import RenderFieldsToDiff from '../..';
+import { fieldAffectsData } from '../../../../../../../fields/config/types';
+import { getTranslation } from '../../../../../../../utilities/getTranslation';
+import getUniqueListBy from '../../../../../../../utilities/getUniqueListBy';
+import Label from '../../Label';
 import './index.scss';
 
 const baseClass = 'iterable-diff';
 
 const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
-  version,
   comparison,
-  permissions,
   field,
+  fieldComponents,
   locale,
   locales,
-  fieldComponents,
+  permissions,
+  version,
 }) => {
   const versionRowCount = Array.isArray(version) ? version.length : 0;
   const comparisonRowCount = Array.isArray(comparison) ? comparison.length : 0;
   const maxRows = Math.max(versionRowCount, comparisonRowCount);
-  const { t, i18n } = useTranslation('version');
+  const { i18n, t } = useTranslation('version');
 
   return (
     <div className={baseClass}>
@@ -48,8 +50,8 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
             if (field.type === 'blocks') {
               subFields = [
                 {
-                  name: 'blockType',
                   label: t('fields:blockType'),
+                  name: 'blockType',
                   type: 'text',
                 },
               ];
@@ -78,12 +80,12 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
                 key={i}
               >
                 <RenderFieldsToDiff
-                  locales={locales}
-                  version={versionRow}
                   comparison={comparisonRow}
+                  fieldComponents={fieldComponents}
                   fieldPermissions={permissions}
                   fields={subFields.filter((subField) => !(fieldAffectsData(subField) && subField.name === 'id'))}
-                  fieldComponents={fieldComponents}
+                  locales={locales}
+                  version={versionRow}
                 />
               </div>
             );

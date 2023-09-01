@@ -1,98 +1,99 @@
 /* eslint-disable no-use-before-define */
-import { CSSProperties } from 'react';
-import { Editor } from 'slate';
-import type { i18n as Ii18n, TFunction } from 'i18next';
 import type { EditorProps } from '@monaco-editor/react';
+import type { i18n as Ii18n, TFunction } from 'i18next';
+import type { CSSProperties } from 'react';
+import type { Editor } from 'slate';
+
 import monacoeditor from 'monaco-editor'; // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
-import { Operation, Where } from '../../types';
-import { SanitizedConfig } from '../../config/types';
-import { TypeWithID } from '../../collections/config/types';
-import { PayloadRequest, RequestContext } from '../../express/types';
-import { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
-import { Description } from '../../admin/components/forms/FieldDescription/types';
-import { User } from '../../auth';
-import { Payload } from '../../payload';
-import { RowLabel } from '../../admin/components/forms/RowLabel/types';
+import type { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types';
+import type { Description } from '../../admin/components/forms/FieldDescription/types';
+import type { RowLabel } from '../../admin/components/forms/RowLabel/types';
+import type { User } from '../../auth';
+import type { TypeWithID } from '../../collections/config/types';
+import type { SanitizedConfig } from '../../config/types';
+import type { PayloadRequest, RequestContext } from '../../express/types';
+import type { Payload } from '../../payload';
+import type { Operation, Where } from '../../types';
 
 export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
+  context: RequestContext
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
   data?: Partial<T>,
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
   findMany?: boolean
+  /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
+  operation?: 'create' | 'delete' | 'read' | 'update',
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: T,
   /** The document before changes were applied, only in `afterChange` hooks. */
   previousDoc?: T,
   /** The sibling data from the previous document in `afterChange` hook. */
   previousSiblingDoc?: T,
-  /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
-  operation?: 'create' | 'read' | 'update' | 'delete',
+  previousValue?: P,
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
   /** The sibling data passed to a field that the hook is running against. */
   siblingData: Partial<S>
   /** The value of the field. */
   value?: P,
-  previousValue?: P,
-  context: RequestContext
 }
 
-export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => Promise<P> | P;
+export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => P | Promise<P>;
 
 export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
-  req: PayloadRequest<U>
-  id?: string | number
   data?: Partial<T>
-  siblingData?: Partial<P>
   doc?: T
+  id?: number | string
+  req: PayloadRequest<U>
+  siblingData?: Partial<P>
 }) => Promise<boolean> | boolean;
 
 export type Condition<T extends TypeWithID = any, P = any> = (data: Partial<T>, siblingData: Partial<P>, { user }: { user: User }) => boolean;
 
 export type FilterOptionsProps<T = any> = {
-  id: string | number,
-  user: Partial<User>,
   data: T,
-  siblingData: unknown,
+  id: number | string,
   relationTo: string,
+  siblingData: unknown,
+  user: Partial<User>,
 }
 
-export type FilterOptions<T = any> = Where | ((options: FilterOptionsProps<T>) => (Where | Promise<Where>));
+export type FilterOptions<T = any> = ((options: FilterOptionsProps<T>) => (Promise<Where> | Where)) | Where;
 
 type Admin = {
-  position?: 'sidebar';
-  width?: string;
-  style?: CSSProperties;
   className?: string;
-  readOnly?: boolean;
-  disabled?: boolean;
-  condition?: Condition;
-  description?: Description;
   components?: {
-    Filter?: React.ComponentType<any>;
     Cell?: React.ComponentType<any>;
     Field?: React.ComponentType<any>;
+    Filter?: React.ComponentType<any>;
   }
+  condition?: Condition;
+  description?: Description;
   disableBulkEdit?: boolean
+  disabled?: boolean;
   hidden?: boolean
+  position?: 'sidebar';
+  readOnly?: boolean;
+  style?: CSSProperties;
+  width?: string;
 }
 
 export type Labels = {
-  singular: Record<string, string> | string;
   plural: Record<string, string> | string;
+  singular: Record<string, string> | string;
 };
 
 export type ValidateOptions<TData, TSiblingData, TFieldConfig> = {
   data: Partial<TData>
-  siblingData: Partial<TSiblingData>
-  id?: string | number
-  user?: Partial<User>
+  id?: number | string
   operation?: Operation
   payload?: Payload
+  siblingData: Partial<TSiblingData>
   t: TFunction
+  user?: Partial<User>
 } & TFieldConfig;
 
-export type Validate<TValue = any, TData = any, TSiblingData = any, TFieldConfig = any> = (value: TValue, options: ValidateOptions<TData, TSiblingData, TFieldConfig>) => string | true | Promise<string | true>;
+export type Validate<TValue = any, TData = any, TSiblingData = any, TFieldConfig = any> = (value: TValue, options: ValidateOptions<TData, TSiblingData, TFieldConfig>) => Promise<string | true> | string | true;
 
 export type OptionObject = {
   label: Record<string, string> | string
@@ -102,34 +103,33 @@ export type OptionObject = {
 export type Option = OptionObject | string
 
 export interface FieldBase {
-  name: string;
-  label?: Record<string, string> | string | false;
-  required?: boolean;
-  unique?: boolean;
-  index?: boolean;
-  defaultValue?: any;
-  hidden?: boolean;
-  saveToJWT?: string | boolean;
-  localized?: boolean;
-  validate?: Validate;
-  hooks?: {
-    beforeValidate?: FieldHook[];
-    beforeChange?: FieldHook[];
-    afterChange?: FieldHook[];
-    afterRead?: FieldHook[];
-  }
-  admin?: Admin;
   access?: {
     create?: FieldAccess;
     read?: FieldAccess;
     update?: FieldAccess;
   };
+  admin?: Admin;
   /** Extension point to add your custom data. */
   custom?: Record<string, any>;
+  defaultValue?: any;
+  hidden?: boolean;
+  hooks?: {
+    afterChange?: FieldHook[];
+    afterRead?: FieldHook[];
+    beforeChange?: FieldHook[];
+    beforeValidate?: FieldHook[];
+  }
+  index?: boolean;
+  label?: Record<string, string> | false | string;
+  localized?: boolean;
+  name: string;
+  required?: boolean;
+  saveToJWT?: boolean | string;
+  unique?: boolean;
+  validate?: Validate;
 }
 
 export type NumberField = FieldBase & {
-  type: 'number';
   admin?: Admin & {
     /** Set this property to a string that will be used for browser autocomplete. */
     autoComplete?: string
@@ -138,55 +138,56 @@ export type NumberField = FieldBase & {
     /** Set a value for the number field to increment / decrement using browser controls. */
     step?: number
   }
-  /** Minimum value accepted. Used in the default `validation` function. */
-  min?: number
   /** Maximum value accepted. Used in the default `validation` function. */
   max?: number
+  /** Minimum value accepted. Used in the default `validation` function. */
+  min?: number
+  type: 'number';
 } & ({
   /** Makes this field an ordered array of numbers instead of just a single number. */
   hasMany: true
-  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
-  minRows?: number
   /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
   maxRows?: number
+  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+  minRows?: number
 } | {
   /** Makes this field an ordered array of numbers instead of just a single number. */
   hasMany?: false | undefined
-  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
-  minRows?: undefined
   /** Maximum number of numbers in the numbers array, if `hasMany` is set to true. */
   maxRows?: undefined
+  /** Minimum number of numbers in the numbers array, if `hasMany` is set to true. */
+  minRows?: undefined
 })
 
 
 export type TextField = FieldBase & {
-  type: 'text';
-  maxLength?: number
-  minLength?: number
   admin?: Admin & {
-    placeholder?: Record<string, string> | string
     autoComplete?: string
+    placeholder?: Record<string, string> | string
     rtl?: boolean
   }
+  maxLength?: number
+  minLength?: number
+  type: 'text';
 }
 
 export type EmailField = FieldBase & {
-  type: 'email';
   admin?: Admin & {
-    placeholder?: Record<string, string> | string
     autoComplete?: string
+    placeholder?: Record<string, string> | string
   }
+  type: 'email';
 }
 
 export type TextareaField = FieldBase & {
-  type: 'textarea';
-  maxLength?: number
-  minLength?: number
   admin?: Admin & {
     placeholder?: Record<string, string> | string
     rows?: number
     rtl?: boolean
   }
+  maxLength?: number
+  minLength?: number
+  type: 'textarea';
 }
 
 export type CheckboxField = FieldBase & {
@@ -194,19 +195,18 @@ export type CheckboxField = FieldBase & {
 }
 
 export type DateField = FieldBase & {
-  type: 'date';
   admin?: Admin & {
-    placeholder?: Record<string, string> | string
     date?: ConditionalDateProps
+    placeholder?: Record<string, string> | string
   }
+  type: 'date';
 }
 
 export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
-  type: 'group';
-  fields: Field[];
   admin?: Admin & {
     hideGutter?: boolean
   }
+  fields: Field[];
   /** Customize generated GraphQL and Typescript schema names.
    * By default it is bound to the collection.
    *
@@ -214,32 +214,33 @@ export type GroupField = Omit<FieldBase, 'required' | 'validation'> & {
    * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
+  type: 'group';
 }
 
 export type RowAdmin = Omit<Admin, 'description'>;
 
-export type RowField = Omit<FieldBase, 'admin' | 'name' | 'label'> & {
+export type RowField = Omit<FieldBase, 'admin' | 'label' | 'name'> & {
   admin?: RowAdmin;
-  type: 'row';
   fields: Field[];
+  type: 'row';
 }
 
-export type CollapsibleField = Omit<FieldBase, 'name' | 'label'> & {
-  type: 'collapsible';
-  label: RowLabel
-  fields: Field[];
+export type CollapsibleField = Omit<FieldBase, 'label' | 'name'> & {
   admin?: Admin & {
     initCollapsed?: boolean | false;
   }
+  fields: Field[];
+  label: RowLabel
+  type: 'collapsible';
 }
 
 export type TabsAdmin = Omit<Admin, 'description'>;
 
 type TabBase = Omit<FieldBase, 'required' | 'validation'> & {
-  fields: Field[]
-  saveToJWT?: boolean | string
   description?: Description
+  fields: Field[]
   interfaceName?: string
+  saveToJWT?: boolean | string
 }
 
 export type NamedTab = TabBase & {
@@ -253,59 +254,59 @@ export type NamedTab = TabBase & {
 }
 
 export type UnnamedTab = Omit<TabBase, 'name'> & {
+  interfaceName?: never
   label: Record<string, string> | string
   localized?: never
-  interfaceName?: never
 }
 
 export type Tab = NamedTab | UnnamedTab
 
-export type TabsField = Omit<FieldBase, 'admin' | 'name' | 'localized' | 'saveToJWT'> & {
-  type: 'tabs';
-  tabs: Tab[]
+export type TabsField = Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT'> & {
   admin?: TabsAdmin
+  tabs: Tab[]
+  type: 'tabs';
 }
 
 export type TabAsField = Tab & {
-  type: 'tab'
   name?: string
+  type: 'tab'
 };
 
 export type UIField = {
-  name: string
-  label?: Record<string, string> | string
   admin: {
-    position?: string
-    width?: string
-    condition?: Condition
-    disableBulkEdit?: boolean
     components?: {
-      Filter?: React.ComponentType<any>;
       Cell?: React.ComponentType<any>;
       Field: React.ComponentType<any>;
+      Filter?: React.ComponentType<any>;
     }
+    condition?: Condition
+    disableBulkEdit?: boolean
+    position?: string
+    width?: string
   }
-  type: 'ui';
   /** Extension point to add your custom data. */
   custom?: Record<string, any>;
+  label?: Record<string, string> | string
+  name: string
+  type: 'ui';
 }
 
 export type UploadField = FieldBase & {
-  type: 'upload'
-  relationTo: string
-  maxDepth?: number
   filterOptions?: FilterOptions;
+  maxDepth?: number
+  relationTo: string
+  type: 'upload'
 }
 
 type CodeAdmin = Admin & {
-  language?: string;
   editorOptions?: EditorProps['options'];
+  language?: string;
 }
 
 export type CodeField = Omit<FieldBase, 'admin'> & {
   admin?: CodeAdmin
-  minLength?: number
   maxLength?: number
+  minLength?: number
   type: 'code';
 }
 
@@ -319,91 +320,94 @@ export type JSONField = Omit<FieldBase, 'admin'> & {
 }
 
 export type SelectField = FieldBase & {
-  type: 'select'
-  options: Option[]
-  hasMany?: boolean
   admin?: Admin & {
     isClearable?: boolean;
     isSortable?: boolean;
   }
+  hasMany?: boolean
+  options: Option[]
+  type: 'select'
 }
 
 export type RelationshipField = FieldBase & {
-  type: 'relationship';
-  relationTo: string | string[];
+  admin?: Admin & {
+    allowCreate?: boolean;
+    isSortable?: boolean;
+  },
+  filterOptions?: FilterOptions;
   hasMany?: boolean;
   maxDepth?: number;
-  filterOptions?: FilterOptions;
-  admin?: Admin & {
-    isSortable?: boolean;
-    allowCreate?: boolean;
-  },
+  relationTo: string | string[];
+  type: 'relationship';
 } & ({
   hasMany: true
-  /**
-   * @deprecated Use 'minRows' instead
-   */
-  min?: number
   /**
    * @deprecated Use 'maxRows' instead
    */
   max?: number
-  minRows?: number
   maxRows?: number
-} | {
-  hasMany?: false | undefined
   /**
    * @deprecated Use 'minRows' instead
    */
-  min?: undefined
+  min?: number
+  minRows?: number
+} | {
+  hasMany?: false | undefined
   /**
    * @deprecated Use 'maxRows' instead
    */
   max?: undefined
-  minRows?: undefined
   maxRows?: undefined
+  /**
+   * @deprecated Use 'minRows' instead
+   */
+  min?: undefined
+  minRows?: undefined
 })
 
 export type ValueWithRelation = {
   relationTo: string
-  value: string | number
+  value: number | string
 }
 
 export function valueIsValueWithRelation(value: unknown): value is ValueWithRelation {
   return value !== null && typeof value === 'object' && 'relationTo' in value && 'value' in value;
 }
 
-export type RelationshipValue = (string | number)
-  | (string | number)[]
+export type RelationshipValue = (number | string)[]
   | ValueWithRelation
   | ValueWithRelation[]
+  | (number | string)
 
 type RichTextPlugin = (editor: Editor) => Editor;
 
 export type RichTextCustomElement = {
-  name: string
   Button: React.ComponentType<any>
   Element: React.ComponentType<any>
+  name: string
   plugins?: RichTextPlugin[]
 }
 
 export type RichTextCustomLeaf = {
-  name: string
   Button: React.ComponentType<any>
   Leaf: React.ComponentType<any>
+  name: string
   plugins?: RichTextPlugin[]
 }
 
-export type RichTextElement = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote' | 'ul' | 'ol' | 'link' | 'relationship' | 'upload' | 'indent' | 'textAlign' | RichTextCustomElement;
-export type RichTextLeaf = 'bold' | 'italic' | 'underline' | 'strikethrough' | 'code' | RichTextCustomLeaf;
+export type RichTextElement = 'blockquote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'indent' | 'link' | 'ol' | 'relationship' | 'textAlign' | 'ul' | 'upload' | RichTextCustomElement;
+export type RichTextLeaf = 'bold' | 'code' | 'italic' | 'strikethrough' | 'underline' | RichTextCustomLeaf;
 
 export type RichTextField = FieldBase & {
-  type: 'richText';
   admin?: Admin & {
-    placeholder?: Record<string, string> | string
     elements?: RichTextElement[];
-    leaves?: RichTextLeaf[];
     hideGutter?: boolean
+    leaves?: RichTextLeaf[];
+    link?: {
+      fields?: ((args: { config: SanitizedConfig, defaultFields: Field[], i18n: Ii18n }) => Field[]) | Field[];
+    }
+    placeholder?: Record<string, string> | string
+    rtl?: boolean
     upload?: {
       collections: {
         [collection: string]: {
@@ -411,25 +415,18 @@ export type RichTextField = FieldBase & {
         }
       }
     }
-    link?: {
-      fields?: Field[] | ((args: { defaultFields: Field[], config: SanitizedConfig, i18n: Ii18n }) => Field[]);
-    }
-    rtl?: boolean
   }
+  type: 'richText';
 }
 
 export type ArrayField = FieldBase & {
-  type: 'array';
-  minRows?: number;
-  maxRows?: number;
-  labels?: Labels;
-  fields: Field[];
   admin?: Admin & {
-    initCollapsed?: boolean | false;
     components?: {
       RowLabel?: RowLabel
     } & Admin['components']
+    initCollapsed?: boolean | false;
   };
+  fields: Field[];
   /** Customize generated GraphQL and Typescript schema names.
    * By default it is bound to the collection.
    *
@@ -437,26 +434,28 @@ export type ArrayField = FieldBase & {
    * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
+  labels?: Labels;
+  maxRows?: number;
+  minRows?: number;
+  type: 'array';
 };
 
 export type RadioField = FieldBase & {
-  type: 'radio';
-  options: Option[]
   admin?: Admin & {
     layout?: 'horizontal' | 'vertical'
   }
+  options: Option[]
+  type: 'radio';
 }
 
 export type Block = {
-  slug: string;
-  labels?: Labels;
   fields: Field[];
-  imageURL?: string;
-  imageAltText?: string;
   /** @deprecated - please migrate to the interfaceName property instead. */
   graphQL?: {
     singularName?: string
   }
+  imageAltText?: string;
+  imageURL?: string;
   /** Customize generated GraphQL and Typescript schema names.
    * The slug is used by default.
    *
@@ -464,18 +463,20 @@ export type Block = {
    * **Note**: Top level types can collide, ensure they are unique among collections, arrays, groups, blocks, tabs.
    */
   interfaceName?: string
+  labels?: Labels;
+  slug: string;
 }
 
 export type BlockField = FieldBase & {
-  type: 'blocks';
-  minRows?: number;
-  maxRows?: number;
-  blocks: Block[];
-  defaultValue?: unknown
-  labels?: Labels
   admin?: Admin & {
     initCollapsed?: boolean | false;
   }
+  blocks: Block[];
+  defaultValue?: unknown
+  labels?: Labels
+  maxRows?: number;
+  minRows?: number;
+  type: 'blocks';
 
 }
 
@@ -484,90 +485,90 @@ export type PointField = FieldBase & {
 }
 
 export type Field =
-  TextField
-  | NumberField
-  | EmailField
-  | TextareaField
-  | CheckboxField
-  | DateField
+  ArrayField
   | BlockField
+  | CheckboxField
+  | CodeField
+  | CollapsibleField
+  | DateField
+  | EmailField
   | GroupField
+  | JSONField
+  | NumberField
+  | PointField
   | RadioField
   | RelationshipField
-  | ArrayField
   | RichTextField
-  | SelectField
-  | UploadField
-  | CodeField
-  | JSONField
-  | PointField
   | RowField
-  | CollapsibleField
+  | SelectField
   | TabsField
-  | UIField;
+  | TextField
+  | TextareaField
+  | UIField
+  | UploadField;
 
 export type FieldAffectingData =
-  TextField
-  | NumberField
-  | EmailField
-  | TextareaField
-  | CheckboxField
-  | DateField
+  ArrayField
   | BlockField
+  | CheckboxField
+  | CodeField
+  | DateField
+  | EmailField
   | GroupField
+  | JSONField
+  | NumberField
+  | PointField
   | RadioField
   | RelationshipField
-  | ArrayField
   | RichTextField
   | SelectField
-  | UploadField
-  | CodeField
-  | JSONField
-  | PointField
   | TabAsField
+  | TextField
+  | TextareaField
+  | UploadField
 
 export type NonPresentationalField =
-  TextField
-  | NumberField
-  | EmailField
-  | TextareaField
-  | CheckboxField
-  | DateField
+  ArrayField
   | BlockField
+  | CheckboxField
+  | CodeField
+  | CollapsibleField
+  | DateField
+  | EmailField
   | GroupField
+  | JSONField
+  | NumberField
+  | PointField
   | RadioField
   | RelationshipField
-  | ArrayField
   | RichTextField
-  | SelectField
-  | UploadField
-  | CodeField
-  | JSONField
-  | PointField
   | RowField
+  | SelectField
   | TabsField
-  | CollapsibleField;
+  | TextField
+  | TextareaField
+  | UploadField;
 
 export type FieldWithPath = Field & {
   path?: string
 }
 
 export type FieldWithSubFields =
-  GroupField
-  | ArrayField
-  | RowField
-  | CollapsibleField;
+  ArrayField
+  | CollapsibleField
+  | GroupField
+  | RowField;
 
 export type FieldPresentationalOnly =
   UIField;
 
 export type FieldWithMany =
-  SelectField
-  | RelationshipField
+  RelationshipField
+  | SelectField
 
 export type FieldWithMaxDepth =
-  UploadField
-  | RelationshipField
+  RelationshipField
+  | UploadField
 
 export function fieldHasSubFields(field: Field): field is FieldWithSubFields {
   return (field.type === 'group' || field.type === 'array' || field.type === 'row' || field.type === 'collapsible');
@@ -617,4 +618,4 @@ export function fieldIsLocalized(field: Field | Tab): boolean {
   return 'localized' in field && field.localized;
 }
 
-export type HookName = 'beforeRead' | 'beforeChange' | 'beforeValidate' | 'afterChange' | 'afterRead';
+export type HookName = 'afterChange' | 'afterRead' | 'beforeChange' | 'beforeRead' | 'beforeValidate';

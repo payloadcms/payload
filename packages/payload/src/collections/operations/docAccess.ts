@@ -1,13 +1,14 @@
-import { AllOperations } from '../../types';
-import { CollectionPermission } from '../../auth';
+import type { CollectionPermission } from '../../auth';
 import type { PayloadRequest } from '../../express/types';
+import type { AllOperations } from '../../types';
+
 import { getEntityPolicies } from '../../utilities/getEntityPolicies';
 
 const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete'];
 
 type Arguments = {
-  req: PayloadRequest
   id: string
+  req: PayloadRequest
 }
 
 export async function docAccess(args: Arguments): Promise<CollectionPermission> {
@@ -32,10 +33,10 @@ export async function docAccess(args: Arguments): Promise<CollectionPermission> 
   }
 
   return getEntityPolicies({
-    type: 'collection',
-    req,
     entity: config,
-    operations: collectionOperations,
     id,
+    operations: collectionOperations,
+    req,
+    type: 'collection',
   });
 }

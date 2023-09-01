@@ -1,60 +1,62 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-import React, {
-  useReducer, useEffect, useRef, useState, useCallback,
-} from 'react';
 import isDeepEqual from 'deep-equal';
 import { serialize } from 'object-to-formdata';
+import React, {
+  useCallback, useEffect, useReducer, useRef, useState,
+} from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../utilities/Auth';
-import { useLocale } from '../../utilities/Locale';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
+
+import type { Field } from '../../../../fields/config/types';
+import type { Context, Fields, Context as FormContextType, GetDataByPath, Props, Row, SubmitOptions } from './types';
+
+import { isNumber } from '../../../../utilities/isNumber';
+import { setsAreEqual } from '../../../../utilities/setsAreEqual';
+import { splitPathByArrayFields } from '../../../../utilities/splitPathByArrayFields';
+import wait from '../../../../utilities/wait';
 import { requests } from '../../../api';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
-import { fieldReducer } from './fieldReducer';
-import initContextState from './initContextState';
-import reduceFieldsToValues from './reduceFieldsToValues';
-import getSiblingDataFunc from './getSiblingData';
-import getDataByPathFunc from './getDataByPath';
-import wait from '../../../../utilities/wait';
-import { Field } from '../../../../fields/config/types';
-import buildInitialState from './buildInitialState';
-import errorMessages from './errorMessages';
-import { Context, Fields, Context as FormContextType, GetDataByPath, Props, Row, SubmitOptions } from './types';
-import { SubmittedContext, ProcessingContext, ModifiedContext, FormContext, FormFieldsContext, FormWatchContext } from './context';
-import buildStateFromSchema from './buildStateFromSchema';
+import { useAuth } from '../../utilities/Auth';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import { useLocale } from '../../utilities/Locale';
 import { useOperation } from '../../utilities/OperationProvider';
 import { WatchFormErrors } from './WatchFormErrors';
-import { splitPathByArrayFields } from '../../../../utilities/splitPathByArrayFields';
-import { setsAreEqual } from '../../../../utilities/setsAreEqual';
 import { buildFieldSchemaMap } from './buildFieldSchemaMap';
-import { isNumber } from '../../../../utilities/isNumber';
+import buildInitialState from './buildInitialState';
+import buildStateFromSchema from './buildStateFromSchema';
+import { FormContext, FormFieldsContext, FormWatchContext, ModifiedContext, ProcessingContext, SubmittedContext } from './context';
+import errorMessages from './errorMessages';
+import { fieldReducer } from './fieldReducer';
+import getDataByPathFunc from './getDataByPath';
+import getSiblingDataFunc from './getSiblingData';
+import initContextState from './initContextState';
+import reduceFieldsToValues from './reduceFieldsToValues';
 
 const baseClass = 'form';
 
 const Form: React.FC<Props> = (props) => {
   const {
-    disabled,
-    onSubmit,
-    method,
     action,
-    handleResponse,
-    onSuccess,
     children,
     className,
-    redirect,
     disableSuccessStatus,
-    initialState, // fully formed initial field state
+    disabled,
+    handleResponse,
     initialData, // values only, paths are required as key - form should build initial state as convenience
+    initialState, // fully formed initial field state
+    method,
+    onSubmit,
+    onSuccess,
+    redirect,
     waitForAutocomplete,
   } = props;
 
   const history = useHistory();
   const { code: locale } = useLocale();
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
   const { refreshCookie, user } = useAuth();
-  const { id, getDocPreferences, collection, global } = useDocumentInfo();
+  const { collection, getDocPreferences, global, id } = useDocumentInfo();
   const operation = useOperation();
 
   const [modified, setModified] = useState(false);
@@ -124,9 +126,9 @@ const Form: React.FC<Props> = (props) => {
 
       if (!stateMatches) {
         dispatchFields({
-          type: 'UPDATE',
           path,
           rows: newRows,
+          type: 'UPDATE',
         });
       }
     });
@@ -149,11 +151,11 @@ const Form: React.FC<Props> = (props) => {
         if (typeof field.validate === 'function') {
           validationResult = await field.validate(field.value, {
             data,
-            siblingData: contextRef.current.getSiblingData(path),
-            user,
             id,
             operation,
+            siblingData: contextRef.current.getSiblingData(path),
             t,
+            user,
           });
         }
 
@@ -170,7 +172,7 @@ const Form: React.FC<Props> = (props) => {
     await Promise.all(validationPromises);
 
     if (!isDeepEqual(contextRef.current.fields, validatedFieldState)) {
-      dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState });
+      dispatchFields({ state: validatedFieldState, type: 'REPLACE_STATE' });
     }
 
     return isValid;
@@ -178,9 +180,9 @@ const Form: React.FC<Props> = (props) => {
 
   const submit = useCallback(async (options: SubmitOptions = {}, e): Promise<void> => {
     const {
-      overrides = {},
       action: actionToUse = action,
       method: methodToUse = method,
+      overrides = {},
       skipValidation,
     } = options;
 
@@ -322,9 +324,9 @@ const Form: React.FC<Props> = (props) => {
             dispatchFields({
               type: 'UPDATE',
               ...(contextRef.current?.fields?.[err.field] || {}),
-              valid: false,
               errorMessage: err.message,
               path: err.field,
+              valid: false,
             });
           });
 
@@ -361,9 +363,9 @@ const Form: React.FC<Props> = (props) => {
     waitForAutocomplete,
   ]);
 
-  const traverseRowConfigs = React.useCallback(({ pathPrefix, path, fieldConfig }: {
-    path: string,
+  const traverseRowConfigs = React.useCallback(({ fieldConfig, path, pathPrefix }: {
     fieldConfig: Field[]
+    path: string,
     pathPrefix?: string,
   }) => {
     const config = fieldConfig;
@@ -385,18 +387,18 @@ const Form: React.FC<Props> = (props) => {
           const blockConfig = configMap.get(`${parentFieldPath}.${rowField.blockType}`);
           if (blockConfig) {
             return traverseRowConfigs({
-              pathPrefix: `${arrayFieldPath}.${rowIndex}`,
-              path: remainingPath,
               fieldConfig: blockConfig,
+              path: remainingPath,
+              pathPrefix: `${arrayFieldPath}.${rowIndex}`,
             });
           }
 
           throw new Error(`Block config not found for ${rowField.blockType} at path ${path}`);
         } else {
           return traverseRowConfigs({
-            pathPrefix: `${arrayFieldPath}.${rowIndex}`,
-            path: remainingPath,
             fieldConfig: configMap.get(parentFieldPath),
+            path: remainingPath,
+            pathPrefix: `${arrayFieldPath}.${rowIndex}`,
           });
         }
       }
@@ -405,11 +407,11 @@ const Form: React.FC<Props> = (props) => {
     return config;
   }, []);
 
-  const getRowConfigByPath = React.useCallback(({ path, blockType }: {
-    path: string,
+  const getRowConfigByPath = React.useCallback(({ blockType, path }: {
     blockType?: string
+    path: string,
   }) => {
-    const rowConfig = traverseRowConfigs({ path, fieldConfig: collection?.fields || global?.fields });
+    const rowConfig = traverseRowConfigs({ fieldConfig: collection?.fields || global?.fields, path });
     const rowFieldConfigs = buildFieldSchemaMap(rowConfig);
     const pathSegments = splitPathByArrayFields(path);
     const fieldKey = pathSegments.at(-1);
@@ -417,33 +419,33 @@ const Form: React.FC<Props> = (props) => {
   }, [traverseRowConfigs, collection?.fields, global?.fields]);
 
   // Array/Block row manipulation
-  const addFieldRow: Context['addFieldRow'] = useCallback(async ({ path, rowIndex, data }) => {
+  const addFieldRow: Context['addFieldRow'] = useCallback(async ({ data, path, rowIndex }) => {
     const preferences = await getDocPreferences();
     const fieldConfig = getRowConfigByPath({
-      path,
       blockType: data?.blockType,
+      path,
     });
 
     if (fieldConfig) {
-      const subFieldState = await buildStateFromSchema({ fieldSchema: fieldConfig, data, preferences, operation, id, user, locale, t });
-      dispatchFields({ type: 'ADD_ROW', rowIndex: rowIndex - 1, path, blockType: data?.blockType, subFieldState });
+      const subFieldState = await buildStateFromSchema({ data, fieldSchema: fieldConfig, id, locale, operation, preferences, t, user });
+      dispatchFields({ blockType: data?.blockType, path, rowIndex: rowIndex - 1, subFieldState, type: 'ADD_ROW' });
     }
   }, [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath]);
 
   const removeFieldRow: Context['removeFieldRow'] = useCallback(async ({ path, rowIndex }) => {
-    dispatchFields({ type: 'REMOVE_ROW', rowIndex, path });
+    dispatchFields({ path, rowIndex, type: 'REMOVE_ROW' });
   }, [dispatchFields]);
 
-  const replaceFieldRow: Context['replaceFieldRow'] = useCallback(async ({ path, rowIndex, data }) => {
+  const replaceFieldRow: Context['replaceFieldRow'] = useCallback(async ({ data, path, rowIndex }) => {
     const preferences = await getDocPreferences();
     const fieldConfig = getRowConfigByPath({
-      path,
       blockType: data?.blockType,
+      path,
     });
 
     if (fieldConfig) {
-      const subFieldState = await buildStateFromSchema({ fieldSchema: fieldConfig, data, preferences, operation, id, user, locale, t });
-      dispatchFields({ type: 'REPLACE_ROW', rowIndex: rowIndex - 1, path, blockType: data?.blockType, subFieldState });
+      const subFieldState = await buildStateFromSchema({ data, fieldSchema: fieldConfig, id, locale, operation, preferences, t, user });
+      dispatchFields({ blockType: data?.blockType, path, rowIndex: rowIndex - 1, subFieldState, type: 'REPLACE_ROW' });
     }
   }, [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath]);
 
@@ -479,16 +481,16 @@ const Form: React.FC<Props> = (props) => {
 
   const reset = useCallback(async (fieldSchema: Field[], data: unknown) => {
     const preferences = await getDocPreferences();
-    const state = await buildStateFromSchema({ fieldSchema, preferences, data, user, id, operation, locale, t });
+    const state = await buildStateFromSchema({ data, fieldSchema, id, locale, operation, preferences, t, user });
     contextRef.current = { ...initContextState } as FormContextType;
     setModified(false);
-    dispatchFields({ type: 'REPLACE_STATE', state });
+    dispatchFields({ state, type: 'REPLACE_STATE' });
   }, [id, user, operation, locale, t, dispatchFields, getDocPreferences]);
 
   const replaceState = useCallback((state: Fields) => {
     contextRef.current = { ...initContextState } as FormContextType;
     setModified(false);
-    dispatchFields({ type: 'REPLACE_STATE', state });
+    dispatchFields({ state, type: 'REPLACE_STATE' });
   }, [dispatchFields]);
 
   contextRef.current.submit = submit;
@@ -514,7 +516,7 @@ const Form: React.FC<Props> = (props) => {
   useEffect(() => {
     if (initialState) {
       contextRef.current = { ...initContextState } as FormContextType;
-      dispatchFields({ type: 'REPLACE_STATE', state: initialState });
+      dispatchFields({ state: initialState, type: 'REPLACE_STATE' });
     }
   }, [initialState, dispatchFields]);
 
@@ -523,7 +525,7 @@ const Form: React.FC<Props> = (props) => {
       contextRef.current = { ...initContextState } as FormContextType;
       const builtState = buildInitialState(initialData);
       setFormattedInitialData(builtState);
-      dispatchFields({ type: 'REPLACE_STATE', state: builtState });
+      dispatchFields({ state: builtState, type: 'REPLACE_STATE' });
     }
   }, [initialData, dispatchFields]);
 
@@ -543,11 +545,11 @@ const Form: React.FC<Props> = (props) => {
 
   return (
     <form
-      noValidate
-      onSubmit={(e) => contextRef.current.submit({}, e)}
-      method={method}
       action={action}
       className={classes}
+      method={method}
+      noValidate
+      onSubmit={(e) => contextRef.current.submit({}, e)}
       ref={formRef}
     >
       <FormContext.Provider value={contextRef.current}>

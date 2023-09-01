@@ -2,13 +2,13 @@
 import httpStatus from 'http-status';
 
 class ExtendableError<TData extends object = { [key: string]: unknown }> extends Error {
-  status: number;
-
   data: TData;
+
+  isOperational: boolean;
 
   isPublic: boolean;
 
-  isOperational: boolean;
+  status: number;
 
   constructor(message: string, status: number, data: TData, isPublic: boolean) {
     super(message);
@@ -26,7 +26,7 @@ class ExtendableError<TData extends object = { [key: string]: unknown }> extends
  * Class representing an API error.
  * @extends ExtendableError
  */
-class APIError<TData extends null | object = null | { [key: string]: unknown }> extends ExtendableError<TData> {
+class APIError<TData extends null | object = { [key: string]: unknown } | null> extends ExtendableError<TData> {
   /**
    * Creates an API error.
    * @param {string} message - Error message.

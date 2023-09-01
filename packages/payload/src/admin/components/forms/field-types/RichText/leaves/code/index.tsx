@@ -1,6 +1,7 @@
 import React from 'react';
-import LeafButton from '../Button';
+
 import CodeIcon from '../../../../../icons/Code';
+import LeafButton from '../Button';
 
 const Code = ({ attributes, children }) => (
   <code {...attributes}>{children}</code>

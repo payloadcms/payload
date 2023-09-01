@@ -1,4 +1,5 @@
-import { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../src/collections/config/types';
+
 import { relationsSlug } from '../Relations';
 
 export const nestedAfterReadHooksSlug = 'nested-after-read-hooks';

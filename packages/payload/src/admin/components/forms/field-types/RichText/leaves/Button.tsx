@@ -1,18 +1,17 @@
 import React from 'react';
 import { useSlate } from 'slate-react';
+
+import '../buttons.scss';
 import isMarkActive from './isActive';
 import toggleLeaf from './toggle';
 
-import '../buttons.scss';
-
 const baseClass = 'rich-text__button';
 
-const LeafButton = ({ format, children }) => {
+const LeafButton = ({ children, format }) => {
   const editor = useSlate();
 
   return (
     <button
-      type="button"
       className={[
         baseClass,
         isMarkActive(editor, format) && `${baseClass}__button--active`,
@@ -21,6 +20,7 @@ const LeafButton = ({ format, children }) => {
         event.preventDefault();
         toggleLeaf(editor, format);
       }}
+      type="button"
     >
       {children}
     </button>

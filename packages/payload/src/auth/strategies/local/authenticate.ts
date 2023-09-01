@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import scmp from 'scmp';
-import { TypeWithID } from '../../../collections/config/types';
+
+import type { TypeWithID } from '../../../collections/config/types';
 
 type Doc = TypeWithID & Record<string, unknown>
 
@@ -14,7 +15,7 @@ export const authenticateLocalStrategy = async ({
   password,
 }: Args): Promise<Doc | null> => {
   try {
-    const { salt, hash } = doc;
+    const { hash, salt } = doc;
 
     if (typeof salt === 'string' && typeof hash === 'string') {
       const res = await new Promise<Doc | null>((resolve, reject) => {

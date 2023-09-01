@@ -1,8 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Props, isComponent } from './types';
+
+import type { Props} from './types';
+
 import { getTranslation } from '../../../../utilities/getTranslation';
 import './index.scss';
+import { isComponent } from './types';
 
 const baseClass = 'field-description';
 

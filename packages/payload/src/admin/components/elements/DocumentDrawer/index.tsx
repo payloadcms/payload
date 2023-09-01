@@ -1,50 +1,51 @@
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types';
+
+import type { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types';
+
 import { getTranslation } from '../../../../utilities/getTranslation';
-import { Drawer, DrawerToggler } from '../Drawer';
 import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections';
 import { useEditDepth } from '../../utilities/EditDepth';
+import { Drawer, DrawerToggler } from '../Drawer';
 import { DocumentDrawerContent } from './DrawerContent';
-
 import './index.scss';
 
 export const baseClass = 'doc-drawer';
 
 const formatDocumentDrawerSlug = ({
   collectionSlug,
-  id,
   depth,
+  id,
   uuid,
 }: {
   collectionSlug: string,
-  id: string,
   depth: number,
+  id: string,
   uuid: string, // supply when creating a new document and no id is available
 }) => `doc-drawer_${collectionSlug}_${depth}${id ? `_${id}` : ''}_${uuid}`;
 
 export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
   children,
   className,
-  drawerSlug,
-  id,
   collectionSlug,
   disabled,
+  drawerSlug,
+  id,
   ...rest
 }) => {
-  const { t, i18n } = useTranslation(['fields', 'general']);
+  const { i18n, t } = useTranslation(['fields', 'general']);
   const [collectionConfig] = useRelatedCollections(collectionSlug);
 
   return (
     <DrawerToggler
-      slug={drawerSlug}
       className={[
         className,
         `${baseClass}__toggler`,
       ].filter(Boolean).join(' ')}
-      disabled={disabled}
       aria-label={t(!id ? 'fields:addNewLabel' : 'general:editLabel', { label: getTranslation(collectionConfig.labels.singular, i18n) })}
+      disabled={disabled}
+      slug={drawerSlug}
       {...rest}
     >
       {children}
@@ -57,25 +58,25 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
 
   return (
     <Drawer
-      slug={drawerSlug}
       className={baseClass}
-      header={false}
       gutter={false}
+      header={false}
+      slug={drawerSlug}
     >
       <DocumentDrawerContent {...props} />
     </Drawer>
   );
 };
 
-export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => {
+export const useDocumentDrawer: UseDocumentDrawer = ({ collectionSlug, id }) => {
   const drawerDepth = useEditDepth();
   const uuid = useId();
-  const { modalState, toggleModal, closeModal, openModal } = useModal();
+  const { closeModal, modalState, openModal, toggleModal } = useModal();
   const [isOpen, setIsOpen] = useState(false);
   const drawerSlug = formatDocumentDrawerSlug({
     collectionSlug,
-    id,
     depth: drawerDepth,
+    id,
     uuid,
   });
 
@@ -100,8 +101,8 @@ export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => 
       <DocumentDrawer
         {...props}
         collectionSlug={collectionSlug}
-        id={id}
         drawerSlug={drawerSlug}
+        id={id}
         key={drawerSlug}
       />
     ));
@@ -111,20 +112,20 @@ export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => 
     return ((props) => (
       <DocumentDrawerToggler
         {...props}
-        id={id}
         collectionSlug={collectionSlug}
         drawerSlug={drawerSlug}
+        id={id}
       />
     ));
   }, [id, drawerSlug, collectionSlug]);
 
   const MemoizedDrawerState = useMemo(() => ({
-    drawerSlug,
-    drawerDepth,
-    isDrawerOpen: isOpen,
-    toggleDrawer,
     closeDrawer,
+    drawerDepth,
+    drawerSlug,
+    isDrawerOpen: isOpen,
     openDrawer,
+    toggleDrawer,
   }), [drawerDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer, openDrawer]);
 
   return [

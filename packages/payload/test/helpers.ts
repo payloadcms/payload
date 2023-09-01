@@ -1,5 +1,7 @@
 import type { Page } from '@playwright/test';
+
 import { expect } from '@playwright/test';
+
 import wait from '../src/utilities/wait';
 import { devUser } from './credentials';
 

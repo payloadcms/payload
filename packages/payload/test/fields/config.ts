@@ -1,30 +1,31 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+
+import getFileByPath from '../../src/uploads/getFileByPath';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 import ArrayFields, { arrayDoc } from './collections/Array';
 import BlockFields, { blocksDoc } from './collections/Blocks';
+import CodeFields, { codeDoc } from './collections/Code';
 import CollapsibleFields, { collapsibleDoc } from './collections/Collapsible';
 import ConditionalLogic, { conditionalLogicDoc } from './collections/ConditionalLogic';
 import DateFields, { dateDoc } from './collections/Date';
+import GroupFields, { groupDoc } from './collections/Group';
+import IndexedFields from './collections/Indexed';
+import JSONFields, { jsonDoc } from './collections/JSON';
+import NumberFields, { numberDoc } from './collections/Number';
+import PointFields, { pointDoc } from './collections/Point';
+import RadioFields, { radiosDoc } from './collections/Radio';
+import RelationshipFields from './collections/Relationship';
 import RichTextFields, { richTextBulletsDoc, richTextDoc } from './collections/RichText';
+import RowFields from './collections/Row';
 import SelectFields, { selectsDoc } from './collections/Select';
 import TabsFields, { tabsDoc } from './collections/Tabs';
 import TextFields, { textDoc, textFieldsSlug } from './collections/Text';
-import PointFields, { pointDoc } from './collections/Point';
-import GroupFields, { groupDoc } from './collections/Group';
-import getFileByPath from '../../src/uploads/getFileByPath';
 import Uploads, { uploadsDoc } from './collections/Upload';
-import IndexedFields from './collections/Indexed';
-import NumberFields, { numberDoc } from './collections/Number';
-import CodeFields, { codeDoc } from './collections/Code';
-import JSONFields, { jsonDoc } from './collections/JSON';
-import RelationshipFields from './collections/Relationship';
-import RadioFields, { radiosDoc } from './collections/Radio';
 import Uploads2 from './collections/Upload2';
 import Uploads3 from './collections/Uploads3';
-import RowFields from './collections/Row';
 
 export default buildConfigWithDefaults({
   admin: {
@@ -123,7 +124,7 @@ export default buildConfigWithDefaults({
       file: jpgFile,
     });
 
-    const richTextDocWithRelId = JSON.parse(JSON.stringify(richTextDoc).replace(/{{ARRAY_DOC_ID}}/g, createdArrayDoc.id));
+    const richTextDocWithRelId = JSON.parse(JSON.stringify(richTextDoc).replace(/\{\{ARRAY_DOC_ID\}\}/g, createdArrayDoc.id));
     const richTextDocWithRelationship = { ...richTextDocWithRelId };
 
     const richTextRelationshipIndex = richTextDocWithRelationship.richText.findIndex(({ type }) => type === 'relationship');

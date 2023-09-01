@@ -1,12 +1,10 @@
-import defaultRichTextValue from './richText/defaultValue';
-import {
+import type {
   ArrayField,
   BlockField,
   CheckboxField,
   CodeField,
   DateField,
   EmailField,
-  fieldAffectsData,
   JSONField,
   NumberField,
   PointField,
@@ -15,16 +13,20 @@ import {
   RelationshipValue,
   RichTextField,
   SelectField,
-  TextareaField,
   TextField,
+  TextareaField,
   UploadField,
-  Validate,
-} from './config/types';
-import canUseDOM from '../utilities/canUseDOM';
-import { isValidID } from '../utilities/isValidID';
-import { getIDType } from '../utilities/getIDType';
+  Validate} from './config/types';
 
-export const number: Validate<unknown, unknown, NumberField> = (value: number | number[], { t, required, min, max, minRows, maxRows, hasMany }) => {
+import canUseDOM from '../utilities/canUseDOM';
+import { getIDType } from '../utilities/getIDType';
+import { isValidID } from '../utilities/isValidID';
+import {
+  fieldAffectsData
+} from './config/types';
+import defaultRichTextValue from './richText/defaultValue';
+
+export const number: Validate<unknown, unknown, NumberField> = (value: number | number[], { hasMany, max, maxRows, min, minRows, required, t }) => {
   const toValidate: number[] = Array.isArray(value) ? value : [value];
 
   // eslint-disable-next-line no-restricted-syntax
@@ -35,11 +37,11 @@ export const number: Validate<unknown, unknown, NumberField> = (value: number | 
     }
 
     if (typeof max === 'number' && floatValue > max) {
-      return t('validation:greaterThanMax', { value, max, label: t('value') });
+      return t('validation:greaterThanMax', { label: t('value'), max, value });
     }
 
     if (typeof min === 'number' && floatValue < min) {
-      return t('validation:lessThanMin', { value, min, label: t('value') });
+      return t('validation:lessThanMin', { label: t('value'), min, value });
     }
 
     if (required && typeof floatValue !== 'number') {
@@ -54,11 +56,11 @@ export const number: Validate<unknown, unknown, NumberField> = (value: number | 
 
   if (hasMany === true) {
     if (minRows && toValidate.length < minRows) {
-      return t('validation:lessThanMin', { value: toValidate.length, min: minRows, label: t('rows') });
+      return t('validation:lessThanMin', { label: t('rows'), min: minRows, value: toValidate.length });
     }
 
     if (maxRows && toValidate.length > maxRows) {
-      return t('validation:greaterThanMax', { value: toValidate.length, max: maxRows, label: t('rows') });
+      return t('validation:greaterThanMax', { label: t('rows'), max: maxRows, value: toValidate.length });
     }
   }
 
@@ -66,7 +68,7 @@ export const number: Validate<unknown, unknown, NumberField> = (value: number | 
   return true;
 };
 
-export const text: Validate<unknown, unknown, TextField> = (value: string, { t, minLength, maxLength: fieldMaxLength, required, payload }) => {
+export const text: Validate<unknown, unknown, TextField> = (value: string, { maxLength: fieldMaxLength, minLength, payload, required, t }) => {
   let maxLength: number;
 
   if (typeof payload?.config?.defaultMaxTextLength === 'number') maxLength = payload.config.defaultMaxTextLength;
@@ -88,7 +90,7 @@ export const text: Validate<unknown, unknown, TextField> = (value: string, { t, 
   return true;
 };
 
-export const password: Validate<unknown, unknown, TextField> = (value: string, { t, required, maxLength: fieldMaxLength, minLength, payload }) => {
+export const password: Validate<unknown, unknown, TextField> = (value: string, { maxLength: fieldMaxLength, minLength, payload, required, t }) => {
   let maxLength: number;
 
   if (typeof payload?.config?.defaultMaxTextLength === 'number') maxLength = payload.config.defaultMaxTextLength;
@@ -109,8 +111,8 @@ export const password: Validate<unknown, unknown, TextField> = (value: string, {
   return true;
 };
 
-export const email: Validate<unknown, unknown, EmailField> = (value: string, { t, required }) => {
-  if ((value && !/\S+@\S+\.\S+/.test(value))
+export const email: Validate<unknown, unknown, EmailField> = (value: string, { required, t }) => {
+  if ((value && !/\S[^\s@]*@\S+\.\S+/.test(value))
     || (!value && required)) {
     return t('validation:emailAddress');
   }
@@ -119,11 +121,11 @@ export const email: Validate<unknown, unknown, EmailField> = (value: string, { t
 };
 
 export const textarea: Validate<unknown, unknown, TextareaField> = (value: string, {
-  t,
-  required,
   maxLength: fieldMaxLength,
   minLength,
   payload,
+  required,
+  t,
 }) => {
   let maxLength: number;
 
@@ -144,7 +146,7 @@ export const textarea: Validate<unknown, unknown, TextareaField> = (value: strin
   return true;
 };
 
-export const code: Validate<unknown, unknown, CodeField> = (value: string, { t, required }) => {
+export const code: Validate<unknown, unknown, CodeField> = (value: string, { required, t }) => {
   if (required && value === undefined) {
     return t('validation:required');
   }
@@ -153,7 +155,7 @@ export const code: Validate<unknown, unknown, CodeField> = (value: string, { t, 
 };
 
 export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }> = (value: string, {
-  t, required, jsonError,
+  jsonError, required, t,
 }) => {
   if (required && !value) {
     return t('validation:required');
@@ -166,7 +168,7 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
   return true;
 };
 
-export const richText: Validate<unknown, unknown, RichTextField> = (value, { t, required }) => {
+export const richText: Validate<unknown, unknown, RichTextField> = (value, { required, t }) => {
   if (required) {
     const stringifiedDefaultValue = JSON.stringify(defaultRichTextValue);
     if (value && JSON.stringify(value) !== stringifiedDefaultValue) return true;
@@ -176,7 +178,7 @@ export const richText: Validate<unknown, unknown, RichTextField> = (value, { t, 
   return true;
 };
 
-export const checkbox: Validate<unknown, unknown, CheckboxField> = (value: boolean, { t, required }) => {
+export const checkbox: Validate<unknown, unknown, CheckboxField> = (value: boolean, { required, t }) => {
   if ((value && typeof value !== 'boolean')
     || (required && typeof value !== 'boolean')) {
     return t('validation:trueOrFalse');
@@ -185,7 +187,7 @@ export const checkbox: Validate<unknown, unknown, CheckboxField> = (value: boole
   return true;
 };
 
-export const date: Validate<unknown, unknown, DateField> = (value, { t, required }) => {
+export const date: Validate<unknown, unknown, DateField> = (value, { required, t }) => {
   if (value && !isNaN(Date.parse(value.toString()))) { /* eslint-disable-line */
     return true;
   }
@@ -201,10 +203,10 @@ export const date: Validate<unknown, unknown, DateField> = (value, { t, required
   return true;
 };
 
-const validateFilterOptions: Validate = async (value, { t, filterOptions, id, user, data, siblingData, relationTo, payload }) => {
+const validateFilterOptions: Validate = async (value, { data, filterOptions, id, payload, relationTo, siblingData, t, user }) => {
   if (!canUseDOM && typeof filterOptions !== 'undefined' && value) {
     const options: {
-      [collection: string]: (string | number)[]
+      [collection: string]: (number | string)[]
     } = {};
 
     const collections = typeof relationTo === 'string' ? [relationTo] : relationTo;
@@ -212,14 +214,14 @@ const validateFilterOptions: Validate = async (value, { t, filterOptions, id, us
 
     await Promise.all(collections.map(async (collection) => {
       const optionFilter = typeof filterOptions === 'function' ? await filterOptions({
-        id,
         data,
+        id,
+        relationTo: collection,
         siblingData,
         user,
-        relationTo: collection,
       }) : filterOptions;
 
-      const valueIDs: (string | number)[] = [];
+      const valueIDs: (number | string)[] = [];
 
       values.forEach((val) => {
         if (typeof val === 'object' && val?.value) {
@@ -249,7 +251,7 @@ const validateFilterOptions: Validate = async (value, { t, filterOptions, id, us
 
     const invalidRelationships = values.filter((val) => {
       let collection: string;
-      let requestedID: string | number;
+      let requestedID: number | string;
 
       if (typeof relationTo === 'string') {
         collection = relationTo;
@@ -298,11 +300,11 @@ export const upload: Validate<unknown, unknown, UploadField> = (value: string, o
 
 export const relationship: Validate<unknown, unknown, RelationshipField> = async (value: RelationshipValue, options) => {
   const {
-    required,
-    minRows,
     maxRows,
-    relationTo,
+    minRows,
     payload,
+    relationTo,
+    required,
     t,
   } = options;
 
@@ -312,11 +314,11 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
 
   if (Array.isArray(value)) {
     if (minRows && value.length < minRows) {
-      return t('validation:lessThanMin', { value: value.length, min: minRows, label: t('rows') });
+      return t('validation:lessThanMin', { label: t('rows'), min: minRows, value: value.length });
     }
 
     if (maxRows && value.length > maxRows) {
-      return t('validation:greaterThanMax', { value: value.length, max: maxRows, label: t('rows') });
+      return t('validation:greaterThanMax', { label: t('rows'), max: maxRows, value: value.length });
     }
   }
 
@@ -360,14 +362,14 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
     if (invalidRelationships.length > 0) {
       return `This field has the following invalid selections: ${invalidRelationships.map((err, invalid) => {
         return `${err} ${JSON.stringify(invalid)}`;
-      }).join(', ')}` as string;
+      }).join(', ')}` ;
     }
   }
 
   return validateFilterOptions(value, options);
 };
 
-export const array: Validate<unknown, unknown, ArrayField> = (value, { t, minRows, maxRows, required }) => {
+export const array: Validate<unknown, unknown, ArrayField> = (value, { maxRows, minRows, required, t }) => {
   if (minRows && value < minRows) {
     return t('validation:requiresAtLeast', { count: minRows, label: t('rows') });
   }
@@ -383,7 +385,7 @@ export const array: Validate<unknown, unknown, ArrayField> = (value, { t, minRow
   return true;
 };
 
-export const select: Validate<unknown, unknown, SelectField> = (value, { t, options, hasMany, required }) => {
+export const select: Validate<unknown, unknown, SelectField> = (value, { hasMany, options, required, t }) => {
   if (Array.isArray(value) && value.some((input) => !options.some((option) => (option === input || (typeof option !== 'string' && option?.value === input))))) {
     return t('validation:invalidSelection');
   }
@@ -401,7 +403,7 @@ export const select: Validate<unknown, unknown, SelectField> = (value, { t, opti
   return true;
 };
 
-export const radio: Validate<unknown, unknown, RadioField> = (value, { t, options, required }) => {
+export const radio: Validate<unknown, unknown, RadioField> = (value, { options, required, t }) => {
   if (value) {
     const valueMatchesOption = options.some((option) => (option === value || (typeof option !== 'string' && option.value === value)));
     return valueMatchesOption || t('validation:invalidSelection');
@@ -410,7 +412,7 @@ export const radio: Validate<unknown, unknown, RadioField> = (value, { t, option
   return required ? t('validation:required') : true;
 };
 
-export const blocks: Validate<unknown, unknown, BlockField> = (value, { t, maxRows, minRows, required }) => {
+export const blocks: Validate<unknown, unknown, BlockField> = (value, { maxRows, minRows, required, t }) => {
   if (minRows && value < minRows) {
     return t('validation:requiresAtLeast', { count: minRows, label: t('rows') });
   }
@@ -426,7 +428,7 @@ export const blocks: Validate<unknown, unknown, BlockField> = (value, { t, maxRo
   return true;
 };
 
-export const point: Validate<unknown, unknown, PointField> = (value: [number | string, number | string] = ['', ''], { t, required }) => {
+export const point: Validate<unknown, unknown, PointField> = (value: [number | string, number | string] = ['', ''], { required, t }) => {
   const lng = parseFloat(String(value[0]));
   const lat = parseFloat(String(value[1]));
   if (required && (
@@ -445,21 +447,21 @@ export const point: Validate<unknown, unknown, PointField> = (value: [number | s
 };
 
 export default {
-  number,
-  text,
-  password,
-  email,
-  textarea,
-  code,
-  richText,
-  checkbox,
-  date,
-  upload,
-  relationship,
   array,
-  select,
-  radio,
   blocks,
-  point,
+  checkbox,
+  code,
+  date,
+  email,
   json,
+  number,
+  password,
+  point,
+  radio,
+  relationship,
+  richText,
+  select,
+  text,
+  textarea,
+  upload,
 };

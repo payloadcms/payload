@@ -1,49 +1,50 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import withCondition from '../../withCondition';
-import Button from '../../../elements/Button';
-import { useForm, useFormSubmitted } from '../../Form/context';
-import useField from '../../useField';
-import { useLocale } from '../../../utilities/Locale';
-import Error from '../../Error';
+
+import type { Props } from './types';
+
 import { array } from '../../../../../fields/validations';
-import Banner from '../../../elements/Banner';
-import FieldDescription from '../../FieldDescription';
-import { useDocumentInfo } from '../../../utilities/DocumentInfo';
-import { Props } from './types';
-import { scrollToID } from '../../../../utilities/scrollToID';
 import { getTranslation } from '../../../../../utilities/getTranslation';
-import { useConfig } from '../../../utilities/Config';
-import { NullifyLocaleField } from '../../NullifyField';
+import { scrollToID } from '../../../../utilities/scrollToID';
+import Banner from '../../../elements/Banner';
+import Button from '../../../elements/Button';
 import DraggableSortable from '../../../elements/DraggableSortable';
 import DraggableSortableItem from '../../../elements/DraggableSortable/DraggableSortableItem';
-import { ArrayRow } from './ArrayRow';
 import { ErrorPill } from '../../../elements/ErrorPill';
-
+import { useConfig } from '../../../utilities/Config';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo';
+import { useLocale } from '../../../utilities/Locale';
+import Error from '../../Error';
+import FieldDescription from '../../FieldDescription';
+import { useForm, useFormSubmitted } from '../../Form/context';
+import { NullifyLocaleField } from '../../NullifyField';
+import useField from '../../useField';
+import withCondition from '../../withCondition';
+import { ArrayRow } from './ArrayRow';
 import './index.scss';
 
 const baseClass = 'array-field';
 
 const ArrayFieldType: React.FC<Props> = (props) => {
   const {
-    name,
-    path: pathFromProps,
-    fields,
-    fieldTypes,
-    validate = array,
-    required,
-    maxRows,
-    minRows,
-    permissions,
-    indexPath,
-    localized,
     admin: {
-      readOnly,
-      description,
-      condition,
       className,
       components,
+      condition,
+      description,
+      readOnly,
     },
+    fieldTypes,
+    fields,
+    indexPath,
+    localized,
+    maxRows,
+    minRows,
+    name,
+    path: pathFromProps,
+    permissions,
+    required,
+    validate = array,
   } = props;
 
   const path = pathFromProps || name;
@@ -54,10 +55,10 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   const CustomRowLabel = components?.RowLabel || undefined;
 
   const { setDocFieldPreferences } = useDocumentInfo();
-  const { dispatchFields, setModified, addFieldRow, removeFieldRow } = useForm();
+  const { addFieldRow, dispatchFields, removeFieldRow, setModified } = useForm();
   const submitted = useFormSubmitted();
   const { code: locale } = useLocale();
-  const { t, i18n } = useTranslation('fields');
+  const { i18n, t } = useTranslation('fields');
   const { localization } = useConfig();
 
   const editingDefaultLocale = (() => {
@@ -72,8 +73,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   // Handle labeling for Arrays, Global Arrays, and Blocks
   const getLabels = (p: Props) => {
     if (p?.labels) return p.labels;
-    if (p?.label) return { singular: p.label, plural: undefined };
-    return { singular: t('row'), plural: t('rows') };
+    if (p?.label) return { plural: undefined, singular: p.label };
+    return { plural: t('rows'), singular: t('row') };
   };
 
   const labels = getLabels(props);
@@ -83,24 +84,24 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     if (!editingDefaultLocale && value === null) {
       return true;
     }
-    return validate(value, { ...options, minRows, maxRows, required });
+    return validate(value, { ...options, maxRows, minRows, required });
   }, [maxRows, minRows, required, validate, editingDefaultLocale]);
 
   const {
-    showError,
     errorMessage,
-    value,
     rows = [],
+    showError,
     valid,
+    value,
   } = useField<number>({
-    path,
-    validate: memoizedValidate,
     condition,
     hasRows: true,
+    path,
+    validate: memoizedValidate,
   });
 
   const addRow = useCallback(async (rowIndex: number) => {
-    await addFieldRow({ rowIndex, path });
+    await addFieldRow({ path, rowIndex });
     setModified(true);
 
     setTimeout(() => {
@@ -109,7 +110,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   }, [addFieldRow, path, setModified]);
 
   const duplicateRow = useCallback(async (rowIndex: number) => {
-    dispatchFields({ type: 'DUPLICATE_ROW', rowIndex, path });
+    dispatchFields({ path, rowIndex, type: 'DUPLICATE_ROW' });
     setModified(true);
 
     setTimeout(() => {
@@ -118,21 +119,21 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   }, [dispatchFields, path, setModified]);
 
   const removeRow = useCallback((rowIndex: number) => {
-    removeFieldRow({ rowIndex, path });
+    removeFieldRow({ path, rowIndex });
     setModified(true);
   }, [removeFieldRow, path, setModified]);
 
   const moveRow = useCallback((moveFromIndex: number, moveToIndex: number) => {
-    dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path });
+    dispatchFields({ moveFromIndex, moveToIndex, path, type: 'MOVE_ROW' });
     setModified(true);
   }, [dispatchFields, path, setModified]);
 
   const toggleCollapseAll = useCallback(async (collapsed: boolean) => {
-    dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', path, collapsed, setDocFieldPreferences });
+    dispatchFields({ collapsed, path, setDocFieldPreferences, type: 'SET_ALL_ROWS_COLLAPSED' });
   }, [dispatchFields, path, setDocFieldPreferences]);
 
   const setCollapse = useCallback(async (rowID: string, collapsed: boolean) => {
-    dispatchFields({ type: 'SET_ROW_COLLAPSED', path, collapsed, rowID, setDocFieldPreferences });
+    dispatchFields({ collapsed, path, rowID, setDocFieldPreferences, type: 'SET_ROW_COLLAPSED' });
   }, [dispatchFields, path, setDocFieldPreferences]);
 
   const hasMaxRows = maxRows && rows.length >= maxRows;
@@ -148,13 +149,13 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   return (
     <div
-      id={`field-${path.replace(/\./gi, '__')}`}
       className={classes}
+      id={`field-${path.replace(/\./g, '__')}`}
     >
       <div className={`${baseClass}__error-wrap`}>
         <Error
-          showError={showError}
           message={errorMessage}
+          showError={showError}
         />
       </div>
       <header className={`${baseClass}__header`}>
@@ -174,9 +175,9 @@ const ArrayFieldType: React.FC<Props> = (props) => {
           <ul className={`${baseClass}__header-actions`}>
             <li>
               <button
-                type="button"
-                onClick={() => toggleCollapseAll(true)}
                 className={`${baseClass}__header-action`}
+                onClick={() => toggleCollapseAll(true)}
+                type="button"
               >
                 {t('collapseAll')}
               </button>
@@ -184,9 +185,9 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
             <li>
               <button
-                type="button"
-                onClick={() => toggleCollapseAll(false)}
                 className={`${baseClass}__header-action`}
+                onClick={() => toggleCollapseAll(false)}
+                type="button"
               >
                 {t('showAll')}
               </button>
@@ -194,49 +195,49 @@ const ArrayFieldType: React.FC<Props> = (props) => {
           </ul>
         </div>
         <FieldDescription
-          className={`field-description-${path.replace(/\./gi, '__')}`}
-          value={value}
+          className={`field-description-${path.replace(/\./g, '__')}`}
           description={description}
+          value={value}
         />
       </header>
 
       <NullifyLocaleField
+        fieldValue={value}
         localized={localized}
         path={path}
-        fieldValue={value}
       />
 
       <DraggableSortable
+        className={`${baseClass}__draggable-rows`}
         ids={rows.map((row) => row.id)}
         onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
-        className={`${baseClass}__draggable-rows`}
       >
         {rows.length > 0 && rows.map((row, i) => (
           <DraggableSortableItem
-            key={row.id}
-            id={row.id}
             disabled={readOnly}
+            id={row.id}
+            key={row.id}
           >
             {(draggableSortableItemProps) => (
               <ArrayRow
                 {...draggableSortableItemProps}
-                row={row}
+                CustomRowLabel={CustomRowLabel}
                 addRow={addRow}
                 duplicateRow={duplicateRow}
-                removeRow={removeRow}
-                setCollapse={setCollapse}
-                path={path}
                 fieldTypes={fieldTypes}
                 fields={fields}
-                moveRow={moveRow}
-                readOnly={readOnly}
-                rowCount={rows.length}
-                permissions={permissions}
-                CustomRowLabel={CustomRowLabel}
-                rowIndex={i}
+                hasMaxRows={hasMaxRows}
                 indexPath={indexPath}
                 labels={labels}
-                hasMaxRows={hasMaxRows}
+                moveRow={moveRow}
+                path={path}
+                permissions={permissions}
+                readOnly={readOnly}
+                removeRow={removeRow}
+                row={row}
+                rowCount={rows.length}
+                rowIndex={i}
+                setCollapse={setCollapse}
               />
             )}
           </DraggableSortableItem>
@@ -265,11 +266,11 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       {(!readOnly && !hasMaxRows) && (
         <div className={`${baseClass}__add-button-wrap`}>
           <Button
-            icon="plus"
             buttonStyle="icon-label"
-            iconStyle="with-border"
+            icon="plus"
             iconPosition="left"
-            onClick={() => addRow(value as number)}
+            iconStyle="with-border"
+            onClick={() => addRow(value )}
           >
             {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
           </Button>

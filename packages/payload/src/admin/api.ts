@@ -5,6 +5,21 @@ type GetOptions = RequestInit & {
 }
 
 export const requests = {
+  delete: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {
+    const headers = options && options.headers ? { ...options.headers } : {};
+
+    const formattedOptions: RequestInit = {
+      ...options,
+      credentials: 'include',
+      headers: {
+        ...headers,
+      },
+      method: 'delete',
+    };
+
+    return fetch(url, formattedOptions);
+  },
+
   get: (url: string, options: GetOptions = { headers: {} }): Promise<Response> => {
     let query = '';
     if (options.params) {
@@ -16,16 +31,31 @@ export const requests = {
     });
   },
 
+  patch: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {
+    const headers = options && options.headers ? { ...options.headers } : {};
+
+    const formattedOptions: RequestInit = {
+      ...options,
+      credentials: 'include',
+      headers: {
+        ...headers,
+      },
+      method: 'PATCH',
+    };
+
+    return fetch(url, formattedOptions);
+  },
+
   post: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {
     const headers = options && options.headers ? { ...options.headers } : {};
 
     const formattedOptions: RequestInit = {
       ...options,
-      method: 'post',
       credentials: 'include',
       headers: {
         ...headers,
       },
+      method: 'post',
     };
 
     return fetch(`${url}`, formattedOptions);
@@ -36,41 +66,11 @@ export const requests = {
 
     const formattedOptions: RequestInit = {
       ...options,
+      credentials: 'include',
+      headers: {
+        ...headers,
+      },
       method: 'put',
-      credentials: 'include',
-      headers: {
-        ...headers,
-      },
-    };
-
-    return fetch(url, formattedOptions);
-  },
-
-  patch: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {
-    const headers = options && options.headers ? { ...options.headers } : {};
-
-    const formattedOptions: RequestInit = {
-      ...options,
-      method: 'PATCH',
-      credentials: 'include',
-      headers: {
-        ...headers,
-      },
-    };
-
-    return fetch(url, formattedOptions);
-  },
-
-  delete: (url: string, options: RequestInit = { headers: {} }): Promise<Response> => {
-    const headers = options && options.headers ? { ...options.headers } : {};
-
-    const formattedOptions: RequestInit = {
-      ...options,
-      method: 'delete',
-      credentials: 'include',
-      headers: {
-        ...headers,
-      },
     };
 
     return fetch(url, formattedOptions);

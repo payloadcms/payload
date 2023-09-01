@@ -1,7 +1,10 @@
-import { Response } from 'express';
+import type { Response } from 'express';
+import type { GraphQLError } from 'graphql';
+
 import { createHandler } from 'graphql-http/lib/use/express';
-import { GraphQLError } from 'graphql';
-import { PayloadRequest } from '../express/types';
+
+import type { PayloadRequest } from '../express/types';
+
 import errorHandler from './errorHandler';
 
 const graphQLHandler = (req: PayloadRequest, res: Response) => {
@@ -11,11 +14,11 @@ const graphQLHandler = (req: PayloadRequest, res: Response) => {
 
   return createHandler(
     {
-      schema: payload.schema,
+      context: { req, res },
       onOperation: async (request, args, result) => {
         const response = typeof payload.extensions === 'function' ? await payload.extensions({
-          req: request,
           args,
+          req: request,
           result,
         }) : result;
         if (response.errors) {
@@ -27,7 +30,7 @@ const graphQLHandler = (req: PayloadRequest, res: Response) => {
         }
         return response;
       },
-      context: { req, res },
+      schema: payload.schema,
       validationRules: (request, args, defaultRules) => defaultRules.concat(payload.validationRules(args)),
     },
   );

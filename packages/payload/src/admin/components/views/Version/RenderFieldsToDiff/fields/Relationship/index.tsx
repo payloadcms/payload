@@ -1,15 +1,17 @@
 import React from 'react';
 import ReactDiffViewer from 'react-diff-viewer-continued';
 import { useTranslation } from 'react-i18next';
+
+import type { SanitizedCollectionConfig } from '../../../../../../../collections/config/types';
+import type { RelationshipField } from '../../../../../../../fields/config/types';
+import type { Props } from '../types';
+
+import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../../../../fields/config/types';
+import { getTranslation } from '../../../../../../../utilities/getTranslation';
 import { useConfig } from '../../../../../utilities/Config';
 import { useLocale } from '../../../../../utilities/Locale';
-import { SanitizedCollectionConfig } from '../../../../../../../collections/config/types';
-import { fieldAffectsData, fieldIsPresentationalOnly, RelationshipField } from '../../../../../../../fields/config/types';
 import Label from '../../Label';
-import { Props } from '../types';
 import { diffStyles } from '../styles';
-import { getTranslation } from '../../../../../../../utilities/getTranslation';
-
 import './index.scss';
 
 const baseClass = 'relationship-diff';
@@ -20,7 +22,7 @@ const generateLabelFromValue = (
   collections: SanitizedCollectionConfig[],
   field: RelationshipField,
   locale: string,
-  value: RelationshipValue | { relationTo: string, value: RelationshipValue },
+  value: { relationTo: string, value: RelationshipValue } | RelationshipValue,
 ): string => {
   let relation: string;
   let relatedDoc: RelationshipValue;
@@ -60,9 +62,9 @@ const generateLabelFromValue = (
   return valueToReturn;
 };
 
-const Relationship: React.FC<Props & { field: RelationshipField }> = ({ field, version, comparison }) => {
+const Relationship: React.FC<Props & { field: RelationshipField }> = ({ comparison, field, version }) => {
   const { collections } = useConfig();
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
   const { code: locale } = useLocale();
 
   let placeholder = '';
@@ -89,12 +91,12 @@ const Relationship: React.FC<Props & { field: RelationshipField }> = ({ field, v
         {getTranslation(field.label, i18n)}
       </Label>
       <ReactDiffViewer
-        styles={diffStyles}
-        oldValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}
-        newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
-        splitView
         hideLineNumbers
+        newValue={typeof versionToRender !== 'undefined' ? String(versionToRender) : placeholder}
+        oldValue={typeof comparisonToRender !== 'undefined' ? String(comparisonToRender) : placeholder}
         showDiffOnly={false}
+        splitView
+        styles={diffStyles}
       />
     </div>
   );

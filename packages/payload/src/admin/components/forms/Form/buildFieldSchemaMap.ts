@@ -1,4 +1,5 @@
-import { Field } from '../../../../fields/config/types';
+import type { Field } from '../../../../fields/config/types';
+
 import { createNestedFieldPath } from './createNestedFieldPath';
 
 /**

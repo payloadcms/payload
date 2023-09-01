@@ -2,6 +2,7 @@
 // @ts-ignore - need to do this because this file doesn't actually exist
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+
 import Root from './Root';
 
 const container = document.getElementById('app');

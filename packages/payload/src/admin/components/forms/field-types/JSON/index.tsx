@@ -1,34 +1,34 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
+import type { Props } from './types';
+
+import { json } from '../../../../../fields/validations';
+import { CodeEditor } from '../../../elements/CodeEditor';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
-import { json } from '../../../../../fields/validations';
 import Label from '../../Label';
-import { Props } from './types';
 import useField from '../../useField';
 import withCondition from '../../withCondition';
-import { CodeEditor } from '../../../elements/CodeEditor';
-
 import './index.scss';
 
 const baseClass = 'json-field';
 
 const JSONField: React.FC<Props> = (props) => {
   const {
-    path: pathFromProps,
-    name,
-    required,
-    validate = json,
     admin: {
+      className,
+      condition,
+      description,
+      editorOptions,
       readOnly,
       style,
-      className,
       width,
-      description,
-      condition,
-      editorOptions,
     } = {},
     label,
+    name,
+    path: pathFromProps,
+    required,
+    validate = json,
   } = props;
 
   const path = pathFromProps || name;
@@ -36,19 +36,19 @@ const JSONField: React.FC<Props> = (props) => {
   const [jsonError, setJsonError] = useState<string>();
 
   const memoizedValidate = useCallback((value, options) => {
-    return validate(value, { ...options, required, jsonError });
+    return validate(value, { ...options, jsonError, required });
   }, [validate, required, jsonError]);
 
   const {
-    value,
-    initialValue,
-    showError,
-    setValue,
     errorMessage,
+    initialValue,
+    setValue,
+    showError,
+    value,
   } = useField<string>({
+    condition,
     path,
     validate: memoizedValidate,
-    condition,
   });
 
   const handleChange = useCallback((val) => {
@@ -77,15 +77,15 @@ const JSONField: React.FC<Props> = (props) => {
 
   return (
     <div
-      className={classes}
       style={{
         ...style,
         width,
       }}
+      className={classes}
     >
       <Error
-        showError={showError}
         message={errorMessage}
+        showError={showError}
       />
       <Label
         htmlFor={`field-${path}`}
@@ -93,15 +93,15 @@ const JSONField: React.FC<Props> = (props) => {
         required={required}
       />
       <CodeEditor
-        options={editorOptions}
         defaultLanguage="json"
-        value={stringValue}
         onChange={handleChange}
+        options={editorOptions}
         readOnly={readOnly}
+        value={stringValue}
       />
       <FieldDescription
-        value={value}
         description={description}
+        value={value}
       />
     </div>
   );

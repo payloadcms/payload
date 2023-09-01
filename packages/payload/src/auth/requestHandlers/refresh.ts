@@ -1,6 +1,8 @@
-import { Response, NextFunction } from 'express';
+import type { NextFunction, Response } from 'express';
+
+import type { PayloadRequest } from '../../express/types';
+
 import getExtractJWT from '../getExtractJWT';
-import { PayloadRequest } from '../../express/types';
 import refresh from '../operations/refresh';
 
 export default async function refreshHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
@@ -15,9 +17,9 @@ export default async function refreshHandler(req: PayloadRequest, res: Response,
     }
 
     const result = await refresh({
+      collection: req.collection,
       req,
       res,
-      collection: req.collection,
       token,
     });
 

@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../src/collections/config/types';
 
 export const hooksSlug = 'hooks';
 const Hooks: CollectionConfig = {

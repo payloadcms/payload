@@ -1,12 +1,14 @@
-import mongoose from 'mongoose';
-import jwtDecode from 'jwt-decode';
 import { GraphQLClient } from 'graphql-request';
+import jwtDecode from 'jwt-decode';
+import mongoose from 'mongoose';
+
+import type { User } from '../../src/auth';
+
 import payload from '../../src';
+import configPromise from '../collections-graphql/config';
+import { devUser } from '../credentials';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { namedSaveToJWTValue, saveToJWTKey, slug } from './config';
-import { devUser } from '../credentials';
-import type { User } from '../../src/auth';
-import configPromise from '../collections-graphql/config';
 
 require('isomorphic-fetch');
 

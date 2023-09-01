@@ -1,50 +1,52 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-import { DocumentDrawerProps } from './types';
-import DefaultEdit from '../../views/collections/Edit/Default';
-import X from '../../icons/X';
-import { Fields } from '../../forms/Form/types';
-import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
-import { getTranslation } from '../../../../utilities/getTranslation';
-import Button from '../Button';
-import { useConfig } from '../../utilities/Config';
-import { useLocale } from '../../utilities/Locale';
-import { useAuth } from '../../utilities/Auth';
-import { DocumentInfoProvider, useDocumentInfo } from '../../utilities/DocumentInfo';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import usePayloadAPI from '../../../hooks/usePayloadAPI';
-import formatFields from '../../views/collections/Edit/formatFields';
-import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections';
-import IDLabel from '../IDLabel';
+
+import type { CollectionPermission } from '../../../../auth';
+import type { Fields } from '../../forms/Form/types';
+import type { DocumentDrawerProps } from './types';
+
 import { baseClass } from '.';
-import { CollectionPermission } from '../../../../auth';
+import { getTranslation } from '../../../../utilities/getTranslation';
+import usePayloadAPI from '../../../hooks/usePayloadAPI';
+import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
+import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections';
+import X from '../../icons/X';
+import { useAuth } from '../../utilities/Auth';
+import { useConfig } from '../../utilities/Config';
+import { DocumentInfoProvider, useDocumentInfo } from '../../utilities/DocumentInfo';
+import { useLocale } from '../../utilities/Locale';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent';
+import DefaultEdit from '../../views/collections/Edit/Default';
+import formatFields from '../../views/collections/Edit/formatFields';
+import Button from '../Button';
+import IDLabel from '../IDLabel';
 
 const Content: React.FC<DocumentDrawerProps> = ({
   collectionSlug,
-  drawerSlug,
   customHeader,
+  drawerSlug,
   onSave,
 }) => {
-  const { serverURL, routes: { api } } = useConfig();
-  const { toggleModal, modalState, closeModal } = useModal();
+  const { routes: { api }, serverURL } = useConfig();
+  const { closeModal, modalState, toggleModal } = useModal();
   const { code: locale } = useLocale();
   const { permissions, user } = useAuth();
   const [internalState, setInternalState] = useState<Fields>();
-  const { t, i18n } = useTranslation(['fields', 'general']);
+  const { i18n, t } = useTranslation(['fields', 'general']);
   const hasInitializedState = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [collectionConfig] = useRelatedCollections(collectionSlug);
-  const { docPermissions, id, getDocPreferences } = useDocumentInfo();
+  const { docPermissions, getDocPreferences, id } = useDocumentInfo();
 
   const [fields, setFields] = useState(() => formatFields(collectionConfig, true));
 
   // no need to an additional requests when creating new documents
   const initialID = useRef(id);
-  const [{ data, isLoading: isLoadingDocument, isError }] = usePayloadAPI(
+  const [{ data, isError, isLoading: isLoadingDocument }] = usePayloadAPI(
     (initialID.current ? `${serverURL}${api}/${collectionSlug}/${initialID.current}` : null),
-    { initialParams: { 'fallback-locale': 'null', depth: 0, draft: 'true' } },
+    { initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
   );
 
   useEffect(() => {
@@ -59,14 +61,14 @@ const Content: React.FC<DocumentDrawerProps> = ({
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences();
       const state = await buildStateFromSchema({
-        fieldSchema: fields,
-        preferences,
         data,
-        user,
-        operation: id ? 'update' : 'create',
+        fieldSchema: fields,
         id,
         locale,
+        operation: id ? 'update' : 'create',
+        preferences,
         t,
+        user,
       });
       setInternalState(state);
     };
@@ -96,24 +98,10 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
   return (
     <RenderCustomComponent
-      DefaultComponent={DefaultEdit}
-      CustomComponent={collectionConfig.admin?.components?.views?.Edit}
       componentProps={{
-        isLoading,
-        data,
-        id,
-        collection: collectionConfig,
-        permissions: permissions.collections[collectionConfig.slug],
-        isEditing,
-        apiURL,
-        onSave,
-        internalState,
-        hasSavePermission,
         action,
-        disableEyebrow: true,
-        disableActions: true,
-        me: true,
-        disableLeaveWithoutSaving: true,
+        apiURL,
+        collection: collectionConfig,
         customHeader: (
           <div className={`${baseClass}__header`}>
             <div className={`${baseClass}__header-content`}>
@@ -121,10 +109,10 @@ const Content: React.FC<DocumentDrawerProps> = ({
                 {!customHeader ? t(!id ? 'fields:addNewLabel' : 'general:editLabel', { label: getTranslation(collectionConfig.labels.singular, i18n) }) : customHeader}
               </h2>
               <Button
+                aria-label={t('general:close')}
                 buttonStyle="none"
                 className={`${baseClass}__header-close`}
                 onClick={() => toggleModal(drawerSlug)}
-                aria-label={t('general:close')}
               >
                 <X />
               </Button>
@@ -134,7 +122,21 @@ const Content: React.FC<DocumentDrawerProps> = ({
             )}
           </div>
         ),
+        data,
+        disableActions: true,
+        disableEyebrow: true,
+        disableLeaveWithoutSaving: true,
+        hasSavePermission,
+        id,
+        internalState,
+        isEditing,
+        isLoading,
+        me: true,
+        onSave,
+        permissions: permissions.collections[collectionConfig.slug],
       }}
+      CustomComponent={collectionConfig.admin?.components?.views?.Edit}
+      DefaultComponent={DefaultEdit}
     />
   );
 };
@@ -146,7 +148,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
   const { collectionSlug, id: idFromProps, onSave: onSaveFromProps } = props;
   const [collectionConfig] = useRelatedCollections(collectionSlug);
-  const [id, setId] = useState<string | null>(idFromProps);
+  const [id, setId] = useState<null | string>(idFromProps);
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
     setId(args.doc.id);

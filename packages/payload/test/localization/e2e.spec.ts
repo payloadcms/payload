@@ -1,10 +1,13 @@
 import type { Page } from '@playwright/test';
+
 import { expect, test } from '@playwright/test';
+
+import type { LocalizedPost } from './payload-types';
+
 import payload from '../../src';
+import { saveDocAndAssert } from '../helpers';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadTest } from '../helpers/configHelpers';
-import { saveDocAndAssert } from '../helpers';
-import type { LocalizedPost } from './payload-types';
 import { localizedPostsSlug } from './config';
 import { englishTitle, spanishLocale } from './shared';
 

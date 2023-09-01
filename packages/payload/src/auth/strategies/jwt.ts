@@ -1,15 +1,19 @@
+import type { StrategyOptions } from 'passport-jwt';
+import type { Strategy as PassportStrategy } from 'passport-strategy';
+
+import passportJwt from 'passport-jwt';
 import url from 'url';
-import passportJwt, { StrategyOptions } from 'passport-jwt';
-import { Strategy as PassportStrategy } from 'passport-strategy';
-import { Payload } from '../../payload';
+
+import type { Payload } from '../../payload';
+
 import getExtractJWT from '../getExtractJWT';
 
 const JwtStrategy = passportJwt.Strategy;
 
-export default ({ secret, config, collections }: Payload): PassportStrategy => {
+export default ({ collections, config, secret }: Payload): PassportStrategy => {
   const opts: StrategyOptions = {
-    passReqToCallback: true,
     jwtFromRequest: getExtractJWT(config),
+    passReqToCallback: true,
     secretOrKey: secret,
   };
 
@@ -25,10 +29,10 @@ export default ({ secret, config, collections }: Payload): PassportStrategy => {
       const isGraphQL = parsedURL.pathname === config.routes.graphQL;
 
       const user = await req.payload.findByID({
-        id: token.id,
         collection: token.collection,
-        req,
         depth: isGraphQL ? 0 : collection.config.auth.depth,
+        id: token.id,
+        req,
       });
 
       if (user && (!collection.config.auth.verify || user._verified)) {

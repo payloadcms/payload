@@ -1,18 +1,19 @@
-import React from 'react';
-import { DiffMethod } from 'react-diff-viewer-continued';
-import { FieldPermissions } from '../../../../../../auth';
+import type React from 'react';
+import type { DiffMethod } from 'react-diff-viewer-continued';
+
+import type { FieldPermissions } from '../../../../../../auth';
 
 export type FieldComponents = Record<string, React.FC<Props>>
 
 export type Props = {
-  diffMethod?: DiffMethod
-  fieldComponents: FieldComponents
-  version: any
   comparison: any
+  diffMethod?: DiffMethod
+  disableGutter?: boolean
   field: any
-  permissions?: Record<string, FieldPermissions>
+  fieldComponents: FieldComponents
+  isRichText?: boolean
   locale?: string
   locales?: string[]
-  disableGutter?: boolean
-  isRichText?: boolean
+  permissions?: Record<string, FieldPermissions>
+  version: any
 }

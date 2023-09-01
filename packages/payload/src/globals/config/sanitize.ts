@@ -1,12 +1,13 @@
-import { toWords } from '../../utilities/formatLabels';
-import { CollectionConfig } from '../../collections/config/types';
-import sanitizeFields from '../../fields/config/sanitize';
-import { GlobalConfig, SanitizedGlobalConfig } from './types';
+import type { CollectionConfig } from '../../collections/config/types';
+import type { GlobalConfig, SanitizedGlobalConfig } from './types';
+
 import defaultAccess from '../../auth/defaultAccess';
-import baseVersionFields from '../../versions/baseFields';
+import sanitizeFields from '../../fields/config/sanitize';
+import { fieldAffectsData } from '../../fields/config/types';
 import mergeBaseFields from '../../fields/mergeBaseFields';
 import translations from '../../translations';
-import { fieldAffectsData } from '../../fields/config/types';
+import { toWords } from '../../utilities/formatLabels';
+import baseVersionFields from '../../versions/baseFields';
 
 const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[]): SanitizedGlobalConfig[] => {
   const sanitizedGlobals = globals.map((global) => {
@@ -68,24 +69,24 @@ const sanitizeGlobals = (collections: CollectionConfig[], globals: GlobalConfig[
     });
     if (!hasUpdatedAt) {
       sanitizedGlobal.fields.push({
-        name: 'updatedAt',
-        label: translations['general:updatedAt'],
-        type: 'date',
         admin: {
-          hidden: true,
           disableBulkEdit: true,
+          hidden: true,
         },
+        label: translations['general:updatedAt'],
+        name: 'updatedAt',
+        type: 'date',
       });
     }
     if (!hasCreatedAt) {
       sanitizedGlobal.fields.push({
-        name: 'createdAt',
-        label: translations['general:createdAt'],
-        type: 'date',
         admin: {
-          hidden: true,
           disableBulkEdit: true,
+          hidden: true,
         },
+        label: translations['general:createdAt'],
+        name: 'createdAt',
+        type: 'date',
       });
     }
 

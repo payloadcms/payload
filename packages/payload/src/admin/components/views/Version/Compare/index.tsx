@@ -1,14 +1,15 @@
-import React, { useState, useCallback, useEffect } from 'react';
 import qs from 'qs';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../utilities/Config';
-import { Props } from './types';
-import ReactSelect from '../../../elements/ReactSelect';
-import type { PaginatedDocs } from '../../../../../database/types';
-import { Where } from '../../../../../types';
-import { mostRecentVersionOption, publishedVersionOption } from '../shared';
-import { formatDate } from '../../../../utilities/formatDate';
 
+import type { PaginatedDocs } from '../../../../../database/types';
+import type { Where } from '../../../../../types';
+import type { Props } from './types';
+
+import { formatDate } from '../../../../utilities/formatDate';
+import ReactSelect from '../../../elements/ReactSelect';
+import { useConfig } from '../../../utilities/Config';
+import { mostRecentVersionOption, publishedVersionOption } from '../shared';
 import './index.scss';
 
 const baseClass = 'compare-version';
@@ -20,7 +21,7 @@ const baseOptions = [
 ];
 
 const CompareVersion: React.FC<Props> = (props) => {
-  const { onChange, value, baseURL, versionID, parentID, publishedDoc } = props;
+  const { baseURL, onChange, parentID, publishedDoc, value, versionID } = props;
 
   const {
     admin: {
@@ -31,7 +32,7 @@ const CompareVersion: React.FC<Props> = (props) => {
   const [options, setOptions] = useState(baseOptions);
   const [lastLoadedPage, setLastLoadedPage] = useState(1);
   const [errorLoading, setErrorLoading] = useState('');
-  const { t, i18n } = useTranslation('version');
+  const { i18n, t } = useTranslation('version');
 
   const getResults = useCallback(async ({
     lastLoadedPage: lastLoadedPageArg,
@@ -40,9 +41,9 @@ const CompareVersion: React.FC<Props> = (props) => {
       [key: string]: unknown
       where: Where
     } = {
+      depth: 0,
       limit: maxResultsPerRequest,
       page: lastLoadedPageArg,
-      depth: 0,
       where: {
         and: [
           {
@@ -108,14 +109,14 @@ const CompareVersion: React.FC<Props> = (props) => {
       </div>
       {!errorLoading && (
         <ReactSelect
-          isSearchable={false}
-          placeholder={t('selectVersionToCompare')}
-          onChange={onChange}
           onMenuScrollToBottom={() => {
             getResults({ lastLoadedPage: lastLoadedPage + 1 });
           }}
-          value={value}
+          isSearchable={false}
+          onChange={onChange}
           options={options}
+          placeholder={t('selectVersionToCompare')}
+          value={value}
         />
       )}
       {errorLoading && (

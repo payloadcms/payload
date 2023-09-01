@@ -1,18 +1,21 @@
-import { Response, NextFunction } from 'express';
+import type { NextFunction, Response } from 'express';
+
 import httpStatus from 'http-status';
+
+import type { PayloadRequest } from '../../express/types';
+import type { Document } from '../../types';
+import type { SanitizedGlobalConfig } from '../config/types';
+
 import formatSuccessResponse from '../../express/responses/formatSuccess';
-import { PayloadRequest } from '../../express/types';
-import { Document } from '../../types';
-import { SanitizedGlobalConfig } from '../config/types';
 import restoreVersion from '../operations/restoreVersion';
 
 export default function restoreVersionHandler(globalConfig: SanitizedGlobalConfig) {
   return async function handler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<Document> | void> {
     const options = {
-      req,
+      depth: Number(req.query.depth),
       globalConfig,
       id: req.params.id,
-      depth: Number(req.query.depth),
+      req,
     };
 
     try {

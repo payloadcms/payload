@@ -1,33 +1,33 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { Collection } from '../../collections/config/types';
-import { Field, RichTextField } from '../config/types';
-import { PayloadRequest } from '../../express/types';
+import type { Collection } from '../../collections/config/types';
+import type { PayloadRequest } from '../../express/types';
+import type { Field, RichTextField } from '../config/types';
 
 type Arguments = {
-  data: unknown
-  overrideAccess?: boolean
-  key: string | number
-  depth: number
   currentDepth?: number
+  data: unknown
+  depth: number
   field: RichTextField
+  key: number | string
+  overrideAccess?: boolean
   req: PayloadRequest
   showHiddenFields: boolean
 }
 
 export const populate = async ({
-  id,
   collection,
+  currentDepth,
   data,
+  depth,
+  id,
   key,
   overrideAccess,
-  depth,
-  currentDepth,
   req,
   showHiddenFields,
 }: Omit<Arguments, 'field'> & {
-  id: string,
-  field: Field
   collection: Collection
+  field: Field
+  id: string,
 }): Promise<void> => {
   const dataRef = data as Record<string, unknown>;
 

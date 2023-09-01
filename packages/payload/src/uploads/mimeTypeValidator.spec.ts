@@ -1,5 +1,6 @@
+import type { ValidateOptions } from '../fields/config/types';
+
 import { mimeTypeValidator } from './mimeTypeValidator';
-import { ValidateOptions } from '../fields/config/types';
 
 const options = { siblingData: { filename: 'file.xyz' } } as ValidateOptions<undefined, undefined, undefined>;
 

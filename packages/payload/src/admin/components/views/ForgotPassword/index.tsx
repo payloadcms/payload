@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Trans, useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import MinimalTemplate from '../../templates/Minimal';
-import Form from '../../forms/Form';
-import Email from '../../forms/field-types/Email';
-import FormSubmit from '../../forms/Submit';
-import Button from '../../elements/Button';
-import Meta from '../../utilities/Meta';
 
+import Button from '../../elements/Button';
+import Form from '../../forms/Form';
+import FormSubmit from '../../forms/Submit';
+import Email from '../../forms/field-types/Email';
+import MinimalTemplate from '../../templates/Minimal';
+import { useAuth } from '../../utilities/Auth';
+import { useConfig } from '../../utilities/Config';
+import Meta from '../../utilities/Meta';
 import './index.scss';
 
 const baseClass = 'forgot-password';
@@ -21,11 +21,11 @@ const ForgotPassword: React.FC = () => {
   const { t } = useTranslation('authentication');
   const {
     admin: { user: userSlug },
-    serverURL,
     routes: {
       admin,
       api,
     },
+    serverURL,
   } = useConfig();
 
   const handleResponse = (res) => {
@@ -41,9 +41,9 @@ const ForgotPassword: React.FC = () => {
     return (
       <MinimalTemplate className={baseClass}>
         <Meta
-          title={t('forgotPassword')}
           description={t('forgotPassword')}
           keywords={t('forgotPassword')}
+          title={t('forgotPassword')}
         />
 
         <h1>{t('alreadyLoggedIn')}</h1>
@@ -57,8 +57,8 @@ const ForgotPassword: React.FC = () => {
         </p>
         <br />
         <Button
-          el="link"
           buttonStyle="secondary"
+          el="link"
           to={admin}
         >
           {t('general:backToDashboard')}
@@ -81,16 +81,16 @@ const ForgotPassword: React.FC = () => {
   return (
     <MinimalTemplate className={baseClass}>
       <Form
+        action={`${serverURL}${api}/${userSlug}/forgot-password`}
         handleResponse={handleResponse}
         method="post"
-        action={`${serverURL}${api}/${userSlug}/forgot-password`}
       >
         <h1>{t('forgotPassword')}</h1>
         <p>{t('forgotPasswordEmailInstructions')}</p>
         <Email
+          admin={{ autoComplete: 'email' }}
           label={t('general:emailAddress')}
           name="email"
-          admin={{ autoComplete: 'email' }}
           required
         />
         <FormSubmit>{t('general:submit')}</FormSubmit>

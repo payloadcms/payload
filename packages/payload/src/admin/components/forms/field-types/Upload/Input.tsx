@@ -1,68 +1,69 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Label from '../../Label';
-import Error from '../../Error';
-import FileDetails from '../../../elements/FileDetails';
-import FieldDescription from '../../FieldDescription';
-import { FilterOptions, UploadField } from '../../../../../fields/config/types';
-import { Description } from '../../FieldDescription/types';
-import { FieldTypes } from '..';
-import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import { useDocumentDrawer } from '../../../elements/DocumentDrawer';
-import { useListDrawer } from '../../../elements/ListDrawer';
-import Button from '../../../elements/Button';
-import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
-import { ListDrawerProps } from '../../../elements/ListDrawer/types';
-import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
-import { FilterOptionsResult } from '../Relationship/types';
 
+import type { FieldTypes } from '..';
+import type { SanitizedCollectionConfig } from '../../../../../collections/config/types';
+import type { FilterOptions, UploadField } from '../../../../../fields/config/types';
+import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
+import type { ListDrawerProps } from '../../../elements/ListDrawer/types';
+import type { Description } from '../../FieldDescription/types';
+import type { FilterOptionsResult } from '../Relationship/types';
+
+import { getTranslation } from '../../../../../utilities/getTranslation';
+import Button from '../../../elements/Button';
+import { useDocumentDrawer } from '../../../elements/DocumentDrawer';
+import FileDetails from '../../../elements/FileDetails';
+import { useListDrawer } from '../../../elements/ListDrawer';
+import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
+import Error from '../../Error';
+import FieldDescription from '../../FieldDescription';
+import Label from '../../Label';
 import './index.scss';
 
 const baseClass = 'upload';
 
 export type UploadInputProps = Omit<UploadField, 'type'> & {
-  showError?: boolean
-  errorMessage?: string
-  readOnly?: boolean
-  path: string
-  required?: boolean
-  value?: string
-  description?: Description
-  onChange?: (e) => void
-  placeholder?: string
-  style?: React.CSSProperties
-  className?: string
-  width?: string
-  fieldTypes?: FieldTypes
-  collection?: SanitizedCollectionConfig
-  serverURL?: string
   api?: string
+  className?: string
+  collection?: SanitizedCollectionConfig
+  description?: Description
+  errorMessage?: string
+  fieldTypes?: FieldTypes
   filterOptions: FilterOptions
+  onChange?: (e) => void
+  path: string
+  placeholder?: string
+  readOnly?: boolean
+  required?: boolean
+  serverURL?: string
+  showError?: boolean
+  style?: React.CSSProperties
+  value?: string
+  width?: string
 }
 
 const UploadInput: React.FC<UploadInputProps> = (props) => {
   const {
-    path,
-    required,
-    readOnly,
-    style,
-    className,
-    width,
-    description,
-    label,
-    relationTo,
-    value,
-    onChange,
-    showError,
-    serverURL = 'http://localhost:3000',
     api = '/api',
+    className,
     collection,
+    description,
     errorMessage,
     filterOptions,
+    label,
+    onChange,
+    path,
+    readOnly,
+    relationTo,
+    required,
+    serverURL = 'http://localhost:3000',
+    showError,
+    style,
+    value,
+    width,
   } = props;
 
-  const { t, i18n } = useTranslation('fields');
+  const { i18n, t } = useTranslation('fields');
 
   const [file, setFile] = useState(undefined);
   const [missingFile, setMissingFile] = useState(false);
@@ -144,27 +145,27 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
 
   return (
     <div
-      className={classes}
       style={{
         ...style,
         width,
       }}
+      className={classes}
     >
       <GetFilterOptions
         {...{
-          filterOptionsResult,
-          setFilterOptionsResult,
           filterOptions,
+          filterOptionsResult,
           path,
           relationTo,
+          setFilterOptionsResult,
         }}
       />
       <Error
-        showError={showError}
         message={errorMessage}
+        showError={showError}
       />
       <Label
-        htmlFor={`field-${path.replace(/\./gi, '__')}`}
+        htmlFor={`field-${path.replace(/\./g, '__')}`}
         label={label}
         required={required}
       />
@@ -172,11 +173,11 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
         <React.Fragment>
           {(file && !missingFile) && (
             <FileDetails
-              collection={collection}
-              doc={file}
               handleRemove={readOnly ? undefined : () => {
                 onChange(null);
               }}
+              collection={collection}
+              doc={file}
             />
           )}
           {(!file || missingFile) && (
@@ -188,8 +189,8 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
                 >
                   <Button
                     buttonStyle="secondary"
-                    el="div"
                     disabled={readOnly}
+                    el="div"
                   >
                     {t('uploadNewLabel', { label: getTranslation(collection.labels.singular, i18n) })}
                   </Button>
@@ -200,8 +201,8 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
                 >
                   <Button
                     buttonStyle="secondary"
-                    el="div"
                     disabled={readOnly}
+                    el="div"
                   >
                     {t('chooseFromExisting')}
                   </Button>
@@ -210,8 +211,8 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
             </div>
           )}
           <FieldDescription
-            value={file}
             description={description}
+            value={file}
           />
         </React.Fragment>
       )}

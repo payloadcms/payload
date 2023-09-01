@@ -12,22 +12,22 @@ const DragHandle: React.FC<{ className?: string }> = ({ className }) => (
     xmlns="http://www.w3.org/2000/svg"
   >
     <circle
+      className="fill"
       cx="16.3872"
       cy="12.5"
       r="1"
-      className="fill"
     />
     <circle
+      className="fill"
       cx="12.3872"
       cy="12.5"
       r="1"
-      className="fill"
     />
     <circle
+      className="fill"
       cx="8.61279"
       cy="12.5"
       r="1"
-      className="fill"
     />
   </svg>
 );

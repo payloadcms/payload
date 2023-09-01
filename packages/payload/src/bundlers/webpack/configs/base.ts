@@ -1,6 +1,9 @@
-import path from 'path';
+import type { Configuration } from 'webpack';
+
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import webpack, { Configuration } from 'webpack';
+import path from 'path';
+import webpack from 'webpack';
+
 import type { SanitizedConfig } from '../../../config/types';
 
 const mockModulePath = path.resolve(__dirname, '../../mocks/emptyModule.js');
@@ -16,14 +19,11 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       adminFolderPath,
     ],
   },
-  resolveLoader: {
-    modules: ['node_modules', path.join(__dirname, nodeModulesPath)],
-  },
   module: {
     rules: [
       {
-        test: /\.(t|j)sx?$/,
         exclude: /\/node_modules\/(?!.+\.tsx?$).*$/,
+        test: /\.(t|j)sx?$/,
         use: [
           {
             loader: require.resolve('swc-loader'),
@@ -48,23 +48,6 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       },
     ],
   },
-  resolve: {
-    fallback: {
-      path: require.resolve('path-browserify'),
-      crypto: false,
-      https: false,
-      http: false,
-    },
-    modules: ['node_modules', path.resolve(__dirname, nodeModulesPath)],
-    alias: {
-      'payload-config': payloadConfig.paths.rawConfig,
-      payload$: mockModulePath,
-      'payload-user-css': payloadConfig.admin.css,
-      dotenv: mockDotENVPath,
-      [bundlerPath]: mockModulePath,
-    },
-    extensions: ['.ts', '.tsx', '.js', '.json'],
-  },
   plugins: [
     new webpack.ProvidePlugin(
       { process: require.resolve('process/browser') },
@@ -85,9 +68,29 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       ),
     ),
     new HtmlWebpackPlugin({
-      template: payloadConfig.admin.indexHTML,
       filename: path.normalize('./index.html'),
+      template: payloadConfig.admin.indexHTML,
     }),
     new webpack.HotModuleReplacementPlugin(),
   ],
+  resolve: {
+    alias: {
+      [bundlerPath]: mockModulePath,
+      dotenv: mockDotENVPath,
+      payload$: mockModulePath,
+      'payload-config': payloadConfig.paths.rawConfig,
+      'payload-user-css': payloadConfig.admin.css,
+    },
+    extensions: ['.ts', '.tsx', '.js', '.json'],
+    fallback: {
+      crypto: false,
+      http: false,
+      https: false,
+      path: require.resolve('path-browserify'),
+    },
+    modules: ['node_modules', path.resolve(__dirname, nodeModulesPath)],
+  },
+  resolveLoader: {
+    modules: ['node_modules', path.join(__dirname, nodeModulesPath)],
+  },
 });

@@ -1,14 +1,15 @@
 /* eslint-disable no-param-reassign */
 
-import { SanitizedGlobalConfig } from '../../config/types';
-import { Document } from '../../../types';
+import type { PayloadRequest } from '../../../express/types';
+import type { Document } from '../../../types';
+import type { SanitizedGlobalConfig } from '../../config/types';
+
 import restoreVersion from '../../operations/restoreVersion';
-import { PayloadRequest } from '../../../express/types';
 
 type Resolver = (
   _: unknown,
   args: {
-    id: string | number
+    id: number | string
   },
   context: {
     req: PayloadRequest,
@@ -18,10 +19,10 @@ type Resolver = (
 export default function restoreVersionResolver(globalConfig: SanitizedGlobalConfig): Resolver {
   return async function resolver(_, args, context) {
     const options = {
-      id: args.id,
-      globalConfig,
-      req: context.req,
       depth: 0,
+      globalConfig,
+      id: args.id,
+      req: context.req,
     };
 
     const result = await restoreVersion(options);

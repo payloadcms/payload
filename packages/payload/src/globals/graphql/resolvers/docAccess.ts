@@ -1,6 +1,7 @@
-import { CollectionPermission, GlobalPermission } from '../../../auth';
-import { PayloadRequest } from '../../../express/types';
-import { SanitizedGlobalConfig } from '../../config/types';
+import type { CollectionPermission, GlobalPermission } from '../../../auth';
+import type { PayloadRequest } from '../../../express/types';
+import type { SanitizedGlobalConfig } from '../../config/types';
+
 import { docAccess } from '../../operations/docAccess';
 
 export type Resolver = (
@@ -14,8 +15,8 @@ export type Resolver = (
 export function docAccessResolver(global: SanitizedGlobalConfig): Resolver {
   async function resolver(_, context) {
     return docAccess({
-      req: context.req,
       globalConfig: global,
+      req: context.req,
     });
   }
 

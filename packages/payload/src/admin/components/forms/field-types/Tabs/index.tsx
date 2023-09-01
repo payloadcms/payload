@@ -1,34 +1,35 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import RenderFields from '../../RenderFields';
-import withCondition from '../../withCondition';
-import { Props } from './types';
+
+import type { DocumentPreferences } from '../../../../../preferences/types';
+import type { Props } from './types';
+
 import { tabHasName } from '../../../../../fields/config/types';
-import type { Tab } from '../../../../../fields/config/types';
-import FieldDescription from '../../FieldDescription';
+import { Tab } from '../../../../../fields/config/types';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 import toKebabCase from '../../../../../utilities/toKebabCase';
 import { useCollapsible } from '../../../elements/Collapsible/provider';
-import { TabsProvider } from './provider';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import { usePreferences } from '../../../utilities/Preferences';
-import { DocumentPreferences } from '../../../../../preferences/types';
-import { useDocumentInfo } from '../../../utilities/DocumentInfo';
-import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
-import { WatchChildErrors } from '../../WatchChildErrors';
 import { ErrorPill } from '../../../elements/ErrorPill';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo';
+import { usePreferences } from '../../../utilities/Preferences';
+import FieldDescription from '../../FieldDescription';
 import { useFormSubmitted } from '../../Form/context';
-
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
+import RenderFields from '../../RenderFields';
+import { WatchChildErrors } from '../../WatchChildErrors';
+import withCondition from '../../withCondition';
 import './index.scss';
+import { TabsProvider } from './provider';
 
 const baseClass = 'tabs-field';
 
 type TabProps = {
   isActive?: boolean;
+  parentPath: string
   setIsActive: () => void;
   tab: Tab;
-  parentPath: string
 }
-const Tab: React.FC<TabProps> = ({ tab, isActive, setIsActive, parentPath }) => {
+const Tab: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, tab }) => {
   const { i18n } = useTranslation();
   const [errorCount, setErrorCount] = useState(undefined);
   const hasName = tabHasName(tab);
@@ -43,18 +44,18 @@ const Tab: React.FC<TabProps> = ({ tab, isActive, setIsActive, parentPath }) => 
   return (
     <React.Fragment>
       <WatchChildErrors
-        setErrorCount={setErrorCount}
-        path={path}
         fieldSchema={hasName ? undefined : tab.fields}
+        path={path}
+        setErrorCount={setErrorCount}
       />
       <button
-        type="button"
         className={[
           `${baseClass}__tab-button`,
           tabHasErrors && `${baseClass}__tab-button--has-error`,
           isActive && `${baseClass}__tab-button--active`,
         ].filter(Boolean).join(' ')}
         onClick={setIsActive}
+        type="button"
       >
         {tab.label ? getTranslation(tab.label, i18n) : (hasName && tab.name)}
         {tabHasErrors && (
@@ -67,15 +68,15 @@ const Tab: React.FC<TabProps> = ({ tab, isActive, setIsActive, parentPath }) => 
 
 const TabsField: React.FC<Props> = (props) => {
   const {
-    tabs,
+    admin: {
+      className,
+      readOnly,
+    },
     fieldTypes,
+    indexPath,
     path,
     permissions,
-    indexPath,
-    admin: {
-      readOnly,
-      className,
-    },
+    tabs,
   } = props;
 
   const { getPreference, setPreference } = usePreferences();
@@ -137,10 +138,10 @@ const TabsField: React.FC<Props> = (props) => {
             {tabs.map((tab, tabIndex) => {
               return (
                 <Tab
-                  key={tabIndex}
-                  setIsActive={() => handleTabChange(tabIndex)}
                   isActive={activeTabIndex === tabIndex}
+                  key={tabIndex}
                   parentPath={path}
+                  setIsActive={() => handleTabChange(tabIndex)}
                   tab={tab}
                 />
               );
@@ -161,11 +162,6 @@ const TabsField: React.FC<Props> = (props) => {
                   description={activeTabConfig.description}
                 />
                 <RenderFields
-                  key={String(activeTabConfig.label)}
-                  forceRender
-                  readOnly={readOnly}
-                  permissions={tabHasName(activeTabConfig) ? permissions[activeTabConfig.name].fields : permissions}
-                  fieldTypes={fieldTypes}
                   fieldSchema={activeTabConfig.fields.map((field) => {
                     const pathSegments = [];
 
@@ -177,7 +173,12 @@ const TabsField: React.FC<Props> = (props) => {
                       path: createNestedFieldPath(pathSegments.join('.'), field),
                     };
                   })}
+                  fieldTypes={fieldTypes}
+                  forceRender
                   indexPath={indexPath}
+                  key={String(activeTabConfig.label)}
+                  permissions={tabHasName(activeTabConfig) ? permissions[activeTabConfig.name].fields : permissions}
+                  readOnly={readOnly}
                 />
               </div>
             </React.Fragment>

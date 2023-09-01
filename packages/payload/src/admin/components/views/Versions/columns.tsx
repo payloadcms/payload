@@ -1,23 +1,27 @@
+import type { TFunction} from 'react-i18next';
+
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useRouteMatch } from 'react-router-dom';
-import { TFunction, useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { Column } from '../../elements/Table/types';
-import SortColumn from '../../elements/SortColumn';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../../../globals/config/types';
+
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import type { SanitizedGlobalConfig } from '../../../../globals/config/types';
+import type { Column } from '../../elements/Table/types';
+
 import { Pill } from '../..';
 import { formatDate } from '../../../utilities/formatDate';
+import SortColumn from '../../elements/SortColumn';
+import { useConfig } from '../../utilities/Config';
 
 type CreatedAtCellProps = {
-  id: string
-  date: string
   collection?: SanitizedCollectionConfig
+  date: string
   global?: SanitizedGlobalConfig
+  id: string
 }
 
-const CreatedAtCell: React.FC<CreatedAtCellProps> = ({ collection, global, id, date }) => {
-  const { routes: { admin }, admin: { dateFormat } } = useConfig();
+const CreatedAtCell: React.FC<CreatedAtCellProps> = ({ collection, date, global, id }) => {
+  const { admin: { dateFormat }, routes: { admin } } = useConfig();
   const { params: { id: docID } } = useRouteMatch<{ id: string }>();
 
   const { i18n } = useTranslation();
@@ -48,8 +52,6 @@ export const buildVersionColumns = (
   {
     accessor: 'updatedAt',
     active: true,
-    label: '',
-    name: '',
     components: {
       Heading: (
         <SortColumn
@@ -60,40 +62,40 @@ export const buildVersionColumns = (
       renderCell: (row, data) => (
         <CreatedAtCell
           collection={collection}
+          date={data}
           global={global}
           id={row?.id}
-          date={data}
         />
       ),
     },
+    label: '',
+    name: '',
   },
   {
     accessor: 'id',
     active: true,
-    label: '',
-    name: '',
     components: {
       Heading: (
         <SortColumn
-          label={t('versionID')}
           disable
+          label={t('versionID')}
           name="id"
         />
       ),
       renderCell: (row, data) => <TextCell>{data}</TextCell>,
     },
+    label: '',
+    name: '',
   },
   {
     accessor: 'autosave',
     active: true,
-    label: '',
-    name: '',
     components: {
       Heading: (
         <SortColumn
+          disable
           label={t('type')}
           name="autosave"
-          disable
         />
       ),
       renderCell: (row) => (
@@ -122,5 +124,7 @@ export const buildVersionColumns = (
         </TextCell>
       ),
     },
+    label: '',
+    name: '',
   },
 ];

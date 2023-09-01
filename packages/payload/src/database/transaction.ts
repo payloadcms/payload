@@ -1,4 +1,4 @@
-import { Transaction } from './types';
+import type { Transaction } from './types';
 
 export const transaction: Transaction = async function transaction(
   callback: () => Promise<unknown>,

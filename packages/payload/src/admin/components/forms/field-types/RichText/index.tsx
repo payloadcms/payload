@@ -1,6 +1,8 @@
 import React, { Suspense, lazy } from 'react';
+
+import type { Props } from './types';
+
 import { ShimmerEffect } from '../../../elements/ShimmerEffect';
-import { Props } from './types';
 
 const RichText = lazy(() => import('./RichText'));
 

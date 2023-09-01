@@ -1,17 +1,19 @@
 /* eslint-disable no-param-reassign */
-import { User } from '..';
-import { CollectionConfig } from '../../collections/config/types';
-import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../fields/config/types';
+import type { User } from '..';
+import type { CollectionConfig } from '../../collections/config/types';
+import type { Field, TabAsField} from '../../fields/config/types';
+
+import { fieldAffectsData, tabHasName } from '../../fields/config/types';
 
 type TraverseFieldsArgs = {
-  fields: (Field | TabAsField)[]
   data: Record<string, unknown>
+  fields: (Field | TabAsField)[]
   result: Record<string, unknown>
 }
 const traverseFields = ({
+  data,
   // parent,
   fields,
-  data,
   result,
 }: TraverseFieldsArgs) => {
   fields.forEach((field) => {
@@ -19,8 +21,8 @@ const traverseFields = ({
       case 'row':
       case 'collapsible': {
         traverseFields({
-          fields: field.fields,
           data,
+          fields: field.fields,
           result,
         });
         break;
@@ -37,16 +39,16 @@ const traverseFields = ({
         const groupData: Record<string, unknown> = data[field.name] as Record<string, unknown>;
         const groupResult = (targetResult ? result[targetResult] : result) as Record<string, unknown>;
         traverseFields({
-          fields: field.fields,
           data: groupData,
+          fields: field.fields,
           result: groupResult,
         });
         break;
       }
       case 'tabs': {
         traverseFields({
-          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
           data,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
           result,
         });
         break;
@@ -64,14 +66,14 @@ const traverseFields = ({
           const tabData: Record<string, unknown> = data[field.name] as Record<string, unknown>;
           const tabResult = (targetResult ? result[targetResult] : result) as Record<string, unknown>;
           traverseFields({
-            fields: field.fields,
             data: tabData,
+            fields: field.fields,
             result: tabResult,
           });
         } else {
           traverseFields({
-            fields: field.fields,
             data,
+            fields: field.fields,
             result,
           });
         }
@@ -96,24 +98,24 @@ const traverseFields = ({
 };
 export const getFieldsToSign = (args: {
   collectionConfig: CollectionConfig,
-  user: User
   email: string
+  user: User
 }): Record<string, unknown> => {
   const {
     collectionConfig,
-    user,
     email,
+    user,
   } = args;
 
   const result: Record<string, unknown> = {
+    collection: collectionConfig.slug,
     email,
     id: user.id,
-    collection: collectionConfig.slug,
   };
 
   traverseFields({
-    fields: collectionConfig.fields,
     data: user,
+    fields: collectionConfig.fields,
     result,
   });
 

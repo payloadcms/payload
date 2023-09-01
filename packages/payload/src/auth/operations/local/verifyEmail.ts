@@ -1,12 +1,14 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+
+import type { PayloadRequest } from '../../../express/types';
+import type { Payload } from '../../../payload';
+
 import { APIError } from '../../../errors';
-import { Payload } from '../../../payload';
 import verifyEmail from '../verifyEmail';
-import { PayloadRequest } from '../../../express/types';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
-  token: string,
   collection: T
+  token: string,
 }
 
 async function localVerifyEmail<T extends keyof GeneratedTypes['collections']>(
@@ -29,9 +31,9 @@ async function localVerifyEmail<T extends keyof GeneratedTypes['collections']>(
   }
 
   return verifyEmail({
+    collection,
     req,
     token,
-    collection,
   });
 }
 

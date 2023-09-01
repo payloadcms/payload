@@ -1,14 +1,14 @@
-import { RichTextField } from '../../../../../fields/config/types';
+import type { RichTextField } from '../../../../../fields/config/types';
 
 export type Props = Omit<RichTextField, 'type'> & {
   path?: string
 }
 
-export type TextNode = { text: string;[x: string]: unknown }
+export type TextNode = { [x: string]: unknown;text: string }
 
-export type ElementNode = { type?: string; children: (TextNode | ElementNode)[] }
+export type ElementNode = { children: (ElementNode | TextNode)[]; type?: string }
 
-export function nodeIsTextNode(node: TextNode | ElementNode): node is TextNode {
+export function nodeIsTextNode(node: ElementNode | TextNode): node is TextNode {
   return 'text' in node;
 }
 

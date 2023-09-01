@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import type { CollectionConfig } from '../../../../src/collections/config/types';
+
 import { blocksField, blocksFieldSeedData } from '../Blocks';
 import { UIField } from './UIField';
 

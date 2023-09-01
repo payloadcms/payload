@@ -1,6 +1,7 @@
 import React from 'react';
-import LeafButton from '../Button';
+
 import ItalicIcon from '../../../../../icons/Italic';
+import LeafButton from '../Button';
 
 const Italic = ({ attributes, children }) => (
   <em {...attributes}>{children}</em>

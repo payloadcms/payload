@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Field, fieldAffectsData,
-  fieldHasSubFields, FieldWithPath,
+
+import type {
+  Field, FieldWithPath} from '../../../../fields/config/types';
+
+import { fieldAffectsData,
+  fieldHasSubFields,
   tabHasName,
 } from '../../../../fields/config/types';
-import ReactSelect from '../ReactSelect';
 import { getTranslation } from '../../../../utilities/getTranslation';
-import Label from '../../forms/Label';
 import { useForm } from '../../forms/Form/context';
 import { createNestedFieldPath } from '../../forms/Form/createNestedFieldPath';
-
+import Label from '../../forms/Label';
+import ReactSelect from '../ReactSelect';
 import './index.scss';
 
 const baseClass = 'field-select';
@@ -63,9 +65,9 @@ export const FieldSelect: React.FC<Props> = ({
   fields,
   setSelected,
 }) => {
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
   const [options] = useState(() => reduceFields(fields, i18n));
-  const { getFields, dispatchFields } = useForm();
+  const { dispatchFields, getFields } = useForm();
   const handleChange = (selected) => {
     const activeFields = getFields();
     if (selected === null) {
@@ -80,8 +82,8 @@ export const FieldSelect: React.FC<Props> = ({
           return field.value.path === path;
         })) {
           dispatchFields({
-            type: 'REMOVE',
             path,
+            type: 'REMOVE',
           });
         }
       });
@@ -92,9 +94,9 @@ export const FieldSelect: React.FC<Props> = ({
     <div className={baseClass}>
       <Label label={t('fields:selectFieldsToEdit')} />
       <ReactSelect
-        options={options}
         isMulti
         onChange={handleChange}
+        options={options}
       />
     </div>
   );

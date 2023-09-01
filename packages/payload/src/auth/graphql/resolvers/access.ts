@@ -1,6 +1,7 @@
+import type { Payload } from '../../../payload';
+
 import formatName from '../../../graphql/utilities/formatName';
 import access from '../../operations/access';
-import { Payload } from '../../../payload';
 
 const formatConfigNames = (results, configs) => {
   const formattedResults = { ...results };

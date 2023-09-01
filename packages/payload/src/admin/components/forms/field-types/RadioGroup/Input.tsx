@@ -1,50 +1,51 @@
 import React from 'react';
 
-import Error from '../../Error';
-import Label from '../../Label';
-import FieldDescription from '../../FieldDescription';
-import RadioInput from './RadioInput';
-import { optionIsObject, RadioField } from '../../../../../fields/config/types';
-import { Description } from '../../FieldDescription/types';
-import { OnChange } from './types';
+import type { RadioField } from '../../../../../fields/config/types';
+import type { Description } from '../../FieldDescription/types';
+import type { OnChange } from './types';
 
+import { optionIsObject } from '../../../../../fields/config/types';
+import Error from '../../Error';
+import FieldDescription from '../../FieldDescription';
+import Label from '../../Label';
+import RadioInput from './RadioInput';
 import './index.scss';
 
 const baseClass = 'radio-group';
 
 export type RadioGroupInputProps = Omit<RadioField, 'type'> & {
-  showError?: boolean
-  errorMessage?: string
-  readOnly?: boolean
-  path?: string
-  required?: boolean
-  layout?: 'horizontal' | 'vertical'
-  description?: Description
-  onChange?: OnChange
-  value?: string
-  placeholder?: string
-  style?: React.CSSProperties
   className?: string
+  description?: Description
+  errorMessage?: string
+  layout?: 'horizontal' | 'vertical'
+  onChange?: OnChange
+  path?: string
+  placeholder?: string
+  readOnly?: boolean
+  required?: boolean
+  showError?: boolean
+  style?: React.CSSProperties
+  value?: string
   width?: string
 }
 
 const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
   const {
-    name,
-    path: pathFromProps,
-    required,
-    label,
-    readOnly,
-    layout = 'horizontal',
-    style,
     className,
-    width,
     description,
-    onChange,
-    value,
-    showError,
     errorMessage,
+    label,
+    layout = 'horizontal',
+    name,
+    onChange,
     options,
+    path: pathFromProps,
+    readOnly,
+    required,
+    showError,
+    style,
+    value,
+    width,
   } = props;
 
   const path = pathFromProps || name;
@@ -60,16 +61,16 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
 
   return (
     <div
-      className={classes}
       style={{
         ...style,
         width,
       }}
+      className={classes}
     >
       <div className={`${baseClass}__error-wrap`}>
         <Error
-          showError={showError}
           message={errorMessage}
+          showError={showError}
         />
       </div>
       <Label
@@ -78,8 +79,8 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
         required={required}
       />
       <ul
-        id={`field-${path.replace(/\./gi, '__')}`}
         className={`${baseClass}--group`}
+        id={`field-${path.replace(/\./g, '__')}`}
       >
         {options.map((option) => {
           let optionValue = '';
@@ -95,18 +96,18 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
           return (
             <li key={`${path} - ${optionValue}`}>
               <RadioInput
-                path={path}
                 isSelected={isSelected}
-                option={optionIsObject(option) ? option : { label: option, value: option }}
                 onChange={readOnly ? undefined : onChange}
+                option={optionIsObject(option) ? option : { label: option, value: option }}
+                path={path}
               />
             </li>
           );
         })}
       </ul>
       <FieldDescription
-        value={value}
         description={description}
+        value={value}
       />
     </div>
   );

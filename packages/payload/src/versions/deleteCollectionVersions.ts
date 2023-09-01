@@ -1,28 +1,28 @@
-import { Payload } from '../payload';
-import { PayloadRequest } from '../express/types';
+import type { PayloadRequest } from '../express/types';
+import type { Payload } from '../payload';
 
 type Args = {
+  id?: number | string
   payload: Payload
-  slug: string
-  id?: string | number
   req?: PayloadRequest
+  slug: string
 }
 
 export const deleteCollectionVersions = async ({
-  payload,
-  slug,
   id,
+  payload,
   req,
+  slug,
 }: Args): Promise<void> => {
   try {
     await payload.db.deleteVersions({
       collection: slug,
+      req,
       where: {
         parent: {
           equals: id,
         },
       },
-      req,
     });
   } catch (err) {
     payload.logger.error(`There was an error removing versions for the deleted ${slug} document with ID ${id}.`);

@@ -1,5 +1,7 @@
 import { unflatten } from 'flatley';
-import { Fields, Data } from './types';
+
+import type { Data, Fields } from './types';
+
 import reduceFieldsToValues from './reduceFieldsToValues';
 
 const getSiblingData = (fields: Fields, path: string): Data => {

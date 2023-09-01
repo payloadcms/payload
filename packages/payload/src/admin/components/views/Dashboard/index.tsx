@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
+
 import { useStepNav } from '../../elements/StepNav';
+import { useAuth } from '../../utilities/Auth';
+import { useConfig } from '../../utilities/Config';
 import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import DefaultDashboard from './Default';
 
@@ -11,8 +12,6 @@ const Dashboard: React.FC = () => {
   const [filteredGlobals, setFilteredGlobals] = useState([]);
 
   const {
-    collections,
-    globals,
     admin: {
       components: {
         views: {
@@ -22,6 +21,8 @@ const Dashboard: React.FC = () => {
         },
       } = {},
     } = {},
+    collections,
+    globals,
   } = useConfig();
 
   useEffect(() => {
@@ -36,14 +37,14 @@ const Dashboard: React.FC = () => {
 
   return (
     <RenderCustomComponent
-      DefaultComponent={DefaultDashboard}
-      CustomComponent={CustomDashboard}
       componentProps={{
-        globals: filteredGlobals,
         collections: collections.filter((collection) => permissions?.collections?.[collection.slug]?.read?.permission),
+        globals: filteredGlobals,
         permissions,
         user,
       }}
+      CustomComponent={CustomDashboard}
+      DefaultComponent={DefaultDashboard}
     />
   );
 };

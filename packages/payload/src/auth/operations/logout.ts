@@ -1,41 +1,44 @@
+import type { Response } from 'express';
+
 import httpStatus from 'http-status';
-import { Response } from 'express';
-import { PayloadRequest } from '../../express/types';
+
+import type { Collection } from '../../collections/config/types';
+import type { PayloadRequest } from '../../express/types';
+
 import { APIError } from '../../errors';
-import { Collection } from '../../collections/config/types';
 
 export type Arguments = {
+  collection: Collection
   req: PayloadRequest
   res: Response
-  collection: Collection
 }
 
 async function logout(incomingArgs: Arguments): Promise<string> {
   let args = incomingArgs;
   const {
-    res,
+    collection,
+    collection: {
+      config: collectionConfig,
+    },
+    req,
     req: {
       payload: {
         config,
       },
       user,
     },
-    req,
-    collection: {
-      config: collectionConfig,
-    },
-    collection,
+    res,
   } = incomingArgs;
 
   if (!user) throw new APIError('No User', httpStatus.BAD_REQUEST);
   if (user.collection !== collectionConfig.slug) throw new APIError('Incorrect collection', httpStatus.FORBIDDEN);
 
   const cookieOptions = {
-    path: '/',
-    httpOnly: true,
-    secure: collectionConfig.auth.cookies.secure,
-    sameSite: collectionConfig.auth.cookies.sameSite,
     domain: undefined,
+    httpOnly: true,
+    path: '/',
+    sameSite: collectionConfig.auth.cookies.sameSite,
+    secure: collectionConfig.auth.cookies.secure,
   };
 
   if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
@@ -44,9 +47,9 @@ async function logout(incomingArgs: Arguments): Promise<string> {
     await priorHook;
 
     args = (await hook({
+      context: req.context,
       req,
       res,
-      context: req.context,
     })) || args;
   }, Promise.resolve());
 

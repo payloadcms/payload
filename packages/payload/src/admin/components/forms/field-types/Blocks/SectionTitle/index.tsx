@@ -1,8 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import useField from '../../../useField';
-import { Props } from './types';
 
+import type { Props } from './types';
+
+import useField from '../../../useField';
 import './index.scss';
 
 const baseClass = 'section-title';
@@ -10,7 +11,7 @@ const baseClass = 'section-title';
 const SectionTitle: React.FC<Props> = (props) => {
   const { path, readOnly } = props;
 
-  const { value, setValue } = useField({ path });
+  const { setValue, value } = useField({ path });
   const { t } = useTranslation('general');
 
   const classes = [
@@ -23,18 +24,18 @@ const SectionTitle: React.FC<Props> = (props) => {
       data-value={value}
     >
       <input
-        className={`${baseClass}__input`}
-        id={path}
-        value={value as string || ''}
-        placeholder={t('untitled')}
-        type="text"
-        name={path}
         onChange={(e) => {
           e.stopPropagation();
           e.preventDefault();
           setValue(e.target.value);
         }}
+        className={`${baseClass}__input`}
+        id={path}
+        name={path}
+        placeholder={t('untitled')}
         readOnly={readOnly}
+        type="text"
+        value={value as string || ''}
       />
     </div>
   );

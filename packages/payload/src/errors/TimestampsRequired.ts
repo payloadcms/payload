@@ -1,4 +1,5 @@
-import { CollectionConfig } from '../collections/config/types';
+import type { CollectionConfig } from '../collections/config/types';
+
 import APIError from './APIError';
 
 class TimestampsRequired extends APIError {

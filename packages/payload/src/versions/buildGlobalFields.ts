@@ -1,34 +1,34 @@
-import { Field } from '../fields/config/types';
-import { SanitizedGlobalConfig } from '../globals/config/types';
+import type { Field } from '../fields/config/types';
+import type { SanitizedGlobalConfig } from '../globals/config/types';
 
 export const buildVersionGlobalFields = (global: SanitizedGlobalConfig): Field[] => {
   const fields: Field[] = [
     {
+      fields: global.fields,
       name: 'version',
       type: 'group',
-      fields: global.fields,
     },
     {
+      admin: {
+        disabled: true,
+      },
       name: 'createdAt',
       type: 'date',
-      admin: {
-        disabled: true,
-      },
     },
     {
-      name: 'updatedAt',
-      type: 'date',
       admin: {
         disabled: true,
       },
+      name: 'updatedAt',
+      type: 'date',
     },
   ];
 
   if (global?.versions?.drafts && global?.versions?.drafts?.autosave) {
     fields.push({
+      index: true,
       name: 'autosave',
       type: 'checkbox',
-      index: true,
     });
   }
 

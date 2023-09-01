@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
+
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types';
+
+import Button from '../../elements/Button';
 import Logo from '../../graphics/Logo';
 import MinimalTemplate from '../../templates/Minimal';
-import Button from '../../elements/Button';
+import { useAuth } from '../../utilities/Auth';
+import { useConfig } from '../../utilities/Config';
 import Meta from '../../utilities/Meta';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
 import Login from '../Login';
-
 import './index.scss';
 
 const baseClass = 'verify';
@@ -19,8 +20,8 @@ const Verify: React.FC<{ collection: SanitizedCollectionConfig }> = ({ collectio
 
   const { user } = useAuth();
   const { token } = useParams<{token?: string}>();
-  const { serverURL, routes: { admin: adminRoute }, admin: { user: adminUser } } = useConfig();
-  const { t, i18n } = useTranslation('authentication');
+  const { admin: { user: adminUser }, routes: { admin: adminRoute }, serverURL } = useConfig();
+  const { i18n, t } = useTranslation('authentication');
 
   const isAdminUser = collectionSlug === adminUser;
   const [verifyResult, setVerifyResult] = useState(null);
@@ -28,11 +29,11 @@ const Verify: React.FC<{ collection: SanitizedCollectionConfig }> = ({ collectio
   useEffect(() => {
     async function verifyToken() {
       const result = await fetch(`${serverURL}/api/${collectionSlug}/verify/${token}`, {
-        method: 'POST',
         credentials: 'include',
         headers: {
           'Accept-Language': i18n.language,
         },
+        method: 'POST',
       });
       setVerifyResult(result);
     }
@@ -52,9 +53,9 @@ const Verify: React.FC<{ collection: SanitizedCollectionConfig }> = ({ collectio
   return (
     <MinimalTemplate className={baseClass}>
       <Meta
-        title={t('verify')}
         description={t('verifyUser')}
         keywords={t('verify')}
+        title={t('verify')}
       />
       <div className={`${baseClass}__brand`}>
         <Logo />
@@ -64,8 +65,8 @@ const Verify: React.FC<{ collection: SanitizedCollectionConfig }> = ({ collectio
       </h2>
       {isAdminUser && verifyResult?.status === 200 && (
         <Button
-          el="link"
           buttonStyle="secondary"
+          el="link"
           to={`${adminRoute}/login`}
         >
           {t('login')}

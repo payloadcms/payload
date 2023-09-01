@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import useIntersect from '../../../hooks/useIntersect';
-import { Props } from './types';
+
+import type { Props } from './types';
+
 import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../fields/config/types';
-import { useOperation } from '../../utilities/OperationProvider';
 import { getTranslation } from '../../../../utilities/getTranslation';
+import useIntersect from '../../../hooks/useIntersect';
+import { useOperation } from '../../utilities/OperationProvider';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
 const baseClass = 'render-fields';
 
@@ -15,17 +17,17 @@ const intersectionObserverOptions = {
 
 const RenderFields: React.FC<Props> = (props) => {
   const {
+    className,
     fieldSchema,
     fieldTypes,
     filter,
-    permissions,
-    readOnly: readOnlyOverride,
-    className,
     forceRender,
     indexPath: incomingIndexPath,
+    permissions,
+    readOnly: readOnlyOverride,
   } = props;
 
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
   const [hasRendered, setHasRendered] = useState(Boolean(forceRender));
   const [intersectionRef, entry] = useIntersect(intersectionObserverOptions);
   const operation = useOperation();
@@ -48,8 +50,8 @@ const RenderFields: React.FC<Props> = (props) => {
   if (fieldSchema) {
     return (
       <div
-        ref={intersectionRef}
         className={classes}
+        ref={intersectionRef}
       >
         {hasRendered && (
           fieldSchema.map((field, fieldIndex) => {
@@ -87,20 +89,20 @@ const RenderFields: React.FC<Props> = (props) => {
                   if (FieldComponent) {
                     return (
                       <RenderCustomComponent
-                        key={fieldIndex}
-                        CustomComponent={field?.admin?.components?.Field}
-                        DefaultComponent={FieldComponent}
                         componentProps={{
                           ...field,
-                          path: field.path || (isFieldAffectingData ? field.name : ''),
-                          fieldTypes,
-                          indexPath: incomingIndexPath ? `${incomingIndexPath}.${fieldIndex}` : `${fieldIndex}`,
                           admin: {
                             ...(field.admin || {}),
                             readOnly,
                           },
+                          fieldTypes,
+                          indexPath: incomingIndexPath ? `${incomingIndexPath}.${fieldIndex}` : `${fieldIndex}`,
+                          path: field.path || (isFieldAffectingData ? field.name : ''),
                           permissions: fieldPermissions,
                         }}
+                        CustomComponent={field?.admin?.components?.Field}
+                        DefaultComponent={FieldComponent}
+                        key={fieldIndex}
                       />
                     );
                   }

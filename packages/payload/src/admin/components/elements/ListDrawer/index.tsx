@@ -1,11 +1,12 @@
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useModal } from '@faceless-ui/modal';
-import { ListDrawerProps, ListTogglerProps, UseListDrawer } from './types';
-import { Drawer, DrawerToggler } from '../Drawer';
-import { useEditDepth } from '../../utilities/EditDepth';
-import { ListDrawerContent } from './DrawerContent';
-import { useConfig } from '../../utilities/Config';
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 
+import type { ListDrawerProps, ListTogglerProps, UseListDrawer } from './types';
+
+import { useConfig } from '../../utilities/Config';
+import { useEditDepth } from '../../utilities/EditDepth';
+import { Drawer, DrawerToggler } from '../Drawer';
+import { ListDrawerContent } from './DrawerContent';
 import './index.scss';
 
 export const baseClass = 'list-drawer';
@@ -21,18 +22,18 @@ export const formatListDrawerSlug = ({
 export const ListDrawerToggler: React.FC<ListTogglerProps> = ({
   children,
   className,
-  drawerSlug,
   disabled,
+  drawerSlug,
   ...rest
 }) => {
   return (
     <DrawerToggler
-      slug={drawerSlug}
       className={[
         className,
         `${baseClass}__toggler`,
       ].filter(Boolean).join(' ')}
       disabled={disabled}
+      slug={drawerSlug}
       {...rest}
     >
       {children}
@@ -45,10 +46,10 @@ export const ListDrawer: React.FC<ListDrawerProps> = (props) => {
 
   return (
     <Drawer
-      slug={drawerSlug}
       className={baseClass}
-      header={false}
       gutter={false}
+      header={false}
+      slug={drawerSlug}
     >
       <ListDrawerContent
         {...props}
@@ -59,14 +60,14 @@ export const ListDrawer: React.FC<ListDrawerProps> = (props) => {
 
 export const useListDrawer: UseListDrawer = ({
   collectionSlugs: collectionSlugsFromProps,
-  uploads,
-  selectedCollection,
   filterOptions,
+  selectedCollection,
+  uploads,
 }) => {
   const { collections } = useConfig();
   const drawerDepth = useEditDepth();
   const uuid = useId();
-  const { modalState, toggleModal, closeModal, openModal } = useModal();
+  const { closeModal, modalState, openModal, toggleModal } = useModal();
   const [isOpen, setIsOpen] = useState(false);
   const [collectionSlugs, setCollectionSlugs] = useState(collectionSlugsFromProps);
 
@@ -107,13 +108,13 @@ export const useListDrawer: UseListDrawer = ({
     return ((props) => (
       <ListDrawer
         {...props}
-        drawerSlug={drawerSlug}
-        collectionSlugs={collectionSlugs}
-        uploads={uploads}
         closeDrawer={closeDrawer}
+        collectionSlugs={collectionSlugs}
+        drawerSlug={drawerSlug}
+        filterOptions={filterOptions}
         key={drawerSlug}
         selectedCollection={selectedCollection}
-        filterOptions={filterOptions}
+        uploads={uploads}
       />
     ));
   }, [drawerSlug, collectionSlugs, uploads, closeDrawer, selectedCollection, filterOptions]);
@@ -128,12 +129,12 @@ export const useListDrawer: UseListDrawer = ({
   }, [drawerSlug]);
 
   const MemoizedDrawerState = useMemo(() => ({
-    drawerSlug,
-    drawerDepth,
-    isDrawerOpen: isOpen,
-    toggleDrawer,
     closeDrawer,
+    drawerDepth,
+    drawerSlug,
+    isDrawerOpen: isOpen,
     openDrawer,
+    toggleDrawer,
   }), [drawerDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer, openDrawer]);
 
   return [

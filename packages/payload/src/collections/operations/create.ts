@@ -1,47 +1,47 @@
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+import type { MarkOptional } from 'ts-essentials';
+
+import crypto from 'crypto';
 import fs from 'fs';
 import { promisify } from 'util';
 
-import crypto from 'crypto';
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { MarkOptional } from 'ts-essentials';
+import type { PayloadRequest } from '../../express/types';
+import type { Document } from '../../types';
+import type { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection } from '../config/types';
+
 import executeAccess from '../../auth/executeAccess';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-
-import { ValidationError } from '../../errors';
-
 import sendVerificationEmail from '../../auth/sendVerificationEmail';
-import { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection } from '../config/types';
-import { PayloadRequest } from '../../express/types';
-import { Document } from '../../types';
+import { registerLocalStrategy } from '../../auth/strategies/local/register';
+import { ValidationError } from '../../errors';
 import { fieldAffectsData } from '../../fields/config/types';
-import { uploadFiles } from '../../uploads/uploadFiles';
-import { beforeChange } from '../../fields/hooks/beforeChange';
-import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { afterChange } from '../../fields/hooks/afterChange';
 import { afterRead } from '../../fields/hooks/afterRead';
+import { beforeChange } from '../../fields/hooks/beforeChange';
+import { beforeValidate } from '../../fields/hooks/beforeValidate';
 import { generateFileData } from '../../uploads/generateFileData';
-import { saveVersion } from '../../versions/saveVersion';
-import { mapAsync } from '../../utilities/mapAsync';
-import { buildAfterOperation } from './utils';
-import { registerLocalStrategy } from '../../auth/strategies/local/register';
+import { uploadFiles } from '../../uploads/uploadFiles';
 import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
+import { mapAsync } from '../../utilities/mapAsync';
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
+import { saveVersion } from '../../versions/saveVersion';
+import { buildAfterOperation } from './utils';
 
 const unlinkFile = promisify(fs.unlink);
 
-export type CreateUpdateType = { [field: string | number | symbol]: unknown }
+export type CreateUpdateType = { [field: number | string | symbol]: unknown }
 
 export type Arguments<T extends CreateUpdateType> = {
+  autosave?: boolean
   collection: Collection
-  req: PayloadRequest
+  data: MarkOptional<T, 'createdAt' | 'id' | 'sizes' | 'updatedAt'>
   depth?: number
   disableVerificationEmail?: boolean
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
-  data: MarkOptional<T, 'id' | 'updatedAt' | 'createdAt' | 'sizes'>
-  overwriteExistingFiles?: boolean
   draft?: boolean
-  autosave?: boolean
+  overrideAccess?: boolean
+  overwriteExistingFiles?: boolean
+  req: PayloadRequest
+  showHiddenFields?: boolean
 }
 
 async function create<TSlug extends keyof GeneratedTypes['collections']>(
@@ -58,17 +58,22 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
     args = (await hook({
       args,
-      operation: 'create',
       context: args.req.context,
+      operation: 'create',
     })) || args;
   }, Promise.resolve());
 
   const {
-    collection,
+    autosave = false,
     collection: {
       config: collectionConfig,
     },
-    req,
+    collection,
+    depth,
+    disableVerificationEmail,
+    draft = false,
+    overrideAccess,
+    overwriteExistingFiles = false,
     req: {
       payload,
       payload: {
@@ -76,13 +81,8 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
         emailOptions,
       },
     },
-    disableVerificationEmail,
-    depth,
-    overrideAccess,
+    req,
     showHiddenFields,
-    overwriteExistingFiles = false,
-    draft = false,
-    autosave = false,
   } = args;
 
   try {
@@ -97,8 +97,8 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
       args = (await hook({
         args,
-        operation: 'create',
         context: req.context,
+        operation: 'create',
       })) || args;
     }, Promise.resolve());
 
@@ -112,7 +112,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     if (!overrideAccess) {
-      await executeAccess({ req, data }, collectionConfig.access.create);
+      await executeAccess({ data, req }, collectionConfig.access.create);
     }
 
     // /////////////////////////////////////
@@ -132,12 +132,12 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     const { data: newFileData, files: filesToUpload } = await generateFileData({
-      config,
       collection,
-      req,
+      config,
       data,
-      throwOnMissingFile: !shouldSaveDraft,
       overwriteExistingFiles,
+      req,
+      throwOnMissingFile: !shouldSaveDraft,
     });
 
     data = newFileData;
@@ -147,13 +147,13 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     data = await beforeValidate({
+      context: req.context,
       data,
       doc: {},
       entityConfig: collectionConfig,
       operation: 'create',
       overrideAccess,
       req,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -164,10 +164,10 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       await priorHook;
 
       data = (await hook({
-        data,
-        req,
-        operation: 'create',
         context: req.context,
+        data,
+        operation: 'create',
+        req,
       })) || data;
     }, Promise.resolve());
 
@@ -187,10 +187,10 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       await priorHook;
 
       data = (await hook({
-        data,
-        req,
-        operation: 'create',
         context: req.context,
+        data,
+        operation: 'create',
+        req,
       })) || data;
     }, Promise.resolve());
 
@@ -199,6 +199,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     const resultWithLocales = await beforeChange<Record<string, unknown>>({
+      context: req.context,
       data,
       doc: {},
       docWithLocales: {},
@@ -206,7 +207,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       operation: 'create',
       req,
       skipValidation: shouldSaveDraft,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -228,8 +228,8 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       doc = await registerLocalStrategy({
         collection: collectionConfig,
         doc: resultWithLocales,
-        payload: req.payload,
         password: data.password as string,
+        payload: req.payload,
         req,
       });
     } else {
@@ -242,7 +242,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       } catch (error) {
         // Handle uniqueness error from MongoDB
         throw error.code === 11000 && error.keyValue
-          ? new ValidationError([{ message: req.t('error:valueMustBeUnique'), field: Object.keys(error.keyValue)[0] }], req.t)
+          ? new ValidationError([{ field: Object.keys(error.keyValue)[0], message: req.t('error:valueMustBeUnique') }], req.t)
           : error;
       }
     }
@@ -256,12 +256,12 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
     if (collectionConfig.versions) {
       await saveVersion({
-        payload,
-        collection: collectionConfig,
-        req,
-        id: result.id,
-        docWithLocales: result,
         autosave,
+        collection: collectionConfig,
+        docWithLocales: result,
+        id: result.id,
+        payload,
+        req,
       });
     }
 
@@ -271,14 +271,14 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
     if (collectionConfig.auth && collectionConfig.auth.verify) {
       sendVerificationEmail({
-        emailOptions,
-        config: payload.config,
-        sendEmail: payload.sendEmail,
         collection: { config: collectionConfig },
-        user: result,
-        token: verificationToken,
-        req,
+        config: payload.config,
         disableEmail: disableVerificationEmail,
+        emailOptions,
+        req,
+        sendEmail: payload.sendEmail,
+        token: verificationToken,
+        user: result,
       });
     }
 
@@ -287,13 +287,13 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await afterRead({
+      context: req.context,
       depth,
       doc: result,
       entityConfig: collectionConfig,
       overrideAccess,
       req,
       showHiddenFields,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -304,9 +304,9 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       await priorHook;
 
       result = await hook({
-        req,
-        doc: result,
         context: req.context,
+        doc: result,
+        req,
       }) || result;
     }, Promise.resolve());
 
@@ -315,13 +315,13 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await afterChange({
+      context: req.context,
       data,
       doc: result,
-      previousDoc: {},
       entityConfig: collectionConfig,
       operation: 'create',
+      previousDoc: {},
       req,
-      context: req.context,
     });
 
     // Remove temp files if enabled, as express-fileupload does not do this automatically
@@ -344,11 +344,11 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       await priorHook;
 
       result = await hook({
+        context: req.context,
         doc: result,
+        operation: 'create',
         previousDoc: {},
         req: args.req,
-        operation: 'create',
-        context: req.context,
       }) || result;
     }, Promise.resolve());
 
@@ -357,8 +357,8 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
-      operation: 'create',
       args,
+      operation: 'create',
       result,
     });
 

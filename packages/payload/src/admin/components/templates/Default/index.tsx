@@ -1,11 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import DefaultNav from '../../elements/Nav';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import Meta from '../../utilities/Meta';
-import { Props } from './types';
 
+import type { Props } from './types';
+
+import DefaultNav from '../../elements/Nav';
+import { useConfig } from '../../utilities/Config';
+import Meta from '../../utilities/Meta';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 import './index.scss';
 
 const baseClass = 'template-default';
@@ -30,13 +31,13 @@ const Default: React.FC<Props> = ({ children, className }) => {
   return (
     <div className={classes}>
       <Meta
-        title={t('dashboard')}
         description={`${t('dashboard')} Payload`}
         keywords={`${t('dashboard')}, Payload`}
+        title={t('dashboard')}
       />
       <RenderCustomComponent
-        DefaultComponent={DefaultNav}
         CustomComponent={CustomNav}
+        DefaultComponent={DefaultNav}
       />
       <div className={`${baseClass}__wrap`}>
         {children}

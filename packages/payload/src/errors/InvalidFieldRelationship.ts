@@ -1,4 +1,5 @@
-import { RelationshipField, UploadField } from '../fields/config/types';
+import type { RelationshipField, UploadField } from '../fields/config/types';
+
 import APIError from './APIError';
 
 class InvalidFieldRelationship extends APIError {

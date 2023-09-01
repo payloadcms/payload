@@ -1,6 +1,9 @@
-import { Request } from 'express';
+import type { Request } from 'express';
+
 import { Strategy } from 'passport-strategy';
-import { Payload } from '../../../src/payload';
+
+import type { Payload } from '../../../src/payload';
+
 import { buildConfigWithDefaults } from '../../buildConfigWithDefaults';
 
 export const slug = 'users';

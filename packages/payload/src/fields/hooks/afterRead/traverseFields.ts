@@ -1,8 +1,10 @@
-import { Field, TabAsField } from '../../config/types';
+import type { PayloadRequest, RequestContext } from '../../../express/types';
+import type { Field, TabAsField } from '../../config/types';
+
 import { promise } from './promise';
-import { PayloadRequest, RequestContext } from '../../../express/types';
 
 type Args = {
+  context: RequestContext
   currentDepth: number
   depth: number
   doc: Record<string, unknown>
@@ -10,15 +12,15 @@ type Args = {
   fields: (Field | TabAsField)[]
   findMany: boolean
   flattenLocales: boolean
+  overrideAccess: boolean
   populationPromises: Promise<void>[]
   req: PayloadRequest
-  overrideAccess: boolean
-  siblingDoc: Record<string, unknown>
   showHiddenFields: boolean
-  context: RequestContext
+  siblingDoc: Record<string, unknown>
 }
 
 export const traverseFields = ({
+  context,
   currentDepth,
   depth,
   doc,
@@ -29,12 +31,12 @@ export const traverseFields = ({
   overrideAccess,
   populationPromises,
   req,
-  siblingDoc,
   showHiddenFields,
-  context,
+  siblingDoc,
 }: Args): void => {
   fields.forEach((field) => {
     fieldPromises.push(promise({
+      context,
       currentDepth,
       depth,
       doc,
@@ -45,9 +47,8 @@ export const traverseFields = ({
       overrideAccess,
       populationPromises,
       req,
-      siblingDoc,
       showHiddenFields,
-      context,
+      siblingDoc,
     }));
   });
 };

@@ -1,24 +1,24 @@
-import { Payload } from '../payload';
 import type { SanitizedCollectionConfig } from '../collections/config/types';
 import type { SanitizedGlobalConfig } from '../globals/config/types';
+import type { Payload } from '../payload';
+import type { PayloadRequest } from '../types';
 import type { Where } from '../types';
-import { PayloadRequest } from '../types';
 
 type Args = {
-  payload: Payload
-  max: number
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
-  id?: string | number
+  id?: number | string
+  max: number
+  payload: Payload
   req?: PayloadRequest
 }
 
 export const enforceMaxVersions = async ({
-  payload,
-  max,
   collection,
   global,
   id,
+  max,
+  payload,
   req,
 }: Args): Promise<void> => {
   const entityType = collection ? 'collection' : 'global';
@@ -34,22 +34,22 @@ export const enforceMaxVersions = async ({
       };
 
       const query = await payload.db.findVersions({
-        where,
         collection: collection.slug,
-        skip: max,
-        sort: '-updatedAt',
         pagination: false,
         req,
+        skip: max,
+        sort: '-updatedAt',
+        where,
       });
 
       [oldestAllowedDoc] = query.docs;
     } else if (global) {
       const query = await payload.db.findGlobalVersions({
-        where,
         global: global.slug,
+        req,
         skip: max,
         sort: '-updatedAt',
-        req,
+        where,
       });
 
       [oldestAllowedDoc] = query.docs;
@@ -70,8 +70,8 @@ export const enforceMaxVersions = async ({
 
       await payload.db.deleteVersions({
         collection: collection?.slug,
-        where: deleteQuery,
         req,
+        where: deleteQuery,
       });
     }
   } catch (err) {

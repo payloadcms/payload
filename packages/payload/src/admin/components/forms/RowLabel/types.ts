@@ -1,24 +1,25 @@
 import React from 'react';
-import { Data } from '../Form/types';
+
+import type { Data } from '../Form/types';
 
 export type Props = {
-  path: string;
-  label?: RowLabel;
-  rowNumber?: number;
   className?: string,
+  label?: RowLabel;
+  path: string;
+  rowNumber?: number;
 }
 
 export type RowLabelArgs = {
   data: Data,
-  path: string,
   index?: number,
+  path: string,
 }
 
 export type RowLabelFunction = (args: RowLabelArgs) => string
 
 export type RowLabelComponent = React.ComponentType<RowLabelArgs>
 
-export type RowLabel = string | Record<string, string> | RowLabelFunction | RowLabelComponent
+export type RowLabel = Record<string, string> | RowLabelComponent | RowLabelFunction | string
 
 export function isComponent(label: RowLabel): label is RowLabelComponent {
   return React.isValidElement(label);

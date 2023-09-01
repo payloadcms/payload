@@ -1,34 +1,35 @@
-import React from 'react';
-import { CollectionPermission, GlobalPermission } from '../../../../auth';
-import { SanitizedCollectionConfig, TypeWithID, TypeWithTimestamps } from '../../../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../../../globals/config/types';
+import type React from 'react';
+
+import type { CollectionPermission, GlobalPermission } from '../../../../auth';
+import type { SanitizedCollectionConfig, TypeWithID, TypeWithTimestamps } from '../../../../collections/config/types';
 import type { PaginatedDocs } from '../../../../database/types';
-import { TypeWithVersion } from '../../../../versions/types';
+import type { SanitizedGlobalConfig } from '../../../../globals/config/types';
+import type { TypeWithVersion } from '../../../../versions/types';
 
 export type Version = TypeWithVersion<any>
 
-export type DocumentPermissions = null | GlobalPermission | CollectionPermission
+export type DocumentPermissions = CollectionPermission | GlobalPermission | null
 
 export type ContextType = {
   collection?: SanitizedCollectionConfig
-  global?: SanitizedGlobalConfig
-  slug?: string
-  id?: string | number
-  preferencesKey?: string
-  versions?: PaginatedDocs<Version>
-  unpublishedVersions?: PaginatedDocs<Version>
-  publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
-  getVersions: () => Promise<void>
   docPermissions: DocumentPermissions
   getDocPermissions: () => Promise<void>
-  setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
   getDocPreferences: () => Promise<{ [key: string]: unknown }>
+  getVersions: () => Promise<void>
+  global?: SanitizedGlobalConfig
+  id?: number | string
+  preferencesKey?: string
+  publishedDoc?: TypeWithID & TypeWithTimestamps & { _status?: string }
+  setDocFieldPreferences: (field: string, fieldPreferences: { [key: string]: unknown }) => void
+  slug?: string
+  unpublishedVersions?: PaginatedDocs<Version>
+  versions?: PaginatedDocs<Version>
 }
 
 export type Props = {
+  children?: React.ReactNode
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
-  id?: string | number
+  id?: number | string
   idFromParams?: boolean
-  children?: React.ReactNode
 }

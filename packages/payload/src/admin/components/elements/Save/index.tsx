@@ -1,10 +1,11 @@
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import FormSubmit from '../../forms/Submit';
+
 import useHotkey from '../../../hooks/useHotkey';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import { useEditDepth } from '../../utilities/EditDepth';
 import { useForm } from '../../forms/Form/context';
+import FormSubmit from '../../forms/Submit';
+import { useEditDepth } from '../../utilities/EditDepth';
+import RenderCustomComponent from '../../utilities/RenderCustomComponent';
 
 export type CustomSaveButtonProps = React.ComponentType<DefaultSaveButtonProps & {
   DefaultButton: React.ComponentType<DefaultSaveButtonProps>;
@@ -18,7 +19,7 @@ const DefaultSaveButton: React.FC<DefaultSaveButtonProps> = ({ label, save }) =>
   const ref = useRef<HTMLButtonElement>(null);
   const editDepth = useEditDepth();
 
-  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true, editDepth }, (e) => {
+  useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (ref?.current) {
@@ -28,10 +29,10 @@ const DefaultSaveButton: React.FC<DefaultSaveButtonProps> = ({ label, save }) =>
 
   return (
     <FormSubmit
-      type="button"
       buttonId="action-save"
       onClick={save}
       ref={ref}
+      type="button"
     >
       {label}
     </FormSubmit>
@@ -47,13 +48,13 @@ export const Save: React.FC<Props> = ({ CustomComponent }) => {
 
   return (
     <RenderCustomComponent
+      componentProps={{
+        DefaultButton: DefaultSaveButton,
+        label: t('save'),
+        save: submit,
+      }}
       CustomComponent={CustomComponent}
       DefaultComponent={DefaultSaveButton}
-      componentProps={{
-        save: submit,
-        label: t('save'),
-        DefaultButton: DefaultSaveButton,
-      }}
     />
   );
 };

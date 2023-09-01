@@ -1,10 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import Button from '../Button';
-import { Props } from './types';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
 
+import type { Props } from './types';
+
+import { useConfig } from '../../utilities/Config';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import Button from '../Button';
 import './index.scss';
 
 const baseClass = 'versions-count';
@@ -31,8 +32,8 @@ const VersionsCount: React.FC<Props> = ({ collection, global, id }) => {
       {versionCount === 0 && t('versionCount_none')}
       {versionCount > 0 && (
         <Button
-          className={`${baseClass}__button`}
           buttonStyle="none"
+          className={`${baseClass}__button`}
           el="link"
           to={versionsURL}
         >

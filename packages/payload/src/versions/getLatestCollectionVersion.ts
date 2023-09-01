@@ -1,22 +1,24 @@
-import { docHasTimestamps, PayloadRequest } from '../types';
-import { Payload } from '../payload';
-import { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
-import { TypeWithVersion } from './types';
+import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types';
 import type { FindOneArgs } from '../database/types';
+import type { Payload } from '../payload';
+import type { PayloadRequest } from '../types';
+import type { TypeWithVersion } from './types';
+
+import { docHasTimestamps } from '../types';
 
 type Args = {
+  config: SanitizedCollectionConfig;
+  id: number | string;
   payload: Payload;
   query: FindOneArgs;
-  id: string | number;
-  config: SanitizedCollectionConfig;
   req?: PayloadRequest
 };
 
 export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
-  payload,
   config,
-  query,
   id,
+  payload,
+  query,
   req,
 }: Args): Promise<T> => {
   let latestVersion: TypeWithVersion<T>;
@@ -24,9 +26,9 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
   if (config.versions?.drafts) {
     const { docs } = await payload.db.findVersions<T>({
       collection: config.slug,
-      where: { parent: { equals: id } },
-      sort: '-updatedAt',
       req,
+      sort: '-updatedAt',
+      where: { parent: { equals: id } },
     });
     [latestVersion] = docs;
   }
@@ -42,8 +44,8 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
 
   return {
     ...latestVersion.version,
+    createdAt: latestVersion.createdAt,
     id,
     updatedAt: latestVersion.updatedAt,
-    createdAt: latestVersion.createdAt,
   };
 };

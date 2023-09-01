@@ -1,4 +1,5 @@
 import type { CollectionConfig } from '../../../../src/collections/config/types';
+
 import { loremIpsum } from './loremIpsum';
 
 const RichTextFields: CollectionConfig = {

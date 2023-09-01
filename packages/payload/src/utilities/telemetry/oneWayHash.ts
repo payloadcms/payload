@@ -1,4 +1,6 @@
-import { BinaryLike, createHash } from 'crypto';
+import type { BinaryLike} from 'crypto';
+
+import { createHash } from 'crypto';
 
 export const oneWayHash = (data: BinaryLike, secret: string): string => {
   const hash = createHash('sha256');

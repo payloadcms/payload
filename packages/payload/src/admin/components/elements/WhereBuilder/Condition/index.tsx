@@ -1,35 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { Props } from './types';
+import React, { useEffect, useState } from 'react';
+
+import type { FieldCondition } from '../types';
+import type { Props } from './types';
+
+import useDebounce from '../../../../hooks/useDebounce';
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent';
-import ReactSelect from '../../ReactSelect';
 import Button from '../../Button';
+import ReactSelect from '../../ReactSelect';
 import Date from './Date';
 import Number from './Number';
-import Text from './Text';
 import Relationship from './Relationship';
 import { Select } from './Select';
-import useDebounce from '../../../../hooks/useDebounce';
-import { FieldCondition } from '../types';
-
+import Text from './Text';
 import './index.scss';
 
 const valueFields = {
   Date,
   Number,
-  Text,
   Relationship,
   Select,
+  Text,
 };
 
 const baseClass = 'condition';
 
 const Condition: React.FC<Props> = (props) => {
   const {
-    fields,
-    dispatch,
-    value,
-    orIndex,
     andIndex,
+    dispatch,
+    fields,
+    orIndex,
+    value,
   } = props;
   const fieldValue = Object.keys(value)[0];
   const operatorAndValue = value?.[fieldValue] ? Object.entries(value[fieldValue])[0] : undefined;
@@ -51,9 +52,9 @@ const Condition: React.FC<Props> = (props) => {
 
   useEffect(() => {
     dispatch({
-      type: 'update',
-      orIndex,
       andIndex,
+      orIndex,
+      type: 'update',
       value: debouncedValue || '',
     });
   }, [debouncedValue, dispatch, orIndex, andIndex]);
@@ -74,71 +75,71 @@ const Condition: React.FC<Props> = (props) => {
         <div className={`${baseClass}__inputs`}>
           <div className={`${baseClass}__field`}>
             <ReactSelect
-              value={fields.find((field) => fieldValue === field.value)}
-              options={fields}
               onChange={(field) => dispatch({
-                type: 'update',
-                orIndex,
                 andIndex,
                 field: field.value,
+                orIndex,
+                type: 'update',
               })}
+              options={fields}
+              value={fields.find((field) => fieldValue === field.value)}
             />
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              disabled={!fieldValue}
-              value={activeField.operators.find((operator) => operatorValue === operator.value)}
-              options={activeField.operators}
               onChange={(operator) => {
                 dispatch({
-                  type: 'update',
-                  orIndex,
                   andIndex,
                   operator: operator.value,
+                  orIndex,
+                  type: 'update',
                 });
               }}
+              disabled={!fieldValue}
+              options={activeField.operators}
+              value={activeField.operators.find((operator) => operatorValue === operator.value)}
             />
           </div>
           <div className={`${baseClass}__value`}>
             <RenderCustomComponent
-              CustomComponent={activeField?.props?.admin?.components?.Filter}
-              DefaultComponent={ValueComponent}
               componentProps={{
                 ...activeField?.props,
-                options: selectOptions,
-                operator: operatorValue,
-                value: internalValue,
                 onChange: setInternalValue,
+                operator: operatorValue,
+                options: selectOptions,
+                value: internalValue,
               }}
+              CustomComponent={activeField?.props?.admin?.components?.Filter}
+              DefaultComponent={ValueComponent}
             />
           </div>
         </div>
         <div className={`${baseClass}__actions`}>
           <Button
-            icon="x"
-            className={`${baseClass}__actions-remove`}
-            round
-            buttonStyle="icon-label"
-            iconStyle="with-border"
             onClick={() => dispatch({
-              type: 'remove',
-              orIndex,
               andIndex,
+              orIndex,
+              type: 'remove',
             })}
+            buttonStyle="icon-label"
+            className={`${baseClass}__actions-remove`}
+            icon="x"
+            iconStyle="with-border"
+            round
           />
           <Button
-            icon="plus"
-            className={`${baseClass}__actions-add`}
-            round
-            buttonStyle="icon-label"
-            iconStyle="with-border"
             onClick={() => dispatch({
-              type: 'add',
-              field: fields[0].value,
-              relation: 'and',
-              orIndex,
               andIndex: andIndex + 1,
+              field: fields[0].value,
+              orIndex,
+              relation: 'and',
+              type: 'add',
             })}
+            buttonStyle="icon-label"
+            className={`${baseClass}__actions-add`}
+            icon="plus"
+            iconStyle="with-border"
+            round
           />
         </div>
       </div>

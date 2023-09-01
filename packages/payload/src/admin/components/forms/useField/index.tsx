@@ -1,12 +1,14 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import type { UPDATE } from '../Form/types';
+import type { FieldType, Options } from './types';
+
+import useThrottledEffect from '../../../hooks/useThrottledEffect';
 import { useAuth } from '../../utilities/Auth';
-import { useFormProcessing, useFormSubmitted, useForm, useFormFields } from '../Form/context';
-import { Options, FieldType } from './types';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useOperation } from '../../utilities/OperationProvider';
-import useThrottledEffect from '../../../hooks/useThrottledEffect';
-import type { UPDATE } from '../Form/types';
+import { useForm, useFormFields, useFormProcessing, useFormSubmitted } from '../Form/context';
 
 /**
  * Get and set the value of a form field.
@@ -15,11 +17,11 @@ import type { UPDATE } from '../Form/types';
  */
 const useField = <T, >(options: Options): FieldType<T> => {
   const {
+    condition,
+    disableFormData = false,
+    hasRows,
     path,
     validate,
-    disableFormData = false,
-    condition,
-    hasRows,
   } = options;
 
   const submitted = useFormSubmitted();
@@ -54,10 +56,10 @@ const useField = <T, >(options: Options): FieldType<T> => {
     }
 
     dispatchField({
-      type: 'UPDATE',
-      path,
-      value: val,
       disableFormData: disableFormData || (hasRows && val > 0),
+      path,
+      type: 'UPDATE',
+      value: val,
     });
   }, [
     setModified,
@@ -70,15 +72,15 @@ const useField = <T, >(options: Options): FieldType<T> => {
   // Store result from hook as ref
   // to prevent unnecessary rerenders
   const result: FieldType<T> = useMemo(() => ({
-    showError,
     errorMessage: field?.errorMessage,
-    value,
-    formSubmitted: submitted,
     formProcessing: processing,
-    setValue,
+    formSubmitted: submitted,
     initialValue,
     rows: field?.rows,
+    setValue,
+    showError,
     valid: field?.valid,
+    value,
   }), [
     field?.errorMessage,
     field?.rows,
@@ -95,24 +97,24 @@ const useField = <T, >(options: Options): FieldType<T> => {
   useThrottledEffect(() => {
     const validateField = async () => {
       const action: UPDATE = {
-        type: 'UPDATE',
-        path,
-        disableFormData: disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
-        validate,
         condition,
-        value,
-        valid: false,
+        disableFormData: disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
         errorMessage: undefined,
+        path,
         rows: field?.rows,
+        type: 'UPDATE',
+        valid: false,
+        validate,
+        value,
       };
 
       const validateOptions = {
-        id,
-        user,
         data: getData(),
-        siblingData: getSiblingData(path),
+        id,
         operation,
+        siblingData: getSiblingData(path),
         t,
+        user,
       };
 
       const validationResult = typeof validate === 'function' ? await validate(value, validateOptions) : true;

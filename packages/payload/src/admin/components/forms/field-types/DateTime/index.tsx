@@ -1,37 +1,37 @@
 import React, { useCallback } from 'react';
-
 import { useTranslation } from 'react-i18next';
+
+import type { Props } from './types';
+
+import { date as dateValidation } from '../../../../../fields/validations';
+import { getTranslation } from '../../../../../utilities/getTranslation';
 import DatePicker from '../../../elements/DatePicker';
-import withCondition from '../../withCondition';
-import useField from '../../useField';
-import Label from '../../Label';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
-import { date as dateValidation } from '../../../../../fields/validations';
-import { Props } from './types';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-
+import Label from '../../Label';
+import useField from '../../useField';
+import withCondition from '../../withCondition';
 import './index.scss';
 
 const baseClass = 'date-time-field';
 
 const DateTime: React.FC<Props> = (props) => {
   const {
-    path: pathFromProps,
-    name,
-    required,
-    validate = dateValidation,
-    label,
     admin: {
+      className,
+      condition,
+      date,
+      description,
       placeholder,
       readOnly,
       style,
-      className,
       width,
-      date,
-      description,
-      condition,
     } = {},
+    label,
+    name,
+    path: pathFromProps,
+    required,
+    validate = dateValidation,
   } = props;
 
   const { i18n } = useTranslation();
@@ -43,14 +43,14 @@ const DateTime: React.FC<Props> = (props) => {
   }, [validate, required]);
 
   const {
-    value,
-    showError,
     errorMessage,
     setValue,
+    showError,
+    value,
   } = useField({
+    condition,
     path,
     validate: memoizedValidate,
-    condition,
   });
 
   const classes = [
@@ -63,16 +63,16 @@ const DateTime: React.FC<Props> = (props) => {
 
   return (
     <div
-      className={classes}
       style={{
         ...style,
         width,
       }}
+      className={classes}
     >
       <div className={`${baseClass}__error-wrap`}>
         <Error
-          showError={showError}
           message={errorMessage}
+          showError={showError}
         />
       </div>
       <Label
@@ -81,22 +81,22 @@ const DateTime: React.FC<Props> = (props) => {
         required={required}
       />
       <div
-        id={`field-${path.replace(/\./gi, '__')}`}
         className={`${baseClass}__input-wrapper`}
+        id={`field-${path.replace(/\./g, '__')}`}
       >
         <DatePicker
           {...date}
-          placeholder={getTranslation(placeholder, i18n)}
-          readOnly={readOnly}
           onChange={(incomingDate) => {
             if (!readOnly) setValue(incomingDate?.toISOString() || null);
           }}
+          placeholder={getTranslation(placeholder, i18n)}
+          readOnly={readOnly}
           value={value as Date}
         />
       </div>
       <FieldDescription
-        value={value}
         description={description}
+        value={value}
       />
     </div>
   );

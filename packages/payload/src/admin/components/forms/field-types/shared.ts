@@ -6,13 +6,13 @@ import type { Locale, SanitizedLocalizationConfig } from '../../../../config/typ
  * @returns Whether the field should be displayed as RTL.
  */
 export function isFieldRTL({
-  fieldRTL,
   fieldLocalized,
+  fieldRTL,
   locale,
   localizationConfig,
 }: {
-    fieldRTL: boolean;
     fieldLocalized: boolean;
+    fieldRTL: boolean;
     locale: Locale;
     localizationConfig?: SanitizedLocalizationConfig;
 }) {

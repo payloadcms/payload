@@ -1,6 +1,6 @@
 import ObjectID from 'bson-objectid';
 
-export const isValidID = (value: string | number, type: 'text' | 'number' | 'ObjectID'): boolean => {
+export const isValidID = (value: number | string, type: 'ObjectID' | 'number' | 'text'): boolean => {
   if (type === 'ObjectID') {
     return ObjectID.isValid(String(value));
   }

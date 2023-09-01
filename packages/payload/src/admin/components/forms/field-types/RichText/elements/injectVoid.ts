@@ -1,5 +1,9 @@
-import { Editor, Element, Transforms } from 'slate';
-import { ElementNode } from '../types';
+import type { Element} from 'slate';
+
+import { Editor, Transforms } from 'slate';
+
+import type { ElementNode } from '../types';
+
 import { isLastSelectedElementEmpty } from './isLastSelectedElementEmpty';
 
 export const injectVoidElement = (editor: Editor, element: Element): void => {

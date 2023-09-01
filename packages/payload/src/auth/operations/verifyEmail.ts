@@ -1,19 +1,21 @@
 import httpStatus from 'http-status';
+
+import type { Collection } from '../../collections/config/types';
+import type { PayloadRequest } from '../../express/types';
+
 import { APIError } from '../../errors';
-import { Collection } from '../../collections/config/types';
-import { PayloadRequest } from '../../express/types';
 
 export type Args = {
+  collection: Collection
   req: PayloadRequest,
   token: string
-  collection: Collection
 }
 
 async function verifyEmail(args: Args): Promise<boolean> {
   const {
+    collection,
     req,
     token,
-    collection,
   } = args;
   if (!Object.prototype.hasOwnProperty.call(args, 'token')) {
     throw new APIError('Missing required data.', httpStatus.BAD_REQUEST);
@@ -31,11 +33,11 @@ async function verifyEmail(args: Args): Promise<boolean> {
 
   await req.payload.db.updateOne({
     collection: collection.config.slug,
-    id: user.id,
     data: {
-      _verified: true,
       _verificationToken: null,
+      _verified: true,
     },
+    id: user.id,
     req,
   });
 

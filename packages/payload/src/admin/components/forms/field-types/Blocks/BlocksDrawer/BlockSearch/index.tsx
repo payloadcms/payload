@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import SearchIcon from '../../../../../graphics/Search';
 
+import SearchIcon from '../../../../../graphics/Search';
 import './index.scss';
 
 const baseClass = 'block-search';
@@ -18,8 +18,8 @@ const BlockSearch: React.FC<{ setSearchTerm: (term: string) => void }> = (props)
     <div className={baseClass}>
       <input
         className={`${baseClass}__input`}
-        placeholder={t('searchForBlock')}
         onChange={handleChange}
+        placeholder={t('searchForBlock')}
       />
       <SearchIcon />
     </div>

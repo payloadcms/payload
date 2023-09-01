@@ -1,5 +1,6 @@
 import { unflatten } from 'flatley';
-import { Fields } from './types';
+
+import type { Fields } from './types';
 
 const getDataByPath = <T = unknown>(fields: Fields, path: string): T => {
   const pathPrefixToRemove = path.substring(0, path.lastIndexOf('.') + 1);

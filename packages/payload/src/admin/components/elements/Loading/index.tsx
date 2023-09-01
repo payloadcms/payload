@@ -1,21 +1,22 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
+import type { LoadingOverlayTypes } from '../../utilities/LoadingOverlay/types';
+
 import { getTranslation } from '../../../../utilities/getTranslation';
 import { useFormProcessing } from '../../forms/Form/context';
 import { useLoadingOverlay } from '../../utilities/LoadingOverlay';
-import type { LoadingOverlayTypes } from '../../utilities/LoadingOverlay/types';
-
 import './index.scss';
 
 const baseClass = 'loading-overlay';
 
 type Props = {
-  show?: boolean;
+  animationDuration?: string;
   loadingText?: string;
   overlayType?: string
-  animationDuration?: string;
+  show?: boolean;
 }
-export const LoadingOverlay: React.FC<Props> = ({ loadingText, show = true, overlayType, animationDuration }) => {
+export const LoadingOverlay: React.FC<Props> = ({ animationDuration, loadingText, overlayType, show = true }) => {
   const { t } = useTranslation('general');
 
   return (
@@ -44,26 +45,26 @@ export const LoadingOverlay: React.FC<Props> = ({ loadingText, show = true, over
 
 
 type UseLoadingOverlayToggleT = {
-  show: boolean;
-  name: string;
-  type?: LoadingOverlayTypes,
   loadingText?: string;
+  name: string;
+  show: boolean;
+  type?: LoadingOverlayTypes,
 }
-export const LoadingOverlayToggle: React.FC<UseLoadingOverlayToggleT> = ({ name: key, show, type = 'fullscreen', loadingText }) => {
+export const LoadingOverlayToggle: React.FC<UseLoadingOverlayToggleT> = ({ loadingText, name: key, show, type = 'fullscreen' }) => {
   const { toggleLoadingOverlay } = useLoadingOverlay();
 
   React.useEffect(() => {
     toggleLoadingOverlay({
-      key,
       isLoading: show,
-      type,
+      key,
       loadingText: loadingText || undefined,
+      type,
     });
 
     return () => {
       toggleLoadingOverlay({
-        key,
         isLoading: false,
+        key,
         type,
       });
     };
@@ -74,28 +75,28 @@ export const LoadingOverlayToggle: React.FC<UseLoadingOverlayToggleT> = ({ name:
 
 
 type FormLoadingOverlayToggleT = {
+  action: 'create' | 'loading' | 'update';
+  formIsLoading?: boolean;
+  loadingSuffix?: string;
   name: string;
   type?: LoadingOverlayTypes;
-  formIsLoading?: boolean;
-  action: 'loading' | 'create' | 'update';
-  loadingSuffix?: string;
 }
-export const FormLoadingOverlayToggle: React.FC<FormLoadingOverlayToggleT> = ({ name, formIsLoading = false, action, type = 'fullscreen', loadingSuffix }) => {
+export const FormLoadingOverlayToggle: React.FC<FormLoadingOverlayToggleT> = ({ action, formIsLoading = false, loadingSuffix, name, type = 'fullscreen' }) => {
   const isProcessing = useFormProcessing();
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
 
   const labels = {
     create: t('creating'),
-    update: t('updating'),
     loading: t('loading'),
+    update: t('updating'),
   };
 
   return (
     <LoadingOverlayToggle
+      loadingText={`${labels[action]} ${loadingSuffix ? getTranslation(loadingSuffix, i18n) : ''}`.trim()}
       name={name}
       show={formIsLoading || isProcessing}
       type={type}
-      loadingText={`${labels[action]} ${loadingSuffix ? getTranslation(loadingSuffix, i18n) : ''}`.trim()}
     />
   );
 };

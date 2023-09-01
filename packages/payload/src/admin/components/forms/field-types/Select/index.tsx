@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import withCondition from '../../withCondition';
-import useField from '../../useField';
+
+import type { Option, OptionObject } from '../../../../../fields/config/types';
+import type { Props } from './types';
+
 import { select } from '../../../../../fields/validations';
-import { Option, OptionObject } from '../../../../../fields/config/types';
-import { Props } from './types';
+import useField from '../../useField';
+import withCondition from '../../withCondition';
 import SelectInput from './Input';
 
 const formatOptions = (options: Option[]): OptionObject[] => options.map((option) => {
@@ -19,23 +21,23 @@ const formatOptions = (options: Option[]): OptionObject[] => options.map((option
 
 const Select: React.FC<Props> = (props) => {
   const {
-    path: pathFromProps,
-    name,
-    validate = select,
-    label,
-    options: optionsFromProps,
-    hasMany,
-    required,
     admin: {
-      readOnly,
-      style,
       className,
-      width,
+      condition,
       description,
       isClearable,
-      condition,
       isSortable = true,
+      readOnly,
+      style,
+      width,
     } = {},
+    hasMany,
+    label,
+    name,
+    options: optionsFromProps,
+    path: pathFromProps,
+    required,
+    validate = select,
   } = props;
 
   const path = pathFromProps || name;
@@ -47,18 +49,18 @@ const Select: React.FC<Props> = (props) => {
   }, [optionsFromProps]);
 
   const memoizedValidate = useCallback((value, validationOptions) => {
-    return validate(value, { ...validationOptions, options, hasMany, required });
+    return validate(value, { ...validationOptions, hasMany, options, required });
   }, [validate, required, hasMany, options]);
 
   const {
-    value,
-    showError,
-    setValue,
     errorMessage,
+    setValue,
+    showError,
+    value,
   } = useField({
+    condition,
     path,
     validate: memoizedValidate,
-    condition,
   });
 
   const onChange = useCallback((selectedOption) => {
@@ -86,23 +88,23 @@ const Select: React.FC<Props> = (props) => {
 
   return (
     <SelectInput
-      path={path}
-      onChange={onChange}
-      value={value as string | string[]}
-      name={name}
-      options={options}
-      label={label}
-      showError={showError}
-      errorMessage={errorMessage}
-      required={required}
-      readOnly={readOnly}
-      description={description}
-      style={style}
       className={className}
-      width={width}
+      description={description}
+      errorMessage={errorMessage}
       hasMany={hasMany}
-      isSortable={isSortable}
       isClearable={isClearable}
+      isSortable={isSortable}
+      label={label}
+      name={name}
+      onChange={onChange}
+      options={options}
+      path={path}
+      readOnly={readOnly}
+      required={required}
+      showError={showError}
+      style={style}
+      value={value as string | string[]}
+      width={width}
     />
   );
 };

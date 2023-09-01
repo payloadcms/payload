@@ -1,4 +1,5 @@
-import { Option, Action, OptionGroup } from './types';
+import type { Action, Option, OptionGroup } from './types';
+
 import { getTranslation } from '../../../../../utilities/getTranslation';
 import { formatUseAsTitle } from '../../../../hooks/useTitle';
 
@@ -31,15 +32,15 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
     }
 
     case 'UPDATE': {
-      const { collection, doc, i18n, config } = action;
+      const { collection, config, doc, i18n } = action;
       const relation = collection.slug;
       const newOptions = [...state];
 
       const docTitle = formatUseAsTitle({
-        doc,
         collection,
-        i18n,
         config,
+        doc,
+        i18n,
       });
 
       const foundOptionGroup = newOptions.find((optionGroup) => optionGroup.label === collection.labels.plural);
@@ -54,7 +55,7 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
     }
 
     case 'ADD': {
-      const { collection, docs, sort, ids = [], i18n, config } = action;
+      const { collection, config, docs, i18n, ids = [], sort } = action;
       const relation = collection.slug;
       const loadedIDs = reduceToIDs(state);
       const newOptions = [...state];
@@ -65,10 +66,10 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
           loadedIDs.push(doc.id);
 
           const docTitle = formatUseAsTitle({
-            doc,
             collection,
-            i18n,
             config,
+            doc,
+            i18n,
           });
 
           return [
@@ -87,8 +88,8 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
       ids.forEach((id) => {
         if (!loadedIDs.includes(id)) {
           newSubOptions.push({
-            relationTo: relation,
             label: `${i18n.t('general:untitled')} - ID: ${id}`,
+            relationTo: relation,
             value: id,
           });
         }

@@ -1,30 +1,31 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import path from 'path';
-import minimist from 'minimist';
 import swcRegister from '@swc/register';
 import { getTsconfig as getTSconfig } from 'get-tsconfig';
-import { generateTypes } from './generateTypes';
+import minimist from 'minimist';
+import path from 'path';
+
 import { generateGraphQLSchema } from './generateGraphQLSchema';
+import { generateTypes } from './generateTypes';
 import { migrate } from './migrate';
 
 const tsConfig = getTSconfig();
 
 const swcOptions = {
-  sourceMaps: 'inline',
+  ignore: [
+    /.*\/node_modules\/.*/, // parse everything besides files within node_modules
+  ],
   jsc: {
+    baseUrl: path.resolve(),
     parser: {
       syntax: 'typescript',
       tsx: true,
     },
     paths: undefined,
-    baseUrl: path.resolve(),
   },
   module: {
     type: 'commonjs',
   },
-  ignore: [
-    /.*\/node_modules\/.*/, // parse everything besides files within node_modules
-  ],
+  sourceMaps: 'inline',
 };
 
 if (tsConfig?.config?.compilerOptions?.paths) {

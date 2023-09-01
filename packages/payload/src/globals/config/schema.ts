@@ -1,43 +1,44 @@
 import joi from 'joi';
-import { componentSchema } from '../../utilities/componentSchema';
+
 import { endpointsSchema } from '../../config/schema';
+import { componentSchema } from '../../utilities/componentSchema';
 
 const globalSchema = joi.object().keys({
-  slug: joi.string().required(),
-  label: joi.alternatives().try(
-    joi.string(),
-    joi.object().pattern(joi.string(), [joi.string()]),
-  ),
+  access: joi.object({
+    read: joi.func(),
+    readVersions: joi.func(),
+    update: joi.func(),
+  }),
   admin: joi.object({
-    hidden: joi.alternatives().try(
-      joi.boolean(),
-      joi.func(),
+    components: joi.object({
+      elements: joi.object({
+        PreviewButton: componentSchema,
+        PublishButton: componentSchema,
+        SaveButton: componentSchema,
+        SaveDraftButton: componentSchema,
+      }),
+      views: joi.object({
+        Edit: componentSchema,
+      }),
+    }),
+    description: joi.alternatives().try(
+      joi.string(),
+      componentSchema,
     ),
     group: joi.alternatives().try(
       joi.string(),
       joi.object().pattern(joi.string(), [joi.string()]),
     ),
-    hideAPIURL: joi.boolean(),
-    description: joi.alternatives().try(
-      joi.string(),
-      componentSchema,
+    hidden: joi.alternatives().try(
+      joi.boolean(),
+      joi.func(),
     ),
-    components: joi.object({
-      views: joi.object({
-        Edit: componentSchema,
-      }),
-      elements: joi.object({
-        SaveButton: componentSchema,
-        PublishButton: componentSchema,
-        SaveDraftButton: componentSchema,
-        PreviewButton: componentSchema,
-      }),
-    }),
+    hideAPIURL: joi.boolean(),
     preview: joi.func(),
   }),
-  typescript: joi.object().keys({
-    interface: joi.string(),
-  }),
+  custom: joi.object().pattern(joi.string(), joi.any()),
+  endpoints: endpointsSchema,
+  fields: joi.array(),
   graphQL: joi.alternatives().try(
     joi.object().keys({
       name: joi.string(),
@@ -45,22 +46,22 @@ const globalSchema = joi.object().keys({
     joi.boolean(),
   ),
   hooks: joi.object({
-    beforeValidate: joi.array().items(joi.func()),
-    beforeChange: joi.array().items(joi.func()),
     afterChange: joi.array().items(joi.func()),
-    beforeRead: joi.array().items(joi.func()),
     afterRead: joi.array().items(joi.func()),
+    beforeChange: joi.array().items(joi.func()),
+    beforeRead: joi.array().items(joi.func()),
+    beforeValidate: joi.array().items(joi.func()),
   }),
-  endpoints: endpointsSchema,
-  access: joi.object({
-    read: joi.func(),
-    readVersions: joi.func(),
-    update: joi.func(),
+  label: joi.alternatives().try(
+    joi.string(),
+    joi.object().pattern(joi.string(), [joi.string()]),
+  ),
+  slug: joi.string().required(),
+  typescript: joi.object().keys({
+    interface: joi.string(),
   }),
-  fields: joi.array(),
   versions: joi.alternatives().try(
     joi.object({
-      max: joi.number(),
       drafts: joi.alternatives().try(
         joi.object({
           autosave: joi.alternatives().try(
@@ -72,10 +73,10 @@ const globalSchema = joi.object().keys({
         }),
         joi.boolean(),
       ),
+      max: joi.number(),
     }),
     joi.boolean(),
   ),
-  custom: joi.object().pattern(joi.string(), joi.any()),
 }).unknown();
 
 export default globalSchema;

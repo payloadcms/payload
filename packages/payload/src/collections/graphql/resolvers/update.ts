@@ -1,16 +1,18 @@
 /* eslint-disable no-param-reassign */
-import { Response } from 'express';
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Collection } from '../../config/types';
+import type { Response } from 'express';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+
+import type { PayloadRequest } from '../../../express/types';
+import type { Collection } from '../../config/types';
+
 import updateByID from '../../operations/updateByID';
-import { PayloadRequest } from '../../../express/types';
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (_: unknown, args: {
-  id: string | number
-  data: GeneratedTypes['collections'][TSlug]
-  locale?: string
-  draft: boolean
   autosave: boolean
+  data: GeneratedTypes['collections'][TSlug]
+  draft: boolean
+  id: number | string
+  locale?: string
 },
   context: {
     req: PayloadRequest,
@@ -26,13 +28,13 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['colle
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale;
 
     const options = {
+      autosave: args.autosave,
       collection,
       data: args.data,
-      id: args.id,
       depth: 0,
-      req: context.req,
       draft: args.draft,
-      autosave: args.autosave,
+      id: args.id,
+      req: context.req,
     };
 
     const result = await updateByID<TSlug>(options);

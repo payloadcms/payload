@@ -1,17 +1,17 @@
-import { initPayloadTest } from '../helpers/configHelpers';
-import configPromise from './config';
 import payload from '../../src';
+import { AuthenticationError } from '../../src/errors';
+import { devUser, regularUser } from '../credentials';
+import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
-import { transformSlug } from './collections/Transform';
-import { hooksSlug } from './collections/Hook';
+import { afterOperationSlug } from './collections/AfterOperation';
 import { chainingHooksSlug } from './collections/ChainingHooks';
+import { contextHooksSlug } from './collections/ContextHooks';
+import { hooksSlug } from './collections/Hook';
 import { generatedAfterReadText, nestedAfterReadHooksSlug } from './collections/NestedAfterReadHooks';
 import { relationsSlug } from './collections/Relations';
+import { transformSlug } from './collections/Transform';
 import { hooksUsersSlug } from './collections/Users';
-import { devUser, regularUser } from '../credentials';
-import { AuthenticationError } from '../../src/errors';
-import { afterOperationSlug } from './collections/AfterOperation';
-import { contextHooksSlug } from './collections/ContextHooks';
+import configPromise from './config';
 
 let client: RESTClient;
 let apiUrl;

@@ -1,20 +1,23 @@
+import type { MongooseAdapter } from '@payloadcms/db-mongodb';
 import type { IndexDirection, IndexOptions } from 'mongoose';
+
 import { GraphQLClient } from 'graphql-request';
+
+import type { PaginatedDocs } from '../../src/database/types';
+import type { RichTextField } from './payload-types';
+
+import payload from '../../src';
 import { initPayloadTest } from '../helpers/configHelpers';
 import { RESTClient } from '../helpers/rest';
 import configPromise from '../uploads/config';
-import payload from '../../src';
-import { pointDoc } from './collections/Point';
 import { arrayDefaultValue, arrayDoc, arrayFieldsSlug } from './collections/Array';
-import { groupDefaultChild, groupDefaultValue, groupDoc, groupFieldsSlug } from './collections/Group';
-import { defaultText } from './collections/Text';
 import { blocksFieldSeedData } from './collections/Blocks';
-import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
-import { defaultNumber, numberDoc } from './collections/Number';
 import { dateDoc } from './collections/Date';
-import type { RichTextField } from './payload-types';
-import type { PaginatedDocs } from '../../src/database/types';
-import type { MongooseAdapter } from '@payloadcms/db-mongodb';
+import { groupDefaultChild, groupDefaultValue, groupDoc, groupFieldsSlug } from './collections/Group';
+import { defaultNumber, numberDoc } from './collections/Number';
+import { pointDoc } from './collections/Point';
+import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsDoc, tabsSlug } from './collections/Tabs';
+import { defaultText } from './collections/Text';
 
 let client;
 let graphQLClient: GraphQLClient;

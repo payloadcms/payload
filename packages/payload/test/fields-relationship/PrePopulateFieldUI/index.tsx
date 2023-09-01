@@ -1,8 +1,9 @@
 import * as React from 'react';
+
 import useField from '../../../src/admin/components/forms/useField';
 import { collection1Slug } from '../collectionSlugs';
 
-export const PrePopulateFieldUI: React.FC<{ path: string, hasMany?: boolean, hasMultipleRelations?: boolean }> = ({ path, hasMany = true, hasMultipleRelations = false }) => {
+export const PrePopulateFieldUI: React.FC<{ hasMany?: boolean, hasMultipleRelations?: boolean, path: string }> = ({ hasMany = true, hasMultipleRelations = false, path }) => {
   const { setValue } = useField({ path });
 
   const addDefaults = React.useCallback(() => {
@@ -33,18 +34,18 @@ export const PrePopulateFieldUI: React.FC<{ path: string, hasMany?: boolean, has
   return (
     <div
       style={{
-        display: 'flex',
         alignItems: 'center',
+        display: 'flex',
         justifyContent: 'center',
       }}
       className="pre-populate-field-ui"
     >
       <button
-        type="button"
-        onClick={addDefaults}
         style={{
 
         }}
+        onClick={addDefaults}
+        type="button"
       >
         Add default items
       </button>

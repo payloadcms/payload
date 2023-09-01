@@ -1,8 +1,11 @@
-import React, { ElementType } from 'react';
-import { Link } from 'react-router-dom';
-import { Props, RenderedTypeProps } from './types';
-import { useDraggableSortable } from '../DraggableSortable/useDraggableSortable';
+import type { ElementType } from 'react';
 
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+import type { Props, RenderedTypeProps } from './types';
+
+import { useDraggableSortable } from '../DraggableSortable/useDraggableSortable';
 import './index.scss';
 
 const baseClass = 'pill';
@@ -10,7 +13,7 @@ const baseClass = 'pill';
 const DraggablePill: React.FC<Props> = (props) => {
   const { className, id } = props;
 
-  const { attributes, listeners, transform, setNodeRef, isDragging } = useDraggableSortable({
+  const { attributes, isDragging, listeners, setNodeRef, transform } = useDraggableSortable({
     id,
   });
 
@@ -24,10 +27,10 @@ const DraggablePill: React.FC<Props> = (props) => {
       elementProps={{
         ...listeners,
         ...attributes,
+        ref: setNodeRef,
         style: {
           transform,
         },
-        ref: setNodeRef,
       }}
     />
   );
@@ -35,20 +38,20 @@ const DraggablePill: React.FC<Props> = (props) => {
 
 const StaticPill: React.FC<Props> = (props) => {
   const {
-    className,
-    to,
-    icon,
     alignIcon = 'right',
+    'aria-checked': ariaChecked,
+    'aria-controls': ariaControls,
+    'aria-expanded': ariaExpanded,
+    'aria-label': ariaLabel,
+    children,
+    className,
+    draggable,
+    elementProps,
+    icon,
     onClick,
     pillStyle = 'light',
-    draggable,
-    children,
-    elementProps,
     rounded,
-    'aria-label': ariaLabel,
-    'aria-expanded': ariaExpanded,
-    'aria-controls': ariaControls,
-    'aria-checked': ariaChecked,
+    to,
   } = props;
 
   const classes = [
@@ -71,14 +74,14 @@ const StaticPill: React.FC<Props> = (props) => {
   return (
     <Element
       {...elementProps}
-      aria-label={ariaLabel}
-      aria-expanded={ariaExpanded}
-      aria-controls={ariaControls}
       aria-checked={ariaChecked}
+      aria-controls={ariaControls}
+      aria-expanded={ariaExpanded}
+      aria-label={ariaLabel}
       className={classes}
-      type={Element === 'button' ? 'button' : undefined}
-      to={to || undefined}
       onClick={onClick}
+      to={to || undefined}
+      type={Element === 'button' ? 'button' : undefined}
     >
       {(icon && alignIcon === 'left') && (
         <React.Fragment>

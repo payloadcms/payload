@@ -1,5 +1,5 @@
-import { Action } from './types';
-import { Where } from '../../../../types';
+import type { Where } from '../../../../types';
+import type { Action } from './types';
 
 const reducer = (state: Where[], action: Action): Where[] => {
   const newState = [
@@ -7,13 +7,13 @@ const reducer = (state: Where[], action: Action): Where[] => {
   ];
 
   const {
-    orIndex,
     andIndex,
+    orIndex,
   } = action;
 
   switch (action.type) {
     case 'add': {
-      const { relation, field } = action;
+      const { field, relation } = action;
 
       if (relation === 'and') {
         newState[orIndex].and.splice(andIndex, 0, { [field]: {} });

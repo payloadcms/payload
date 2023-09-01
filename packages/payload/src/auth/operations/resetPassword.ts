@@ -1,14 +1,17 @@
+import type { Response } from 'express';
+
 import jwt from 'jsonwebtoken';
-import { Response } from 'express';
-import { Collection } from '../../collections/config/types';
+
+import type { Collection } from '../../collections/config/types';
+import type { PayloadRequest } from '../../express/types';
+
 import { APIError } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
-import { getFieldsToSign } from './getFieldsToSign';
-import { PayloadRequest } from '../../express/types';
-import { authenticateLocalStrategy } from '../strategies/local/authenticate';
-import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash';
 import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
+import { authenticateLocalStrategy } from '../strategies/local/authenticate';
+import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash';
+import { getFieldsToSign } from './getFieldsToSign';
 
 export type Result = {
   token?: string
@@ -16,15 +19,15 @@ export type Result = {
 }
 
 export type Arguments = {
-  data: {
-    token: string
-    password: string
-  }
   collection: Collection
-  req: PayloadRequest
-  overrideAccess?: boolean
-  res?: Response
+  data: {
+    password: string
+    token: string
+  }
   depth?: number
+  overrideAccess?: boolean
+  req: PayloadRequest
+  res?: Response
 }
 
 async function resetPassword(args: Arguments): Promise<Result> {
@@ -37,7 +40,9 @@ async function resetPassword(args: Arguments): Promise<Result> {
     collection: {
       config: collectionConfig,
     },
-    req,
+    data,
+    depth,
+    overrideAccess,
     req: {
       payload: {
         config,
@@ -45,9 +50,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
       },
       payload,
     },
-    overrideAccess,
-    data,
-    depth,
+    req,
   } = args;
 
   try {
@@ -59,17 +62,17 @@ async function resetPassword(args: Arguments): Promise<Result> {
 
     const user = await payload.db.findOne<any>({
       collection: collectionConfig.slug,
-      where: {
-        resetPasswordToken: { equals: data.token },
-        resetPasswordExpiration: { greater_than: Date.now() },
-      },
       req,
+      where: {
+        resetPasswordExpiration: { greater_than: Date.now() },
+        resetPasswordToken: { equals: data.token },
+      },
     });
 
     if (!user) throw new APIError('Token is either invalid or has expired.');
 
     // TODO: replace this method
-    const { salt, hash } = await generatePasswordSaltHash({ password: data.password });
+    const { hash, salt } = await generatePasswordSaltHash({ password: data.password });
 
     user.salt = salt;
     user.hash = hash;
@@ -82,18 +85,18 @@ async function resetPassword(args: Arguments): Promise<Result> {
 
     const doc = await payload.db.updateOne({
       collection: collectionConfig.slug,
-      id: user.id,
       data: user,
+      id: user.id,
       req,
     });
 
 
-    await authenticateLocalStrategy({ password: data.password, doc });
+    await authenticateLocalStrategy({ doc, password: data.password });
 
     const fieldsToSign = getFieldsToSign({
       collectionConfig,
-      user,
       email: user.email,
+      user,
     });
 
     const token = jwt.sign(
@@ -106,12 +109,12 @@ async function resetPassword(args: Arguments): Promise<Result> {
 
     if (args.res) {
       const cookieOptions = {
-        path: '/',
-        httpOnly: true,
-        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-        secure: collectionConfig.auth.cookies.secure,
-        sameSite: collectionConfig.auth.cookies.sameSite,
         domain: undefined,
+        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
+        httpOnly: true,
+        path: '/',
+        sameSite: collectionConfig.auth.cookies.sameSite,
+        secure: collectionConfig.auth.cookies.secure,
       };
 
 
@@ -120,7 +123,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
       args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
     }
 
-    const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess, depth, req });
+    const fullUser = await payload.findByID({ collection: collectionConfig.slug, depth, id: user.id, overrideAccess, req });
     if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
 
     return {

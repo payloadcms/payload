@@ -1,100 +1,96 @@
 export * from './../types';
 
 export {
-  validOperators
-} from './../types/constants';
+  CustomPublishButtonProps,
+  CustomSaveButtonProps,
+  CustomSaveDraftButtonProps,
+} from './../admin/components/elements/types';
 
 
 export {
-  AccessArgs,
+  RowLabel,
+} from './../admin/components/forms/RowLabel/types';
+
+export {
+  AfterChangeHook as CollectionAfterChangeHook,
+  AfterDeleteHook as CollectionAfterDeleteHook,
+  AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
+  AfterLoginHook as CollectionAfterLoginHook,
+  AfterOperationHook as CollectionAfterOperationHook,
+  AfterReadHook as CollectionAfterReadHook,
+  BeforeChangeHook as CollectionBeforeChangeHook,
+  BeforeDeleteHook as CollectionBeforeDeleteHook,
+  BeforeDuplicate,
+  BeforeLoginHook as CollectionBeforeLoginHook,
+  BeforeOperationHook as CollectionBeforeOperationHook,
+  BeforeReadHook as CollectionBeforeReadHook,
+  BeforeValidateHook as CollectionBeforeValidateHook,
+  CollectionConfig,
+  SanitizedCollectionConfig,
+  TypeWithID,
+} from './../collections/config/types';
+
+export {
   Access,
+  AccessArgs,
 } from './../config/types';
 
 export { DatabaseAdapter } from './../database/types';
 
 export {
-  CollectionConfig,
-  SanitizedCollectionConfig,
-  TypeWithID,
-  AfterOperationHook as CollectionAfterOperationHook,
-  BeforeOperationHook as CollectionBeforeOperationHook,
-  BeforeValidateHook as CollectionBeforeValidateHook,
-  BeforeChangeHook as CollectionBeforeChangeHook,
-  AfterChangeHook as CollectionAfterChangeHook,
-  AfterReadHook as CollectionAfterReadHook,
-  BeforeReadHook as CollectionBeforeReadHook,
-  BeforeDeleteHook as CollectionBeforeDeleteHook,
-  AfterDeleteHook as CollectionAfterDeleteHook,
-  BeforeLoginHook as CollectionBeforeLoginHook,
-  AfterLoginHook as CollectionAfterLoginHook,
-  AfterForgotPasswordHook as CollectionAfterForgotPasswordHook,
-  BeforeDuplicate,
-} from './../collections/config/types';
-
-export {
-  GlobalConfig,
-  SanitizedGlobalConfig,
-  BeforeValidateHook as GlobalBeforeValidateHook,
-  BeforeChangeHook as GlobalBeforeChangeHook,
-  AfterChangeHook as GlobalAfterChangeHook,
-  BeforeReadHook as GlobalBeforeReadHook,
-  AfterReadHook as GlobalAfterReadHook,
-} from './../globals/config/types';
-
-export {
-  Field,
-  FieldHook,
-  FieldWithPath,
-  FieldAccess,
-  RichTextCustomElement,
-  RichTextCustomLeaf,
-  Block,
-  TextField,
-  NumberField,
-  EmailField,
-  TextareaField,
-  CheckboxField,
-  DateField,
-  BlockField,
-  GroupField,
-  JSONField,
-  RadioField,
-  RelationshipField,
   ArrayField,
-  RichTextField,
-  SelectField,
-  UploadField,
+  Block,
+  BlockField,
+  CheckboxField,
   CodeField,
-  PointField,
-  RowField,
   CollapsibleField,
-  TabsField,
-  UIField,
-  Validate,
   Condition,
+  DateField,
+  EmailField,
+  Field,
+  FieldAccess,
   FieldAffectingData,
   FieldBase,
+  FieldHook,
   FieldHookArgs,
   FieldPresentationalOnly,
   FieldWithMany,
   FieldWithMaxDepth,
+  FieldWithPath,
   FieldWithSubFields,
   FilterOptions,
   FilterOptionsProps,
+  GroupField,
   HookName,
+  JSONField,
   Labels,
   NamedTab,
   NonPresentationalField,
+  NumberField,
   Option,
   OptionObject,
+  PointField,
+  RadioField,
+  RelationshipField,
   RelationshipValue,
+  RichTextCustomElement,
+  RichTextCustomLeaf,
   RichTextElement,
+  RichTextField,
   RichTextLeaf,
   RowAdmin,
+  RowField,
+  SelectField,
   Tab,
   TabAsField,
   TabsAdmin,
+  TabsField,
+  TextField,
+  TextareaField,
+  UIField,
   UnnamedTab,
+  UploadField,
+  Validate,
   ValidateOptions,
   ValueWithRelation,
   fieldAffectsData,
@@ -113,11 +109,15 @@ export {
 } from './../fields/config/types';
 
 export {
-  RowLabel,
-} from './../admin/components/forms/RowLabel/types';
+  AfterChangeHook as GlobalAfterChangeHook,
+  AfterReadHook as GlobalAfterReadHook,
+  BeforeChangeHook as GlobalBeforeChangeHook,
+  BeforeReadHook as GlobalBeforeReadHook,
+  BeforeValidateHook as GlobalBeforeValidateHook,
+  GlobalConfig,
+  SanitizedGlobalConfig,
+} from './../globals/config/types';
 
 export {
-  CustomSaveButtonProps,
-  CustomSaveDraftButtonProps,
-  CustomPublishButtonProps,
-} from './../admin/components/elements/types';
+  validOperators
+} from './../types/constants';

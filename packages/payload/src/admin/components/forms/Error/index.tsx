@@ -1,15 +1,16 @@
 import React from 'react';
-import Tooltip from '../../elements/Tooltip';
-import { Props } from './types';
 
+import type { Props } from './types';
+
+import Tooltip from '../../elements/Tooltip';
 import './index.scss';
 
 const baseClass = 'field-error';
 
 const Error: React.FC<Props> = (props) => {
   const {
-    showError = false,
     message,
+    showError = false,
   } = props;
 
   if (showError) {

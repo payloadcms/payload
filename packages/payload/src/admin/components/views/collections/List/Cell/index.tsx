@@ -1,40 +1,42 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
+import type { Props } from './types';
+
+import { fieldAffectsData } from '../../../../../../fields/config/types';
+import { getTranslation } from '../../../../../../utilities/getTranslation';
 import { useConfig } from '../../../../utilities/Config';
 import RenderCustomComponent from '../../../../utilities/RenderCustomComponent';
 import cellComponents from './field-types';
-import { Props } from './types';
-import { getTranslation } from '../../../../../../utilities/getTranslation';
-import { fieldAffectsData } from '../../../../../../fields/config/types';
 
 const DefaultCell: React.FC<Props> = (props) => {
   const {
-    field,
-    collection,
+    cellData,
+    className,
     collection: {
       slug,
     },
-    cellData,
-    rowData,
+    collection,
+    field,
+    link = true,
+    onClick,
     rowData: {
       id,
     } = {},
-    link = true,
-    onClick,
-    className,
+    rowData,
   } = props;
 
   const { routes: { admin } } = useConfig();
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
 
   let WrapElement: React.ComponentType<any> | string = 'span';
 
   const wrapElementProps: {
-    to?: string
-    onClick?: () => void
-    type?: 'button'
     className?: string
+    onClick?: () => void
+    to?: string
+    type?: 'button'
   } = {
     className,
   };
@@ -72,9 +74,9 @@ const DefaultCell: React.FC<Props> = (props) => {
   return (
     <WrapElement {...wrapElementProps}>
       <CellComponent
-        field={field}
-        data={cellData}
         collection={collection}
+        data={cellData}
+        field={field}
         rowData={rowData}
       />
     </WrapElement>
@@ -83,11 +85,10 @@ const DefaultCell: React.FC<Props> = (props) => {
 
 const Cell: React.FC<Props> = (props) => {
   const {
+    cellData,
+    className,
     colIndex,
     collection,
-    cellData,
-    rowData,
-    field,
     field: {
       admin: {
         components: {
@@ -95,22 +96,23 @@ const Cell: React.FC<Props> = (props) => {
         } = {},
       } = {},
     },
+    field,
     link,
     onClick,
-    className,
+    rowData,
   } = props;
 
   return (
     <RenderCustomComponent
       componentProps={{
-        rowData,
-        colIndex,
         cellData,
+        className,
+        colIndex,
         collection,
         field,
         link,
         onClick,
-        className,
+        rowData,
       }}
       CustomComponent={CustomCell}
       DefaultComponent={DefaultCell}

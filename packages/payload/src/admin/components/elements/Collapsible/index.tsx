@@ -1,25 +1,26 @@
 import React, { useState } from 'react';
 import AnimateHeight from 'react-animate-height';
 import { useTranslation } from 'react-i18next';
-import { Props } from './types';
-import { CollapsibleProvider, useCollapsible } from './provider';
+
+import type { Props } from './types';
+
 import Chevron from '../../icons/Chevron';
 import DragHandle from '../../icons/Drag';
-
 import './index.scss';
+import { CollapsibleProvider, useCollapsible } from './provider';
 
 const baseClass = 'collapsible';
 
 export const Collapsible: React.FC<Props> = ({
+  actions,
   children,
-  collapsed: collapsedFromProps,
-  onToggle,
   className,
+  collapsed: collapsedFromProps,
+  collapsibleStyle = 'default',
+  dragHandleProps,
   header,
   initCollapsed,
-  dragHandleProps,
-  actions,
-  collapsibleStyle = 'default',
+  onToggle,
 }) => {
   const [collapsedLocal, setCollapsedLocal] = useState(Boolean(initCollapsed));
   const [hoveringToggle, setHoveringToggle] = useState(false);
@@ -55,7 +56,6 @@ export const Collapsible: React.FC<Props> = ({
             </div>
           )}
           <button
-            type="button"
             className={[
               `${baseClass}__toggle`,
               `${baseClass}__toggle--${collapsed ? 'collapsed' : 'open'}`,
@@ -64,6 +64,7 @@ export const Collapsible: React.FC<Props> = ({
               if (typeof onToggle === 'function') onToggle(!collapsed);
               setCollapsedLocal(!collapsed);
             }}
+            type="button"
           >
             <span>
               {t('toggleBlock')}
@@ -88,8 +89,8 @@ export const Collapsible: React.FC<Props> = ({
           </div>
         </div>
         <AnimateHeight
-          height={collapsed ? 0 : 'auto'}
           duration={200}
+          height={collapsed ? 0 : 'auto'}
         >
           <div className={`${baseClass}__content`}>
             {children}

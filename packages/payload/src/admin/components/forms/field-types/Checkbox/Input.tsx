@@ -1,35 +1,35 @@
 import React from 'react';
-import Check from '../../../icons/Check';
-import Label from '../../Label';
-import Line from '../../../icons/Line';
 
+import Check from '../../../icons/Check';
+import Line from '../../../icons/Line';
+import Label from '../../Label';
 import './index.scss';
 
 const baseClass = 'custom-checkbox';
 
 type CheckboxInputProps = {
-  onToggle: React.FormEventHandler<HTMLInputElement>
-  inputRef?: React.MutableRefObject<HTMLInputElement>
-  readOnly?: boolean
-  checked?: boolean
-  partialChecked?: boolean
-  name?: string
-  id?: string
-  label?: string
   'aria-label'?: string
+  checked?: boolean
+  id?: string
+  inputRef?: React.MutableRefObject<HTMLInputElement>
+  label?: string
+  name?: string
+  onToggle: React.FormEventHandler<HTMLInputElement>
+  partialChecked?: boolean
+  readOnly?: boolean
   required?: boolean
 }
 
 export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
   const {
-    onToggle,
-    checked,
-    partialChecked,
-    inputRef,
-    name,
-    id,
-    label,
     'aria-label': ariaLabel,
+    checked,
+    id,
+    inputRef,
+    label,
+    name,
+    onToggle,
+    partialChecked,
     readOnly,
     required,
   } = props;
@@ -44,14 +44,14 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
     >
       <div className={`${baseClass}__input`}>
         <input
-          ref={inputRef}
-          id={id}
-          type="checkbox"
-          name={name}
           aria-label={ariaLabel}
           checked={Boolean(checked)}
           disabled={readOnly}
+          id={id}
+          name={name}
           onInput={onToggle}
+          ref={inputRef}
+          type="checkbox"
         />
         <span className={`${baseClass}__icon ${!partialChecked ? 'check' : 'partial'}`}>
           {!partialChecked && (

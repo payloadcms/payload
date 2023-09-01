@@ -1,11 +1,12 @@
-import { CollectionPermission, GlobalPermission } from '../../../auth';
-import { PayloadRequest } from '../../../express/types';
+import type { CollectionPermission, GlobalPermission } from '../../../auth';
+import type { PayloadRequest } from '../../../express/types';
+
 import { docAccess } from '../../operations/docAccess';
 
 export type Resolver = (
   _: unknown,
   args: {
-    id: string | number
+    id: number | string
   },
   context: {
     req: PayloadRequest,
@@ -16,8 +17,8 @@ export type Resolver = (
 export function docAccessResolver(): Resolver {
   async function resolver(_, args, context) {
     return docAccess({
-      req: context.req,
       id: args.id,
+      req: context.req,
     });
   }
 

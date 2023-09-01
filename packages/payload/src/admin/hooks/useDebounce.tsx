@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 // Our hook
 export default function useDebounce<T = unknown>(value: T, delay: number): T {

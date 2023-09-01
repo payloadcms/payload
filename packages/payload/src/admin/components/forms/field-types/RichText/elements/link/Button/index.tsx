@@ -1,22 +1,24 @@
+import { useModal } from '@faceless-ui/modal';
 import React, { Fragment, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Editor, Range, Transforms } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
-import { Transforms, Range, Editor } from 'slate';
-import { useModal } from '@faceless-ui/modal';
-import ElementButton from '../../Button';
-import LinkIcon from '../../../../../../icons/Link';
-import reduceFieldsToValues from '../../../../../Form/reduceFieldsToValues';
-import { useConfig } from '../../../../../../utilities/Config';
-import isElementActive from '../../isActive';
-import { transformExtraFields, unwrapLink } from '../utilities';
-import { LinkDrawer } from '../LinkDrawer';
-import { Props as RichTextFieldProps } from '../../../types';
-import buildStateFromSchema from '../../../../../Form/buildStateFromSchema';
-import { useAuth } from '../../../../../../utilities/Auth';
-import { Fields } from '../../../../../Form/types';
-import { useLocale } from '../../../../../../utilities/Locale';
+
+import type { Fields } from '../../../../../Form/types';
+import type { Props as RichTextFieldProps } from '../../../types';
+
 import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
+import LinkIcon from '../../../../../../icons/Link';
+import { useAuth } from '../../../../../../utilities/Auth';
+import { useConfig } from '../../../../../../utilities/Config';
 import { useDocumentInfo } from '../../../../../../utilities/DocumentInfo';
+import { useLocale } from '../../../../../../utilities/Locale';
+import buildStateFromSchema from '../../../../../Form/buildStateFromSchema';
+import reduceFieldsToValues from '../../../../../Form/reduceFieldsToValues';
+import ElementButton from '../../Button';
+import isElementActive from '../../isActive';
+import { LinkDrawer } from '../LinkDrawer';
+import { transformExtraFields, unwrapLink } from '../utilities';
 
 /**
  * This function is called when an new link is created - not when an existing link is edited.
@@ -26,13 +28,13 @@ const insertLink = (editor, fields) => {
   const data = reduceFieldsToValues(fields, true);
 
   const newLink = {
-    type: 'link',
-    linkType: data.linkType,
-    url: data.url,
-    doc: data.doc,
-    newTab: data.newTab,
-    fields: data.fields, // Any custom user-added fields are part of data.fields
     children: [],
+    doc: data.doc,
+    fields: data.fields, // Any custom user-added fields are part of data.fields
+    linkType: data.linkType,
+    newTab: data.newTab,
+    type: 'link',
+    url: data.url,
   };
 
   if (isCollapsed || !editor.selection) {
@@ -57,15 +59,15 @@ const insertLink = (editor, fields) => {
 };
 
 export const LinkButton: React.FC<{
-  path: string
   fieldProps: RichTextFieldProps
+  path: string
 }> = ({ fieldProps }) => {
   const customFieldSchema = fieldProps?.admin?.link?.fields;
   const { user } = useAuth();
   const { code: locale } = useLocale();
   const [initialState, setInitialState] = useState<Fields>({});
 
-  const { t, i18n } = useTranslation(['upload', 'general']);
+  const { i18n, t } = useTranslation(['upload', 'general']);
   const editor = useSlate();
   const config = useConfig();
 
@@ -75,16 +77,13 @@ export const LinkButton: React.FC<{
     return fields;
   });
 
-  const { openModal, closeModal } = useModal();
+  const { closeModal, openModal } = useModal();
   const drawerSlug = useDrawerSlug('rich-text-link');
   const { getDocPreferences } = useDocumentInfo();
 
   return (
     <Fragment>
       <ElementButton
-        format="link"
-        tooltip={t('fields:addLink')}
-        className="link"
         onClick={async () => {
           if (isElementActive(editor, 'link')) {
             unwrapLink(editor);
@@ -99,25 +98,28 @@ export const LinkButton: React.FC<{
               };
 
               const preferences = await getDocPreferences();
-              const state = await buildStateFromSchema({ fieldSchema, preferences, data, user, operation: 'create', locale, t });
+              const state = await buildStateFromSchema({ data, fieldSchema, locale, operation: 'create', preferences, t, user });
               setInitialState(state);
             }
           }
         }}
+        className="link"
+        format="link"
+        tooltip={t('fields:addLink')}
       >
         <LinkIcon />
       </ElementButton>
       <LinkDrawer
-        drawerSlug={drawerSlug}
+        handleClose={() => {
+          closeModal(drawerSlug);
+        }}
         handleModalSubmit={(fields) => {
           insertLink(editor, fields);
           closeModal(drawerSlug);
         }}
-        initialState={initialState}
+        drawerSlug={drawerSlug}
         fieldSchema={fieldSchema}
-        handleClose={() => {
-          closeModal(drawerSlug);
-        }}
+        initialState={initialState}
       />
     </Fragment>
   );

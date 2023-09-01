@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+
 import { ValidationError } from "../../../errors"
 
 const defaultPasswordValidator = (password: string): string | true => {
@@ -22,11 +23,11 @@ type Args = {
 
 export const generatePasswordSaltHash = async ({
   password,
-}: Args): Promise<{ salt: string, hash: string }> => {
+}: Args): Promise<{ hash: string, salt: string }> => {
   const validationResult = defaultPasswordValidator(password)
 
   if (typeof validationResult === 'string') {
-    throw new ValidationError([{ message: validationResult, field: 'password' }])
+    throw new ValidationError([{ field: 'password', message: validationResult }])
   }
 
   const saltBuffer = await randomBytes()
@@ -35,5 +36,5 @@ export const generatePasswordSaltHash = async ({
   const hashRaw = await pbkdf2Promisified(password, salt)
   const hash = hashRaw.toString('hex')
 
-  return { salt, hash }
+  return { hash, salt }
 }

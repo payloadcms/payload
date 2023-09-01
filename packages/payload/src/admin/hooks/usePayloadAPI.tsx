@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
 import queryString from 'qs';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocale } from '../components/utilities/Locale';
+
 import { requests } from '../api';
+import { useLocale } from '../components/utilities/Locale';
 
 type Result = [
   {
-    isLoading: boolean
-    isError: boolean
     data: any
+    isError: boolean
+    isLoading: boolean
   },
   {
     setParams: React.Dispatch<unknown>
@@ -16,16 +17,16 @@ type Result = [
 ]
 
 type Options = {
-  initialParams?: unknown
   initialData?: any
+  initialParams?: unknown
 }
 
 type UsePayloadAPI = (url: string, options?: Options) => Result;
 
 const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
   const {
-    initialParams = {},
     initialData = {},
+    initialParams = {},
   } = options;
 
   const { i18n } = useTranslation();
@@ -51,10 +52,10 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
 
       try {
         const response = await requests.get(`${url}${search}`, {
-          signal: abortController.signal,
           headers: {
             'Accept-Language': i18n.language,
           },
+          signal: abortController.signal,
         });
 
         if (response.status > 201) {
@@ -84,7 +85,7 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
     };
   }, [url, locale, search, i18n.language]);
 
-  return [{ data, isLoading, isError }, { setParams }];
+  return [{ data, isError, isLoading }, { setParams }];
 };
 
 export default usePayloadAPI;

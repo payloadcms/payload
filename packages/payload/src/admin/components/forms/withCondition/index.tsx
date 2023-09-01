@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
-import { FieldBase } from '../../../../fields/config/types';
+
+import type { FieldBase } from '../../../../fields/config/types';
+
 import { WatchCondition } from './WatchCondition';
 
 const withCondition = <P extends Record<string, unknown>>(Field: React.ComponentType<P>): React.FC<P> => {
@@ -21,11 +23,11 @@ const withCondition = <P extends Record<string, unknown>>(Field: React.Component
 
   const WithCondition: React.FC<P> = (props) => {
     const {
-      name,
-      path,
       admin: {
         condition,
       } = {},
+      name,
+      path,
     } = props as Partial<FieldBase> & {
       path?: string
     };
@@ -36,9 +38,9 @@ const withCondition = <P extends Record<string, unknown>>(Field: React.Component
       return (
         <React.Fragment>
           <WatchCondition
-            path={path}
-            name={name}
             condition={condition}
+            name={name}
+            path={path}
             setShowField={setShowField}
           />
           <Field {...props} />
@@ -48,9 +50,9 @@ const withCondition = <P extends Record<string, unknown>>(Field: React.Component
 
     return (
       <WatchCondition
-        path={path}
-        name={name}
         condition={condition}
+        name={name}
+        path={path}
         setShowField={setShowField}
       />
     );

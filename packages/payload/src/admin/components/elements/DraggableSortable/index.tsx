@@ -1,24 +1,26 @@
-import React, { useCallback, useId } from 'react';
-import { SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import type {
+  DragEndEvent} from '@dnd-kit/core';
+
 import {
-  DragEndEvent,
-  useDroppable,
   DndContext,
-  closestCenter,
   KeyboardSensor,
   PointerSensor,
+  closestCenter,
+  useDroppable,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import React, { useCallback, useId } from 'react';
 
-import { Props } from './types';
+import type { Props } from './types';
 
 const DraggableSortable: React.FC<Props> = (props) => {
   const {
-    onDragEnd,
-    ids,
-    className,
     children,
+    className,
+    ids,
+    onDragEnd,
   } = props;
 
   const id = useId();
@@ -54,9 +56,9 @@ const DraggableSortable: React.FC<Props> = (props) => {
 
   return (
     <DndContext
+      collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
       sensors={sensors}
-      collisionDetection={closestCenter}
     >
       <SortableContext items={ids}>
         <div

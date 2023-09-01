@@ -1,4 +1,4 @@
-import { PayloadRequest } from '../express/types';
+import type { PayloadRequest } from '../express/types';
 
 /**
  * Starts a new transaction using the db adapter with a random id and then assigns it to the req.transaction
@@ -6,8 +6,8 @@ import { PayloadRequest } from '../express/types';
  */
 export async function initTransaction(req: PayloadRequest): Promise<boolean> {
   const {
-    transactionID,
     payload,
+    transactionID,
   } = req;
   if (!transactionID && typeof payload.db.beginTransaction === 'function') {
     req.transactionID = await payload.db.beginTransaction();

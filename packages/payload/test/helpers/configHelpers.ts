@@ -1,11 +1,13 @@
-import getPort from 'get-port';
 import swcRegister from '@swc/register';
-import path from 'path';
-import { v4 as uuid } from 'uuid';
-import shelljs from 'shelljs';
 import express from 'express';
+import getPort from 'get-port';
+import path from 'path';
+import shelljs from 'shelljs';
+import { v4 as uuid } from 'uuid';
+
 import type { CollectionConfig } from '../../src/collections/config/types';
 import type { InitOptions } from '../../src/config/types';
+
 import payload from '../../src';
 
 type Options = {

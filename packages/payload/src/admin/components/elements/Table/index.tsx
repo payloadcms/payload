@@ -1,12 +1,13 @@
 import React from 'react';
-import { Props } from './types';
-import { useTableColumns } from '../TableColumns';
 
+import type { Props } from './types';
+
+import { useTableColumns } from '../TableColumns';
 import './index.scss';
 
 const baseClass = 'table';
 
-export const Table: React.FC<Props> = ({ data, columns: columnsFromProps }) => {
+export const Table: React.FC<Props> = ({ columns: columnsFromProps, data }) => {
   const {
     columns: columnsFromContext,
   } = useTableColumns();
@@ -32,8 +33,8 @@ export const Table: React.FC<Props> = ({ data, columns: columnsFromProps }) => {
           <tr>
             {activeColumns.map((col, i) => (
               <th
-                key={i}
                 id={`heading-${col.accessor}`}
+                key={i}
               >
                 {col.components.Heading}
               </th>
@@ -43,8 +44,8 @@ export const Table: React.FC<Props> = ({ data, columns: columnsFromProps }) => {
         <tbody>
           {data && data.map((row, rowIndex) => (
             <tr
-              key={rowIndex}
               className={`row-${rowIndex + 1}`}
+              key={rowIndex}
             >
               {columns.map((col, colIndex) => {
                 const { active } = col;
@@ -53,8 +54,8 @@ export const Table: React.FC<Props> = ({ data, columns: columnsFromProps }) => {
 
                 return (
                   <td
-                    key={colIndex}
                     className={`cell-${col.accessor}`}
+                    key={colIndex}
                   >
                     {col.components.renderCell(row, row[col.accessor])}
                   </td>

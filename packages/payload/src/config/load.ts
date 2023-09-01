@@ -1,13 +1,16 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
+import type pino from 'pino';
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import path from 'path';
-import pino from 'pino';
+
+import type { SanitizedConfig } from './types';
+
 import Logger from '../utilities/logger';
-import { SanitizedConfig } from './types';
+import { clientFiles } from './clientFiles';
 import findConfig from './find';
 import validate from './validate';
-import { clientFiles } from './clientFiles';
 
 const loadConfig = async (logger?: pino.Logger): Promise<SanitizedConfig> => {
   const localLogger = logger ?? Logger();
@@ -32,8 +35,8 @@ const loadConfig = async (logger?: pino.Logger): Promise<SanitizedConfig> => {
   return {
     ...config,
     paths: {
-      configDir: path.dirname(configPath),
       config: configPath,
+      configDir: path.dirname(configPath),
       rawConfig: configPath,
     },
   };

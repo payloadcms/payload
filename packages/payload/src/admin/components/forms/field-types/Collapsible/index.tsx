@@ -1,42 +1,43 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import RenderFields from '../../RenderFields';
-import withCondition from '../../withCondition';
-import { Props } from './types';
-import { Collapsible } from '../../../elements/Collapsible';
-import { usePreferences } from '../../../utilities/Preferences';
-import { DocumentPreferences } from '../../../../../preferences/types';
-import { useDocumentInfo } from '../../../utilities/DocumentInfo';
-import FieldDescription from '../../FieldDescription';
-import { RowLabel } from '../../RowLabel';
-import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
-import { WatchChildErrors } from '../../WatchChildErrors';
-import { useFormSubmitted } from '../../Form/context';
-import { ErrorPill } from '../../../elements/ErrorPill';
 
+import type { DocumentPreferences } from '../../../../../preferences/types';
+import type { Props } from './types';
+
+import { Collapsible } from '../../../elements/Collapsible';
+import { ErrorPill } from '../../../elements/ErrorPill';
+import { useDocumentInfo } from '../../../utilities/DocumentInfo';
+import { usePreferences } from '../../../utilities/Preferences';
+import FieldDescription from '../../FieldDescription';
+import { useFormSubmitted } from '../../Form/context';
+import { createNestedFieldPath } from '../../Form/createNestedFieldPath';
+import RenderFields from '../../RenderFields';
+import { RowLabel } from '../../RowLabel';
+import { WatchChildErrors } from '../../WatchChildErrors';
+import withCondition from '../../withCondition';
 import './index.scss';
 
 const baseClass = 'collapsible-field';
 
 const CollapsibleField: React.FC<Props> = (props) => {
   const {
-    label,
-    fields,
+    admin: {
+      className,
+      description,
+      initCollapsed,
+      readOnly,
+    },
     fieldTypes,
+    fields,
+    indexPath,
+    label,
     path,
     permissions,
-    indexPath,
-    admin: {
-      readOnly,
-      className,
-      initCollapsed,
-      description,
-    },
   } = props;
 
   const { getPreference, setPreference } = usePreferences();
   const { preferencesKey } = useDocumentInfo();
   const [collapsedOnMount, setCollapsedOnMount] = useState<boolean>();
-  const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./gi, '__')}`;
+  const fieldPreferencesKey = `collapsible-${indexPath.replace(/\./g, '__')}`;
   const [errorCount, setErrorCount] = useState(0);
   const submitted = useFormSubmitted();
 
@@ -91,21 +92,18 @@ const CollapsibleField: React.FC<Props> = (props) => {
   ].filter(Boolean).join(' ');
 
   return (
-    <div id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./gi, '__')}` : ''}`}>
+    <div id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./g, '__')}` : ''}`}>
       <WatchChildErrors
-        setErrorCount={setErrorCount}
-        path={path}
         fieldSchema={fields}
+        path={path}
+        setErrorCount={setErrorCount}
       />
       <Collapsible
-        initCollapsed={collapsedOnMount}
-        className={classes}
-        collapsibleStyle={errorCount > 0 ? 'error' : 'default'}
         header={(
           <div className={`${baseClass}__row-label-wrap`}>
             <RowLabel
-              path={path}
               label={label}
+              path={path}
             />
             {errorCount > 0 && (
               <ErrorPill
@@ -115,18 +113,21 @@ const CollapsibleField: React.FC<Props> = (props) => {
             )}
           </div>
         )}
+        className={classes}
+        collapsibleStyle={errorCount > 0 ? 'error' : 'default'}
+        initCollapsed={collapsedOnMount}
         onToggle={onToggle}
       >
         <RenderFields
-          forceRender
-          readOnly={readOnly}
-          permissions={permissions}
-          fieldTypes={fieldTypes}
-          indexPath={indexPath}
           fieldSchema={fields.map((field) => ({
             ...field,
             path: createNestedFieldPath(path, field),
           }))}
+          fieldTypes={fieldTypes}
+          forceRender
+          indexPath={indexPath}
+          permissions={permissions}
+          readOnly={readOnly}
         />
       </Collapsible>
       <FieldDescription

@@ -1,32 +1,33 @@
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import qs from 'qs';
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../utilities/Config';
-import { useAuth } from '../../../utilities/Auth';
-import withCondition from '../../withCondition';
+
+import type { PaginatedDocs } from '../../../../../database/types';
+import type { Where } from '../../../../../types';
+import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
+import type { FilterOptionsResult, GetResults, Option, Props, Value } from './types';
+
+import { relationship } from '../../../../../fields/validations';
+import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex';
+import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
 import ReactSelect from '../../../elements/ReactSelect';
-import useField from '../../useField';
-import Label from '../../Label';
+import { useAuth } from '../../../utilities/Auth';
+import { useConfig } from '../../../utilities/Config';
+import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
+import { useLocale } from '../../../utilities/Locale';
 import Error from '../../Error';
 import FieldDescription from '../../FieldDescription';
-import { relationship } from '../../../../../fields/validations';
-import { Where } from '../../../../../types';
-import type { PaginatedDocs } from '../../../../../database/types';
 import { useFormProcessing } from '../../Form/context';
-import optionsReducer from './optionsReducer';
-import { FilterOptionsResult, GetResults, Option, Props, Value } from './types';
-import { createRelationMap } from './createRelationMap';
-import { useDebouncedCallback } from '../../../../hooks/useDebouncedCallback';
-import wordBoundariesRegex from '../../../../../utilities/wordBoundariesRegex';
+import Label from '../../Label';
+import useField from '../../useField';
+import withCondition from '../../withCondition';
 import { AddNewRelation } from './AddNew';
+import { createRelationMap } from './createRelationMap';
 import { findOptionsByValue } from './findOptionsByValue';
-import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
-import { SingleValue } from './select-components/SingleValue';
-import { MultiValueLabel } from './select-components/MultiValueLabel';
-import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
-import { useLocale } from '../../../utilities/Locale';
-
 import './index.scss';
+import optionsReducer from './optionsReducer';
+import { MultiValueLabel } from './select-components/MultiValueLabel';
+import { SingleValue } from './select-components/SingleValue';
 
 const maxResultsPerRequest = 10;
 
@@ -34,37 +35,37 @@ const baseClass = 'relationship';
 
 const Relationship: React.FC<Props> = (props) => {
   const {
-    relationTo,
-    validate = relationship,
-    path,
-    name,
-    required,
-    label,
-    hasMany,
-    filterOptions,
     admin: {
+      allowCreate = true,
+      className,
+      condition,
+      description,
+      isSortable = true,
       readOnly,
       style,
-      className,
       width,
-      description,
-      condition,
-      isSortable = true,
-      allowCreate = true,
     } = {},
+    filterOptions,
+    hasMany,
+    label,
+    name,
+    path,
+    relationTo,
+    required,
+    validate = relationship,
   } = props;
 
   const config = useConfig();
 
   const {
-    serverURL,
+    collections,
     routes: {
       api,
     },
-    collections,
+    serverURL,
   } = config;
 
-  const { t, i18n } = useTranslation('fields');
+  const { i18n, t } = useTranslation('fields');
   const { permissions } = useAuth();
   const { code: locale } = useLocale();
   const formProcessing = useFormProcessing();
@@ -86,15 +87,15 @@ const Relationship: React.FC<Props> = (props) => {
   }, [validate, required]);
 
   const {
-    value,
-    showError,
     errorMessage,
-    setValue,
     initialValue,
+    setValue,
+    showError,
+    value,
   } = useField<Value | Value[]>({
+    condition,
     path: pathOrName,
     validate: memoizedValidate,
-    condition,
   });
 
   const [drawerIsOpen, setDrawerIsOpen] = useState(false);
@@ -102,10 +103,10 @@ const Relationship: React.FC<Props> = (props) => {
   const getResults: GetResults = useCallback(
     async ({
       lastFullyLoadedRelation: lastFullyLoadedRelationArg,
-      search: searchArg,
-      value: valueArg,
-      sort,
       onSuccess,
+      search: searchArg,
+      sort,
+      value: valueArg,
     }) => {
       if (!permissions) {
         return;
@@ -146,6 +147,11 @@ const Relationship: React.FC<Props> = (props) => {
               [key: string]: unknown;
               where: Where;
             } = {
+              depth: 0,
+              limit: maxResultsPerRequest,
+              locale,
+              page: lastLoadedPageToUse,
+              sort: fieldToSearch,
               where: {
                 and: [
                   {
@@ -155,11 +161,6 @@ const Relationship: React.FC<Props> = (props) => {
                   },
                 ],
               },
-              limit: maxResultsPerRequest,
-              page: lastLoadedPageToUse,
-              sort: fieldToSearch,
-              locale,
-              depth: 0,
             };
 
             if (searchArg) {
@@ -201,24 +202,24 @@ const Relationship: React.FC<Props> = (props) => {
                 resultsFetched += data.docs.length;
 
                 dispatchOptions({
-                  type: 'ADD',
-                  docs: data.docs,
                   collection,
-                  sort,
-                  i18n,
                   config,
+                  docs: data.docs,
+                  i18n,
+                  sort,
+                  type: 'ADD',
                 });
               }
             } else if (response.status === 403) {
               setLastFullyLoadedRelation(relations.indexOf(relation));
               dispatchOptions({
-                type: 'ADD',
-                docs: [],
                 collection,
-                sort,
-                ids: relationMap[relation],
-                i18n,
                 config,
+                docs: [],
+                i18n,
+                ids: relationMap[relation],
+                sort,
+                type: 'ADD',
               });
             } else {
               setErrorLoading(t('error:unspecific'));
@@ -248,7 +249,7 @@ const Relationship: React.FC<Props> = (props) => {
   );
 
   const updateSearch = useDebouncedCallback((searchArg: string, valueArg: Value | Value[]) => {
-    getResults({ search: searchArg, value: valueArg, sort: true });
+    getResults({ search: searchArg, sort: true, value: valueArg });
     setSearch(searchArg);
   }, 300);
 
@@ -279,14 +280,14 @@ const Relationship: React.FC<Props> = (props) => {
 
       if (idsToLoad.length > 0) {
         const query = {
+          depth: 0,
+          limit: idsToLoad.length,
+          locale,
           where: {
             id: {
               in: idsToLoad,
             },
           },
-          depth: 0,
-          locale,
-          limit: idsToLoad.length,
         };
 
         if (!errorLoading) {
@@ -306,13 +307,13 @@ const Relationship: React.FC<Props> = (props) => {
           }
 
           dispatchOptions({
-            type: 'ADD',
-            docs,
             collection,
-            sort: true,
-            ids: idsToLoad,
-            i18n,
             config,
+            docs,
+            i18n,
+            ids: idsToLoad,
+            sort: true,
+            type: 'ADD',
           });
         }
       }
@@ -358,7 +359,7 @@ const Relationship: React.FC<Props> = (props) => {
   }, [relationTo, filterOptionsResult, locale]);
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
-    dispatchOptions({ type: 'UPDATE', doc: args.doc, collection: args.collectionConfig, i18n, config });
+    dispatchOptions({ collection: args.collectionConfig, config, doc: args.doc, i18n, type: 'UPDATE' });
   }, [i18n, config]);
 
   const filterOption = useCallback((item: Option, searchFilter: string) => {
@@ -390,34 +391,41 @@ const Relationship: React.FC<Props> = (props) => {
     readOnly && `${baseClass}--read-only`,
   ].filter(Boolean).join(' ');
 
-  const valueToRender = findOptionsByValue({ value, options });
+  const valueToRender = findOptionsByValue({ options, value });
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') valueToRender.value = null;
 
   return (
     <div
-      id={`field-${(pathOrName).replace(/\./gi, '__')}`}
-      className={classes}
       style={{
         ...style,
         width,
       }}
+      className={classes}
+      id={`field-${(pathOrName).replace(/\./g, '__')}`}
     >
       <Error
-        showError={showError}
         message={errorMessage}
+        showError={showError}
       />
       <Label
         htmlFor={pathOrName}
         label={label}
         required={required}
       />
-      <GetFilterOptions {...{ filterOptionsResult, setFilterOptionsResult, filterOptions, path: pathOrName, relationTo }} />
+      <GetFilterOptions {...{ filterOptions, filterOptionsResult, path: pathOrName, relationTo, setFilterOptionsResult }} />
       {!errorLoading && (
         <div className={`${baseClass}__wrap`}>
           <ReactSelect
-            backspaceRemovesValue={!drawerIsOpen}
-            disabled={readOnly || formProcessing}
-            onInputChange={(newSearch) => handleInputChange(newSearch, value)}
+            components={{
+              MultiValueLabel,
+              SingleValue,
+            }}
+            customProps={{
+              disableKeyDown: drawerIsOpen,
+              disableMouseDown: drawerIsOpen,
+              onSave,
+              setDrawerIsOpen,
+            }}
             onChange={!readOnly ? (selected) => {
               if (selected === null) {
                 setValue(hasMany ? [] : null);
@@ -441,47 +449,40 @@ const Relationship: React.FC<Props> = (props) => {
                 setValue(selected.value);
               }
             } : undefined}
-            onMenuScrollToBottom={() => {
-              getResults({
-                lastFullyLoadedRelation,
-                search,
-                value: initialValue,
-                sort: false,
-              });
-            }}
-            value={valueToRender ?? null}
-            showError={showError}
-            options={options}
-            isMulti={hasMany}
-            isSortable={isSortable}
-            isLoading={isLoading}
-            components={{
-              SingleValue,
-              MultiValueLabel,
-            }}
-            customProps={{
-              disableMouseDown: drawerIsOpen,
-              disableKeyDown: drawerIsOpen,
-              setDrawerIsOpen,
-              onSave,
-            }}
             onMenuOpen={() => {
               if (!hasLoadedFirstPage) {
                 setIsLoading(true);
                 getResults({
-                  value: initialValue,
                   onSuccess: () => {
                     setHasLoadedFirstPage(true);
                     setIsLoading(false);
                   },
+                  value: initialValue,
                 });
               }
             }}
+            onMenuScrollToBottom={() => {
+              getResults({
+                lastFullyLoadedRelation,
+                search,
+                sort: false,
+                value: initialValue,
+              });
+            }}
+            backspaceRemovesValue={!drawerIsOpen}
+            disabled={readOnly || formProcessing}
             filterOption={enableWordBoundarySearch ? filterOption : undefined}
+            isLoading={isLoading}
+            isMulti={hasMany}
+            isSortable={isSortable}
+            onInputChange={(newSearch) => handleInputChange(newSearch, value)}
+            options={options}
+            showError={showError}
+            value={valueToRender ?? null}
           />
           {!readOnly && allowCreate && (
             <AddNewRelation
-              {...{ path: pathOrName, hasMany, relationTo, value, setValue, dispatchOptions, options }}
+              {...{ dispatchOptions, hasMany, options, path: pathOrName, relationTo, setValue, value }}
             />
           )}
         </div>
@@ -492,8 +493,8 @@ const Relationship: React.FC<Props> = (props) => {
         </div>
       )}
       <FieldDescription
-        value={value}
         description={description}
+        value={value}
       />
     </div>
   );

@@ -1,6 +1,6 @@
-import { Field, FieldHook } from '../../fields/config/types';
+import type { Field, FieldHook } from '../../fields/config/types';
 
-const autoRemoveVerificationToken: FieldHook = ({ originalDoc, data, value, operation }) => {
+const autoRemoveVerificationToken: FieldHook = ({ data, operation, originalDoc, value }) => {
   // If a user manually sets `_verified` to true,
   // and it was `false`, set _verificationToken to `null`.
   // This is useful because the admin panel
@@ -17,27 +17,27 @@ const autoRemoveVerificationToken: FieldHook = ({ originalDoc, data, value, oper
 
 export default [
   {
-    name: '_verified',
-    type: 'checkbox',
     access: {
       create: ({ req: { user } }) => Boolean(user),
-      update: ({ req: { user } }) => Boolean(user),
       read: ({ req: { user } }) => Boolean(user),
+      update: ({ req: { user } }) => Boolean(user),
     },
     admin: {
       components: {
         Field: () => null,
       },
     },
+    name: '_verified',
+    type: 'checkbox',
   },
   {
-    name: '_verificationToken',
-    type: 'text',
     hidden: true,
     hooks: {
       beforeChange: [
         autoRemoveVerificationToken,
       ],
     },
+    name: '_verificationToken',
+    type: 'text',
   },
 ] as Field[];

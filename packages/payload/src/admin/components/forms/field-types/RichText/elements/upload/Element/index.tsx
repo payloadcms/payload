@@ -1,22 +1,25 @@
-import React, { HTMLAttributes, useCallback, useReducer, useState } from 'react';
-import { Transforms } from 'slate';
-import { ReactEditor, useSlateStatic, useFocused, useSelected } from 'slate-react';
+import type { HTMLAttributes} from 'react';
+
+import React, { useCallback, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../../../utilities/Config';
+import { Transforms } from 'slate';
+import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react';
+
+import type { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
+import type { Props as RichTextProps } from '../../../types';
+
+import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI';
-import FileGraphic from '../../../../../../graphics/File';
 import useThumbnail from '../../../../../../../hooks/useThumbnail';
 import Button from '../../../../../../elements/Button';
-import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer';
-import { useListDrawer } from '../../../../../../elements/ListDrawer';
-import { SanitizedCollectionConfig } from '../../../../../../../../collections/config/types';
-import { Props as RichTextProps } from '../../../types';
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
-import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
-import { UploadDrawer } from './UploadDrawer';
 import { DrawerToggler } from '../../../../../../elements/Drawer';
-
+import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
+import { useListDrawer } from '../../../../../../elements/ListDrawer';
+import FileGraphic from '../../../../../../graphics/File';
+import { useConfig } from '../../../../../../utilities/Config';
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
+import { UploadDrawer } from './UploadDrawer';
 import './index.scss';
 
 const baseClass = 'rich-text-upload';
@@ -29,25 +32,25 @@ export type ElementProps = {
   attributes: HTMLAttributes<HTMLDivElement>
   children: React.ReactNode
   element: any
-  fieldProps: RichTextProps
   enabledCollectionSlugs: string[]
+  fieldProps: RichTextProps
 }
 
 const Element: React.FC<ElementProps> = (props) => {
   const {
     attributes,
     children,
-    element,
     element: {
       relationTo,
       value,
     },
-    fieldProps,
+    element,
     enabledCollectionSlugs,
+    fieldProps,
   } = props;
 
-  const { collections, serverURL, routes: { api } } = useConfig();
-  const { t, i18n } = useTranslation('fields');
+  const { collections, routes: { api }, serverURL } = useConfig();
+  const { i18n, t } = useTranslation('fields');
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0);
   const [relatedCollection, setRelatedCollection] = useState<SanitizedCollectionConfig>(() => collections.find((coll) => coll.slug === relationTo));
 
@@ -123,14 +126,14 @@ const Element: React.FC<ElementProps> = (props) => {
     closeDrawer();
   }, [editor, element, setParams, cacheBust, closeDrawer]);
 
-  const swapUpload = React.useCallback(({ docID, collectionConfig }) => {
+  const swapUpload = React.useCallback(({ collectionConfig, docID }) => {
     const newNode = {
-      type: 'upload',
-      value: { id: docID },
-      relationTo: collectionConfig.slug,
       children: [
         { text: ' ' },
       ],
+      relationTo: collectionConfig.slug,
+      type: 'upload',
+      value: { id: docID },
     };
 
     const elementPath = ReactEditor.findPath(editor, element);
@@ -163,8 +166,8 @@ const Element: React.FC<ElementProps> = (props) => {
           <div className={`${baseClass}__thumbnail`}>
             {thumbnailSRC ? (
               <img
-                src={thumbnailSRC}
                 alt={data?.filename}
+                src={thumbnailSRC}
               />
             ) : (
               <FileGraphic />
@@ -177,18 +180,18 @@ const Element: React.FC<ElementProps> = (props) => {
             <div className={`${baseClass}__actions`}>
               {customFields?.length > 0 && (
                 <DrawerToggler
-                  slug={drawerSlug}
                   className={`${baseClass}__upload-drawer-toggler`}
                   disabled={fieldProps?.admin?.readOnly}
+                  slug={drawerSlug}
                 >
                   <Button
-                    icon="edit"
-                    round
-                    buttonStyle="icon-label"
-                    el="div"
                     onClick={(e) => {
                       e.preventDefault();
                     }}
+                    buttonStyle="icon-label"
+                    el="div"
+                    icon="edit"
+                    round
                     tooltip={t('fields:editRelationship')}
                   />
                 </DrawerToggler>
@@ -198,28 +201,28 @@ const Element: React.FC<ElementProps> = (props) => {
                 disabled={fieldProps?.admin?.readOnly}
               >
                 <Button
-                  icon="swap"
-                  round
-                  buttonStyle="icon-label"
                   onClick={() => {
                     // do nothing
                   }}
-                  el="div"
-                  tooltip={t('swapUpload')}
+                  buttonStyle="icon-label"
                   disabled={fieldProps?.admin?.readOnly}
+                  el="div"
+                  icon="swap"
+                  round
+                  tooltip={t('swapUpload')}
                 />
               </ListDrawerToggler>
               <Button
-                icon="x"
-                round
-                buttonStyle="icon-label"
-                className={`${baseClass}__removeButton`}
                 onClick={(e) => {
                   e.preventDefault();
                   removeUpload();
                 }}
-                tooltip={t('removeUpload')}
+                buttonStyle="icon-label"
+                className={`${baseClass}__removeButton`}
                 disabled={fieldProps?.admin?.readOnly}
+                icon="x"
+                round
+                tooltip={t('removeUpload')}
               />
             </div>
           </div>

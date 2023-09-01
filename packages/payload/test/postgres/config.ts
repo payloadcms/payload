@@ -1,4 +1,5 @@
-import { CollectionConfig } from '../../src/collections/config/types';
+import type { CollectionConfig } from '../../src/collections/config/types';
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 
 export const Posts: CollectionConfig = {

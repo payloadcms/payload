@@ -1,18 +1,20 @@
-import { GraphQLJSONObject } from 'graphql-type-json';
 import { GraphQLBoolean, GraphQLNonNull, GraphQLObjectType } from 'graphql';
-import formatName from '../utilities/formatName';
-import { CollectionConfig, SanitizedCollectionConfig } from '../../collections/config/types';
-import { GlobalConfig, SanitizedGlobalConfig } from '../../globals/config/types';
-import { Field } from '../../fields/config/types';
-import { Payload } from '../../payload';
-import { toWords } from '../../utilities/formatLabels';
+import { GraphQLJSONObject } from 'graphql-type-json';
 
-type OperationType = 'create' | 'read' | 'update' | 'delete' | 'unlock' | 'readVersions';
+import type { CollectionConfig, SanitizedCollectionConfig } from '../../collections/config/types';
+import type { Field } from '../../fields/config/types';
+import type { GlobalConfig, SanitizedGlobalConfig } from '../../globals/config/types';
+import type { Payload } from '../../payload';
+
+import { toWords } from '../../utilities/formatLabels';
+import formatName from '../utilities/formatName';
+
+type OperationType = 'create' | 'delete' | 'read' | 'readVersions' | 'unlock' | 'update';
 
 type AccessScopes = 'docAccess' | undefined
 
 type ObjectTypeFields = {
-  [key in OperationType | 'fields']?: { type: GraphQLObjectType };
+  [key in 'fields' | OperationType]?: { type: GraphQLObjectType };
 }
 
 const buildFields = (label, fieldsToBuild) => fieldsToBuild.reduce((builtFields, field) => {
@@ -27,12 +29,12 @@ const buildFields = (label, fieldsToBuild) => fieldsToBuild.reduce((builtFields,
           ...operations,
           [operation]: {
             type: new GraphQLObjectType({
-              name: `${label}_${fieldName}_${capitalizedOperation}`,
               fields: {
                 permission: {
                   type: new GraphQLNonNull(GraphQLBoolean),
                 },
               },
+              name: `${label}_${fieldName}_${capitalizedOperation}`,
             }),
           },
         };
@@ -41,8 +43,8 @@ const buildFields = (label, fieldsToBuild) => fieldsToBuild.reduce((builtFields,
       if (field.fields) {
         objectTypeFields.fields = {
           type: new GraphQLObjectType({
-            name: `${label}_${fieldName}_Fields`,
             fields: buildFields(`${label}_${fieldName}`, field.fields),
+            name: `${label}_${fieldName}_Fields`,
           }),
         };
       }
@@ -51,8 +53,8 @@ const buildFields = (label, fieldsToBuild) => fieldsToBuild.reduce((builtFields,
         ...builtFields,
         [field.name]: {
           type: new GraphQLObjectType({
-            name: `${label}_${fieldName}`,
             fields: objectTypeFields,
+            name: `${label}_${fieldName}`,
           }),
         },
       };
@@ -80,20 +82,20 @@ const buildFields = (label, fieldsToBuild) => fieldsToBuild.reduce((builtFields,
 }, {});
 
 type BuildEntityPolicy = {
-  name: string
   entityFields: Field[]
+  name: string
   operations: OperationType[]
   scope: AccessScopes
 }
 export const buildEntityPolicy = (args: BuildEntityPolicy) => {
-  const { name, entityFields, operations, scope } = args;
+  const { entityFields, name, operations, scope } = args;
 
   const fieldsTypeName = toWords(`${name}-${scope || ''}-Fields`, true);
   const fields = {
     fields: {
       type: new GraphQLObjectType({
-        name: fieldsTypeName,
         fields: buildFields(fieldsTypeName, entityFields),
+        name: fieldsTypeName,
       }),
     },
   };
@@ -103,11 +105,11 @@ export const buildEntityPolicy = (args: BuildEntityPolicy) => {
 
     fields[operation] = {
       type: new GraphQLObjectType({
-        name: operationTypeName,
         fields: {
           permission: { type: new GraphQLNonNull(GraphQLBoolean) },
           where: { type: GraphQLJSONObject },
         },
+        name: operationTypeName,
       }),
     };
   });
@@ -116,8 +118,8 @@ export const buildEntityPolicy = (args: BuildEntityPolicy) => {
 };
 
 type BuildPolicyType = {
-  typeSuffix?: string
   scope?: AccessScopes
+  typeSuffix?: string
 } & ({
   entity: CollectionConfig
   type: 'collection'
@@ -126,8 +128,8 @@ type BuildPolicyType = {
   type: 'global'
 })
 export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
-  const { typeSuffix, entity, type, scope } = args;
-  const { slug, graphQL, fields, versions } = entity;
+  const { entity, scope, type, typeSuffix } = args;
+  const { fields, graphQL, slug, versions } = entity;
 
   let operations = [];
 
@@ -147,13 +149,13 @@ export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
     const collectionTypeName = formatName(`${slug}${typeSuffix || ''}`);
 
     return new GraphQLObjectType({
-      name: collectionTypeName,
       fields: buildEntityPolicy({
-        name: slug,
         entityFields: fields,
+        name: slug,
         operations,
         scope,
       }),
+      name: collectionTypeName,
     });
   }
 
@@ -167,13 +169,13 @@ export function buildPolicyType(args: BuildPolicyType): GraphQLObjectType {
   const globalTypeName = formatName(`${global?.graphQL?.name || slug}${typeSuffix || ''}`);
 
   return new GraphQLObjectType({
-    name: globalTypeName,
     fields: buildEntityPolicy({
-      name: (entity.graphQL) ? entity?.graphQL?.name || slug : slug,
       entityFields: entity.fields,
+      name: (entity.graphQL) ? entity?.graphQL?.name || slug : slug,
       operations,
       scope,
     }),
+    name: globalTypeName,
   });
 }
 
@@ -189,9 +191,9 @@ export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
       return;
     }
     const collectionPolicyType = buildPolicyType({
-      typeSuffix: 'Access',
       entity: collection,
       type: 'collection',
+      typeSuffix: 'Access',
     });
 
     fields[formatName(collection.slug)] = {
@@ -201,9 +203,9 @@ export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
 
   Object.values(payload.config.globals).forEach((global: SanitizedGlobalConfig) => {
     const globalPolicyType = buildPolicyType({
-      typeSuffix: 'Access',
       entity: global,
       type: 'global',
+      typeSuffix: 'Access',
     });
 
     fields[formatName(global.slug)] = {
@@ -212,7 +214,7 @@ export default function buildPoliciesType(payload: Payload): GraphQLObjectType {
   });
 
   return new GraphQLObjectType({
-    name: 'Access',
     fields,
+    name: 'Access',
   });
 }

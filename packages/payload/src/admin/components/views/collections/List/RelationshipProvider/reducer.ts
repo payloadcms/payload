@@ -1,19 +1,19 @@
-import { Documents } from './index';
-import { TypeWithID } from '../../../../../../collections/config/types';
+import type { TypeWithID } from '../../../../../../collections/config/types';
+import type { Documents } from './index';
 
 type RequestDocuments = {
-  type: 'REQUEST',
   docs: { relationTo: string, value: number | string }[],
+  type: 'REQUEST',
 }
 
 type AddLoadedDocuments = {
-  type: 'ADD_LOADED',
-  relationTo: string,
   docs: TypeWithID[],
-  idsToLoad: (string | number)[]
+  idsToLoad: (number | string)[]
+  relationTo: string,
+  type: 'ADD_LOADED',
 }
 
-type Action = RequestDocuments | AddLoadedDocuments;
+type Action = AddLoadedDocuments | RequestDocuments;
 
 export function reducer(state: Documents, action: Action): Documents {
   switch (action.type) {

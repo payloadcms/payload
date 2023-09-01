@@ -1,21 +1,24 @@
-import { UploadedFile } from 'express-fileupload';
+import type { UploadedFile } from 'express-fileupload';
+
 import { fromBuffer } from 'file-type';
 import fs from 'fs';
 import sanitize from 'sanitize-filename';
 import sharp from 'sharp';
-import { SanitizedCollectionConfig } from '../collections/config/types';
-import { PayloadRequest } from '../express/types';
+
+import type { SanitizedCollectionConfig } from '../collections/config/types';
+import type { PayloadRequest } from '../express/types';
+import type { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types';
+
 import fileExists from './fileExists';
-import { FileSize, FileSizes, FileToSave, ImageSize, ProbedImageSize } from './types';
 
 type ResizeArgs = {
-  req: PayloadRequest;
-  file: UploadedFile;
-  dimensions: ProbedImageSize;
-  staticPath: string;
   config: SanitizedCollectionConfig;
-  savedFilename: string;
+  dimensions: ProbedImageSize;
+  file: UploadedFile;
   mimeType: string;
+  req: PayloadRequest;
+  savedFilename: string;
+  staticPath: string;
 };
 
 /** Result from resizing and transforming the requested image sizes */
@@ -25,8 +28,8 @@ type ImageSizesResult = {
 };
 
 type SanitizedImageData = {
-  name: string;
   ext: string;
+  name: string;
 };
 
 /**
@@ -38,7 +41,7 @@ type SanitizedImageData = {
 const getSanitizedImageData = (sourceImage: string): SanitizedImageData => {
   const extension = sourceImage.split('.').pop();
   const name = sanitize(sourceImage.substring(0, sourceImage.lastIndexOf('.')) || sourceImage);
-  return { name, ext: extension! };
+  return { ext: extension, name };
 };
 
 /**
@@ -56,7 +59,7 @@ const getSanitizedImageData = (sourceImage: string): SanitizedImageData => {
  */
 const createImageName = (
   outputImageName: string,
-  { width, height }: sharp.OutputInfo,
+  { height, width }: sharp.OutputInfo,
   extension: string,
 ) => `${outputImageName}-${width}x${height}.${extension}`;
 
@@ -83,16 +86,16 @@ const createResult = (
   mimeType: FileSize['mimeType'] = null,
   sizesToSave: FileToSave[] = [],
 ): ImageSizesResult => ({
-  sizesToSave,
   sizeData: {
     [name]: {
-      width,
-      height,
       filename,
       filesize,
+      height,
       mimeType,
+      width,
     },
   },
+  sizesToSave,
 });
 
 /**
@@ -106,7 +109,7 @@ const createResult = (
  * @returns true if the image needs to be resized, false otherwise
  */
 const needsResize = (
-  { width: desiredWidth, height: desiredHeight, withoutEnlargement, withoutReduction }: ImageSize,
+  { height: desiredHeight, width: desiredWidth, withoutEnlargement, withoutReduction }: ImageSize,
   original: ProbedImageSize,
 ): boolean => {
   // allow enlargement or prevent reduction (our default is to prevent
@@ -150,13 +153,13 @@ const needsResize = (
  * @returns the result of the resize operation(s)
  */
 export default async function resizeAndTransformImageSizes({
-  req,
-  file,
-  dimensions,
-  staticPath,
   config,
-  savedFilename,
+  dimensions,
+  file,
   mimeType,
+  req,
+  savedFilename,
+  staticPath,
 }: ResizeArgs): Promise<ImageSizesResult> {
   const { imageSizes } = config.upload;
 
@@ -211,7 +214,7 @@ export default async function resizeAndTransformImageSizes({
         fs.unlinkSync(imagePath);
       }
 
-      const { width, height, size } = bufferInfo;
+      const { height, size, width } = bufferInfo;
       return createResult(
         imageResizeConfig.name,
         imageNameWithDimensions,
@@ -219,7 +222,7 @@ export default async function resizeAndTransformImageSizes({
         height,
         size,
         mimeInfo?.mime || mimeType,
-        [{ path: imagePath, buffer: bufferData }],
+        [{ buffer: bufferData, path: imagePath }],
       );
     }),
   );

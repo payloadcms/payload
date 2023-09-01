@@ -1,18 +1,18 @@
-import React, { Fragment, useCallback } from 'react';
 import { Modal, useModal } from '@faceless-ui/modal';
+import React, { Fragment, useCallback } from 'react';
 import { Transforms } from 'slate';
-import { useSlate, ReactEditor } from 'slate-react';
-import MinimalTemplate from '../../../../../../../src/admin/components/templates/Minimal';
-import ElementButton from '../../../../../../../src/admin/components/forms/field-types/RichText/elements/Button';
-import X from '../../../../../../../src/admin/components/icons/X';
+import { ReactEditor, useSlate } from 'slate-react';
+
 import Button from '../../../../../../../src/admin/components/elements/Button';
 import Form from '../../../../../../../src/admin/components/forms/Form';
-import Submit from '../../../../../../../src/admin/components/forms/Submit';
 import reduceFieldsToValues from '../../../../../../../src/admin/components/forms/Form/reduceFieldsToValues';
-import Text from '../../../../../../../src/admin/components/forms/field-types/Text';
+import Submit from '../../../../../../../src/admin/components/forms/Submit';
 import Checkbox from '../../../../../../../src/admin/components/forms/field-types/Checkbox';
+import ElementButton from '../../../../../../../src/admin/components/forms/field-types/RichText/elements/Button';
 import Select from '../../../../../../../src/admin/components/forms/field-types/Select';
-
+import Text from '../../../../../../../src/admin/components/forms/field-types/Text';
+import X from '../../../../../../../src/admin/components/icons/X';
+import MinimalTemplate from '../../../../../../../src/admin/components/templates/Minimal';
 import './index.scss';
 
 const baseClass = 'button-rich-text-button';
@@ -21,17 +21,17 @@ const initialFormData = {
   style: 'primary',
 };
 
-const insertButton = (editor, { href, label, style, newTab = false }: any) => {
+const insertButton = (editor, { href, label, newTab = false, style }: any) => {
   const text = { text: ' ' };
   const button = {
-    type: 'button',
-    href,
-    style,
-    newTab,
-    label,
     children: [
       text,
     ],
+    href,
+    label,
+    newTab,
+    style,
+    type: 'button',
   };
 
   const nodes = [button, { children: [{ text: '' }] }];
@@ -43,14 +43,14 @@ const insertButton = (editor, { href, label, style, newTab = false }: any) => {
   Transforms.insertNodes(editor, nodes);
 
   const currentPath = editor.selection.anchor.path[0];
-  const newSelection = { anchor: { path: [currentPath + 1, 0], offset: 0 }, focus: { path: [currentPath + 1, 0], offset: 0 } };
+  const newSelection = { anchor: { offset: 0, path: [currentPath + 1, 0] }, focus: { offset: 0, path: [currentPath + 1, 0] } };
 
   Transforms.select(editor, newSelection);
   ReactEditor.focus(editor);
 };
 
 const ToolbarButton: React.FC<{path: string}> = ({ path }) => {
-  const { open, closeAll } = useModal();
+  const { closeAll, open } = useModal();
   const editor = useSlate();
 
   const handleAddButton = useCallback((fields) => {
@@ -71,8 +71,8 @@ const ToolbarButton: React.FC<{path: string}> = ({ path }) => {
         Button
       </ElementButton>
       <Modal
-        slug={modalSlug}
         className={`${baseClass}__modal`}
+        slug={modalSlug}
       >
         <MinimalTemplate>
           <header className={`${baseClass}__header`}>
@@ -85,8 +85,8 @@ const ToolbarButton: React.FC<{path: string}> = ({ path }) => {
             </Button>
           </header>
           <Form
-            onSubmit={handleAddButton}
             initialData={initialFormData}
+            onSubmit={handleAddButton}
           >
             <Text
               label="Label"
@@ -99,8 +99,6 @@ const ToolbarButton: React.FC<{path: string}> = ({ path }) => {
               required
             />
             <Select
-              label="Style"
-              name="style"
               options={[
                 {
                   label: 'Primary',
@@ -111,6 +109,8 @@ const ToolbarButton: React.FC<{path: string}> = ({ path }) => {
                   value: 'secondary',
                 },
               ]}
+              label="Style"
+              name="style"
             />
             <Checkbox
               label="Open in new tab"

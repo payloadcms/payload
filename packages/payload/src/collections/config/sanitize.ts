@@ -1,20 +1,22 @@
 import merge from 'deepmerge';
 import { isPlainObject } from 'is-plain-object';
-import { CollectionConfig, SanitizedCollectionConfig } from './types';
-import sanitizeFields from '../../fields/config/sanitize';
-import baseAuthFields from '../../auth/baseFields/auth';
-import baseAPIKeyFields from '../../auth/baseFields/apiKey';
-import baseVerificationFields from '../../auth/baseFields/verification';
+
+import type { Config } from '../../config/types';
+import type { CollectionConfig, SanitizedCollectionConfig } from './types';
+
 import baseAccountLockFields from '../../auth/baseFields/accountLock';
-import getBaseUploadFields from '../../uploads/getBaseFields';
-import { formatLabels } from '../../utilities/formatLabels';
-import { authDefaults, defaults } from './defaults';
-import { Config } from '../../config/types';
-import baseVersionFields from '../../versions/baseFields';
+import baseAPIKeyFields from '../../auth/baseFields/apiKey';
+import baseAuthFields from '../../auth/baseFields/auth';
+import baseVerificationFields from '../../auth/baseFields/verification';
 import TimestampsRequired from '../../errors/TimestampsRequired';
+import sanitizeFields from '../../fields/config/sanitize';
+import { fieldAffectsData } from '../../fields/config/types';
 import mergeBaseFields from '../../fields/mergeBaseFields';
 import { extractTranslations } from '../../translations/extractTranslations';
-import { fieldAffectsData } from '../../fields/config/types';
+import getBaseUploadFields from '../../uploads/getBaseFields';
+import { formatLabels } from '../../utilities/formatLabels';
+import baseVersionFields from '../../versions/baseFields';
+import { authDefaults, defaults } from './defaults';
 
 const translations = extractTranslations([
   'general:createdAt',
@@ -43,24 +45,24 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
     });
     if (!hasUpdatedAt) {
       sanitized.fields.push({
-        name: 'updatedAt',
-        label: translations['general:updatedAt'],
-        type: 'date',
         admin: {
-          hidden: true,
           disableBulkEdit: true,
+          hidden: true,
         },
+        label: translations['general:updatedAt'],
+        name: 'updatedAt',
+        type: 'date',
       });
     }
     if (!hasCreatedAt) {
       sanitized.fields.push({
-        name: 'createdAt',
-        label: translations['general:createdAt'],
-        type: 'date',
         admin: {
-          hidden: true,
           disableBulkEdit: true,
+          hidden: true,
         },
+        label: translations['general:createdAt'],
+        name: 'createdAt',
+        type: 'date',
       });
     }
   }
@@ -99,8 +101,8 @@ const sanitizeCollection = (config: Config, collection: CollectionConfig): Sanit
     sanitized.admin.useAsTitle = (sanitized.admin.useAsTitle && sanitized.admin.useAsTitle !== 'id') ? sanitized.admin.useAsTitle : 'filename';
 
     const uploadFields = getBaseUploadFields({
-      config,
       collection: sanitized,
+      config,
     });
 
     sanitized.fields = mergeBaseFields(sanitized.fields, uploadFields);

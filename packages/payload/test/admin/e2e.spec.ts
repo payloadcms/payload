@@ -1,14 +1,17 @@
 import type { Page } from '@playwright/test';
+
 import { expect, test } from '@playwright/test';
 import qs from 'qs';
-import payload from '../../src';
-import { AdminUrlUtil } from '../helpers/adminUrlUtil';
-import { initPayloadE2E } from '../helpers/configHelpers';
-import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers';
+
 import type { Post } from './config';
-import { globalSlug, slug } from './shared';
+
+import payload from '../../src';
 import { mapAsync } from '../../src/utilities/mapAsync';
 import wait from '../../src/utilities/wait';
+import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers';
+import { AdminUrlUtil } from '../helpers/adminUrlUtil';
+import { initPayloadE2E } from '../helpers/configHelpers';
+import { globalSlug, slug } from './shared';
 
 const { afterEach, beforeAll, beforeEach, describe } = test;
 
@@ -620,7 +623,7 @@ describe('admin', () => {
 
         await page.locator('.delete-documents__toggle').click();
         await page.locator('#confirm-delete').click();
-        await expect(await page.locator('.cell-_select')).toHaveCount(1);
+        await expect(page.locator('.cell-_select')).toHaveCount(1);
       });
     });
 
@@ -676,14 +679,14 @@ describe('admin', () => {
         await upChevron.click({ delay: 200 });
 
         // Order should have swapped
-        expect(await page.locator('.row-1 .cell-id').innerText()).toEqual(secondId);
-        expect(await page.locator('.row-2 .cell-id').innerText()).toEqual(firstId);
+        await expect(page.locator('.row-1 .cell-id')).toHaveText(secondId);
+        await expect(page.locator('.row-2 .cell-id')).toHaveText(firstId);
 
         await downChevron.click({ delay: 200 });
 
         // Swap back
-        expect(await page.locator('.row-1 .cell-id').innerText()).toEqual(firstId);
-        expect(await page.locator('.row-2 .cell-id').innerText()).toEqual(secondId);
+        await expect(page.locator('.row-1 .cell-id')).toHaveText(firstId);
+        await expect(page.locator('.row-2 .cell-id')).toHaveText(secondId);
       });
     });
 

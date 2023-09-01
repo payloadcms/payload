@@ -1,14 +1,16 @@
 import crypto from 'crypto';
-import { APIError } from '../../errors';
-import { PayloadRequest } from '../../express/types';
-import { Collection } from '../../collections/config/types';
+
+import type { Collection } from '../../collections/config/types';
+import type { PayloadRequest } from '../../express/types';
+
 import { buildAfterOperation } from '../../collections/operations/utils';
+import { APIError } from '../../errors';
 
 export type Arguments = {
   collection: Collection
   data: {
-    email: string
     [key: string]: unknown
+    email: string
   }
   disableEmail?: boolean
   expiration?: number
@@ -17,7 +19,7 @@ export type Arguments = {
 
 export type Result = string;
 
-async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
+async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
   if (!Object.prototype.hasOwnProperty.call(incomingArgs.data, 'email')) {
     throw new APIError('Missing email.', 400);
   }
@@ -33,8 +35,8 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
 
     args = (await hook({
       args,
-      operation: 'forgotPassword',
       context: args.req.context,
+      operation: 'forgotPassword',
     })) || args;
   }, Promise.resolve());
 
@@ -46,13 +48,13 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
     disableEmail,
     expiration,
     req: {
-      t,
-      payload,
       payload: {
         config,
-        sendEmail: email,
         emailOptions,
+        sendEmail: email,
       },
+      payload,
+      t,
     },
     req,
   } = args;
@@ -61,13 +63,13 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
   // Forget password
   // /////////////////////////////////////
 
-  let token: string | Buffer = crypto.randomBytes(20);
+  let token: Buffer | string = crypto.randomBytes(20);
   token = token.toString('hex');
 
   type UserDoc = {
-    id: string | number
-    resetPasswordToken?: string,
+    id: number | string
     resetPasswordExpiration?: Date,
+    resetPasswordToken?: string,
   }
 
   if (!data.email) {
@@ -76,7 +78,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
 
   let user = await payload.db.findOne<UserDoc>({
     collection: collectionConfig.slug,
-    where: { email: { equals: (data.email as string).toLowerCase() } },
+    where: { email: { equals: (data.email ).toLowerCase() } },
   });
 
 
@@ -87,8 +89,8 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
 
   user = await payload.update({
     collection: collectionConfig.slug,
-    id: user.id,
     data: user,
+    id: user.id,
   });
 
   if (!disableEmail) {
@@ -120,9 +122,9 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
 
     email({
       from: `"${emailOptions.fromName}" <${emailOptions.fromAddress}>`,
-      to: data.email,
-      subject,
       html,
+      subject,
+      to: data.email,
     });
   }
 
@@ -140,8 +142,8 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
   // /////////////////////////////////////
 
   token = await buildAfterOperation({
-    operation: 'forgotPassword',
     args,
+    operation: 'forgotPassword',
     result: token,
   });
 

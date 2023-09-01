@@ -1,92 +1,93 @@
+import { useModal } from '@faceless-ui/modal';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useModal } from '@faceless-ui/modal';
-import { useConfig } from '../../utilities/Config';
-import { Drawer, DrawerToggler } from '../Drawer';
-import { Props } from './types';
-import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider';
+
+import type { Props } from './types';
+
 import { getTranslation } from '../../../../utilities/getTranslation';
-import { useAuth } from '../../utilities/Auth';
-import { FieldSelect } from '../FieldSelect';
-import FormSubmit from '../../forms/Submit';
 import Form from '../../forms/Form';
 import { useForm } from '../../forms/Form/context';
 import RenderFields from '../../forms/RenderFields';
-import { OperationContext } from '../../utilities/OperationProvider';
+import FormSubmit from '../../forms/Submit';
 import fieldTypes from '../../forms/field-types';
 import X from '../../icons/X';
-
+import { useAuth } from '../../utilities/Auth';
+import { useConfig } from '../../utilities/Config';
+import { OperationContext } from '../../utilities/OperationProvider';
+import { SelectAllStatus, useSelection } from '../../views/collections/List/SelectionProvider';
+import { Drawer, DrawerToggler } from '../Drawer';
+import { FieldSelect } from '../FieldSelect';
 import './index.scss';
 
 const baseClass = 'edit-many';
 
-const Submit: React.FC<{disabled: boolean, action: string}> = ({ action, disabled }) => {
+const Submit: React.FC<{action: string, disabled: boolean}> = ({ action, disabled }) => {
   const { submit } = useForm();
   const { t } = useTranslation('general');
 
   const save = useCallback(() => {
     submit({
-      skipValidation: true,
-      method: 'PATCH',
       action,
+      method: 'PATCH',
+      skipValidation: true,
     });
   }, [action, submit]);
 
   return (
     <FormSubmit
       className={`${baseClass}__save`}
-      onClick={save}
       disabled={disabled}
+      onClick={save}
     >
       {t('save')}
     </FormSubmit>
   );
 };
-const Publish: React.FC<{disabled: boolean, action: string}> = ({ action, disabled }) => {
+const Publish: React.FC<{action: string, disabled: boolean}> = ({ action, disabled }) => {
   const { submit } = useForm();
   const { t } = useTranslation('version');
 
   const save = useCallback(() => {
     submit({
-      skipValidation: true,
+      action,
       method: 'PATCH',
       overrides: {
         _status: 'published',
       },
-      action,
+      skipValidation: true,
     });
   }, [action, submit]);
 
   return (
     <FormSubmit
       className={`${baseClass}__publish`}
-      onClick={save}
       disabled={disabled}
+      onClick={save}
     >
       {t('publishChanges')}
     </FormSubmit>
   );
 };
-const SaveDraft: React.FC<{disabled: boolean, action: string}> = ({ action, disabled }) => {
+const SaveDraft: React.FC<{action: string, disabled: boolean}> = ({ action, disabled }) => {
   const { submit } = useForm();
   const { t } = useTranslation('version');
 
   const save = useCallback(() => {
     submit({
-      skipValidation: true,
+      action,
       method: 'PATCH',
       overrides: {
         _status: 'draft',
       },
-      action,
+      skipValidation: true,
     });
   }, [action, submit]);
 
   return (
     <FormSubmit
       className={`${baseClass}__draft`}
-      onClick={save}
       disabled={disabled}
+      onClick={save}
     >
       {t('saveDraft')}
     </FormSubmit>
@@ -94,22 +95,22 @@ const SaveDraft: React.FC<{disabled: boolean, action: string}> = ({ action, disa
 };
 const EditMany: React.FC<Props> = (props) => {
   const {
-    resetParams,
-    collection,
     collection: {
-      slug,
+      fields,
       labels: {
         plural,
       },
-      fields,
+      slug,
     } = {},
+    collection,
+    resetParams,
   } = props;
 
   const { permissions } = useAuth();
   const { closeModal } = useModal();
-  const { serverURL, routes: { api } } = useConfig();
-  const { selectAll, count, getQueryParams } = useSelection();
-  const { t, i18n } = useTranslation('general');
+  const { routes: { api }, serverURL } = useConfig();
+  const { count, getQueryParams, selectAll } = useSelection();
+  const { i18n, t } = useTranslation('general');
   const [selected, setSelected] = useState([]);
 
   const collectionPermissions = permissions?.collections?.[slug];
@@ -128,18 +129,18 @@ const EditMany: React.FC<Props> = (props) => {
   return (
     <div className={baseClass}>
       <DrawerToggler
-        slug={drawerSlug}
-        className={`${baseClass}__toggle`}
-        aria-label={t('edit')}
         onClick={() => {
           setSelected([]);
         }}
+        aria-label={t('edit')}
+        className={`${baseClass}__toggle`}
+        slug={drawerSlug}
       >
         {t('edit')}
       </DrawerToggler>
       <Drawer
-        slug={drawerSlug}
         header={null}
+        slug={drawerSlug}
       >
         <OperationContext.Provider value="update">
           <Form
@@ -149,14 +150,14 @@ const EditMany: React.FC<Props> = (props) => {
             <div className={`${baseClass}__main`}>
               <div className={`${baseClass}__header`}>
                 <h2 className={`${baseClass}__header__title`}>
-                  {t('editingLabel', { label: getTranslation(plural, i18n), count })}
+                  {t('editingLabel', { count, label: getTranslation(plural, i18n) })}
                 </h2>
                 <button
+                  aria-label={t('close')}
                   className={`${baseClass}__header__close`}
                   id={`close-drawer__${drawerSlug}`}
-                  type="button"
                   onClick={() => closeModal(drawerSlug)}
-                  aria-label={t('close')}
+                  type="button"
                 >
                   <X />
                 </button>
@@ -166,8 +167,8 @@ const EditMany: React.FC<Props> = (props) => {
                 setSelected={setSelected}
               />
               <RenderFields
-                fieldTypes={fieldTypes}
                 fieldSchema={selected}
+                fieldTypes={fieldTypes}
               />
               <div className={`${baseClass}__sidebar-wrap`}>
                 <div className={`${baseClass}__sidebar`}>

@@ -1,7 +1,8 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../../../../../utilities/Config';
+
 import { useAuth } from '../../../../../../../utilities/Auth';
+import { useConfig } from '../../../../../../../utilities/Config';
 import { useFormFields } from '../../../../../../Form/context';
 import Relationship from '../../../../../Relationship';
 import Select from '../../../../../Select';
@@ -35,10 +36,10 @@ const RelationshipFields = () => {
   return (
     <Fragment>
       <Select
-        required
         label={t('relationTo')}
         name="relationTo"
         options={options}
+        required
       />
       {relationTo && (
         <Relationship

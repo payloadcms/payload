@@ -1,14 +1,17 @@
 import type { Page } from '@playwright/test';
+
 import { expect, test } from '@playwright/test';
 import path from 'path';
-import { relationSlug, mediaSlug, audioSlug, adminThumbnailSlug } from './config';
+
 import type { Media } from './payload-types';
+
 import payload from '../../src';
+import wait from '../../src/utilities/wait';
+import { saveDocAndAssert } from '../helpers';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
-import { saveDocAndAssert } from '../helpers';
-import wait from '../../src/utilities/wait';
 import { adminThumbnailSrc } from './collections/admin-thumbnail';
+import { adminThumbnailSlug, audioSlug, mediaSlug, relationSlug } from './config';
 
 const { beforeAll, describe } = test;
 
@@ -127,19 +130,19 @@ describe('uploads', () => {
     // remove the selection and open the list drawer
     await page.locator('.file-details__remove').click();
     await page.locator('.upload__toggler.list-drawer__toggler').click();
-    const listDrawer = await page.locator('[id^=list-drawer_1_]');
+    const listDrawer = page.locator('[id^=list-drawer_1_]');
     await expect(listDrawer).toBeVisible();
     await wait(200); // list is loading
 
     // ensure the only card is the audio file
-    const rows = await listDrawer.locator('table tbody tr');
+    const rows = listDrawer.locator('table tbody tr');
     expect(await rows.count()).toEqual(1);
     const filename = rows.locator('.cell-filename');
     await expect(filename).toHaveText('audio.mp3');
 
     // upload an image and try to select it
     await listDrawer.locator('button.list-drawer__create-new-button.doc-drawer__toggler').click();
-    await expect(await page.locator('[id^=doc-drawer_media_2_]')).toBeVisible();
+    await expect(page.locator('[id^=doc-drawer_media_2_]')).toBeVisible();
     await page.locator('[id^=doc-drawer_media_2_] .file-field__upload input[type="file"]').setInputFiles(path.resolve(__dirname, './image.png'));
     await page.locator('[id^=doc-drawer_media_2_] button#action-save').click();
     await wait(200);

@@ -1,5 +1,6 @@
 import { Editor, Element, Node, Text, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
+
 import { getCommonBlock } from './getCommonBlock';
 import isListActive from './isListActive';
 import listTypes from './listTypes';
@@ -21,8 +22,8 @@ const toggleList = (editor: Editor, format: string): void => {
     if (Text.isText(selectedLeaf) && String(selectedLeaf.text).length === 0) {
       Transforms.unwrapNodes(editor, {
         match: (n) => Element.isElement(n) && listTypes.includes(n.type),
-        split: true,
         mode: 'lowest',
+        split: true,
       });
 
       Transforms.setNodes(editor, { type: undefined });
@@ -48,13 +49,12 @@ const toggleList = (editor: Editor, format: string): void => {
     );
     // Otherwise we can assume that we should just activate the list
   } else {
-    Transforms.wrapNodes(editor, { type: format, children: [] });
+    Transforms.wrapNodes(editor, { children: [], type: format });
 
     const [, parentNodePath] = getCommonBlock(editor, (node) => Element.isElement(node) && node.type === format);
 
     // Only set li on nodes that don't have type
     Transforms.setNodes(editor, { type: 'li' }, {
-      voids: true,
       match: (node, path) => {
         const match = Element.isElement(node)
           && typeof node.type === 'undefined'
@@ -62,6 +62,7 @@ const toggleList = (editor: Editor, format: string): void => {
 
         return match;
       },
+      voids: true,
     });
 
     // Wrap nodes that do have a type with an li
@@ -78,7 +79,7 @@ const toggleList = (editor: Editor, format: string): void => {
     }));
 
     nodesToWrap.forEach(([, path]) => {
-      Transforms.wrapNodes(editor, { type: 'li', children: [] }, { at: path });
+      Transforms.wrapNodes(editor, { children: [], type: 'li' }, { at: path });
     });
   }
 

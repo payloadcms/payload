@@ -1,18 +1,22 @@
 /* eslint-disable no-param-reassign */
 import merge from 'deepmerge';
-import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
-import { Operation } from '../../../types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { traverseFields } from './traverseFields';
+
+import type { PayloadRequest, RequestContext } from '../../../express/types';
+import type { Operation } from '../../../types';
+import type { Field, TabAsField} from '../../config/types';
+
+import { fieldAffectsData, tabHasName } from '../../config/types';
 import { getExistingRowDoc } from './getExistingRowDoc';
+import { traverseFields } from './traverseFields';
 
 type Args = {
+  context: RequestContext
   data: Record<string, unknown>
   doc: Record<string, unknown>
   docWithLocales: Record<string, unknown>
-  errors: { message: string, field: string }[]
+  errors: { field: string, message: string }[]
   field: Field | TabAsField
-  id?: string | number
+  id?: number | string
   mergeLocaleActions: (() => void)[]
   operation: Operation
   path: string
@@ -21,7 +25,6 @@ type Args = {
   siblingDoc: Record<string, unknown>
   siblingDocWithLocales?: Record<string, unknown>
   skipValidation: boolean
-  context: RequestContext
 }
 
 // This function is responsible for the following actions, in order:
@@ -32,6 +35,7 @@ type Args = {
 // - Unflatten locales
 
 export const promise = async ({
+  context,
   data,
   doc,
   docWithLocales,
@@ -46,7 +50,6 @@ export const promise = async ({
   siblingDoc,
   siblingDocWithLocales,
   skipValidation,
-  context,
 }: Args): Promise<void> => {
   const passesCondition = (field.admin?.condition) ? field.admin.condition(data, siblingData, { user: req.user }) : true;
   let skipValidationFromHere = skipValidation || !passesCondition;
@@ -68,13 +71,13 @@ export const promise = async ({
         await priorHook;
 
         const hookedValue = await currentHook({
-          value: siblingData[field.name],
-          originalDoc: doc,
-          data,
-          siblingData,
-          operation,
-          req,
           context,
+          data,
+          operation,
+          originalDoc: doc,
+          req,
+          siblingData,
+          value: siblingData[field.name],
         });
 
         if (hookedValue !== undefined) {
@@ -104,20 +107,20 @@ export const promise = async ({
 
       const validationResult = await field.validate(valueToValidate, {
         ...field,
-        jsonError,
         data: merge(doc, data, { arrayMerge: (_, source) => source }),
-        siblingData: merge(siblingDoc, siblingData, { arrayMerge: (_, source) => source }),
         id,
+        jsonError,
         operation,
-        user: req.user,
         payload: req.payload,
+        siblingData: merge(siblingDoc, siblingData, { arrayMerge: (_, source) => source }),
         t: req.t,
+        user: req.user,
       });
 
       if (typeof validationResult === 'string') {
         errors.push({
-          message: validationResult,
           field: `${path}${field.name}`,
+          message: validationResult,
         });
       }
     }
@@ -157,11 +160,11 @@ export const promise = async ({
       // Transform point data for storage
       if (Array.isArray(siblingData[field.name]) && siblingData[field.name][0] !== null && siblingData[field.name][1] !== null) {
         siblingData[field.name] = {
-          type: 'Point',
           coordinates: [
             parseFloat(siblingData[field.name][0]),
             parseFloat(siblingData[field.name][1]),
           ],
+          type: 'Point',
         };
       }
 
@@ -174,6 +177,7 @@ export const promise = async ({
       if (typeof siblingDocWithLocales[field.name] !== 'object') siblingDocWithLocales[field.name] = {};
 
       await traverseFields({
+        context,
         data,
         doc,
         docWithLocales,
@@ -188,7 +192,6 @@ export const promise = async ({
         siblingDoc: siblingDoc[field.name] as Record<string, unknown>,
         siblingDocWithLocales: siblingDocWithLocales[field.name] as Record<string, unknown>,
         skipValidation: skipValidationFromHere,
-        context,
       });
 
       break;
@@ -201,6 +204,7 @@ export const promise = async ({
         const promises = [];
         rows.forEach((row, i) => {
           promises.push(traverseFields({
+            context,
             data,
             doc,
             docWithLocales,
@@ -215,7 +219,6 @@ export const promise = async ({
             siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
             siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
             skipValidation: skipValidationFromHere,
-            context,
           }));
         });
 
@@ -235,6 +238,7 @@ export const promise = async ({
 
           if (block) {
             promises.push(traverseFields({
+              context,
               data,
               doc,
               docWithLocales,
@@ -249,7 +253,6 @@ export const promise = async ({
               siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
               siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
               skipValidation: skipValidationFromHere,
-              context,
             }));
           }
         });
@@ -263,6 +266,7 @@ export const promise = async ({
     case 'row':
     case 'collapsible': {
       await traverseFields({
+        context,
         data,
         doc,
         docWithLocales,
@@ -277,7 +281,6 @@ export const promise = async ({
         siblingDoc,
         siblingDocWithLocales,
         skipValidation: skipValidationFromHere,
-        context,
       });
 
       break;
@@ -301,6 +304,7 @@ export const promise = async ({
       }
 
       await traverseFields({
+        context,
         data,
         doc,
         docWithLocales,
@@ -315,7 +319,6 @@ export const promise = async ({
         siblingDoc: tabSiblingDoc,
         siblingDocWithLocales: tabSiblingDocWithLocales,
         skipValidation: skipValidationFromHere,
-        context,
       });
 
       break;
@@ -323,6 +326,7 @@ export const promise = async ({
 
     case 'tabs': {
       await traverseFields({
+        context,
         data,
         doc,
         docWithLocales,
@@ -337,7 +341,6 @@ export const promise = async ({
         siblingDoc,
         siblingDocWithLocales,
         skipValidation: skipValidationFromHere,
-        context,
       });
 
       break;

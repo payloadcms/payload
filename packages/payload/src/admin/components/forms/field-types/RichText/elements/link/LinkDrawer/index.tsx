@@ -1,41 +1,42 @@
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Drawer } from '../../../../../../elements/Drawer';
-import Form from '../../../../../Form';
-import FormSubmit from '../../../../../Submit';
-import { Props } from './types';
-import fieldTypes from '../../../..';
-import RenderFields from '../../../../../RenderFields';
-import useHotkey from '../../../../../../../hooks/useHotkey';
-import { useEditDepth } from '../../../../../../utilities/EditDepth';
 
+import type { Props } from './types';
+
+import fieldTypes from '../../../..';
+import useHotkey from '../../../../../../../hooks/useHotkey';
+import { Drawer } from '../../../../../../elements/Drawer';
+import { useEditDepth } from '../../../../../../utilities/EditDepth';
+import Form from '../../../../../Form';
+import RenderFields from '../../../../../RenderFields';
+import FormSubmit from '../../../../../Submit';
 import './index.scss';
 
 const baseClass = 'rich-text-link-edit-modal';
 
 export const LinkDrawer: React.FC<Props> = ({
+  drawerSlug,
+  fieldSchema,
   handleModalSubmit,
   initialState,
-  fieldSchema,
-  drawerSlug,
 }) => {
   const { t } = useTranslation('fields');
 
   return (
     <Drawer
-      slug={drawerSlug}
       className={baseClass}
+      slug={drawerSlug}
       title={t('editLink')}
     >
       <Form
-        onSubmit={handleModalSubmit}
         initialState={initialState}
+        onSubmit={handleModalSubmit}
       >
         <RenderFields
-          fieldTypes={fieldTypes}
-          readOnly={false}
           fieldSchema={fieldSchema}
+          fieldTypes={fieldTypes}
           forceRender
+          readOnly={false}
         />
         <LinkSubmit />
       </Form>
@@ -49,7 +50,7 @@ const LinkSubmit: React.FC = () => {
   const ref = useRef<HTMLButtonElement>(null);
   const editDepth = useEditDepth();
 
-  useHotkey({ keyCodes: ['s'], cmdCtrlKey: true, editDepth }, (e) => {
+  useHotkey({ cmdCtrlKey: true, editDepth, keyCodes: ['s'] }, (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (ref?.current) {

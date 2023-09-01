@@ -1,22 +1,24 @@
 /* eslint-disable no-param-reassign */
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { Field, fieldAffectsData, TabAsField, tabHasName, valueIsValueWithRelation } from '../../config/types';
+import type { PayloadRequest, RequestContext } from '../../../express/types';
+import type { Field, TabAsField} from '../../config/types';
+
+import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types';
 import getValueWithDefault from '../../getDefaultValue';
 import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc';
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc';
 import { traverseFields } from './traverseFields';
 
 type Args<T> = {
+  context: RequestContext
   data: T
   doc: T
   field: Field | TabAsField
-  id?: string | number
+  id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
-  context: RequestContext
 }
 
 // This function is responsible for the following actions, in order:
@@ -27,6 +29,7 @@ type Args<T> = {
 // - Compute default values for undefined fields
 
 export const promise = async <T>({
+  context,
   data,
   doc,
   field,
@@ -36,7 +39,6 @@ export const promise = async <T>({
   req,
   siblingData,
   siblingDoc,
-  context,
 }: Args<T>): Promise<void> => {
   if (fieldAffectsData(field)) {
     if (field.name === 'id') {
@@ -114,7 +116,7 @@ export const promise = async <T>({
 
         if (Array.isArray(field.relationTo)) {
           if (Array.isArray(value)) {
-            value.forEach((relatedDoc: { value: unknown, relationTo: string }, i) => {
+            value.forEach((relatedDoc: { relationTo: string, value: unknown }, i) => {
               const relatedCollection = req.payload.config.collections.find((collection) => collection.slug === relatedDoc.relationTo);
               const relationshipIDField = relatedCollection.fields.find((collectionField) => fieldAffectsData(collectionField) && collectionField.name === 'id');
               if (relationshipIDField?.type === 'number') {
@@ -171,13 +173,13 @@ export const promise = async <T>({
         await priorHook;
 
         const hookedValue = await currentHook({
-          value: siblingData[field.name],
-          originalDoc: doc,
-          data,
-          siblingData,
-          operation,
-          req,
           context,
+          data,
+          operation,
+          originalDoc: doc,
+          req,
+          siblingData,
+          value: siblingData[field.name],
         });
 
         if (hookedValue !== undefined) {
@@ -188,7 +190,7 @@ export const promise = async <T>({
 
     // Execute access control
     if (field.access && field.access[operation]) {
-      const result = overrideAccess ? true : await field.access[operation]({ req, id, siblingData, data, doc });
+      const result = overrideAccess ? true : await field.access[operation]({ data, doc, id, req, siblingData });
 
       if (!result) {
         delete siblingData[field.name];
@@ -203,10 +205,10 @@ export const promise = async <T>({
         // Otherwise compute default value
       } else if (typeof field.defaultValue !== 'undefined') {
         siblingData[field.name] = await getValueWithDefault({
-          value: siblingData[field.name],
           defaultValue: field.defaultValue,
           locale: req.locale,
           user: req.user,
+          value: siblingData[field.name],
         });
       }
     }
@@ -222,6 +224,7 @@ export const promise = async <T>({
       if (typeof siblingDoc[field.name] !== 'object') groupDoc = {};
 
       await traverseFields({
+        context,
         data,
         doc,
         fields: field.fields,
@@ -231,7 +234,6 @@ export const promise = async <T>({
         req,
         siblingData: groupData,
         siblingDoc: groupDoc,
-        context,
       });
 
       break;
@@ -244,6 +246,7 @@ export const promise = async <T>({
         const promises = [];
         rows.forEach((row, i) => {
           promises.push(traverseFields({
+            context,
             data,
             doc,
             fields: field.fields,
@@ -253,7 +256,6 @@ export const promise = async <T>({
             req,
             siblingData: row,
             siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
-            context,
           }));
         });
         await Promise.all(promises);
@@ -271,6 +273,7 @@ export const promise = async <T>({
 
           if (block) {
             promises.push(traverseFields({
+              context,
               data,
               doc,
               fields: block.fields,
@@ -280,7 +283,6 @@ export const promise = async <T>({
               req,
               siblingData: row,
               siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
-              context,
             }));
           }
         });
@@ -293,6 +295,7 @@ export const promise = async <T>({
     case 'row':
     case 'collapsible': {
       await traverseFields({
+        context,
         data,
         doc,
         fields: field.fields,
@@ -302,7 +305,6 @@ export const promise = async <T>({
         req,
         siblingData,
         siblingDoc,
-        context,
       });
 
       break;
@@ -323,6 +325,7 @@ export const promise = async <T>({
       }
 
       await traverseFields({
+        context,
         data,
         doc,
         fields: field.fields,
@@ -332,7 +335,6 @@ export const promise = async <T>({
         req,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
-        context,
       });
 
       break;
@@ -340,6 +342,7 @@ export const promise = async <T>({
 
     case 'tabs': {
       await traverseFields({
+        context,
         data,
         doc,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
@@ -349,7 +352,6 @@ export const promise = async <T>({
         req,
         siblingData,
         siblingDoc,
-        context,
       });
 
       break;

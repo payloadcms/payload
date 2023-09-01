@@ -1,9 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { SelectAllStatus, useSelection } from '../SelectionProvider';
-
 import { CheckboxInput } from '../../../../forms/field-types/Checkbox/Input';
+import { SelectAllStatus, useSelection } from '../SelectionProvider';
 
 const SelectAll: React.FC = () => {
   const { t } = useTranslation('general');
@@ -11,11 +10,11 @@ const SelectAll: React.FC = () => {
 
   return (
     <CheckboxInput
-      id="select-all"
       aria-label={selectAll === SelectAllStatus.None ? t('selectAllRows') : t('deselectAllRows')}
       checked={selectAll === SelectAllStatus.AllInPage || selectAll === SelectAllStatus.AllAvailable}
-      partialChecked={selectAll === SelectAllStatus.Some}
+      id="select-all"
       onToggle={() => toggleAll()}
+      partialChecked={selectAll === SelectAllStatus.Some}
     />
   );
 };

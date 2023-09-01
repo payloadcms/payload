@@ -1,12 +1,12 @@
-import { FieldPermissions } from '../../../../../auth';
-import { Field } from '../../../../../fields/config/types';
-import { FieldComponents } from './fields/types';
+import type { FieldPermissions } from '../../../../../auth';
+import type { Field } from '../../../../../fields/config/types';
+import type { FieldComponents } from './fields/types';
 
 export type Props = {
-  fields: Field[]
+  comparison: Record<string, any>
   fieldComponents: FieldComponents,
   fieldPermissions: Record<string, FieldPermissions>
-  version: Record<string, any>
-  comparison: Record<string, any>
+  fields: Field[]
   locales: string[]
+  version: Record<string, any>
 }

@@ -1,10 +1,10 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import { devUser } from '../credentials';
 import AutosavePosts from './collections/Autosave';
 import DraftPosts from './collections/Drafts';
-import AutosaveGlobal from './globals/Autosave';
-import { devUser } from '../credentials';
-import DraftGlobal from './globals/Draft';
 import VersionPosts from './collections/Versions';
+import AutosaveGlobal from './globals/Autosave';
+import DraftGlobal from './globals/Draft';
 import { draftSlug } from './shared';
 
 export default buildConfigWithDefaults({

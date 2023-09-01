@@ -1,24 +1,26 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Payload } from '../../../payload';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+
+import type { PayloadRequest } from '../../../express/types';
+import type { Payload } from '../../../payload';
+import type { Document } from '../../../types';
+import type { TypeWithVersion } from '../../../versions/types';
+
 import { getDataLoader } from '../../../collections/dataloader';
-import { PayloadRequest } from '../../../express/types';
-import { Document } from '../../../types';
-import { TypeWithVersion } from '../../../versions/types';
-import findVersionByID from '../findVersionByID';
-import { i18nInit } from '../../../translations/init';
 import { APIError } from '../../../errors';
 import { setRequestContext } from '../../../express/setRequestContext';
+import { i18nInit } from '../../../translations/init';
+import findVersionByID from '../findVersionByID';
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
-  slug: T
-  id: string
   depth?: number
-  locale?: string
+  disableErrors?: boolean
   fallbackLocale?: string
-  user?: Document
+  id: string
+  locale?: string
   overrideAccess?: boolean
   showHiddenFields?: boolean
-  disableErrors?: boolean
+  slug: T
+  user?: Document
 }
 
 export default async function findVersionByIDLocal<T extends keyof GeneratedTypes['globals']>(
@@ -26,15 +28,15 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
   options: Options<T>,
 ): Promise<TypeWithVersion<GeneratedTypes['globals'][T]>> {
   const {
-    slug: globalSlug,
     depth,
+    disableErrors = false,
+    fallbackLocale = null,
     id,
     locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
-    fallbackLocale = null,
-    user,
     overrideAccess = true,
-    disableErrors = false,
     showHiddenFields,
+    slug: globalSlug,
+    user,
   } = options;
 
   const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
@@ -45,13 +47,13 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
   }
 
   const req = {
-    user,
-    payloadAPI: 'local',
-    locale,
     fallbackLocale,
-    payload,
     i18n,
+    locale,
+    payload,
+    payloadAPI: 'local',
     t: i18n.t,
+    user,
   } as PayloadRequest;
   setRequestContext(req);
 
@@ -59,11 +61,11 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
 
   return findVersionByID({
     depth,
-    id,
-    globalConfig,
-    overrideAccess,
     disableErrors,
-    showHiddenFields,
+    globalConfig,
+    id,
+    overrideAccess,
     req,
+    showHiddenFields,
   });
 }

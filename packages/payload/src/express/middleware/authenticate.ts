@@ -1,6 +1,8 @@
+import type { NextFunction, Request, Response } from 'express';
+
 import passport from 'passport';
-import { Request, Response, NextFunction } from 'express';
-import { SanitizedConfig } from '../../config/types';
+
+import type { SanitizedConfig } from '../../config/types';
 
 export type PayloadAuthenticate = (req: Request, res: Response, next: NextFunction) => NextFunction;
 

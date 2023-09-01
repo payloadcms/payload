@@ -1,14 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Props } from './types';
-import { getTranslation } from '../../../../../../utilities/getTranslation';
 
+import type { Props } from './types';
+
+import { getTranslation } from '../../../../../../utilities/getTranslation';
 import './index.scss';
 
 const baseClass = 'radio-input';
 
 const RadioInput: React.FC<Props> = (props) => {
-  const { isSelected, option, onChange, path } = props;
+  const { isSelected, onChange, option, path } = props;
   const { i18n } = useTranslation();
 
   const classes = [
@@ -24,10 +25,10 @@ const RadioInput: React.FC<Props> = (props) => {
     >
       <div className={classes}>
         <input
-          id={id}
-          type="radio"
           checked={isSelected}
+          id={id}
           onChange={() => (typeof onChange === 'function' ? onChange(option.value) : null)}
+          type="radio"
         />
         <span className={`${baseClass}__styled-radio`} />
         <span className={`${baseClass}__label`}>{getTranslation(option.label, i18n)}</span>

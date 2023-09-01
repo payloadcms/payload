@@ -1,29 +1,31 @@
+import { Modal, useModal } from '@faceless-ui/modal';
 import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Modal, useModal } from '@faceless-ui/modal';
-import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { Props } from './types';
-import Button from '../Button';
+
+import type { Props } from './types';
+
+import { getTranslation } from '../../../../utilities/getTranslation';
 import { requests } from '../../../api';
 import { useForm, useFormModified } from '../../forms/Form/context';
 import MinimalTemplate from '../../templates/Minimal';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { useConfig } from '../../utilities/Config';
+import Button from '../Button';
 import './index.scss';
 
 
 const baseClass = 'duplicate';
 
-const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
+const Duplicate: React.FC<Props> = ({ collection, id, slug }) => {
   const { push } = useHistory();
   const modified = useFormModified();
   const { toggleModal } = useModal();
   const { setModified } = useForm();
-  const { serverURL, routes: { api }, localization } = useConfig();
+  const { localization, routes: { api }, serverURL } = useConfig();
   const { routes: { admin } } = useConfig();
   const [hasClicked, setHasClicked] = useState<boolean>(false);
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
 
   const modalSlug = `duplicate-${id}`;
 
@@ -35,14 +37,14 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
       return;
     }
 
-    const create = async (locale = ''): Promise<string | null> => {
+    const create = async (locale = ''): Promise<null | string> => {
       const response = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
-        params: {
-          locale,
-          depth: 0,
-        },
         headers: {
           'Accept-Language': i18n.language,
+        },
+        params: {
+          depth: 0,
+          locale,
         },
       });
       let data = await response.json();
@@ -58,11 +60,11 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
       }
 
       const result = await requests.post(`${serverURL}${api}/${slug}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept-Language': i18n.language,
-        },
         body: JSON.stringify(data),
+        headers: {
+          'Accept-Language': i18n.language,
+          'Content-Type': 'application/json',
+        },
       });
       const json = await result.json();
 
@@ -82,12 +84,12 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         .forEach(async (locale) => {
           if (!abort) {
             const res = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
-              params: {
-                locale,
-                depth: 0,
-              },
               headers: {
                 'Accept-Language': i18n.language,
+              },
+              params: {
+                depth: 0,
+                locale,
               },
             });
             let localizedDoc = await res.json();
@@ -100,11 +102,11 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
             }
 
             const patchResult = await requests.patch(`${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}`, {
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept-Language': i18n.language,
-              },
               body: JSON.stringify(localizedDoc),
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
+              },
             });
             if (patchResult.status > 400) {
               abort = true;
@@ -145,17 +147,17 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
   return (
     <React.Fragment>
       <Button
-        id="action-duplicate"
         buttonStyle="none"
         className={baseClass}
+        id="action-duplicate"
         onClick={() => handleClick(false)}
       >
         {t('duplicate')}
       </Button>
       {modified && hasClicked && (
         <Modal
-          slug={modalSlug}
           className={`${baseClass}__modal`}
+          slug={modalSlug}
         >
           <MinimalTemplate className={`${baseClass}__modal-template`}>
             <h1>{t('confirmDuplication')}</h1>
@@ -163,16 +165,16 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
               {t('unsavedChangesDuplicate')}
             </p>
             <Button
-              id="confirm-cancel"
               buttonStyle="secondary"
-              type="button"
+              id="confirm-cancel"
               onClick={() => toggleModal(modalSlug)}
+              type="button"
             >
               {t('cancel')}
             </Button>
             <Button
-              onClick={confirm}
               id="confirm-duplicate"
+              onClick={confirm}
             >
               {t('duplicateWithoutSaving')}
             </Button>

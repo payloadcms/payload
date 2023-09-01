@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+
+import type { User } from '../../src/auth';
+import type { UIField } from '../../src/fields/config/types';
+
 import { useAuth } from '../../src/admin/components/utilities/Auth';
-import { User } from '../../src/auth';
-import { UIField } from '../../src/fields/config/types';
 
 export const AuthDebug: React.FC<UIField> = () => {
   const [state, setState] = useState<User | null | undefined>();

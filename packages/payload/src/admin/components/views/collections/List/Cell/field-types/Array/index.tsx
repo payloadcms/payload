@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrayField } from '../../../../../../../../fields/config/types';
+
+import type { ArrayField } from '../../../../../../../../fields/config/types';
+
 import { getTranslation } from '../../../../../../../../utilities/getTranslation';
 
 type Props = {
@@ -9,7 +11,7 @@ type Props = {
 }
 
 const ArrayCell: React.FC<Props> = ({ data, field }) => {
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
   const arrayFields = data ?? [];
   const label = `${arrayFields.length} ${getTranslation(field?.labels?.plural || t('rows'), i18n)}`;
 

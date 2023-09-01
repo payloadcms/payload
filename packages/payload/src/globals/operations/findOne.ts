@@ -1,37 +1,38 @@
+import type { AccessResult } from '../../config/types';
+import type { PayloadRequest } from '../../express/types';
 import type { Where } from '../../types';
+import type { SanitizedGlobalConfig } from '../config/types';
+
 import executeAccess from '../../auth/executeAccess';
-import { AccessResult } from '../../config/types';
-import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 import { afterRead } from '../../fields/hooks/afterRead';
-import { SanitizedGlobalConfig } from '../config/types';
-import { PayloadRequest } from '../../express/types';
 import { initTransaction } from '../../utilities/initTransaction';
 import { killTransaction } from '../../utilities/killTransaction';
+import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable';
 
 type Args = {
+  depth?: number
+  draft?: boolean
   globalConfig: SanitizedGlobalConfig
   locale?: string
-  req: PayloadRequest
-  slug: string
-  depth?: number
-  showHiddenFields?: boolean
-  draft?: boolean
   overrideAccess?: boolean
+  req: PayloadRequest
+  showHiddenFields?: boolean
+  slug: string
 }
 
 async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T> {
   const {
-    globalConfig,
-    req,
-    req: {
-      payload,
-      locale,
-    },
-    slug,
     depth,
-    showHiddenFields,
     draft: draftEnabled = false,
+    globalConfig,
     overrideAccess = false,
+    req: {
+      locale,
+      payload,
+    },
+    req,
+    showHiddenFields,
+    slug,
   } = args;
 
   try {
@@ -52,10 +53,10 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     // /////////////////////////////////////
 
     let doc = await req.payload.db.findGlobal({
-      slug,
       locale,
-      where: overrideAccess ? undefined : accessResult as Where,
       req,
+      slug,
+      where: overrideAccess ? undefined : accessResult as Where,
     });
     if (!doc) {
       doc = {};
@@ -67,12 +68,12 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
 
     if (globalConfig.versions?.drafts && draftEnabled) {
       doc = await replaceWithDraftIfAvailable({
+        accessResult,
+        doc,
         entity: globalConfig,
         entityType: 'global',
-        doc,
-        req,
         overrideAccess,
-        accessResult,
+        req,
       });
     }
 
@@ -84,8 +85,8 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
       await priorHook;
 
       doc = await hook({
-        req,
         doc,
+        req,
       }) || doc;
     }, Promise.resolve());
 
@@ -94,13 +95,13 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
     // /////////////////////////////////////
 
     doc = await afterRead({
+      context: req.context,
       depth,
       doc,
       entityConfig: globalConfig,
-      req,
       overrideAccess,
+      req,
       showHiddenFields,
-      context: req.context,
     });
 
     // /////////////////////////////////////
@@ -111,8 +112,8 @@ async function findOne<T extends Record<string, unknown>>(args: Args): Promise<T
       await priorHook;
 
       doc = await hook({
-        req,
         doc,
+        req,
       }) || doc;
     }, Promise.resolve());
 

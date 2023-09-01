@@ -4,16 +4,18 @@ import {
   GraphQLInputObjectType, GraphQLList,
 } from 'graphql';
 
-import {
+import type {
   Field,
-  FieldAffectingData,
+  FieldAffectingData} from '../../fields/config/types';
+
+import {
   fieldAffectsData,
   fieldHasSubFields,
   fieldIsPresentationalOnly,
 } from '../../fields/config/types';
 import formatName from '../utilities/formatName';
-import { withOperators } from './withOperators';
 import fieldToSchemaMap from './fieldToWhereInputSchemaMap';
+import { withOperators } from './withOperators';
 
 /** This does as the function name suggests. It builds a where GraphQL input type
  * for all the fields which are passed to the function.
@@ -76,22 +78,22 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
   const fieldName = formatName(name);
 
   return new GraphQLInputObjectType({
-    name: `${fieldName}_where`,
     fields: {
       ...fieldTypes,
-      OR: {
-        type: new GraphQLList(new GraphQLInputObjectType({
-          name: `${fieldName}_where_or`,
-          fields: fieldTypes,
-        })),
-      },
       AND: {
         type: new GraphQLList(new GraphQLInputObjectType({
-          name: `${fieldName}_where_and`,
           fields: fieldTypes,
+          name: `${fieldName}_where_and`,
+        })),
+      },
+      OR: {
+        type: new GraphQLList(new GraphQLInputObjectType({
+          fields: fieldTypes,
+          name: `${fieldName}_where_or`,
         })),
       },
     },
+    name: `${fieldName}_where`,
   });
 };
 

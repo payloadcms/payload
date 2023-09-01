@@ -1,26 +1,29 @@
-import React, { forwardRef, Ref } from 'react';
+import type { Ref } from 'react';
+
+import React, { forwardRef } from 'react';
+
 import './index.scss';
 
 type Props = {
+  children: React.ReactNode
+  className?: string
   left?: boolean
-  right?: boolean
   negativeLeft?: boolean
   negativeRight?: boolean
-  className?: string
-  children: React.ReactNode
   ref?: Ref<HTMLDivElement>
+  right?: boolean
 }
 
 const baseClass = 'gutter';
 
 export const Gutter: React.FC<Props> = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const {
+    children,
+    className,
     left = true,
-    right = true,
     negativeLeft = false,
     negativeRight = false,
-    className,
-    children,
+    right = true,
   } = props;
 
   const shouldPadLeft = left && !negativeLeft;
@@ -28,7 +31,6 @@ export const Gutter: React.FC<Props> = forwardRef<HTMLDivElement, Props>((props,
 
   return (
     <div
-      ref={ref}
       className={[
         shouldPadLeft && `${baseClass}--left`,
         shouldPadRight && `${baseClass}--right`,
@@ -36,6 +38,7 @@ export const Gutter: React.FC<Props> = forwardRef<HTMLDivElement, Props>((props,
         negativeRight && `${baseClass}--negative-right`,
         className,
       ].filter(Boolean).join(' ')}
+      ref={ref}
     >
       {children}
     </div>

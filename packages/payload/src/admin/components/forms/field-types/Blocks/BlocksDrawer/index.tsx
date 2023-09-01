@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useModal } from '@faceless-ui/modal';
-import { useTranslation } from 'react-i18next';
 import type { i18n } from 'i18next';
-import BlockSearch from './BlockSearch';
-import { Props } from './types';
-import { Drawer } from '../../../../elements/Drawer';
+
+import { useModal } from '@faceless-ui/modal';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import type { Block } from '../../../../../../fields/config/types';
+import type { Props } from './types';
+
 import { getTranslation } from '../../../../../../utilities/getTranslation';
+import { Drawer } from '../../../../elements/Drawer';
 import { ThumbnailCard } from '../../../../elements/ThumbnailCard';
 import DefaultBlockImage from '../../../../graphics/DefaultBlockImage';
-import { Block } from '../../../../../../fields/config/types';
-
+import BlockSearch from './BlockSearch';
 import './index.scss';
 
 const baseClass = 'blocks-drawer';
@@ -24,9 +26,9 @@ const getBlockLabel = (block: Block, i18n: i18n) => {
 
 export const BlocksDrawer: React.FC<Props> = (props) => {
   const {
-    blocks,
     addRow,
     addRowIndex,
+    blocks,
     drawerSlug,
     labels,
   } = props;
@@ -34,7 +36,7 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredBlocks, setFilteredBlocks] = useState(blocks);
   const { closeModal, isModalOpen } = useModal();
-  const { t, i18n } = useTranslation('fields');
+  const { i18n, t } = useTranslation('fields');
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -63,16 +65,16 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
         <ul className={`${baseClass}__blocks`}>
           {filteredBlocks?.map((block, index) => {
             const {
+              imageAltText,
+              imageURL,
               labels: blockLabels,
               slug,
-              imageURL,
-              imageAltText,
             } = block;
 
             return (
               <li
-                key={index}
                 className={`${baseClass}__block`}
+                key={index}
               >
                 <ThumbnailCard
                   onClick={() => {
@@ -81,16 +83,16 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
                   }}
                   thumbnail={imageURL ? (
                     <img
-                      src={imageURL}
                       alt={imageAltText}
+                      src={imageURL}
                     />
                   ) : (
                     <div className={`${baseClass}__default-image`}>
                       <DefaultBlockImage />
                     </div>
                   )}
-                  label={getTranslation(blockLabels.singular, i18n)}
                   alignLabel="center"
+                  label={getTranslation(blockLabels.singular, i18n)}
                 />
               </li>
             );

@@ -8,6 +8,7 @@ import es from './es.json';
 import fa from './fa.json';
 import fr from './fr.json';
 import hr from './hr.json';
+import hu from './hu.json';
 import it from './it.json';
 import ja from './ja.json';
 import my from './my.json';
@@ -23,7 +24,6 @@ import tr from './tr.json';
 import ua from './ua.json';
 import vi from './vi.json';
 import zh from './zh.json';
-import hu from './hu.json';
 
 export default {
   ar,

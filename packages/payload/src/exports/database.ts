@@ -1,5 +1,4 @@
 export {
-  DatabaseAdapter,
   BeginTransaction,
   CommitTransaction,
   Connect,
@@ -10,6 +9,7 @@ export {
   CreateMigration,
   CreateVersion,
   CreateVersionArgs,
+  DatabaseAdapter,
   DeleteMany,
   DeleteManyArgs,
   DeleteOne,
@@ -63,10 +63,6 @@ export {
 } from '../database/getLocalizedPaths'
 
 export {
-  transaction
-} from '../database/transaction'
-
-export {
   createMigration
 } from '../database/migrations/createMigration'
 
@@ -118,3 +114,7 @@ export {
 export {
   validateSearchParam
 } from '../database/queryValidation/validateSearchParams'
+
+export {
+  transaction
+} from '../database/transaction'

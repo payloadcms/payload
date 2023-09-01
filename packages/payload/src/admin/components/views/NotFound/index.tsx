@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import Eyebrow from '../../elements/Eyebrow';
-import { useStepNav } from '../../elements/StepNav';
+
 import Button from '../../elements/Button';
-import Meta from '../../utilities/Meta';
+import Eyebrow from '../../elements/Eyebrow';
 import { Gutter } from '../../elements/Gutter';
+import { useStepNav } from '../../elements/StepNav';
+import { useConfig } from '../../utilities/Config';
+import Meta from '../../utilities/Meta';
 
 const baseClass = 'not-found';
 
@@ -23,9 +24,9 @@ const NotFound: React.FC = () => {
   return (
     <div className={baseClass}>
       <Meta
-        title={t('notFound')}
         description={t('pageNotFound')}
         keywords={`404 ${t('notFound')}`}
+        title={t('notFound')}
       />
       <Eyebrow />
       <Gutter className={`${baseClass}__wrap`}>

@@ -1,7 +1,9 @@
 import { Table } from 'console-table-printer';
-import { DatabaseAdapter } from '../types';
-import { readMigrationFiles } from './readMigrationFiles';
+
+import type { DatabaseAdapter } from '../types';
+
 import { getMigrations } from './getMigrations';
+import { readMigrationFiles } from './readMigrationFiles';
 
 export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
   const { payload } = this;
@@ -19,9 +21,9 @@ export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
       (m) => m.name === migration.name,
     );
     return {
-      Ran: existingMigration ? 'Yes' : 'No',
-      Name: migration.name,
       Batch: existingMigration?.batch,
+      Name: migration.name,
+      Ran: existingMigration ? 'Yes' : 'No',
     };
   });
 

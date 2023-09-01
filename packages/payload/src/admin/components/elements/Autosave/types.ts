@@ -1,9 +1,9 @@
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../../../globals/config/types';
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import type { SanitizedGlobalConfig } from '../../../../globals/config/types';
 
 export type Props = {
   collection?: SanitizedCollectionConfig,
   global?: SanitizedGlobalConfig,
-  id?: string | number
+  id?: number | string
   publishedDocUpdatedAt: string
 }

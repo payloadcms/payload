@@ -1,9 +1,10 @@
 
-import React from 'react';
-import { UseDraggableArguments } from '@dnd-kit/core';
+import type { UseDraggableArguments } from '@dnd-kit/core';
 // eslint-disable-next-line import/no-unresolved
-import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
-import { UseDraggableSortableReturn } from '../useDraggableSortable/types';
+import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
+import type React from 'react';
+
+import type { UseDraggableSortableReturn } from '../useDraggableSortable/types';
 
 export type DragHandleProps = UseDraggableArguments & {
   attributes: UseDraggableArguments['attributes']

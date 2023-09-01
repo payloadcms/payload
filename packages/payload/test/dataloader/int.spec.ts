@@ -1,4 +1,5 @@
 import { GraphQLClient } from 'graphql-request';
+
 import payload from '../../src';
 import { devUser } from '../credentials';
 import { initPayloadTest } from '../helpers/configHelpers';

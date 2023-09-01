@@ -1,18 +1,20 @@
 import React from 'react';
+
+import type { TabsField } from '../../../../../../../fields/config/types';
+import type { Props } from '../types';
+
 import RenderFieldsToDiff from '../..';
-import { Props } from '../types';
-import { TabsField } from '../../../../../../../fields/config/types';
 import Nested from '../Nested';
 
 const baseClass = 'tabs-diff';
 
 const Tabs: React.FC<Props & { field: TabsField }> = ({
-  version,
   comparison,
-  permissions,
   field,
-  locales,
   fieldComponents,
+  locales,
+  permissions,
+  version,
 }) => (
   <div className={baseClass}>
     <div className={`${baseClass}__wrap`}>
@@ -20,26 +22,26 @@ const Tabs: React.FC<Props & { field: TabsField }> = ({
         if ('name' in tab) {
           return (
             <Nested
-              key={i}
-              version={version?.[tab.name]}
               comparison={comparison?.[tab.name]}
-              permissions={permissions}
               field={tab}
-              locales={locales}
               fieldComponents={fieldComponents}
+              key={i}
+              locales={locales}
+              permissions={permissions}
+              version={version?.[tab.name]}
             />
           );
         }
 
         return (
           <RenderFieldsToDiff
+            comparison={comparison}
+            fieldComponents={fieldComponents}
+            fieldPermissions={permissions}
+            fields={tab.fields}
             key={i}
             locales={locales}
             version={version}
-            comparison={comparison}
-            fieldPermissions={permissions}
-            fields={tab.fields}
-            fieldComponents={fieldComponents}
           />
         );
       })}

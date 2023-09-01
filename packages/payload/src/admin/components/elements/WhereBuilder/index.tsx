@@ -1,21 +1,22 @@
-import React, { useState, useReducer } from 'react';
 import queryString from 'qs';
-import { useHistory } from 'react-router-dom';
+import React, { useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Props } from './types';
+import { useHistory } from 'react-router-dom';
+
+import type { Where } from '../../../../types';
+import type { Props } from './types';
+
+import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
+import { getTranslation } from '../../../../utilities/getTranslation';
 import useThrottledEffect from '../../../hooks/useThrottledEffect';
+import { useSearchParams } from '../../utilities/SearchParams';
 import Button from '../Button';
-import reducer from './reducer';
 import Condition from './Condition';
 import fieldTypes from './field-types';
-import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields';
-import { useSearchParams } from '../../utilities/SearchParams';
-import validateWhereQuery from './validateWhereQuery';
-import { Where } from '../../../../types';
-import { getTranslation } from '../../../../utilities/getTranslation';
-import { transformWhereQuery } from './transformWhereQuery';
-
 import './index.scss';
+import reducer from './reducer';
+import { transformWhereQuery } from './transformWhereQuery';
+import validateWhereQuery from './validateWhereQuery';
 
 const baseClass = 'where-builder';
 
@@ -50,19 +51,19 @@ const reduceFields = (fields, i18n) => flattenTopLevelFields(fields).reduce((red
  */
 const WhereBuilder: React.FC<Props> = (props) => {
   const {
-    collection,
-    modifySearchQuery = true,
-    handleChange,
     collection: {
       labels: {
         plural,
       } = {},
     } = {},
+    collection,
+    handleChange,
+    modifySearchQuery = true,
   } = props;
 
   const history = useHistory();
   const params = useSearchParams();
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
 
   // This handles initializing the where conditions from the search query (URL). That way, if you pass in
   // query params to the URL, the where conditions will be initialized from those and displayed in the UI.
@@ -89,7 +90,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
 
   // This handles updating the search query (URL) when the where conditions change
   useThrottledEffect(() => {
-    const currentParams = queryString.parse(history.location.search, { ignoreQueryPrefix: true, depth: 10 }) as { where: Where };
+    const currentParams = queryString.parse(history.location.search, { depth: 10, ignoreQueryPrefix: true }) as { where: Where };
 
     const paramsToKeep = typeof currentParams?.where === 'object' && 'or' in currentParams.where ? currentParams.where.or.reduce((keptParams, param) => {
       const newParam = { ...param };
@@ -152,12 +153,12 @@ const WhereBuilder: React.FC<Props> = (props) => {
                         </div>
                       )}
                       <Condition
-                        value={conditions[orIndex].and[andIndex]}
-                        orIndex={orIndex}
                         andIndex={andIndex}
-                        key={andIndex}
-                        fields={reducedFields}
                         dispatch={dispatchConditions}
+                        fields={reducedFields}
+                        key={andIndex}
+                        orIndex={orIndex}
+                        value={conditions[orIndex].and[andIndex]}
                       />
                     </li>
                   ))}
@@ -166,14 +167,14 @@ const WhereBuilder: React.FC<Props> = (props) => {
             ))}
           </ul>
           <Button
+            onClick={() => {
+              if (reducedFields.length > 0) dispatchConditions({ field: reducedFields[0].value, type: 'add' });
+            }}
+            buttonStyle="icon-label"
             className={`${baseClass}__add-or`}
             icon="plus"
-            buttonStyle="icon-label"
             iconPosition="left"
             iconStyle="with-border"
-            onClick={() => {
-              if (reducedFields.length > 0) dispatchConditions({ type: 'add', field: reducedFields[0].value });
-            }}
           >
             {t('or')}
           </Button>
@@ -183,14 +184,14 @@ const WhereBuilder: React.FC<Props> = (props) => {
         <div className={`${baseClass}__no-filters`}>
           <div className={`${baseClass}__label`}>{t('noFiltersSet')}</div>
           <Button
+            onClick={() => {
+              if (reducedFields.length > 0) dispatchConditions({ field: reducedFields[0].value, type: 'add' });
+            }}
+            buttonStyle="icon-label"
             className={`${baseClass}__add-first-filter`}
             icon="plus"
-            buttonStyle="icon-label"
             iconPosition="left"
             iconStyle="with-border"
-            onClick={() => {
-              if (reducedFields.length > 0) dispatchConditions({ type: 'add', field: reducedFields[0].value });
-            }}
           >
             {t('addFilter')}
           </Button>

@@ -1,12 +1,13 @@
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import useField from '../../useField';
-import Label from '../../Label';
-import Error from '../../Error';
-import { useFormFields } from '../../Form/context';
-import { FormField } from '../../Form/types';
+
+import type { FormField } from '../../Form/types';
 import type { Props } from './types';
 
+import Error from '../../Error';
+import { useFormFields } from '../../Form/context';
+import Label from '../../Label';
+import useField from '../../useField';
 import './index.scss';
 
 const ConfirmPassword: React.FC<Props> = (props) => {
@@ -30,13 +31,13 @@ const ConfirmPassword: React.FC<Props> = (props) => {
   }, [password, t]);
 
   const {
-    value,
-    showError,
-    setValue,
     errorMessage,
+    setValue,
+    showError,
+    value,
   } = useField({
-    path: 'confirm-password',
     disableFormData: true,
+    path: 'confirm-password',
     validate,
   });
 
@@ -49,8 +50,8 @@ const ConfirmPassword: React.FC<Props> = (props) => {
   return (
     <div className={classes}>
       <Error
-        showError={showError}
         message={errorMessage}
+        showError={showError}
       />
       <Label
         htmlFor="field-confirm-password"
@@ -58,13 +59,13 @@ const ConfirmPassword: React.FC<Props> = (props) => {
         required
       />
       <input
-        value={value as string || ''}
-        onChange={setValue}
-        type="password"
         autoComplete="off"
+        disabled={!!disabled}
         id="field-confirm-password"
         name="confirm-password"
-        disabled={!!disabled}
+        onChange={setValue}
+        type="password"
+        value={value as string || ''}
       />
     </div>
   );

@@ -1,35 +1,37 @@
-import { Configuration, WebpackPluginInstance } from 'webpack';
+import type { Configuration, WebpackPluginInstance } from 'webpack';
+
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import { SwcMinifyWebpackPlugin } from 'swc-minify-webpack-plugin';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+
+import type { SanitizedConfig } from '../../../config/types';
+
 import { getBaseConfig } from './base';
-import { SanitizedConfig } from '../../../config/types';
 
 export const getProdConfig = (payloadConfig: SanitizedConfig): Configuration => {
   const baseConfig = getBaseConfig(payloadConfig) as any;
 
   let webpackConfig: Configuration = {
     ...baseConfig,
-    output: {
-      publicPath: `${payloadConfig.routes.admin}/`,
-      path: payloadConfig.admin.buildPath,
-      filename: '[name].[chunkhash].js',
-      chunkFilename: '[name].[chunkhash].js',
-    },
     mode: 'production',
-    stats: 'errors-only',
     optimization: {
       minimizer: [new SwcMinifyWebpackPlugin()],
       splitChunks: {
         cacheGroups: {
           styles: {
-            name: 'styles',
-            test: /\.(sa|sc|c)ss$/,
             chunks: 'all',
             enforce: true,
+            name: 'styles',
+            test: /\.(sa|sc|c)ss$/,
           },
         },
       },
+    },
+    output: {
+      chunkFilename: '[name].[chunkhash].js',
+      filename: '[name].[chunkhash].js',
+      path: payloadConfig.admin.buildPath,
+      publicPath: `${payloadConfig.routes.admin}/`,
     },
     plugins: [
       ...baseConfig.plugins,
@@ -38,11 +40,12 @@ export const getProdConfig = (payloadConfig: SanitizedConfig): Configuration => 
         ignoreOrder: true,
       }),
     ],
+    stats: 'errors-only',
   };
 
   webpackConfig.module.rules.push({
-    test: /\.(scss|css)$/,
     sideEffects: true,
+    test: /\.(scss|css)$/,
     use: [
       MiniCSSExtractPlugin.loader,
       {

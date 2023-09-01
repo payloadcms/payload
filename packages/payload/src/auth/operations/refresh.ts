@@ -1,25 +1,28 @@
-import url from 'url';
+import type { Response } from 'express';
+
 import jwt from 'jsonwebtoken';
-import { Response } from 'express';
-import { Collection, BeforeOperationHook } from '../../collections/config/types';
+import url from 'url';
+
+import type { BeforeOperationHook, Collection } from '../../collections/config/types';
+import type { PayloadRequest } from '../../express/types';
+import type { Document } from '../../types';
+
+import { buildAfterOperation } from '../../collections/operations/utils';
 import { Forbidden } from '../../errors';
 import getCookieExpiration from '../../utilities/getCookieExpiration';
-import { Document } from '../../types';
-import { PayloadRequest } from '../../express/types';
-import { buildAfterOperation } from '../../collections/operations/utils';
 import { getFieldsToSign } from './getFieldsToSign';
 
 export type Result = {
   exp: number,
-  user: Document,
   refreshedToken: string
+  user: Document,
 }
 
 export type Arguments = {
   collection: Collection,
-  token: string
   req: PayloadRequest
   res?: Response
+  token: string
 }
 
 async function refresh(incomingArgs: Arguments): Promise<Result> {
@@ -34,8 +37,8 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
 
     args = (await hook({
       args,
-      operation: 'refresh',
       context: args.req.context,
+      operation: 'refresh',
     })) || args;
   }, Promise.resolve());
 
@@ -49,8 +52,8 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
     },
     req: {
       payload: {
-        secret,
         config,
+        secret,
       },
     },
   } = args;
@@ -61,16 +64,16 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
   const isGraphQL = parsedURL.pathname === config.routes.graphQL;
 
   const user = await args.req.payload.findByID({
-    id: args.req.user.id,
     collection: args.req.user.collection,
-    req: args.req,
     depth: isGraphQL ? 0 : args.collection.config.auth.depth,
+    id: args.req.user.id,
+    req: args.req,
   });
 
   const fieldsToSign = getFieldsToSign({
     collectionConfig,
-    user: args?.req?.user,
     email: user?.email as string,
+    user: args?.req?.user,
   });
 
   const refreshedToken = jwt.sign(
@@ -85,12 +88,12 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
 
   if (args.res) {
     const cookieOptions = {
-      path: '/',
-      httpOnly: true,
-      expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-      secure: collectionConfig.auth.cookies.secure,
-      sameSite: collectionConfig.auth.cookies.sameSite,
       domain: undefined,
+      expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
+      httpOnly: true,
+      path: '/',
+      sameSite: collectionConfig.auth.cookies.sameSite,
+      secure: collectionConfig.auth.cookies.secure,
     };
 
     if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
@@ -99,9 +102,9 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
   }
 
   let result: Result = {
-    user,
-    refreshedToken,
     exp,
+    refreshedToken,
+    user,
   };
 
   // /////////////////////////////////////
@@ -112,11 +115,11 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
     await priorHook;
 
     result = (await hook({
+      context: args.req.context,
+      exp,
       req: args.req,
       res: args.res,
-      exp,
       token: refreshedToken,
-      context: args.req.context,
     })) || result;
   }, Promise.resolve());
 
@@ -126,8 +129,8 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
   // /////////////////////////////////////
 
   result = await buildAfterOperation({
-    operation: 'refresh',
     args,
+    operation: 'refresh',
     result,
   });
 

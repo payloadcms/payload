@@ -1,23 +1,27 @@
 /* eslint-disable no-param-reassign */
-import express, { NextFunction, Response } from 'express';
-import { InitOptions } from './config/types';
+import type { NextFunction, Response } from 'express';
 
-import authenticate from './express/middleware/authenticate';
-import expressMiddleware from './express/middleware';
-import initAdmin from './express/admin';
+import express from 'express';
+
+import type { InitOptions } from './config/types';
+import type { PayloadRequest } from './express/types';
+import type { Payload } from './payload';
+
 import initAuth from './auth/init';
 import access from './auth/requestHandlers/access';
-import initCollectionsHTTP from './collections/initHTTP';
-import initGlobalsHTTP from './globals/initHTTP';
-import initGraphQLPlayground from './graphql/initPlayground';
-import initStatic from './express/static';
-import graphQLHandler from './graphql/graphQLHandler';
-import identifyAPI from './express/middleware/identifyAPI';
-import errorHandler from './express/middleware/errorHandler';
-import { PayloadRequest } from './express/types';
 import { getDataLoader } from './collections/dataloader';
+import initCollectionsHTTP from './collections/initHTTP';
+import initAdmin from './express/admin';
+import expressMiddleware from './express/middleware';
+import authenticate from './express/middleware/authenticate';
+import errorHandler from './express/middleware/errorHandler';
+import identifyAPI from './express/middleware/identifyAPI';
 import mountEndpoints from './express/mountEndpoints';
-import { getPayload, Payload } from './payload';
+import initStatic from './express/static';
+import initGlobalsHTTP from './globals/initHTTP';
+import graphQLHandler from './graphql/graphQLHandler';
+import initGraphQLPlayground from './graphql/initPlayground';
+import { getPayload } from './payload';
 
 export const initHTTP = async (options: InitOptions): Promise<Payload> => {
   if (typeof options.local === 'undefined') options.local = false;

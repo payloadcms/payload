@@ -1,5 +1,5 @@
-import { Readable } from 'stream';
 import fs from 'fs';
+import { Readable } from 'stream';
 
 /**
  * Save buffer data to a file.

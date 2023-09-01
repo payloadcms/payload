@@ -1,24 +1,24 @@
 export type Props = {
-  limit?: number,
-  totalPages?: number,
-  page?: number,
-  hasPrevPage?: boolean,
+  disableHistoryChange?: boolean,
   hasNextPage?: boolean,
-  prevPage?: number,
+  hasPrevPage?: boolean,
+  limit?: number,
   nextPage?: number,
   numberOfNeighbors?: number,
-  disableHistoryChange?: boolean,
   onChange?: (page: number) => void,
+  page?: number,
+  prevPage?: number,
+  totalPages?: number,
 }
 
 export type Node = {
-  type: 'Page' | 'Separator' | 'ClickableArrow'
   props?: {
-    page?: number
-    updatePage: (page?: number) => void
+    direction?: 'left' | 'right'
+    isDisabled?: boolean
     isFirstPage?: boolean
     isLastPage?: boolean
-    isDisabled?: boolean
-    direction?: 'right' | 'left'
+    page?: number
+    updatePage: (page?: number) => void
   }
+  type: 'ClickableArrow' | 'Page' | 'Separator'
 } | number

@@ -1,6 +1,9 @@
+import type { ValueContainerProps } from 'react-select';
+
 import React from 'react';
-import { components as SelectComponents, ValueContainerProps } from 'react-select';
-import { Option } from '../types';
+import { components as SelectComponents } from 'react-select';
+
+import type { Option } from '../types';
 
 import './index.scss';
 
@@ -15,8 +18,8 @@ export const ValueContainer: React.FC<ValueContainerProps<Option, any>> = (props
 
   return (
     <div
-      ref={customProps?.droppableRef}
       className={baseClass}
+      ref={customProps?.droppableRef}
     >
       <SelectComponents.ValueContainer {...props} />
     </div>

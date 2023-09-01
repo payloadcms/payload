@@ -1,8 +1,11 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { InitOptions } from './config/types';
-import { initHTTP } from './initHTTP';
-import { Payload as LocalPayload, BasePayload } from './payload';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+
+import type { InitOptions } from './config/types';
 import type { RequestContext } from './express/types';
+import type { Payload as LocalPayload} from './payload';
+
+import { initHTTP } from './initHTTP';
+import { BasePayload } from './payload';
 
 export { DatabaseAdapter } from './database/types';
 

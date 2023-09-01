@@ -1,6 +1,6 @@
+import qs from 'qs';
 import React, { createContext, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
-import qs from 'qs';
 
 const Context = createContext({});
 
@@ -9,7 +9,7 @@ export const SearchParamsProvider: React.FC<{children?: React.ReactNode}> = ({ c
 
   const params = qs.parse(
     location.search,
-    { ignoreQueryPrefix: true, depth: 10 },
+    { depth: 10, ignoreQueryPrefix: true },
   );
 
   return (

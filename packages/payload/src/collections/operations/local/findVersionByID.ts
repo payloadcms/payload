@@ -1,30 +1,32 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Payload } from '../../../payload';
-import { Document } from '../../../types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { TypeWithVersion } from '../../../versions/types';
-import findVersionByID from '../findVersionByID';
-import { getDataLoader } from '../../dataloader';
-import { i18nInit } from '../../../translations/init';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+
+import type { PayloadRequest, RequestContext } from '../../../express/types';
+import type { Payload } from '../../../payload';
+import type { Document } from '../../../types';
+import type { TypeWithVersion } from '../../../versions/types';
+
 import { APIError } from '../../../errors';
 import { setRequestContext } from '../../../express/setRequestContext';
+import { i18nInit } from '../../../translations/init';
+import { getDataLoader } from '../../dataloader';
+import findVersionByID from '../findVersionByID';
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
-  id: string
-  depth?: number
-  locale?: string
-  fallbackLocale?: string
-  user?: Document
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
-  disableErrors?: boolean
-  req?: PayloadRequest
-  draft?: boolean
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
   context?: RequestContext,
+  depth?: number
+  disableErrors?: boolean
+  draft?: boolean
+  fallbackLocale?: string
+  id: string
+  locale?: string
+  overrideAccess?: boolean
+  req?: PayloadRequest
+  showHiddenFields?: boolean
+  user?: Document
 }
 
 export default async function findVersionByIDLocal<T extends keyof GeneratedTypes['collections']>(
@@ -33,15 +35,15 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
 ): Promise<TypeWithVersion<GeneratedTypes['collections'][T]>> {
   const {
     collection: collectionSlug,
+    context,
     depth,
+    disableErrors = false,
+    fallbackLocale = null,
     id,
     locale = null,
-    fallbackLocale = null,
     overrideAccess = true,
-    disableErrors = false,
-    showHiddenFields,
     req = {} as PayloadRequest,
-    context,
+    showHiddenFields,
   } = options;
   setRequestContext(options.req, context);
 
@@ -62,12 +64,12 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
 
   return findVersionByID({
-    depth,
-    id,
     collection,
-    overrideAccess,
+    depth,
     disableErrors,
-    showHiddenFields,
+    id,
+    overrideAccess,
     req,
+    showHiddenFields,
   });
 }

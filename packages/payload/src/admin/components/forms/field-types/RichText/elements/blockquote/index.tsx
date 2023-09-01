@@ -1,7 +1,7 @@
 import React from 'react';
-import ElementButton from '../Button';
-import BlockquoteIcon from '../../../../../icons/Blockquote';
 
+import BlockquoteIcon from '../../../../../icons/Blockquote';
+import ElementButton from '../Button';
 import './index.scss';
 
 const Blockquote = ({ attributes, children }) => (

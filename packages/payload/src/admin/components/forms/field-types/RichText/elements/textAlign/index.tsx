@@ -1,11 +1,11 @@
 import React from 'react';
-import ElementButton from '../Button';
-import AlignLeftIcon from '../../../../../icons/AlignLeft';
+
 import AlignCenterIcon from '../../../../../icons/AlignCenter';
+import AlignLeftIcon from '../../../../../icons/AlignLeft';
 import AlignRightIcon from '../../../../../icons/AlignRight';
+import ElementButton from '../Button';
 
 export default {
-  name: 'alignment',
   Button: () => {
     return (
       <React.Fragment>
@@ -30,4 +30,5 @@ export default {
       </React.Fragment>
     );
   },
+  name: 'alignment',
 };

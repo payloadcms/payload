@@ -1,17 +1,18 @@
-import { PreferenceUpdateRequest } from '../types';
+import type { PreferenceUpdateRequest } from '../types';
+
 import defaultAccess from '../../auth/defaultAccess';
 import executeAccess from '../../auth/executeAccess';
 import UnauthorizedError from '../../errors/UnathorizedError';
 
 async function update(args: PreferenceUpdateRequest) {
   const {
+    key,
     overrideAccess,
-    user,
-    req,
     req: {
       payload,
     },
-    key,
+    req,
+    user,
     value,
   } = args;
 
@@ -19,17 +20,17 @@ async function update(args: PreferenceUpdateRequest) {
 
   const filter = {
     key: { equals: key },
-    'user.value': { equals: user.id },
     'user.relationTo': { equals: user.collection },
+    'user.value': { equals: user.id },
   };
 
   const preference = {
     key,
-    value,
     user: {
-      value: user.id,
       relationTo: user.collection,
+      value: user.id,
     },
+    value,
   };
 
   if (!user) {
@@ -50,9 +51,9 @@ async function update(args: PreferenceUpdateRequest) {
   } catch (err: unknown) {
     await payload.db.updateOne({
       collection,
-      where: filter,
       data: preference,
       req,
+      where: filter,
     });
   }
 

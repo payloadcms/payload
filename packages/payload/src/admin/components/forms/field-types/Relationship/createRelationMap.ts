@@ -1,7 +1,7 @@
-import { Value } from './types';
+import type { Value } from './types';
 
 type RelationMap = {
-  [relation: string]: (string | number)[]
+  [relation: string]: (number | string)[]
 }
 
 type CreateRelationMap = (args: {

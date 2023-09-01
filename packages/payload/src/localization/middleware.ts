@@ -6,7 +6,7 @@ import type { SanitizedLocalizationConfig } from '../config/types';
  * @param localization
  * @returns {Function}
  */
-export default function localizationMiddleware(localization: false | SanitizedLocalizationConfig) {
+export default function localizationMiddleware(localization: SanitizedLocalizationConfig | false) {
   const middleware = (req, res, next) => {
     if (localization) {
       const validLocales = [...localization.localeCodes, 'all'];

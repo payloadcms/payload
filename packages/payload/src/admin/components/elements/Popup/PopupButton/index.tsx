@@ -1,5 +1,6 @@
 import React from 'react';
-import { Props } from './types';
+
+import type { Props } from './types';
 
 import './index.scss';
 
@@ -7,11 +8,11 @@ const baseClass = 'popup-button';
 
 const PopupButton: React.FC<Props> = (props) => {
   const {
-    className,
-    buttonType,
-    button,
-    setActive,
     active,
+    button,
+    buttonType,
+    className,
+    setActive,
   } = props;
 
   const classes = [
@@ -31,11 +32,11 @@ const PopupButton: React.FC<Props> = (props) => {
   if (buttonType === 'custom') {
     return (
       <div
+        className={classes}
+        onClick={handleClick}
+        onKeyDown={(e) => { if (e.key === 'Enter') handleClick(); }}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter') handleClick(); }}
-        onClick={handleClick}
-        className={classes}
       >
         {button}
       </div>
@@ -44,9 +45,9 @@ const PopupButton: React.FC<Props> = (props) => {
 
   return (
     <button
-      type="button"
-      onClick={() => setActive(!active)}
       className={classes}
+      onClick={() => setActive(!active)}
+      type="button"
     >
       {button}
     </button>

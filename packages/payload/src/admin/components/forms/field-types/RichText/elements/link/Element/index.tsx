@@ -1,24 +1,27 @@
-import React, { HTMLAttributes, useCallback, useEffect, useState } from 'react';
-import { ReactEditor, useSlate } from 'slate-react';
-import { Transforms, Node, Editor } from 'slate';
-import { useModal } from '@faceless-ui/modal';
-import { Trans, useTranslation } from 'react-i18next';
-import { transformExtraFields, unwrapLink } from '../utilities';
-import Popup from '../../../../../../elements/Popup';
-import { LinkDrawer } from '../LinkDrawer';
-import { Fields } from '../../../../../Form/types';
-import buildStateFromSchema from '../../../../../Form/buildStateFromSchema';
-import { useAuth } from '../../../../../../utilities/Auth';
-import { useLocale } from '../../../../../../utilities/Locale';
-import { useConfig } from '../../../../../../utilities/Config';
-import reduceFieldsToValues from '../../../../../Form/reduceFieldsToValues';
-import deepCopyObject from '../../../../../../../../utilities/deepCopyObject';
-import Button from '../../../../../../elements/Button';
-import { getTranslation } from '../../../../../../../../utilities/getTranslation';
-import { Props as RichTextFieldProps } from '../../../types';
-import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
-import { useDocumentInfo } from '../../../../../../utilities/DocumentInfo';
+import type { HTMLAttributes} from 'react';
 
+import { useModal } from '@faceless-ui/modal';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import { Editor, Node, Transforms } from 'slate';
+import { ReactEditor, useSlate } from 'slate-react';
+
+import type { Fields } from '../../../../../Form/types';
+import type { Props as RichTextFieldProps } from '../../../types';
+
+import deepCopyObject from '../../../../../../../../utilities/deepCopyObject';
+import { getTranslation } from '../../../../../../../../utilities/getTranslation';
+import Button from '../../../../../../elements/Button';
+import { useDrawerSlug } from '../../../../../../elements/Drawer/useDrawerSlug';
+import Popup from '../../../../../../elements/Popup';
+import { useAuth } from '../../../../../../utilities/Auth';
+import { useConfig } from '../../../../../../utilities/Config';
+import { useDocumentInfo } from '../../../../../../utilities/DocumentInfo';
+import { useLocale } from '../../../../../../utilities/Locale';
+import buildStateFromSchema from '../../../../../Form/buildStateFromSchema';
+import reduceFieldsToValues from '../../../../../Form/reduceFieldsToValues';
+import { LinkDrawer } from '../LinkDrawer';
+import { transformExtraFields, unwrapLink } from '../utilities';
 import './index.scss';
 
 const baseClass = 'rich-text-link';
@@ -33,10 +36,10 @@ const insertChange = (editor, fields, customFieldSchema) => {
   const [, parentPath] = Editor.above(editor);
 
   const newNode: Record<string, unknown> = {
+    doc: data.doc,
+    linkType: data.linkType,
     newTab: data.newTab,
     url: data.url,
-    linkType: data.linkType,
-    doc: data.doc,
   };
 
   if (customFieldSchema) {
@@ -59,15 +62,15 @@ const insertChange = (editor, fields, customFieldSchema) => {
 export const LinkElement: React.FC<{
   attributes: HTMLAttributes<HTMLDivElement>
   children: React.ReactNode
+  editorRef: React.RefObject<HTMLDivElement>
   element: any
   fieldProps: RichTextFieldProps
-  editorRef: React.RefObject<HTMLDivElement>
 }> = (props) => {
   const {
     attributes,
     children,
-    element,
     editorRef,
+    element,
     fieldProps,
   } = props;
 
@@ -77,8 +80,8 @@ export const LinkElement: React.FC<{
   const config = useConfig();
   const { user } = useAuth();
   const { code: locale } = useLocale();
-  const { t, i18n } = useTranslation('fields');
-  const { openModal, toggleModal, closeModal } = useModal();
+  const { i18n, t } = useTranslation('fields');
+  const { closeModal, openModal, toggleModal } = useModal();
   const [renderModal, setRenderModal] = useState(false);
   const [renderPopup, setRenderPopup] = useState(false);
   const [initialState, setInitialState] = useState<Fields>({});
@@ -101,16 +104,16 @@ export const LinkElement: React.FC<{
   useEffect(() => {
     const awaitInitialState = async () => {
       const data = {
-        text: Node.string(element),
-        linkType: element.linkType,
-        url: element.url,
         doc: element.doc,
-        newTab: element.newTab,
         fields: deepCopyObject(element.fields),
+        linkType: element.linkType,
+        newTab: element.newTab,
+        text: Node.string(element),
+        url: element.url,
       };
 
       const preferences = await getDocPreferences();
-      const state = await buildStateFromSchema({ fieldSchema, preferences, data, user, operation: 'update', locale, t });
+      const state = await buildStateFromSchema({ data, fieldSchema, locale, operation: 'update', preferences, t, user });
       setInitialState(state);
     };
 
@@ -123,13 +126,11 @@ export const LinkElement: React.FC<{
       {...attributes}
     >
       <span
-        style={{ userSelect: 'none' }}
         contentEditable={false}
+        style={{ userSelect: 'none' }}
       >
         {renderModal && (
           <LinkDrawer
-            drawerSlug={drawerSlug}
-            fieldSchema={fieldSchema}
             handleClose={() => {
               toggleModal(drawerSlug);
               setRenderModal(false);
@@ -138,17 +139,12 @@ export const LinkElement: React.FC<{
               insertChange(editor, fields, customFieldSchema);
               closeModal(drawerSlug);
             }}
+            drawerSlug={drawerSlug}
+            fieldSchema={fieldSchema}
             initialState={initialState}
           />
         )}
         <Popup
-          buttonType="none"
-          size="small"
-          forceOpen={renderPopup}
-          onToggleOpen={handleTogglePopup}
-          horizontalAlign="left"
-          verticalAlign="bottom"
-          boundingRef={editorRef}
           render={() => (
             <div className={`${baseClass}__popup`}>
               {element.linkType === 'internal' && element.doc?.relationTo && element.doc?.value && (
@@ -159,8 +155,8 @@ export const LinkElement: React.FC<{
                   <a
                     className={`${baseClass}__link-label`}
                     href={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}
-                    target="_blank"
                     rel="noreferrer"
+                    target="_blank"
                   >
                     label
                   </a>
@@ -170,48 +166,55 @@ export const LinkElement: React.FC<{
                 <a
                   className={`${baseClass}__link-label`}
                   href={element.url}
-                  target="_blank"
                   rel="noreferrer"
+                  target="_blank"
                 >
                   {element.url}
                 </a>
               )}
               <Button
-                className={`${baseClass}__link-edit`}
-                icon="edit"
-                round
-                buttonStyle="icon-label"
                 onClick={(e) => {
                   e.preventDefault();
                   setRenderPopup(false);
                   openModal(drawerSlug);
                   setRenderModal(true);
                 }}
+                buttonStyle="icon-label"
+                className={`${baseClass}__link-edit`}
+                icon="edit"
+                round
                 tooltip={t('general:edit')}
               />
               <Button
-                className={`${baseClass}__link-close`}
-                icon="x"
-                round
-                buttonStyle="icon-label"
                 onClick={(e) => {
                   e.preventDefault();
                   unwrapLink(editor);
                 }}
+                buttonStyle="icon-label"
+                className={`${baseClass}__link-close`}
+                icon="x"
+                round
                 tooltip={t('general:remove')}
               />
             </div>
           )}
+          boundingRef={editorRef}
+          buttonType="none"
+          forceOpen={renderPopup}
+          horizontalAlign="left"
+          onToggleOpen={handleTogglePopup}
+          size="small"
+          verticalAlign="bottom"
         />
       </span>
       <span
-        tabIndex={0}
-        role="button"
         className={[
           `${baseClass}__popup-toggler`,
         ].filter(Boolean).join(' ')}
-        onKeyDown={(e) => { if (e.key === 'Enter') setRenderPopup(true); }}
         onClick={() => setRenderPopup(true)}
+        onKeyDown={(e) => { if (e.key === 'Enter') setRenderPopup(true); }}
+        role="button"
+        tabIndex={0}
       >
         {children}
       </span>

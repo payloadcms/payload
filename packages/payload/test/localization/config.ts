@@ -1,7 +1,8 @@
+import type { LocalizedPost } from './payload-types';
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { devUser } from '../credentials';
 import { ArrayCollection } from './collections/Array';
-import { LocalizedPost } from './payload-types';
 import {
   defaultLocale,
   englishTitle,

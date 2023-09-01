@@ -1,17 +1,19 @@
 /* eslint-disable no-param-reassign */
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { DeepPartial } from 'ts-essentials';
-import { PayloadRequest } from '../../../express/types';
-import { SanitizedGlobalConfig } from '../../config/types';
+import type { Config as GeneratedTypes } from 'payload/generated-types';
+import type { DeepPartial } from 'ts-essentials';
+
+import type { PayloadRequest } from '../../../express/types';
+import type { SanitizedGlobalConfig } from '../../config/types';
+
 import update from '../../operations/update';
 
 type Resolver<TSlug extends keyof GeneratedTypes['globals']> = (
   _: unknown,
   args: {
-    locale?: string
-    fallbackLocale?: string
     data?: DeepPartial<Omit<GeneratedTypes['globals'][TSlug], 'id'>>
     draft?: boolean
+    fallbackLocale?: string
+    locale?: string
   },
   context: {
     req: PayloadRequest,
@@ -29,12 +31,12 @@ export default function updateResolver<TSlug extends keyof GeneratedTypes['globa
     const { slug } = globalConfig;
 
     const options = {
-      globalConfig,
-      slug,
-      depth: 0,
       data: args.data,
-      req: context.req,
+      depth: 0,
       draft: args.draft,
+      globalConfig,
+      req: context.req,
+      slug,
     };
 
     const result = await update<TSlug>(options);

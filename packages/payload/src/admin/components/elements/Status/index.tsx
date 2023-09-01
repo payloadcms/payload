@@ -1,39 +1,40 @@
-import React, { useCallback, useState } from 'react';
-import { toast } from 'react-toastify';
 import { Modal, useModal } from '@faceless-ui/modal';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import Button from '../Button';
+import { toast } from 'react-toastify';
+
+import type { Field } from '../../../../fields/config/types';
+
 import { MinimalTemplate } from '../..';
 import { requests } from '../../../api';
 import { useForm } from '../../forms/Form/context';
-import { Field } from '../../../../fields/config/types';
+import { useConfig } from '../../utilities/Config';
+import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import { useLocale } from '../../utilities/Locale';
-
+import Button from '../Button';
 import './index.scss';
 
 const baseClass = 'status';
 
 const Status: React.FC = () => {
   const {
-    publishedDoc,
-    unpublishedVersions,
     collection,
+    docPermissions,
+    getVersions,
     global,
     id,
-    getVersions,
-    docPermissions,
+    publishedDoc,
+    unpublishedVersions,
   } = useDocumentInfo();
   const { toggleModal } = useModal();
   const {
-    serverURL,
     routes: { api },
+    serverURL,
   } = useConfig();
   const [processing, setProcessing] = useState(false);
   const { reset: resetForm } = useForm();
   const { code: locale } = useLocale();
-  const { t, i18n } = useTranslation('version');
+  const { i18n, t } = useTranslation('version');
 
   const unPublishModalSlug = `confirm-un-publish-${id}`;
   const revertModalSlug = `confirm-revert-${id}`;
@@ -75,11 +76,11 @@ const Status: React.FC = () => {
     }
 
     const res = await requests[method](url, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept-Language': i18n.language,
-      },
       body: JSON.stringify(body),
+      headers: {
+        'Accept-Language': i18n.language,
+        'Content-Type': 'application/json',
+      },
     });
 
     if (res.status === 200) {
@@ -125,23 +126,23 @@ const Status: React.FC = () => {
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
-                onClick={() => toggleModal(unPublishModalSlug)}
-                className={`${baseClass}__action`}
                 buttonStyle="none"
+                className={`${baseClass}__action`}
+                onClick={() => toggleModal(unPublishModalSlug)}
               >
                 {t('unpublish')}
               </Button>
               <Modal
-                slug={unPublishModalSlug}
                 className={`${baseClass}__modal`}
+                slug={unPublishModalSlug}
               >
                 <MinimalTemplate className={`${baseClass}__modal-template`}>
                   <h1>{t('confirmUnpublish')}</h1>
                   <p>{t('aboutToUnpublish')}</p>
                   <Button
                     buttonStyle="secondary"
-                    type="button"
                     onClick={processing ? undefined : () => toggleModal(unPublishModalSlug)}
+                    type="button"
                   >
                     {t('general:cancel')}
                   </Button>
@@ -158,23 +159,23 @@ const Status: React.FC = () => {
             <React.Fragment>
               &nbsp;&mdash;&nbsp;
               <Button
-                onClick={() => toggleModal(revertModalSlug)}
-                className={`${baseClass}__action`}
                 buttonStyle="none"
+                className={`${baseClass}__action`}
+                onClick={() => toggleModal(revertModalSlug)}
               >
                 {t('revertToPublished')}
               </Button>
               <Modal
-                slug={revertModalSlug}
                 className={`${baseClass}__modal`}
+                slug={revertModalSlug}
               >
                 <MinimalTemplate className={`${baseClass}__modal-template`}>
                   <h1>{t('confirmRevertToSaved')}</h1>
                   <p>{t('aboutToRevertToPublished')}</p>
                   <Button
                     buttonStyle="secondary"
-                    type="button"
                     onClick={processing ? undefined : () => toggleModal(revertModalSlug)}
+                    type="button"
                   >
                     {t('general:cancel')}
                   </Button>

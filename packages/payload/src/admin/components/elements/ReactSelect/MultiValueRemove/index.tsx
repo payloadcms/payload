@@ -1,10 +1,12 @@
+import type { MultiValueRemoveProps } from 'react-select';
+
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MultiValueRemoveProps } from 'react-select';
+
+import type { Option as OptionType } from '../types';
+
 import X from '../../../icons/X';
 import Tooltip from '../../Tooltip';
-import { Option as OptionType } from '../types';
-
 import './index.scss';
 
 const baseClass = 'multi-value-remove';
@@ -25,19 +27,19 @@ export const MultiValueRemove: React.FC<MultiValueRemoveProps<OptionType> & {
 
   return (
     <button
-      type="button"
       className={[
         baseClass,
         className,
       ].filter(Boolean).join(' ')}
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
-      onTouchEnd={onTouchEnd}
       onClick={(e) => {
         setShowTooltip(false);
         onClick(e);
       }}
       aria-label={t('remove')}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+      onTouchEnd={onTouchEnd}
+      type="button"
     >
       <Tooltip
         className={`${baseClass}__tooltip`}

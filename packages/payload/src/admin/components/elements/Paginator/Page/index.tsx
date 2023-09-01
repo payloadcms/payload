@@ -1,14 +1,15 @@
 import React from 'react';
-import { Props } from './types';
+
+import type { Props } from './types';
 
 const baseClass = 'paginator__page';
 
 const Page: React.FC<Props> = ({
-  page = 1,
   isCurrent,
-  updatePage,
   isFirstPage = false,
   isLastPage = false,
+  page = 1,
+  updatePage,
 }) => {
   const classes = [
     baseClass,

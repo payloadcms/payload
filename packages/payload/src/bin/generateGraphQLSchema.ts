@@ -1,9 +1,10 @@
 /* eslint-disable no-nested-ternary */
 import fs from 'fs';
 import { printSchema } from 'graphql';
-import Logger from '../utilities/logger';
-import loadConfig from '../config/load';
+
 import payload from '..';
+import loadConfig from '../config/load';
+import Logger from '../utilities/logger';
 
 export async function generateGraphQLSchema(): Promise<void> {
   const logger = Logger();
@@ -12,8 +13,8 @@ export async function generateGraphQLSchema(): Promise<void> {
   config.db = null;
 
   await payload.init({
-    secret: '--unused--',
     local: true,
+    secret: '--unused--',
   });
 
   logger.info('Compiling GraphQL schema...');

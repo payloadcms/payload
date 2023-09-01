@@ -1,17 +1,18 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckboxInput } from '../field-types/Checkbox/Input';
+
 import { Banner } from '../../elements/Banner';
-import { useLocale } from '../../utilities/Locale';
 import { useConfig } from '../../utilities/Config';
+import { useLocale } from '../../utilities/Locale';
 import { useForm } from '../Form/context';
+import { CheckboxInput } from '../field-types/Checkbox/Input';
 
 type NullifyLocaleFieldProps = {
+  fieldValue?: [] | null | number
   localized: boolean
   path: string
-  fieldValue?: null | [] | number
 }
-export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({ localized, path, fieldValue }) => {
+export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({ fieldValue, localized, path }) => {
   const { dispatchFields, setModified } = useForm();
   const { code: currentLocale } = useLocale();
   const { localization } = useConfig();
@@ -23,8 +24,8 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({ localize
     const useFallback = !checked;
 
     dispatchFields({
-      type: 'UPDATE',
       path,
+      type: 'UPDATE',
       value: useFallback ? null : (fieldValue || 0),
     });
     setModified(true);
@@ -50,10 +51,10 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({ localize
   return (
     <Banner>
       <CheckboxInput
-        id={`field-${path.replace(/\./gi, '__')}`}
-        onToggle={onChange}
-        label={t('fallbackToDefaultLocale')}
         checked={checked}
+        id={`field-${path.replace(/\./g, '__')}`}
+        label={t('fallbackToDefaultLocale')}
+        onToggle={onChange}
       />
     </Banner>
   );

@@ -1,5 +1,6 @@
 import graphQLPlayground from 'graphql-playground-middleware-express';
-import { Payload } from '../payload';
+
+import type { Payload } from '../payload';
 
 function initPlayground(ctx: Payload): void {
   if ((!ctx.config.graphQL.disable && !ctx.config.graphQL.disablePlaygroundInProduction && process.env.NODE_ENV === 'production') || process.env.NODE_ENV !== 'production') {

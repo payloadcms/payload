@@ -1,24 +1,25 @@
-import React, { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
 import queryString from 'qs';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Props } from './types';
-import Chevron from '../../icons/Chevron';
-import Button from '../Button';
-import { useSearchParams } from '../../utilities/SearchParams';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import { useHistory } from 'react-router-dom';
 
+import type { Props } from './types';
+
+import { getTranslation } from '../../../../utilities/getTranslation';
+import Chevron from '../../icons/Chevron';
+import { useSearchParams } from '../../utilities/SearchParams';
+import Button from '../Button';
 import './index.scss';
 
 const baseClass = 'sort-column';
 
 const SortColumn: React.FC<Props> = (props) => {
   const {
-    label, name, disable = false,
+    disable = false, label, name,
   } = props;
   const params = useSearchParams();
   const history = useHistory();
-  const { t, i18n } = useTranslation('general');
+  const { i18n, t } = useTranslation('general');
 
   const { sort } = params;
 
@@ -46,20 +47,20 @@ const SortColumn: React.FC<Props> = (props) => {
       {!disable && (
         <span className={`${baseClass}__buttons`}>
           <Button
-            round
+            aria-label={t('sortByLabelDirection', { direction: t('ascending'), label: getTranslation(label, i18n) })}
             buttonStyle="none"
             className={ascClasses.join(' ')}
             onClick={() => setSort(asc)}
-            aria-label={t('sortByLabelDirection', { label: getTranslation(label, i18n), direction: t('ascending') })}
+            round
           >
             <Chevron />
           </Button>
           <Button
-            round
+            aria-label={t('sortByLabelDirection', { direction: t('descending'), label: getTranslation(label, i18n) })}
             buttonStyle="none"
             className={descClasses.join(' ')}
             onClick={() => setSort(desc)}
-            aria-label={t('sortByLabelDirection', { label: getTranslation(label, i18n), direction: t('descending') })}
+            round
           >
             <Chevron />
           </Button>

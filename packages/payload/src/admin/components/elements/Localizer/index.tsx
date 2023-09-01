@@ -1,13 +1,12 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
 import qs from 'qs';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
 import { useConfig } from '../../utilities/Config';
 import { useLocale } from '../../utilities/Locale';
 import { useSearchParams } from '../../utilities/SearchParams';
 import Popup from '../Popup';
-
-
 import './index.scss';
 
 const baseClass = 'localizer';
@@ -26,9 +25,6 @@ const Localizer: React.FC = () => {
     return (
       <div className={baseClass}>
         <Popup
-          showScrollbar
-          horizontalAlign="left"
-          button={locale.label}
           render={({ close }) => (
             <div>
               <span>{t('locales')}</span>
@@ -51,12 +47,12 @@ const Localizer: React.FC = () => {
                   if (localeOption.code !== locale.code) {
                     return (
                       <li
-                        key={localeOption.code}
                         className={localeClasses}
+                        key={localeOption.code}
                       >
                         <Link
-                          to={{ search }}
                           onClick={close}
+                          to={{ search }}
                         >
                           {localeOption.label}
                         </Link>
@@ -69,6 +65,9 @@ const Localizer: React.FC = () => {
               </ul>
             </div>
           )}
+          button={locale.label}
+          horizontalAlign="left"
+          showScrollbar
         />
       </div>
     );

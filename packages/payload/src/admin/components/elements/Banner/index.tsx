@@ -1,18 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Props, RenderedTypeProps } from './types';
+
+import type { Props, RenderedTypeProps } from './types';
 
 import './index.scss';
 
 const baseClass = 'banner';
 
 export const Banner: React.FC<Props> = ({
+  alignIcon = 'right',
   children,
   className,
-  to,
   icon,
-  alignIcon = 'right',
   onClick,
+  to,
   type = 'default',
 }) => {
   const classes = [
@@ -25,7 +26,7 @@ export const Banner: React.FC<Props> = ({
     icon && `${baseClass}--align-icon-${alignIcon}`,
   ].filter(Boolean).join(' ');
 
-  let RenderedType: string | React.ComponentType<RenderedTypeProps> = 'div';
+  let RenderedType: React.ComponentType<RenderedTypeProps> | string = 'div';
 
   if (onClick && !to) RenderedType = 'button';
   if (to) RenderedType = Link;

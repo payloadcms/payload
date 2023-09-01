@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import AnimateHeight from 'react-animate-height';
 import { useTranslation } from 'react-i18next';
-import Thumbnail from '../Thumbnail';
-import Button from '../Button';
-import Meta from './Meta';
-import Chevron from '../../icons/Chevron';
-import { Props } from './types';
-import { FileSizes, Upload } from '../../../../uploads/types';
 
+import type { FileSizes, Upload } from '../../../../uploads/types';
+import type { Props } from './types';
+
+import Chevron from '../../icons/Chevron';
+import Button from '../Button';
+import Thumbnail from '../Thumbnail';
+import Meta from './Meta';
 import './index.scss';
 
 const baseClass = 'file-details';
@@ -29,28 +30,28 @@ const sortSizes = (sizes: FileSizes, imageSizes: Upload['imageSizes']) => {
 
 const FileDetails: React.FC<Props> = (props) => {
   const {
-    doc,
     collection,
+    doc,
     handleRemove,
   } = props;
 
   const {
-    upload: {
-      staticURL,
-      imageSizes,
-    },
     slug: collectionSlug,
+    upload: {
+      imageSizes,
+      staticURL,
+    },
   } = collection;
 
   const {
     filename,
     filesize,
-    width,
     height,
+    id,
     mimeType,
     sizes,
     url,
-    id,
+    width,
   } = doc;
 
   const [orderedSizes, setOrderedSizes] = useState<FileSizes>(() => sortSizes(sizes, imageSizes));
@@ -68,25 +69,25 @@ const FileDetails: React.FC<Props> = (props) => {
     <div className={baseClass}>
       <header>
         <Thumbnail
-          doc={doc}
           collection={collection}
+          doc={doc}
         />
         <div className={`${baseClass}__main-detail`}>
           <Meta
-            staticURL={staticURL}
+            collection={collectionSlug }
             filename={filename as string}
             filesize={filesize as number}
-            width={width as number}
             height={height as number}
-            mimeType={mimeType as string}
-            url={url as string}
             id={id as string}
-            collection={collectionSlug as string}
+            mimeType={mimeType as string}
+            staticURL={staticURL}
+            url={url as string}
+            width={width as number}
           />
           {hasSizes && (
             <Button
-              className={`${baseClass}__toggle-more-info${moreInfoOpen ? ' open' : ''}`}
               buttonStyle="none"
+              className={`${baseClass}__toggle-more-info${moreInfoOpen ? ' open' : ''}`}
               onClick={() => setMoreInfoOpen(!moreInfoOpen)}
             >
               {!moreInfoOpen && (
@@ -106,12 +107,12 @@ const FileDetails: React.FC<Props> = (props) => {
         </div>
         {handleRemove && (
           <Button
-            icon="x"
-            round
             buttonStyle="icon-label"
+            className={`${baseClass}__remove`}
+            icon="x"
             iconStyle="with-border"
             onClick={handleRemove}
-            className={`${baseClass}__remove`}
+            round
           />
         )}
       </header>

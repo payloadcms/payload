@@ -1,5 +1,7 @@
 import { GraphQLEnumType } from 'graphql';
-import { SanitizedLocalizationConfig } from '../../config/types';
+
+import type { SanitizedLocalizationConfig } from '../../config/types';
+
 import formatName from '../utilities/formatName';
 
 const buildFallbackLocaleInputType = (

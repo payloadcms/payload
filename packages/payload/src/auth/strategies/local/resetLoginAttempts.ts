@@ -1,27 +1,27 @@
-import { Payload } from '../../..';
-import { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types';
-import { PayloadRequest } from '../../../express/types';
+import type { Payload } from '../../..';
+import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types';
+import type { PayloadRequest } from '../../../express/types';
 
 type Args = {
-  req: PayloadRequest,
-  payload: Payload
-  doc: TypeWithID & Record<string, unknown>
   collection: SanitizedCollectionConfig
+  doc: TypeWithID & Record<string, unknown>
+  payload: Payload
+  req: PayloadRequest,
 }
 
 export const resetLoginAttempts = async ({
-  req,
-  payload,
-  doc,
   collection,
+  doc,
+  payload,
+  req,
 }: Args): Promise<void> => {
   await payload.update({
-    req,
     collection: collection.slug,
-    id: doc.id,
     data: {
-      loginAttempts: 0,
       lockUntil: null,
+      loginAttempts: 0,
     },
+    id: doc.id,
+    req,
   });
 };

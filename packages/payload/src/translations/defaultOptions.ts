@@ -1,24 +1,25 @@
 import type { InitOptions } from 'i18next';
+
 import translations from './index';
 
 export const defaultOptions: InitOptions = {
-  fallbackLng: 'en',
   debug: false,
-  supportedLngs: Object.keys(translations),
-  resources: translations,
-  interpolation: {
-    escapeValue: false,
-  },
   detection: {
-    order: [
+    caches: [
       'cookie',
       'localStorage',
     ],
     lookupCookie: 'lng',
     lookupLocalStorage: 'lng',
-    caches: [
+    order: [
       'cookie',
       'localStorage',
     ],
   },
+  fallbackLng: 'en',
+  interpolation: {
+    escapeValue: false,
+  },
+  resources: translations,
+  supportedLngs: Object.keys(translations),
 };

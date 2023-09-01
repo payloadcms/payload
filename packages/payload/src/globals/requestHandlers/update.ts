@@ -1,8 +1,11 @@
-import { NextFunction, Response } from 'express';
+import type { NextFunction, Response } from 'express';
+
 import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import { SanitizedGlobalConfig } from '../config/types';
-import { Document } from '../../types';
+
+import type { PayloadRequest } from '../../express/types';
+import type { Document } from '../../types';
+import type { SanitizedGlobalConfig } from '../config/types';
+
 import update from '../operations/update';
 
 export type UpdateGlobalResult = Promise<Response<Document> | void>;
@@ -16,13 +19,13 @@ export default function updateHandler(globalConfig: SanitizedGlobalConfig): Upda
       const autosave = req.query.autosave === 'true';
 
       const result = await update({
-        req,
-        globalConfig,
-        slug,
-        depth: Number(req.query.depth),
-        data: req.body,
-        draft,
         autosave,
+        data: req.body,
+        depth: Number(req.query.depth),
+        draft,
+        globalConfig,
+        req,
+        slug,
       });
 
       let message = req.t('general:updatedSuccessfully');

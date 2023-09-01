@@ -1,16 +1,17 @@
 import React, {
-  useState, useRef, useEffect, useCallback,
+  useCallback, useEffect, useRef, useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDocumentInfo } from '../../../../utilities/DocumentInfo';
-import useField from '../../../../forms/useField';
+
+import type { Props } from './types';
+
 import Button from '../../../../elements/Button';
 import FileDetails from '../../../../elements/FileDetails';
 import Error from '../../../../forms/Error';
-import { Props } from './types';
 import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues';
 import Label from '../../../../forms/Label';
-
+import useField from '../../../../forms/useField';
+import { useDocumentInfo } from '../../../../utilities/DocumentInfo';
 import './index.scss';
 
 const baseClass = 'file-field';
@@ -45,10 +46,10 @@ const Upload: React.FC<Props> = (props) => {
   const { docPermissions } = useDocumentInfo();
 
   const {
-    value,
+    errorMessage,
     setValue,
     showError,
-    errorMessage,
+    value,
   } = useField<{ name: string }>({
     path: 'file',
     validate,
@@ -147,17 +148,17 @@ const Upload: React.FC<Props> = (props) => {
   return (
     <div className={classes}>
       <Error
-        showError={showError}
         message={errorMessage}
+        showError={showError}
       />
       {(doc.filename && !replacingFile) && (
         <FileDetails
-          doc={doc}
-          collection={collection}
           handleRemove={canRemoveUpload ? () => {
             setReplacingFile(true);
             setValue(null);
           } : undefined}
+          collection={collection}
+          doc={doc}
         />
       )}
       {(!doc.filename || replacingFile) && (
@@ -170,19 +171,19 @@ const Upload: React.FC<Props> = (props) => {
               />
               <div className={`${baseClass}__file-upload`}>
                 <input
-                  type="text"
                   className={`${baseClass}__filename`}
-                  value={value.name}
                   onChange={handleFileNameChange}
+                  type="text"
+                  value={value.name}
                 />
                 <Button
-                  icon="x"
-                  buttonStyle="none"
-                  tooltip={t('general:cancel')}
                   onClick={() => {
                     setValue(null);
                     inputRef.current.value = null;
                   }}
+                  buttonStyle="none"
+                  icon="x"
+                  tooltip={t('general:cancel')}
                 />
               </div>
             </div>
@@ -190,20 +191,20 @@ const Upload: React.FC<Props> = (props) => {
           {!value && (
             <React.Fragment>
               <div
-                className={`${baseClass}__drop-zone`}
-                ref={dropRef}
                 onPaste={(e) => {
                   if (e?.clipboardData?.files.length) {
                     const fileObject = e.clipboardData.files[0];
                     if (fileObject) setValue(fileObject);
                   }
                 }}
+                className={`${baseClass}__drop-zone`}
+                ref={dropRef}
               >
                 <Button
-                  size="small"
                   buttonStyle="secondary"
-                  onClick={() => setSelectingFile(true)}
                   className={`${baseClass}__file-button`}
+                  onClick={() => setSelectingFile(true)}
+                  size="small"
                 >
                   {t('selectFile')}
                 </Button>
@@ -216,10 +217,10 @@ const Upload: React.FC<Props> = (props) => {
             </React.Fragment>
           )}
           <input
-            ref={inputRef}
-            type="file"
             accept={collection?.upload?.mimeTypes?.join(',')}
             onChange={handleInputChange}
+            ref={inputRef}
+            type="file"
           />
         </div>
       )}

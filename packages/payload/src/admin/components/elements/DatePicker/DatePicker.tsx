@@ -1,32 +1,33 @@
+import * as Locales from 'date-fns/locale';
 import React from 'react';
 import DatePicker, { registerLocale } from 'react-datepicker';
-import * as Locales from 'date-fns/locale';
+import 'react-datepicker/dist/react-datepicker.css';
 import { useTranslation } from 'react-i18next';
+
+import type { Props } from './types';
+
+import { getSupportedDateLocale } from '../../../utilities/formatDate/getSupportedDateLocale';
 import CalendarIcon from '../../icons/Calendar';
 import XIcon from '../../icons/X';
-import { Props } from './types';
-import { getSupportedDateLocale } from '../../../utilities/formatDate/getSupportedDateLocale';
-
-import 'react-datepicker/dist/react-datepicker.css';
 import './index.scss';
 
 const baseClass = 'date-time-picker';
 
 const DateTime: React.FC<Props> = (props) => {
   const {
-    value,
-    onChange,
     displayFormat: customDisplayFormat,
-    pickerAppearance = 'default',
-    minDate,
     maxDate,
-    monthsToShow = 1,
-    minTime,
     maxTime,
-    timeIntervals = 30,
-    timeFormat = 'h:mm aa',
-    readOnly,
+    minDate,
+    minTime,
+    monthsToShow = 1,
+    onChange,
+    pickerAppearance = 'default',
     placeholder: placeholderText,
+    readOnly,
+    timeFormat = 'h:mm aa',
+    timeIntervals = 30,
+    value,
   } = props;
 
   // Use the user's AdminUI language preference for the locale
@@ -51,22 +52,22 @@ const DateTime: React.FC<Props> = (props) => {
   }
 
   const dateTimePickerProps = {
-    minDate,
-    maxDate,
-    dateFormat,
-    monthsShown: Math.min(2, monthsToShow),
-    showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
-    minTime,
-    maxTime,
-    timeIntervals,
-    timeFormat,
-    placeholderText,
-    disabled: readOnly,
-    onChange,
-    showPopperArrow: false,
-    selected: value && new Date(value),
     customInputRef: 'ref',
+    dateFormat,
+    disabled: readOnly,
+    maxDate,
+    maxTime,
+    minDate,
+    minTime,
+    monthsShown: Math.min(2, monthsToShow),
+    onChange,
+    placeholderText,
+    selected: value && new Date(value),
     showMonthYearPicker: pickerAppearance === 'monthOnly',
+    showPopperArrow: false,
+    showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
+    timeFormat,
+    timeIntervals,
   };
 
   const classes = [
@@ -79,9 +80,9 @@ const DateTime: React.FC<Props> = (props) => {
       <div className={`${baseClass}__icon-wrap`}>
         {dateTimePickerProps.selected && (
           <button
-            type="button"
             className={`${baseClass}__clear-button`}
             onClick={() => onChange(null)}
+            type="button"
           >
             <XIcon />
           </button>
@@ -91,17 +92,17 @@ const DateTime: React.FC<Props> = (props) => {
       <div className={`${baseClass}__input-wrapper`}>
         <DatePicker
           {...dateTimePickerProps}
-          onChange={(val) => onChange(val as Date)}
-          locale={locale}
           popperModifiers={[
             {
-              name: 'preventOverflow',
               enabled: true,
+              name: 'preventOverflow',
             },
           ]}
+          dropdownMode="select"
+          locale={locale}
+          onChange={(val) => onChange(val )}
           showMonthDropdown
           showYearDropdown
-          dropdownMode="select"
         />
       </div>
     </div>

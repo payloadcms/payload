@@ -1,5 +1,7 @@
-import httpStatus from 'http-status';
 import type { TFunction } from 'i18next';
+
+import httpStatus from 'http-status';
+
 import APIError from './APIError';
 
 class FileUploadError extends APIError {

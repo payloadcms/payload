@@ -1,12 +1,12 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import TransformHooks from './collections/Transform';
+import AfterOperation from './collections/AfterOperation';
+import ChainingHooks from './collections/ChainingHooks';
+import ContextHooks from './collections/ContextHooks';
 import Hooks, { hooksSlug } from './collections/Hook';
 import NestedAfterReadHooks from './collections/NestedAfterReadHooks';
-import ChainingHooks from './collections/ChainingHooks';
 import Relations from './collections/Relations';
-import AfterOperation from './collections/AfterOperation';
+import TransformHooks from './collections/Transform';
 import Users, { seedHooksUsers } from './collections/Users';
-import ContextHooks from './collections/ContextHooks';
 
 export default buildConfigWithDefaults({
   collections: [

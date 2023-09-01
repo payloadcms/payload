@@ -1,23 +1,26 @@
-import React, { ElementType, useCallback, useState } from 'react';
+import type { ElementType} from 'react';
+
+import React, { useCallback, useState } from 'react';
 import { useSlate } from 'slate-react';
+
+import type { ButtonProps } from './types';
+
+import Tooltip from '../../../../elements/Tooltip';
+import '../buttons.scss';
 import isElementActive from './isActive';
 import toggleElement from './toggle';
-import { ButtonProps } from './types';
-import Tooltip from '../../../../elements/Tooltip';
-
-import '../buttons.scss';
 
 export const baseClass = 'rich-text__button';
 
 const ElementButton: React.FC<ButtonProps> = (props) => {
   const {
-    format,
     children,
-    onClick,
     className,
+    el = 'button',
+    format,
+    onClick,
     tooltip,
     type = 'type',
-    el = 'button',
   } = props;
 
   const editor = useSlate();

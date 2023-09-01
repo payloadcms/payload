@@ -1,9 +1,14 @@
-import nodemailer, { Transporter } from 'nodemailer';
-import { Logger } from 'pino';
-import { EmailOptions, EmailTransport, hasTransport, hasTransportOptions } from '../config/types';
+import type { Transporter } from 'nodemailer';
+import type { Logger } from 'pino';
+
+import nodemailer from 'nodemailer';
+
+import type { EmailOptions, EmailTransport} from '../config/types';
+import type { BuildEmailResult, MockEmailHandler } from './types';
+
+import { hasTransport, hasTransportOptions } from '../config/types';
 import { InvalidConfiguration } from '../errors';
 import mockHandler from './mockHandler';
-import { BuildEmailResult, MockEmailHandler } from './types';
 
 async function handleTransport(transport: Transporter, email: EmailTransport, logger: Logger): BuildEmailResult {
   try {
@@ -27,7 +32,7 @@ const handleMockAccount = async (emailConfig: EmailOptions, logger: Logger) => {
   let mockAccount: MockEmailHandler;
   try {
     mockAccount = await mockHandler(emailConfig);
-    const { account: { web, user, pass } } = mockAccount;
+    const { account: { pass, user, web } } = mockAccount;
     if (emailConfig?.logMockCredentials) {
       logger.info('E-mail configured with mock configuration');
       logger.info(`Log into mock email provider at ${web}`);
@@ -35,7 +40,7 @@ const handleMockAccount = async (emailConfig: EmailOptions, logger: Logger) => {
       logger.info(`Mock email account password: ${pass}`);
     }
   } catch (err) {
-    logger.error({ msg: 'There was a problem setting up the mock email handler', err });
+    logger.error({ err, msg: 'There was a problem setting up the mock email handler' });
   }
   return mockAccount;
 };

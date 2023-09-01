@@ -1,48 +1,50 @@
-import { Field, fieldAffectsData } from '../../fields/config/types';
-import { PayloadRequest } from '../../express/types';
+import type { SanitizedCollectionConfig } from '../../collections/config/types';
+import type { PayloadRequest } from '../../express/types';
+import type { Field} from '../../fields/config/types';
+import type { SanitizedGlobalConfig } from '../../globals/config/types';
+import type { EntityPolicies, PathToQuery } from './types';
+
+import { fieldAffectsData } from '../../fields/config/types';
 import { getEntityPolicies } from '../../utilities/getEntityPolicies';
-import { SanitizedCollectionConfig } from '../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../globals/config/types';
-import { validateQueryPaths } from './validateQueryPaths';
-import { EntityPolicies, PathToQuery } from './types';
 import { getLocalizedPaths } from '../getLocalizedPaths';
+import { validateQueryPaths } from './validateQueryPaths';
 
 type Args = {
-  fields: Field[]
-  path: string
-  val: unknown
-  operator: string
-  req: PayloadRequest
-  errors: { path: string }[]
-  policies: EntityPolicies
   collectionConfig?: SanitizedCollectionConfig
+  errors: { path: string }[]
+  fields: Field[]
   globalConfig?: SanitizedGlobalConfig
-  versionFields?: Field[]
+  operator: string
   overrideAccess: boolean
+  path: string
+  policies: EntityPolicies
+  req: PayloadRequest
+  val: unknown
+  versionFields?: Field[]
 }
 
 /**
  * Validate the Payload key / value / operator
  */
 export async function validateSearchParam({
-  fields,
-  path: incomingPath,
-  versionFields,
-  val,
-  operator,
   collectionConfig,
-  globalConfig,
   errors,
-  req,
-  policies,
+  fields,
+  globalConfig,
+  operator,
   overrideAccess,
+  path: incomingPath,
+  policies,
+  req,
+  val,
+  versionFields,
 }: Args): Promise<void> {
   // Replace GraphQL nested field double underscore formatting
   let sanitizedPath;
   if (incomingPath === '_id') {
     sanitizedPath = 'id';
   } else {
-    sanitizedPath = incomingPath.replace(/__/gi, '.');
+    sanitizedPath = incomingPath.replace(/__/g, '.');
   }
   let paths: PathToQuery[] = [];
   const { slug } = (collectionConfig || globalConfig);
@@ -53,26 +55,26 @@ export async function validateSearchParam({
 
     // eslint-disable-next-line no-param-reassign
     policies.globals[slug] = await getEntityPolicies({
-      req,
       entity: globalConfig,
       operations: ['read'],
+      req,
       type: 'global',
     });
   }
 
   if (sanitizedPath !== 'id') {
     paths = await getLocalizedPaths({
-      payload: req.payload,
-      locale: req.locale,
       collectionSlug: collectionConfig?.slug,
-      globalSlug: globalConfig?.slug,
       fields,
+      globalSlug: globalConfig?.slug,
       incomingPath: sanitizedPath,
+      locale: req.locale,
       overrideAccess,
+      payload: req.payload,
     });
   }
   const promises = [];
-  promises.push(...paths.map(async ({ path, field, invalid, collectionSlug }, i) => {
+  promises.push(...paths.map(async ({ collectionSlug, field, invalid, path }, i) => {
     if (invalid) {
       errors.push({ path });
       return;
@@ -83,14 +85,14 @@ export async function validateSearchParam({
         if (!policies.collections[collectionSlug]) {
           // eslint-disable-next-line no-param-reassign
           policies.collections[collectionSlug] = await getEntityPolicies({
-            req,
             entity: req.payload.collections[collectionSlug].config,
             operations: ['read'],
+            req,
             type: 'collection',
           });
         }
 
-        if (['salt', 'hash'].includes(incomingPath) && collectionConfig.auth && !collectionConfig.auth?.disableLocalStrategy) {
+        if (['hash', 'salt'].includes(incomingPath) && collectionConfig.auth && !collectionConfig.auth?.disableLocalStrategy) {
           errors.push({ path: incomingPath });
         }
       }
@@ -138,24 +140,24 @@ export async function validateSearchParam({
         .reverse();
 
       pathsToQuery.forEach(({
-        path: subPath,
         collectionSlug: pathCollectionSlug,
+        path: subPath,
       }, pathToQueryIndex) => {
         // On the "deepest" collection,
         // validate query of the relationship
         if (pathToQueryIndex === 0) {
           promises.push(validateQueryPaths({
             collectionConfig: req.payload.collections[pathCollectionSlug].config,
+            errors,
             globalConfig: undefined,
+            overrideAccess,
+            policies,
+            req,
             where: {
               [subPath]: {
                 [operator]: val,
               },
             },
-            errors,
-            policies,
-            req,
-            overrideAccess,
           }));
         }
       });
