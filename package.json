@@ -1,70 +1,43 @@
 {
-  "name": "payload-monorepo",
-  "private": true,
-  "version": "0.0.0",
-  "description": "Node, React and MongoDB Headless CMS and Application Framework",
-  "license": "MIT",
-  "engines": {
-    "node": ">=14",
-    "pnpm": ">=8"
-  },
   "author": {
     "email": "info@payloadcms.com",
     "name": "Payload",
     "url": "https://payloadcms.com"
   },
-  "maintainers": [
-    {
-      "name": "Payload",
-      "email": "info@payloadcms.com",
-      "url": "https://payloadcms.com"
-    }
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git"
-  },
-  "homepage": "https://payloadcms.com",
-  "main": "./dist/index.js",
-  "typings": "./dist/index.d.ts",
-  "sideEffects": false,
   "bin": {
     "payload": "bin.js"
-  },
-  "workspaces:": [
-    "packages/*"
-  ],
-  "scripts": {
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
-    "build:tsc": "tsc",
-    "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
-    "build": "pnpm copyfiles && pnpm build:tsc && pnpm build:components",
-    "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
-    "dev": "pnpm --filter payload run dev",
-    "dev:postgres": "pnpm --filter payload run dev:postgres",
-    "dev:generate-types": "pnpm --filter payload run dev:generate-types",
-    "dev:generate-graphql-schema": "pnpm --filter payload run dev:generate-graphql-schema",
-    "pretest": "pnpm build",
-    "test": "pnpm --filter payload run test",
-    "test:int": "pnpm --filter payload run test:int",
-    "test:e2e": "pnpm --filter payload run test:e2e",
-    "test:e2e:headed": "pnpm --filter payload run test:e2e:headed",
-    "test:e2e:debug": "pnpm --filter payload run test:e2e:debug",
-    "test:components": "pnpm --filter payload run test:components",
-    "translateNewKeys": "pnpm --filter payload run translateNewKeys",
-    "clean:cache": "rimraf node_modules/.cache && rimraf packages/payload/node_modules/.cache",
-    "clean": "rimraf dist && rimraf packages/payload/dist",
-    "release:patch": "release-it patch",
-    "release:minor": "release-it minor",
-    "release:major": "release-it major",
-    "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.json",
-    "release:canary": "release-it pre --preReleaseId=canary --npm.tag=canary --config .release-it.pre.json",
-    "fix": "eslint \"src/**/*.ts\" --fix",
-    "lint": "eslint \"src/**/*.ts\""
   },
   "bugs": {
     "url": "https://github.com/payloadcms/payload"
   },
+  "dependencies": {
+    "turbo": "^1.10.13"
+  },
+  "description": "Node, React and MongoDB Headless CMS and Application Framework",
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
+    "@types/node": "20.5.7",
+    "copyfiles": "2.4.1",
+    "cross-env": "7.0.3",
+    "prettier": "^3.0.3",
+    "typescript": "5.2.2"
+  },
+  "engines": {
+    "node": ">=14",
+    "pnpm": ">=8"
+  },
+  "files": [
+    "bin.js",
+    "dist",
+    "docs",
+    "components",
+    "scss",
+    "*.js",
+    "*.d.ts",
+    "!jest.config.js",
+    "!jest.components.config.js"
+  ],
+  "homepage": "https://payloadcms.com",
   "keywords": [
     "payload",
     "cms",
@@ -86,29 +59,56 @@
     "react",
     "auth"
   ],
-  "dependencies": {
-    "turbo": "^1.10.13"
-  },
-  "devDependencies": {
-    "@payloadcms/eslint-config": "workspace:*",
-    "@types/node": "20.5.7",
-    "copyfiles": "2.4.1",
-    "cross-env": "7.0.3",
-    "prettier": "^3.0.3",
-    "typescript": "5.2.2"
-  },
-  "files": [
-    "bin.js",
-    "dist",
-    "docs",
-    "components",
-    "scss",
-    "*.js",
-    "*.d.ts",
-    "!jest.config.js",
-    "!jest.components.config.js"
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "maintainers": [
+    {
+      "email": "info@payloadcms.com",
+      "name": "Payload",
+      "url": "https://payloadcms.com"
+    }
   ],
+  "name": "payload-monorepo",
+  "private": true,
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git"
+  },
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:tsc && pnpm build:components",
+    "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
+    "build:tsc": "tsc",
+    "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
+    "clean": "rimraf dist && rimraf packages/payload/dist",
+    "clean:cache": "rimraf node_modules/.cache && rimraf packages/payload/node_modules/.cache",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
+    "dev": "pnpm --filter payload run dev",
+    "dev:generate-graphql-schema": "pnpm --filter payload run dev:generate-graphql-schema",
+    "dev:generate-types": "pnpm --filter payload run dev:generate-types",
+    "dev:postgres": "pnpm --filter payload run dev:postgres",
+    "fix": "eslint \"src/**/*.ts\" --fix",
+    "lint": "eslint \"src/**/*.ts\"",
+    "pretest": "pnpm build",
+    "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.json",
+    "release:canary": "release-it pre --preReleaseId=canary --npm.tag=canary --config .release-it.pre.json",
+    "release:major": "release-it major",
+    "release:minor": "release-it minor",
+    "release:patch": "release-it patch",
+    "test": "pnpm --filter payload run test",
+    "test:components": "pnpm --filter payload run test:components",
+    "test:e2e": "pnpm --filter payload run test:e2e",
+    "test:e2e:debug": "pnpm --filter payload run test:e2e:debug",
+    "test:e2e:headed": "pnpm --filter payload run test:e2e:headed",
+    "test:int": "pnpm --filter payload run test:int",
+    "translateNewKeys": "pnpm --filter payload run translateNewKeys"
+  },
+  "sideEffects": false,
+  "typings": "./dist/index.d.ts",
+  "version": "0.0.0",
+  "workspaces:": [
+    "packages/*"
+  ]
 }

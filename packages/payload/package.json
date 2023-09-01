@@ -1,126 +1,16 @@
 {
-  "name": "payload",
-  "version": "1.14.0",
-  "description": "Node, React and MongoDB Headless CMS and Application Framework",
-  "license": "MIT",
-  "engines": {
-    "node": ">=14",
-    "pnpm": ">=8"
-  },
   "author": {
     "email": "info@payloadcms.com",
     "name": "Payload",
     "url": "https://payloadcms.com"
   },
-  "maintainers": [
-    {
-      "name": "Payload",
-      "email": "info@payloadcms.com",
-      "url": "https://payloadcms.com"
-    }
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git"
-  },
-  "homepage": "https://payloadcms.com",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "module": "./dist/index.js",
-    "access": "public",
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "./*": {
-        "types": "./dist/exports/*.d.ts",
-        "default": "./dist/exports/*.js"
-      },
-      "./scss": {
-        "default": "./dist/exports/scss.scss"
-      }
-    }
-  },
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "import": "./src/index.ts",
-      "require": "./src/index.ts"
-    },
-    "./*": {
-      "types": "./src/exports/*.ts",
-      "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts"
-    },
-    "./scss": {
-      "import": "./src/exports/scss.scss",
-      "require": "./src/exports/scss.scss"
-    }
-  },
-  "sideEffects": false,
   "bin": {
     "payload": "bin.js"
-  },
-  "scripts": {
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
-    "build:tsc": "tsc -p tsconfig.build.json",
-    "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
-    "build": "pnpm copyfiles && pnpm build:tsc && pnpm build:components",
-    "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
-    "dev": "nodemon",
-    "dev:postgres": "cross-env PAYLOAD_DATABASE=postgres nodemon",
-    "dev:generate-types": "ts-node -T ./test/generateTypes.ts",
-    "dev:generate-graphql-schema": "ts-node -T ./test/generateGraphQLSchema.ts",
-    "pretest": "pnpm build",
-    "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
-    "test:int": "cross-env DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
-    "test:e2e": "ts-node -T ./test/runE2E.ts",
-    "test:e2e:headed": "cross-env DISABLE_LOGGING=true playwright test --headed",
-    "test:e2e:debug": "cross-env PWDEBUG=1 DISABLE_LOGGING=true playwright test",
-    "test:components": "cross-env jest --config=jest.components.config.js",
-    "translateNewKeys": "ts-node -T ./scripts/translateNewKeys.ts",
-    "clean:cache": "rimraf node_modules/.cache",
-    "clean": "rimraf dist",
-    "release:patch": "release-it patch",
-    "release:minor": "release-it minor",
-    "release:major": "release-it major",
-    "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.json",
-    "release:canary": "release-it pre --preReleaseId=canary --npm.tag=canary --config .release-it.pre.json",
-    "fix": "eslint \"src/**/*.ts\" --fix",
-    "lint": "eslint \"src/**/*.ts\""
   },
   "bugs": {
     "url": "https://github.com/payloadcms/payload"
   },
-  "keywords": [
-    "payload",
-    "cms",
-    "content management",
-    "framework",
-    "typescript",
-    "javascript",
-    "node",
-    "express",
-    "headless",
-    "graphQL",
-    "restful",
-    "access control",
-    "dashboard",
-    "admin panel",
-    "api",
-    "MongoDB",
-    "self hosted",
-    "react",
-    "auth"
-  ],
   "dependencies": {
-    "@payloadcms/db-postgres": "workspace:*",
-    "@payloadcms/db-mongodb": "workspace:*",
     "@date-io/date-fns": "2.16.0",
     "@dnd-kit/core": "6.0.8",
     "@dnd-kit/sortable": "7.0.2",
@@ -128,6 +18,8 @@
     "@faceless-ui/scroll-info": "1.3.0",
     "@faceless-ui/window-info": "2.1.1",
     "@monaco-editor/react": "4.5.1",
+    "@payloadcms/db-mongodb": "workspace:*",
+    "@payloadcms/db-postgres": "workspace:*",
     "@swc/core": "1.3.76",
     "@swc/register": "0.1.10",
     "@types/sharp": "0.31.1",
@@ -231,7 +123,9 @@
     "webpack-dev-middleware": "6.0.1",
     "webpack-hot-middleware": "2.25.4"
   },
+  "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
     "@playwright/test": "1.37.1",
     "@release-it/conventional-changelog": "7.0.0",
     "@swc/jest": "0.2.29",
@@ -307,8 +201,27 @@
     "shelljs": "0.8.5",
     "slash": "3.0.0",
     "terser": "5.19.2",
-    "ts-node": "10.9.1",
-    "@payloadcms/eslint-config": "workspace:*"
+    "ts-node": "10.9.1"
+  },
+  "engines": {
+    "node": ">=14",
+    "pnpm": ">=8"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./*": {
+      "import": "./src/exports/*.ts",
+      "require": "./src/exports/*.ts",
+      "types": "./src/exports/*.ts"
+    },
+    "./scss": {
+      "import": "./src/exports/scss.scss",
+      "require": "./src/exports/scss.scss"
+    }
   },
   "files": [
     "bin.js",
@@ -320,5 +233,92 @@
     "*.d.ts",
     "!jest.config.js",
     "!jest.components.config.js"
-  ]
+  ],
+  "homepage": "https://payloadcms.com",
+  "keywords": [
+    "payload",
+    "cms",
+    "content management",
+    "framework",
+    "typescript",
+    "javascript",
+    "node",
+    "express",
+    "headless",
+    "graphQL",
+    "restful",
+    "access control",
+    "dashboard",
+    "admin panel",
+    "api",
+    "MongoDB",
+    "self hosted",
+    "react",
+    "auth"
+  ],
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "maintainers": [
+    {
+      "email": "info@payloadcms.com",
+      "name": "Payload",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "name": "payload",
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "default": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      },
+      "./*": {
+        "default": "./dist/exports/*.js",
+        "types": "./dist/exports/*.d.ts"
+      },
+      "./scss": {
+        "default": "./dist/exports/scss.scss"
+      }
+    },
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "registry": "https://registry.npmjs.org/",
+    "types": "./dist/index.d.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git"
+  },
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:tsc && pnpm build:components",
+    "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
+    "build:tsc": "tsc -p tsconfig.build.json",
+    "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
+    "clean": "rimraf dist",
+    "clean:cache": "rimraf node_modules/.cache",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
+    "dev": "nodemon",
+    "dev:generate-graphql-schema": "ts-node -T ./test/generateGraphQLSchema.ts",
+    "dev:generate-types": "ts-node -T ./test/generateTypes.ts",
+    "dev:postgres": "cross-env PAYLOAD_DATABASE=postgres nodemon",
+    "fix": "eslint \"src/**/*.ts\" --fix",
+    "lint": "eslint \"src/**/*.ts\"",
+    "pretest": "pnpm build",
+    "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.json",
+    "release:canary": "release-it pre --preReleaseId=canary --npm.tag=canary --config .release-it.pre.json",
+    "release:major": "release-it major",
+    "release:minor": "release-it minor",
+    "release:patch": "release-it patch",
+    "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
+    "test:components": "cross-env jest --config=jest.components.config.js",
+    "test:e2e": "ts-node -T ./test/runE2E.ts",
+    "test:e2e:debug": "cross-env PWDEBUG=1 DISABLE_LOGGING=true playwright test",
+    "test:e2e:headed": "cross-env DISABLE_LOGGING=true playwright test --headed",
+    "test:int": "cross-env DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
+    "translateNewKeys": "ts-node -T ./scripts/translateNewKeys.ts"
+  },
+  "sideEffects": false,
+  "types": "./src/index.ts",
+  "version": "1.14.0"
 }

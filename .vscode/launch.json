@@ -1,112 +1,112 @@
 {
   // Use IntelliSense to learn about possible attributes.
   // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-  "version": "0.2.0",
   "configurations": [
     {
       "command": "pnpm run dev _community",
+      "cwd": "${workspaceFolder}",
       "name": "Run Dev Community",
       "request": "launch",
-      "type": "node-terminal",
-      "cwd": "${workspaceFolder}"
+      "type": "node-terminal"
     },
     {
       "command": "pnpm run dev fields",
+      "cwd": "${workspaceFolder}",
       "name": "Run Dev Fields",
       "request": "launch",
-      "type": "node-terminal",
-      "cwd": "${workspaceFolder}"
+      "type": "node-terminal"
     },
     {
       "command": "pnpm run dev:postgres postgres -- -I", // Allow input
+      "cwd": "${workspaceFolder}",
       "name": "Run Dev Postgres",
       "request": "launch",
-      "type": "node-terminal",
-      "cwd": "${workspaceFolder}"
+      "type": "node-terminal"
     },
     {
       "command": "pnpm run dev versions",
+      "cwd": "${workspaceFolder}",
       "name": "Run Dev Versions",
       "request": "launch",
-      "type": "node-terminal",
-      "cwd": "${workspaceFolder}"
+      "type": "node-terminal"
     },
     {
-      "type": "node-terminal",
       "command": "ts-node src/bin/migrate.ts migrate",
-      "request": "launch",
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_DATABASE": "postgres",
+        // "PAYLOAD_DROP_DATABASE": "true",
+      },
       "name": "Migrate CLI - migrate",
-      "env": {
-        "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_DATABASE": "postgres",
-        // "PAYLOAD_DROP_DATABASE": "true",
-      },
       "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal",
     },
     {
-      "type": "node-terminal",
       "command": "ts-node src/bin/migrate.ts migrate:status",
-      "request": "launch",
-      "name": "Migrate CLI - status",
       "env": {
         "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
         "PAYLOAD_DATABASE": "postgres",
         // "PAYLOAD_DROP_DATABASE": "true",
       },
+      "name": "Migrate CLI - status",
       "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal",
     },
     {
-      "type": "node-terminal",
       "command": "ts-node src/bin/migrate.ts migrate:create yass",
-      "request": "launch",
+      "env": {
+        // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
+        "PAYLOAD_DATABASE": "postgres",
+        // "PAYLOAD_DROP_DATABASE": "true",
+      },
       "name": "Migrate CLI - create",
-      "env": {
-        // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
-        "PAYLOAD_DATABASE": "postgres",
-        // "PAYLOAD_DROP_DATABASE": "true",
-      },
       "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal",
     },
     {
-      "type": "node-terminal",
       "command": "ts-node src/bin/migrate.ts migrate:down",
-      "request": "launch",
+      "env": {
+        // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
+        "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
+        "PAYLOAD_DATABASE": "postgres",
+        // "PAYLOAD_DROP_DATABASE": "true",
+      },
       "name": "Migrate CLI - down",
-      "env": {
-        // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
-        "PAYLOAD_DATABASE": "postgres",
-        // "PAYLOAD_DROP_DATABASE": "true",
-      },
       "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal",
     },
     {
-      "type": "node-terminal",
       "command": "ts-node src/bin/migrate.ts migrate:reset",
-      "request": "launch",
-      "name": "Migrate CLI - reset",
       "env": {
         // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
         "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
         "PAYLOAD_DATABASE": "postgres",
         // "PAYLOAD_DROP_DATABASE": "true",
       },
+      "name": "Migrate CLI - reset",
       "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal",
     },
     {
-      "type": "node-terminal",
       "command": "ts-node src/bin/migrate.ts migrate:refresh",
-      "request": "launch",
-      "name": "Migrate CLI - refresh",
       "env": {
         // "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
         "PAYLOAD_CONFIG_PATH": "test/postgres/config.ts",
         "PAYLOAD_DATABASE": "postgres",
         // "PAYLOAD_DROP_DATABASE": "true",
       },
+      "name": "Migrate CLI - refresh",
       "outputCapture": "std",
+      "request": "launch",
+      "type": "node-terminal",
     },
-  ]
+  ],
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0"
 }
