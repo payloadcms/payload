@@ -48,6 +48,7 @@
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
     "better-sqlite3": "^8.5.0",
-    "payload": "workspace:*"
+    "payload": "workspace:*",
+    "@payloadcms/eslint-config": "workspace:*"
   }
 }

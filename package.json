@@ -1,6 +1,7 @@
 {
-  "name": "payload",
-  "version": "1.14.0",
+  "name": "payload-monorepo",
+  "private": true,
+  "version": "0.0.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "engines": {
@@ -85,10 +86,16 @@
     "react",
     "auth"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "turbo": "^1.10.13"
+  },
   "devDependencies": {
-    "typescript": "5.2.2",
-    "@types/node": "20.5.6"
+    "@payloadcms/eslint-config": "workspace:*",
+    "@types/node": "20.5.7",
+    "copyfiles": "2.4.1",
+    "cross-env": "7.0.3",
+    "prettier": "^3.0.3",
+    "typescript": "5.2.2"
   },
   "files": [
     "bin.js",

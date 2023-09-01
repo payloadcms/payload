@@ -2,9 +2,9 @@
     "extends": "../../tsconfig.json",
     "compilerOptions": {
       "composite": true,
-      "target": "es2019",
+      "target": "ES2019",
       "sourceMap": true,
-      "module": "commonjs",
+      "module": "Node16",
       "allowJs": true, /* Allow javascript files to be compiled. */
       "checkJs": false, /* Report errors in .js files. */
       "jsx": "react", /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
