@@ -7,7 +7,7 @@ const { PAYLOAD_SECRET, MONGODB_URI } = process.env;
 // This function ensures that there is at least one corresponding version for any document
 // within each of your draft-enabled collections.
 
-const boostVersionsQueryPerformance = async () => {
+const improveVersionsQueryPerformance = async () => {
   // Initialize Payload
   // IMPORTANT: make sure your ENV variables are filled properly here
   // as the below variable names are just for reference.
@@ -21,7 +21,6 @@ const boostVersionsQueryPerformance = async () => {
   // For each collection
   await Promise.all(
     payload.config.collections.map(async ({ slug, versions }) => {
-      // If drafts are enabled
       if (versions) {
         const VersionsModel = payload.versions[slug];
 
@@ -43,11 +42,11 @@ const boostVersionsQueryPerformance = async () => {
         })
           .exec();
 
-        const newDocIds = newestDocs.map((doc) => doc._versionID);
+        const newestDocIds = newestDocs.map((doc) => doc._versionID);
 
         await VersionsModel.updateMany({
           _id: {
-            $in: newDocIds,
+            $in: newestDocIds,
           },
         }, {
           latest: true,
@@ -58,20 +57,17 @@ const boostVersionsQueryPerformance = async () => {
             $eq: true,
           },
         });
-
-        console.log(newVersions);
       }
     }),
   );
 
-  // For each collection
+  // For each global
   await Promise.all(
     payload.config.globals.map(async ({ slug, versions }) => {
-      // If drafts are enabled
       if (versions) {
         const VersionsModel = payload.versions[slug];
 
-        const updatedGlobalVersion = await VersionsModel.findOneAndUpdate(
+        await VersionsModel.findOneAndUpdate(
           {},
           { latest: true },
           {
@@ -79,8 +75,6 @@ const boostVersionsQueryPerformance = async () => {
             new: true,
           },
         ).exec();
-
-        console.log(updatedGlobalVersion);
       }
     }),
   );
@@ -89,4 +83,4 @@ const boostVersionsQueryPerformance = async () => {
   process.exit(0);
 };
 
-boostVersionsQueryPerformance();
+improveVersionsQueryPerformance();
