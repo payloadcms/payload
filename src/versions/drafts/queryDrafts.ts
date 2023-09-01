@@ -62,11 +62,35 @@ export const queryDrafts = async <T extends TypeWithID>({
     {
       $group: {
         _id: '$parent',
-        version: { $first: '$version' },
+        // Remember the doc ID of this version. Used in the subsequent `$lookup`.
+        versionId: { $first: '$_id' },
         updatedAt: { $first: '$updatedAt' },
         createdAt: { $first: '$createdAt' },
+        // Note we're dropping the actual version data here for a smaller `$group` operation.
       },
     },
+    // Apply the original data again using the ID we got through `$first`.
+    {
+      $lookup: {
+        from: VersionModel.collection.collectionName,
+        localField: 'versionId',
+        foreignField: '_id',
+        as: '_versionData',
+      },
+    },
+    // Merge up the original doc to restore the complete data.
+    {
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: [
+            { $arrayElemAt: ['$_versionData', 0] },
+            '$$ROOT',
+          ],
+        },
+      },
+    },
+    // Drop the field added by `$lookup`.
+    { $project: { _versionData: 0 } },
     // Filter based on incoming query
     { $match: versionQuery },
   ], {
