@@ -16,6 +16,7 @@
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
+    "@swc/cli": "^0.1.62",
     "@types/node": "20.5.7",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
