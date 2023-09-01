@@ -15,6 +15,8 @@ module.exports = {
         'esm-loader-playwright.mjs',
         '*.json',
         '*.md',
+        '*.yml',
+        '*.yaml',
       ],
     },
     {

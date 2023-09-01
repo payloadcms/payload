@@ -3,7 +3,7 @@ module.exports = {
   overrides: [
     {
       extends: ['plugin:@typescript-eslint/disable-type-checked'],
-      files: ['*.js', '*.cjs', '*.json', '*.md'],
+      files: ['*.js', '*.cjs', '*.json', '*.md', '*.yml', '*.yaml'],
     },
     {
       files: ['packages/eslint-config-payload/**'],
