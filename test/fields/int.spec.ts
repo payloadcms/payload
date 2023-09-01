@@ -1,4 +1,4 @@
-import type { MongooseAdapter } from '@payloadcms/db-mongodb'
+import type { MongooseAdapter } from '../../packages/db-mongodb/src/index'
 import type { IndexDirection, IndexOptions } from 'mongoose'
 
 import { GraphQLClient } from 'graphql-request'
@@ -38,7 +38,7 @@ let token
 
 describe('Fields', () => {
   beforeAll(async () => {
-    ; ({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }))
+    ;({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }))
     config = await configPromise
 
     client = new RESTClient(config, { serverURL, defaultSlug: 'point-fields' })
@@ -393,7 +393,7 @@ describe('Fields', () => {
         collection: 'point-fields',
         pagination: false,
       })
-        ;[doc] = findDoc.docs
+      ;[doc] = findDoc.docs
     })
 
     it('should read', async () => {
@@ -402,7 +402,7 @@ describe('Fields', () => {
         pagination: false,
       })
 
-        ;[doc] = find.docs
+      ;[doc] = find.docs
 
       expect(doc.point).toEqual(pointDoc.point)
       expect(doc.localized).toEqual(pointDoc.localized)
