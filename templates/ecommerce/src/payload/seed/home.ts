@@ -121,7 +121,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Manage this users, pages, products, and more from the ',
+                  text: "Manage this site's users, pages, products, and more from the ",
                 },
                 {
                   type: 'link',
@@ -163,7 +163,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Complete user ',
+                  text: 'User ',
                 },
                 {
                   type: 'link',
@@ -189,7 +189,7 @@ export const home: Partial<Page> = {
                   ],
                 },
                 {
-                  text: ' flows with email verification and password reset.',
+                  text: ' flows are complete with email verification and password reset.',
                 },
               ],
             },
@@ -303,7 +303,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Shopping carts persist between sessions, can saved for later and accessed from any device.',
+                  text: 'Shopping carts persist between sessions, can be saved for later, and are accessible from any device.',
                 },
               ],
             },
@@ -332,7 +332,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Secure in-app checkout powered by Stripe so your customers never have to leave your site.',
+                  text: 'Secure in-app checkout powered by Stripe means your customers never have to leave your site.',
                 },
               ],
             },
@@ -432,7 +432,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Users will experience this site in their preferred color scheme and each block can be inverted.',
+                  text: 'Users will experience this site in their preferred color scheme, and each block can be inverted.',
                 },
               ],
             },
