@@ -31,7 +31,7 @@
   "author": "Payload CMS, Inc.",
   "license": "MIT",
   "scripts": {
-    "build": "tsc"
+    "builddisabled": "tsc"
   },
   "peerDependencies": {
     "better-sqlite3": "^8.5.0"

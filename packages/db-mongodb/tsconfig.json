@@ -1,14 +1,27 @@
 {
   "compilerOptions": {
-    "target": "ES2019",
-    "moduleResolution": "Node16", /* Required for exports to work */
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext" /* Required for exports to work */,
     "composite": true,
-    "declaration": true, /* Generates corresponding '.d.ts' file. */
-    "module": "Node16",                                /* Specify what module code is generated. */
-    "rootDir": "./src",                                  /* Specify the root folder within your source files. */
-    "outDir": "./dist",                                   /* Specify an output folder for all emitted files. */
-    "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
-    "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
-    "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
-  }
+    "declaration": true /* Generates corresponding '.d.ts' file. */,
+    "rootDir": "./src" /* Specify the root folder within your source files. */,
+    "outDir": "./dist" /* Specify an output folder for all emitted files. */,
+    "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
+    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+    "resolveJsonModule": true
+  },
+  "exclude": [
+    "dist",
+    "build",
+    "tests",
+    "test",
+    "node_modules",
+    ".eslintrc.js",
+    "**/*.spec.js",
+    "**/*.spec.jsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
+  ]
 }

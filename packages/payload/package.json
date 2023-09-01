@@ -30,20 +30,19 @@
     "registry": "https://registry.npmjs.org/",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
+    "module": "./dist/index.js",
+    "access": "public",
     "exports": {
       ".": {
         "types": "./dist/index.d.ts",
-        "import": "./dist/index.js",
-        "default": "./dist/index.js",
-        "node": "./dist/index.js",
-        "require": "./dist/index.js"
+        "default": "./dist/index.js"
       },
       "./*": {
         "types": "./dist/exports/*.d.ts",
-        "import": "./dist/exports/*.js",
-        "default": "./dist/exports/*.js",
-        "node": "./dist/exports/*.js",
-        "require": "./dist/exports/*.js"
+        "default": "./dist/exports/*.js"
+      },
+      "./scss": {
+        "default": "./dist/exports/scss.scss"
       }
     }
   },
@@ -51,16 +50,16 @@
     ".": {
       "types": "./src/index.ts",
       "import": "./src/index.ts",
-      "default": "./src/index.ts",
-      "node": "./src/index.ts",
       "require": "./src/index.ts"
     },
     "./*": {
       "types": "./src/exports/*.ts",
       "import": "./src/exports/*.ts",
-      "default": "./src/exports/*.ts",
-      "node": "./src/exports/*.ts",
       "require": "./src/exports/*.ts"
+    },
+    "./scss": {
+      "import": "./src/exports/scss.scss",
+      "require": "./src/exports/scss.scss"
     }
   },
   "sideEffects": false,
@@ -69,7 +68,7 @@
   },
   "scripts": {
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
-    "build:tsc": "tsc",
+    "build:tsc": "tsc -p tsconfig.build.json",
     "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
     "build": "pnpm copyfiles && pnpm build:tsc && pnpm build:components",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",

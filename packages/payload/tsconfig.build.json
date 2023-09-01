@@ -1,9 +1,7 @@
 {
-  /* Like tsconfig.build.json, but includes test directory and doesnt emit anything */
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": ["jest", "node", "@types/jest"],
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["node"],
     "composite": true,
     "target": "ESNext",
     "sourceMap": true,
@@ -14,9 +12,9 @@
     "declaration": true /* Generates corresponding '.d.ts' file. */,
     /* Concatenate and emit output to single file. */
     "outDir": "./dist" /* Redirect output structure to the directory. */,
-    "rootDir": "." /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
+    "rootDir": "./src" /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
     /* Do not emit comments to output. */
-    "noEmit": true /* Do not emit outputs. */,
+    "noEmit": false /* Do not emit outputs. */,
     "strict": false /* Enable all strict type-checking options. */,
     "moduleResolution": "NodeNext" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
     "paths": {
@@ -35,15 +33,18 @@
     "esm": true,
     "experimentalSpecifierResolution": "node"
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.d.ts",
-    "src/**/*.json",
-    "test/**/*.ts",
-    "test/**/*.tsx",
-    "test/**/*.d.ts",
-    "test/**/*.json"
-  ],
-  "exclude": ["dist", "build", "temp", "node_modules"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
+  "exclude": [
+    "dist",
+    "build",
+    "tests",
+    "test",
+    "node_modules",
+    ".eslintrc.js",
+    "**/*.spec.js",
+    "**/*.spec.jsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "temp"
+  ]
 }
