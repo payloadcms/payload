@@ -1,5 +1,6 @@
-import path from 'path';
 import type { Webpack } from 'payload/database';
+
+import path from 'path';
 
 export const webpack: Webpack = (config) => {
   return {

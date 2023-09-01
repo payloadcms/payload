@@ -1,32 +1,35 @@
-import { PaginateOptions } from 'mongoose';
+import type { PaginateOptions } from 'mongoose';
 import type { FindVersions } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
+
 import { flattenWhereToOperators } from 'payload/database';
-import { PayloadRequest } from 'payload/types';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
+
 import type { MongooseAdapter } from '.';
+
 import { buildSortParam } from './queries/buildSortParam';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import { withSession } from './withSession';
 
 export const findVersions: FindVersions = async function findVersions(
   this: MongooseAdapter,
   {
     collection,
-    where,
-    page,
     limit,
-    sort: sortArg,
     locale,
+    page,
     pagination,
-    skip,
     req = {} as PayloadRequest,
+    skip,
+    sort: sortArg,
+    where,
   },
 ) {
   const Model = this.versions[collection];
   const collectionConfig = this.payload.collections[collection].config;
   const options = {
     ...withSession(this, req.transactionID),
-    skip,
     limit,
+    skip,
   };
 
   let hasNearConstraint = false;
@@ -39,31 +42,31 @@ export const findVersions: FindVersions = async function findVersions(
   let sort;
   if (!hasNearConstraint) {
     sort = buildSortParam({
-      sort: sortArg || '-updatedAt',
-      fields: collectionConfig.fields,
-      timestamps: true,
       config: this.payload.config,
+      fields: collectionConfig.fields,
       locale,
+      sort: sortArg || '-updatedAt',
+      timestamps: true,
     });
   }
 
   const query = await Model.buildQuery({
-    payload: this.payload,
     locale,
+    payload: this.payload,
     where,
   });
 
   const paginationOptions: PaginateOptions = {
-    page,
-    sort,
-    limit,
+    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
-    pagination,
+    limit,
     offset: skip,
-    useEstimatedCount: hasNearConstraint,
-    forceCountFn: hasNearConstraint,
     options,
+    page,
+    pagination,
+    sort,
+    useEstimatedCount: hasNearConstraint,
   };
 
   if (limit > 0) {

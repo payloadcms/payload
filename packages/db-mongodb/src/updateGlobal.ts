@@ -1,18 +1,20 @@
 import type { UpdateGlobal } from 'payload/database';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import type { PayloadRequest } from 'payload/types';
+
 import type { MongooseAdapter } from '.';
+
+import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import { withSession } from './withSession';
 
 export const updateGlobal: UpdateGlobal = async function updateGlobal(
   this: MongooseAdapter,
-  { slug, data, req = {} as PayloadRequest },
+  { data, req = {} as PayloadRequest, slug },
 ) {
   const Model = this.globals;
   const options = {
     ...withSession(this, req.transactionID),
-    new: true,
     lean: true,
+    new: true,
   };
 
   let result;

@@ -1,26 +1,29 @@
-import { ValidationError } from 'payload/errors';
-import type { PayloadRequest } from 'payload/types';
 import type { UpdateOne } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
+
+import { ValidationError } from 'payload/errors';
 import { i18nInit } from 'payload/utilities';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
+
 import type { MongooseAdapter } from '.';
+
+import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import { withSession } from './withSession';
 
 export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,
-  { collection, data, where: whereArg, id, locale, req = {} as PayloadRequest },
+  { collection, data, id, locale, req = {} as PayloadRequest, where: whereArg },
 ) {
   const where = id ? { id: { equals: id } } : whereArg;
   const Model = this.collections[collection];
   const options = {
     ...withSession(this, req.transactionID),
-    new: true,
     lean: true,
+    new: true,
   };
 
   const query = await Model.buildQuery({
-    payload: this.payload,
     locale,
+    payload: this.payload,
     where,
   });
 
@@ -33,8 +36,8 @@ export const updateOne: UpdateOne = async function updateOne(
       ? new ValidationError(
         [
           {
-            message: 'Value must be unique',
             field: Object.keys(error.keyValue)[0],
+            message: 'Value must be unique',
           },
         ],
         req?.t ?? i18nInit(this.payload.config.i18n).t,

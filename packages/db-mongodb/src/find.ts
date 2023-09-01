@@ -1,23 +1,26 @@
 import type { PaginateOptions } from 'mongoose';
 import type { Find } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
+
 import { flattenWhereToOperators } from 'payload/database';
-import { PayloadRequest } from 'payload/types';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
-import { buildSortParam } from './queries/buildSortParam';
+
 import type { MongooseAdapter } from '.';
+
+import { buildSortParam } from './queries/buildSortParam';
+import sanitizeInternalFields from './utilities/sanitizeInternalFields';
 import { withSession } from './withSession';
 
 export const find: Find = async function find(
   this: MongooseAdapter,
   {
     collection,
-    where,
-    page,
     limit,
-    sort: sortArg,
     locale,
+    page,
     pagination,
     req = {} as PayloadRequest,
+    sort: sortArg,
+    where,
   },
 ) {
   const Model = this.collections[collection];
@@ -34,29 +37,29 @@ export const find: Find = async function find(
   let sort;
   if (!hasNearConstraint) {
     sort = buildSortParam({
-      sort: sortArg || collectionConfig.defaultSort,
-      fields: collectionConfig.fields,
-      timestamps: true,
       config: this.payload.config,
+      fields: collectionConfig.fields,
       locale,
+      sort: sortArg || collectionConfig.defaultSort,
+      timestamps: true,
     });
   }
 
   const query = await Model.buildQuery({
-    payload: this.payload,
     locale,
+    payload: this.payload,
     where,
   });
 
   const paginationOptions: PaginateOptions = {
-    page,
-    sort,
+    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
-    useEstimatedCount: hasNearConstraint,
-    forceCountFn: hasNearConstraint,
-    pagination,
     options,
+    page,
+    pagination,
+    sort,
+    useEstimatedCount: hasNearConstraint,
   };
 
   if (limit > 0) {

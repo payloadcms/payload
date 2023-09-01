@@ -1,19 +1,21 @@
 import type { CreateVersion } from 'payload/database';
-import { PayloadRequest } from 'payload/types';
+import type { PayloadRequest } from 'payload/types';
 import type { Document } from 'payload/types';
+
 import type { MongooseAdapter } from '.';
+
 import { withSession } from './withSession';
 
 export const createVersion: CreateVersion = async function createVersion(
   this: MongooseAdapter,
   {
-    collectionSlug,
-    parent,
-    versionData,
     autosave,
+    collectionSlug,
     createdAt,
-    updatedAt,
+    parent,
     req = {} as PayloadRequest,
+    updatedAt,
+    versionData,
   },
 ) {
   const VersionModel = this.versions[collectionSlug];
@@ -22,11 +24,11 @@ export const createVersion: CreateVersion = async function createVersion(
   const [doc] = await VersionModel.create(
     [
       {
-        parent,
-        version: versionData,
         autosave,
         createdAt,
+        parent,
         updatedAt,
+        version: versionData,
       },
     ],
     options,

@@ -1,7 +1,9 @@
+import type { PaginateOptions, Schema } from 'mongoose';
+import type { SanitizedConfig } from 'payload/config';
+import type { SanitizedCollectionConfig } from 'payload/types';
+
 import paginate from 'mongoose-paginate-v2';
-import { PaginateOptions, Schema } from 'mongoose';
-import { SanitizedConfig } from 'payload/config';
-import { SanitizedCollectionConfig } from 'payload/types';
+
 import getBuildQueryPlugin from '../queries/buildQuery';
 import buildSchema from './buildSchema';
 
@@ -11,12 +13,12 @@ const buildCollectionSchema = (collection: SanitizedCollectionConfig, config: Sa
     collection.fields,
     {
       draftsEnabled: Boolean(typeof collection?.versions === 'object' && collection.versions.drafts),
+      indexSortableFields: config.indexSortableFields,
       options: {
-        timestamps: collection.timestamps !== false,
         minimize: false,
+        timestamps: collection.timestamps !== false,
         ...schemaOptions,
       },
-      indexSortableFields: config.indexSortableFields,
     },
   );
 

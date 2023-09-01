@@ -1,22 +1,24 @@
 import type { UpdateVersion } from 'payload/database';
 import type { PayloadRequest } from 'payload/types';
+
 import type { MongooseAdapter } from '.';
+
 import { withSession } from './withSession';
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: MongooseAdapter,
-  { collectionSlug, where, locale, versionData, req = {} as PayloadRequest },
+  { collectionSlug, locale, req = {} as PayloadRequest, versionData, where },
 ) {
   const VersionModel = this.versions[collectionSlug];
   const options = {
     ...withSession(this, req.transactionID),
-    new: true,
     lean: true,
+    new: true,
   };
 
   const query = await VersionModel.buildQuery({
-    payload: this.payload,
     locale,
+    payload: this.payload,
     where,
   });
 

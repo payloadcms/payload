@@ -1,14 +1,18 @@
-import mongoose from 'mongoose';
+import type { Payload } from 'payload';
+import type { PathToQuery } from 'payload/database';
+import type { Field} from 'payload/types';
+import type { Operator } from 'payload/types';
+
 import objectID from 'bson-objectid';
+import mongoose from 'mongoose';
 import { getLocalizedPaths } from 'payload/database';
-import { Field, fieldAffectsData } from 'payload/types';
-import { PathToQuery } from 'payload/database';
+import { fieldAffectsData } from 'payload/types';
 import { validOperators } from 'payload/types';
-import { Payload } from 'payload';
-import { Operator } from 'payload/types';
+
+import type { MongooseAdapter } from '..';
+
 import { operatorMap } from './operatorMap';
 import { sanitizeQueryValue } from './sanitizeQueryValue';
-import { MongooseAdapter } from '..';
 
 type SearchParam = {
   path?: string,
@@ -16,34 +20,34 @@ type SearchParam = {
 }
 
 const subQueryOptions = {
-  limit: 50,
   lean: true,
+  limit: 50,
 };
 
 /**
  * Convert the Payload key / value / operator into a MongoDB query
  */
 export async function buildSearchParam({
-  fields,
-  incomingPath,
-  val,
-  operator,
   collectionSlug,
+  fields,
   globalSlug,
-  payload,
+  incomingPath,
   locale,
+  operator,
+  payload,
+  val,
 }: {
-  fields: Field[],
-  incomingPath: string,
-  val: unknown,
-  operator: string
   collectionSlug?: string,
+  fields: Field[],
   globalSlug?: string,
-  payload: Payload,
+  incomingPath: string,
   locale?: string
+  operator: string
+  payload: Payload,
+  val: unknown,
 }): Promise<SearchParam> {
   // Replace GraphQL nested field double underscore formatting
-  let sanitizedPath = incomingPath.replace(/__/gi, '.');
+  let sanitizedPath = incomingPath.replace(/__/g, '.');
   if (sanitizedPath === 'id') sanitizedPath = '_id';
 
   let paths: PathToQuery[] = [];
@@ -53,7 +57,7 @@ export async function buildSearchParam({
   if (sanitizedPath === '_id') {
     const customIDfield = payload.collections[collectionSlug]?.config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
 
-    let idFieldType: 'text' | 'number' = 'text';
+    let idFieldType: 'number' | 'text' = 'text';
 
     if (customIDfield) {
       if (customIDfield?.type === 'text' || customIDfield?.type === 'number') {
@@ -64,37 +68,37 @@ export async function buildSearchParam({
     }
 
     paths.push({
-      path: '_id',
+      collectionSlug,
+      complete: true,
       field: {
         name: 'id',
         type: idFieldType,
       } as Field,
-      complete: true,
-      collectionSlug,
+      path: '_id',
     });
   } else {
     paths = await getLocalizedPaths({
-      payload,
-      locale,
       collectionSlug,
-      globalSlug,
       fields,
+      globalSlug,
       incomingPath: sanitizedPath,
+      locale,
+      payload,
     });
   }
 
   const [{
-    path,
     field,
+    path,
   }] = paths;
 
   if (path) {
     const formattedValue = sanitizeQueryValue({
       field,
-      path,
-      operator,
-      val,
       hasCustomID,
+      operator,
+      path,
+      val,
     });
 
     // If there are multiple collections to search through,
@@ -110,8 +114,8 @@ export async function buildSearchParam({
       } as SearchParam;
 
       const relationshipQuery = await pathsToQuery.reduce(async (priorQuery, {
-        path: subPath,
         collectionSlug: slug,
+        path: subPath,
       }, i) => {
         const priorQueryResult = await priorQuery;
 
@@ -121,13 +125,13 @@ export async function buildSearchParam({
         // Search on the value passed through the query
         if (i === 0) {
           const subQuery = await SubModel.buildQuery({
+            locale,
+            payload,
             where: {
               [subPath]: {
                 [operator]: val,
               },
             },
-            payload,
-            locale,
           });
 
           const result = await SubModel.find(subQuery, subQueryOptions);
@@ -225,8 +229,8 @@ export async function buildSearchParam({
           value: {
             $and: words.map((word) => ({
               [path]: {
-                $regex: word.replace(/[\\^$*+?\\.()|[\]{}]/g, '\\$&'),
                 $options: 'i',
+                $regex: word.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
               },
             })),
           },

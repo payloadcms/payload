@@ -1,16 +1,18 @@
+import type { Field, TabAsField } from 'payload/dist/fields/config/types';
+
 import mongoose from 'mongoose';
-import { Field, TabAsField } from 'payload/dist/fields/config/types';
+
 import { createArrayFromCommaDelineated } from '../utilities/createArrayFromCommaDelineated';
 
 type SanitizeQueryValueArgs = {
   field: Field | TabAsField
-  path: string
-  operator: string,
-  val: any
   hasCustomID: boolean
+  operator: string,
+  path: string
+  val: any
 }
 
-export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: SanitizeQueryValueArgs): unknown => {
+export const sanitizeQueryValue = ({ field, hasCustomID, operator, path, val }: SanitizeQueryValueArgs): unknown => {
   let formattedValue = val;
 
   // Disregard invalid _ids
@@ -38,7 +40,7 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
     if (val.toLowerCase() === 'false') formattedValue = false;
   }
 
-  if (['all', 'not_in', 'in'].includes(operator) && typeof formattedValue === 'string') {
+  if (['all', 'in', 'not_in'].includes(operator) && typeof formattedValue === 'string') {
     formattedValue = createArrayFromCommaDelineated(formattedValue);
 
     if (field.type === 'number') {
@@ -99,7 +101,7 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
       formattedValue = undefined;
     } else {
       formattedValue = {
-        $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
+        $geometry: { coordinates: [parseFloat(lng), parseFloat(lat)], type: 'Point' },
       };
 
       if (maxDistance) formattedValue.$maxDistance = parseFloat(maxDistance);
@@ -115,7 +117,7 @@ export const sanitizeQueryValue = ({ field, path, operator, val, hasCustomID }: 
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
     if (operator === 'contains') {
-      formattedValue = { $regex: formattedValue, $options: 'i' };
+      formattedValue = { $options: 'i', $regex: formattedValue };
     }
   }
 
