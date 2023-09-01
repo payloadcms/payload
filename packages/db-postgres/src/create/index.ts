@@ -1,5 +1,7 @@
-import { Create } from 'payload/database';
+import type { Create } from 'payload/database';
+
 import toSnakeCase from 'to-snake-case';
+
 import { upsertRow } from '../upsertRow';
 
 export const create: Create = async function create({

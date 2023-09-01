@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
-import { PostgresAdapter } from './types';
-import { ArrayRowToInsert } from './transform/write/types';
+import type { ArrayRowToInsert } from './transform/write/types';
+import type { PostgresAdapter } from './types';
 
 type Args = {
   adapter: PostgresAdapter
@@ -12,13 +12,13 @@ type Args = {
 
 type RowsByTable = {
   [tableName: string]: {
-    rows: Record<string, unknown>[]
-    locales: Record<string, unknown>[]
-    columnName: string
-    rowIndexMap: [number, number][]
     arrays: {
       [tableName: string]: ArrayRowToInsert[]
     }[]
+    columnName: string
+    locales: Record<string, unknown>[]
+    rowIndexMap: [number, number][]
+    rows: Record<string, unknown>[]
   }
 }
 // We want to insert ALL array rows per table with a single insertion
@@ -39,11 +39,11 @@ export const insertArrays = async ({
       // If the table doesn't exist in map, initialize it
       if (!rowsByTable[tableName]) {
         rowsByTable[tableName] = {
-          rows: [],
-          locales: [],
-          columnName: arrayRows[0]?.columnName,
-          rowIndexMap: [],
           arrays: [],
+          columnName: arrayRows[0]?.columnName,
+          locales: [],
+          rowIndexMap: [],
+          rows: [],
         };
       }
 
@@ -108,7 +108,7 @@ export const insertArrays = async ({
 
   // Finally, hoist up the newly inserted arrays to their parent row
   // by slicing out the appropriate range from rowIndexMap
-  Object.values(rowsByTable).forEach(({ rows, columnName, rowIndexMap }) => {
+  Object.values(rowsByTable).forEach(({ columnName, rowIndexMap, rows }) => {
     rowIndexMap.forEach(([start, finish], i) => {
       parentRows[i][columnName] = rows.slice(start, finish);
     });

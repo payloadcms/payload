@@ -1,10 +1,13 @@
 /* eslint-disable no-param-reassign */
+import type { SanitizedConfig } from 'payload/config';
+import type { Field } from 'payload/types';
+
 import { fieldAffectsData } from 'payload/types';
-import { Field } from 'payload/types';
-import { SanitizedConfig } from 'payload/config';
-import { mergeLocales } from './mergeLocales';
-import { BlocksMap } from '../../utilities/createBlocksMap';
+
+import type { BlocksMap } from '../../utilities/createBlocksMap';
+
 import { transform } from '.';
+import { mergeLocales } from './mergeLocales';
 
 type TraverseFieldsArgs = {
   /**
@@ -73,7 +76,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         case 'array':
           if (Array.isArray(fieldData)) {
             result[field.name] = fieldData.map((row, i) => {
-              const dataWithLocales = mergeLocales({ data: row, locale, fallbackLocale });
+              const dataWithLocales = mergeLocales({ data: row, fallbackLocale, locale });
 
               return traverseFields<T>({
                 blocks,
@@ -97,7 +100,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
           if (Array.isArray(blocks[blockFieldPath])) {
             result[field.name] = blocks[blockFieldPath].map((row, i) => {
               delete row._order;
-              const dataWithLocales = mergeLocales({ data: row, locale, fallbackLocale });
+              const dataWithLocales = mergeLocales({ data: row, fallbackLocale, locale });
               const block = field.blocks.find(({ slug }) => slug === row.blockType);
 
               if (block) {
@@ -128,7 +131,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
           field.fields.forEach((subField) => {
             if (fieldAffectsData(subField)) {
-              const subFieldKey = `${sanitizedPath.replace(/[.]/g, '_')}${field.name}_${subField.name}`;
+              const subFieldKey = `${sanitizedPath.replace(/\./g, '_')}${field.name}_${subField.name}`;
               if (table[subFieldKey]) {
                 groupData[subField.name] = table[subFieldKey];
                 delete table[subFieldKey];
@@ -161,7 +164,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
             if (relation) {
               // Handle hasOne Poly
               if (Array.isArray(field.relationTo)) {
-                const matchedRelation = Object.entries(relation).find(([key, val]) => val !== null && !['order', 'id', 'parent'].includes(key));
+                const matchedRelation = Object.entries(relation).find(([key, val]) => val !== null && !['id', 'order', 'parent'].includes(key));
 
                 if (matchedRelation) {
                   const relationTo = matchedRelation[0].replace('ID', '');
@@ -234,7 +237,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 }
               } else {
                 // Handle hasMany Poly
-                const matchedRelation = Object.entries(relation).find(([key, val]) => val !== null && !['order', 'parent', 'id'].includes(key));
+                const matchedRelation = Object.entries(relation).find(([key, val]) => val !== null && !['id', 'order', 'parent'].includes(key));
 
                 if (matchedRelation) {
                   const relationTo = matchedRelation[0].replace('ID', '');

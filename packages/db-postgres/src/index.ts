@@ -1,10 +1,13 @@
 import type { Payload } from 'payload';
+
 import { createDatabaseAdapter } from 'payload/database';
+
+import type { Args, PostgresAdapter, PostgresAdapterResult } from './types';
+
 import { connect } from './connect';
-import { init } from './init';
 import { createMigration } from './createMigration';
+import { init } from './init';
 import { webpack } from './webpack';
-import { Args, PostgresAdapter, PostgresAdapterResult } from './types';
 // import { createGlobal } from './createGlobal';
 // import { createVersion } from './createVersion';
 // import { beginTransaction } from './transactions/beginTransaction';
@@ -31,24 +34,24 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
     // @ts-expect-error
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
-      enums: {},
-      relations: {},
-      tables: {},
-      payload,
       connect,
+      create,
+      createMigration,
       db: undefined,
+      enums: {},
+      find,
+      // queryDrafts,
+      findOne,
       // destroy,
       init,
-      webpack,
-      createMigration,
+      payload,
       // beginTransaction,
       // rollbackTransaction,
       // commitTransaction,
-      // queryDrafts,
-      findOne,
-      find,
-      create,
+      relations: {},
+      tables: {},
       updateOne,
+      webpack,
       // deleteOne,
       // deleteMany,
       // findGlobal,

@@ -1,23 +1,25 @@
-import { Where } from 'payload/types';
-import { Field } from 'payload/types';
-import { SQL } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
+import type { Field } from 'payload/types';
+import type { Where } from 'payload/types';
+
+import type { PostgresAdapter } from '../types';
+
 import { parseParams } from './parseParams';
-import { PostgresAdapter } from '../types';
 
 export async function buildAndOrConditions({
-  where,
-  collectionSlug,
-  globalSlug,
   adapter,
-  locale,
+  collectionSlug,
   fields,
+  globalSlug,
+  locale,
+  where,
 }: {
-  where: Where[],
-  collectionSlug?: string,
-  globalSlug?: string,
   adapter: PostgresAdapter
-  locale?: string,
+  collectionSlug?: string,
   fields: Field[],
+  globalSlug?: string,
+  locale?: string,
+  where: Where[],
 }): Promise<SQL[]> {
   const completedConditions = [];
   // Loop over all AND / OR operations and add them to the AND / OR query param
@@ -28,12 +30,12 @@ export async function buildAndOrConditions({
     if (typeof condition === 'object') {
       // eslint-disable-next-line no-await-in-loop
       const result = await parseParams({
-        where: condition,
-        collectionSlug,
-        globalSlug,
         adapter,
-        locale,
+        collectionSlug,
         fields,
+        globalSlug,
+        locale,
+        where: condition,
       });
       if (Object.keys(result).length > 0) {
         completedConditions.push(result);

@@ -1,16 +1,18 @@
-import toSnakeCase from 'to-snake-case';
 import type { FindOne } from 'payload/database';
-import type { PayloadRequest } from 'payload/types';
 import type { SanitizedCollectionConfig } from 'payload/types';
-import buildQuery from './queries/buildQuery';
+import type { PayloadRequest } from 'payload/types';
+
+import toSnakeCase from 'to-snake-case';
+
 import { buildFindManyArgs } from './find/buildFindManyArgs';
+import buildQuery from './queries/buildQuery';
 import { transform } from './transform/read';
 
 export const findOne: FindOne = async function findOne({
   collection,
-  where,
   locale,
   req = {} as PayloadRequest,
+  where,
 }) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config;
   const tableName = toSnakeCase(collection);
@@ -24,8 +26,8 @@ export const findOne: FindOne = async function findOne({
 
   const findManyArgs = buildFindManyArgs({
     adapter: this,
-    config: this.payload.config,
     collection: collectionConfig,
+    config: this.payload.config,
     depth: 0,
     fallbackLocale: req.fallbackLocale,
     locale: req.locale,
@@ -37,10 +39,10 @@ export const findOne: FindOne = async function findOne({
 
   const result = transform({
     config: this.payload.config,
-    fallbackLocale: req.fallbackLocale,
-    locale: req.locale,
     data: doc,
+    fallbackLocale: req.fallbackLocale,
     fields: collectionConfig.fields,
+    locale: req.locale,
   });
 
   return result;

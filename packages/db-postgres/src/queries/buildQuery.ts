@@ -1,26 +1,29 @@
-import { Where } from 'payload/types';
-import { Field } from 'payload/types';
+import type { SQL } from 'drizzle-orm';
+import type { Where } from 'payload/types';
+import type { Field } from 'payload/types';
+
 import { QueryError } from 'payload/errors';
-import { SQL } from 'drizzle-orm';
+
+import type { PostgresAdapter } from '../types';
+
 import { parseParams } from './parseParams';
-import { PostgresAdapter } from '../types';
 
 type BuildQueryArgs = {
   adapter: PostgresAdapter
-  where: Where
-  locale?: string
   collectionSlug?: string
   globalSlug?: string
+  locale?: string
   versionsFields?: Field[]
+  where: Where
 }
 
 const buildQuery = async function buildQuery({
   adapter,
-  where,
-  locale,
   collectionSlug,
   globalSlug,
+  locale,
   versionsFields,
+  where,
 }: BuildQueryArgs): Promise<SQL> {
   let fields = versionsFields;
   if (!fields) {
@@ -35,10 +38,10 @@ const buildQuery = async function buildQuery({
   }
   const errors = [];
   const result = await parseParams({
+    adapter,
     collectionSlug,
     fields,
     globalSlug,
-    adapter,
     locale,
     where,
   });

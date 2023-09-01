@@ -1,23 +1,28 @@
 /* eslint-disable no-param-reassign */
-import {
+import type { Relation} from 'drizzle-orm';
+import type {
   AnyPgColumnBuilder,
+  IndexBuilder} from 'drizzle-orm/pg-core';
+import type { Field } from 'payload/types';
+
+import { relations } from 'drizzle-orm';
+import {
+  index,
   integer,
+  numeric,
   pgTable,
   serial,
-  varchar,
-  index,
-  numeric,
   timestamp,
-  IndexBuilder,
   unique,
+  varchar,
 } from 'drizzle-orm/pg-core';
-import { Field } from 'payload/types';
-import toSnakeCase from 'to-snake-case';
-import { Relation, relations } from 'drizzle-orm';
 import { fieldAffectsData } from 'payload/types';
-import { GenericColumns, GenericTable, PostgresAdapter } from '../types';
-import { traverseFields } from './traverseFields';
+import toSnakeCase from 'to-snake-case';
+
+import type { GenericColumns, GenericTable, PostgresAdapter } from '../types';
+
 import { parentIDColumnMap } from './parentIDColumnMap';
+import { traverseFields } from './traverseFields';
 
 type Args = {
   adapter: PostgresAdapter
@@ -131,9 +136,9 @@ export const buildTable = ({
     if (relationships.size) {
       const relationshipColumns: Record<string, AnyPgColumnBuilder> = {
         id: serial('id').primaryKey(),
+        order: integer('order'),
         parent: parentIDColumnMap[idColType]('parent_id').references(() => table.id).notNull(),
         path: varchar('path').notNull(),
-        order: integer('order'),
       };
 
       if (hasLocalizedRelationshipField) {
@@ -163,9 +168,9 @@ export const buildTable = ({
       const relationshipsTableRelations = relations(relationshipsTable, ({ one }) => {
         const result: Record<string, Relation<string>> = {
           parent: one(table, {
-            relationName: '_relationships',
             fields: [relationshipsTable.parent],
             references: [table.id],
+            relationName: '_relationships',
           }),
         };
 

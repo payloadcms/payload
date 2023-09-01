@@ -1,19 +1,22 @@
-import { ArrayField, Block } from 'payload/types';
+import type { DBQueryConfig } from 'drizzle-orm';
+import type { SanitizedConfig } from 'payload/config';
+import type { ArrayField, Block } from 'payload/types';
+import type { SanitizedCollectionConfig } from 'payload/types';
+
 import toSnakeCase from 'to-snake-case';
-import { SanitizedCollectionConfig } from 'payload/types';
-import { SanitizedConfig } from 'payload/config';
-import { DBQueryConfig } from 'drizzle-orm';
-import { traverseFields } from './traverseFields';
+
+import type { PostgresAdapter } from '../types';
+
 import { buildWithFromDepth } from './buildWithFromDepth';
 import { createLocaleWhereQuery } from './createLocaleWhereQuery';
-import { PostgresAdapter } from '../types';
+import { traverseFields } from './traverseFields';
 
 type BuildFindQueryArgs = {
   adapter: PostgresAdapter
-  config: SanitizedConfig
   collection: SanitizedCollectionConfig
+  config: SanitizedConfig
   depth: number
-  fallbackLocale?: string | false
+  fallbackLocale?: false | string
   locale?: string
 }
 
@@ -23,8 +26,8 @@ export type Result = DBQueryConfig<'many', true, any, any>
 // a collection field structure
 export const buildFindManyArgs = ({
   adapter,
-  config,
   collection,
+  config,
   depth,
   fallbackLocale,
   locale,
@@ -34,22 +37,22 @@ export const buildFindManyArgs = ({
   };
 
   const _locales: Result = {
-    where: createLocaleWhereQuery({ fallbackLocale, locale }),
     columns: {
-      id: false,
       _parentID: false,
+      id: false,
     },
+    where: createLocaleWhereQuery({ fallbackLocale, locale }),
   };
 
   const tableName = toSnakeCase(collection.slug);
 
   if (adapter.tables[`${tableName}_relationships`]) {
     result.with._relationships = {
-      orderBy: ({ order }, { asc }) => [asc(order)],
       columns: {
         id: false,
         parent: false,
       },
+      orderBy: ({ order }, { asc }) => [asc(order)],
       with: buildWithFromDepth({
         adapter,
         config,
@@ -68,13 +71,13 @@ export const buildFindManyArgs = ({
   const locatedArrays: { [path: string]: ArrayField } = {};
 
   traverseFields({
+    _locales,
     adapter,
     config,
     currentArgs: result,
     currentTableName: tableName,
     depth,
     fields: collection.fields,
-    _locales,
     locatedArrays,
     locatedBlocks,
     path: '',

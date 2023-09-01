@@ -1,14 +1,17 @@
-import toSnakeCase from 'to-snake-case';
+import type { SQL } from 'drizzle-orm';
+import type { PathToQuery } from 'payload/database';
+import type { Field } from 'payload/types';
+import type { Operator } from 'payload/types';
+
 import { inArray } from 'drizzle-orm';
-import { SQL } from 'drizzle-orm';
 import { getLocalizedPaths } from 'payload/database';
-import { Field } from 'payload/types';
 import { fieldAffectsData } from 'payload/types';
-import { PathToQuery } from 'payload/database';
 import { validOperators } from 'payload/types';
-import { Operator } from 'payload/types';
+import toSnakeCase from 'to-snake-case';
+
+import type { PostgresAdapter } from '../types';
+
 import { operatorMap } from './operatorMap';
-import { PostgresAdapter } from '../types';
 
 type SearchParam = {
   path?: string,
@@ -21,26 +24,26 @@ type SearchParam = {
  * Convert the Payload key / value / operator into a Drizzle query
  */
 export async function buildSearchParam({
-  fields,
-  incomingPath,
-  val,
-  operator,
-  collectionSlug,
-  globalSlug,
   adapter,
+  collectionSlug,
+  fields,
+  globalSlug,
+  incomingPath,
   locale,
+  operator,
+  val,
 }: {
-  fields: Field[],
-  incomingPath: string,
-  val: unknown,
-  operator: string
-  collectionSlug?: string,
-  globalSlug?: string,
   adapter: PostgresAdapter
+  collectionSlug?: string,
+  fields: Field[],
+  globalSlug?: string,
+  incomingPath: string,
   locale?: string
+  operator: string
+  val: unknown,
 }): Promise<SearchParam> {
   // Replace GraphQL nested field double underscore formatting
-  const sanitizedPath = incomingPath.replace(/__/gi, '.');
+  const sanitizedPath = incomingPath.replace(/__/g, '.');
 
   let paths: PathToQuery[] = [];
 
@@ -49,7 +52,7 @@ export async function buildSearchParam({
   if (sanitizedPath === 'id') {
     const customIDfield = adapter.payload.collections[collectionSlug]?.config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
 
-    let idFieldType: 'text' | 'number' = 'text';
+    let idFieldType: 'number' | 'text' = 'text';
 
     if (customIDfield) {
       if (customIDfield?.type === 'text' || customIDfield?.type === 'number') {
@@ -60,29 +63,29 @@ export async function buildSearchParam({
     }
 
     paths.push({
-      path: 'id',
+      collectionSlug,
+      complete: true,
       field: {
         name: 'id',
         type: idFieldType,
       } as Field,
-      complete: true,
-      collectionSlug,
+      path: 'id',
     });
   } else {
     // TODO: handle differently
     paths = await getLocalizedPaths({
-      payload: adapter.payload,
-      locale,
       collectionSlug,
-      globalSlug,
       fields,
+      globalSlug,
       incomingPath: sanitizedPath,
+      locale,
+      payload: adapter.payload,
     });
   }
 
   const [{
-    path,
     field,
+    path,
   }] = paths;
 
   if (path) {
@@ -109,8 +112,8 @@ export async function buildSearchParam({
       } as SearchParam;
 
       const relationshipQuery = await pathsToQuery.reduce(async (priorQuery, {
-        path: subPath,
         collectionSlug: slug,
+        path: subPath,
       }, i) => {
         const priorQueryResult = await priorQuery;
         const tableName = toSnakeCase(slug);
@@ -128,9 +131,9 @@ export async function buildSearchParam({
             .from(table)
             .where(operatorMap[operator](table[subPath], val));
 
-          const relatedIDs: (string | number)[] = [];
+          const relatedIDs: (number | string)[] = [];
 
-          result.forEach((row: { id: string | number, [key: string]: unknown }) => {
+          result.forEach((row: { [key: string]: unknown, id: number | string }) => {
             relatedIDs.push(row.id);
           });
 
@@ -157,7 +160,7 @@ export async function buildSearchParam({
           // TODO: only select id?
           .select()
           .from(subQueryTable)
-          .where(subQuery as SQL);
+          .where(subQuery );
 
         const relatedIDs = result.map(({ id }) => id);
         // TODO: not sure if this is tableName or subQueryTable

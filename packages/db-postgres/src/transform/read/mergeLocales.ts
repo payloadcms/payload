@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 type MergeLocalesArgs = {
   data: Record<string, unknown>
-  fallbackLocale?: string | false
+  fallbackLocale?: false | string
   locale?: string
 }
 

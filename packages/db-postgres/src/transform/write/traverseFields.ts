@@ -1,8 +1,11 @@
 /* eslint-disable no-param-reassign */
-import { Field } from 'payload/types';
-import toSnakeCase from 'to-snake-case';
+import type { Field } from 'payload/types';
+
 import { fieldAffectsData, valueIsValueWithRelation } from 'payload/types';
-import { ArrayRowToInsert, BlockRowToInsert } from './types';
+import toSnakeCase from 'to-snake-case';
+
+import type { ArrayRowToInsert, BlockRowToInsert } from './types';
+
 import { isArrayOfRows } from '../../utilities/isArrayOfRows';
 
 type Args = {
@@ -76,14 +79,14 @@ export const traverseFields = ({
 
           fieldData.forEach((arrayRow, i) => {
             const newRow: ArrayRowToInsert = {
+              arrays: {},
               columnName,
-              row: {
-                _order: i + 1,
-              },
               locale: {
                 _locale: locale,
               },
-              arrays: {},
+              row: {
+                _order: i + 1,
+              },
             };
 
             if (field.localized) newRow.row._locale = locale;
@@ -121,11 +124,11 @@ export const traverseFields = ({
 
             const newRow: BlockRowToInsert = {
               arrays: {},
+              locale: {},
               row: {
                 _order: i + 1,
                 _path: `${path}${field.name}`,
               },
-              locale: {},
             };
 
             if (field.localized) newRow.row._locale = locale;
