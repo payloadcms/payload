@@ -1,5 +1,5 @@
 {
-  "exec": "ts-node ./test/dev.ts",
+  "exec": "ts-node ../../test/dev.ts",
   "ext": "ts,js,json",
   "ignore": [
     ".git",
@@ -9,5 +9,9 @@
     "src/**/*.spec.ts",
     "test/**/payload-types.ts"
   ],
-  "watch": ["src/**/*.ts", "test/", "packages/**/*.ts"]
+  "watch": [
+    "src/**/*.ts",
+    "../../test/",
+    "packages/**/*.ts"
+  ]
 }

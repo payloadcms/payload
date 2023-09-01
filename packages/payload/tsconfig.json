@@ -21,7 +21,7 @@
       "payload/types": ["./src/types/index.ts"]
     },
     "resolveJsonModule": true,
-    "rootDir": "." /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
+    "rootDir": "./src" /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
     "skipLibCheck": true /* Skip type checking of declaration files. */,
     "sourceMap": true,
     "strict": false /* Enable all strict type-checking options. */,
@@ -30,7 +30,6 @@
   },
   "exclude": ["dist", "build", "temp", "node_modules"],
   /* Like tsconfig.build.json, but includes test directory and doesnt emit anything */
-  "extends": "../../tsconfig.json",
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
@@ -38,8 +37,7 @@
     "src/**/*.json",
     "test/**/*.ts",
     "test/**/*.tsx",
-    "test/**/*.d.ts",
-    "test/**/*.json"
+    "test/**/*.d.ts"
   ],
   "ts-node": {
     "esm": true,

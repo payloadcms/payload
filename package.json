@@ -99,10 +99,10 @@
     "release:patch": "release-it patch",
     "test": "pnpm --filter payload run test",
     "test:components": "pnpm --filter payload run test:components",
-    "test:e2e": "pnpm --filter payload run test:e2e",
+    "test:e2e": "ts-node -T ./test/runE2E.ts",
     "test:e2e:debug": "pnpm --filter payload run test:e2e:debug",
     "test:e2e:headed": "pnpm --filter payload run test:e2e:headed",
-    "test:int": "pnpm --filter payload run test:int",
+    "test:int": "cross-env DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
   },
   "sideEffects": false,

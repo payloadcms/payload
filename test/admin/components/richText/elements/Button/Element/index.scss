@@ -1,0 +1,19 @@
+@import '../../../../../../../packages/payload/src/admin/scss/styles.scss';
+
+.rich-text-button {
+  margin: $baseline 0;
+}
+
+.rich-text-button__button {
+  padding: base(0.5) base(1.5);
+  border-radius: $style-radius-s;
+
+  &--primary {
+    background-color: $color-dark-gray;
+    color: white;
+  }
+
+  &--secondary {
+    background-color: $color-light-gray;
+  }
+}
