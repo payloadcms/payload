@@ -1,8 +1,11 @@
-import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import { Field, fieldAffectsData } from '../../../../../fields/config/types';
+import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
+import type { Field } from '../../../../../fields/config/types'
 
-const formatFields = (collection: SanitizedCollectionConfig, isEditing: boolean): Field[] => (isEditing
-  ? collection.fields.filter((field) => (fieldAffectsData(field) && field.name !== 'id') || true)
-  : collection.fields);
+import { fieldAffectsData } from '../../../../../fields/config/types'
 
-export default formatFields;
+const formatFields = (collection: SanitizedCollectionConfig, isEditing: boolean): Field[] =>
+  isEditing
+    ? collection.fields.filter((field) => (fieldAffectsData(field) && field.name !== 'id') || true)
+    : collection.fields
+
+export default formatFields

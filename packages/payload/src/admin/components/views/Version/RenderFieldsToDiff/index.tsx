@@ -1,127 +1,124 @@
-import React from 'react';
-import { DiffMethod } from 'react-diff-viewer-continued';
-import { Props } from './types';
-import { fieldAffectsData, fieldHasSubFields } from '../../../../../fields/config/types';
-import Nested from './fields/Nested';
-import { diffMethods } from './fields/diffMethods';
+import type { DiffMethod } from 'react-diff-viewer-continued'
 
-import './index.scss';
+import React from 'react'
 
-const baseClass = 'render-field-diffs';
+import type { Props } from './types'
+
+import { fieldAffectsData, fieldHasSubFields } from '../../../../../fields/config/types'
+import Nested from './fields/Nested'
+import { diffMethods } from './fields/diffMethods'
+import './index.scss'
+
+const baseClass = 'render-field-diffs'
 
 const RenderFieldsToDiff: React.FC<Props> = ({
-  fields,
+  comparison,
   fieldComponents,
   fieldPermissions,
-  version,
-  comparison,
+  fields,
   locales,
+  version,
 }) => (
   <div className={baseClass}>
     {fields.map((field, i) => {
-      const Component = fieldComponents[field.type];
+      const Component = fieldComponents[field.type]
 
-      const isRichText = field.type === 'richText';
-      const diffMethod: DiffMethod = diffMethods[field.type] || 'CHARS';
+      const isRichText = field.type === 'richText'
+      const diffMethod: DiffMethod = diffMethods[field.type] || 'CHARS'
 
       if (Component) {
         if (fieldAffectsData(field)) {
-          const valueIsObject = field.type === 'code' || field.type === 'json';
-          const versionValue = valueIsObject ? JSON.stringify(version?.[field.name]) : version?.[field.name];
-          const comparisonValue = valueIsObject ? JSON.stringify(comparison?.[field.name]) : comparison?.[field.name];
-          const hasPermission = fieldPermissions?.[field.name]?.read?.permission;
-          const subFieldPermissions = fieldPermissions?.[field.name]?.fields;
+          const valueIsObject = field.type === 'code' || field.type === 'json'
+          const versionValue = valueIsObject
+            ? JSON.stringify(version?.[field.name])
+            : version?.[field.name]
+          const comparisonValue = valueIsObject
+            ? JSON.stringify(comparison?.[field.name])
+            : comparison?.[field.name]
+          const hasPermission = fieldPermissions?.[field.name]?.read?.permission
+          const subFieldPermissions = fieldPermissions?.[field.name]?.fields
 
-          if (hasPermission === false) return null;
+          if (hasPermission === false) return null
 
           if (field.localized) {
             return (
-              <div
-                className={`${baseClass}__field`}
-                key={i}
-              >
+              <div className={`${baseClass}__field`} key={i}>
                 {locales.map((locale) => {
-                  const versionLocaleValue = versionValue?.[locale];
-                  const comparisonLocaleValue = comparisonValue?.[locale];
+                  const versionLocaleValue = versionValue?.[locale]
+                  const comparisonLocaleValue = comparisonValue?.[locale]
                   return (
-                    <div
-                      className={`${baseClass}__locale`}
-                      key={locale}
-                    >
+                    <div className={`${baseClass}__locale`} key={locale}>
                       <div className={`${baseClass}__locale-value`}>
                         <Component
+                          comparison={comparisonLocaleValue}
                           diffMethod={diffMethod}
-                          locale={locale}
-                          locales={locales}
                           field={field}
                           fieldComponents={fieldComponents}
-                          version={versionLocaleValue}
-                          comparison={comparisonLocaleValue}
-                          permissions={subFieldPermissions}
                           isRichText={isRichText}
+                          locale={locale}
+                          locales={locales}
+                          permissions={subFieldPermissions}
+                          version={versionLocaleValue}
                         />
                       </div>
                     </div>
-                  );
+                  )
                 })}
               </div>
-            );
+            )
           }
 
           return (
-            <div
-              className={`${baseClass}__field`}
-              key={i}
-            >
+            <div className={`${baseClass}__field`} key={i}>
               <Component
+                comparison={comparisonValue}
                 diffMethod={diffMethod}
-                locales={locales}
                 field={field}
                 fieldComponents={fieldComponents}
-                version={versionValue}
-                comparison={comparisonValue}
-                permissions={subFieldPermissions}
                 isRichText={isRichText}
+                locales={locales}
+                permissions={subFieldPermissions}
+                version={versionValue}
               />
             </div>
-          );
+          )
         }
 
         if (field.type === 'tabs') {
-          const Tabs = fieldComponents.tabs;
+          const Tabs = fieldComponents.tabs
 
           return (
             <Tabs
-              key={i}
-              version={version}
               comparison={comparison}
               field={field}
-              locales={locales}
               fieldComponents={fieldComponents}
+              key={i}
+              locales={locales}
+              version={version}
             />
-          );
+          )
         }
 
         // At this point, we are dealing with a `row` or similar
         if (fieldHasSubFields(field)) {
           return (
             <Nested
-              key={i}
-              locales={locales}
+              comparison={comparison}
               disableGutter
               field={field}
               fieldComponents={fieldComponents}
-              version={version}
-              comparison={comparison}
+              key={i}
+              locales={locales}
               permissions={fieldPermissions}
+              version={version}
             />
-          );
+          )
         }
       }
 
-      return null;
+      return null
     })}
   </div>
-);
+)
 
-export default RenderFieldsToDiff;
+export default RenderFieldsToDiff

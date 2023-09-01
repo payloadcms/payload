@@ -1,20 +1,24 @@
-import { DeleteMany } from 'payload/database';
-import { PayloadRequest } from 'payload/types';
-import type { MongooseAdapter } from '.';
-import { withSession } from './withSession';
+import type { DeleteMany } from 'payload/database'
+import type { PayloadRequest } from 'payload/types'
 
-export const deleteMany: DeleteMany = async function deleteMany(this: MongooseAdapter,
-  { collection, where, req = {} as PayloadRequest }) {
-  const Model = this.collections[collection];
+import type { MongooseAdapter } from '.'
+
+import { withSession } from './withSession'
+
+export const deleteMany: DeleteMany = async function deleteMany(
+  this: MongooseAdapter,
+  { collection, req = {} as PayloadRequest, where },
+) {
+  const Model = this.collections[collection]
   const options = {
     ...withSession(this, req.transactionID),
     lean: true,
-  };
+  }
 
   const query = await Model.buildQuery({
     payload: this.payload,
     where,
-  });
+  })
 
-  await Model.deleteMany(query, options);
-};
+  await Model.deleteMany(query, options)
+}

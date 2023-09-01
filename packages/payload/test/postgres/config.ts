@@ -1,5 +1,6 @@
-import { CollectionConfig } from '../../src/collections/config/types';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import type { CollectionConfig } from '../../src/collections/config/types'
+
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -146,7 +147,7 @@ export const Posts: CollectionConfig = {
       ],
     },
   ],
-};
+}
 
 const config = buildConfigWithDefaults({
   collections: [
@@ -188,38 +189,38 @@ const config = buildConfigWithDefaults({
       data: {
         slug: 'first',
       },
-    });
+    })
 
     const page2 = await payload.create({
       collection: 'pages',
       data: {
         slug: 'second',
       },
-    });
+    })
 
     const findResult = await payload.find({
       collection: 'pages',
       where: { slug: { equals: 'second' } },
-    });
+    })
 
     const findOneResult = await payload.findByID({
       collection: 'pages',
       id: page1.id,
-    });
+    })
 
     const person1 = await payload.create({
       collection: 'people',
       data: {
         fullName: 'Dan Ribbens',
       },
-    });
+    })
 
     const person2 = await payload.create({
       collection: 'people',
       data: {
         fullName: 'Elliot DeNolf',
       },
-    });
+    })
 
     const post = await payload.create({
       collection: 'posts',
@@ -302,7 +303,7 @@ const config = buildConfigWithDefaults({
           },
         ],
       },
-    });
+    })
 
     await payload.update({
       collection: 'posts',
@@ -385,8 +386,8 @@ const config = buildConfigWithDefaults({
           },
         ],
       },
-    });
+    })
   },
-});
+})
 
-export default config;
+export default config

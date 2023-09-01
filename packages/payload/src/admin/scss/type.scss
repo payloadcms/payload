@@ -28,7 +28,7 @@
   letter-spacing: -1px;
 
   @include small-break {
-    letter-spacing: -.5px;
+    letter-spacing: -0.5px;
     font-size: base(1.25);
     line-height: base(1.25);
   }
@@ -38,42 +38,42 @@
   margin: 0 0 base(1);
   font-size: base(1.25);
   line-height: base(1.5);
-  letter-spacing: -.5px;
+  letter-spacing: -0.5px;
 
   @include small-break {
-    font-size: base(.85);
-    line-height: base(.85);
+    font-size: base(0.85);
+    line-height: base(0.85);
   }
 }
 
 %h3 {
   margin: 0 0 base(1);
-  font-size: base(.925);
+  font-size: base(0.925);
   line-height: 1.25;
-  letter-spacing: -.5px;
+  letter-spacing: -0.5px;
 
   @include small-break {
-    font-size: base(.65);
-    line-height: base(.75);
+    font-size: base(0.65);
+    line-height: base(0.75);
   }
 }
 
 %h4 {
   margin: 0 0 $baseline;
-  font-size: base(.75);
+  font-size: base(0.75);
   line-height: 1.5;
-  letter-spacing: -.375px;
+  letter-spacing: -0.375px;
 }
 
 %h5 {
   margin: 0;
-  font-size: base(.5625);
+  font-size: base(0.5625);
   line-height: 1.5;
 }
 
 %h6 {
   margin: 0;
-  font-size: base(.5);
+  font-size: base(0.5);
   line-height: 1.5;
 }
 
@@ -88,18 +88,18 @@
 /////////////////////////////
 
 %large-body {
-  font-size: base(.6);
+  font-size: base(0.6);
   line-height: base(1);
-  letter-spacing: base(.02);
+  letter-spacing: base(0.02);
 
   @include mid-break {
-    font-size: base(.7);
+    font-size: base(0.7);
     line-height: base(1);
   }
 
   @include small-break {
-    font-size: base(.55);
-    line-height: base(.75);
+    font-size: base(0.55);
+    line-height: base(0.75);
   }
 }
 
@@ -110,7 +110,7 @@
 }
 
 %code {
-  font-size: base(.4);
+  font-size: base(0.4);
   color: var(--theme-elevation-400);
 
   span {

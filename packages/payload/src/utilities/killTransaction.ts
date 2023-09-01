@@ -1,15 +1,12 @@
-import { PayloadRequest } from '../express/types';
+import type { PayloadRequest } from '../express/types'
 
 /**
  * Rollback the transaction from the req using the db adapter and removes it from the req
  */
 export async function killTransaction(req: PayloadRequest): Promise<void> {
-  const {
-    transactionID,
-    payload,
-  } = req;
+  const { payload, transactionID } = req
   if (transactionID) {
-    await payload.db.rollbackTransaction(req.transactionID);
-    delete req.transactionID;
+    await payload.db.rollbackTransaction(req.transactionID)
+    delete req.transactionID
   }
 }

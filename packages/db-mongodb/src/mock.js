@@ -1,1 +1,1 @@
-exports.mongooseAdapter = () => ({});
+exports.mongooseAdapter = () => ({})

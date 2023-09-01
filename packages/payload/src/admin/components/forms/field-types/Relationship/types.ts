@@ -1,8 +1,9 @@
-import i18n from 'i18next';
-import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import { RelationshipField } from '../../../../../fields/config/types';
-import { Where } from '../../../../../types';
-import { SanitizedConfig } from '../../../../../config/types';
+import type i18n from 'i18next'
+
+import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
+import type { SanitizedConfig } from '../../../../../config/types'
+import type { RelationshipField } from '../../../../../fields/config/types'
+import type { Where } from '../../../../../types'
 
 export type Props = Omit<RelationshipField, 'type'> & {
   path?: string
@@ -10,9 +11,9 @@ export type Props = Omit<RelationshipField, 'type'> & {
 
 export type Option = {
   label: string
-  value: string | number
-  relationTo?: string
   options?: Option[]
+  relationTo?: string
+  value: number | string
 }
 
 export type OptionGroup = {
@@ -22,41 +23,41 @@ export type OptionGroup = {
 
 export type ValueWithRelation = {
   relationTo: string
-  value: string | number
+  value: number | string
 }
 
-export type Value = ValueWithRelation | string | number
+export type Value = ValueWithRelation | number | string
 
 type CLEAR = {
   type: 'CLEAR'
 }
 
 type UPDATE = {
-  type: 'UPDATE'
-  doc: any
   collection: SanitizedCollectionConfig
-  i18n: typeof i18n
   config: SanitizedConfig
+  doc: any
+  i18n: typeof i18n
+  type: 'UPDATE'
 }
 
 type ADD = {
-  type: 'ADD'
-  docs: any[]
   collection: SanitizedCollectionConfig
-  sort?: boolean
-  ids?: (string | number)[]
-  i18n: typeof i18n
   config: SanitizedConfig
+  docs: any[]
+  i18n: typeof i18n
+  ids?: (number | string)[]
+  sort?: boolean
+  type: 'ADD'
 }
 
-export type Action = CLEAR | ADD | UPDATE
+export type Action = ADD | CLEAR | UPDATE
 
 export type GetResults = (args: {
   lastFullyLoadedRelation?: number
-  search?: string
-  value?: Value | Value[]
-  sort?: boolean
   onSuccess?: () => void
+  search?: string
+  sort?: boolean
+  value?: Value | Value[]
 }) => Promise<void>
 
 export type FilterOptionsResult = {

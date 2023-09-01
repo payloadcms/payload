@@ -166,7 +166,7 @@
   --theme-elevation-1000: var(--color-base-1000);
 }
 
-html[data-theme=dark] {
+html[data-theme='dark'] {
   --theme-border-color: var(--theme-elevation-150);
 
   --theme-elevation-0: var(--color-base-900);

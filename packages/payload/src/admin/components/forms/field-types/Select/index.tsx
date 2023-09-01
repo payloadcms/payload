@@ -1,110 +1,110 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import withCondition from '../../withCondition';
-import useField from '../../useField';
-import { select } from '../../../../../fields/validations';
-import { Option, OptionObject } from '../../../../../fields/config/types';
-import { Props } from './types';
-import SelectInput from './Input';
+import React, { useCallback, useEffect, useState } from 'react'
 
-const formatOptions = (options: Option[]): OptionObject[] => options.map((option) => {
-  if (typeof option === 'object' && (option.value || option.value === '')) {
-    return option;
-  }
+import type { Option, OptionObject } from '../../../../../fields/config/types'
+import type { Props } from './types'
 
-  return {
-    label: option,
-    value: option,
-  } as OptionObject;
-});
+import { select } from '../../../../../fields/validations'
+import useField from '../../useField'
+import withCondition from '../../withCondition'
+import SelectInput from './Input'
+
+const formatOptions = (options: Option[]): OptionObject[] =>
+  options.map((option) => {
+    if (typeof option === 'object' && (option.value || option.value === '')) {
+      return option
+    }
+
+    return {
+      label: option,
+      value: option,
+    } as OptionObject
+  })
 
 const Select: React.FC<Props> = (props) => {
   const {
-    path: pathFromProps,
-    name,
-    validate = select,
-    label,
-    options: optionsFromProps,
-    hasMany,
-    required,
     admin: {
-      readOnly,
-      style,
       className,
-      width,
+      condition,
       description,
       isClearable,
-      condition,
       isSortable = true,
+      readOnly,
+      style,
+      width,
     } = {},
-  } = props;
+    hasMany,
+    label,
+    name,
+    options: optionsFromProps,
+    path: pathFromProps,
+    required,
+    validate = select,
+  } = props
 
-  const path = pathFromProps || name;
+  const path = pathFromProps || name
 
-  const [options, setOptions] = useState(formatOptions(optionsFromProps));
+  const [options, setOptions] = useState(formatOptions(optionsFromProps))
 
   useEffect(() => {
-    setOptions(formatOptions(optionsFromProps));
-  }, [optionsFromProps]);
+    setOptions(formatOptions(optionsFromProps))
+  }, [optionsFromProps])
 
-  const memoizedValidate = useCallback((value, validationOptions) => {
-    return validate(value, { ...validationOptions, options, hasMany, required });
-  }, [validate, required, hasMany, options]);
+  const memoizedValidate = useCallback(
+    (value, validationOptions) => {
+      return validate(value, { ...validationOptions, hasMany, options, required })
+    },
+    [validate, required, hasMany, options],
+  )
 
-  const {
-    value,
-    showError,
-    setValue,
-    errorMessage,
-  } = useField({
+  const { errorMessage, setValue, showError, value } = useField({
+    condition,
     path,
     validate: memoizedValidate,
-    condition,
-  });
+  })
 
-  const onChange = useCallback((selectedOption) => {
-    if (!readOnly) {
-      let newValue;
-      if (!selectedOption) {
-        newValue = null;
-      } else if (hasMany) {
-        if (Array.isArray(selectedOption)) {
-          newValue = selectedOption.map((option) => option.value);
+  const onChange = useCallback(
+    (selectedOption) => {
+      if (!readOnly) {
+        let newValue
+        if (!selectedOption) {
+          newValue = null
+        } else if (hasMany) {
+          if (Array.isArray(selectedOption)) {
+            newValue = selectedOption.map((option) => option.value)
+          } else {
+            newValue = []
+          }
         } else {
-          newValue = [];
+          newValue = selectedOption.value
         }
-      } else {
-        newValue = selectedOption.value;
-      }
 
-      setValue(newValue);
-    }
-  }, [
-    readOnly,
-    hasMany,
-    setValue,
-  ]);
+        setValue(newValue)
+      }
+    },
+    [readOnly, hasMany, setValue],
+  )
 
   return (
     <SelectInput
-      path={path}
-      onChange={onChange}
-      value={value as string | string[]}
-      name={name}
-      options={options}
-      label={label}
-      showError={showError}
-      errorMessage={errorMessage}
-      required={required}
-      readOnly={readOnly}
-      description={description}
-      style={style}
       className={className}
-      width={width}
+      description={description}
+      errorMessage={errorMessage}
       hasMany={hasMany}
-      isSortable={isSortable}
       isClearable={isClearable}
+      isSortable={isSortable}
+      label={label}
+      name={name}
+      onChange={onChange}
+      options={options}
+      path={path}
+      readOnly={readOnly}
+      required={required}
+      showError={showError}
+      style={style}
+      value={value as string | string[]}
+      width={width}
     />
-  );
-};
+  )
+}
 
-export default withCondition(Select);
+export default withCondition(Select)

@@ -1,21 +1,21 @@
-import { CollectionPermission, GlobalPermission } from '../../auth';
-import { Field, FieldAffectingData, TabAsField, UIField } from '../../fields/config/types';
+import type { CollectionPermission, GlobalPermission } from '../../auth'
+import type { Field, FieldAffectingData, TabAsField, UIField } from '../../fields/config/types'
 
 export type EntityPolicies = {
   collections?: {
-    [collectionSlug: string]: CollectionPermission;
-  };
+    [collectionSlug: string]: CollectionPermission
+  }
   globals?: {
-    [globalSlug: string]: GlobalPermission;
-  };
-};
+    [globalSlug: string]: GlobalPermission
+  }
+}
 
 export type PathToQuery = {
-  complete: boolean
   collectionSlug?: string
-  globalSlug?: string
-  path: string
+  complete: boolean
   field: Field | TabAsField
-  fields?: (FieldAffectingData | UIField | TabAsField)[]
+  fields?: (FieldAffectingData | TabAsField | UIField)[]
+  globalSlug?: string
   invalid?: boolean
+  path: string
 }

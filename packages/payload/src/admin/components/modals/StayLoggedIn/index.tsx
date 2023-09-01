@@ -1,60 +1,57 @@
-import React from 'react';
-import { useHistory } from 'react-router-dom';
-import { useModal, Modal } from '@faceless-ui/modal';
-import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import MinimalTemplate from '../../templates/Minimal';
-import Button from '../../elements/Button';
-import { Props } from './types';
+import { Modal, useModal } from '@faceless-ui/modal'
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import { useHistory } from 'react-router-dom'
 
-import './index.scss';
+import type { Props } from './types'
 
-const baseClass = 'stay-logged-in';
+import Button from '../../elements/Button'
+import MinimalTemplate from '../../templates/Minimal'
+import { useConfig } from '../../utilities/Config'
+import './index.scss'
 
-const modalSlug = 'stay-logged-in';
+const baseClass = 'stay-logged-in'
+
+const modalSlug = 'stay-logged-in'
 
 const StayLoggedInModal: React.FC<Props> = (props) => {
-  const { refreshCookie } = props;
-  const history = useHistory();
-  const config = useConfig();
+  const { refreshCookie } = props
+  const history = useHistory()
+  const config = useConfig()
   const {
+    admin: { logoutRoute },
     routes: { admin },
-    admin: {
-      logoutRoute,
-    },
-  } = config;
-  const { toggleModal } = useModal();
-  const { t } = useTranslation('authentication');
+  } = config
+  const { toggleModal } = useModal()
+  const { t } = useTranslation('authentication')
 
   return (
-    <Modal
-      className={baseClass}
-      slug="stay-logged-in"
-    >
+    <Modal className={baseClass} slug="stay-logged-in">
       <MinimalTemplate className={`${baseClass}__template`}>
         <h1>{t('stayLoggedIn')}</h1>
         <p>{t('youAreInactive')}</p>
         <div className={`${baseClass}__actions`}>
           <Button
-            buttonStyle="secondary"
             onClick={() => {
-              toggleModal(modalSlug);
-              history.push(`${admin}${logoutRoute}`);
+              toggleModal(modalSlug)
+              history.push(`${admin}${logoutRoute}`)
             }}
+            buttonStyle="secondary"
           >
             {t('logOut')}
           </Button>
-          <Button onClick={() => {
-            refreshCookie();
-            toggleModal(modalSlug);
-          }}
+          <Button
+            onClick={() => {
+              refreshCookie()
+              toggleModal(modalSlug)
+            }}
           >
             {t('stayLoggedIn')}
           </Button>
         </div>
       </MinimalTemplate>
     </Modal>
-  );
-};
+  )
+}
 
-export default StayLoggedInModal;
+export default StayLoggedInModal

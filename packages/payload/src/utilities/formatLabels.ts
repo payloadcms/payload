@@ -1,53 +1,48 @@
-import pluralize, { isPlural, singular } from 'pluralize';
+import pluralize, { isPlural, singular } from 'pluralize'
 
-const capitalizeFirstLetter = (string: string): string => string.charAt(0).toUpperCase() + string.slice(1);
+const capitalizeFirstLetter = (string: string): string =>
+  string.charAt(0).toUpperCase() + string.slice(1)
 
 const toWords = (inputString: string, joinWords = false): string => {
-  const notNullString = inputString || '';
-  const trimmedString = notNullString.trim();
-  const arrayOfStrings = trimmedString.split(/[\s-]/);
+  const notNullString = inputString || ''
+  const trimmedString = notNullString.trim()
+  const arrayOfStrings = trimmedString.split(/[\s-]/)
 
-  const splitStringsArray = [];
+  const splitStringsArray = []
   arrayOfStrings.forEach((tempString) => {
     if (tempString !== '') {
-      const splitWords = tempString.split(/(?=[A-Z])/).join(' ');
-      splitStringsArray.push(capitalizeFirstLetter(splitWords));
+      const splitWords = tempString.split(/(?=[A-Z])/).join(' ')
+      splitStringsArray.push(capitalizeFirstLetter(splitWords))
     }
-  });
+  })
 
-  return joinWords
-    ? splitStringsArray.join('').replace(/\s/gi, '')
-    : splitStringsArray.join(' ');
-};
+  return joinWords ? splitStringsArray.join('').replace(/\s/g, '') : splitStringsArray.join(' ')
+}
 
-const formatLabels = ((slug: string): { singular: string, plural: string } => {
-  const words = toWords(slug);
-  return (isPlural(slug))
+const formatLabels = (slug: string): { plural: string; singular: string } => {
+  const words = toWords(slug)
+  return isPlural(slug)
     ? {
-      singular: singular(words),
-      plural: words,
-    }
+        plural: words,
+        singular: singular(words),
+      }
     : {
-      singular: words,
-      plural: pluralize(words),
-    };
-});
+        plural: pluralize(words),
+        singular: words,
+      }
+}
 
-const formatNames = ((slug: string): { singular: string, plural: string } => {
-  const words = toWords(slug, true);
-  return (isPlural(slug))
+const formatNames = (slug: string): { plural: string; singular: string } => {
+  const words = toWords(slug, true)
+  return isPlural(slug)
     ? {
-      singular: singular(words),
-      plural: words,
-    }
+        plural: words,
+        singular: singular(words),
+      }
     : {
-      singular: words,
-      plural: pluralize(words),
-    };
-});
+        plural: pluralize(words),
+        singular: words,
+      }
+}
 
-export {
-  formatNames,
-  formatLabels,
-  toWords,
-};
+export { formatLabels, formatNames, toWords }

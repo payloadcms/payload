@@ -13,45 +13,45 @@ $breakpoint-l-width: 1440px !default;
 // BASELINE GRID
 //////////////////////////////
 
-$baseline-px : 25px !default;
-$baseline-body-size : 13px !default;
-$baseline : math.div($baseline-px, $baseline-body-size)+rem;
+$baseline-px: 25px !default;
+$baseline-body-size: 13px !default;
+$baseline: math.div($baseline-px, $baseline-body-size) + rem;
 
 @function base($multiplier) {
-  @return (math.div($baseline-px, $baseline-body-size) * $multiplier)+rem;
+  @return (math.div($baseline-px, $baseline-body-size) * $multiplier) + rem;
 }
 
 //////////////////////////////
 // FONTS (DEPRECATED. DO NOT USE. PREFER CSS VARIABLES)
 //////////////////////////////
 
-$font-body : 'Suisse Intl' !default;
-$font-mono : monospace !default;
+$font-body: 'Suisse Intl' !default;
+$font-mono: monospace !default;
 
 //////////////////////////////
 // COLORS (DEPRECATED. DO NOT USE. PREFER CSS VARIABLES)
 //////////////////////////////
 
-$color-dark-gray : #333333 !default;
-$color-gray : #9A9A9A !default;
-$color-light-gray : #DADADA !default;
-$color-background-gray : #F3F3F3 !default;
-$color-red : #ff6f76 !default;
-$color-yellow : #FDFFA4 !default;
-$color-green : #B2FFD6 !default;
-$color-purple : #F3DDF3 !default;
+$color-dark-gray: #333333 !default;
+$color-gray: #9a9a9a !default;
+$color-light-gray: #dadada !default;
+$color-background-gray: #f3f3f3 !default;
+$color-red: #ff6f76 !default;
+$color-yellow: #fdffa4 !default;
+$color-green: #b2ffd6 !default;
+$color-purple: #f3ddf3 !default;
 
 //////////////////////////////
 // STYLES
 //////////////////////////////
 
-$style-radius-s : 3px !default;
-$style-radius-m : 4px !default;
+$style-radius-s: 3px !default;
+$style-radius-m: 4px !default;
 $style-radius-l: 9px !default;
-$style-stroke-width : 1px !default;
+$style-stroke-width: 1px !default;
 
-$style-stroke-width-s : 1px !default;
-$style-stroke-width-m : 2px !default;
+$style-stroke-width-s: 1px !default;
+$style-stroke-width-m: 2px !default;
 
 //////////////////////////////
 // MISC
@@ -66,31 +66,41 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 //////////////////////////////
 
 @mixin shadow-sm {
-  box-shadow: 0 2px 3px 0 rgba(0, 2, 4, 0.05), 0 10px 4px -8px rgba(0, 2, 4, 0.02);
+  box-shadow:
+    0 2px 3px 0 rgba(0, 2, 4, 0.05),
+    0 10px 4px -8px rgba(0, 2, 4, 0.02);
 }
 
 @mixin shadow-m {
-  box-shadow: 0 0 30px 0 rgb(0 2 4 / 12%), 0 30px 25px -8px rgb(0 2 4 / 10%);
+  box-shadow:
+    0 0 30px 0 rgb(0 2 4 / 12%),
+    0 30px 25px -8px rgb(0 2 4 / 10%);
 }
 
 @mixin shadow-lg {
-  box-shadow: 0 20px 35px -10px rgba(0, 2, 4, 0.2), 0 6px 4px -4px rgba(0, 2, 4, 0.02);
+  box-shadow:
+    0 20px 35px -10px rgba(0, 2, 4, 0.2),
+    0 6px 4px -4px rgba(0, 2, 4, 0.02);
 }
 
 @mixin shadow-lg-top {
-  box-shadow: 0 -2px 20px 7px rgba(0, 2, 4, 0.1), 0 6px 4px -4px rgba(0, 2, 4, 0.02);
+  box-shadow:
+    0 -2px 20px 7px rgba(0, 2, 4, 0.1),
+    0 6px 4px -4px rgba(0, 2, 4, 0.02);
 }
 
 @mixin shadow {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .07);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 }
 
 @mixin inputShadowActive {
-  box-shadow: 0 2px 3px 0 rgba(0, 2, 4, 0.16), 0 6px 4px -4px rgba(0, 2, 4, 0.13);
+  box-shadow:
+    0 2px 3px 0 rgba(0, 2, 4, 0.16),
+    0 6px 4px -4px rgba(0, 2, 4, 0.13);
 }
 
 @mixin inputShadow {
@@ -98,7 +108,9 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 
   &:not(:disabled) {
     &:hover {
-      box-shadow: 0 2px 3px 0 rgba(0, 2, 4, 0.13), 0 6px 4px -4px rgba(0, 2, 4, 0.1);
+      box-shadow:
+        0 2px 3px 0 rgba(0, 2, 4, 0.13),
+        0 6px 4px -4px rgba(0, 2, 4, 0.1);
     }
 
     &:active,
@@ -118,7 +130,6 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 //////////////////////////////
 
 @mixin blur-bg($color: var(--theme-bg)) {
-
   &:before,
   &:after {
     content: ' ';
@@ -131,7 +142,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
 
   &:before {
     background: $color;
-    opacity: .85;
+    opacity: 0.85;
   }
 
   &:after {
@@ -139,7 +150,7 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
   }
 }
 
-@mixin formInput () {
+@mixin formInput() {
   @include inputShadow;
   font-family: var(--font-body);
   width: 100%;
@@ -150,12 +161,12 @@ $focus-box-shadow: 0 0 0 $style-stroke-width-m var(--theme-success-500);
   font-size: 1rem;
   height: base(2);
   line-height: base(1);
-  padding: base(.5) base(.75);
+  padding: base(0.5) base(0.75);
   -webkit-appearance: none;
 
   &[data-rtl='true'] {
     direction: rtl;
-  } 
+  }
 
   &::-webkit-input-placeholder {
     color: var(--theme-elevation-400);

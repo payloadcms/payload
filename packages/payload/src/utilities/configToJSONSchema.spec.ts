@@ -1,59 +1,60 @@
-import { sanitizeConfig } from '../config/sanitize';
-import { Config } from '../config/types';
-import { configToJSONSchema } from './configToJSONSchema';
+import type { Config } from '../config/types'
+
+import { sanitizeConfig } from '../config/sanitize'
+import { configToJSONSchema } from './configToJSONSchema'
 
 describe('configToJSONSchema', () => {
   it('should handle optional arrays with required fields', () => {
     const config: Config = {
       collections: [
         {
-          slug: 'test',
           fields: [
             {
-              name: 'someRequiredField',
-              type: 'array',
               fields: [
                 {
                   name: 'someRequiredField',
-                  type: 'text',
                   required: true,
+                  type: 'text',
                 },
               ],
+              name: 'someRequiredField',
+              type: 'array',
             },
           ],
+          slug: 'test',
           timestamps: false,
         },
       ],
-    };
+    }
 
-    const sanitizedConfig = sanitizeConfig(config);
-    const schema = configToJSONSchema(sanitizedConfig);
+    const sanitizedConfig = sanitizeConfig(config)
+    const schema = configToJSONSchema(sanitizedConfig)
     expect(schema?.definitions?.test).toStrictEqual({
-      title: 'Test',
-      type: 'object',
       additionalProperties: false,
       properties: {
         id: {
           type: 'string',
         },
         someRequiredField: {
-          type: 'array',
           items: {
-            type: 'object',
             additionalProperties: false,
             properties: {
-              someRequiredField: {
+              id: {
                 type: 'string',
               },
-              id: {
+              someRequiredField: {
                 type: 'string',
               },
             },
             required: ['someRequiredField'],
+            type: 'object',
           },
+          type: 'array',
         },
       },
       required: ['id'],
-    });
-  });
-});
+      title: 'Test',
+      type: 'object',
+    })
+  })
+})

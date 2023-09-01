@@ -1,5 +1,5 @@
 export type Props = {
-  updatePage?: () => void,
-  isDisabled?: boolean,
-  direction?: 'right' | 'left',
+  direction?: 'left' | 'right'
+  isDisabled?: boolean
+  updatePage?: () => void
 }

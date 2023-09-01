@@ -1,10 +1,11 @@
-import { RadioField, SelectField } from '../fields/config/types';
-import APIError from './APIError';
+import type { RadioField, SelectField } from '../fields/config/types'
+
+import APIError from './APIError'
 
 class MissingFieldInputOptions extends APIError {
-  constructor(field: SelectField | RadioField) {
-    super(`Field ${field.label} is missing options.`);
+  constructor(field: RadioField | SelectField) {
+    super(`Field ${field.label} is missing options.`)
   }
 }
 
-export default MissingFieldInputOptions;
+export default MissingFieldInputOptions

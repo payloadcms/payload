@@ -1,39 +1,32 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": ["node"],
-    "composite": true,
-    "target": "ESNext",
-    "sourceMap": true,
-    "module": "NodeNext",
     "allowJs": true /* Allow javascript files to be compiled. */,
     "checkJs": false /* Report errors in .js files. */,
-    "jsx": "react" /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */,
+    "composite": true,
     "declaration": true /* Generates corresponding '.d.ts' file. */,
-    /* Concatenate and emit output to single file. */
-    "outDir": "./dist" /* Redirect output structure to the directory. */,
-    "rootDir": "./src" /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
+    "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
+    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
+    "jsx": "react" /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
     /* Do not emit comments to output. */
     "noEmit": false /* Do not emit outputs. */,
-    "strict": false /* Enable all strict type-checking options. */,
-    "moduleResolution": "NodeNext" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
+    /* Concatenate and emit output to single file. */
+    "outDir": "./dist" /* Redirect output structure to the directory. */,
     "paths": {
-      "payload/generated-types": ["./src/generated-types.ts"],
-      "payload/config": ["./src/config/types.ts"],
       "payload/auth": ["./src/auth/types.ts"],
+      "payload/config": ["./src/config/types.ts"],
+      "payload/generated-types": ["./src/generated-types.ts"],
       "payload/types": ["./src/types/index.ts"]
     },
-    "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
     "resolveJsonModule": true,
+    "rootDir": "./src" /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */,
     "skipLibCheck": true /* Skip type checking of declaration files. */,
-    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */
+    "sourceMap": true,
+    "strict": false /* Enable all strict type-checking options. */,
+    "target": "ESNext",
+    "types": ["node"]
   },
-  "ts-node": {
-    "swc": true,
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
   "exclude": [
     "dist",
     "build",
@@ -46,5 +39,12 @@
     "**/*.spec.ts",
     "**/*.spec.tsx",
     "temp"
-  ]
+  ],
+  "extends": "../../tsconfig.json",
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
+    "swc": true
+  }
 }

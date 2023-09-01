@@ -1,11 +1,14 @@
 /* eslint-disable no-param-reassign */
-import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../config/types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { traverseFields } from './traverseFields';
-import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise';
-import relationshipPopulationPromise from './relationshipPopulationPromise';
+import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { Field, TabAsField } from '../../config/types'
+
+import { fieldAffectsData, tabHasName } from '../../config/types'
+import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise'
+import relationshipPopulationPromise from './relationshipPopulationPromise'
+import { traverseFields } from './traverseFields'
 
 type Args = {
+  context: RequestContext
   currentDepth: number
   depth: number
   doc: Record<string, unknown>
@@ -13,12 +16,11 @@ type Args = {
   fieldPromises: Promise<void>[]
   findMany: boolean
   flattenLocales: boolean
+  overrideAccess: boolean
   populationPromises: Promise<void>[]
   req: PayloadRequest
-  overrideAccess: boolean
-  siblingDoc: Record<string, unknown>
   showHiddenFields: boolean
-  context: RequestContext
+  siblingDoc: Record<string, unknown>
 }
 
 // This function is responsible for the following actions, in order:
@@ -30,6 +32,7 @@ type Args = {
 // - Populate relationships
 
 export const promise = async ({
+  context,
   currentDepth,
   depth,
   doc,
@@ -40,55 +43,64 @@ export const promise = async ({
   overrideAccess,
   populationPromises,
   req,
-  siblingDoc,
   showHiddenFields,
-  context,
+  siblingDoc,
 }: Args): Promise<void> => {
-  if (fieldAffectsData(field) && field.hidden && typeof siblingDoc[field.name] !== 'undefined' && !showHiddenFields) {
-    delete siblingDoc[field.name];
+  if (
+    fieldAffectsData(field) &&
+    field.hidden &&
+    typeof siblingDoc[field.name] !== 'undefined' &&
+    !showHiddenFields
+  ) {
+    delete siblingDoc[field.name]
   }
 
-  const shouldHoistLocalizedValue = flattenLocales
-    && fieldAffectsData(field)
-    && (typeof siblingDoc[field.name] === 'object' && siblingDoc[field.name] !== null)
-    && field.localized
-    && req.locale !== 'all'
-    && req.payload.config.localization;
+  const shouldHoistLocalizedValue =
+    flattenLocales &&
+    fieldAffectsData(field) &&
+    typeof siblingDoc[field.name] === 'object' &&
+    siblingDoc[field.name] !== null &&
+    field.localized &&
+    req.locale !== 'all' &&
+    req.payload.config.localization
 
   if (shouldHoistLocalizedValue) {
     // replace actual value with localized value before sanitizing
     // { [locale]: fields } -> fields
-    const { locale } = req;
-    const value = siblingDoc[field.name][locale];
-    const fallbackLocale = req.payload.config.localization && req.payload.config.localization?.fallback && req.fallbackLocale;
+    const { locale } = req
+    const value = siblingDoc[field.name][locale]
+    const fallbackLocale =
+      req.payload.config.localization &&
+      req.payload.config.localization?.fallback &&
+      req.fallbackLocale
 
-    let hoistedValue = value;
+    let hoistedValue = value
 
     if (fallbackLocale && fallbackLocale !== locale) {
-      const fallbackValue = siblingDoc[field.name][fallbackLocale];
-      const isNullOrUndefined = typeof value === 'undefined' || value === null;
+      const fallbackValue = siblingDoc[field.name][fallbackLocale]
+      const isNullOrUndefined = typeof value === 'undefined' || value === null
 
       if (fallbackValue) {
         switch (field.type) {
           case 'text':
           case 'textarea': {
             if (value === '' || isNullOrUndefined) {
-              hoistedValue = fallbackValue;
+              hoistedValue = fallbackValue
             }
-            break;
+            break
           }
 
           default: {
             if (isNullOrUndefined) {
-              hoistedValue = fallbackValue;
+              hoistedValue = fallbackValue
             }
-            break;
+            break
           }
         }
       }
     }
 
-    siblingDoc[field.name] = hoistedValue;
+    siblingDoc[field.name] = hoistedValue
   }
 
   // Sanitize outgoing field value
@@ -97,50 +109,60 @@ export const promise = async ({
       // Fill groups with empty objects so fields with hooks within groups can populate
       // themselves virtually as necessary
       if (typeof siblingDoc[field.name] === 'undefined') {
-        siblingDoc[field.name] = {};
+        siblingDoc[field.name] = {}
       }
 
-      break;
+      break
     }
     case 'tabs': {
       field.tabs.forEach((tab) => {
-        if (tabHasName(tab) && (typeof siblingDoc[tab.name] === 'undefined' || siblingDoc[tab.name] === null)) {
-          siblingDoc[tab.name] = {};
+        if (
+          tabHasName(tab) &&
+          (typeof siblingDoc[tab.name] === 'undefined' || siblingDoc[tab.name] === null)
+        ) {
+          siblingDoc[tab.name] = {}
         }
-      });
+      })
 
-      break;
+      break
     }
 
     case 'richText': {
-      if (((field.admin?.elements?.includes('relationship') || field.admin?.elements?.includes('upload') || field.admin?.elements?.includes('link')) || !field?.admin?.elements)) {
-        populationPromises.push(richTextRelationshipPromise({
-          currentDepth,
-          depth,
-          field,
-          overrideAccess,
-          req,
-          siblingDoc,
-          showHiddenFields,
-        }));
+      if (
+        field.admin?.elements?.includes('relationship') ||
+        field.admin?.elements?.includes('upload') ||
+        field.admin?.elements?.includes('link') ||
+        !field?.admin?.elements
+      ) {
+        populationPromises.push(
+          richTextRelationshipPromise({
+            currentDepth,
+            depth,
+            field,
+            overrideAccess,
+            req,
+            showHiddenFields,
+            siblingDoc,
+          }),
+        )
       }
 
-      break;
+      break
     }
 
     case 'point': {
-      const pointDoc = siblingDoc[field.name] as Record<string, unknown>;
+      const pointDoc = siblingDoc[field.name] as Record<string, unknown>
       if (Array.isArray(pointDoc?.coordinates) && pointDoc.coordinates.length === 2) {
-        siblingDoc[field.name] = pointDoc.coordinates;
+        siblingDoc[field.name] = pointDoc.coordinates
       } else {
-        siblingDoc[field.name] = undefined;
+        siblingDoc[field.name] = undefined
       }
 
-      break;
+      break
     }
 
     default: {
-      break;
+      break
     }
   }
 
@@ -148,77 +170,91 @@ export const promise = async ({
     // Execute hooks
     if (field.hooks?.afterRead) {
       await field.hooks.afterRead.reduce(async (priorHook, currentHook) => {
-        await priorHook;
+        await priorHook
 
-        const shouldRunHookOnAllLocales = field.localized
-          && (req.locale === 'all' || !flattenLocales)
-          && typeof siblingDoc[field.name] === 'object';
+        const shouldRunHookOnAllLocales =
+          field.localized &&
+          (req.locale === 'all' || !flattenLocales) &&
+          typeof siblingDoc[field.name] === 'object'
 
         if (shouldRunHookOnAllLocales) {
-          const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) => (async () => {
-            const hookedValue = await currentHook({
-              value,
-              originalDoc: doc,
-              data: doc,
-              siblingData: siblingDoc,
-              operation: 'read',
-              req,
-              context,
-            });
+          const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) =>
+            (async () => {
+              const hookedValue = await currentHook({
+                context,
+                data: doc,
+                operation: 'read',
+                originalDoc: doc,
+                req,
+                siblingData: siblingDoc,
+                value,
+              })
 
-            if (hookedValue !== undefined) {
-              siblingDoc[field.name][locale] = hookedValue;
-            }
-          })());
+              if (hookedValue !== undefined) {
+                siblingDoc[field.name][locale] = hookedValue
+              }
+            })(),
+          )
 
-          await Promise.all(hookPromises);
+          await Promise.all(hookPromises)
         } else {
           const hookedValue = await currentHook({
+            context,
             data: doc,
             findMany,
-            originalDoc: doc,
             operation: 'read',
-            siblingData: siblingDoc,
+            originalDoc: doc,
             req,
+            siblingData: siblingDoc,
             value: siblingDoc[field.name],
-            context,
-          });
+          })
 
           if (hookedValue !== undefined) {
-            siblingDoc[field.name] = hookedValue;
+            siblingDoc[field.name] = hookedValue
           }
         }
-      }, Promise.resolve());
+      }, Promise.resolve())
     }
 
     // Execute access control
     if (field.access && field.access.read) {
-      const result = overrideAccess ? true : await field.access.read({ req, id: doc.id as string | number, siblingData: siblingDoc, data: doc, doc });
+      const result = overrideAccess
+        ? true
+        : await field.access.read({
+            data: doc,
+            doc,
+            id: doc.id as number | string,
+            req,
+            siblingData: siblingDoc,
+          })
 
       if (!result) {
-        delete siblingDoc[field.name];
+        delete siblingDoc[field.name]
       }
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
-      populationPromises.push(relationshipPopulationPromise({
-        currentDepth,
-        depth,
-        field,
-        overrideAccess,
-        req,
-        showHiddenFields,
-        siblingDoc,
-      }));
+      populationPromises.push(
+        relationshipPopulationPromise({
+          currentDepth,
+          depth,
+          field,
+          overrideAccess,
+          req,
+          showHiddenFields,
+          siblingDoc,
+        }),
+      )
     }
   }
 
   switch (field.type) {
     case 'group': {
-      let groupDoc = siblingDoc[field.name] as Record<string, unknown>;
-      if (typeof siblingDoc[field.name] !== 'object') groupDoc = {};
+      let groupDoc = siblingDoc[field.name] as Record<string, unknown>
+      if (typeof siblingDoc[field.name] !== 'object') groupDoc = {}
 
       traverseFields({
+        context,
         currentDepth,
         depth,
         doc,
@@ -229,120 +265,120 @@ export const promise = async ({
         overrideAccess,
         populationPromises,
         req,
-        siblingDoc: groupDoc,
         showHiddenFields,
-        context,
-      });
+        siblingDoc: groupDoc,
+      })
 
-      break;
+      break
     }
 
     case 'array': {
-      const rows = siblingDoc[field.name];
+      const rows = siblingDoc[field.name]
 
       if (Array.isArray(rows)) {
         rows.forEach((row) => {
           traverseFields({
+            context,
             currentDepth,
             depth,
             doc,
-            fields: field.fields,
             fieldPromises,
+            fields: field.fields,
             findMany,
             flattenLocales,
             overrideAccess,
             populationPromises,
             req,
-            siblingDoc: row || {},
             showHiddenFields,
-            context,
-          });
-        });
+            siblingDoc: row || {},
+          })
+        })
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
         Object.values(rows).forEach((localeRows) => {
           if (Array.isArray(localeRows)) {
             localeRows.forEach((row) => {
               traverseFields({
+                context,
                 currentDepth,
                 depth,
                 doc,
-                fields: field.fields,
                 fieldPromises,
+                fields: field.fields,
                 findMany,
                 flattenLocales,
                 overrideAccess,
                 populationPromises,
                 req,
-                siblingDoc: row || {},
                 showHiddenFields,
-                context,
-              });
-            });
+                siblingDoc: row || {},
+              })
+            })
           }
-        });
+        })
       }
-      break;
+      break
     }
 
     case 'blocks': {
-      const rows = siblingDoc[field.name];
+      const rows = siblingDoc[field.name]
 
       if (Array.isArray(rows)) {
         rows.forEach((row) => {
-          const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
+          const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
 
           if (block) {
             traverseFields({
+              context,
               currentDepth,
               depth,
               doc,
-              fields: block.fields,
               fieldPromises,
+              fields: block.fields,
               findMany,
               flattenLocales,
               overrideAccess,
               populationPromises,
               req,
-              siblingDoc: row || {},
               showHiddenFields,
-              context,
-            });
+              siblingDoc: row || {},
+            })
           }
-        });
+        })
       } else if (!shouldHoistLocalizedValue && typeof rows === 'object' && rows !== null) {
         Object.values(rows).forEach((localeRows) => {
           if (Array.isArray(localeRows)) {
             localeRows.forEach((row) => {
-              const block = field.blocks.find((blockType) => blockType.slug === row.blockType);
+              const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
 
               if (block) {
                 traverseFields({
+                  context,
                   currentDepth,
                   depth,
                   doc,
-                  fields: block.fields,
                   fieldPromises,
+                  fields: block.fields,
                   findMany,
                   flattenLocales,
                   overrideAccess,
                   populationPromises,
                   req,
-                  siblingDoc: row || {},
                   showHiddenFields,
-                  context,
-                });
+                  siblingDoc: row || {},
+                })
               }
-            });
+            })
           }
-        });
+        })
       }
 
-      break;
+      break
     }
 
     case 'row':
     case 'collapsible': {
       traverseFields({
+        context,
         currentDepth,
         depth,
         doc,
@@ -353,22 +389,22 @@ export const promise = async ({
         overrideAccess,
         populationPromises,
         req,
-        siblingDoc,
         showHiddenFields,
-        context,
-      });
+        siblingDoc,
+      })
 
-      break;
+      break
     }
 
     case 'tab': {
-      let tabDoc = siblingDoc;
+      let tabDoc = siblingDoc
       if (tabHasName(field)) {
-        tabDoc = siblingDoc[field.name] as Record<string, unknown>;
-        if (typeof siblingDoc[field.name] !== 'object') tabDoc = {};
+        tabDoc = siblingDoc[field.name] as Record<string, unknown>
+        if (typeof siblingDoc[field.name] !== 'object') tabDoc = {}
       }
 
       await traverseFields({
+        context,
         currentDepth,
         depth,
         doc,
@@ -379,16 +415,16 @@ export const promise = async ({
         overrideAccess,
         populationPromises,
         req,
-        siblingDoc: tabDoc,
         showHiddenFields,
-        context,
-      });
+        siblingDoc: tabDoc,
+      })
 
-      break;
+      break
     }
 
     case 'tabs': {
       traverseFields({
+        context,
         currentDepth,
         depth,
         doc,
@@ -399,15 +435,14 @@ export const promise = async ({
         overrideAccess,
         populationPromises,
         req,
-        siblingDoc,
         showHiddenFields,
-        context,
-      });
-      break;
+        siblingDoc,
+      })
+      break
     }
 
     default: {
-      break;
+      break
     }
   }
-};
+}

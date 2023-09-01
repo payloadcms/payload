@@ -5,11 +5,11 @@
   cursor: pointer;
 
   svg {
-    width: base(.75);
-    height: base(.75);
+    width: base(0.75);
+    height: base(0.75);
   }
 
   &--disabled {
-    opacity: .4;
+    opacity: 0.4;
   }
 }

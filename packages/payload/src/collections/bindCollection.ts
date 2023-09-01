@@ -1,9 +1,12 @@
-import { NextFunction, Request, Response } from 'express';
-import { Collection } from './config/types';
+import type { NextFunction, Request, Response } from 'express'
 
-const bindCollectionMiddleware = (collection: Collection) => (req: Request & { collection: Collection }, res: Response, next: NextFunction): void => {
-  req.collection = collection;
-  next();
-};
+import type { Collection } from './config/types'
 
-export default bindCollectionMiddleware;
+const bindCollectionMiddleware =
+  (collection: Collection) =>
+  (req: Request & { collection: Collection }, res: Response, next: NextFunction): void => {
+    req.collection = collection
+    next()
+  }
+
+export default bindCollectionMiddleware

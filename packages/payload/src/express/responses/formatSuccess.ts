@@ -3,11 +3,11 @@ const formatSuccessResponse = (incoming, type) => {
     case 'message':
       return {
         message: incoming,
-      };
+      }
 
     default:
-      return incoming;
+      return incoming
   }
-};
+}
 
-export default formatSuccessResponse;
+export default formatSuccessResponse

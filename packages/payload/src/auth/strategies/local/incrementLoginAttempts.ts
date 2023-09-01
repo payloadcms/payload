@@ -1,60 +1,56 @@
-import { Payload } from '../../..';
-import { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types';
-import { PayloadRequest } from '../../../express/types';
+import type { Payload } from '../../..'
+import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types'
+import type { PayloadRequest } from '../../../express/types'
 
 type Args = {
-  req: PayloadRequest,
-  payload: Payload
-  doc: TypeWithID & Record<string, unknown>
   collection: SanitizedCollectionConfig
+  doc: TypeWithID & Record<string, unknown>
+  payload: Payload
+  req: PayloadRequest
 }
 
 export const incrementLoginAttempts = async ({
-  req,
-  payload,
-  doc,
   collection,
+  doc,
+  payload,
+  req,
 }: Args): Promise<void> => {
   const {
-    auth: {
-      maxLoginAttempts,
-      lockTime,
-    },
-  } = collection;
+    auth: { lockTime, maxLoginAttempts },
+  } = collection
 
   if ('lockUntil' in doc && typeof doc.lockUntil === 'string') {
-    const lockUntil = Math.floor(new Date(doc.lockUntil).getTime() / 1000);
+    const lockUntil = Math.floor(new Date(doc.lockUntil).getTime() / 1000)
 
     // Expired lock, restart count at 1
     if (lockUntil < Date.now()) {
       await payload.update({
-        req,
         collection: collection.slug,
-        id: doc.id,
         data: {
-          loginAttempts: 1,
           lockUntil: null,
+          loginAttempts: 1,
         },
-      });
+        id: doc.id,
+        req,
+      })
     }
 
-    return;
+    return
   }
 
   const data: Record<string, unknown> = {
     loginAttempts: Number(doc.loginAttempts) + 1,
-  };
+  }
 
   // Lock the account if at max attempts and not already locked
   if (typeof doc.loginAttempts === 'number' && doc.loginAttempts + 1 >= maxLoginAttempts) {
-    const lockUntil = new Date((Date.now() + lockTime));
-    data.lockUntil = lockUntil;
+    const lockUntil = new Date(Date.now() + lockTime)
+    data.lockUntil = lockUntil
   }
-
 
   await payload.update({
     collection: collection.slug,
-    id: doc.id,
     data,
-  });
-};
+    id: doc.id,
+  })
+}

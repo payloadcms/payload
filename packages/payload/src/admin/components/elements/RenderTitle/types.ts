@@ -1,11 +1,11 @@
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
 
 export type Props = {
-  useAsTitle?: string
+  collection?: SanitizedCollectionConfig
   data?: {
     id?: string
   }
-  title?: string
   fallback?: string
-  collection?: SanitizedCollectionConfig
+  title?: string
+  useAsTitle?: string
 }

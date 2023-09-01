@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
 
 // fields with fields
 // - array -> fields
@@ -89,84 +89,90 @@ export default buildConfigWithDefaults({
         {
           type: 'tabs',
           label: 'Tabs',
-          tabs: [{
-            label: 'Tab 1',
-            name: 'tab1',
-            fields: [
-              {
-                type: 'blocks',
-                name: 'layout',
-                blocks: [{
-                  slug: 'block-1',
-                  fields: [
+          tabs: [
+            {
+              label: 'Tab 1',
+              name: 'tab1',
+              fields: [
+                {
+                  type: 'blocks',
+                  name: 'layout',
+                  blocks: [
                     {
-                      type: 'array',
-                      name: 'items',
+                      slug: 'block-1',
                       fields: [
                         {
-                          type: 'text',
-                          name: 'title',
-                          required: true,
+                          type: 'array',
+                          name: 'items',
+                          fields: [
+                            {
+                              type: 'text',
+                              name: 'title',
+                              required: true,
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                    {
+                      slug: 'block-2',
+                      fields: [
+                        {
+                          type: 'array',
+                          name: 'items',
+                          fields: [
+                            {
+                              type: 'text',
+                              name: 'title2',
+                              required: true,
+                            },
+                          ],
                         },
                       ],
                     },
                   ],
                 },
-                {
-                  slug: 'block-2',
-                  fields: [
-                    {
-                      type: 'array',
-                      name: 'items',
-                      fields: [
-                        {
-                          type: 'text',
-                          name: 'title2',
-                          required: true,
-                        },
-                      ],
-                    },
-                  ],
-                }],
-              },
-            ],
-          }],
+              ],
+            },
+          ],
         },
         {
           type: 'blocks',
           name: 'blocksWithSimilarConfigs',
-          blocks: [{
-            slug: 'block-1',
-            fields: [
-              {
-                type: 'array',
-                name: 'items',
-                fields: [
-                  {
-                    type: 'text',
-                    name: 'title',
-                    required: true,
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            slug: 'block-2',
-            fields: [
-              {
-                type: 'array',
-                name: 'items',
-                fields: [
-                  {
-                    type: 'text',
-                    name: 'title2',
-                    required: true,
-                  },
-                ],
-              },
-            ],
-          }],
+          blocks: [
+            {
+              slug: 'block-1',
+              fields: [
+                {
+                  type: 'array',
+                  name: 'items',
+                  fields: [
+                    {
+                      type: 'text',
+                      name: 'title',
+                      required: true,
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              slug: 'block-2',
+              fields: [
+                {
+                  type: 'array',
+                  name: 'items',
+                  fields: [
+                    {
+                      type: 'text',
+                      name: 'title2',
+                      required: true,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     },
@@ -178,6 +184,6 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
   },
-});
+})

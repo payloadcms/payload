@@ -1,10 +1,10 @@
 const withRelationship = (incomingEditor) => {
-  const editor = incomingEditor;
-  const { isVoid } = editor;
+  const editor = incomingEditor
+  const { isVoid } = editor
 
-  editor.isVoid = (element) => (element.type === 'upload' ? true : isVoid(element));
+  editor.isVoid = (element) => (element.type === 'upload' ? true : isVoid(element))
 
-  return editor;
-};
+  return editor
+}
 
-export default withRelationship;
+export default withRelationship

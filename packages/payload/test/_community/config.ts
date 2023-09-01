@@ -1,8 +1,8 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { PostsCollection, postsSlug } from './collections/Posts';
-import { MenuGlobal } from './globals/Menu';
-import { devUser } from '../credentials';
-import { MediaCollection } from './collections/Media';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
+import { MediaCollection } from './collections/Media'
+import { PostsCollection, postsSlug } from './collections/Posts'
+import { MenuGlobal } from './globals/Menu'
 
 export default buildConfigWithDefaults({
   // ...extend config here
@@ -26,13 +26,13 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
 
     await payload.create({
       collection: postsSlug,
       data: {
         text: 'example post',
       },
-    });
+    })
   },
-});
+})

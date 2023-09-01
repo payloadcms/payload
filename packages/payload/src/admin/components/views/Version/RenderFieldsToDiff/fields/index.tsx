@@ -1,29 +1,29 @@
-import Text from './Text';
-import Nested from './Nested';
-import Iterable from './Iterable';
-import Relationship from './Relationship';
-import Tabs from './Tabs';
-import Select from './Select';
+import Iterable from './Iterable'
+import Nested from './Nested'
+import Relationship from './Relationship'
+import Select from './Select'
+import Tabs from './Tabs'
+import Text from './Text'
 
 export default {
-  text: Text,
-  textarea: Text,
-  number: Text,
-  email: Text,
-  code: Text,
-  json: Text,
-  checkbox: Text,
-  radio: Select,
-  row: Nested,
-  collapsible: Nested,
-  group: Nested,
   array: Iterable,
   blocks: Iterable,
+  checkbox: Text,
+  code: Text,
+  collapsible: Nested,
   date: Text,
-  select: Select,
-  richText: Text,
-  relationship: Relationship,
-  upload: Relationship,
+  email: Text,
+  group: Nested,
+  json: Text,
+  number: Text,
   point: Text,
+  radio: Select,
+  relationship: Relationship,
+  richText: Text,
+  row: Nested,
+  select: Select,
   tabs: Tabs,
-};
+  text: Text,
+  textarea: Text,
+  upload: Relationship,
+}

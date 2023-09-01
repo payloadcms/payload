@@ -1,238 +1,247 @@
-import mongoose from 'mongoose';
-import objectID from 'bson-objectid';
-import { getLocalizedPaths } from 'payload/database';
-import { Field, fieldAffectsData } from 'payload/types';
-import { PathToQuery } from 'payload/database';
-import { validOperators } from 'payload/types';
-import { Payload } from 'payload';
-import { Operator } from 'payload/types';
-import { operatorMap } from './operatorMap';
-import { sanitizeQueryValue } from './sanitizeQueryValue';
-import { MongooseAdapter } from '..';
+import type { Payload } from 'payload'
+import type { PathToQuery } from 'payload/database'
+import type { Field } from 'payload/types'
+import type { Operator } from 'payload/types'
+
+import objectID from 'bson-objectid'
+import mongoose from 'mongoose'
+import { getLocalizedPaths } from 'payload/database'
+import { fieldAffectsData } from 'payload/types'
+import { validOperators } from 'payload/types'
+
+import type { MongooseAdapter } from '..'
+
+import { operatorMap } from './operatorMap'
+import { sanitizeQueryValue } from './sanitizeQueryValue'
 
 type SearchParam = {
-  path?: string,
-  value: unknown,
+  path?: string
+  value: unknown
 }
 
 const subQueryOptions = {
-  limit: 50,
   lean: true,
-};
+  limit: 50,
+}
 
 /**
  * Convert the Payload key / value / operator into a MongoDB query
  */
 export async function buildSearchParam({
-  fields,
-  incomingPath,
-  val,
-  operator,
   collectionSlug,
+  fields,
   globalSlug,
-  payload,
+  incomingPath,
   locale,
+  operator,
+  payload,
+  val,
 }: {
-  fields: Field[],
-  incomingPath: string,
-  val: unknown,
-  operator: string
-  collectionSlug?: string,
-  globalSlug?: string,
-  payload: Payload,
+  collectionSlug?: string
+  fields: Field[]
+  globalSlug?: string
+  incomingPath: string
   locale?: string
+  operator: string
+  payload: Payload
+  val: unknown
 }): Promise<SearchParam> {
   // Replace GraphQL nested field double underscore formatting
-  let sanitizedPath = incomingPath.replace(/__/gi, '.');
-  if (sanitizedPath === 'id') sanitizedPath = '_id';
+  let sanitizedPath = incomingPath.replace(/__/g, '.')
+  if (sanitizedPath === 'id') sanitizedPath = '_id'
 
-  let paths: PathToQuery[] = [];
+  let paths: PathToQuery[] = []
 
-  let hasCustomID = false;
+  let hasCustomID = false
 
   if (sanitizedPath === '_id') {
-    const customIDfield = payload.collections[collectionSlug]?.config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
+    const customIDfield = payload.collections[collectionSlug]?.config.fields.find(
+      (field) => fieldAffectsData(field) && field.name === 'id',
+    )
 
-    let idFieldType: 'text' | 'number' = 'text';
+    let idFieldType: 'number' | 'text' = 'text'
 
     if (customIDfield) {
       if (customIDfield?.type === 'text' || customIDfield?.type === 'number') {
-        idFieldType = customIDfield.type;
+        idFieldType = customIDfield.type
       }
 
-      hasCustomID = true;
+      hasCustomID = true
     }
 
     paths.push({
-      path: '_id',
+      collectionSlug,
+      complete: true,
       field: {
         name: 'id',
         type: idFieldType,
       } as Field,
-      complete: true,
-      collectionSlug,
-    });
+      path: '_id',
+    })
   } else {
     paths = await getLocalizedPaths({
-      payload,
-      locale,
       collectionSlug,
-      globalSlug,
       fields,
+      globalSlug,
       incomingPath: sanitizedPath,
-    });
+      locale,
+      payload,
+    })
   }
 
-  const [{
-    path,
-    field,
-  }] = paths;
+  const [{ field, path }] = paths
 
   if (path) {
     const formattedValue = sanitizeQueryValue({
       field,
-      path,
-      operator,
-      val,
       hasCustomID,
-    });
+      operator,
+      path,
+      val,
+    })
 
     // If there are multiple collections to search through,
     // Recursively build up a list of query constraints
     if (paths.length > 1) {
       // Remove top collection and reverse array
       // to work backwards from top
-      const pathsToQuery = paths.slice(1)
-        .reverse();
+      const pathsToQuery = paths.slice(1).reverse()
 
       const initialRelationshipQuery = {
         value: {},
-      } as SearchParam;
+      } as SearchParam
 
-      const relationshipQuery = await pathsToQuery.reduce(async (priorQuery, {
-        path: subPath,
-        collectionSlug: slug,
-      }, i) => {
-        const priorQueryResult = await priorQuery;
+      const relationshipQuery = await pathsToQuery.reduce(
+        async (priorQuery, { collectionSlug: slug, path: subPath }, i) => {
+          const priorQueryResult = await priorQuery
 
-        const SubModel = (payload.db as MongooseAdapter).collections[slug];
+          const SubModel = (payload.db as MongooseAdapter).collections[slug]
 
-        // On the "deepest" collection,
-        // Search on the value passed through the query
-        if (i === 0) {
-          const subQuery = await SubModel.buildQuery({
-            where: {
-              [subPath]: {
-                [operator]: val,
+          // On the "deepest" collection,
+          // Search on the value passed through the query
+          if (i === 0) {
+            const subQuery = await SubModel.buildQuery({
+              locale,
+              payload,
+              where: {
+                [subPath]: {
+                  [operator]: val,
+                },
               },
-            },
-            payload,
-            locale,
-          });
+            })
 
-          const result = await SubModel.find(subQuery, subQueryOptions);
+            const result = await SubModel.find(subQuery, subQueryOptions)
 
-          const $in: unknown[] = [];
+            const $in: unknown[] = []
 
-          result.forEach((doc) => {
-            const stringID = doc._id.toString();
-            $in.push(stringID);
+            result.forEach((doc) => {
+              const stringID = doc._id.toString()
+              $in.push(stringID)
 
-            if (mongoose.Types.ObjectId.isValid(stringID)) {
-              $in.push(doc._id);
+              if (mongoose.Types.ObjectId.isValid(stringID)) {
+                $in.push(doc._id)
+              }
+            })
+
+            if (pathsToQuery.length === 1) {
+              return {
+                path,
+                value: { $in },
+              }
             }
-          });
 
-          if (pathsToQuery.length === 1) {
+            const nextSubPath = pathsToQuery[i + 1].path
+
+            return {
+              value: { [nextSubPath]: { $in } },
+            }
+          }
+
+          const subQuery = priorQueryResult.value
+          const result = await SubModel.find(subQuery, subQueryOptions)
+
+          const $in = result.map((doc) => doc._id.toString())
+
+          // If it is the last recursion
+          // then pass through the search param
+          if (i + 1 === pathsToQuery.length) {
             return {
               path,
               value: { $in },
-            };
+            }
           }
 
-          const nextSubPath = pathsToQuery[i + 1].path;
-
           return {
-            value: { [nextSubPath]: { $in } },
-          };
-        }
+            value: {
+              _id: { $in },
+            },
+          }
+        },
+        Promise.resolve(initialRelationshipQuery),
+      )
 
-        const subQuery = priorQueryResult.value;
-        const result = await SubModel.find(subQuery, subQueryOptions);
-
-        const $in = result.map((doc) => doc._id.toString());
-
-        // If it is the last recursion
-        // then pass through the search param
-        if (i + 1 === pathsToQuery.length) {
-          return {
-            path,
-            value: { $in },
-          };
-        }
-
-        return {
-          value: {
-            _id: { $in },
-          },
-        };
-      }, Promise.resolve(initialRelationshipQuery));
-
-      return relationshipQuery;
+      return relationshipQuery
     }
 
     if (operator && validOperators.includes(operator as Operator)) {
-      const operatorKey = operatorMap[operator];
+      const operatorKey = operatorMap[operator]
 
       if (field.type === 'relationship' || field.type === 'upload') {
-        let hasNumberIDRelation;
+        let hasNumberIDRelation
 
         const result = {
           value: {
-            $or: [
-              { [path]: { [operatorKey]: formattedValue } },
-            ],
+            $or: [{ [path]: { [operatorKey]: formattedValue } }],
           },
-        };
+        }
 
         if (typeof formattedValue === 'string') {
           if (mongoose.Types.ObjectId.isValid(formattedValue)) {
-            result.value.$or.push({ [path]: { [operatorKey]: objectID(formattedValue) } });
+            result.value.$or.push({ [path]: { [operatorKey]: objectID(formattedValue) } })
           } else {
-            (Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach((relationTo) => {
-              const isRelatedToCustomNumberID = payload.collections[relationTo]?.config?.fields.find((relatedField) => {
-                return fieldAffectsData(relatedField) && relatedField.name === 'id' && relatedField.type === 'number';
-              });
+            ;(Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(
+              (relationTo) => {
+                const isRelatedToCustomNumberID = payload.collections[
+                  relationTo
+                ]?.config?.fields.find((relatedField) => {
+                  return (
+                    fieldAffectsData(relatedField) &&
+                    relatedField.name === 'id' &&
+                    relatedField.type === 'number'
+                  )
+                })
 
-              if (isRelatedToCustomNumberID) {
-                if (isRelatedToCustomNumberID.type === 'number') hasNumberIDRelation = true;
-              }
-            });
+                if (isRelatedToCustomNumberID) {
+                  if (isRelatedToCustomNumberID.type === 'number') hasNumberIDRelation = true
+                }
+              },
+            )
 
-            if (hasNumberIDRelation) result.value.$or.push({ [path]: { [operatorKey]: parseFloat(formattedValue) } });
+            if (hasNumberIDRelation)
+              result.value.$or.push({ [path]: { [operatorKey]: parseFloat(formattedValue) } })
           }
         }
 
         if (result.value.$or.length > 1) {
-          return result;
+          return result
         }
       }
 
       if (operator === 'like' && typeof formattedValue === 'string') {
-        const words = formattedValue.split(' ');
+        const words = formattedValue.split(' ')
 
         const result = {
           value: {
             $and: words.map((word) => ({
               [path]: {
-                $regex: word.replace(/[\\^$*+?\\.()|[\]{}]/g, '\\$&'),
                 $options: 'i',
+                $regex: word.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
               },
             })),
           },
-        };
+        }
 
-        return result;
+        return result
       }
 
       // Some operators like 'near' need to define a full query
@@ -241,14 +250,14 @@ export async function buildSearchParam({
         return {
           path,
           value: formattedValue,
-        };
+        }
       }
 
       return {
         path,
         value: { [operatorKey]: formattedValue },
-      };
+      }
     }
   }
-  return undefined;
+  return undefined
 }

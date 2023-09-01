@@ -1,97 +1,82 @@
-import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import withCondition from '../../withCondition';
-import useField from '../../useField';
-import Label from '../../Label';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import { email } from '../../../../../fields/validations';
-import { Props } from './types';
-import { getTranslation } from '../../../../../utilities/getTranslation';
+import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import './index.scss';
+import type { Props } from './types'
+
+import { email } from '../../../../../fields/validations'
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import Error from '../../Error'
+import FieldDescription from '../../FieldDescription'
+import Label from '../../Label'
+import useField from '../../useField'
+import withCondition from '../../withCondition'
+import './index.scss'
 
 const Email: React.FC<Props> = (props) => {
   const {
+    admin: {
+      autoComplete,
+      className,
+      condition,
+      description,
+      placeholder,
+      readOnly,
+      style,
+      width,
+    } = {},
+    label,
     name,
     path: pathFromProps,
     required,
     validate = email,
-    admin: {
-      readOnly,
-      style,
-      className,
-      width,
-      placeholder,
-      autoComplete,
-      description,
-      condition,
-    } = {},
-    label,
-  } = props;
+  } = props
 
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation()
 
-  const path = pathFromProps || name;
+  const path = pathFromProps || name
 
-  const memoizedValidate = useCallback((value, options) => {
-    return validate(value, { ...options, required });
-  }, [validate, required]);
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
 
   const fieldType = useField({
+    condition,
     path,
     validate: memoizedValidate,
-    condition,
-  });
+  })
 
-  const {
-    value,
-    showError,
-    setValue,
-    errorMessage,
-  } = fieldType;
+  const { errorMessage, setValue, showError, value } = fieldType
 
-  const classes = [
-    'field-type',
-    'email',
-    className,
-    showError && 'error',
-    readOnly && 'read-only',
-  ].filter(Boolean).join(' ');
+  const classes = ['field-type', 'email', className, showError && 'error', readOnly && 'read-only']
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <div
-      className={classes}
       style={{
         ...style,
         width,
       }}
+      className={classes}
     >
-      <Error
-        showError={showError}
-        message={errorMessage}
-      />
-      <Label
-        htmlFor={`field-${path.replace(/\./gi, '__')}`}
-        label={label}
-        required={required}
-      />
+      <Error message={errorMessage} showError={showError} />
+      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <input
-        id={`field-${path.replace(/\./gi, '__')}`}
-        value={value as string || ''}
-        onChange={setValue}
+        autoComplete={autoComplete}
         disabled={Boolean(readOnly)}
+        id={`field-${path.replace(/\./g, '__')}`}
+        name={path}
+        onChange={setValue}
         placeholder={getTranslation(placeholder, i18n)}
         type="email"
-        name={path}
-        autoComplete={autoComplete}
+        value={(value as string) || ''}
       />
-      <FieldDescription
-        value={value}
-        description={description}
-      />
+      <FieldDescription description={description} value={value} />
     </div>
-  );
-};
+  )
+}
 
-export default withCondition(Email);
+export default withCondition(Email)

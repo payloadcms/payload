@@ -1,42 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import AnimateHeight from 'react-animate-height';
-import { useTranslation } from 'react-i18next';
-import { useWindowInfo } from '@faceless-ui/window-info';
-import { fieldAffectsData } from '../../../../fields/config/types';
-import SearchFilter from '../SearchFilter';
-import ColumnSelector from '../ColumnSelector';
-import WhereBuilder from '../WhereBuilder';
-import SortComplex from '../SortComplex';
-import Button from '../Button';
-import { Props } from './types';
-import { useSearchParams } from '../../utilities/SearchParams';
-import validateWhereQuery from '../WhereBuilder/validateWhereQuery';
-import flattenFields from '../../../../utilities/flattenTopLevelFields';
-import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched';
-import { getTranslation } from '../../../../utilities/getTranslation';
-import Pill from '../Pill';
-import Chevron from '../../icons/Chevron';
-import EditMany from '../EditMany';
-import DeleteMany from '../DeleteMany';
-import PublishMany from '../PublishMany';
-import UnpublishMany from '../UnpublishMany';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import { useWindowInfo } from '@faceless-ui/window-info'
+import React, { useEffect, useState } from 'react'
+import AnimateHeight from 'react-animate-height'
+import { useTranslation } from 'react-i18next'
 
-import './index.scss';
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
+import type { Props } from './types'
 
-const baseClass = 'list-controls';
+import { fieldAffectsData } from '../../../../fields/config/types'
+import flattenFields from '../../../../utilities/flattenTopLevelFields'
+import { getTranslation } from '../../../../utilities/getTranslation'
+import Chevron from '../../icons/Chevron'
+import { useSearchParams } from '../../utilities/SearchParams'
+import Button from '../Button'
+import ColumnSelector from '../ColumnSelector'
+import DeleteMany from '../DeleteMany'
+import EditMany from '../EditMany'
+import Pill from '../Pill'
+import PublishMany from '../PublishMany'
+import SearchFilter from '../SearchFilter'
+import SortComplex from '../SortComplex'
+import UnpublishMany from '../UnpublishMany'
+import WhereBuilder from '../WhereBuilder'
+import validateWhereQuery from '../WhereBuilder/validateWhereQuery'
+import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched'
+import './index.scss'
+
+const baseClass = 'list-controls'
 
 const getUseAsTitle = (collection: SanitizedCollectionConfig) => {
   const {
-    admin: {
-      useAsTitle,
-    },
+    admin: { useAsTitle },
     fields,
-  } = collection;
+  } = collection
 
-  const topLevelFields = flattenFields(fields);
-  return topLevelFields.find((field) => fieldAffectsData(field) && field.name === useAsTitle);
-};
+  const topLevelFields = flattenFields(fields)
+  return topLevelFields.find((field) => fieldAffectsData(field) && field.name === useAsTitle)
+}
 
 /**
  * The ListControls component is used to render the controls (search, filter, where)
@@ -45,6 +44,10 @@ const getUseAsTitle = (collection: SanitizedCollectionConfig) => {
  */
 const ListControls: React.FC<Props> = (props) => {
   const {
+    collection: {
+      admin: { listSearchableFields },
+      fields,
+    },
     collection,
     enableColumns = true,
     enableSort = false,
@@ -52,90 +55,87 @@ const ListControls: React.FC<Props> = (props) => {
     handleWhereChange,
     modifySearchQuery = true,
     resetParams,
-    collection: {
-      fields,
-      admin: {
-        listSearchableFields,
-      },
-    },
-  } = props;
+  } = props
 
-  const params = useSearchParams();
-  const shouldInitializeWhereOpened = validateWhereQuery(params?.where);
+  const params = useSearchParams()
+  const shouldInitializeWhereOpened = validateWhereQuery(params?.where)
 
-  const [titleField, setTitleField] = useState(getUseAsTitle(collection));
+  const [titleField, setTitleField] = useState(getUseAsTitle(collection))
   useEffect(() => {
-    setTitleField(getUseAsTitle(collection));
-  }, [collection]);
+    setTitleField(getUseAsTitle(collection))
+  }, [collection])
 
-  const [textFieldsToBeSearched] = useState(getTextFieldsToBeSearched(listSearchableFields, fields));
-  const [visibleDrawer, setVisibleDrawer] = useState<'where' | 'sort' | 'columns'>(shouldInitializeWhereOpened ? 'where' : undefined);
-  const { t, i18n } = useTranslation('general');
-  const { breakpoints: { s: smallBreak } } = useWindowInfo();
+  const [textFieldsToBeSearched] = useState(getTextFieldsToBeSearched(listSearchableFields, fields))
+  const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
+    shouldInitializeWhereOpened ? 'where' : undefined,
+  )
+  const { i18n, t } = useTranslation('general')
+  const {
+    breakpoints: { s: smallBreak },
+  } = useWindowInfo()
 
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <SearchFilter
+          fieldLabel={
+            (titleField &&
+              fieldAffectsData(titleField) &&
+              getTranslation(titleField.label || titleField.name, i18n)) ??
+            undefined
+          }
           fieldName={titleField && fieldAffectsData(titleField) ? titleField.name : undefined}
           handleChange={handleWhereChange}
-          modifySearchQuery={modifySearchQuery}
-          fieldLabel={(titleField && fieldAffectsData(titleField) && getTranslation(titleField.label || titleField.name, i18n)) ?? undefined}
           listSearchableFields={textFieldsToBeSearched}
+          modifySearchQuery={modifySearchQuery}
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
-            { !smallBreak && (
+            {!smallBreak && (
               <React.Fragment>
-                <EditMany
-                  collection={collection}
-                  resetParams={resetParams}
-                />
-                <PublishMany
-                  collection={collection}
-                  resetParams={resetParams}
-                />
-                <UnpublishMany
-                  collection={collection}
-                  resetParams={resetParams}
-                />
-                <DeleteMany
-                  collection={collection}
-                  resetParams={resetParams}
-                />
+                <EditMany collection={collection} resetParams={resetParams} />
+                <PublishMany collection={collection} resetParams={resetParams} />
+                <UnpublishMany collection={collection} resetParams={resetParams} />
+                <DeleteMany collection={collection} resetParams={resetParams} />
               </React.Fragment>
             )}
             {enableColumns && (
               <Pill
-                pillStyle="light"
-                className={`${baseClass}__toggle-columns ${visibleDrawer === 'columns' ? `${baseClass}__buttons-active` : ''}`}
-                onClick={() => setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)}
-                aria-expanded={visibleDrawer === 'columns'}
+                className={`${baseClass}__toggle-columns ${
+                  visibleDrawer === 'columns' ? `${baseClass}__buttons-active` : ''
+                }`}
+                onClick={() =>
+                  setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
+                }
                 aria-controls={`${baseClass}-columns`}
+                aria-expanded={visibleDrawer === 'columns'}
                 icon={<Chevron />}
+                pillStyle="light"
               >
                 {t('columns')}
               </Pill>
             )}
             <Pill
-              pillStyle="light"
-              className={`${baseClass}__toggle-where ${visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''}`}
-              onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
-              aria-expanded={visibleDrawer === 'where'}
+              className={`${baseClass}__toggle-where ${
+                visibleDrawer === 'where' ? `${baseClass}__buttons-active` : ''
+              }`}
               aria-controls={`${baseClass}-where`}
+              aria-expanded={visibleDrawer === 'where'}
               icon={<Chevron />}
+              onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
+              pillStyle="light"
             >
               {t('filters')}
             </Pill>
             {enableSort && (
               <Button
-                className={`${baseClass}__toggle-sort`}
-                buttonStyle={visibleDrawer === 'sort' ? undefined : 'secondary'}
-                onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
-                aria-expanded={visibleDrawer === 'sort'}
                 aria-controls={`${baseClass}-sort`}
+                aria-expanded={visibleDrawer === 'sort'}
+                buttonStyle={visibleDrawer === 'sort' ? undefined : 'secondary'}
+                className={`${baseClass}__toggle-sort`}
                 icon="chevron"
                 iconStyle="none"
+                onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
               >
                 {t('sort')}
               </Button>
@@ -159,8 +159,8 @@ const ListControls: React.FC<Props> = (props) => {
       >
         <WhereBuilder
           collection={collection}
-          modifySearchQuery={modifySearchQuery}
           handleChange={handleWhereChange}
+          modifySearchQuery={modifySearchQuery}
         />
       </AnimateHeight>
       {enableSort && (
@@ -170,14 +170,14 @@ const ListControls: React.FC<Props> = (props) => {
           id={`${baseClass}-sort`}
         >
           <SortComplex
-            modifySearchQuery={modifySearchQuery}
             collection={collection}
             handleChange={handleSortChange}
+            modifySearchQuery={modifySearchQuery}
           />
         </AnimateHeight>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default ListControls;
+export default ListControls

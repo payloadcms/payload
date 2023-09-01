@@ -1,61 +1,70 @@
-import type { TFunction } from 'i18next';
-import { User } from '../../../../../auth';
-import { Field as FieldSchema, fieldIsPresentationalOnly } from '../../../../../fields/config/types';
-import { Data, Fields } from '../types';
-import { addFieldStatePromise } from './addFieldStatePromise';
+import type { TFunction } from 'i18next'
+
+import type { User } from '../../../../../auth'
+import type { Field as FieldSchema } from '../../../../../fields/config/types'
+import type { Data, Fields } from '../types'
+
+import { fieldIsPresentationalOnly } from '../../../../../fields/config/types'
+import { addFieldStatePromise } from './addFieldStatePromise'
 
 type Args = {
-  state: Fields
-  fields: FieldSchema[]
   data: Data
+  fields: FieldSchema[]
   fullData: Data
+  id: number | string
+  locale: string
+  operation: 'create' | 'update'
   parentPassesCondition: boolean
   path: string
-  user: User
-  locale: string
-  id: string | number
-  operation: 'create' | 'update'
-  t: TFunction
   preferences: {
     [key: string]: unknown
   }
+  state: Fields
+  t: TFunction
+  user: User
 }
 
 export const iterateFields = async ({
-  fields,
   data,
-  parentPassesCondition,
-  path = '',
+  fields,
   fullData,
-  user,
+  id,
   locale,
   operation,
-  id,
+  parentPassesCondition,
+  path = '',
+  preferences,
   state,
   t,
-  preferences,
+  user,
 }: Args): Promise<void> => {
-  const promises = [];
+  const promises = []
   fields.forEach((field) => {
-    const initialData = data;
+    const initialData = data
     if (!fieldIsPresentationalOnly(field) && !field?.admin?.disabled) {
-      const passesCondition = Boolean((field?.admin?.condition ? field.admin.condition(fullData || {}, initialData || {}, { user }) : true) && parentPassesCondition);
+      const passesCondition = Boolean(
+        (field?.admin?.condition
+          ? field.admin.condition(fullData || {}, initialData || {}, { user })
+          : true) && parentPassesCondition,
+      )
 
-      promises.push(addFieldStatePromise({
-        fullData,
-        id,
-        locale,
-        operation,
-        path,
-        state,
-        user,
-        field,
-        passesCondition,
-        data,
-        t,
-        preferences,
-      }));
+      promises.push(
+        addFieldStatePromise({
+          data,
+          field,
+          fullData,
+          id,
+          locale,
+          operation,
+          passesCondition,
+          path,
+          preferences,
+          state,
+          t,
+          user,
+        }),
+      )
     }
-  });
-  await Promise.all(promises);
-};
+  })
+  await Promise.all(promises)
+}

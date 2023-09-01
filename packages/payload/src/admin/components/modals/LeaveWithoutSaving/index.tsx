@@ -1,43 +1,36 @@
-import React from 'react';
-import NavigationPrompt from 'react-router-navigation-prompt';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../utilities/Auth';
-import { useFormModified } from '../../forms/Form/context';
-import MinimalTemplate from '../../templates/Minimal';
-import Button from '../../elements/Button';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import NavigationPrompt from 'react-router-navigation-prompt'
 
-import './index.scss';
+import Button from '../../elements/Button'
+import { useFormModified } from '../../forms/Form/context'
+import MinimalTemplate from '../../templates/Minimal'
+import { useAuth } from '../../utilities/Auth'
+import './index.scss'
 
-const modalSlug = 'leave-without-saving';
+const modalSlug = 'leave-without-saving'
 
 const LeaveWithoutSaving: React.FC = () => {
-  const modified = useFormModified();
-  const { user } = useAuth();
-  const { t } = useTranslation('general');
+  const modified = useFormModified()
+  const { user } = useAuth()
+  const { t } = useTranslation('general')
 
   return (
     <NavigationPrompt when={Boolean(modified && user)}>
-      {({ onConfirm, onCancel }) => (
+      {({ onCancel, onConfirm }) => (
         <div className={modalSlug}>
           <MinimalTemplate className={`${modalSlug}__template`}>
             <h1>{t('leaveWithoutSaving')}</h1>
             <p>{t('changesNotSaved')}</p>
-            <Button
-              onClick={onCancel}
-              buttonStyle="secondary"
-            >
+            <Button buttonStyle="secondary" onClick={onCancel}>
               {t('stayOnThisPage')}
             </Button>
-            <Button
-              onClick={onConfirm}
-            >
-              {t('leaveAnyway')}
-            </Button>
+            <Button onClick={onConfirm}>{t('leaveAnyway')}</Button>
           </MinimalTemplate>
         </div>
       )}
     </NavigationPrompt>
-  );
-};
+  )
+}
 
-export default LeaveWithoutSaving;
+export default LeaveWithoutSaving

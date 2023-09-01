@@ -1,13 +1,11 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
-import { ArrayRowLabel } from './LabelComponent';
-import { AddCustomBlocks } from './components/AddCustomBlocks';
+import type { CollectionConfig } from '../../../../src/collections/config/types'
 
-export const arrayDefaultValue = [
-  { text: 'row one' },
-  { text: 'row two' },
-];
+import { ArrayRowLabel } from './LabelComponent'
+import { AddCustomBlocks } from './components/AddCustomBlocks'
 
-export const arrayFieldsSlug = 'array-fields';
+export const arrayDefaultValue = [{ text: 'row one' }, { text: 'row two' }]
+
+export const arrayFieldsSlug = 'array-fields'
 
 const ArrayFields: CollectionConfig = {
   slug: arrayFieldsSlug,
@@ -153,7 +151,7 @@ const ArrayFields: CollectionConfig = {
       },
     },
   ],
-};
+}
 
 export const arrayDoc = {
   items: [
@@ -181,6 +179,6 @@ export const arrayDoc = {
       text: 'initialize collapsed',
     },
   ],
-};
+}
 
-export default ArrayFields;
+export default ArrayFields

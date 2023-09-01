@@ -14,7 +14,7 @@
     display: flex;
     align-items: flex-end;
     flex-wrap: wrap;
-    gap: base(.75);
+    gap: base(0.75);
 
     h1 {
       margin: 0;
@@ -25,13 +25,13 @@
     }
 
     .pill {
-      margin: base(.5) 0 base(.25);
+      margin: base(0.5) 0 base(0.25);
     }
   }
 
   &__sub-header {
     flex-basis: 100%;
-    margin-top: base(.25);
+    margin-top: base(0.25);
   }
 
   .table {
@@ -58,32 +58,32 @@
   }
 
   &__page-info {
-    [dir=ltr] & {
+    [dir='ltr'] & {
       margin-right: base(1);
       margin-left: auto;
     }
-    [dir=rtl] & {
+    [dir='rtl'] & {
       margin-left: base(1);
       margin-right: auto;
-    }  
+    }
   }
 
   &__list-selection {
     position: fixed;
     bottom: 0;
     z-index: 10;
-    padding: base(.75) 0;
+    padding: base(0.75) 0;
     width: 100%;
     background-color: var(--theme-bg);
 
     .btn {
-      margin: 0 0 0 base(.5);
+      margin: 0 0 0 base(0.5);
     }
 
     .btn {
       background-color: var(--theme-elevation-100);
       cursor: pointer;
-      padding: 0 base(.25);
+      padding: 0 base(0.25);
       border-radius: $style-radius-s;
 
       &:hover {
@@ -94,13 +94,13 @@
 
   &__list-selection-actions {
     display: flex;
-    gap: base(.25);
+    gap: base(0.25);
   }
 
   &__shimmer {
     margin-top: base(1.75);
     width: 100%;
-    >div {
+    > div {
       margin-top: 8px;
     }
   }
@@ -113,7 +113,7 @@
 
     &__header {
       .pill {
-        margin-bottom: base(.0625);
+        margin-bottom: base(0.0625);
       }
     }
 

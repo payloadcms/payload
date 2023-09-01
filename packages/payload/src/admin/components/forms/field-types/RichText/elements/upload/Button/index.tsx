@@ -1,90 +1,82 @@
-import React, { Fragment, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { ReactEditor, useSlate } from 'slate-react';
-import ElementButton from '../../Button';
-import UploadIcon from '../../../../../../icons/Upload';
-import { useListDrawer } from '../../../../../../elements/ListDrawer';
-import { injectVoidElement } from '../../injectVoid';
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition';
+import React, { Fragment, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+import { ReactEditor, useSlate } from 'slate-react'
 
-import './index.scss';
+import { useListDrawer } from '../../../../../../elements/ListDrawer'
+import UploadIcon from '../../../../../../icons/Upload'
+import ElementButton from '../../Button'
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition'
+import { injectVoidElement } from '../../injectVoid'
+import './index.scss'
 
-const baseClass = 'upload-rich-text-button';
+const baseClass = 'upload-rich-text-button'
 
-const insertUpload = (editor, { value, relationTo }) => {
-  const text = { text: ' ' };
+const insertUpload = (editor, { relationTo, value }) => {
+  const text = { text: ' ' }
 
   const upload = {
+    children: [text],
+    relationTo,
     type: 'upload',
     value,
-    relationTo,
-    children: [
-      text,
-    ],
-  };
+  }
 
-  injectVoidElement(editor, upload);
+  injectVoidElement(editor, upload)
 
-  ReactEditor.focus(editor);
-};
+  ReactEditor.focus(editor)
+}
 
 type ButtonProps = {
-  path: string
   enabledCollectionSlugs: string[]
+  path: string
 }
 
 const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
-  const { t } = useTranslation(['upload', 'general']);
-  const editor = useSlate();
+  const { t } = useTranslation(['upload', 'general'])
+  const editor = useSlate()
 
-  const [
-    ListDrawer,
-    ListDrawerToggler,
-    {
-      closeDrawer,
-    },
-  ] = useListDrawer({
-    uploads: true,
+  const [ListDrawer, ListDrawerToggler, { closeDrawer }] = useListDrawer({
     collectionSlugs: enabledCollectionSlugs,
-  });
+    uploads: true,
+  })
 
-  const onSelect = useCallback(({ docID, collectionConfig }) => {
-    insertUpload(editor, {
-      value: {
-        id: docID,
-      },
-      relationTo: collectionConfig.slug,
-    });
-    closeDrawer();
-  }, [editor, closeDrawer]);
+  const onSelect = useCallback(
+    ({ collectionConfig, docID }) => {
+      insertUpload(editor, {
+        relationTo: collectionConfig.slug,
+        value: {
+          id: docID,
+        },
+      })
+      closeDrawer()
+    },
+    [editor, closeDrawer],
+  )
 
   return (
     <Fragment>
       <ListDrawerToggler>
         <ElementButton
-          className={baseClass}
-          format="upload"
-          tooltip={t('fields:addUpload')}
-          el="div"
           onClick={() => {
             // do nothing
           }}
+          className={baseClass}
+          el="div"
+          format="upload"
+          tooltip={t('fields:addUpload')}
         >
           <UploadIcon />
         </ElementButton>
       </ListDrawerToggler>
       <ListDrawer onSelect={onSelect} />
     </Fragment>
-  );
-};
+  )
+}
 
 export default (props: ButtonProps): React.ReactNode => {
   return (
-    <EnabledRelationshipsCondition
-      {...props}
-      uploads
-    >
+    <EnabledRelationshipsCondition {...props} uploads>
       <UploadButton {...props} />
     </EnabledRelationshipsCondition>
-  );
-};
+  )
+}

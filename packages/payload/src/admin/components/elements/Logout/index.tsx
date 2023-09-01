@@ -1,32 +1,33 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import LogOut from '../../icons/LogOut';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 
-const baseClass = 'nav';
+import LogOut from '../../icons/LogOut'
+import { useConfig } from '../../utilities/Config'
+import RenderCustomComponent from '../../utilities/RenderCustomComponent'
+
+const baseClass = 'nav'
 
 const DefaultLogout = () => {
-  const { t } = useTranslation('authentication');
-  const config = useConfig();
+  const { t } = useTranslation('authentication')
+  const config = useConfig()
   const {
-    routes: { admin },
     admin: {
-      logoutRoute,
       components: { logout },
+      logoutRoute,
     },
-  } = config;
+    routes: { admin },
+  } = config
   return (
     <Link
-      to={`${admin}${logoutRoute}`}
-      className={`${baseClass}__log-out`}
       aria-label={t('logOut')}
+      className={`${baseClass}__log-out`}
+      to={`${admin}${logoutRoute}`}
     >
       <LogOut />
     </Link>
-  );
-};
+  )
+}
 
 const Logout: React.FC = () => {
   const {
@@ -37,14 +38,9 @@ const Logout: React.FC = () => {
         },
       } = {},
     } = {},
-  } = useConfig();
+  } = useConfig()
 
-  return (
-    <RenderCustomComponent
-      CustomComponent={CustomLogout}
-      DefaultComponent={DefaultLogout}
-    />
-  );
-};
+  return <RenderCustomComponent CustomComponent={CustomLogout} DefaultComponent={DefaultLogout} />
+}
 
-export default Logout;
+export default Logout

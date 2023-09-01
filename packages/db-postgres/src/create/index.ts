@@ -1,13 +1,11 @@
-import { Create } from 'payload/database';
-import toSnakeCase from 'to-snake-case';
-import { upsertRow } from '../upsertRow';
+import type { Create } from 'payload/database'
 
-export const create: Create = async function create({
-  collection: collectionSlug,
-  data,
-  req,
-}) {
-  const collection = this.payload.collections[collectionSlug].config;
+import toSnakeCase from 'to-snake-case'
+
+import { upsertRow } from '../upsertRow'
+
+export const create: Create = async function create({ collection: collectionSlug, data, req }) {
+  const collection = this.payload.collections[collectionSlug].config
 
   const result = await upsertRow({
     adapter: this,
@@ -17,7 +15,7 @@ export const create: Create = async function create({
     locale: req.locale,
     operation: 'create',
     tableName: toSnakeCase(collectionSlug),
-  });
+  })
 
-  return result;
-};
+  return result
+}

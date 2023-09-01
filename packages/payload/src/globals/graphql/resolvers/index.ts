@@ -1,13 +1,7 @@
-import findOne from './findOne';
-import update from './update';
-import findVersions from './findVersions';
-import findVersionByID from './findVersionByID';
-import restoreVersion from './restoreVersion';
+import findOne from './findOne'
+import findVersionByID from './findVersionByID'
+import findVersions from './findVersions'
+import restoreVersion from './restoreVersion'
+import update from './update'
 
-export {
-  findOne,
-  update,
-  findVersions,
-  findVersionByID,
-  restoreVersion,
-};
+export { findOne, findVersionByID, findVersions, restoreVersion, update }

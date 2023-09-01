@@ -1,91 +1,103 @@
-import React, { Fragment, useCallback, useState } from 'react';
-import { toast } from 'react-toastify';
-import { Modal, useModal } from '@faceless-ui/modal';
-import { useHistory } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../../utilities/Config';
-import { Button, MinimalTemplate, Pill } from '../../..';
-import { Props } from './types';
-import { requests } from '../../../../api';
-import { getTranslation } from '../../../../../utilities/getTranslation';
+import { Modal, useModal } from '@faceless-ui/modal'
+import React, { Fragment, useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useHistory } from 'react-router-dom'
+import { toast } from 'react-toastify'
 
-import './index.scss';
+import type { Props } from './types'
 
-const baseClass = 'restore-version';
-const modalSlug = 'restore-version';
+import { Button, MinimalTemplate, Pill } from '../../..'
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import { requests } from '../../../../api'
+import { useConfig } from '../../../utilities/Config'
+import './index.scss'
 
-const Restore: React.FC<Props> = ({ collection, global, className, versionID, originalDocID, versionDate }) => {
-  const { serverURL, routes: { api, admin } } = useConfig();
-  const history = useHistory();
-  const { toggleModal } = useModal();
-  const [processing, setProcessing] = useState(false);
-  const { t, i18n } = useTranslation('version');
+const baseClass = 'restore-version'
+const modalSlug = 'restore-version'
 
-  let fetchURL = `${serverURL}${api}`;
-  let redirectURL: string;
-  let restoreMessage: string;
+const Restore: React.FC<Props> = ({
+  className,
+  collection,
+  global,
+  originalDocID,
+  versionDate,
+  versionID,
+}) => {
+  const {
+    routes: { admin, api },
+    serverURL,
+  } = useConfig()
+  const history = useHistory()
+  const { toggleModal } = useModal()
+  const [processing, setProcessing] = useState(false)
+  const { i18n, t } = useTranslation('version')
+
+  let fetchURL = `${serverURL}${api}`
+  let redirectURL: string
+  let restoreMessage: string
 
   if (collection) {
-    fetchURL = `${fetchURL}/${collection.slug}/versions/${versionID}`;
-    redirectURL = `${admin}/collections/${collection.slug}/${originalDocID}`;
-    restoreMessage = t('aboutToRestore', { label: getTranslation(collection.labels.singular, i18n), versionDate });
+    fetchURL = `${fetchURL}/${collection.slug}/versions/${versionID}`
+    redirectURL = `${admin}/collections/${collection.slug}/${originalDocID}`
+    restoreMessage = t('aboutToRestore', {
+      label: getTranslation(collection.labels.singular, i18n),
+      versionDate,
+    })
   }
 
   if (global) {
-    fetchURL = `${fetchURL}/globals/${global.slug}/versions/${versionID}`;
-    redirectURL = `${admin}/globals/${global.slug}`;
-    restoreMessage = t('aboutToRestoreGlobal', { label: getTranslation(global.label, i18n), versionDate });
+    fetchURL = `${fetchURL}/globals/${global.slug}/versions/${versionID}`
+    redirectURL = `${admin}/globals/${global.slug}`
+    restoreMessage = t('aboutToRestoreGlobal', {
+      label: getTranslation(global.label, i18n),
+      versionDate,
+    })
   }
 
   const handleRestore = useCallback(async () => {
-    setProcessing(true);
+    setProcessing(true)
 
     const res = await requests.post(fetchURL, {
       headers: {
         'Accept-Language': i18n.language,
       },
-    });
+    })
 
     if (res.status === 200) {
-      const json = await res.json();
-      toast.success(json.message);
-      history.push(redirectURL);
+      const json = await res.json()
+      toast.success(json.message)
+      history.push(redirectURL)
     } else {
-      toast.error(t('problemRestoringVersion'));
+      toast.error(t('problemRestoringVersion'))
     }
-  }, [fetchURL, history, redirectURL, t, i18n]);
+  }, [fetchURL, history, redirectURL, t, i18n])
 
   return (
     <Fragment>
       <Pill
-        onClick={() => toggleModal(modalSlug)}
         className={[baseClass, className].filter(Boolean).join(' ')}
+        onClick={() => toggleModal(modalSlug)}
       >
         {t('restoreThisVersion')}
       </Pill>
-      <Modal
-        slug={modalSlug}
-        className={`${baseClass}__modal`}
-      >
+      <Modal className={`${baseClass}__modal`} slug={modalSlug}>
         <MinimalTemplate className={`${baseClass}__modal-template`}>
           <h1>{t('confirmVersionRestoration')}</h1>
           <p>{restoreMessage}</p>
           <Button
             buttonStyle="secondary"
-            type="button"
             onClick={processing ? undefined : () => toggleModal(modalSlug)}
+            type="button"
           >
             {t('general:cancel')}
           </Button>
-          <Button
-            onClick={processing ? undefined : handleRestore}
-          >
+          <Button onClick={processing ? undefined : handleRestore}>
             {processing ? t('restoring') : t('general:confirm')}
           </Button>
         </MinimalTemplate>
       </Modal>
     </Fragment>
-  );
-};
+  )
+}
 
-export default Restore;
+export default Restore

@@ -1,100 +1,110 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { PayloadRequest } from '../../express/types';
-import { Forbidden, NotFound } from '../../errors';
-import executeAccess from '../../auth/executeAccess';
-import { BeforeOperationHook, Collection } from '../config/types';
-import { Document } from '../../types';
-import { hasWhereAccessResult } from '../../auth/types';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions';
-import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles';
-import { combineQueries } from '../../database/combineQueries';
-import { deleteUserPreferences } from '../../preferences/deleteUserPreferences';
-import { killTransaction } from '../../utilities/killTransaction';
-import { initTransaction } from '../../utilities/initTransaction';
-import { buildAfterOperation } from './utils';
+import type { Config as GeneratedTypes } from 'payload/generated-types'
+
+import type { PayloadRequest } from '../../express/types'
+import type { Document } from '../../types'
+import type { BeforeOperationHook, Collection } from '../config/types'
+
+import executeAccess from '../../auth/executeAccess'
+import { hasWhereAccessResult } from '../../auth/types'
+import { combineQueries } from '../../database/combineQueries'
+import { Forbidden, NotFound } from '../../errors'
+import { afterRead } from '../../fields/hooks/afterRead'
+import { deleteUserPreferences } from '../../preferences/deleteUserPreferences'
+import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
+import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions'
+import { buildAfterOperation } from './utils'
 
 export type Arguments = {
-  depth?: number
   collection: Collection
-  id: string | number
-  req: PayloadRequest
+  depth?: number
+  id: number | string
   overrideAccess?: boolean
+  req: PayloadRequest
   showHiddenFields?: boolean
 }
 
-async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(incomingArgs: Arguments): Promise<Document> {
-  let args = incomingArgs;
+async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
+  incomingArgs: Arguments,
+): Promise<Document> {
+  let args = incomingArgs
 
   // /////////////////////////////////////
   // beforeOperation - Collection
   // /////////////////////////////////////
 
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-    await priorHook;
+  await args.collection.config.hooks.beforeOperation.reduce(
+    async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+      await priorHook
 
-    args = (await hook({
-      args,
-      operation: 'delete',
-      context: args.req.context,
-    })) || args;
-  }, Promise.resolve());
+      args =
+        (await hook({
+          args,
+          context: args.req.context,
+          operation: 'delete',
+        })) || args
+    },
+    Promise.resolve(),
+  )
 
   const {
+    collection: { config: collectionConfig },
     depth,
-    collection: {
-      config: collectionConfig,
-    },
     id,
-    req,
-    req: {
-      t,
-      payload,
-      payload: {
-        config,
-      },
-    },
     overrideAccess,
+    req: {
+      payload: { config },
+      payload,
+      t,
+    },
+    req,
     showHiddenFields,
-  } = args;
+  } = args
 
   try {
-    const shouldCommit = await initTransaction(req);
+    const shouldCommit = await initTransaction(req)
 
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-      await priorHook;
+    await args.collection.config.hooks.beforeOperation.reduce(
+      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+        await priorHook
 
-      args = (await hook({
-        args,
-        operation: 'delete',
-        context: req.context,
-      })) || args;
-    }, Promise.resolve());
+        args =
+          (await hook({
+            args,
+            context: req.context,
+            operation: 'delete',
+          })) || args
+      },
+      Promise.resolve(),
+    )
 
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
-    const accessResults = !overrideAccess ? await executeAccess({ req, id }, collectionConfig.access.delete) : true;
-    const hasWhereAccess = hasWhereAccessResult(accessResults);
+    const accessResults = !overrideAccess
+      ? await executeAccess({ id, req }, collectionConfig.access.delete)
+      : true
+    const hasWhereAccess = hasWhereAccessResult(accessResults)
 
     // /////////////////////////////////////
     // beforeDelete - Collection
     // /////////////////////////////////////
 
     await collectionConfig.hooks.beforeDelete.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
       return hook({
-        req,
-        id,
         context: req.context,
-      });
-    }, Promise.resolve());
+        id,
+        req,
+      })
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // Retrieve document
@@ -102,40 +112,42 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
 
     const docToDelete = await req.payload.db.findOne({
       collection: collectionConfig.slug,
-      where: combineQueries({ id: { equals: id } }, accessResults),
       locale: req.locale,
       req,
-    });
+      where: combineQueries({ id: { equals: id } }, accessResults),
+    })
 
+    if (!docToDelete && !hasWhereAccess) throw new NotFound(t)
+    if (!docToDelete && hasWhereAccess) throw new Forbidden(t)
 
-    if (!docToDelete && !hasWhereAccess) throw new NotFound(t);
-    if (!docToDelete && hasWhereAccess) throw new Forbidden(t);
-
-
-    await deleteAssociatedFiles({ config, collectionConfig, doc: docToDelete, t, overrideDelete: true });
+    await deleteAssociatedFiles({
+      collectionConfig,
+      config,
+      doc: docToDelete,
+      overrideDelete: true,
+      t,
+    })
 
     // /////////////////////////////////////
     // Delete document
     // /////////////////////////////////////
 
-
     let result = await req.payload.db.deleteOne({
       collection: collectionConfig.slug,
-      where: { id: { equals: id } },
       req,
-    });
-
+      where: { id: { equals: id } },
+    })
 
     // /////////////////////////////////////
     // Delete Preferences
     // /////////////////////////////////////
 
     deleteUserPreferences({
-      payload,
       collectionConfig,
       ids: [id],
+      payload,
       req,
-    });
+    })
 
     // /////////////////////////////////////
     // Delete versions
@@ -143,11 +155,11 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
 
     if (collectionConfig.versions) {
       deleteCollectionVersions({
-        payload,
         id,
-        slug: collectionConfig.slug,
+        payload,
         req,
-      });
+        slug: collectionConfig.slug,
+      })
     }
 
     // /////////////////////////////////////
@@ -155,65 +167,67 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(inc
     // /////////////////////////////////////
 
     result = await afterRead({
+      context: req.context,
       depth,
       doc: result,
       entityConfig: collectionConfig,
       overrideAccess,
       req,
       showHiddenFields,
-      context: req.context,
-    });
+    })
 
     // /////////////////////////////////////
     // afterRead - Collection
     // /////////////////////////////////////
 
     await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      result = await hook({
-        req,
-        context: req.context,
-        doc: result,
-      }) || result;
-    }, Promise.resolve());
+      result =
+        (await hook({
+          context: req.context,
+          doc: result,
+          req,
+        })) || result
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // afterDelete - Collection
     // /////////////////////////////////////
 
     await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      result = await hook({
-        req,
-        id,
-        doc: result,
-        context: req.context,
-      }) || result;
-    }, Promise.resolve());
+      result =
+        (await hook({
+          context: req.context,
+          doc: result,
+          id,
+          req,
+        })) || result
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // afterOperation - Collection
     // /////////////////////////////////////
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
-      operation: 'deleteByID',
       args,
+      operation: 'deleteByID',
       result,
-    });
+    })
 
     // /////////////////////////////////////
     // 8. Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
-    return result;
+    return result
   } catch (error: unknown) {
-    await killTransaction(req);
-    throw error;
+    await killTransaction(req)
+    throw error
   }
 }
 
-export default deleteByID;
+export default deleteByID

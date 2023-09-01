@@ -1,3 +1,3 @@
-const overwriteMerge = (_, sourceArray) => sourceArray;
+const overwriteMerge = (_, sourceArray) => sourceArray
 
-export default overwriteMerge;
+export default overwriteMerge

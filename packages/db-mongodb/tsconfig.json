@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext" /* Required for exports to work */,
     "composite": true,
     "declaration": true /* Generates corresponding '.d.ts' file. */,
-    "rootDir": "./src" /* Specify the root folder within your source files. */,
-    "outDir": "./dist" /* Specify an output folder for all emitted files. */,
     "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
     "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext" /* Required for exports to work */,
+    "outDir": "./dist" /* Specify an output folder for all emitted files. */,
+    "resolveJsonModule": true,
+    "rootDir": "./src" /* Specify the root folder within your source files. */,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
-    "resolveJsonModule": true
+    "target": "ESNext"
   },
   "exclude": [
     "dist",

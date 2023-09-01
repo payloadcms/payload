@@ -1,98 +1,96 @@
-import React from 'react';
-import Cell from '../../views/collections/List/Cell';
-import SortColumn from '../SortColumn';
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import { Column } from '../Table/types';
-import { fieldIsPresentationalOnly } from '../../../../fields/config/types';
-import flattenFields from '../../../../utilities/flattenTopLevelFields';
-import { Props as CellProps } from '../../views/collections/List/Cell/types';
-import SelectAll from '../../views/collections/List/SelectAll';
-import SelectRow from '../../views/collections/List/SelectRow';
+import React from 'react'
+
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
+import type { Props as CellProps } from '../../views/collections/List/Cell/types'
+import type { Column } from '../Table/types'
+
+import { fieldIsPresentationalOnly } from '../../../../fields/config/types'
+import flattenFields from '../../../../utilities/flattenTopLevelFields'
+import Cell from '../../views/collections/List/Cell'
+import SelectAll from '../../views/collections/List/SelectAll'
+import SelectRow from '../../views/collections/List/SelectRow'
+import SortColumn from '../SortColumn'
 
 const buildColumns = ({
+  cellProps,
   collection,
   columns,
-  cellProps,
 }: {
-  collection: SanitizedCollectionConfig,
-  columns: Pick<Column, 'accessor' | 'active'>[],
   cellProps: Partial<CellProps>[]
+  collection: SanitizedCollectionConfig
+  columns: Pick<Column, 'accessor' | 'active'>[]
 }): Column[] => {
   // sort the fields to the order of activeColumns
   const sortedFields = flattenFields(collection.fields, true).sort((a, b) => {
-    const aIndex = columns.findIndex((column) => column.accessor === a.name);
-    const bIndex = columns.findIndex((column) => column.accessor === b.name);
-    if (aIndex === -1 && bIndex === -1) return 0;
-    if (aIndex === -1) return 1;
-    if (bIndex === -1) return -1;
-    return aIndex - bIndex;
-  });
+    const aIndex = columns.findIndex((column) => column.accessor === a.name)
+    const bIndex = columns.findIndex((column) => column.accessor === b.name)
+    if (aIndex === -1 && bIndex === -1) return 0
+    if (aIndex === -1) return 1
+    if (bIndex === -1) return -1
+    return aIndex - bIndex
+  })
 
-  const firstActiveColumn = sortedFields.find((field) => columns.find((column) => column.accessor === field.name)?.active);
+  const firstActiveColumn = sortedFields.find(
+    (field) => columns.find((column) => column.accessor === field.name)?.active,
+  )
 
-  let colIndex = -1;
+  let colIndex = -1
   const cols: Column[] = sortedFields.map((field) => {
-    const isActive = columns.find((column) => column.accessor === field.name)?.active || false;
-    const isFirstActive = firstActiveColumn?.name === field.name;
+    const isActive = columns.find((column) => column.accessor === field.name)?.active || false
+    const isFirstActive = firstActiveColumn?.name === field.name
     if (isActive) {
-      colIndex += 1;
+      colIndex += 1
     }
-    const props = cellProps?.[colIndex] || {};
+    const props = cellProps?.[colIndex] || {}
     return {
-      active: isActive,
       accessor: field.name,
-      name: field.name,
-      label: field.label,
+      active: isActive,
       components: {
         Heading: (
           <SortColumn
+            disable={
+              ('disableSort' in field && Boolean(field.disableSort)) ||
+              fieldIsPresentationalOnly(field) ||
+              undefined
+            }
             label={field.label || field.name}
             name={field.name}
-            disable={
-              ('disableSort' in field && Boolean(field.disableSort))
-              || fieldIsPresentationalOnly(field)
-              || undefined
-            }
           />
         ),
         renderCell: (rowData, cellData) => {
           return (
             <Cell
-              key={JSON.stringify(cellData)}
-              field={field}
+              cellData={cellData}
               colIndex={colIndex}
               collection={collection}
-              rowData={rowData}
-              cellData={cellData}
+              field={field}
+              key={JSON.stringify(cellData)}
               link={isFirstActive}
-              {...(props)}
+              rowData={rowData}
+              {...props}
             />
-          );
+          )
         },
       },
-    };
-  });
+      label: field.label,
+      name: field.name,
+    }
+  })
 
   if (cellProps?.[0]?.link !== false) {
     cols.unshift({
+      accessor: '_select',
       active: true,
+      components: {
+        Heading: <SelectAll />,
+        renderCell: (rowData) => <SelectRow id={rowData.id} />,
+      },
       label: null,
       name: '',
-      accessor: '_select',
-      components: {
-        Heading: (
-          <SelectAll />
-        ),
-        renderCell: (rowData) => (
-          <SelectRow
-            id={rowData.id}
-          />
-        ),
-      },
-    });
+    })
   }
 
-  return cols;
-};
+  return cols
+}
 
-export default buildColumns;
+export default buildColumns

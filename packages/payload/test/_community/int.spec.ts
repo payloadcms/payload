@@ -1,24 +1,24 @@
-import payload from '../../src';
-import { initPayloadTest } from '../helpers/configHelpers';
-import { devUser } from '../credentials';
-import { postsSlug } from './collections/Posts';
+import payload from '../../src'
+import { devUser } from '../credentials'
+import { initPayloadTest } from '../helpers/configHelpers'
+import { postsSlug } from './collections/Posts'
 
-require('isomorphic-fetch');
+require('isomorphic-fetch')
 
-let apiUrl;
-let jwt;
+let apiUrl
+let jwt
 
 const headers = {
   'Content-Type': 'application/json',
-};
-const { email, password } = devUser;
+}
+const { email, password } = devUser
 describe('_Community Tests', () => {
   // --__--__--__--__--__--__--__--__--__
   // Boilerplate test setup/teardown
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
-    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } });
-    apiUrl = `${serverURL}/api`;
+    const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
+    apiUrl = `${serverURL}/api`
 
     const response = await fetch(`${apiUrl}/users/login`, {
       body: JSON.stringify({
@@ -27,17 +27,17 @@ describe('_Community Tests', () => {
       }),
       headers,
       method: 'post',
-    });
+    })
 
-    const data = await response.json();
-    jwt = data.token;
-  });
+    const data = await response.json()
+    jwt = data.token
+  })
 
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy(payload);
+      await payload.db.destroy(payload)
     }
-  });
+  })
 
   // --__--__--__--__--__--__--__--__--__
   // You can run tests against the local API or the REST API
@@ -50,10 +50,10 @@ describe('_Community Tests', () => {
       data: {
         text: 'LOCAL API EXAMPLE',
       },
-    });
+    })
 
-    expect(newPost.text).toEqual('LOCAL API EXAMPLE');
-  });
+    expect(newPost.text).toEqual('LOCAL API EXAMPLE')
+  })
 
   it('rest API example', async () => {
     const newPost = await fetch(`${apiUrl}/${postsSlug}`, {
@@ -65,8 +65,8 @@ describe('_Community Tests', () => {
       body: JSON.stringify({
         text: 'REST API EXAMPLE',
       }),
-    }).then((res) => res.json());
+    }).then((res) => res.json())
 
-    expect(newPost.doc.text).toEqual('REST API EXAMPLE');
-  });
-});
+    expect(newPost.doc.text).toEqual('REST API EXAMPLE')
+  })
+})

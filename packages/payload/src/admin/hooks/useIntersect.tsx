@@ -1,18 +1,11 @@
 /* eslint-disable no-shadow */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react'
 
-type Intersect = [
-  setNode: React.Dispatch<Element>,
-  entry: IntersectionObserverEntry
-]
+type Intersect = [setNode: React.Dispatch<Element>, entry: IntersectionObserverEntry]
 
-const useIntersect = ({
-  root = null,
-  rootMargin = '0px',
-  threshold = 0,
-} = {}): Intersect => {
-  const [entry, updateEntry] = useState<IntersectionObserverEntry>();
-  const [node, setNode] = useState(null);
+const useIntersect = ({ root = null, rootMargin = '0px', threshold = 0 } = {}): Intersect => {
+  const [entry, updateEntry] = useState<IntersectionObserverEntry>()
+  const [node, setNode] = useState(null)
 
   const observer = useRef(
     new window.IntersectionObserver(([ent]) => updateEntry(ent), {
@@ -20,21 +13,18 @@ const useIntersect = ({
       rootMargin,
       threshold,
     }),
-  );
+  )
 
-  useEffect(
-    () => {
-      const { current: currentObserver } = observer;
-      currentObserver.disconnect();
+  useEffect(() => {
+    const { current: currentObserver } = observer
+    currentObserver.disconnect()
 
-      if (node) currentObserver.observe(node);
+    if (node) currentObserver.observe(node)
 
-      return () => currentObserver.disconnect();
-    },
-    [node],
-  );
+    return () => currentObserver.disconnect()
+  }, [node])
 
-  return [setNode, entry];
-};
+  return [setNode, entry]
+}
 
-export default useIntersect;
+export default useIntersect

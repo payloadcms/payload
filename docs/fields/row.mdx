@@ -6,39 +6,42 @@ desc: With the Row field you can arrange fields next to each other in the Admin 
 keywords: row, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
-<Banner >
-  The Row field is presentational-only and only affects the Admin panel. By using it, you can arrange fields next to each other horizontally.
+<Banner>
+  The Row field is presentational-only and only affects the Admin panel. By using it, you can
+  arrange fields next to each other horizontally.
 </Banner>
 
-<LightDarkImage 
-  srcLight='https://payloadcms.com/images/docs/fields/row.png'
-  srcDark='https://payloadcms.com/images/docs/fields/row-dark.png'
-  alt='Shows a row field in the Payload admin panel'
-  caption='Admin panel screenshot of a Row field'
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/row.png"
+  srcDark="https://payloadcms.com/images/docs/fields/row-dark.png"
+  alt="Shows a row field in the Payload admin panel"
+  caption="Admin panel screenshot of a Row field"
 />
 
 ### Config
 
-| Option           | Description |
-| ---------------- | ----------- |
-| **`fields`** *       | Array of field types to nest within this Row. |
-| **`admin`**          | Admin-specific configuration excluding `description`, `readOnly`, and `hidden`. See the [default field admin config](/docs/fields/overview#admin-config) for more details. |
-| **`custom`**         | Extension point for adding custom data (e.g. for plugins) |
+| Option          | Description                                                                                                                                                                |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`fields`** \* | Array of field types to nest within this Row.                                                                                                                              |
+| **`admin`**     | Admin-specific configuration excluding `description`, `readOnly`, and `hidden`. See the [default field admin config](/docs/fields/overview#admin-config) for more details. |
+| **`custom`**    | Extension point for adding custom data (e.g. for plugins)                                                                                                                  |
 
-*\* An asterisk denotes that a property is required.*
+_\* An asterisk denotes that a property is required._
 
 ### Example
 
 `collections/ExampleCollection.ts`
+
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from 'payload/types'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
   fields: [
     {
       type: 'row', // required
-      fields: [ // required
+      fields: [
+        // required
         {
           name: 'label',
           type: 'text',
@@ -56,8 +59,7 @@ export const ExampleCollection: CollectionConfig = {
           },
         },
       ],
-    }
-  ]
+    },
+  ],
 }
-
 ```

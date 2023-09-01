@@ -1,93 +1,84 @@
-import React, { useCallback } from 'react';
-import { useConfig } from '../../../utilities/Config';
-import useField from '../../useField';
-import withCondition from '../../withCondition';
-import { upload } from '../../../../../fields/validations';
-import { Props } from './types';
-import UploadInput from './Input';
+import React, { useCallback } from 'react'
 
-import './index.scss';
+import type { Props } from './types'
+
+import { upload } from '../../../../../fields/validations'
+import { useConfig } from '../../../utilities/Config'
+import useField from '../../useField'
+import withCondition from '../../withCondition'
+import UploadInput from './Input'
+import './index.scss'
 
 const Upload: React.FC<Props> = (props) => {
   const {
     collections,
+    routes: { api },
     serverURL,
-    routes: {
-      api,
-    },
-  } = useConfig();
+  } = useConfig()
 
   const {
-    path,
-    name,
-    required,
-    admin: {
-      readOnly,
-      style,
-      className,
-      width,
-      description,
-      condition,
-    } = {},
-    label,
-    validate = upload,
-    relationTo,
+    admin: { className, condition, description, readOnly, style, width } = {},
     fieldTypes,
     filterOptions,
-  } = props;
+    label,
+    name,
+    path,
+    relationTo,
+    required,
+    validate = upload,
+  } = props
 
-  const collection = collections.find((coll) => coll.slug === relationTo);
+  const collection = collections.find((coll) => coll.slug === relationTo)
 
-  const memoizedValidate = useCallback((value, options) => {
-    return validate(value, { ...options, required });
-  }, [validate, required]);
+  const memoizedValidate = useCallback(
+    (value, options) => {
+      return validate(value, { ...options, required })
+    },
+    [validate, required],
+  )
 
   const field = useField({
+    condition,
     path,
     validate: memoizedValidate,
-    condition,
-  });
+  })
 
-  const {
-    value,
-    showError,
-    setValue,
-    errorMessage,
-  } = field;
+  const { errorMessage, setValue, showError, value } = field
 
-  const onChange = useCallback((incomingValue) => {
-    const incomingID = incomingValue?.id || incomingValue;
-    setValue(incomingID);
-  }, [
-    setValue,
-  ]);
+  const onChange = useCallback(
+    (incomingValue) => {
+      const incomingID = incomingValue?.id || incomingValue
+      setValue(incomingID)
+    },
+    [setValue],
+  )
 
   if (collection.upload) {
     return (
       <UploadInput
-        path={path}
-        value={value as string}
-        onChange={onChange}
-        description={description}
-        label={label}
-        required={required}
-        showError={showError}
-        serverURL={serverURL}
         api={api}
-        errorMessage={errorMessage}
-        readOnly={readOnly}
-        style={style}
         className={className}
-        width={width}
         collection={collection}
+        description={description}
+        errorMessage={errorMessage}
         fieldTypes={fieldTypes}
-        name={name}
-        relationTo={relationTo}
         filterOptions={filterOptions}
+        label={label}
+        name={name}
+        onChange={onChange}
+        path={path}
+        readOnly={readOnly}
+        relationTo={relationTo}
+        required={required}
+        serverURL={serverURL}
+        showError={showError}
+        style={style}
+        value={value as string}
+        width={width}
       />
-    );
+    )
   }
 
-  return null;
-};
-export default withCondition(Upload);
+  return null
+}
+export default withCondition(Upload)

@@ -1,3 +1,5 @@
-export default [{
-  children: [{ text: '' }],
-}];
+export default [
+  {
+    children: [{ text: '' }],
+  },
+]

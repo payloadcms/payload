@@ -1,56 +1,63 @@
-import * as React from 'react';
-import { useDelay } from '../../../hooks/useDelay';
+import * as React from 'react'
 
-import './index.scss';
+import { useDelay } from '../../../hooks/useDelay'
+import './index.scss'
 
 type ShimmerEffectT = {
-  animationDelay?: string;
-  height?: number | string;
-  width?: number | string;
+  animationDelay?: string
+  height?: number | string
+  width?: number | string
 }
-export const ShimmerEffect: React.FC<ShimmerEffectT> = ({ animationDelay = '0ms', height = '60px', width = '100%' }) => {
+export const ShimmerEffect: React.FC<ShimmerEffectT> = ({
+  animationDelay = '0ms',
+  height = '60px',
+  width = '100%',
+}) => {
   return (
     <div
-      className="shimmer-effect"
       style={{
         height: typeof height === 'number' ? `${height}px` : height,
         width: typeof width === 'number' ? `${width}px` : width,
       }}
+      className="shimmer-effect"
     >
       <div
-        className="shimmer-effect__shine"
         style={{
           animationDelay,
         }}
+        className="shimmer-effect__shine"
       />
     </div>
-  );
-};
+  )
+}
 
 type StaggeredShimmersT = {
-  count: number;
-  shimmerDelay?: number | string;
-  height?: number | string;
-  width?: number | string;
-  className?: string;
-  shimmerItemClassName?: string;
-  renderDelay?: number;
+  className?: string
+  count: number
+  height?: number | string
+  renderDelay?: number
+  shimmerDelay?: number | string
+  shimmerItemClassName?: string
+  width?: number | string
 }
-export const StaggeredShimmers: React.FC<StaggeredShimmersT> = ({ count, className, shimmerItemClassName, width, height, shimmerDelay = 25, renderDelay = 500 }) => {
-  const shimmerDelayToPass = typeof shimmerDelay === 'number' ? `${shimmerDelay}ms` : shimmerDelay;
-  const [hasDelayed] = useDelay(renderDelay, true);
+export const StaggeredShimmers: React.FC<StaggeredShimmersT> = ({
+  className,
+  count,
+  height,
+  renderDelay = 500,
+  shimmerDelay = 25,
+  shimmerItemClassName,
+  width,
+}) => {
+  const shimmerDelayToPass = typeof shimmerDelay === 'number' ? `${shimmerDelay}ms` : shimmerDelay
+  const [hasDelayed] = useDelay(renderDelay, true)
 
-  if (!hasDelayed) return null;
+  if (!hasDelayed) return null
 
   return (
-    <div
-      className={className}
-    >
+    <div className={className}>
       {[...Array(count)].map((_, i) => (
-        <div
-          key={i}
-          className={shimmerItemClassName}
-        >
+        <div className={shimmerItemClassName} key={i}>
           <ShimmerEffect
             animationDelay={`calc(${i} * ${shimmerDelayToPass})`}
             height={height}
@@ -59,5 +66,5 @@ export const StaggeredShimmers: React.FC<StaggeredShimmersT> = ({ count, classNa
         </div>
       ))}
     </div>
-  );
-};
+  )
+}

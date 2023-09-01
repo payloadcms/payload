@@ -1,27 +1,26 @@
-import executeAccess from '../../auth/executeAccess';
-import defaultAccess from '../../auth/defaultAccess';
-import { Document, Where } from '../../types';
-import UnauthorizedError from '../../errors/UnathorizedError';
-import { PreferenceRequest } from '../types';
-import NotFound from '../../errors/NotFound';
+import type { Document, Where } from '../../types'
+import type { PreferenceRequest } from '../types'
+
+import defaultAccess from '../../auth/defaultAccess'
+import executeAccess from '../../auth/executeAccess'
+import NotFound from '../../errors/NotFound'
+import UnauthorizedError from '../../errors/UnathorizedError'
 
 async function deleteOperation(args: PreferenceRequest): Promise<Document> {
   const {
-    overrideAccess,
-    req,
-    req: {
-      payload,
-    },
-    user,
     key,
-  } = args;
+    overrideAccess,
+    req: { payload },
+    req,
+    user,
+  } = args
 
   if (!user) {
-    throw new UnauthorizedError(req.t);
+    throw new UnauthorizedError(req.t)
   }
 
   if (!overrideAccess) {
-    await executeAccess({ req }, defaultAccess);
+    await executeAccess({ req }, defaultAccess)
   }
 
   const where: Where = {
@@ -30,19 +29,19 @@ async function deleteOperation(args: PreferenceRequest): Promise<Document> {
       { 'user.value': { equals: user.id } },
       { 'user.relationTo': { equals: user.collection } },
     ],
-  };
+  }
 
   const result = await payload.delete({
     collection: 'payload-preferences',
-    where,
     depth: 0,
     user,
-  });
+    where,
+  })
 
   if (result.docs.length === 1) {
-    return result.docs[0];
+    return result.docs[0]
   }
-  throw new NotFound();
+  throw new NotFound()
 }
 
-export default deleteOperation;
+export default deleteOperation

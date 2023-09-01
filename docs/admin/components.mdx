@@ -11,8 +11,10 @@ While designing the Payload Admin panel, we determined it should be as minimal a
 To swap in your own React component, first, consult the list of available component overrides below. Determine the scope that corresponds to what you are trying to accomplish, and then author your React component accordingly.
 
 <Banner type="success">
-  <strong>Tip:</strong><br />
-  Custom components will automatically be provided with all props that the default component would accept.
+  <strong>Tip:</strong>
+  <br />
+  Custom components will automatically be provided with all props that the default component would
+  accept.
 </Banner>
 
 ### Base Component Overrides
@@ -41,7 +43,7 @@ You can override a set of admin panel-wide components by providing a component t
 `payload.config.js`
 
 ```ts
-import { buildConfig } from "payload/config";
+import { buildConfig } from 'payload/config'
 import {
   MyCustomNav,
   MyCustomLogo,
@@ -49,7 +51,7 @@ import {
   MyCustomAccount,
   MyCustomDashboard,
   MyProvider,
-} from "./customComponents";
+} from './customComponents'
 
 export default buildConfig({
   admin: {
@@ -66,7 +68,7 @@ export default buildConfig({
       providers: [MyProvider],
     },
   },
-});
+})
 ```
 
 _For more examples regarding how to customize components, look at the following [examples](https://github.com/payloadcms/payload/tree/master/test/admin/components)._
@@ -93,20 +95,17 @@ You can override components on a Collection-by-Collection basis via each Collect
 ```tsx
 // Custom Buttons
 
-import * as React from "react";
+import * as React from 'react'
 import {
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
   CustomPublishButtonProps,
   CustomPreviewButtonProps,
-} from "payload/types";
+} from 'payload/types'
 
-export const CustomSaveButton: CustomSaveButtonProps = ({
-  DefaultButton,
-  label,
-}) => {
-  return <DefaultButton label={label} />;
-};
+export const CustomSaveButton: CustomSaveButtonProps = ({ DefaultButton, label }) => {
+  return <DefaultButton label={label} />
+}
 
 export const CustomSaveDraftButton: CustomSaveDraftButtonProps = ({
   DefaultButton,
@@ -114,10 +113,8 @@ export const CustomSaveDraftButton: CustomSaveDraftButtonProps = ({
   label,
   saveDraft,
 }) => {
-  return (
-    <DefaultButton label={label} disabled={disabled} saveDraft={saveDraft} />
-  );
-};
+  return <DefaultButton label={label} disabled={disabled} saveDraft={saveDraft} />
+}
 
 export const CustomPublishButton: CustomPublishButtonProps = ({
   DefaultButton,
@@ -125,8 +122,8 @@ export const CustomPublishButton: CustomPublishButtonProps = ({
   label,
   publish,
 }) => {
-  return <DefaultButton label={label} disabled={disabled} publish={publish} />;
-};
+  return <DefaultButton label={label} disabled={disabled} publish={publish} />
+}
 
 export const CustomPreviewButton: CustomPreviewButtonProps = ({
   DefaultButton,
@@ -134,8 +131,8 @@ export const CustomPreviewButton: CustomPreviewButtonProps = ({
   label,
   preview,
 }) => {
-  return <DefaultButton label={label} disabled={disabled} preview={preview} />;
-};
+  return <DefaultButton label={label} disabled={disabled} preview={preview} />
+}
 ```
 
 ##### Custom Collection List View Example
@@ -162,17 +159,17 @@ export const MyCollection: CollectionConfig = {
 MyListComponent.tsx
 
 ```tsx
-import React from "react";
-import { List, type Props } from "payload/components/views/List"; // Payload's default List view component and its props
+import React from 'react'
+import { List, type Props } from 'payload/components/views/List' // Payload's default List view component and its props
 export const MyListComponent: React.FC<Props> = (props) => (
   <div>
     <p>
-      Some text before the default list view component. If you just want to do
-      that, you can also use the admin.components.list.BeforeList hook
+      Some text before the default list view component. If you just want to do that, you can also
+      use the admin.components.list.BeforeList hook
     </p>
     <List {...props} />
   </div>
-);
+)
 ```
 
 ### Globals
@@ -194,10 +191,9 @@ All Payload fields support the ability to swap in your own React components. So,
 <Banner type="success">
   <strong>Tip:</strong>
   <br />
-  Don't see a built-in field type that you need? Build it! Using a combination
-  of custom validation and custom components, you can override the entirety of
-  how a component functions within the admin panel and effectively create your
-  own field type.
+  Don't see a built-in field type that you need? Build it! Using a combination of custom validation
+  and custom components, you can override the entirety of how a component functions within the admin
+  panel and effectively create your own field type.
 </Banner>
 
 **Fields support the following custom components:**
@@ -223,15 +219,15 @@ These are the props that will be passed to your custom Cell to use in your own c
 #### Example
 
 ```tsx
-import React from "react";
-import "./index.scss";
-const baseClass = "custom-cell";
+import React from 'react'
+import './index.scss'
+const baseClass = 'custom-cell'
 
 const CustomCell: React.FC<Props> = (props) => {
-  const { field, colIndex, collection, cellData, rowData } = props;
+  const { field, colIndex, collection, cellData, rowData } = props
 
-  return <span className={baseClass}>{cellData}</span>;
-};
+  return <span className={baseClass}>{cellData}</span>
+}
 ```
 
 ## Field Component
@@ -243,25 +239,22 @@ When writing your own custom components you can make use of a number of hooks to
 When swapping out the `Field` component, you'll be responsible for sending and receiving the field's `value` from the form itself. To do so, import the `useField` hook as follows:
 
 ```tsx
-import { useField } from "payload/components/forms";
+import { useField } from 'payload/components/forms'
 
-type Props = { path: string };
+type Props = { path: string }
 
 const CustomTextField: React.FC<Props> = ({ path }) => {
   // highlight-start
-  const { value, setValue } = useField<Props>({ path });
+  const { value, setValue } = useField<Props>({ path })
   // highlight-end
 
-  return (
-    <input onChange={(e) => setValue(e.target.value)} value={value.path} />
-  );
-};
+  return <input onChange={(e) => setValue(e.target.value)} value={value.path} />
+}
 ```
 
 <Banner type="success">
-  For more information regarding the hooks that are available to you while you
-  build custom components, including the <strong>useField</strong> hook, [click
-  here](/docs/admin/hooks).
+  For more information regarding the hooks that are available to you while you build custom
+  components, including the <strong>useField</strong> hook, [click here](/docs/admin/hooks).
 </Banner>
 
 ## Custom routes
@@ -292,9 +285,8 @@ Your custom route components will be given all the props that a React Router `<R
 <Banner type="warning">
   <strong>Note:</strong>
   <br />
-  It's up to you to secure your custom routes. If your route requires a user to
-  be logged in or to have certain access rights, you should handle that within
-  your route component yourself.
+  It's up to you to secure your custom routes. If your route requires a user to be logged in or to
+  have certain access rights, you should handle that within your route component yourself.
 </Banner>
 
 #### Example
@@ -311,8 +303,8 @@ To see how to pass in your custom views to create custom routes of your own, tak
 As your admin customizations gets more complex you may want to share state between fields or other components. You can add custom providers to do add your own context to any Payload app for use in other custom components within the admin panel. Within your config add `admin.components.providers`, these can be used to share context or provide other custom functionality. Read the [React context](https://reactjs.org/docs/context.html) docs to learn more.
 
 <Banner type="warning">
-  <strong>Reminder:</strong> Don't forget to pass the **children** prop through
-  the provider component for the admin UI to show
+  <strong>Reminder:</strong> Don't forget to pass the **children** prop through the provider
+  component for the admin UI to show
 </Banner>
 
 ### Styling Custom Components
@@ -332,21 +324,21 @@ When developing custom components you can support multiple languages to be consi
 For example:
 
 ```tsx
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next'
 
 const CustomComponent: React.FC = () => {
   // highlight-start
-  const { t, i18n } = useTranslation("namespace1");
+  const { t, i18n } = useTranslation('namespace1')
   // highlight-end
 
   return (
     <ul>
-      <li>{t("key", { variable: "value" })}</li>
-      <li>{t("namespace2:key", { variable: "value" })}</li>
+      <li>{t('key', { variable: 'value' })}</li>
+      <li>{t('namespace2:key', { variable: 'value' })}</li>
       <li>{i18n.language}</li>
     </ul>
-  );
-};
+  )
+}
 ```
 
 ### Getting the current locale
@@ -354,18 +346,18 @@ const CustomComponent: React.FC = () => {
 In any custom component you can get the selected locale with `useLocale` hook. `useLocale` returns the full locale object, consisting of a `label`, `rtl`(right-to-left) property, and then `code`. Here is a simple example:
 
 ```tsx
-import { useLocale } from "payload/components/utilities";
+import { useLocale } from 'payload/components/utilities'
 
 const Greeting: React.FC = () => {
   // highlight-start
-  const locale = useLocale();
+  const locale = useLocale()
   // highlight-end
 
   const trans = {
-    en: "Hello",
-    es: "Hola",
-  };
+    en: 'Hello',
+    es: 'Hola',
+  }
 
   return <span> {trans[locale.code]} </span>
-};
+}
 ```

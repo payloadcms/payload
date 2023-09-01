@@ -1,7 +1,7 @@
 async function wait(ms) {
   return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
+    setTimeout(resolve, ms)
+  })
 }
 
-export default wait;
+export default wait

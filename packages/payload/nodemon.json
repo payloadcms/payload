@@ -1,4 +1,6 @@
 {
+  "exec": "ts-node ./test/dev.ts",
+  "ext": "ts,js,json",
   "ignore": [
     ".git",
     "node_modules",
@@ -7,7 +9,5 @@
     "src/**/*.spec.ts",
     "test/**/payload-types.ts"
   ],
-  "watch": ["src/**/*.ts", "test/", "packages/**/*.ts"],
-  "ext": "ts,js,json",
-  "exec": "ts-node ./test/dev.ts"
+  "watch": ["src/**/*.ts", "test/", "packages/**/*.ts"]
 }

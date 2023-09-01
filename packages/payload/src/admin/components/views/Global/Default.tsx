@@ -1,79 +1,72 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import Eyebrow from '../../elements/Eyebrow';
-import Form from '../../forms/Form';
-import PreviewButton from '../../elements/PreviewButton';
-import RenderFields from '../../forms/RenderFields';
-import CopyToClipboard from '../../elements/CopyToClipboard';
-import Meta from '../../utilities/Meta';
-import fieldTypes from '../../forms/field-types';
-import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving';
-import VersionsCount from '../../elements/VersionsCount';
-import { Props } from './types';
-import ViewDescription from '../../elements/ViewDescription';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import { SaveDraft } from '../../elements/SaveDraft';
-import { Publish } from '../../elements/Publish';
-import { Save } from '../../elements/Save';
-import Status from '../../elements/Status';
-import Autosave from '../../elements/Autosave';
-import { OperationContext } from '../../utilities/OperationProvider';
-import { Gutter } from '../../elements/Gutter';
-import { getTranslation } from '../../../../utilities/getTranslation';
-import { FormLoadingOverlayToggle } from '../../elements/Loading';
-import { formatDate } from '../../../utilities/formatDate';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-import './index.scss';
+import type { Props } from './types'
 
-const baseClass = 'global-edit';
+import { getTranslation } from '../../../../utilities/getTranslation'
+import { formatDate } from '../../../utilities/formatDate'
+import Autosave from '../../elements/Autosave'
+import CopyToClipboard from '../../elements/CopyToClipboard'
+import Eyebrow from '../../elements/Eyebrow'
+import { Gutter } from '../../elements/Gutter'
+import { FormLoadingOverlayToggle } from '../../elements/Loading'
+import PreviewButton from '../../elements/PreviewButton'
+import { Publish } from '../../elements/Publish'
+import { Save } from '../../elements/Save'
+import { SaveDraft } from '../../elements/SaveDraft'
+import Status from '../../elements/Status'
+import VersionsCount from '../../elements/VersionsCount'
+import ViewDescription from '../../elements/ViewDescription'
+import Form from '../../forms/Form'
+import RenderFields from '../../forms/RenderFields'
+import fieldTypes from '../../forms/field-types'
+import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving'
+import { useConfig } from '../../utilities/Config'
+import { useDocumentInfo } from '../../utilities/DocumentInfo'
+import Meta from '../../utilities/Meta'
+import { OperationContext } from '../../utilities/OperationProvider'
+import './index.scss'
+
+const baseClass = 'global-edit'
 
 const DefaultGlobalView: React.FC<Props> = (props) => {
-  const {
-    global, data, onSave, permissions, action, apiURL, initialState, isLoading, updatedAt,
-  } = props;
-
-  const { admin: { dateFormat } } = useConfig();
-  const { publishedDoc } = useDocumentInfo();
-  const { t, i18n } = useTranslation('general');
+  const { action, apiURL, data, global, initialState, isLoading, onSave, permissions, updatedAt } =
+    props
 
   const {
-    fields,
-    versions,
-    label,
-    admin: {
-      description,
-      hideAPIURL,
-      preview,
-    } = {},
-  } = global;
+    admin: { dateFormat },
+  } = useConfig()
+  const { publishedDoc } = useDocumentInfo()
+  const { i18n, t } = useTranslation('general')
 
-  const hasSavePermission = permissions?.update?.permission;
+  const { admin: { description, hideAPIURL, preview } = {}, fields, label, versions } = global
+
+  const hasSavePermission = permissions?.update?.permission
 
   return (
     <div className={baseClass}>
       <OperationContext.Provider value="update">
         <Form
-          className={`${baseClass}__form`}
-          method="post"
           action={action}
-          onSuccess={onSave}
+          className={`${baseClass}__form`}
           disabled={!hasSavePermission}
           initialState={initialState}
+          method="post"
+          onSuccess={onSave}
         >
           <FormLoadingOverlayToggle
             action="update"
-            name={`global-edit--${label}`}
             loadingSuffix={getTranslation(label, i18n)}
+            name={`global-edit--${label}`}
           />
 
           {!isLoading && (
             <React.Fragment>
               <div className={`${baseClass}__main`}>
                 <Meta
-                  title={getTranslation(label, i18n)}
                   description={getTranslation(label, i18n)}
                   keywords={`${getTranslation(label, i18n)}, Payload, CMS`}
+                  title={getTranslation(label, i18n)}
                 />
                 <Eyebrow />
                 {!(global.versions?.drafts && global.versions?.drafts?.autosave) && (
@@ -81,9 +74,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                 )}
                 <Gutter className={`${baseClass}__edit`}>
                   <header className={`${baseClass}__header`}>
-                    <h1>
-                      {t('editLabel', { label: getTranslation(label, i18n) })}
-                    </h1>
+                    <h1>{t('editLabel', { label: getTranslation(label, i18n) })}</h1>
                     {description && (
                       <div className={`${baseClass}__sub-header`}>
                         <ViewDescription description={description} />
@@ -91,24 +82,34 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                     )}
                   </header>
                   <RenderFields
-                    readOnly={!hasSavePermission}
-                    permissions={permissions.fields}
-                    filter={(field) => (!field.admin.position || (field.admin.position && field.admin.position !== 'sidebar'))}
-                    fieldTypes={fieldTypes}
+                    filter={(field) =>
+                      !field.admin.position ||
+                      (field.admin.position && field.admin.position !== 'sidebar')
+                    }
                     fieldSchema={fields}
+                    fieldTypes={fieldTypes}
+                    permissions={permissions.fields}
+                    readOnly={!hasSavePermission}
                   />
                 </Gutter>
               </div>
               <div className={`${baseClass}__sidebar-wrap`}>
                 <div className={`${baseClass}__sidebar`}>
                   <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                    <div className={`${baseClass}__document-actions${((global.versions?.drafts && !global.versions?.drafts?.autosave) || preview) ? ` ${baseClass}__document-actions--has-2` : ''}`}>
-                      {(preview && (!global.versions?.drafts || global.versions?.drafts?.autosave)) && (
-                        <PreviewButton
-                          generatePreviewURL={preview}
-                          CustomComponent={global?.admin?.components?.elements?.PreviewButton}
-                        />
-                      )}
+                    <div
+                      className={`${baseClass}__document-actions${
+                        (global.versions?.drafts && !global.versions?.drafts?.autosave) || preview
+                          ? ` ${baseClass}__document-actions--has-2`
+                          : ''
+                      }`}
+                    >
+                      {preview &&
+                        (!global.versions?.drafts || global.versions?.drafts?.autosave) && (
+                          <PreviewButton
+                            CustomComponent={global?.admin?.components?.elements?.PreviewButton}
+                            generatePreviewURL={preview}
+                          />
+                        )}
 
                       {hasSavePermission && (
                         <React.Fragment>
@@ -116,7 +117,9 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                             <React.Fragment>
                               {!global.versions.drafts.autosave && (
                                 <SaveDraft
-                                  CustomComponent={global?.admin?.components?.elements?.SaveDraftButton}
+                                  CustomComponent={
+                                    global?.admin?.components?.elements?.SaveDraftButton
+                                  }
                                 />
                               )}
 
@@ -134,29 +137,29 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                       )}
                     </div>
                     <div className={`${baseClass}__sidebar-fields`}>
-                      {(preview && (global.versions?.drafts && !global.versions?.drafts?.autosave)) && (
+                      {preview && global.versions?.drafts && !global.versions?.drafts?.autosave && (
                         <PreviewButton
-                          generatePreviewURL={preview}
                           CustomComponent={global?.admin?.components?.elements?.PreviewButton}
+                          generatePreviewURL={preview}
                         />
                       )}
                       {global.versions?.drafts && (
                         <React.Fragment>
                           <Status />
-                          {(global.versions.drafts.autosave && hasSavePermission) && (
+                          {global.versions.drafts.autosave && hasSavePermission && (
                             <Autosave
-                              publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
                               global={global}
+                              publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
                             />
                           )}
                         </React.Fragment>
                       )}
                       <RenderFields
-                        readOnly={!hasSavePermission}
-                        permissions={permissions.fields}
-                        filter={(field) => field.admin.position === 'sidebar'}
-                        fieldTypes={fieldTypes}
                         fieldSchema={fields}
+                        fieldTypes={fieldTypes}
+                        filter={(field) => field.admin.position === 'sidebar'}
+                        permissions={permissions.fields}
+                        readOnly={!hasSavePermission}
                       />
                     </div>
                     <ul className={`${baseClass}__meta`}>
@@ -166,18 +169,12 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                           <VersionsCount global={global} />
                         </li>
                       )}
-                      {(data && !hideAPIURL) && (
+                      {data && !hideAPIURL && (
                         <li className={`${baseClass}__api-url`}>
                           <span className={`${baseClass}__label`}>
-                            API URL
-                            {' '}
-                            <CopyToClipboard value={apiURL} />
+                            API URL <CopyToClipboard value={apiURL} />
                           </span>
-                          <a
-                            href={apiURL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
+                          <a href={apiURL} rel="noopener noreferrer" target="_blank">
                             {apiURL}
                           </a>
                         </li>
@@ -185,7 +182,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                       {updatedAt && (
                         <li>
                           <div className={`${baseClass}__label`}>{t('lastModified')}</div>
-                          <div>{formatDate((updatedAt as string), dateFormat, i18n?.language)}</div>
+                          <div>{formatDate(updatedAt, dateFormat, i18n?.language)}</div>
                         </li>
                       )}
                     </ul>
@@ -197,7 +194,7 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
         </Form>
       </OperationContext.Provider>
     </div>
-  );
-};
+  )
+}
 
-export default DefaultGlobalView;
+export default DefaultGlobalView

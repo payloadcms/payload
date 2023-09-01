@@ -1,57 +1,72 @@
-import React, { useEffect } from 'react';
-import { useAuth } from '../../utilities/Auth';
-import { useAllFormFields } from '../Form/context';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import reduceFieldsToValues from '../Form/reduceFieldsToValues';
-import getSiblingData from '../Form/getSiblingData';
-import { Condition } from '../../../../fields/config/types';
+import type React from 'react'
+
+import { useEffect } from 'react'
+
+import type { Condition } from '../../../../fields/config/types'
+
+import { useAuth } from '../../utilities/Auth'
+import { useDocumentInfo } from '../../utilities/DocumentInfo'
+import { useAllFormFields } from '../Form/context'
+import getSiblingData from '../Form/getSiblingData'
+import reduceFieldsToValues from '../Form/reduceFieldsToValues'
 
 type Props = {
-  path?: string
-  name: string
   condition: Condition
+  name: string
+  path?: string
   setShowField: (isVisible: boolean) => void
 }
 
 export const WatchCondition: React.FC<Props> = ({
-  path: pathFromProps,
-  name,
   condition,
+  name,
+  path: pathFromProps,
   setShowField,
 }) => {
-  const path = typeof pathFromProps === 'string' ? pathFromProps : name;
+  const path = typeof pathFromProps === 'string' ? pathFromProps : name
 
-  const { user } = useAuth();
-  const [fields, dispatchFields] = useAllFormFields();
-  const { id } = useDocumentInfo();
+  const { user } = useAuth()
+  const [fields, dispatchFields] = useAllFormFields()
+  const { id } = useDocumentInfo()
 
-  const data = reduceFieldsToValues(fields, true);
-  const siblingData = getSiblingData(fields, path);
+  const data = reduceFieldsToValues(fields, true)
+  const siblingData = getSiblingData(fields, path)
 
   // Manually provide ID to `data`
-  data.id = id;
+  data.id = id
 
-  const hasCondition = Boolean(condition);
-  const isPassingCondition = hasCondition ? condition(data, siblingData, { user }) : true;
-  const field = fields[path];
+  const hasCondition = Boolean(condition)
+  const isPassingCondition = hasCondition ? condition(data, siblingData, { user }) : true
+  const field = fields[path]
 
-  const wasPassingCondition = field?.passesCondition;
+  const wasPassingCondition = field?.passesCondition
 
   useEffect(() => {
     if (hasCondition) {
       if (isPassingCondition && !wasPassingCondition) {
-        dispatchFields({ type: 'MODIFY_CONDITION', path, result: true, user });
+        dispatchFields({ path, result: true, type: 'MODIFY_CONDITION', user })
       }
 
-      if (!isPassingCondition && (wasPassingCondition || typeof wasPassingCondition === 'undefined')) {
-        dispatchFields({ type: 'MODIFY_CONDITION', path, result: false, user });
+      if (
+        !isPassingCondition &&
+        (wasPassingCondition || typeof wasPassingCondition === 'undefined')
+      ) {
+        dispatchFields({ path, result: false, type: 'MODIFY_CONDITION', user })
       }
     }
-  }, [isPassingCondition, wasPassingCondition, dispatchFields, path, hasCondition, user, setShowField]);
+  }, [
+    isPassingCondition,
+    wasPassingCondition,
+    dispatchFields,
+    path,
+    hasCondition,
+    user,
+    setShowField,
+  ])
 
   useEffect(() => {
-    setShowField(isPassingCondition);
-  }, [setShowField, isPassingCondition]);
+    setShowField(isPassingCondition)
+  }, [setShowField, isPassingCondition])
 
-  return null;
-};
+  return null
+}

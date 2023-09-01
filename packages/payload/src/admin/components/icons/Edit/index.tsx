@@ -1,13 +1,9 @@
-import React from 'react';
+import React from 'react'
 
-import './index.scss';
+import './index.scss'
 
 const Edit: React.FC = () => (
-  <svg
-    className="icon icon--edit"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 25 25"
-  >
+  <svg className="icon icon--edit" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
     <polygon
       className="fill"
       points="16.92 16.86 8.25 16.86 8.25 8.21 12.54 8.21 12.54 6.63 6.68 6.63 6.68 18.43 18.5 18.43 18.5 12.53 16.92 12.53 16.92 16.86"
@@ -18,13 +14,13 @@ const Edit: React.FC = () => (
     />
     <rect
       className="fill"
-      x="16.94"
-      y="6.44"
-      width="1.58"
       height="1.15"
       transform="translate(10.16 -10.48) rotate(45)"
+      width="1.58"
+      x="16.94"
+      y="6.44"
     />
   </svg>
-);
+)
 
-export default Edit;
+export default Edit

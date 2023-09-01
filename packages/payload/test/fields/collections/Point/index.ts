@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../src/collections/config/types'
 
-export const pointFieldsSlug = 'point-fields';
+export const pointFieldsSlug = 'point-fields'
 
 const PointFields: CollectionConfig = {
   slug: pointFieldsSlug,
@@ -33,12 +33,12 @@ const PointFields: CollectionConfig = {
       ],
     },
   ],
-};
+}
 
 export const pointDoc = {
   point: [7, -7],
   localized: [15, -12],
   group: { point: [1, 9] },
-};
+}
 
-export default PointFields;
+export default PointFields

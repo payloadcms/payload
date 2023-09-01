@@ -1,15 +1,16 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { PreferenceRequest } from '../types';
-import { Where } from '../../types';
+import type { Config as GeneratedTypes } from 'payload/generated-types'
 
-async function findOne(args: PreferenceRequest): Promise<GeneratedTypes['collections']['_preference']> {
+import type { Where } from '../../types'
+import type { PreferenceRequest } from '../types'
+
+async function findOne(
+  args: PreferenceRequest,
+): Promise<GeneratedTypes['collections']['_preference']> {
   const {
-    req: {
-      payload,
-    },
-    user,
     key,
-  } = args;
+    req: { payload },
+    user,
+  } = args
 
   const where: Where = {
     and: [
@@ -17,19 +18,19 @@ async function findOne(args: PreferenceRequest): Promise<GeneratedTypes['collect
       { 'user.value': { equals: user.id } },
       { 'user.relationTo': { equals: user.collection } },
     ],
-  };
+  }
 
   const { docs } = await payload.find({
     collection: 'payload-preferences',
-    where,
     depth: 0,
     pagination: false,
     user,
-  });
+    where,
+  })
 
-  if (docs.length === 0) return null;
+  if (docs.length === 0) return null
 
-  return docs[0];
+  return docs[0]
 }
 
-export default findOne;
+export default findOne

@@ -1,1 +1,1 @@
-export default ['ol', 'ul'];
+export default ['ol', 'ul']

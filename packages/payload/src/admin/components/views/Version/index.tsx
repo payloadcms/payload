@@ -1,19 +1,15 @@
-import React, { Suspense, lazy } from 'react';
-import { LoadingOverlayToggle } from '../../elements/Loading';
-import { Props } from './types';
+import React, { Suspense, lazy } from 'react'
 
-const VersionView = lazy(() => import('./Version'));
+import type { Props } from './types'
+
+import { LoadingOverlayToggle } from '../../elements/Loading'
+
+const VersionView = lazy(() => import('./Version'))
 
 const Version: React.FC<Props> = (props) => (
-  <Suspense fallback={(
-    <LoadingOverlayToggle
-      show
-      name="version-suspense"
-    />
-  )}
-  >
+  <Suspense fallback={<LoadingOverlayToggle name="version-suspense" show />}>
     <VersionView {...props} />
   </Suspense>
-);
+)
 
-export default Version;
+export default Version

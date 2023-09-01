@@ -1,98 +1,90 @@
-import React, { ChangeEvent } from 'react';
-import { useTranslation } from 'react-i18next';
-import Label from '../../Label';
-import Error from '../../Error';
-import FieldDescription from '../../FieldDescription';
-import { TextField } from '../../../../../fields/config/types';
-import { Description } from '../../FieldDescription/types';
-import { getTranslation } from '../../../../../utilities/getTranslation';
+import type { ChangeEvent } from 'react'
 
-import './index.scss';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+
+import type { TextField } from '../../../../../fields/config/types'
+import type { Description } from '../../FieldDescription/types'
+
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import Error from '../../Error'
+import FieldDescription from '../../FieldDescription'
+import Label from '../../Label'
+import './index.scss'
 
 export type TextInputProps = Omit<TextField, 'type'> & {
-  showError?: boolean;
-  errorMessage?: string;
-  readOnly?: boolean;
-  path: string;
-  required?: boolean;
-  value?: string;
-  description?: Description;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
-  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
-  placeholder?: Record<string, string> | string;
-  style?: React.CSSProperties;
-  className?: string;
-  width?: string;
-  inputRef?: React.MutableRefObject<HTMLInputElement>;
-  rtl?: boolean;
-};
+  className?: string
+  description?: Description
+  errorMessage?: string
+  inputRef?: React.MutableRefObject<HTMLInputElement>
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>
+  path: string
+  placeholder?: Record<string, string> | string
+  readOnly?: boolean
+  required?: boolean
+  rtl?: boolean
+  showError?: boolean
+  style?: React.CSSProperties
+  value?: string
+  width?: string
+}
 
 const TextInput: React.FC<TextInputProps> = (props) => {
   const {
-    showError,
+    className,
+    description,
     errorMessage,
-    placeholder,
-    readOnly,
-    path,
+    inputRef,
     label,
-    required,
-    value,
     onChange,
     onKeyDown,
-    description,
-    style,
-    className,
-    width,
-    inputRef,
+    path,
+    placeholder,
+    readOnly,
+    required,
     rtl,
-  } = props;
+    showError,
+    style,
+    value,
+    width,
+  } = props
 
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation()
 
-  const classes = [
-    'field-type',
-    'text',
-    className,
-    showError && 'error',
-    readOnly && 'read-only',
-  ].filter(Boolean).join(' ');
+  const classes = ['field-type', 'text', className, showError && 'error', readOnly && 'read-only']
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <div
-      className={classes}
       style={{
         ...style,
         width,
       }}
+      className={classes}
     >
-      <Error
-        showError={showError}
-        message={errorMessage}
-      />
-      <Label
-        htmlFor={`field-${path.replace(/\./gi, '__')}`}
-        label={label}
-        required={required}
-      />
+      <Error message={errorMessage} showError={showError} />
+      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <input
-        ref={inputRef}
-        id={`field-${path.replace(/\./gi, '__')}`}
-        value={value || ''}
+        data-rtl={rtl}
+        disabled={readOnly}
+        id={`field-${path.replace(/\./g, '__')}`}
+        name={path}
         onChange={onChange}
         onKeyDown={onKeyDown}
-        disabled={readOnly}
         placeholder={getTranslation(placeholder, i18n)}
+        ref={inputRef}
         type="text"
-        name={path}
-        data-rtl={rtl}
+        value={value || ''}
       />
       <FieldDescription
-        className={`field-description-${path.replace(/\./gi, '__')}`}
-        value={value}
+        className={`field-description-${path.replace(/\./g, '__')}`}
         description={description}
+        value={value}
       />
     </div>
-  );
-};
+  )
+}
 
-export default TextInput;
+export default TextInput

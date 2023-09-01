@@ -1,22 +1,22 @@
-import { Condition, Validate } from '../../../../fields/config/types';
-import { Row } from '../Form/types';
+import type { Condition, Validate } from '../../../../fields/config/types'
+import type { Row } from '../Form/types'
 
 export type Options = {
+  condition?: Condition
+  disableFormData?: boolean
+  hasRows?: boolean
   path: string
   validate?: Validate
-  disableFormData?: boolean
-  condition?: Condition
-  hasRows?: boolean
 }
 
 export type FieldType<T> = {
-  value: T
   errorMessage?: string
-  showError: boolean
-  formSubmitted: boolean
   formProcessing: boolean
-  setValue: (val: unknown, modifyForm?: boolean) => void
+  formSubmitted: boolean
   initialValue?: T
   rows?: Row[]
+  setValue: (val: unknown, modifyForm?: boolean) => void
+  showError: boolean
   valid?: boolean
+  value: T
 }

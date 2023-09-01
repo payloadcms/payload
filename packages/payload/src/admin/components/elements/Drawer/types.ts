@@ -1,17 +1,17 @@
-import { HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react'
 
 export type Props = {
-  slug: string
   children: React.ReactNode
   className?: string
-  title?: string
-  header?: React.ReactNode
   gutter?: boolean
+  header?: React.ReactNode
+  slug: string
+  title?: string
 }
 
 export type TogglerProps = HTMLAttributes<HTMLButtonElement> & {
-  slug: string
   children: React.ReactNode
   className?: string
   disabled?: boolean
+  slug: string
 }

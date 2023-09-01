@@ -1,12 +1,9 @@
-import React from 'react';
-import LeafButton from '../Button';
-import StrikethroughIcon from '../../../../../icons/Strikethrough';
+import React from 'react'
 
-const Strikethrough = ({ attributes, children }) => (
-  <del {...attributes}>
-    {children}
-  </del>
-);
+import StrikethroughIcon from '../../../../../icons/Strikethrough'
+import LeafButton from '../Button'
+
+const Strikethrough = ({ attributes, children }) => <del {...attributes}>{children}</del>
 
 const strikethrough = {
   Button: () => (
@@ -15,6 +12,6 @@ const strikethrough = {
     </LeafButton>
   ),
   Leaf: Strikethrough,
-};
+}
 
-export default strikethrough;
+export default strikethrough

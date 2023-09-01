@@ -13,7 +13,7 @@
   }
 
   &__intro {
-    margin-bottom: base(.5);
+    margin-bottom: base(0.5);
   }
 
   &__parent-doc {
@@ -23,12 +23,12 @@
   }
 
   &__parent-doc-pills {
-    [dir=ltr] & {
+    [dir='ltr'] & {
       margin-left: auto;
     }
-    [dir=rtl] & {
+    [dir='rtl'] & {
       margin-right: auto;
-    }  
+    }
   }
 
   .table {
@@ -49,14 +49,14 @@
   }
 
   &__page-info {
-    [dir=ltr] & {
+    [dir='ltr'] & {
       margin-right: base(1);
       margin-left: auto;
     }
-    [dir=rtl] & {
+    [dir='rtl'] & {
       margin-left: base(1);
       margin-right: auto;
-    } 
+    }
   }
 
   @include mid-break {
@@ -69,12 +69,12 @@
     }
 
     &__page-info {
-      [dir=ltr] & {
+      [dir='ltr'] & {
         margin-left: 0;
       }
-      [dir=rtl] & {
+      [dir='rtl'] & {
         margin-right: 0;
-      }  
+      }
     }
 
     .paginator {

@@ -1,4 +1,4 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../src/collections/config/types'
 
 const ConditionalLogic: CollectionConfig = {
   slug: 'conditional-logic',
@@ -28,7 +28,7 @@ const ConditionalLogic: CollectionConfig = {
       type: 'text',
       admin: {
         condition: (_data, _siblingData, { user }) => {
-          return Boolean(user?.canViewConditionalField);
+          return Boolean(user?.canViewConditionalField)
         },
       },
     },
@@ -62,10 +62,7 @@ const ConditionalLogic: CollectionConfig = {
     {
       name: 'groupSelection',
       type: 'select',
-      options: [
-        'group1',
-        'group2',
-      ],
+      options: ['group1', 'group2'],
     },
     {
       name: 'group1',
@@ -94,12 +91,12 @@ const ConditionalLogic: CollectionConfig = {
       },
     },
   ],
-};
+}
 
 export const conditionalLogicDoc = {
   text: 'Seeded conditional logic document',
   toggleField: true,
   fieldToToggle: 'spiderman',
-};
+}
 
-export default ConditionalLogic;
+export default ConditionalLogic

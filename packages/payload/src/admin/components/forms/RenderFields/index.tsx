@@ -1,132 +1,134 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import useIntersect from '../../../hooks/useIntersect';
-import { Props } from './types';
-import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../fields/config/types';
-import { useOperation } from '../../utilities/OperationProvider';
-import { getTranslation } from '../../../../utilities/getTranslation';
+import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
-const baseClass = 'render-fields';
+import type { Props } from './types'
+
+import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../fields/config/types'
+import { getTranslation } from '../../../../utilities/getTranslation'
+import useIntersect from '../../../hooks/useIntersect'
+import { useOperation } from '../../utilities/OperationProvider'
+import RenderCustomComponent from '../../utilities/RenderCustomComponent'
+
+const baseClass = 'render-fields'
 
 const intersectionObserverOptions = {
   rootMargin: '1000px',
-};
+}
 
 const RenderFields: React.FC<Props> = (props) => {
   const {
+    className,
     fieldSchema,
     fieldTypes,
     filter,
-    permissions,
-    readOnly: readOnlyOverride,
-    className,
     forceRender,
     indexPath: incomingIndexPath,
-  } = props;
+    permissions,
+    readOnly: readOnlyOverride,
+  } = props
 
-  const { t, i18n } = useTranslation('general');
-  const [hasRendered, setHasRendered] = useState(Boolean(forceRender));
-  const [intersectionRef, entry] = useIntersect(intersectionObserverOptions);
-  const operation = useOperation();
+  const { i18n, t } = useTranslation('general')
+  const [hasRendered, setHasRendered] = useState(Boolean(forceRender))
+  const [intersectionRef, entry] = useIntersect(intersectionObserverOptions)
+  const operation = useOperation()
 
-  const isIntersecting = Boolean(entry?.isIntersecting);
-  const isAboveViewport = entry?.boundingClientRect?.top < 0;
-  const shouldRender = forceRender || isIntersecting || isAboveViewport;
+  const isIntersecting = Boolean(entry?.isIntersecting)
+  const isAboveViewport = entry?.boundingClientRect?.top < 0
+  const shouldRender = forceRender || isIntersecting || isAboveViewport
 
   useEffect(() => {
     if (shouldRender && !hasRendered) {
-      setHasRendered(true);
+      setHasRendered(true)
     }
-  }, [shouldRender, hasRendered]);
+  }, [shouldRender, hasRendered])
 
-  const classes = [
-    baseClass,
-    className,
-  ].filter(Boolean).join(' ');
+  const classes = [baseClass, className].filter(Boolean).join(' ')
 
   if (fieldSchema) {
     return (
-      <div
-        ref={intersectionRef}
-        className={classes}
-      >
-        {hasRendered && (
+      <div className={classes} ref={intersectionRef}>
+        {hasRendered &&
           fieldSchema.map((field, fieldIndex) => {
-            const fieldIsPresentational = fieldIsPresentationalOnly(field);
-            let FieldComponent = fieldTypes[field.type];
+            const fieldIsPresentational = fieldIsPresentationalOnly(field)
+            let FieldComponent = fieldTypes[field.type]
 
             if (fieldIsPresentational || (!field?.hidden && field?.admin?.disabled !== true)) {
               if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
                 if (fieldIsPresentational) {
-                  return (
-                    <FieldComponent
-                      {...field}
-                      key={fieldIndex}
-                    />
-                  );
+                  return <FieldComponent {...field} key={fieldIndex} />
                 }
 
                 if (field?.admin?.hidden) {
-                  FieldComponent = fieldTypes.hidden;
+                  FieldComponent = fieldTypes.hidden
                 }
 
-                const isFieldAffectingData = fieldAffectsData(field);
+                const isFieldAffectingData = fieldAffectsData(field)
 
-                const fieldPermissions = isFieldAffectingData ? permissions?.[field.name] : permissions;
+                const fieldPermissions = isFieldAffectingData
+                  ? permissions?.[field.name]
+                  : permissions
 
-                let { admin: { readOnly } = {} } = field;
+                let { admin: { readOnly } = {} } = field
 
-                if (readOnlyOverride && readOnly !== false) readOnly = true;
+                if (readOnlyOverride && readOnly !== false) readOnly = true
 
-                if ((isFieldAffectingData && permissions?.[field?.name]?.read?.permission !== false) || !isFieldAffectingData) {
-                  if (isFieldAffectingData && permissions?.[field?.name]?.[operation]?.permission === false) {
-                    readOnly = true;
+                if (
+                  (isFieldAffectingData &&
+                    permissions?.[field?.name]?.read?.permission !== false) ||
+                  !isFieldAffectingData
+                ) {
+                  if (
+                    isFieldAffectingData &&
+                    permissions?.[field?.name]?.[operation]?.permission === false
+                  ) {
+                    readOnly = true
                   }
 
                   if (FieldComponent) {
                     return (
                       <RenderCustomComponent
-                        key={fieldIndex}
-                        CustomComponent={field?.admin?.components?.Field}
-                        DefaultComponent={FieldComponent}
                         componentProps={{
                           ...field,
-                          path: field.path || (isFieldAffectingData ? field.name : ''),
-                          fieldTypes,
-                          indexPath: incomingIndexPath ? `${incomingIndexPath}.${fieldIndex}` : `${fieldIndex}`,
                           admin: {
                             ...(field.admin || {}),
                             readOnly,
                           },
+                          fieldTypes,
+                          indexPath: incomingIndexPath
+                            ? `${incomingIndexPath}.${fieldIndex}`
+                            : `${fieldIndex}`,
+                          path: field.path || (isFieldAffectingData ? field.name : ''),
                           permissions: fieldPermissions,
                         }}
+                        CustomComponent={field?.admin?.components?.Field}
+                        DefaultComponent={FieldComponent}
+                        key={fieldIndex}
                       />
-                    );
+                    )
                   }
 
                   return (
-                    <div
-                      className="missing-field"
-                      key={fieldIndex}
-                    >
-                      {t('error:noMatchedField', { label: fieldAffectsData(field) ? getTranslation(field.label || field.name, i18n) : field.path })}
+                    <div className="missing-field" key={fieldIndex}>
+                      {t('error:noMatchedField', {
+                        label: fieldAffectsData(field)
+                          ? getTranslation(field.label || field.name, i18n)
+                          : field.path,
+                      })}
                     </div>
-                  );
+                  )
                 }
               }
 
-              return null;
+              return null
             }
 
-            return null;
-          })
-        )}
+            return null
+          })}
       </div>
-    );
+    )
   }
 
-  return null;
-};
+  return null
+}
 
-export default RenderFields;
+export default RenderFields

@@ -1,48 +1,39 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import DefaultNav from '../../elements/Nav';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import Meta from '../../utilities/Meta';
-import { Props } from './types';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-import './index.scss';
+import type { Props } from './types'
 
-const baseClass = 'template-default';
+import DefaultNav from '../../elements/Nav'
+import { useConfig } from '../../utilities/Config'
+import Meta from '../../utilities/Meta'
+import RenderCustomComponent from '../../utilities/RenderCustomComponent'
+import './index.scss'
+
+const baseClass = 'template-default'
 
 const Default: React.FC<Props> = ({ children, className }) => {
   const {
     admin: {
-      components: {
-        Nav: CustomNav,
-      } = {
+      components: { Nav: CustomNav } = {
         Nav: undefined,
       },
     } = {},
-  } = useConfig();
-  const { t } = useTranslation('general');
+  } = useConfig()
+  const { t } = useTranslation('general')
 
-  const classes = [
-    baseClass,
-    className,
-  ].filter(Boolean).join(' ');
+  const classes = [baseClass, className].filter(Boolean).join(' ')
 
   return (
     <div className={classes}>
       <Meta
-        title={t('dashboard')}
         description={`${t('dashboard')} Payload`}
         keywords={`${t('dashboard')}, Payload`}
+        title={t('dashboard')}
       />
-      <RenderCustomComponent
-        DefaultComponent={DefaultNav}
-        CustomComponent={CustomNav}
-      />
-      <div className={`${baseClass}__wrap`}>
-        {children}
-      </div>
+      <RenderCustomComponent CustomComponent={CustomNav} DefaultComponent={DefaultNav} />
+      <div className={`${baseClass}__wrap`}>{children}</div>
     </div>
-  );
-};
+  )
+}
 
-export default Default;
+export default Default

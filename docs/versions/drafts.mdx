@@ -8,22 +8,20 @@ keywords: version history, drafts, preview, draft, restore, publish, autosave, C
 
 Payload's Draft functionality builds on top of the Versions functionality to allow you to make changes to your collection documents and globals, but publish only when you're ready. This functionality allows you to build powerful Preview environments for your data, where you can make sure your changes look good before publishing documents.
 
-<Banner type="warning">
-	Drafts rely on Versions being enabled in order to function.
-</Banner>
+<Banner type="warning">Drafts rely on Versions being enabled in order to function.</Banner>
 
 By enabling Versions with Drafts, your collections and globals can maintain _newer_, and _unpublished_ versions of your documents. It's perfect for cases where you might want to work on a document, update it and save your progress, but not necessarily make it publicly published right away. Drafts are extremely helpful when building preview implementations.
 
 ![Drafts Enabled](/images/docs/drafts-enabled.png)
-*If Drafts are enabled, the typical Save button is replaced with new actions which allow you to either save a draft, or publish your changes.*
+_If Drafts are enabled, the typical Save button is replaced with new actions which allow you to either save a draft, or publish your changes._
 
 ### Options
 
 Collections and Globals both support the same options for configuring drafts. You can either set `versions.drafts` to `true`, or pass an object to configure draft properties.
 
-| Draft Option                 | Description  |
-| ---------------------------- | -------------|
-| `autosave`                   | Enable `autosave` to automatically save progress while documents are edited. To enable, set to `true` or pass an object with [options](/docs/versions/autosave). |
+| Draft Option | Description                                                                                                                                                      |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `autosave`   | Enable `autosave` to automatically save progress while documents are edited. To enable, set to `true` or pass an object with [options](/docs/versions/autosave). |
 
 ### Database changes
 
@@ -33,14 +31,18 @@ By enabling drafts on a collection or a global, Payload will <strong>automatical
 
 Within the Admin UI, if drafts are enabled, a document can be shown with one of three "statuses":
 
-1. <strong>Draft</strong> - if a document has never been published, and only draft versions of the document are present
+1. <strong>Draft</strong> - if a document has never been published, and only draft versions of the document
+   are present
 1. <strong>Published</strong> - if a document is published and there are no newer drafts available
-1. <strong>Changed</strong> - if a document has been published, but there are newer drafts available and not yet published
+1. <strong>Changed</strong> - if a document has been published, but there are newer drafts available
+   and not yet published
 
 ### Draft API
 
 <Banner type="success">
-  If drafts are enabled on your collection or global, important and powerful changes are made to your REST, GraphQL, and Local APIs that allow you to specify if you are interacting with drafts or with live documents.
+  If drafts are enabled on your collection or global, important and powerful changes are made to
+  your REST, GraphQL, and Local APIs that allow you to specify if you are interacting with drafts or
+  with live documents.
 </Banner>
 
 ##### Updating or creating drafts
@@ -72,7 +74,9 @@ But, if you specify `draft` as `true`, Payload will automatically replace your p
 ### Controlling who can see Collection drafts
 
 <Banner type="warning">
-  If you're using the <strong>drafts</strong> feature, it's important for you to consider who can view your drafts, and who can view only published documents. Luckily, Payload makes this extremely simple and puts the power completely in your hands.
+  If you're using the <strong>drafts</strong> feature, it's important for you to consider who can
+  view your drafts, and who can view only published documents. Luckily, Payload makes this extremely
+  simple and puts the power completely in your hands.
 </Banner>
 
 ##### Restricting draft access
@@ -82,7 +86,7 @@ You can use the `read` [Access Control](/docs/access-control/collections#read) m
 Here is an example that utilizes the `_status` field to require a user to be logged in to retrieve drafts:
 
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from 'payload/types'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -90,7 +94,7 @@ export const Pages: CollectionConfig = {
     read: ({ req }) => {
       // If there is a user logged in,
       // let them retrieve all documents
-      if (req.user) return true;
+      if (req.user) return true
 
       // If there is no user,
       // restrict the documents that are returned
@@ -99,25 +103,32 @@ export const Pages: CollectionConfig = {
         _status: {
           equals: 'published',
         },
-      };
+      }
     },
   },
   versions: {
-    drafts: true
+    drafts: true,
   },
   //.. the rest of the Pages config here
 }
 ```
 
 <Banner type="warning">
-  <strong>Note regarding adding versions to an existing collection</strong><br/>
-  If you already have a collection with documents, and you <em>opt in</em> to draft functionality after you have already created existing documents, all of your old documents <em>will not have a _status field</em> until you resave them. For this reason, if you are <em>adding</em> versions into an existing collection, you might want to write your access control function to allow for users to read both documents where <strong>_status is equal to "published"</strong> as well as where <strong>_status does not exist</strong>.
+  <strong>Note regarding adding versions to an existing collection</strong>
+  <br />
+  If you already have a collection with documents, and you <em>opt in</em> to draft functionality
+  after you have already created existing documents, all of your old documents{' '}
+  <em>will not have a _status field</em> until you resave them. For this reason, if you are{' '}
+  <em>adding</em> versions into an existing collection, you might want to write your access control
+  function to allow for users to read both documents where{' '}
+  <strong>_status is equal to "published"</strong> as well as where{' '}
+  <strong>_status does not exist</strong>.
 </Banner>
 
 Here is an example for how to write an access control function that grants access to both documents where `_status` is equal to "published" and where `_status` does not exist:
 
 ```ts
-import { CollectionConfig } from 'payload/types';
+import { CollectionConfig } from 'payload/types'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -125,7 +136,7 @@ export const Pages: CollectionConfig = {
     read: ({ req }) => {
       // If there is a user logged in,
       // let them retrieve all documents
-      if (req.user) return true;
+      if (req.user) return true
 
       // If there is no user,
       // restrict the documents that are returned
@@ -141,14 +152,14 @@ export const Pages: CollectionConfig = {
           {
             _status: {
               exists: false,
-            }
-          }
-        ]
-      };
+            },
+          },
+        ],
+      }
     },
   },
   versions: {
-    drafts: true
+    drafts: true,
   },
   //.. the rest of the Pages config here
 }
@@ -161,4 +172,3 @@ If a document is published, the Payload Admin UI will be updated to show an "unp
 ### Reverting to published
 
 If a document is published, and you have made further changes which are saved as a draft, Payload will show a "revert to published" button at the top of the sidebar which will allow you to reject your draft changes and "revert" back to the published state of the document. Your drafts will still be saved, but a new version will be created that will reflect the last published state of the document.
-

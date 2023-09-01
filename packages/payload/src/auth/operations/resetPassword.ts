@@ -1,14 +1,17 @@
-import jwt from 'jsonwebtoken';
-import { Response } from 'express';
-import { Collection } from '../../collections/config/types';
-import { APIError } from '../../errors';
-import getCookieExpiration from '../../utilities/getCookieExpiration';
-import { getFieldsToSign } from './getFieldsToSign';
-import { PayloadRequest } from '../../express/types';
-import { authenticateLocalStrategy } from '../strategies/local/authenticate';
-import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import type { Response } from 'express'
+
+import jwt from 'jsonwebtoken'
+
+import type { Collection } from '../../collections/config/types'
+import type { PayloadRequest } from '../../express/types'
+
+import { APIError } from '../../errors'
+import getCookieExpiration from '../../utilities/getCookieExpiration'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
+import { authenticateLocalStrategy } from '../strategies/local/authenticate'
+import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash'
+import { getFieldsToSign } from './getFieldsToSign'
 
 export type Result = {
   token?: string
@@ -16,42 +19,39 @@ export type Result = {
 }
 
 export type Arguments = {
-  data: {
-    token: string
-    password: string
-  }
   collection: Collection
-  req: PayloadRequest
-  overrideAccess?: boolean
-  res?: Response
+  data: {
+    password: string
+    token: string
+  }
   depth?: number
+  overrideAccess?: boolean
+  req: PayloadRequest
+  res?: Response
 }
 
 async function resetPassword(args: Arguments): Promise<Result> {
-  if (!Object.prototype.hasOwnProperty.call(args.data, 'token')
-    || !Object.prototype.hasOwnProperty.call(args.data, 'password')) {
-    throw new APIError('Missing required data.');
+  if (
+    !Object.prototype.hasOwnProperty.call(args.data, 'token') ||
+    !Object.prototype.hasOwnProperty.call(args.data, 'password')
+  ) {
+    throw new APIError('Missing required data.')
   }
 
   const {
-    collection: {
-      config: collectionConfig,
-    },
-    req,
-    req: {
-      payload: {
-        config,
-        secret,
-      },
-      payload,
-    },
-    overrideAccess,
+    collection: { config: collectionConfig },
     data,
     depth,
-  } = args;
+    overrideAccess,
+    req: {
+      payload: { config, secret },
+      payload,
+    },
+    req,
+  } = args
 
   try {
-    const shouldCommit = await initTransaction(req);
+    const shouldCommit = await initTransaction(req)
 
     // /////////////////////////////////////
     // Reset Password
@@ -59,78 +59,79 @@ async function resetPassword(args: Arguments): Promise<Result> {
 
     const user = await payload.db.findOne<any>({
       collection: collectionConfig.slug,
-      where: {
-        resetPasswordToken: { equals: data.token },
-        resetPasswordExpiration: { greater_than: Date.now() },
-      },
       req,
-    });
+      where: {
+        resetPasswordExpiration: { greater_than: Date.now() },
+        resetPasswordToken: { equals: data.token },
+      },
+    })
 
-    if (!user) throw new APIError('Token is either invalid or has expired.');
+    if (!user) throw new APIError('Token is either invalid or has expired.')
 
     // TODO: replace this method
-    const { salt, hash } = await generatePasswordSaltHash({ password: data.password });
+    const { hash, salt } = await generatePasswordSaltHash({ password: data.password })
 
-    user.salt = salt;
-    user.hash = hash;
+    user.salt = salt
+    user.hash = hash
 
-    user.resetPasswordExpiration = Date.now();
+    user.resetPasswordExpiration = Date.now()
 
     if (collectionConfig.auth.verify) {
-      user._verified = true;
+      user._verified = true
     }
 
     const doc = await payload.db.updateOne({
       collection: collectionConfig.slug,
-      id: user.id,
       data: user,
+      id: user.id,
       req,
-    });
+    })
 
-
-    await authenticateLocalStrategy({ password: data.password, doc });
+    await authenticateLocalStrategy({ doc, password: data.password })
 
     const fieldsToSign = getFieldsToSign({
       collectionConfig,
-      user,
       email: user.email,
-    });
+      user,
+    })
 
-    const token = jwt.sign(
-      fieldsToSign,
-      secret,
-      {
-        expiresIn: collectionConfig.auth.tokenExpiration,
-      },
-    );
+    const token = jwt.sign(fieldsToSign, secret, {
+      expiresIn: collectionConfig.auth.tokenExpiration,
+    })
 
     if (args.res) {
       const cookieOptions = {
-        path: '/',
-        httpOnly: true,
-        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-        secure: collectionConfig.auth.cookies.secure,
-        sameSite: collectionConfig.auth.cookies.sameSite,
         domain: undefined,
-      };
+        expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
+        httpOnly: true,
+        path: '/',
+        sameSite: collectionConfig.auth.cookies.sameSite,
+        secure: collectionConfig.auth.cookies.secure,
+      }
 
+      if (collectionConfig.auth.cookies.domain)
+        cookieOptions.domain = collectionConfig.auth.cookies.domain
 
-      if (collectionConfig.auth.cookies.domain) cookieOptions.domain = collectionConfig.auth.cookies.domain;
-
-      args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions);
+      args.res.cookie(`${config.cookiePrefix}-token`, token, cookieOptions)
     }
 
-    const fullUser = await payload.findByID({ collection: collectionConfig.slug, id: user.id, overrideAccess, depth, req });
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+    const fullUser = await payload.findByID({
+      collection: collectionConfig.slug,
+      depth,
+      id: user.id,
+      overrideAccess,
+      req,
+    })
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
     return {
       token: collectionConfig.auth.removeTokenFromResponses ? undefined : token,
       user: fullUser,
-    };
+    }
   } catch (error: unknown) {
-    await killTransaction(req);
-    throw error;
+    await killTransaction(req)
+    throw error
   }
 }
 
-export default resetPassword;
+export default resetPassword

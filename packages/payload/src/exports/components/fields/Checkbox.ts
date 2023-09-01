@@ -1,1 +1,1 @@
-export type { Props } from '../../../admin/components/forms/field-types/Checkbox/types';
+export type { Props } from '../../../admin/components/forms/field-types/Checkbox/types'

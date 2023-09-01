@@ -13,15 +13,16 @@ You can add your own CSS by providing your base Payload config with a path to yo
 To do so, provide your base Payload config with a path to your own stylesheet. It can be either a CSS or SCSS file.
 
 **Example in payload.config.js:**
+
 ```ts
-import { buildConfig } from 'payload/config';
-import path from 'path';
+import { buildConfig } from 'payload/config'
+import path from 'path'
 
 const config = buildConfig({
-	admin: {
-		css: path.resolve(__dirname, 'relative/path/to/stylesheet.scss'),
-	},
-});
+  admin: {
+    css: path.resolve(__dirname, 'relative/path/to/stylesheet.scss'),
+  },
+})
 ```
 
 ### Overriding built-in styles
@@ -43,7 +44,8 @@ You can find the built-in Payload CSS variables within [`./src/admin/scss/app.sc
 #### Dark mode
 
 <Banner type="warning">
-  If you're overriding colors or theme elevations, make sure to consider how your changes will affect dark mode.
+  If you're overriding colors or theme elevations, make sure to consider how your changes will
+  affect dark mode.
 </Banner>
 
 By default, Payload automatically overrides all `--theme-elevation`s and inverts all success / warning / error shades to suit dark mode. We also update some base theme variables like `--theme-bg`, `--theme-text`, etc.

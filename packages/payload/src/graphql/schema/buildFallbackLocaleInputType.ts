@@ -1,6 +1,8 @@
-import { GraphQLEnumType } from 'graphql';
-import { SanitizedLocalizationConfig } from '../../config/types';
-import formatName from '../utilities/formatName';
+import { GraphQLEnumType } from 'graphql'
+
+import type { SanitizedLocalizationConfig } from '../../config/types'
+
+import formatName from '../utilities/formatName'
 
 const buildFallbackLocaleInputType = (
   localization: SanitizedLocalizationConfig,
@@ -16,7 +18,7 @@ const buildFallbackLocaleInputType = (
       }),
       {},
     ),
-  });
-};
+  })
+}
 
-export default buildFallbackLocaleInputType;
+export default buildFallbackLocaleInputType

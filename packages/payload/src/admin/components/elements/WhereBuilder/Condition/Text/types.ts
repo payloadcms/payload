@@ -1,4 +1,4 @@
 export type Props = {
-  onChange: (val: string) => void,
-  value: string,
+  onChange: (val: string) => void
+  value: string
 }

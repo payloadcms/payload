@@ -1,7 +1,7 @@
-import { GraphQLType } from 'graphql';
+import type { GraphQLType } from 'graphql'
 
 export type BaseFields = {
-  id?: { type: GraphQLType },
   createdAt?: { type: GraphQLType }
+  id?: { type: GraphQLType }
   updatedAt?: { type: GraphQLType }
-};
+}

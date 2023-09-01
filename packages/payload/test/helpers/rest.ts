@@ -1,170 +1,129 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import qs from 'qs';
-import fetch from 'node-fetch';
-import type { Config } from '../../src/config/types';
-import type { Where } from '../../src/types';
-import { devUser } from '../credentials';
-import type { PaginatedDocs } from '../../src/database/types';
+import fetch from 'node-fetch'
+import qs from 'qs'
+
+import type { Config } from '../../src/config/types'
+import type { PaginatedDocs } from '../../src/database/types'
+import type { Where } from '../../src/types'
+
+import { devUser } from '../credentials'
 
 type Args = {
-  serverURL: string;
-  defaultSlug: string;
-};
+  defaultSlug: string
+  serverURL: string
+}
 
 type LoginArgs = {
-  email: string;
-  password: string;
-  collection: string;
-};
+  collection: string
+  email: string
+  password: string
+}
 
 type LogoutArgs = {
-  collection: string;
-};
+  collection: string
+}
 
 type CreateArgs<T = any> = {
-  slug?: string;
-  data: T;
-  auth?: boolean;
-  file?: boolean;
-};
+  auth?: boolean
+  data: T
+  file?: boolean
+  slug?: string
+}
 
 type FindArgs = {
-  slug?: string;
-  query?: Where;
-  auth?: boolean;
+  auth?: boolean
   depth?: number
-  page?: number
   limit?: number
-};
+  page?: number
+  query?: Where
+  slug?: string
+}
 
 type FindByIDArgs = {
-  id: string | number;
-  slug?: string;
-  query?: Where;
-  auth?: boolean;
+  auth?: boolean
+  id: number | string
   options?: {
     depth?: number
-    page?: number
     limit?: number
-  },
-};
+    page?: number
+  }
+  query?: Where
+  slug?: string
+}
 
 type UpdateArgs<T = any> = {
-  slug?: string;
-  id: string;
-  data: Partial<T>;
-  auth?: boolean;
-  query?: any;
-};
+  auth?: boolean
+  data: Partial<T>
+  id: string
+  query?: any
+  slug?: string
+}
 
 type UpdateManyArgs<T = any> = {
-  slug?: string;
-  data: Partial<T>;
-  auth?: boolean;
-  where: any;
-};
+  auth?: boolean
+  data: Partial<T>
+  slug?: string
+  where: any
+}
 
 type DeleteArgs = {
-  slug?: string;
-  id: string;
-  auth?: boolean;
-};
+  auth?: boolean
+  id: string
+  slug?: string
+}
 
 type DeleteManyArgs = {
-  slug?: string;
-  auth?: boolean;
-  where: any;
-};
+  auth?: boolean
+  slug?: string
+  where: any
+}
 
 type FindGlobalArgs<T = any> = {
-  slug?: string;
-  auth?: boolean;
+  auth?: boolean
+  slug?: string
 }
 
 type UpdateGlobalArgs<T = any> = {
-  slug?: string;
-  auth?: boolean;
-  data: Partial<T>;
+  auth?: boolean
+  data: Partial<T>
+  slug?: string
 }
 
 type DocResponse<T> = {
-  status: number;
-  doc: T;
-  errors?: { name: string, message: string, data: any }[]
-};
+  doc: T
+  errors?: { data: any; message: string; name: string }[]
+  status: number
+}
 
 type DocsResponse<T> = {
-  status: number;
-  docs: T[];
-  errors?: { name: string, message: string, data: any, id: string | number }[]
-};
+  docs: T[]
+  errors?: { data: any; id: number | string; message: string; name: string }[]
+  status: number
+}
 
 const headers = {
   'Content-Type': 'application/json',
   Authorization: '',
-};
+}
 
 type QueryResponse<T> = {
-  status: number;
-  result: PaginatedDocs<T>;
-};
+  result: PaginatedDocs<T>
+  status: number
+}
 
 export class RESTClient {
-  private readonly config: Config;
+  private readonly config: Config
 
-  private token: string;
+  private defaultSlug: string
 
-  private defaultSlug: string;
+  private token: string
 
-  serverURL: string;
+  serverURL: string
 
   constructor(config: Config, args: Args) {
-    this.config = config;
-    this.serverURL = args.serverURL;
-    this.defaultSlug = args.defaultSlug;
-  }
-
-  async login(incomingArgs?: LoginArgs): Promise<string> {
-    const args = incomingArgs ?? {
-      email: devUser.email,
-      password: devUser.password,
-      collection: 'users',
-    };
-
-    const response = await fetch(`${this.serverURL}/api/${args.collection}/login`, {
-      body: JSON.stringify({
-        email: args.email,
-        password: args.password,
-      }),
-      headers,
-      method: 'POST',
-    });
-
-    let { token } = await response.json();
-
-    // If the token is not in the response body, then we can extract it from the cookies
-    if (!token) {
-      const setCookie = response.headers.get('Set-Cookie');
-      const tokenMatchResult = setCookie?.match(/payload-token=(?<token>.+?);/);
-      token = tokenMatchResult?.groups?.token;
-    }
-
-    this.token = token;
-
-    return token;
-  }
-
-  async logout(incomingArgs?: LogoutArgs): Promise<void> {
-    const args = incomingArgs ?? {
-      collection: 'users',
-    };
-
-    await fetch(`${this.serverURL}/api/${args.collection}/logout`, {
-      headers,
-      method: 'POST',
-    });
-
-    this.token = '';
+    this.config = config
+    this.serverURL = args.serverURL
+    this.defaultSlug = args.defaultSlug
   }
 
   async create<T = any>(args: CreateArgs): Promise<DocResponse<T>> {
@@ -175,210 +134,273 @@ export class RESTClient {
         Authorization: '',
       },
       method: 'POST',
-    };
-
-    if (args?.auth !== false && this.token) {
-      options.headers.Authorization = `JWT ${this.token}`;
     }
 
-    const slug = args.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/${slug}`, options);
-    const { status } = response;
-    const { doc } = await response.json();
-    return { status, doc };
-  }
-
-  async find<T = any>(args?: FindArgs): Promise<QueryResponse<T>> {
-    const options = {
-      headers: { ...headers },
-    };
-
     if (args?.auth !== false && this.token) {
-      options.headers.Authorization = `JWT ${this.token}`;
+      options.headers.Authorization = `JWT ${this.token}`
     }
 
-    const whereQuery = qs.stringify({
-      ...(args?.query ? { where: args.query } : {}),
-      limit: args?.limit,
-      page: args?.page,
-    }, {
-      addQueryPrefix: true,
-    });
-
-    const slug = args?.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/${slug}${whereQuery}`, options);
-    const { status } = response;
-    const result = await response.json();
-    if (result.errors) throw new Error(result.errors[0].message);
-    return { status, result };
-  }
-
-  async update<T = any>(args: UpdateArgs<T>): Promise<DocResponse<T>> {
-    const { id, query, data } = args;
-
-    const options = {
-      body: JSON.stringify(data),
-      headers: { ...headers },
-      method: 'PATCH',
-    };
-
-    if (args?.auth !== false && this.token) {
-      options.headers.Authorization = `JWT ${this.token}`;
-    }
-
-    const formattedQs = qs.stringify(query);
-    const slug = args.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/${slug}/${id}${formattedQs}`, options);
-    const { status } = response;
-    const json = await response.json();
-    return { status, doc: json.doc, errors: json.errors };
-  }
-
-  async updateMany<T = any>(args: UpdateManyArgs<T>): Promise<DocsResponse<T>> {
-    const { data, where } = args;
-    const options = {
-      body: JSON.stringify(data),
-      headers: { ...headers },
-      method: 'PATCH',
-    };
-
-    if (args?.auth !== false && this.token) {
-      options.headers.Authorization = `JWT ${this.token}`;
-    }
-
-    const formattedQs = qs.stringify({
-      ...(where ? { where } : {}),
-    }, {
-      addQueryPrefix: true,
-    });
-
-    const slug = args?.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/${slug}${formattedQs}`, options);
-    const { status } = response;
-    const json = await response.json();
-    return { status, docs: json.docs, errors: json.errors };
-  }
-
-  async deleteMany<T = any>(args: DeleteManyArgs): Promise<DocsResponse<T>> {
-    const { where } = args;
-    const options = {
-      headers: { ...headers },
-      method: 'DELETE',
-    };
-
-    if (args?.auth !== false && this.token) {
-      options.headers.Authorization = `JWT ${this.token}`;
-    }
-
-    const formattedQs = qs.stringify({
-      ...(where ? { where } : {}),
-    }, {
-      addQueryPrefix: true,
-    });
-
-    const slug = args?.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/${slug}${formattedQs}`, options);
-    const { status } = response;
-    const json = await response.json();
-    return { status, docs: json.docs, errors: json.errors };
-  }
-
-  async findByID<T = any>(args: FindByIDArgs): Promise<DocResponse<T>> {
-    const options = {
-      headers: { ...headers },
-    };
-
-    if (args?.auth !== false && this.token) {
-      options.headers.Authorization = `JWT ${this.token}`;
-    }
-
-    const slug = args?.slug || this.defaultSlug;
-    const formattedOpts = qs.stringify(args?.options || {}, { addQueryPrefix: true });
-    const response = await fetch(`${this.serverURL}/api/${slug}/${args.id}${formattedOpts}`, options);
-    const { status } = response;
-    const doc = await response.json();
-    return { status, doc };
+    const slug = args.slug || this.defaultSlug
+    const response = await fetch(`${this.serverURL}/api/${slug}`, options)
+    const { status } = response
+    const { doc } = await response.json()
+    return { status, doc }
   }
 
   async delete<T = any>(id: string, args?: DeleteArgs): Promise<DocResponse<T>> {
     const options = {
       headers: { ...headers },
       method: 'DELETE',
-    };
-
-    if (args?.auth !== false && this.token) {
-      options.headers.Authorization = `JWT ${this.token}`;
     }
 
-    const slug = args?.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/${slug}/${id}`, options);
-    const { status } = response;
-    const doc = await response.json();
-    return { status, doc };
+    if (args?.auth !== false && this.token) {
+      options.headers.Authorization = `JWT ${this.token}`
+    }
+
+    const slug = args?.slug || this.defaultSlug
+    const response = await fetch(`${this.serverURL}/api/${slug}/${id}`, options)
+    const { status } = response
+    const doc = await response.json()
+    return { status, doc }
+  }
+
+  async deleteMany<T = any>(args: DeleteManyArgs): Promise<DocsResponse<T>> {
+    const { where } = args
+    const options = {
+      headers: { ...headers },
+      method: 'DELETE',
+    }
+
+    if (args?.auth !== false && this.token) {
+      options.headers.Authorization = `JWT ${this.token}`
+    }
+
+    const formattedQs = qs.stringify(
+      {
+        ...(where ? { where } : {}),
+      },
+      {
+        addQueryPrefix: true,
+      },
+    )
+
+    const slug = args?.slug || this.defaultSlug
+    const response = await fetch(`${this.serverURL}/api/${slug}${formattedQs}`, options)
+    const { status } = response
+    const json = await response.json()
+    return { status, docs: json.docs, errors: json.errors }
+  }
+
+  async endpoint<T = any>(
+    path: string,
+    method = 'GET',
+    params: any = undefined,
+  ): Promise<{ data: T; status: number }> {
+    const options = {
+      body: JSON.stringify(params),
+      headers: { ...headers },
+      method,
+    }
+
+    const response = await fetch(`${this.serverURL}${path}`, options)
+    const { status } = response
+    const data = await response.json()
+    return { status, data }
+  }
+
+  async endpointWithAuth<T = any>(
+    path: string,
+    method = 'GET',
+    params: any = undefined,
+  ): Promise<{ data: T; status: number }> {
+    const options = {
+      body: JSON.stringify(params),
+      headers: { ...headers },
+      method,
+    }
+
+    if (this.token) {
+      options.headers.Authorization = `JWT ${this.token}`
+    }
+
+    const response = await fetch(`${this.serverURL}${path}`, options)
+    const { status } = response
+    const data = await response.json()
+    return { status, data }
+  }
+
+  async find<T = any>(args?: FindArgs): Promise<QueryResponse<T>> {
+    const options = {
+      headers: { ...headers },
+    }
+
+    if (args?.auth !== false && this.token) {
+      options.headers.Authorization = `JWT ${this.token}`
+    }
+
+    const whereQuery = qs.stringify(
+      {
+        ...(args?.query ? { where: args.query } : {}),
+        limit: args?.limit,
+        page: args?.page,
+      },
+      {
+        addQueryPrefix: true,
+      },
+    )
+
+    const slug = args?.slug || this.defaultSlug
+    const response = await fetch(`${this.serverURL}/api/${slug}${whereQuery}`, options)
+    const { status } = response
+    const result = await response.json()
+    if (result.errors) throw new Error(result.errors[0].message)
+    return { status, result }
+  }
+
+  async findByID<T = any>(args: FindByIDArgs): Promise<DocResponse<T>> {
+    const options = {
+      headers: { ...headers },
+    }
+
+    if (args?.auth !== false && this.token) {
+      options.headers.Authorization = `JWT ${this.token}`
+    }
+
+    const slug = args?.slug || this.defaultSlug
+    const formattedOpts = qs.stringify(args?.options || {}, { addQueryPrefix: true })
+    const response = await fetch(
+      `${this.serverURL}/api/${slug}/${args.id}${formattedOpts}`,
+      options,
+    )
+    const { status } = response
+    const doc = await response.json()
+    return { status, doc }
   }
 
   async findGlobal<T = any>(args?: FindGlobalArgs): Promise<DocResponse<T>> {
     const options = {
       headers: { ...headers },
-    };
-
-    if (args?.auth !== false && this.token) {
-      options.headers.Authorization = `JWT ${this.token}`;
     }
 
-    const slug = args?.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/globals/${slug}`, options);
-    const { status } = response;
-    const doc = await response.json();
-    return { status, doc };
+    if (args?.auth !== false && this.token) {
+      options.headers.Authorization = `JWT ${this.token}`
+    }
+
+    const slug = args?.slug || this.defaultSlug
+    const response = await fetch(`${this.serverURL}/api/globals/${slug}`, options)
+    const { status } = response
+    const doc = await response.json()
+    return { status, doc }
+  }
+
+  async login(incomingArgs?: LoginArgs): Promise<string> {
+    const args = incomingArgs ?? {
+      email: devUser.email,
+      password: devUser.password,
+      collection: 'users',
+    }
+
+    const response = await fetch(`${this.serverURL}/api/${args.collection}/login`, {
+      body: JSON.stringify({
+        email: args.email,
+        password: args.password,
+      }),
+      headers,
+      method: 'POST',
+    })
+
+    let { token } = await response.json()
+
+    // If the token is not in the response body, then we can extract it from the cookies
+    if (!token) {
+      const setCookie = response.headers.get('Set-Cookie')
+      const tokenMatchResult = setCookie?.match(/payload-token=(?<token>.+?);/)
+      token = tokenMatchResult?.groups?.token
+    }
+
+    this.token = token
+
+    return token
+  }
+
+  async logout(incomingArgs?: LogoutArgs): Promise<void> {
+    const args = incomingArgs ?? {
+      collection: 'users',
+    }
+
+    await fetch(`${this.serverURL}/api/${args.collection}/logout`, {
+      headers,
+      method: 'POST',
+    })
+
+    this.token = ''
+  }
+
+  async update<T = any>(args: UpdateArgs<T>): Promise<DocResponse<T>> {
+    const { id, query, data } = args
+
+    const options = {
+      body: JSON.stringify(data),
+      headers: { ...headers },
+      method: 'PATCH',
+    }
+
+    if (args?.auth !== false && this.token) {
+      options.headers.Authorization = `JWT ${this.token}`
+    }
+
+    const formattedQs = qs.stringify(query)
+    const slug = args.slug || this.defaultSlug
+    const response = await fetch(`${this.serverURL}/api/${slug}/${id}${formattedQs}`, options)
+    const { status } = response
+    const json = await response.json()
+    return { status, doc: json.doc, errors: json.errors }
   }
 
   async updateGlobal<T = any>(args: UpdateGlobalArgs): Promise<DocResponse<T>> {
-    const { data } = args;
+    const { data } = args
     const options = {
       body: JSON.stringify(data),
       headers: { ...headers },
       method: 'POST',
-    };
+    }
 
     if (args?.auth !== false && this.token) {
-      options.headers.Authorization = `JWT ${this.token}`;
+      options.headers.Authorization = `JWT ${this.token}`
     }
 
-    const slug = args?.slug || this.defaultSlug;
-    const response = await fetch(`${this.serverURL}/api/globals/${slug}`, options);
-    const { status } = response;
-    const { result } = await response.json();
-    return { status, doc: result };
+    const slug = args?.slug || this.defaultSlug
+    const response = await fetch(`${this.serverURL}/api/globals/${slug}`, options)
+    const { status } = response
+    const { result } = await response.json()
+    return { status, doc: result }
   }
 
-  async endpoint<T = any>(path: string, method = 'GET', params: any = undefined): Promise<{ status: number, data: T }> {
+  async updateMany<T = any>(args: UpdateManyArgs<T>): Promise<DocsResponse<T>> {
+    const { data, where } = args
     const options = {
-      body: JSON.stringify(params),
+      body: JSON.stringify(data),
       headers: { ...headers },
-      method,
-    };
-
-    const response = await fetch(`${this.serverURL}${path}`, options);
-    const { status } = response;
-    const data = await response.json();
-    return { status, data };
-  }
-
-  async endpointWithAuth<T = any>(path: string, method = 'GET', params: any = undefined): Promise<{ status: number, data: T }> {
-    const options = {
-      body: JSON.stringify(params),
-      headers: { ...headers },
-      method,
-    };
-
-    if (this.token) {
-      options.headers.Authorization = `JWT ${this.token}`;
+      method: 'PATCH',
     }
 
-    const response = await fetch(`${this.serverURL}${path}`, options);
-    const { status } = response;
-    const data = await response.json();
-    return { status, data };
+    if (args?.auth !== false && this.token) {
+      options.headers.Authorization = `JWT ${this.token}`
+    }
+
+    const formattedQs = qs.stringify(
+      {
+        ...(where ? { where } : {}),
+      },
+      {
+        addQueryPrefix: true,
+      },
+    )
+
+    const slug = args?.slug || this.defaultSlug
+    const response = await fetch(`${this.serverURL}/api/${slug}${formattedQs}`, options)
+    const { status } = response
+    const json = await response.json()
+    return { status, docs: json.docs, errors: json.errors }
   }
 }

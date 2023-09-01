@@ -1,12 +1,12 @@
-import { sanitizeConfig } from 'payload/config';
-import { Config } from 'payload/config';
-import { getLocalizedSortProperty } from './getLocalizedSortProperty';
+import { sanitizeConfig } from 'payload/config'
+import { Config } from 'payload/config'
+import { getLocalizedSortProperty } from './getLocalizedSortProperty'
 
 const config = {
   localization: {
     locales: ['en', 'es'],
   },
-} as Config;
+} as Config
 
 describe('get localized sort property', () => {
   it('passes through a non-localized sort property', () => {
@@ -20,10 +20,10 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
-    });
+    })
 
-    expect(result).toStrictEqual('title');
-  });
+    expect(result).toStrictEqual('title')
+  })
 
   it('properly localizes an un-localized sort property', () => {
     const result = getLocalizedSortProperty({
@@ -37,10 +37,10 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
-    });
+    })
 
-    expect(result).toStrictEqual('title.en');
-  });
+    expect(result).toStrictEqual('title.en')
+  })
 
   it('keeps specifically asked-for localized sort properties', () => {
     const result = getLocalizedSortProperty({
@@ -54,10 +54,10 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
-    });
+    })
 
-    expect(result).toStrictEqual('title.es');
-  });
+    expect(result).toStrictEqual('title.es')
+  })
 
   it('properly localizes nested sort properties', () => {
     const result = getLocalizedSortProperty({
@@ -77,10 +77,10 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
-    });
+    })
 
-    expect(result).toStrictEqual('group.title.en');
-  });
+    expect(result).toStrictEqual('group.title.en')
+  })
 
   it('keeps requested locale with nested sort properties', () => {
     const result = getLocalizedSortProperty({
@@ -100,10 +100,10 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
-    });
+    })
 
-    expect(result).toStrictEqual('group.title.es');
-  });
+    expect(result).toStrictEqual('group.title.es')
+  })
 
   it('properly localizes field within row', () => {
     const result = getLocalizedSortProperty({
@@ -122,10 +122,10 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
-    });
+    })
 
-    expect(result).toStrictEqual('title.en');
-  });
+    expect(result).toStrictEqual('title.en')
+  })
 
   it('properly localizes field within named tab', () => {
     const result = getLocalizedSortProperty({
@@ -149,10 +149,10 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
-    });
+    })
 
-    expect(result).toStrictEqual('tab.title.en');
-  });
+    expect(result).toStrictEqual('tab.title.en')
+  })
 
   it('properly localizes field within unnamed tab', () => {
     const result = getLocalizedSortProperty({
@@ -176,8 +176,8 @@ describe('get localized sort property', () => {
         },
       ],
       locale: 'en',
-    });
+    })
 
-    expect(result).toStrictEqual('title.en');
-  });
-});
+    expect(result).toStrictEqual('title.en')
+  })
+})

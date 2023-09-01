@@ -1,24 +1,24 @@
 /* eslint-disable max-classes-per-file */
-import httpStatus from 'http-status';
+import httpStatus from 'http-status'
 
 class ExtendableError<TData extends object = { [key: string]: unknown }> extends Error {
-  status: number;
+  data: TData
 
-  data: TData;
+  isOperational: boolean
 
-  isPublic: boolean;
+  isPublic: boolean
 
-  isOperational: boolean;
+  status: number
 
   constructor(message: string, status: number, data: TData, isPublic: boolean) {
-    super(message);
-    this.name = this.constructor.name;
-    this.message = message;
-    this.status = status;
-    this.data = data;
-    this.isPublic = isPublic;
-    this.isOperational = true; // This is required since bluebird 4 doesn't append it anymore.
-    Error.captureStackTrace(this, this.constructor);
+    super(message)
+    this.name = this.constructor.name
+    this.message = message
+    this.status = status
+    this.data = data
+    this.isPublic = isPublic
+    this.isOperational = true // This is required since bluebird 4 doesn't append it anymore.
+    Error.captureStackTrace(this, this.constructor)
   }
 }
 
@@ -26,7 +26,9 @@ class ExtendableError<TData extends object = { [key: string]: unknown }> extends
  * Class representing an API error.
  * @extends ExtendableError
  */
-class APIError<TData extends null | object = null | { [key: string]: unknown }> extends ExtendableError<TData> {
+class APIError<
+  TData extends null | object = { [key: string]: unknown } | null,
+> extends ExtendableError<TData> {
   /**
    * Creates an API error.
    * @param {string} message - Error message.
@@ -40,8 +42,8 @@ class APIError<TData extends null | object = null | { [key: string]: unknown }> 
     data: TData = null,
     isPublic = false,
   ) {
-    super(message, status, data, isPublic);
+    super(message, status, data, isPublic)
   }
 }
 
-export default APIError;
+export default APIError

@@ -1,22 +1,23 @@
-import { GraphQLBoolean, GraphQLInt, GraphQLList, GraphQLObjectType } from 'graphql';
+import { GraphQLBoolean, GraphQLInt, GraphQLList, GraphQLObjectType } from 'graphql'
 
-const buildPaginatedListType = (name, docType) => new GraphQLObjectType({
-  name,
-  fields: {
-    docs: {
-      type: new GraphQLList(docType),
+const buildPaginatedListType = (name, docType) =>
+  new GraphQLObjectType({
+    fields: {
+      docs: {
+        type: new GraphQLList(docType),
+      },
+      hasNextPage: { type: GraphQLBoolean },
+      hasPrevPage: { type: GraphQLBoolean },
+      limit: { type: GraphQLInt },
+      nextPage: { type: GraphQLInt },
+      offset: { type: GraphQLInt },
+      page: { type: GraphQLInt },
+      pagingCounter: { type: GraphQLInt },
+      prevPage: { type: GraphQLInt },
+      totalDocs: { type: GraphQLInt },
+      totalPages: { type: GraphQLInt },
     },
-    totalDocs: { type: GraphQLInt },
-    offset: { type: GraphQLInt },
-    limit: { type: GraphQLInt },
-    totalPages: { type: GraphQLInt },
-    page: { type: GraphQLInt },
-    pagingCounter: { type: GraphQLInt },
-    hasPrevPage: { type: GraphQLBoolean },
-    hasNextPage: { type: GraphQLBoolean },
-    prevPage: { type: GraphQLInt },
-    nextPage: { type: GraphQLInt },
-  },
-});
+    name,
+  })
 
-export default buildPaginatedListType;
+export default buildPaginatedListType

@@ -1,55 +1,56 @@
-import { Endpoint } from '../config/types';
-import findVersions from './requestHandlers/findVersions';
-import findVersionByID from './requestHandlers/findVersionByID';
-import restoreVersion from './requestHandlers/restoreVersion';
-import { SanitizedGlobalConfig } from './config/types';
-import update from './requestHandlers/update';
-import findOne from './requestHandlers/findOne';
-import docAccessRequestHandler from './requestHandlers/docAccess';
+import type { Endpoint } from '../config/types'
+import type { SanitizedGlobalConfig } from './config/types'
+
+import docAccessRequestHandler from './requestHandlers/docAccess'
+import findOne from './requestHandlers/findOne'
+import findVersionByID from './requestHandlers/findVersionByID'
+import findVersions from './requestHandlers/findVersions'
+import restoreVersion from './requestHandlers/restoreVersion'
+import update from './requestHandlers/update'
 
 const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
-  if (!global.endpoints) return [];
-  const endpoints = [...global.endpoints];
+  if (!global.endpoints) return []
+  const endpoints = [...global.endpoints]
 
   if (global.versions) {
     endpoints.push(
       {
-        path: '/versions',
-        method: 'get',
         handler: findVersions(global),
-      },
-      {
-        path: '/versions/:id',
         method: 'get',
-        handler: findVersionByID(global),
+        path: '/versions',
       },
       {
+        handler: findVersionByID(global),
+        method: 'get',
         path: '/versions/:id',
-        method: 'post',
-        handler: restoreVersion(global),
       },
-    );
+      {
+        handler: restoreVersion(global),
+        method: 'post',
+        path: '/versions/:id',
+      },
+    )
   }
 
   endpoints.push(
     {
-      path: '/access',
-      method: 'get',
       handler: async (req, res, next) => docAccessRequestHandler(req, res, next, global),
-    },
-    {
-      path: '/',
       method: 'get',
-      handler: findOne(global),
+      path: '/access',
     },
     {
+      handler: findOne(global),
+      method: 'get',
       path: '/',
-      method: 'post',
-      handler: update(global),
     },
-  );
+    {
+      handler: update(global),
+      method: 'post',
+      path: '/',
+    },
+  )
 
-  return endpoints;
-};
+  return endpoints
+}
 
-export default buildEndpoints;
+export default buildEndpoints

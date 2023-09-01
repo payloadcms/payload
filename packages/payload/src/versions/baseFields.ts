@@ -1,7 +1,8 @@
-import { Field } from '../fields/config/types';
-import { extractTranslations } from '../translations/extractTranslations';
+import type { Field } from '../fields/config/types'
 
-const labels = extractTranslations(['version:draft', 'version:published', 'version:status']);
+import { extractTranslations } from '../translations/extractTranslations'
+
+const labels = extractTranslations(['version:draft', 'version:published', 'version:status'])
 
 export const statuses = [
   {
@@ -12,22 +13,22 @@ export const statuses = [
     label: labels['version:published'],
     value: 'published',
   },
-];
+]
 
 const baseVersionFields: Field[] = [
   {
-    name: '_status',
-    label: labels['version:status'],
-    type: 'select',
-    options: statuses,
-    defaultValue: 'draft',
     admin: {
-      disableBulkEdit: true,
       components: {
         Field: () => null,
       },
+      disableBulkEdit: true,
     },
+    defaultValue: 'draft',
+    label: labels['version:status'],
+    name: '_status',
+    options: statuses,
+    type: 'select',
   },
-];
+]
 
-export default baseVersionFields;
+export default baseVersionFields

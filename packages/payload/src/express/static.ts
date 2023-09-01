@@ -1,35 +1,37 @@
-import express from 'express';
-import passport from 'passport';
-import path from 'path';
-import getExecuteStaticAccess from '../auth/getExecuteStaticAccess';
-import authenticate from './middleware/authenticate';
-import { Payload } from '../payload';
-import corsHeaders from './middleware/corsHeaders';
+import express from 'express'
+import passport from 'passport'
+import path from 'path'
+
+import type { Payload } from '../payload'
+
+import getExecuteStaticAccess from '../auth/getExecuteStaticAccess'
+import authenticate from './middleware/authenticate'
+import corsHeaders from './middleware/corsHeaders'
 
 function initStatic(ctx: Payload): void {
   Object.entries(ctx.collections).forEach(([_, collection]) => {
-    const { config } = collection;
+    const { config } = collection
 
     if (config.upload && config.upload.staticURL.startsWith('/')) {
-      const router = express.Router();
+      const router = express.Router()
 
-      router.use(corsHeaders(ctx.config));
-      router.use(passport.initialize());
-      router.use(authenticate(ctx.config));
+      router.use(corsHeaders(ctx.config))
+      router.use(passport.initialize())
+      router.use(authenticate(ctx.config))
 
-      router.use(getExecuteStaticAccess(config));
+      router.use(getExecuteStaticAccess(config))
 
       if (Array.isArray(config.upload?.handlers)) {
-        router.get('/:filename*', config.upload.handlers);
+        router.get('/:filename*', config.upload.handlers)
       }
 
-      const staticPath = path.resolve(ctx.config.paths.configDir, config.upload.staticDir);
+      const staticPath = path.resolve(ctx.config.paths.configDir, config.upload.staticDir)
 
-      router.use(express.static(staticPath, config.upload.staticOptions || {}));
+      router.use(express.static(staticPath, config.upload.staticOptions || {}))
 
-      ctx.express.use(`${config.upload.staticURL}`, router);
+      ctx.express.use(`${config.upload.staticURL}`, router)
     }
-  });
+  })
 }
 
-export default initStatic;
+export default initStatic

@@ -1,46 +1,46 @@
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import { Field } from '../../../../fields/config/types';
-import { Operator, Where } from '../../../../types';
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
+import type { Field } from '../../../../fields/config/types'
+import type { Operator, Where } from '../../../../types'
 
 export type Props = {
-  collection: SanitizedCollectionConfig,
+  collection: SanitizedCollectionConfig
   handleChange?: (where: Where) => void
   modifySearchQuery?: boolean
 }
 
 export type FieldCondition = {
+  component?: string
   label: string
-  value: string
   operators: {
     label: string
     value: Operator
   }[]
-  component?: string
   props: Field
+  value: string
 }
 
 export type Relation = 'and' | 'or'
 
 export type ADD = {
-  type: 'add'
-  field: string
-  relation?: Relation
   andIndex?: number
+  field: string
   orIndex?: number
+  relation?: Relation
+  type: 'add'
 }
 
 export type REMOVE = {
- type: 'remove'
- andIndex: number
- orIndex: number
+  andIndex: number
+  orIndex: number
+  type: 'remove'
 }
 
 export type UPDATE = {
-  type: 'update'
   andIndex: number
-  orIndex: number
-  operator?: string
   field?: string
+  operator?: string
+  orIndex: number
+  type: 'update'
   value?: unknown
 }
 

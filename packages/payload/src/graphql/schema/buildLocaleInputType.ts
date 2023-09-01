@@ -1,6 +1,10 @@
-import { GraphQLEnumType, GraphQLScalarType } from 'graphql';
-import type { SanitizedLocalizationConfig } from '../../config/types';
-import formatName from '../utilities/formatName';
+import type { GraphQLScalarType } from 'graphql'
+
+import { GraphQLEnumType } from 'graphql'
+
+import type { SanitizedLocalizationConfig } from '../../config/types'
+
+import formatName from '../utilities/formatName'
 
 const buildLocaleInputType = (
   localization: SanitizedLocalizationConfig,
@@ -16,7 +20,7 @@ const buildLocaleInputType = (
       }),
       {},
     ),
-  });
-};
+  })
+}
 
-export default buildLocaleInputType;
+export default buildLocaleInputType

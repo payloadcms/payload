@@ -1,51 +1,52 @@
-import React, { useEffect, useState } from 'react';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import { useStepNav } from '../../elements/StepNav';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import DefaultDashboard from './Default';
+import React, { useEffect, useState } from 'react'
+
+import { useStepNav } from '../../elements/StepNav'
+import { useAuth } from '../../utilities/Auth'
+import { useConfig } from '../../utilities/Config'
+import RenderCustomComponent from '../../utilities/RenderCustomComponent'
+import DefaultDashboard from './Default'
 
 const Dashboard: React.FC = () => {
-  const { permissions, user } = useAuth();
-  const { setStepNav } = useStepNav();
-  const [filteredGlobals, setFilteredGlobals] = useState([]);
+  const { permissions, user } = useAuth()
+  const { setStepNav } = useStepNav()
+  const [filteredGlobals, setFilteredGlobals] = useState([])
 
   const {
-    collections,
-    globals,
     admin: {
       components: {
-        views: {
-          Dashboard: CustomDashboard,
-        } = {
+        views: { Dashboard: CustomDashboard } = {
           Dashboard: undefined,
         },
       } = {},
     } = {},
-  } = useConfig();
+    collections,
+    globals,
+  } = useConfig()
 
   useEffect(() => {
     setFilteredGlobals(
       globals.filter((global) => permissions?.globals?.[global.slug]?.read?.permission),
-    );
-  }, [permissions, globals]);
+    )
+  }, [permissions, globals])
 
   useEffect(() => {
-    setStepNav([]);
-  }, [setStepNav]);
+    setStepNav([])
+  }, [setStepNav])
 
   return (
     <RenderCustomComponent
-      DefaultComponent={DefaultDashboard}
-      CustomComponent={CustomDashboard}
       componentProps={{
+        collections: collections.filter(
+          (collection) => permissions?.collections?.[collection.slug]?.read?.permission,
+        ),
         globals: filteredGlobals,
-        collections: collections.filter((collection) => permissions?.collections?.[collection.slug]?.read?.permission),
         permissions,
         user,
       }}
+      CustomComponent={CustomDashboard}
+      DefaultComponent={DefaultDashboard}
     />
-  );
-};
+  )
+}
 
-export default Dashboard;
+export default Dashboard

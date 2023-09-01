@@ -1,103 +1,92 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { useTranslation } from 'react-i18next';
-import useField from '../../../../forms/useField';
-import Label from '../../../../forms/Label';
-import CopyToClipboard from '../../../../elements/CopyToClipboard';
-import { text } from '../../../../../../fields/validations';
-import { useFormFields } from '../../../../forms/Form/context';
+import React, { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { v4 as uuidv4 } from 'uuid'
 
-import GenerateConfirmation from '../../../../elements/GenerateConfirmation';
+import { text } from '../../../../../../fields/validations'
+import CopyToClipboard from '../../../../elements/CopyToClipboard'
+import GenerateConfirmation from '../../../../elements/GenerateConfirmation'
+import { useFormFields } from '../../../../forms/Form/context'
+import Label from '../../../../forms/Label'
+import useField from '../../../../forms/useField'
 
-const path = 'apiKey';
-const baseClass = 'api-key';
+const path = 'apiKey'
+const baseClass = 'api-key'
 
-const APIKey: React.FC<{readOnly?: boolean}> = ({ readOnly }) => {
-  const [initialAPIKey, setInitialAPIKey] = useState(null);
-  const [highlightedField, setHighlightedField] = useState(false);
-  const { t } = useTranslation();
+const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
+  const [initialAPIKey, setInitialAPIKey] = useState(null)
+  const [highlightedField, setHighlightedField] = useState(false)
+  const { t } = useTranslation()
 
-  const apiKey = useFormFields(([fields]) => fields[path]);
-  const validate = (val) => text(val, { minLength: 24, maxLength: 48, data: {}, siblingData: {}, t });
+  const apiKey = useFormFields(([fields]) => fields[path])
+  const validate = (val) =>
+    text(val, { data: {}, maxLength: 48, minLength: 24, siblingData: {}, t })
 
-  const apiKeyValue = apiKey?.value;
+  const apiKeyValue = apiKey?.value
 
-  const APIKeyLabel = useMemo(() => (
-    <div className={`${baseClass}__label`}>
-      <span>
-        API Key
-      </span>
-      <CopyToClipboard value={apiKeyValue as string} />
-    </div>
-  ), [apiKeyValue]);
+  const APIKeyLabel = useMemo(
+    () => (
+      <div className={`${baseClass}__label`}>
+        <span>API Key</span>
+        <CopyToClipboard value={apiKeyValue as string} />
+      </div>
+    ),
+    [apiKeyValue],
+  )
 
   const fieldType = useField({
     path: 'apiKey',
     validate,
-  });
+  })
 
   const highlightField = () => {
     if (highlightedField) {
-      setHighlightedField(false);
+      setHighlightedField(false)
     }
     setTimeout(() => {
-      setHighlightedField(true);
-    }, 1);
-  };
+      setHighlightedField(true)
+    }, 1)
+  }
 
-  const {
-    value,
-    setValue,
-  } = fieldType;
+  const { setValue, value } = fieldType
 
   useEffect(() => {
-    setInitialAPIKey(uuidv4());
-  }, []);
+    setInitialAPIKey(uuidv4())
+  }, [])
 
   useEffect(() => {
     if (!apiKeyValue) {
-      setValue(initialAPIKey);
+      setValue(initialAPIKey)
     }
-  }, [apiKeyValue, setValue, initialAPIKey]);
+  }, [apiKeyValue, setValue, initialAPIKey])
 
   useEffect(() => {
     if (highlightedField) {
       setTimeout(() => {
-        setHighlightedField(false);
-      }, 10000);
+        setHighlightedField(false)
+      }, 10000)
     }
-  }, [highlightedField]);
+  }, [highlightedField])
 
-  const classes = [
-    'field-type',
-    'api-key',
-    'read-only',
-  ].filter(Boolean).join(' ');
+  const classes = ['field-type', 'api-key', 'read-only'].filter(Boolean).join(' ')
 
   return (
     <React.Fragment>
       <div className={classes}>
-        <Label
-          htmlFor={path}
-          label={APIKeyLabel}
-        />
+        <Label htmlFor={path} label={APIKeyLabel} />
         <input
-          value={value as string || ''}
           className={highlightedField ? 'highlight' : undefined}
           disabled
-          type="text"
           id="apiKey"
           name="apiKey"
+          type="text"
+          value={(value as string) || ''}
         />
       </div>
       {!readOnly && (
-        <GenerateConfirmation
-          setKey={() => setValue(uuidv4())}
-          highlightField={highlightField}
-        />
+        <GenerateConfirmation highlightField={highlightField} setKey={() => setValue(uuidv4())} />
       )}
     </React.Fragment>
-  );
-};
+  )
+}
 
-export default APIKey;
+export default APIKey

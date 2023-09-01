@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 /* eslint-disable jest/prefer-strict-equal */
-import formatName from './formatName';
+import formatName from './formatName'
 
 describe('formatName', () => {
   it.each`
@@ -13,6 +13,6 @@ describe('formatName', () => {
     ${'ñ'} | ${'n'}
     ${'ü'} | ${'u'}
   `('should convert accented character: $char', ({ char, expected }) => {
-    expect(formatName(char)).toEqual(expected);
-  });
-});
+    expect(formatName(char)).toEqual(expected)
+  })
+})

@@ -5,7 +5,7 @@
   min-width: 0;
 
   .rs__value-container {
-    padding: base(.25) 0;
+    padding: base(0.25) 0;
     min-height: base(1.5);
     overflow: visible;
 
@@ -24,7 +24,7 @@
       padding-left: base(0.25);
 
       .rs__multi-value {
-        margin: calc(#{base(.125)} - #{$style-stroke-width-s * 2});
+        margin: calc(#{base(0.125)} - #{$style-stroke-width-s * 2});
       }
 
       &.rs__value-container--has-value {

@@ -1,7 +1,8 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
-import { ArrayCollection } from './collections/Array';
-import { LocalizedPost } from './payload-types';
+import type { LocalizedPost } from './payload-types'
+
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
+import { ArrayCollection } from './collections/Array'
 import {
   defaultLocale,
   englishTitle,
@@ -11,26 +12,26 @@ import {
   relationSpanishTitle2,
   spanishLocale,
   spanishTitle,
-} from './shared';
+} from './shared'
 
 export type LocalizedPostAllLocale = LocalizedPost & {
   title: {
-    en?: string;
-    es?: string;
-  };
-};
+    en?: string
+    es?: string
+  }
+}
 
-export const localizedPostsSlug = 'localized-posts';
-export const withLocalizedRelSlug = 'with-localized-relationship';
-export const relationshipLocalizedSlug = 'relationship-localized';
-export const withRequiredLocalizedFields = 'localized-required';
+export const localizedPostsSlug = 'localized-posts'
+export const withLocalizedRelSlug = 'with-localized-relationship'
+export const relationshipLocalizedSlug = 'relationship-localized'
+export const withRequiredLocalizedFields = 'localized-required'
 
 const openAccess = {
   read: () => true,
   create: () => true,
   delete: () => true,
   update: () => true,
-};
+}
 
 export default buildConfigWithDefaults({
   localization: {
@@ -230,21 +231,21 @@ export default buildConfigWithDefaults({
     },
   ],
   onInit: async (payload) => {
-    const collection = localizedPostsSlug;
+    const collection = localizedPostsSlug
 
     await payload.create({
       collection,
       data: {
         title: englishTitle,
       },
-    });
+    })
 
     const localizedPost = await payload.create({
       collection,
       data: {
         title: englishTitle,
       },
-    });
+    })
 
     await payload.create({
       collection: 'users',
@@ -253,7 +254,7 @@ export default buildConfigWithDefaults({
         password: devUser.password,
         relation: localizedPost.id,
       },
-    });
+    })
 
     await payload.update({
       collection,
@@ -262,14 +263,14 @@ export default buildConfigWithDefaults({
       data: {
         title: spanishTitle,
       },
-    });
+    })
 
     const localizedRelation = await payload.create({
       collection,
       data: {
         title: relationEnglishTitle,
       },
-    });
+    })
 
     await payload.update({
       collection,
@@ -278,14 +279,14 @@ export default buildConfigWithDefaults({
       data: {
         title: relationSpanishTitle,
       },
-    });
+    })
 
     const localizedRelation2 = await payload.create({
       collection,
       data: {
         title: relationEnglishTitle2,
       },
-    });
+    })
     await payload.update({
       collection,
       id: localizedPost.id,
@@ -293,7 +294,7 @@ export default buildConfigWithDefaults({
       data: {
         title: relationSpanishTitle2,
       },
-    });
+    })
 
     await payload.create({
       collection: withLocalizedRelSlug,
@@ -306,7 +307,7 @@ export default buildConfigWithDefaults({
           { relationTo: localizedPostsSlug, value: localizedRelation2.id },
         ],
       },
-    });
+    })
     await payload.create({
       collection: relationshipLocalizedSlug,
       locale: 'en',
@@ -324,7 +325,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
-    });
+    })
 
     const globalArray = await payload.updateGlobal({
       slug: 'global-array',
@@ -338,7 +339,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
-    });
+    })
 
     await payload.updateGlobal({
       slug: 'global-array',
@@ -349,6 +350,6 @@ export default buildConfigWithDefaults({
           text: `test es ${i + 1}`,
         })),
       },
-    });
+    })
   },
-});
+})

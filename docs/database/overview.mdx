@@ -23,7 +23,8 @@ Database transactions allow your application to make a series of database change
 By default, Payload will use transactions for all operations, as long as it is supported by the configured database. Database changes are contained within all Payload operations and any errors thrown will result in all changes being rolled back without being committed. When transactions are not supported by the database, Payload will continue to operate as expected without them.
 
 <Banner type="info">
-  <strong>Note:</strong><br/>
+  <strong>Note:</strong>
+  <br />
   MongoDB requires a connection to a replicaset in order to make use of transactions.
 </Banner>
 
@@ -37,12 +38,13 @@ const afterChange: CollectionAfterChangeHook = async ({ req }) => {
     collection: 'my-slug',
     data: {
       some: 'data',
-    }
-  });
+    },
+  })
 }
 ```
 
 ### Async Hooks with Transactions
+
 Since Payload hooks can be async and be written to not await the result, it is possible to have an incorrect success response returned on a request that is rolled back. If you have a hook where you do not `await` the result, then you should **not** pass the `req.transactionID`.
 
 ```ts
@@ -53,7 +55,7 @@ const afterChange: CollectionAfterChangeHook = async ({ req }) => {
     collection: 'my-slug',
     data: {
       some: 'other data',
-    }
+    },
   })
 
   // Should this call fail, it will not rollback other changes
@@ -65,7 +67,7 @@ const afterChange: CollectionAfterChangeHook = async ({ req }) => {
     collection: 'my-slug',
     data: {
       some: 'other data',
-    }
+    },
   })
 }
 ```
@@ -82,4 +84,3 @@ The following functions can be used for managing transactions:
 `payload.db.rollbackTransaction` - Takes the identifier for the transaction, discards any changes.
 
 ## Migrations
-

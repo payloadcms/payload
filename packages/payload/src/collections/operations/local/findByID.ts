@@ -1,30 +1,32 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { Document } from '../../../types';
-import findByID from '../findByID';
-import { Payload } from '../../../payload';
-import { getDataLoader } from '../../dataloader';
-import { i18nInit } from '../../../translations/init';
-import { APIError } from '../../../errors';
-import { setRequestContext } from '../../../express/setRequestContext';
+import type { Config as GeneratedTypes } from 'payload/generated-types'
+
+import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { Payload } from '../../../payload'
+import type { Document } from '../../../types'
+
+import { APIError } from '../../../errors'
+import { setRequestContext } from '../../../express/setRequestContext'
+import { i18nInit } from '../../../translations/init'
+import { getDataLoader } from '../../dataloader'
+import findByID from '../findByID'
 
 export type Options<T extends keyof GeneratedTypes['collections']> = {
   collection: T
-  id: string | number
-  depth?: number
-  currentDepth?: number
-  locale?: string
-  fallbackLocale?: string
-  user?: Document
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
-  disableErrors?: boolean
-  req?: PayloadRequest
-  draft?: boolean
   /**
    * context, which will then be passed to req.context, which can be read by hooks
    */
-  context?: RequestContext,
+  context?: RequestContext
+  currentDepth?: number
+  depth?: number
+  disableErrors?: boolean
+  draft?: boolean
+  fallbackLocale?: string
+  id: number | string
+  locale?: string
+  overrideAccess?: boolean
+  req?: PayloadRequest
+  showHiddenFields?: boolean
+  user?: Document
 }
 
 export default async function findByIDLocal<T extends keyof GeneratedTypes['collections']>(
@@ -33,48 +35,52 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
 ): Promise<GeneratedTypes['collections'][T]> {
   const {
     collection: collectionSlug,
-    depth,
+    context,
     currentDepth,
+    depth,
+    disableErrors = false,
+    draft = false,
+    fallbackLocale = null,
     id,
     locale = null,
-    fallbackLocale = null,
-    user,
     overrideAccess = true,
-    disableErrors = false,
-    showHiddenFields,
     req = {} as PayloadRequest,
-    draft = false,
-    context,
-  } = options;
-  setRequestContext(options.req, context);
+    showHiddenFields,
+    user,
+  } = options
+  setRequestContext(options.req, context)
 
-  const collection = payload.collections[collectionSlug];
-  const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
+  const collection = payload.collections[collectionSlug]
+  const defaultLocale = payload?.config?.localization
+    ? payload?.config?.localization?.defaultLocale
+    : null
 
   if (!collection) {
-    throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found. Find By ID Operation.`);
+    throw new APIError(
+      `The collection with slug ${String(collectionSlug)} can't be found. Find By ID Operation.`,
+    )
   }
 
-  req.payloadAPI = req.payloadAPI || 'local';
-  req.locale = locale ?? req?.locale ?? defaultLocale;
-  req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale;
-  req.i18n = i18nInit(payload.config.i18n);
-  req.payload = payload;
+  req.payloadAPI = req.payloadAPI || 'local'
+  req.locale = locale ?? req?.locale ?? defaultLocale
+  req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale
+  req.i18n = i18nInit(payload.config.i18n)
+  req.payload = payload
 
-  if (typeof user !== 'undefined') req.user = user;
+  if (typeof user !== 'undefined') req.user = user
 
-  if (!req.t) req.t = req.i18n.t;
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
+  if (!req.t) req.t = req.i18n.t
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   return findByID<GeneratedTypes['collections'][T]>({
-    depth,
-    currentDepth,
-    id,
     collection,
-    overrideAccess,
+    currentDepth,
+    depth,
     disableErrors,
-    showHiddenFields,
-    req,
     draft,
-  });
+    id,
+    overrideAccess,
+    req,
+    showHiddenFields,
+  })
 }

@@ -1,90 +1,85 @@
-import React, { Fragment, lazy, Suspense, useEffect, useState } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from './utilities/Auth';
-import { useConfig } from './utilities/Config';
-import List from './views/collections/List';
-import DefaultTemplate from './templates/Default';
-import { requests } from '../api';
-import StayLoggedIn from './modals/StayLoggedIn';
-import Versions from './views/Versions';
-import Version from './views/Version';
-import { DocumentInfoProvider } from './utilities/DocumentInfo';
-import { useLocale } from './utilities/Locale';
-import { LoadingOverlayToggle } from './elements/Loading';
+import React, { Fragment, Suspense, lazy, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Redirect, Route, Switch } from 'react-router-dom'
 
-const Dashboard = lazy(() => import('./views/Dashboard'));
-const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
-const Login = lazy(() => import('./views/Login'));
-const Logout = lazy(() => import('./views/Logout'));
-const NotFound = lazy(() => import('./views/NotFound'));
-const Verify = lazy(() => import('./views/Verify'));
-const CreateFirstUser = lazy(() => import('./views/CreateFirstUser'));
-const Edit = lazy(() => import('./views/collections/Edit'));
-const EditGlobal = lazy(() => import('./views/Global'));
-const ResetPassword = lazy(() => import('./views/ResetPassword'));
-const Unauthorized = lazy(() => import('./views/Unauthorized'));
-const Account = lazy(() => import('./views/Account'));
+import { requests } from '../api'
+import { LoadingOverlayToggle } from './elements/Loading'
+import StayLoggedIn from './modals/StayLoggedIn'
+import DefaultTemplate from './templates/Default'
+import { useAuth } from './utilities/Auth'
+import { useConfig } from './utilities/Config'
+import { DocumentInfoProvider } from './utilities/DocumentInfo'
+import { useLocale } from './utilities/Locale'
+import Version from './views/Version'
+import Versions from './views/Versions'
+import List from './views/collections/List'
+
+const Dashboard = lazy(() => import('./views/Dashboard'))
+const ForgotPassword = lazy(() => import('./views/ForgotPassword'))
+const Login = lazy(() => import('./views/Login'))
+const Logout = lazy(() => import('./views/Logout'))
+const NotFound = lazy(() => import('./views/NotFound'))
+const Verify = lazy(() => import('./views/Verify'))
+const CreateFirstUser = lazy(() => import('./views/CreateFirstUser'))
+const Edit = lazy(() => import('./views/collections/Edit'))
+const EditGlobal = lazy(() => import('./views/Global'))
+const ResetPassword = lazy(() => import('./views/ResetPassword'))
+const Unauthorized = lazy(() => import('./views/Unauthorized'))
+const Account = lazy(() => import('./views/Account'))
 
 const Routes: React.FC = () => {
-  const [initialized, setInitialized] = useState(null);
-  const { user, permissions, refreshCookie } = useAuth();
-  const { i18n } = useTranslation();
-  const { code: locale } = useLocale();
+  const [initialized, setInitialized] = useState(null)
+  const { permissions, refreshCookie, user } = useAuth()
+  const { i18n } = useTranslation()
+  const { code: locale } = useLocale()
 
-  const canAccessAdmin = permissions?.canAccessAdmin;
+  const canAccessAdmin = permissions?.canAccessAdmin
 
-  const config = useConfig();
+  const config = useConfig()
 
   const {
     admin: {
-      user: userSlug,
-      logoutRoute,
+      components: { routes: customRoutes } = {},
       inactivityRoute: logoutInactivityRoute,
-      components: {
-        routes: customRoutes,
-      } = {},
+      logoutRoute,
+      user: userSlug,
     },
-    routes,
     collections,
     globals,
-  } = config;
+    routes,
+  } = config
 
-  const isLoadingUser = Boolean(typeof user === 'undefined' || (user && typeof canAccessAdmin === 'undefined'));
-  const userCollection = collections.find(({ slug }) => slug === userSlug);
+  const isLoadingUser = Boolean(
+    typeof user === 'undefined' || (user && typeof canAccessAdmin === 'undefined'),
+  )
+  const userCollection = collections.find(({ slug }) => slug === userSlug)
 
   useEffect(() => {
-    const { slug } = userCollection;
+    const { slug } = userCollection
 
     if (!userCollection.auth.disableLocalStrategy) {
-      requests.get(`${routes.api}/${slug}/init`, {
-        headers: {
-          'Accept-Language': i18n.language,
-        },
-      }).then((res) => res.json().then((data) => {
-        if (data && 'initialized' in data) {
-          setInitialized(data.initialized);
-        }
-      }));
+      requests
+        .get(`${routes.api}/${slug}/init`, {
+          headers: {
+            'Accept-Language': i18n.language,
+          },
+        })
+        .then((res) =>
+          res.json().then((data) => {
+            if (data && 'initialized' in data) {
+              setInitialized(data.initialized)
+            }
+          }),
+        )
     } else {
-      setInitialized(true);
+      setInitialized(true)
     }
-  }, [i18n.language, routes, userCollection]);
+  }, [i18n.language, routes, userCollection])
 
   return (
-    <Suspense fallback={(
-      <LoadingOverlayToggle
-        show
-        name="route-suspense"
-      />
-    )}
-    >
-      <LoadingOverlayToggle
-        name="route-loader"
-        show={isLoadingUser}
-      />
+    <Suspense fallback={<LoadingOverlayToggle name="route-suspense" show />}>
+      <LoadingOverlayToggle name="route-loader" show={isLoadingUser} />
       <Route
-        path={routes.admin}
         render={({ match }) => {
           if (initialized === false) {
             return (
@@ -96,26 +91,24 @@ const Routes: React.FC = () => {
                   <Redirect to={`${match.url}/create-first-user`} />
                 </Route>
               </Switch>
-            );
+            )
           }
 
           if (initialized === true && !isLoadingUser) {
             return (
               <Switch>
-                {Array.isArray(customRoutes) && customRoutes.map(({ path, Component, strict, exact, sensitive }) => (
-                  <Route
-                    key={`${match.url}${path}`}
-                    path={`${match.url}${path}`}
-                    strict={strict}
-                    exact={exact}
-                    sensitive={sensitive}
-                  >
-                    <Component
-                      user={user}
-                      canAccessAdmin={canAccessAdmin}
-                    />
-                  </Route>
-                ))}
+                {Array.isArray(customRoutes) &&
+                  customRoutes.map(({ Component, exact, path, sensitive, strict }) => (
+                    <Route
+                      exact={exact}
+                      key={`${match.url}${path}`}
+                      path={`${match.url}${path}`}
+                      sensitive={sensitive}
+                      strict={strict}
+                    >
+                      <Component canAccessAdmin={canAccessAdmin} user={user} />
+                    </Route>
+                  ))}
                 <Route path={`${match.url}/login`}>
                   <Login />
                 </Route>
@@ -141,15 +134,15 @@ const Routes: React.FC = () => {
                   if (collection?.auth?.verify && !collection.auth.disableLocalStrategy) {
                     return (
                       <Route
+                        exact
                         key={`${collection.slug}-verify`}
                         path={`${match.url}/${collection.slug}/verify/:token`}
-                        exact
                       >
                         <Verify collection={collection} />
                       </Route>
-                    );
+                    )
                   }
-                  return null;
+                  return null
                 })}
 
                 <Route>
@@ -158,10 +151,7 @@ const Routes: React.FC = () => {
                       {canAccessAdmin && (
                         <DefaultTemplate>
                           <Switch>
-                            <Route
-                              path={`${match.url}/`}
-                              exact
-                            >
+                            <Route exact path={`${match.url}/`}>
                               <Dashboard />
                             </Route>
                             <Route path={`${match.url}/account`}>
@@ -173,29 +163,33 @@ const Routes: React.FC = () => {
                               </DocumentInfoProvider>
                             </Route>
                             {collections
-                              .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
+                              .filter(
+                                ({ admin: { hidden } }) =>
+                                  !(typeof hidden === 'function' ? hidden({ user }) : hidden),
+                              )
                               .reduce((collectionRoutes, collection) => {
                                 const routesToReturn = [
                                   ...collectionRoutes,
                                   <Route
+                                    exact
                                     key={`${collection.slug}-list`}
                                     path={`${match.url}/collections/${collection.slug}`}
-                                    exact
                                   >
-                                    {permissions?.collections?.[collection.slug]?.read?.permission
-                                      ? <List collection={collection} />
-                                      : <Unauthorized />}
+                                    {permissions?.collections?.[collection.slug]?.read
+                                      ?.permission ? (
+                                      <List collection={collection} />
+                                    ) : (
+                                      <Unauthorized />
+                                    )}
                                   </Route>,
                                   <Route
+                                    exact
                                     key={`${collection.slug}-create`}
                                     path={`${match.url}/collections/${collection.slug}/create`}
-                                    exact
                                   >
-                                    {permissions?.collections?.[collection.slug]?.create?.permission ? (
-                                      <DocumentInfoProvider
-                                        collection={collection}
-                                        idFromParams
-                                      >
+                                    {permissions?.collections?.[collection.slug]?.create
+                                      ?.permission ? (
+                                      <DocumentInfoProvider collection={collection} idFromParams>
                                         <Edit collection={collection} />
                                       </DocumentInfoProvider>
                                     ) : (
@@ -203,107 +197,119 @@ const Routes: React.FC = () => {
                                     )}
                                   </Route>,
                                   <Route
+                                    exact
                                     key={`${collection.slug}-edit`}
                                     path={`${match.url}/collections/${collection.slug}/:id`}
-                                    exact
                                   >
-                                    {permissions?.collections?.[collection.slug]?.read?.permission ? (
-                                      <DocumentInfoProvider
-                                        collection={collection}
-                                        idFromParams
-                                      >
-                                        <Edit
-                                          isEditing
-                                          collection={collection}
-                                        />
+                                    {permissions?.collections?.[collection.slug]?.read
+                                      ?.permission ? (
+                                      <DocumentInfoProvider collection={collection} idFromParams>
+                                        <Edit collection={collection} isEditing />
                                       </DocumentInfoProvider>
-                                    ) : <Unauthorized />}
+                                    ) : (
+                                      <Unauthorized />
+                                    )}
                                   </Route>,
-                                ];
+                                ]
 
                                 if (collection.versions) {
                                   routesToReturn.push(
                                     <Route
+                                      exact
                                       key={`${collection.slug}-versions`}
                                       path={`${match.url}/collections/${collection.slug}/:id/versions`}
-                                      exact
                                     >
-                                      {permissions?.collections?.[collection.slug]?.readVersions?.permission ? (
+                                      {permissions?.collections?.[collection.slug]?.readVersions
+                                        ?.permission ? (
                                         <Versions collection={collection} />
-                                      ) : <Unauthorized />}
+                                      ) : (
+                                        <Unauthorized />
+                                      )}
                                     </Route>,
-                                  );
+                                  )
 
                                   routesToReturn.push(
                                     <Route
+                                      exact
                                       key={`${collection.slug}-view-version`}
                                       path={`${match.url}/collections/${collection.slug}/:id/versions/:versionID`}
-                                      exact
                                     >
-                                      {permissions?.collections?.[collection.slug]?.readVersions?.permission ? (
-                                        <DocumentInfoProvider
-                                          collection={collection}
-                                          idFromParams
-                                        >
+                                      {permissions?.collections?.[collection.slug]?.readVersions
+                                        ?.permission ? (
+                                        <DocumentInfoProvider collection={collection} idFromParams>
                                           <Version collection={collection} />
                                         </DocumentInfoProvider>
-                                      ) : <Unauthorized />}
+                                      ) : (
+                                        <Unauthorized />
+                                      )}
                                     </Route>,
-                                  );
+                                  )
                                 }
 
-                                return routesToReturn;
+                                return routesToReturn
                               }, [])}
-                            {globals && globals
-                              .filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
-                              .reduce((globalRoutes, global) => {
-                                const routesToReturn = [
-                                  ...globalRoutes,
-                                  <Route
-                                    key={global.slug}
-                                    path={`${match.url}/globals/${global.slug}`}
-                                    exact
-                                  >
-                                    {permissions?.globals?.[global.slug]?.read?.permission ? (
-                                      <DocumentInfoProvider
-                                        global={global}
-                                        key={`${global.slug}-${locale}`}
-                                        idFromParams
+                            {globals &&
+                              globals
+                                .filter(
+                                  ({ admin: { hidden } }) =>
+                                    !(typeof hidden === 'function' ? hidden({ user }) : hidden),
+                                )
+                                .reduce((globalRoutes, global) => {
+                                  const routesToReturn = [
+                                    ...globalRoutes,
+                                    <Route
+                                      exact
+                                      key={global.slug}
+                                      path={`${match.url}/globals/${global.slug}`}
+                                    >
+                                      {permissions?.globals?.[global.slug]?.read?.permission ? (
+                                        <DocumentInfoProvider
+                                          global={global}
+                                          idFromParams
+                                          key={`${global.slug}-${locale}`}
+                                        >
+                                          <EditGlobal global={global} />
+                                        </DocumentInfoProvider>
+                                      ) : (
+                                        <Unauthorized />
+                                      )}
+                                    </Route>,
+                                  ]
+
+                                  if (global.versions) {
+                                    routesToReturn.push(
+                                      <Route
+                                        exact
+                                        key={`${global.slug}-versions`}
+                                        path={`${match.url}/globals/${global.slug}/versions`}
                                       >
-                                        <EditGlobal global={global} />
-                                      </DocumentInfoProvider>
-                                    ) : <Unauthorized />}
-                                  </Route>,
-                                ];
+                                        {permissions?.globals?.[global.slug]?.readVersions
+                                          ?.permission ? (
+                                          <Versions global={global} />
+                                        ) : (
+                                          <Unauthorized />
+                                        )}
+                                      </Route>,
+                                    )
 
-                                if (global.versions) {
-                                  routesToReturn.push(
-                                    <Route
-                                      key={`${global.slug}-versions`}
-                                      path={`${match.url}/globals/${global.slug}/versions`}
-                                      exact
-                                    >
-                                      {permissions?.globals?.[global.slug]?.readVersions?.permission
-                                        ? <Versions global={global} />
-                                        : <Unauthorized />}
-                                    </Route>,
-                                  );
+                                    routesToReturn.push(
+                                      <Route
+                                        exact
+                                        key={`${global.slug}-view-version`}
+                                        path={`${match.url}/globals/${global.slug}/versions/:versionID`}
+                                      >
+                                        {permissions?.globals?.[global.slug]?.readVersions
+                                          ?.permission ? (
+                                          <Version global={global} />
+                                        ) : (
+                                          <Unauthorized />
+                                        )}
+                                      </Route>,
+                                    )
+                                  }
 
-                                  routesToReturn.push(
-                                    <Route
-                                      key={`${global.slug}-view-version`}
-                                      path={`${match.url}/globals/${global.slug}/versions/:versionID`}
-                                      exact
-                                    >
-                                      {permissions?.globals?.[global.slug]?.readVersions?.permission ? (
-                                        <Version global={global} />
-                                      ) : <Unauthorized />}
-                                    </Route>,
-                                  );
-                                }
-
-                                return routesToReturn;
-                              }, [])}
+                                  return routesToReturn
+                                }, [])}
 
                             <Route path={`${match.url}*`}>
                               <NotFound />
@@ -311,25 +317,34 @@ const Routes: React.FC = () => {
                           </Switch>
                         </DefaultTemplate>
                       )}
-                      {canAccessAdmin === false && (
-                        <Unauthorized />
-                      )}
+                      {canAccessAdmin === false && <Unauthorized />}
                     </Fragment>
-                  ) : <Redirect to={`${match.url}/login${window.location.pathname.startsWith(routes.admin) ? `?redirect=${encodeURIComponent(window.location.pathname.replace(routes.admin, ''))}` : ''}`} />}
+                  ) : (
+                    <Redirect
+                      to={`${match.url}/login${
+                        window.location.pathname.startsWith(routes.admin)
+                          ? `?redirect=${encodeURIComponent(
+                              window.location.pathname.replace(routes.admin, ''),
+                            )}`
+                          : ''
+                      }`}
+                    />
+                  )}
                 </Route>
                 <Route path={`${match.url}*`}>
                   <NotFound />
                 </Route>
               </Switch>
-            );
+            )
           }
 
-          return null;
+          return null
         }}
+        path={routes.admin}
       />
       <StayLoggedIn refreshCookie={refreshCookie} />
     </Suspense>
-  );
-};
+  )
+}
 
-export default Routes;
+export default Routes

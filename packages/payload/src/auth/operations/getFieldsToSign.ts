@@ -1,17 +1,19 @@
 /* eslint-disable no-param-reassign */
-import { User } from '..';
-import { CollectionConfig } from '../../collections/config/types';
-import { Field, fieldAffectsData, TabAsField, tabHasName } from '../../fields/config/types';
+import type { User } from '..'
+import type { CollectionConfig } from '../../collections/config/types'
+import type { Field, TabAsField } from '../../fields/config/types'
+
+import { fieldAffectsData, tabHasName } from '../../fields/config/types'
 
 type TraverseFieldsArgs = {
-  fields: (Field | TabAsField)[]
   data: Record<string, unknown>
+  fields: (Field | TabAsField)[]
   result: Record<string, unknown>
 }
 const traverseFields = ({
+  data,
   // parent,
   fields,
-  data,
   result,
 }: TraverseFieldsArgs) => {
   fields.forEach((field) => {
@@ -19,103 +21,105 @@ const traverseFields = ({
       case 'row':
       case 'collapsible': {
         traverseFields({
-          fields: field.fields,
           data,
+          fields: field.fields,
           result,
-        });
-        break;
+        })
+        break
       }
       case 'group': {
-        let targetResult;
+        let targetResult
         if (typeof field.saveToJWT === 'string') {
-          targetResult = field.saveToJWT;
-          result[field.saveToJWT] = data[field.name];
+          targetResult = field.saveToJWT
+          result[field.saveToJWT] = data[field.name]
         } else if (field.saveToJWT) {
-          targetResult = field.name;
-          result[field.name] = data[field.name];
+          targetResult = field.name
+          result[field.name] = data[field.name]
         }
-        const groupData: Record<string, unknown> = data[field.name] as Record<string, unknown>;
-        const groupResult = (targetResult ? result[targetResult] : result) as Record<string, unknown>;
+        const groupData: Record<string, unknown> = data[field.name] as Record<string, unknown>
+        const groupResult = (targetResult ? result[targetResult] : result) as Record<
+          string,
+          unknown
+        >
         traverseFields({
-          fields: field.fields,
           data: groupData,
+          fields: field.fields,
           result: groupResult,
-        });
-        break;
+        })
+        break
       }
       case 'tabs': {
         traverseFields({
-          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
           data,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
           result,
-        });
-        break;
+        })
+        break
       }
       case 'tab': {
         if (tabHasName(field)) {
-          let targetResult;
+          let targetResult
           if (typeof field.saveToJWT === 'string') {
-            targetResult = field.saveToJWT;
-            result[field.saveToJWT] = data[field.name];
+            targetResult = field.saveToJWT
+            result[field.saveToJWT] = data[field.name]
           } else if (field.saveToJWT) {
-            targetResult = field.name;
-            result[field.name] = data[field.name];
+            targetResult = field.name
+            result[field.name] = data[field.name]
           }
-          const tabData: Record<string, unknown> = data[field.name] as Record<string, unknown>;
-          const tabResult = (targetResult ? result[targetResult] : result) as Record<string, unknown>;
+          const tabData: Record<string, unknown> = data[field.name] as Record<string, unknown>
+          const tabResult = (targetResult ? result[targetResult] : result) as Record<
+            string,
+            unknown
+          >
           traverseFields({
-            fields: field.fields,
             data: tabData,
+            fields: field.fields,
             result: tabResult,
-          });
+          })
         } else {
           traverseFields({
-            fields: field.fields,
             data,
+            fields: field.fields,
             result,
-          });
+          })
         }
-        break;
+        break
       }
       default:
         if (fieldAffectsData(field)) {
           if (field.saveToJWT) {
             if (typeof field.saveToJWT === 'string') {
-              result[field.saveToJWT] = data[field.name];
-              delete result[field.name];
+              result[field.saveToJWT] = data[field.name]
+              delete result[field.name]
             } else {
-              result[field.name] = data[field.name] as Record<string, unknown>;
+              result[field.name] = data[field.name] as Record<string, unknown>
             }
           } else if (field.saveToJWT === false) {
-            delete result[field.name];
+            delete result[field.name]
           }
         }
     }
-  });
-  return result;
-};
+  })
+  return result
+}
 export const getFieldsToSign = (args: {
-  collectionConfig: CollectionConfig,
-  user: User
+  collectionConfig: CollectionConfig
   email: string
+  user: User
 }): Record<string, unknown> => {
-  const {
-    collectionConfig,
-    user,
-    email,
-  } = args;
+  const { collectionConfig, email, user } = args
 
   const result: Record<string, unknown> = {
+    collection: collectionConfig.slug,
     email,
     id: user.id,
-    collection: collectionConfig.slug,
-  };
+  }
 
   traverseFields({
-    fields: collectionConfig.fields,
     data: user,
+    fields: collectionConfig.fields,
     result,
-  });
+  })
 
-  return result;
-};
+  return result
+}

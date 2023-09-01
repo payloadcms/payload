@@ -1,15 +1,17 @@
-import { Field, TabAsField } from '../../config/types';
-import { promise } from './promise';
-import { Operation } from '../../../types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
+import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { Operation } from '../../../types'
+import type { Field, TabAsField } from '../../config/types'
+
+import { promise } from './promise'
 
 type Args = {
+  context: RequestContext
   data: Record<string, unknown>
   doc: Record<string, unknown>
   docWithLocales: Record<string, unknown>
-  errors: { message: string, field: string }[]
+  errors: { field: string; message: string }[]
   fields: (Field | TabAsField)[]
-  id?: string | number
+  id?: number | string
   mergeLocaleActions: (() => void)[]
   operation: Operation
   path: string
@@ -18,10 +20,10 @@ type Args = {
   siblingDoc: Record<string, unknown>
   siblingDocWithLocales: Record<string, unknown>
   skipValidation?: boolean
-  context: RequestContext
 }
 
 export const traverseFields = async ({
+  context,
   data,
   doc,
   docWithLocales,
@@ -36,29 +38,30 @@ export const traverseFields = async ({
   siblingDoc,
   siblingDocWithLocales,
   skipValidation,
-  context,
 }: Args): Promise<void> => {
-  const promises = [];
+  const promises = []
 
   fields.forEach((field) => {
-    promises.push(promise({
-      data,
-      doc,
-      docWithLocales,
-      errors,
-      field,
-      id,
-      mergeLocaleActions,
-      operation,
-      path,
-      req,
-      siblingData,
-      siblingDoc,
-      siblingDocWithLocales,
-      skipValidation,
-      context,
-    }));
-  });
+    promises.push(
+      promise({
+        context,
+        data,
+        doc,
+        docWithLocales,
+        errors,
+        field,
+        id,
+        mergeLocaleActions,
+        operation,
+        path,
+        req,
+        siblingData,
+        siblingDoc,
+        siblingDocWithLocales,
+        skipValidation,
+      }),
+    )
+  })
 
-  await Promise.all(promises);
-};
+  await Promise.all(promises)
+}

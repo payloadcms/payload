@@ -1,116 +1,96 @@
-import React, { Fragment } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useWindowInfo } from '@faceless-ui/window-info';
-import Eyebrow from '../../../elements/Eyebrow';
-import Paginator from '../../../elements/Paginator';
-import ListControls from '../../../elements/ListControls';
-import ListSelection from '../../../elements/ListSelection';
-import Pill from '../../../elements/Pill';
-import Button from '../../../elements/Button';
-import { Table } from '../../../elements/Table';
-import Meta from '../../../utilities/Meta';
-import { Props } from './types';
-import ViewDescription from '../../../elements/ViewDescription';
-import PerPage from '../../../elements/PerPage';
-import { Gutter } from '../../../elements/Gutter';
-import { RelationshipProvider } from './RelationshipProvider';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import { StaggeredShimmers } from '../../../elements/ShimmerEffect';
-import { SelectionProvider } from './SelectionProvider';
-import EditMany from '../../../elements/EditMany';
-import DeleteMany from '../../../elements/DeleteMany';
-import PublishMany from '../../../elements/PublishMany';
-import UnpublishMany from '../../../elements/UnpublishMany';
-import formatFilesize from '../../../../../uploads/formatFilesize';
+import { useWindowInfo } from '@faceless-ui/window-info'
+import React, { Fragment } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import './index.scss';
+import type { Props } from './types'
 
-const baseClass = 'collection-list';
+import formatFilesize from '../../../../../uploads/formatFilesize'
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import Button from '../../../elements/Button'
+import DeleteMany from '../../../elements/DeleteMany'
+import EditMany from '../../../elements/EditMany'
+import Eyebrow from '../../../elements/Eyebrow'
+import { Gutter } from '../../../elements/Gutter'
+import ListControls from '../../../elements/ListControls'
+import ListSelection from '../../../elements/ListSelection'
+import Paginator from '../../../elements/Paginator'
+import PerPage from '../../../elements/PerPage'
+import Pill from '../../../elements/Pill'
+import PublishMany from '../../../elements/PublishMany'
+import { StaggeredShimmers } from '../../../elements/ShimmerEffect'
+import { Table } from '../../../elements/Table'
+import UnpublishMany from '../../../elements/UnpublishMany'
+import ViewDescription from '../../../elements/ViewDescription'
+import Meta from '../../../utilities/Meta'
+import { RelationshipProvider } from './RelationshipProvider'
+import { SelectionProvider } from './SelectionProvider'
+import './index.scss'
+
+const baseClass = 'collection-list'
 
 const DefaultList: React.FC<Props> = (props) => {
   const {
-    collection,
     collection: {
-      labels: {
-        singular: singularLabel,
-        plural: pluralLabel,
-      },
       admin: {
+        components: { AfterList, AfterListTable, BeforeList, BeforeListTable } = {},
         description,
-        components: {
-          BeforeList,
-          BeforeListTable,
-          AfterListTable,
-          AfterList,
-        } = {},
       } = {},
+      labels: { plural: pluralLabel, singular: singularLabel },
     },
+    collection,
+    customHeader,
     data,
-    newDocumentURL,
-    limit,
-    hasCreatePermission,
     disableEyebrow,
-    modifySearchParams,
-    handleSortChange,
-    handleWhereChange,
     handlePageChange,
     handlePerPageChange,
-    customHeader,
+    handleSortChange,
+    handleWhereChange,
+    hasCreatePermission,
+    limit,
+    modifySearchParams,
+    newDocumentURL,
     resetParams,
-  } = props;
+  } = props
 
-  const { breakpoints: { s: smallBreak } } = useWindowInfo();
-  const { t, i18n } = useTranslation('general');
-  let formattedDocs = data.docs || [];
+  const {
+    breakpoints: { s: smallBreak },
+  } = useWindowInfo()
+  const { i18n, t } = useTranslation('general')
+  let formattedDocs = data.docs || []
 
   if (collection.upload) {
     formattedDocs = formattedDocs?.map((doc) => {
       return {
         ...doc,
         filesize: formatFilesize(doc.filesize),
-      };
-    });
+      }
+    })
   }
 
   return (
     <div className={baseClass}>
-      {Array.isArray(BeforeList) && BeforeList.map((Component, i) => (
-        <Component
-          key={i}
-          {...props}
-        />
-      ))}
+      {Array.isArray(BeforeList) &&
+        BeforeList.map((Component, i) => <Component key={i} {...props} />)}
 
-      <Meta
-        title={getTranslation(collection.labels.plural, i18n)}
-      />
-      <SelectionProvider
-        docs={data.docs}
-        totalDocs={data.totalDocs}
-      >
-        {!disableEyebrow && (
-          <Eyebrow />
-        )}
+      <Meta title={getTranslation(collection.labels.plural, i18n)} />
+      <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
+        {!disableEyebrow && <Eyebrow />}
         <Gutter className={`${baseClass}__wrap`}>
           <header className={`${baseClass}__header`}>
             {customHeader && customHeader}
             {!customHeader && (
               <Fragment>
-                <h1>
-                  {getTranslation(pluralLabel, i18n)}
-                </h1>
+                <h1>{getTranslation(pluralLabel, i18n)}</h1>
                 {hasCreatePermission && (
                   <Pill
-                    to={newDocumentURL}
                     aria-label={t('createNewLabel', { label: getTranslation(singularLabel, i18n) })}
+                    to={newDocumentURL}
                   >
                     {t('createNew')}
                   </Pill>
                 )}
                 {!smallBreak && (
-                  <ListSelection
-                    label={getTranslation(collection.labels.plural, i18n)}
-                  />
+                  <ListSelection label={getTranslation(collection.labels.plural, i18n)} />
                 )}
                 {description && (
                   <div className={`${baseClass}__sub-header`}>
@@ -122,104 +102,75 @@ const DefaultList: React.FC<Props> = (props) => {
           </header>
           <ListControls
             collection={collection}
-            modifySearchQuery={modifySearchParams}
             handleSortChange={handleSortChange}
             handleWhereChange={handleWhereChange}
+            modifySearchQuery={modifySearchParams}
             resetParams={resetParams}
           />
-          {Array.isArray(BeforeListTable) && BeforeListTable.map((Component, i) => (
-            <Component
-              key={i}
-              {...props}
-            />
-          ))}
+          {Array.isArray(BeforeListTable) &&
+            BeforeListTable.map((Component, i) => <Component key={i} {...props} />)}
           {!data.docs && (
             <StaggeredShimmers
               className={[`${baseClass}__shimmer`, `${baseClass}__shimmer--rows`].join(' ')}
               count={6}
             />
           )}
-          {(data.docs && data.docs.length > 0) && (
+          {data.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <Table data={formattedDocs} />
             </RelationshipProvider>
           )}
           {data.docs && data.docs.length === 0 && (
             <div className={`${baseClass}__no-results`}>
-              <p>
-                {t('noResults', { label: getTranslation(pluralLabel, i18n) })}
-              </p>
+              <p>{t('noResults', { label: getTranslation(pluralLabel, i18n) })}</p>
               {hasCreatePermission && newDocumentURL && (
-                <Button
-                  el="link"
-                  to={newDocumentURL}
-                >
+                <Button el="link" to={newDocumentURL}>
                   {t('createNewLabel', { label: getTranslation(singularLabel, i18n) })}
                 </Button>
               )}
             </div>
           )}
-          {Array.isArray(AfterListTable) && AfterListTable.map((Component, i) => (
-            <Component
-              key={i}
-              {...props}
-            />
-          ))}
+          {Array.isArray(AfterListTable) &&
+            AfterListTable.map((Component, i) => <Component key={i} {...props} />)}
 
           <div className={`${baseClass}__page-controls`}>
             <Paginator
-              limit={data.limit}
-              totalPages={data.totalPages}
-              page={data.page}
-              hasPrevPage={data.hasPrevPage}
+              disableHistoryChange={modifySearchParams === false}
               hasNextPage={data.hasNextPage}
-              prevPage={data.prevPage}
+              hasPrevPage={data.hasPrevPage}
+              limit={data.limit}
               nextPage={data.nextPage}
               numberOfNeighbors={1}
-              disableHistoryChange={modifySearchParams === false}
               onChange={handlePageChange}
+              page={data.page}
+              prevPage={data.prevPage}
+              totalPages={data.totalPages}
             />
             {data?.totalDocs > 0 && (
               <Fragment>
                 <div className={`${baseClass}__page-info`}>
-                  {(data.page * data.limit) - (data.limit - 1)}
-                  -
-                  {data.totalPages > 1 && data.totalPages !== data.page ? (data.limit * data.page) : data.totalDocs}
-                  {' '}
-                  {t('of')}
-                  {' '}
-                  {data.totalDocs}
+                  {data.page * data.limit - (data.limit - 1)}-
+                  {data.totalPages > 1 && data.totalPages !== data.page
+                    ? data.limit * data.page
+                    : data.totalDocs}{' '}
+                  {t('of')} {data.totalDocs}
                 </div>
                 <PerPage
-                  limits={collection?.admin?.pagination?.limits}
-                  limit={limit}
-                  modifySearchParams={modifySearchParams}
                   handleChange={handlePerPageChange}
+                  limit={limit}
+                  limits={collection?.admin?.pagination?.limits}
+                  modifySearchParams={modifySearchParams}
                   resetPage={data.totalDocs <= data.pagingCounter}
                 />
                 <div className={`${baseClass}__list-selection`}>
                   {smallBreak && (
                     <Fragment>
-                      <ListSelection
-                        label={getTranslation(collection.labels.plural, i18n)}
-                      />
+                      <ListSelection label={getTranslation(collection.labels.plural, i18n)} />
                       <div className={`${baseClass}__list-selection-actions`}>
-                        <EditMany
-                          collection={collection}
-                          resetParams={resetParams}
-                        />
-                        <PublishMany
-                          collection={collection}
-                          resetParams={resetParams}
-                        />
-                        <UnpublishMany
-                          collection={collection}
-                          resetParams={resetParams}
-                        />
-                        <DeleteMany
-                          collection={collection}
-                          resetParams={resetParams}
-                        />
+                        <EditMany collection={collection} resetParams={resetParams} />
+                        <PublishMany collection={collection} resetParams={resetParams} />
+                        <UnpublishMany collection={collection} resetParams={resetParams} />
+                        <DeleteMany collection={collection} resetParams={resetParams} />
                       </div>
                     </Fragment>
                   )}
@@ -229,14 +180,10 @@ const DefaultList: React.FC<Props> = (props) => {
           </div>
         </Gutter>
       </SelectionProvider>
-      {Array.isArray(AfterList) && AfterList.map((Component, i) => (
-        <Component
-          key={i}
-          {...props}
-        />
-      ))}
+      {Array.isArray(AfterList) &&
+        AfterList.map((Component, i) => <Component key={i} {...props} />)}
     </div>
-  );
-};
+  )
+}
 
-export default DefaultList;
+export default DefaultList

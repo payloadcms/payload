@@ -1,1 +1,1 @@
-export * from '../../fields/validations';
+export * from '../../fields/validations'

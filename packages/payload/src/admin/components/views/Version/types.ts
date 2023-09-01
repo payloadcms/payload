@@ -1,16 +1,16 @@
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../../../globals/config/types';
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
+import type { SanitizedGlobalConfig } from '../../../../globals/config/types'
 
 export type LocaleOption = {
-  label: string
   code: string
+  label: string
 }
 
 export type CompareOption = {
   label: string
-  value: string
-  relationTo?: string
   options?: CompareOption[]
+  relationTo?: string
+  value: string
 }
 
 export type Props = {

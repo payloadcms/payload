@@ -1,94 +1,83 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import Label from '../../Label';
-import Error from '../../Error';
-import FileDetails from '../../../elements/FileDetails';
-import FieldDescription from '../../FieldDescription';
-import { FilterOptions, UploadField } from '../../../../../fields/config/types';
-import { Description } from '../../FieldDescription/types';
-import { FieldTypes } from '..';
-import { SanitizedCollectionConfig } from '../../../../../collections/config/types';
-import { getTranslation } from '../../../../../utilities/getTranslation';
-import { useDocumentDrawer } from '../../../elements/DocumentDrawer';
-import { useListDrawer } from '../../../elements/ListDrawer';
-import Button from '../../../elements/Button';
-import { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types';
-import { ListDrawerProps } from '../../../elements/ListDrawer/types';
-import { GetFilterOptions } from '../../../utilities/GetFilterOptions';
-import { FilterOptionsResult } from '../Relationship/types';
+import React, { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import './index.scss';
+import type { FieldTypes } from '..'
+import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
+import type { FilterOptions, UploadField } from '../../../../../fields/config/types'
+import type { DocumentDrawerProps } from '../../../elements/DocumentDrawer/types'
+import type { ListDrawerProps } from '../../../elements/ListDrawer/types'
+import type { Description } from '../../FieldDescription/types'
+import type { FilterOptionsResult } from '../Relationship/types'
 
-const baseClass = 'upload';
+import { getTranslation } from '../../../../../utilities/getTranslation'
+import Button from '../../../elements/Button'
+import { useDocumentDrawer } from '../../../elements/DocumentDrawer'
+import FileDetails from '../../../elements/FileDetails'
+import { useListDrawer } from '../../../elements/ListDrawer'
+import { GetFilterOptions } from '../../../utilities/GetFilterOptions'
+import Error from '../../Error'
+import FieldDescription from '../../FieldDescription'
+import Label from '../../Label'
+import './index.scss'
+
+const baseClass = 'upload'
 
 export type UploadInputProps = Omit<UploadField, 'type'> & {
-  showError?: boolean
-  errorMessage?: string
-  readOnly?: boolean
-  path: string
-  required?: boolean
-  value?: string
-  description?: Description
-  onChange?: (e) => void
-  placeholder?: string
-  style?: React.CSSProperties
-  className?: string
-  width?: string
-  fieldTypes?: FieldTypes
-  collection?: SanitizedCollectionConfig
-  serverURL?: string
   api?: string
+  className?: string
+  collection?: SanitizedCollectionConfig
+  description?: Description
+  errorMessage?: string
+  fieldTypes?: FieldTypes
   filterOptions: FilterOptions
+  onChange?: (e) => void
+  path: string
+  placeholder?: string
+  readOnly?: boolean
+  required?: boolean
+  serverURL?: string
+  showError?: boolean
+  style?: React.CSSProperties
+  value?: string
+  width?: string
 }
 
 const UploadInput: React.FC<UploadInputProps> = (props) => {
   const {
-    path,
-    required,
-    readOnly,
-    style,
-    className,
-    width,
-    description,
-    label,
-    relationTo,
-    value,
-    onChange,
-    showError,
-    serverURL = 'http://localhost:3000',
     api = '/api',
+    className,
     collection,
+    description,
     errorMessage,
     filterOptions,
-  } = props;
+    label,
+    onChange,
+    path,
+    readOnly,
+    relationTo,
+    required,
+    serverURL = 'http://localhost:3000',
+    showError,
+    style,
+    value,
+    width,
+  } = props
 
-  const { t, i18n } = useTranslation('fields');
+  const { i18n, t } = useTranslation('fields')
 
-  const [file, setFile] = useState(undefined);
-  const [missingFile, setMissingFile] = useState(false);
-  const [collectionSlugs] = useState([collection?.slug]);
-  const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>();
+  const [file, setFile] = useState(undefined)
+  const [missingFile, setMissingFile] = useState(false)
+  const [collectionSlugs] = useState([collection?.slug])
+  const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>()
 
-  const [
-    DocumentDrawer,
-    DocumentDrawerToggler,
-    {
-      closeDrawer,
-    },
-  ] = useDocumentDrawer({
+  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     collectionSlug: collectionSlugs[0],
-  });
+  })
 
-  const [
-    ListDrawer,
-    ListDrawerToggler,
-    {
-      closeDrawer: closeListDrawer,
-    },
-  ] = useListDrawer({
+  const [ListDrawer, ListDrawerToggler, { closeDrawer: closeListDrawer }] = useListDrawer({
     collectionSlugs,
     filterOptions: filterOptionsResult,
-  });
+  })
 
   const classes = [
     'field-type',
@@ -96,7 +85,9 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
     className,
     showError && 'error',
     readOnly && 'read-only',
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   useEffect(() => {
     if (typeof value === 'string' && value !== '') {
@@ -106,119 +97,101 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
           headers: {
             'Accept-Language': i18n.language,
           },
-        });
+        })
         if (response.ok) {
-          const json = await response.json();
-          setFile(json);
+          const json = await response.json()
+          setFile(json)
         } else {
-          setMissingFile(true);
-          setFile(undefined);
+          setMissingFile(true)
+          setFile(undefined)
         }
-      };
+      }
 
-      fetchFile();
+      fetchFile()
     } else {
-      setFile(undefined);
+      setFile(undefined)
     }
-  }, [
-    value,
-    relationTo,
-    api,
-    serverURL,
-    i18n,
-  ]);
+  }, [value, relationTo, api, serverURL, i18n])
 
-  const onSave = useCallback<DocumentDrawerProps['onSave']>((args) => {
-    setMissingFile(false);
-    onChange(args.doc);
-    closeDrawer();
-  }, [onChange, closeDrawer]);
+  const onSave = useCallback<DocumentDrawerProps['onSave']>(
+    (args) => {
+      setMissingFile(false)
+      onChange(args.doc)
+      closeDrawer()
+    },
+    [onChange, closeDrawer],
+  )
 
-  const onSelect = useCallback<ListDrawerProps['onSelect']>((args) => {
-    setMissingFile(false);
-    onChange({
-      id: args.docID,
-    });
-    closeListDrawer();
-  }, [onChange, closeListDrawer]);
+  const onSelect = useCallback<ListDrawerProps['onSelect']>(
+    (args) => {
+      setMissingFile(false)
+      onChange({
+        id: args.docID,
+      })
+      closeListDrawer()
+    },
+    [onChange, closeListDrawer],
+  )
 
   return (
     <div
-      className={classes}
       style={{
         ...style,
         width,
       }}
+      className={classes}
     >
       <GetFilterOptions
         {...{
-          filterOptionsResult,
-          setFilterOptionsResult,
           filterOptions,
+          filterOptionsResult,
           path,
           relationTo,
+          setFilterOptionsResult,
         }}
       />
-      <Error
-        showError={showError}
-        message={errorMessage}
-      />
-      <Label
-        htmlFor={`field-${path.replace(/\./gi, '__')}`}
-        label={label}
-        required={required}
-      />
+      <Error message={errorMessage} showError={showError} />
+      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       {collection?.upload && (
         <React.Fragment>
-          {(file && !missingFile) && (
+          {file && !missingFile && (
             <FileDetails
+              handleRemove={
+                readOnly
+                  ? undefined
+                  : () => {
+                      onChange(null)
+                    }
+              }
               collection={collection}
               doc={file}
-              handleRemove={readOnly ? undefined : () => {
-                onChange(null);
-              }}
             />
           )}
           {(!file || missingFile) && (
             <div className={`${baseClass}__wrap`}>
               <div className={`${baseClass}__buttons`}>
-                <DocumentDrawerToggler
-                  className={`${baseClass}__toggler`}
-                  disabled={readOnly}
-                >
-                  <Button
-                    buttonStyle="secondary"
-                    el="div"
-                    disabled={readOnly}
-                  >
-                    {t('uploadNewLabel', { label: getTranslation(collection.labels.singular, i18n) })}
+                <DocumentDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
+                  <Button buttonStyle="secondary" disabled={readOnly} el="div">
+                    {t('uploadNewLabel', {
+                      label: getTranslation(collection.labels.singular, i18n),
+                    })}
                   </Button>
                 </DocumentDrawerToggler>
-                <ListDrawerToggler
-                  className={`${baseClass}__toggler`}
-                  disabled={readOnly}
-                >
-                  <Button
-                    buttonStyle="secondary"
-                    el="div"
-                    disabled={readOnly}
-                  >
+                <ListDrawerToggler className={`${baseClass}__toggler`} disabled={readOnly}>
+                  <Button buttonStyle="secondary" disabled={readOnly} el="div">
                     {t('chooseFromExisting')}
                   </Button>
                 </ListDrawerToggler>
               </div>
             </div>
           )}
-          <FieldDescription
-            value={file}
-            description={description}
-          />
+          <FieldDescription description={description} value={file} />
         </React.Fragment>
       )}
       {!readOnly && <DocumentDrawer onSave={onSave} />}
       {!readOnly && <ListDrawer onSelect={onSelect} />}
     </div>
-  );
-};
+  )
+}
 
-export default UploadInput;
+export default UploadInput

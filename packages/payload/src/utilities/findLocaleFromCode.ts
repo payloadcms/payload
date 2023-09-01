@@ -1,4 +1,4 @@
-import type { SanitizedLocalizationConfig, Locale } from '../config/types';
+import type { Locale, SanitizedLocalizationConfig } from '../config/types'
 /*
  return the Locale for given locale code, else return null
 */
@@ -7,10 +7,8 @@ export const findLocaleFromCode = (
   locale: string,
 ): Locale | null => {
   if (!localizationConfig?.locales || localizationConfig.locales.length === 0) {
-    return null;
+    return null
   }
 
-  return localizationConfig.locales.find(
-    (el) => el?.code === locale,
-  );
-};
+  return localizationConfig.locales.find((el) => el?.code === locale)
+}

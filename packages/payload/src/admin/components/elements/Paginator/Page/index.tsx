@@ -1,31 +1,30 @@
-import React from 'react';
-import { Props } from './types';
+import React from 'react'
 
-const baseClass = 'paginator__page';
+import type { Props } from './types'
+
+const baseClass = 'paginator__page'
 
 const Page: React.FC<Props> = ({
-  page = 1,
   isCurrent,
-  updatePage,
   isFirstPage = false,
   isLastPage = false,
+  page = 1,
+  updatePage,
 }) => {
   const classes = [
     baseClass,
     isCurrent && `${baseClass}--is-current`,
     isFirstPage && `${baseClass}--is-first-page`,
     isLastPage && `${baseClass}--is-last-page`,
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
-    <button
-      className={classes}
-      onClick={() => updatePage(page)}
-      type="button"
-    >
+    <button className={classes} onClick={() => updatePage(page)} type="button">
       {page}
     </button>
-  );
-};
+  )
+}
 
-export default Page;
+export default Page

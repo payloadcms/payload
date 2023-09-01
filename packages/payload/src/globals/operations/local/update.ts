@@ -1,24 +1,26 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { DeepPartial } from 'ts-essentials';
-import { Payload } from '../../../payload';
-import { Document } from '../../../types';
-import { PayloadRequest } from '../../../express/types';
-import update from '../update';
-import { getDataLoader } from '../../../collections/dataloader';
-import { i18nInit } from '../../../translations/init';
-import { APIError } from '../../../errors';
-import { setRequestContext } from '../../../express/setRequestContext';
+import type { Config as GeneratedTypes } from 'payload/generated-types'
+import type { DeepPartial } from 'ts-essentials'
+
+import type { PayloadRequest } from '../../../express/types'
+import type { Payload } from '../../../payload'
+import type { Document } from '../../../types'
+
+import { getDataLoader } from '../../../collections/dataloader'
+import { APIError } from '../../../errors'
+import { setRequestContext } from '../../../express/setRequestContext'
+import { i18nInit } from '../../../translations/init'
+import update from '../update'
 
 export type Options<TSlug extends keyof GeneratedTypes['globals']> = {
-  slug: TSlug
-  depth?: number
-  locale?: string
-  fallbackLocale?: string
   data: DeepPartial<Omit<GeneratedTypes['globals'][TSlug], 'id'>>
-  user?: Document
+  depth?: number
+  draft?: boolean
+  fallbackLocale?: string
+  locale?: string
   overrideAccess?: boolean
   showHiddenFields?: boolean
-  draft?: boolean
+  slug: TSlug
+  user?: Document
 }
 
 export default async function updateLocal<TSlug extends keyof GeneratedTypes['globals']>(
@@ -26,45 +28,45 @@ export default async function updateLocal<TSlug extends keyof GeneratedTypes['gl
   options: Options<TSlug>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
-    slug: globalSlug,
-    depth,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
-    fallbackLocale = null,
     data,
-    user,
+    depth,
+    draft,
+    fallbackLocale = null,
+    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
     showHiddenFields,
-    draft,
-  } = options;
+    slug: globalSlug,
+    user,
+  } = options
 
-  const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
-  const i18n = i18nInit(payload.config.i18n);
+  const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
+  const i18n = i18nInit(payload.config.i18n)
 
   if (!globalConfig) {
-    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`);
+    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
 
   const req = {
-    user,
-    payloadAPI: 'local',
-    locale,
     fallbackLocale,
-    payload,
     i18n,
+    locale,
+    payload,
+    payloadAPI: 'local',
     t: i18n.t,
-  } as PayloadRequest;
-  setRequestContext(req);
+    user,
+  } as PayloadRequest
+  setRequestContext(req)
 
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   return update<TSlug>({
-    slug: globalSlug as string,
     data,
     depth,
+    draft,
     globalConfig,
     overrideAccess,
-    showHiddenFields,
-    draft,
     req,
-  });
+    showHiddenFields,
+    slug: globalSlug as string,
+  })
 }

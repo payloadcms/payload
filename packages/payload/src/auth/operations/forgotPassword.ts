@@ -1,129 +1,128 @@
-import crypto from 'crypto';
-import { APIError } from '../../errors';
-import { PayloadRequest } from '../../express/types';
-import { Collection } from '../../collections/config/types';
-import { buildAfterOperation } from '../../collections/operations/utils';
+import crypto from 'crypto'
+
+import type { Collection } from '../../collections/config/types'
+import type { PayloadRequest } from '../../express/types'
+
+import { buildAfterOperation } from '../../collections/operations/utils'
+import { APIError } from '../../errors'
 
 export type Arguments = {
   collection: Collection
   data: {
-    email: string
     [key: string]: unknown
+    email: string
   }
   disableEmail?: boolean
   expiration?: number
   req: PayloadRequest
 }
 
-export type Result = string;
+export type Result = string
 
-async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
+async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
   if (!Object.prototype.hasOwnProperty.call(incomingArgs.data, 'email')) {
-    throw new APIError('Missing email.', 400);
+    throw new APIError('Missing email.', 400)
   }
 
-  let args = incomingArgs;
+  let args = incomingArgs
 
   // /////////////////////////////////////
   // beforeOperation - Collection
   // /////////////////////////////////////
 
   await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook;
+    await priorHook
 
-    args = (await hook({
-      args,
-      operation: 'forgotPassword',
-      context: args.req.context,
-    })) || args;
-  }, Promise.resolve());
+    args =
+      (await hook({
+        args,
+        context: args.req.context,
+        operation: 'forgotPassword',
+      })) || args
+  }, Promise.resolve())
 
   const {
-    collection: {
-      config: collectionConfig,
-    },
+    collection: { config: collectionConfig },
     data,
     disableEmail,
     expiration,
     req: {
-      t,
+      payload: { config, emailOptions, sendEmail: email },
       payload,
-      payload: {
-        config,
-        sendEmail: email,
-        emailOptions,
-      },
+      t,
     },
     req,
-  } = args;
+  } = args
 
   // /////////////////////////////////////
   // Forget password
   // /////////////////////////////////////
 
-  let token: string | Buffer = crypto.randomBytes(20);
-  token = token.toString('hex');
+  let token: Buffer | string = crypto.randomBytes(20)
+  token = token.toString('hex')
 
   type UserDoc = {
-    id: string | number
-    resetPasswordToken?: string,
-    resetPasswordExpiration?: Date,
+    id: number | string
+    resetPasswordExpiration?: Date
+    resetPasswordToken?: string
   }
 
   if (!data.email) {
-    throw new APIError('Missing email.');
+    throw new APIError('Missing email.')
   }
 
   let user = await payload.db.findOne<UserDoc>({
     collection: collectionConfig.slug,
-    where: { email: { equals: (data.email as string).toLowerCase() } },
-  });
+    where: { email: { equals: data.email.toLowerCase() } },
+  })
 
+  if (!user) return null
 
-  if (!user) return null;
-
-  user.resetPasswordToken = token;
-  user.resetPasswordExpiration = new Date(expiration || Date.now() + 3600000); // 1 hour
+  user.resetPasswordToken = token
+  user.resetPasswordExpiration = new Date(expiration || Date.now() + 3600000) // 1 hour
 
   user = await payload.update({
     collection: collectionConfig.slug,
-    id: user.id,
     data: user,
-  });
+    id: user.id,
+  })
 
   if (!disableEmail) {
-    const serverURL = (config.serverURL !== null && config.serverURL !== '') ? config.serverURL : `${req.protocol}://${req.get('host')}`;
+    const serverURL =
+      config.serverURL !== null && config.serverURL !== ''
+        ? config.serverURL
+        : `${req.protocol}://${req.get('host')}`
 
     let html = `${t('authentication:youAreReceivingResetPassword')}
     <a href="${serverURL}${config.routes.admin}/reset/${token}">
      ${serverURL}${config.routes.admin}/reset/${token}
     </a>
-    ${t('authentication:youDidNotRequestPassword')}`;
+    ${t('authentication:youDidNotRequestPassword')}`
 
     if (typeof collectionConfig.auth.forgotPassword.generateEmailHTML === 'function') {
       html = await collectionConfig.auth.forgotPassword.generateEmailHTML({
         req,
         token,
         user,
-      });
+      })
     }
 
-    let subject = t('authentication:resetYourPassword');
+    let subject = t('authentication:resetYourPassword')
 
     if (typeof collectionConfig.auth.forgotPassword.generateEmailSubject === 'function') {
       subject = await collectionConfig.auth.forgotPassword.generateEmailSubject({
         req,
         token,
         user,
-      });
+      })
     }
 
     email({
       from: `"${emailOptions.fromName}" <${emailOptions.fromAddress}>`,
-      to: data.email,
-      subject,
       html,
-    });
+      subject,
+      to: data.email,
+    })
   }
 
   // /////////////////////////////////////
@@ -131,21 +130,21 @@ async function forgotPassword(incomingArgs: Arguments): Promise<string | null> {
   // /////////////////////////////////////
 
   await collectionConfig.hooks.afterForgotPassword.reduce(async (priorHook, hook) => {
-    await priorHook;
-    await hook({ args, context: req.context });
-  }, Promise.resolve());
+    await priorHook
+    await hook({ args, context: req.context })
+  }, Promise.resolve())
 
   // /////////////////////////////////////
   // afterOperation - Collection
   // /////////////////////////////////////
 
   token = await buildAfterOperation({
-    operation: 'forgotPassword',
     args,
+    operation: 'forgotPassword',
     result: token,
-  });
+  })
 
-  return token;
+  return token
 }
 
-export default forgotPassword;
+export default forgotPassword

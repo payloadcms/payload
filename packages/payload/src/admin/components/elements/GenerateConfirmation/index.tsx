@@ -1,80 +1,68 @@
-import React from 'react';
-import { toast } from 'react-toastify';
-import { Modal, useModal } from '@faceless-ui/modal';
-import { Trans, useTranslation } from 'react-i18next';
-import Button from '../Button';
-import MinimalTemplate from '../../templates/Minimal';
-import { Props } from './types';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
+import { Modal, useModal } from '@faceless-ui/modal'
+import React from 'react'
+import { Trans, useTranslation } from 'react-i18next'
+import { toast } from 'react-toastify'
 
-import './index.scss';
+import type { Props } from './types'
 
-const baseClass = 'generate-confirmation';
+import MinimalTemplate from '../../templates/Minimal'
+import { useDocumentInfo } from '../../utilities/DocumentInfo'
+import Button from '../Button'
+import './index.scss'
+
+const baseClass = 'generate-confirmation'
 
 const GenerateConfirmation: React.FC<Props> = (props) => {
-  const {
-    setKey,
-    highlightField,
-  } = props;
+  const { highlightField, setKey } = props
 
-  const { id } = useDocumentInfo();
-  const { toggleModal } = useModal();
-  const { t } = useTranslation('authentication');
+  const { id } = useDocumentInfo()
+  const { toggleModal } = useModal()
+  const { t } = useTranslation('authentication')
 
-  const modalSlug = `generate-confirmation-${id}`;
+  const modalSlug = `generate-confirmation-${id}`
 
   const handleGenerate = () => {
-    setKey();
-    toggleModal(modalSlug);
-    toast.success(t('newAPIKeyGenerated'), { autoClose: 3000 });
-    highlightField(true);
-  };
+    setKey()
+    toggleModal(modalSlug)
+    toast.success(t('newAPIKeyGenerated'), { autoClose: 3000 })
+    highlightField(true)
+  }
 
   return (
     <React.Fragment>
       <Button
-        size="small"
-        buttonStyle="secondary"
         onClick={() => {
-          toggleModal(modalSlug);
+          toggleModal(modalSlug)
         }}
+        buttonStyle="secondary"
+        size="small"
       >
         {t('generateNewAPIKey')}
       </Button>
-      <Modal
-        slug={modalSlug}
-        className={baseClass}
-      >
+      <Modal className={baseClass} slug={modalSlug}>
         <MinimalTemplate className={`${baseClass}__template`}>
           <h1>{t('confirmGeneration')}</h1>
           <p>
-            <Trans
-              i18nKey="generatingNewAPIKeyWillInvalidate"
-              t={t}
-            >
+            <Trans i18nKey="generatingNewAPIKeyWillInvalidate" t={t}>
               generatingNewAPIKeyWillInvalidate
               <strong>invalidate</strong>
             </Trans>
           </p>
 
           <Button
+            onClick={() => {
+              toggleModal(modalSlug)
+            }}
             buttonStyle="secondary"
             type="button"
-            onClick={() => {
-              toggleModal(modalSlug);
-            }}
           >
             {t('general:cancel')}
           </Button>
-          <Button
-            onClick={handleGenerate}
-          >
-            {t('generate')}
-          </Button>
+          <Button onClick={handleGenerate}>{t('generate')}</Button>
         </MinimalTemplate>
       </Modal>
     </React.Fragment>
-  );
-};
+  )
+}
 
-export default GenerateConfirmation;
+export default GenerateConfirmation

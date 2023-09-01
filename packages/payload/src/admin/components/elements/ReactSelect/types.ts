@@ -1,23 +1,20 @@
-import { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } from 'react-select';
-import { DocumentDrawerProps } from '../DocumentDrawer/types';
+import type { CommonProps, GroupBase, Props as ReactSelectStateManagerProps } from 'react-select'
+
+import type { DocumentDrawerProps } from '../DocumentDrawer/types'
 
 type CustomSelectProps = {
-  disableMouseDown?: boolean
   disableKeyDown?: boolean
-  droppableRef?: React.RefObject<HTMLDivElement>
-  setDrawerIsOpen?: (isOpen: boolean) => void
-  onSave?: DocumentDrawerProps['onSave']
+  disableMouseDown?: boolean
   draggableProps?: any
+  droppableRef?: React.RefObject<HTMLDivElement>
+  onSave?: DocumentDrawerProps['onSave']
+  setDrawerIsOpen?: (isOpen: boolean) => void
 }
 
 // augment the types for the `Select` component from `react-select`
 // this is to include the `selectProps` prop at the top-level `Select` component
 declare module 'react-select/dist/declarations/src/Select' {
-  export interface Props<
-    Option,
-    IsMulti extends boolean,
-    Group extends GroupBase<Option>
-  > {
+  export interface Props<Option, IsMulti extends boolean, Group extends GroupBase<Option>> {
     customProps?: CustomSelectProps
   }
 }
@@ -25,16 +22,20 @@ declare module 'react-select/dist/declarations/src/Select' {
 // augment the types for the `CommonPropsAndClassName` from `react-select`
 // this will include the `selectProps` prop to every `react-select` component automatically
 declare module 'react-select/dist/declarations/src' {
-  export interface CommonPropsAndClassName<Option, IsMulti extends boolean, Group extends GroupBase<Option>> extends CommonProps<Option, IsMulti, Group> {
+  export interface CommonPropsAndClassName<
+    Option,
+    IsMulti extends boolean,
+    Group extends GroupBase<Option>,
+  > extends CommonProps<Option, IsMulti, Group> {
     customProps?: ReactSelectStateManagerProps<Option, IsMulti, Group> & CustomSelectProps
   }
 }
 
 export type Option = {
   [key: string]: unknown
-  value: unknown
   //* The ID is used to identify the option in the UI. If it doesn't exist and value cannot be transformed into a string, sorting won't work */
   id?: string
+  value: unknown
 }
 
 export type OptionGroup = {
@@ -43,39 +44,42 @@ export type OptionGroup = {
 }
 
 export type Props = {
-  inputId?: string
-  className?: string
-  value?: Option | Option[],
-  onChange?: (value: any) => void, // eslint-disable-line @typescript-eslint/no-explicit-any
-  onMenuOpen?: () => void
-  disabled?: boolean,
-  showError?: boolean,
-  options: Option[] | OptionGroup[]
-  /** Allows you to specify multiple values instead of just one */
-  isMulti?: boolean,
-  /** Allows you to create own values in the UI despite them not being pre-specified */
-  isCreatable?: boolean,
-  isLoading?: boolean
-  isOptionSelected?: any
-  isSortable?: boolean,
-  onInputChange?: (val: string) => void
-  onMenuScrollToBottom?: () => void
-  placeholder?: string
-  isSearchable?: boolean
-  isClearable?: boolean
+  backspaceRemovesValue?: boolean
   blurInputOnSelect?: boolean
-  filterOption?:
-  | (({ label, value, data }: { label: string, value: string, data: Option }, search: string) => boolean)
-  | undefined,
-  numberOnly?: boolean,
+  className?: string
   components?: {
     [key: string]: React.FC<any>
   }
   customProps?: CustomSelectProps
-  /**
-  * @deprecated Since version 1.0. Will be deleted in version 2.0. Use customProps instead.
-  */
-  selectProps?: CustomSelectProps
-  backspaceRemovesValue?: boolean
+  disabled?: boolean
+  filterOption?:
+    | ((
+        { data, label, value }: { data: Option; label: string; value: string },
+        search: string,
+      ) => boolean)
+    | undefined
+  inputId?: string
+  isClearable?: boolean
+  /** Allows you to create own values in the UI despite them not being pre-specified */
+  isCreatable?: boolean
+  isLoading?: boolean
+  /** Allows you to specify multiple values instead of just one */
+  isMulti?: boolean
+  isOptionSelected?: any
+  isSearchable?: boolean
+  isSortable?: boolean
   noOptionsMessage?: (obj: { inputValue: string }) => string
+  numberOnly?: boolean
+  onChange?: (value: any) => void // eslint-disable-line @typescript-eslint/no-explicit-any
+  onInputChange?: (val: string) => void
+  onMenuOpen?: () => void
+  onMenuScrollToBottom?: () => void
+  options: Option[] | OptionGroup[]
+  placeholder?: string
+  /**
+   * @deprecated Since version 1.0. Will be deleted in version 2.0. Use customProps instead.
+   */
+  selectProps?: CustomSelectProps
+  showError?: boolean
+  value?: Option | Option[]
 }

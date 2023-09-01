@@ -1,39 +1,49 @@
-import path from 'path';
-import { Config } from './types';
+import path from 'path'
+
+import type { Config } from './types'
 
 export const defaults: Omit<Config, 'db'> = {
-  serverURL: '',
-  defaultDepth: 2,
-  maxDepth: 10,
-  defaultMaxTextLength: 40000,
-  collections: [],
-  globals: [],
-  endpoints: [],
-  cookiePrefix: 'payload',
-  csrf: [],
-  cors: [],
   admin: {
+    avatar: 'default',
     buildPath: path.resolve(process.cwd(), './build'),
+    components: {},
+    css: path.resolve(__dirname, '../admin/scss/custom.css'),
+    dateFormat: 'MMMM do yyyy, h:mm a',
+    disable: false,
+    inactivityRoute: '/logout-inactivity',
+    indexHTML: path.resolve(__dirname, '../admin/index.html'),
+    logoutRoute: '/logout',
     meta: {
       titleSuffix: '- Payload',
     },
-    disable: false,
-    indexHTML: path.resolve(__dirname, '../admin/index.html'),
-    avatar: 'default',
-    components: {},
-    logoutRoute: '/logout',
-    inactivityRoute: '/logout-inactivity',
-    css: path.resolve(__dirname, '../admin/scss/custom.css'),
-    dateFormat: 'MMMM do yyyy, h:mm a',
   },
-  typescript: {
-    outputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/payload-types.ts`,
+  collections: [],
+  cookiePrefix: 'payload',
+  cors: [],
+  csrf: [],
+  custom: {},
+  defaultDepth: 2,
+  defaultMaxTextLength: 40000,
+  endpoints: [],
+  express: {
+    compression: {},
+    json: {},
+    middleware: [],
+    postMiddleware: [],
+    preMiddleware: [],
   },
-  upload: {},
+  globals: [],
   graphQL: {
-    maxComplexity: 1000,
     disablePlaygroundInProduction: true,
+    maxComplexity: 1000,
     schemaOutputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/schema.graphql`,
+  },
+  hooks: {},
+  localization: false,
+  maxDepth: 10,
+  rateLimit: {
+    max: 500,
+    window: 15 * 60 * 100, // 15min default,
   },
   routes: {
     admin: '/admin',
@@ -41,19 +51,10 @@ export const defaults: Omit<Config, 'db'> = {
     graphQL: '/graphql',
     graphQLPlayground: '/graphql-playground',
   },
-  rateLimit: {
-    window: 15 * 60 * 100, // 15min default,
-    max: 500,
-  },
-  express: {
-    json: {},
-    compression: {},
-    middleware: [],
-    preMiddleware: [],
-    postMiddleware: [],
-  },
-  hooks: {},
-  localization: false,
+  serverURL: '',
   telemetry: true,
-  custom: {},
-};
+  typescript: {
+    outputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/payload-types.ts`,
+  },
+  upload: {},
+}

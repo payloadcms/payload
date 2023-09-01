@@ -1,20 +1,21 @@
-import path from 'path';
-import { CollectionConfig } from '../../../../src/collections/config/types';
+import path from 'path'
+
+import type { CollectionConfig } from '../../../../src/collections/config/types'
 
 type TypeWithFile = {
-  filename: string;
-  mimeType: string;
-  filesize: number;
+  filename: string
+  filesize: number
+  mimeType: string
 } & Record<string, unknown>
 
 function docHasFilename(doc: Record<string, unknown>): doc is TypeWithFile {
   if (typeof doc === 'object' && 'filename' in doc) {
-    return true;
+    return true
   }
-  return false;
+  return false
 }
 
-export const adminThumbnailSrc = '/media/image-640x480.png';
+export const adminThumbnailSrc = '/media/image-640x480.png'
 
 export const AdminThumbnailCol: CollectionConfig = {
   slug: 'admin-thumbnail',
@@ -23,14 +24,14 @@ export const AdminThumbnailCol: CollectionConfig = {
     adminThumbnail: ({ doc }) => {
       if (docHasFilename(doc)) {
         if (doc.mimeType.startsWith('image/')) {
-          return null; // Fallback to default admin thumbnail if image
+          return null // Fallback to default admin thumbnail if image
         }
-        return adminThumbnailSrc; // Use custom thumbnail if not image
+        return adminThumbnailSrc // Use custom thumbnail if not image
       }
-      return null;
+      return null
     },
   },
   fields: [],
-};
+}
 
-export default AdminThumbnailCol;
+export default AdminThumbnailCol

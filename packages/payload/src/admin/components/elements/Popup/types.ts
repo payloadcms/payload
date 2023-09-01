@@ -1,22 +1,22 @@
-import { CSSProperties } from 'react';
+import type { CSSProperties } from 'react'
 
 export type Props = {
-  className?: string
-  buttonClassName?: string
-  render?: (any) => React.ReactNode,
-  children?: React.ReactNode,
-  verticalAlign?: 'top' | 'bottom'
-  horizontalAlign?: 'left' | 'center' | 'right',
-  size?: 'small' | 'large' | 'wide',
-  color?: 'light' | 'dark',
-  buttonType?: 'default' | 'custom' | 'none',
-  button?: React.ReactNode,
-  forceOpen?: boolean
-  showOnHover?: boolean,
-  initActive?: boolean,
-  onToggleOpen?: (active: boolean) => void,
-  backgroundColor?: CSSProperties['backgroundColor'],
-  padding?: CSSProperties['padding'],
+  backgroundColor?: CSSProperties['backgroundColor']
   boundingRef?: React.MutableRefObject<HTMLElement>
+  button?: React.ReactNode
+  buttonClassName?: string
+  buttonType?: 'custom' | 'default' | 'none'
+  children?: React.ReactNode
+  className?: string
+  color?: 'dark' | 'light'
+  forceOpen?: boolean
+  horizontalAlign?: 'center' | 'left' | 'right'
+  initActive?: boolean
+  onToggleOpen?: (active: boolean) => void
+  padding?: CSSProperties['padding']
+  render?: (any) => React.ReactNode
+  showOnHover?: boolean
   showScrollbar?: boolean
+  size?: 'large' | 'small' | 'wide'
+  verticalAlign?: 'bottom' | 'top'
 }

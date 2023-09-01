@@ -1,58 +1,54 @@
-import payload from '..';
+import payload from '..'
 
 export const migrate = async (args: string[]): Promise<void> => {
   // Barebones instance to access database adapter
   await payload.init({
-    secret: '--unused--',
     local: true,
-  });
+    secret: '--unused--',
+  })
 
-  const adapter = payload.db;
+  const adapter = payload.db
 
   if (!adapter) {
-    throw new Error('No database adapter found');
+    throw new Error('No database adapter found')
   }
 
   switch (args[0]) {
     case 'migrate':
-      await adapter.migrate();
-      break;
+      await adapter.migrate()
+      break
     case 'migrate:status':
-      await adapter.migrateStatus();
-      break;
+      await adapter.migrateStatus()
+      break
     case 'migrate:down':
-      await adapter.migrateDown();
-      break;
+      await adapter.migrateDown()
+      break
     case 'migrate:refresh':
-      await adapter.migrateRefresh();
-      break;
+      await adapter.migrateRefresh()
+      break
     case 'migrate:reset':
-      await adapter.migrateReset();
-      break;
+      await adapter.migrateReset()
+      break
     case 'migrate:fresh':
-      await adapter.migrateFresh();
-      break;
+      await adapter.migrateFresh()
+      break
     case 'migrate:create':
       try {
-        await adapter.createMigration(
-          payload,
-          '.migrations',
-          args[1],
-        );
+        await adapter.createMigration(payload, '.migrations', args[1])
       } catch (err) {
-        throw new Error(`Error creating migration: ${err.message}`);
+        throw new Error(`Error creating migration: ${err.message}`)
       }
-      break;
+      break
 
     default:
-      throw new Error(`Unknown migration command: ${args[0]}`);
+      throw new Error(`Unknown migration command: ${args[0]}`)
   }
-};
+}
 
 // When launched directly call migrate
 if (module.id === require.main.id) {
-  const args = process.argv.slice(2);
+  const args = process.argv.slice(2)
   migrate(args).then(() => {
-    process.exit(0);
-  });
+    process.exit(0)
+  })
 }

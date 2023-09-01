@@ -1,17 +1,14 @@
-import React from 'react';
-import ULIcon from '../../../../../icons/UnorderedList';
-import ListButton from '../ListButton';
+import React from 'react'
 
-import './index.scss';
+import ULIcon from '../../../../../icons/UnorderedList'
+import ListButton from '../ListButton'
+import './index.scss'
 
 const UL = ({ attributes, children }) => (
-  <ul
-    className="rich-text-ul"
-    {...attributes}
-  >
+  <ul className="rich-text-ul" {...attributes}>
     {children}
   </ul>
-);
+)
 
 const ul = {
   Button: () => (
@@ -20,6 +17,6 @@ const ul = {
     </ListButton>
   ),
   Element: UL,
-};
+}
 
-export default ul;
+export default ul

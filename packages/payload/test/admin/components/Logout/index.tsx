@@ -1,23 +1,19 @@
-import React from 'react';
-import { useConfig } from '../../../../src/admin/components/utilities/Config';
-import LogOut from '../../../../src/admin/components/icons/LogOut';
+import React from 'react'
 
+import LogOut from '../../../../src/admin/components/icons/LogOut'
+import { useConfig } from '../../../../src/admin/components/utilities/Config'
 
 const Logout: React.FC = () => {
-  const config = useConfig();
+  const config = useConfig()
   const {
-    routes: {
-      admin,
-    },
-    admin: {
-      logoutRoute
-    },
-  } = config;
+    admin: { logoutRoute },
+    routes: { admin },
+  } = config
   return (
     <a href={`${admin}${logoutRoute}#custom`}>
       <LogOut />
     </a>
-  );
-};
+  )
+}
 
-export default Logout;
+export default Logout

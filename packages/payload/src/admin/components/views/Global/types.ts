@@ -1,21 +1,21 @@
-import { GlobalPermission } from '../../../../auth/types';
-import { SanitizedGlobalConfig } from '../../../../globals/config/types';
-import { Fields } from '../../forms/Form/types';
-import { Document } from '../../../../types';
+import type { GlobalPermission } from '../../../../auth/types'
+import type { SanitizedGlobalConfig } from '../../../../globals/config/types'
+import type { Document } from '../../../../types'
+import type { Fields } from '../../forms/Form/types'
 
 export type IndexProps = {
   global: SanitizedGlobalConfig
 }
 
 export type Props = {
-  global: SanitizedGlobalConfig
-  data: Document
-  onSave: () => void
-  permissions: GlobalPermission
   action: string
   apiURL: string
+  autosaveEnabled: boolean
+  data: Document
+  global: SanitizedGlobalConfig
   initialState: Fields
   isLoading: boolean
-  autosaveEnabled: boolean
+  onSave: () => void
+  permissions: GlobalPermission
   updatedAt: string
 }

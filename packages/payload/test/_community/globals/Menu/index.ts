@@ -1,6 +1,6 @@
-import { GlobalConfig } from '../../../../src/globals/config/types';
+import type { GlobalConfig } from '../../../../src/globals/config/types'
 
-export const menuSlug = 'menu';
+export const menuSlug = 'menu'
 
 export const MenuGlobal: GlobalConfig = {
   slug: menuSlug,
@@ -10,4 +10,4 @@ export const MenuGlobal: GlobalConfig = {
       type: 'text',
     },
   ],
-};
+}

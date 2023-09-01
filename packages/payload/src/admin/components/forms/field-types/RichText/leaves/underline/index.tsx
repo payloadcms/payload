@@ -1,10 +1,9 @@
-import React from 'react';
-import LeafButton from '../Button';
-import UnderlineIcon from '../../../../../icons/Underline';
+import React from 'react'
 
-const Underline = ({ attributes, children }) => (
-  <u {...attributes}>{children}</u>
-);
+import UnderlineIcon from '../../../../../icons/Underline'
+import LeafButton from '../Button'
+
+const Underline = ({ attributes, children }) => <u {...attributes}>{children}</u>
 
 const underline = {
   Button: () => (
@@ -13,6 +12,6 @@ const underline = {
     </LeafButton>
   ),
   Leaf: Underline,
-};
+}
 
-export default underline;
+export default underline

@@ -1,7 +1,6 @@
 @import '../../../scss/styles.scss';
 
 .edit-many {
-
   &__toggle {
     font-size: 1rem;
     line-height: base(1);
@@ -13,7 +12,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     border: 0;
-    padding: 0 base(.25);
+    padding: 0 base(0.25);
     align-items: center;
     cursor: pointer;
     text-decoration: none;
@@ -67,14 +66,14 @@
         width: base(2.75);
         height: base(2.75);
         position: relative;
-        [dir=ltr] & {
-          left: base(-.825);
+        [dir='ltr'] & {
+          left: base(-0.825);
         }
 
-        [dir=rtl] & {
-          right: base(-.825);
+        [dir='rtl'] & {
+          right: base(-0.825);
         }
-        top: base(-.825);
+        top: base(-0.825);
 
         .stroke {
           stroke-width: 2px;
@@ -89,12 +88,12 @@
     padding-bottom: base(2);
     flex-grow: 1;
   }
-  [dir=rtl] &__sidebar-wrap {
+  [dir='rtl'] &__sidebar-wrap {
     left: 0;
     border-right: 1px solid var(--theme-elevation-100);
-    right:auto
+    right: auto;
   }
-  
+
   &__sidebar-wrap {
     position: fixed;
     width: base(15);
@@ -120,10 +119,10 @@
   &__collection-actions,
   &__meta,
   &__sidebar-fields {
-    [dir=ltr] & {
+    [dir='ltr'] & {
       padding-left: base(1.5);
     }
-    [dir=rtl] & {
+    [dir='rtl'] & {
       padding-right: base(1.5);
     }
   }
@@ -148,7 +147,7 @@
     display: flex;
     flex-wrap: wrap;
     padding: base(1);
-    gap: base(.5);
+    gap: base(0.5);
 
     .form-submit {
       width: calc(50% - #{base(1)});
@@ -160,8 +159,8 @@
 
       .btn {
         width: 100%;
-        padding-left: base(.5);
-        padding-right: base(.5);
+        padding-left: base(0.5);
+        padding-right: base(0.5);
         margin-bottom: 0;
       }
     }

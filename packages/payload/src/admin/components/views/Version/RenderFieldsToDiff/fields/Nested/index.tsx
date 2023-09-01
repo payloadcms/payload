@@ -1,54 +1,52 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import RenderFieldsToDiff from '../..';
-import { Props } from '../types';
-import Label from '../../Label';
-import { FieldWithSubFields } from '../../../../../../../fields/config/types';
-import { getTranslation } from '../../../../../../../utilities/getTranslation';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-import './index.scss';
+import type { FieldWithSubFields } from '../../../../../../../fields/config/types'
+import type { Props } from '../types'
 
-const baseClass = 'nested-diff';
+import RenderFieldsToDiff from '../..'
+import { getTranslation } from '../../../../../../../utilities/getTranslation'
+import Label from '../../Label'
+import './index.scss'
 
-const Nested: React.FC<Props & { field: FieldWithSubFields}> = ({
-  version,
+const baseClass = 'nested-diff'
+
+const Nested: React.FC<Props & { field: FieldWithSubFields }> = ({
   comparison,
-  permissions,
+  disableGutter = false,
   field,
+  fieldComponents,
   locale,
   locales,
-  fieldComponents,
-  disableGutter = false,
+  permissions,
+  version,
 }) => {
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation()
 
   return (
     <div className={baseClass}>
       {field.label && (
         <Label>
-          {locale && (
-            <span className={`${baseClass}__locale-label`}>{locale}</span>
-          )}
+          {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
           {getTranslation(field.label, i18n)}
         </Label>
       )}
-      <div className={[
-        `${baseClass}__wrap`,
-        !disableGutter && `${baseClass}__wrap--gutter`,
-      ].filter(Boolean)
-        .join(' ')}
+      <div
+        className={[`${baseClass}__wrap`, !disableGutter && `${baseClass}__wrap--gutter`]
+          .filter(Boolean)
+          .join(' ')}
       >
         <RenderFieldsToDiff
-          locales={locales}
-          version={version}
           comparison={comparison}
+          fieldComponents={fieldComponents}
           fieldPermissions={permissions}
           fields={field.fields}
-          fieldComponents={fieldComponents}
+          locales={locales}
+          version={version}
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Nested;
+export default Nested

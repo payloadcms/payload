@@ -1,82 +1,90 @@
-import { Field } from '../fields/config/types';
-import { Config } from '../config/types';
-import { CollectionConfig } from '../collections/config/types';
-import { mimeTypeValidator } from './mimeTypeValidator';
-import { IncomingUploadType } from './types';
-import { extractTranslations } from '../translations/extractTranslations';
+import type { CollectionConfig } from '../collections/config/types'
+import type { Config } from '../config/types'
+import type { Field } from '../fields/config/types'
+import type { IncomingUploadType } from './types'
 
-const labels = extractTranslations(['upload:width', 'upload:height', 'upload:fileSize', 'upload:fileName', 'upload:sizes']);
+import { extractTranslations } from '../translations/extractTranslations'
+import { mimeTypeValidator } from './mimeTypeValidator'
+
+const labels = extractTranslations([
+  'upload:width',
+  'upload:height',
+  'upload:fileSize',
+  'upload:fileName',
+  'upload:sizes',
+])
 
 type Options = {
-  config: Config
   collection: CollectionConfig
+  config: Config
 }
 
-const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
-  const uploadOptions: IncomingUploadType = typeof collection.upload === 'object' ? collection.upload : {};
+const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
+  const uploadOptions: IncomingUploadType =
+    typeof collection.upload === 'object' ? collection.upload : {}
 
   const mimeType: Field = {
-    name: 'mimeType',
-    label: 'MIME Type',
-    type: 'text',
     admin: {
-      readOnly: true,
       hidden: true,
+      readOnly: true,
     },
-  };
+    label: 'MIME Type',
+    name: 'mimeType',
+    type: 'text',
+  }
 
   const url: Field = {
-    name: 'url',
-    label: 'URL',
-    type: 'text',
     admin: {
-      readOnly: true,
       hidden: true,
+      readOnly: true,
     },
-  };
+    label: 'URL',
+    name: 'url',
+    type: 'text',
+  }
 
   const width: Field = {
-    name: 'width',
-    label: labels['upload:width'],
-    type: 'number',
     admin: {
-      readOnly: true,
       hidden: true,
+      readOnly: true,
     },
-  };
+    label: labels['upload:width'],
+    name: 'width',
+    type: 'number',
+  }
 
   const height: Field = {
-    name: 'height',
-    label: labels['upload:height'],
-    type: 'number',
     admin: {
-      readOnly: true,
       hidden: true,
+      readOnly: true,
     },
-  };
+    label: labels['upload:height'],
+    name: 'height',
+    type: 'number',
+  }
 
   const filesize: Field = {
-    name: 'filesize',
-    label: labels['upload:fileSize'],
-    type: 'number',
     admin: {
-      readOnly: true,
       hidden: true,
+      readOnly: true,
     },
-  };
+    label: labels['upload:fileSize'],
+    name: 'filesize',
+    type: 'number',
+  }
 
   const filename: Field = {
-    name: 'filename',
-    label: labels['upload:fileName'],
-    type: 'text',
-    index: true,
-    unique: true,
     admin: {
-      readOnly: true,
-      hidden: true,
       disableBulkEdit: true,
+      hidden: true,
+      readOnly: true,
     },
-  };
+    index: true,
+    label: labels['upload:fileName'],
+    name: 'filename',
+    type: 'text',
+    unique: true,
+  }
 
   let uploadFields: Field[] = [
     {
@@ -86,12 +94,12 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
           ({ data }) => {
             if (data?.filename) {
               if (uploadOptions.staticURL.startsWith('/')) {
-                return `${config.serverURL}${uploadOptions.staticURL}/${data.filename}`;
+                return `${config.serverURL}${uploadOptions.staticURL}/${data.filename}`
               }
-              return `${uploadOptions.staticURL}/${data.filename}`;
+              return `${uploadOptions.staticURL}/${data.filename}`
             }
 
-            return undefined;
+            return undefined
           },
         ],
       },
@@ -101,25 +109,19 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
     filesize,
     width,
     height,
-  ];
+  ]
 
   if (uploadOptions.mimeTypes) {
-    mimeType.validate = mimeTypeValidator(uploadOptions.mimeTypes);
+    mimeType.validate = mimeTypeValidator(uploadOptions.mimeTypes)
   }
 
   if (uploadOptions.imageSizes) {
     uploadFields = uploadFields.concat([
       {
-        name: 'sizes',
-        label: labels['upload:Sizes'],
-        type: 'group',
         admin: {
           hidden: true,
         },
         fields: uploadOptions.imageSizes.map((size) => ({
-          label: size.name,
-          name: size.name,
-          type: 'group',
           admin: {
             hidden: true,
           },
@@ -129,16 +131,16 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
               hooks: {
                 afterRead: [
                   ({ data }) => {
-                    const sizeFilename = data?.sizes?.[size.name]?.filename;
+                    const sizeFilename = data?.sizes?.[size.name]?.filename
 
                     if (sizeFilename) {
                       if (uploadOptions.staticURL.startsWith('/')) {
-                        return `${config.serverURL}${uploadOptions.staticURL}/${sizeFilename}`;
+                        return `${config.serverURL}${uploadOptions.staticURL}/${sizeFilename}`
                       }
-                      return `${uploadOptions.staticURL}/${sizeFilename}`;
+                      return `${uploadOptions.staticURL}/${sizeFilename}`
                     }
 
-                    return undefined;
+                    return undefined
                   },
                 ],
               },
@@ -152,11 +154,17 @@ const getBaseUploadFields = ({ config, collection }: Options): Field[] => {
               unique: false,
             },
           ],
+          label: size.name,
+          name: size.name,
+          type: 'group',
         })),
+        label: labels['upload:Sizes'],
+        name: 'sizes',
+        type: 'group',
       },
-    ]);
+    ])
   }
-  return uploadFields;
-};
+  return uploadFields
+}
 
-export default getBaseUploadFields;
+export default getBaseUploadFields

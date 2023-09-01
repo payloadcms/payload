@@ -1,5 +1,5 @@
-import { Readable } from 'stream';
-import fs from 'fs';
+import fs from 'fs'
+import { Readable } from 'stream'
 
 /**
  * Save buffer data to a file.
@@ -8,14 +8,14 @@ import fs from 'fs';
  */
 const saveBufferToFile = async (buffer: Buffer, filePath: string): Promise<void> => {
   // Setup readable stream from buffer.
-  let streamData = buffer;
-  const readStream = new Readable();
+  let streamData = buffer
+  const readStream = new Readable()
   readStream._read = () => {
-    readStream.push(streamData);
-    streamData = null;
-  };
+    readStream.push(streamData)
+    streamData = null
+  }
   // Setup file system writable stream.
-  return fs.writeFileSync(filePath, buffer);
-};
+  return fs.writeFileSync(filePath, buffer)
+}
 
-export default saveBufferToFile;
+export default saveBufferToFile

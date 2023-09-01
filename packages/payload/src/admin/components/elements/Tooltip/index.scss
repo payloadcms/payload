@@ -4,16 +4,16 @@
   --caret-size: 6px;
 
   opacity: 0;
-	background-color: var(--theme-elevation-800);
-	position: absolute;
-	z-index: 2;
-	left: 50%;
-	padding: base(.2) base(.4);
-	color: var(--theme-elevation-0);
-	line-height: base(.75);
-	font-weight: normal;
-	white-space: nowrap;
-	border-radius: 2px;
+  background-color: var(--theme-elevation-800);
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  padding: base(0.2) base(0.4);
+  color: var(--theme-elevation-0);
+  line-height: base(0.75);
+  font-weight: normal;
+  white-space: nowrap;
+  border-radius: 2px;
   visibility: hidden;
 
   &::after {
@@ -31,7 +31,7 @@
   &--show {
     visibility: visible;
     opacity: 1;
-    transition: opacity .2s ease-in-out;
+    transition: opacity 0.2s ease-in-out;
     cursor: default;
   }
 
@@ -60,10 +60,9 @@
   }
 }
 
-
-html[data-theme=light] {
+html[data-theme='light'] {
   .tooltip {
-	  background-color: var(--theme-error-250);
+    background-color: var(--theme-error-250);
     color: var(--theme-error-750);
 
     &--position-top:after {

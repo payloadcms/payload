@@ -1,23 +1,22 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { Props } from './types';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-import './index.scss';
+import type { Props } from './types'
 
-const baseClass = 'error-pill';
+import './index.scss'
+
+const baseClass = 'error-pill'
 
 export const ErrorPill: React.FC<Props> = (props) => {
-  const { className, count, withMessage } = props;
-  const lessThan3Chars = !withMessage && count < 99;
-  const { t } = useTranslation();
+  const { className, count, withMessage } = props
+  const lessThan3Chars = !withMessage && count < 99
+  const { t } = useTranslation()
 
-  const classes = [
-    baseClass,
-    lessThan3Chars && `${baseClass}--fixed-width`,
-    className && className,
-  ].filter(Boolean).join(' ');
+  const classes = [baseClass, lessThan3Chars && `${baseClass}--fixed-width`, className && className]
+    .filter(Boolean)
+    .join(' ')
 
-  if (count === 0) return null;
+  if (count === 0) return null
 
   return (
     <div className={classes}>
@@ -26,5 +25,5 @@ export const ErrorPill: React.FC<Props> = (props) => {
         {withMessage && ` ${count > 1 ? t('general:errors') : t('general:error')}`}
       </div>
     </div>
-  );
-};
+  )
+}

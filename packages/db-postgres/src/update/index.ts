@@ -1,8 +1,10 @@
-import { UpdateOne } from 'payload/database';
-import toSnakeCase from 'to-snake-case';
-import { SQL } from 'drizzle-orm';
-import buildQuery from '../queries/buildQuery';
-import { upsertRow } from '../upsertRow';
+import type { SQL } from 'drizzle-orm'
+import type { UpdateOne } from 'payload/database'
+
+import toSnakeCase from 'to-snake-case'
+
+import buildQuery from '../queries/buildQuery'
+import { upsertRow } from '../upsertRow'
 
 export const updateOne: UpdateOne = async function updateOne({
   collection: collectionSlug,
@@ -13,9 +15,9 @@ export const updateOne: UpdateOne = async function updateOne({
   req,
   where,
 }) {
-  const collection = this.payload.collections[collectionSlug].config;
+  const collection = this.payload.collections[collectionSlug].config
 
-  let query: SQL<unknown>;
+  let query: SQL<unknown>
 
   if (where) {
     query = await buildQuery({
@@ -23,7 +25,7 @@ export const updateOne: UpdateOne = async function updateOne({
       collectionSlug,
       locale,
       where,
-    });
+    })
   }
 
   const result = await upsertRow({
@@ -36,7 +38,7 @@ export const updateOne: UpdateOne = async function updateOne({
     operation: 'update',
     tableName: toSnakeCase(collectionSlug),
     where: query,
-  });
+  })
 
-  return result;
-};
+  return result
+}

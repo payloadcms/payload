@@ -1,22 +1,27 @@
-import { User } from '../auth';
+import type { User } from '../auth'
 
 type Args = {
-  value?: unknown,
-  defaultValue: unknown,
-  user: User,
-  locale: string | undefined,
-};
+  defaultValue: unknown
+  locale: string | undefined
+  user: User
+  value?: unknown
+}
 
-const getValueWithDefault = async ({ value, defaultValue, locale, user }: Args): Promise<unknown> => {
+const getValueWithDefault = async ({
+  defaultValue,
+  locale,
+  user,
+  value,
+}: Args): Promise<unknown> => {
   if (typeof value !== 'undefined') {
-    return value;
+    return value
   }
 
   if (defaultValue && typeof defaultValue === 'function') {
-    return defaultValue({ locale, user });
+    return defaultValue({ locale, user })
   }
 
-  return defaultValue;
-};
+  return defaultValue
+}
 
-export default getValueWithDefault;
+export default getValueWithDefault

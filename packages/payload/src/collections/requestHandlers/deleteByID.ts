@@ -1,32 +1,37 @@
-import { NextFunction, Response } from 'express';
-import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import { NotFound } from '../../errors';
-import { Document } from '../../types';
-import deleteByID from '../operations/deleteByID';
+import type { NextFunction, Response } from 'express'
+
+import httpStatus from 'http-status'
+
+import type { PayloadRequest } from '../../express/types'
+import type { Document } from '../../types'
+
+import { NotFound } from '../../errors'
+import deleteByID from '../operations/deleteByID'
 
 export type DeleteResult = {
-  message: string;
-  doc: Document;
+  doc: Document
+  message: string
 }
 
-export default async function deleteByIDHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<Response<DeleteResult> | void> {
+export default async function deleteByIDHandler(
+  req: PayloadRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<Response<DeleteResult> | void> {
   try {
     const doc = await deleteByID({
-      req,
       collection: req.collection,
-      id: req.params.id,
       depth: parseInt(String(req.query.depth), 10),
-    });
+      id: req.params.id,
+      req,
+    })
 
     if (!doc) {
-      res.status(httpStatus.NOT_FOUND)
-        .json(new NotFound(req.t));
+      res.status(httpStatus.NOT_FOUND).json(new NotFound(req.t))
     }
 
-    res.status(httpStatus.OK)
-      .send(doc);
+    res.status(httpStatus.OK).send(doc)
   } catch (error) {
-    next(error);
+    next(error)
   }
 }

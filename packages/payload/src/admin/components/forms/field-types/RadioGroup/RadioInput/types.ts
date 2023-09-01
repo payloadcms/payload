@@ -1,11 +1,11 @@
-import { OnChange } from '../types';
+import type { OnChange } from '../types'
 
 export type Props = {
   isSelected: boolean
+  onChange: OnChange
   option: {
     label: Record<string, string> | string
     value: string
   }
-  onChange: OnChange
   path: string
 }

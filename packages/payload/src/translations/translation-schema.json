@@ -1,13 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "type": "object",
   "additionalProperties": false,
   "properties": {
     "$schema": {
       "type": "string"
     },
     "authentication": {
-      "type": "object",
       "additionalProperties": false,
       "properties": {
         "account": {
@@ -228,10 +226,10 @@
         "youAreInactive",
         "youAreReceivingResetPassword",
         "youDidNotRequestPassword"
-      ]
+      ],
+      "type": "object"
     },
     "error": {
-      "type": "object",
       "additionalProperties": false,
       "properties": {
         "accountAlreadyActivated": {
@@ -252,10 +250,10 @@
         "emailOrPasswordIncorrect": {
           "type": "string"
         },
-        "followingFieldsInvalid_other": {
+        "followingFieldsInvalid_one": {
           "type": "string"
         },
-        "followingFieldsInvalid_one": {
+        "followingFieldsInvalid_other": {
           "type": "string"
         },
         "incorrectCollection": {
@@ -312,6 +310,12 @@
         "unPublishingDocument": {
           "type": "string"
         },
+        "unableToDeleteCount": {
+          "type": "string"
+        },
+        "unableToUpdateCount": {
+          "type": "string"
+        },
         "unauthorized": {
           "type": "string"
         },
@@ -319,12 +323,6 @@
           "type": "string"
         },
         "unspecific": {
-          "type": "string"
-        },
-        "unableToDeleteCount": {
-          "type": "string"
-        },
-        "unableToUpdateCount": {
           "type": "string"
         },
         "userLocked": {
@@ -372,48 +370,12 @@
         "userLocked",
         "valueMustBeUnique",
         "verificationTokenInvalid"
-      ]
+      ],
+      "type": "object"
     },
     "fields": {
-      "type": "object",
       "additionalProperties": false,
       "properties": {
-        "block": {
-          "type": "string"
-        },
-        "blocks": {
-          "type": "string"
-        },
-        "chooseBetweenCustomTextOrDocument": {
-          "type": "string"
-        },
-        "chooseDocumentToLink": {
-          "type": "string"
-        },
-        "customURL": {
-          "type": "string"
-        },
-        "editLink": {
-          "type": "string"
-        },
-        "editRelationship": {
-          "type": "string"
-        },
-        "enterURL": {
-          "type": "string"
-        },
-        "internalLink": {
-          "type": "string"
-        },
-        "linkType": {
-          "type": "string"
-        },
-        "openInNewTab": {
-          "type": "string"
-        },
-        "textToDisplay": {
-          "type": "string"
-        },
         "addLabel": {
           "type": "string"
         },
@@ -432,7 +394,19 @@
         "addUpload": {
           "type": "string"
         },
+        "block": {
+          "type": "string"
+        },
         "blockType": {
+          "type": "string"
+        },
+        "blocks": {
+          "type": "string"
+        },
+        "chooseBetweenCustomTextOrDocument": {
+          "type": "string"
+        },
+        "chooseDocumentToLink": {
           "type": "string"
         },
         "chooseFromExisting": {
@@ -444,7 +418,22 @@
         "collapseAll": {
           "type": "string"
         },
+        "customURL": {
+          "type": "string"
+        },
         "editLabelData": {
+          "type": "string"
+        },
+        "editLink": {
+          "type": "string"
+        },
+        "editRelationship": {
+          "type": "string"
+        },
+        "enterURL": {
+          "type": "string"
+        },
+        "internalLink": {
           "type": "string"
         },
         "itemsAndMore": {
@@ -456,6 +445,9 @@
         "latitude": {
           "type": "string"
         },
+        "linkType": {
+          "type": "string"
+        },
         "linkedTo": {
           "type": "string"
         },
@@ -463,6 +455,9 @@
           "type": "string"
         },
         "newLabel": {
+          "type": "string"
+        },
+        "openInNewTab": {
           "type": "string"
         },
         "passwordsDoNotMatch": {
@@ -499,6 +494,9 @@
           "type": "string"
         },
         "swapUpload": {
+          "type": "string"
+        },
+        "textToDisplay": {
           "type": "string"
         },
         "toggleBlock": {
@@ -552,10 +550,10 @@
         "swapUpload",
         "toggleBlock",
         "uploadNewLabel"
-      ]
+      ],
+      "type": "object"
     },
     "general": {
-      "type": "object",
       "additionalProperties": false,
       "properties": {
         "aboutToDelete": {
@@ -1003,22 +1001,16 @@
         "users",
         "value",
         "welcome"
-      ]
+      ],
+      "type": "object"
     },
     "operators": {
-      "type": "object",
       "additionalProperties": false,
       "properties": {
+        "contains": {
+          "type": "string"
+        },
         "equals": {
-          "type": "string"
-        },
-        "isNotEqualTo": {
-          "type": "string"
-        },
-        "isIn": {
-          "type": "string"
-        },
-        "isNotIn": {
           "type": "string"
         },
         "exists": {
@@ -1027,22 +1019,28 @@
         "isGreaterThan": {
           "type": "string"
         },
+        "isGreaterThanOrEqualTo": {
+          "type": "string"
+        },
+        "isIn": {
+          "type": "string"
+        },
         "isLessThan": {
           "type": "string"
         },
         "isLessThanOrEqualTo": {
           "type": "string"
         },
-        "isGreaterThanOrEqualTo": {
-          "type": "string"
-        },
-        "near": {
-          "type": "string"
-        },
         "isLike": {
           "type": "string"
         },
-        "contains": {
+        "isNotEqualTo": {
+          "type": "string"
+        },
+        "isNotIn": {
+          "type": "string"
+        },
+        "near": {
           "type": "string"
         }
       },
@@ -1059,12 +1057,15 @@
         "near",
         "isLike",
         "contains"
-      ]
+      ],
+      "type": "object"
     },
     "upload": {
-      "type": "object",
       "additionalProperties": false,
       "properties": {
+        "dragAndDrop": {
+          "type": "string"
+        },
         "dragAndDropHere": {
           "type": "string"
         },
@@ -1089,9 +1090,6 @@
         "selectFile": {
           "type": "string"
         },
-        "dragAndDrop": {
-          "type": "string"
-        },
         "sizes": {
           "type": "string"
         },
@@ -1111,19 +1109,16 @@
         "dragAndDrop",
         "sizes",
         "width"
-      ]
+      ],
+      "type": "object"
     },
     "validation": {
-      "type": "object",
       "additionalProperties": false,
       "properties": {
         "emailAddress": {
           "type": "string"
         },
         "enterNumber": {
-          "type": "string"
-        },
-        "limitReached": {
           "type": "string"
         },
         "fieldHasNo": {
@@ -1142,6 +1137,9 @@
           "type": "string"
         },
         "lessThanMin": {
+          "type": "string"
+        },
+        "limitReached": {
           "type": "string"
         },
         "longerThanMin": {
@@ -1190,10 +1188,10 @@
         "shorterThanMax",
         "trueOrFalse",
         "validUploadID"
-      ]
+      ],
+      "type": "object"
     },
     "version": {
-      "type": "object",
       "additionalProperties": false,
       "properties": {
         "aboutToPublishSelection": {
@@ -1265,10 +1263,10 @@
         "problemRestoringVersion": {
           "type": "string"
         },
-        "publishChanges": {
+        "publish": {
           "type": "string"
         },
-        "publish": {
+        "publishChanges": {
           "type": "string"
         },
         "published": {
@@ -1298,10 +1296,10 @@
         "selectVersionToCompare": {
           "type": "string"
         },
-        "showingVersionsFor": {
+        "showLocales": {
           "type": "string"
         },
-        "showLocales": {
+        "showingVersionsFor": {
           "type": "string"
         },
         "status": {
@@ -1322,13 +1320,13 @@
         "versionCount_many": {
           "type": "string"
         },
-        "versionCount_other": {
-          "type": "string"
-        },
         "versionCount_none": {
           "type": "string"
         },
         "versionCount_one": {
+          "type": "string"
+        },
+        "versionCount_other": {
           "type": "string"
         },
         "versionCreatedOn": {
@@ -1406,7 +1404,8 @@
         "viewingVersionGlobal",
         "viewingVersions",
         "viewingVersionsGlobal"
-      ]
+      ],
+      "type": "object"
     }
   },
   "required": [
@@ -1418,5 +1417,6 @@
     "upload",
     "validation",
     "version"
-  ]
+  ],
+  "type": "object"
 }

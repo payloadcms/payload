@@ -1,45 +1,33 @@
-import React from 'react';
-import Button from '../Button';
-import { Props } from './types';
+import React from 'react'
 
-import './index.scss';
+import type { Props } from './types'
 
-const baseClass = 'card';
+import Button from '../Button'
+import './index.scss'
+
+const baseClass = 'card'
 
 const Card: React.FC<Props> = (props) => {
-  const { id, title, titleAs, buttonAriaLabel, actions, onClick } = props;
+  const { actions, buttonAriaLabel, id, onClick, title, titleAs } = props
 
-  const classes = [
-    baseClass,
-    id,
-    onClick && `${baseClass}--has-onclick`,
-  ].filter(Boolean).join(' ');
+  const classes = [baseClass, id, onClick && `${baseClass}--has-onclick`].filter(Boolean).join(' ')
 
-  const Tag = titleAs ?? 'div';
+  const Tag = titleAs ?? 'div'
 
   return (
-    <div
-      className={classes}
-      id={id}
-    >
-      <Tag className={`${baseClass}__title`}>
-        {title}
-      </Tag>
-      {actions && (
-        <div className={`${baseClass}__actions`}>
-          {actions}
-        </div>
-      )}
+    <div className={classes} id={id}>
+      <Tag className={`${baseClass}__title`}>{title}</Tag>
+      {actions && <div className={`${baseClass}__actions`}>{actions}</div>}
       {onClick && (
         <Button
           aria-label={buttonAriaLabel}
-          className={`${baseClass}__click`}
           buttonStyle="none"
+          className={`${baseClass}__click`}
           onClick={onClick}
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Card;
+export default Card

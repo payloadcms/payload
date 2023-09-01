@@ -1,7 +1,7 @@
 @import '../../../../../../scss/styles.scss';
 
 $icon-width: base(1);
-$icon-margin: base(.25);
+$icon-margin: base(0.25);
 
 .block-search {
   position: sticky;
@@ -20,7 +20,7 @@ $icon-margin: base(.25);
     position: absolute;
     top: 50%;
     transform: translate3d(0, -50%, 0);
-    right: base(.25);
+    right: base(0.25);
     width: $icon-width;
     margin: 0 $icon-margin;
 

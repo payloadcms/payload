@@ -1,8 +1,8 @@
-import { SanitizedCollectionConfig } from '../../../../collections/config/types';
+import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
 
 export type Props = {
-  doc: Record<string, unknown>
-  collection: SanitizedCollectionConfig
-  size?: 'small' | 'medium' | 'large' | 'expand',
   className?: string
+  collection: SanitizedCollectionConfig
+  doc: Record<string, unknown>
+  size?: 'expand' | 'large' | 'medium' | 'small'
 }

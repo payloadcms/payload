@@ -1,88 +1,84 @@
-import { Where } from '../../types';
-import { PayloadRequest } from '../../express/types';
-import executeAccess from '../../auth/executeAccess';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { Collection } from '../config/types';
-import type { PaginatedDocs } from '../../database/types';
-import { TypeWithVersion } from '../../versions/types';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
-import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
-import { combineQueries } from '../../database/combineQueries';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import type { PaginatedDocs } from '../../database/types'
+import type { PayloadRequest } from '../../express/types'
+import type { Where } from '../../types'
+import type { TypeWithVersion } from '../../versions/types'
+import type { Collection } from '../config/types'
+
+import executeAccess from '../../auth/executeAccess'
+import { combineQueries } from '../../database/combineQueries'
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths'
+import { afterRead } from '../../fields/hooks/afterRead'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields'
 
 export type Arguments = {
   collection: Collection
-  where?: Where
-  page?: number
-  limit?: number
-  sort?: string
   depth?: number
-  req?: PayloadRequest
+  limit?: number
   overrideAccess?: boolean
+  page?: number
+  req?: PayloadRequest
   showHiddenFields?: boolean
+  sort?: string
+  where?: Where
 }
 
 async function findVersions<T extends TypeWithVersion<T>>(
   args: Arguments,
 ): Promise<PaginatedDocs<T>> {
   const {
-    where,
-    page,
-    limit,
+    collection: { config: collectionConfig },
     depth,
-    collection: {
-      config: collectionConfig,
-    },
-    sort,
-    req,
-    req: {
-      locale,
-      payload,
-    },
+    limit,
     overrideAccess,
+    page,
+    req: { locale, payload },
+    req,
     showHiddenFields,
-  } = args;
+    sort,
+    where,
+  } = args
 
   try {
-    const shouldCommit = await initTransaction(req);
+    const shouldCommit = await initTransaction(req)
 
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
-    let accessResults;
+    let accessResults
 
     if (!overrideAccess) {
-      accessResults = await executeAccess({ req }, collectionConfig.access.readVersions);
+      accessResults = await executeAccess({ req }, collectionConfig.access.readVersions)
     }
 
-    const versionFields = buildVersionCollectionFields(collectionConfig);
+    const versionFields = buildVersionCollectionFields(collectionConfig)
 
     await validateQueryPaths({
       collectionConfig,
+      overrideAccess,
+      req,
       versionFields,
       where,
-      req,
-      overrideAccess,
-    });
+    })
 
-    const fullWhere = combineQueries(where, accessResults);
+    const fullWhere = combineQueries(where, accessResults)
 
     // /////////////////////////////////////
     // Find
     // /////////////////////////////////////
 
     const paginatedDocs = await payload.db.findVersions<T>({
-      where: fullWhere,
-      page: page || 1,
-      limit: limit ?? 10,
       collection: collectionConfig.slug,
-      sort,
+      limit: limit ?? 10,
       locale,
+      page: page || 1,
       req,
-    });
+      sort,
+      where: fullWhere,
+    })
 
     // /////////////////////////////////////
     // beforeRead - Collection
@@ -90,22 +86,25 @@ async function findVersions<T extends TypeWithVersion<T>>(
 
     let result = {
       ...paginatedDocs,
-      docs: await Promise.all(paginatedDocs.docs.map(async (doc) => {
-        const docRef = doc;
-        await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-          await priorHook;
+      docs: await Promise.all(
+        paginatedDocs.docs.map(async (doc) => {
+          const docRef = doc
+          await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
+            await priorHook
 
-          docRef.version = await hook({
-            req,
-            query: fullWhere,
-            doc: docRef.version,
-            context: req.context,
-          }) || docRef.version;
-        }, Promise.resolve());
+            docRef.version =
+              (await hook({
+                context: req.context,
+                doc: docRef.version,
+                query: fullWhere,
+                req,
+              })) || docRef.version
+          }, Promise.resolve())
 
-        return docRef;
-      })),
-    } as PaginatedDocs<T>;
+          return docRef
+        }),
+      ),
+    } as PaginatedDocs<T>
 
     // /////////////////////////////////////
     // afterRead - Fields
@@ -113,20 +112,22 @@ async function findVersions<T extends TypeWithVersion<T>>(
 
     result = {
       ...result,
-      docs: await Promise.all(result.docs.map(async (data) => ({
-        ...data,
-        version: await afterRead({
-          depth,
-          doc: data.version,
-          entityConfig: collectionConfig,
-          overrideAccess,
-          req,
-          showHiddenFields,
-          findMany: true,
-          context: req.context,
-        }),
-      }))),
-    };
+      docs: await Promise.all(
+        result.docs.map(async (data) => ({
+          ...data,
+          version: await afterRead({
+            context: req.context,
+            depth,
+            doc: data.version,
+            entityConfig: collectionConfig,
+            findMany: true,
+            overrideAccess,
+            req,
+            showHiddenFields,
+          }),
+        })),
+      ),
+    }
 
     // /////////////////////////////////////
     // afterRead - Collection
@@ -134,24 +135,27 @@ async function findVersions<T extends TypeWithVersion<T>>(
 
     result = {
       ...result,
-      docs: await Promise.all(result.docs.map(async (doc) => {
-        const docRef = doc;
+      docs: await Promise.all(
+        result.docs.map(async (doc) => {
+          const docRef = doc
 
-        await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-          await priorHook;
+          await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
+            await priorHook
 
-          docRef.version = await hook({
-            req,
-            query: fullWhere,
-            doc: doc.version,
-            findMany: true,
-            context: req.context,
-          }) || doc.version;
-        }, Promise.resolve());
+            docRef.version =
+              (await hook({
+                context: req.context,
+                doc: doc.version,
+                findMany: true,
+                query: fullWhere,
+                req,
+              })) || doc.version
+          }, Promise.resolve())
 
-        return docRef;
-      })),
-    };
+          return docRef
+        }),
+      ),
+    }
 
     // /////////////////////////////////////
     // Return results
@@ -160,15 +164,15 @@ async function findVersions<T extends TypeWithVersion<T>>(
     result = {
       ...result,
       docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
-    };
+    }
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
-    return result;
+    return result
   } catch (error: unknown) {
-    await killTransaction(req);
-    throw error;
+    await killTransaction(req)
+    throw error
   }
 }
 
-export default findVersions;
+export default findVersions

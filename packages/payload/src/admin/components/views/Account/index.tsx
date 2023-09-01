@@ -1,122 +1,134 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useConfig } from '../../utilities/Config';
-import { useAuth } from '../../utilities/Auth';
-import { useStepNav } from '../../elements/StepNav';
-import usePayloadAPI from '../../../hooks/usePayloadAPI';
-import { useLocale } from '../../utilities/Locale';
-import DefaultAccount from './Default';
-import buildStateFromSchema from '../../forms/Form/buildStateFromSchema';
-import RenderCustomComponent from '../../utilities/RenderCustomComponent';
-import { useDocumentInfo } from '../../utilities/DocumentInfo';
-import { Fields } from '../../forms/Form/types';
-import { usePreferences } from '../../utilities/Preferences';
+import React, { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router-dom'
+
+import type { Fields } from '../../forms/Form/types'
+
+import usePayloadAPI from '../../../hooks/usePayloadAPI'
+import { useStepNav } from '../../elements/StepNav'
+import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
+import { useAuth } from '../../utilities/Auth'
+import { useConfig } from '../../utilities/Config'
+import { useDocumentInfo } from '../../utilities/DocumentInfo'
+import { useLocale } from '../../utilities/Locale'
+import { usePreferences } from '../../utilities/Preferences'
+import RenderCustomComponent from '../../utilities/RenderCustomComponent'
+import DefaultAccount from './Default'
 
 const AccountView: React.FC = () => {
-  const { state: locationState } = useLocation<{ data: unknown }>();
-  const { code: locale } = useLocale();
-  const { setStepNav } = useStepNav();
-  const { user } = useAuth();
-  const userRef = useRef(user);
-  const [internalState, setInternalState] = useState<Fields>();
-  const { id, preferencesKey, docPermissions, getDocPermissions, slug, getDocPreferences } = useDocumentInfo();
-  const { getPreference } = usePreferences();
+  const { state: locationState } = useLocation<{ data: unknown }>()
+  const { code: locale } = useLocale()
+  const { setStepNav } = useStepNav()
+  const { user } = useAuth()
+  const userRef = useRef(user)
+  const [internalState, setInternalState] = useState<Fields>()
+  const { docPermissions, getDocPermissions, getDocPreferences, id, preferencesKey, slug } =
+    useDocumentInfo()
+  const { getPreference } = usePreferences()
 
   const {
-    serverURL,
-    routes: { api },
-    collections,
     admin: {
       components: {
-        views: {
-          Account: CustomAccount,
-        } = {
+        views: { Account: CustomAccount } = {
           Account: undefined,
         },
       } = {},
     },
-  } = useConfig();
+    collections,
+    routes: { api },
+    serverURL,
+  } = useConfig()
 
-  const { t } = useTranslation('authentication');
+  const { t } = useTranslation('authentication')
 
-  const collection = collections.find((coll) => coll.slug === slug);
+  const collection = collections.find((coll) => coll.slug === slug)
 
-  const { fields } = collection;
+  const { fields } = collection
 
-  const [{ data, isLoading: isLoadingData }] = usePayloadAPI(
-    `${serverURL}${api}/${slug}/${id}`,
-    {
-      initialParams: {
-        'fallback-locale': 'null',
-        depth: 0,
-      },
-      initialData: null,
+  const [{ data, isLoading: isLoadingData }] = usePayloadAPI(`${serverURL}${api}/${slug}/${id}`, {
+    initialData: null,
+    initialParams: {
+      depth: 0,
+      'fallback-locale': 'null',
     },
-  );
+  })
 
-  const hasSavePermission = docPermissions?.update?.permission;
-  const dataToRender = locationState?.data || data;
-  const apiURL = `${serverURL}${api}/${slug}/${data?.id}?locale=${locale}`;
+  const hasSavePermission = docPermissions?.update?.permission
+  const dataToRender = locationState?.data || data
+  const apiURL = `${serverURL}${api}/${slug}/${data?.id}?locale=${locale}`
 
-  const action = `${serverURL}${api}/${slug}/${data?.id}?locale=${locale}&depth=0`;
+  const action = `${serverURL}${api}/${slug}/${data?.id}?locale=${locale}&depth=0`
 
-  const onSave = React.useCallback(async (json: any) => {
-    getDocPermissions();
-    const preferences = await getDocPreferences();
-    const state = await buildStateFromSchema({ fieldSchema: collection.fields, preferences, data: json.doc, user, id, operation: 'update', locale, t });
-    setInternalState(state);
-  }, [collection, user, id, t, locale, getDocPermissions, getDocPreferences]);
+  const onSave = React.useCallback(
+    async (json: any) => {
+      getDocPermissions()
+      const preferences = await getDocPreferences()
+      const state = await buildStateFromSchema({
+        data: json.doc,
+        fieldSchema: collection.fields,
+        id,
+        locale,
+        operation: 'update',
+        preferences,
+        t,
+        user,
+      })
+      setInternalState(state)
+    },
+    [collection, user, id, t, locale, getDocPermissions, getDocPreferences],
+  )
 
   useEffect(() => {
-    const nav = [{
-      label: t('account'),
-    }];
+    const nav = [
+      {
+        label: t('account'),
+      },
+    ]
 
-    setStepNav(nav);
-  }, [setStepNav, t]);
+    setStepNav(nav)
+  }, [setStepNav, t])
 
   useEffect(() => {
     const awaitInternalState = async () => {
-      const preferences = await getDocPreferences();
+      const preferences = await getDocPreferences()
 
       const state = await buildStateFromSchema({
-        fieldSchema: fields,
-        preferences,
         data: dataToRender,
-        operation: 'update',
+        fieldSchema: fields,
         id,
-        user: userRef.current,
         locale,
+        operation: 'update',
+        preferences,
         t,
-      });
+        user: userRef.current,
+      })
 
-      await getPreference(preferencesKey);
-      setInternalState(state);
-    };
+      await getPreference(preferencesKey)
+      setInternalState(state)
+    }
 
-    if (dataToRender) awaitInternalState();
-  }, [dataToRender, fields, id, locale, preferencesKey, getPreference, t, getDocPreferences]);
+    if (dataToRender) awaitInternalState()
+  }, [dataToRender, fields, id, locale, preferencesKey, getPreference, t, getDocPreferences])
 
-  const isLoading = !internalState || !docPermissions || isLoadingData;
+  const isLoading = !internalState || !docPermissions || isLoadingData
 
   return (
     <RenderCustomComponent
-      DefaultComponent={DefaultAccount}
-      CustomComponent={CustomAccount}
       componentProps={{
         action,
-        data,
+        apiURL,
         collection,
-        permissions: docPermissions,
+        data,
         hasSavePermission,
         initialState: internalState,
-        apiURL,
         isLoading,
         onSave,
+        permissions: docPermissions,
       }}
+      CustomComponent={CustomAccount}
+      DefaultComponent={DefaultAccount}
     />
-  );
-};
+  )
+}
 
-export default AccountView;
+export default AccountView

@@ -7,15 +7,15 @@ keywords: relationship, fields, config, configuration, documentation, Content Ma
 ---
 
 <Banner>
-  The Relationship field is one of the most powerful fields Payload features. It
-  provides for the ability to easily relate documents together.
+  The Relationship field is one of the most powerful fields Payload features. It provides for the
+  ability to easily relate documents together.
 </Banner>
 
-<LightDarkImage 
-  srcLight='https://payloadcms.com/images/docs/fields/relationship.png'
-  srcDark='https://payloadcms.com/images/docs/fields/relationship-dark.png'
-  alt='Shows a relationship field in the Payload admin panel'
-  caption='Admin panel screenshot of a Relationship field'
+<LightDarkImage
+  srcLight="https://payloadcms.com/images/docs/fields/relationship.png"
+  srcDark="https://payloadcms.com/images/docs/fields/relationship-dark.png"
+  alt="Shows a relationship field in the Payload admin panel"
+  caption="Admin panel screenshot of a Relationship field"
 />
 
 **Example uses:**
@@ -54,8 +54,8 @@ _\* An asterisk denotes that a property is required._
 <Banner type="success">
   <strong>Tip:</strong>
   <br />
-  The [Depth](/docs/getting-started/concepts#depth) parameter can be used to
-  automatically populate related documents that are returned by the API.
+  The [Depth](/docs/getting-started/concepts#depth) parameter can be used to automatically populate
+  related documents that are returned by the API.
 </Banner>
 
 ### Admin config
@@ -87,32 +87,32 @@ The `filterOptions` property can either be a `Where` query directly, or a functi
 ### Example
 
 ```ts
-import { CollectionConfig } from "payload/types";
+import { CollectionConfig } from 'payload/types'
 
 export const ExampleCollection: CollectionConfig = {
-  slug: "example-collection",
+  slug: 'example-collection',
   fields: [
     {
-      name: "purchase",
-      type: "relationship",
-      relationTo: ["products", "services"],
+      name: 'purchase',
+      type: 'relationship',
+      relationTo: ['products', 'services'],
       filterOptions: ({ relationTo, siblingData }) => {
         // returns a Where query dynamically by the type of relationship
-        if (relationTo === "products") {
+        if (relationTo === 'products') {
           return {
             stock: { greater_than: siblingData.quantity },
-          };
+          }
         }
 
-        if (relationTo === "services") {
+        if (relationTo === 'services') {
           return {
             isAvailable: { equals: true },
-          };
+          }
         }
       },
     },
   ],
-};
+}
 ```
 
 You can learn more about writing queries [here](/docs/queries/overview).
@@ -120,11 +120,10 @@ You can learn more about writing queries [here](/docs/queries/overview).
 <Banner type="warning">
   <strong>Note:</strong>
   <br />
-  When a relationship field has both <strong>filterOptions</strong> and a custom{" "}
-  <strong>validate</strong> function, the api will not validate{" "}
-  <strong>filterOptions</strong> unless you call the default relationship field
-  validation function imported from <strong>payload/fields/validations</strong>{" "}
-  in your validate function.
+  When a relationship field has both <strong>filterOptions</strong> and a custom{' '}
+  <strong>validate</strong> function, the api will not validate <strong>filterOptions</strong>{' '}
+  unless you call the default relationship field validation function imported from{' '}
+  <strong>payload/fields/validations</strong> in your validate function.
 </Banner>
 
 ### How the data is saved

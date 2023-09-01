@@ -1,105 +1,111 @@
-import { execSync } from 'child_process';
-import Conf from 'conf';
-import { randomBytes } from 'crypto';
-import findUp from 'find-up';
-import fs from 'fs';
-import { Payload } from '../../payload';
-import { ServerInitEvent } from './events/serverInit';
-import { AdminInitEvent } from './events/adminInit';
-import { oneWayHash } from './oneWayHash';
+import { execSync } from 'child_process'
+import Conf from 'conf'
+import { randomBytes } from 'crypto'
+import findUp from 'find-up'
+import fs from 'fs'
+
+import type { Payload } from '../../payload'
+import type { AdminInitEvent } from './events/adminInit'
+import type { ServerInitEvent } from './events/serverInit'
+
+import { oneWayHash } from './oneWayHash'
 
 export type BaseEvent = {
   envID: string
-  projectID: string
-  nodeVersion: string
   nodeEnv: string
+  nodeVersion: string
   payloadVersion: string
-};
+  projectID: string
+}
 
 type PackageJSON = {
-  name: string
   dependencies: Record<string, string | undefined>
+  name: string
 }
 
-type TelemetryEvent = ServerInitEvent | AdminInitEvent
+type TelemetryEvent = AdminInitEvent | ServerInitEvent
 
 type Args = {
-  payload: Payload
   event: TelemetryEvent
+  payload: Payload
 }
 
-export const sendEvent = async ({ payload, event }: Args): Promise<void> => {
+export const sendEvent = async ({ event, payload }: Args): Promise<void> => {
   if (payload.config.telemetry !== false) {
     try {
-      const packageJSON = await getPackageJSON();
+      const packageJSON = await getPackageJSON()
 
       const baseEvent: BaseEvent = {
         envID: getEnvID(),
-        projectID: getProjectID(payload, packageJSON),
-        nodeVersion: process.version,
         nodeEnv: process.env.NODE_ENV || 'development',
+        nodeVersion: process.version,
         payloadVersion: getPayloadVersion(packageJSON),
-      };
+        projectID: getProjectID(payload, packageJSON),
+      }
 
       await fetch('https://telemetry.payloadcms.com/events', {
-        method: 'post',
+        body: JSON.stringify({ ...baseEvent, ...event }),
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...baseEvent, ...event }),
-      });
+        method: 'post',
+      })
     } catch (_) {
       // Eat any errors in sending telemetry event
     }
   }
-};
+}
 
 /**
  * This is a quasi-persistent identifier used to dedupe recurring events. It's
  * generated from random data and completely anonymous.
  */
 const getEnvID = (): string => {
-  const conf = new Conf();
-  const ENV_ID = 'envID';
+  const conf = new Conf()
+  const ENV_ID = 'envID'
 
-  const val = conf.get(ENV_ID);
+  const val = conf.get(ENV_ID)
   if (val) {
-    return val as string;
+    return val as string
   }
 
-  const generated = randomBytes(32).toString('hex');
-  conf.set(ENV_ID, generated);
-  return generated;
-};
+  const generated = randomBytes(32).toString('hex')
+  conf.set(ENV_ID, generated)
+  return generated
+}
 
 const getProjectID = (payload: Payload, packageJSON: PackageJSON): string => {
-  const projectID = getGitID(payload) || getPackageJSONID(payload, packageJSON) || payload.config.serverURL || process.cwd();
-  return oneWayHash(projectID, payload.secret);
-};
+  const projectID =
+    getGitID(payload) ||
+    getPackageJSONID(payload, packageJSON) ||
+    payload.config.serverURL ||
+    process.cwd()
+  return oneWayHash(projectID, payload.secret)
+}
 
 const getGitID = (payload: Payload) => {
   try {
     const originBuffer = execSync('git config --local --get remote.origin.url', {
-      timeout: 1000,
       stdio: 'pipe',
-    });
+      timeout: 1000,
+    })
 
-    return oneWayHash(String(originBuffer).trim(), payload.secret);
+    return oneWayHash(String(originBuffer).trim(), payload.secret)
   } catch (_) {
-    return null;
+    return null
   }
-};
+}
 
 const getPackageJSON = async (): Promise<PackageJSON> => {
-  const packageJsonPath = await findUp('package.json', { cwd: __dirname });
-  const jsonContent: PackageJSON = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-  return jsonContent;
-};
+  const packageJsonPath = await findUp('package.json', { cwd: __dirname })
+  const jsonContent: PackageJSON = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
+  return jsonContent
+}
 
 const getPackageJSONID = (payload: Payload, packageJSON: PackageJSON): string => {
-  return oneWayHash(packageJSON.name, payload.secret);
-};
+  return oneWayHash(packageJSON.name, payload.secret)
+}
 
 export const getPayloadVersion = (packageJSON: PackageJSON): string => {
-  return packageJSON?.dependencies?.payload ?? '';
-};
+  return packageJSON?.dependencies?.payload ?? ''
+}

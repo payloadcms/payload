@@ -6,7 +6,8 @@
   align-self: stretch;
   overflow: hidden;
 
-  img, svg {
+  img,
+  svg {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -18,7 +19,8 @@
     padding-top: 100%;
     position: relative;
 
-    img, svg {
+    img,
+    svg {
       position: absolute;
       top: 0;
     }

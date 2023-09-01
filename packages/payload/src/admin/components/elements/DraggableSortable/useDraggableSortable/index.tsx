@@ -1,17 +1,16 @@
-import { useSortable } from '@dnd-kit/sortable';
-import { UseDraggableArguments } from '@dnd-kit/core';
-import { UseDraggableSortableReturn } from './types';
+import type { UseDraggableArguments } from '@dnd-kit/core'
+
+import { useSortable } from '@dnd-kit/sortable'
+
+import type { UseDraggableSortableReturn } from './types'
 
 export const useDraggableSortable = (props: UseDraggableArguments): UseDraggableSortableReturn => {
-  const {
-    id,
-    disabled,
-  } = props;
+  const { disabled, id } = props
 
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useSortable({
-    id,
+  const { attributes, isDragging, listeners, setNodeRef, transform } = useSortable({
     disabled,
-  });
+    id,
+  })
 
   return {
     attributes: {
@@ -24,5 +23,5 @@ export const useDraggableSortable = (props: UseDraggableArguments): UseDraggable
     listeners,
     setNodeRef,
     transform: transform && `translate3d(${transform.x}px, ${transform.y}px, 0)`, // translate3d is faster than translate in most browsers
-  };
-};
+  }
+}

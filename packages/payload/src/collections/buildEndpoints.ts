@@ -1,166 +1,167 @@
-import { SanitizedCollectionConfig } from './config/types';
-import { Endpoint } from '../config/types';
-import find from './requestHandlers/find';
-import verifyEmail from '../auth/requestHandlers/verifyEmail';
-import unlock from '../auth/requestHandlers/unlock';
-import create from './requestHandlers/create';
-import initHandler from '../auth/requestHandlers/init';
-import loginHandler from '../auth/requestHandlers/login';
-import refreshHandler from '../auth/requestHandlers/refresh';
-import meHandler from '../auth/requestHandlers/me';
-import registerFirstUserHandler from '../auth/requestHandlers/registerFirstUser';
-import forgotPasswordHandler from '../auth/requestHandlers/forgotPassword';
-import resetPassword from '../auth/requestHandlers/resetPassword';
-import findVersions from './requestHandlers/findVersions';
-import findVersionByID from './requestHandlers/findVersionByID';
-import restoreVersion from './requestHandlers/restoreVersion';
-import deleteHandler from './requestHandlers/delete';
-import findByID from './requestHandlers/findByID';
-import update from './requestHandlers/update';
-import updateByID, { deprecatedUpdate } from './requestHandlers/updateByID';
-import logoutHandler from '../auth/requestHandlers/logout';
-import docAccessRequestHandler from './requestHandlers/docAccess';
-import deleteByID from './requestHandlers/deleteByID';
+import type { Endpoint } from '../config/types'
+import type { SanitizedCollectionConfig } from './config/types'
+
+import forgotPasswordHandler from '../auth/requestHandlers/forgotPassword'
+import initHandler from '../auth/requestHandlers/init'
+import loginHandler from '../auth/requestHandlers/login'
+import logoutHandler from '../auth/requestHandlers/logout'
+import meHandler from '../auth/requestHandlers/me'
+import refreshHandler from '../auth/requestHandlers/refresh'
+import registerFirstUserHandler from '../auth/requestHandlers/registerFirstUser'
+import resetPassword from '../auth/requestHandlers/resetPassword'
+import unlock from '../auth/requestHandlers/unlock'
+import verifyEmail from '../auth/requestHandlers/verifyEmail'
+import create from './requestHandlers/create'
+import deleteHandler from './requestHandlers/delete'
+import deleteByID from './requestHandlers/deleteByID'
+import docAccessRequestHandler from './requestHandlers/docAccess'
+import find from './requestHandlers/find'
+import findByID from './requestHandlers/findByID'
+import findVersionByID from './requestHandlers/findVersionByID'
+import findVersions from './requestHandlers/findVersions'
+import restoreVersion from './requestHandlers/restoreVersion'
+import update from './requestHandlers/update'
+import updateByID, { deprecatedUpdate } from './requestHandlers/updateByID'
 
 const buildEndpoints = (collection: SanitizedCollectionConfig): Endpoint[] => {
-  if (!collection.endpoints) return [];
-  const endpoints = [...collection.endpoints];
+  if (!collection.endpoints) return []
+  const endpoints = [...collection.endpoints]
 
   if (collection.auth) {
     if (!collection.auth.disableLocalStrategy) {
       if (collection.auth.verify) {
         endpoints.push({
-          path: '/verify/:token',
-          method: 'post',
           handler: verifyEmail,
-        });
+          method: 'post',
+          path: '/verify/:token',
+        })
       }
 
       if (collection.auth.maxLoginAttempts > 0) {
         endpoints.push({
-          path: '/unlock',
-          method: 'post',
           handler: unlock,
-        });
+          method: 'post',
+          path: '/unlock',
+        })
       }
 
       endpoints.push(
         {
-          path: '/login',
-          method: 'post',
           handler: loginHandler,
+          method: 'post',
+          path: '/login',
         },
         {
-          path: '/first-register',
-          method: 'post',
           handler: registerFirstUserHandler,
+          method: 'post',
+          path: '/first-register',
         },
         {
-          path: '/forgot-password',
-          method: 'post',
           handler: forgotPasswordHandler,
+          method: 'post',
+          path: '/forgot-password',
         },
         {
-          path: '/reset-password',
-          method: 'post',
           handler: resetPassword,
+          method: 'post',
+          path: '/reset-password',
         },
-      );
+      )
     }
 
     endpoints.push(
       {
-        path: '/init',
-        method: 'get',
         handler: initHandler,
-      },
-      {
-        path: '/me',
         method: 'get',
+        path: '/init',
+      },
+      {
         handler: meHandler,
+        method: 'get',
+        path: '/me',
       },
       {
-        path: '/logout',
-        method: 'post',
         handler: logoutHandler,
+        method: 'post',
+        path: '/logout',
       },
       {
-        path: '/refresh-token',
-        method: 'post',
         handler: refreshHandler,
+        method: 'post',
+        path: '/refresh-token',
       },
-    );
+    )
   }
 
   if (collection.versions) {
     endpoints.push(
       {
-        path: '/versions',
-        method: 'get',
         handler: findVersions,
-      },
-      {
-        path: '/versions/:id',
         method: 'get',
-        handler: findVersionByID,
+        path: '/versions',
       },
       {
+        handler: findVersionByID,
+        method: 'get',
         path: '/versions/:id',
-        method: 'post',
-        handler: restoreVersion,
       },
-    );
+      {
+        handler: restoreVersion,
+        method: 'post',
+        path: '/versions/:id',
+      },
+    )
   }
 
   endpoints.push(
     {
-      path: '/',
-      method: 'get',
       handler: find,
+      method: 'get',
+      path: '/',
     },
     {
-      path: '/',
-      method: 'post',
       handler: create,
+      method: 'post',
+      path: '/',
     },
     {
-      path: '/access/:id',
-      method: 'get',
       handler: docAccessRequestHandler,
-    },
-    {
-      path: '/:id',
-      method: 'put',
-      handler: deprecatedUpdate,
-    },
-    {
-      path: '/',
-      method: 'patch',
-      handler: update,
-    },
-    {
-      path: '/:id',
-      method: 'patch',
-      handler: updateByID,
-    },
-    {
-      path: '/:id',
       method: 'get',
-      handler: findByID,
+      path: '/access/:id',
     },
     {
+      handler: deprecatedUpdate,
+      method: 'put',
       path: '/:id',
-      method: 'delete',
-      handler: deleteByID,
     },
     {
+      handler: update,
+      method: 'patch',
       path: '/',
-      method: 'delete',
-      handler: deleteHandler,
     },
-  );
+    {
+      handler: updateByID,
+      method: 'patch',
+      path: '/:id',
+    },
+    {
+      handler: findByID,
+      method: 'get',
+      path: '/:id',
+    },
+    {
+      handler: deleteByID,
+      method: 'delete',
+      path: '/:id',
+    },
+    {
+      handler: deleteHandler,
+      method: 'delete',
+      path: '/',
+    },
+  )
 
-  return endpoints;
-};
+  return endpoints
+}
 
-export default buildEndpoints;
+export default buildEndpoints

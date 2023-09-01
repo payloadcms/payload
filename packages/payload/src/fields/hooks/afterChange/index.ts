@@ -1,42 +1,43 @@
-import { SanitizedCollectionConfig } from '../../../collections/config/types';
-import { SanitizedGlobalConfig } from '../../../globals/config/types';
-import { PayloadRequest, RequestContext } from '../../../express/types';
-import { traverseFields } from './traverseFields';
-import deepCopyObject from '../../../utilities/deepCopyObject';
+import type { SanitizedCollectionConfig } from '../../../collections/config/types'
+import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types'
+
+import deepCopyObject from '../../../utilities/deepCopyObject'
+import { traverseFields } from './traverseFields'
 
 type Args<T> = {
-  data: T | Record<string, unknown>
-  doc: T | Record<string, unknown>
-  previousDoc: T | Record<string, unknown>
+  context: RequestContext
+  data: Record<string, unknown> | T
+  doc: Record<string, unknown> | T
   entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
   operation: 'create' | 'update'
+  previousDoc: Record<string, unknown> | T
   req: PayloadRequest
-  context: RequestContext
 }
 
 export const afterChange = async <T extends Record<string, unknown>>({
+  context,
   data,
   doc: incomingDoc,
-  previousDoc,
   entityConfig,
   operation,
+  previousDoc,
   req,
-  context,
 }: Args<T>): Promise<T> => {
-  const doc = deepCopyObject(incomingDoc);
+  const doc = deepCopyObject(incomingDoc)
 
   await traverseFields({
+    context,
     data,
     doc,
-    previousDoc,
     fields: entityConfig.fields,
     operation,
-    req,
+    previousDoc,
     previousSiblingDoc: previousDoc,
-    siblingDoc: doc,
+    req,
     siblingData: data,
-    context,
-  });
+    siblingDoc: doc,
+  })
 
-  return doc;
-};
+  return doc
+}

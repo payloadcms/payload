@@ -1,58 +1,50 @@
-import type { TFunction } from 'i18next';
-import { User } from '../../../../../auth';
-import { Field as FieldSchema } from '../../../../../fields/config/types';
-import { Fields, Data } from '../types';
-import { iterateFields } from './iterateFields';
+import type { TFunction } from 'i18next'
+
+import type { User } from '../../../../../auth'
+import type { Field as FieldSchema } from '../../../../../fields/config/types'
+import type { Data, Fields } from '../types'
+
+import { iterateFields } from './iterateFields'
 
 type Args = {
+  data?: Data
   fieldSchema: FieldSchema[]
-  data?: Data,
-  siblingData?: Data,
-  user?: User,
-  id?: string | number,
-  operation?: 'create' | 'update'
+  id?: number | string
   locale: string
-  t: TFunction
+  operation?: 'create' | 'update'
   preferences: {
     [key: string]: unknown
   }
+  siblingData?: Data
+  t: TFunction
+  user?: User
 }
 
 const buildStateFromSchema = async (args: Args): Promise<Fields> => {
-  const {
-    fieldSchema,
-    data: fullData = {},
-    user,
-    id,
-    operation,
-    locale,
-    t,
-    preferences,
-  } = args;
+  const { data: fullData = {}, fieldSchema, id, locale, operation, preferences, t, user } = args
 
   if (fieldSchema) {
-    const state: Fields = {};
+    const state: Fields = {}
 
     await iterateFields({
-      state,
+      data: fullData,
       fields: fieldSchema,
+      fullData,
       id,
       locale,
       operation,
-      path: '',
-      user,
-      data: fullData,
-      fullData,
       parentPassesCondition: true,
-      t,
+      path: '',
       preferences,
-    });
+      state,
+      t,
+      user,
+    })
 
-    return state;
+    return state
   }
 
-  return {};
-};
+  return {}
+}
 
-
-export default buildStateFromSchema;
+export default buildStateFromSchema

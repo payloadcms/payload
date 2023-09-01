@@ -1,42 +1,42 @@
 export type LoadingOverlayTypes = 'fullscreen' | 'withoutNav'
 
 type ToggleLoadingOverlayOptions = {
-  type?: LoadingOverlayTypes
-  key: string
   isLoading?: boolean
+  key: string
   loadingText?: string
+  type?: LoadingOverlayTypes
 }
 export type ToggleLoadingOverlay = (options: ToggleLoadingOverlayOptions) => void
 
 type Add = {
-  type: 'add'
   payload: {
-    type: LoadingOverlayTypes
     key: string
     loadingText?: string
+    type: LoadingOverlayTypes
   }
+  type: 'add'
 }
 type Remove = {
-  type: 'remove'
   payload: {
     key: string
-    type: LoadingOverlayTypes
     loadingText?: never
+    type: LoadingOverlayTypes
   }
+  type: 'remove'
 }
 export type Action = Add | Remove
 export type State = {
   isLoading: boolean
-  overlayType: null | LoadingOverlayTypes
   loaders: {
-    type: LoadingOverlayTypes
     key: string
     loadingText: string
+    type: LoadingOverlayTypes
   }[]
   loadingText: string
+  overlayType: LoadingOverlayTypes | null
 }
 
 export type LoadingOverlayContext = {
-  toggleLoadingOverlay: ToggleLoadingOverlay
   isOnScreen: boolean
+  toggleLoadingOverlay: ToggleLoadingOverlay
 }

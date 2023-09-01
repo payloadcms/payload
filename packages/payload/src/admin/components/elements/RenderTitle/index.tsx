@@ -1,37 +1,28 @@
-import React from 'react';
-import { Props } from './types';
-import useTitle from '../../../hooks/useTitle';
-import IDLabel from '../IDLabel';
+import React from 'react'
 
-const baseClass = 'render-title';
+import type { Props } from './types'
+
+import useTitle from '../../../hooks/useTitle'
+import IDLabel from '../IDLabel'
+
+const baseClass = 'render-title'
 
 const RenderTitle: React.FC<Props> = (props) => {
-  const {
-    collection,
-    title: titleFromProps,
-    data,
-    fallback = '[untitled]',
-  } = props;
-  const titleFromForm = useTitle(collection);
+  const { collection, data, fallback = '[untitled]', title: titleFromProps } = props
+  const titleFromForm = useTitle(collection)
 
-  let title = titleFromForm;
-  if (!title) title = data?.id;
-  if (!title) title = fallback;
-  title = titleFromProps || title;
+  let title = titleFromForm
+  if (!title) title = data?.id
+  if (!title) title = fallback
+  title = titleFromProps || title
 
-  const idAsTitle = title === data?.id;
+  const idAsTitle = title === data?.id
 
   if (idAsTitle) {
-    return (
-      <IDLabel id={data?.id} />
-    );
+    return <IDLabel id={data?.id} />
   }
 
-  return (
-    <span className={baseClass}>
-      {title}
-    </span>
-  );
-};
+  return <span className={baseClass}>{title}</span>
+}
 
-export default RenderTitle;
+export default RenderTitle

@@ -1,152 +1,156 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { DeepPartial } from 'ts-essentials';
-import type { Where } from '../../types';
-import { SanitizedGlobalConfig } from '../config/types';
-import executeAccess from '../../auth/executeAccess';
-import { beforeChange } from '../../fields/hooks/beforeChange';
-import { beforeValidate } from '../../fields/hooks/beforeValidate';
-import { afterChange } from '../../fields/hooks/afterChange';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { PayloadRequest } from '../../express/types';
-import { saveVersion } from '../../versions/saveVersion';
-import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import type { Config as GeneratedTypes } from 'payload/generated-types'
+import type { DeepPartial } from 'ts-essentials'
 
-type Args<T extends { [field: string | number | symbol]: unknown }> = {
-  globalConfig: SanitizedGlobalConfig
-  slug: string
-  req: PayloadRequest
-  depth?: number
-  overrideAccess?: boolean
-  showHiddenFields?: boolean
-  draft?: boolean
+import type { PayloadRequest } from '../../express/types'
+import type { Where } from '../../types'
+import type { SanitizedGlobalConfig } from '../config/types'
+
+import executeAccess from '../../auth/executeAccess'
+import { afterChange } from '../../fields/hooks/afterChange'
+import { afterRead } from '../../fields/hooks/afterRead'
+import { beforeChange } from '../../fields/hooks/beforeChange'
+import { beforeValidate } from '../../fields/hooks/beforeValidate'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
+import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion'
+import { saveVersion } from '../../versions/saveVersion'
+
+type Args<T extends { [field: number | string | symbol]: unknown }> = {
   autosave?: boolean
   data: DeepPartial<Omit<T, 'id'>>
+  depth?: number
+  draft?: boolean
+  globalConfig: SanitizedGlobalConfig
+  overrideAccess?: boolean
+  req: PayloadRequest
+  showHiddenFields?: boolean
+  slug: string
 }
 
 async function update<TSlug extends keyof GeneratedTypes['globals']>(
   args: Args<GeneratedTypes['globals'][TSlug]>,
 ): Promise<GeneratedTypes['globals'][TSlug]> {
   const {
-    globalConfig,
-    slug,
-    req,
-    req: {
-      payload,
-      locale,
-    },
-    depth,
-    overrideAccess,
-    showHiddenFields,
-    draft: draftArg,
     autosave,
-  } = args;
+    depth,
+    draft: draftArg,
+    globalConfig,
+    overrideAccess,
+    req: { locale, payload },
+    req,
+    showHiddenFields,
+    slug,
+  } = args
 
   try {
-    const shouldCommit = await initTransaction(req);
+    const shouldCommit = await initTransaction(req)
 
-    let { data } = args;
+    let { data } = args
 
-    const shouldSaveDraft = Boolean(draftArg && globalConfig.versions?.drafts);
+    const shouldSaveDraft = Boolean(draftArg && globalConfig.versions?.drafts)
 
     // /////////////////////////////////////
     // 1. Retrieve and execute access
     // /////////////////////////////////////
 
-    const accessResults = !overrideAccess ? await executeAccess({
-      req,
-      data,
-    }, globalConfig.access.update) : true;
+    const accessResults = !overrideAccess
+      ? await executeAccess(
+          {
+            data,
+            req,
+          },
+          globalConfig.access.update,
+        )
+      : true
 
     // /////////////////////////////////////
     // Retrieve document
     // /////////////////////////////////////
 
-    const query: Where = overrideAccess ? undefined : accessResults as Where;
+    const query: Where = overrideAccess ? undefined : (accessResults as Where)
 
     // /////////////////////////////////////
     // 2. Retrieve document
     // /////////////////////////////////////
-    const {
-      global,
-      globalExists,
-    } = await getLatestGlobalVersion({
-      payload,
+    const { global, globalExists } = await getLatestGlobalVersion({
       config: globalConfig,
+      locale,
+      payload,
+      req,
       slug,
       where: query,
-      locale,
-      req,
-    });
+    })
 
-    let globalJSON: Record<string, unknown> = {};
+    let globalJSON: Record<string, unknown> = {}
 
     if (global) {
-      globalJSON = JSON.parse(JSON.stringify(global));
+      globalJSON = JSON.parse(JSON.stringify(global))
 
       if (globalJSON._id) {
-        delete globalJSON._id;
+        delete globalJSON._id
       }
     }
 
     const originalDoc = await afterRead({
+      context: req.context,
       depth: 0,
       doc: globalJSON,
       entityConfig: globalConfig,
-      req,
       overrideAccess: true,
+      req,
       showHiddenFields,
-      context: req.context,
-    });
+    })
 
     // /////////////////////////////////////
     // beforeValidate - Fields
     // /////////////////////////////////////
 
     data = await beforeValidate({
+      context: req.context,
       data,
       doc: originalDoc,
       entityConfig: globalConfig,
       operation: 'update',
       overrideAccess,
       req,
-      context: req.context,
-    });
+    })
 
     // /////////////////////////////////////
     // beforeValidate - Global
     // /////////////////////////////////////
 
     await globalConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      data = (await hook({
-        data,
-        req,
-        originalDoc,
-      })) || data;
-    }, Promise.resolve());
+      data =
+        (await hook({
+          data,
+          originalDoc,
+          req,
+        })) || data
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // beforeChange - Global
     // /////////////////////////////////////
 
     await globalConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      data = (await hook({
-        data,
-        req,
-        originalDoc,
-      })) || data;
-    }, Promise.resolve());
+      data =
+        (await hook({
+          data,
+          originalDoc,
+          req,
+        })) || data
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // beforeChange - Fields
     // /////////////////////////////////////
 
     let result = await beforeChange({
+      context: req.context,
       data,
       doc: originalDoc,
       docWithLocales: globalJSON,
@@ -154,8 +158,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
       operation: 'update',
       req,
       skipValidation: shouldSaveDraft,
-      context: req.context,
-    });
+    })
 
     // /////////////////////////////////////
     // Update
@@ -164,16 +167,16 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     if (!shouldSaveDraft) {
       if (globalExists) {
         result = await payload.db.updateGlobal({
-          slug,
           data: result,
           req,
-        });
+          slug,
+        })
       } else {
         result = await payload.db.createGlobal({
-          slug,
           data: result,
           req,
-        });
+          slug,
+        })
       }
     }
 
@@ -183,17 +186,17 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
 
     if (globalConfig.versions) {
       result = await saveVersion({
-        payload,
-        global: globalConfig,
-        req,
+        autosave,
         docWithLocales: {
           ...result,
           createdAt: result.createdAt,
           updatedAt: result.updatedAt,
         },
-        autosave,
         draft: shouldSaveDraft,
-      });
+        global: globalConfig,
+        payload,
+        req,
+      })
     }
 
     // /////////////////////////////////////
@@ -201,67 +204,69 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
     // /////////////////////////////////////
 
     result = await afterRead({
+      context: req.context,
       depth,
       doc: result,
       entityConfig: globalConfig,
-      req,
       overrideAccess,
+      req,
       showHiddenFields,
-      context: req.context,
-    });
+    })
 
     // /////////////////////////////////////
     // afterRead - Global
     // /////////////////////////////////////
 
     await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      result = await hook({
-        doc: result,
-        req,
-      }) || result;
-    }, Promise.resolve());
+      result =
+        (await hook({
+          doc: result,
+          req,
+        })) || result
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // afterChange - Fields
     // /////////////////////////////////////
 
     result = await afterChange({
+      context: req.context,
       data,
       doc: result,
-      previousDoc: originalDoc,
       entityConfig: globalConfig,
       operation: 'update',
+      previousDoc: originalDoc,
       req,
-      context: req.context,
-    });
+    })
 
     // /////////////////////////////////////
     // afterChange - Global
     // /////////////////////////////////////
 
     await globalConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-      await priorHook;
+      await priorHook
 
-      result = await hook({
-        doc: result,
-        previousDoc: originalDoc,
-        req,
-      }) || result;
-    }, Promise.resolve());
+      result =
+        (await hook({
+          doc: result,
+          previousDoc: originalDoc,
+          req,
+        })) || result
+    }, Promise.resolve())
 
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
-    return result;
+    return result
   } catch (error: unknown) {
-    await killTransaction(req);
-    throw error;
+    await killTransaction(req)
+    throw error
   }
 }
 
-export default update;
+export default update

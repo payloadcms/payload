@@ -1,10 +1,13 @@
 /* eslint-disable no-param-reassign */
-import { fieldAffectsData } from 'payload/types';
-import { Field } from 'payload/types';
-import { SanitizedConfig } from 'payload/config';
-import { mergeLocales } from './mergeLocales';
-import { BlocksMap } from '../../utilities/createBlocksMap';
-import { transform } from '.';
+import type { SanitizedConfig } from 'payload/config'
+import type { Field } from 'payload/types'
+
+import { fieldAffectsData } from 'payload/types'
+
+import type { BlocksMap } from '../../utilities/createBlocksMap'
+
+import { transform } from '.'
+import { mergeLocales } from './mergeLocales'
 
 type TraverseFieldsArgs = {
   /**
@@ -63,17 +66,17 @@ export const traverseFields = <T extends Record<string, unknown>>({
   siblingData,
   table,
 }: TraverseFieldsArgs): T => {
-  const sanitizedPath = path ? `${path}.` : path;
+  const sanitizedPath = path ? `${path}.` : path
 
   const formatted = fields.reduce((result, field) => {
     if (fieldAffectsData(field)) {
-      const fieldData = result[field.name];
+      const fieldData = result[field.name]
 
       switch (field.type) {
         case 'array':
           if (Array.isArray(fieldData)) {
             result[field.name] = fieldData.map((row, i) => {
-              const dataWithLocales = mergeLocales({ data: row, locale, fallbackLocale });
+              const dataWithLocales = mergeLocales({ data: row, fallbackLocale, locale })
 
               return traverseFields<T>({
                 blocks,
@@ -85,20 +88,20 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 relationships,
                 siblingData: dataWithLocales,
                 table: dataWithLocales,
-              });
-            });
+              })
+            })
           }
 
-          break;
+          break
 
         case 'blocks': {
-          const blockFieldPath = `${sanitizedPath}${field.name}`;
+          const blockFieldPath = `${sanitizedPath}${field.name}`
 
           if (Array.isArray(blocks[blockFieldPath])) {
             result[field.name] = blocks[blockFieldPath].map((row, i) => {
-              delete row._order;
-              const dataWithLocales = mergeLocales({ data: row, locale, fallbackLocale });
-              const block = field.blocks.find(({ slug }) => slug === row.blockType);
+              delete row._order
+              const dataWithLocales = mergeLocales({ data: row, fallbackLocale, locale })
+              const block = field.blocks.find(({ slug }) => slug === row.blockType)
 
               if (block) {
                 return traverseFields<T>({
@@ -111,30 +114,32 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   relationships,
                   siblingData: dataWithLocales,
                   table: dataWithLocales,
-                });
+                })
               }
 
-              return {};
-            });
+              return {}
+            })
           }
 
-          break;
+          break
         }
 
         case 'group': {
           const groupData: Record<string, unknown> = {
             ...(typeof fieldData === 'object' ? fieldData : {}),
-          };
+          }
 
           field.fields.forEach((subField) => {
             if (fieldAffectsData(subField)) {
-              const subFieldKey = `${sanitizedPath.replace(/[.]/g, '_')}${field.name}_${subField.name}`;
+              const subFieldKey = `${sanitizedPath.replace(/\./g, '_')}${field.name}_${
+                subField.name
+              }`
               if (table[subFieldKey]) {
-                groupData[subField.name] = table[subFieldKey];
-                delete table[subFieldKey];
+                groupData[subField.name] = table[subFieldKey]
+                delete table[subFieldKey]
               }
             }
-          });
+          })
 
           result[field.name] = traverseFields<Record<string, unknown>>({
             blocks,
@@ -146,28 +151,32 @@ export const traverseFields = <T extends Record<string, unknown>>({
             relationships,
             siblingData: groupData,
             table,
-          });
+          })
 
-          break;
+          break
         }
 
         case 'relationship': {
-          const relationPathMatch = relationships[`${sanitizedPath}${field.name}`];
-          if (!relationPathMatch) break;
+          const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
+          if (!relationPathMatch) break
 
           if (!field.hasMany) {
-            const relation = relationPathMatch[0];
+            const relation = relationPathMatch[0]
 
             if (relation) {
               // Handle hasOne Poly
               if (Array.isArray(field.relationTo)) {
-                const matchedRelation = Object.entries(relation).find(([key, val]) => val !== null && !['order', 'id', 'parent'].includes(key));
+                const matchedRelation = Object.entries(relation).find(
+                  ([key, val]) => val !== null && !['id', 'order', 'parent'].includes(key),
+                )
 
                 if (matchedRelation) {
-                  const relationTo = matchedRelation[0].replace('ID', '');
+                  const relationTo = matchedRelation[0].replace('ID', '')
 
                   if (typeof matchedRelation[1] === 'object') {
-                    const relatedCollection = config.collections.find(({ slug }) => slug === relationTo);
+                    const relatedCollection = config.collections.find(
+                      ({ slug }) => slug === relationTo,
+                    )
 
                     if (relatedCollection) {
                       const value = transform({
@@ -176,71 +185,79 @@ export const traverseFields = <T extends Record<string, unknown>>({
                         fallbackLocale,
                         fields: relatedCollection.fields,
                         locale,
-                      });
+                      })
 
                       result[field.name] = {
                         relationTo,
                         value,
-                      };
+                      }
                     }
                   } else {
                     result[field.name] = {
                       relationTo,
                       value: matchedRelation[1],
-                    };
+                    }
                   }
                 }
               } else {
                 // Handle hasOne
-                const relatedData = relation[`${field.relationTo}ID`];
+                const relatedData = relation[`${field.relationTo}ID`]
 
                 if (typeof relatedData === 'object' && relatedData !== null) {
-                  const relatedCollection = config.collections.find(({ slug }) => slug === field.relationTo);
+                  const relatedCollection = config.collections.find(
+                    ({ slug }) => slug === field.relationTo,
+                  )
                   result[field.name] = transform({
                     config,
                     data: relatedData as Record<string, unknown>,
                     fallbackLocale,
                     fields: relatedCollection.fields,
                     locale,
-                  });
+                  })
                 } else {
-                  result[field.name] = relatedData;
+                  result[field.name] = relatedData
                 }
               }
             }
           } else {
-            const transformedRelations = [
-              ...(Array.isArray(fieldData) ? fieldData : []),
-            ];
+            const transformedRelations = [...(Array.isArray(fieldData) ? fieldData : [])]
 
             relationPathMatch.forEach((relation) => {
               // Handle hasMany
               if (!Array.isArray(field.relationTo)) {
-                const relatedCollection = config.collections.find(({ slug }) => slug === field.relationTo);
-                const relatedData = relation[`${field.relationTo}ID`];
+                const relatedCollection = config.collections.find(
+                  ({ slug }) => slug === field.relationTo,
+                )
+                const relatedData = relation[`${field.relationTo}ID`]
 
                 if (relatedData) {
                   if (typeof relatedData === 'object' && relatedData !== null) {
-                    transformedRelations.push(transform({
-                      config,
-                      data: relatedData as Record<string, unknown>,
-                      fallbackLocale,
-                      fields: relatedCollection.fields,
-                      locale,
-                    }));
+                    transformedRelations.push(
+                      transform({
+                        config,
+                        data: relatedData as Record<string, unknown>,
+                        fallbackLocale,
+                        fields: relatedCollection.fields,
+                        locale,
+                      }),
+                    )
                   } else {
-                    transformedRelations.push(relatedData);
+                    transformedRelations.push(relatedData)
                   }
                 }
               } else {
                 // Handle hasMany Poly
-                const matchedRelation = Object.entries(relation).find(([key, val]) => val !== null && !['order', 'parent', 'id'].includes(key));
+                const matchedRelation = Object.entries(relation).find(
+                  ([key, val]) => val !== null && !['id', 'order', 'parent'].includes(key),
+                )
 
                 if (matchedRelation) {
-                  const relationTo = matchedRelation[0].replace('ID', '');
+                  const relationTo = matchedRelation[0].replace('ID', '')
 
                   if (typeof matchedRelation[1] === 'object') {
-                    const relatedCollection = config.collections.find(({ slug }) => slug === relationTo);
+                    const relatedCollection = config.collections.find(
+                      ({ slug }) => slug === relationTo,
+                    )
 
                     if (relatedCollection) {
                       const value = transform({
@@ -249,47 +266,47 @@ export const traverseFields = <T extends Record<string, unknown>>({
                         fallbackLocale,
                         fields: relatedCollection.fields,
                         locale,
-                      });
+                      })
 
                       transformedRelations.push({
                         relationTo,
                         value,
-                      });
+                      })
                     }
                   } else {
                     transformedRelations.push({
                       relationTo,
                       value: matchedRelation[1],
-                    });
+                    })
                   }
                 }
               }
-            });
+            })
 
-            result[field.name] = transformedRelations;
+            result[field.name] = transformedRelations
           }
 
-          break;
+          break
         }
 
         case 'date': {
           if (fieldData instanceof Date) {
-            result[field.name] = fieldData.toISOString();
+            result[field.name] = fieldData.toISOString()
           }
 
-          break;
+          break
         }
 
         default: {
-          break;
+          break
         }
       }
 
-      return result;
+      return result
     }
 
-    return siblingData;
-  }, siblingData);
+    return siblingData
+  }, siblingData)
 
-  return formatted as T;
-};
+  return formatted as T
+}

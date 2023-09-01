@@ -1,83 +1,48 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
-import { CodeField } from '../../payload-types';
+import type { CollectionConfig } from '../../../../src/collections/config/types'
+import type { CodeField } from '../../payload-types'
 
 const Code: CollectionConfig = {
-  slug: 'code-fields',
   fields: [
     {
-      name: 'javascript',
-      type: 'code',
       admin: {
         language: 'javascript',
       },
+      name: 'javascript',
+      type: 'code',
     },
     {
-      name: 'typescript',
-      type: 'code',
       admin: {
         language: 'typescript',
       },
+      name: 'typescript',
+      type: 'code',
     },
     {
-      name: 'json',
-      type: 'code',
       admin: {
         language: 'json',
       },
+      name: 'json',
+      type: 'code',
     },
     {
-      name: 'html',
-      type: 'code',
       admin: {
         language: 'html',
       },
+      name: 'html',
+      type: 'code',
     },
     {
-      name: 'css',
-      type: 'code',
       admin: {
         language: 'css',
       },
+      name: 'css',
+      type: 'code',
     },
   ],
-};
-
-export const codeDoc: Partial<CodeField> = {
-  javascript: "console.log('Hello');",
-  typescript: `class Greeter {
-  greeting: string;
-
-  constructor(message: string) {
-    this.greeting = message;
-  }
-
-  greet() {
-    return "Hello, " + this.greeting;
-  }
+  slug: 'code-fields',
 }
 
-let greeter = new Greeter("world");`,
-
-  html: `<!DOCTYPE html>
-<html lang="en">
-<head>
-
-<script>
-  // Just a lil’ script to show off that inline JS gets highlighted
-  window.console && console.log('foo');
-</script>
-<meta charset="utf-8" />
-<link rel="icon" href="assets/favicon.png" />
-<title>Prism</title>
-<link rel="stylesheet" href="assets/style.css" />
-<link rel="stylesheet" href="themes/prism.css" data-noprefix />
-<script src="assets/vendor/prefixfree.min.js"></script>
-
-<script>var _gaq = [['_setAccount', 'UA-11111111-1'], ['_trackPageview']];</script>
-<script src="https://www.google-analytics.com/ga.js" async></script>
-</head>
-<body>`,
-
+export const codeDoc: Partial<CodeField> = {
   css: `@import url(https://fonts.googleapis.com/css?family=Questrial);
 @import url(https://fonts.googleapis.com/css?family=Arvo);
 
@@ -119,8 +84,43 @@ a {
 section h1 {
   font-size: 250%;
 }`,
+  html: `<!DOCTYPE html>
+<html lang="en">
+<head>
 
-  json: JSON.stringify({ property: 'value', arr: ['val1', 'val2', 'val3'] }, null, 2),
-};
+<script>
+  // Just a lil’ script to show off that inline JS gets highlighted
+  window.console && console.log('foo');
+</script>
+<meta charset="utf-8" />
+<link rel="icon" href="assets/favicon.png" />
+<title>Prism</title>
+<link rel="stylesheet" href="assets/style.css" />
+<link rel="stylesheet" href="themes/prism.css" data-noprefix />
+<script src="assets/vendor/prefixfree.min.js"></script>
 
-export default Code;
+<script>var _gaq = [['_setAccount', 'UA-11111111-1'], ['_trackPageview']];</script>
+<script src="https://www.google-analytics.com/ga.js" async></script>
+</head>
+<body>`,
+
+  javascript: "console.log('Hello');",
+
+  json: JSON.stringify({ arr: ['val1', 'val2', 'val3'], property: 'value' }, null, 2),
+
+  typescript: `class Greeter {
+  greeting: string;
+
+  constructor(message: string) {
+    this.greeting = message;
+  }
+
+  greet() {
+    return "Hello, " + this.greeting;
+  }
+}
+
+let greeter = new Greeter("world");`,
+}
+
+export default Code

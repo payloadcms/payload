@@ -1,7 +1,8 @@
-import { RichTextField } from '../config/types';
-import { PayloadRequest } from '../../express/types';
-import { recurseNestedFields } from './recurseNestedFields';
-import { populate } from './populate';
+import type { PayloadRequest } from '../../express/types'
+import type { RichTextField } from '../config/types'
+
+import { populate } from './populate'
+import { recurseNestedFields } from './recurseNestedFields'
 
 type Args = {
   currentDepth?: number
@@ -9,98 +10,104 @@ type Args = {
   field: RichTextField
   overrideAccess?: boolean
   req: PayloadRequest
-  siblingDoc: Record<string, unknown>
   showHiddenFields: boolean
+  siblingDoc: Record<string, unknown>
 }
 
 type RecurseRichTextArgs = {
   children: unknown[]
-  overrideAccess: boolean
-  depth: number
   currentDepth: number
+  depth: number
   field: RichTextField
-  req: PayloadRequest
+  overrideAccess: boolean
   promises: Promise<void>[]
+  req: PayloadRequest
   showHiddenFields: boolean
 }
 
 export const recurseRichText = ({
-  req,
   children,
-  overrideAccess = false,
-  depth,
   currentDepth = 0,
+  depth,
   field,
+  overrideAccess = false,
   promises,
+  req,
   showHiddenFields,
 }: RecurseRichTextArgs): void => {
   if (Array.isArray(children)) {
-    (children as any[]).forEach((element) => {
-      if ((depth && currentDepth <= depth)) {
-        if ((element.type === 'relationship' || element.type === 'upload')
-          && element?.value?.id) {
-          const collection = req.payload.collections[element?.relationTo];
+    ;(children as any[]).forEach((element) => {
+      if (depth && currentDepth <= depth) {
+        if ((element.type === 'relationship' || element.type === 'upload') && element?.value?.id) {
+          const collection = req.payload.collections[element?.relationTo]
 
           if (collection) {
-            promises.push(populate({
-              req,
-              id: element.value.id,
-              data: element,
-              key: 'value',
-              overrideAccess,
-              depth,
-              currentDepth,
-              field,
-              collection,
-              showHiddenFields,
-            }));
+            promises.push(
+              populate({
+                collection,
+                currentDepth,
+                data: element,
+                depth,
+                field,
+                id: element.value.id,
+                key: 'value',
+                overrideAccess,
+                req,
+                showHiddenFields,
+              }),
+            )
           }
 
-          if (element.type === 'upload' && Array.isArray(field.admin?.upload?.collections?.[element?.relationTo]?.fields)) {
+          if (
+            element.type === 'upload' &&
+            Array.isArray(field.admin?.upload?.collections?.[element?.relationTo]?.fields)
+          ) {
             recurseNestedFields({
-              promises,
-              data: element.fields || {},
-              fields: field.admin.upload.collections[element.relationTo].fields,
-              req,
-              overrideAccess,
-              depth,
               currentDepth,
+              data: element.fields || {},
+              depth,
+              fields: field.admin.upload.collections[element.relationTo].fields,
+              overrideAccess,
+              promises,
+              req,
               showHiddenFields,
-            });
+            })
           }
         }
 
         if (element.type === 'link') {
           if (element?.doc?.value && element?.doc?.relationTo) {
-            const collection = req.payload.collections[element?.doc?.relationTo];
+            const collection = req.payload.collections[element?.doc?.relationTo]
 
             if (collection) {
-              promises.push(populate({
-                req,
-                id: element.doc.value,
-                data: element.doc,
-                key: 'value',
-                overrideAccess,
-                depth,
-                currentDepth,
-                field,
-                collection,
-                showHiddenFields,
-              }));
+              promises.push(
+                populate({
+                  collection,
+                  currentDepth,
+                  data: element.doc,
+                  depth,
+                  field,
+                  id: element.doc.value,
+                  key: 'value',
+                  overrideAccess,
+                  req,
+                  showHiddenFields,
+                }),
+              )
             }
           }
 
           if (Array.isArray(field.admin?.link?.fields)) {
             recurseNestedFields({
-              promises,
-              data: element.fields || {},
-              fields: field.admin?.link?.fields,
-              req,
-              overrideAccess,
-              depth,
               currentDepth,
+              data: element.fields || {},
+              depth,
+              fields: field.admin?.link?.fields,
+              overrideAccess,
+              promises,
+              req,
               showHiddenFields,
-            });
+            })
           }
         }
       }
@@ -115,11 +122,11 @@ export const recurseRichText = ({
           promises,
           req,
           showHiddenFields,
-        });
+        })
       }
-    });
+    })
   }
-};
+}
 
 const richTextRelationshipPromise = async ({
   currentDepth,
@@ -127,10 +134,10 @@ const richTextRelationshipPromise = async ({
   field,
   overrideAccess,
   req,
-  siblingDoc,
   showHiddenFields,
+  siblingDoc,
 }: Args): Promise<void> => {
-  const promises = [];
+  const promises = []
 
   recurseRichText({
     children: siblingDoc[field.name] as unknown[],
@@ -141,9 +148,9 @@ const richTextRelationshipPromise = async ({
     promises,
     req,
     showHiddenFields,
-  });
+  })
 
-  await Promise.all(promises);
-};
+  await Promise.all(promises)
+}
 
-export default richTextRelationshipPromise;
+export default richTextRelationshipPromise

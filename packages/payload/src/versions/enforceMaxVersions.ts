@@ -1,58 +1,58 @@
-import { Payload } from '../payload';
-import type { SanitizedCollectionConfig } from '../collections/config/types';
-import type { SanitizedGlobalConfig } from '../globals/config/types';
-import type { Where } from '../types';
-import { PayloadRequest } from '../types';
+import type { SanitizedCollectionConfig } from '../collections/config/types'
+import type { SanitizedGlobalConfig } from '../globals/config/types'
+import type { Payload } from '../payload'
+import type { PayloadRequest } from '../types'
+import type { Where } from '../types'
 
 type Args = {
-  payload: Payload
-  max: number
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
-  id?: string | number
+  id?: number | string
+  max: number
+  payload: Payload
   req?: PayloadRequest
 }
 
 export const enforceMaxVersions = async ({
-  payload,
-  max,
   collection,
   global,
   id,
+  max,
+  payload,
   req,
 }: Args): Promise<void> => {
-  const entityType = collection ? 'collection' : 'global';
-  const slug = collection ? collection.slug : global?.slug;
+  const entityType = collection ? 'collection' : 'global'
+  const slug = collection ? collection.slug : global?.slug
 
   try {
-    const where: Where = {};
-    let oldestAllowedDoc;
+    const where: Where = {}
+    let oldestAllowedDoc
 
     if (collection) {
       where.parent = {
         equals: id,
-      };
+      }
 
       const query = await payload.db.findVersions({
-        where,
         collection: collection.slug,
-        skip: max,
-        sort: '-updatedAt',
         pagination: false,
         req,
-      });
-
-      [oldestAllowedDoc] = query.docs;
-    } else if (global) {
-      const query = await payload.db.findGlobalVersions({
-        where,
-        global: global.slug,
         skip: max,
         sort: '-updatedAt',
-        req,
-      });
+        where,
+      })
 
-      [oldestAllowedDoc] = query.docs;
+      ;[oldestAllowedDoc] = query.docs
+    } else if (global) {
+      const query = await payload.db.findGlobalVersions({
+        global: global.slug,
+        req,
+        skip: max,
+        sort: '-updatedAt',
+        where,
+      })
+
+      ;[oldestAllowedDoc] = query.docs
     }
 
     if (oldestAllowedDoc?.updatedAt) {
@@ -60,21 +60,23 @@ export const enforceMaxVersions = async ({
         updatedAt: {
           less_than_equal: oldestAllowedDoc.updatedAt,
         },
-      };
+      }
 
       if (collection) {
         deleteQuery.parent = {
           equals: id,
-        };
+        }
       }
 
       await payload.db.deleteVersions({
         collection: collection?.slug,
-        where: deleteQuery,
         req,
-      });
+        where: deleteQuery,
+      })
     }
   } catch (err) {
-    payload.logger.error(`There was an error cleaning up old versions for the ${entityType} ${slug}`);
+    payload.logger.error(
+      `There was an error cleaning up old versions for the ${entityType} ${slug}`,
+    )
   }
-};
+}

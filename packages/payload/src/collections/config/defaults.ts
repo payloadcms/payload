@@ -1,16 +1,14 @@
-import defaultAccess from '../../auth/defaultAccess';
+import defaultAccess from '../../auth/defaultAccess'
 
 export const defaults = {
   access: {
     create: defaultAccess,
-    read: defaultAccess,
-    update: defaultAccess,
     delete: defaultAccess,
+    read: defaultAccess,
     unlock: defaultAccess,
+    update: defaultAccess,
   },
-  timestamps: true,
   admin: {
-    useAsTitle: 'id',
     components: {},
     enableRichTextLink: true,
     enableRichTextRelationship: true,
@@ -18,40 +16,42 @@ export const defaults = {
       defaultLimit: 10,
       limits: [5, 10, 25, 50, 100],
     },
+    useAsTitle: 'id',
   },
+  auth: false,
+  custom: {},
+  endpoints: [],
   fields: [],
   hooks: {
-    beforeOperation: [],
-    beforeValidate: [],
-    beforeChange: [],
     afterChange: [],
-    beforeRead: [],
-    afterRead: [],
-    beforeDelete: [],
     afterDelete: [],
-    afterOperation: [],
-    beforeLogin: [],
+    afterForgotPassword: [],
     afterLogin: [],
     afterLogout: [],
-    afterRefresh: [],
     afterMe: [],
-    afterForgotPassword: [],
+    afterOperation: [],
+    afterRead: [],
+    afterRefresh: [],
+    beforeChange: [],
+    beforeDelete: [],
+    beforeLogin: [],
+    beforeOperation: [],
+    beforeRead: [],
+    beforeValidate: [],
   },
-  endpoints: [],
-  auth: false,
+  timestamps: true,
   upload: false,
   versions: false,
-  custom: {},
-};
+}
 
 export const authDefaults = {
-  tokenExpiration: 7200,
-  maxLoginAttempts: 5,
-  lockTime: 600000, // 10 minutes
   cookies: {
-    secure: false,
     sameSite: 'Lax',
+    secure: false,
   },
-  verify: false,
   forgotPassword: {},
-};
+  lockTime: 600000, // 10 minutes
+  maxLoginAttempts: 5,
+  tokenExpiration: 7200,
+  verify: false,
+}

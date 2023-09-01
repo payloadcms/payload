@@ -1,22 +1,23 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { Props } from './types';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-import './index.scss';
+import type { Props } from './types'
 
-const baseClass = 'condition-value-number';
+import './index.scss'
+
+const baseClass = 'condition-value-number'
 
 const NumberField: React.FC<Props> = ({ onChange, value }) => {
-  const { t } = useTranslation('general');
+  const { t } = useTranslation('general')
   return (
     <input
-      placeholder={t('enterAValue')}
       className={baseClass}
-      type="number"
       onChange={(e) => onChange(e.target.value)}
+      placeholder={t('enterAValue')}
+      type="number"
       value={value}
     />
-  );
-};
+  )
+}
 
-export default NumberField;
+export default NumberField

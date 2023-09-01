@@ -1,23 +1,29 @@
-import { NextFunction, Response } from 'express';
-import httpStatus from 'http-status';
-import { PayloadRequest } from '../../express/types';
-import verifyEmail from '../operations/verifyEmail';
+import type { NextFunction, Response } from 'express'
 
-async function verifyEmailHandler(req: PayloadRequest, res: Response, next: NextFunction): Promise<any> {
+import httpStatus from 'http-status'
+
+import type { PayloadRequest } from '../../express/types'
+
+import verifyEmail from '../operations/verifyEmail'
+
+async function verifyEmailHandler(
+  req: PayloadRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<any> {
   try {
     await verifyEmail({
-      req,
       collection: req.collection,
+      req,
       token: req.params.token,
-    });
+    })
 
-    return res.status(httpStatus.OK)
-      .json({
-        message: 'Email verified successfully.',
-      });
+    return res.status(httpStatus.OK).json({
+      message: 'Email verified successfully.',
+    })
   } catch (error) {
-    return next(error);
+    return next(error)
   }
 }
 
-export default verifyEmailHandler;
+export default verifyEmailHandler

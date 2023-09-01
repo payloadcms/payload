@@ -1,10 +1,9 @@
-import React from 'react';
-import ElementButton from '../Button';
-import H3Icon from '../../../../../icons/headings/H3';
+import React from 'react'
 
-const H3 = ({ attributes, children }) => (
-  <h3 {...attributes}>{children}</h3>
-);
+import H3Icon from '../../../../../icons/headings/H3'
+import ElementButton from '../Button'
+
+const H3 = ({ attributes, children }) => <h3 {...attributes}>{children}</h3>
 
 const h3 = {
   Button: () => (
@@ -13,6 +12,6 @@ const h3 = {
     </ElementButton>
   ),
   Element: H3,
-};
+}
 
-export default h3;
+export default h3

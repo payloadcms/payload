@@ -1,24 +1,22 @@
-import { Text } from 'slate';
+import { Text } from 'slate'
 
 export const stringifyRichText = (content: unknown): string => {
   if (Array.isArray(content)) {
     return content.reduce((output, node) => {
-      const isTextNode = Text.isText(node);
+      const isTextNode = Text.isText(node)
 
-      const {
-        text,
-      } = node;
+      const { text } = node
 
       if (isTextNode) {
         // convert straight single quotations to curly
         // "\u201C" is starting double curly
         // "\u201D" is ending double curly
-        const sanitizedText = text?.replace(/'/g, '\u2019'); // single quotes
-        return `${output}${sanitizedText}`;
+        const sanitizedText = text?.replace(/'/g, '\u2019') // single quotes
+        return `${output}${sanitizedText}`
       }
 
       if (node) {
-        let nodeHTML;
+        let nodeHTML
         switch (node.type) {
           case 'h1':
           case 'h2':
@@ -29,37 +27,37 @@ export const stringifyRichText = (content: unknown): string => {
           case 'li':
           case 'p':
           case undefined:
-            nodeHTML = `${stringifyRichText(node.children)}\n`;
-            break;
+            nodeHTML = `${stringifyRichText(node.children)}\n`
+            break
 
           case 'ul':
           case 'ol':
-            nodeHTML = `${stringifyRichText(node.children)}\n\n`;
-            break;
+            nodeHTML = `${stringifyRichText(node.children)}\n\n`
+            break
 
           case 'link':
-            nodeHTML = `${stringifyRichText(node.children)}`;
-            break;
+            nodeHTML = `${stringifyRichText(node.children)}`
+            break
 
           case 'relationship':
-            nodeHTML = `Relationship to ${node.relationTo}: ${node?.value?.id}\n\n`;
-            break;
+            nodeHTML = `Relationship to ${node.relationTo}: ${node?.value?.id}\n\n`
+            break
 
           case 'upload':
-            nodeHTML = `${node.relationTo} Upload: ${node?.value?.id}\n\n`;
-            break;
+            nodeHTML = `${node.relationTo} Upload: ${node?.value?.id}\n\n`
+            break
 
           default:
-            nodeHTML = `${node.type}: ${JSON.stringify(node)}\n\n`;
-            break;
+            nodeHTML = `${node.type}: ${JSON.stringify(node)}\n\n`
+            break
         }
 
-        return `${output}${nodeHTML}`;
+        return `${output}${nodeHTML}`
       }
 
-      return output;
-    }, '');
+      return output
+    }, '')
   }
 
-  return '';
-};
+  return ''
+}

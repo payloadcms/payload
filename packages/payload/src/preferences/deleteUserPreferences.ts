@@ -1,34 +1,34 @@
-import type { Payload } from '../index';
-import type { SanitizedCollectionConfig } from '../collections/config/types';
-import { PayloadRequest } from '../express/types';
+import type { SanitizedCollectionConfig } from '../collections/config/types'
+import type { PayloadRequest } from '../express/types'
+import type { Payload } from '../index'
 
 type Args = {
-  payload: Payload
+  collectionConfig: SanitizedCollectionConfig
   /**
    * User IDs to delete
    */
-  ids: (string|number)[]
-  collectionConfig: SanitizedCollectionConfig
+  ids: (number | string)[]
+  payload: Payload
   req: PayloadRequest
 }
-export const deleteUserPreferences = ({ payload, ids, collectionConfig, req }: Args) => {
+export const deleteUserPreferences = ({ collectionConfig, ids, payload, req }: Args) => {
   if (collectionConfig.auth) {
     payload.db.deleteMany({
       collection: 'payload-preferences',
+      req,
       where: {
         user: { in: ids },
         userCollection: {
           equals: 'collectionConfig.slug,',
         },
       },
-      req,
-    });
+    })
   }
   payload.db.deleteMany({
     collection: 'payload-preferences',
+    req,
     where: {
       key: { in: ids.map((id) => `collection-${collectionConfig.slug}-${id}`) },
     },
-    req,
-  });
-};
+  })
+}

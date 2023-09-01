@@ -1,22 +1,24 @@
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { Payload } from '../../../payload';
-import { getDataLoader } from '../../../collections/dataloader';
-import { PayloadRequest } from '../../../express/types';
-import { Document } from '../../../types';
-import restoreVersion from '../restoreVersion';
-import { i18nInit } from '../../../translations/init';
-import { APIError } from '../../../errors';
-import { setRequestContext } from '../../../express/setRequestContext';
+import type { Config as GeneratedTypes } from 'payload/generated-types'
+
+import type { PayloadRequest } from '../../../express/types'
+import type { Payload } from '../../../payload'
+import type { Document } from '../../../types'
+
+import { getDataLoader } from '../../../collections/dataloader'
+import { APIError } from '../../../errors'
+import { setRequestContext } from '../../../express/setRequestContext'
+import { i18nInit } from '../../../translations/init'
+import restoreVersion from '../restoreVersion'
 
 export type Options<T extends keyof GeneratedTypes['globals']> = {
-  slug: string
-  id: string
   depth?: number
-  locale?: string
   fallbackLocale?: string
-  user?: Document
+  id: string
+  locale?: string
   overrideAccess?: boolean
   showHiddenFields?: boolean
+  slug: string
+  user?: Document
 }
 
 export default async function restoreVersionLocal<T extends keyof GeneratedTypes['globals']>(
@@ -24,42 +26,42 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   options: Options<T>,
 ): Promise<GeneratedTypes['globals'][T]> {
   const {
-    slug: globalSlug,
     depth,
-    id,
-    user,
-    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     fallbackLocale = null,
+    id,
+    locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
     showHiddenFields,
-  } = options;
+    slug: globalSlug,
+    user,
+  } = options
 
-  const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug);
-  const i18n = i18nInit(payload.config.i18n);
+  const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
+  const i18n = i18nInit(payload.config.i18n)
 
   if (!globalConfig) {
-    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`);
+    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
   }
 
   const req = {
-    user,
-    payloadAPI: 'local',
-    payload,
-    locale,
     fallbackLocale,
     i18n,
+    locale,
+    payload,
+    payloadAPI: 'local',
     t: i18n.t,
-  } as PayloadRequest;
-  setRequestContext(req);
+    user,
+  } as PayloadRequest
+  setRequestContext(req)
 
-  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req);
+  if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   return restoreVersion({
     depth,
     globalConfig,
-    overrideAccess,
     id,
-    showHiddenFields,
+    overrideAccess,
     req,
-  });
+    showHiddenFields,
+  })
 }

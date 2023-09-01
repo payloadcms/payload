@@ -1,21 +1,22 @@
-import { UseDraggableArguments } from '@dnd-kit/core';
-import React, { Fragment } from 'react';
-import { useDraggableSortable } from '../useDraggableSortable';
-import { ChildFunction } from './types';
+import type { UseDraggableArguments } from '@dnd-kit/core'
 
-export const DraggableSortableItem: React.FC<UseDraggableArguments & {
-  children: ChildFunction
-}> = (props) => {
-  const {
-    id,
-    disabled,
-    children,
-  } = props;
+import React, { Fragment } from 'react'
 
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggableSortable({
-    id,
+import type { ChildFunction } from './types'
+
+import { useDraggableSortable } from '../useDraggableSortable'
+
+export const DraggableSortableItem: React.FC<
+  UseDraggableArguments & {
+    children: ChildFunction
+  }
+> = (props) => {
+  const { children, disabled, id } = props
+
+  const { attributes, isDragging, listeners, setNodeRef, transform } = useDraggableSortable({
     disabled,
-  });
+    id,
+  })
 
   return (
     <Fragment>
@@ -31,7 +32,7 @@ export const DraggableSortableItem: React.FC<UseDraggableArguments & {
         transform,
       })}
     </Fragment>
-  );
-};
+  )
+}
 
-export default DraggableSortableItem;
+export default DraggableSortableItem

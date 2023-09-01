@@ -1,32 +1,32 @@
-import { docHasTimestamps, PayloadRequest, Where } from '../../types';
-import { hasWhereAccessResult } from '../../auth';
-import { AccessResult } from '../../config/types';
-import { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types';
-import sanitizeInternalFields from '../../utilities/sanitizeInternalFields';
-import { appendVersionToQueryKey } from './appendVersionToQueryKey';
-import { SanitizedGlobalConfig } from '../../globals/config/types';
-import { combineQueries } from '../../database/combineQueries';
-import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types';
+import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types'
+import type { AccessResult } from '../../config/types'
+import type { FindGlobalVersionsArgs, FindVersionsArgs } from '../../database/types'
+import type { SanitizedGlobalConfig } from '../../globals/config/types'
+import type { PayloadRequest, Where } from '../../types'
+
+import { hasWhereAccessResult } from '../../auth'
+import { combineQueries } from '../../database/combineQueries'
+import { docHasTimestamps } from '../../types'
+import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
+import { appendVersionToQueryKey } from './appendVersionToQueryKey'
 
 type Arguments<T> = {
+  accessResult: AccessResult
+  doc: T
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   entityType: 'collection' | 'global'
-  doc: T
-  req: PayloadRequest
   overrideAccess: boolean
-  accessResult: AccessResult
+  req: PayloadRequest
 }
 
 const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
+  accessResult,
+  doc,
   entity,
   entityType,
-  doc,
   req,
-  accessResult,
 }: Arguments<T>): Promise<T> => {
-  const {
-    locale,
-  } = req;
+  const { locale } = req
 
   const queryToBuild: Where = {
     and: [
@@ -36,14 +36,14 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
         },
       },
     ],
-  };
+  }
 
   if (entityType === 'collection') {
     queryToBuild.and.push({
       parent: {
         equals: doc.id,
       },
-    });
+    })
   }
 
   if (docHasTimestamps(doc)) {
@@ -51,42 +51,40 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
       updatedAt: {
         greater_than: doc.updatedAt,
       },
-    });
+    })
   }
 
-  let versionAccessResult;
+  let versionAccessResult
 
   if (hasWhereAccessResult(accessResult)) {
-    versionAccessResult = appendVersionToQueryKey(accessResult);
+    versionAccessResult = appendVersionToQueryKey(accessResult)
   }
 
-
   const findVersionsArgs: FindVersionsArgs & FindGlobalVersionsArgs = {
-    locale,
-    where: combineQueries(queryToBuild, versionAccessResult),
     collection: entity.slug,
     global: entity.slug,
     limit: 1,
-    sort: '-updatedAt',
+    locale,
     req,
-  };
-
-  let versionDocs;
-  if (entityType === 'global') {
-    versionDocs = (await req.payload.db.findGlobalVersions<T>(findVersionsArgs)).docs;
-  } else {
-    versionDocs = (await req.payload.db.findVersions<T>(findVersionsArgs)).docs;
+    sort: '-updatedAt',
+    where: combineQueries(queryToBuild, versionAccessResult),
   }
 
-  let draft = versionDocs[0];
+  let versionDocs
+  if (entityType === 'global') {
+    versionDocs = (await req.payload.db.findGlobalVersions<T>(findVersionsArgs)).docs
+  } else {
+    versionDocs = (await req.payload.db.findVersions<T>(findVersionsArgs)).docs
+  }
 
+  let draft = versionDocs[0]
 
   if (!draft) {
-    return doc;
+    return doc
   }
 
-  draft = JSON.parse(JSON.stringify(draft));
-  draft = sanitizeInternalFields(draft);
+  draft = JSON.parse(JSON.stringify(draft))
+  draft = sanitizeInternalFields(draft)
 
   // Disregard all other draft content at this point,
   // Only interested in the version itself.
@@ -96,7 +94,7 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     ...draft.version,
     createdAt: draft.createdAt,
     updatedAt: draft.updatedAt,
-  };
-};
+  }
+}
 
-export default replaceWithDraftIfAvailable;
+export default replaceWithDraftIfAvailable

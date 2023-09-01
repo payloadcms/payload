@@ -1,48 +1,51 @@
-import { Field, TabAsField } from '../../config/types';
-import { promise } from './promise';
-import { PayloadRequest, RequestContext } from '../../../express/types';
+import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { Field, TabAsField } from '../../config/types'
+
+import { promise } from './promise'
 
 type Args = {
+  context: RequestContext
   data: Record<string, unknown>
   doc: Record<string, unknown>
-  previousDoc: Record<string, unknown>
-  previousSiblingDoc: Record<string, unknown>
   fields: (Field | TabAsField)[]
   operation: 'create' | 'update'
+  previousDoc: Record<string, unknown>
+  previousSiblingDoc: Record<string, unknown>
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
-  context: RequestContext
 }
 
 export const traverseFields = async ({
+  context,
   data,
   doc,
-  previousDoc,
-  previousSiblingDoc,
   fields,
   operation,
+  previousDoc,
+  previousSiblingDoc,
   req,
   siblingData,
   siblingDoc,
-  context,
 }: Args): Promise<void> => {
-  const promises = [];
+  const promises = []
 
   fields.forEach((field) => {
-    promises.push(promise({
-      data,
-      doc,
-      previousDoc,
-      previousSiblingDoc,
-      field,
-      operation,
-      req,
-      siblingData,
-      siblingDoc,
-      context,
-    }));
-  });
+    promises.push(
+      promise({
+        context,
+        data,
+        doc,
+        field,
+        operation,
+        previousDoc,
+        previousSiblingDoc,
+        req,
+        siblingData,
+        siblingDoc,
+      }),
+    )
+  })
 
-  await Promise.all(promises);
-};
+  await Promise.all(promises)
+}

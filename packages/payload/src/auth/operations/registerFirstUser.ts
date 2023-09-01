@@ -1,15 +1,17 @@
-import { Response } from 'express';
-import { Config as GeneratedTypes } from 'payload/generated-types';
-import { MarkOptional } from 'ts-essentials';
-import { Forbidden } from '../../errors';
-import { PayloadRequest } from '../../express/types';
-import { Collection } from '../../collections/config/types';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
+import type { Response } from 'express'
+import type { Config as GeneratedTypes } from 'payload/generated-types'
+import type { MarkOptional } from 'ts-essentials'
 
-export type Arguments<T extends { [field: string | number | symbol]: unknown }> = {
+import type { Collection } from '../../collections/config/types'
+import type { PayloadRequest } from '../../express/types'
+
+import { Forbidden } from '../../errors'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
+
+export type Arguments<T extends { [field: number | string | symbol]: unknown }> = {
   collection: Collection
-  data: MarkOptional<T, 'id' | 'updatedAt' | 'createdAt' | 'sizes'> & {
+  data: MarkOptional<T, 'createdAt' | 'id' | 'sizes' | 'updatedAt'> & {
     email: string
     password: string
   }
@@ -18,7 +20,7 @@ export type Arguments<T extends { [field: string | number | symbol]: unknown }> 
 }
 
 export type Result<T> = {
-  message: string,
+  message: string
   user: T
 }
 
@@ -29,49 +31,45 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     collection: {
       config,
       config: {
+        auth: { verify },
         slug,
-        auth: {
-          verify,
-        },
       },
     },
-    req: {
-      payload,
-    },
-    req,
     data,
-  } = args;
+    req,
+    req: { payload },
+  } = args
 
   try {
-    const shouldCommit = await initTransaction(req);
+    const shouldCommit = await initTransaction(req)
 
     const doc = await payload.db.findOne({
       collection: config.slug,
       req,
-    });
+    })
 
-    if (doc) throw new Forbidden(req.t);
+    if (doc) throw new Forbidden(req.t)
 
     // /////////////////////////////////////
     // Register first user
     // /////////////////////////////////////
 
     const result = await payload.create<TSlug>({
-      req,
       collection: slug as TSlug,
       data,
       overrideAccess: true,
-    });
+      req,
+    })
 
     // auto-verify (if applicable)
     if (verify) {
       await payload.update({
-        id: result.id,
         collection: slug,
         data: {
           _verified: true,
         },
-      });
+        id: result.id,
+      })
     }
 
     // /////////////////////////////////////
@@ -81,23 +79,23 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     const { token } = await payload.login({
       ...args,
       collection: slug,
-    });
+    })
 
     const resultToReturn = {
       ...result,
       token,
-    };
+    }
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID);
+    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
 
     return {
       message: 'Registered and logged in successfully. Welcome!',
       user: resultToReturn,
-    };
+    }
   } catch (error: unknown) {
-    await killTransaction(req);
-    throw error;
+    await killTransaction(req)
+    throw error
   }
 }
 
-export default registerFirstUser;
+export default registerFirstUser

@@ -1,63 +1,64 @@
-import crypto from 'crypto';
-import { Field, FieldHook } from '../../fields/config/types';
-import { extractTranslations } from '../../translations/extractTranslations';
+import crypto from 'crypto'
 
-const labels = extractTranslations(['authentication:enableAPIKey', 'authentication:apiKey']);
+import type { Field, FieldHook } from '../../fields/config/types'
 
-const encryptKey: FieldHook = ({ req, value }) => (value ? req.payload.encrypt(value as string) : undefined);
-const decryptKey: FieldHook = ({ req, value }) => (value ? req.payload.decrypt(value as string) : undefined);
+import { extractTranslations } from '../../translations/extractTranslations'
+
+const labels = extractTranslations(['authentication:enableAPIKey', 'authentication:apiKey'])
+
+const encryptKey: FieldHook = ({ req, value }) =>
+  value ? req.payload.encrypt(value as string) : undefined
+const decryptKey: FieldHook = ({ req, value }) =>
+  value ? req.payload.decrypt(value as string) : undefined
 
 export default [
   {
-    name: 'enableAPIKey',
-    label: labels['authentication:enableAPIKey'],
-    type: 'checkbox',
-    defaultValue: false,
     admin: {
       components: {
         Field: () => null,
       },
     },
+    defaultValue: false,
+    label: labels['authentication:enableAPIKey'],
+    name: 'enableAPIKey',
+    type: 'checkbox',
   },
   {
-    name: 'apiKey',
-    label: labels['authentication:apiKey'],
-    type: 'text',
     admin: {
       components: {
         Field: () => null,
       },
     },
     hooks: {
-      beforeChange: [
-        encryptKey,
-      ],
-      afterRead: [
-        decryptKey,
-      ],
+      afterRead: [decryptKey],
+      beforeChange: [encryptKey],
     },
+    label: labels['authentication:apiKey'],
+    name: 'apiKey',
+    type: 'text',
   },
   {
-    name: 'apiKeyIndex',
-    type: 'text',
-    hidden: true,
     admin: {
       disabled: true,
     },
+    hidden: true,
     hooks: {
       beforeValidate: [
         async ({ data, req, value }) => {
           if (data.apiKey) {
-            return crypto.createHmac('sha1', req.payload.secret)
+            return crypto
+              .createHmac('sha1', req.payload.secret)
               .update(data.apiKey as string)
-              .digest('hex');
+              .digest('hex')
           }
           if (data.enableAPIKey === false) {
-            return null;
+            return null
           }
-          return value;
+          return value
         },
       ],
     },
+    name: 'apiKeyIndex',
+    type: 'text',
   },
-] as Field[];
+] as Field[]

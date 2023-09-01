@@ -1,39 +1,41 @@
-import { Response } from 'express';
-import { Document, Where } from '../../../types';
-import { SanitizedGlobalConfig } from '../../config/types';
-import { PayloadRequest } from '../../../express/types';
-import findVersions from '../../operations/findVersions';
+import type { Response } from 'express'
+
+import type { PayloadRequest } from '../../../express/types'
+import type { Document, Where } from '../../../types'
+import type { SanitizedGlobalConfig } from '../../config/types'
+
+import findVersions from '../../operations/findVersions'
 
 export type Resolver = (
   _: unknown,
   args: {
-    locale?: string
     fallbackLocale?: string
-    where: Where
     limit?: number
+    locale?: string
     page?: number
     sort?: string
+    where: Where
   },
   context: {
-    req: PayloadRequest,
+    req: PayloadRequest
     res: Response
-  }
+  },
 ) => Promise<Document>
 
 export default function findVersionsResolver(globalConfig: SanitizedGlobalConfig): Resolver {
   return async function resolver(_, args, context) {
     const options = {
+      depth: 0,
       globalConfig,
-      where: args.where,
       limit: args.limit,
       page: args.page,
-      sort: args.sort,
       req: context.req,
-      depth: 0,
-    };
+      sort: args.sort,
+      where: args.where,
+    }
 
-    const result = await findVersions(options);
+    const result = await findVersions(options)
 
-    return result;
-  };
+    return result
+  }
 }
