@@ -1,0 +1,11 @@
+// As this is the demo folder, we import Payload SCSS functions relatively.
+@import '../../../../../packages/payload/src/exports/scss.scss';
+
+// In your own projects, you'd import as follows:
+// @import '~payload/scss';
+
+.custom-minimal-route {
+  &__login-btn {
+    margin-right: base(0.5);
+  }
+}

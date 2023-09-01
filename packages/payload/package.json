@@ -288,9 +288,10 @@
     "url": "https://github.com/payloadcms/payload.git"
   },
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:tsc && pnpm build:components",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:components",
     "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
-    "build:tsc": "tsc -p tsconfig.build.json",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist -p tsconfig.build.json",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
     "clean": "rimraf dist",
     "clean:cache": "rimraf node_modules/.cache",
