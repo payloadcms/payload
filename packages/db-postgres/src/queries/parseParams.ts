@@ -4,24 +4,33 @@ import { Operator, Where } from 'payload/types';
 import { Field } from 'payload/dist/fields/config/types';
 import { validOperators } from 'payload/dist/types/constants';
 import { and, SQL } from 'drizzle-orm';
+import { PgSelectQueryBuilder } from 'drizzle-orm/pg-core';
 import { buildSearchParam } from './buildSearchParams';
 import { buildAndOrConditions } from './buildAndOrConditions';
 import { PostgresAdapter } from '../types';
+import { operatorMap } from './operatorMap';
+import { BuildQueryJoins } from './buildQuery';
 
 export async function parseParams({
+  selectQuery,
+  joins,
   where,
   collectionSlug,
   globalSlug,
   adapter,
   locale,
   fields,
+  sort,
 }: {
+  selectQuery: PgSelectQueryBuilder<any, any, any, any, any>,
+  joins: BuildQueryJoins
   where: Where,
   collectionSlug?: string,
   globalSlug?: string,
   adapter: PostgresAdapter
   locale: string,
   fields: Field[],
+  sort: string,
 }): Promise<SQL> {
   let result: SQL;
 
@@ -37,15 +46,17 @@ export async function parseParams({
       }
       if (Array.isArray(condition)) {
         const builtConditions = await buildAndOrConditions({
+          selectQuery,
+          joins,
           collectionSlug,
           fields,
           globalSlug,
           adapter,
           locale,
           where: condition,
+          sort,
         });
-
-        if (builtConditions.length > 0) result = and(result, ...builtConditions);
+        if (builtConditions.length > 0) result = operatorMap[conditionOperator](result, ...builtConditions);
       } else {
         // It's a path - and there can be multiple comparisons on a single path.
         // For example - title like 'test' and title not equal to 'tester'
@@ -54,7 +65,9 @@ export async function parseParams({
         if (typeof pathOperators === 'object') {
           for (const operator of Object.keys(pathOperators)) {
             if (validOperators.includes(operator as Operator)) {
-              const searchParam = await buildSearchParam({
+              result = and(await buildSearchParam({
+                selectQuery,
+                joins,
                 collectionSlug,
                 globalSlug,
                 adapter,
@@ -63,31 +76,14 @@ export async function parseParams({
                 incomingPath: relationOrPath,
                 val: pathOperators[operator],
                 operator,
-              });
-
-              if (searchParam?.value && searchParam?.path) {
-                result = and(result, searchParam.value);
-                // result = {
-                //   ...result,
-                //   [searchParam.path]: searchParam.value,
-                // };
-              } else if (typeof searchParam?.value === 'object') {
-                result = and(result, searchParam.value);
-                // result = deepmerge(result, searchParam.value, { arrayMerge: combineMerge });
-              }
+                sort,
+              }));
             }
           }
         }
       }
     }
   }
-
-  // await db.select().from(users).where(
-  //   and(
-  //     eq(users.id, 42),
-  //     eq(users.name, 'Dan')
-  //   )
-  // );
 
   return result;
 }

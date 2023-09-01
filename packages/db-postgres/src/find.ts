@@ -1,62 +1,117 @@
-import { sql } from 'drizzle-orm';
+import { asc, desc, inArray, sql } from 'drizzle-orm';
 import toSnakeCase from 'to-snake-case';
 import type { Find } from 'payload/dist/database/types';
 import type { PayloadRequest } from 'payload/dist/express/types';
 import type { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
-import buildQuery from './queries/buildQuery';
+import buildQuery, { BuildQueryJoins } from './queries/buildQuery';
 import { buildFindManyArgs } from './find/buildFindManyArgs';
 import { transform } from './transform/read';
+import { PostgresAdapter } from './types';
 
-export const find: Find = async function find({
-  collection,
-  where,
-  page = 1,
-  limit: limitArg,
-  sort: sortArg,
-  locale,
-  pagination,
-  req = {} as PayloadRequest,
-}) {
+export const find: Find = async function find(
+  this: PostgresAdapter, {
+    collection,
+    where,
+    page = 1,
+    limit: limitArg,
+    sort: sortArg,
+    locale,
+    pagination,
+    req = {} as PayloadRequest,
+  },
+) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config;
   const tableName = toSnakeCase(collection);
   const table = this.tables[tableName];
   const limit = typeof limitArg === 'number' ? limitArg : collectionConfig.admin.pagination.defaultLimit;
   const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort;
+  const joins: BuildQueryJoins = {};
   let totalDocs: number;
   let totalPages: number;
   let hasPrevPage: boolean;
   let hasNextPage: boolean;
   let pagingCounter: number;
+  const orderedIDs: Record<number | string, number> = {};
 
+  // initial query
+  const selectQuery = this.db.selectDistinct({
+    id: table.id,
+  })
+    .from(table);
+
+  // TODO: remove await for buildQuery, kept in to avoid publishing new `payload with getLocalizedPaths return type allowing PathToQuery | Promise<PathToQuery>'
+  /**
+   * build a query applying the following:
+   *  - sets `selectQuery.orderBy` based on `sort`
+   *  - adds necessary joins as it iterates paths in `where` and `sort`
+   *  - returns a query used in `where` for filtering
+   */
   const query = await buildQuery({
+    selectQuery,
+    joins,
     collectionSlug: collection,
     adapter: this,
     locale,
     where,
+    sort,
   });
-
-  if (pagination !== false) {
-    const countResult = await this.db.select({ count: sql<number>`count(*)` }).from(table).where(query);
-    totalDocs = Number(countResult[0].count);
-    totalPages = Math.ceil(totalDocs / limit);
-    hasPrevPage = page > 1;
-    hasNextPage = totalPages > page;
-    pagingCounter = ((page - 1) * limit) + 1;
-  }
 
   const findManyArgs = buildFindManyArgs({
     adapter: this,
     depth: 0,
     fields: collectionConfig.fields,
     tableName,
-    sort,
   });
 
-  findManyArgs.limit = limit === 0 ? undefined : limit;
-  findManyArgs.offset = (page - 1) * limit;
-  findManyArgs.where = query;
+  // only fetch IDs when a sort or where query is used that needs to be done on join tables, otherwise these can be done directly on the table in findMany
+  if (Object.keys(joins).length > 0) {
+    selectQuery.where(query);
+    Object.values(joins)
+      .forEach(({
+        table: joinTable,
+        condition,
+      }) => {
+        selectQuery.leftJoin(joinTable, condition);
+      });
+    const result = await selectQuery
+      .offset((page - 1) * limit)
+      .limit(limit === 0 ? undefined : limit);
+    // set the id in an object for sorting later
+    result.forEach(({ id }, i) => {
+      orderedIDs[id as (number | string)] = i;
+    });
+    findManyArgs.where = inArray(this.tables[tableName].id, Object(orderedIDs)
+      .values());
+  } else {
+    findManyArgs.where = query;
+    // orderBy will only be set if a complex sort is needed on a relation
+    if (sort[0] === '-') {
+      findManyArgs.orderBy = desc(this.tables[tableName][sort.substring(1)]);
+    } else {
+      findManyArgs.orderBy = asc(this.tables[tableName][sort]);
+    }
+  }
+
+  if (pagination !== false) {
+    // use query above, optionally we don't need the sort
+    const countResult = await this.db.select({ count: sql<number>`count(*)` })
+      .from(table)
+      .where(query);
+    totalDocs = Number(countResult[0].count);
+    totalPages = Math.ceil(totalDocs / limit);
+    hasPrevPage = page > 1;
+    hasNextPage = totalPages > page;
+    pagingCounter = ((page - 1) * limit) + 1;
+    findManyArgs.limit = limit === 0 ? undefined : limit;
+    findManyArgs.offset = (page - 1) * limit;
+  }
 
   const rawDocs = await this.db.query[tableName].findMany(findManyArgs);
+
+  // sort rawDocs from selectQuery
+  if (orderedIDs) {
+    rawDocs.sort((a, b) => (orderedIDs[a.id] - orderedIDs[b.id]));
+  }
 
   const docs = rawDocs.map((data) => {
     return transform({

@@ -75,6 +75,10 @@ describe('Fields', () => {
         depth: 0,
         where: {
           updatedAt: {
+            // TODO:
+            //  drizzle is not adjusting for timezones
+            //  tenMinutesAgo: "2023-08-29T15:49:39.897Z" UTC
+            //  doc.updatedAt: "2023-08-29T11:59:43.738Z" GMT -4
             greater_than_equal: tenMinutesAgo,
           },
         },

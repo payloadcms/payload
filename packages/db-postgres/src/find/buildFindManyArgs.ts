@@ -1,5 +1,5 @@
 import { ArrayField, Block, Field } from 'payload/types';
-import { asc, DBQueryConfig, desc } from 'drizzle-orm';
+import { DBQueryConfig } from 'drizzle-orm';
 import { traverseFields } from './traverseFields';
 import { PostgresAdapter } from '../types';
 
@@ -8,7 +8,6 @@ type BuildFindQueryArgs = {
   depth: number
   fields: Field[]
   tableName: string
-  sort?: string
 }
 
 export type Result = DBQueryConfig<'many', true, any, any>
@@ -20,7 +19,6 @@ export const buildFindManyArgs = ({
   depth,
   fields,
   tableName,
-  sort,
 }: BuildFindQueryArgs): Record<string, unknown> => {
   const result: Result = {
     with: {},
@@ -45,14 +43,6 @@ export const buildFindManyArgs = ({
 
   if (adapter.tables[`${tableName}_locales`]) {
     result.with._locales = _locales;
-  }
-
-  if (sort) {
-    if (sort[0] === '-') {
-      result.orderBy = desc(adapter.tables[tableName][sort.substring(1)]);
-    } else {
-      result.orderBy = asc(adapter.tables[tableName][sort]);
-    }
   }
 
   const locatedBlocks: Block[] = [];
