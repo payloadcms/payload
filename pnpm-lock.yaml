@@ -176,12 +176,6 @@ importers:
       '@monaco-editor/react':
         specifier: 4.5.1
         version: 4.5.1(monaco-editor@0.38.0)(react-dom@18.2.0)(react@18.2.0)
-      '@payloadcms/db-mongodb':
-        specifier: workspace:*
-        version: link:../db-mongodb
-      '@payloadcms/db-postgres':
-        specifier: workspace:*
-        version: link:../db-postgres
       '@swc/core':
         specifier: 1.3.76
         version: 1.3.76
