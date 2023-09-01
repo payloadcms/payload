@@ -86,7 +86,7 @@ describe('fields', () => {
       const field = page.locator('#field-number')
       await field.fill(String(input))
       await saveDocAndAssert(page)
-      await await expect(field).toHaveValue(String(input))
+      await expect(field).toHaveValue(String(input))
     })
 
     test('should create hasMany', async () => {
@@ -215,12 +215,12 @@ describe('fields', () => {
       await groupLatField.fill('-8')
 
       await saveDocAndAssert(page)
-      await await expect(longField).toHaveAttribute('value', '9')
-      await await expect(latField).toHaveAttribute('value', '-2')
-      await await expect(localizedLongField).toHaveAttribute('value', '1')
-      await await expect(localizedLatField).toHaveAttribute('value', '-1')
-      await await expect(groupLongitude).toHaveAttribute('value', '3')
-      await await expect(groupLatField).toHaveAttribute('value', '-8')
+      await expect(longField).toHaveAttribute('value', '9')
+      await expect(latField).toHaveAttribute('value', '-2')
+      await expect(localizedLongField).toHaveAttribute('value', '1')
+      await expect(localizedLatField).toHaveAttribute('value', '-1')
+      await expect(groupLongitude).toHaveAttribute('value', '3')
+      await expect(groupLatField).toHaveAttribute('value', '-8')
     })
 
     test('should update point', async () => {
@@ -245,12 +245,12 @@ describe('fields', () => {
 
       await saveDocAndAssert(page)
 
-      await await expect(longField).toHaveAttribute('value', '9')
-      await await expect(latField).toHaveAttribute('value', '-2')
-      await await expect(localizedLongField).toHaveAttribute('value', '2')
-      await await expect(localizedLatField).toHaveAttribute('value', '-2')
-      await await expect(groupLongitude).toHaveAttribute('value', '3')
-      await await expect(groupLatField).toHaveAttribute('value', '-8')
+      await expect(longField).toHaveAttribute('value', '9')
+      await expect(latField).toHaveAttribute('value', '-2')
+      await expect(localizedLongField).toHaveAttribute('value', '2')
+      await expect(localizedLatField).toHaveAttribute('value', '-2')
+      await expect(groupLongitude).toHaveAttribute('value', '3')
+      await expect(groupLatField).toHaveAttribute('value', '-8')
     })
 
     test('should be able to clear a value point', async () => {
@@ -264,8 +264,8 @@ describe('fields', () => {
 
       await saveDocAndAssert(page)
 
-      await await expect(groupLongitude).toHaveAttribute('value', '')
-      await await expect(groupLatField).toHaveAttribute('value', '')
+      await expect(groupLongitude).toHaveAttribute('value', '')
+      await expect(groupLatField).toHaveAttribute('value', '')
     })
   })
 
@@ -341,7 +341,7 @@ describe('fields', () => {
       await rowActions.locator('.array-actions__button').click()
       const addBelowButton = rowActions.locator('.array-actions__action.array-actions__add')
       await expect(addBelowButton).toBeVisible()
-      addBelowButton.click()
+      await addBelowButton.click()
 
       const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
       await expect(blocksDrawer).toBeVisible()
@@ -788,7 +788,7 @@ describe('fields', () => {
         const button = field.locator(
           'button.rich-text-relationship__list-drawer-toggler.list-drawer__toggler',
         )
-        button.click()
+        await button.click()
 
         // check that the search is on the `name` field of the `text-fields` collection
         const drawer = page.locator('[id^=list-drawer_1_]')
