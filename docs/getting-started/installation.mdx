@@ -15,8 +15,7 @@ Payload requires the following software:
 - A MongoDB Database
 
 <Banner type="warning">
-  Before proceeding any further, please ensure that you have the above
-  requirements met.
+  Before proceeding any further, please ensure that you have the above requirements met.
 </Banner>
 
 ## Quickstart with create-payload-app
@@ -36,13 +35,13 @@ Adding Payload to either a new or existing TypeScript + Express app is super str
 From there, the first step is writing a baseline config. Create a new `payload.config.ts` in your project's `/src` directory (or whatever your root TS dir is). The simplest config contains the following:
 
 ```js
-import { buildConfig } from "payload/config";
+import { buildConfig } from 'payload/config'
 
 export default buildConfig({
   // By default, Payload will boot up normally
   // and you will be provided with a base `User` collection.
   // But, here is where you define how you'd like Payload to work!
-});
+})
 ```
 
 Write the above code into your newly created config file. This baseline config will automatically provide you with a default `User` collection. For more information about users and authentication, including how to provide your own user config, jump to the [Authentication](/docs/authentication/config) section.
@@ -58,15 +57,13 @@ Now that you've got a baseline Payload config, it's time to initialize Payload. 
 1. Add the following code to `server.ts`:
 
 ```ts
-import express from "express";
+import express from 'express'
 
-const app = express();
+const app = express()
 
 app.listen(3000, async () => {
-  console.log(
-    "Express is now listening for incoming connections on port 3000."
-  );
-});
+  console.log('Express is now listening for incoming connections on port 3000.')
+})
 ```
 
 This server doesn't do anything just yet. But, after you have this in place, we can initialize Payload via its asynchronous `init()` method, which accepts a small set of arguments to tell it how to operate.
@@ -74,27 +71,25 @@ This server doesn't do anything just yet. But, after you have this in place, we 
 To initialize Payload, update your `server.ts` file to reflect the following code:
 
 ```ts
-import express from "express";
-import payload from "payload";
+import express from 'express'
+import payload from 'payload'
 
-require("dotenv").config();
-const app = express();
+require('dotenv').config()
+const app = express()
 
 const start = async () => {
   await payload.init({
     secret: process.env.PAYLOAD_SECRET,
     mongoURL: process.env.MONGODB_URI,
     express: app,
-  });
+  })
 
   app.listen(3000, async () => {
-    console.log(
-      "Express is now listening for incoming connections on port 3000."
-    );
-  });
-};
+    console.log('Express is now listening for incoming connections on port 3000.')
+  })
+}
 
-start();
+start()
 ```
 
 A quick reminder: in this configuration, we're making use of two environmental variables, `process.env.PAYLOAD_SECRET` and `process.env.MONGODB_URI`. Often, it's smart to store these values in an `.env` file at the root of your directory and set different values for each of your environments (local, stage, prod, etc). The `dotenv` package is very handy and works well alongside of Payload. A typical `.env` file will look like this:

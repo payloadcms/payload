@@ -102,19 +102,19 @@ By generating types, we'll end up with a file containing the following two TypeS
 
 ```ts
 export interface User {
-  id: string;
-  name: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
+  id: string
+  name: string
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
 }
 
 export interface Post {
-  id: string;
-  title?: string;
-  author?: string | User;
+  id: string
+  title?: string
+  author?: string | User
 }
 ```
 
@@ -145,25 +145,24 @@ will generate:
 ```ts
 // a top level reusable interface!!
 export interface SharedMeta {
-  title?: string;
-  description?: string;
+  title?: string
+  description?: string
 }
 
 // example usage inside collection interface
 export interface Collection1 {
   // ...other fields
-  meta?: SharedMeta;
+  meta?: SharedMeta
 }
 ```
 
 <Banner type="warning">
   <strong>Naming Collisions</strong>
   <br />
-  Since these types are hoisted to the top level, you need to be aware that
-  naming collisions can occur. For example, if you have a collection with the
-  name of `Meta` and you also create a interface with the name `Meta` they will
-  collide. It is recommended to scope your interfaces by appending the field
-  type to the end, i.e. `MetaGroup` or similar.
+  Since these types are hoisted to the top level, you need to be aware that naming collisions can
+  occur. For example, if you have a collection with the name of `Meta` and you also create a
+  interface with the name `Meta` they will collide. It is recommended to scope your interfaces by
+  appending the field type to the end, i.e. `MetaGroup` or similar.
 </Banner>
 
 ### Using your types

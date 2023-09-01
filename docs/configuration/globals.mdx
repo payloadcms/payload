@@ -32,29 +32,29 @@ _\* An asterisk denotes that a property is required._
 #### Simple Global example
 
 ```ts
-import { GlobalConfig } from "payload/types";
+import { GlobalConfig } from 'payload/types'
 
 const Nav: GlobalConfig = {
-  slug: "nav",
+  slug: 'nav',
   fields: [
     {
-      name: "items",
-      type: "array",
+      name: 'items',
+      type: 'array',
       required: true,
       maxRows: 8,
       fields: [
         {
-          name: "page",
-          type: "relationship",
-          relationTo: "pages", // "pages" is the slug of an existing collection
+          name: 'page',
+          type: 'relationship',
+          relationTo: 'pages', // "pages" is the slug of an existing collection
           required: true,
         },
       ],
     },
   ],
-};
+}
 
-export default Nav;
+export default Nav
 ```
 
 #### Global config example
@@ -66,8 +66,8 @@ You can find an [example Global config](https://github.com/payloadcms/public-dem
 You can customize the way that the Admin panel behaves on a Global-by-Global basis by defining the `admin` property on a Global's config.
 
 | Option       | Description                                                                                                                       |
-|--------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `group`      | Text used as a label for grouping collection and global links together in the navigation.                                                    |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `group`      | Text used as a label for grouping collection and global links together in the navigation.                                         |
 | `hidden`     | Set to true or a function, called with the current user, returning true to exclude this global from navigation and admin routing. |
 | `components` | Swap in your own React components to be used within this Global. [More](/docs/admin/components#globals)                           |
 | `preview`    | Function to generate a preview URL within the Admin panel for this global that can point to your app. [More](#preview).           |
@@ -87,27 +87,27 @@ If the function is specified, a Preview button will automatically appear in the 
 **Example global with preview function:**
 
 ```ts
-import { GlobalConfig } from "payload/types";
+import { GlobalConfig } from 'payload/types'
 
 export const MyGlobal: GlobalConfig = {
-  slug: "my-global",
+  slug: 'my-global',
   fields: [
     {
-      name: "slug",
-      type: "text",
+      name: 'slug',
+      type: 'text',
       required: true,
     },
   ],
   admin: {
     preview: (doc, { locale }) => {
       if (doc?.slug) {
-        return `https://bigbird.com/preview/${doc.slug}?locale=${locale}`;
+        return `https://bigbird.com/preview/${doc.slug}?locale=${locale}`
       }
 
-      return null;
+      return null
     },
   },
-};
+}
 ```
 
 ### Access control
@@ -127,14 +127,14 @@ Globals support all field types that Payload has to offer—including simple fie
 You can import global types as follows:
 
 ```ts
-import { GlobalConfig } from "payload/types";
+import { GlobalConfig } from 'payload/types'
 
 // This is the type used for incoming global configs.
 // Only the bare minimum properties are marked as required.
 ```
 
 ```ts
-import { SanitizedGlobalConfig } from "payload/types";
+import { SanitizedGlobalConfig } from 'payload/types'
 
 // This is the type used after an incoming global config is fully sanitized.
 // Generally, this is only used internally by Payload.
