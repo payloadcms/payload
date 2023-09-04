@@ -3,10 +3,9 @@ import { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
-import { Post } from '../../../../payload/payload-types'
+import { Comment, Post } from '../../../../payload/payload-types'
 import { fetchDoc } from '../../../_api/fetchDoc'
 import { fetchDocs } from '../../../_api/fetchDocs'
-import { RelatedPosts } from '../../../_blocks/RelatedPosts'
 import { Blocks } from '../../../_components/Blocks'
 import { PostHero } from '../../../_heros/PostHero'
 import { generateMeta } from '../../../_utilities/generateMeta'
@@ -19,6 +18,7 @@ export default async function Post({ params: { slug } }) {
   const { isEnabled: isDraftMode } = draftMode()
 
   let post: Post | null = null
+  let comments: Comment[] | null = null
 
   try {
     post = await fetchDoc<Post>({
@@ -34,6 +34,14 @@ export default async function Post({ params: { slug } }) {
     notFound()
   }
 
+  try {
+    comments = await fetchDocs('comments', false, {
+      doc: post?.id,
+    })
+  } catch (error) {
+    console.error(error) // eslint-disable-line no-console
+  }
+
   const { layout, relatedPosts } = post
 
   return (
@@ -42,6 +50,43 @@ export default async function Post({ params: { slug } }) {
       <Blocks
         blocks={[
           ...layout,
+          {
+            blockType: 'comments',
+            blockName: 'Comments',
+            relationTo: 'posts',
+            introContent: [
+              {
+                type: 'h4',
+                children: [
+                  {
+                    text: 'Comments',
+                  },
+                ],
+              },
+              {
+                type: 'p',
+                children: [
+                  {
+                    text: 'Logged in users can leave comments on this post. All new comments are given the status "draft" until they are approved by an admin. Draft comments are not accessible to the public and will not show up on this page until it is marked as "published". To manage all comments, ',
+                  },
+                  {
+                    type: 'link',
+                    url: '/admin/collections/comments',
+                    children: [
+                      {
+                        text: 'navigate to the admin dashboard',
+                      },
+                    ],
+                  },
+                  {
+                    text: '.',
+                  },
+                ],
+              },
+            ],
+            doc: post,
+            comments,
+          },
           {
             blockType: 'relatedPosts',
             blockName: 'Related Posts',
@@ -52,6 +97,26 @@ export default async function Post({ params: { slug } }) {
                 children: [
                   {
                     text: 'Related posts',
+                  },
+                ],
+              },
+              {
+                type: 'p',
+                children: [
+                  {
+                    text: 'The posts displayed here were individually selected for this page. Admins can select any number of related posts to display here and the layout will adjust accordingly. Alternatively, you could swap this out for the "Archive" block to automatically populate posts by category. To manage related posts, ',
+                  },
+                  {
+                    type: 'link',
+                    url: `/admin/collections/posts/${post.id}`,
+                    children: [
+                      {
+                        text: 'navigate to the admin dashboard',
+                      },
+                    ],
+                  },
+                  {
+                    text: '.',
                   },
                 ],
               },

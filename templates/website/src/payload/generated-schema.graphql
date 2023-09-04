@@ -25,6 +25,11 @@ type Query {
   docAccessUser(id: String!): usersDocAccess
   meUser: usersMe
   initializedUser: Boolean
+  Comment(id: String!, draft: Boolean): Comment
+  Comments(where: Comment_where, draft: Boolean, page: Int, limit: Int, sort: String): Comments
+  docAccessComment(id: String!): commentsDocAccess
+  versionComment(id: String): CommentVersion
+  versionsComments(where: versionsComment_where, page: Int, limit: Int, sort: String): versionsComments
   Settings(draft: Boolean): Settings
   docAccessSettings: settingsDocAccess
   Header(draft: Boolean): Header
@@ -611,8 +616,7 @@ type Post {
   publishedDate: DateTime
   hero: Post_Hero
   layout: [Post_Layout!]!
-  user: User
-  comment: String
+  relatedPosts: [Post!]
   slug: String
   meta: Post_Meta
   updatedAt: DateTime
@@ -830,32 +834,6 @@ input Post_Hero_Media_where_and {
 
 union Post_Layout = Cta | Content | MediaBlock | Archive
 
-type User {
-  id: String
-  name: String
-  roles: [User_roles!]
-  updatedAt: DateTime
-  createdAt: DateTime
-  email: EmailAddress!
-  resetPasswordToken: String
-  resetPasswordExpiration: DateTime
-  salt: String
-  hash: String
-  loginAttempts: Float
-  lockUntil: DateTime
-  password: String!
-}
-
-enum User_roles {
-  admin
-  user
-}
-
-"""
-A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
-"""
-scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
-
 type Post_Meta {
   title: String
   description: String
@@ -1032,6 +1010,7 @@ type Project {
   publishedDate: DateTime
   hero: Project_Hero
   layout: [Project_Layout!]!
+  relatedProjects: [Project!]
   slug: String
   meta: Project_Meta
   updatedAt: DateTime
@@ -3330,8 +3309,7 @@ input Post_where {
   hero__links__link__appearance: Post_hero__links__link__appearance_operator
   hero__links__id: Post_hero__links__id_operator
   hero__media: Post_hero__media_operator
-  user: Post_user_operator
-  comment: Post_comment_operator
+  relatedPosts: Post_relatedPosts_operator
   slug: Post_slug_operator
   meta__title: Post_meta__title_operator
   meta__description: Post_meta__description_operator
@@ -3476,20 +3454,12 @@ input Post_hero__media_operator {
   not_equals: String
 }
 
-input Post_user_operator {
+input Post_relatedPosts_operator {
   equals: String
   not_equals: String
   in: [String]
   not_in: [String]
   all: [String]
-  exists: Boolean
-}
-
-input Post_comment_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
   exists: Boolean
 }
 
@@ -3590,8 +3560,7 @@ input Post_where_or {
   hero__links__link__appearance: Post_hero__links__link__appearance_operator
   hero__links__id: Post_hero__links__id_operator
   hero__media: Post_hero__media_operator
-  user: Post_user_operator
-  comment: Post_comment_operator
+  relatedPosts: Post_relatedPosts_operator
   slug: Post_slug_operator
   meta__title: Post_meta__title_operator
   meta__description: Post_meta__description_operator
@@ -3616,8 +3585,7 @@ input Post_where_and {
   hero__links__link__appearance: Post_hero__links__link__appearance_operator
   hero__links__id: Post_hero__links__id_operator
   hero__media: Post_hero__media_operator
-  user: Post_user_operator
-  comment: Post_comment_operator
+  relatedPosts: Post_relatedPosts_operator
   slug: Post_slug_operator
   meta__title: Post_meta__title_operator
   meta__description: Post_meta__description_operator
@@ -3643,8 +3611,7 @@ type PostsDocAccessFields {
   publishedDate: PostsDocAccessFields_publishedDate
   hero: PostsDocAccessFields_hero
   layout: PostsDocAccessFields_layout
-  user: PostsDocAccessFields_user
-  comment: PostsDocAccessFields_comment
+  relatedPosts: PostsDocAccessFields_relatedPosts
   slug: PostsDocAccessFields_slug
   meta: PostsDocAccessFields_meta
   updatedAt: PostsDocAccessFields_updatedAt
@@ -4067,49 +4034,26 @@ type PostsDocAccessFields_layout_Delete {
   permission: Boolean!
 }
 
-type PostsDocAccessFields_user {
-  create: PostsDocAccessFields_user_Create
-  read: PostsDocAccessFields_user_Read
-  update: PostsDocAccessFields_user_Update
-  delete: PostsDocAccessFields_user_Delete
+type PostsDocAccessFields_relatedPosts {
+  create: PostsDocAccessFields_relatedPosts_Create
+  read: PostsDocAccessFields_relatedPosts_Read
+  update: PostsDocAccessFields_relatedPosts_Update
+  delete: PostsDocAccessFields_relatedPosts_Delete
 }
 
-type PostsDocAccessFields_user_Create {
+type PostsDocAccessFields_relatedPosts_Create {
   permission: Boolean!
 }
 
-type PostsDocAccessFields_user_Read {
+type PostsDocAccessFields_relatedPosts_Read {
   permission: Boolean!
 }
 
-type PostsDocAccessFields_user_Update {
+type PostsDocAccessFields_relatedPosts_Update {
   permission: Boolean!
 }
 
-type PostsDocAccessFields_user_Delete {
-  permission: Boolean!
-}
-
-type PostsDocAccessFields_comment {
-  create: PostsDocAccessFields_comment_Create
-  read: PostsDocAccessFields_comment_Read
-  update: PostsDocAccessFields_comment_Update
-  delete: PostsDocAccessFields_comment_Delete
-}
-
-type PostsDocAccessFields_comment_Create {
-  permission: Boolean!
-}
-
-type PostsDocAccessFields_comment_Read {
-  permission: Boolean!
-}
-
-type PostsDocAccessFields_comment_Update {
-  permission: Boolean!
-}
-
-type PostsDocAccessFields_comment_Delete {
+type PostsDocAccessFields_relatedPosts_Delete {
   permission: Boolean!
 }
 
@@ -4391,8 +4335,7 @@ type PostVersion_Version {
   publishedDate: DateTime
   hero: PostVersion_Version_Hero
   layout: [PostVersion_Version_Layout!]!
-  user: User
-  comment: String
+  relatedPosts: [Post!]
   slug: String
   meta: PostVersion_Version_Meta
   updatedAt: DateTime
@@ -4808,8 +4751,7 @@ input versionsPost_where {
   version__hero__links__link__appearance: versionsPost_version__hero__links__link__appearance_operator
   version__hero__links__id: versionsPost_version__hero__links__id_operator
   version__hero__media: versionsPost_version__hero__media_operator
-  version__user: versionsPost_version__user_operator
-  version__comment: versionsPost_version__comment_operator
+  version__relatedPosts: versionsPost_version__relatedPosts_operator
   version__slug: versionsPost_version__slug_operator
   version__meta__title: versionsPost_version__meta__title_operator
   version__meta__description: versionsPost_version__meta__description_operator
@@ -4965,20 +4907,12 @@ input versionsPost_version__hero__media_operator {
   not_equals: String
 }
 
-input versionsPost_version__user_operator {
+input versionsPost_version__relatedPosts_operator {
   equals: String
   not_equals: String
   in: [String]
   not_in: [String]
   all: [String]
-  exists: Boolean
-}
-
-input versionsPost_version__comment_operator {
-  equals: String
-  not_equals: String
-  like: String
-  contains: String
   exists: Boolean
 }
 
@@ -5102,8 +5036,7 @@ input versionsPost_where_or {
   version__hero__links__link__appearance: versionsPost_version__hero__links__link__appearance_operator
   version__hero__links__id: versionsPost_version__hero__links__id_operator
   version__hero__media: versionsPost_version__hero__media_operator
-  version__user: versionsPost_version__user_operator
-  version__comment: versionsPost_version__comment_operator
+  version__relatedPosts: versionsPost_version__relatedPosts_operator
   version__slug: versionsPost_version__slug_operator
   version__meta__title: versionsPost_version__meta__title_operator
   version__meta__description: versionsPost_version__meta__description_operator
@@ -5131,8 +5064,7 @@ input versionsPost_where_and {
   version__hero__links__link__appearance: versionsPost_version__hero__links__link__appearance_operator
   version__hero__links__id: versionsPost_version__hero__links__id_operator
   version__hero__media: versionsPost_version__hero__media_operator
-  version__user: versionsPost_version__user_operator
-  version__comment: versionsPost_version__comment_operator
+  version__relatedPosts: versionsPost_version__relatedPosts_operator
   version__slug: versionsPost_version__slug_operator
   version__meta__title: versionsPost_version__meta__title_operator
   version__meta__description: versionsPost_version__meta__description_operator
@@ -5173,6 +5105,7 @@ input Project_where {
   hero__links__link__appearance: Project_hero__links__link__appearance_operator
   hero__links__id: Project_hero__links__id_operator
   hero__media: Project_hero__media_operator
+  relatedProjects: Project_relatedProjects_operator
   slug: Project_slug_operator
   meta__title: Project_meta__title_operator
   meta__description: Project_meta__description_operator
@@ -5317,6 +5250,15 @@ input Project_hero__media_operator {
   not_equals: String
 }
 
+input Project_relatedProjects_operator {
+  equals: String
+  not_equals: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
 input Project_slug_operator {
   equals: String
   not_equals: String
@@ -5414,6 +5356,7 @@ input Project_where_or {
   hero__links__link__appearance: Project_hero__links__link__appearance_operator
   hero__links__id: Project_hero__links__id_operator
   hero__media: Project_hero__media_operator
+  relatedProjects: Project_relatedProjects_operator
   slug: Project_slug_operator
   meta__title: Project_meta__title_operator
   meta__description: Project_meta__description_operator
@@ -5438,6 +5381,7 @@ input Project_where_and {
   hero__links__link__appearance: Project_hero__links__link__appearance_operator
   hero__links__id: Project_hero__links__id_operator
   hero__media: Project_hero__media_operator
+  relatedProjects: Project_relatedProjects_operator
   slug: Project_slug_operator
   meta__title: Project_meta__title_operator
   meta__description: Project_meta__description_operator
@@ -5463,6 +5407,7 @@ type ProjectsDocAccessFields {
   publishedDate: ProjectsDocAccessFields_publishedDate
   hero: ProjectsDocAccessFields_hero
   layout: ProjectsDocAccessFields_layout
+  relatedProjects: ProjectsDocAccessFields_relatedProjects
   slug: ProjectsDocAccessFields_slug
   meta: ProjectsDocAccessFields_meta
   updatedAt: ProjectsDocAccessFields_updatedAt
@@ -5885,6 +5830,29 @@ type ProjectsDocAccessFields_layout_Delete {
   permission: Boolean!
 }
 
+type ProjectsDocAccessFields_relatedProjects {
+  create: ProjectsDocAccessFields_relatedProjects_Create
+  read: ProjectsDocAccessFields_relatedProjects_Read
+  update: ProjectsDocAccessFields_relatedProjects_Update
+  delete: ProjectsDocAccessFields_relatedProjects_Delete
+}
+
+type ProjectsDocAccessFields_relatedProjects_Create {
+  permission: Boolean!
+}
+
+type ProjectsDocAccessFields_relatedProjects_Read {
+  permission: Boolean!
+}
+
+type ProjectsDocAccessFields_relatedProjects_Update {
+  permission: Boolean!
+}
+
+type ProjectsDocAccessFields_relatedProjects_Delete {
+  permission: Boolean!
+}
+
 type ProjectsDocAccessFields_slug {
   create: ProjectsDocAccessFields_slug_Create
   read: ProjectsDocAccessFields_slug_Read
@@ -6163,6 +6131,7 @@ type ProjectVersion_Version {
   publishedDate: DateTime
   hero: ProjectVersion_Version_Hero
   layout: [ProjectVersion_Version_Layout!]!
+  relatedProjects: [Project!]
   slug: String
   meta: ProjectVersion_Version_Meta
   updatedAt: DateTime
@@ -6578,6 +6547,7 @@ input versionsProject_where {
   version__hero__links__link__appearance: versionsProject_version__hero__links__link__appearance_operator
   version__hero__links__id: versionsProject_version__hero__links__id_operator
   version__hero__media: versionsProject_version__hero__media_operator
+  version__relatedProjects: versionsProject_version__relatedProjects_operator
   version__slug: versionsProject_version__slug_operator
   version__meta__title: versionsProject_version__meta__title_operator
   version__meta__description: versionsProject_version__meta__description_operator
@@ -6733,6 +6703,15 @@ input versionsProject_version__hero__media_operator {
   not_equals: String
 }
 
+input versionsProject_version__relatedProjects_operator {
+  equals: String
+  not_equals: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
 input versionsProject_version__slug_operator {
   equals: String
   not_equals: String
@@ -6853,6 +6832,7 @@ input versionsProject_where_or {
   version__hero__links__link__appearance: versionsProject_version__hero__links__link__appearance_operator
   version__hero__links__id: versionsProject_version__hero__links__id_operator
   version__hero__media: versionsProject_version__hero__media_operator
+  version__relatedProjects: versionsProject_version__relatedProjects_operator
   version__slug: versionsProject_version__slug_operator
   version__meta__title: versionsProject_version__meta__title_operator
   version__meta__description: versionsProject_version__meta__description_operator
@@ -6880,6 +6860,7 @@ input versionsProject_where_and {
   version__hero__links__link__appearance: versionsProject_version__hero__links__link__appearance_operator
   version__hero__links__id: versionsProject_version__hero__links__id_operator
   version__hero__media: versionsProject_version__hero__media_operator
+  version__relatedProjects: versionsProject_version__relatedProjects_operator
   version__slug: versionsProject_version__slug_operator
   version__meta__title: versionsProject_version__meta__title_operator
   version__meta__description: versionsProject_version__meta__description_operator
@@ -7733,6 +7714,32 @@ type CategoriesDeleteDocAccess {
   where: JSONObject
 }
 
+type User {
+  id: String
+  name: String
+  roles: [User_roles!]
+  updatedAt: DateTime
+  createdAt: DateTime
+  email: EmailAddress!
+  resetPasswordToken: String
+  resetPasswordExpiration: DateTime
+  salt: String
+  hash: String
+  loginAttempts: Float
+  lockUntil: DateTime
+  password: String!
+}
+
+enum User_roles {
+  admin
+  user
+}
+
+"""
+A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
+"""
+scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+
 type Users {
   docs: [User]
   totalDocs: Int
@@ -8030,6 +8037,646 @@ type usersMe {
   user: User
   exp: Int
   collection: String
+}
+
+type Comment {
+  id: String
+  user: User
+  fullUser: Comment_FullUser
+  doc: Post
+  comment: String
+  updatedAt: DateTime
+  createdAt: DateTime
+  _status: Comment__status
+}
+
+type Comment_FullUser {
+  id: String
+  name: String
+}
+
+enum Comment__status {
+  draft
+  published
+}
+
+type Comments {
+  docs: [Comment]
+  totalDocs: Int
+  offset: Int
+  limit: Int
+  totalPages: Int
+  page: Int
+  pagingCounter: Int
+  hasPrevPage: Boolean
+  hasNextPage: Boolean
+  prevPage: Int
+  nextPage: Int
+}
+
+input Comment_where {
+  user: Comment_user_operator
+  fullUser__id: Comment_fullUser__id_operator
+  fullUser__name: Comment_fullUser__name_operator
+  doc: Comment_doc_operator
+  comment: Comment_comment_operator
+  updatedAt: Comment_updatedAt_operator
+  createdAt: Comment_createdAt_operator
+  _status: Comment__status_operator
+  id: Comment_id_operator
+  OR: [Comment_where_or]
+  AND: [Comment_where_and]
+}
+
+input Comment_user_operator {
+  equals: String
+  not_equals: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Comment_fullUser__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Comment_fullUser__name_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Comment_doc_operator {
+  equals: String
+  not_equals: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Comment_comment_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  exists: Boolean
+}
+
+input Comment_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Comment_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Comment__status_operator {
+  equals: Comment__status_Input
+  not_equals: Comment__status_Input
+  in: [Comment__status_Input]
+  not_in: [Comment__status_Input]
+  all: [Comment__status_Input]
+  exists: Boolean
+}
+
+enum Comment__status_Input {
+  draft
+  published
+}
+
+input Comment_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Comment_where_or {
+  user: Comment_user_operator
+  fullUser__id: Comment_fullUser__id_operator
+  fullUser__name: Comment_fullUser__name_operator
+  doc: Comment_doc_operator
+  comment: Comment_comment_operator
+  updatedAt: Comment_updatedAt_operator
+  createdAt: Comment_createdAt_operator
+  _status: Comment__status_operator
+  id: Comment_id_operator
+}
+
+input Comment_where_and {
+  user: Comment_user_operator
+  fullUser__id: Comment_fullUser__id_operator
+  fullUser__name: Comment_fullUser__name_operator
+  doc: Comment_doc_operator
+  comment: Comment_comment_operator
+  updatedAt: Comment_updatedAt_operator
+  createdAt: Comment_createdAt_operator
+  _status: Comment__status_operator
+  id: Comment_id_operator
+}
+
+type commentsDocAccess {
+  fields: CommentsDocAccessFields
+  create: CommentsCreateDocAccess
+  read: CommentsReadDocAccess
+  update: CommentsUpdateDocAccess
+  delete: CommentsDeleteDocAccess
+  readVersions: CommentsReadVersionsDocAccess
+}
+
+type CommentsDocAccessFields {
+  user: CommentsDocAccessFields_user
+  fullUser: CommentsDocAccessFields_fullUser
+  doc: CommentsDocAccessFields_doc
+  comment: CommentsDocAccessFields_comment
+  updatedAt: CommentsDocAccessFields_updatedAt
+  createdAt: CommentsDocAccessFields_createdAt
+  _status: CommentsDocAccessFields__status
+}
+
+type CommentsDocAccessFields_user {
+  create: CommentsDocAccessFields_user_Create
+  read: CommentsDocAccessFields_user_Read
+  update: CommentsDocAccessFields_user_Update
+  delete: CommentsDocAccessFields_user_Delete
+}
+
+type CommentsDocAccessFields_user_Create {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_user_Read {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_user_Update {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_user_Delete {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_fullUser {
+  create: CommentsDocAccessFields_fullUser_Create
+  read: CommentsDocAccessFields_fullUser_Read
+  update: CommentsDocAccessFields_fullUser_Update
+  delete: CommentsDocAccessFields_fullUser_Delete
+  fields: CommentsDocAccessFields_fullUser_Fields
+}
+
+type CommentsDocAccessFields_fullUser_Create {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_fullUser_Read {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_fullUser_Update {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_fullUser_Delete {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_fullUser_Fields {
+  id: CommentsDocAccessFields_fullUser_id
+  name: CommentsDocAccessFields_fullUser_name
+}
+
+type CommentsDocAccessFields_fullUser_id {
+  create: CommentsDocAccessFields_fullUser_id_Create
+  read: CommentsDocAccessFields_fullUser_id_Read
+  update: CommentsDocAccessFields_fullUser_id_Update
+  delete: CommentsDocAccessFields_fullUser_id_Delete
+}
+
+type CommentsDocAccessFields_fullUser_id_Create {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_fullUser_id_Read {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_fullUser_id_Update {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_fullUser_id_Delete {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_fullUser_name {
+  create: CommentsDocAccessFields_fullUser_name_Create
+  read: CommentsDocAccessFields_fullUser_name_Read
+  update: CommentsDocAccessFields_fullUser_name_Update
+  delete: CommentsDocAccessFields_fullUser_name_Delete
+}
+
+type CommentsDocAccessFields_fullUser_name_Create {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_fullUser_name_Read {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_fullUser_name_Update {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_fullUser_name_Delete {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_doc {
+  create: CommentsDocAccessFields_doc_Create
+  read: CommentsDocAccessFields_doc_Read
+  update: CommentsDocAccessFields_doc_Update
+  delete: CommentsDocAccessFields_doc_Delete
+}
+
+type CommentsDocAccessFields_doc_Create {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_doc_Read {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_doc_Update {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_doc_Delete {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_comment {
+  create: CommentsDocAccessFields_comment_Create
+  read: CommentsDocAccessFields_comment_Read
+  update: CommentsDocAccessFields_comment_Update
+  delete: CommentsDocAccessFields_comment_Delete
+}
+
+type CommentsDocAccessFields_comment_Create {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_comment_Read {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_comment_Update {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_comment_Delete {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_updatedAt {
+  create: CommentsDocAccessFields_updatedAt_Create
+  read: CommentsDocAccessFields_updatedAt_Read
+  update: CommentsDocAccessFields_updatedAt_Update
+  delete: CommentsDocAccessFields_updatedAt_Delete
+}
+
+type CommentsDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_createdAt {
+  create: CommentsDocAccessFields_createdAt_Create
+  read: CommentsDocAccessFields_createdAt_Read
+  update: CommentsDocAccessFields_createdAt_Update
+  delete: CommentsDocAccessFields_createdAt_Delete
+}
+
+type CommentsDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields__status {
+  create: CommentsDocAccessFields__status_Create
+  read: CommentsDocAccessFields__status_Read
+  update: CommentsDocAccessFields__status_Update
+  delete: CommentsDocAccessFields__status_Delete
+}
+
+type CommentsDocAccessFields__status_Create {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields__status_Read {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields__status_Update {
+  permission: Boolean!
+}
+
+type CommentsDocAccessFields__status_Delete {
+  permission: Boolean!
+}
+
+type CommentsCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CommentsReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CommentsUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CommentsDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CommentsReadVersionsDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CommentVersion {
+  parent: Comment
+  version: CommentVersion_Version
+  createdAt: DateTime
+  updatedAt: DateTime
+  id: String
+}
+
+type CommentVersion_Version {
+  user: User
+  fullUser: CommentVersion_Version_FullUser
+  doc: Post
+  comment: String
+  updatedAt: DateTime
+  createdAt: DateTime
+  _status: CommentVersion_Version__status
+}
+
+type CommentVersion_Version_FullUser {
+  id: String
+  name: String
+}
+
+enum CommentVersion_Version__status {
+  draft
+  published
+}
+
+type versionsComments {
+  docs: [CommentVersion]
+  totalDocs: Int
+  offset: Int
+  limit: Int
+  totalPages: Int
+  page: Int
+  pagingCounter: Int
+  hasPrevPage: Boolean
+  hasNextPage: Boolean
+  prevPage: Int
+  nextPage: Int
+}
+
+input versionsComment_where {
+  parent: versionsComment_parent_operator
+  version__user: versionsComment_version__user_operator
+  version__fullUser__id: versionsComment_version__fullUser__id_operator
+  version__fullUser__name: versionsComment_version__fullUser__name_operator
+  version__doc: versionsComment_version__doc_operator
+  version__comment: versionsComment_version__comment_operator
+  version__updatedAt: versionsComment_version__updatedAt_operator
+  version__createdAt: versionsComment_version__createdAt_operator
+  version___status: versionsComment_version___status_operator
+  createdAt: versionsComment_createdAt_operator
+  updatedAt: versionsComment_updatedAt_operator
+  id: versionsComment_id_operator
+  OR: [versionsComment_where_or]
+  AND: [versionsComment_where_and]
+}
+
+input versionsComment_parent_operator {
+  equals: String
+  not_equals: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsComment_version__user_operator {
+  equals: String
+  not_equals: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsComment_version__fullUser__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsComment_version__fullUser__name_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsComment_version__doc_operator {
+  equals: String
+  not_equals: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsComment_version__comment_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  exists: Boolean
+}
+
+input versionsComment_version__updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsComment_version__createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsComment_version___status_operator {
+  equals: versionsComment_version___status_Input
+  not_equals: versionsComment_version___status_Input
+  in: [versionsComment_version___status_Input]
+  not_in: [versionsComment_version___status_Input]
+  all: [versionsComment_version___status_Input]
+  exists: Boolean
+}
+
+enum versionsComment_version___status_Input {
+  draft
+  published
+}
+
+input versionsComment_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsComment_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input versionsComment_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsComment_where_or {
+  parent: versionsComment_parent_operator
+  version__user: versionsComment_version__user_operator
+  version__fullUser__id: versionsComment_version__fullUser__id_operator
+  version__fullUser__name: versionsComment_version__fullUser__name_operator
+  version__doc: versionsComment_version__doc_operator
+  version__comment: versionsComment_version__comment_operator
+  version__updatedAt: versionsComment_version__updatedAt_operator
+  version__createdAt: versionsComment_version__createdAt_operator
+  version___status: versionsComment_version___status_operator
+  createdAt: versionsComment_createdAt_operator
+  updatedAt: versionsComment_updatedAt_operator
+  id: versionsComment_id_operator
+}
+
+input versionsComment_where_and {
+  parent: versionsComment_parent_operator
+  version__user: versionsComment_version__user_operator
+  version__fullUser__id: versionsComment_version__fullUser__id_operator
+  version__fullUser__name: versionsComment_version__fullUser__name_operator
+  version__doc: versionsComment_version__doc_operator
+  version__comment: versionsComment_version__comment_operator
+  version__updatedAt: versionsComment_version__updatedAt_operator
+  version__createdAt: versionsComment_version__createdAt_operator
+  version___status: versionsComment_version___status_operator
+  createdAt: versionsComment_createdAt_operator
+  updatedAt: versionsComment_updatedAt_operator
+  id: versionsComment_id_operator
 }
 
 type Settings {
@@ -8773,6 +9420,7 @@ type Access {
   media: mediaAccess
   categories: categoriesAccess
   users: usersAccess
+  comments: commentsAccess
   settings: settingsAccess
   header: headerAccess
   footer: footerAccess
@@ -9470,8 +10118,7 @@ type PostsFields {
   publishedDate: PostsFields_publishedDate
   hero: PostsFields_hero
   layout: PostsFields_layout
-  user: PostsFields_user
-  comment: PostsFields_comment
+  relatedPosts: PostsFields_relatedPosts
   slug: PostsFields_slug
   meta: PostsFields_meta
   updatedAt: PostsFields_updatedAt
@@ -9894,49 +10541,26 @@ type PostsFields_layout_Delete {
   permission: Boolean!
 }
 
-type PostsFields_user {
-  create: PostsFields_user_Create
-  read: PostsFields_user_Read
-  update: PostsFields_user_Update
-  delete: PostsFields_user_Delete
+type PostsFields_relatedPosts {
+  create: PostsFields_relatedPosts_Create
+  read: PostsFields_relatedPosts_Read
+  update: PostsFields_relatedPosts_Update
+  delete: PostsFields_relatedPosts_Delete
 }
 
-type PostsFields_user_Create {
+type PostsFields_relatedPosts_Create {
   permission: Boolean!
 }
 
-type PostsFields_user_Read {
+type PostsFields_relatedPosts_Read {
   permission: Boolean!
 }
 
-type PostsFields_user_Update {
+type PostsFields_relatedPosts_Update {
   permission: Boolean!
 }
 
-type PostsFields_user_Delete {
-  permission: Boolean!
-}
-
-type PostsFields_comment {
-  create: PostsFields_comment_Create
-  read: PostsFields_comment_Read
-  update: PostsFields_comment_Update
-  delete: PostsFields_comment_Delete
-}
-
-type PostsFields_comment_Create {
-  permission: Boolean!
-}
-
-type PostsFields_comment_Read {
-  permission: Boolean!
-}
-
-type PostsFields_comment_Update {
-  permission: Boolean!
-}
-
-type PostsFields_comment_Delete {
+type PostsFields_relatedPosts_Delete {
   permission: Boolean!
 }
 
@@ -10219,6 +10843,7 @@ type ProjectsFields {
   publishedDate: ProjectsFields_publishedDate
   hero: ProjectsFields_hero
   layout: ProjectsFields_layout
+  relatedProjects: ProjectsFields_relatedProjects
   slug: ProjectsFields_slug
   meta: ProjectsFields_meta
   updatedAt: ProjectsFields_updatedAt
@@ -10638,6 +11263,29 @@ type ProjectsFields_layout_Update {
 }
 
 type ProjectsFields_layout_Delete {
+  permission: Boolean!
+}
+
+type ProjectsFields_relatedProjects {
+  create: ProjectsFields_relatedProjects_Create
+  read: ProjectsFields_relatedProjects_Read
+  update: ProjectsFields_relatedProjects_Update
+  delete: ProjectsFields_relatedProjects_Delete
+}
+
+type ProjectsFields_relatedProjects_Create {
+  permission: Boolean!
+}
+
+type ProjectsFields_relatedProjects_Read {
+  permission: Boolean!
+}
+
+type ProjectsFields_relatedProjects_Update {
+  permission: Boolean!
+}
+
+type ProjectsFields_relatedProjects_Delete {
   permission: Boolean!
 }
 
@@ -11608,6 +12256,263 @@ type UsersUnlockAccess {
   where: JSONObject
 }
 
+type commentsAccess {
+  fields: CommentsFields
+  create: CommentsCreateAccess
+  read: CommentsReadAccess
+  update: CommentsUpdateAccess
+  delete: CommentsDeleteAccess
+  readVersions: CommentsReadVersionsAccess
+}
+
+type CommentsFields {
+  user: CommentsFields_user
+  fullUser: CommentsFields_fullUser
+  doc: CommentsFields_doc
+  comment: CommentsFields_comment
+  updatedAt: CommentsFields_updatedAt
+  createdAt: CommentsFields_createdAt
+  _status: CommentsFields__status
+}
+
+type CommentsFields_user {
+  create: CommentsFields_user_Create
+  read: CommentsFields_user_Read
+  update: CommentsFields_user_Update
+  delete: CommentsFields_user_Delete
+}
+
+type CommentsFields_user_Create {
+  permission: Boolean!
+}
+
+type CommentsFields_user_Read {
+  permission: Boolean!
+}
+
+type CommentsFields_user_Update {
+  permission: Boolean!
+}
+
+type CommentsFields_user_Delete {
+  permission: Boolean!
+}
+
+type CommentsFields_fullUser {
+  create: CommentsFields_fullUser_Create
+  read: CommentsFields_fullUser_Read
+  update: CommentsFields_fullUser_Update
+  delete: CommentsFields_fullUser_Delete
+  fields: CommentsFields_fullUser_Fields
+}
+
+type CommentsFields_fullUser_Create {
+  permission: Boolean!
+}
+
+type CommentsFields_fullUser_Read {
+  permission: Boolean!
+}
+
+type CommentsFields_fullUser_Update {
+  permission: Boolean!
+}
+
+type CommentsFields_fullUser_Delete {
+  permission: Boolean!
+}
+
+type CommentsFields_fullUser_Fields {
+  id: CommentsFields_fullUser_id
+  name: CommentsFields_fullUser_name
+}
+
+type CommentsFields_fullUser_id {
+  create: CommentsFields_fullUser_id_Create
+  read: CommentsFields_fullUser_id_Read
+  update: CommentsFields_fullUser_id_Update
+  delete: CommentsFields_fullUser_id_Delete
+}
+
+type CommentsFields_fullUser_id_Create {
+  permission: Boolean!
+}
+
+type CommentsFields_fullUser_id_Read {
+  permission: Boolean!
+}
+
+type CommentsFields_fullUser_id_Update {
+  permission: Boolean!
+}
+
+type CommentsFields_fullUser_id_Delete {
+  permission: Boolean!
+}
+
+type CommentsFields_fullUser_name {
+  create: CommentsFields_fullUser_name_Create
+  read: CommentsFields_fullUser_name_Read
+  update: CommentsFields_fullUser_name_Update
+  delete: CommentsFields_fullUser_name_Delete
+}
+
+type CommentsFields_fullUser_name_Create {
+  permission: Boolean!
+}
+
+type CommentsFields_fullUser_name_Read {
+  permission: Boolean!
+}
+
+type CommentsFields_fullUser_name_Update {
+  permission: Boolean!
+}
+
+type CommentsFields_fullUser_name_Delete {
+  permission: Boolean!
+}
+
+type CommentsFields_doc {
+  create: CommentsFields_doc_Create
+  read: CommentsFields_doc_Read
+  update: CommentsFields_doc_Update
+  delete: CommentsFields_doc_Delete
+}
+
+type CommentsFields_doc_Create {
+  permission: Boolean!
+}
+
+type CommentsFields_doc_Read {
+  permission: Boolean!
+}
+
+type CommentsFields_doc_Update {
+  permission: Boolean!
+}
+
+type CommentsFields_doc_Delete {
+  permission: Boolean!
+}
+
+type CommentsFields_comment {
+  create: CommentsFields_comment_Create
+  read: CommentsFields_comment_Read
+  update: CommentsFields_comment_Update
+  delete: CommentsFields_comment_Delete
+}
+
+type CommentsFields_comment_Create {
+  permission: Boolean!
+}
+
+type CommentsFields_comment_Read {
+  permission: Boolean!
+}
+
+type CommentsFields_comment_Update {
+  permission: Boolean!
+}
+
+type CommentsFields_comment_Delete {
+  permission: Boolean!
+}
+
+type CommentsFields_updatedAt {
+  create: CommentsFields_updatedAt_Create
+  read: CommentsFields_updatedAt_Read
+  update: CommentsFields_updatedAt_Update
+  delete: CommentsFields_updatedAt_Delete
+}
+
+type CommentsFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type CommentsFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type CommentsFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type CommentsFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type CommentsFields_createdAt {
+  create: CommentsFields_createdAt_Create
+  read: CommentsFields_createdAt_Read
+  update: CommentsFields_createdAt_Update
+  delete: CommentsFields_createdAt_Delete
+}
+
+type CommentsFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type CommentsFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type CommentsFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type CommentsFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type CommentsFields__status {
+  create: CommentsFields__status_Create
+  read: CommentsFields__status_Read
+  update: CommentsFields__status_Update
+  delete: CommentsFields__status_Delete
+}
+
+type CommentsFields__status_Create {
+  permission: Boolean!
+}
+
+type CommentsFields__status_Read {
+  permission: Boolean!
+}
+
+type CommentsFields__status_Update {
+  permission: Boolean!
+}
+
+type CommentsFields__status_Delete {
+  permission: Boolean!
+}
+
+type CommentsCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CommentsReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CommentsUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CommentsDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type CommentsReadVersionsAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type settingsAccess {
   fields: SettingsFields
   read: SettingsReadAccess
@@ -12286,6 +13191,10 @@ type Mutation {
   forgotPasswordUser(email: String!, disableEmail: Boolean, expiration: Int): Boolean!
   resetPasswordUser(token: String, password: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
+  createComment(data: mutationCommentInput!, draft: Boolean): Comment
+  updateComment(id: String!, data: mutationCommentUpdateInput!, draft: Boolean, autosave: Boolean): Comment
+  deleteComment(id: String!): Comment
+  restoreVersionComment(id: String): Comment
   updateSettings(data: mutationSettingsInput!, draft: Boolean): Settings
   updateHeader(data: mutationHeaderInput!, draft: Boolean): Header
   updateFooter(data: mutationFooterInput!, draft: Boolean): Footer
@@ -12431,8 +13340,7 @@ input mutationPostInput {
   publishedDate: String
   hero: mutationPost_HeroInput!
   layout: JSON
-  user: String
-  comment: String
+  relatedPosts: [String]
   slug: String
   meta: mutationPost_MetaInput
   updatedAt: String
@@ -12500,8 +13408,7 @@ input mutationPostUpdateInput {
   publishedDate: String
   hero: mutationPostUpdate_HeroInput!
   layout: JSON
-  user: String
-  comment: String
+  relatedPosts: [String]
   slug: String
   meta: mutationPostUpdate_MetaInput
   updatedAt: String
@@ -12569,6 +13476,7 @@ input mutationProjectInput {
   publishedDate: String
   hero: mutationProject_HeroInput!
   layout: JSON
+  relatedProjects: [String]
   slug: String
   meta: mutationProject_MetaInput
   updatedAt: String
@@ -12636,6 +13544,7 @@ input mutationProjectUpdateInput {
   publishedDate: String
   hero: mutationProjectUpdate_HeroInput!
   layout: JSON
+  relatedProjects: [String]
   slug: String
   meta: mutationProjectUpdate_MetaInput
   updatedAt: String
@@ -12813,6 +13722,46 @@ type usersLoginResult {
 type usersResetPassword {
   token: String
   user: User
+}
+
+input mutationCommentInput {
+  user: String
+  fullUser: mutationComment_FullUserInput
+  doc: String
+  comment: String
+  updatedAt: String
+  createdAt: String
+  _status: Comment__status_MutationInput
+}
+
+input mutationComment_FullUserInput {
+  id: String
+  name: String
+}
+
+enum Comment__status_MutationInput {
+  draft
+  published
+}
+
+input mutationCommentUpdateInput {
+  user: String
+  fullUser: mutationCommentUpdate_FullUserInput
+  doc: String
+  comment: String
+  updatedAt: String
+  createdAt: String
+  _status: CommentUpdate__status_MutationInput
+}
+
+input mutationCommentUpdate_FullUserInput {
+  id: String
+  name: String
+}
+
+enum CommentUpdate__status_MutationInput {
+  draft
+  published
 }
 
 input mutationSettingsInput {

@@ -516,10 +516,11 @@ export interface User {
 export interface Comment {
   id: string;
   user?: string | User;
-  doc?: {
-    value: string | Post;
-    relationTo: 'posts';
+  fullUser?: {
+    id?: string;
+    name?: string;
   };
+  doc?: string | Post;
   comment?: string;
   updatedAt: string;
   createdAt: string;

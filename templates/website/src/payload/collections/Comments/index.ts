@@ -1,11 +1,17 @@
 import type { CollectionConfig } from 'payload/types'
 
 import { checkRole } from '../Users/checkRole'
+import { populateUser } from './hooks/populateUser'
+import { revalidatePost } from './hooks/revalidatePost'
 
 const Comments: CollectionConfig = {
   slug: 'comments',
   admin: {
-    useAsTitle: 'title',
+    useAsTitle: 'comment',
+  },
+  hooks: {
+    afterChange: [revalidatePost],
+    afterRead: [populateUser],
   },
   access: {
     // Public users should only be able to read published comments
@@ -51,10 +57,34 @@ const Comments: CollectionConfig = {
       relationTo: 'users',
       hasMany: false,
     },
+    // This field is only used to populate the user data via the `populateUser` hook
+    // This is because the `user` collection has access control locked
+    // GraphQL will also not return mutated user data that differs from the underlying schema
+    {
+      name: 'fullUser',
+      type: 'group',
+      admin: {
+        readOnly: true,
+        disabled: true,
+      },
+      access: {
+        update: () => false,
+      },
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+        },
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
     {
       name: 'doc',
       type: 'relationship',
-      relationTo: ['posts'],
+      relationTo: 'posts',
       hasMany: false,
     },
     {

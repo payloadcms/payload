@@ -16,10 +16,21 @@
   height: calc(var(--base) * 2);
   line-height: calc(var(--base) * 2);
   padding: 0 calc(var(--base) / 2);
+  font-size: inherit;
 
   &:focus {
     border: none;
     outline: none;
+  }
+
+  &::placeholder {
+    color: var(--theme-elevation-500);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    pointer-events: none;
+    color: var(--theme-elevation-500);
   }
 
   &:-webkit-autofill,
@@ -29,6 +40,10 @@
     -webkit-box-shadow: 0 0 0px 1000px var(--theme-elevation-150) inset;
     transition: background-color 5000s ease-in-out 0s;
   }
+}
+
+.textarea {
+  height: calc(var(--base) * 5);
 }
 
 :global([data-theme="dark"]) {

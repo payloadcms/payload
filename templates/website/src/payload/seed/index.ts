@@ -54,6 +54,27 @@ export const seed = async (payload: Payload): Promise<void> => {
     ), // eslint-disable-line function-paren-newline
   ])
 
+  payload.logger.info(`— Seeding John Doe user..`)
+
+  await payload.delete({
+    collection: 'users',
+    where: {
+      email: {
+        equals: 'john-doe@payloadcms.com',
+      },
+    },
+  })
+
+  const { id: johnDoeUserID } = await payload.create({
+    collection: 'users',
+    data: {
+      email: 'john-doe@payloadcms.com',
+      name: 'John Doe',
+      password: 'demo-public-user',
+      roles: ['user'],
+    },
+  })
+
   payload.logger.info(`— Seeding media...`)
 
   const [image1Doc, image2Doc] = await Promise.all([
@@ -94,7 +115,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   payload.logger.info(`— Seeding posts...`)
 
-  const [post1Doc, post2Doc, post3Doc] = await Promise.all([
+  const posts = await Promise.all([
     payload.create({
       collection: 'posts',
       data: JSON.parse(
@@ -124,6 +145,8 @@ export const seed = async (payload: Payload): Promise<void> => {
     }),
   ])
 
+  const [post1Doc, post2Doc, post3Doc] = posts
+
   // update each post with related posts
 
   await Promise.all([
@@ -152,41 +175,21 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   payload.logger.info(`— Seeding comments...`)
 
-  await Promise.all([
-    payload.create({
-      collection: 'comments',
-      data: {
-        doc: {
-          relationTo: 'posts',
-          value: post1Doc.id,
-        },
-        user: '',
-        comment: 'This is a comment',
-      },
-    }),
-    payload.create({
-      collection: 'comments',
-      data: {
-        doc: {
-          relationTo: 'posts',
-          value: post2Doc.id,
-        },
-        user: '',
-        comment: 'This is a comment',
-      },
-    }),
-    payload.create({
-      collection: 'comments',
-      data: {
-        doc: {
-          relationTo: 'posts',
-          value: post3Doc.id,
-        },
-        user: '',
-        comment: 'This is a comment',
-      },
-    }),
-  ])
+  await Promise.all(
+    posts.map(
+      async (post, index) =>
+        await payload.create({
+          collection: 'comments',
+          data: {
+            comment: `This is a comment on post ${
+              index + 1
+            }. It was first left by a user then approved by an admin.`,
+            user: johnDoeUserID,
+            doc: post.id,
+          },
+        }),
+    ),
+  )
 
   payload.logger.info(`— Seeding projects...`)
 
