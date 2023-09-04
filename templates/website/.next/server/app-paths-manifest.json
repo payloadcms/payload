@@ -1,5 +1,0 @@
-{
-  "/api/revalidate/route": "app/api/revalidate/route.js",
-  "/(pages)/[slug]/page": "app/(pages)/[slug]/page.js",
-  "/(pages)/posts/[slug]/page": "app/(pages)/posts/[slug]/page.js"
-}
