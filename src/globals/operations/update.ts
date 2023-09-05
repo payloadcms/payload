@@ -164,16 +164,24 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
   // Update
   // /////////////////////////////////////
 
+  const now = new Date().toISOString();
+
   if (!shouldSaveDraft) {
     if (globalExists) {
       result = await Model.findOneAndUpdate(
         { globalType: slug },
-        result,
+        {
+          ...result,
+          updatedAt: now,
+        },
         { new: true },
       );
     } else {
       result.globalType = slug;
-      result = await Model.create(result);
+      result = await Model.create({
+        ...result,
+        createdAt: now,
+      });
     }
   }
 
@@ -192,7 +200,7 @@ async function update<TSlug extends keyof GeneratedTypes['globals']>(
       docWithLocales: {
         ...result,
         createdAt: result.createdAt,
-        updatedAt: result.updatedAt,
+        updatedAt: now,
       },
       autosave,
       draft: shouldSaveDraft,

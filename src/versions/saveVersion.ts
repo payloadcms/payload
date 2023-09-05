@@ -82,8 +82,53 @@ export const saveVersion = async ({
         createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
         updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
       };
-      if (collection) data.parent = id;
+
+      if (payload.config.database.queryDrafts_2_0) {
+        data.latest = true;
+      }
+
+      if (collection) {
+        data.parent = id;
+      }
+
       result = await VersionModel.create(data);
+
+      if (collection) {
+        await VersionModel.updateMany({
+          $and: [
+            {
+              _id: {
+                $ne: result._id,
+              },
+            },
+            {
+              parent: {
+                $eq: id,
+              },
+            },
+            {
+              latest: {
+                $eq: true,
+              },
+            },
+          ],
+        }, { $unset: { latest: 1 } });
+      } else if (global) {
+        await VersionModel.updateMany({
+          $and: [
+            {
+              _id: {
+                $ne: result._id,
+              },
+            },
+            {
+              latest: {
+                $eq: true,
+              },
+            },
+          ],
+        }, { $unset: { latest: 1 } });
+      }
     }
   } catch (err) {
     let errorMessage: string;

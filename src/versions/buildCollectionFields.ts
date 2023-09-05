@@ -40,5 +40,16 @@ export const buildVersionCollectionFields = (collection: SanitizedCollectionConf
     });
   }
 
+  if (collection?.versions?.drafts) {
+    fields.push({
+      name: 'latest',
+      type: 'checkbox',
+      index: true,
+      admin: {
+        disabled: true,
+      },
+    });
+  }
+
   return fields;
 };
