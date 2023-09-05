@@ -143,9 +143,9 @@ async function restoreVersion<T extends TypeWithID = any>(args: Arguments): Prom
     parent: parentDocID,
     version: rawVersion.version,
     autosave: false,
-    latest: true,
     createdAt: prevVersion.createdAt,
     updatedAt: new Date().toISOString(),
+    latest: payload.config.database.queryDrafts_2_0 ? true : undefined,
   });
 
   // /////////////////////////////////////

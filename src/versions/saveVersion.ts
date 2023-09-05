@@ -79,20 +79,26 @@ export const saveVersion = async ({
       const data: Record<string, unknown> = {
         autosave: Boolean(autosave),
         version: versionData,
-        latest: true,
         createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
         updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
       };
 
+      if (payload.config.database.queryDrafts_2_0) {
+        data.latest = true;
+      }
+
       if (collection) {
         data.parent = id;
+      }
 
+      result = await VersionModel.create(data);
+
+      if (collection) {
         await VersionModel.updateMany({
           $and: [
-            // TODO: is this _id necessary? Is this when you publish from a version?
             {
               _id: {
-                $ne: doc._id,
+                $ne: result._id,
               },
             },
             {
@@ -111,6 +117,11 @@ export const saveVersion = async ({
         await VersionModel.updateMany({
           $and: [
             {
+              _id: {
+                $ne: result._id,
+              },
+            },
+            {
               latest: {
                 $eq: true,
               },
@@ -118,8 +129,6 @@ export const saveVersion = async ({
           ],
         }, { $unset: { latest: 1 } });
       }
-
-      result = await VersionModel.create(data);
     }
   } catch (err) {
     let errorMessage: string;
