@@ -73,36 +73,36 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       depth: 0,
     };
 
+    const publishedVersionParams: { where: Where, depth: number } = {
+      where: {
+        and: [
+          {
+            or: [
+              {
+                _status: {
+                  equals: 'published',
+                },
+              },
+              {
+                _status: {
+                  exists: false,
+                },
+              },
+            ],
+          },
+        ],
+      },
+      depth: 0,
+    };
+
     if (global) {
       draftsEnabled = Boolean(global?.versions?.drafts);
       shouldFetchVersions = Boolean(global?.versions);
       versionFetchURL = `${baseURL}/globals/${global.slug}/versions`;
-      publishedFetchURL = `${baseURL}/globals/${global.slug}?depth=0`;
+      publishedFetchURL = `${baseURL}/globals/${global.slug}?${qs.stringify(publishedVersionParams)}`;
     }
 
     if (collection) {
-      const publishedVersionParams: { where: Where, depth: number } = {
-        where: {
-          and: [
-            {
-              or: [
-                {
-                  _status: {
-                    equals: 'published',
-                  },
-                },
-                {
-                  _status: {
-                    exists: false,
-                  },
-                },
-              ],
-            },
-          ],
-        },
-        depth: 0,
-      };
-
       draftsEnabled = Boolean(collection?.versions?.drafts);
       shouldFetchVersions = Boolean(collection?.versions);
       versionFetchURL = `${baseURL}/${collection.slug}/versions`;
