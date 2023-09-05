@@ -8,6 +8,7 @@ import { fetchComments } from '../../../_api/fetchComments'
 import { fetchDoc } from '../../../_api/fetchDoc'
 import { fetchDocs } from '../../../_api/fetchDocs'
 import { Blocks } from '../../../_components/Blocks'
+import { PremiumContent } from '../../../_components/PremiumContent'
 import { PostHero } from '../../../_heros/PostHero'
 import { generateMeta } from '../../../_utilities/generateMeta'
 
@@ -38,14 +39,16 @@ export default async function Post({ params: { slug } }) {
     doc: post?.id,
   })
 
-  const { layout, relatedPosts } = post
+  const { layout, relatedPosts, enablePremiumContent, premiumContent } = post
 
   return (
     <React.Fragment>
       <PostHero post={post} />
+      <Blocks blocks={layout} />
+      {enablePremiumContent && <PremiumContent postSlug={slug as string} disableTopPadding />}
       <Blocks
+        disableTopPadding
         blocks={[
-          ...layout,
           {
             blockType: 'comments',
             blockName: 'Comments',
@@ -63,7 +66,7 @@ export default async function Post({ params: { slug } }) {
                 type: 'p',
                 children: [
                   {
-                    text: 'Logged in users can leave comments on this post. All new comments are given the status "draft" until they are approved by an admin. Draft comments are not accessible to the public and will not show up on this page until it is marked as "published". To manage all comments, ',
+                    text: 'Authenticated users can leave comments on this post. All new comments are given the status "draft" until they are approved by an admin. Draft comments are not accessible to the public and will not show up on this page until it is marked as "published". To manage all comments, ',
                   },
                   {
                     type: 'link',

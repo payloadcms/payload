@@ -342,6 +342,120 @@ export interface Post {
         blockType: 'archive';
       }
   )[];
+  enablePremiumContent?: boolean;
+  premiumContent?: (
+    | {
+        invertBackground?: boolean;
+        richText: {
+          [k: string]: unknown;
+        }[];
+        links?: {
+          link: {
+            type?: 'reference' | 'custom';
+            newTab?: boolean;
+            reference: {
+              value: string | Page;
+              relationTo: 'pages';
+            };
+            url: string;
+            label: string;
+            appearance?: 'primary' | 'secondary';
+          };
+          id?: string;
+        }[];
+        id?: string;
+        blockName?: string;
+        blockType: 'cta';
+      }
+    | {
+        invertBackground?: boolean;
+        columns?: {
+          size?: 'oneThird' | 'half' | 'twoThirds' | 'full';
+          richText: {
+            [k: string]: unknown;
+          }[];
+          enableLink?: boolean;
+          link?: {
+            type?: 'reference' | 'custom';
+            newTab?: boolean;
+            reference: {
+              value: string | Page;
+              relationTo: 'pages';
+            };
+            url: string;
+            label: string;
+            appearance?: 'default' | 'primary' | 'secondary';
+          };
+          id?: string;
+        }[];
+        id?: string;
+        blockName?: string;
+        blockType: 'content';
+      }
+    | {
+        invertBackground?: boolean;
+        position?: 'default' | 'fullscreen';
+        media: string | Media;
+        id?: string;
+        blockName?: string;
+        blockType: 'mediaBlock';
+      }
+    | {
+        introContent: {
+          [k: string]: unknown;
+        }[];
+        populateBy?: 'collection' | 'selection';
+        relationTo?: 'posts' | 'projects';
+        categories?: string[] | Category[];
+        limit?: number;
+        selectedDocs?:
+          | (
+              | {
+                  value: string;
+                  relationTo: 'posts';
+                }
+              | {
+                  value: string;
+                  relationTo: 'projects';
+                }
+            )[]
+          | (
+              | {
+                  value: Post;
+                  relationTo: 'posts';
+                }
+              | {
+                  value: Project;
+                  relationTo: 'projects';
+                }
+            )[];
+        populatedDocs?:
+          | (
+              | {
+                  value: string;
+                  relationTo: 'posts';
+                }
+              | {
+                  value: string;
+                  relationTo: 'projects';
+                }
+            )[]
+          | (
+              | {
+                  value: Post;
+                  relationTo: 'posts';
+                }
+              | {
+                  value: Project;
+                  relationTo: 'projects';
+                }
+            )[];
+        populatedDocsTotal?: number;
+        id?: string;
+        blockName?: string;
+        blockType: 'archive';
+      }
+  )[];
   relatedPosts?: string[] | Post[];
   slug?: string;
   meta?: {

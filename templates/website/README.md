@@ -126,7 +126,7 @@ For more details on how to extend this functionality, see the [Payload Access Co
 
 ## Premium Content
 
-Posts can optionally restrict access to content or digital assets behind authentication. This will require the user to be logged-in before full the post data or resources become accessible. To do this, a `premiumContent` field is added to the `posts` collection with `read` access control set to check for an authenticated user on the request. Every time a user requests a post, this will only return data to those who have access to it:
+Posts can optionally restrict access to content or digital assets behind authentication. This will ensure that only members of your site can access the full post data and its resources. To do this, a `premiumContent` field is added to the `posts` collection with `read` access control set to check for an authenticated user on the request. Every time a user requests a post, this will only return data to those who have access to it:
 
 ```ts
 {

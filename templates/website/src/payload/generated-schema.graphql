@@ -618,6 +618,8 @@ type Post {
   populatedAuthors: [Post_PopulatedAuthors!]
   hero: Post_Hero
   layout: [Post_Layout!]!
+  enablePremiumContent: Boolean
+  premiumContent: [Post_PremiumContent!]
   relatedPosts: [Post!]
   slug: String
   meta: Post_Meta
@@ -866,6 +868,8 @@ input Post_Hero_Media_where_and {
 }
 
 union Post_Layout = Cta | Content | MediaBlock | Archive
+
+union Post_PremiumContent = Cta | Content | MediaBlock | Archive
 
 type Post_Meta {
   title: String
@@ -3345,6 +3349,7 @@ input Post_where {
   hero__links__link__appearance: Post_hero__links__link__appearance_operator
   hero__links__id: Post_hero__links__id_operator
   hero__media: Post_hero__media_operator
+  enablePremiumContent: Post_enablePremiumContent_operator
   relatedPosts: Post_relatedPosts_operator
   slug: Post_slug_operator
   meta__title: Post_meta__title_operator
@@ -3521,6 +3526,12 @@ input Post_hero__media_operator {
   not_equals: String
 }
 
+input Post_enablePremiumContent_operator {
+  equals: Boolean
+  not_equals: Boolean
+  exists: Boolean
+}
+
 input Post_relatedPosts_operator {
   equals: String
   not_equals: String
@@ -3630,6 +3641,7 @@ input Post_where_or {
   hero__links__link__appearance: Post_hero__links__link__appearance_operator
   hero__links__id: Post_hero__links__id_operator
   hero__media: Post_hero__media_operator
+  enablePremiumContent: Post_enablePremiumContent_operator
   relatedPosts: Post_relatedPosts_operator
   slug: Post_slug_operator
   meta__title: Post_meta__title_operator
@@ -3658,6 +3670,7 @@ input Post_where_and {
   hero__links__link__appearance: Post_hero__links__link__appearance_operator
   hero__links__id: Post_hero__links__id_operator
   hero__media: Post_hero__media_operator
+  enablePremiumContent: Post_enablePremiumContent_operator
   relatedPosts: Post_relatedPosts_operator
   slug: Post_slug_operator
   meta__title: Post_meta__title_operator
@@ -3686,6 +3699,8 @@ type PostsDocAccessFields {
   populatedAuthors: PostsDocAccessFields_populatedAuthors
   hero: PostsDocAccessFields_hero
   layout: PostsDocAccessFields_layout
+  enablePremiumContent: PostsDocAccessFields_enablePremiumContent
+  premiumContent: PostsDocAccessFields_premiumContent
   relatedPosts: PostsDocAccessFields_relatedPosts
   slug: PostsDocAccessFields_slug
   meta: PostsDocAccessFields_meta
@@ -4207,6 +4222,52 @@ type PostsDocAccessFields_layout_Delete {
   permission: Boolean!
 }
 
+type PostsDocAccessFields_enablePremiumContent {
+  create: PostsDocAccessFields_enablePremiumContent_Create
+  read: PostsDocAccessFields_enablePremiumContent_Read
+  update: PostsDocAccessFields_enablePremiumContent_Update
+  delete: PostsDocAccessFields_enablePremiumContent_Delete
+}
+
+type PostsDocAccessFields_enablePremiumContent_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_enablePremiumContent_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_enablePremiumContent_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_enablePremiumContent_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_premiumContent {
+  create: PostsDocAccessFields_premiumContent_Create
+  read: PostsDocAccessFields_premiumContent_Read
+  update: PostsDocAccessFields_premiumContent_Update
+  delete: PostsDocAccessFields_premiumContent_Delete
+}
+
+type PostsDocAccessFields_premiumContent_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_premiumContent_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_premiumContent_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_premiumContent_Delete {
+  permission: Boolean!
+}
+
 type PostsDocAccessFields_relatedPosts {
   create: PostsDocAccessFields_relatedPosts_Create
   read: PostsDocAccessFields_relatedPosts_Read
@@ -4510,6 +4571,8 @@ type PostVersion_Version {
   populatedAuthors: [PostVersion_Version_PopulatedAuthors!]
   hero: PostVersion_Version_Hero
   layout: [PostVersion_Version_Layout!]!
+  enablePremiumContent: Boolean
+  premiumContent: [PostVersion_Version_PremiumContent!]
   relatedPosts: [Post!]
   slug: String
   meta: PostVersion_Version_Meta
@@ -4733,6 +4796,8 @@ input PostVersion_Version_Hero_Media_where_and {
 
 union PostVersion_Version_Layout = Cta | Content | MediaBlock | Archive
 
+union PostVersion_Version_PremiumContent = Cta | Content | MediaBlock | Archive
+
 type PostVersion_Version_Meta {
   title: String
   description: String
@@ -4934,6 +4999,7 @@ input versionsPost_where {
   version__hero__links__link__appearance: versionsPost_version__hero__links__link__appearance_operator
   version__hero__links__id: versionsPost_version__hero__links__id_operator
   version__hero__media: versionsPost_version__hero__media_operator
+  version__enablePremiumContent: versionsPost_version__enablePremiumContent_operator
   version__relatedPosts: versionsPost_version__relatedPosts_operator
   version__slug: versionsPost_version__slug_operator
   version__meta__title: versionsPost_version__meta__title_operator
@@ -5121,6 +5187,12 @@ input versionsPost_version__hero__media_operator {
   not_equals: String
 }
 
+input versionsPost_version__enablePremiumContent_operator {
+  equals: Boolean
+  not_equals: Boolean
+  exists: Boolean
+}
+
 input versionsPost_version__relatedPosts_operator {
   equals: String
   not_equals: String
@@ -5253,6 +5325,7 @@ input versionsPost_where_or {
   version__hero__links__link__appearance: versionsPost_version__hero__links__link__appearance_operator
   version__hero__links__id: versionsPost_version__hero__links__id_operator
   version__hero__media: versionsPost_version__hero__media_operator
+  version__enablePremiumContent: versionsPost_version__enablePremiumContent_operator
   version__relatedPosts: versionsPost_version__relatedPosts_operator
   version__slug: versionsPost_version__slug_operator
   version__meta__title: versionsPost_version__meta__title_operator
@@ -5284,6 +5357,7 @@ input versionsPost_where_and {
   version__hero__links__link__appearance: versionsPost_version__hero__links__link__appearance_operator
   version__hero__links__id: versionsPost_version__hero__links__id_operator
   version__hero__media: versionsPost_version__hero__media_operator
+  version__enablePremiumContent: versionsPost_version__enablePremiumContent_operator
   version__relatedPosts: versionsPost_version__relatedPosts_operator
   version__slug: versionsPost_version__slug_operator
   version__meta__title: versionsPost_version__meta__title_operator
@@ -10314,6 +10388,8 @@ type PostsFields {
   populatedAuthors: PostsFields_populatedAuthors
   hero: PostsFields_hero
   layout: PostsFields_layout
+  enablePremiumContent: PostsFields_enablePremiumContent
+  premiumContent: PostsFields_premiumContent
   relatedPosts: PostsFields_relatedPosts
   slug: PostsFields_slug
   meta: PostsFields_meta
@@ -10832,6 +10908,52 @@ type PostsFields_layout_Update {
 }
 
 type PostsFields_layout_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_enablePremiumContent {
+  create: PostsFields_enablePremiumContent_Create
+  read: PostsFields_enablePremiumContent_Read
+  update: PostsFields_enablePremiumContent_Update
+  delete: PostsFields_enablePremiumContent_Delete
+}
+
+type PostsFields_enablePremiumContent_Create {
+  permission: Boolean!
+}
+
+type PostsFields_enablePremiumContent_Read {
+  permission: Boolean!
+}
+
+type PostsFields_enablePremiumContent_Update {
+  permission: Boolean!
+}
+
+type PostsFields_enablePremiumContent_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_premiumContent {
+  create: PostsFields_premiumContent_Create
+  read: PostsFields_premiumContent_Read
+  update: PostsFields_premiumContent_Update
+  delete: PostsFields_premiumContent_Delete
+}
+
+type PostsFields_premiumContent_Create {
+  permission: Boolean!
+}
+
+type PostsFields_premiumContent_Read {
+  permission: Boolean!
+}
+
+type PostsFields_premiumContent_Update {
+  permission: Boolean!
+}
+
+type PostsFields_premiumContent_Delete {
   permission: Boolean!
 }
 
@@ -13636,6 +13758,8 @@ input mutationPostInput {
   populatedAuthors: [mutationPost_PopulatedAuthorsInput]
   hero: mutationPost_HeroInput!
   layout: JSON
+  enablePremiumContent: Boolean
+  premiumContent: JSON
   relatedPosts: [String]
   slug: String
   meta: mutationPost_MetaInput
@@ -13711,6 +13835,8 @@ input mutationPostUpdateInput {
   populatedAuthors: [mutationPostUpdate_PopulatedAuthorsInput]
   hero: mutationPostUpdate_HeroInput!
   layout: JSON
+  enablePremiumContent: Boolean
+  premiumContent: JSON
   relatedPosts: [String]
   slug: String
   meta: mutationPostUpdate_MetaInput

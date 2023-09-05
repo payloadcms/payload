@@ -51,5 +51,37 @@ export const post1: Partial<Post> = {
       ],
     },
   ],
+  enablePremiumContent: true,
+  premiumContent: [
+    {
+      blockType: 'content',
+      columns: [
+        {
+          size: 'twoThirds',
+          richText: [
+            {
+              children: [
+                {
+                  text: 'This is premium content.',
+                  bold: true,
+                },
+                {
+                  text: ' It is only available to authenticated users. This content can be anything from additional video, text, and content, to download links and more. These are simply layout building blocks configured in the CMS.',
+                },
+              ],
+            },
+          ],
+          link: {
+            reference: {
+              relationTo: 'pages',
+              value: '',
+            },
+            url: '',
+            label: '',
+          },
+        },
+      ],
+    },
+  ],
   relatedPosts: [], // this is populated by the seed script
 }

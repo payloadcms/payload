@@ -275,7 +275,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Easily require users to be logged in to access premium post content.',
+                  text: 'Easily restrict access to premium post content to members of your site.',
                 },
               ],
             },
