@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload/types'
 
+import type { Comment } from '../../payload-types'
 import { checkRole } from '../Users/checkRole'
 import { populateUser } from './hooks/populateUser'
 import { revalidatePost } from './hooks/revalidatePost'
@@ -8,6 +9,10 @@ const Comments: CollectionConfig = {
   slug: 'comments',
   admin: {
     useAsTitle: 'comment',
+    preview: (comment: Partial<Comment>) =>
+      `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/posts/${
+        comment?.doc && typeof comment?.doc === 'object' ? comment?.doc?.slug : comment?.doc
+      }`,
   },
   hooks: {
     afterChange: [revalidatePost],

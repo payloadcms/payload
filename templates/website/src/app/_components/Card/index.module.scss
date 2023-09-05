@@ -59,15 +59,6 @@
   flex-grow: 1;
 }
 
-.priceActions {
-  gap: var(--base);
-}
-
-.price {
-  font-weight: 600;
-  margin: 0;
-}
-
 .leader {
   @extend %label;
   display: flex;

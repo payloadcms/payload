@@ -34,7 +34,7 @@ export const post1: Partial<Post> = {
             {
               children: [
                 {
-                  text: "This content is completely dynamic using custom layout building blocks configured in the CMS. This can be anything you'd like from rich text, to images, or even highly designed, complex components.",
+                  text: "This content is completely dynamic using custom layout building blocks configured in the CMS. This can be anything you'd like from rich text and images, to highly designed, complex components.",
                 },
               ],
             },

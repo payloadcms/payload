@@ -59,7 +59,7 @@ export default async function Project({ params: { slug } }) {
                 type: 'p',
                 children: [
                   {
-                    text: 'The projects displayed here are individually selected for this page. Admins can select any number of related projects to display here and the layout will adjust accordingly. Alternatively, you could swap this out for the "Archive" block to automatically populate projects by category. To manage related projects, ',
+                    text: 'The projects displayed here are individually selected for this page. Admins can select any number of related projects to display here and the layout will adjust accordingly. Alternatively, you could swap this out for the "Archive" block to automatically populate projects by category complete with pagination. To manage related projects, ',
                   },
                   {
                     type: 'link',

@@ -21,11 +21,11 @@ export const Card: React.FC<{
     showCategories,
     title: titleFromProps,
     doc,
-    doc: { slug, title, categories, meta } = {},
     className,
     orientation = 'vertical',
   } = props
 
+  const { slug, title, categories, meta } = doc || {}
   const { description, image: metaImage } = meta || {}
 
   const hasCategories = categories && Array.isArray(categories) && categories.length > 0
