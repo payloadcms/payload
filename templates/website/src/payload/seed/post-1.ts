@@ -8,6 +8,7 @@ export const post1: Partial<Post> = {
     description: 'This is the first post.',
     image: '{{IMAGE}}',
   },
+  authors: ['{{AUTHOR}}'],
   hero: {
     type: 'lowImpact',
     links: null,

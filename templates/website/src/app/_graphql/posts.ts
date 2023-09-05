@@ -23,6 +23,11 @@ export const POST = `
           title
         }
         createdAt
+        publishedOn
+        populatedAuthors {
+          id
+          name
+        }
         hero {
           type
           richText

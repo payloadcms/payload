@@ -1,17 +1,32 @@
-export const COMMENTS = `
+const COMMENT = `
+id
+doc {
+  id
+  slug
+}
+populatedUser {
+  id
+  name
+}
+comment
+createdAt
+`
+
+export const COMMENTS_BY_DOC = `
   query Comments($doc: String) {
-    Comments(where: { doc: { equals: $doc } }, limit: 300) {
+    Comments(where: { doc: { equals: $doc } }) {
       docs {
-        id
-        doc {
-          id
-        }
-        fullUser {
-          id
-          name
-        }
-        comment
-        createdAt
+        ${COMMENT}
+      }
+    }
+  }
+`
+
+export const COMMENTS_BY_USER = `
+  query Comments($user: String) {
+    Comments(where: { user: { equals: $user } }) {
+      docs {
+        ${COMMENT}
       }
     }
   }

@@ -58,10 +58,10 @@ const Comments: CollectionConfig = {
       hasMany: false,
     },
     // This field is only used to populate the user data via the `populateUser` hook
-    // This is because the `user` collection has access control locked
+    // This is because the `user` collection has access control locked to protect user privacy
     // GraphQL will also not return mutated user data that differs from the underlying schema
     {
-      name: 'fullUser',
+      name: 'populatedUser',
       type: 'group',
       admin: {
         readOnly: true,

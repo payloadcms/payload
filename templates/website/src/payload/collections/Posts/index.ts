@@ -10,6 +10,7 @@ import { hero } from '../../fields/hero'
 import { slugField } from '../../fields/slug'
 import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
 import { populatePublishedDate } from '../../hooks/populatePublishedDate'
+import { populateAuthors } from './hooks/populateAuthors'
 import { revalidatePost } from './hooks/revalidatePost'
 
 export const Posts: CollectionConfig = {
@@ -26,7 +27,7 @@ export const Posts: CollectionConfig = {
   hooks: {
     beforeChange: [populatePublishedDate],
     afterChange: [revalidatePost],
-    afterRead: [populateArchiveBlock],
+    afterRead: [populateArchiveBlock, populateAuthors],
   },
   versions: {
     drafts: true,
@@ -53,11 +54,57 @@ export const Posts: CollectionConfig = {
       },
     },
     {
-      name: 'publishedDate',
+      name: 'publishedOn',
       type: 'date',
       admin: {
         position: 'sidebar',
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
       },
+      hooks: {
+        beforeChange: [
+          ({ siblingData, value }) => {
+            if (siblingData._status === 'published' && !value) {
+              return new Date()
+            }
+            return value
+          },
+        ],
+      },
+    },
+    {
+      name: 'authors',
+      type: 'relationship',
+      relationTo: 'users',
+      hasMany: true,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    // This field is only used to populate the user data via the `populateAuthors` hook
+    // This is because the `user` collection has access control locked to protect user privacy
+    // GraphQL will also not return mutated user data that differs from the underlying schema
+    {
+      name: 'populatedAuthors',
+      type: 'array',
+      admin: {
+        readOnly: true,
+        disabled: true,
+      },
+      access: {
+        update: () => false,
+      },
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+        },
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
     },
     {
       type: 'tabs',

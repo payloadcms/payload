@@ -2,6 +2,7 @@
 
 import React, { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
+import { usePathname } from 'next/navigation'
 
 import { Button } from '../../../_components/Button'
 import { Input } from '../../../_components/Input'
@@ -17,6 +18,7 @@ type FormData = {
 export const CommentForm: React.FC<{
   docID: string
 }> = ({ docID }) => {
+  const pathname = usePathname()
   const [error, setError] = React.useState<string | null>(null)
   const [success, setSuccess] = React.useState<string | null>(null)
 
@@ -52,7 +54,9 @@ export const CommentForm: React.FC<{
         if (!res.ok) throw new Error((await res.json()).message)
 
         setError(null)
-        setSuccess('Thank you. You comment submitted for moderation successfully.')
+        setSuccess(
+          'Your comment submitted for moderation successfully. Navigate to the admin dashboard to approve it.',
+        )
         reset()
       } catch (_) {
         setError('Something went wrong')
@@ -82,7 +86,7 @@ export const CommentForm: React.FC<{
       />
       {!user ? (
         <Button
-          href="/login"
+          href={`/login?redirect=${encodeURIComponent(pathname)}`}
           appearance="primary"
           label="Login to comment"
           disabled={isLoading}

@@ -6,20 +6,16 @@
   margin-top: var(--base);
 }
 
-.purchases {
-  list-style: none;
-  padding: 0;
+.column {
   display: flex;
   flex-direction: column;
   gap: var(--base);
 }
 
-.purchase {
-  > * {
-    margin: 0;
-  }
+.comment {
+  margin: 0;
 }
 
-.noPurchases {
-  font-weight: 600;
+.meta {
+  margin: 0;
 }

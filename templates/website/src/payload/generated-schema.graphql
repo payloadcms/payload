@@ -613,7 +613,9 @@ type Post {
   id: String
   title: String
   categories: [Category!]
-  publishedDate: DateTime
+  publishedOn: DateTime
+  authors: [User!]
+  populatedAuthors: [Post_PopulatedAuthors!]
   hero: Post_Hero
   layout: [Post_Layout!]!
   relatedPosts: [Post!]
@@ -622,6 +624,37 @@ type Post {
   updatedAt: DateTime
   createdAt: DateTime
   _status: Post__status
+}
+
+type User {
+  id: String
+  name: String
+  roles: [User_roles!]
+  updatedAt: DateTime
+  createdAt: DateTime
+  email: EmailAddress!
+  resetPasswordToken: String
+  resetPasswordExpiration: DateTime
+  salt: String
+  hash: String
+  loginAttempts: Float
+  lockUntil: DateTime
+  password: String!
+}
+
+enum User_roles {
+  admin
+  user
+}
+
+"""
+A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
+"""
+scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+
+type Post_PopulatedAuthors {
+  id: String
+  name: String
 }
 
 type Post_Hero {
@@ -3298,7 +3331,10 @@ type Posts {
 input Post_where {
   title: Post_title_operator
   categories: Post_categories_operator
-  publishedDate: Post_publishedDate_operator
+  publishedOn: Post_publishedOn_operator
+  authors: Post_authors_operator
+  populatedAuthors__id: Post_populatedAuthors__id_operator
+  populatedAuthors__name: Post_populatedAuthors__name_operator
   hero__type: Post_hero__type_operator
   hero__richText: Post_hero__richText_operator
   hero__links__link__type: Post_hero__links__link__type_operator
@@ -3341,7 +3377,7 @@ input Post_categories_operator {
   exists: Boolean
 }
 
-input Post_publishedDate_operator {
+input Post_publishedOn_operator {
   equals: DateTime
   not_equals: DateTime
   greater_than_equal: DateTime
@@ -3349,6 +3385,37 @@ input Post_publishedDate_operator {
   less_than_equal: DateTime
   less_than: DateTime
   like: DateTime
+  exists: Boolean
+}
+
+input Post_authors_operator {
+  equals: String
+  not_equals: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Post_populatedAuthors__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Post_populatedAuthors__name_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -3549,7 +3616,10 @@ input Post_id_operator {
 input Post_where_or {
   title: Post_title_operator
   categories: Post_categories_operator
-  publishedDate: Post_publishedDate_operator
+  publishedOn: Post_publishedOn_operator
+  authors: Post_authors_operator
+  populatedAuthors__id: Post_populatedAuthors__id_operator
+  populatedAuthors__name: Post_populatedAuthors__name_operator
   hero__type: Post_hero__type_operator
   hero__richText: Post_hero__richText_operator
   hero__links__link__type: Post_hero__links__link__type_operator
@@ -3574,7 +3644,10 @@ input Post_where_or {
 input Post_where_and {
   title: Post_title_operator
   categories: Post_categories_operator
-  publishedDate: Post_publishedDate_operator
+  publishedOn: Post_publishedOn_operator
+  authors: Post_authors_operator
+  populatedAuthors__id: Post_populatedAuthors__id_operator
+  populatedAuthors__name: Post_populatedAuthors__name_operator
   hero__type: Post_hero__type_operator
   hero__richText: Post_hero__richText_operator
   hero__links__link__type: Post_hero__links__link__type_operator
@@ -3608,7 +3681,9 @@ type postsDocAccess {
 type PostsDocAccessFields {
   title: PostsDocAccessFields_title
   categories: PostsDocAccessFields_categories
-  publishedDate: PostsDocAccessFields_publishedDate
+  publishedOn: PostsDocAccessFields_publishedOn
+  authors: PostsDocAccessFields_authors
+  populatedAuthors: PostsDocAccessFields_populatedAuthors
   hero: PostsDocAccessFields_hero
   layout: PostsDocAccessFields_layout
   relatedPosts: PostsDocAccessFields_relatedPosts
@@ -3665,26 +3740,124 @@ type PostsDocAccessFields_categories_Delete {
   permission: Boolean!
 }
 
-type PostsDocAccessFields_publishedDate {
-  create: PostsDocAccessFields_publishedDate_Create
-  read: PostsDocAccessFields_publishedDate_Read
-  update: PostsDocAccessFields_publishedDate_Update
-  delete: PostsDocAccessFields_publishedDate_Delete
+type PostsDocAccessFields_publishedOn {
+  create: PostsDocAccessFields_publishedOn_Create
+  read: PostsDocAccessFields_publishedOn_Read
+  update: PostsDocAccessFields_publishedOn_Update
+  delete: PostsDocAccessFields_publishedOn_Delete
 }
 
-type PostsDocAccessFields_publishedDate_Create {
+type PostsDocAccessFields_publishedOn_Create {
   permission: Boolean!
 }
 
-type PostsDocAccessFields_publishedDate_Read {
+type PostsDocAccessFields_publishedOn_Read {
   permission: Boolean!
 }
 
-type PostsDocAccessFields_publishedDate_Update {
+type PostsDocAccessFields_publishedOn_Update {
   permission: Boolean!
 }
 
-type PostsDocAccessFields_publishedDate_Delete {
+type PostsDocAccessFields_publishedOn_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_authors {
+  create: PostsDocAccessFields_authors_Create
+  read: PostsDocAccessFields_authors_Read
+  update: PostsDocAccessFields_authors_Update
+  delete: PostsDocAccessFields_authors_Delete
+}
+
+type PostsDocAccessFields_authors_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_authors_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_authors_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_authors_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_populatedAuthors {
+  create: PostsDocAccessFields_populatedAuthors_Create
+  read: PostsDocAccessFields_populatedAuthors_Read
+  update: PostsDocAccessFields_populatedAuthors_Update
+  delete: PostsDocAccessFields_populatedAuthors_Delete
+  fields: PostsDocAccessFields_populatedAuthors_Fields
+}
+
+type PostsDocAccessFields_populatedAuthors_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_populatedAuthors_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_populatedAuthors_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_populatedAuthors_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_populatedAuthors_Fields {
+  id: PostsDocAccessFields_populatedAuthors_id
+  name: PostsDocAccessFields_populatedAuthors_name
+}
+
+type PostsDocAccessFields_populatedAuthors_id {
+  create: PostsDocAccessFields_populatedAuthors_id_Create
+  read: PostsDocAccessFields_populatedAuthors_id_Read
+  update: PostsDocAccessFields_populatedAuthors_id_Update
+  delete: PostsDocAccessFields_populatedAuthors_id_Delete
+}
+
+type PostsDocAccessFields_populatedAuthors_id_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_populatedAuthors_id_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_populatedAuthors_id_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_populatedAuthors_id_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_populatedAuthors_name {
+  create: PostsDocAccessFields_populatedAuthors_name_Create
+  read: PostsDocAccessFields_populatedAuthors_name_Read
+  update: PostsDocAccessFields_populatedAuthors_name_Update
+  delete: PostsDocAccessFields_populatedAuthors_name_Delete
+}
+
+type PostsDocAccessFields_populatedAuthors_name_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_populatedAuthors_name_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_populatedAuthors_name_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_populatedAuthors_name_Delete {
   permission: Boolean!
 }
 
@@ -4332,7 +4505,9 @@ type PostVersion {
 type PostVersion_Version {
   title: String
   categories: [Category!]
-  publishedDate: DateTime
+  publishedOn: DateTime
+  authors: [User!]
+  populatedAuthors: [PostVersion_Version_PopulatedAuthors!]
   hero: PostVersion_Version_Hero
   layout: [PostVersion_Version_Layout!]!
   relatedPosts: [Post!]
@@ -4341,6 +4516,11 @@ type PostVersion_Version {
   updatedAt: DateTime
   createdAt: DateTime
   _status: PostVersion_Version__status
+}
+
+type PostVersion_Version_PopulatedAuthors {
+  id: String
+  name: String
 }
 
 type PostVersion_Version_Hero {
@@ -4740,7 +4920,10 @@ input versionsPost_where {
   parent: versionsPost_parent_operator
   version__title: versionsPost_version__title_operator
   version__categories: versionsPost_version__categories_operator
-  version__publishedDate: versionsPost_version__publishedDate_operator
+  version__publishedOn: versionsPost_version__publishedOn_operator
+  version__authors: versionsPost_version__authors_operator
+  version__populatedAuthors__id: versionsPost_version__populatedAuthors__id_operator
+  version__populatedAuthors__name: versionsPost_version__populatedAuthors__name_operator
   version__hero__type: versionsPost_version__hero__type_operator
   version__hero__richText: versionsPost_version__hero__richText_operator
   version__hero__links__link__type: versionsPost_version__hero__links__link__type_operator
@@ -4794,7 +4977,7 @@ input versionsPost_version__categories_operator {
   exists: Boolean
 }
 
-input versionsPost_version__publishedDate_operator {
+input versionsPost_version__publishedOn_operator {
   equals: DateTime
   not_equals: DateTime
   greater_than_equal: DateTime
@@ -4802,6 +4985,37 @@ input versionsPost_version__publishedDate_operator {
   less_than_equal: DateTime
   less_than: DateTime
   like: DateTime
+  exists: Boolean
+}
+
+input versionsPost_version__authors_operator {
+  equals: String
+  not_equals: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsPost_version__populatedAuthors__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input versionsPost_version__populatedAuthors__name_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -5025,7 +5239,10 @@ input versionsPost_where_or {
   parent: versionsPost_parent_operator
   version__title: versionsPost_version__title_operator
   version__categories: versionsPost_version__categories_operator
-  version__publishedDate: versionsPost_version__publishedDate_operator
+  version__publishedOn: versionsPost_version__publishedOn_operator
+  version__authors: versionsPost_version__authors_operator
+  version__populatedAuthors__id: versionsPost_version__populatedAuthors__id_operator
+  version__populatedAuthors__name: versionsPost_version__populatedAuthors__name_operator
   version__hero__type: versionsPost_version__hero__type_operator
   version__hero__richText: versionsPost_version__hero__richText_operator
   version__hero__links__link__type: versionsPost_version__hero__links__link__type_operator
@@ -5053,7 +5270,10 @@ input versionsPost_where_and {
   parent: versionsPost_parent_operator
   version__title: versionsPost_version__title_operator
   version__categories: versionsPost_version__categories_operator
-  version__publishedDate: versionsPost_version__publishedDate_operator
+  version__publishedOn: versionsPost_version__publishedOn_operator
+  version__authors: versionsPost_version__authors_operator
+  version__populatedAuthors__id: versionsPost_version__populatedAuthors__id_operator
+  version__populatedAuthors__name: versionsPost_version__populatedAuthors__name_operator
   version__hero__type: versionsPost_version__hero__type_operator
   version__hero__richText: versionsPost_version__hero__richText_operator
   version__hero__links__link__type: versionsPost_version__hero__links__link__type_operator
@@ -7714,32 +7934,6 @@ type CategoriesDeleteDocAccess {
   where: JSONObject
 }
 
-type User {
-  id: String
-  name: String
-  roles: [User_roles!]
-  updatedAt: DateTime
-  createdAt: DateTime
-  email: EmailAddress!
-  resetPasswordToken: String
-  resetPasswordExpiration: DateTime
-  salt: String
-  hash: String
-  loginAttempts: Float
-  lockUntil: DateTime
-  password: String!
-}
-
-enum User_roles {
-  admin
-  user
-}
-
-"""
-A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
-"""
-scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
-
 type Users {
   docs: [User]
   totalDocs: Int
@@ -8042,7 +8236,7 @@ type usersMe {
 type Comment {
   id: String
   user: User
-  fullUser: Comment_FullUser
+  populatedUser: Comment_PopulatedUser
   doc: Post
   comment: String
   updatedAt: DateTime
@@ -8050,7 +8244,7 @@ type Comment {
   _status: Comment__status
 }
 
-type Comment_FullUser {
+type Comment_PopulatedUser {
   id: String
   name: String
 }
@@ -8076,8 +8270,8 @@ type Comments {
 
 input Comment_where {
   user: Comment_user_operator
-  fullUser__id: Comment_fullUser__id_operator
-  fullUser__name: Comment_fullUser__name_operator
+  populatedUser__id: Comment_populatedUser__id_operator
+  populatedUser__name: Comment_populatedUser__name_operator
   doc: Comment_doc_operator
   comment: Comment_comment_operator
   updatedAt: Comment_updatedAt_operator
@@ -8097,7 +8291,7 @@ input Comment_user_operator {
   exists: Boolean
 }
 
-input Comment_fullUser__id_operator {
+input Comment_populatedUser__id_operator {
   equals: String
   not_equals: String
   like: String
@@ -8108,7 +8302,7 @@ input Comment_fullUser__id_operator {
   exists: Boolean
 }
 
-input Comment_fullUser__name_operator {
+input Comment_populatedUser__name_operator {
   equals: String
   not_equals: String
   like: String
@@ -8185,8 +8379,8 @@ input Comment_id_operator {
 
 input Comment_where_or {
   user: Comment_user_operator
-  fullUser__id: Comment_fullUser__id_operator
-  fullUser__name: Comment_fullUser__name_operator
+  populatedUser__id: Comment_populatedUser__id_operator
+  populatedUser__name: Comment_populatedUser__name_operator
   doc: Comment_doc_operator
   comment: Comment_comment_operator
   updatedAt: Comment_updatedAt_operator
@@ -8197,8 +8391,8 @@ input Comment_where_or {
 
 input Comment_where_and {
   user: Comment_user_operator
-  fullUser__id: Comment_fullUser__id_operator
-  fullUser__name: Comment_fullUser__name_operator
+  populatedUser__id: Comment_populatedUser__id_operator
+  populatedUser__name: Comment_populatedUser__name_operator
   doc: Comment_doc_operator
   comment: Comment_comment_operator
   updatedAt: Comment_updatedAt_operator
@@ -8218,7 +8412,7 @@ type commentsDocAccess {
 
 type CommentsDocAccessFields {
   user: CommentsDocAccessFields_user
-  fullUser: CommentsDocAccessFields_fullUser
+  populatedUser: CommentsDocAccessFields_populatedUser
   doc: CommentsDocAccessFields_doc
   comment: CommentsDocAccessFields_comment
   updatedAt: CommentsDocAccessFields_updatedAt
@@ -8249,78 +8443,78 @@ type CommentsDocAccessFields_user_Delete {
   permission: Boolean!
 }
 
-type CommentsDocAccessFields_fullUser {
-  create: CommentsDocAccessFields_fullUser_Create
-  read: CommentsDocAccessFields_fullUser_Read
-  update: CommentsDocAccessFields_fullUser_Update
-  delete: CommentsDocAccessFields_fullUser_Delete
-  fields: CommentsDocAccessFields_fullUser_Fields
+type CommentsDocAccessFields_populatedUser {
+  create: CommentsDocAccessFields_populatedUser_Create
+  read: CommentsDocAccessFields_populatedUser_Read
+  update: CommentsDocAccessFields_populatedUser_Update
+  delete: CommentsDocAccessFields_populatedUser_Delete
+  fields: CommentsDocAccessFields_populatedUser_Fields
 }
 
-type CommentsDocAccessFields_fullUser_Create {
+type CommentsDocAccessFields_populatedUser_Create {
   permission: Boolean!
 }
 
-type CommentsDocAccessFields_fullUser_Read {
+type CommentsDocAccessFields_populatedUser_Read {
   permission: Boolean!
 }
 
-type CommentsDocAccessFields_fullUser_Update {
+type CommentsDocAccessFields_populatedUser_Update {
   permission: Boolean!
 }
 
-type CommentsDocAccessFields_fullUser_Delete {
+type CommentsDocAccessFields_populatedUser_Delete {
   permission: Boolean!
 }
 
-type CommentsDocAccessFields_fullUser_Fields {
-  id: CommentsDocAccessFields_fullUser_id
-  name: CommentsDocAccessFields_fullUser_name
+type CommentsDocAccessFields_populatedUser_Fields {
+  id: CommentsDocAccessFields_populatedUser_id
+  name: CommentsDocAccessFields_populatedUser_name
 }
 
-type CommentsDocAccessFields_fullUser_id {
-  create: CommentsDocAccessFields_fullUser_id_Create
-  read: CommentsDocAccessFields_fullUser_id_Read
-  update: CommentsDocAccessFields_fullUser_id_Update
-  delete: CommentsDocAccessFields_fullUser_id_Delete
+type CommentsDocAccessFields_populatedUser_id {
+  create: CommentsDocAccessFields_populatedUser_id_Create
+  read: CommentsDocAccessFields_populatedUser_id_Read
+  update: CommentsDocAccessFields_populatedUser_id_Update
+  delete: CommentsDocAccessFields_populatedUser_id_Delete
 }
 
-type CommentsDocAccessFields_fullUser_id_Create {
+type CommentsDocAccessFields_populatedUser_id_Create {
   permission: Boolean!
 }
 
-type CommentsDocAccessFields_fullUser_id_Read {
+type CommentsDocAccessFields_populatedUser_id_Read {
   permission: Boolean!
 }
 
-type CommentsDocAccessFields_fullUser_id_Update {
+type CommentsDocAccessFields_populatedUser_id_Update {
   permission: Boolean!
 }
 
-type CommentsDocAccessFields_fullUser_id_Delete {
+type CommentsDocAccessFields_populatedUser_id_Delete {
   permission: Boolean!
 }
 
-type CommentsDocAccessFields_fullUser_name {
-  create: CommentsDocAccessFields_fullUser_name_Create
-  read: CommentsDocAccessFields_fullUser_name_Read
-  update: CommentsDocAccessFields_fullUser_name_Update
-  delete: CommentsDocAccessFields_fullUser_name_Delete
+type CommentsDocAccessFields_populatedUser_name {
+  create: CommentsDocAccessFields_populatedUser_name_Create
+  read: CommentsDocAccessFields_populatedUser_name_Read
+  update: CommentsDocAccessFields_populatedUser_name_Update
+  delete: CommentsDocAccessFields_populatedUser_name_Delete
 }
 
-type CommentsDocAccessFields_fullUser_name_Create {
+type CommentsDocAccessFields_populatedUser_name_Create {
   permission: Boolean!
 }
 
-type CommentsDocAccessFields_fullUser_name_Read {
+type CommentsDocAccessFields_populatedUser_name_Read {
   permission: Boolean!
 }
 
-type CommentsDocAccessFields_fullUser_name_Update {
+type CommentsDocAccessFields_populatedUser_name_Update {
   permission: Boolean!
 }
 
-type CommentsDocAccessFields_fullUser_name_Delete {
+type CommentsDocAccessFields_populatedUser_name_Delete {
   permission: Boolean!
 }
 
@@ -8474,7 +8668,7 @@ type CommentVersion {
 
 type CommentVersion_Version {
   user: User
-  fullUser: CommentVersion_Version_FullUser
+  populatedUser: CommentVersion_Version_PopulatedUser
   doc: Post
   comment: String
   updatedAt: DateTime
@@ -8482,7 +8676,7 @@ type CommentVersion_Version {
   _status: CommentVersion_Version__status
 }
 
-type CommentVersion_Version_FullUser {
+type CommentVersion_Version_PopulatedUser {
   id: String
   name: String
 }
@@ -8509,8 +8703,8 @@ type versionsComments {
 input versionsComment_where {
   parent: versionsComment_parent_operator
   version__user: versionsComment_version__user_operator
-  version__fullUser__id: versionsComment_version__fullUser__id_operator
-  version__fullUser__name: versionsComment_version__fullUser__name_operator
+  version__populatedUser__id: versionsComment_version__populatedUser__id_operator
+  version__populatedUser__name: versionsComment_version__populatedUser__name_operator
   version__doc: versionsComment_version__doc_operator
   version__comment: versionsComment_version__comment_operator
   version__updatedAt: versionsComment_version__updatedAt_operator
@@ -8541,7 +8735,7 @@ input versionsComment_version__user_operator {
   exists: Boolean
 }
 
-input versionsComment_version__fullUser__id_operator {
+input versionsComment_version__populatedUser__id_operator {
   equals: String
   not_equals: String
   like: String
@@ -8552,7 +8746,7 @@ input versionsComment_version__fullUser__id_operator {
   exists: Boolean
 }
 
-input versionsComment_version__fullUser__name_operator {
+input versionsComment_version__populatedUser__name_operator {
   equals: String
   not_equals: String
   like: String
@@ -8652,8 +8846,8 @@ input versionsComment_id_operator {
 input versionsComment_where_or {
   parent: versionsComment_parent_operator
   version__user: versionsComment_version__user_operator
-  version__fullUser__id: versionsComment_version__fullUser__id_operator
-  version__fullUser__name: versionsComment_version__fullUser__name_operator
+  version__populatedUser__id: versionsComment_version__populatedUser__id_operator
+  version__populatedUser__name: versionsComment_version__populatedUser__name_operator
   version__doc: versionsComment_version__doc_operator
   version__comment: versionsComment_version__comment_operator
   version__updatedAt: versionsComment_version__updatedAt_operator
@@ -8667,8 +8861,8 @@ input versionsComment_where_or {
 input versionsComment_where_and {
   parent: versionsComment_parent_operator
   version__user: versionsComment_version__user_operator
-  version__fullUser__id: versionsComment_version__fullUser__id_operator
-  version__fullUser__name: versionsComment_version__fullUser__name_operator
+  version__populatedUser__id: versionsComment_version__populatedUser__id_operator
+  version__populatedUser__name: versionsComment_version__populatedUser__name_operator
   version__doc: versionsComment_version__doc_operator
   version__comment: versionsComment_version__comment_operator
   version__updatedAt: versionsComment_version__updatedAt_operator
@@ -10115,7 +10309,9 @@ type postsAccess {
 type PostsFields {
   title: PostsFields_title
   categories: PostsFields_categories
-  publishedDate: PostsFields_publishedDate
+  publishedOn: PostsFields_publishedOn
+  authors: PostsFields_authors
+  populatedAuthors: PostsFields_populatedAuthors
   hero: PostsFields_hero
   layout: PostsFields_layout
   relatedPosts: PostsFields_relatedPosts
@@ -10172,26 +10368,124 @@ type PostsFields_categories_Delete {
   permission: Boolean!
 }
 
-type PostsFields_publishedDate {
-  create: PostsFields_publishedDate_Create
-  read: PostsFields_publishedDate_Read
-  update: PostsFields_publishedDate_Update
-  delete: PostsFields_publishedDate_Delete
+type PostsFields_publishedOn {
+  create: PostsFields_publishedOn_Create
+  read: PostsFields_publishedOn_Read
+  update: PostsFields_publishedOn_Update
+  delete: PostsFields_publishedOn_Delete
 }
 
-type PostsFields_publishedDate_Create {
+type PostsFields_publishedOn_Create {
   permission: Boolean!
 }
 
-type PostsFields_publishedDate_Read {
+type PostsFields_publishedOn_Read {
   permission: Boolean!
 }
 
-type PostsFields_publishedDate_Update {
+type PostsFields_publishedOn_Update {
   permission: Boolean!
 }
 
-type PostsFields_publishedDate_Delete {
+type PostsFields_publishedOn_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_authors {
+  create: PostsFields_authors_Create
+  read: PostsFields_authors_Read
+  update: PostsFields_authors_Update
+  delete: PostsFields_authors_Delete
+}
+
+type PostsFields_authors_Create {
+  permission: Boolean!
+}
+
+type PostsFields_authors_Read {
+  permission: Boolean!
+}
+
+type PostsFields_authors_Update {
+  permission: Boolean!
+}
+
+type PostsFields_authors_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_populatedAuthors {
+  create: PostsFields_populatedAuthors_Create
+  read: PostsFields_populatedAuthors_Read
+  update: PostsFields_populatedAuthors_Update
+  delete: PostsFields_populatedAuthors_Delete
+  fields: PostsFields_populatedAuthors_Fields
+}
+
+type PostsFields_populatedAuthors_Create {
+  permission: Boolean!
+}
+
+type PostsFields_populatedAuthors_Read {
+  permission: Boolean!
+}
+
+type PostsFields_populatedAuthors_Update {
+  permission: Boolean!
+}
+
+type PostsFields_populatedAuthors_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_populatedAuthors_Fields {
+  id: PostsFields_populatedAuthors_id
+  name: PostsFields_populatedAuthors_name
+}
+
+type PostsFields_populatedAuthors_id {
+  create: PostsFields_populatedAuthors_id_Create
+  read: PostsFields_populatedAuthors_id_Read
+  update: PostsFields_populatedAuthors_id_Update
+  delete: PostsFields_populatedAuthors_id_Delete
+}
+
+type PostsFields_populatedAuthors_id_Create {
+  permission: Boolean!
+}
+
+type PostsFields_populatedAuthors_id_Read {
+  permission: Boolean!
+}
+
+type PostsFields_populatedAuthors_id_Update {
+  permission: Boolean!
+}
+
+type PostsFields_populatedAuthors_id_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_populatedAuthors_name {
+  create: PostsFields_populatedAuthors_name_Create
+  read: PostsFields_populatedAuthors_name_Read
+  update: PostsFields_populatedAuthors_name_Update
+  delete: PostsFields_populatedAuthors_name_Delete
+}
+
+type PostsFields_populatedAuthors_name_Create {
+  permission: Boolean!
+}
+
+type PostsFields_populatedAuthors_name_Read {
+  permission: Boolean!
+}
+
+type PostsFields_populatedAuthors_name_Update {
+  permission: Boolean!
+}
+
+type PostsFields_populatedAuthors_name_Delete {
   permission: Boolean!
 }
 
@@ -12267,7 +12561,7 @@ type commentsAccess {
 
 type CommentsFields {
   user: CommentsFields_user
-  fullUser: CommentsFields_fullUser
+  populatedUser: CommentsFields_populatedUser
   doc: CommentsFields_doc
   comment: CommentsFields_comment
   updatedAt: CommentsFields_updatedAt
@@ -12298,78 +12592,78 @@ type CommentsFields_user_Delete {
   permission: Boolean!
 }
 
-type CommentsFields_fullUser {
-  create: CommentsFields_fullUser_Create
-  read: CommentsFields_fullUser_Read
-  update: CommentsFields_fullUser_Update
-  delete: CommentsFields_fullUser_Delete
-  fields: CommentsFields_fullUser_Fields
+type CommentsFields_populatedUser {
+  create: CommentsFields_populatedUser_Create
+  read: CommentsFields_populatedUser_Read
+  update: CommentsFields_populatedUser_Update
+  delete: CommentsFields_populatedUser_Delete
+  fields: CommentsFields_populatedUser_Fields
 }
 
-type CommentsFields_fullUser_Create {
+type CommentsFields_populatedUser_Create {
   permission: Boolean!
 }
 
-type CommentsFields_fullUser_Read {
+type CommentsFields_populatedUser_Read {
   permission: Boolean!
 }
 
-type CommentsFields_fullUser_Update {
+type CommentsFields_populatedUser_Update {
   permission: Boolean!
 }
 
-type CommentsFields_fullUser_Delete {
+type CommentsFields_populatedUser_Delete {
   permission: Boolean!
 }
 
-type CommentsFields_fullUser_Fields {
-  id: CommentsFields_fullUser_id
-  name: CommentsFields_fullUser_name
+type CommentsFields_populatedUser_Fields {
+  id: CommentsFields_populatedUser_id
+  name: CommentsFields_populatedUser_name
 }
 
-type CommentsFields_fullUser_id {
-  create: CommentsFields_fullUser_id_Create
-  read: CommentsFields_fullUser_id_Read
-  update: CommentsFields_fullUser_id_Update
-  delete: CommentsFields_fullUser_id_Delete
+type CommentsFields_populatedUser_id {
+  create: CommentsFields_populatedUser_id_Create
+  read: CommentsFields_populatedUser_id_Read
+  update: CommentsFields_populatedUser_id_Update
+  delete: CommentsFields_populatedUser_id_Delete
 }
 
-type CommentsFields_fullUser_id_Create {
+type CommentsFields_populatedUser_id_Create {
   permission: Boolean!
 }
 
-type CommentsFields_fullUser_id_Read {
+type CommentsFields_populatedUser_id_Read {
   permission: Boolean!
 }
 
-type CommentsFields_fullUser_id_Update {
+type CommentsFields_populatedUser_id_Update {
   permission: Boolean!
 }
 
-type CommentsFields_fullUser_id_Delete {
+type CommentsFields_populatedUser_id_Delete {
   permission: Boolean!
 }
 
-type CommentsFields_fullUser_name {
-  create: CommentsFields_fullUser_name_Create
-  read: CommentsFields_fullUser_name_Read
-  update: CommentsFields_fullUser_name_Update
-  delete: CommentsFields_fullUser_name_Delete
+type CommentsFields_populatedUser_name {
+  create: CommentsFields_populatedUser_name_Create
+  read: CommentsFields_populatedUser_name_Read
+  update: CommentsFields_populatedUser_name_Update
+  delete: CommentsFields_populatedUser_name_Delete
 }
 
-type CommentsFields_fullUser_name_Create {
+type CommentsFields_populatedUser_name_Create {
   permission: Boolean!
 }
 
-type CommentsFields_fullUser_name_Read {
+type CommentsFields_populatedUser_name_Read {
   permission: Boolean!
 }
 
-type CommentsFields_fullUser_name_Update {
+type CommentsFields_populatedUser_name_Update {
   permission: Boolean!
 }
 
-type CommentsFields_fullUser_name_Delete {
+type CommentsFields_populatedUser_name_Delete {
   permission: Boolean!
 }
 
@@ -13337,7 +13631,9 @@ enum PageUpdate__status_MutationInput {
 input mutationPostInput {
   title: String!
   categories: [String]
-  publishedDate: String
+  publishedOn: String
+  authors: [String]
+  populatedAuthors: [mutationPost_PopulatedAuthorsInput]
   hero: mutationPost_HeroInput!
   layout: JSON
   relatedPosts: [String]
@@ -13346,6 +13642,11 @@ input mutationPostInput {
   updatedAt: String
   createdAt: String
   _status: Post__status_MutationInput
+}
+
+input mutationPost_PopulatedAuthorsInput {
+  id: String
+  name: String
 }
 
 input mutationPost_HeroInput {
@@ -13405,7 +13706,9 @@ enum Post__status_MutationInput {
 input mutationPostUpdateInput {
   title: String
   categories: [String]
-  publishedDate: String
+  publishedOn: String
+  authors: [String]
+  populatedAuthors: [mutationPostUpdate_PopulatedAuthorsInput]
   hero: mutationPostUpdate_HeroInput!
   layout: JSON
   relatedPosts: [String]
@@ -13414,6 +13717,11 @@ input mutationPostUpdateInput {
   updatedAt: String
   createdAt: String
   _status: PostUpdate__status_MutationInput
+}
+
+input mutationPostUpdate_PopulatedAuthorsInput {
+  id: String
+  name: String
 }
 
 input mutationPostUpdate_HeroInput {
@@ -13726,7 +14034,7 @@ type usersResetPassword {
 
 input mutationCommentInput {
   user: String
-  fullUser: mutationComment_FullUserInput
+  populatedUser: mutationComment_PopulatedUserInput
   doc: String
   comment: String
   updatedAt: String
@@ -13734,7 +14042,7 @@ input mutationCommentInput {
   _status: Comment__status_MutationInput
 }
 
-input mutationComment_FullUserInput {
+input mutationComment_PopulatedUserInput {
   id: String
   name: String
 }
@@ -13746,7 +14054,7 @@ enum Comment__status_MutationInput {
 
 input mutationCommentUpdateInput {
   user: String
-  fullUser: mutationCommentUpdate_FullUserInput
+  populatedUser: mutationCommentUpdate_PopulatedUserInput
   doc: String
   comment: String
   updatedAt: String
@@ -13754,7 +14062,7 @@ input mutationCommentUpdateInput {
   _status: CommentUpdate__status_MutationInput
 }
 
-input mutationCommentUpdate_FullUserInput {
+input mutationCommentUpdate_PopulatedUserInput {
   id: String
   name: String
 }

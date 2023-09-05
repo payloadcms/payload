@@ -9,11 +9,11 @@ export const image2 = {
         {
           type: 'link',
           linkType: 'custom',
-          url: 'https://unsplash.com/@jamestarbotton?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
+          url: 'https://unsplash.com/@fabiosbruun?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
           newTab: true,
           children: [
             {
-              text: 'James Tarbotton',
+              text: 'Fabio Santaniello Bruun',
             },
           ],
         },
@@ -23,7 +23,7 @@ export const image2 = {
         {
           type: 'link',
           linkType: 'custom',
-          url: 'https://unsplash.com/photos/PkyL3p9Kx8c?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
+          url: 'https://unsplash.com/photos/8BgmKIuQ-GU?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
           newTab: true,
           children: [
             {

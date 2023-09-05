@@ -202,7 +202,12 @@ export interface Post {
   id: string;
   title: string;
   categories?: string[] | Category[];
-  publishedDate?: string;
+  publishedOn?: string;
+  authors?: string[] | User[];
+  populatedAuthors?: {
+    id?: string;
+    name?: string;
+  }[];
   hero: {
     type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
     richText: {
@@ -347,6 +352,21 @@ export interface Post {
   updatedAt: string;
   createdAt: string;
   _status?: 'draft' | 'published';
+}
+export interface User {
+  id: string;
+  name?: string;
+  roles?: ('admin' | 'user')[];
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string;
+  resetPasswordExpiration?: string;
+  salt?: string;
+  hash?: string;
+  loginAttempts?: number;
+  lockUntil?: string;
+  password?: string;
 }
 export interface Project {
   id: string;
@@ -498,25 +518,10 @@ export interface Project {
   createdAt: string;
   _status?: 'draft' | 'published';
 }
-export interface User {
-  id: string;
-  name?: string;
-  roles?: ('admin' | 'user')[];
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  salt?: string;
-  hash?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  password?: string;
-}
 export interface Comment {
   id: string;
   user?: string | User;
-  fullUser?: {
+  populatedUser?: {
     id?: string;
     name?: string;
   };

@@ -34,7 +34,7 @@ export const CommentsBlock: React.FC<CommentsBlockProps> = props => {
         <div className={classes.comments}>
           <HR />
           {comments?.map((com, index) => {
-            const { fullUser, comment, createdAt } = com
+            const { populatedUser, comment, createdAt } = com
 
             if (!comment) return null
 
@@ -50,9 +50,9 @@ export const CommentsBlock: React.FC<CommentsBlockProps> = props => {
                     .join(' ')}
                 >
                   <p className={classes.comment}>{comment}</p>
-                  {fullUser && (
+                  {populatedUser && (
                     <p className={classes.meta}>
-                      {fullUser?.name || 'Unnamed User'}
+                      {populatedUser?.name || 'Unnamed User'}
                       {createdAt && ` on ${formatDateTime(createdAt)}`}
                     </p>
                   )}

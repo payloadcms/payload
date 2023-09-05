@@ -9,11 +9,11 @@ export const image1 = {
         {
           type: 'link',
           linkType: 'custom',
-          url: 'https://unsplash.com/@maddybakes?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
+          url: 'https://unsplash.com/@cerpow?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
           newTab: true,
           children: [
             {
-              text: 'Maddy Baker',
+              text: 'Voicu Apostol',
             },
           ],
         },
@@ -23,7 +23,7 @@ export const image1 = {
         {
           type: 'link',
           linkType: 'custom',
-          url: 'https://unsplash.com/photos/luYQYrNFCcc?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
+          url: 'https://unsplash.com/photos/a-close-up-of-a-pine-tree-branch-Cy1F3H1X3WI?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
           newTab: true,
           children: [
             {

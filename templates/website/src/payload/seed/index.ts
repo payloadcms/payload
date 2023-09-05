@@ -56,24 +56,39 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   payload.logger.info(`— Seeding John Doe user..`)
 
-  await payload.delete({
-    collection: 'users',
-    where: {
-      email: {
-        equals: 'john-doe@payloadcms.com',
-      },
-    },
-  })
+  await Promise.all(
+    ['demo-author@payloadcms.com', 'demo-user@payloadcms.com'].map(async email => {
+      await payload.delete({
+        collection: 'users',
+        where: {
+          email: {
+            equals: email,
+          },
+        },
+      })
+    }),
+  )
 
-  const { id: johnDoeUserID } = await payload.create({
-    collection: 'users',
-    data: {
-      email: 'john-doe@payloadcms.com',
-      name: 'John Doe',
-      password: 'demo-public-user',
-      roles: ['user'],
-    },
-  })
+  const [{ id: demoAuthorID }, { id: demoUserID }] = await Promise.all([
+    payload.create({
+      collection: 'users',
+      data: {
+        email: 'demo-author@payloadcms.com',
+        name: 'Demo Author',
+        password: 'password',
+        roles: ['admin'],
+      },
+    }),
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: 'demo-user@payloadcms.com',
+        name: 'Demo User',
+        password: 'password',
+        roles: ['user'],
+      },
+    }),
+  ])
 
   payload.logger.info(`— Seeding media...`)
 
@@ -119,28 +134,25 @@ export const seed = async (payload: Payload): Promise<void> => {
     payload.create({
       collection: 'posts',
       data: JSON.parse(
-        JSON.stringify({ ...post1, categories: [technologyCategory.id] }).replace(
-          /{{IMAGE}}/g,
-          image1Doc.id,
-        ),
+        JSON.stringify({ ...post1, categories: [technologyCategory.id] })
+          .replace(/{{IMAGE}}/g, image1Doc.id)
+          .replace(/{{AUTHOR}}/g, demoAuthorID),
       ),
     }),
     payload.create({
       collection: 'posts',
       data: JSON.parse(
-        JSON.stringify({ ...post2, categories: [newsCategory.id] }).replace(
-          /{{IMAGE}}/g,
-          image1Doc.id,
-        ),
+        JSON.stringify({ ...post2, categories: [newsCategory.id] })
+          .replace(/{{IMAGE}}/g, image1Doc.id)
+          .replace(/{{AUTHOR}}/g, demoAuthorID),
       ),
     }),
     payload.create({
       collection: 'posts',
       data: JSON.parse(
-        JSON.stringify({ ...post3, categories: [lifestyleCategory.id] }).replace(
-          /{{IMAGE}}/g,
-          image1Doc.id,
-        ),
+        JSON.stringify({ ...post3, categories: [lifestyleCategory.id] })
+          .replace(/{{IMAGE}}/g, image1Doc.id)
+          .replace(/{{AUTHOR}}/g, demoAuthorID),
       ),
     }),
   ])
@@ -183,8 +195,8 @@ export const seed = async (payload: Payload): Promise<void> => {
           data: {
             comment: `This is a comment on post ${
               index + 1
-            }. It was first left by a user then approved by an admin.`,
-            user: johnDoeUserID,
+            }. It has been approved by an admin and is now visible to the public. You can leave your own comment on this post using the form below.`,
+            user: demoUserID,
             doc: post.id,
           },
         }),

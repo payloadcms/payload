@@ -4,6 +4,7 @@ import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
 import { Comment, Post } from '../../../../payload/payload-types'
+import { fetchComments } from '../../../_api/fetchComments'
 import { fetchDoc } from '../../../_api/fetchDoc'
 import { fetchDocs } from '../../../_api/fetchDocs'
 import { Blocks } from '../../../_components/Blocks'
@@ -18,7 +19,6 @@ export default async function Post({ params: { slug } }) {
   const { isEnabled: isDraftMode } = draftMode()
 
   let post: Post | null = null
-  let comments: Comment[] | null = null
 
   try {
     post = await fetchDoc<Post>({
@@ -34,13 +34,9 @@ export default async function Post({ params: { slug } }) {
     notFound()
   }
 
-  try {
-    comments = await fetchDocs('comments', false, {
-      doc: post?.id,
-    })
-  } catch (error) {
-    console.error(error) // eslint-disable-line no-console
-  }
+  const comments = await fetchComments({
+    doc: post?.id,
+  })
 
   const { layout, relatedPosts } = post
 

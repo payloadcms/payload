@@ -12,7 +12,14 @@ import classes from './index.module.scss'
 export const PostHero: React.FC<{
   post: Post
 }> = ({ post }) => {
-  const { id, title, categories, meta: { image: metaImage, description } = {}, createdAt } = post
+  const {
+    id,
+    title,
+    categories,
+    meta: { image: metaImage, description } = {},
+    publishedOn,
+    populatedAuthors,
+  } = post
 
   return (
     <Fragment>
@@ -20,8 +27,6 @@ export const PostHero: React.FC<{
         <div className={classes.content}>
           <div className={classes.leader}>
             <div className={classes.categories}>
-              {createdAt && formatDateTime(createdAt)}
-              &nbsp; &mdash; &nbsp;
               {categories?.map((category, index) => {
                 const { title: categoryTitle } = category
 
@@ -39,6 +44,34 @@ export const PostHero: React.FC<{
             </div>
           </div>
           <h1 className={classes.title}>{title}</h1>
+          <p className={classes.meta}>
+            {populatedAuthors && (
+              <Fragment>
+                {'By '}
+                {populatedAuthors.map((author, index) => {
+                  const { name } = author
+
+                  const isLast = index === populatedAuthors.length - 1
+                  const secondToLast = index === populatedAuthors.length - 2
+
+                  return (
+                    <Fragment key={index}>
+                      {name}
+                      {secondToLast && populatedAuthors.length > 2 && <Fragment>, </Fragment>}
+                      {secondToLast && populatedAuthors.length === 2 && <Fragment> </Fragment>}
+                      {!isLast && populatedAuthors.length > 1 && <Fragment>and </Fragment>}
+                    </Fragment>
+                  )
+                })}
+              </Fragment>
+            )}
+            {publishedOn && (
+              <Fragment>
+                {' on '}
+                {formatDateTime(publishedOn)}
+              </Fragment>
+            )}
+          </p>
           <div>
             <p className={classes.description}>
               {`${description ? `${description} ` : ''}To edit this post, `}
