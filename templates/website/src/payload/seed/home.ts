@@ -267,7 +267,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Gated Content',
+                  text: 'Premium Content',
                 },
               ],
               type: 'h3',

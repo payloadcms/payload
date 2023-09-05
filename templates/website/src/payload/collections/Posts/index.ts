@@ -122,6 +122,19 @@ export const Posts: CollectionConfig = {
               required: true,
               blocks: [CallToAction, Content, MediaBlock, Archive],
             },
+            {
+              name: 'enablePremiumContent',
+              label: 'Enable Premium Content',
+              type: 'checkbox',
+            },
+            {
+              name: 'premiumContent',
+              type: 'blocks',
+              access: {
+                read: ({ req }) => req.user,
+              },
+              blocks: [CallToAction, Content, MediaBlock, Archive],
+            },
           ],
         },
       ],
