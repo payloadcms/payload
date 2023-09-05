@@ -1,5 +1,18 @@
 
 
+## [1.15.3](https://github.com/payloadcms/payload/compare/v1.15.2...v1.15.3) (2023-09-05)
+
+
+### Bug Fixes
+
+* draft globals always displaying unpublish button ([9bc072c](https://github.com/payloadcms/payload/commit/9bc072ccaf318c61b2c4e2a553604a24ff6a188e))
+* globals not saving updatedAt and createdAt and version dates correctly ([9fbabc8](https://github.com/payloadcms/payload/commit/9fbabc8fd6a3bea5628bea8d0acc915ddb33bb5c))
+
+
+### Features
+
+* improves query speed for version enabled collections ([16e94d4](https://github.com/payloadcms/payload/commit/16e94d401bd7cb82de53142c5f9a325abd31a81a))
+
 ## [1.15.2](https://github.com/payloadcms/payload/compare/v1.15.1...v1.15.2) (2023-08-25)
 
 ## [1.15.1](https://github.com/payloadcms/payload/compare/v1.15.0...v1.15.1) (2023-08-25)
