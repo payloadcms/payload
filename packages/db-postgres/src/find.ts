@@ -3,7 +3,7 @@ import toSnakeCase from 'to-snake-case';
 import type { Find } from 'payload/dist/database/types';
 import type { PayloadRequest } from 'payload/dist/express/types';
 import type { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
-import buildQuery, { BuildQueryJoins } from './queries/buildQuery';
+import buildQuery from './queries/buildQuery';
 import { buildFindManyArgs } from './find/buildFindManyArgs';
 import { transform } from './transform/read';
 import { PostgresAdapter } from './types';
@@ -62,12 +62,9 @@ export const find: Find = async function find(
   // only fetch IDs when a sort or where query is used that needs to be done on join tables, otherwise these can be done directly on the table in findMany
   if (Object.keys(joins).length > 0) {
     selectQuery.where(where);
-    Object.values(joins)
-      .forEach(({
-        table: joinTable,
-        condition,
-      }) => {
-        selectQuery.leftJoin(joinTable, condition);
+    Object.entries(joins)
+      .forEach(([joinTable, condition]) => {
+        selectQuery.leftJoin(this.tables[joinTable], condition);
       });
     const result = await selectQuery
       .offset((page - 1) * limit)

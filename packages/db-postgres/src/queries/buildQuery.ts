@@ -1,15 +1,11 @@
 import { Where } from 'payload/dist/types';
 import { Field } from 'payload/dist/fields/config/types';
-import { PgTable } from 'drizzle-orm/pg-core';
 import { asc, desc, SQL } from 'drizzle-orm';
 import { parseParams } from './parseParams';
 import { GenericColumn, PostgresAdapter } from '../types';
 import { getTableColumnFromPath } from './getTableColumnFromPath';
 
-export type BuildQueryJoins = Record<string, {
-  table: PgTable<any>,
-  condition: SQL,
-}>
+export type BuildQueryJoins = Record<string, SQL>
 
 type BuildQueryArgs = {
   adapter: PostgresAdapter
@@ -60,6 +56,7 @@ const buildQuery = async function buildQuery({
       adapter,
       path: sortPath,
       joins,
+      locale,
       tableName,
     });
 

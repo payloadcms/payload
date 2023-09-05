@@ -1,8 +1,9 @@
 /* eslint-disable no-param-reassign */
-import { Field, FieldAffectingData, fieldAffectsData } from 'payload/dist/fields/config/types';
+import { Field, FieldAffectingData, fieldAffectsData, tabHasName } from 'payload/dist/fields/config/types';
 import toSnakeCase from 'to-snake-case';
 import flattenFields from 'payload/dist/utilities/flattenTopLevelFields';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
+import { APIError } from 'payload/errors';
 import { BuildQueryJoins } from './buildQuery';
 import { GenericTable, PostgresAdapter } from '../types';
 
@@ -16,6 +17,7 @@ type Args = {
   columnPrefix?: string
   fields?: Field[]
   joins: BuildQueryJoins
+  locale?: string
   path: string
   tableName: string
 }
@@ -29,128 +31,136 @@ export const getTableColumnFromPath = ({
   columnPrefix = '',
   fields,
   joins,
+  locale,
   path: incomingPath,
   tableName,
 }: Args): TableColumn => {
-  const sanitizedPath = incomingPath.replace(/__/gi, '.');
-  const pathSegments = sanitizedPath.split('.');
+  const pathSegments = incomingPath.split('.');
+  const fieldPath = pathSegments[0];
+  const field = fields.find((fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath) as FieldAffectingData;
+  let newTableName = tableName;
 
-  const result: TableColumn = {
-    table: adapter.tables[tableName],
-    columnName: undefined,
-  };
-
-  // Goal here is to "chunk down" the path segments
-
-  for (let i = 0; i < pathSegments.length; i += 1) {
-    const segment = pathSegments[i];
-    const currentPath = traversedPath.path ? `${traversedPath.path}.${segment}` : segment;
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const matchedField = traversedPath.fields.find((field) => fieldAffectsData(field) && field.name === segment) as FieldAffectingData;
-
-    // if (currentPath === 'globalType' && globalSlug) {
-    //   lastIncompletePath.path = currentPath;
-    //   lastIncompletePath.complete = true;
-    //   lastIncompletePath.field = {
-    //     name: 'globalType',
-    //     type: 'text',
-    //   };
-    //
-    //   return paths;
-    // }
-
-    if (matchedField) {
-      traversedPath.columnName = `${columnPrefix || ''}${toSnakeCase(matchedField.name)}`;
-      if ('hidden' in matchedField && matchedField.hidden) {
-        // TODO: !overrideAccess throw error
-      }
-
-      switch (matchedField.type) {
-        case 'group': {
+  if (field) {
+    if (pathSegments.length === 1) {
+      return {
+        table: adapter.tables[tableName],
+        columnName: incomingPath,
+      };
+    }
+    switch (field.type) {
+      case 'tab':
+        if (tabHasName(field)) {
           return getTableColumnFromPath({
             adapter,
-            collectionSlug,
-            path: pathSegments.slice(i + 1).join('.'),
-            fields: flattenFields(matchedField.fields) as Field[],
-            columnPrefix: `${columnName}_`,
+            columnPrefix: `${columnPrefix}${toSnakeCase(field.name)}_`,
+            fields: flattenFields(field.fields) as Field[],
             joins,
+            locale,
+            path: pathSegments.slice(1).join('.'),
+            tableName: newTableName,
           });
         }
+        return getTableColumnFromPath({
+          adapter,
+          columnPrefix,
+          fields: flattenFields(field.fields) as Field[],
+          joins,
+          locale,
+          path: pathSegments.slice(1).join('.'),
+          tableName: newTableName,
+        });
 
-        // case 'blocks':
-        // case 'richText':
-        // case 'json': {
-        //   const upcomingSegments = pathSegments.slice(i + 1)
-        //     .join('.');
-        //   lastIncompletePath.complete = true;
-        //   lastIncompletePath.path = upcomingSegments ? `${currentPath}.${upcomingSegments}` : currentPath;
-        //   return paths;
-        // }
 
-        // case 'relationship':
-        // case 'upload': {
-        //   // If this is a polymorphic relation,
-        //   // We only support querying directly (no nested querying)
-        //   if (typeof matchedField.relationTo !== 'string') {
-        //     const lastSegmentIsValid = ['value', 'relationTo'].includes(pathSegments[pathSegments.length - 1]);
-        //
-        //     if (lastSegmentIsValid) {
-        //       lastIncompletePath.complete = true;
-        //       lastIncompletePath.path = pathSegments.join('.');
-        //     } else {
-        //       lastIncompletePath.invalid = true;
-        //       return paths;
-        //     }
-        //   } else {
-        //     lastIncompletePath.complete = true;
-        //     lastIncompletePath.path = currentPath;
-        //
-        //     const nestedPathToQuery = pathSegments.slice(i + 1).join('.');
-        //
-        //     if (nestedPathToQuery) {
-        //       const relatedCollection = adapter.payload.collections[matchedField.relationTo as string].config;
-        //
-        //       // eslint-disable-next-line no-await-in-loop
-        //       const remainingPaths = traversePath({
-        //         adapter,
-        //         collectionSlug: relatedCollection.slug,
-        //         path: nestedPathToQuery,
-        //         joins,
-        //       });
-        //
-        //       paths = [
-        //         ...paths,
-        //         ...remainingPaths,
-        //       ];
-        //     }
-        //
-        //     return paths;
-        //   }
-        //
-        //   break;
-        // }
-
-        default: {
-          if (matchedField.localized) {
-            const joinTable = `${traversedPath.tableName}_locales`;
-            joins[`${joinTable}, eq(${tableName}.id, ${joinTable}._parent_id)`] = {
-              table: adapter.tables[`${traversedPath.tableName}_locales`],
-              condition: eq(adapter.tables[tableName].id, adapter.tables[joinTable]._parent_id),
-            };
-            traversedPath.tableName = joinTable;
-            traversedPath.columnName = `${traversedPath.columnPrefix || ''}${toSnakeCase(matchedField.name)}`;
-          }
-
-          traversedPath.path = currentPath;
-
-          return traversedPath;
+      case 'group': {
+        if (field.localized) {
+          newTableName = `${tableName}_locales`;
+          joins[tableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
         }
+        return getTableColumnFromPath({
+          adapter,
+          columnPrefix: `${columnPrefix}${toSnakeCase(field.name)}_`,
+          fields: flattenFields(field.fields) as Field[],
+          joins,
+          locale,
+          path: pathSegments.slice(1).join('.'),
+          tableName: newTableName,
+        });
       }
-    } else {
-      // TODO: throw error
+
+      case 'array': {
+        newTableName = `${tableName}_${toSnakeCase(field.name)}`;
+        if (field.localized && adapter.payload.config.localization) {
+          joins[newTableName] = and(
+            eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
+            eq(adapter[newTableName]._locale, locale),
+          );
+        } else {
+          joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
+        }
+        return getTableColumnFromPath({
+          adapter,
+          fields: flattenFields(field.fields) as Field[],
+          joins,
+          locale,
+          path: pathSegments.slice(1).join('.'),
+          tableName: newTableName,
+        });
+      }
+
+      case 'relationship':
+      case 'upload': {
+        newTableName = `${tableName}_relationships`;
+        let relationshipFields;
+        if (typeof field.relationTo === 'string') {
+          relationshipFields = adapter.payload.collections[field.relationTo];
+          if (field.localized && adapter.payload.config.localization) {
+            joins[newTableName] = and(
+              eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
+              eq(adapter[newTableName]._locale, locale),
+            );
+          } else {
+            joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
+          }
+        } else {
+          throw new APIError('Not supported');
+        }
+        return getTableColumnFromPath({
+          adapter,
+          fields: flattenFields(relationshipFields) as Field[],
+          joins,
+          locale,
+          path: pathSegments.slice(1).join('.'),
+          tableName: newTableName,
+        });
+      }
+
+      default: {
+        // case 'email':
+        // case 'text':
+        // case 'number':
+        // case 'textarea':
+        // case 'checkbox':
+        // case 'date':
+        // case 'radio':
+        // case 'code':
+        // case 'json':
+        // case 'richText':
+        // case 'select':
+        // case 'point':
+        if (locale && field.localized && adapter.payload.config.localization) {
+          newTableName = `${tableName}_locales`;
+          joins[newTableName] = and(
+            eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
+            eq(adapter[newTableName]._locale, locale),
+          );
+        }
+        return {
+          table: adapter.tables[newTableName],
+          columnName: `${columnPrefix}${toSnakeCase(field.name)}`,
+        };
+      }
     }
   }
-  return traversedPath;
+
+  throw new APIError(`Cannot find field for path at ${fieldPath}`);
 };

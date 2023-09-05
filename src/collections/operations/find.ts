@@ -160,7 +160,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         where: fullWhere,
         page: sanitizedPage,
         limit: sanitizedLimit,
-        sort,
+        sort: sort.replace(/__/gi, '.'),
         locale,
         pagination,
         req,
