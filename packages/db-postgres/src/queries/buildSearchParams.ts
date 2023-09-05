@@ -1,6 +1,5 @@
 import { a as SQL } from 'drizzle-orm/column.d-aa4e525d';
 import { Field } from 'payload/dist/fields/config/types';
-import { PgSelectQueryBuilder } from 'drizzle-orm/pg-core';
 import { PostgresAdapter } from '../types';
 import { BuildQueryJoins } from './buildQuery';
 
@@ -14,7 +13,6 @@ type SearchParam = {
  * Convert the Payload key / value / operator into a Drizzle query
  */
 export async function buildSearchParam({
-  selectQuery,
   joins,
   fields,
   incomingPath,
@@ -24,9 +22,7 @@ export async function buildSearchParam({
   globalSlug,
   adapter,
   locale,
-  sort,
 }: {
-  selectQuery: PgSelectQueryBuilder<any, any, any, any, any>,
   fields: Field[],
   joins: BuildQueryJoins,
   incomingPath: string,
@@ -40,6 +36,7 @@ export async function buildSearchParam({
 }): Promise<SQL> {
   // Replace GraphQL nested field double underscore formatting
   const sanitizedPath = incomingPath.replace(/__/gi, '.');
+
 
   // TODO:
   //   - switch on field type

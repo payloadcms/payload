@@ -4,7 +4,6 @@ import { Operator, Where } from 'payload/types';
 import { Field } from 'payload/dist/fields/config/types';
 import { validOperators } from 'payload/dist/types/constants';
 import { and, SQL } from 'drizzle-orm';
-import { PgSelectQueryBuilder } from 'drizzle-orm/pg-core';
 import { buildSearchParam } from './buildSearchParams';
 import { buildAndOrConditions } from './buildAndOrConditions';
 import { PostgresAdapter } from '../types';
@@ -12,7 +11,6 @@ import { operatorMap } from './operatorMap';
 import { BuildQueryJoins } from './buildQuery';
 
 export async function parseParams({
-  selectQuery,
   joins,
   where,
   collectionSlug,
@@ -20,9 +18,8 @@ export async function parseParams({
   adapter,
   locale,
   fields,
-  sort,
+  columnPrefix,
 }: {
-  selectQuery: PgSelectQueryBuilder<any, any, any, any, any>,
   joins: BuildQueryJoins
   where: Where,
   collectionSlug?: string,
@@ -30,7 +27,7 @@ export async function parseParams({
   adapter: PostgresAdapter
   locale: string,
   fields: Field[],
-  sort: string,
+  columnPrefix: string,
 }): Promise<SQL> {
   let result: SQL;
 
@@ -46,7 +43,6 @@ export async function parseParams({
       }
       if (Array.isArray(condition)) {
         const builtConditions = await buildAndOrConditions({
-          selectQuery,
           joins,
           collectionSlug,
           fields,
@@ -54,7 +50,6 @@ export async function parseParams({
           adapter,
           locale,
           where: condition,
-          sort,
         });
         if (builtConditions.length > 0) result = operatorMap[conditionOperator](result, ...builtConditions);
       } else {
@@ -66,7 +61,6 @@ export async function parseParams({
           for (const operator of Object.keys(pathOperators)) {
             if (validOperators.includes(operator as Operator)) {
               result = and(await buildSearchParam({
-                selectQuery,
                 joins,
                 collectionSlug,
                 globalSlug,
@@ -76,7 +70,6 @@ export async function parseParams({
                 incomingPath: relationOrPath,
                 val: pathOperators[operator],
                 operator,
-                sort,
               }));
             }
           }

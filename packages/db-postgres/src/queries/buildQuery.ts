@@ -1,10 +1,10 @@
 import { Where } from 'payload/dist/types';
 import { Field } from 'payload/dist/fields/config/types';
 import { PgSelectQueryBuilder, PgTable } from 'drizzle-orm/pg-core';
-import { SQL } from 'drizzle-orm';
+import { asc, desc, SQL } from 'drizzle-orm';
 import { parseParams } from './parseParams';
 import { PostgresAdapter } from '../types';
-import { traversePath } from './traverseFields';
+import { traversePath } from './traversePath';
 
 export type BuildQueryJoins = Record<string, {
   table: PgTable<any>,
@@ -46,17 +46,27 @@ const buildQuery = async function buildQuery({
   }
 
   if (collectionSlug && sort) {
-    traversePath({
-      payload: adapter.payload,
+    let sortName;
+    let sortOperator;
+    if (sort[0] === '-') {
+      sortName = sort.substring(1);
+      sortOperator = desc;
+    } else {
+      sortName = sort;
+      sortOperator = asc;
+    }
+
+    const sortPath = traversePath({
+      adapter,
       collectionSlug,
-      fields,
-      path: sort,
+      path: sortName,
       joins,
     });
+    console.log(sortPath);
+    selectQuery.orderBy(sortOperator(adapter.tables[sortPath.tableName][sortPath.columnName]));
   }
 
   return parseParams({
-    selectQuery,
     joins,
     collectionSlug,
     fields,
@@ -64,7 +74,6 @@ const buildQuery = async function buildQuery({
     adapter,
     locale,
     where,
-    sort,
   });
 };
   // const results = db.selectDistinct({ id: posts.id })
