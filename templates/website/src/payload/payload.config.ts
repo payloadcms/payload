@@ -1,5 +1,7 @@
 import { payloadCloud } from '@payloadcms/plugin-cloud'
+// import formBuilder from '@payloadcms/plugin-form-builder'
 import nestedDocs from '@payloadcms/plugin-nested-docs'
+import redirects from '@payloadcms/plugin-redirects'
 import seo from '@payloadcms/plugin-seo'
 import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
 import dotenv from 'dotenv'
@@ -61,6 +63,10 @@ export default buildConfig({
     },
   ],
   plugins: [
+    // formBuilder({}),
+    redirects({
+      collections: ['pages', 'posts'],
+    }),
     nestedDocs({
       collections: ['categories'],
     }),

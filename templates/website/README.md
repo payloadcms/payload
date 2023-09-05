@@ -17,6 +17,7 @@ Core features:
 - [Comments](#comments)
 - [Layout Builder](#layout-builder)
 - [Draft Preview](#draft-preview)
+- [Redirects](#redirects)
 - [SEO](#seo)
 - [Website](#website)
 
@@ -170,6 +171,10 @@ For more details on how to extend this functionality, see the official [Draft Pr
 
 This template comes pre-configured with the official [Payload SEO Plugin](https://github.com/payloadcms/plugin-seo) for complete SEO control from the admin panel. All SEO data is fully integrated into the front-end website that comes with this template. See [Website](#website) for more details.
 
+## Redirects
+
+If you are migrating an existing site or moving content to a new URL, you can use the `redirects` collection to create a proper redirect from old URLs to new ones. This will ensure that proper request status codes are returned to search engines and that your users are not left with a broken link. This template comes pre-configured with the official [Payload Redirects Plugin](https://github.com/payloadcms/plugin-redirects) for complete redirect control from the admin panel. All redirects are fully integrated into the front-end website that comes with this template. See [Website](#website) for more details.
+
 ## Website
 
 This template includes a beautifully designed, production-ready front-end built with the [Next.js App Router](https://nextjs.org), served right alongside your Payload app in a single Express server. This makes is so that you can deploy both apps simultaneously and host them together. If you prefer a different front-end framework, this pattern works for any framework that supports a custom server. If you prefer to host your website separately from Payload, you can easily [Eject](#eject) the front-end out from this template to swap in your own, or to use it as a standalone CMS. For more details, see the official [Custom Server Example](https://github.com/payloadcms/payload/tree/master/examples/custom-server).
@@ -181,15 +186,16 @@ Core features:
 - [TypeScript](https://www.typescriptlang.org)
 - [React Hook Form](https://react-hook-form.com)
 - [Payload Admin Bar](https://github.com/payloadcms/payload-admin-bar)
-- Complete authentication flow
+- Authentication
 - Fully featured blog
-- Complete publication workflow
-- Fully built commenting system
+- Publication workflow
+- Comments
 - Premium content
 - User accounts
 - Dark mode
 - Pre-made layout building blocks
-- Complete SEO integration
+- SEO
+- Redirects
 
 ### Cache
 
