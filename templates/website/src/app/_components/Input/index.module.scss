@@ -42,6 +42,10 @@
   }
 }
 
+.asterisk {
+  color: var(--color-error-500);
+}
+
 .textarea {
   height: calc(var(--base) * 5);
 }

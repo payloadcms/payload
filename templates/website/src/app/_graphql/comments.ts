@@ -1,5 +1,6 @@
 const COMMENT = `
 id
+_status
 doc {
   id
   slug

@@ -123,7 +123,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: "Manage this site's, pages, posts, and projects from the ",
+                  text: "Manage this site's users, pages, posts, projects and more from the ",
                 },
                 {
                   type: 'link',
@@ -165,7 +165,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Complete editor ',
+                  text: 'Complete user ',
                 },
                 {
                   type: 'link',
@@ -178,7 +178,104 @@ export const home: Partial<Page> = {
                   ],
                 },
                 {
-                  text: ' and publication flows with versions and draft preview.',
+                  text: ' and ',
+                },
+                {
+                  type: 'link',
+                  linkType: 'custom',
+                  url: '/create-account',
+                  children: [
+                    {
+                      text: 'create account',
+                    },
+                  ],
+                },
+                {
+                  text: ' flows with email verification and password reset.',
+                },
+              ],
+            },
+          ],
+          enableLink: false,
+          link: {
+            reference: {
+              value: '',
+              relationTo: 'pages',
+            },
+            url: '',
+            label: '',
+          },
+        },
+        {
+          size: 'oneThird',
+          richText: [
+            {
+              children: [
+                {
+                  text: 'User Accounts',
+                },
+              ],
+              type: 'h3',
+            },
+            {
+              children: [
+                {
+                  text: 'Users can ',
+                },
+                {
+                  type: 'link',
+                  linkType: 'custom',
+                  url: '/account',
+                  children: [
+                    {
+                      text: 'manage their account',
+                    },
+                  ],
+                },
+                {
+                  text: ', ',
+                },
+                {
+                  type: 'link',
+                  linkType: 'custom',
+                  url: '/orders',
+                  children: [
+                    {
+                      text: 'view their comment history',
+                    },
+                  ],
+                },
+                {
+                  text: ', and more without leaving the site.',
+                },
+              ],
+            },
+          ],
+          enableLink: false,
+          link: {
+            reference: {
+              value: '',
+              relationTo: 'pages',
+            },
+            url: '',
+            label: '',
+          },
+        },
+        {
+          size: 'oneThird',
+          richText: [
+            {
+              children: [
+                {
+                  text: 'Gated Content',
+                },
+              ],
+              type: 'h3',
+            },
+            {
+              children: [
+                {
+                  text: 'Easily require users to be logged in to access premium post content.',
                 },
               ],
             },
@@ -207,7 +304,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Use version, drafts, and preview to make changes before publishing.',
+                  text: 'With versions, drafts, and preview, editors make review their changes before publishing them.',
                 },
               ],
             },
@@ -222,14 +319,13 @@ export const home: Partial<Page> = {
             label: '',
           },
         },
-
         {
           size: 'oneThird',
           richText: [
             {
               children: [
                 {
-                  text: 'Blog',
+                  text: 'Comments',
                 },
               ],
               type: 'h3',
@@ -237,37 +333,20 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Publish your thoughts and allows users to comment on posts.',
+                  text: 'Users can comment on posts and editors can moderate comments directly from the ',
                 },
-              ],
-            },
-          ],
-          enableLink: false,
-          link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
-            url: '',
-            label: '',
-          },
-        },
-
-        {
-          size: 'oneThird',
-          richText: [
-            {
-              children: [
                 {
-                  text: 'Portfolio',
+                  type: 'link',
+                  linkType: 'custom',
+                  url: '/admin/collections/comments',
+                  children: [
+                    {
+                      text: 'admin dashboard',
+                    },
+                  ],
                 },
-              ],
-              type: 'h3',
-            },
-            {
-              children: [
                 {
-                  text: 'Distribute your work with unique layouts and custom content.',
+                  text: '.',
                 },
               ],
             },
@@ -296,7 +375,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Custom page builder allows you to create unique page layouts for any type of content.',
+                  text: 'Custom page builder allows you to create unique page, post, and project layouts for any type of content.',
                 },
               ],
             },
@@ -406,7 +485,7 @@ export const home: Partial<Page> = {
           type: 'p',
           children: [
             {
-              text: 'The posts below are displayed in an "Archive" layout building block which is an extremely powerful way to display docs on a page. It can be auto-populated by collection, filtered by category, and much more.',
+              text: 'The posts below are displayed in an "Archive" layout building block which is an extremely powerful way to display docs on a page. It can be auto-populated by collection, filtered by category, or posts can be individually selected.',
             },
           ],
         },
@@ -431,7 +510,7 @@ export const home: Partial<Page> = {
           type: 'p',
           children: [
             {
-              text: 'The projects below are displayed in an "Archive" layout building block which is an extremely powerful way to display docs on a page. It can be auto-populated by collection, filtered by category, and much more.',
+              text: 'The projects below are displayed in an "Archive" layout building block which is an extremely powerful way to display docs on a page. It can be auto-populated by collection, filtered by category, or projects can be individually selected.',
             },
           ],
         },

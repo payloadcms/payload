@@ -5,8 +5,6 @@ import { notFound } from 'next/navigation'
 
 import { Page } from '../../../payload/payload-types'
 import { staticHome } from '../../../payload/seed/home-static'
-import { staticPosts } from '../../../payload/seed/posts-static'
-import { staticProjects } from '../../../payload/seed/projects-static'
 import { fetchDoc } from '../../_api/fetchDoc'
 import { fetchDocs } from '../../_api/fetchDocs'
 import { Blocks } from '../../_components/Blocks'
@@ -92,8 +90,6 @@ export async function generateMetadata({ params: { slug = 'home' } }): Promise<M
 
   if (!page) {
     if (slug === 'home') page = staticHome
-    if (slug === 'posts') page = staticPosts
-    if (slug === 'projects') page = staticProjects
   }
 
   return generateMeta({ doc: page })

@@ -48,7 +48,7 @@ export const projectsPage: Partial<Page> = {
           type: 'p',
           children: [
             {
-              text: 'The projects below are displayed in an "Archive" layout building block which is an extremely powerful way to display docs on a page. It can be auto-populated by collection, filtered by category, and much more.',
+              text: 'The projects below are displayed in an "Archive" layout building block which is an extremely powerful way to display docs on a page. It can be auto-populated by collection, filtered by category, or projects can be individually selected.',
             },
           ],
         },

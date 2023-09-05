@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import React, { Fragment, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
+import { Comment } from '../../../../payload/payload-types'
 import { Button } from '../../../_components/Button'
 import { Input } from '../../../_components/Input'
 import { Message } from '../../../_components/Message'
@@ -20,7 +22,7 @@ export const CommentForm: React.FC<{
 }> = ({ docID }) => {
   const pathname = usePathname()
   const [error, setError] = React.useState<string | null>(null)
-  const [success, setSuccess] = React.useState<string | null>(null)
+  const [success, setSuccess] = React.useState<React.ReactNode | null>(null)
 
   const {
     register,
@@ -51,12 +53,28 @@ export const CommentForm: React.FC<{
           }),
         })
 
-        if (!res.ok) throw new Error((await res.json()).message)
+        const json: Comment & {
+          message?: string
+        } = await res.json()
+
+        if (!res.ok) throw new Error(json.message)
 
         setError(null)
+
         setSuccess(
-          'Your comment submitted for moderation successfully. Navigate to the admin dashboard to approve it.',
+          <Fragment>
+            {'Your comment was submitted for moderation successfully. To approve it, '}
+            <Link
+              href={`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/collections/comments/${
+                typeof json.doc === 'object' ? json.doc.id : json.doc
+              }`}
+            >
+              navigate to the admin dashboard
+            </Link>
+            {' and click "publish".'}
+          </Fragment>,
         )
+
         reset()
       } catch (_) {
         setError('Something went wrong')

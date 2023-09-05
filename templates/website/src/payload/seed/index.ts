@@ -54,7 +54,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     ), // eslint-disable-line function-paren-newline
   ])
 
-  payload.logger.info(`— Seeding John Doe user..`)
+  payload.logger.info(`— Seeding demo author and user...`)
 
   await Promise.all(
     ['demo-author@payloadcms.com', 'demo-user@payloadcms.com'].map(async email => {
@@ -70,7 +70,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   )
 
   const [{ id: demoAuthorID }, { id: demoUserID }] = await Promise.all([
-    payload.create({
+    await payload.create({
       collection: 'users',
       data: {
         email: 'demo-author@payloadcms.com',
@@ -93,12 +93,12 @@ export const seed = async (payload: Payload): Promise<void> => {
   payload.logger.info(`— Seeding media...`)
 
   const [image1Doc, image2Doc] = await Promise.all([
-    payload.create({
+    await payload.create({
       collection: 'media',
       filePath: path.resolve(__dirname, 'image-1.jpg'),
       data: image1,
     }),
-    payload.create({
+    await payload.create({
       collection: 'media',
       filePath: path.resolve(__dirname, 'image-2.jpg'),
       data: image2,
@@ -107,76 +107,103 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   payload.logger.info(`— Seeding categories...`)
 
-  const [technologyCategory, newsCategory, lifestyleCategory] = await Promise.all([
-    payload.create({
+  const [
+    technologyCategory,
+    newsCategory,
+    financeCategory,
+    designCat,
+    softwareCat,
+    engineeringCat,
+  ] = await Promise.all([
+    await payload.create({
       collection: 'categories',
       data: {
         title: 'Technology',
       },
     }),
-    payload.create({
+    await payload.create({
       collection: 'categories',
       data: {
         title: 'News',
       },
     }),
-    payload.create({
+    await payload.create({
       collection: 'categories',
       data: {
-        title: 'Lifestyle',
+        title: 'Finance',
+      },
+    }),
+    await payload.create({
+      collection: 'categories',
+      data: {
+        title: 'Design',
+      },
+    }),
+    await payload.create({
+      collection: 'categories',
+      data: {
+        title: 'Software',
+      },
+    }),
+    await payload.create({
+      collection: 'categories',
+      data: {
+        title: 'Engineering',
       },
     }),
   ])
 
   payload.logger.info(`— Seeding posts...`)
 
-  const posts = await Promise.all([
-    payload.create({
-      collection: 'posts',
-      data: JSON.parse(
-        JSON.stringify({ ...post1, categories: [technologyCategory.id] })
-          .replace(/{{IMAGE}}/g, image1Doc.id)
-          .replace(/{{AUTHOR}}/g, demoAuthorID),
-      ),
-    }),
-    payload.create({
-      collection: 'posts',
-      data: JSON.parse(
-        JSON.stringify({ ...post2, categories: [newsCategory.id] })
-          .replace(/{{IMAGE}}/g, image1Doc.id)
-          .replace(/{{AUTHOR}}/g, demoAuthorID),
-      ),
-    }),
-    payload.create({
-      collection: 'posts',
-      data: JSON.parse(
-        JSON.stringify({ ...post3, categories: [lifestyleCategory.id] })
-          .replace(/{{IMAGE}}/g, image1Doc.id)
-          .replace(/{{AUTHOR}}/g, demoAuthorID),
-      ),
-    }),
-  ])
+  // Do not create posts with `Promise.all` because we want the posts to be created in order
+  // This way we can sort them by `createdAt` or `publishedOn` and they will be in the expected order
+  const post1Doc = await payload.create({
+    collection: 'posts',
+    data: JSON.parse(
+      JSON.stringify({ ...post1, categories: [technologyCategory.id] })
+        .replace(/{{IMAGE}}/g, image1Doc.id)
+        .replace(/{{AUTHOR}}/g, demoAuthorID),
+    ),
+  })
 
-  const [post1Doc, post2Doc, post3Doc] = posts
+  const post2Doc = await payload.create({
+    collection: 'posts',
+    data: JSON.parse(
+      JSON.stringify({ ...post2, categories: [newsCategory.id] })
+        .replace(/{{IMAGE}}/g, image1Doc.id)
+        .replace(/{{AUTHOR}}/g, demoAuthorID),
+    ),
+  })
+
+  const post3Doc = await payload.create({
+    collection: 'posts',
+    data: JSON.parse(
+      JSON.stringify({ ...post3, categories: [financeCategory.id] })
+        .replace(/{{IMAGE}}/g, image1Doc.id)
+        .replace(/{{AUTHOR}}/g, demoAuthorID),
+    ),
+  })
+
+  const posts = [post1Doc, post2Doc, post3Doc]
 
   // update each post with related posts
 
   await Promise.all([
-    payload.update({
+    await payload.update({
       collection: 'posts',
       id: post1Doc.id,
       data: {
         relatedPosts: [post2Doc.id, post3Doc.id],
       },
     }),
-    payload.update({
+    await payload.update({
       collection: 'posts',
       id: post2Doc.id,
       data: {
         relatedPosts: [post1Doc.id, post3Doc.id],
       },
     }),
-    payload.update({
+    await payload.update({
       collection: 'posts',
       id: post3Doc.id,
       data: {
@@ -193,6 +220,7 @@ export const seed = async (payload: Payload): Promise<void> => {
         await payload.create({
           collection: 'comments',
           data: {
+            _status: 'published',
             comment: `This is a comment on post ${
               index + 1
             }. It has been approved by an admin and is now visible to the public. You can leave your own comment on this post using the form below.`,
@@ -205,54 +233,56 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   payload.logger.info(`— Seeding projects...`)
 
-  const [project1Doc, project2Doc, project3Doc] = await Promise.all([
-    payload.create({
-      collection: 'projects',
-      data: JSON.parse(
-        JSON.stringify({ ...project1, categories: [technologyCategory.id] }).replace(
-          /{{IMAGE}}/g,
-          image2Doc.id,
-        ),
+  // Do not create posts with `Promise.all` because we want the posts to be created in order
+  // This way we can sort them by `createdAt` or `publishedOn` and they will be in the expected order
+  const project1Doc = await payload.create({
+    collection: 'projects',
+    data: JSON.parse(
+      JSON.stringify({ ...project1, categories: [designCat.id] }).replace(
+        /{{IMAGE}}/g,
+        image2Doc.id,
       ),
-    }),
-    payload.create({
-      collection: 'projects',
-      data: JSON.parse(
-        JSON.stringify({ ...project2, categories: [newsCategory.id] }).replace(
-          /{{IMAGE}}/g,
-          image2Doc.id,
-        ),
+    ),
+  })
+
+  const project2Doc = await payload.create({
+    collection: 'projects',
+    data: JSON.parse(
+      JSON.stringify({ ...project2, categories: [softwareCat.id] }).replace(
+        /{{IMAGE}}/g,
+        image2Doc.id,
       ),
-    }),
-    payload.create({
-      collection: 'projects',
-      data: JSON.parse(
-        JSON.stringify({ ...project3, categories: [lifestyleCategory.id] }).replace(
-          /{{IMAGE}}/g,
-          image2Doc.id,
-        ),
+    ),
+  })
+
+  const project3Doc = await payload.create({
+    collection: 'projects',
+    data: JSON.parse(
+      JSON.stringify({ ...project3, categories: [engineeringCat.id] }).replace(
+        /{{IMAGE}}/g,
+        image2Doc.id,
       ),
-    }),
-  ])
+    ),
+  })
 
   // update each project with related projects
 
   await Promise.all([
-    payload.update({
+    await payload.update({
       collection: 'projects',
       id: project1Doc.id,
       data: {
         relatedProjects: [project2Doc.id, project3Doc.id],
       },
     }),
-    payload.update({
+    await payload.update({
       collection: 'projects',
       id: project2Doc.id,
       data: {
         relatedProjects: [project1Doc.id, project3Doc.id],
       },
     }),
-    payload.update({
+    await payload.update({
       collection: 'projects',
       id: project3Doc.id,
       data: {

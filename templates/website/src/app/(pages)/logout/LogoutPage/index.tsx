@@ -28,6 +28,9 @@ export const LogoutPage: React.FC<{
     performLogout()
   }, [logout])
 
+  const hasPostsPage = typeof postsPage === 'object' && postsPage?.slug
+  const hasProjectsPage = typeof projectsPage === 'object' && projectsPage?.slug
+
   return (
     <Fragment>
       {(error || success) && (
@@ -35,16 +38,16 @@ export const LogoutPage: React.FC<{
           <h1>{error || success}</h1>
           <p>
             {'What would you like to do next? '}
-            {typeof postsPage === 'object' && postsPage?.slug && (
+            {hasPostsPage && hasProjectsPage && <Fragment>{'Browse '}</Fragment>}
+            {hasPostsPage && (
               <Fragment>
-                <Link href={`/${postsPage.slug}`}>Click here</Link>
-                {` to see all posts, or `}
+                <Link href={`/${postsPage.slug}`}>all posts</Link>
               </Fragment>
             )}
-            {typeof projectsPage === 'object' && projectsPage?.slug && (
+            {hasPostsPage && hasProjectsPage && <Fragment>{' or '}</Fragment>}
+            {hasProjectsPage && (
               <Fragment>
-                <Link href={`/${projectsPage.slug}`}>click here</Link>
-                {` to see all projects.`}
+                <Link href={`/${projectsPage.slug}`}>all projects</Link>
               </Fragment>
             )}
             {` To log back in, `}

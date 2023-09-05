@@ -29,7 +29,8 @@ export const Input: React.FC<Props> = ({
   return (
     <div className={classes.inputWrap}>
       <label htmlFor="name" className={classes.label}>
-        {`${label} ${required ? '*' : ''}`}
+        {label}
+        {required ? <span className={classes.asterisk}>&nbsp;*</span> : ''}
       </label>
       {type === 'textarea' ? (
         <textarea

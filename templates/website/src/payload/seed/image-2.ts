@@ -1,5 +1,10 @@
-export const image2 = {
+import type { Media } from '../payload-types'
+
+export const image2: Media = {
   alt: 'E-Book',
+  id: '',
+  createdAt: '',
+  updatedAt: '',
   caption: [
     {
       children: [
@@ -9,11 +14,11 @@ export const image2 = {
         {
           type: 'link',
           linkType: 'custom',
-          url: 'https://unsplash.com/@fabiosbruun?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
+          url: 'https://unsplash.com/@sebastiansvenson?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
           newTab: true,
           children: [
             {
-              text: 'Fabio Santaniello Bruun',
+              text: 'Sebastian Svenson',
             },
           ],
         },
@@ -23,7 +28,7 @@ export const image2 = {
         {
           type: 'link',
           linkType: 'custom',
-          url: 'https://unsplash.com/photos/8BgmKIuQ-GU?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
+          url: 'https://unsplash.com/photos/d2w-_1LJioQ?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText',
           newTab: true,
           children: [
             {

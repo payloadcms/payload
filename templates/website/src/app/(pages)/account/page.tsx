@@ -81,7 +81,7 @@ export default async function Account() {
             return (
               <Fragment key={index}>
                 <div className={classes.column}>
-                  <p className={classes.comment}>{comment}</p>
+                  <p className={classes.comment}>"{comment}"</p>
                   <p className={classes.meta}>
                     {'Posted '}
                     {doc && typeof doc === 'object' && (

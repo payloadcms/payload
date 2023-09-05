@@ -5,7 +5,7 @@ import { META } from './meta'
 
 export const PAGES = `
   query Pages {
-    Pages(limit: 300, where: { slug: { not_in: ["posts", "projects"] } })  {
+    Pages(limit: 300)  {
       docs {
         slug
       }

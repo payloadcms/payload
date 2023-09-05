@@ -1,5 +1,10 @@
-export const image1 = {
+import type { Media } from '../payload-types'
+
+export const image1: Media = {
   alt: 'Shirts',
+  id: '',
+  createdAt: '',
+  updatedAt: '',
   caption: [
     {
       children: [

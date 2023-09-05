@@ -5,21 +5,22 @@ import { useSearchParams } from 'next/navigation'
 
 import { Message } from '../Message'
 
+import classes from './index.module.scss'
+
 export type Props = {
   params?: string[]
   message?: string
   className?: string
-  onParams?: (paramValues: (string | string[])[]) => void
+  onParams?: (paramValues: ((string | null | undefined) | string[])[]) => void
 }
 
 export const RenderParamsComponent: React.FC<Props> = ({
-  params = ['error', 'message', 'success'],
-  message,
+  params = ['error', 'warning', 'success', 'message'],
   className,
   onParams,
 }) => {
   const searchParams = useSearchParams()
-  const paramValues = params.map(param => searchParams.get(param)).filter(Boolean)
+  const paramValues = params.map(param => searchParams?.get(param))
 
   useEffect(() => {
     if (paramValues.length && onParams) {
@@ -30,9 +31,19 @@ export const RenderParamsComponent: React.FC<Props> = ({
   if (paramValues.length) {
     return (
       <div className={className}>
-        {paramValues.map(paramValue => (
-          <Message key={paramValue} message={(message || 'PARAM')?.replace('PARAM', paramValue)} />
-        ))}
+        {paramValues.map((paramValue, index) => {
+          if (!paramValue) return null
+
+          return (
+            <Message
+              className={classes.renderParams}
+              key={paramValue}
+              {...{
+                [params[index]]: paramValue,
+              }}
+            />
+          )
+        })}
       </div>
     )
   }
