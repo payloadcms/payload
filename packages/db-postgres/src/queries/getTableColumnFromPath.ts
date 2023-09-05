@@ -4,51 +4,43 @@ import toSnakeCase from 'to-snake-case';
 import flattenFields from 'payload/dist/utilities/flattenTopLevelFields';
 import { eq } from 'drizzle-orm';
 import { BuildQueryJoins } from './buildQuery';
-import { PostgresAdapter } from '../types';
+import { GenericTable, PostgresAdapter } from '../types';
 
-type PathToTraverse = {
-  path: string
-  fields: Field[]
-  collectionSlug: string
-  tableName: string
-  columnPrefix: string
+type TableColumn = {
+  table: GenericTable
   columnName: string
 }
 
 type Args = {
   adapter: PostgresAdapter,
-  collectionSlug: string
-  path: string
-  joins: BuildQueryJoins
-  fields?: Field[]
   columnPrefix?: string
+  fields?: Field[]
+  joins: BuildQueryJoins
+  path: string
+  tableName: string
 }
 /**
- * Traverses the fields and relationships of a given path
+ * Transforms path to table and column name
  * Adds tables to `join`
- * @returns PathToTraverse[]
+ * @returns TableColumn
  */
-export const traversePath = ({
+export const getTableColumnFromPath = ({
   adapter,
-  collectionSlug,
-  path: incomingPath,
-  joins,
-  fields,
   columnPrefix = '',
-}: Args): PathToTraverse => {
-  const collection = adapter.payload.collections[collectionSlug].config;
-  const pathSegments = incomingPath.split('.');
-  const localizationConfig = adapter.payload.config.localization;
-  const tableName = toSnakeCase(collection.slug);
+  fields,
+  joins,
+  path: incomingPath,
+  tableName,
+}: Args): TableColumn => {
+  const sanitizedPath = incomingPath.replace(/__/gi, '.');
+  const pathSegments = sanitizedPath.split('.');
 
-  const traversedPath: PathToTraverse = {
-    path: '',
-    tableName,
-    fields: fields || (flattenFields(collection.fields, false) as Field[]),
-    collectionSlug,
+  const result: TableColumn = {
+    table: adapter.tables[tableName],
     columnName: undefined,
-    columnPrefix: '',
   };
+
+  // Goal here is to "chunk down" the path segments
 
   for (let i = 0; i < pathSegments.length; i += 1) {
     const segment = pathSegments[i];
@@ -77,7 +69,7 @@ export const traversePath = ({
 
       switch (matchedField.type) {
         case 'group': {
-          return traversePath({
+          return getTableColumnFromPath({
             adapter,
             collectionSlug,
             path: pathSegments.slice(i + 1).join('.'),

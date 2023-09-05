@@ -11,7 +11,7 @@ import { PostgresAdapter } from './types';
 export const find: Find = async function find(
   this: PostgresAdapter, {
     collection,
-    where,
+    where: incomingWhere,
     page = 1,
     limit: limitArg,
     sort: sortArg,
@@ -25,12 +25,25 @@ export const find: Find = async function find(
   const table = this.tables[tableName];
   const limit = typeof limitArg === 'number' ? limitArg : collectionConfig.admin.pagination.defaultLimit;
   const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort;
-  const joins: BuildQueryJoins = {};
   let totalDocs: number;
   let totalPages: number;
   let hasPrevPage: boolean;
   let hasNextPage: boolean;
   let pagingCounter: number;
+
+  const {
+    where,
+    orderBy,
+    joins,
+  } = await buildQuery({
+    adapter: this,
+    fields: collectionConfig.fields,
+    locale,
+    where: incomingWhere,
+    sort,
+    tableName,
+  });
+
   const orderedIDs: Record<number | string, number> = {};
 
   // initial query
@@ -38,23 +51,6 @@ export const find: Find = async function find(
     id: table.id,
   })
     .from(table);
-
-  // TODO: remove await for buildQuery, kept in to avoid publishing new `payload with getLocalizedPaths return type allowing PathToQuery | Promise<PathToQuery>'
-  /**
-   * build a query applying the following:
-   *  - sets `selectQuery.orderBy` based on `sort`
-   *  - adds necessary joins as it iterates paths in `where` and `sort`
-   *  - returns a query used in `where` for filtering
-   */
-  const query = await buildQuery({
-    selectQuery,
-    joins,
-    collectionSlug: collection,
-    adapter: this,
-    locale,
-    where,
-    sort,
-  });
 
   const findManyArgs = buildFindManyArgs({
     adapter: this,
@@ -65,7 +61,7 @@ export const find: Find = async function find(
 
   // only fetch IDs when a sort or where query is used that needs to be done on join tables, otherwise these can be done directly on the table in findMany
   if (Object.keys(joins).length > 0) {
-    selectQuery.where(query);
+    selectQuery.where(where);
     Object.values(joins)
       .forEach(({
         table: joinTable,
@@ -83,7 +79,7 @@ export const find: Find = async function find(
     findManyArgs.where = inArray(this.tables[tableName].id, Object(orderedIDs)
       .values());
   } else {
-    findManyArgs.where = query;
+    findManyArgs.where = where;
     // orderBy will only be set if a complex sort is needed on a relation
     if (sort[0] === '-') {
       findManyArgs.orderBy = desc(this.tables[tableName][sort.substring(1)]);
@@ -96,7 +92,7 @@ export const find: Find = async function find(
     // use query above, optionally we don't need the sort
     const countResult = await this.db.select({ count: sql<number>`count(*)` })
       .from(table)
-      .where(query);
+      .where(where);
     totalDocs = Number(countResult[0].count);
     totalPages = Math.ceil(totalDocs / limit);
     hasPrevPage = page > 1;

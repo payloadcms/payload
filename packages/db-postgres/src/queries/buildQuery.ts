@@ -1,10 +1,10 @@
 import { Where } from 'payload/dist/types';
 import { Field } from 'payload/dist/fields/config/types';
-import { PgSelectQueryBuilder, PgTable } from 'drizzle-orm/pg-core';
+import { PgTable } from 'drizzle-orm/pg-core';
 import { asc, desc, SQL } from 'drizzle-orm';
 import { parseParams } from './parseParams';
-import { PostgresAdapter } from '../types';
-import { traversePath } from './traversePath';
+import { GenericColumn, PostgresAdapter } from '../types';
+import { getTableColumnFromPath } from './getTableColumnFromPath';
 
 export type BuildQueryJoins = Record<string, {
   table: PgTable<any>,
@@ -12,76 +12,74 @@ export type BuildQueryJoins = Record<string, {
 }>
 
 type BuildQueryArgs = {
-  selectQuery: PgSelectQueryBuilder<any, any, any, any, any>
-  joins: BuildQueryJoins
   adapter: PostgresAdapter
-  where: Where
+  fields: Field[]
   locale?: string
-  collectionSlug?: string
-  globalSlug?: string
-  versionsFields?: Field[]
   sort: string
+  tableName: string
+  where: Where
+}
+
+type Result = {
+  where: SQL
+  orderBy: {
+    column: GenericColumn
+    order: typeof asc | typeof desc
+  }
+  joins: BuildQueryJoins
 }
 const buildQuery = async function buildQuery({
-  selectQuery,
-  joins,
   adapter,
-  where,
+  fields,
   locale,
-  collectionSlug,
-  globalSlug,
-  versionsFields,
   sort,
-}: BuildQueryArgs): Promise<SQL> {
-  let fields = versionsFields;
-  if (!fields) {
-    if (globalSlug) {
-      const globalConfig = adapter.payload.globals.config.find(({ slug }) => slug === globalSlug);
-      fields = globalConfig.fields;
-    }
-    if (collectionSlug) {
-      const collectionConfig = adapter.payload.collections[collectionSlug].config;
-      fields = collectionConfig.fields;
-    }
-  }
+  tableName,
+  where: incomingWhere,
+}: BuildQueryArgs): Promise<Result> {
+  const joins: BuildQueryJoins = {};
+  const orderBy: Result['orderBy'] = {
+    column: null,
+    order: null,
+  };
 
-  if (collectionSlug && sort) {
-    let sortName;
-    let sortOperator;
+  if (sort) {
+    let sortPath;
+
     if (sort[0] === '-') {
-      sortName = sort.substring(1);
-      sortOperator = desc;
+      sortPath = sort.substring(1);
+      orderBy.order = desc;
     } else {
-      sortName = sort;
-      sortOperator = asc;
+      sortPath = sort;
+      orderBy.order = asc;
     }
 
-    const sortPath = traversePath({
+    const {
+      table: sortTable,
+      columnName: sortTableColumnName,
+    } = getTableColumnFromPath({
       adapter,
-      collectionSlug,
-      path: sortName,
+      path: sortPath,
       joins,
+      tableName,
     });
-    console.log(sortPath);
-    selectQuery.orderBy(sortOperator(adapter.tables[sortPath.tableName][sortPath.columnName]));
+
+    orderBy.column = sortTable[sortTableColumnName];
   }
 
-  return parseParams({
-    joins,
-    collectionSlug,
-    fields,
-    globalSlug,
+  const where = parseParams({
     adapter,
+    fields,
+    joins,
     locale,
-    where,
+    tableName,
+    where: incomingWhere,
   });
+
+  return {
+    joins,
+    orderBy,
+    where,
+  };
 };
-  // const results = db.selectDistinct({ id: posts.id })
-  //       .from(posts)
-  //       .innerJoin(posts_locales, eq(posts.id, posts_locales._parentID))
-  //       .innerJoin(posts_relationships, eq(posts.id, posts_relationships.parent))
-  //       .where(eq(posts_locales.title, postTitleEN))
-  //       .orderBy(posts_locales.title)
-  //       .all()
 
 export default buildQuery;
