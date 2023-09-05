@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { Field, FieldAffectingData, fieldAffectsData, tabHasName } from 'payload/dist/fields/config/types';
+import { Field, fieldAffectsData, TabAsField, tabHasName } from 'payload/dist/fields/config/types';
 import toSnakeCase from 'to-snake-case';
 import flattenFields from 'payload/dist/utilities/flattenTopLevelFields';
 import { and, eq } from 'drizzle-orm';
@@ -15,7 +15,7 @@ type TableColumn = {
 type Args = {
   adapter: PostgresAdapter,
   columnPrefix?: string
-  fields?: Field[]
+  fields?: (Field | TabAsField)[]
   joins: BuildQueryJoins
   locale?: string
   path: string
@@ -37,7 +37,7 @@ export const getTableColumnFromPath = ({
 }: Args): TableColumn => {
   const pathSegments = incomingPath.split('.');
   const fieldPath = pathSegments[0];
-  const field = fields.find((fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath) as FieldAffectingData;
+  const field = fields.find((fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath);
   let newTableName = tableName;
 
   if (field) {
@@ -48,6 +48,17 @@ export const getTableColumnFromPath = ({
       };
     }
     switch (field.type) {
+      case 'tabs': {
+        return getTableColumnFromPath({
+          adapter,
+          columnPrefix,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          joins,
+          locale,
+          path: pathSegments.slice(1).join('.'),
+          tableName: newTableName,
+        });
+      }
       case 'tab':
         if (tabHasName(field)) {
           return getTableColumnFromPath({
@@ -147,7 +158,7 @@ export const getTableColumnFromPath = ({
         // case 'richText':
         // case 'select':
         // case 'point':
-        if (locale && field.localized && adapter.payload.config.localization) {
+        if (locale && fieldAffectsData(field) && field.localized && adapter.payload.config.localization) {
           newTableName = `${tableName}_locales`;
           joins[newTableName] = and(
             eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
@@ -156,7 +167,7 @@ export const getTableColumnFromPath = ({
         }
         return {
           table: adapter.tables[newTableName],
-          columnName: `${columnPrefix}${toSnakeCase(field.name)}`,
+          columnName: `${columnPrefix}${toSnakeCase(fieldAffectsData(field) ? field.name : pathSegments[0])}`,
         };
       }
     }
