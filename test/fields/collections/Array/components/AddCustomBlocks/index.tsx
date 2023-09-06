@@ -40,7 +40,7 @@ export const AddCustomBlocks: React.FC = () => {
         >
           Replace Block
           {' '}
-          {nextIndex - 1}
+          {nextIndex}
         </button>
       </div>
     </div>

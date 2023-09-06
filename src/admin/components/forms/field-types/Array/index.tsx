@@ -104,7 +104,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     setModified(true);
 
     setTimeout(() => {
-      scrollToID(`${path}-row-${rowIndex + 1}`);
+      scrollToID(`${path}-row-${rowIndex}`);
     }, 0);
   }, [addFieldRow, path, setModified]);
 

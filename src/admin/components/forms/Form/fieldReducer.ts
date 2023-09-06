@@ -115,7 +115,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
 
       const rowsMetadata = [...state[path]?.rows || []];
       rowsMetadata.splice(
-        rowIndex + 1,
+        rowIndex,
         0,
         // new row
         {
@@ -137,7 +137,7 @@ export function fieldReducer(state: Fields, action: FieldAction): Fields {
       const { remainingFields, rows } = separateRows(path, state);
 
       // actual form state (value saved in db)
-      rows.splice(rowIndex + 1, 0, subFieldState);
+      rows.splice(rowIndex, 0, subFieldState);
 
       const newState: Fields = {
         ...remainingFields,

@@ -63,7 +63,7 @@ export const ArrayAction: React.FC<Props> = ({
                   className={`${baseClass}__action ${baseClass}__add`}
                   type="button"
                   onClick={() => {
-                    addRow(index + 1);
+                    addRow(index);
                     close();
                   }}
                 >

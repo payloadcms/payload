@@ -429,7 +429,7 @@ const Form: React.FC<Props> = (props) => {
 
     if (fieldConfig) {
       const subFieldState = await buildStateFromSchema({ fieldSchema: fieldConfig, data, preferences, operation, id, user, locale, t });
-      dispatchFields({ type: 'ADD_ROW', rowIndex: rowIndex - 1, path, blockType: data?.blockType, subFieldState });
+      dispatchFields({ type: 'ADD_ROW', rowIndex, path, blockType: data?.blockType, subFieldState });
     }
   }, [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath]);
 
@@ -446,7 +446,7 @@ const Form: React.FC<Props> = (props) => {
 
     if (fieldConfig) {
       const subFieldState = await buildStateFromSchema({ fieldSchema: fieldConfig, data, preferences, operation, id, user, locale, t });
-      dispatchFields({ type: 'REPLACE_ROW', rowIndex: rowIndex - 1, path, blockType: data?.blockType, subFieldState });
+      dispatchFields({ type: 'REPLACE_ROW', rowIndex, path, blockType: data?.blockType, subFieldState });
     }
   }, [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath]);
 
