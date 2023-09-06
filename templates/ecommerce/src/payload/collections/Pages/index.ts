@@ -8,7 +8,6 @@ import { MediaBlock } from '../../blocks/MediaBlock'
 import { hero } from '../../fields/hero'
 import { slugField } from '../../fields/slug'
 import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
-import { populatePublishedDate } from '../../hooks/populatePublishedDate'
 import { adminsOrPublished } from './access/adminsOrPublished'
 import { revalidatePage } from './hooks/revalidatePage'
 
@@ -24,7 +23,6 @@ export const Pages: CollectionConfig = {
     },
   },
   hooks: {
-    beforeChange: [populatePublishedDate],
     afterChange: [revalidatePage],
     afterRead: [populateArchiveBlock],
   },
@@ -44,10 +42,23 @@ export const Pages: CollectionConfig = {
       required: true,
     },
     {
-      name: 'publishedDate',
+      name: 'publishedOn',
       type: 'date',
       admin: {
         position: 'sidebar',
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
+      hooks: {
+        beforeChange: [
+          ({ siblingData, value }) => {
+            if (siblingData._status === 'published' && !value) {
+              return new Date()
+            }
+            return value
+          },
+        ],
       },
     },
     {

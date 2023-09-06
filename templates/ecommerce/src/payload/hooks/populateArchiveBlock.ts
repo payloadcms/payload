@@ -34,7 +34,7 @@ export const populateArchiveBlock: AfterReadHook = async ({ doc, req: { payload 
                   }
                 : {}),
             },
-            sort: '-publishedDate',
+            sort: '-publishedOn',
           })
 
           return {

@@ -7,7 +7,6 @@ import { Content } from '../../blocks/Content'
 import { MediaBlock } from '../../blocks/MediaBlock'
 import { slugField } from '../../fields/slug'
 import { populateArchiveBlock } from '../../hooks/populateArchiveBlock'
-import { populatePublishedDate } from '../../hooks/populatePublishedDate'
 import { checkUserPurchases } from './access/checkUserPurchases'
 import { beforeProductChange } from './hooks/beforeChange'
 import { deleteProductFromCarts } from './hooks/deleteProductFromCarts'
@@ -26,7 +25,7 @@ const Products: CollectionConfig = {
     },
   },
   hooks: {
-    beforeChange: [populatePublishedDate, beforeProductChange],
+    beforeChange: [beforeProductChange],
     afterChange: [revalidateProduct],
     afterRead: [populateArchiveBlock],
     afterDelete: [deleteProductFromCarts],
@@ -47,10 +46,23 @@ const Products: CollectionConfig = {
       required: true,
     },
     {
-      name: 'publishedDate',
+      name: 'publishedOn',
       type: 'date',
       admin: {
         position: 'sidebar',
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
+      hooks: {
+        beforeChange: [
+          ({ siblingData, value }) => {
+            if (siblingData._status === 'published' && !value) {
+              return new Date()
+            }
+            return value
+          },
+        ],
       },
     },
     {
