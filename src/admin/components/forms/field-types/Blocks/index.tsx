@@ -90,7 +90,7 @@ const BlocksField: React.FC<Props> = (props) => {
     value,
     rows = [],
     valid,
-  } = useField<number>({
+  } = useField<[]>({
     path,
     validate: memoizedValidate,
     condition,
@@ -290,7 +290,7 @@ const BlocksField: React.FC<Props> = (props) => {
             drawerSlug={drawerSlug}
             blocks={blocks}
             addRow={addRow}
-            addRowIndex={value}
+            addRowIndex={value?.length || 0}
             labels={labels}
           />
         </Fragment>

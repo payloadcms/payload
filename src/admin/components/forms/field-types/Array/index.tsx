@@ -92,7 +92,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     value,
     rows = [],
     valid,
-  } = useField<number>({
+  } = useField<[]>({
     path,
     validate: memoizedValidate,
     condition,
@@ -269,7 +269,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
             buttonStyle="icon-label"
             iconStyle="with-border"
             iconPosition="left"
-            onClick={() => addRow(value as number)}
+            onClick={() => addRow(value?.length || 0)}
           >
             {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
           </Button>
