@@ -365,7 +365,7 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
 };
 
 export const array: Validate<unknown, unknown, ArrayField> = (value, { t, minRows, maxRows, required }) => {
-  const arrayLength = Array.isArray(value) ? value.length : (value || 0);
+  const arrayLength = Array.isArray(value) ? value.length : 0;
 
   if (minRows && arrayLength < minRows) {
     return t('validation:requiresAtLeast', { count: minRows, label: t('rows') });
@@ -410,15 +410,17 @@ export const radio: Validate<unknown, unknown, RadioField> = (value, { t, option
 };
 
 export const blocks: Validate<unknown, unknown, BlockField> = (value, { t, maxRows, minRows, required }) => {
-  if (minRows && value < minRows) {
+  const arrayLength = Array.isArray(value) ? value.length : 0;
+
+  if (minRows && arrayLength < minRows) {
     return t('validation:requiresAtLeast', { count: minRows, label: t('rows') });
   }
 
-  if (maxRows && value > maxRows) {
+  if (maxRows && arrayLength > maxRows) {
     return t('validation:requiresNoMoreThan', { count: maxRows, label: t('rows') });
   }
 
-  if (!value && required) {
+  if (!arrayLength && required) {
     return t('validation:requiresAtLeast', { count: 1, label: t('row') });
   }
 
