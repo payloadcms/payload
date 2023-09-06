@@ -2,8 +2,6 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 import type { PayloadRequest } from '../../../../packages/payload/src/types'
 
-import payload from '../../../../packages/payload/src'
-
 export const contextHooksSlug = 'context-hooks'
 const ContextHooks: CollectionConfig = {
   slug: contextHooksSlug,
@@ -47,12 +45,12 @@ const ContextHooks: CollectionConfig = {
       },
     ],
     afterChange: [
-      async ({ context, doc }) => {
+      async ({ context, doc, req }) => {
         if (context.triggerAfterChange === false) {
           // Make sure we don't trigger afterChange again and again in an infinite loop
           return
         }
-        await payload.update({
+        await req.payload.update({
           collection: contextHooksSlug,
           id: doc.id,
           data: {
