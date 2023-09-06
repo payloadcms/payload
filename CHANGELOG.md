@@ -1,5 +1,15 @@
 
 
+## [1.15.4](https://github.com/payloadcms/payload/compare/v1.15.3...v1.15.4) (2023-09-06)
+
+
+### Bug Fixes
+
+* **#3274:** sets full user data from fetchFullUser instead of partial jwt data ([#3279](https://github.com/payloadcms/payload/issues/3279)) ([cf12b5f](https://github.com/payloadcms/payload/commit/cf12b5fc703be6341b2b23efebd8aa85e8602567)), closes [#3274](https://github.com/payloadcms/payload/issues/3274)
+* aligns depth behaviour between local api and admin panel ([#3276](https://github.com/payloadcms/payload/issues/3276)) ([5096c37](https://github.com/payloadcms/payload/commit/5096c378743f4c5eb5f4f2f7e67e5e206cc9da40))
+* appends versions key to incoming where query ([#3287](https://github.com/payloadcms/payload/issues/3287)) ([9cd5e5a](https://github.com/payloadcms/payload/commit/9cd5e5aefaf0ee2af4f577da9578bb31bf4b0acb))
+* change scoping of `force` parameter to prevent false negation; ([#3278](https://github.com/payloadcms/payload/issues/3278)) ([429a88a](https://github.com/payloadcms/payload/commit/429a88a5a18e8905c63dfe00b78b3e71d56758fd))
+
 ## [1.15.3](https://github.com/payloadcms/payload/compare/v1.15.2...v1.15.3) (2023-09-05)
 
 
