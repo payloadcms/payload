@@ -226,7 +226,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let reminder: ReturnType<typeof setTimeout>;
     const now = Math.round((new Date()).getTime() / 1000);
     const remainingTime = typeof exp === 'number' ? exp - now : 0;
-    console.log({ remainingTime, exp });
 
     if (remainingTime > 0) {
       reminder = setTimeout(() => {
