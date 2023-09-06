@@ -8,6 +8,7 @@ import sanitizeGlobals from '../globals/config/sanitize';
 import checkDuplicateCollections from '../utilities/checkDuplicateCollections';
 import { defaults } from './defaults';
 import getDefaultBundler from '../bundlers/webpack/bundler';
+import getLogger from '../utilities/logger';
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize };
@@ -55,6 +56,8 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   if (config.serverURL !== '') {
     config.csrf.push(config.serverURL);
+  } else {
+    getLogger().warn('No serverURL provided in config, defaulted to \'\'. If this was intended, ignore this message.');
   }
 
   return config as SanitizedConfig;
