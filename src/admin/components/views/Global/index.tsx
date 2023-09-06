@@ -96,7 +96,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
         global,
         onSave,
         apiURL: `${serverURL}${api}/globals/${slug}?locale=${locale}${global.versions?.drafts ? '&draft=true' : ''}`,
-        action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
+        action: `${serverURL}${api}/globals/${slug}?locale=${locale}&fallback-locale=null`,
         updatedAt: updatedAt || dataToRender?.updatedAt,
       }}
     />

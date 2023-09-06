@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign */
-import payload from '../../../../src';
 import { CollectionConfig } from '../../../../src/collections/config/types';
 import type { PayloadRequest } from '../../../../src/types';
 
@@ -41,11 +40,11 @@ const ContextHooks: CollectionConfig = {
       }
       return data;
     }],
-    afterChange: [async ({ context, doc }) => {
+    afterChange: [async ({ context, doc, req }) => {
       if (context.triggerAfterChange === false) { // Make sure we don't trigger afterChange again and again in an infinite loop
         return;
       }
-      await payload.update({
+      await req.payload.update({
         collection: contextHooksSlug,
         id: doc.id,
         data: {
