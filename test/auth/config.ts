@@ -15,8 +15,8 @@ export default buildConfigWithDefaults({
   admin: {
     user: 'users',
     autoLogin: {
-      email: 'test@example.com',
-      password: 'test',
+      email: devUser.email,
+      password: devUser.password,
       prefillOnly: true,
     },
   },

@@ -26,12 +26,12 @@ const ResetPassword: React.FC = () => {
   } = config
   const { token } = useParams<{ token?: string }>()
   const history = useHistory()
-  const { setToken, user } = useAuth()
+  const { fetchFullUser, user } = useAuth()
   const { t } = useTranslation('authentication')
 
-  const onSuccess = (data) => {
+  const onSuccess = async (data) => {
     if (data.token) {
-      setToken(data.token)
+      await fetchFullUser()
       history.push(`${admin}`)
     } else {
       history.push(`${admin}/login`)

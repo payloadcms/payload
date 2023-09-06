@@ -1,5 +1,4 @@
 import { useModal } from '@faceless-ui/modal'
-import jwtDecode from 'jwt-decode'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useHistory, useLocation } from 'react-router-dom'
@@ -19,6 +18,7 @@ const maxTimeoutTime = 2147483647
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>()
   const [tokenInMemory, setTokenInMemory] = useState<string>()
+  const [tokenExpiration, setTokenExpiration] = useState<number>()
   const { pathname } = useLocation()
   const { push } = useHistory()
 
@@ -29,8 +29,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     routes: { admin, api },
     serverURL,
   } = config
-
-  const exp = user?.exp
 
   const [permissions, setPermissions] = useState<Permissions>()
 
@@ -53,12 +51,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     closeAllModals()
   }, [push, admin, logoutInactivityRoute, closeAllModals])
 
+  const revokeTokenAndExpire = useCallback(() => {
+    setTokenInMemory(undefined)
+    setTokenExpiration(undefined)
+  }, [])
+
+  const setTokenAndExpiration = useCallback(
+    (json) => {
+      const token = json?.token || json?.refreshedToken
+      if (token && json?.exp) {
+        setTokenInMemory(token)
+        setTokenExpiration(json.exp)
+      } else {
+        revokeTokenAndExpire()
+      }
+    },
+    [revokeTokenAndExpire],
+  )
+
   const refreshCookie = useCallback(
     (forceRefresh?: boolean) => {
       const now = Math.round(new Date().getTime() / 1000)
-      const remainingTime = ((exp as number) || 0) - now
+      const remainingTime = (typeof tokenExpiration === 'number' ? tokenExpiration : 0) - now
 
-      if (forceRefresh || (exp && remainingTime < 120)) {
+      if (forceRefresh || (tokenExpiration && remainingTime < 120)) {
         setTimeout(async () => {
           try {
             const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`, {
@@ -70,6 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (request.status === 200) {
               const json = await request.json()
               setUser(json.user)
+              setTokenAndExpiration(json)
             } else {
               setUser(null)
               redirectToInactivityRoute()
@@ -80,7 +97,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }, 1000)
       }
     },
-    [exp, serverURL, api, userSlug, i18n, redirectToInactivityRoute],
+    [
+      tokenExpiration,
+      serverURL,
+      api,
+      userSlug,
+      i18n,
+      redirectToInactivityRoute,
+      setTokenAndExpiration,
+    ],
   )
 
   const refreshCookieAsync = useCallback(
@@ -94,7 +119,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (request.status === 200) {
           const json = await request.json()
-          if (!skipSetUser) setUser(json.user)
+          if (!skipSetUser) {
+            setUser(json.user)
+            setTokenAndExpiration(json)
+          }
           return json.user
         }
 
@@ -106,20 +134,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null
       }
     },
-    [serverURL, api, userSlug, i18n, redirectToInactivityRoute],
+    [serverURL, api, userSlug, i18n, redirectToInactivityRoute, setTokenAndExpiration],
   )
-
-  const setToken = useCallback((token: string) => {
-    const decoded = jwtDecode<User>(token)
-    setUser(decoded)
-    setTokenInMemory(token)
-  }, [])
 
   const logOut = useCallback(() => {
     setUser(null)
-    setTokenInMemory(undefined)
+    revokeTokenAndExpire()
     requests.post(`${serverURL}${api}/${userSlug}/logout`)
-  }, [serverURL, api, userSlug])
+  }, [serverURL, api, userSlug, revokeTokenAndExpire])
 
   const refreshPermissions = useCallback(async () => {
     try {
@@ -140,56 +162,59 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [serverURL, api, i18n])
 
-  // On mount, get user and set
-  useEffect(() => {
-    const fetchMe = async () => {
-      try {
-        const request = await requests.get(`${serverURL}${api}/${userSlug}/me`, {
-          headers: {
-            'Accept-Language': i18n.language,
-          },
-        })
+  const fetchFullUser = React.useCallback(async () => {
+    try {
+      const request = await requests.get(`${serverURL}${api}/${userSlug}/me`, {
+        headers: {
+          'Accept-Language': i18n.language,
+        },
+      })
 
-        if (request.status === 200) {
-          const json = await request.json()
+      if (request.status === 200) {
+        const json = await request.json()
 
-          if (json?.user) {
-            setUser(json.user)
-          } else if (json?.token) {
-            setToken(json.token)
-          } else if (autoLogin && autoLogin.prefillOnly !== true) {
-            // auto log-in with the provided autoLogin credentials. This is used in dev mode
-            // so you don't have to log in over and over again
-            const autoLoginResult = await requests.post(`${serverURL}${api}/${userSlug}/login`, {
-              body: JSON.stringify({
-                email: autoLogin.email,
-                password: autoLogin.password,
-              }),
-              headers: {
-                'Accept-Language': i18n.language,
-                'Content-Type': 'application/json',
-              },
-            })
-            if (autoLoginResult.status === 200) {
-              const autoLoginJson = await autoLoginResult.json()
-              setUser(autoLoginJson.user)
-              if (autoLoginJson?.token) {
-                setToken(autoLoginJson.token)
-              }
-            } else {
-              setUser(null)
+        if (json?.user) {
+          setUser(json.user)
+          if (json?.token) {
+            setTokenAndExpiration(json)
+          }
+        } else if (autoLogin && autoLogin.prefillOnly !== true) {
+          // auto log-in with the provided autoLogin credentials. This is used in dev mode
+          // so you don't have to log in over and over again
+          const autoLoginResult = await requests.post(`${serverURL}${api}/${userSlug}/login`, {
+            body: JSON.stringify({
+              email: autoLogin.email,
+              password: autoLogin.password,
+            }),
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
+            },
+          })
+          if (autoLoginResult.status === 200) {
+            const autoLoginJson = await autoLoginResult.json()
+            setUser(autoLoginJson.user)
+            if (autoLoginJson?.token) {
+              setTokenAndExpiration(autoLoginJson)
             }
           } else {
             setUser(null)
+            revokeTokenAndExpire()
           }
+        } else {
+          setUser(null)
+          revokeTokenAndExpire()
         }
-      } catch (e) {
-        toast.error(`Fetching user failed: ${e.message}`)
       }
+    } catch (e) {
+      toast.error(`Fetching user failed: ${e.message}`)
     }
+  }, [serverURL, api, userSlug, i18n, autoLogin, setTokenAndExpiration, revokeTokenAndExpire])
 
-    fetchMe()
-  }, [i18n, setToken, api, serverURL, userSlug, autoLogin])
+  // On mount, get user and set
+  useEffect(() => {
+    fetchFullUser()
+  }, [fetchFullUser])
 
   // When location changes, refresh cookie
   useEffect(() => {
@@ -212,41 +237,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     let reminder: ReturnType<typeof setTimeout>
     const now = Math.round(new Date().getTime() / 1000)
-    const remainingTime = (exp as number) - now
+    const remainingTime = typeof tokenExpiration === 'number' ? tokenExpiration - now : 0
 
     if (remainingTime > 0) {
       reminder = setTimeout(
         () => {
           openModal('stay-logged-in')
         },
-        (Math.min((remainingTime - 60) * 1000), maxTimeoutTime),
+        Math.max(Math.min((remainingTime - 60) * 1000, maxTimeoutTime)),
       )
     }
 
     return () => {
       if (reminder) clearTimeout(reminder)
     }
-  }, [exp, openModal])
+  }, [tokenExpiration, openModal])
 
   useEffect(() => {
     let forceLogOut: ReturnType<typeof setTimeout>
     const now = Math.round(new Date().getTime() / 1000)
-    const remainingTime = (exp as number) - now
+    const remainingTime = typeof tokenExpiration === 'number' ? tokenExpiration - now : 0
 
     if (remainingTime > 0) {
       forceLogOut = setTimeout(
         () => {
           setUser(null)
+          revokeTokenAndExpire()
           redirectToInactivityRoute()
         },
-        Math.min(remainingTime * 1000, maxTimeoutTime),
+        Math.max(Math.min(remainingTime * 1000, maxTimeoutTime), 0),
       )
     }
 
     return () => {
       if (forceLogOut) clearTimeout(forceLogOut)
     }
-  }, [exp, closeAllModals, i18n, redirectToInactivityRoute])
+  }, [tokenExpiration, closeAllModals, i18n, redirectToInactivityRoute, revokeTokenAndExpire])
 
   return (
     <Context.Provider
@@ -256,9 +282,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshCookie,
         refreshCookieAsync,
         refreshPermissions,
-        setToken,
         setUser,
         token: tokenInMemory,
+        fetchFullUser,
         user,
       }}
     >
