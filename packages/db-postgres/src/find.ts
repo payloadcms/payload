@@ -6,7 +6,7 @@ import type { SanitizedCollectionConfig } from 'payload/dist/collections/config/
 import buildQuery from './queries/buildQuery';
 import { buildFindManyArgs } from './find/buildFindManyArgs';
 import { transform } from './transform/read';
-import { PostgresAdapter } from './types';
+import { GenericColumn, PostgresAdapter } from './types';
 
 export const find: Find = async function find(
   this: PostgresAdapter, {
@@ -44,13 +44,19 @@ export const find: Find = async function find(
     tableName,
   });
 
-  const orderedIDs: Record<number | string, number> = {};
+  const orderedIDMap: Record<number | string, number> = {};
+
+  const selectFields: Record<string, GenericColumn> = {
+    id: table.id,
+  };
+  if (orderBy) {
+    selectFields.sort = orderBy.column;
+  }
 
   // initial query
-  const selectQuery = this.db.selectDistinct({
-    id: table.id,
-  })
-    .from(table);
+  const selectQuery = this.db.selectDistinct(selectFields)
+    .from(table)
+    .orderBy(orderBy.order(orderBy.column));
 
   const findManyArgs = buildFindManyArgs({
     adapter: this,
@@ -61,7 +67,9 @@ export const find: Find = async function find(
 
   // only fetch IDs when a sort or where query is used that needs to be done on join tables, otherwise these can be done directly on the table in findMany
   if (Object.keys(joins).length > 0) {
-    selectQuery.where(where);
+    if (where) {
+      selectQuery.where(where);
+    }
     Object.entries(joins)
       .forEach(([joinTable, condition]) => {
         selectQuery.leftJoin(this.tables[joinTable], condition);
@@ -71,10 +79,9 @@ export const find: Find = async function find(
       .limit(limit === 0 ? undefined : limit);
     // set the id in an object for sorting later
     result.forEach(({ id }, i) => {
-      orderedIDs[id as (number | string)] = i;
+      orderedIDMap[id as (number | string)] = i;
     });
-    findManyArgs.where = inArray(this.tables[tableName].id, Object(orderedIDs)
-      .values());
+    findManyArgs.where = inArray(this.tables[tableName].id, Object.keys(orderedIDMap));
   } else {
     findManyArgs.where = where;
     // orderBy will only be set if a complex sort is needed on a relation
@@ -102,8 +109,8 @@ export const find: Find = async function find(
   const rawDocs = await this.db.query[tableName].findMany(findManyArgs);
 
   // sort rawDocs from selectQuery
-  if (orderedIDs) {
-    rawDocs.sort((a, b) => (orderedIDs[a.id] - orderedIDs[b.id]));
+  if (Object.keys(orderedIDMap).length > 0) {
+    rawDocs.sort((a, b) => (orderedIDMap[a.id] - orderedIDMap[b.id]));
   }
 
   const docs = rawDocs.map((data) => {

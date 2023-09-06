@@ -1,25 +1,28 @@
 /* eslint-disable no-param-reassign */
 import { Field, fieldAffectsData, TabAsField, tabHasName } from 'payload/dist/fields/config/types';
 import toSnakeCase from 'to-snake-case';
-import flattenFields from 'payload/dist/utilities/flattenTopLevelFields';
 import { and, eq } from 'drizzle-orm';
 import { APIError } from 'payload/errors';
+import flattenFields from 'payload/dist/utilities/flattenTopLevelFields';
 import { BuildQueryJoins } from './buildQuery';
 import { GenericTable, PostgresAdapter } from '../types';
 
 type TableColumn = {
   table: GenericTable
   columnName: string
+  collectionPath: string
 }
 
 type Args = {
   adapter: PostgresAdapter,
+  collectionPath: string
   columnPrefix?: string
-  fields?: (Field | TabAsField)[]
+  fields: (Field | TabAsField)[]
   joins: BuildQueryJoins
   locale?: string
-  path: string
+  pathSegments: string[]
   tableName: string
+  tableColumns?: TableColumn[]
 }
 /**
  * Transforms path to table and column name
@@ -28,74 +31,81 @@ type Args = {
  */
 export const getTableColumnFromPath = ({
   adapter,
+  collectionPath,
   columnPrefix = '',
   fields,
   joins,
   locale,
-  path: incomingPath,
+  pathSegments,
   tableName,
-}: Args): TableColumn => {
-  const pathSegments = incomingPath.split('.');
+  tableColumns = [],
+}: Args): TableColumn[] => {
   const fieldPath = pathSegments[0];
-  const field = fields.find((fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath);
+  const field = flattenFields(fields as Field[])
+    .find((fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath) as Field | TabAsField;
   let newTableName = tableName;
 
   if (field) {
-    if (pathSegments.length === 1) {
-      return {
-        table: adapter.tables[tableName],
-        columnName: incomingPath,
-      };
-    }
     switch (field.type) {
       case 'tabs': {
-        return getTableColumnFromPath({
+        tableColumns = tableColumns.concat(getTableColumnFromPath({
           adapter,
+          collectionPath,
           columnPrefix,
-          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          fields: field.tabs.map((tab) => ({
+            ...tab,
+            type: 'tab',
+          })),
           joins,
           locale,
-          path: pathSegments.slice(1).join('.'),
+          pathSegments: pathSegments.slice(1),
           tableName: newTableName,
-        });
+          tableColumns,
+        }));
+        break;
       }
-      case 'tab':
+      case 'tab': {
         if (tabHasName(field)) {
-          return getTableColumnFromPath({
+          tableColumns = tableColumns.concat(getTableColumnFromPath({
             adapter,
-            columnPrefix: `${columnPrefix}${toSnakeCase(field.name)}_`,
-            fields: flattenFields(field.fields) as Field[],
+            collectionPath,
+            columnPrefix: `${columnPrefix}${field.name}_`,
+            fields: field.fields as Field[],
             joins,
             locale,
-            path: pathSegments.slice(1).join('.'),
+            pathSegments: pathSegments.slice(1),
             tableName: newTableName,
-          });
+          }));
         }
-        return getTableColumnFromPath({
+        tableColumns = tableColumns.concat(getTableColumnFromPath({
           adapter,
+          collectionPath,
           columnPrefix,
-          fields: flattenFields(field.fields) as Field[],
+          fields: field.fields as Field[],
           joins,
           locale,
-          path: pathSegments.slice(1).join('.'),
+          pathSegments: pathSegments.slice(1),
           tableName: newTableName,
-        });
-
+        }));
+        break;
+      }
 
       case 'group': {
-        if (field.localized) {
+        if (field.localized && adapter.payload.config.localization) {
           newTableName = `${tableName}_locales`;
           joins[tableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
         }
-        return getTableColumnFromPath({
+        tableColumns = tableColumns.concat(getTableColumnFromPath({
           adapter,
-          columnPrefix: `${columnPrefix}${toSnakeCase(field.name)}_`,
-          fields: flattenFields(field.fields) as Field[],
+          collectionPath,
+          columnPrefix: `${columnPrefix}${field.name}_`,
+          fields: field.fields as Field[],
           joins,
           locale,
-          path: pathSegments.slice(1).join('.'),
+          pathSegments: pathSegments.slice(1),
           tableName: newTableName,
-        });
+        }));
+        break;
       }
 
       case 'array': {
@@ -108,19 +118,26 @@ export const getTableColumnFromPath = ({
         } else {
           joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
         }
-        return getTableColumnFromPath({
+        tableColumns = tableColumns.concat(getTableColumnFromPath({
           adapter,
-          fields: flattenFields(field.fields) as Field[],
+          collectionPath,
+          fields: field.fields as Field[],
           joins,
           locale,
-          path: pathSegments.slice(1).join('.'),
+          pathSegments: pathSegments.slice(1),
           tableName: newTableName,
-        });
+        }));
+        break;
+      }
+
+      case 'blocks': {
+        // TODO: implement blocks
+        throw new Error('not implemented');
       }
 
       case 'relationship':
       case 'upload': {
-        newTableName = `${tableName}_relationships`;
+        newTableName = `${toSnakeCase(tableName)}_relationships`;
         let relationshipFields;
         if (typeof field.relationTo === 'string') {
           relationshipFields = adapter.payload.collections[field.relationTo];
@@ -135,14 +152,17 @@ export const getTableColumnFromPath = ({
         } else {
           throw new APIError('Not supported');
         }
-        return getTableColumnFromPath({
+        tableColumns = tableColumns.concat(getTableColumnFromPath({
           adapter,
-          fields: flattenFields(relationshipFields) as Field[],
+          collectionPath: pathSegments.slice(1)
+            .join('.'),
+          fields: relationshipFields as Field[],
           joins,
           locale,
-          path: pathSegments.slice(1).join('.'),
+          pathSegments: pathSegments.slice(1),
           tableName: newTableName,
-        });
+        }));
+        break;
       }
 
       default: {
@@ -162,15 +182,17 @@ export const getTableColumnFromPath = ({
           newTableName = `${tableName}_locales`;
           joins[newTableName] = and(
             eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
-            eq(adapter[newTableName]._locale, locale),
+            eq(adapter.tables[newTableName]._locale, locale),
           );
         }
-        return {
+        tableColumns.push({
+          collectionPath,
           table: adapter.tables[newTableName],
-          columnName: `${columnPrefix}${toSnakeCase(fieldAffectsData(field) ? field.name : pathSegments[0])}`,
-        };
+          columnName: `${columnPrefix}${fieldAffectsData(field) ? field.name : pathSegments[0]}`,
+        });
       }
     }
+    return tableColumns;
   }
 
   throw new APIError(`Cannot find field for path at ${fieldPath}`);

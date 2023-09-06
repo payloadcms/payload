@@ -10,6 +10,16 @@ import { PostgresAdapter } from '../types';
 import { operatorMap } from './operatorMap';
 import { BuildQueryJoins } from './buildQuery';
 
+type Args = {
+  joins: BuildQueryJoins
+  where: Where
+  collectionSlug?: string
+  globalSlug?: string
+  adapter: PostgresAdapter
+  locale: string
+  fields: Field[]
+  columnPrefix: string
+}
 export async function parseParams({
   joins,
   where,
@@ -19,16 +29,7 @@ export async function parseParams({
   locale,
   fields,
   columnPrefix,
-}: {
-  joins: BuildQueryJoins
-  where: Where,
-  collectionSlug?: string,
-  globalSlug?: string,
-  adapter: PostgresAdapter
-  locale: string,
-  fields: Field[],
-  columnPrefix: string,
-}): Promise<SQL> {
+}: Args): Promise<SQL> {
   let result: SQL;
 
   if (typeof where === 'object') {

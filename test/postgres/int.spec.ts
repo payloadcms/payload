@@ -19,6 +19,9 @@ describe('Postgres', () => {
         collection: 'pages',
         data: {
           slug: 'first',
+          meta: {
+            title: 'abc',
+          },
         },
       });
 
@@ -26,6 +29,9 @@ describe('Postgres', () => {
         collection: 'pages',
         data: {
           slug: 'second',
+          meta: {
+            title: 'def',
+          },
         },
       });
 
@@ -379,20 +385,29 @@ describe('Postgres', () => {
 
     it('sort localized asc', async () => {
       const { docs: pages } = await payload.find({
-        collection: 'posts',
+        collection: 'pages',
         sort: 'slug',
       });
-      expect(pages[0].fullName).toEqual('first');
-      expect(pages[1].fullName).toEqual('second');
+      expect(pages[0].slug).toEqual('first');
+      expect(pages[1].slug).toEqual('second');
     });
 
-    it('sort nested field', async () => {
+    it('sort nested localized field asc', async () => {
       const { docs: pages } = await payload.find({
-        collection: 'posts',
-        sort: 'myGroup.subField',
+        collection: 'pages',
+        sort: 'meta.title',
       });
-      expect(pages[0].fullName).toEqual('first');
-      expect(pages[1].fullName).toEqual('second');
+      expect(pages[0].slug).toEqual('first');
+      expect(pages[1].slug).toEqual('second');
+    });
+
+    it('sort nested localized field desc', async () => {
+      const { docs: pages } = await payload.find({
+        collection: 'pages',
+        sort: '-meta.title',
+      });
+      expect(pages[0].slug).toEqual('second');
+      expect(pages[1].slug).toEqual('first');
     });
 
     it('sort localized desc', async () => {

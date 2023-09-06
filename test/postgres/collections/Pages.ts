@@ -12,5 +12,16 @@ export const Pages: CollectionConfig = {
       type: 'text',
       localized: true,
     },
+    {
+      name: 'meta',
+      type: 'group',
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+          localized: true,
+        },
+      ],
+    },
   ],
 };

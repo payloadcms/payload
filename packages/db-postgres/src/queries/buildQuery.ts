@@ -49,28 +49,40 @@ const buildQuery = async function buildQuery({
       orderBy.order = asc;
     }
 
-    const {
-      table: sortTable,
-      columnName: sortTableColumnName,
-    } = getTableColumnFromPath({
+    const tableColumns = getTableColumnFromPath({
       adapter,
-      path: sortPath,
+      collectionPath: sortPath,
+      fields,
+      pathSegments: sortPath.split('.'),
       joins,
       locale,
       tableName,
     });
 
+    const lastTableColumn = tableColumns[tableColumns.length - 1];
+    const {
+      table: sortTable,
+      columnName: sortTableColumnName,
+    } = lastTableColumn;
+    // } = tableColumns[tableColumns.length - 1];
+
     orderBy.column = sortTable[sortTableColumnName];
   }
 
-  const where = parseParams({
-    adapter,
-    fields,
-    joins,
-    locale,
-    tableName,
-    where: incomingWhere,
-  });
+  let where: SQL;
+
+  if (Object.keys(incomingWhere).length > 0) {
+    where = await parseParams({
+      adapter,
+      collectionSlug: '',
+      columnPrefix: '',
+      globalSlug: '',
+      fields,
+      joins,
+      locale,
+      where: incomingWhere,
+    });
+  }
 
   return {
     joins,
