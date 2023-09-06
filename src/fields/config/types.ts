@@ -13,7 +13,7 @@ import { User } from '../../auth';
 import { Payload } from '../../payload';
 import { RowLabel } from '../../admin/components/forms/RowLabel/types';
 
-export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
+export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any, U = any> = {
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
   data?: Partial<T>,
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
@@ -27,7 +27,7 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'read' | 'update' | 'delete',
   /** The Express request object. It is mocked for Local API operations. */
-  req: PayloadRequest
+  req: PayloadRequest<U>
   /** The sibling data passed to a field that the hook is running against. */
   siblingData: Partial<S>
   /** The value of the field. */
@@ -36,7 +36,7 @@ export type FieldHookArgs<T extends TypeWithID = any, P = any, S = any> = {
   context: RequestContext
 }
 
-export type FieldHook<T extends TypeWithID = any, P = any, S = any> = (args: FieldHookArgs<T, P, S>) => Promise<P> | P;
+export type FieldHook<T extends TypeWithID = any, P = any, S = any, U = any> = (args: FieldHookArgs<T, P, S, U>) => Promise<P> | P;
 
 export type FieldAccess<T extends TypeWithID = any, P = any, U = any> = (args: {
   req: PayloadRequest<U>
