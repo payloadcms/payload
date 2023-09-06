@@ -245,7 +245,8 @@ export const addFieldStatePromise = async ({
         break;
       }
 
-      case 'relationship': {
+      case 'relationship':
+      case 'upload': {
         const relationshipValue = valueWithDefault && typeof valueWithDefault === 'object' && 'id' in valueWithDefault ? valueWithDefault.id : valueWithDefault;
         fieldState.value = relationshipValue;
         fieldState.initialValue = relationshipValue;
