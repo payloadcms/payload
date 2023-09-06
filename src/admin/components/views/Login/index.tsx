@@ -20,7 +20,7 @@ const baseClass = 'login';
 const Login: React.FC = () => {
   const history = useHistory();
   const { t } = useTranslation('authentication');
-  const { user, setToken } = useAuth();
+  const { user, fetchFullUser } = useAuth();
   const config = useConfig();
   const {
     admin: {
@@ -47,9 +47,9 @@ const Login: React.FC = () => {
   const redirect = query.get('redirect');
 
 
-  const onSuccess = (data) => {
+  const onSuccess = async (data) => {
     if (data.token) {
-      setToken(data.token);
+      await fetchFullUser();
 
       // Ensure the redirect always starts with the admin route, and concatenate the redirect path
       history.push(admin + (redirect || ''));
