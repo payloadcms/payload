@@ -266,7 +266,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Gated Content',
+                  text: 'Paywall',
                 },
               ],
               type: 'h3',
@@ -295,7 +295,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Shopping cart',
+                  text: 'Shopping Cart',
                 },
               ],
               type: 'h3',
@@ -353,7 +353,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Page builder',
+                  text: 'Page Builder',
                 },
               ],
               type: 'h3',
@@ -424,7 +424,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Dark mode',
+                  text: 'Dark Mode',
                 },
               ],
               type: 'h3',

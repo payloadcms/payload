@@ -20,7 +20,7 @@ export const product2: Partial<Product> = {
             {
               children: [
                 {
-                  text: "All content from this point is completely dynamic using custom layout building block configured in the CMS. This can be anything you'd like.",
+                  text: "This content is completely dynamic using custom layout building blocks configured in the CMS. This can be anything you'd like from rich text and images, to highly designed, complex components.",
                 },
               ],
             },
@@ -59,7 +59,7 @@ export const product2: Partial<Product> = {
                   bold: true,
                 },
                 {
-                  text: ' It is only available to admins and users who have purchased this product. This content can be anything from additional video and text and content, to download links and more. These are simply layout building blocks configured in the CMS.',
+                  text: ' It is only available to admins and users who have purchased this product. This content can be anything from additional video, text, and content, to download links and more. These are simply layout building blocks configured in the CMS.',
                 },
               ],
             },

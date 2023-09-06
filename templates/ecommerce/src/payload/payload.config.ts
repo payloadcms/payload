@@ -1,5 +1,7 @@
 import { payloadCloud } from '@payloadcms/plugin-cloud'
+// import formBuilder from '@payloadcms/plugin-form-builder'
 import nestedDocs from '@payloadcms/plugin-nested-docs'
+import redirects from '@payloadcms/plugin-redirects'
 import seo from '@payloadcms/plugin-seo'
 import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
 import stripePlugin from '@payloadcms/plugin-stripe'
@@ -104,6 +106,7 @@ export default buildConfig({
     },
   ],
   plugins: [
+    // formBuilder({}),
     stripePlugin({
       stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
       isTestKey: Boolean(process.env.PAYLOAD_PUBLIC_STRIPE_IS_TEST_KEY),
@@ -114,6 +117,9 @@ export default buildConfig({
         'product.updated': productUpdated,
         'price.updated': priceUpdated,
       },
+    }),
+    redirects({
+      collections: ['pages', 'products'],
     }),
     nestedDocs({
       collections: ['categories'],

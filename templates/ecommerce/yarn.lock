@@ -1423,6 +1423,11 @@
   resolved "https://registry.yarnpkg.com/@payloadcms/plugin-nested-docs/-/plugin-nested-docs-1.0.6.tgz#7fece37ae3a5192e080444d220616edc90ce9c65"
   integrity sha512-+rPMWYYjxxIQeCO+MFlfsj4baLaK3S7RzP4dGouWcCtORbZEXbVPUGXgWWNyAP3FolQh4YDEgFVB4PHyIa+O/A==
 
+"@payloadcms/plugin-redirects@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@payloadcms/plugin-redirects/-/plugin-redirects-1.0.0.tgz#e03243cb0582b9305cac9cc3ef571a9c0beb1665"
+  integrity sha512-BAoNRSw6bT73wnxdKsR8HwaMeRwSshp4d7xfN1EfaW6IMoUYER/lHG/bwN61O2+hapvBd6fOfMuUdzy9sDazxw==
+
 "@payloadcms/plugin-seo@^1.0.10":
   version "1.0.13"
   resolved "https://registry.yarnpkg.com/@payloadcms/plugin-seo/-/plugin-seo-1.0.13.tgz#b1d2f24f5cabf14e8ab7db6815b6fb41ee718557"
