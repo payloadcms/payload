@@ -124,8 +124,8 @@ const queryDraftsV2 = async <T extends TypeWithID>({
   where,
 }: Args): Promise<PaginatedDocs<T>> => {
   const VersionModel = payload.versions[collection.config.slug] as CollectionModel;
-
-  const combinedQuery = combineQueries({ latest: { equals: true } }, where);
+  const queryWithPrefix = appendVersionToQueryKey(where || {});
+  const combinedQuery = combineQueries({ latest: { equals: true } }, queryWithPrefix);
 
   const versionsQuery = await VersionModel.buildQuery({
     where: combinedQuery,
