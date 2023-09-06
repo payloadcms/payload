@@ -10,7 +10,7 @@ export const AddCustomBlocks: React.FC = () => {
   const { addFieldRow, replaceFieldRow } = useForm()
   const { value } = useField({ path: 'customBlocks' })
 
-  const nextIndex = typeof value === 'number' ? value + 1 : 0
+  const nextIndex = Array.isArray(value) ? value.length : 0
 
   return (
     <div className={baseClass}>
@@ -56,7 +56,7 @@ export const AddCustomBlocks: React.FC = () => {
           className={`${baseClass}__block-button ${baseClass}__replace-block-button`}
           type="button"
         >
-          Replace Block {nextIndex - 1}
+          Replace Block {nextIndex}
         </button>
       </div>
     </div>
