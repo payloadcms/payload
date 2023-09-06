@@ -4,33 +4,30 @@ import { Operator, Where } from 'payload/types';
 import { Field } from 'payload/dist/fields/config/types';
 import { validOperators } from 'payload/dist/types/constants';
 import { and, SQL } from 'drizzle-orm';
-import { buildSearchParam } from './buildSearchParams';
 import { buildAndOrConditions } from './buildAndOrConditions';
 import { PostgresAdapter } from '../types';
 import { operatorMap } from './operatorMap';
 import { BuildQueryJoins } from './buildQuery';
+import { getTableColumnFromPath } from './getTableColumnFromPath';
 
 type Args = {
   joins: BuildQueryJoins
   where: Where
-  collectionSlug?: string
-  globalSlug?: string
   adapter: PostgresAdapter
   locale: string
+  tableName: string,
   fields: Field[]
-  columnPrefix: string
 }
 export async function parseParams({
   joins,
   where,
-  collectionSlug,
-  globalSlug,
   adapter,
   locale,
   fields,
-  columnPrefix,
+  tableName,
 }: Args): Promise<SQL> {
   let result: SQL;
+  const constraints: SQL[] = [];
 
   if (typeof where === 'object') {
     // We need to determine if the whereKey is an AND, OR, or a schema path
@@ -45,11 +42,10 @@ export async function parseParams({
       if (Array.isArray(condition)) {
         const builtConditions = await buildAndOrConditions({
           joins,
-          collectionSlug,
           fields,
-          globalSlug,
           adapter,
           locale,
+          tableName,
           where: condition,
         });
         if (builtConditions.length > 0) result = operatorMap[conditionOperator](result, ...builtConditions);
@@ -61,23 +57,26 @@ export async function parseParams({
         if (typeof pathOperators === 'object') {
           for (const operator of Object.keys(pathOperators)) {
             if (validOperators.includes(operator as Operator)) {
-              result = and(await buildSearchParam({
-                joins,
-                collectionSlug,
-                globalSlug,
+              const tableColumn = getTableColumnFromPath({
                 adapter,
-                locale,
+                collectionPath: relationOrPath,
                 fields,
-                incomingPath: relationOrPath,
-                val: pathOperators[operator],
-                operator,
-              }));
+                joins,
+                locale,
+                pathSegments: relationOrPath.split('.'),
+                tableName,
+              });
+              constraints.push(operatorMap[operator](tableColumn.table[tableColumn.columnName], where[relationOrPath][operator]));
             }
           }
         }
       }
     }
   }
+  if (constraints.length > 0) {
+    result = and(result, ...constraints);
+  }
+
 
   return result;
 }

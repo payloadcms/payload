@@ -8,11 +8,10 @@ import { BuildQueryJoins } from './buildQuery';
 export async function buildAndOrConditions({
   joins,
   where,
-  collectionSlug,
-  globalSlug,
   adapter,
   locale,
   fields,
+  tableName,
 }: {
   joins: BuildQueryJoins,
   where: Where[],
@@ -21,6 +20,7 @@ export async function buildAndOrConditions({
   adapter: PostgresAdapter
   locale?: string,
   fields: Field[],
+  tableName: string,
 }): Promise<SQL[]> {
   const completedConditions = [];
   // Loop over all AND / OR operations and add them to the AND / OR query param
@@ -33,11 +33,10 @@ export async function buildAndOrConditions({
       const result = await parseParams({
         joins,
         where: condition,
-        collectionSlug,
-        globalSlug,
         adapter,
         locale,
         fields,
+        tableName,
       });
       if (Object.keys(result).length > 0) {
         completedConditions.push(result);

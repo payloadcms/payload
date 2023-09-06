@@ -55,8 +55,10 @@ export const find: Find = async function find(
 
   // initial query
   const selectQuery = this.db.selectDistinct(selectFields)
-    .from(table)
-    .orderBy(orderBy.order(orderBy.column));
+    .from(table);
+  if (orderBy.order && orderBy.column) {
+    selectQuery.orderBy(orderBy.order(orderBy.column));
+  }
 
   const findManyArgs = buildFindManyArgs({
     adapter: this,
@@ -85,10 +87,12 @@ export const find: Find = async function find(
   } else {
     findManyArgs.where = where;
     // orderBy will only be set if a complex sort is needed on a relation
-    if (sort[0] === '-') {
-      findManyArgs.orderBy = desc(this.tables[tableName][sort.substring(1)]);
-    } else {
-      findManyArgs.orderBy = asc(this.tables[tableName][sort]);
+    if (sort) {
+      if (sort[0] === '-') {
+        findManyArgs.orderBy = desc(this.tables[tableName][sort.substring(1)]);
+      } else {
+        findManyArgs.orderBy = asc(this.tables[tableName][sort]);
+      }
     }
   }
 

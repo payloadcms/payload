@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { Field, fieldAffectsData, TabAsField, tabHasName } from 'payload/dist/fields/config/types';
+import { Field, FieldAffectingData, fieldAffectsData, TabAsField, tabHasName } from 'payload/dist/fields/config/types';
 import toSnakeCase from 'to-snake-case';
 import { and, eq } from 'drizzle-orm';
 import { APIError } from 'payload/errors';
@@ -11,6 +11,7 @@ type TableColumn = {
   table: GenericTable
   columnName: string
   collectionPath: string
+  field: FieldAffectingData
 }
 
 type Args = {
@@ -22,7 +23,6 @@ type Args = {
   locale?: string
   pathSegments: string[]
   tableName: string
-  tableColumns?: TableColumn[]
 }
 /**
  * Transforms path to table and column name
@@ -38,8 +38,7 @@ export const getTableColumnFromPath = ({
   locale,
   pathSegments,
   tableName,
-  tableColumns = [],
-}: Args): TableColumn[] => {
+}: Args): TableColumn => {
   const fieldPath = pathSegments[0];
   const field = flattenFields(fields as Field[])
     .find((fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath) as Field | TabAsField;
@@ -48,7 +47,7 @@ export const getTableColumnFromPath = ({
   if (field) {
     switch (field.type) {
       case 'tabs': {
-        tableColumns = tableColumns.concat(getTableColumnFromPath({
+        return getTableColumnFromPath({
           adapter,
           collectionPath,
           columnPrefix,
@@ -60,13 +59,11 @@ export const getTableColumnFromPath = ({
           locale,
           pathSegments: pathSegments.slice(1),
           tableName: newTableName,
-          tableColumns,
-        }));
-        break;
+        });
       }
       case 'tab': {
         if (tabHasName(field)) {
-          tableColumns = tableColumns.concat(getTableColumnFromPath({
+          return getTableColumnFromPath({
             adapter,
             collectionPath,
             columnPrefix: `${columnPrefix}${field.name}_`,
@@ -75,9 +72,9 @@ export const getTableColumnFromPath = ({
             locale,
             pathSegments: pathSegments.slice(1),
             tableName: newTableName,
-          }));
+          });
         }
-        tableColumns = tableColumns.concat(getTableColumnFromPath({
+        return getTableColumnFromPath({
           adapter,
           collectionPath,
           columnPrefix,
@@ -86,8 +83,7 @@ export const getTableColumnFromPath = ({
           locale,
           pathSegments: pathSegments.slice(1),
           tableName: newTableName,
-        }));
-        break;
+        });
       }
 
       case 'group': {
@@ -95,7 +91,7 @@ export const getTableColumnFromPath = ({
           newTableName = `${tableName}_locales`;
           joins[tableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
         }
-        tableColumns = tableColumns.concat(getTableColumnFromPath({
+        return getTableColumnFromPath({
           adapter,
           collectionPath,
           columnPrefix: `${columnPrefix}${field.name}_`,
@@ -104,8 +100,7 @@ export const getTableColumnFromPath = ({
           locale,
           pathSegments: pathSegments.slice(1),
           tableName: newTableName,
-        }));
-        break;
+        });
       }
 
       case 'array': {
@@ -118,7 +113,7 @@ export const getTableColumnFromPath = ({
         } else {
           joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
         }
-        tableColumns = tableColumns.concat(getTableColumnFromPath({
+        return getTableColumnFromPath({
           adapter,
           collectionPath,
           fields: field.fields as Field[],
@@ -126,8 +121,7 @@ export const getTableColumnFromPath = ({
           locale,
           pathSegments: pathSegments.slice(1),
           tableName: newTableName,
-        }));
-        break;
+        });
       }
 
       case 'blocks': {
@@ -152,7 +146,7 @@ export const getTableColumnFromPath = ({
         } else {
           throw new APIError('Not supported');
         }
-        tableColumns = tableColumns.concat(getTableColumnFromPath({
+        return getTableColumnFromPath({
           adapter,
           collectionPath: pathSegments.slice(1)
             .join('.'),
@@ -161,8 +155,7 @@ export const getTableColumnFromPath = ({
           locale,
           pathSegments: pathSegments.slice(1),
           tableName: newTableName,
-        }));
-        break;
+        });
       }
 
       default: {
@@ -178,21 +171,23 @@ export const getTableColumnFromPath = ({
         // case 'richText':
         // case 'select':
         // case 'point':
-        if (locale && fieldAffectsData(field) && field.localized && adapter.payload.config.localization) {
-          newTableName = `${tableName}_locales`;
-          joins[newTableName] = and(
-            eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
-            eq(adapter.tables[newTableName]._locale, locale),
-          );
+        if (fieldAffectsData(field)) {
+          if (locale && field.localized && adapter.payload.config.localization) {
+            newTableName = `${tableName}_locales`;
+            joins[newTableName] = and(
+              eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
+              eq(adapter.tables[newTableName]._locale, locale),
+            );
+          }
+          return {
+            collectionPath,
+            field,
+            table: adapter.tables[newTableName],
+            columnName: `${columnPrefix}${field.name}`,
+          };
         }
-        tableColumns.push({
-          collectionPath,
-          table: adapter.tables[newTableName],
-          columnName: `${columnPrefix}${fieldAffectsData(field) ? field.name : pathSegments[0]}`,
-        });
       }
     }
-    return tableColumns;
   }
 
   throw new APIError(`Cannot find field for path at ${fieldPath}`);

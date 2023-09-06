@@ -415,8 +415,17 @@ describe('Postgres', () => {
         collection: 'posts',
         sort: '-slug',
       });
-      expect(pages[0].fullName).toEqual('second');
-      expect(pages[1].fullName).toEqual('first');
+      expect(pages[0].tableName).toEqual('second');
+      expect(pages[1].tableName).toEqual('first');
+    });
+    it('find where', async () => {
+      const { docs: people } = await payload.find({
+        collection: 'people',
+        where: {
+          fullName: { equals: 'Dan Ribbens' },
+        },
+      });
+      expect(people).toHaveLength(1);
     });
   });
 
