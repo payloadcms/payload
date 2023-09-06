@@ -56,10 +56,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     closeAllModals();
   }, [push, admin, logoutInactivityRoute, closeAllModals]);
 
+  const setToken = useCallback((token: string) => {
+    const decoded = jwtDecode<User>(token);
+    setUser(decoded);
+    setTokenInMemory(token);
+  }, []);
+
   const refreshCookie = useCallback((forceRefresh?: boolean) => {
     const now = Math.round((new Date()).getTime() / 1000);
     const remainingTime = (exp as number || 0) - now;
-
     if (forceRefresh || (exp && remainingTime < 120)) {
       setTimeout(async () => {
         try {
@@ -71,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           if (request.status === 200) {
             const json = await request.json();
-            setUser(json.user);
+            setToken(json.refreshedToken);
           } else {
             setUser(null);
             redirectToInactivityRoute();
@@ -81,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }, 1000);
     }
-  }, [exp, serverURL, api, userSlug, i18n, redirectToInactivityRoute]);
+  }, [serverURL, api, userSlug, i18n, exp, redirectToInactivityRoute, setToken]);
 
   const refreshCookieAsync = useCallback(async (skipSetUser?: boolean): Promise<User> => {
     try {
@@ -93,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (request.status === 200) {
         const json = await request.json();
-        if (!skipSetUser) setUser(json.user);
+        if (!skipSetUser) setToken(json.refreshedToken);
         return json.user;
       }
 
@@ -104,13 +109,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.error(`Refreshing token failed: ${e.message}`);
       return null;
     }
-  }, [serverURL, api, userSlug, i18n, redirectToInactivityRoute]);
-
-  const setToken = useCallback((token: string) => {
-    const decoded = jwtDecode<User>(token);
-    setUser(decoded);
-    setTokenInMemory(token);
-  }, []);
+  }, [serverURL, api, userSlug, i18n, redirectToInactivityRoute, setToken]);
 
   const logOut = useCallback(() => {
     setUser(null);
@@ -150,9 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (request.status === 200) {
           const json = await request.json();
 
-          if (json?.user) {
-            setUser(json.user);
-          } else if (json?.token) {
+          if (json?.token) {
             setToken(json.token);
           } else if (autoLogin && autoLogin.prefillOnly !== true) {
             // auto log-in with the provided autoLogin credentials. This is used in dev mode
@@ -169,7 +166,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
             if (autoLoginResult.status === 200) {
               const autoLoginJson = await autoLoginResult.json();
-              setUser(autoLoginJson.user);
               if (autoLoginJson?.token) {
                 setToken(autoLoginJson.token);
               }
@@ -209,12 +205,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     let reminder: ReturnType<typeof setTimeout>;
     const now = Math.round((new Date()).getTime() / 1000);
-    const remainingTime = exp as number - now;
+    const remainingTime = typeof exp === 'number' ? exp - now : 0;
 
     if (remainingTime > 0) {
       reminder = setTimeout(() => {
         openModal('stay-logged-in');
-      }, (Math.min((remainingTime - 60) * 1000), maxTimeoutTime));
+      }, Math.max(Math.min((remainingTime - 60) * 1000, maxTimeoutTime)));
     }
 
     return () => {
@@ -225,13 +221,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     let forceLogOut: ReturnType<typeof setTimeout>;
     const now = Math.round((new Date()).getTime() / 1000);
-    const remainingTime = exp as number - now;
+    const remainingTime = typeof exp === 'number' ? exp - now : 0;
 
     if (remainingTime > 0) {
       forceLogOut = setTimeout(() => {
         setUser(null);
         redirectToInactivityRoute();
-      }, Math.min(remainingTime * 1000, maxTimeoutTime));
+      }, Math.max(Math.min(remainingTime * 1000, maxTimeoutTime), 0));
     }
 
     return () => {
