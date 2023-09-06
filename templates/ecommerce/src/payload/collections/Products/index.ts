@@ -129,6 +129,19 @@ const Products: CollectionConfig = {
         position: 'sidebar',
       },
     },
+    {
+      name: 'relatedProducts',
+      type: 'relationship',
+      relationTo: 'products',
+      hasMany: true,
+      filterOptions: ({ id }) => {
+        return {
+          id: {
+            not_in: [id],
+          },
+        }
+      },
+    },
     slugField(),
     {
       name: 'skipSync',

@@ -93,7 +93,7 @@ export const home: Partial<Page> = {
             {
               children: [
                 {
-                  text: 'Core features',
+                  text: 'Core Features',
                 },
               ],
               type: 'h2',
@@ -454,6 +454,31 @@ export const home: Partial<Page> = {
       blockName: 'Media Block',
       position: 'default',
       media: '{{PRODUCT2_IMAGE}}',
+    },
+    {
+      blockName: 'Archive Block',
+      blockType: 'archive',
+      introContent: [
+        {
+          type: 'h4',
+          children: [
+            {
+              text: 'Recent Products',
+            },
+          ],
+        },
+        {
+          type: 'p',
+          children: [
+            {
+              text: 'The products below are displayed in an "Archive" layout building block which is an extremely powerful way to display documents on a page. It can be auto-populated by collection or by category, or products can be individually selected. Pagination controls will automatically appear if the number of results exceeds the number of items per page.',
+            },
+          ],
+        },
+      ],
+      populateBy: 'collection',
+      relationTo: 'products',
+      categories: [],
     },
     {
       blockType: 'cta',

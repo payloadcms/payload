@@ -27,8 +27,14 @@ export const PRODUCT = `
           ${ARCHIVE_BLOCK}
         }
         priceJSON
-        ${META}
         enablePaywall
+        relatedProducts {
+          id
+          slug
+          title
+          ${META}
+        }
+        ${META}
       }
     }
   }

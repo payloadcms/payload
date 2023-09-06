@@ -55,17 +55,17 @@ export const seed = async (payload: Payload): Promise<void> => {
   payload.logger.info(`— Seeding media...`)
 
   const [image1Doc, image2Doc, image3Doc] = await Promise.all([
-    payload.create({
+    await payload.create({
       collection: 'media',
       filePath: path.resolve(__dirname, 'image-1.jpg'),
       data: image1,
     }),
-    payload.create({
+    await payload.create({
       collection: 'media',
       filePath: path.resolve(__dirname, 'image-2.jpg'),
       data: image2,
     }),
-    payload.create({
+    await payload.create({
       collection: 'media',
       filePath: path.resolve(__dirname, 'image-3.jpg'),
       data: image3,
@@ -75,19 +75,19 @@ export const seed = async (payload: Payload): Promise<void> => {
   payload.logger.info(`— Seeding categories...`)
 
   const [apparelCategory, ebooksCategory, coursesCategory] = await Promise.all([
-    payload.create({
+    await payload.create({
       collection: 'categories',
       data: {
         title: 'Apparel',
       },
     }),
-    payload.create({
+    await payload.create({
       collection: 'categories',
       data: {
         title: 'E-books',
       },
     }),
-    payload.create({
+    await payload.create({
       collection: 'categories',
       data: {
         title: 'Online courses',
@@ -97,33 +97,61 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   payload.logger.info(`— Seeding products...`)
 
-  Promise.all([
-    payload.create({
-      collection: 'products',
-      data: JSON.parse(
-        JSON.stringify({ ...product1, categories: [apparelCategory.id] }).replace(
-          /{{PRODUCT_IMAGE}}/g,
-          image1Doc.id,
-        ),
+  // Do not create product with `Promise.all` because we want the products to be created in order
+  // This way we can sort them by `createdAt` or `publishedOn` and they will be in the expected order
+  const product1Doc = await payload.create({
+    collection: 'products',
+    data: JSON.parse(
+      JSON.stringify({ ...product1, categories: [apparelCategory.id] }).replace(
+        /{{PRODUCT_IMAGE}}/g,
+        image1Doc.id,
       ),
+    ),
+  })
+
+  const product2Doc = await payload.create({
+    collection: 'products',
+    data: JSON.parse(
+      JSON.stringify({ ...product2, categories: [ebooksCategory.id] }).replace(
+        /{{PRODUCT_IMAGE}}/g,
+        image2Doc.id,
+      ),
+    ),
+  })
+
+  const product3Doc = await payload.create({
+    collection: 'products',
+    data: JSON.parse(
+      JSON.stringify({ ...product3, categories: [coursesCategory.id] }).replace(
+        /{{PRODUCT_IMAGE}}/g,
+        image3Doc.id,
+      ),
+    ),
+  })
+
+  // update each product with related products
+
+  await Promise.all([
+    await payload.update({
+      collection: 'products',
+      id: product1Doc.id,
+      data: {
+        relatedProducts: [product2Doc.id, product3Doc.id],
+      },
     }),
-    payload.create({
+    await payload.update({
       collection: 'products',
-      data: JSON.parse(
-        JSON.stringify({ ...product2, categories: [ebooksCategory.id] }).replace(
-          /{{PRODUCT_IMAGE}}/g,
-          image2Doc.id,
-        ),
-      ),
+      id: product2Doc.id,
+      data: {
+        relatedProducts: [product1Doc.id, product3Doc.id],
+      },
     }),
-    payload.create({
+    await payload.update({
       collection: 'products',
-      data: JSON.parse(
-        JSON.stringify({ ...product3, categories: [coursesCategory.id] }).replace(
-          /{{PRODUCT_IMAGE}}/g,
-          image3Doc.id,
-        ),
-      ),
+      id: product3Doc.id,
+      data: {
+        relatedProducts: [product1Doc.id, product2Doc.id],
+      },
     }),
   ])
 

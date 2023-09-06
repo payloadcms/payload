@@ -366,6 +366,7 @@ export interface Product {
       }
   )[];
   categories?: string[] | Category[];
+  relatedProducts?: string[] | Product[];
   slug?: string;
   skipSync?: boolean;
   meta?: {

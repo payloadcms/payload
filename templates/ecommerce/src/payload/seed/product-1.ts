@@ -37,4 +37,5 @@ export const product1: Partial<Product> = {
       ],
     },
   ],
+  relatedProducts: [], // this is populated by the seed script
 }
