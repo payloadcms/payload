@@ -1,6 +1,6 @@
 import joi from 'joi'
 
-import { componentSchema } from '../../utilities/componentSchema'
+import { componentSchema } from '../../config/shared/componentSchema'
 
 export const baseAdminComponentFields = joi
   .object()

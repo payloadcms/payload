@@ -49,14 +49,21 @@ const CustomDefaultRoute: AdminView = ({ canAccessAdmin, user }) => {
         title="Custom Route with Default Template"
       />
       <Eyebrow />
-      <h1>Custom Route</h1>
-      <p>
-        Here is a custom route that was added in the Payload config. It uses the Default Template,
-        so the sidebar is rendered.
-      </p>
-      <Button buttonStyle="secondary" el="link" to={`${adminRoute}`}>
-        Go to Dashboard
-      </Button>
+      <div
+        style={{
+          paddingRight: 'var(--gutter-h)',
+          paddingLeft: 'var(--gutter-h)',
+        }}
+      >
+        <h1>Custom Route</h1>
+        <p>
+          Here is a custom route that was added in the Payload config. It uses the Default Template,
+          so the sidebar is rendered.
+        </p>
+        <Button buttonStyle="secondary" el="link" to={`${adminRoute}`}>
+          Go to Dashboard
+        </Button>
+      </div>
     </DefaultTemplate>
   )
 }

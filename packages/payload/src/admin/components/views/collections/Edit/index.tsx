@@ -18,31 +18,48 @@ import DefaultEdit from './Default'
 import formatFields from './formatFields'
 
 const EditView: React.FC<IndexProps> = (props) => {
+  console.log('ksjngkdfngkjhbdg')
   const { collection: incomingCollection, isEditing } = props
 
-  const { admin: { components: { views: { Edit: CustomEdit } = {} } = {} } = {}, slug } =
+  const { admin: { components: { views: { Edit } = {} } = {} } = {}, slug: collectionSlug } =
     incomingCollection
+
+  // The component definition could come from multiple places in the config
+  // we need to cascade into the proper component from the top-down
+  // 1. "components.Edit"
+  // 2. "components.Edit.Default"
+  // 3. "components.Edit.Default.Component"
+  const CustomEditView =
+    typeof Edit === 'function'
+      ? Edit
+      : typeof Edit === 'object' && typeof Edit.Default === 'function'
+      ? Edit.Default
+      : typeof Edit?.Default === 'object' && typeof Edit.Default.Component === 'function'
+      ? Edit.Default.Component
+      : undefined
 
   const [fields] = useState(() => formatFields(incomingCollection, isEditing))
   const [collection] = useState(() => ({ ...incomingCollection, fields }))
   const [redirect, setRedirect] = useState<string>()
 
   const { code: locale } = useLocale()
+
   const {
     routes: { admin, api },
     serverURL,
   } = useConfig()
+
   const { params: { id } = {} } = useRouteMatch<Record<string, string>>()
   const history = useHistory()
   const [internalState, setInternalState] = useState<Fields>()
   const [updatedAt, setUpdatedAt] = useState<string>()
-  const { user } = useAuth()
+  const { permissions, user } = useAuth()
   const userRef = useRef(user)
   const { docPermissions, getDocPermissions, getDocPreferences, getVersions } = useDocumentInfo()
   const { t } = useTranslation('general')
 
   const [{ data, isError, isLoading: isLoadingData }] = usePayloadAPI(
-    isEditing ? `${serverURL}${api}/${slug}/${id}` : null,
+    isEditing ? `${serverURL}${api}/${collectionSlug}/${id}` : null,
     { initialData: null, initialParams: { depth: 0, draft: 'true', 'fallback-locale': 'null' } },
   )
 
@@ -107,25 +124,29 @@ const EditView: React.FC<IndexProps> = (props) => {
     return <Redirect to={`${admin}/not-found`} />
   }
 
-  const apiURL = `${serverURL}${api}/${slug}/${id}?locale=${locale}${
+  const apiURL = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}${
     collection.versions.drafts ? '&draft=true' : ''
   }`
-  const action = `${serverURL}${api}/${slug}${
+
+  const action = `${serverURL}${api}/${collectionSlug}${
     isEditing ? `/${id}` : ''
   }?locale=${locale}&fallback-locale=null`
+
   const hasSavePermission =
     (isEditing && docPermissions?.update?.permission) ||
     (!isEditing && (docPermissions as CollectionPermission)?.create?.permission)
+
   const isLoading = !internalState || !docPermissions || isLoadingData
 
   return (
     <EditDepthContext.Provider value={1}>
       <RenderCustomComponent
-        CustomComponent={CustomEdit}
+        CustomComponent={CustomEditView}
         DefaultComponent={DefaultEdit}
         componentProps={{
           action,
           apiURL,
+          canAccessAdmin: permissions?.canAccessAdmin,
           collection,
           data,
           hasSavePermission,
@@ -136,6 +157,7 @@ const EditView: React.FC<IndexProps> = (props) => {
           onSave,
           permissions: docPermissions,
           updatedAt: updatedAt || data?.updatedAt,
+          user,
         }}
       />
     </EditDepthContext.Provider>
