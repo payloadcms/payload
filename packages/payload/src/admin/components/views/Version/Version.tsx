@@ -37,9 +37,11 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     serverURL,
   } = useConfig()
   const { setStepNav } = useStepNav()
+
   const {
     params: { id, versionID },
   } = useRouteMatch<{ id?: string; versionID: string }>()
+
   const [compareValue, setCompareValue] = useState<CompareOption>(mostRecentVersionOption)
   const [localeOptions] = useState<LocaleOption[]>(() => (localization ? localization.locales : []))
   const [locales, setLocales] = useState<LocaleOption[]>(localeOptions)

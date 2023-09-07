@@ -1,5 +1,7 @@
 import joi from 'joi'
 
+import { routeSchema } from './shared/routeSchema'
+
 const component = joi.alternatives().try(joi.object().unknown(), joi.func())
 
 export const endpointsSchema = joi.alternatives().try(
@@ -50,15 +52,7 @@ export default joi.object({
         Button: component,
       }),
       providers: joi.array().items(component),
-      routes: joi.array().items(
-        joi.object().keys({
-          Component: component.required(),
-          exact: joi.bool(),
-          path: joi.string().required(),
-          sensitive: joi.bool(),
-          strict: joi.bool(),
-        }),
-      ),
+      routes: routeSchema,
       views: joi.object({
         Account: component,
         Dashboard: component,
