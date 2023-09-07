@@ -16,6 +16,7 @@ import { useFormSubmitted } from '../../../../forms/Form/context'
 import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues'
 import { fieldBaseClass } from '../../../../forms/field-types/shared'
 import useField from '../../../../forms/useField'
+import FileGraphic from '../../../../graphics/File'
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo'
 import './index.scss'
 
