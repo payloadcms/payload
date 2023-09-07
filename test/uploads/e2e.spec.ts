@@ -11,7 +11,7 @@ import { saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { adminThumbnailSrc } from './collections/admin-thumbnail'
-import { adminThumbnailSlug, audioSlug, mediaSlug, relationSlug } from './config'
+import { adminThumbnailSlug, audioSlug, mediaSlug, relationSlug } from './shared'
 
 const { beforeAll, describe } = test
 

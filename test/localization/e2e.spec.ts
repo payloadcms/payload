@@ -8,8 +8,7 @@ import payload from '../../packages/payload/src'
 import { saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadTest } from '../helpers/configHelpers'
-import { localizedPostsSlug } from './config'
-import { englishTitle, spanishLocale } from './shared'
+import { englishTitle, localizedPostsSlug, spanishLocale } from './shared'
 
 /**
  * TODO: Localization
