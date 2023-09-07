@@ -44,6 +44,18 @@ export const getTableColumnFromPath = ({
     .find((fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath) as Field | TabAsField;
   let newTableName = tableName;
 
+  if (!field && fieldPath === 'id') {
+    return {
+      collectionPath,
+      field: {
+        name: 'id',
+        type: 'number',
+      },
+      table: adapter.tables[newTableName],
+      columnName: 'id',
+    };
+  }
+
   if (field) {
     switch (field.type) {
       case 'tabs': {
@@ -87,7 +99,7 @@ export const getTableColumnFromPath = ({
       }
 
       case 'group': {
-        if (field.localized && adapter.payload.config.localization) {
+        if (locale && field.localized && adapter.payload.config.localization) {
           newTableName = `${tableName}_locales`;
           joins[tableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
         }
@@ -105,7 +117,7 @@ export const getTableColumnFromPath = ({
 
       case 'array': {
         newTableName = `${tableName}_${toSnakeCase(field.name)}`;
-        if (field.localized && adapter.payload.config.localization) {
+        if (locale && field.localized && adapter.payload.config.localization) {
           joins[newTableName] = and(
             eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
             eq(adapter[newTableName]._locale, locale),
@@ -135,7 +147,7 @@ export const getTableColumnFromPath = ({
         let relationshipFields;
         if (typeof field.relationTo === 'string') {
           relationshipFields = adapter.payload.collections[field.relationTo];
-          if (field.localized && adapter.payload.config.localization) {
+          if (locale && field.localized && adapter.payload.config.localization) {
             joins[newTableName] = and(
               eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
               eq(adapter[newTableName]._locale, locale),

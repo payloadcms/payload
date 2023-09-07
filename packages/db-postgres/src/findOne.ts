@@ -8,18 +8,19 @@ import { transform } from './transform/read';
 
 export const findOne: FindOne = async function findOne({
   collection,
-  where,
+  where: incomingWhere,
   locale,
   req = {} as PayloadRequest,
 }) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config;
   const tableName = toSnakeCase(collection);
 
-  const query = await buildQuery({
+  const { where } = await buildQuery({
     adapter: this,
-    collectionSlug: collection,
+    fields: collectionConfig.fields,
+    tableName,
     locale,
-    where,
+    where: incomingWhere,
   });
 
   const findManyArgs = buildFindManyArgs({
@@ -29,15 +30,13 @@ export const findOne: FindOne = async function findOne({
     tableName,
   });
 
-  findManyArgs.where = query;
+  findManyArgs.where = where;
 
   const doc = await this.db.query[tableName].findFirst(findManyArgs);
 
-  const result = transform({
+  return transform({
     config: this.payload.config,
     data: doc,
     fields: collectionConfig.fields,
   });
-
-  return result;
 };

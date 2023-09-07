@@ -2,7 +2,7 @@ import { asc, desc, inArray, sql } from 'drizzle-orm';
 import toSnakeCase from 'to-snake-case';
 import type { Find } from 'payload/dist/database/types';
 import type { PayloadRequest } from 'payload/dist/express/types';
-import type { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
+import type { SanitizedCollectionConfig, TypeWithID } from 'payload/dist/collections/config/types';
 import buildQuery from './queries/buildQuery';
 import { buildFindManyArgs } from './find/buildFindManyArgs';
 import { transform } from './transform/read';
@@ -117,7 +117,7 @@ export const find: Find = async function find(
     rawDocs.sort((a, b) => (orderedIDMap[a.id] - orderedIDMap[b.id]));
   }
 
-  const docs = rawDocs.map((data) => {
+  const docs = rawDocs.map((data: TypeWithID) => {
     return transform({
       config: this.payload.config,
       data,

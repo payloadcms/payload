@@ -1,5 +1,17 @@
 /* eslint-disable no-param-reassign */
-import { AnyPgColumnBuilder, integer, text, varchar, numeric, IndexBuilder, PgNumericBuilder, PgVarcharBuilder, jsonb, unique, UniqueConstraintBuilder } from 'drizzle-orm/pg-core';
+import {
+  AnyPgColumnBuilder,
+  IndexBuilder,
+  integer,
+  jsonb,
+  numeric,
+  PgNumericBuilder,
+  PgVarcharBuilder,
+  text,
+  unique,
+  UniqueConstraintBuilder,
+  varchar,
+} from 'drizzle-orm/pg-core';
 import { Field } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
 import { fieldAffectsData } from 'payload/dist/fields/config/types';
@@ -67,7 +79,7 @@ export const traverseFields = ({
 
       // If field is localized,
       // add the column to the locale table instead of main table
-      if (field.localized || forceLocalized) {
+      if (adapter.payload.config.localization && (field.localized || forceLocalized)) {
         hasLocalizedField = true;
         targetTable = localesColumns;
         targetIndexes = localesIndexes;
@@ -325,7 +337,7 @@ export const traverseFields = ({
           relationships.add(field.relationTo);
         }
 
-        if (field.localized) {
+        if (field.localized && adapter.payload.config.localization) {
           hasLocalizedRelationshipField = true;
         }
         break;

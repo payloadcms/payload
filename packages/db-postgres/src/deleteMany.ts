@@ -7,14 +7,19 @@ import { buildFindManyArgs } from './find/buildFindManyArgs';
 import { transform } from './transform/read';
 
 export const deleteMany: DeleteMany = async function deleteMany(this: PostgresAdapter,
-  { collection, where, req = {} as PayloadRequest }) {
+  {
+    collection,
+    where: incomingWhere,
+    req = {} as PayloadRequest,
+  }) {
   const collectionConfig = this.payload.collections[collection].config;
   const tableName = toSnakeCase(collection);
 
-  const query = await buildQuery({
+  const { where } = await buildQuery({
     adapter: this,
-    collectionSlug: collection,
-    where,
+    fields: collectionConfig.fields,
+    where: incomingWhere,
+    tableName,
   });
 
   const findManyArgs = buildFindManyArgs({
@@ -24,7 +29,7 @@ export const deleteMany: DeleteMany = async function deleteMany(this: PostgresAd
     tableName,
   });
 
-  findManyArgs.where = query;
+  findManyArgs.where = where;
 
   const docsToDelete = await this.db.query[tableName].findMany(findManyArgs);
 
@@ -36,7 +41,8 @@ export const deleteMany: DeleteMany = async function deleteMany(this: PostgresAd
     });
   });
 
-  await this.db.delete(this.tables[tableName]).where(query);
+  await this.db.delete(this.tables[tableName])
+    .where(where);
 
   return result;
 };

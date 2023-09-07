@@ -8,15 +8,20 @@ import { transform } from './transform/read';
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: PostgresAdapter,
-  { collection, where, req = {} as PayloadRequest },
+  {
+    collection,
+    where: incomingWhere,
+    req = {} as PayloadRequest,
+  },
 ) {
   const collectionConfig = this.payload.collections[collection].config;
   const tableName = toSnakeCase(collection);
 
-  const query = await buildQuery({
+  const { where } = await buildQuery({
     adapter: this,
-    collectionSlug: collection,
-    where,
+    fields: collectionConfig.fields,
+    tableName,
+    where: incomingWhere,
   });
 
   const findManyArgs = buildFindManyArgs({
@@ -26,7 +31,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     tableName,
   });
 
-  findManyArgs.where = query;
+  findManyArgs.where = where;
 
   const docToDelete = await this.db.query[tableName].findFirst(findManyArgs);
 
@@ -36,7 +41,8 @@ export const deleteOne: DeleteOne = async function deleteOne(
     fields: collectionConfig.fields,
   });
 
-  await this.db.delete(this.tables[tableName]).where(query);
+  await this.db.delete(this.tables[tableName])
+    .where(where);
 
   return result;
 };

@@ -11,7 +11,7 @@ type BuildQueryArgs = {
   adapter: PostgresAdapter
   fields: Field[]
   locale?: string
-  sort: string
+  sort?: string
   tableName: string
   where: Where
 }
