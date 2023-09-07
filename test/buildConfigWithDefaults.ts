@@ -35,9 +35,9 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
       process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN === 'true'
         ? false
         : {
-          email: 'dev@payloadcms.com',
-          password: 'test',
-        },
+            email: 'dev@payloadcms.com',
+            password: 'test',
+          },
     ...(config.admin || {}),
     webpack: (webpackConfig) => {
       const existingConfig =
@@ -60,14 +60,8 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
               __dirname,
               '../packages/db-mongodb/src/mock',
             ),
-            '@payloadcms/db-mongodb': path.resolve(
-              __dirname,
-              '../packages/db-mongodb/src/mock',
-            ),
-            '@payloadcms/db-postgres': path.resolve(
-              __dirname,
-              '../packages/db-postgres/src/mock',
-            ),
+            '@payloadcms/db-mongodb': path.resolve(__dirname, '../packages/db-mongodb/src/mock'),
+            '@payloadcms/db-postgres': path.resolve(__dirname, '../packages/db-postgres/src/mock'),
           },
         },
       }

@@ -25,13 +25,16 @@ module.exports = {
 
     // Enforce that all elements that require alternative text have meaningful information
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/alt-text.md
-    'jsx-a11y/alt-text': ['error', {
-      elements: ['img', 'object', 'area', 'input[type="image"]'],
-      img: [],
-      object: [],
-      area: [],
-      'input[type="image"]': [],
-    }],
+    'jsx-a11y/alt-text': [
+      'error',
+      {
+        elements: ['img', 'object', 'area', 'input[type="image"]'],
+        img: [],
+        object: [],
+        area: [],
+        'input[type="image"]': [],
+      },
+    ],
 
     // Prevent img alt text from containing redundant words like "image", "picture", or "photo"
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/img-redundant-alt.md
@@ -40,52 +43,53 @@ module.exports = {
     // require that JSX labels use "htmlFor"
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/label-has-for.md
     // deprecated: replaced by `label-has-associated-control` rule
-    'jsx-a11y/label-has-for': ['off', {
-      components: [],
-      required: {
-        every: ['nesting', 'id'],
+    'jsx-a11y/label-has-for': [
+      'off',
+      {
+        components: [],
+        required: {
+          every: ['nesting', 'id'],
+        },
+        allowChildren: false,
       },
-      allowChildren: false,
-    }],
+    ],
 
     // Enforce that a label tag has a text label and an associated control.
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/b800f40a2a69ad48015ae9226fbe879f946757ed/docs/rules/label-has-associated-control.md
-    'jsx-a11y/label-has-associated-control': ['error', {
-      labelComponents: [],
-      labelAttributes: [],
-      controlComponents: [],
-      assert: 'both',
-      depth: 25,
-    }],
+    'jsx-a11y/label-has-associated-control': [
+      'error',
+      {
+        labelComponents: [],
+        labelAttributes: [],
+        controlComponents: [],
+        assert: 'both',
+        depth: 25,
+      },
+    ],
 
     // Enforce that a control (an interactive element) has a text label.
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/control-has-associated-label.md
-    'jsx-a11y/control-has-associated-label': ['error', {
-      labelAttributes: ['label'],
-      controlComponents: [],
-      ignoreElements: [
-        'audio',
-        'canvas',
-        'embed',
-        'input',
-        'textarea',
-        'tr',
-        'video',
-      ],
-      ignoreRoles: [
-        'grid',
-        'listbox',
-        'menu',
-        'menubar',
-        'radiogroup',
-        'row',
-        'tablist',
-        'toolbar',
-        'tree',
-        'treegrid',
-      ],
-      depth: 5,
-    }],
+    'jsx-a11y/control-has-associated-label': [
+      'error',
+      {
+        labelAttributes: ['label'],
+        controlComponents: [],
+        ignoreElements: ['audio', 'canvas', 'embed', 'input', 'textarea', 'tr', 'video'],
+        ignoreRoles: [
+          'grid',
+          'listbox',
+          'menu',
+          'menubar',
+          'radiogroup',
+          'row',
+          'tablist',
+          'toolbar',
+          'tree',
+          'treegrid',
+        ],
+        depth: 5,
+      },
+    ],
 
     // require that mouseover/out come with focus/blur, for keyboard-only users
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/mouse-events-have-key-events.md
@@ -131,9 +135,12 @@ module.exports = {
 
     // prevent distracting elements, like <marquee> and <blink>
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/no-distracting-elements.md
-    'jsx-a11y/no-distracting-elements': ['error', {
-      elements: ['marquee', 'blink'],
-    }],
+    'jsx-a11y/no-distracting-elements': [
+      'error',
+      {
+        elements: ['marquee', 'blink'],
+      },
+    ],
 
     // only allow <th> to have the "scope" attr
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/scope.md
@@ -145,29 +152,21 @@ module.exports = {
 
     // Enforce that DOM elements without semantic behavior not have interaction handlers
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/no-static-element-interactions.md
-    'jsx-a11y/no-static-element-interactions': ['error', {
-      handlers: [
-        'onClick',
-        'onMouseDown',
-        'onMouseUp',
-        'onKeyPress',
-        'onKeyDown',
-        'onKeyUp',
-      ],
-    }],
+    'jsx-a11y/no-static-element-interactions': [
+      'error',
+      {
+        handlers: ['onClick', 'onMouseDown', 'onMouseUp', 'onKeyPress', 'onKeyDown', 'onKeyUp'],
+      },
+    ],
 
     // A non-interactive element does not support event handlers (mouse and key handlers)
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/no-noninteractive-element-interactions.md
-    'jsx-a11y/no-noninteractive-element-interactions': ['error', {
-      handlers: [
-        'onClick',
-        'onMouseDown',
-        'onMouseUp',
-        'onKeyPress',
-        'onKeyDown',
-        'onKeyUp',
-      ],
-    }],
+    'jsx-a11y/no-noninteractive-element-interactions': [
+      'error',
+      {
+        handlers: ['onClick', 'onMouseDown', 'onMouseUp', 'onKeyPress', 'onKeyDown', 'onKeyUp'],
+      },
+    ],
 
     // ensure emoji are accessible
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/accessible-emoji.md
@@ -191,41 +190,56 @@ module.exports = {
 
     // media elements must have captions
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/media-has-caption.md
-    'jsx-a11y/media-has-caption': ['error', {
-      audio: [],
-      video: [],
-      track: [],
-    }],
+    'jsx-a11y/media-has-caption': [
+      'error',
+      {
+        audio: [],
+        video: [],
+        track: [],
+      },
+    ],
 
     // WAI-ARIA roles should not be used to convert an interactive element to non-interactive
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/no-interactive-element-to-noninteractive-role.md
-    'jsx-a11y/no-interactive-element-to-noninteractive-role': ['error', {
-      tr: ['none', 'presentation'],
-    }],
+    'jsx-a11y/no-interactive-element-to-noninteractive-role': [
+      'error',
+      {
+        tr: ['none', 'presentation'],
+      },
+    ],
 
     // WAI-ARIA roles should not be used to convert a non-interactive element to interactive
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/no-noninteractive-element-to-interactive-role.md
-    'jsx-a11y/no-noninteractive-element-to-interactive-role': ['error', {
-      ul: ['listbox', 'menu', 'menubar', 'radiogroup', 'tablist', 'tree', 'treegrid'],
-      ol: ['listbox', 'menu', 'menubar', 'radiogroup', 'tablist', 'tree', 'treegrid'],
-      li: ['menuitem', 'option', 'row', 'tab', 'treeitem'],
-      table: ['grid'],
-      td: ['gridcell'],
-    }],
+    'jsx-a11y/no-noninteractive-element-to-interactive-role': [
+      'error',
+      {
+        ul: ['listbox', 'menu', 'menubar', 'radiogroup', 'tablist', 'tree', 'treegrid'],
+        ol: ['listbox', 'menu', 'menubar', 'radiogroup', 'tablist', 'tree', 'treegrid'],
+        li: ['menuitem', 'option', 'row', 'tab', 'treeitem'],
+        table: ['grid'],
+        td: ['gridcell'],
+      },
+    ],
 
     // Tab key navigation should be limited to elements on the page that can be interacted with.
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/no-noninteractive-tabindex.md
-    'jsx-a11y/no-noninteractive-tabindex': ['error', {
-      tags: [],
-      roles: ['tabpanel'],
-    }],
+    'jsx-a11y/no-noninteractive-tabindex': [
+      'error',
+      {
+        tags: [],
+        roles: ['tabpanel'],
+      },
+    ],
 
     // ensure <a> tags are valid
     // https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/0745af376cdc8686d85a361ce36952b1fb1ccf6e/docs/rules/anchor-is-valid.md
-    'jsx-a11y/anchor-is-valid': ['error', {
-      components: ['Link'],
-      specialLink: ['to'],
-      aspects: ['noHref', 'invalidHref', 'preferButton'],
-    }],
+    'jsx-a11y/anchor-is-valid': [
+      'error',
+      {
+        components: ['Link'],
+        specialLink: ['to'],
+        aspects: ['noHref', 'invalidHref', 'preferButton'],
+      },
+    ],
   },
-};
+}

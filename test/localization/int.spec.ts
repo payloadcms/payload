@@ -34,7 +34,7 @@ describe('Localization', () => {
   let postWithLocalizedData: LocalizedPost
 
   beforeAll(async () => {
-    ; ({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }))
+    ;({ serverURL } = await initPayloadTest({ __dirname, init: { local: false } }))
     config = await configPromise
 
     post1 = await payload.create({

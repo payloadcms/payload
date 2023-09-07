@@ -381,19 +381,19 @@ export default buildConfigWithDefaults({
         },
       })
     })
-      ;[...Array(15)].forEach((_, i) => {
-        payload.create({
-          collection: collection1Slug,
-          data: {
-            name: `relationship-test ${i}`,
-          },
-        })
-        payload.create({
-          collection: collection2Slug,
-          data: {
-            name: `relationship-test ${i}`,
-          },
-        })
+    ;[...Array(15)].forEach((_, i) => {
+      payload.create({
+        collection: collection1Slug,
+        data: {
+          name: `relationship-test ${i}`,
+        },
       })
+      payload.create({
+        collection: collection2Slug,
+        data: {
+          name: `relationship-test ${i}`,
+        },
+      })
+    })
   },
 })

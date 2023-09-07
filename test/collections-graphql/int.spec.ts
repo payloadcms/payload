@@ -477,7 +477,7 @@ describe('collections-graphql', () => {
           docs.forEach(({ point: coordinates }) => {
             // The next document point should always be greater than the one before
             expect(previous).toBeLessThanOrEqual(coordinates[0])
-              ;[previous] = coordinates
+            ;[previous] = coordinates
           })
         })
       })

@@ -1,4 +1,7 @@
-import type { BeforeLoginHook, CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type {
+  BeforeLoginHook,
+  CollectionConfig,
+} from '../../../../packages/payload/src/collections/config/types'
 import type { Payload } from '../../../../packages/payload/src/payload'
 
 import { AuthenticationError } from '../../../../packages/payload/src/errors'

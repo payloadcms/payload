@@ -1,4 +1,7 @@
-import type { AfterOperationHook, CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type {
+  AfterOperationHook,
+  CollectionConfig,
+} from '../../../../packages/payload/src/collections/config/types'
 
 import { AfterOperation } from '../../payload-types'
 
@@ -32,9 +35,9 @@ const AfterOperation: CollectionConfig = {
             docs: result.docs?.map((doc, index) =>
               index === 0
                 ? {
-                  ...doc,
-                  title: 'Title read',
-                }
+                    ...doc,
+                    title: 'Title read',
+                  }
                 : doc,
             ),
           }

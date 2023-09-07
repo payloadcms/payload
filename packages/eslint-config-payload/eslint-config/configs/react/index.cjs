@@ -2,11 +2,7 @@ module.exports = {
   env: {
     browser: true,
   },
-  plugins: [
-    'jsx-a11y',
-    'react-hooks',
-    'react',
-  ],
+  plugins: ['jsx-a11y', 'react-hooks', 'react'],
   settings: {
     react: {
       version: 'detect',
@@ -17,9 +13,6 @@ module.exports = {
       jsx: true,
     },
   },
-  extends: [
-    './rules/react-a11y.cjs',
-    './rules/react.cjs',
-  ].map(require.resolve),
+  extends: ['./rules/react-a11y.cjs', './rules/react.cjs'].map(require.resolve),
   rules: {},
-};
+}

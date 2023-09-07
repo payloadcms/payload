@@ -430,18 +430,18 @@ describe('collections-rest', () => {
       const nameToQuery2 = 'name2'
 
       beforeEach(async () => {
-        ; ({ doc: relation } = await client.create<Relation>({
+        ;({ doc: relation } = await client.create<Relation>({
           slug: relationSlug,
           data: {
             name: nameToQuery,
           },
         }))
-          ; ({ doc: relation2 } = await client.create<Relation>({
-            slug: relationSlug,
-            data: {
-              name: nameToQuery2,
-            },
-          }))
+        ;({ doc: relation2 } = await client.create<Relation>({
+          slug: relationSlug,
+          data: {
+            name: nameToQuery2,
+          },
+        }))
 
         post = await createPost({
           relationField: relation.id,
@@ -909,7 +909,7 @@ describe('collections-rest', () => {
           docs.forEach(({ point: coordinates }) => {
             // the next document point should always be greater than the one before
             expect(previous).toBeLessThanOrEqual(coordinates[0])
-              ;[previous] = coordinates
+            ;[previous] = coordinates
           })
         })
       })

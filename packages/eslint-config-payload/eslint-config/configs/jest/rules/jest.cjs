@@ -34,4 +34,4 @@ module.exports = {
     'jest/valid-expect': 'error',
     'jest/valid-title': 'error',
   },
-};
+}

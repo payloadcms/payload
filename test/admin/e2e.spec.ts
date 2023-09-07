@@ -427,7 +427,8 @@ describe('admin', () => {
       test('should accept where query from complex, valid URL where parameter using the near operator', async () => {
         // We have one point collection with the point [5,-5] and one with [7,-7]. This where query should kick out the [5,-5] point
         await page.goto(
-          `${new AdminUrlUtil(serverURL, 'geo').list
+          `${
+            new AdminUrlUtil(serverURL, 'geo').list
           }?limit=10&page=1&where[or][0][and][0][point][near]=6,-7,200000`,
         )
 
@@ -438,7 +439,8 @@ describe('admin', () => {
       test('should accept transformed where query from complex, invalid URL where parameter using the near operator', async () => {
         // We have one point collection with the point [5,-5] and one with [7,-7]. This where query should kick out the [5,-5] point
         await page.goto(
-          `${new AdminUrlUtil(serverURL, 'geo').list
+          `${
+            new AdminUrlUtil(serverURL, 'geo').list
           }?limit=10&page=1&where[point][near]=6,-7,200000`,
         )
 
