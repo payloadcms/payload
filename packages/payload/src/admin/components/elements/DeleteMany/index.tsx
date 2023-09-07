@@ -91,11 +91,11 @@ const DeleteMany: React.FC<Props> = (props) => {
   return (
     <React.Fragment>
       <Pill
+        className={`${baseClass}__toggle`}
         onClick={() => {
           setDeleting(false)
           toggleModal(modalSlug)
         }}
-        className={`${baseClass}__toggle`}
       >
         {t('delete')}
       </Pill>

@@ -71,11 +71,11 @@ const PointField: React.FC<Props> = (props) => {
 
   return (
     <div
+      className={classes}
       style={{
         ...style,
         width,
       }}
-      className={classes}
     >
       <Error message={errorMessage} showError={showError} />
       <ul className={`${baseClass}__wrap`}>

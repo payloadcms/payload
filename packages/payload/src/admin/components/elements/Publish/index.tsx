@@ -50,14 +50,14 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
 
   return (
     <RenderCustomComponent
+      CustomComponent={CustomComponent}
+      DefaultComponent={DefaultPublishButton}
       componentProps={{
         DefaultButton: DefaultPublishButton,
         disabled: !canPublish,
         label: t('publishChanges'),
         publish,
       }}
-      CustomComponent={CustomComponent}
-      DefaultComponent={DefaultPublishButton}
     />
   )
 }

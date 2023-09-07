@@ -405,12 +405,12 @@ const Relationship: React.FC<Props> = (props) => {
 
   return (
     <div
+      className={classes}
+      id={`field-${pathOrName.replace(/\./g, '__')}`}
       style={{
         ...style,
         width,
       }}
-      className={classes}
-      id={`field-${pathOrName.replace(/\./g, '__')}`}
     >
       <Error message={errorMessage} showError={showError} />
       <Label htmlFor={pathOrName} label={label} required={required} />
@@ -426,6 +426,7 @@ const Relationship: React.FC<Props> = (props) => {
       {!errorLoading && (
         <div className={`${baseClass}__wrap`}>
           <ReactSelect
+            backspaceRemovesValue={!drawerIsOpen}
             components={{
               MultiValueLabel,
               SingleValue,
@@ -436,6 +437,11 @@ const Relationship: React.FC<Props> = (props) => {
               onSave,
               setDrawerIsOpen,
             }}
+            disabled={readOnly || formProcessing}
+            filterOption={enableWordBoundarySearch ? filterOption : undefined}
+            isLoading={isLoading}
+            isMulti={hasMany}
+            isSortable={isSortable}
             onChange={
               !readOnly
                 ? (selected) => {
@@ -467,6 +473,7 @@ const Relationship: React.FC<Props> = (props) => {
                   }
                 : undefined
             }
+            onInputChange={(newSearch) => handleInputChange(newSearch, value)}
             onMenuOpen={() => {
               if (!hasLoadedFirstPage) {
                 setIsLoading(true)
@@ -487,13 +494,6 @@ const Relationship: React.FC<Props> = (props) => {
                 value: initialValue,
               })
             }}
-            backspaceRemovesValue={!drawerIsOpen}
-            disabled={readOnly || formProcessing}
-            filterOption={enableWordBoundarySearch ? filterOption : undefined}
-            isLoading={isLoading}
-            isMulti={hasMany}
-            isSortable={isSortable}
-            onInputChange={(newSearch) => handleInputChange(newSearch, value)}
             options={options}
             showError={showError}
             value={valueToRender ?? null}

@@ -62,6 +62,8 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         isLoading={isLoading}
         placeholder={getTranslation(placeholder, i18n)}
         {...props}
+        className={classes}
+        classNamePrefix="rs"
         components={{
           ClearIndicator,
           Control,
@@ -73,8 +75,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
           ValueContainer,
           ...components,
         }}
-        className={classes}
-        classNamePrefix="rs"
         filterOption={filterOption}
         isClearable={isClearable}
         isDisabled={disabled}
@@ -130,6 +130,8 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       isLoading={isLoading}
       placeholder={getTranslation(placeholder, i18n)}
       {...props}
+      className={classes}
+      classNamePrefix="rs"
       components={{
         ClearIndicator,
         Control,
@@ -141,8 +143,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         ValueContainer,
         ...components,
       }}
-      className={classes}
-      classNamePrefix="rs"
       filterOption={filterOption}
       inputValue={inputValue}
       isClearable={isClearable}
@@ -171,6 +171,8 @@ const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
 
   return (
     <DraggableSortable
+      className="react-select-container"
+      ids={ids}
       onDragEnd={({ moveFromIndex, moveToIndex }) => {
         let sorted = value
         if (value && Array.isArray(value)) {
@@ -178,8 +180,6 @@ const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
         }
         onChange(sorted)
       }}
-      className="react-select-container"
-      ids={ids}
     >
       <SelectAdapter {...props} />
     </DraggableSortable>

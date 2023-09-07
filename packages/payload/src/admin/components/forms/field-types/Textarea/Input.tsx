@@ -62,11 +62,11 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
 
   return (
     <div
+      className={classes}
       style={{
         ...style,
         width,
       }}
-      className={classes}
     >
       <Error message={errorMessage} showError={showError} />
       <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />

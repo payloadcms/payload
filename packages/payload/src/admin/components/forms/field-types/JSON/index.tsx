@@ -71,11 +71,11 @@ const JSONField: React.FC<Props> = (props) => {
 
   return (
     <div
+      className={classes}
       style={{
         ...style,
         width,
       }}
-      className={classes}
     >
       <Error message={errorMessage} showError={showError} />
       <Label htmlFor={`field-${path}`} label={label} required={required} />

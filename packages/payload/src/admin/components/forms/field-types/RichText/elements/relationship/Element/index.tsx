@@ -156,26 +156,26 @@ const Element: React.FC<Props> = (props) => {
           disabled={fieldProps?.admin?.readOnly}
         >
           <Button
-            onClick={() => {
-              // do nothing
-            }}
             buttonStyle="icon-label"
             disabled={fieldProps?.admin?.readOnly}
             el="div"
             icon="swap"
+            onClick={() => {
+              // do nothing
+            }}
             round
             tooltip={t('swapRelationship')}
           />
         </ListDrawerToggler>
         <Button
-          onClick={(e) => {
-            e.preventDefault()
-            removeRelationship()
-          }}
           buttonStyle="icon-label"
           className={`${baseClass}__removeButton`}
           disabled={fieldProps?.admin?.readOnly}
           icon="x"
+          onClick={(e) => {
+            e.preventDefault()
+            removeRelationship()
+          }}
           round
           tooltip={t('fields:removeRelationship')}
         />

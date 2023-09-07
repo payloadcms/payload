@@ -103,11 +103,11 @@ const CompareVersion: React.FC<Props> = (props) => {
       <div className={`${baseClass}__label`}>{t('compareVersion')}</div>
       {!errorLoading && (
         <ReactSelect
+          isSearchable={false}
+          onChange={onChange}
           onMenuScrollToBottom={() => {
             getResults({ lastLoadedPage: lastLoadedPage + 1 })
           }}
-          isSearchable={false}
-          onChange={onChange}
           options={options}
           placeholder={t('selectVersionToCompare')}
           value={value}

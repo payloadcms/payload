@@ -24,6 +24,9 @@ const CodeEditor: React.FC<Props> = (props) => {
 
   return (
     <Editor
+      className={classes}
+      height={height}
+      loading={<ShimmerEffect height={height} />}
       options={{
         detectIndentation: true,
         minimap: {
@@ -35,9 +38,6 @@ const CodeEditor: React.FC<Props> = (props) => {
         wordWrap: 'on',
         ...options,
       }}
-      className={classes}
-      height={height}
-      loading={<ShimmerEffect height={height} />}
       theme={theme === 'dark' ? 'vs-dark' : 'vs'}
       {...rest}
     />

@@ -29,14 +29,14 @@ const ColumnSelector: React.FC<Props> = (props) => {
 
   return (
     <DraggableSortable
+      className={baseClass}
+      ids={columns.map((col) => col.accessor)}
       onDragEnd={({ moveFromIndex, moveToIndex }) => {
         moveColumn({
           fromIndex: moveFromIndex,
           toIndex: moveToIndex,
         })
       }}
-      className={baseClass}
-      ids={columns.map((col) => col.accessor)}
     >
       {columns.map((col, i) => {
         const { accessor, active, label, name } = col
@@ -45,18 +45,18 @@ const ColumnSelector: React.FC<Props> = (props) => {
 
         return (
           <Pill
+            alignIcon="left"
+            aria-checked={active}
             className={[`${baseClass}__column`, active && `${baseClass}__column--active`]
               .filter(Boolean)
               .join(' ')}
-            onClick={() => {
-              toggleColumn(accessor)
-            }}
-            alignIcon="left"
-            aria-checked={active}
             draggable
             icon={active ? <X /> : <Plus />}
             id={accessor}
             key={`${collection.slug}-${col.name || i}${editDepth ? `-${editDepth}-` : ''}${uuid}`}
+            onClick={() => {
+              toggleColumn(accessor)
+            }}
           >
             {getTranslation(label || name, i18n)}
           </Pill>

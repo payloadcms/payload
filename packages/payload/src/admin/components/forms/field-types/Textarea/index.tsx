@@ -64,14 +64,14 @@ const Textarea: React.FC<Props> = (props) => {
 
   return (
     <TextareaInput
-      onChange={(e) => {
-        setValue(e.target.value)
-      }}
       className={className}
       description={description}
       errorMessage={errorMessage}
       label={label}
       name={name}
+      onChange={(e) => {
+        setValue(e.target.value)
+      }}
       path={path}
       placeholder={getTranslation(placeholder, i18n)}
       readOnly={readOnly}

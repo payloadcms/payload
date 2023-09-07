@@ -64,12 +64,12 @@ const RelationshipButton: React.FC<Props> = ({ enabledCollectionSlugs }) => {
     <Fragment>
       <ListDrawerToggler>
         <ElementButton
-          onClick={() => {
-            // do nothing
-          }}
           className={baseClass}
           el="div"
           format="relationship"
+          onClick={() => {
+            // do nothing
+          }}
           tooltip={t('addRelationship')}
         >
           <RelationshipIcon />

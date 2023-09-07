@@ -147,6 +147,8 @@ const Upload: React.FC<Props> = (props) => {
       <Error message={errorMessage} showError={showError} />
       {doc.filename && !replacingFile && (
         <FileDetails
+          collection={collection}
+          doc={doc}
           handleRemove={
             canRemoveUpload
               ? () => {
@@ -155,8 +157,6 @@ const Upload: React.FC<Props> = (props) => {
                 }
               : undefined
           }
-          collection={collection}
-          doc={doc}
         />
       )}
       {(!doc.filename || replacingFile) && (
@@ -172,12 +172,12 @@ const Upload: React.FC<Props> = (props) => {
                   value={value.name}
                 />
                 <Button
+                  buttonStyle="none"
+                  icon="x"
                   onClick={() => {
                     setValue(null)
                     inputRef.current.value = null
                   }}
-                  buttonStyle="none"
-                  icon="x"
                   tooltip={t('general:cancel')}
                 />
               </div>
@@ -186,13 +186,13 @@ const Upload: React.FC<Props> = (props) => {
           {!value && (
             <React.Fragment>
               <div
+                className={`${baseClass}__drop-zone`}
                 onPaste={(e) => {
                   if (e?.clipboardData?.files.length) {
                     const fileObject = e.clipboardData.files[0]
                     if (fileObject) setValue(fileObject)
                   }
                 }}
-                className={`${baseClass}__drop-zone`}
                 ref={dropRef}
               >
                 <Button

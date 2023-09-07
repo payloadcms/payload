@@ -110,11 +110,11 @@ const EditMany: React.FC<Props> = (props) => {
   return (
     <div className={baseClass}>
       <DrawerToggler
+        aria-label={t('edit')}
+        className={`${baseClass}__toggle`}
         onClick={() => {
           setSelected([])
         }}
-        aria-label={t('edit')}
-        className={`${baseClass}__toggle`}
         slug={drawerSlug}
       >
         {t('edit')}

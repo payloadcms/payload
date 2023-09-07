@@ -122,6 +122,8 @@ export const LinkElement: React.FC<{
       <span contentEditable={false} style={{ userSelect: 'none' }}>
         {renderModal && (
           <LinkDrawer
+            drawerSlug={drawerSlug}
+            fieldSchema={fieldSchema}
             handleClose={() => {
               toggleModal(drawerSlug)
               setRenderModal(false)
@@ -130,16 +132,20 @@ export const LinkElement: React.FC<{
               insertChange(editor, fields, customFieldSchema)
               closeModal(drawerSlug)
             }}
-            drawerSlug={drawerSlug}
-            fieldSchema={fieldSchema}
             initialState={initialState}
           />
         )}
         <Popup
+          boundingRef={editorRef}
+          buttonType="none"
+          forceOpen={renderPopup}
+          horizontalAlign="left"
+          onToggleOpen={handleTogglePopup}
           render={() => (
             <div className={`${baseClass}__popup`}>
               {element.linkType === 'internal' && element.doc?.relationTo && element.doc?.value && (
                 <Trans
+                  i18nKey="fields:linkedTo"
                   values={{
                     label: getTranslation(
                       config.collections.find(({ slug }) => slug === element.doc.relationTo)?.labels
@@ -147,7 +153,6 @@ export const LinkElement: React.FC<{
                       i18n,
                     ),
                   }}
-                  i18nKey="fields:linkedTo"
                 >
                   <a
                     className={`${baseClass}__link-label`}
@@ -170,46 +175,41 @@ export const LinkElement: React.FC<{
                 </a>
               )}
               <Button
+                buttonStyle="icon-label"
+                className={`${baseClass}__link-edit`}
+                icon="edit"
                 onClick={(e) => {
                   e.preventDefault()
                   setRenderPopup(false)
                   openModal(drawerSlug)
                   setRenderModal(true)
                 }}
-                buttonStyle="icon-label"
-                className={`${baseClass}__link-edit`}
-                icon="edit"
                 round
                 tooltip={t('general:edit')}
               />
               <Button
+                buttonStyle="icon-label"
+                className={`${baseClass}__link-close`}
+                icon="x"
                 onClick={(e) => {
                   e.preventDefault()
                   unwrapLink(editor)
                 }}
-                buttonStyle="icon-label"
-                className={`${baseClass}__link-close`}
-                icon="x"
                 round
                 tooltip={t('general:remove')}
               />
             </div>
           )}
-          boundingRef={editorRef}
-          buttonType="none"
-          forceOpen={renderPopup}
-          horizontalAlign="left"
-          onToggleOpen={handleTogglePopup}
           size="small"
           verticalAlign="bottom"
         />
       </span>
       <span
+        className={[`${baseClass}__popup-toggler`].filter(Boolean).join(' ')}
+        onClick={() => setRenderPopup(true)}
         onKeyDown={(e) => {
           if (e.key === 'Enter') setRenderPopup(true)
         }}
-        className={[`${baseClass}__popup-toggler`].filter(Boolean).join(' ')}
-        onClick={() => setRenderPopup(true)}
         role="button"
         tabIndex={0}
       >

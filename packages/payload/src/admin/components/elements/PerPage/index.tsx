@@ -41,6 +41,7 @@ const PerPage: React.FC<Props> = ({
             <Chevron />
           </strong>
         }
+        horizontalAlign="right"
         render={({ close }) => (
           <div>
             <ul>
@@ -79,7 +80,6 @@ const PerPage: React.FC<Props> = ({
             </ul>
           </div>
         )}
-        horizontalAlign="right"
       />
     </div>
   )

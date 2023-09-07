@@ -50,15 +50,15 @@ const Text: React.FC<Props> = (props) => {
 
   return (
     <TextInput
-      onChange={(e) => {
-        setValue(e.target.value)
-      }}
       className={className}
       description={description}
       errorMessage={errorMessage}
       inputRef={inputRef}
       label={label}
       name={name}
+      onChange={(e) => {
+        setValue(e.target.value)
+      }}
       path={path}
       placeholder={placeholder}
       readOnly={readOnly}

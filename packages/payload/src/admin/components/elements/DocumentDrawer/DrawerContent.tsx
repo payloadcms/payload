@@ -105,6 +105,8 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
   return (
     <RenderCustomComponent
+      CustomComponent={collectionConfig.admin?.components?.views?.Edit}
+      DefaultComponent={DefaultEdit}
       componentProps={{
         action,
         apiURL,
@@ -144,8 +146,6 @@ const Content: React.FC<DocumentDrawerProps> = ({
         onSave,
         permissions: permissions.collections[collectionConfig.slug],
       }}
-      CustomComponent={collectionConfig.admin?.components?.views?.Edit}
-      DefaultComponent={DefaultEdit}
     />
   )
 }

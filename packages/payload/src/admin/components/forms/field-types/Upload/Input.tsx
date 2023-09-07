@@ -135,11 +135,11 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
 
   return (
     <div
+      className={classes}
       style={{
         ...style,
         width,
       }}
-      className={classes}
     >
       <GetFilterOptions
         {...{
@@ -156,6 +156,8 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
         <React.Fragment>
           {file && !missingFile && (
             <FileDetails
+              collection={collection}
+              doc={file}
               handleRemove={
                 readOnly
                   ? undefined
@@ -163,8 +165,6 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
                       onChange(null)
                     }
               }
-              collection={collection}
-              doc={file}
             />
           )}
           {(!file || missingFile) && (

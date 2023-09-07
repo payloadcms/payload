@@ -25,12 +25,12 @@ export const MultiValueRemove: React.FC<
 
   return (
     <button
+      aria-label={t('remove')}
+      className={[baseClass, className].filter(Boolean).join(' ')}
       onClick={(e) => {
         setShowTooltip(false)
         onClick(e)
       }}
-      aria-label={t('remove')}
-      className={[baseClass, className].filter(Boolean).join(' ')}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
       onTouchEnd={onTouchEnd}

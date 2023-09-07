@@ -72,12 +72,12 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
 
   return (
     <div
-      style={{
-        transform,
-      }}
       id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
       key={`${parentPath}-row-${rowIndex}`}
       ref={setNodeRef}
+      style={{
+        transform,
+      }}
     >
       <Collapsible
         actions={
@@ -96,6 +96,9 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             />
           ) : undefined
         }
+        className={classNames}
+        collapsed={row.collapsed}
+        collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         dragHandleProps={{
           attributes,
           id: row.id,
@@ -116,19 +119,16 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             {fieldHasErrors && <ErrorPill count={childErrorPathsCount} withMessage />}
           </div>
         }
-        className={classNames}
-        collapsed={row.collapsed}
-        collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
         <RenderFields
+          className={`${baseClass}__fields`}
           fieldSchema={blockToRender.fields.map((field) => ({
             ...field,
             path: createNestedFieldPath(path, field),
           }))}
-          className={`${baseClass}__fields`}
           fieldTypes={fieldTypes}
           indexPath={indexPath}
           permissions={permissions?.blocks?.[row.blockType]?.fields}

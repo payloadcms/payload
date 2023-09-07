@@ -87,6 +87,8 @@ const RenderFields: React.FC<Props> = (props) => {
                   if (FieldComponent) {
                     return (
                       <RenderCustomComponent
+                        CustomComponent={field?.admin?.components?.Field}
+                        DefaultComponent={FieldComponent}
                         componentProps={{
                           ...field,
                           admin: {
@@ -100,8 +102,6 @@ const RenderFields: React.FC<Props> = (props) => {
                           path: field.path || (isFieldAffectingData ? field.name : ''),
                           permissions: fieldPermissions,
                         }}
-                        CustomComponent={field?.admin?.components?.Field}
-                        DefaultComponent={FieldComponent}
                         key={fieldIndex}
                       />
                     )

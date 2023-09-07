@@ -35,6 +35,8 @@ const Dashboard: React.FC = () => {
 
   return (
     <RenderCustomComponent
+      CustomComponent={CustomDashboard}
+      DefaultComponent={DefaultDashboard}
       componentProps={{
         collections: collections.filter(
           (collection) => permissions?.collections?.[collection.slug]?.read?.permission,
@@ -43,8 +45,6 @@ const Dashboard: React.FC = () => {
         permissions,
         user,
       }}
-      CustomComponent={CustomDashboard}
-      DefaultComponent={DefaultDashboard}
     />
   )
 }

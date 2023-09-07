@@ -261,6 +261,8 @@ const RelationshipField: React.FC<Props> = (props) => {
     <div className={classes}>
       {!errorLoading && (
         <ReactSelect
+          isMulti={hasMany}
+          isSortable={isSortable}
           onChange={(selected) => {
             if (hasMany) {
               onChange(
@@ -286,12 +288,10 @@ const RelationshipField: React.FC<Props> = (props) => {
               onChange(selected.value)
             }
           }}
+          onInputChange={handleInputChange}
           onMenuScrollToBottom={() => {
             getResults({ lastFullyLoadedRelation, lastLoadedPage: lastLoadedPage + 1 })
           }}
-          isMulti={hasMany}
-          isSortable={isSortable}
-          onInputChange={handleInputChange}
           options={options}
           placeholder={t('selectValue')}
           value={valueToRender}

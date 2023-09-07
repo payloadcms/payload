@@ -71,10 +71,10 @@ export const UploadDrawer: React.FC<
 
   return (
     <Drawer
+      slug={drawerSlug}
       title={t('general:editLabel', {
         label: getTranslation(relatedCollection.labels.singular, i18n),
       })}
-      slug={drawerSlug}
     >
       <Form initialState={initialState} onSubmit={handleUpdateEditData}>
         <RenderFields fieldSchema={fieldSchema} fieldTypes={fieldTypes} readOnly={false} />

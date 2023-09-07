@@ -96,13 +96,13 @@ const DeleteDocument: React.FC<Props> = (props) => {
     return (
       <React.Fragment>
         <Button
+          buttonStyle="none"
+          className={`${baseClass}__toggle`}
+          id={buttonId}
           onClick={() => {
             setDeleting(false)
             toggleModal(modalSlug)
           }}
-          buttonStyle="none"
-          className={`${baseClass}__toggle`}
-          id={buttonId}
         >
           {t('delete')}
         </Button>

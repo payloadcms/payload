@@ -83,14 +83,14 @@ const PreviewButton: React.FC<Props> = ({ CustomComponent, generatePreviewURL })
 
   return (
     <RenderCustomComponent
+      CustomComponent={CustomComponent}
+      DefaultComponent={DefaultPreviewButton}
       componentProps={{
         DefaultButton: DefaultPreviewButton,
         disabled: isLoading || !generatePreviewURL,
         label: isLoading ? t('general:loading') : t('preview'),
         preview,
       }}
-      CustomComponent={CustomComponent}
-      DefaultComponent={DefaultPreviewButton}
     />
   )
 }

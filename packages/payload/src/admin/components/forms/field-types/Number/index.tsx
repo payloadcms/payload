@@ -113,21 +113,27 @@ const NumberField: React.FC<Props> = (props) => {
 
   return (
     <div
+      className={classes}
       style={{
         ...style,
         width,
       }}
-      className={classes}
     >
       <Error message={errorMessage} showError={showError} />
       <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       {hasMany ? (
         <ReactSelect
+          className={`field-${path.replace(/\./g, '__')}`}
+          disabled={readOnly}
           filterOption={(option, rawInput) => {
             // eslint-disable-next-line no-restricted-globals
             const isOverHasMany = Array.isArray(value) && value.length >= maxRows
             return isNumber(rawInput) && !isOverHasMany
           }}
+          isClearable
+          isCreatable
+          isMulti
+          isSortable
           noOptionsMessage={({ inputValue }) => {
             const isOverHasMany = Array.isArray(value) && value.length >= maxRows
             if (isOverHasMany) {
@@ -135,12 +141,6 @@ const NumberField: React.FC<Props> = (props) => {
             }
             return t('general:noOptions')
           }}
-          className={`field-${path.replace(/\./g, '__')}`}
-          disabled={readOnly}
-          isClearable
-          isCreatable
-          isMulti
-          isSortable
           numberOnly
           onChange={handleHasManyChange}
           options={[]}
@@ -150,15 +150,15 @@ const NumberField: React.FC<Props> = (props) => {
         />
       ) : (
         <input
+          disabled={readOnly}
+          id={`field-${path.replace(/\./g, '__')}`}
+          name={path}
+          onChange={handleChange}
           onWheel={(e) => {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             e.target.blur()
           }}
-          disabled={readOnly}
-          id={`field-${path.replace(/\./g, '__')}`}
-          name={path}
-          onChange={handleChange}
           placeholder={getTranslation(placeholder, i18n)}
           step={step}
           type="number"

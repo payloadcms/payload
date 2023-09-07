@@ -63,6 +63,8 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
             return (
               <li className={`${baseClass}__block`} key={index}>
                 <ThumbnailCard
+                  alignLabel="center"
+                  label={getTranslation(blockLabels.singular, i18n)}
                   onClick={() => {
                     addRow(addRowIndex, slug)
                     closeModal(drawerSlug)
@@ -76,8 +78,6 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
                       </div>
                     )
                   }
-                  alignLabel="center"
-                  label={getTranslation(blockLabels.singular, i18n)}
                 />
               </li>
             )

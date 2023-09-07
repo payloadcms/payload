@@ -160,10 +160,10 @@ const Popup: React.FC<Props> = (props) => {
       <div className={`${baseClass}__content`} ref={contentRef}>
         <div className={`${baseClass}__wrap`} ref={intersectionRef}>
           <div
+            className={`${baseClass}__scroll`}
             style={{
               padding,
             }}
-            className={`${baseClass}__scroll`}
           >
             {render && render({ close: () => setActive(false) })}
             {children && children}

@@ -99,14 +99,14 @@ const CollapsibleField: React.FC<Props> = (props) => {
     <div id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./g, '__')}` : ''}`}>
       <WatchChildErrors fieldSchema={fields} path={path} setErrorCount={setErrorCount} />
       <Collapsible
+        className={classes}
+        collapsibleStyle={errorCount > 0 ? 'error' : 'default'}
         header={
           <div className={`${baseClass}__row-label-wrap`}>
             <RowLabel label={label} path={path} />
             {errorCount > 0 && <ErrorPill count={errorCount} withMessage />}
           </div>
         }
-        className={classes}
-        collapsibleStyle={errorCount > 0 ? 'error' : 'default'}
         initCollapsed={collapsedOnMount}
         onToggle={onToggle}
       >

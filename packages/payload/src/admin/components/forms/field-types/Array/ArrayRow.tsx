@@ -77,12 +77,12 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
 
   return (
     <div
-      style={{
-        transform,
-      }}
       id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
       key={`${parentPath}-row-${row.id}`}
       ref={setNodeRef}
+      style={{
+        transform,
+      }}
     >
       <Collapsible
         actions={
@@ -98,6 +98,9 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             />
           ) : undefined
         }
+        className={classNames}
+        collapsed={row.collapsed}
+        collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         dragHandleProps={{
           attributes,
           id: row.id,
@@ -113,18 +116,15 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             {fieldHasErrors && <ErrorPill count={childErrorPathsCount} withMessage />}
           </div>
         }
-        className={classNames}
-        collapsed={row.collapsed}
-        collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
         <HiddenInput name={`${path}.id`} value={row.id} />
         <RenderFields
+          className={`${baseClass}__fields`}
           fieldSchema={fields.map((field) => ({
             ...field,
             path: createNestedFieldPath(path, field),
           }))}
-          className={`${baseClass}__fields`}
           fieldTypes={fieldTypes}
           indexPath={indexPath}
           permissions={permissions?.fields}

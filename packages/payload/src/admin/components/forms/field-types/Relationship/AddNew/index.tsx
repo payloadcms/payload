@@ -159,6 +159,9 @@ export const AddNewRelation: React.FC<Props> = ({
                   <Plus />
                 </Button>
               }
+              buttonType="custom"
+              horizontalAlign="center"
+              onToggleOpen={onPopopToggle}
               render={({ close: closePopup }) => (
                 <ul className={`${baseClass}__relations`}>
                   {relatedCollections.map((relatedCollection) => {
@@ -166,11 +169,11 @@ export const AddNewRelation: React.FC<Props> = ({
                       return (
                         <li key={relatedCollection.slug}>
                           <button
+                            className={`${baseClass}__relation-button ${baseClass}__relation-button--${relatedCollection.slug}`}
                             onClick={() => {
                               closePopup()
                               setSelectedCollection(relatedCollection.slug)
                             }}
-                            className={`${baseClass}__relation-button ${baseClass}__relation-button--${relatedCollection.slug}`}
                             type="button"
                           >
                             {getTranslation(relatedCollection.labels.singular, i18n)}
@@ -183,9 +186,6 @@ export const AddNewRelation: React.FC<Props> = ({
                   })}
                 </ul>
               )}
-              buttonType="custom"
-              horizontalAlign="center"
-              onToggleOpen={onPopopToggle}
             />
             {collectionConfig &&
               permissions.collections[collectionConfig.slug].create.permission && (

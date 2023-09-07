@@ -98,14 +98,14 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
 
   return (
     <RenderCustomComponent
+      CustomComponent={CustomComponent}
+      DefaultComponent={DefaultSaveDraftButton}
       componentProps={{
         DefaultButton: DefaultSaveDraftButton,
         disabled: !canSaveDraft,
         label: t('saveDraft'),
         saveDraft,
       }}
-      CustomComponent={CustomComponent}
-      DefaultComponent={DefaultSaveDraftButton}
     />
   )
 }

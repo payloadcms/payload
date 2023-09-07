@@ -309,11 +309,11 @@ const RichText: React.FC<Props> = (props) => {
 
   return (
     <div
+      className={classes}
       style={{
         ...style,
         width,
       }}
-      className={classes}
     >
       <div className={`${baseClass}__wrap`}>
         <Error message={errorMessage} showError={showError} />
@@ -364,6 +364,8 @@ const RichText: React.FC<Props> = (props) => {
             </div>
             <div className={`${baseClass}__editor`} ref={editorRef}>
               <Editable
+                className={`${baseClass}__input`}
+                id={`field-${path.replace(/\./g, '__')}`}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     if (event.shiftKey) {
@@ -426,8 +428,6 @@ const RichText: React.FC<Props> = (props) => {
                     }
                   })
                 }}
-                className={`${baseClass}__input`}
-                id={`field-${path.replace(/\./g, '__')}`}
                 placeholder={getTranslation(placeholder, i18n)}
                 readOnly={readOnly}
                 renderElement={renderElement}

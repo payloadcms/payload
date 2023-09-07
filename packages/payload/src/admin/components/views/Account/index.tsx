@@ -114,6 +114,8 @@ const AccountView: React.FC = () => {
 
   return (
     <RenderCustomComponent
+      CustomComponent={CustomAccount}
+      DefaultComponent={DefaultAccount}
       componentProps={{
         action,
         apiURL,
@@ -125,8 +127,6 @@ const AccountView: React.FC = () => {
         onSave,
         permissions: docPermissions,
       }}
-      CustomComponent={CustomAccount}
-      DefaultComponent={DefaultAccount}
     />
   )
 }

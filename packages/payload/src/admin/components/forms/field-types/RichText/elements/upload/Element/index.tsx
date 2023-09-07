@@ -160,12 +160,12 @@ const Element: React.FC<ElementProps> = (props) => {
                   slug={drawerSlug}
                 >
                   <Button
-                    onClick={(e) => {
-                      e.preventDefault()
-                    }}
                     buttonStyle="icon-label"
                     el="div"
                     icon="edit"
+                    onClick={(e) => {
+                      e.preventDefault()
+                    }}
                     round
                     tooltip={t('fields:editRelationship')}
                   />
@@ -176,26 +176,26 @@ const Element: React.FC<ElementProps> = (props) => {
                 disabled={fieldProps?.admin?.readOnly}
               >
                 <Button
-                  onClick={() => {
-                    // do nothing
-                  }}
                   buttonStyle="icon-label"
                   disabled={fieldProps?.admin?.readOnly}
                   el="div"
                   icon="swap"
+                  onClick={() => {
+                    // do nothing
+                  }}
                   round
                   tooltip={t('swapUpload')}
                 />
               </ListDrawerToggler>
               <Button
-                onClick={(e) => {
-                  e.preventDefault()
-                  removeUpload()
-                }}
                 buttonStyle="icon-label"
                 className={`${baseClass}__removeButton`}
                 disabled={fieldProps?.admin?.readOnly}
                 icon="x"
+                onClick={(e) => {
+                  e.preventDefault()
+                  removeUpload()
+                }}
                 round
                 tooltip={t('removeUpload')}
               />

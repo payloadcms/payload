@@ -23,11 +23,11 @@ const Row: React.FC<Props> = (props) => {
   return (
     <RowProvider>
       <RenderFields
+        className={classes}
         fieldSchema={fields.map((field) => ({
           ...field,
           path: createNestedFieldPath(path, field),
         }))}
-        className={classes}
         fieldTypes={fieldTypes}
         indexPath={indexPath}
         permissions={permissions}

@@ -20,6 +20,7 @@ const DraggablePill: React.FC<Props> = (props) => {
   return (
     <StaticPill
       {...props}
+      className={[isDragging && `${baseClass}--is-dragging`, className].filter(Boolean).join(' ')}
       elementProps={{
         ...listeners,
         ...attributes,
@@ -28,7 +29,6 @@ const DraggablePill: React.FC<Props> = (props) => {
           transform,
         },
       }}
-      className={[isDragging && `${baseClass}--is-dragging`, className].filter(Boolean).join(' ')}
     />
   )
 }

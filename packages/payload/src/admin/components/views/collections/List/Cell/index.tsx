@@ -98,6 +98,8 @@ const Cell: React.FC<Props> = (props) => {
 
   return (
     <RenderCustomComponent
+      CustomComponent={CustomCell}
+      DefaultComponent={DefaultCell}
       componentProps={{
         cellData,
         className,
@@ -108,8 +110,6 @@ const Cell: React.FC<Props> = (props) => {
         onClick,
         rowData,
       }}
-      CustomComponent={CustomCell}
-      DefaultComponent={DefaultCell}
     />
   )
 }

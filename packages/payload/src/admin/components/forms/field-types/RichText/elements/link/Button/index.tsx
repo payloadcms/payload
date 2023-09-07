@@ -84,6 +84,8 @@ export const LinkButton: React.FC<{
   return (
     <Fragment>
       <ElementButton
+        className="link"
+        format="link"
         onClick={async () => {
           if (isElementActive(editor, 'link')) {
             unwrapLink(editor)
@@ -111,13 +113,13 @@ export const LinkButton: React.FC<{
             }
           }
         }}
-        className="link"
-        format="link"
         tooltip={t('fields:addLink')}
       >
         <LinkIcon />
       </ElementButton>
       <LinkDrawer
+        drawerSlug={drawerSlug}
+        fieldSchema={fieldSchema}
         handleClose={() => {
           closeModal(drawerSlug)
         }}
@@ -125,8 +127,6 @@ export const LinkButton: React.FC<{
           insertLink(editor, fields)
           closeModal(drawerSlug)
         }}
-        drawerSlug={drawerSlug}
-        fieldSchema={fieldSchema}
         initialState={initialState}
       />
     </Fragment>

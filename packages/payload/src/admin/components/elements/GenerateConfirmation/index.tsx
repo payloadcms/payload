@@ -31,10 +31,10 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
   return (
     <React.Fragment>
       <Button
+        buttonStyle="secondary"
         onClick={() => {
           toggleModal(modalSlug)
         }}
-        buttonStyle="secondary"
         size="small"
       >
         {t('generateNewAPIKey')}
@@ -50,10 +50,10 @@ const GenerateConfirmation: React.FC<Props> = (props) => {
           </p>
 
           <Button
+            buttonStyle="secondary"
             onClick={() => {
               toggleModal(modalSlug)
             }}
-            buttonStyle="secondary"
             type="button"
           >
             {t('general:cancel')}

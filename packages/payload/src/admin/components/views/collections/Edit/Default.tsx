@@ -126,11 +126,11 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       collection.labels.singular,
                       i18n,
                     )}`}
+                    keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
                     title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
                       collection.labels.singular,
                       i18n,
                     )}`}
-                    keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
                   />
                   {!disableEyebrow && <Eyebrow />}
 
@@ -169,11 +169,11 @@ const DefaultEditView: React.FC<Props> = (props) => {
                     )}
 
                     <RenderFields
+                      fieldSchema={fields}
+                      fieldTypes={fieldTypes}
                       filter={(field) =>
                         !field?.admin?.position || field?.admin?.position !== 'sidebar'
                       }
-                      fieldSchema={fields}
-                      fieldTypes={fieldTypes}
                       permissions={permissions.fields}
                       readOnly={!hasSavePermission}
                     />

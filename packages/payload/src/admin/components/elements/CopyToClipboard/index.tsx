@@ -18,6 +18,7 @@ const CopyToClipboard: React.FC<Props> = ({ defaultMessage, successMessage, valu
   if (value) {
     return (
       <button
+        className={baseClass}
         onClick={() => {
           if (ref && ref.current) {
             ref.current.select()
@@ -34,7 +35,6 @@ const CopyToClipboard: React.FC<Props> = ({ defaultMessage, successMessage, valu
           setHovered(false)
           setCopied(false)
         }}
-        className={baseClass}
         type="button"
       >
         <Copy />

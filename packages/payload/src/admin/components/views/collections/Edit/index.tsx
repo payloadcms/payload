@@ -121,6 +121,8 @@ const EditView: React.FC<IndexProps> = (props) => {
   return (
     <EditDepthContext.Provider value={1}>
       <RenderCustomComponent
+        CustomComponent={CustomEdit}
+        DefaultComponent={DefaultEdit}
         componentProps={{
           action,
           apiURL,
@@ -135,8 +137,6 @@ const EditView: React.FC<IndexProps> = (props) => {
           permissions: docPermissions,
           updatedAt: updatedAt || data?.updatedAt,
         }}
-        CustomComponent={CustomEdit}
-        DefaultComponent={DefaultEdit}
       />
     </EditDepthContext.Provider>
   )

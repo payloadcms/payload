@@ -63,11 +63,11 @@ const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
 
   return (
     <div
+      className={classes}
       style={{
         ...style,
         width,
       }}
-      className={classes}
     >
       <div className={`${baseClass}__error-wrap`}>
         <Error message={errorMessage} showError={showError} />

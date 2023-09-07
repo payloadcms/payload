@@ -82,12 +82,12 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                     )}
                   </header>
                   <RenderFields
+                    fieldSchema={fields}
+                    fieldTypes={fieldTypes}
                     filter={(field) =>
                       !field.admin.position ||
                       (field.admin.position && field.admin.position !== 'sidebar')
                     }
-                    fieldSchema={fields}
-                    fieldTypes={fieldTypes}
                     permissions={permissions.fields}
                     readOnly={!hasSavePermission}
                   />

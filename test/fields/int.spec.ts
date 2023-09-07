@@ -1,8 +1,8 @@
-import type { MongooseAdapter } from '../../packages/db-mongodb/src/index'
 import type { IndexDirection, IndexOptions } from 'mongoose'
 
 import { GraphQLClient } from 'graphql-request'
 
+import type { MongooseAdapter } from '../../packages/db-mongodb/src/index'
 import type { PaginatedDocs } from '../../packages/payload/src/database/types'
 import type { RichTextField } from './payload-types'
 

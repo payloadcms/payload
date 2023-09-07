@@ -91,15 +91,15 @@ const DateTime: React.FC<Props> = (props) => {
       <div className={`${baseClass}__input-wrapper`}>
         <DatePicker
           {...dateTimePickerProps}
+          dropdownMode="select"
+          locale={locale}
+          onChange={(val) => onChange(val)}
           popperModifiers={[
             {
               enabled: true,
               name: 'preventOverflow',
             },
           ]}
-          dropdownMode="select"
-          locale={locale}
-          onChange={(val) => onChange(val)}
           showMonthDropdown
           showYearDropdown
         />

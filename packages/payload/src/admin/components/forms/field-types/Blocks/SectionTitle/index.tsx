@@ -19,14 +19,14 @@ const SectionTitle: React.FC<Props> = (props) => {
   return (
     <div className={classes} data-value={value}>
       <input
+        className={`${baseClass}__input`}
+        id={path}
+        name={path}
         onChange={(e) => {
           e.stopPropagation()
           e.preventDefault()
           setValue(e.target.value)
         }}
-        className={`${baseClass}__input`}
-        id={path}
-        name={path}
         placeholder={t('untitled')}
         readOnly={readOnly}
         type="text"

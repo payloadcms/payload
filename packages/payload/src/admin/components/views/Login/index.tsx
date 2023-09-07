@@ -73,12 +73,12 @@ const Login: React.FC = () => {
           {Array.isArray(beforeLogin) && beforeLogin.map((Component, i) => <Component key={i} />)}
           {!collection.auth.disableLocalStrategy && (
             <Form
+              action={`${serverURL}${api}/${userSlug}/login`}
+              disableSuccessStatus
               initialData={{
                 email: autoLogin && autoLogin.prefillOnly ? autoLogin.email : undefined,
                 password: autoLogin && autoLogin.prefillOnly ? autoLogin.password : undefined,
               }}
-              action={`${serverURL}${api}/${userSlug}/login`}
-              disableSuccessStatus
               method="post"
               onSuccess={onSuccess}
               waitForAutocomplete

@@ -185,6 +185,8 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     >
       <DocumentInfoProvider collection={selectedCollectionConfig}>
         <RenderCustomComponent
+          CustomComponent={selectedCollectionConfig?.admin?.components?.views?.List}
+          DefaultComponent={DefaultList}
           componentProps={{
             collection: {
               ...selectedCollectionConfig,
@@ -206,10 +208,10 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
                     )}
                   </div>
                   <button
+                    className={`${baseClass}__header-close`}
                     onClick={() => {
                       closeModal(drawerSlug)
                     }}
-                    className={`${baseClass}__header-close`}
                     type="button"
                   >
                     <X />
@@ -224,12 +226,12 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
                   <div className={`${baseClass}__select-collection-wrap`}>
                     <Label label={t('selectCollectionToBrowse')} />
                     <ReactSelect
+                      className={`${baseClass}__select-collection`}
+                      onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
                       options={enabledCollectionConfigs.map((coll) => ({
                         label: getTranslation(coll.labels.singular, i18n),
                         value: coll.slug,
                       }))}
-                      className={`${baseClass}__select-collection`}
-                      onChange={setSelectedOption} // this is only changing the options which is not rerunning my effect
                       value={selectedOption}
                     />
                   </div>
@@ -249,8 +251,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             setLimit,
             setSort,
           }}
-          CustomComponent={selectedCollectionConfig?.admin?.components?.views?.List}
-          DefaultComponent={DefaultList}
         />
       </DocumentInfoProvider>
       <DocumentDrawer onSave={onCreateNew} />

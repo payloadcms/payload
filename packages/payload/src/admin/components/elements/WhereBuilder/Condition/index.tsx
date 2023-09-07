@@ -87,6 +87,7 @@ const Condition: React.FC<Props> = (props) => {
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
+              disabled={!fieldValue}
               onChange={(operator) => {
                 dispatch({
                   andIndex,
@@ -95,13 +96,14 @@ const Condition: React.FC<Props> = (props) => {
                   type: 'update',
                 })
               }}
-              disabled={!fieldValue}
               options={activeField.operators}
               value={activeField.operators.find((operator) => operatorValue === operator.value)}
             />
           </div>
           <div className={`${baseClass}__value`}>
             <RenderCustomComponent
+              CustomComponent={activeField?.props?.admin?.components?.Filter}
+              DefaultComponent={ValueComponent}
               componentProps={{
                 ...activeField?.props,
                 onChange: setInternalValue,
@@ -109,13 +111,15 @@ const Condition: React.FC<Props> = (props) => {
                 options: selectOptions,
                 value: internalValue,
               }}
-              CustomComponent={activeField?.props?.admin?.components?.Filter}
-              DefaultComponent={ValueComponent}
             />
           </div>
         </div>
         <div className={`${baseClass}__actions`}>
           <Button
+            buttonStyle="icon-label"
+            className={`${baseClass}__actions-remove`}
+            icon="x"
+            iconStyle="with-border"
             onClick={() =>
               dispatch({
                 andIndex,
@@ -123,13 +127,13 @@ const Condition: React.FC<Props> = (props) => {
                 type: 'remove',
               })
             }
-            buttonStyle="icon-label"
-            className={`${baseClass}__actions-remove`}
-            icon="x"
-            iconStyle="with-border"
             round
           />
           <Button
+            buttonStyle="icon-label"
+            className={`${baseClass}__actions-add`}
+            icon="plus"
+            iconStyle="with-border"
             onClick={() =>
               dispatch({
                 andIndex: andIndex + 1,
@@ -139,10 +143,6 @@ const Condition: React.FC<Props> = (props) => {
                 type: 'add',
               })
             }
-            buttonStyle="icon-label"
-            className={`${baseClass}__actions-add`}
-            icon="plus"
-            iconStyle="with-border"
             round
           />
         </div>

@@ -166,15 +166,15 @@ const WhereBuilder: React.FC<Props> = (props) => {
             ))}
           </ul>
           <Button
-            onClick={() => {
-              if (reducedFields.length > 0)
-                dispatchConditions({ field: reducedFields[0].value, type: 'add' })
-            }}
             buttonStyle="icon-label"
             className={`${baseClass}__add-or`}
             icon="plus"
             iconPosition="left"
             iconStyle="with-border"
+            onClick={() => {
+              if (reducedFields.length > 0)
+                dispatchConditions({ field: reducedFields[0].value, type: 'add' })
+            }}
           >
             {t('or')}
           </Button>
@@ -184,15 +184,15 @@ const WhereBuilder: React.FC<Props> = (props) => {
         <div className={`${baseClass}__no-filters`}>
           <div className={`${baseClass}__label`}>{t('noFiltersSet')}</div>
           <Button
-            onClick={() => {
-              if (reducedFields.length > 0)
-                dispatchConditions({ field: reducedFields[0].value, type: 'add' })
-            }}
             buttonStyle="icon-label"
             className={`${baseClass}__add-first-filter`}
             icon="plus"
             iconPosition="left"
             iconStyle="with-border"
+            onClick={() => {
+              if (reducedFields.length > 0)
+                dispatchConditions({ field: reducedFields[0].value, type: 'add' })
+            }}
           >
             {t('addFilter')}
           </Button>

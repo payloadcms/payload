@@ -95,11 +95,11 @@ const PublishMany: React.FC<Props> = (props) => {
   return (
     <React.Fragment>
       <Pill
+        className={`${baseClass}__toggle`}
         onClick={() => {
           setSubmitted(false)
           toggleModal(modalSlug)
         }}
-        className={`${baseClass}__toggle`}
       >
         {t('publish')}
       </Pill>

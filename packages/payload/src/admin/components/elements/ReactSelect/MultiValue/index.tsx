@@ -35,6 +35,7 @@ export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
   return (
     <SelectComponents.MultiValue
       {...props}
+      className={classes}
       innerProps={{
         ...innerProps,
         ...attributes,
@@ -50,7 +51,6 @@ export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
           transform,
         },
       }}
-      className={classes}
     />
   )
 }

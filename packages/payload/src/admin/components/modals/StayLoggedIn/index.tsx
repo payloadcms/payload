@@ -32,11 +32,11 @@ const StayLoggedInModal: React.FC<Props> = (props) => {
         <p>{t('youAreInactive')}</p>
         <div className={`${baseClass}__actions`}>
           <Button
+            buttonStyle="secondary"
             onClick={() => {
               toggleModal(modalSlug)
               history.push(`${admin}${logoutRoute}`)
             }}
-            buttonStyle="secondary"
           >
             {t('logOut')}
           </Button>

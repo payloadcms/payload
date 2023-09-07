@@ -82,6 +82,8 @@ const ToolbarButton: React.FC<{ path: string }> = ({ path }) => {
             <Text label="Label" name="label" required />
             <Text label="URL" name="href" required />
             <Select
+              label="Style"
+              name="style"
               options={[
                 {
                   label: 'Primary',
@@ -92,8 +94,6 @@ const ToolbarButton: React.FC<{ path: string }> = ({ path }) => {
                   value: 'secondary',
                 },
               ]}
-              label="Style"
-              name="style"
             />
             <Checkbox label="Open in new tab" name="newTab" />
             <Submit>Add button</Submit>

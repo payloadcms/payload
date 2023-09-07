@@ -12,10 +12,10 @@ const baseClass = 'row-label'
 export const RowLabel: React.FC<Props> = ({ className, ...rest }) => {
   return (
     <span
+      className={[baseClass, className].filter(Boolean).join(' ')}
       style={{
         pointerEvents: 'none',
       }}
-      className={[baseClass, className].filter(Boolean).join(' ')}
     >
       <RowLabelContent {...rest} />
     </span>

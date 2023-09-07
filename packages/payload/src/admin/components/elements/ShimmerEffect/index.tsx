@@ -15,17 +15,17 @@ export const ShimmerEffect: React.FC<ShimmerEffectT> = ({
 }) => {
   return (
     <div
+      className="shimmer-effect"
       style={{
         height: typeof height === 'number' ? `${height}px` : height,
         width: typeof width === 'number' ? `${width}px` : width,
       }}
-      className="shimmer-effect"
     >
       <div
+        className="shimmer-effect__shine"
         style={{
           animationDelay,
         }}
-        className="shimmer-effect__shine"
       />
     </div>
   )

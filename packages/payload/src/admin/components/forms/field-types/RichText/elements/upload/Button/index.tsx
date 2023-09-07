@@ -57,12 +57,12 @@ const UploadButton: React.FC<ButtonProps> = ({ enabledCollectionSlugs }) => {
     <Fragment>
       <ListDrawerToggler>
         <ElementButton
-          onClick={() => {
-            // do nothing
-          }}
           className={baseClass}
           el="div"
           format="upload"
+          onClick={() => {
+            // do nothing
+          }}
           tooltip={t('fields:addUpload')}
         >
           <UploadIcon />

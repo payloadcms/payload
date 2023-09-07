@@ -25,16 +25,20 @@ export const ArrayAction: React.FC<Props> = ({
   const { t } = useTranslation('general')
   return (
     <Popup
+      button={<More />}
+      buttonClassName={`${baseClass}__button`}
+      className={baseClass}
+      horizontalAlign="center"
       render={({ close }) => {
         return (
           <React.Fragment>
             {index !== 0 && (
               <button
+                className={`${baseClass}__action ${baseClass}__move-up`}
                 onClick={() => {
                   moveRow(index, index - 1)
                   close()
                 }}
-                className={`${baseClass}__action ${baseClass}__move-up`}
                 type="button"
               >
                 <Chevron />
@@ -43,11 +47,11 @@ export const ArrayAction: React.FC<Props> = ({
             )}
             {index < rowCount - 1 && (
               <button
+                className={`${baseClass}__action ${baseClass}__move-down`}
                 onClick={() => {
                   moveRow(index, index + 1)
                   close()
                 }}
-                className={`${baseClass}__action ${baseClass}__move-down`}
                 type="button"
               >
                 <Chevron />
@@ -57,22 +61,22 @@ export const ArrayAction: React.FC<Props> = ({
             {!hasMaxRows && (
               <React.Fragment>
                 <button
+                  className={`${baseClass}__action ${baseClass}__add`}
                   onClick={() => {
                     addRow(index + 1)
                     close()
                   }}
-                  className={`${baseClass}__action ${baseClass}__add`}
                   type="button"
                 >
                   <Plus />
                   {t('addBelow')}
                 </button>
                 <button
+                  className={`${baseClass}__action ${baseClass}__duplicate`}
                   onClick={() => {
                     duplicateRow(index)
                     close()
                   }}
-                  className={`${baseClass}__action ${baseClass}__duplicate`}
                   type="button"
                 >
                   <Copy />
@@ -81,11 +85,11 @@ export const ArrayAction: React.FC<Props> = ({
               </React.Fragment>
             )}
             <button
+              className={`${baseClass}__action ${baseClass}__remove`}
               onClick={() => {
                 removeRow(index)
                 close()
               }}
-              className={`${baseClass}__action ${baseClass}__remove`}
               type="button"
             >
               <X />
@@ -94,10 +98,6 @@ export const ArrayAction: React.FC<Props> = ({
           </React.Fragment>
         )
       }}
-      button={<More />}
-      buttonClassName={`${baseClass}__button`}
-      className={baseClass}
-      horizontalAlign="center"
     />
   )
 }

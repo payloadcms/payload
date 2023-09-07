@@ -25,6 +25,8 @@ const Localizer: React.FC = () => {
     return (
       <div className={baseClass}>
         <Popup
+          button={locale.label}
+          horizontalAlign="left"
           render={({ close }) => (
             <div>
               <span>{t('locales')}</span>
@@ -61,8 +63,6 @@ const Localizer: React.FC = () => {
               </ul>
             </div>
           )}
-          button={locale.label}
-          horizontalAlign="left"
           showScrollbar
         />
       </div>

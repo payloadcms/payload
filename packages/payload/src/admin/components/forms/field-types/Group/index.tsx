@@ -57,11 +57,11 @@ const Group: React.FC<Props> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      id={`field-${path.replace(/\./g, '__')}`}
       style={{
         ...style,
         width,
       }}
-      id={`field-${path.replace(/\./g, '__')}`}
     >
       <WatchChildErrors fieldSchema={fields} path={path} setErrorCount={setErrorCount} />
       <GroupProvider>

@@ -74,22 +74,22 @@ export const Drawer: React.FC<Props> = ({
         className={[className, baseClass, animateIn && `${baseClass}--is-open`]
           .filter(Boolean)
           .join(' ')}
+        slug={slug}
         style={{
           zIndex: zBase + drawerDepth,
         }}
-        slug={slug}
       >
         {drawerDepth === 1 && <div className={`${baseClass}__blur-bg`} />}
         <button
+          aria-label={t('close')}
+          className={`${baseClass}__close`}
+          id={`close-drawer__${slug}`}
+          onClick={() => closeModal(slug)}
           style={{
             width: `calc(${midBreak ? 'var(--gutter-h)' : 'var(--nav-width)'} + ${
               drawerDepth - 1
             } * 25px)`,
           }}
-          aria-label={t('close')}
-          className={`${baseClass}__close`}
-          id={`close-drawer__${slug}`}
-          onClick={() => closeModal(slug)}
           type="button"
         />
         <div className={`${baseClass}__content`}>

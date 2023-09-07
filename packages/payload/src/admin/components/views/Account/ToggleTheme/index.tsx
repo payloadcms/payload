@@ -20,6 +20,9 @@ export const ToggleTheme: React.FC = () => {
 
   return (
     <RadioGroupInput
+      label={t('adminTheme')}
+      name="theme"
+      onChange={onChange}
       options={[
         {
           label: t('automatic'),
@@ -34,9 +37,6 @@ export const ToggleTheme: React.FC = () => {
           value: 'dark',
         },
       ]}
-      label={t('adminTheme')}
-      name="theme"
-      onChange={onChange}
       value={autoMode ? 'auto' : theme}
     />
   )

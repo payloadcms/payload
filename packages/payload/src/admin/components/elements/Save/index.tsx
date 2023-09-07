@@ -45,13 +45,13 @@ export const Save: React.FC<Props> = ({ CustomComponent }) => {
 
   return (
     <RenderCustomComponent
+      CustomComponent={CustomComponent}
+      DefaultComponent={DefaultSaveButton}
       componentProps={{
         DefaultButton: DefaultSaveButton,
         label: t('save'),
         save: submit,
       }}
-      CustomComponent={CustomComponent}
-      DefaultComponent={DefaultSaveButton}
     />
   )
 }

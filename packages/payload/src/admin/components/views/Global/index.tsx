@@ -102,6 +102,8 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   return (
     <RenderCustomComponent
+      CustomComponent={CustomEdit}
+      DefaultComponent={DefaultGlobal}
       componentProps={{
         action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
         apiURL: `${serverURL}${api}/globals/${slug}?locale=${locale}${
@@ -115,8 +117,6 @@ const GlobalView: React.FC<IndexProps> = (props) => {
         permissions: docPermissions,
         updatedAt: updatedAt || dataToRender?.updatedAt,
       }}
-      CustomComponent={CustomEdit}
-      DefaultComponent={DefaultGlobal}
     />
   )
 }

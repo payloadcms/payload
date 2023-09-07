@@ -39,12 +39,12 @@ export const PrePopulateFieldUI: React.FC<{
 
   return (
     <div
+      className="pre-populate-field-ui"
       style={{
         alignItems: 'center',
         display: 'flex',
         justifyContent: 'center',
       }}
-      className="pre-populate-field-ui"
     >
       <button onClick={addDefaults} style={{}} type="button">
         Add default items

@@ -92,6 +92,7 @@ const Routes: React.FC = () => {
     <Suspense fallback={<LoadingOverlayToggle name="route-suspense" show />}>
       <LoadingOverlayToggle name="route-loader" show={isLoadingUser} />
       <Route
+        path={routes.admin}
         render={({ match }) => {
           if (initialized === false) {
             return (
@@ -352,7 +353,6 @@ const Routes: React.FC = () => {
 
           return null
         }}
-        path={routes.admin}
       />
       <StayLoggedIn refreshCookie={refreshCookie} />
     </Suspense>
