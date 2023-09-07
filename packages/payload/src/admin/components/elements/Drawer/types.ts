@@ -3,6 +3,7 @@ import type { HTMLAttributes } from 'react'
 export type Props = {
   children: React.ReactNode
   className?: string
+  closeAreaSize?: 'default' | 'small'
   gutter?: boolean
   header?: React.ReactNode
   slug: string

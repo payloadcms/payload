@@ -31,7 +31,7 @@ import Meta from '../../../utilities/Meta'
 import { OperationContext } from '../../../utilities/OperationProvider'
 import Auth from './Auth'
 import { SetStepNav } from './SetStepNav'
-import Upload from './Upload'
+import { Upload } from './Upload'
 import './index.scss'
 
 const baseClass = 'collection-edit'
@@ -164,9 +164,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       />
                     )}
 
-                    {upload && (
-                      <Upload collection={collection} data={data} internalState={internalState} />
-                    )}
+                    {upload && <Upload collection={collection} internalState={internalState} />}
 
                     <RenderFields
                       fieldSchema={fields}
