@@ -9,6 +9,7 @@ import { PostgresAdapter } from '../types';
 import { operatorMap } from './operatorMap';
 import { BuildQueryJoins } from './buildQuery';
 import { getTableColumnFromPath } from './getTableColumnFromPath';
+import { sanitizeQueryValue } from './sanitizeQueryValue';
 
 type Args = {
   joins: BuildQueryJoins
@@ -66,7 +67,12 @@ export async function parseParams({
                 pathSegments: relationOrPath.split('.'),
                 tableName,
               });
-              constraints.push(operatorMap[operator](tableColumn.table[tableColumn.columnName], where[relationOrPath][operator]));
+              const queryValue = sanitizeQueryValue({
+                field: tableColumn.field,
+                operator,
+                val: where[relationOrPath][operator],
+              });
+              constraints.push(operatorMap[operator](tableColumn.table[tableColumn.columnName], queryValue));
             }
           }
         }

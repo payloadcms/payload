@@ -234,7 +234,7 @@ describe('collections-rest', () => {
         });
 
         const { status, docs } = await client.deleteMany<Post>({
-          where: { title: { eq: 'title' } },
+          where: { title: { equals: 'title' } },
         });
 
         expect(status).toEqual(200);

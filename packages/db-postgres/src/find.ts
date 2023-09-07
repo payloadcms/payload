@@ -13,7 +13,7 @@ export const find: Find = async function find(
     collection,
     where: incomingWhere,
     page = 1,
-    limit: limitArg,
+    limit,
     sort: sortArg,
     locale,
     pagination,
@@ -23,7 +23,6 @@ export const find: Find = async function find(
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config;
   const tableName = toSnakeCase(collection);
   const table = this.tables[tableName];
-  const limit = typeof limitArg === 'number' ? limitArg : collectionConfig.admin.pagination.defaultLimit;
   const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort;
   let totalDocs: number;
   let totalPages: number;
