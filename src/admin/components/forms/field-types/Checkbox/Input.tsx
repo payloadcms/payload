@@ -49,7 +49,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
           type="checkbox"
           name={name}
           aria-label={ariaLabel}
-          checked={Boolean(checked)}
+          defaultChecked={Boolean(checked)}
           disabled={readOnly}
           onInput={onToggle}
         />
