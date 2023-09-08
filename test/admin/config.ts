@@ -13,6 +13,7 @@ import CustomDefaultRoute from './components/routes/CustomDefault'
 import CustomMinimalRoute from './components/routes/CustomMinimal'
 import CustomEditView from './components/views/CustomEdit'
 import CustomVersionsView from './components/views/CustomVersions'
+import CustomView from './components/views/CustomView'
 import { globalSlug, slug } from './shared'
 
 export interface Post {
@@ -159,6 +160,11 @@ export default buildConfigWithDefaults({
             Edit: {
               Default: CustomEditView,
               Versions: CustomVersionsView,
+              MyCustomView: {
+                path: '/custom',
+                Component: CustomView,
+                label: 'Custom',
+              },
             },
           },
         },
@@ -284,6 +290,11 @@ export default buildConfigWithDefaults({
             Edit: {
               Default: CustomEditView,
               Versions: CustomVersionsView,
+              MyCustomView: {
+                path: '/custom',
+                Component: CustomView,
+                label: 'Custom',
+              },
             },
           },
         },

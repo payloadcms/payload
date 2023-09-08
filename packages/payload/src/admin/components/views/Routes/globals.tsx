@@ -25,7 +25,7 @@ export const globalRoutes = (props: {
   }>
   permissions: Permissions
   user: User
-}) => {
+}): React.ReactElement[] => {
   const { globals, locale, match, permissions, user } = props
 
   // Note: `Route` must be directly nested within `Switch` for `useRouteMatch` to work
@@ -33,13 +33,13 @@ export const globalRoutes = (props: {
   // Instead, we need to use `reduce` to return an array of routes directly within `Switch`
   return globals
     ?.filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
-    .reduce((globalRoutes, global) => {
+    .reduce((acc, global) => {
       const canReadGlobal = permissions?.globals?.[global.slug]?.read?.permission
       const canReadVersions = permissions?.globals?.[global.slug]?.readVersions?.permission
 
       // Default routes
       const routesToReturn = [
-        ...globalRoutes,
+        ...acc,
         <Route exact key={global.slug} path={`${match.url}/globals/${global.slug}`}>
           {canReadGlobal ? (
             <DocumentInfoProvider global={global} idFromParams key={`${global.slug}-${locale}`}>

@@ -34,11 +34,17 @@ const CustomEditView: CustomAdminView = ({ canAccessAdmin, collection, global, u
   }
 
   let versionsRoute = ''
+  let customRoute = ''
 
-  if (collection)
+  if (collection) {
     versionsRoute = `${adminRoute}/collections/${collection?.slug}/${params.id}/versions`
+    customRoute = `${adminRoute}/collections/${collection?.slug}/${params.id}/custom`
+  }
 
-  if (global) versionsRoute = `${adminRoute}/globals/${global?.slug}/versions`
+  if (global) {
+    versionsRoute = `${adminRoute}/globals/${global?.slug}/versions`
+    customRoute = `${adminRoute}/globals/${global?.slug}/custom`
+  }
 
   return (
     <Fragment>
@@ -60,17 +66,17 @@ const CustomEditView: CustomAdminView = ({ canAccessAdmin, collection, global, u
             </p>
           </li>
           <li>
-            <code>components.views.Edit.default</code>
+            <code>components.views.Edit.Default</code>
             <p>
-              This allows you to override only the default edit view, but{' '}
+              {'This allows you to override only the default edit view, but '}
               <b>
                 <em>not</em>
-              </b>{' '}
-              any nested views like versions, etc.
+              </b>
+              {' any nested views like versions, etc.'}
             </p>
           </li>
           <li>
-            <code>components.views.Edit.default.Component</code>
+            <code>components.views.Edit.Default.Component</code>
             <p>
               This is the most granular override, allowing you to override only the default edit
               view&apos;s Component, and its other properties like path and label.
@@ -78,11 +84,11 @@ const CustomEditView: CustomAdminView = ({ canAccessAdmin, collection, global, u
           </li>
         </ul>
         <Button buttonStyle="primary" el="link" to={versionsRoute}>
-          Versions
+          Custom Versions
         </Button>
         &nbsp; &nbsp; &nbsp;
-        <Button buttonStyle="secondary" el="link" to={adminRoute}>
-          Go to Dashboard
+        <Button buttonStyle="secondary" el="link" to={customRoute}>
+          Custom View
         </Button>
       </div>
     </Fragment>

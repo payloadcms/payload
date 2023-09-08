@@ -11,6 +11,7 @@ import { DocumentInfoProvider } from '../../utilities/DocumentInfo'
 import Version from '../Version'
 import Versions from '../Versions'
 import List from '../collections/List'
+import { childRoutes } from './child'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Edit = lazy(() => import('../collections/Edit'))
@@ -25,7 +26,7 @@ export const collectionRoutes = (props: {
   }>
   permissions: Permissions
   user: User
-}) => {
+}): React.ReactElement[] => {
   const { collections, match, permissions, user } = props
 
   // Note: `Route` must be directly nested within `Switch` for `useRouteMatch` to work
@@ -33,10 +34,10 @@ export const collectionRoutes = (props: {
   // Instead, we need to use `reduce` to return an array of routes directly within `Switch`
   return collections
     ?.filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
-    .reduce((collectionRoutes, collection) => {
+    .reduce((acc, collection) => {
       // Default routes
       const routesToReturn = [
-        ...collectionRoutes,
+        ...acc,
         <Route
           exact
           key={`${collection.slug}-list`}
@@ -74,6 +75,12 @@ export const collectionRoutes = (props: {
             <Unauthorized />
           )}
         </Route>,
+        childRoutes({
+          collection,
+          match,
+          permissions,
+          user,
+        }),
       ]
 
       // Version routes
