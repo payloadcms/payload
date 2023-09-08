@@ -11,9 +11,9 @@ import { GenericColumn, PostgresAdapter } from './types';
 export const find: Find = async function find(
   this: PostgresAdapter, {
     collection,
-    where: incomingWhere,
+    where: whereArg,
     page = 1,
-    limit,
+    limit: limitArg,
     sort: sortArg,
     locale,
     pagination,
@@ -24,6 +24,7 @@ export const find: Find = async function find(
   const tableName = toSnakeCase(collection);
   const table = this.tables[tableName];
   const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort;
+  let limit = limitArg;
   let totalDocs: number;
   let totalPages: number;
   let hasPrevPage: boolean;
@@ -38,7 +39,7 @@ export const find: Find = async function find(
     adapter: this,
     fields: collectionConfig.fields,
     locale,
-    where: incomingWhere,
+    where: whereArg,
     sort,
     tableName,
   });
@@ -95,25 +96,34 @@ export const find: Find = async function find(
     }
   }
 
+  const findPromise = this.db.query[tableName].findMany(findManyArgs);
+
   if (pagination !== false) {
-    // use query above, optionally we don't need the sort
     const countResult = await this.db.select({ count: sql<number>`count(*)` })
       .from(table)
       .where(where);
     totalDocs = Number(countResult[0].count);
-    totalPages = Math.ceil(totalDocs / limit);
+    totalPages = typeof limit === 'number' ? Math.ceil(totalDocs / limit) : 1;
     hasPrevPage = page > 1;
     hasNextPage = totalPages > page;
     pagingCounter = ((page - 1) * limit) + 1;
-    findManyArgs.limit = limit === 0 ? undefined : limit;
-    findManyArgs.offset = (page - 1) * limit;
+    findManyArgs.limit = limitArg === 0 ? undefined : limitArg;
+    findManyArgs.offset = (page - 1) * limitArg;
   }
 
-  const rawDocs = await this.db.query[tableName].findMany(findManyArgs);
-
+  const rawDocs = await findPromise;
   // sort rawDocs from selectQuery
   if (Object.keys(orderedIDMap).length > 0) {
     rawDocs.sort((a, b) => (orderedIDMap[a.id] - orderedIDMap[b.id]));
+  }
+
+  if (pagination === false) {
+    totalDocs = rawDocs.length;
+    limit = totalDocs;
+    totalPages = 1;
+    pagingCounter = 1;
+    hasPrevPage = false;
+    hasNextPage = false;
   }
 
   const docs = rawDocs.map((data: TypeWithID) => {
