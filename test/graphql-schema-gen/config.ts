@@ -139,6 +139,11 @@ export default buildConfigWithDefaults({
             },
           ],
         },
+        {
+          name: 'relationToCollection3',
+          type: 'relationship',
+          relationTo: 'collection3',
+        },
       ],
     },
     {

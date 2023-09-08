@@ -103,11 +103,12 @@ function initCollectionsGraphQL(payload: Payload): void {
       collection.graphQL.type,
     );
 
-    collection.graphQL.whereInputType = buildWhereInputType(
-      singularName,
-      whereInputFields,
-      singularName,
-    );
+    collection.graphQL.whereInputType = buildWhereInputType({
+      name: singularName,
+      fields: whereInputFields,
+      parentName: singularName,
+      payload,
+    });
 
     if (config.auth && !config.auth.disableLocalStrategy) {
       fields.push({
@@ -251,11 +252,12 @@ function initCollectionsGraphQL(payload: Payload): void {
         type: buildPaginatedListType(`versions${formatName(pluralName)}`, collection.graphQL.versionType),
         args: {
           where: {
-            type: buildWhereInputType(
-              `versions${singularName}`,
-              versionCollectionFields,
-              `versions${singularName}`,
-            ),
+            type: buildWhereInputType({
+              name: `versions${singularName}`,
+              fields: versionCollectionFields,
+              parentName: `versions${singularName}`,
+              payload,
+            }),
           },
           ...(payload.config.localization ? {
             locale: { type: payload.types.localeInputType },

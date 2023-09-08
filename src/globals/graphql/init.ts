@@ -126,11 +126,12 @@ function initGlobalsGraphQL(payload: Payload): void {
           type: buildPaginatedListType(`versions${formatName(formattedName)}`, payload.globals.graphQL[slug].versionType),
           args: {
             where: {
-              type: buildWhereInputType(
-                `versions${formattedName}`,
-                versionGlobalFields,
-                `versions${formattedName}`,
-              ),
+              type: buildWhereInputType({
+                name: `versions${formattedName}`,
+                fields: versionGlobalFields,
+                parentName: `versions${formattedName}`,
+                payload,
+              }),
             },
             ...(payload.config.localization ? {
               locale: { type: payload.types.localeInputType },

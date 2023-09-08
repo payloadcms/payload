@@ -7,7 +7,7 @@ import {
   ArrayField,
   CheckboxField,
   CodeField, CollapsibleField, DateField,
-  EmailField, fieldAffectsData, fieldHasSubFields, GroupField,
+  EmailField, GroupField,
   JSONField,
   NumberField, PointField,
   RadioField, RelationshipField,
@@ -20,8 +20,9 @@ import { withOperators } from './withOperators';
 import combineParentName from '../utilities/combineParentName';
 import formatName from '../utilities/formatName';
 import recursivelyBuildNestedPaths from './recursivelyBuildNestedPaths';
+import { Payload } from '../../payload';
 
-const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => ({
+const fieldToSchemaMap = (payload: Payload, parentName: string, nestedFieldName?: string): any => ({
   number: (field: NumberField) => ({
     type: withOperators(
       field,
@@ -105,6 +106,21 @@ const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => 
       };
     }
 
+    if (typeof field.relationTo === 'string') {
+      return [
+        {
+          key: field.name,
+          type: {
+            type: withOperators(
+              field,
+              parentName,
+            ),
+          },
+        },
+        ...recursivelyBuildNestedPaths(payload, parentName, nestedFieldName, field),
+      ];
+    }
+
     return {
       type: withOperators(
         field,
@@ -130,11 +146,11 @@ const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => 
       parentName,
     ),
   }),
-  array: (field: ArrayField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
-  group: (field: GroupField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
-  row: (field: RowField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
-  collapsible: (field: CollapsibleField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
-  tabs: (field: TabsField) => recursivelyBuildNestedPaths(parentName, nestedFieldName, field),
+  array: (field: ArrayField) => recursivelyBuildNestedPaths(payload, parentName, nestedFieldName, field),
+  group: (field: GroupField) => recursivelyBuildNestedPaths(payload, parentName, nestedFieldName, field),
+  row: (field: RowField) => recursivelyBuildNestedPaths(payload, parentName, nestedFieldName, field),
+  collapsible: (field: CollapsibleField) => recursivelyBuildNestedPaths(payload, parentName, nestedFieldName, field),
+  tabs: (field: TabsField) => recursivelyBuildNestedPaths(payload, parentName, nestedFieldName, field),
 });
 
 export default fieldToSchemaMap;

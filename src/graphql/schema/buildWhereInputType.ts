@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-use-before-define */
-import {
-  GraphQLInputObjectType, GraphQLList,
-} from 'graphql';
+import { GraphQLInputObjectType, GraphQLList } from 'graphql';
 
 import {
   Field,
@@ -14,6 +12,7 @@ import {
 import formatName from '../utilities/formatName';
 import { withOperators } from './withOperators';
 import fieldToSchemaMap from './fieldToWhereInputSchemaMap';
+import { Payload } from '../../payload';
 
 /** This does as the function name suggests. It builds a where GraphQL input type
  * for all the fields which are passed to the function.
@@ -29,7 +28,17 @@ import fieldToSchemaMap from './fieldToWhereInputSchemaMap';
  *    directly searchable. Instead, we need to build a chained pathname
  *    using dot notation so MongoDB can properly search nested paths.
  */
-const buildWhereInputType = (name: string, fields: Field[], parentName: string): GraphQLInputObjectType => {
+const buildWhereInputType = ({
+  name,
+  fields,
+  parentName,
+  payload,
+}: {
+  name: string;
+  fields: Field[];
+  parentName: string;
+  payload: Payload;
+}): GraphQLInputObjectType => {
   // This is the function that builds nested paths for all
   // field types with nested paths.
 
@@ -39,12 +48,12 @@ const buildWhereInputType = (name: string, fields: Field[], parentName: string):
     if (fieldAffectsData(field) && field.name === 'id') idField = field;
 
     if (!fieldIsPresentationalOnly(field) && !field.hidden) {
-      const getFieldSchema = fieldToSchemaMap(parentName)[field.type];
+      const getFieldSchema = fieldToSchemaMap(payload, parentName)[field.type];
 
       if (getFieldSchema) {
         const fieldSchema = getFieldSchema(field);
 
-        if (fieldHasSubFields(field) || field.type === 'tabs') {
+        if (fieldHasSubFields(field) || field.type === 'tabs' || (field.type === 'relationship' && Array.isArray(fieldSchema))) {
           return {
             ...schema,
             ...(fieldSchema.reduce((subFields, subField) => ({

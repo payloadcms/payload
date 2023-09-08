@@ -370,6 +370,15 @@ export default buildConfigWithDefaults({
       },
     });
 
+    // Relation - relationField
+    await payload.create({
+      collection: slug,
+      data: {
+        title: 'rel2',
+        relationField: rel2.id,
+      },
+    });
+
     // Relation - hasMany
     await payload.create({
       collection: slug,

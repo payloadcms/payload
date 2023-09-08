@@ -651,6 +651,25 @@ describe('collections-graphql', () => {
         expect(totalDocs).toStrictEqual(1);
         expect(docs[0].relationToCustomID.id).toStrictEqual(1);
       });
+
+      it('should query with the fields of a relationship', async () => {
+        const query = `query {
+          Posts(where: { relationField__name: { equals: "name2" } }) {
+            docs {
+              id
+              title
+              relationField { name }
+            }
+            totalDocs
+          }
+        }`;
+
+        const response = await client.request(query);
+        const { docs, totalDocs } = response.Posts;
+
+        expect(totalDocs).toStrictEqual(1);
+        expect(docs.every(({ relationField }) => relationField?.name === 'name2')).toBe(true);
+      });
     });
   });
 

@@ -5,6 +5,9 @@ type Query {
   Collection2(id: String!, draft: Boolean): Collection2
   Collection2s(where: Collection2_where, draft: Boolean, page: Int, limit: Int, sort: String): Collection2s
   docAccessCollection2(id: String!): collection2DocAccess
+  Collection3(id: String!, draft: Boolean): Collection3
+  Collection3s(where: Collection3_where, draft: Boolean, page: Int, limit: Int, sort: String): Collection3s
+  docAccessCollection3(id: String!): collection3DocAccess
   User(id: String!, draft: Boolean): User
   Users(where: User_where, draft: Boolean, page: Int, limit: Int, sort: String): Users
   docAccessUser(id: String!): usersDocAccess
@@ -448,6 +451,7 @@ type Collection2 {
   id: String
   meta: SharedMeta
   nestedGroup: Collection2_NestedGroup
+  relationToCollection3: Collection3
   updatedAt: DateTime
   createdAt: DateTime
 }
@@ -459,6 +463,28 @@ type SharedMeta {
 
 type Collection2_NestedGroup {
   meta: SharedMeta
+}
+
+type Collection3 {
+  id: String
+  descriptiontab1: String
+  tab2: Collection3_Tab2
+  tab3: Collection3_Tab3
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+type Collection3_Tab2 {
+  selecttab2: Collection3_Tab2_selecttab2
+}
+
+enum Collection3_Tab2_selecttab2 {
+  option1
+  option2
+}
+
+type Collection3_Tab3 {
+  acheckbox: Boolean
 }
 
 type Collection2s {
@@ -481,6 +507,12 @@ input Collection2_where {
   meta__id: Collection2_meta__id_operator
   nestedGroup__meta__title: Collection2_nestedGroup__meta__title_operator
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
+  relationToCollection3: Collection2_relationToCollection3_operator
+  relationToCollection3__descriptiontab1: Collection2_relationToCollection3__descriptiontab1_operator
+  relationToCollection3__tab2__selecttab2: Collection2_relationToCollection3__tab2__selecttab2_operator
+  relationToCollection3__tab3__acheckbox: Collection2_relationToCollection3__tab3__acheckbox_operator
+  relationToCollection3__updatedAt: Collection2_relationToCollection3__updatedAt_operator
+  relationToCollection3__createdAt: Collection2_relationToCollection3__createdAt_operator
   updatedAt: Collection2_updatedAt_operator
   createdAt: Collection2_createdAt_operator
   id: Collection2_id_operator
@@ -543,6 +575,65 @@ input Collection2_nestedGroup__meta__description_operator {
   exists: Boolean
 }
 
+input Collection2_relationToCollection3_operator {
+  equals: String
+  not_equals: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Collection2_relationToCollection3__descriptiontab1_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  exists: Boolean
+}
+
+input Collection2_relationToCollection3__tab2__selecttab2_operator {
+  equals: Collection2_relationToCollection3__tab2__selecttab2_Input
+  not_equals: Collection2_relationToCollection3__tab2__selecttab2_Input
+  in: [Collection2_relationToCollection3__tab2__selecttab2_Input]
+  not_in: [Collection2_relationToCollection3__tab2__selecttab2_Input]
+  all: [Collection2_relationToCollection3__tab2__selecttab2_Input]
+  exists: Boolean
+}
+
+enum Collection2_relationToCollection3__tab2__selecttab2_Input {
+  option1
+  option2
+}
+
+input Collection2_relationToCollection3__tab3__acheckbox_operator {
+  equals: Boolean
+  not_equals: Boolean
+  exists: Boolean
+}
+
+input Collection2_relationToCollection3__updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Collection2_relationToCollection3__createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
 input Collection2_updatedAt_operator {
   equals: DateTime
   not_equals: DateTime
@@ -582,6 +673,12 @@ input Collection2_where_or {
   meta__id: Collection2_meta__id_operator
   nestedGroup__meta__title: Collection2_nestedGroup__meta__title_operator
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
+  relationToCollection3: Collection2_relationToCollection3_operator
+  relationToCollection3__descriptiontab1: Collection2_relationToCollection3__descriptiontab1_operator
+  relationToCollection3__tab2__selecttab2: Collection2_relationToCollection3__tab2__selecttab2_operator
+  relationToCollection3__tab3__acheckbox: Collection2_relationToCollection3__tab3__acheckbox_operator
+  relationToCollection3__updatedAt: Collection2_relationToCollection3__updatedAt_operator
+  relationToCollection3__createdAt: Collection2_relationToCollection3__createdAt_operator
   updatedAt: Collection2_updatedAt_operator
   createdAt: Collection2_createdAt_operator
   id: Collection2_id_operator
@@ -593,6 +690,12 @@ input Collection2_where_and {
   meta__id: Collection2_meta__id_operator
   nestedGroup__meta__title: Collection2_nestedGroup__meta__title_operator
   nestedGroup__meta__description: Collection2_nestedGroup__meta__description_operator
+  relationToCollection3: Collection2_relationToCollection3_operator
+  relationToCollection3__descriptiontab1: Collection2_relationToCollection3__descriptiontab1_operator
+  relationToCollection3__tab2__selecttab2: Collection2_relationToCollection3__tab2__selecttab2_operator
+  relationToCollection3__tab3__acheckbox: Collection2_relationToCollection3__tab3__acheckbox_operator
+  relationToCollection3__updatedAt: Collection2_relationToCollection3__updatedAt_operator
+  relationToCollection3__createdAt: Collection2_relationToCollection3__createdAt_operator
   updatedAt: Collection2_updatedAt_operator
   createdAt: Collection2_createdAt_operator
   id: Collection2_id_operator
@@ -609,6 +712,7 @@ type collection2DocAccess {
 type Collection2DocAccessFields {
   meta: Collection2DocAccessFields_meta
   nestedGroup: Collection2DocAccessFields_nestedGroup
+  relationToCollection3: Collection2DocAccessFields_relationToCollection3
   updatedAt: Collection2DocAccessFields_updatedAt
   createdAt: Collection2DocAccessFields_createdAt
 }
@@ -791,6 +895,29 @@ type Collection2DocAccessFields_nestedGroup_meta_description_Delete {
   permission: Boolean!
 }
 
+type Collection2DocAccessFields_relationToCollection3 {
+  create: Collection2DocAccessFields_relationToCollection3_Create
+  read: Collection2DocAccessFields_relationToCollection3_Read
+  update: Collection2DocAccessFields_relationToCollection3_Update
+  delete: Collection2DocAccessFields_relationToCollection3_Delete
+}
+
+type Collection2DocAccessFields_relationToCollection3_Create {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_relationToCollection3_Read {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_relationToCollection3_Update {
+  permission: Boolean!
+}
+
+type Collection2DocAccessFields_relationToCollection3_Delete {
+  permission: Boolean!
+}
+
 type Collection2DocAccessFields_updatedAt {
   create: Collection2DocAccessFields_updatedAt_Create
   read: Collection2DocAccessFields_updatedAt_Read
@@ -853,6 +980,261 @@ type Collection2UpdateDocAccess {
 }
 
 type Collection2DeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type Collection3s {
+  docs: [Collection3]
+  totalDocs: Int
+  offset: Int
+  limit: Int
+  totalPages: Int
+  page: Int
+  pagingCounter: Int
+  hasPrevPage: Boolean
+  hasNextPage: Boolean
+  prevPage: Int
+  nextPage: Int
+}
+
+input Collection3_where {
+  descriptiontab1: Collection3_descriptiontab1_operator
+  tab2__selecttab2: Collection3_tab2__selecttab2_operator
+  tab3__acheckbox: Collection3_tab3__acheckbox_operator
+  updatedAt: Collection3_updatedAt_operator
+  createdAt: Collection3_createdAt_operator
+  id: Collection3_id_operator
+  OR: [Collection3_where_or]
+  AND: [Collection3_where_and]
+}
+
+input Collection3_descriptiontab1_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  exists: Boolean
+}
+
+input Collection3_tab2__selecttab2_operator {
+  equals: Collection3_tab2__selecttab2_Input
+  not_equals: Collection3_tab2__selecttab2_Input
+  in: [Collection3_tab2__selecttab2_Input]
+  not_in: [Collection3_tab2__selecttab2_Input]
+  all: [Collection3_tab2__selecttab2_Input]
+  exists: Boolean
+}
+
+enum Collection3_tab2__selecttab2_Input {
+  option1
+  option2
+}
+
+input Collection3_tab3__acheckbox_operator {
+  equals: Boolean
+  not_equals: Boolean
+  exists: Boolean
+}
+
+input Collection3_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Collection3_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Collection3_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Collection3_where_or {
+  descriptiontab1: Collection3_descriptiontab1_operator
+  tab2__selecttab2: Collection3_tab2__selecttab2_operator
+  tab3__acheckbox: Collection3_tab3__acheckbox_operator
+  updatedAt: Collection3_updatedAt_operator
+  createdAt: Collection3_createdAt_operator
+  id: Collection3_id_operator
+}
+
+input Collection3_where_and {
+  descriptiontab1: Collection3_descriptiontab1_operator
+  tab2__selecttab2: Collection3_tab2__selecttab2_operator
+  tab3__acheckbox: Collection3_tab3__acheckbox_operator
+  updatedAt: Collection3_updatedAt_operator
+  createdAt: Collection3_createdAt_operator
+  id: Collection3_id_operator
+}
+
+type collection3DocAccess {
+  fields: Collection3DocAccessFields
+  create: Collection3CreateDocAccess
+  read: Collection3ReadDocAccess
+  update: Collection3UpdateDocAccess
+  delete: Collection3DeleteDocAccess
+}
+
+type Collection3DocAccessFields {
+  descriptiontab1: Collection3DocAccessFields_descriptiontab1
+  selecttab2: Collection3DocAccessFields_selecttab2
+  acheckbox: Collection3DocAccessFields_acheckbox
+  updatedAt: Collection3DocAccessFields_updatedAt
+  createdAt: Collection3DocAccessFields_createdAt
+}
+
+type Collection3DocAccessFields_descriptiontab1 {
+  create: Collection3DocAccessFields_descriptiontab1_Create
+  read: Collection3DocAccessFields_descriptiontab1_Read
+  update: Collection3DocAccessFields_descriptiontab1_Update
+  delete: Collection3DocAccessFields_descriptiontab1_Delete
+}
+
+type Collection3DocAccessFields_descriptiontab1_Create {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_descriptiontab1_Read {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_descriptiontab1_Update {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_descriptiontab1_Delete {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_selecttab2 {
+  create: Collection3DocAccessFields_selecttab2_Create
+  read: Collection3DocAccessFields_selecttab2_Read
+  update: Collection3DocAccessFields_selecttab2_Update
+  delete: Collection3DocAccessFields_selecttab2_Delete
+}
+
+type Collection3DocAccessFields_selecttab2_Create {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_selecttab2_Read {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_selecttab2_Update {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_selecttab2_Delete {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_acheckbox {
+  create: Collection3DocAccessFields_acheckbox_Create
+  read: Collection3DocAccessFields_acheckbox_Read
+  update: Collection3DocAccessFields_acheckbox_Update
+  delete: Collection3DocAccessFields_acheckbox_Delete
+}
+
+type Collection3DocAccessFields_acheckbox_Create {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_acheckbox_Read {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_acheckbox_Update {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_acheckbox_Delete {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_updatedAt {
+  create: Collection3DocAccessFields_updatedAt_Create
+  read: Collection3DocAccessFields_updatedAt_Read
+  update: Collection3DocAccessFields_updatedAt_Update
+  delete: Collection3DocAccessFields_updatedAt_Delete
+}
+
+type Collection3DocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_createdAt {
+  create: Collection3DocAccessFields_createdAt_Create
+  read: Collection3DocAccessFields_createdAt_Read
+  update: Collection3DocAccessFields_createdAt_Update
+  delete: Collection3DocAccessFields_createdAt_Delete
+}
+
+type Collection3DocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type Collection3DocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type Collection3CreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type Collection3ReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type Collection3UpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type Collection3DeleteDocAccess {
   permission: Boolean!
   where: JSONObject
 }
@@ -1112,6 +1494,7 @@ type Access {
   canAccessAdmin: Boolean!
   collection1: collection1Access
   collection2: collection2Access
+  collection3: collection3Access
   users: usersAccess
 }
 
@@ -1377,6 +1760,7 @@ type collection2Access {
 type Collection2Fields {
   meta: Collection2Fields_meta
   nestedGroup: Collection2Fields_nestedGroup
+  relationToCollection3: Collection2Fields_relationToCollection3
   updatedAt: Collection2Fields_updatedAt
   createdAt: Collection2Fields_createdAt
 }
@@ -1559,6 +1943,29 @@ type Collection2Fields_nestedGroup_meta_description_Delete {
   permission: Boolean!
 }
 
+type Collection2Fields_relationToCollection3 {
+  create: Collection2Fields_relationToCollection3_Create
+  read: Collection2Fields_relationToCollection3_Read
+  update: Collection2Fields_relationToCollection3_Update
+  delete: Collection2Fields_relationToCollection3_Delete
+}
+
+type Collection2Fields_relationToCollection3_Create {
+  permission: Boolean!
+}
+
+type Collection2Fields_relationToCollection3_Read {
+  permission: Boolean!
+}
+
+type Collection2Fields_relationToCollection3_Update {
+  permission: Boolean!
+}
+
+type Collection2Fields_relationToCollection3_Delete {
+  permission: Boolean!
+}
+
 type Collection2Fields_updatedAt {
   create: Collection2Fields_updatedAt_Create
   read: Collection2Fields_updatedAt_Read
@@ -1621,6 +2028,157 @@ type Collection2UpdateAccess {
 }
 
 type Collection2DeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type collection3Access {
+  fields: Collection3Fields
+  create: Collection3CreateAccess
+  read: Collection3ReadAccess
+  update: Collection3UpdateAccess
+  delete: Collection3DeleteAccess
+}
+
+type Collection3Fields {
+  descriptiontab1: Collection3Fields_descriptiontab1
+  selecttab2: Collection3Fields_selecttab2
+  acheckbox: Collection3Fields_acheckbox
+  updatedAt: Collection3Fields_updatedAt
+  createdAt: Collection3Fields_createdAt
+}
+
+type Collection3Fields_descriptiontab1 {
+  create: Collection3Fields_descriptiontab1_Create
+  read: Collection3Fields_descriptiontab1_Read
+  update: Collection3Fields_descriptiontab1_Update
+  delete: Collection3Fields_descriptiontab1_Delete
+}
+
+type Collection3Fields_descriptiontab1_Create {
+  permission: Boolean!
+}
+
+type Collection3Fields_descriptiontab1_Read {
+  permission: Boolean!
+}
+
+type Collection3Fields_descriptiontab1_Update {
+  permission: Boolean!
+}
+
+type Collection3Fields_descriptiontab1_Delete {
+  permission: Boolean!
+}
+
+type Collection3Fields_selecttab2 {
+  create: Collection3Fields_selecttab2_Create
+  read: Collection3Fields_selecttab2_Read
+  update: Collection3Fields_selecttab2_Update
+  delete: Collection3Fields_selecttab2_Delete
+}
+
+type Collection3Fields_selecttab2_Create {
+  permission: Boolean!
+}
+
+type Collection3Fields_selecttab2_Read {
+  permission: Boolean!
+}
+
+type Collection3Fields_selecttab2_Update {
+  permission: Boolean!
+}
+
+type Collection3Fields_selecttab2_Delete {
+  permission: Boolean!
+}
+
+type Collection3Fields_acheckbox {
+  create: Collection3Fields_acheckbox_Create
+  read: Collection3Fields_acheckbox_Read
+  update: Collection3Fields_acheckbox_Update
+  delete: Collection3Fields_acheckbox_Delete
+}
+
+type Collection3Fields_acheckbox_Create {
+  permission: Boolean!
+}
+
+type Collection3Fields_acheckbox_Read {
+  permission: Boolean!
+}
+
+type Collection3Fields_acheckbox_Update {
+  permission: Boolean!
+}
+
+type Collection3Fields_acheckbox_Delete {
+  permission: Boolean!
+}
+
+type Collection3Fields_updatedAt {
+  create: Collection3Fields_updatedAt_Create
+  read: Collection3Fields_updatedAt_Read
+  update: Collection3Fields_updatedAt_Update
+  delete: Collection3Fields_updatedAt_Delete
+}
+
+type Collection3Fields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type Collection3Fields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type Collection3Fields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type Collection3Fields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type Collection3Fields_createdAt {
+  create: Collection3Fields_createdAt_Create
+  read: Collection3Fields_createdAt_Read
+  update: Collection3Fields_createdAt_Update
+  delete: Collection3Fields_createdAt_Delete
+}
+
+type Collection3Fields_createdAt_Create {
+  permission: Boolean!
+}
+
+type Collection3Fields_createdAt_Read {
+  permission: Boolean!
+}
+
+type Collection3Fields_createdAt_Update {
+  permission: Boolean!
+}
+
+type Collection3Fields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type Collection3CreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type Collection3ReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type Collection3UpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type Collection3DeleteAccess {
   permission: Boolean!
   where: JSONObject
 }
@@ -1765,6 +2323,9 @@ type Mutation {
   createCollection2(data: mutationCollection2Input!, draft: Boolean): Collection2
   updateCollection2(id: String!, data: mutationCollection2UpdateInput!, draft: Boolean, autosave: Boolean): Collection2
   deleteCollection2(id: String!): Collection2
+  createCollection3(data: mutationCollection3Input!, draft: Boolean): Collection3
+  updateCollection3(id: String!, data: mutationCollection3UpdateInput!, draft: Boolean, autosave: Boolean): Collection3
+  deleteCollection3(id: String!): Collection3
   createUser(data: mutationUserInput!, draft: Boolean): User
   updateUser(id: String!, data: mutationUserUpdateInput!, draft: Boolean, autosave: Boolean): User
   deleteUser(id: String!): User
@@ -1812,6 +2373,7 @@ input mutationCollection1Update_MetaInput {
 input mutationCollection2Input {
   meta: mutationCollection2_MetaInput
   nestedGroup: mutationCollection2_NestedGroupInput
+  relationToCollection3: String
   updatedAt: String
   createdAt: String
 }
@@ -1833,6 +2395,7 @@ input mutationCollection2_NestedGroup_MetaInput {
 input mutationCollection2UpdateInput {
   meta: mutationCollection2Update_MetaInput
   nestedGroup: mutationCollection2Update_NestedGroupInput
+  relationToCollection3: String
   updatedAt: String
   createdAt: String
 }
@@ -1849,6 +2412,48 @@ input mutationCollection2Update_NestedGroupInput {
 input mutationCollection2Update_NestedGroup_MetaInput {
   title: String
   description: String
+}
+
+input mutationCollection3Input {
+  descriptiontab1: String
+  tab2: mutationCollection3_Tab2Input
+  tab3: mutationCollection3_Tab3Input
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationCollection3_Tab2Input {
+  selecttab2: Collection3_Tab2_selecttab2_MutationInput
+}
+
+enum Collection3_Tab2_selecttab2_MutationInput {
+  option1
+  option2
+}
+
+input mutationCollection3_Tab3Input {
+  acheckbox: Boolean
+}
+
+input mutationCollection3UpdateInput {
+  descriptiontab1: String
+  tab2: mutationCollection3Update_Tab2Input
+  tab3: mutationCollection3Update_Tab3Input
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationCollection3Update_Tab2Input {
+  selecttab2: Collection3Update_Tab2_selecttab2_MutationInput
+}
+
+enum Collection3Update_Tab2_selecttab2_MutationInput {
+  option1
+  option2
+}
+
+input mutationCollection3Update_Tab3Input {
+  acheckbox: Boolean
 }
 
 input mutationUserInput {

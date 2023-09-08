@@ -208,11 +208,12 @@ function buildObjectType({
       const whereFields = payload.collections[relationTo].config.fields;
 
       upload.args.where = {
-        type: buildWhereInputType(
-          uploadName,
-          whereFields,
-          uploadName,
-        ),
+        type: buildWhereInputType({
+          name: uploadName,
+          fields: whereFields,
+          parentName: uploadName,
+          payload,
+        }),
       };
 
       return {
