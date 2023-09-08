@@ -14,6 +14,8 @@ export const customRoutes = (props: {
 
   if (Array.isArray(customRoutes)) {
     return customRoutes.map(({ Component, exact, path, sensitive, strict }) => (
+      // You are responsible for ensuring that your own custom route is secure
+      // i.e. return `Unauthorized` in your own component if the user does not have permission
       <Route
         exact={exact}
         key={`${match.url}${path}`}

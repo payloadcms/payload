@@ -18,7 +18,6 @@ import DefaultEdit from './Default'
 import formatFields from './formatFields'
 
 const EditView: React.FC<IndexProps> = (props) => {
-  console.log('ksjngkdfngkjhbdg')
   const { collection: incomingCollection, isEditing } = props
 
   const { admin: { components: { views: { Edit } = {} } = {} } = {}, slug: collectionSlug } =

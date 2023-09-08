@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect } from 'react'
-import { Redirect, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 import Button from '../../../../../packages/payload/src/admin/components/elements/Button'
 import Eyebrow from '../../../../../packages/payload/src/admin/components/elements/Eyebrow'
@@ -7,7 +7,7 @@ import { useStepNav } from '../../../../../packages/payload/src/admin/components
 import { useConfig } from '../../../../../packages/payload/src/admin/components/utilities/Config'
 import { type CustomAdminView } from '../../../../../packages/payload/src/config/types'
 
-const CustomVersionsView: CustomAdminView = ({ canAccessAdmin, collection, global, user }) => {
+const CustomView: CustomAdminView = ({ collection, global }) => {
   const {
     routes: { admin: adminRoute },
   } = useConfig()
@@ -22,25 +22,22 @@ const CustomVersionsView: CustomAdminView = ({ canAccessAdmin, collection, globa
   useEffect(() => {
     setStepNav([
       {
-        label: 'Custom Versions View',
+        label: 'Custom View',
       },
     ])
   }, [setStepNav])
 
-  // If an unauthorized user tries to navigate straight to this page,
-  // Boot 'em out
-  if (!user || (user && !canAccessAdmin)) {
-    return <Redirect to={`${adminRoute}/unauthorized`} />
-  }
-
-  let backURL = adminRoute
+  let backURL = ''
+  let versionsRoute = ''
 
   if (collection) {
     backURL = `${adminRoute}/collections/${collection?.slug}/${params.id}`
+    versionsRoute = `${adminRoute}/collections/${collection?.slug}/${params.id}/versions`
   }
 
   if (global) {
     backURL = `${adminRoute}/globals/${global?.slug}`
+    versionsRoute = `${adminRoute}/globals/${global?.slug}/versions`
   }
 
   return (
@@ -52,27 +49,12 @@ const CustomVersionsView: CustomAdminView = ({ canAccessAdmin, collection, globa
           paddingRight: 'var(--gutter-h)',
         }}
       >
-        <h1>Custom Versions View</h1>
-        <p>This custom versions view was added through one of the following Payload configs:</p>
+        <h1>Custom View</h1>
+        <p>This custom view was added through the Payload config:</p>
         <ul>
           <li>
-            <code>components.views.Versions</code>
-            <p>
-              {'This takes precedence over the default versions view, '}
-              <b>as well as all nested views like /versions/:id.</b>
-            </p>
+            <code>components.views[key].Component</code>
           </li>
-          <li>
-            <code>components.views.Edit.versions</code>
-            <p>Same as above.</p>
-          </li>
-          <li>
-            <code>components.views.Edit.versions.Component</code>
-          </li>
-          <p>
-            This is the most granular override, allowing you to override only the default versions
-            view&apos;s Component, and its other properties like path and label.
-          </p>
         </ul>
         <Button buttonStyle="secondary" el="link" to={backURL}>
           Back
@@ -82,4 +64,4 @@ const CustomVersionsView: CustomAdminView = ({ canAccessAdmin, collection, globa
   )
 }
 
-export default CustomVersionsView
+export default CustomView
