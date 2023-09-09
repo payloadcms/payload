@@ -143,10 +143,11 @@ export const getTableColumnFromPath = ({
 
       case 'relationship':
       case 'upload': {
-        newTableName = `${toSnakeCase(tableName)}_relationships`;
         let relationshipFields;
         if (typeof field.relationTo === 'string') {
-          relationshipFields = adapter.payload.collections[field.relationTo];
+          newTableName = `${toSnakeCase(field.relationTo)}`;
+          joins[newTableName] = eq(adapter.tables[newTableName].id, adapter.tables[`${toSnakeCase(tableName)}_relationships`][`${toSnakeCase(field.relationTo)}ID`]);
+          relationshipFields = adapter.payload.collections[field.relationTo].config.fields;
           if (locale && field.localized && adapter.payload.config.localization) {
             joins[newTableName] = and(
               eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
@@ -162,7 +163,7 @@ export const getTableColumnFromPath = ({
           adapter,
           collectionPath: pathSegments.slice(1)
             .join('.'),
-          fields: relationshipFields as Field[],
+          fields: relationshipFields,
           joins,
           locale,
           pathSegments: pathSegments.slice(1),

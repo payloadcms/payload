@@ -49,7 +49,7 @@ export const find: Find = async function find(
   const selectFields: Record<string, GenericColumn> = {
     id: table.id,
   };
-  if (orderBy) {
+  if (orderBy.column) {
     selectFields.sort = orderBy.column;
   }
 
@@ -79,13 +79,30 @@ export const find: Find = async function find(
     const result = await selectQuery
       .offset((page - 1) * limit)
       .limit(limit === 0 ? undefined : limit);
+
+    if (result.length === 0) {
+      return {
+        docs: [],
+        totalDocs: 0,
+        limit,
+        totalPages: 0,
+        page: 1,
+        pagingCounter: 0,
+        hasPrevPage: false,
+        hasNextPage: false,
+        prevPage: null,
+        nextPage: null,
+      };
+    }
     // set the id in an object for sorting later
     result.forEach(({ id }, i) => {
       orderedIDMap[id as (number | string)] = i;
     });
     findManyArgs.where = inArray(this.tables[tableName].id, Object.keys(orderedIDMap));
   } else {
-    findManyArgs.where = where;
+    if (where) {
+      findManyArgs.where = where;
+    }
     // orderBy will only be set if a complex sort is needed on a relation
     if (sort) {
       if (sort[0] === '-') {

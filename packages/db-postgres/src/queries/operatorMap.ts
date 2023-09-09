@@ -1,4 +1,4 @@
-import { and, eq, gt, gte, inArray, isNotNull, lt, lte, ne, notInArray, or } from 'drizzle-orm';
+import { and, eq, gt, gte, ilike, inArray, isNotNull, lt, lte, ne, notInArray, or } from 'drizzle-orm';
 
 export const operatorMap = {
   greater_than_equal: gte,
@@ -6,6 +6,7 @@ export const operatorMap = {
   less_than: lt,
   greater_than: gt,
   in: inArray,
+  like: ilike,
   // TODO:
   // all: all,
   not_in: notInArray,

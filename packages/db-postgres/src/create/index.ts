@@ -13,7 +13,6 @@ export const create: Create = async function create({
     adapter: this,
     data,
     fields: collection.fields,
-    locale: req.locale,
     operation: 'create',
     tableName: toSnakeCase(collectionSlug),
   });
