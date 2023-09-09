@@ -1,5 +1,12 @@
 
 
+## [1.15.5](https://github.com/payloadcms/payload/compare/v1.15.4...v1.15.5) (2023-09-09)
+
+
+### Bug Fixes
+
+* corrects hasMany relationships within addFieldStatePromise ([#3300](https://github.com/payloadcms/payload/issues/3300)) ([a7d47c6](https://github.com/payloadcms/payload/commit/a7d47c627d064e92ca541f70caf0ff3d903b2d1d))
+
 ## [1.15.4](https://github.com/payloadcms/payload/compare/v1.15.3...v1.15.4) (2023-09-06)
 
 
