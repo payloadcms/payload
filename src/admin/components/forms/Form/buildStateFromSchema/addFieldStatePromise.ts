@@ -252,7 +252,7 @@ export const addFieldStatePromise = async ({
               return relationship.id;
             }
             return relationship;
-          }) : [];
+          }) : undefined;
 
           fieldState.value = relationshipValue;
           fieldState.initialValue = relationshipValue;
@@ -265,6 +265,7 @@ export const addFieldStatePromise = async ({
 
           state[`${path}${field.name}`] = fieldState;
         }
+
         break;
       }
 
