@@ -1,5 +1,7 @@
 export * from './../types'
 
+export { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
+
 export {
   CustomPublishButtonProps,
   CustomSaveButtonProps,
@@ -22,6 +24,7 @@ export {
   BeforeOperationHook as CollectionBeforeOperationHook,
   BeforeReadHook as CollectionBeforeReadHook,
   BeforeValidateHook as CollectionBeforeValidateHook,
+  Collection,
   CollectionConfig,
   SanitizedCollectionConfig,
   TypeWithID,
@@ -67,11 +70,7 @@ export {
   RadioField,
   RelationshipField,
   RelationshipValue,
-  RichTextCustomElement,
-  RichTextCustomLeaf,
-  RichTextElement,
   RichTextField,
-  RichTextLeaf,
   RowAdmin,
   RowField,
   SelectField,

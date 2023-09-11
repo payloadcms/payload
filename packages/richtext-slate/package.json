@@ -1,0 +1,46 @@
+{
+  "name": "@payloadcms/richtext-slate",
+  "description": "The officially supported Slate richtext adapter for Payload",
+  "author": "Payload CMS, Inc.",
+  "dependencies": {
+    "i18next": "22.5.1",
+    "is-hotkey": "0.2.0",
+    "react": "18.2.0",
+    "react-i18next": "11.18.6",
+    "slate": "0.91.4",
+    "slate-history": "0.86.0",
+    "slate-hyperscript": "0.81.3",
+    "slate-react": "0.92.0"
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
+    "payload": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "default": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "default": "./dist/index.js",
+        "types": "./dist/index.js"
+      }
+    },
+    "main": "./dist/index.js",
+    "registry": "https://registry.npmjs.org/",
+    "types": "./dist/index.d.ts"
+  },
+  "repository": "https://github.com/payloadcms/payload",
+  "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist"
+  },
+  "types": "./src/index.ts",
+  "version": "0.0.1"
+}

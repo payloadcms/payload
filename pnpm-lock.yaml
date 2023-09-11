@@ -461,18 +461,6 @@ importers:
       sharp:
         specifier: 0.31.3
         version: 0.31.3
-      slate:
-        specifier: 0.91.4
-        version: 0.91.4
-      slate-history:
-        specifier: 0.86.0
-        version: 0.86.0(slate@0.91.4)
-      slate-hyperscript:
-        specifier: 0.81.3
-        version: 0.81.3(slate@0.91.4)
-      slate-react:
-        specifier: 0.92.0
-        version: 0.92.0(react-dom@18.2.0)(react@18.2.0)(slate@0.91.4)
       style-loader:
         specifier: 2.0.0
         version: 2.0.0(webpack@5.88.2)
@@ -717,6 +705,40 @@ importers:
       terser:
         specifier: 5.19.2
         version: 5.19.2
+
+  packages/richtext-slate:
+    dependencies:
+      i18next:
+        specifier: 22.5.1
+        version: 22.5.1
+      is-hotkey:
+        specifier: 0.2.0
+        version: 0.2.0
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+      react-i18next:
+        specifier: 11.18.6
+        version: 11.18.6(i18next@22.5.1)(react-dom@18.2.0)(react@18.2.0)
+      slate:
+        specifier: 0.91.4
+        version: 0.91.4
+      slate-history:
+        specifier: 0.86.0
+        version: 0.86.0(slate@0.91.4)
+      slate-hyperscript:
+        specifier: 0.81.3
+        version: 0.81.3(slate@0.91.4)
+      slate-react:
+        specifier: 0.92.0
+        version: 0.92.0(react-dom@18.2.0)(react@18.2.0)(slate@0.91.4)
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config-payload
+      payload:
+        specifier: workspace:*
+        version: link:../payload
 
 packages:
 

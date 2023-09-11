@@ -3,3 +3,4 @@ export { combineMerge } from '../utilities/combineMerge'
 export { configToJSONSchema, entityToJSONSchema } from '../utilities/configToJSONSchema'
 
 export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields'
+export { getTranslation } from '../utilities/getTranslation'

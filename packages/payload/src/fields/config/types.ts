@@ -1,16 +1,15 @@
 /* eslint-disable no-use-before-define */
 import type { EditorProps } from '@monaco-editor/react'
-import type { i18n as Ii18n, TFunction } from 'i18next'
+import type { TFunction } from 'i18next'
 import type { CSSProperties } from 'react'
-import type { Editor } from 'slate'
 
 import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
 import type { ConditionalDateProps } from '../../admin/components/elements/DatePicker/types'
 import type { Description } from '../../admin/components/forms/FieldDescription/types'
 import type { RowLabel } from '../../admin/components/forms/RowLabel/types'
+import type { RichTextAdapter } from '../../admin/components/forms/field-types/RichText/types'
 import type { User } from '../../auth'
 import type { TypeWithID } from '../../collections/config/types'
-import type { SanitizedConfig } from '../../config/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { Payload } from '../../payload'
 import type { Operation, Where } from '../../types'
@@ -396,68 +395,11 @@ export type RelationshipValue =
   | ValueWithRelation[]
   | (number | string)
 
-type RichTextPlugin = (editor: Editor) => Editor
-
-export type RichTextCustomElement = {
-  Button: React.ComponentType<any>
-  Element: React.ComponentType<any>
-  name: string
-  plugins?: RichTextPlugin[]
-}
-
-export type RichTextCustomLeaf = {
-  Button: React.ComponentType<any>
-  Leaf: React.ComponentType<any>
-  name: string
-  plugins?: RichTextPlugin[]
-}
-
-export type RichTextElement =
-  | 'blockquote'
-  | 'h1'
-  | 'h2'
-  | 'h3'
-  | 'h4'
-  | 'h5'
-  | 'h6'
-  | 'indent'
-  | 'link'
-  | 'ol'
-  | 'relationship'
-  | 'textAlign'
-  | 'ul'
-  | 'upload'
-  | RichTextCustomElement
-export type RichTextLeaf =
-  | 'bold'
-  | 'code'
-  | 'italic'
-  | 'strikethrough'
-  | 'underline'
-  | RichTextCustomLeaf
-
-export type RichTextField = FieldBase & {
-  admin?: Admin & {
-    elements?: RichTextElement[]
-    hideGutter?: boolean
-    leaves?: RichTextLeaf[]
-    link?: {
-      fields?:
-        | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: Ii18n }) => Field[])
-        | Field[]
-    }
-    placeholder?: Record<string, string> | string
-    rtl?: boolean
-    upload?: {
-      collections: {
-        [collection: string]: {
-          fields: Field[]
-        }
-      }
-    }
-  }
+export type RichTextField<AdapterProps = unknown> = FieldBase & {
+  adapter: RichTextAdapter
+  admin?: Admin
   type: 'richText'
-}
+} & AdapterProps
 
 export type ArrayField = FieldBase & {
   admin?: Admin & {
