@@ -279,7 +279,7 @@
     "url": "https://github.com/payloadcms/payload.git"
   },
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:components",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:components && ts-node -T ./scripts/exportPointerFiles.ts",
     "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
