@@ -1,16 +1,16 @@
-# Encryption / Decryption Example Website
+# Payload Encryption Example Front-End
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) that fetches data from [Payload](https://payloadcms.com).
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) that fetches data from [Payload](https://payloadcms.com). It was made explicitly to demonstrate the power and simplicity of the integrating encryption into your Payload application.
 
-This example repo was made explicitly to demonstrate the power and simplicity of the integrating encryption and decryption into your Payload application.
+> This example uses the Pages Router, the legacy API of Next.js. If your app is using the latest [App Router](https://nextjs.org/docs/app), check out the official [App Router Example](https://github.com/payloadcms/payload/tree/master/examples/encryption/next-app).
 
 ## Getting Started
 
 ### Payload
 
-First you'll need a running Payload app. If you have not done so already, open up the `cms` folder and follow the setup instructions. Take note of your server URL, you'll need this in the next step.
+First you'll need a running Payload app. If you have not done so already, open up the `payload` folder and follow the setup instructions. Take note of your server URL, you'll need this in the next step.
 
-### Next.js App
+### Next.js
 
 1. Clone this repo
 2. `cd` into this directory and run `yarn` or `npm install`
@@ -20,9 +20,7 @@ First you'll need a running Payload app. If you have not done so already, open u
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-Once running, you will find a settings page on your local environment. Here you'll see the Date of birth field that encrypted and then decrypted to view.
-
-You can also start editing the Settings to add more fields to encrypt etc.
+Once running, you will land on the Home page. Here you will find a User's Date of birth field that has been encrypted and then decrypted to be view on the front-end.
 
 ## Learn More
 
