@@ -18,14 +18,13 @@ const intersectionObserverOptions = {
 const RenderFields: React.FC<Props> = (props) => {
   const {
     className,
-    fieldComponentProvider,
     fieldSchema,
+    fieldTypes,
     filter,
     forceRender,
     indexPath: incomingIndexPath,
     permissions,
     readOnly: readOnlyOverride,
-    staticFieldTypes,
   } = props
 
   const { i18n, t } = useTranslation('general')
@@ -51,7 +50,7 @@ const RenderFields: React.FC<Props> = (props) => {
         {hasRendered &&
           fieldSchema.map((field, fieldIndex) => {
             const fieldIsPresentational = fieldIsPresentationalOnly(field)
-            let FieldComponent = fieldComponentProvider(field)
+            let FieldComponent = fieldTypes[field.type]
 
             if (fieldIsPresentational || (!field?.hidden && field?.admin?.disabled !== true)) {
               if ((filter && typeof filter === 'function' && filter(field)) || !filter) {
@@ -60,7 +59,7 @@ const RenderFields: React.FC<Props> = (props) => {
                 }
 
                 if (field?.admin?.hidden) {
-                  FieldComponent = staticFieldTypes.hidden
+                  FieldComponent = fieldTypes.hidden
                 }
 
                 const isFieldAffectingData = fieldAffectsData(field)
@@ -96,12 +95,12 @@ const RenderFields: React.FC<Props> = (props) => {
                             ...(field.admin || {}),
                             readOnly,
                           },
+                          fieldTypes,
                           indexPath: incomingIndexPath
                             ? `${incomingIndexPath}.${fieldIndex}`
                             : `${fieldIndex}`,
                           path: field.path || (isFieldAffectingData ? field.name : ''),
                           permissions: fieldPermissions,
-                          staticFieldTypes,
                         }}
                         key={fieldIndex}
                       />

@@ -7,7 +7,7 @@ export type {
   FormFieldsContext,
 } from '../admin/components/forms/Form/types'
 
-export { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
+export type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
 
 export {
   CustomPublishButtonProps,

@@ -68,7 +68,16 @@ const RichText: React.FC<Props> = (props) => {
       readOnly,
       style,
       width,
-    } = {},
+    } = {
+      className: undefined,
+      condition: undefined,
+      description: undefined,
+      hideGutter: undefined,
+      placeholder: undefined,
+      readOnly: undefined,
+      style: undefined,
+      width: undefined,
+    },
     admin,
     defaultValue: defaultValueFromProps,
     label,
@@ -441,4 +450,4 @@ const RichText: React.FC<Props> = (props) => {
     </div>
   )
 }
-export default withCondition(RichText)
+export const RichTextEditor = withCondition(RichText)

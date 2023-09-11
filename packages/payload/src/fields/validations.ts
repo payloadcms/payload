@@ -510,7 +510,6 @@ export default {
   point,
   radio,
   relationship,
-  richText,
   select,
   text,
   textarea,

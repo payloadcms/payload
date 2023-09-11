@@ -1,4 +1,4 @@
-import { getFieldComponent, staticFieldTypes } from 'payload'
+import { fieldTypes } from 'payload'
 import { RenderFields } from 'payload'
 import { FormSubmit } from 'payload'
 import { Form } from 'payload'
@@ -26,11 +26,10 @@ export const LinkDrawer: React.FC<Props> = ({
     <Drawer className={baseClass} slug={drawerSlug} title={t('editLink')}>
       <Form initialState={initialState} onSubmit={handleModalSubmit}>
         <RenderFields
-          fieldComponentProvider={getFieldComponent}
           fieldSchema={fieldSchema}
+          fieldTypes={fieldTypes}
           forceRender
           readOnly={false}
-          staticFieldTypes={staticFieldTypes}
         />
         <LinkSubmit />
       </Form>

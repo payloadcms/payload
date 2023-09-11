@@ -44,7 +44,6 @@ import type {
 import type { Payload } from '../../payload'
 
 import { tabHasName } from '../../fields/config/types'
-import createRichTextRelationshipPromise from '../../fields/richText/richTextRelationshipPromise'
 import { toWords } from '../../utilities/formatLabels'
 import combineParentName from '../utilities/combineParentName'
 import formatName from '../utilities/formatName'
@@ -429,13 +428,14 @@ function buildObjectType({
           if (typeof args.depth !== 'undefined') depth = args.depth
 
           if (depth > 0) {
-            await createRichTextRelationshipPromise({
+            //TODO
+            /*await createRichTextRelationshipPromise({
               depth,
               field,
               req: context.req,
               showHiddenFields: false,
               siblingDoc: parent,
-            })
+            })*/
           }
 
           return parent[field.name]

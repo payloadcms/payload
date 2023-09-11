@@ -1,11 +1,11 @@
 import type { ElementType } from 'react'
 
+import { Tooltip } from 'payload'
 import React, { useCallback, useState } from 'react'
 import { useSlate } from 'slate-react'
 
 import type { ButtonProps } from './types'
 
-import Tooltip from '../../../../elements/Tooltip'
 import '../buttons.scss'
 import isElementActive from './isActive'
 import toggleElement from './toggle'

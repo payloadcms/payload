@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { getFieldComponent, staticFieldTypes } from 'payload'
+import { fieldTypes } from 'payload'
 import { deepCopyObject } from 'payload'
 import { getTranslation } from 'payload'
 import { Drawer } from 'payload'
@@ -77,12 +77,7 @@ export const UploadDrawer: React.FC<
       })}
     >
       <Form initialState={initialState} onSubmit={handleUpdateEditData}>
-        <RenderFields
-          fieldComponentProvider={getFieldComponent}
-          fieldSchema={fieldSchema}
-          readOnly={false}
-          staticFieldTypes={staticFieldTypes}
-        />
+        <RenderFields fieldSchema={fieldSchema} fieldTypes={fieldTypes} readOnly={false} />
         <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
       </Form>
     </Drawer>

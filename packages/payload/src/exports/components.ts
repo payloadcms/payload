@@ -5,6 +5,7 @@ export { default as Pill } from '../admin/components/elements/Pill'
 export { default as Popup } from '../admin/components/elements/Popup'
 
 export { ShimmerEffect } from '../admin/components/elements/ShimmerEffect'
+export { default as Tooltip } from '../admin/components/elements/Tooltip'
 export { default as Check } from '../admin/components/icons/Check'
 export { default as Chevron } from '../admin/components/icons/Chevron'
 export { default as Menu } from '../admin/components/icons/Menu'

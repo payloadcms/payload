@@ -1,5 +1,3 @@
-import type { FieldWithPath } from '../../../..'
-
 import array from './Array'
 import blocks from './Blocks'
 import checkbox from './Checkbox'
@@ -16,6 +14,7 @@ import password from './Password'
 import point from './Point'
 import radio from './RadioGroup'
 import relationship from './Relationship'
+import richText from './RichText'
 import row from './Row'
 import select from './Select'
 import tabs from './Tabs'
@@ -41,6 +40,7 @@ export type FieldTypes = {
   point: React.ComponentType<any>
   radio: React.ComponentType<any>
   relationship: React.ComponentType<any>
+  richText: React.ComponentType<any>
   row: React.ComponentType<any>
   select: React.ComponentType<any>
   tabs: React.ComponentType<any>
@@ -50,11 +50,7 @@ export type FieldTypes = {
   upload: React.ComponentType<any>
 }
 
-/**
- * Contains all the static components for the field types that are available in the admin.
- * richText is not included here as it's a special case due to the fact that it's an adapter.
- */
-export const staticFieldTypes: FieldTypes = {
+export const fieldTypes: FieldTypes = {
   array,
   blocks,
   checkbox,
@@ -71,6 +67,7 @@ export const staticFieldTypes: FieldTypes = {
   point,
   radio,
   relationship,
+  richText,
   row,
   select,
   tabs,
@@ -78,18 +75,4 @@ export const staticFieldTypes: FieldTypes = {
   textarea,
   ui,
   upload,
-}
-
-/**
- * This returns the component for the respective field type.
- * It's mainly used in the RenderFields components
- */
-export function getFieldComponent(field: FieldWithPath): React.ComponentType<any> {
-  let FieldComponent: React.ComponentType<any> = null
-  if (field.type !== 'richText') {
-    FieldComponent = staticFieldTypes[field?.type]
-  } else {
-    FieldComponent = field.adapter.component
-  }
-  return FieldComponent
 }

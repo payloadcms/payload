@@ -3,7 +3,7 @@ import type { PayloadRequest, RequestContext } from '../../../express/types'
 import type { Field, TabAsField } from '../../config/types'
 
 import { fieldAffectsData, tabHasName } from '../../config/types'
-import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise'
+//import richTextRelationshipPromise from '../../richText/richTextRelationshipPromise' //TODO
 import relationshipPopulationPromise from './relationshipPopulationPromise'
 import { traverseFields } from './traverseFields'
 
@@ -128,7 +128,7 @@ export const promise = async ({
     }
 
     case 'richText': {
-      if (
+      /* if (
         field.admin?.elements?.includes('relationship') ||
         field.admin?.elements?.includes('upload') ||
         field.admin?.elements?.includes('link') ||
@@ -145,7 +145,8 @@ export const promise = async ({
             siblingDoc,
           }),
         )
-      }
+      }*/
+      //TODO
 
       break
     }

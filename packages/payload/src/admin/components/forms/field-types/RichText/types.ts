@@ -4,6 +4,6 @@ export type Props = Omit<RichTextField, 'type'> & {
   path?: string
 }
 
-export interface RichTextAdapter {
+export type RichTextAdapter = {
   component: React.FC<Props>
 }

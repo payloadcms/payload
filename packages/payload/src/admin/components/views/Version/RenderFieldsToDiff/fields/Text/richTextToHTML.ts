@@ -1,13 +1,13 @@
-import { Text } from 'slate'
+//import { Text } from 'slate' //TODO
 
 export const richTextToHTML = (content: unknown): string => {
   if (Array.isArray(content)) {
     return content.reduce((output, node) => {
-      const isTextNode = Text.isText(node)
+      //const isTextNode = Text.isText(node)
 
       const { bold, code, italic, strikethrough, text, underline } = node
 
-      if (isTextNode) {
+      /*if (isTextNode) {
         // convert straight single quotations to curly
         // "\u201C" is starting double curly
         // "\u201D" is ending double curly
@@ -34,7 +34,7 @@ export const richTextToHTML = (content: unknown): string => {
         }
 
         return `${output}${html}`
-      }
+      }*/
 
       if (node) {
         let nodeHTML
