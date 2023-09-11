@@ -286,7 +286,7 @@
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
     "clean": "rimraf dist",
     "clean:cache": "rimraf node_modules/.cache",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "dev": "nodemon",
     "dev:generate-graphql-schema": "ts-node -T ./test/generateGraphQLSchema.ts",
     "dev:generate-types": "ts-node -T ./test/generateTypes.ts",
