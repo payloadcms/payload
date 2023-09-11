@@ -101,6 +101,42 @@ describe('fields', () => {
       await saveDocAndAssert(page);
       await expect(field.locator('.rs__value-container')).toContainText(String(input));
     });
+
+    test('should filter Number fields in the collection view - greaterThanOrEqual', async () => {
+      await page.goto(url.list);
+
+      // should have 3 entries
+      await expect(page.locator('table >> tbody >> tr')).toHaveCount(3);
+
+      // open the filter options
+      await page.locator('.list-controls__toggle-where').click();
+      await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible();
+      await page.locator('.where-builder__add-first-filter').click();
+
+      const initialField = page.locator('.condition__field');
+      const operatorField = page.locator('.condition__operator');
+      const valueField = page.locator('.condition__value >> input');
+
+      // select Number field to filter on
+      await initialField.click();
+      const initialFieldOptions = initialField.locator('.rs__option');
+      await initialFieldOptions.locator('text=number').first().click();
+      expect(initialField.locator('.rs__single-value')).toContainText('Number');
+
+      // select >= operator
+      await operatorField.click();
+      const operatorOptions = operatorField.locator('.rs__option');
+      await operatorOptions.last().click();
+      expect(operatorField.locator('.rs__single-value')).toContainText('is greater than or equal to');
+
+      // enter value of 3
+      await valueField.fill('3');
+      await expect(valueField).toHaveValue('3');
+      await wait(300);
+
+      // should have 2 entries after filtering
+      await expect(page.locator('table >> tbody >> tr')).toHaveCount(2);
+    });
   });
 
   describe('json', () => {
