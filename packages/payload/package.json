@@ -217,7 +217,7 @@
     "dist",
     "docs",
     "components",
-    "scss",
+    "*.scss",
     "*.js",
     "*.d.ts",
     "!jest.config.js",
