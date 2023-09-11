@@ -49,6 +49,7 @@ export type Props = {
   validationOperation?: 'create' | 'update'
   children?: React.ReactNode
   action?: string
+  configFieldsSchema?: FieldConfig[]
 }
 
 export type SubmitOptions = {

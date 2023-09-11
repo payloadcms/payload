@@ -88,6 +88,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
               onSuccess={onSave}
               initialState={initialState}
               disabled={!hasSavePermission}
+              configFieldsSchema={fields}
             >
               <div className={`${baseClass}__main`}>
                 <Meta

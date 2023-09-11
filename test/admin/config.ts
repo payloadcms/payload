@@ -186,6 +186,15 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'geo',
+      fields: [
+        {
+          name: 'point',
+          type: 'point',
+        },
+      ],
+    },
   ],
   globals: [
     {
@@ -258,6 +267,20 @@ export default buildConfigWithDefaults({
           description: 'description',
         },
       });
+    });
+
+    await payload.create({
+      collection: 'geo',
+      data: {
+        point: [7, -7],
+      },
+    });
+
+    await payload.create({
+      collection: 'geo',
+      data: {
+        point: [5, -5],
+      },
     });
   },
 });

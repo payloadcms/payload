@@ -1,5 +1,8 @@
 {
   "watch": ["server.ts"],
   "exec": "ts-node --project tsconfig.server.json src/server.ts",
-  "ext": "js ts"
+  "ext": "js ts",
+  "ignore" : [
+    "src/app"
+  ]
 }

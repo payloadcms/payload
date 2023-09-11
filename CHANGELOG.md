@@ -1,5 +1,53 @@
 
 
+## [1.15.5](https://github.com/payloadcms/payload/compare/v1.15.4...v1.15.5) (2023-09-09)
+
+
+### Bug Fixes
+
+* corrects hasMany relationships within addFieldStatePromise ([#3300](https://github.com/payloadcms/payload/issues/3300)) ([a7d47c6](https://github.com/payloadcms/payload/commit/a7d47c627d064e92ca541f70caf0ff3d903b2d1d))
+
+## [1.15.4](https://github.com/payloadcms/payload/compare/v1.15.3...v1.15.4) (2023-09-06)
+
+
+### Bug Fixes
+
+* **#3274:** sets full user data from fetchFullUser instead of partial jwt data ([#3279](https://github.com/payloadcms/payload/issues/3279)) ([cf12b5f](https://github.com/payloadcms/payload/commit/cf12b5fc703be6341b2b23efebd8aa85e8602567)), closes [#3274](https://github.com/payloadcms/payload/issues/3274)
+* aligns depth behaviour between local api and admin panel ([#3276](https://github.com/payloadcms/payload/issues/3276)) ([5096c37](https://github.com/payloadcms/payload/commit/5096c378743f4c5eb5f4f2f7e67e5e206cc9da40))
+* appends versions key to incoming where query ([#3287](https://github.com/payloadcms/payload/issues/3287)) ([9cd5e5a](https://github.com/payloadcms/payload/commit/9cd5e5aefaf0ee2af4f577da9578bb31bf4b0acb))
+* change scoping of `force` parameter to prevent false negation; ([#3278](https://github.com/payloadcms/payload/issues/3278)) ([429a88a](https://github.com/payloadcms/payload/commit/429a88a5a18e8905c63dfe00b78b3e71d56758fd))
+
+## [1.15.3](https://github.com/payloadcms/payload/compare/v1.15.2...v1.15.3) (2023-09-05)
+
+
+### Bug Fixes
+
+* draft globals always displaying unpublish button ([9bc072c](https://github.com/payloadcms/payload/commit/9bc072ccaf318c61b2c4e2a553604a24ff6a188e))
+* globals not saving updatedAt and createdAt and version dates correctly ([9fbabc8](https://github.com/payloadcms/payload/commit/9fbabc8fd6a3bea5628bea8d0acc915ddb33bb5c))
+
+
+### Features
+
+* improves query speed for version enabled collections ([16e94d4](https://github.com/payloadcms/payload/commit/16e94d401bd7cb82de53142c5f9a325abd31a81a))
+
+## [1.15.2](https://github.com/payloadcms/payload/compare/v1.15.1...v1.15.2) (2023-08-25)
+
+## [1.15.1](https://github.com/payloadcms/payload/compare/v1.15.0...v1.15.1) (2023-08-25)
+
+
+### Bug Fixes
+
+* arrays in richtext uploads ([#3222](https://github.com/payloadcms/payload/issues/3222)) ([cb8e07f](https://github.com/payloadcms/payload/commit/cb8e07f85232a26c265872faf408644424312af6))
+* correct out of order dark-mode color variables ([#3197](https://github.com/payloadcms/payload/issues/3197)) ([3a15e07](https://github.com/payloadcms/payload/commit/3a15e077c6914aba3ef26e453fee23c89f3db829))
+* mutation type with tabs missing previous tabs ([#3196](https://github.com/payloadcms/payload/issues/3196)) ([6d3b863](https://github.com/payloadcms/payload/commit/6d3b8636f4e14a4e4155279353fa06e86fe2b25c))
+
+# [1.15.0](https://github.com/payloadcms/payload/compare/v1.14.0...v1.15.0) (2023-08-24)
+
+
+### Features
+
+* query support for geo within and intersects + dynamic GraphQL operator types ([#3183](https://github.com/payloadcms/payload/issues/3183)) ([739abdc](https://github.com/payloadcms/payload/commit/739abdcd81176b3e812470eeea97b1be0d8c4a27))
+
 # [1.14.0](https://github.com/payloadcms/payload/compare/v1.13.4...v1.14.0) (2023-08-16)
 
 

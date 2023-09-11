@@ -23,6 +23,9 @@ type Query {
   docAccessUser(id: String!): usersDocAccess
   meUser: usersMe
   initializedUser: Boolean
+  Redirect(id: String!, draft: Boolean): Redirect
+  Redirects(where: Redirect_where, draft: Boolean, page: Int, limit: Int, sort: String): Redirects
+  docAccessRedirect(id: String!): redirectsDocAccess
   Settings(draft: Boolean): Settings
   docAccessSettings: settingsDocAccess
   Header(draft: Boolean): Header
@@ -36,7 +39,7 @@ type Query {
 type Page {
   id: String
   title: String
-  publishedDate: DateTime
+  publishedOn: DateTime
   hero: Page_Hero
   layout: [Page_Layout!]!
   slug: String
@@ -603,7 +606,7 @@ union Archive_SelectedDocs = Product
 type Product {
   id: String
   title: String
-  publishedDate: DateTime
+  publishedOn: DateTime
   layout: [Product_Layout!]!
   stripeProductID: String
   priceJSON: String
@@ -987,7 +990,7 @@ type Pages {
 
 input Page_where {
   title: Page_title_operator
-  publishedDate: Page_publishedDate_operator
+  publishedOn: Page_publishedOn_operator
   hero__type: Page_hero__type_operator
   hero__richText: Page_hero__richText_operator
   hero__links__link__type: Page_hero__links__link__type_operator
@@ -1020,7 +1023,7 @@ input Page_title_operator {
   all: [String]
 }
 
-input Page_publishedDate_operator {
+input Page_publishedOn_operator {
   equals: DateTime
   not_equals: DateTime
   greater_than_equal: DateTime
@@ -1218,7 +1221,7 @@ input Page_id_operator {
 
 input Page_where_or {
   title: Page_title_operator
-  publishedDate: Page_publishedDate_operator
+  publishedOn: Page_publishedOn_operator
   hero__type: Page_hero__type_operator
   hero__richText: Page_hero__richText_operator
   hero__links__link__type: Page_hero__links__link__type_operator
@@ -1241,7 +1244,7 @@ input Page_where_or {
 
 input Page_where_and {
   title: Page_title_operator
-  publishedDate: Page_publishedDate_operator
+  publishedOn: Page_publishedOn_operator
   hero__type: Page_hero__type_operator
   hero__richText: Page_hero__richText_operator
   hero__links__link__type: Page_hero__links__link__type_operator
@@ -1273,7 +1276,7 @@ type pagesDocAccess {
 
 type PagesDocAccessFields {
   title: PagesDocAccessFields_title
-  publishedDate: PagesDocAccessFields_publishedDate
+  publishedOn: PagesDocAccessFields_publishedOn
   hero: PagesDocAccessFields_hero
   layout: PagesDocAccessFields_layout
   slug: PagesDocAccessFields_slug
@@ -1306,26 +1309,26 @@ type PagesDocAccessFields_title_Delete {
   permission: Boolean!
 }
 
-type PagesDocAccessFields_publishedDate {
-  create: PagesDocAccessFields_publishedDate_Create
-  read: PagesDocAccessFields_publishedDate_Read
-  update: PagesDocAccessFields_publishedDate_Update
-  delete: PagesDocAccessFields_publishedDate_Delete
+type PagesDocAccessFields_publishedOn {
+  create: PagesDocAccessFields_publishedOn_Create
+  read: PagesDocAccessFields_publishedOn_Read
+  update: PagesDocAccessFields_publishedOn_Update
+  delete: PagesDocAccessFields_publishedOn_Delete
 }
 
-type PagesDocAccessFields_publishedDate_Create {
+type PagesDocAccessFields_publishedOn_Create {
   permission: Boolean!
 }
 
-type PagesDocAccessFields_publishedDate_Read {
+type PagesDocAccessFields_publishedOn_Read {
   permission: Boolean!
 }
 
-type PagesDocAccessFields_publishedDate_Update {
+type PagesDocAccessFields_publishedOn_Update {
   permission: Boolean!
 }
 
-type PagesDocAccessFields_publishedDate_Delete {
+type PagesDocAccessFields_publishedOn_Delete {
   permission: Boolean!
 }
 
@@ -1954,7 +1957,7 @@ type PageVersion {
 
 type PageVersion_Version {
   title: String
-  publishedDate: DateTime
+  publishedOn: DateTime
   hero: PageVersion_Version_Hero
   layout: [PageVersion_Version_Layout!]!
   slug: String
@@ -2360,7 +2363,7 @@ type versionsPages {
 input versionsPage_where {
   parent: versionsPage_parent_operator
   version__title: versionsPage_version__title_operator
-  version__publishedDate: versionsPage_version__publishedDate_operator
+  version__publishedOn: versionsPage_version__publishedOn_operator
   version__hero__type: versionsPage_version__hero__type_operator
   version__hero__richText: versionsPage_version__hero__richText_operator
   version__hero__links__link__type: versionsPage_version__hero__links__link__type_operator
@@ -2404,7 +2407,7 @@ input versionsPage_version__title_operator {
   all: [String]
 }
 
-input versionsPage_version__publishedDate_operator {
+input versionsPage_version__publishedOn_operator {
   equals: DateTime
   not_equals: DateTime
   greater_than_equal: DateTime
@@ -2625,7 +2628,7 @@ input versionsPage_id_operator {
 input versionsPage_where_or {
   parent: versionsPage_parent_operator
   version__title: versionsPage_version__title_operator
-  version__publishedDate: versionsPage_version__publishedDate_operator
+  version__publishedOn: versionsPage_version__publishedOn_operator
   version__hero__type: versionsPage_version__hero__type_operator
   version__hero__richText: versionsPage_version__hero__richText_operator
   version__hero__links__link__type: versionsPage_version__hero__links__link__type_operator
@@ -2651,7 +2654,7 @@ input versionsPage_where_or {
 input versionsPage_where_and {
   parent: versionsPage_parent_operator
   version__title: versionsPage_version__title_operator
-  version__publishedDate: versionsPage_version__publishedDate_operator
+  version__publishedOn: versionsPage_version__publishedOn_operator
   version__hero__type: versionsPage_version__hero__type_operator
   version__hero__richText: versionsPage_version__hero__richText_operator
   version__hero__links__link__type: versionsPage_version__hero__links__link__type_operator
@@ -2690,7 +2693,7 @@ type Products {
 
 input Product_where {
   title: Product_title_operator
-  publishedDate: Product_publishedDate_operator
+  publishedOn: Product_publishedOn_operator
   stripeProductID: Product_stripeProductID_operator
   priceJSON: Product_priceJSON_operator
   enablePaywall: Product_enablePaywall_operator
@@ -2718,7 +2721,7 @@ input Product_title_operator {
   all: [String]
 }
 
-input Product_publishedDate_operator {
+input Product_publishedOn_operator {
   equals: DateTime
   not_equals: DateTime
   greater_than_equal: DateTime
@@ -2755,11 +2758,11 @@ input Product_enablePaywall_operator {
 }
 
 input Product_categories_operator {
-  equals: [String]
-  not_equals: [String]
-  in: [[String]]
-  not_in: [[String]]
-  all: [[String]]
+  equals: String
+  not_equals: String
+  in: [String]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -2854,7 +2857,7 @@ input Product_id_operator {
 
 input Product_where_or {
   title: Product_title_operator
-  publishedDate: Product_publishedDate_operator
+  publishedOn: Product_publishedOn_operator
   stripeProductID: Product_stripeProductID_operator
   priceJSON: Product_priceJSON_operator
   enablePaywall: Product_enablePaywall_operator
@@ -2872,7 +2875,7 @@ input Product_where_or {
 
 input Product_where_and {
   title: Product_title_operator
-  publishedDate: Product_publishedDate_operator
+  publishedOn: Product_publishedOn_operator
   stripeProductID: Product_stripeProductID_operator
   priceJSON: Product_priceJSON_operator
   enablePaywall: Product_enablePaywall_operator
@@ -2899,7 +2902,7 @@ type productsDocAccess {
 
 type ProductsDocAccessFields {
   title: ProductsDocAccessFields_title
-  publishedDate: ProductsDocAccessFields_publishedDate
+  publishedOn: ProductsDocAccessFields_publishedOn
   layout: ProductsDocAccessFields_layout
   stripeProductID: ProductsDocAccessFields_stripeProductID
   priceJSON: ProductsDocAccessFields_priceJSON
@@ -2937,26 +2940,26 @@ type ProductsDocAccessFields_title_Delete {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_publishedDate {
-  create: ProductsDocAccessFields_publishedDate_Create
-  read: ProductsDocAccessFields_publishedDate_Read
-  update: ProductsDocAccessFields_publishedDate_Update
-  delete: ProductsDocAccessFields_publishedDate_Delete
+type ProductsDocAccessFields_publishedOn {
+  create: ProductsDocAccessFields_publishedOn_Create
+  read: ProductsDocAccessFields_publishedOn_Read
+  update: ProductsDocAccessFields_publishedOn_Update
+  delete: ProductsDocAccessFields_publishedOn_Delete
 }
 
-type ProductsDocAccessFields_publishedDate_Create {
+type ProductsDocAccessFields_publishedOn_Create {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_publishedDate_Read {
+type ProductsDocAccessFields_publishedOn_Read {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_publishedDate_Update {
+type ProductsDocAccessFields_publishedOn_Update {
   permission: Boolean!
 }
 
-type ProductsDocAccessFields_publishedDate_Delete {
+type ProductsDocAccessFields_publishedOn_Delete {
   permission: Boolean!
 }
 
@@ -3395,7 +3398,7 @@ type ProductVersion {
 
 type ProductVersion_Version {
   title: String
-  publishedDate: DateTime
+  publishedOn: DateTime
   layout: [ProductVersion_Version_Layout!]!
   stripeProductID: String
   priceJSON: String
@@ -3600,7 +3603,7 @@ type versionsProducts {
 input versionsProduct_where {
   parent: versionsProduct_parent_operator
   version__title: versionsProduct_version__title_operator
-  version__publishedDate: versionsProduct_version__publishedDate_operator
+  version__publishedOn: versionsProduct_version__publishedOn_operator
   version__stripeProductID: versionsProduct_version__stripeProductID_operator
   version__priceJSON: versionsProduct_version__priceJSON_operator
   version__enablePaywall: versionsProduct_version__enablePaywall_operator
@@ -3639,7 +3642,7 @@ input versionsProduct_version__title_operator {
   all: [String]
 }
 
-input versionsProduct_version__publishedDate_operator {
+input versionsProduct_version__publishedOn_operator {
   equals: DateTime
   not_equals: DateTime
   greater_than_equal: DateTime
@@ -3676,11 +3679,11 @@ input versionsProduct_version__enablePaywall_operator {
 }
 
 input versionsProduct_version__categories_operator {
-  equals: [String]
-  not_equals: [String]
-  in: [[String]]
-  not_in: [[String]]
-  all: [[String]]
+  equals: String
+  not_equals: String
+  in: [String]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -3798,7 +3801,7 @@ input versionsProduct_id_operator {
 input versionsProduct_where_or {
   parent: versionsProduct_parent_operator
   version__title: versionsProduct_version__title_operator
-  version__publishedDate: versionsProduct_version__publishedDate_operator
+  version__publishedOn: versionsProduct_version__publishedOn_operator
   version__stripeProductID: versionsProduct_version__stripeProductID_operator
   version__priceJSON: versionsProduct_version__priceJSON_operator
   version__enablePaywall: versionsProduct_version__enablePaywall_operator
@@ -3819,7 +3822,7 @@ input versionsProduct_where_or {
 input versionsProduct_where_and {
   parent: versionsProduct_parent_operator
   version__title: versionsProduct_version__title_operator
-  version__publishedDate: versionsProduct_version__publishedDate_operator
+  version__publishedOn: versionsProduct_version__publishedOn_operator
   version__stripeProductID: versionsProduct_version__stripeProductID_operator
   version__priceJSON: versionsProduct_version__priceJSON_operator
   version__enablePaywall: versionsProduct_version__enablePaywall_operator
@@ -5223,11 +5226,11 @@ enum User_roles_Input {
 }
 
 input User_purchases_operator {
-  equals: [String]
-  not_equals: [String]
-  in: [[String]]
-  not_in: [[String]]
-  all: [[String]]
+  equals: String
+  not_equals: String
+  in: [String]
+  not_in: [String]
+  all: [String]
   exists: Boolean
 }
 
@@ -5737,6 +5740,363 @@ type usersMe {
   user: User
   exp: Int
   collection: String
+}
+
+type Redirect {
+  id: String
+  from: String!
+  to: Redirect_To
+  updatedAt: DateTime
+  createdAt: DateTime
+}
+
+type Redirect_To {
+  type: Redirect_To_type
+  reference: Redirect_To_Reference_Relationship
+  url: String
+}
+
+enum Redirect_To_type {
+  reference
+  custom
+}
+
+type Redirect_To_Reference_Relationship {
+  relationTo: Redirect_To_Reference_RelationTo
+  value: Redirect_To_Reference
+}
+
+enum Redirect_To_Reference_RelationTo {
+  pages
+  products
+}
+
+union Redirect_To_Reference = Page | Product
+
+type Redirects {
+  docs: [Redirect]
+  totalDocs: Int
+  offset: Int
+  limit: Int
+  totalPages: Int
+  page: Int
+  pagingCounter: Int
+  hasPrevPage: Boolean
+  hasNextPage: Boolean
+  prevPage: Int
+  nextPage: Int
+}
+
+input Redirect_where {
+  from: Redirect_from_operator
+  to__type: Redirect_to__type_operator
+  to__reference: Redirect_to__reference_Relation
+  to__url: Redirect_to__url_operator
+  updatedAt: Redirect_updatedAt_operator
+  createdAt: Redirect_createdAt_operator
+  id: Redirect_id_operator
+  OR: [Redirect_where_or]
+  AND: [Redirect_where_and]
+}
+
+input Redirect_from_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input Redirect_to__type_operator {
+  equals: Redirect_to__type_Input
+  not_equals: Redirect_to__type_Input
+  in: [Redirect_to__type_Input]
+  not_in: [Redirect_to__type_Input]
+  all: [Redirect_to__type_Input]
+  exists: Boolean
+}
+
+enum Redirect_to__type_Input {
+  reference
+  custom
+}
+
+input Redirect_to__reference_Relation {
+  relationTo: Redirect_to__reference_Relation_RelationTo
+  value: String
+}
+
+enum Redirect_to__reference_Relation_RelationTo {
+  pages
+  products
+}
+
+input Redirect_to__url_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input Redirect_updatedAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Redirect_createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input Redirect_id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Redirect_where_or {
+  from: Redirect_from_operator
+  to__type: Redirect_to__type_operator
+  to__reference: Redirect_to__reference_Relation
+  to__url: Redirect_to__url_operator
+  updatedAt: Redirect_updatedAt_operator
+  createdAt: Redirect_createdAt_operator
+  id: Redirect_id_operator
+}
+
+input Redirect_where_and {
+  from: Redirect_from_operator
+  to__type: Redirect_to__type_operator
+  to__reference: Redirect_to__reference_Relation
+  to__url: Redirect_to__url_operator
+  updatedAt: Redirect_updatedAt_operator
+  createdAt: Redirect_createdAt_operator
+  id: Redirect_id_operator
+}
+
+type redirectsDocAccess {
+  fields: RedirectsDocAccessFields
+  create: RedirectsCreateDocAccess
+  read: RedirectsReadDocAccess
+  update: RedirectsUpdateDocAccess
+  delete: RedirectsDeleteDocAccess
+}
+
+type RedirectsDocAccessFields {
+  from: RedirectsDocAccessFields_from
+  to: RedirectsDocAccessFields_to
+  updatedAt: RedirectsDocAccessFields_updatedAt
+  createdAt: RedirectsDocAccessFields_createdAt
+}
+
+type RedirectsDocAccessFields_from {
+  create: RedirectsDocAccessFields_from_Create
+  read: RedirectsDocAccessFields_from_Read
+  update: RedirectsDocAccessFields_from_Update
+  delete: RedirectsDocAccessFields_from_Delete
+}
+
+type RedirectsDocAccessFields_from_Create {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_from_Read {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_from_Update {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_from_Delete {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to {
+  create: RedirectsDocAccessFields_to_Create
+  read: RedirectsDocAccessFields_to_Read
+  update: RedirectsDocAccessFields_to_Update
+  delete: RedirectsDocAccessFields_to_Delete
+  fields: RedirectsDocAccessFields_to_Fields
+}
+
+type RedirectsDocAccessFields_to_Create {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_Read {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_Update {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_Delete {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_Fields {
+  type: RedirectsDocAccessFields_to_type
+  reference: RedirectsDocAccessFields_to_reference
+  url: RedirectsDocAccessFields_to_url
+}
+
+type RedirectsDocAccessFields_to_type {
+  create: RedirectsDocAccessFields_to_type_Create
+  read: RedirectsDocAccessFields_to_type_Read
+  update: RedirectsDocAccessFields_to_type_Update
+  delete: RedirectsDocAccessFields_to_type_Delete
+}
+
+type RedirectsDocAccessFields_to_type_Create {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_type_Read {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_type_Update {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_type_Delete {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_reference {
+  create: RedirectsDocAccessFields_to_reference_Create
+  read: RedirectsDocAccessFields_to_reference_Read
+  update: RedirectsDocAccessFields_to_reference_Update
+  delete: RedirectsDocAccessFields_to_reference_Delete
+}
+
+type RedirectsDocAccessFields_to_reference_Create {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_reference_Read {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_reference_Update {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_reference_Delete {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_url {
+  create: RedirectsDocAccessFields_to_url_Create
+  read: RedirectsDocAccessFields_to_url_Read
+  update: RedirectsDocAccessFields_to_url_Update
+  delete: RedirectsDocAccessFields_to_url_Delete
+}
+
+type RedirectsDocAccessFields_to_url_Create {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_url_Read {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_url_Update {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_to_url_Delete {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_updatedAt {
+  create: RedirectsDocAccessFields_updatedAt_Create
+  read: RedirectsDocAccessFields_updatedAt_Read
+  update: RedirectsDocAccessFields_updatedAt_Update
+  delete: RedirectsDocAccessFields_updatedAt_Delete
+}
+
+type RedirectsDocAccessFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_createdAt {
+  create: RedirectsDocAccessFields_createdAt_Create
+  read: RedirectsDocAccessFields_createdAt_Read
+  update: RedirectsDocAccessFields_createdAt_Update
+  delete: RedirectsDocAccessFields_createdAt_Delete
+}
+
+type RedirectsDocAccessFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type RedirectsDocAccessFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type RedirectsCreateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type RedirectsReadDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type RedirectsUpdateDocAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type RedirectsDeleteDocAccess {
+  permission: Boolean!
+  where: JSONObject
 }
 
 type Settings {
@@ -6455,6 +6815,7 @@ type Access {
   media: mediaAccess
   categories: categoriesAccess
   users: usersAccess
+  redirects: redirectsAccess
   settings: settingsAccess
   header: headerAccess
   footer: footerAccess
@@ -6471,7 +6832,7 @@ type pagesAccess {
 
 type PagesFields {
   title: PagesFields_title
-  publishedDate: PagesFields_publishedDate
+  publishedOn: PagesFields_publishedOn
   hero: PagesFields_hero
   layout: PagesFields_layout
   slug: PagesFields_slug
@@ -6504,26 +6865,26 @@ type PagesFields_title_Delete {
   permission: Boolean!
 }
 
-type PagesFields_publishedDate {
-  create: PagesFields_publishedDate_Create
-  read: PagesFields_publishedDate_Read
-  update: PagesFields_publishedDate_Update
-  delete: PagesFields_publishedDate_Delete
+type PagesFields_publishedOn {
+  create: PagesFields_publishedOn_Create
+  read: PagesFields_publishedOn_Read
+  update: PagesFields_publishedOn_Update
+  delete: PagesFields_publishedOn_Delete
 }
 
-type PagesFields_publishedDate_Create {
+type PagesFields_publishedOn_Create {
   permission: Boolean!
 }
 
-type PagesFields_publishedDate_Read {
+type PagesFields_publishedOn_Read {
   permission: Boolean!
 }
 
-type PagesFields_publishedDate_Update {
+type PagesFields_publishedOn_Update {
   permission: Boolean!
 }
 
-type PagesFields_publishedDate_Delete {
+type PagesFields_publishedOn_Delete {
   permission: Boolean!
 }
 
@@ -7148,7 +7509,7 @@ type productsAccess {
 
 type ProductsFields {
   title: ProductsFields_title
-  publishedDate: ProductsFields_publishedDate
+  publishedOn: ProductsFields_publishedOn
   layout: ProductsFields_layout
   stripeProductID: ProductsFields_stripeProductID
   priceJSON: ProductsFields_priceJSON
@@ -7186,26 +7547,26 @@ type ProductsFields_title_Delete {
   permission: Boolean!
 }
 
-type ProductsFields_publishedDate {
-  create: ProductsFields_publishedDate_Create
-  read: ProductsFields_publishedDate_Read
-  update: ProductsFields_publishedDate_Update
-  delete: ProductsFields_publishedDate_Delete
+type ProductsFields_publishedOn {
+  create: ProductsFields_publishedOn_Create
+  read: ProductsFields_publishedOn_Read
+  update: ProductsFields_publishedOn_Update
+  delete: ProductsFields_publishedOn_Delete
 }
 
-type ProductsFields_publishedDate_Create {
+type ProductsFields_publishedOn_Create {
   permission: Boolean!
 }
 
-type ProductsFields_publishedDate_Read {
+type ProductsFields_publishedOn_Read {
   permission: Boolean!
 }
 
-type ProductsFields_publishedDate_Update {
+type ProductsFields_publishedOn_Update {
   permission: Boolean!
 }
 
-type ProductsFields_publishedDate_Delete {
+type ProductsFields_publishedOn_Delete {
   permission: Boolean!
 }
 
@@ -8812,6 +9173,209 @@ type UsersUnlockAccess {
   where: JSONObject
 }
 
+type redirectsAccess {
+  fields: RedirectsFields
+  create: RedirectsCreateAccess
+  read: RedirectsReadAccess
+  update: RedirectsUpdateAccess
+  delete: RedirectsDeleteAccess
+}
+
+type RedirectsFields {
+  from: RedirectsFields_from
+  to: RedirectsFields_to
+  updatedAt: RedirectsFields_updatedAt
+  createdAt: RedirectsFields_createdAt
+}
+
+type RedirectsFields_from {
+  create: RedirectsFields_from_Create
+  read: RedirectsFields_from_Read
+  update: RedirectsFields_from_Update
+  delete: RedirectsFields_from_Delete
+}
+
+type RedirectsFields_from_Create {
+  permission: Boolean!
+}
+
+type RedirectsFields_from_Read {
+  permission: Boolean!
+}
+
+type RedirectsFields_from_Update {
+  permission: Boolean!
+}
+
+type RedirectsFields_from_Delete {
+  permission: Boolean!
+}
+
+type RedirectsFields_to {
+  create: RedirectsFields_to_Create
+  read: RedirectsFields_to_Read
+  update: RedirectsFields_to_Update
+  delete: RedirectsFields_to_Delete
+  fields: RedirectsFields_to_Fields
+}
+
+type RedirectsFields_to_Create {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_Read {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_Update {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_Delete {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_Fields {
+  type: RedirectsFields_to_type
+  reference: RedirectsFields_to_reference
+  url: RedirectsFields_to_url
+}
+
+type RedirectsFields_to_type {
+  create: RedirectsFields_to_type_Create
+  read: RedirectsFields_to_type_Read
+  update: RedirectsFields_to_type_Update
+  delete: RedirectsFields_to_type_Delete
+}
+
+type RedirectsFields_to_type_Create {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_type_Read {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_type_Update {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_type_Delete {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_reference {
+  create: RedirectsFields_to_reference_Create
+  read: RedirectsFields_to_reference_Read
+  update: RedirectsFields_to_reference_Update
+  delete: RedirectsFields_to_reference_Delete
+}
+
+type RedirectsFields_to_reference_Create {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_reference_Read {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_reference_Update {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_reference_Delete {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_url {
+  create: RedirectsFields_to_url_Create
+  read: RedirectsFields_to_url_Read
+  update: RedirectsFields_to_url_Update
+  delete: RedirectsFields_to_url_Delete
+}
+
+type RedirectsFields_to_url_Create {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_url_Read {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_url_Update {
+  permission: Boolean!
+}
+
+type RedirectsFields_to_url_Delete {
+  permission: Boolean!
+}
+
+type RedirectsFields_updatedAt {
+  create: RedirectsFields_updatedAt_Create
+  read: RedirectsFields_updatedAt_Read
+  update: RedirectsFields_updatedAt_Update
+  delete: RedirectsFields_updatedAt_Delete
+}
+
+type RedirectsFields_updatedAt_Create {
+  permission: Boolean!
+}
+
+type RedirectsFields_updatedAt_Read {
+  permission: Boolean!
+}
+
+type RedirectsFields_updatedAt_Update {
+  permission: Boolean!
+}
+
+type RedirectsFields_updatedAt_Delete {
+  permission: Boolean!
+}
+
+type RedirectsFields_createdAt {
+  create: RedirectsFields_createdAt_Create
+  read: RedirectsFields_createdAt_Read
+  update: RedirectsFields_createdAt_Update
+  delete: RedirectsFields_createdAt_Delete
+}
+
+type RedirectsFields_createdAt_Create {
+  permission: Boolean!
+}
+
+type RedirectsFields_createdAt_Read {
+  permission: Boolean!
+}
+
+type RedirectsFields_createdAt_Update {
+  permission: Boolean!
+}
+
+type RedirectsFields_createdAt_Delete {
+  permission: Boolean!
+}
+
+type RedirectsCreateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type RedirectsReadAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type RedirectsUpdateAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
+type RedirectsDeleteAccess {
+  permission: Boolean!
+  where: JSONObject
+}
+
 type settingsAccess {
   fields: SettingsFields
   read: SettingsReadAccess
@@ -9465,6 +10029,9 @@ type Mutation {
   forgotPasswordUser(email: String!, disableEmail: Boolean, expiration: Int): Boolean!
   resetPasswordUser(token: String, password: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
+  createRedirect(data: mutationRedirectInput!, draft: Boolean): Redirect
+  updateRedirect(id: String!, data: mutationRedirectUpdateInput!, draft: Boolean, autosave: Boolean): Redirect
+  deleteRedirect(id: String!): Redirect
   updateSettings(data: mutationSettingsInput!, draft: Boolean): Settings
   updateHeader(data: mutationHeaderInput!, draft: Boolean): Header
   updateFooter(data: mutationFooterInput!, draft: Boolean): Footer
@@ -9474,7 +10041,7 @@ type Mutation {
 
 input mutationPageInput {
   title: String!
-  publishedDate: String
+  publishedOn: String
   hero: mutationPage_HeroInput!
   layout: JSON
   slug: String
@@ -9540,7 +10107,7 @@ enum Page__status_MutationInput {
 
 input mutationPageUpdateInput {
   title: String
-  publishedDate: String
+  publishedOn: String
   hero: mutationPageUpdate_HeroInput!
   layout: JSON
   slug: String
@@ -9606,7 +10173,7 @@ enum PageUpdate__status_MutationInput {
 
 input mutationProductInput {
   title: String!
-  publishedDate: String
+  publishedOn: String
   layout: JSON
   stripeProductID: String
   priceJSON: String
@@ -9634,7 +10201,7 @@ enum Product__status_MutationInput {
 
 input mutationProductUpdateInput {
   title: String
-  publishedDate: String
+  publishedOn: String
   layout: JSON
   stripeProductID: String
   priceJSON: String
@@ -9836,6 +10403,52 @@ type usersLoginResult {
 type usersResetPassword {
   token: String
   user: User
+}
+
+input mutationRedirectInput {
+  from: String!
+  to: mutationRedirect_ToInput!
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationRedirect_ToInput {
+  type: String
+  reference: Redirect_To_ReferenceRelationshipInput
+  url: String
+}
+
+input Redirect_To_ReferenceRelationshipInput {
+  relationTo: Redirect_To_ReferenceRelationshipInputRelationTo
+  value: JSON
+}
+
+enum Redirect_To_ReferenceRelationshipInputRelationTo {
+  pages
+  products
+}
+
+input mutationRedirectUpdateInput {
+  from: String
+  to: mutationRedirectUpdate_ToInput!
+  updatedAt: String
+  createdAt: String
+}
+
+input mutationRedirectUpdate_ToInput {
+  type: String
+  reference: RedirectUpdate_To_ReferenceRelationshipInput
+  url: String
+}
+
+input RedirectUpdate_To_ReferenceRelationshipInput {
+  relationTo: RedirectUpdate_To_ReferenceRelationshipInputRelationTo
+  value: JSON
+}
+
+enum RedirectUpdate_To_ReferenceRelationshipInputRelationTo {
+  pages
+  products
 }
 
 input mutationSettingsInput {

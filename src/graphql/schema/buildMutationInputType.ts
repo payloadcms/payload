@@ -200,7 +200,7 @@ function buildMutationInputType(payload: Payload, name: string, fields: Field[],
           if (requiresAtLeastOneField) type = new GraphQLNonNull(type);
 
           return {
-            ...inputObjectTypeConfig,
+            ...acc,
             [tab.name]: { type },
           };
         }

@@ -77,4 +77,5 @@ export type Props = {
   */
   selectProps?: CustomSelectProps
   backspaceRemovesValue?: boolean
+  noOptionsMessage?: (obj: { inputValue: string }) => string
 }

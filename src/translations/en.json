@@ -204,6 +204,7 @@
     "newPassword": "New Password",
     "noFiltersSet": "No filters set",
     "noLabel": "<No {{label}}>",
+    "noOptions": "No options",
     "noResults": "No {{label}} found. Either no {{label}} exist yet or none match the filters you've specified above.",
     "noValue": "No value",
     "none": "None",
@@ -280,6 +281,7 @@
   "validation": {
     "emailAddress": "Please enter a valid email address.",
     "enterNumber": "Please enter a valid number.",
+    "limitReached": "Limit reached, only {{max}} items can be added.",
     "fieldHasNo": "This field has no {{label}}",
     "greaterThanMax": "{{value}} is greater than the max allowed {{label}} of {{max}}.",
     "invalidInput": "This field has an invalid input.",

@@ -141,5 +141,48 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'collection3',
+      fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'Tab 1',
+              fields: [
+                {
+                  name: 'descriptiontab1',
+                  type: 'textarea',
+                },
+              ],
+            },
+            {
+              label: 'Tab 2',
+              name: 'tab2',
+              fields: [
+                {
+                  type: 'select',
+                  name: 'selecttab2',
+                  options: [
+                    { value: 'option1', label: 'Option 1' },
+                    { value: 'option2', label: 'Option 2' },
+                  ],
+                },
+              ],
+            },
+            {
+              label: 'Tab3',
+              name: 'tab3',
+              fields: [
+                {
+                  name: 'acheckbox',
+                  type: 'checkbox',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 });

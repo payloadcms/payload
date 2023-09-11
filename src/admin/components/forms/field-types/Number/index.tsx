@@ -143,9 +143,17 @@ const NumberField: React.FC<Props> = (props) => {
           isMulti
           isSortable
           isClearable
+          noOptionsMessage={({ inputValue }) => {
+            const isOverHasMany = Array.isArray(value) && value.length >= maxRows;
+            if (isOverHasMany) {
+              return t('validation:limitReached', { value: value.length + 1, max: maxRows });
+            }
+            return t('general:noOptions');
+          }}
           filterOption={(option, rawInput) => {
             // eslint-disable-next-line no-restricted-globals
-            return isNumber(rawInput);
+            const isOverHasMany = Array.isArray(value) && value.length >= maxRows;
+            return isNumber(rawInput) && !isOverHasMany;
           }}
           numberOnly
         />

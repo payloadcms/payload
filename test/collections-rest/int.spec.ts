@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
 import { randomBytes } from 'crypto';
+import mongoose from 'mongoose';
 import { initPayloadTest } from '../helpers/configHelpers';
 import type { Relation } from './config';
 import config, { customIdNumberSlug, customIdSlug, errorOnHookSlug, pointSlug, relationSlug, slug } from './config';
@@ -862,6 +862,98 @@ describe('collections-rest', () => {
           }));
         });
       });
+
+      describe('within', () => {
+        type Point = [number, number];
+        const polygon: Point[] = [
+          [9.0, 19.0], // bottom-left
+          [9.0, 21.0], // top-left
+          [11.0, 21.0], // top-right
+          [11.0, 19.0], // bottom-right
+          [9.0, 19.0], // back to starting point to close the polygon
+        ];
+        it('should return a document with the point inside the polygon', async () => {
+          // There should be 1 total points document populated by default with the point [10, 20]
+          const { status, result } = await client.find({
+            slug: pointSlug,
+            query: {
+              point: {
+                within: {
+                  type: 'Polygon',
+                  coordinates: [polygon],
+                },
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toHaveLength(1);
+        });
+
+        it('should not return a document with the point outside a smaller polygon', async () => {
+          const { status, result } = await client.find({
+            slug: pointSlug,
+            query: {
+              point: {
+                within: {
+                  type: 'Polygon',
+                  coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
+                },
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toHaveLength(0);
+        });
+      });
+
+      describe('intersects', () => {
+        type Point = [number, number];
+        const polygon: Point[] = [
+          [9.0, 19.0], // bottom-left
+          [9.0, 21.0], // top-left
+          [11.0, 21.0], // top-right
+          [11.0, 19.0], // bottom-right
+          [9.0, 19.0], // back to starting point to close the polygon
+        ];
+
+        it('should return a document with the point intersecting the polygon', async () => {
+          // There should be 1 total points document populated by default with the point [10, 20]
+          const { status, result } = await client.find({
+            slug: pointSlug,
+            query: {
+              point: {
+                intersects: {
+                  type: 'Polygon',
+                  coordinates: [polygon],
+                },
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toHaveLength(1);
+        });
+
+        it('should not return a document with the point not intersecting a smaller polygon', async () => {
+          const { status, result } = await client.find({
+            slug: pointSlug,
+            query: {
+              point: {
+                intersects: {
+                  type: 'Polygon',
+                  coordinates: [polygon.map((vertex) => vertex.map((coord) => coord * 0.1))], // Reduce polygon to 10% of its size
+                },
+              },
+            },
+          });
+
+          expect(status).toEqual(200);
+          expect(result.docs).toHaveLength(0);
+        });
+      });
+
 
       it('or', async () => {
         const post1 = await createPost({ title: 'post1' });

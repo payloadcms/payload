@@ -4,6 +4,7 @@ import { PayloadRequest, Where } from '../../types';
 import { Payload } from '../../payload';
 import { PaginatedDocs } from '../../mongoose/types';
 import { Collection, CollectionModel, TypeWithID } from '../../collections/config/types';
+import { combineQueries } from '../../database/combineQueries';
 import { hasWhereAccessResult } from '../../auth';
 import { appendVersionToQueryKey } from './appendVersionToQueryKey';
 
@@ -24,7 +25,15 @@ type Args = {
   where: Where
 }
 
-export const queryDrafts = async <T extends TypeWithID>({
+export const queryDrafts = async <T extends TypeWithID>(args: Args): Promise<PaginatedDocs<T>> => {
+  if (args.payload.config?.database?.queryDrafts_2_0) {
+    return queryDraftsV2(args);
+  }
+
+  return queryDraftsV1(args);
+};
+
+const queryDraftsV1 = async <T extends TypeWithID>({
   accessResult,
   collection,
   req,
@@ -98,6 +107,66 @@ export const queryDrafts = async <T extends TypeWithID>({
     ...result,
     docs: result.docs.map((doc) => ({
       _id: doc._id,
+      ...doc.version,
+      updatedAt: doc.updatedAt,
+      createdAt: doc.createdAt,
+    })),
+  };
+};
+
+const queryDraftsV2 = async <T extends TypeWithID>({
+  accessResult,
+  collection,
+  req,
+  overrideAccess,
+  payload,
+  paginationOptions,
+  where,
+}: Args): Promise<PaginatedDocs<T>> => {
+  const VersionModel = payload.versions[collection.config.slug] as CollectionModel;
+  const queryWithPrefix = appendVersionToQueryKey(where || {});
+  const combinedQuery = combineQueries({ latest: { equals: true } }, queryWithPrefix);
+
+  const versionsQuery = await VersionModel.buildQuery({
+    where: combinedQuery,
+    access: accessResult,
+    req,
+    overrideAccess,
+  });
+
+  let result;
+
+  if (paginationOptions) {
+    const paginationOptionsToUse: PaginateOptions = {
+      ...paginationOptions,
+      lean: true,
+      leanWithId: true,
+      useFacet: payload.mongoOptions?.useFacet,
+      sort: Object.entries(paginationOptions.sort)
+        .reduce((sort, [incomingSortKey, order]) => {
+          let key = incomingSortKey;
+
+          if (!['createdAt', 'updatedAt', '_id'].includes(incomingSortKey)) {
+            key = `version.${incomingSortKey}`;
+          }
+
+          return {
+            ...sort,
+            [key]: order === 'asc' ? 1 : -1,
+          };
+        }, {}),
+    };
+
+    result = await VersionModel.paginate(versionsQuery, paginationOptionsToUse);
+  } else {
+    result = await VersionModel.find(versionsQuery);
+  }
+
+  return {
+    ...result,
+    docs: result.docs.map((doc) => ({
+      _id: doc.parent,
+      id: doc.parent,
       ...doc.version,
       updatedAt: doc.updatedAt,
       createdAt: doc.createdAt,

@@ -49,8 +49,8 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
           type="checkbox"
           name={name}
           aria-label={ariaLabel}
-          checked={Boolean(checked)}
-          readOnly
+          defaultChecked={Boolean(checked)}
+          disabled={readOnly}
           onInput={onToggle}
         />
         <span className={`${baseClass}__icon ${!partialChecked ? 'check' : 'partial'}`}>

@@ -24,14 +24,6 @@
     padding-bottom: 0;
     padding-left: base(.5);
   }
-  
-  &:hover {
-    cursor: pointer;
-
-    svg {
-      opacity: 0.2;
-    }
-  }
 
   &__input {
     @include formInput;
@@ -43,18 +35,18 @@
     height: $baseline;
 
     & input[type="checkbox"] {
-      width: 100%;
-      height: 100%;
+      position: absolute;
+      // Without the extra 4px, there is an uncheckable area due to the border of the parent element
+      width: calc(100% + 4px);
+      height: calc(100% + 4px);
       padding: 0;
       margin: 0;
+      margin-left: -2px;
+      margin-top: -2px;
       opacity: 0;
       border-radius: 0;
       z-index: 1;
       cursor: pointer;
-    }
-
-    &:focus-within {
-      box-shadow: 0 0 3px 3px var(--theme-success-400);
     }
   }
 
@@ -63,6 +55,37 @@
 
     svg {
       opacity: 0;
+    }
+  }
+  
+ 
+  &:not(&--read-only) {
+    &:active,
+    &:focus-within,
+    &:focus {
+      .custom-checkbox__input, & input[type="checkbox"] {
+        @include inputShadowActive;
+
+        outline: 0;
+        box-shadow: 0 0 3px 3px var(--theme-success-400)!important;
+        border: 1px solid var(--theme-elevation-150);
+      }
+    }
+
+    &:hover {
+      .custom-checkbox__input, & input[type="checkbox"] {
+        border-color: var(--theme-elevation-250);
+      }
+    }
+  }
+  
+  &:not(&--read-only):not(&--checked) {
+    &:hover {
+      cursor: pointer;
+
+      svg {
+        opacity: 0.2;
+      }
     }
   }
 

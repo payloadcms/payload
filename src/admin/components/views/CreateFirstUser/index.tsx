@@ -17,7 +17,7 @@ const baseClass = 'create-first-user';
 
 const CreateFirstUser: React.FC<Props> = (props) => {
   const { setInitialized } = props;
-  const { setToken } = useAuth();
+  const { fetchFullUser } = useAuth();
   const {
     admin: { user: userSlug }, collections, serverURL, routes: { admin, api },
   } = useConfig();
@@ -25,9 +25,9 @@ const CreateFirstUser: React.FC<Props> = (props) => {
 
   const userConfig = collections.find((collection) => collection.slug === userSlug);
 
-  const onSuccess = (json) => {
+  const onSuccess = async (json) => {
     if (json?.user?.token) {
-      setToken(json.user.token);
+      await fetchFullUser();
     }
 
     setInitialized(true);
@@ -52,6 +52,11 @@ const CreateFirstUser: React.FC<Props> = (props) => {
     },
   ] as Field[];
 
+  const fieldSchema = [
+    ...fields,
+    ...userConfig.fields,
+  ];
+
   return (
     <MinimalTemplate className={baseClass}>
       <h1>{t('general:welcome')}</h1>
@@ -67,12 +72,10 @@ const CreateFirstUser: React.FC<Props> = (props) => {
         redirect={admin}
         action={`${serverURL}${api}/${userSlug}/first-register`}
         validationOperation="create"
+        configFieldsSchema={fieldSchema}
       >
         <RenderFields
-          fieldSchema={[
-            ...fields,
-            ...userConfig.fields,
-          ]}
+          fieldSchema={fieldSchema}
           fieldTypes={fieldTypes}
         />
         <FormSubmit>{t('general:create')}</FormSubmit>

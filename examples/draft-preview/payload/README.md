@@ -1,6 +1,6 @@
 # Payload Draft Preview Example
 
-The [Payload Draft Preview Example](https://github.com/payloadcms/payload/tree/master/examples/draft-preview) demonstrates how to implement draft preview in [Payload](https://github.com/payloadcms/payload) using [Versions](https://payloadcms.com/docs/versions/overview) and [Drafts](https://payloadcms.com/docs/versions/drafts). Draft preview allows you to see content on your front-end before it is published. There are various fully working front-ends made explicitly for this example, including:
+The [Payload Draft Preview Example](https://github.com/payloadcms/payload/tree/master/examples/draft-preview/payload) demonstrates how to implement draft preview in [Payload](https://github.com/payloadcms/payload) using [Versions](https://payloadcms.com/docs/versions/overview) and [Drafts](https://payloadcms.com/docs/versions/drafts). Draft preview allows you to see content on your front-end before it is published. There are various fully working front-ends made explicitly for this example, including:
 
 - [Next.js App Router](../next-app)
 - [Next.js Pages Router](../next-pages)

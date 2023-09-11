@@ -10,4 +10,6 @@ export const operatorMap = {
   exists: '$exists',
   equals: '$eq',
   near: '$near',
+  within: '$geoWithin',
+  intersects: '$geoIntersects',
 };

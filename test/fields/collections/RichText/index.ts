@@ -90,6 +90,17 @@ const RichTextFields: CollectionConfig = {
                   name: 'caption',
                   type: 'richText',
                 },
+                {
+                  name: 'authors',
+                  label: 'Authors',
+                  type: 'array',
+                  fields: [
+                    {
+                      name: 'name',
+                      type: 'text',
+                    },
+                  ],
+                },
               ],
             },
           },

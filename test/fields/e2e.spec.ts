@@ -1,6 +1,6 @@
+import path from 'path';
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
-import path from 'path';
 import payload from '../../src';
 import { AdminUrlUtil } from '../helpers/adminUrlUtil';
 import { initPayloadE2E } from '../helpers/configHelpers';
@@ -78,6 +78,43 @@ describe('fields', () => {
       const textCell = page.locator('.row-1 .cell-number');
       await expect(textCell)
         .toHaveText(String(numberDoc.number));
+    });
+
+
+    test('should filter Number fields in the collection view - greaterThanOrEqual', async () => {
+      await page.goto(url.list);
+
+      // should have 3 entries
+      await expect(page.locator('table >> tbody >> tr')).toHaveCount(3);
+
+      // open the filter options
+      await page.locator('.list-controls__toggle-where').click();
+      await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible();
+      await page.locator('.where-builder__add-first-filter').click();
+
+      const initialField = page.locator('.condition__field');
+      const operatorField = page.locator('.condition__operator');
+      const valueField = page.locator('.condition__value >> input');
+
+      // select Number field to filter on
+      await initialField.click();
+      const initialFieldOptions = initialField.locator('.rs__option');
+      await initialFieldOptions.locator('text=number').first().click();
+      expect(initialField.locator('.rs__single-value')).toContainText('Number');
+
+      // select >= operator
+      await operatorField.click();
+      const operatorOptions = operatorField.locator('.rs__option');
+      await operatorOptions.last().click();
+      expect(operatorField.locator('.rs__single-value')).toContainText('is greater than or equal to');
+
+      // enter value of 3
+      await valueField.fill('3');
+      await expect(valueField).toHaveValue('3');
+      await wait(300);
+
+      // should have 2 entries after filtering
+      await expect(page.locator('table >> tbody >> tr')).toHaveCount(2);
     });
 
     test('should create', async () => {
@@ -835,6 +872,24 @@ describe('fields', () => {
         await expect(documentDrawer).toBeVisible();
         const caption = await documentDrawer.locator('#field-caption');
         await expect(caption).toBeVisible();
+      });
+
+      test('should open upload drawer and populate new entries in a custom relationship array field', async () => {
+        await navigateToRichTextFields();
+        const field = await page.locator('#field-richText');
+        const button = await field.locator('button.rich-text-upload__upload-drawer-toggler');
+
+        await button.click();
+
+        const documentDrawer = await page.locator('[id^=drawer_1_upload-drawer-]');
+        await expect(documentDrawer).toBeVisible();
+
+        // Add new array entry in drawer
+        await documentDrawer.locator('#field-authors .btn').first().click();
+
+        // find added array entry
+        const newArrayEntry = await documentDrawer.locator('#field-authors #authors-row-0');
+        await expect(newArrayEntry).toBeVisible();
       });
 
       test('should open upload document drawer from read-only field', async () => {

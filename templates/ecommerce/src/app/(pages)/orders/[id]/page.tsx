@@ -22,17 +22,24 @@ export default async function Order({ params: { id } }) {
     )}&redirect=${encodeURIComponent(`/order/${id}`)}`,
   })
 
-  const order: Order = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders/${id}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `JWT ${token}`,
-    },
-  })?.then(async res => {
-    const json = await res.json()
-    if ('error' in json && json.error) notFound()
-    if ('errors' in json && json.errors) notFound()
-    return json
-  })
+  let order: Order | null = null
+
+  try {
+    order = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `JWT ${token}`,
+      },
+    })?.then(async res => {
+      if (!res.ok) notFound()
+      const json = await res.json()
+      if ('error' in json && json.error) notFound()
+      if ('errors' in json && json.errors) notFound()
+      return json
+    })
+  } catch (error) {
+    console.error(error) // eslint-disable-line no-console
+  }
 
   if (!order) {
     notFound()
@@ -92,7 +99,7 @@ export default async function Order({ params: { id } }) {
                         <Link
                           href={`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/collections/products/${id}`}
                         >
-                          navigate to the admin dashboard
+                          edit this product in the admin panel
                         </Link>
                         {'.'}
                       </p>

@@ -56,4 +56,7 @@ export const defaults: Config = {
   localization: false,
   telemetry: true,
   custom: {},
+  database: {
+    queryDrafts_2_0: false,
+  },
 };

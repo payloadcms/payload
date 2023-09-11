@@ -13,8 +13,8 @@ export const PRODUCTS = `
 `
 
 export const PRODUCT = `
-  query Product($slug: String ) {
-    Products(where: { slug: { equals: $slug}}) {
+  query Product($slug: String, $draft: Boolean) {
+    Products(where: { slug: { equals: $slug}}, limit: 1, draft: $draft) {
       docs {
         id
         title
@@ -27,16 +27,22 @@ export const PRODUCT = `
           ${ARCHIVE_BLOCK}
         }
         priceJSON
-        ${META}
         enablePaywall
+        relatedProducts {
+          id
+          slug
+          title
+          ${META}
+        }
+        ${META}
       }
     }
   }
 `
 
 export const PRODUCT_PAYWALL = `
-  query Product($slug: String ) {
-    Products(where: { slug: { equals: $slug}}) {
+  query Product($slug: String, $draft: Boolean) {
+    Products(where: { slug: { equals: $slug}}, limit: 1, draft: $draft) {
       docs {
         paywall {
           ${CALL_TO_ACTION}

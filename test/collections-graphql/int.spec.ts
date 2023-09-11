@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 import { GraphQLClient } from 'graphql-request';
 import { initPayloadTest } from '../helpers/configHelpers';
-import configPromise, { slug } from './config';
+import configPromise, { pointSlug, slug } from './config';
 import payload from '../../src';
 import type { Post } from './payload-types';
+import { mapAsync } from '../../src/utilities/mapAsync';
 
 const title = 'title';
 
@@ -383,6 +384,228 @@ describe('collections-graphql', () => {
 
         expect(docs).toContainEqual(expect.objectContaining({ id: specialPost.id }));
       });
+
+      describe('near', () => {
+        const point = [10, 20];
+        const [lat, lng] = point;
+
+        it('should return a document near a point', async () => {
+          const nearQuery = `
+            query {
+              Points(
+                where: {
+                  point: {
+                    near: [${lat + 0.01}, ${lng + 0.01}, 10000]
+                  }
+                }
+              ) {
+                docs {
+                  id
+                  point
+                }
+              }
+            }`;
+
+          const response = await client.request(nearQuery);
+          const { docs } = response.Points;
+
+          expect(docs).toHaveLength(1);
+        });
+
+        it('should not return a point far away', async () => {
+          const nearQuery = `
+            query {
+              Points(
+                where: {
+                  point: {
+                    near: [${lng + 1}, ${lat - 1}, 5000]
+                  }
+                }
+              ) {
+                docs {
+                  id
+                  point
+                }
+              }
+            }`;
+
+          const response = await client.request(nearQuery);
+          const { docs } = response.Points;
+
+          expect(docs).toHaveLength(0);
+        });
+
+        it('should sort find results by nearest distance', async () => {
+          // creating twice as many records as we are querying to get a random sample
+          await mapAsync([...Array(10)], async () => {
+            // setTimeout used to randomize the creation timestamp
+            setTimeout(async () => {
+              await payload.create({
+                collection: pointSlug,
+                data: {
+                  // only randomize longitude to make distance comparison easy
+                  point: [Math.random(), 0],
+                },
+              });
+            }, Math.random());
+          });
+
+          const nearQuery = `
+            query {
+              Points(
+                where: {
+                  point: {
+                    near: [0, 0, 100000, 0]
+                  }
+                },
+                limit: 5
+              ) {
+                docs {
+                  id
+                  point
+                }
+              }
+            }`;
+
+          const response = await client.request(nearQuery);
+          const { docs } = response.Points;
+
+          let previous = 0;
+          docs.forEach(({ point: coordinates }) => {
+            // The next document point should always be greater than the one before
+            expect(previous).toBeLessThanOrEqual(coordinates[0]);
+            [previous] = coordinates;
+          });
+        });
+      });
+
+
+      describe('within', () => {
+        type Point = [number, number];
+        const polygon: Point[] = [
+          [9.0, 19.0], // bottom-left
+          [9.0, 21.0], // top-left
+          [11.0, 21.0], // top-right
+          [11.0, 19.0], // bottom-right
+          [9.0, 19.0], // back to starting point to close the polygon
+        ];
+
+        it('should return a document with the point inside the polygon', async () => {
+          const query = `
+            query {
+              Points(
+                where: {
+                  point: {
+                    within: {
+                      type: "Polygon",
+                      coordinates: ${JSON.stringify([polygon])}
+                    }
+                  }
+              }) {
+                docs {
+                  id
+                  point
+                }
+              }
+            }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Points;
+
+          expect(docs).toHaveLength(1);
+          expect(docs[0].point).toEqual([10, 20]);
+        });
+
+        it('should not return a document with the point outside the polygon', async () => {
+          const reducedPolygon = polygon.map((vertex) => vertex.map((coord) => coord * 0.1));
+          const query = `
+            query {
+              Points(
+                where: {
+                  point: {
+                    within: {
+                      type: "Polygon",
+                      coordinates: ${JSON.stringify([reducedPolygon])}
+                    }
+                  }
+              }) {
+                docs {
+                  id
+                  point
+                }
+              }
+            }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Points;
+
+          expect(docs).toHaveLength(0);
+        });
+      });
+
+      describe('intersects', () => {
+        type Point = [number, number];
+        const polygon: Point[] = [
+          [9.0, 19.0], // bottom-left
+          [9.0, 21.0], // top-left
+          [11.0, 21.0], // top-right
+          [11.0, 19.0], // bottom-right
+          [9.0, 19.0], // back to starting point to close the polygon
+        ];
+
+        it('should return a document with the point intersecting the polygon', async () => {
+          const query = `
+            query {
+              Points(
+                where: {
+                  point: {
+                    intersects: {
+                      type: "Polygon",
+                      coordinates: ${JSON.stringify([polygon])}
+                    }
+                  }
+              }) {
+                docs {
+                  id
+                  point
+                }
+              }
+            }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Points;
+
+          expect(docs).toHaveLength(1);
+          expect(docs[0].point).toEqual([10, 20]);
+        });
+
+        it('should not return a document with the point not intersecting a smaller polygon', async () => {
+          const reducedPolygon = polygon.map((vertex) => vertex.map((coord) => coord * 0.1));
+          const query = `
+            query {
+              Points(
+                where: {
+                  point: {
+                    within: {
+                      type: "Polygon",
+                      coordinates: ${JSON.stringify([reducedPolygon])}
+                    }
+                  }
+              }) {
+                docs {
+                  id
+                  point
+                }
+              }
+            }`;
+
+          const response = await client.request(query);
+          const { docs } = response.Points;
+
+          expect(docs).toHaveLength(0);
+        });
+      });
+
 
       it('can query deeply nested fields within rows, tabs, collapsibles', async () => {
         const withNestedField = await createPost({ D1: { D2: { D3: { D4: 'nested message' } } } });

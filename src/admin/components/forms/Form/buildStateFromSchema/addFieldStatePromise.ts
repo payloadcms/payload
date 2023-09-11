@@ -111,7 +111,7 @@ export const addFieldStatePromise = async ({
 
           acc.rowMetadata.push({
             id: row.id,
-            collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
+            collapsed: collapsedRowIDs === undefined ? Boolean(field?.admin?.initCollapsed) : collapsedRowIDs.includes(row.id),
             childErrorPaths: new Set(),
           });
 
@@ -191,7 +191,7 @@ export const addFieldStatePromise = async ({
 
             acc.rowMetadata.push({
               id: row.id,
-              collapsed: collapsedRowIDs === undefined ? field.admin.initCollapsed : collapsedRowIDs.includes(row.id),
+              collapsed: collapsedRowIDs === undefined ? Boolean(field?.admin?.initCollapsed) : collapsedRowIDs.includes(row.id),
               blockType: row.blockType,
               childErrorPaths: new Set(),
             });
@@ -241,6 +241,40 @@ export const addFieldStatePromise = async ({
           t,
           preferences,
         });
+
+        break;
+      }
+
+      case 'relationship': {
+        if (field.hasMany) {
+          const relationshipValue = Array.isArray(valueWithDefault) ? valueWithDefault.map((relationship) => {
+            if (typeof relationship === 'object' && relationship !== null) {
+              return relationship.id;
+            }
+            return relationship;
+          }) : undefined;
+
+          fieldState.value = relationshipValue;
+          fieldState.initialValue = relationshipValue;
+
+          state[`${path}${field.name}`] = fieldState;
+        } else {
+          const relationshipValue = valueWithDefault && typeof valueWithDefault === 'object' && 'id' in valueWithDefault ? valueWithDefault.id : valueWithDefault;
+          fieldState.value = relationshipValue;
+          fieldState.initialValue = relationshipValue;
+
+          state[`${path}${field.name}`] = fieldState;
+        }
+
+        break;
+      }
+
+      case 'upload': {
+        const relationshipValue = valueWithDefault && typeof valueWithDefault === 'object' && 'id' in valueWithDefault ? valueWithDefault.id : valueWithDefault;
+        fieldState.value = relationshipValue;
+        fieldState.initialValue = relationshipValue;
+
+        state[`${path}${field.name}`] = fieldState;
 
         break;
       }

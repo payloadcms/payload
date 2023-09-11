@@ -1,6 +1,6 @@
 # Payload Draft Preview Example Front-End
 
-This is a [Next.js](https://nextjs.org) app using the [Pages Router](https://nextjs.org/docs/pages). It was made explicitly for Payload's [Draft Preview Example](https://github.com/payloadcms/payload/tree/master/examples/draft-preview).
+This is a [Next.js](https://nextjs.org) app using the [Pages Router](https://nextjs.org/docs/pages). It was made explicitly for Payload's [Draft Preview Example](https://github.com/payloadcms/payload/tree/master/examples/draft-preview/payload).
 
 > This example uses the Pages Router, the legacy API of Next.js. If your app is using the latest [App Router](https://nextjs.org/docs/app), check out the official [App Router Example](https://github.com/payloadcms/payload/tree/master/examples/draft-preview/next-app).
 
