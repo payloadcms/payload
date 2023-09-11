@@ -16,6 +16,7 @@ type Props = {
   overlayType?: string
   show?: boolean
 }
+
 export const LoadingOverlay: React.FC<Props> = ({
   animationDuration,
   loadingText,

@@ -2,7 +2,6 @@
 
 .template-default {
   min-height: 100vh;
-  display: flex;
 
   &__wrap {
     min-width: 0;
@@ -11,15 +10,15 @@
   }
 
   @include mid-break {
-    display: block;
     width: 100%;
+
     [dir='ltr'] & {
       margin-left: 0;
     }
+
     [dir='rtl'] & {
       margin-right: 0;
     }
-    padding-top: base(3);
 
     &__wrap {
       padding: 0 0 $baseline;

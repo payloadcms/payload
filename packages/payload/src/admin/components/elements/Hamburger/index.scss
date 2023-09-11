@@ -1,0 +1,68 @@
+@import '../../../scss/styles';
+
+.hamburger {
+  position: relative;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  width: calc(var(--base) / 1.5);
+  height: calc(var(--base) / 1.5);
+  background-color: transparent;
+  outline: none;
+
+  &:focus {
+    outline: none;
+  }
+
+  &__line {
+    transition: opacity linear 250ms;
+    background-color: var(--theme-text);
+    width: 100%;
+    height: 1px;
+    position: absolute;
+  }
+
+  &__top {
+    top: 2px;
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
+
+  &__middle {
+    top: 50%;
+    transform: translate3d(0, -50%, 0) rotate(0);
+  }
+
+  &__bottom {
+    bottom: 2px;
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
+
+  &__x-left {
+    opacity: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0) rotate(45deg);
+  }
+
+  &__x-right {
+    opacity: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0) rotate(-45deg);
+  }
+
+  &--active {
+    .hamburger {
+      &__x-left,
+      &__x-right {
+        opacity: 1;
+      }
+
+      &__top,
+      &__middle,
+      &__bottom {
+        opacity: 0;
+      }
+    }
+  }
+}
