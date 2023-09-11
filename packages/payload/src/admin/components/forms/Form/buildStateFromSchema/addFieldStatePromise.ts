@@ -265,6 +265,48 @@ export const addFieldStatePromise = async ({
         break
       }
 
+      case 'relationship': {
+        if (field.hasMany) {
+          const relationshipValue = Array.isArray(valueWithDefault)
+            ? valueWithDefault.map((relationship) => {
+                if (typeof relationship === 'object' && relationship !== null) {
+                  return relationship.id
+                }
+                return relationship
+              })
+            : undefined
+
+          fieldState.value = relationshipValue
+          fieldState.initialValue = relationshipValue
+
+          state[`${path}${field.name}`] = fieldState
+        } else {
+          const relationshipValue =
+            valueWithDefault && typeof valueWithDefault === 'object' && 'id' in valueWithDefault
+              ? valueWithDefault.id
+              : valueWithDefault
+          fieldState.value = relationshipValue
+          fieldState.initialValue = relationshipValue
+
+          state[`${path}${field.name}`] = fieldState
+        }
+
+        break
+      }
+
+      case 'upload': {
+        const relationshipValue =
+          valueWithDefault && typeof valueWithDefault === 'object' && 'id' in valueWithDefault
+            ? valueWithDefault.id
+            : valueWithDefault
+        fieldState.value = relationshipValue
+        fieldState.initialValue = relationshipValue
+
+        state[`${path}${field.name}`] = fieldState
+
+        break
+      }
+
       default: {
         fieldState.value = valueWithDefault
         fieldState.initialValue = valueWithDefault

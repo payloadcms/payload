@@ -1,16 +1,11 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "composite": true,
-    "declaration": true /* Generates corresponding '.d.ts' file. */,
-    "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
-    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
-    "module": "Node16",
-    "moduleResolution": "Node16" /* Required for exports to work */,
+    "composite": true, // Make sure typescript knows that this module depends on their references
+    "noEmit": false /* Do not emit outputs. */,
+    "emitDeclarationOnly": true,
     "outDir": "./dist" /* Specify an output folder for all emitted files. */,
-    "resolveJsonModule": true,
-    "rootDir": "./src" /* Specify the root folder within your source files. */,
-    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
-    "target": "ESNext"
+    "rootDir": "./src" /* Specify the root folder within your source files. */
   },
   "exclude": [
     "dist",
@@ -19,9 +14,11 @@
     "test",
     "node_modules",
     ".eslintrc.js",
-    "**/*.spec.js",
-    "**/*.spec.jsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx"
-  ]
+    "src/**/*.spec.js",
+    "src/**/*.spec.jsx",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx"
+  ],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts", "src/**/*.json"],
+  "references": [{ "path": "../payload" }] // db-postgres depends on payload
 }

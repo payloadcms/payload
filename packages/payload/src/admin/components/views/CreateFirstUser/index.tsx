@@ -18,7 +18,7 @@ const baseClass = 'create-first-user'
 
 const CreateFirstUser: React.FC<Props> = (props) => {
   const { setInitialized } = props
-  const { setToken } = useAuth()
+  const { fetchFullUser } = useAuth()
   const {
     admin: { user: userSlug },
     collections,
@@ -29,9 +29,9 @@ const CreateFirstUser: React.FC<Props> = (props) => {
 
   const userConfig = collections.find((collection) => collection.slug === userSlug)
 
-  const onSuccess = (json) => {
+  const onSuccess = async (json) => {
     if (json?.user?.token) {
-      setToken(json.user.token)
+      await fetchFullUser()
     }
 
     setInitialized(true)
