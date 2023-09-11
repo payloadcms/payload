@@ -47,18 +47,18 @@ jobs:
         run: pnpm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: pnpm --filter payload build
+      - run: pnpm build
 
       - name: Component Tests
-        run: pnpm --filter payload run test:components
+        run: pnpm test:components
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: E2E Tests
-        run: pnpm --filter payload test:e2e --bail
+        run: pnpm test:e2e --bail
 
       - name: Integration Tests
-        run: pnpm --filter payload run test:int
+        run: pnpm test:int
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
