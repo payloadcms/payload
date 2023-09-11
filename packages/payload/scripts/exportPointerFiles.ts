@@ -82,6 +82,12 @@ getFiles(sourceDir).forEach((filePath) => {
   // Calculate the depth to correctly adjust imports
   const depth = calculateDepth(filePath)
 
+  // Create any non-existent directories
+  const dir = path.dirname(targetPath)
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true })
+  }
+
   fs.writeFileSync(targetPath, fixImports(fileContent, depth), 'utf-8')
 })
 
