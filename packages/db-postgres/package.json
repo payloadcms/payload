@@ -1,5 +1,11 @@
 {
+  "name": "@payloadcms/db-postgres",
+  "description": "The officially supported Postgres database adapter for Payload",
+  "license": "MIT",
   "author": "Payload CMS, Inc.",
+  "peerDependencies": {
+    "better-sqlite3": "^8.5.0"
+  },
   "dependencies": {
     "@libsql/client": "^0.3.1",
     "drizzle-kit": "0.19.13-e99bac1",
@@ -8,7 +14,6 @@
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0"
   },
-  "description": "The officially supported Postgres database adapter for Payload",
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
@@ -16,33 +21,11 @@
     "better-sqlite3": "^8.5.0",
     "payload": "workspace:*"
   },
-  "exports": {
-    ".": {
-      "default": "./src/index.ts",
-      "import": "./src/index.ts",
-      "node": "./src/index.ts",
-      "require": "./src/index.ts",
-      "types": "./src/index.ts"
-    }
-  },
-  "license": "MIT",
   "main": "./src/index.ts",
-  "name": "@payloadcms/db-postgres",
-  "peerDependencies": {
-    "better-sqlite3": "^8.5.0"
-  },
+  "types": "./src/index.ts",
   "publishConfig": {
-    "exports": {
-      ".": {
-        "default": "./dist/index.js",
-        "import": "./dist/index.js",
-        "node": "./dist/index.js",
-        "require": "./dist/index.js",
-        "types": "./dist/index.d.ts"
-      }
-    },
-    "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
+    "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
   },
   "repository": "https://github.com/payloadcms/payload",
@@ -51,6 +34,5 @@
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "builddisabled": "pnpm build:swc && pnpm build:types"
   },
-  "types": "./src/index.ts",
   "version": "0.0.1"
 }

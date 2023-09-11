@@ -48,6 +48,7 @@
     "build:all": "turbo build",
     "clean": "rimraf dist && rimraf packages/payload/dist",
     "clean:cache": "rimraf node_modules/.cache && rimraf packages/payload/node_modules/.cache",
+    "clean:unix": "find . \\( -type d \\( -name node_modules -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} +",
     "dev": "pnpm --filter payload run dev",
     "dev:generate-graphql-schema": "pnpm --filter payload run dev:generate-graphql-schema",
     "dev:generate-types": "pnpm --filter payload run dev:generate-types",

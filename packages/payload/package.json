@@ -257,19 +257,7 @@
   "name": "payload",
   "publishConfig": {
     "access": "public",
-    "exports": {
-      ".": {
-        "default": "./dist/index.js",
-        "types": "./dist/index.d.ts"
-      },
-      "./*": {
-        "default": "./dist/exports/*.js",
-        "types": "./dist/exports/*.d.ts"
-      },
-      "./scss": {
-        "default": "./dist/exports/scss.scss"
-      }
-    },
+    "exports": null,
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
@@ -279,14 +267,14 @@
     "url": "https://github.com/payloadcms/payload.git"
   },
   "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:components",
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:components && ts-node -T ./scripts/exportPointerFiles.ts",
     "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
     "clean": "rimraf dist",
     "clean:cache": "rimraf node_modules/.cache",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png}\" dist/",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "dev": "nodemon",
     "dev:generate-graphql-schema": "ts-node -T ./test/generateGraphQLSchema.ts",
     "dev:generate-types": "ts-node -T ./test/generateTypes.ts",
