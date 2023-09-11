@@ -105,8 +105,8 @@ describe('fields', () => {
     test('should filter Number fields in the collection view - greaterThanOrEqual', async () => {
       await page.goto(url.list);
 
-      // should have 3 entries
-      await expect(page.locator('table >> tbody >> tr')).toHaveCount(3);
+      // should have 5 entries
+      await expect(page.locator('table >> tbody >> tr')).toHaveCount(5);
 
       // open the filter options
       await page.locator('.list-controls__toggle-where').click();
@@ -134,8 +134,8 @@ describe('fields', () => {
       await expect(valueField).toHaveValue('3');
       await wait(300);
 
-      // should have 2 entries after filtering
-      await expect(page.locator('table >> tbody >> tr')).toHaveCount(2);
+      // should have 3 entries after filtering
+      await expect(page.locator('table >> tbody >> tr')).toHaveCount(3);
     });
   });
 
