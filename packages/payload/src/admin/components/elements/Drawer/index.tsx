@@ -86,9 +86,7 @@ export const Drawer: React.FC<Props> = ({
           id={`close-drawer__${slug}`}
           onClick={() => closeModal(slug)}
           style={{
-            width: `calc(${midBreak ? 'var(--gutter-h)' : 'var(--nav-width)'} + ${
-              drawerDepth - 1
-            } * 25px)`,
+            width: 'var(--gutter-h)',
           }}
           type="button"
         />
