@@ -257,19 +257,7 @@
   "name": "payload",
   "publishConfig": {
     "access": "public",
-    "exports": {
-      ".": {
-        "default": "./dist/index.js",
-        "types": "./dist/index.d.ts"
-      },
-      "./*": {
-        "default": "./dist/exports/*.js",
-        "types": "./dist/exports/*.d.ts"
-      },
-      "./scss": {
-        "default": "./dist/exports/scss.scss"
-      }
-    },
+    "exports": null,
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
