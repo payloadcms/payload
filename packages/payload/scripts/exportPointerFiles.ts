@@ -21,9 +21,18 @@ function getFiles(dir: string): string[] {
   return Array.prototype.concat(...files)
 }
 
-function fixImports(content: string, depth: number): string {
+function fixImports(fileExtension: string, content: string, depth: number): string {
   const parentDirReference = '../'.repeat(depth + 1) // +1 to account for the original reference
   const replacementPrefix = (depth === 0 ? './' : '../'.repeat(depth)) + 'dist/'
+
+  if (fileExtension === '.scss') {
+    // Adjust paths in @import statements for SCSS
+    content = content.replace(
+      new RegExp(`(@import\\s+['"])${parentDirReference}`, 'gs'),
+      `$1${replacementPrefix}`,
+    )
+    return content
+  }
 
   // Adjust paths in require statements
   content = content.replace(
@@ -88,7 +97,7 @@ getFiles(sourceDir).forEach((filePath) => {
     fs.mkdirSync(dir, { recursive: true })
   }
 
-  fs.writeFileSync(targetPath, fixImports(fileContent, depth), 'utf-8')
+  fs.writeFileSync(targetPath, fixImports(path.extname(filePath), fileContent, depth), 'utf-8')
 })
 
 console.log('Export pointer files moved and paths adjusted successfully.')
