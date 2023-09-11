@@ -79,28 +79,6 @@ describe('fields', () => {
       await expect(textCell).toHaveText(String(numberDoc.number))
     })
 
-    test('should create', async () => {
-      const input = 5
-
-      await page.goto(url.create)
-      const field = page.locator('#field-number')
-      await field.fill(String(input))
-      await saveDocAndAssert(page)
-      await expect(field).toHaveValue(String(input))
-    })
-
-    test('should create hasMany', async () => {
-      const input = 5
-
-      await page.goto(url.create)
-      const field = page.locator('.field-hasMany')
-      await field.click()
-      await page.keyboard.type(String(input))
-      await page.keyboard.press('Enter')
-      await saveDocAndAssert(page)
-      await expect(field.locator('.rs__value-container')).toContainText(String(input))
-    })
-
 
     test('should filter Number fields in the collection view - greaterThanOrEqual', async () => {
       await page.goto(url.list);
@@ -137,6 +115,28 @@ describe('fields', () => {
       // should have 2 entries after filtering
       await expect(page.locator('table >> tbody >> tr')).toHaveCount(2);
     });
+
+    test('should create', async () => {
+      const input = 5
+
+      await page.goto(url.create)
+      const field = page.locator('#field-number')
+      await field.fill(String(input))
+      await saveDocAndAssert(page)
+      await expect(field).toHaveValue(String(input))
+    })
+
+    test('should create hasMany', async () => {
+      const input = 5
+
+      await page.goto(url.create)
+      const field = page.locator('.field-hasMany')
+      await field.click()
+      await page.keyboard.type(String(input))
+      await page.keyboard.press('Enter')
+      await saveDocAndAssert(page)
+      await expect(field.locator('.rs__value-container')).toContainText(String(input))
+    })
   })
 
   describe('json', () => {
