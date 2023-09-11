@@ -1,23 +1,23 @@
+import type { SanitizedCollectionConfig } from 'payload'
+
 import { useModal } from '@faceless-ui/modal'
+import { getFieldComponent, staticFieldTypes } from 'payload'
+import { deepCopyObject } from 'payload'
+import { getTranslation } from 'payload'
+import { Drawer } from 'payload'
+import { useAuth } from 'payload'
+import { useDocumentInfo } from 'payload'
+import { useLocale } from 'payload'
+import { Form } from 'payload'
+import { buildStateFromSchema } from 'payload'
+import { RenderFields } from 'payload'
+import { FormSubmit } from 'payload'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Transforms } from 'slate'
 import { ReactEditor, useSlateStatic } from 'slate-react'
 
 import type { ElementProps } from '..'
-import type { SanitizedCollectionConfig } from '../../../../../../../../../collections/config/types'
-
-import fieldTypes from '../../../../..'
-import deepCopyObject from '../../../../../../../../../utilities/deepCopyObject'
-import { getTranslation } from '../../../../../../../../../utilities/getTranslation'
-import { Drawer } from '../../../../../../../elements/Drawer'
-import { useAuth } from '../../../../../../../utilities/Auth'
-import { useDocumentInfo } from '../../../../../../../utilities/DocumentInfo'
-import { useLocale } from '../../../../../../../utilities/Locale'
-import Form from '../../../../../../Form'
-import buildStateFromSchema from '../../../../../../Form/buildStateFromSchema'
-import RenderFields from '../../../../../../RenderFields'
-import FormSubmit from '../../../../../../Submit'
 
 export const UploadDrawer: React.FC<
   ElementProps & {
@@ -77,7 +77,12 @@ export const UploadDrawer: React.FC<
       })}
     >
       <Form initialState={initialState} onSubmit={handleUpdateEditData}>
-        <RenderFields fieldSchema={fieldSchema} fieldTypes={fieldTypes} readOnly={false} />
+        <RenderFields
+          fieldComponentProvider={getFieldComponent}
+          fieldSchema={fieldSchema}
+          readOnly={false}
+          staticFieldTypes={staticFieldTypes}
+        />
         <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
       </Form>
     </Drawer>

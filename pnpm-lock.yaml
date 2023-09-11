@@ -708,6 +708,9 @@ importers:
 
   packages/richtext-slate:
     dependencies:
+      '@faceless-ui/modal':
+        specifier: 2.0.1
+        version: 2.0.1(react-dom@18.2.0)(react@18.2.0)
       i18next:
         specifier: 22.5.1
         version: 22.5.1

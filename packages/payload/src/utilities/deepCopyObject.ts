@@ -1,4 +1,4 @@
-const deepCopyObject = (inObject) => {
+export const deepCopyObject = (inObject) => {
   if (inObject instanceof Date) return inObject
 
   if (inObject instanceof Set) return new Set(inObject)
@@ -21,5 +21,3 @@ const deepCopyObject = (inObject) => {
 
   return outObject
 }
-
-export default deepCopyObject

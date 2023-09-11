@@ -1,3 +1,4 @@
+export { default as buildStateFromSchema } from '../../admin/components/forms/Form/buildStateFromSchema'
 export { useAuth } from '../../admin/components/utilities/Auth'
 export { useConfig } from '../../admin/components/utilities/Config'
 export { useDocumentInfo } from '../../admin/components/utilities/DocumentInfo'

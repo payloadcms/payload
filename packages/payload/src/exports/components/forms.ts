@@ -22,19 +22,22 @@ export { default as reduceFieldsToValues } from '../../admin/components/forms/Fo
 
 export { default as Label } from '../../admin/components/forms/Label'
 
+export { default as RenderFields } from '../../admin/components/forms/RenderFields'
 export { default as Submit } from '../../admin/components/forms/Submit'
-export { default as Checkbox } from '../../admin/components/forms/field-types/Checkbox'
 
+export { default as FormSubmit } from '../../admin/components/forms/Submit'
+export { default as Checkbox } from '../../admin/components/forms/field-types/Checkbox'
 export { default as Group } from '../../admin/components/forms/field-types/Group'
+
 export { default as Select } from '../../admin/components/forms/field-types/Select'
 export { default as SelectInput } from '../../admin/components/forms/field-types/Select/Input'
 
 export { default as Text } from '../../admin/components/forms/field-types/Text'
 export { default as TextInput } from '../../admin/components/forms/field-types/Text/Input'
-
 /**
  * @deprecated This method is now called useField. The useFieldType alias will be removed in an upcoming version.
  */
 export { default as useFieldType } from '../../admin/components/forms/useField'
+
 export { default as useField } from '../../admin/components/forms/useField'
 export { default as withCondition } from '../../admin/components/forms/withCondition'

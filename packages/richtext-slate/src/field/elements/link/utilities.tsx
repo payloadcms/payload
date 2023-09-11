@@ -1,10 +1,9 @@
 import type { i18n } from 'i18next'
+import type { Field } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
 import type { Editor } from 'slate'
 
 import { Element, Range, Transforms } from 'slate'
-
-import type { Field } from '../../../../../../../fields/config/types'
 
 import { getBaseFields } from './LinkDrawer/baseFields'
 

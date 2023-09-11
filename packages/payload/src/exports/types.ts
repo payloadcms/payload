@@ -1,5 +1,12 @@
 export * from './../types'
 
+export type {
+  CreateFormData,
+  Fields,
+  FormField,
+  FormFieldsContext,
+} from '../admin/components/forms/Form/types'
+
 export { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
 
 export {
@@ -110,5 +117,4 @@ export {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './../globals/config/types'
-
 export { validOperators } from './../types/constants'

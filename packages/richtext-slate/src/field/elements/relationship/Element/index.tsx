@@ -1,5 +1,11 @@
 import type { HTMLAttributes } from 'react'
 
+import { getTranslation } from 'payload'
+import { usePayloadAPI } from 'payload'
+import { useConfig } from 'payload'
+import { useListDrawer } from 'payload'
+import { useDocumentDrawer } from 'payload'
+import { Button } from 'payload'
 import React, { useCallback, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Transforms } from 'slate'
@@ -7,12 +13,6 @@ import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-reac
 
 import type { Props as RichTextProps } from '../../../../types'
 
-import { getTranslation } from '../../../../../../../../utilities/getTranslation'
-import usePayloadAPI from '../../../../../../../hooks/usePayloadAPI'
-import Button from '../../../../../../elements/Button'
-import { useDocumentDrawer } from '../../../../../../elements/DocumentDrawer'
-import { useListDrawer } from '../../../../../../elements/ListDrawer'
-import { useConfig } from '../../../../../../utilities/Config'
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition'
 import './index.scss'
 

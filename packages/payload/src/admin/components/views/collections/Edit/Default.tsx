@@ -22,7 +22,7 @@ import Status from '../../../elements/Status'
 import VersionsCount from '../../../elements/VersionsCount'
 import Form from '../../../forms/Form'
 import RenderFields from '../../../forms/RenderFields'
-import fieldTypes from '../../../forms/field-types'
+import { getFieldComponent, staticFieldTypes } from '../../../forms/field-types'
 import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving'
 import { useAuth } from '../../../utilities/Auth'
 import { useConfig } from '../../../utilities/Config'
@@ -169,13 +169,14 @@ const DefaultEditView: React.FC<Props> = (props) => {
                     )}
 
                     <RenderFields
+                      fieldComponentProvider={getFieldComponent}
                       fieldSchema={fields}
-                      fieldTypes={fieldTypes}
                       filter={(field) =>
                         !field?.admin?.position || field?.admin?.position !== 'sidebar'
                       }
                       permissions={permissions.fields}
                       readOnly={!hasSavePermission}
+                      staticFieldTypes={staticFieldTypes}
                     />
                   </Gutter>
                 </div>
@@ -285,11 +286,12 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         )}
 
                         <RenderFields
+                          fieldComponentProvider={getFieldComponent}
                           fieldSchema={fields}
-                          fieldTypes={fieldTypes}
                           filter={(field) => field?.admin?.position === 'sidebar'}
                           permissions={permissions.fields}
                           readOnly={!hasSavePermission}
+                          staticFieldTypes={staticFieldTypes}
                         />
                       </div>
 

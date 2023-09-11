@@ -1,9 +1,9 @@
+import { useListDrawer } from 'payload'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import { useListDrawer } from '../../../../../../elements/ListDrawer'
-import RelationshipIcon from '../../../../../../icons/Relationship'
+import RelationshipIcon from '../../../icons/Relationship'
 import ElementButton from '../../Button'
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition'
 import { injectVoidElement } from '../../injectVoid'

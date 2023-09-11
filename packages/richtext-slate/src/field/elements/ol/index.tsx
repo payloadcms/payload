@@ -1,6 +1,6 @@
 import React from 'react'
 
-import OLIcon from '../../../../../icons/OrderedList'
+import OLIcon from '../../icons/OrderedList'
 import ListButton from '../ListButton'
 import './index.scss'
 

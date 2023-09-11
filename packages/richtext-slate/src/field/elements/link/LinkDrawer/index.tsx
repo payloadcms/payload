@@ -1,15 +1,15 @@
+import { getFieldComponent, staticFieldTypes } from 'payload'
+import { RenderFields } from 'payload'
+import { FormSubmit } from 'payload'
+import { Form } from 'payload'
+import { useEditDepth } from 'payload'
+import { Drawer } from 'payload'
+import { useHotkey } from 'payload'
 import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
-import fieldTypes from '../../../..'
-import useHotkey from '../../../../../../../hooks/useHotkey'
-import { Drawer } from '../../../../../../elements/Drawer'
-import { useEditDepth } from '../../../../../../utilities/EditDepth'
-import Form from '../../../../../Form'
-import RenderFields from '../../../../../RenderFields'
-import FormSubmit from '../../../../../Submit'
 import './index.scss'
 
 const baseClass = 'rich-text-link-edit-modal'
@@ -26,10 +26,11 @@ export const LinkDrawer: React.FC<Props> = ({
     <Drawer className={baseClass} slug={drawerSlug} title={t('editLink')}>
       <Form initialState={initialState} onSubmit={handleModalSubmit}>
         <RenderFields
+          fieldComponentProvider={getFieldComponent}
           fieldSchema={fieldSchema}
-          fieldTypes={fieldTypes}
           forceRender
           readOnly={false}
+          staticFieldTypes={staticFieldTypes}
         />
         <LinkSubmit />
       </Form>

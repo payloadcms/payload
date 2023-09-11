@@ -3,6 +3,7 @@
   "description": "The officially supported Slate richtext adapter for Payload",
   "author": "Payload CMS, Inc.",
   "dependencies": {
+    "@faceless-ui/modal": "2.0.1",
     "i18next": "22.5.1",
     "is-hotkey": "0.2.0",
     "react": "18.2.0",

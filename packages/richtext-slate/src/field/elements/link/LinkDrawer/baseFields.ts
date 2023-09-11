@@ -1,7 +1,7 @@
-import type { Config } from '../../../../../../../../config/types'
-import type { Field } from '../../../../../../../../fields/config/types'
+import type { Config } from 'payload'
+import type { Field } from 'payload'
 
-import { extractTranslations } from '../../../../../../../../translations/extractTranslations'
+import { extractTranslations } from 'payload'
 
 const translations = extractTranslations([
   'fields:textToDisplay',

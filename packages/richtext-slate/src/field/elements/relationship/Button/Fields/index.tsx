@@ -1,11 +1,10 @@
+import { useAuth } from 'payload'
+import { useConfig } from 'payload'
+import { useFormFields } from 'payload'
+import { RelationshipComponent } from 'payload/components/fields/Relationship'
+import { SelectComponent } from 'payload/components/fields/Select'
 import React, { Fragment, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-
-import { useAuth } from '../../../../../../../utilities/Auth'
-import { useConfig } from '../../../../../../../utilities/Config'
-import { useFormFields } from '../../../../../../Form/context'
-import Relationship from '../../../../../Relationship'
-import Select from '../../../../../Select'
 
 const createOptions = (collections, permissions) =>
   collections.reduce((options, collection) => {
@@ -39,9 +38,14 @@ const RelationshipFields = () => {
 
   return (
     <Fragment>
-      <Select label={t('relationTo')} name="relationTo" options={options} required />
+      <SelectComponent label={t('relationTo')} name="relationTo" options={options} required />
       {relationTo && (
-        <Relationship label={t('relatedDocument')} name="value" relationTo={relationTo} required />
+        <RelationshipComponent
+          label={t('relatedDocument')}
+          name="value"
+          relationTo={relationTo}
+          required
+        />
       )}
     </Fragment>
   )

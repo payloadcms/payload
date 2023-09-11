@@ -4,8 +4,8 @@ import { ReactEditor, useSlate } from 'slate-react'
 
 import type { ElementNode } from '../../../types'
 
-import IndentLeft from '../../../../../icons/IndentLeft'
-import IndentRight from '../../../../../icons/IndentRight'
+import IndentLeft from '../../icons/IndentLeft'
+import IndentRight from '../../icons/IndentRight'
 import { baseClass } from '../Button'
 import { getCommonBlock } from '../getCommonBlock'
 import isElementActive from '../isActive'
