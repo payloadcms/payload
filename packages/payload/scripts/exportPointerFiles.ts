@@ -97,7 +97,7 @@ getFiles(sourceDir).forEach((filePath) => {
     fs.mkdirSync(dir, { recursive: true })
   }
 
-  fs.writeFileSync(targetPath, fixImports(path.extname(filePath), fileContent, depth))
+  fs.writeFileSync(targetPath, fixImports(path.extname(filePath), fileContent, depth), 'utf-8')
 })
 
 console.log('Export pointer files moved and paths adjusted successfully.')
