@@ -1,13 +1,13 @@
 import type { Endpoint } from 'payload/config'
 
 export const getUserDOB: Omit<Endpoint, 'root'> = {
-  path: '/:settingsID/userDOB',
+  path: '/:userID/userDOB',
   method: 'get',
   handler: async (req, res) => {
     try {
       const accessibleDoc = await req.payload.findByID({
-        collection: 'settings',
-        id: req.params.settingsID,
+        collection: 'users',
+        id: req.params.userID,
         overrideAccess: false,
         user: req.user,
         showHiddenFields: true,

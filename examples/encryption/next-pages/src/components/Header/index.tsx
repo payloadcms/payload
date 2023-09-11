@@ -1,12 +1,12 @@
-import { ModalToggler } from '@faceless-ui/modal';
-import Link from 'next/link';
 import React from 'react';
 import { useGlobals } from '../../providers/Globals';
+import { CMSLink } from '../Link';
 import { Gutter } from '../Gutter';
 import { MenuIcon } from '../icons/Menu';
-import { CMSLink } from '../Link';
 import { Logo } from '../Logo';
 import { MobileMenuModal, slug as menuModalSlug } from './MobileMenuModal';
+import { ModalToggler } from '@faceless-ui/modal';
+import Link from 'next/link';
 
 import classes from './index.module.scss';
 
@@ -40,11 +40,14 @@ export const Header: React.FC = () => {
   return (
     <>
       <HeaderBar>
-        <nav className={classes.nav}>
-          <CMSLink type='custom' url='/settings' label='Settings' />
-        </nav>
+        {navItems && (
+          <nav className={classes.nav}>
+            {navItems.map(({ link }, i) => {
+              return <CMSLink key={i} {...link} />
+            })}
+          </nav>
+        )}
       </HeaderBar>
-
       <MobileMenuModal navItems={navItems} />
     </>
   )

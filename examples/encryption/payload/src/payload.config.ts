@@ -3,12 +3,10 @@ import path from 'path';
 import { Users } from './collections/Users';
 import { Pages } from './collections/Pages';
 import { MainMenu } from './globals/MainMenu';
-import { Settings } from './collections/Settings';
 
 export default buildConfig({
   collections: [
     Pages,
-    Settings,
     Users,
   ],
   globals: [

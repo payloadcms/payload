@@ -9,7 +9,6 @@
 export interface Config {
   collections: {
     pages: Page;
-    settings: Setting;
     users: User;
   };
   globals: {
@@ -27,15 +26,9 @@ export interface Page {
   createdAt: string;
   _status?: 'draft' | 'published';
 }
-export interface Setting {
-  id: string;
-  title?: string;
-  userDOB?: string;
-  updatedAt: string;
-  createdAt: string;
-}
 export interface User {
   id: string;
+  userDOB?: string;
   updatedAt: string;
   createdAt: string;
   email: string;

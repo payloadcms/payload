@@ -1,6 +1,5 @@
 import { Payload } from 'payload';
 import { home } from './home';
-import { settings } from './settings';
 
 export const seed = async (payload: Payload) => {
   await payload.create({
@@ -8,16 +7,8 @@ export const seed = async (payload: Payload) => {
     data: {
       email: 'dev@payloadcms.com',
       password: 'test',
+      userDOB: '03-17-1992',
     },
-  });
-
-  const settingsJSON = JSON.parse(
-    JSON.stringify(settings),
-  )
-
-  await payload.create({
-    collection: 'settings',
-    data: settingsJSON,
   });
 
   const homePageJSON = JSON.parse(
@@ -28,6 +19,4 @@ export const seed = async (payload: Payload) => {
     collection: 'pages',
     data: homePageJSON,
   });
-
-
 };

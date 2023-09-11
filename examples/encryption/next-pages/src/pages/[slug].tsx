@@ -1,25 +1,36 @@
-import React from 'react';
+import React from 'react'
 import {
   GetStaticProps,
   GetStaticPropsContext,
-} from 'next';
-import { VerticalPadding } from '../components/VerticalPadding';
+  GetStaticPaths
+} from 'next'
 import { Collapsible } from '@faceless-ui/collapsibles'
-import { Gutter } from '../components/Gutter';
-import { Accordion } from '../components/Accordion';
+import { Accordion } from '../components/Accordion'
+import { Gutter } from '../components/Gutter'
+import RichText from '../components/RichText'
 import { TextArea } from '../components/Textarea';
-import type { Setting } from '../../../cms/src/payload-types';
+import { VerticalPadding } from '../components/VerticalPadding'
+import { User, Page, MainMenu } from '../payload-types'
 
-const SettingsPage: React.FC<{
-  setting: Setting
+const Page: React.FC<{
+  mainMenu: MainMenu
+  page: Page
+  user: User
 }> = (props) => {
-  const { setting } = props;
+  const {
+    page: {
+      title,
+      content,
+    },
+    user
+  } = props
+
   const [fetchedUserDOB, setFetchedUserDOB] = React.useState<string | undefined>(undefined)
 
   const fetchUserDOB = React.useCallback(async (): Promise<string | null> => {
     try {
       const req = await fetch(
-        `${process.env.NEXT_PUBLIC_CMS_URL}/api/settings/${setting.id}/userDOB`,
+        `${process.env.NEXT_PUBLIC_CMS_URL}/api/users/${user.id}/userDOB`,
         {
           credentials: 'include',
           headers: {
@@ -44,6 +55,8 @@ const SettingsPage: React.FC<{
         bottom='small'
       >
         <Gutter>
+          <h1>{title}</h1>
+          <RichText content={content} />
           <h2>Date of Birth</h2>
           <Collapsible>
             <Accordion
@@ -59,24 +72,45 @@ const SettingsPage: React.FC<{
           </Collapsible>
         </Gutter>
       </VerticalPadding>
-
     </React.Fragment>
   )
 }
 
-export default SettingsPage;
+export default Page;
 
 export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext,
 ) => {
+  const { params } = context;
+  const slug = params?.slug || 'home';
 
-  const settingsQuery = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/settings`).then(
+  const pageQuery = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/pages?where[slug][equals]=${slug}`).then(
+    (res) => res.json(),
+  );
+
+  const usersQuery = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users`).then(
     (res) => res.json(),
   );
 
   return {
     props: {
-      setting: settingsQuery.docs[0],
+      page: pageQuery.docs[0],
+      user: usersQuery.docs[0],
     },
+  };
+};
+
+export const getStaticPaths: GetStaticPaths<{ slug: string }> = async () => {
+  const pagesQuery: { docs: Page[] } = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/pages?limit=100`).then(
+    (res) => res.json(),
+  );
+
+  return {
+    paths: pagesQuery.docs.map((page) => ({
+      params: {
+        slug: page.slug,
+      },
+    })),
+    fallback: 'blocking',
   };
 };

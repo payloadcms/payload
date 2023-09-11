@@ -4,7 +4,7 @@ import React from 'react';
 import { Header } from '../components/Header';
 import { GlobalsProvider } from '../providers/Globals';
 import { CloseModalOnRouteChange } from '../components/CloseModalOnRouteChange';
-import { MainMenu } from "../../../cms/src/payload-types";
+import { MainMenu } from "../../../payload/src/payload-types";
 
 import '../css/app.scss';
 

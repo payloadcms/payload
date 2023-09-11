@@ -2,10 +2,11 @@ import { CollectionConfig } from 'payload/types';
 import { decryptField, encryptField } from '../../field-hooks/encryption';
 import { getUserDOB } from './endpoints/getUserDOB';
 
-export const Settings: CollectionConfig = {
-  slug: 'settings',
+export const Users: CollectionConfig = {
+  slug: 'users',
+  auth: true,
   admin: {
-    useAsTitle: 'title'
+    useAsTitle: 'email',
   },
   access: {
     create: () => true,
@@ -17,10 +18,6 @@ export const Settings: CollectionConfig = {
     getUserDOB,
   ],
   fields: [
-    {
-      name: 'title',
-      type: 'text',
-    },
     {
       name: 'userDOB',
       type: 'textarea',
