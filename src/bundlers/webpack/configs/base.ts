@@ -88,6 +88,5 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       template: payloadConfig.admin.indexHTML,
       filename: path.normalize('./index.html'),
     }),
-    new webpack.HotModuleReplacementPlugin(),
   ],
 });
