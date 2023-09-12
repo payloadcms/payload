@@ -9,10 +9,7 @@ export const Users: CollectionConfig = {
     useAsTitle: 'email',
   },
   access: {
-    create: () => true,
-    delete: () => true,
     read: () => true,
-    update: () => true,
   },
   endpoints: [
     getUserDOB,
