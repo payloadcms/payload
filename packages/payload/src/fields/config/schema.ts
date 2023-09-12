@@ -352,6 +352,7 @@ export const blocks = baseField.keys({
 
 export const richText = baseField.keys({
   adapter: joi.object().keys({
+    afterReadPromise: joi.func(),
     component: componentSchema,
   }),
   admin: baseAdminFields.default(),
