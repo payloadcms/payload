@@ -25,7 +25,15 @@ const DefaultNav = () => {
 
   return (
     <Fragment>
-      <header className={[baseClass, !isOpen && `${baseClass}--show-bg`].filter(Boolean).join(' ')}>
+      <header
+        className={[
+          baseClass,
+          !isOpen && `${baseClass}--show-bg`,
+          isOpen && `${baseClass}--main-menu-open`,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <div className={`${baseClass}__bg`} />
         <div className={`${baseClass}__content`}>
           <ModalToggler className={`${baseClass}__modalToggler`} slug={mainMenuSlug}>

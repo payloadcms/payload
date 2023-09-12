@@ -90,6 +90,11 @@ export const MainMenuDrawer: React.FC = () => {
         <Gutter className={`${baseClass}__content-children`}>
           {Array.isArray(beforeNavLinks) &&
             beforeNavLinks.map((Component, i) => <Component key={i} />)}
+          <h4 className={`${baseClass}__link`}>
+            <NavLink activeClassName="active" id="nav-dashboard" to={admin}>
+              {t('dashboard')}
+            </NavLink>
+          </h4>
           {groups.map(({ entities, label }, key) => {
             return (
               <NavGroup {...{ key, label }}>
