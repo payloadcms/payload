@@ -1,0 +1,83 @@
+@use "../../css//common.scss" as *;
+
+.accordion {
+  border: 1px solid black;
+  margin-bottom: var(--base);
+  color: black;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background-color: white;
+  padding: calc(var(--base) * .5) calc(var(--base) * 1);
+}
+
+.labelContent {
+  font-size: 18px;
+  margin: 0;
+  display: flex;
+  gap: var(--base);
+  align-items: center;
+
+  * {
+    margin: 0;
+  }
+}
+
+.toggler {
+  all: unset;
+  cursor: pointer;
+  line-height: 1;
+  border-radius: 3px;
+  height: 30px;
+  width: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:hover,
+  &:focus-visible {
+    background-color: gray;
+  }
+
+  // &:focus-visible {
+  //   @include outline;
+  // }
+
+  &.icon--chevron {
+    svg {
+      transform: rotate(90deg);
+    }
+
+    &[aria-expanded="true"] {
+      svg {
+        transform: rotate(-90deg);
+      }
+    }
+  }
+
+  &.icon--eye {
+    svg [data-show] {
+      display: initial;
+    }
+    svg [data-hidden] {
+      display: none;
+    }
+    &[aria-expanded="true"] {
+      svg [data-show] {
+        display: none;
+      }
+      svg [data-hidden] {
+        display: initial;
+      }
+    }
+  }
+}
+
+.collapsibleContent {
+  padding: calc(var(--base) * .75) calc(var(--base) * 1);
+  border-top: 1px solid black;
+}

@@ -1,0 +1,13 @@
+@use '../../css/queries.scss' as *;
+
+.nav {
+  a {
+    text-decoration: none;
+    margin-left: var(--base);
+  }
+
+  @include mid-break {
+    display: none;
+  }
+}
+
