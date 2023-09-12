@@ -4,7 +4,7 @@
   position: sticky;
   top: 0;
   width: 100%;
-  height: calc(var(--base) * 2);
+  height: calc(var(--base) * 3);
   z-index: $z-status;
 
   &__bg {
@@ -26,7 +26,7 @@
     align-items: center;
     justify-content: space-between;
     height: 100%;
-    padding: 0 var(--base);
+    padding: 0 calc(var(--gutter-h) / 2);
     position: relative;
   }
 
@@ -36,6 +36,7 @@
     padding: 0;
     cursor: pointer;
     z-index: 999999;
+    transform: translate3d(-50%, 0, 0);
 
     &:focus {
       outline: none;
@@ -50,9 +51,15 @@
   }
 
   @include mid-break {
+    height: calc(var(--base) * 2);
+
     .nav {
       &__content {
         padding: 0 var(--gutter-h);
+      }
+
+      &__modalToggler {
+        transform: unset;
       }
     }
   }

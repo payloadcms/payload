@@ -35,11 +35,7 @@
   --accessibility-outline: 2px solid var(--theme-text);
   --accessibility-outline-offset: 2px;
 
-  --gutter-h: #{base(5)};
-
-  @include large-break {
-    --gutter-h: #{base(3)};
-  }
+  --gutter-h: #{base(3)};
 
   @include mid-break {
     --gutter-h: #{base(2)};
