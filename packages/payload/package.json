@@ -272,8 +272,6 @@
     "clean:cache": "rimraf node_modules/.cache",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "dev": "nodemon",
-    "dev:generate-graphql-schema": "ts-node -T ../../test/generateGraphQLSchema.ts",
-    "dev:generate-types": "ts-node -T ../../test/generateTypes.ts",
     "dev:postgres": "cross-env PAYLOAD_DATABASE=postgres nodemon",
     "fix": "eslint \"src/**/*.ts\" --fix",
     "lint": "eslint \"src/**/*.ts\"",
@@ -283,7 +281,6 @@
     "release:major": "release-it major",
     "release:minor": "release-it minor",
     "release:patch": "release-it patch",
-    "test:components": "cross-env jest --config=jest.components.config.js",
     "translateNewKeys": "ts-node -T ./scripts/translateNewKeys.ts"
   },
   "sideEffects": false,
