@@ -181,7 +181,7 @@ export const getTableColumnFromPath = ({
           newTableName = `${toSnakeCase(field.relationTo)}`;
           // parent to relationship join table
           relationshipFields = adapter.payload.collections[field.relationTo].config.fields;
-          joins[newTableName] = eq(adapter.tables[newTableName].id, adapter.tables[`${toSnakeCase(tableName)}_relationships`][`${field.relationTo}ID`]);
+          joins[newTableName] = eq(adapter.tables[newTableName].id, adapter.tables[`${tableName}_relationships`][`${field.relationTo}ID`]);
         } else {
           throw new APIError('Not supported');
         }

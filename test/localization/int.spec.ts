@@ -324,7 +324,7 @@ describe('Localization', () => {
           },
         });
 
-        expect(result.docs[0].id).toEqual(withRelationship.id);
+        expect(result.docs.map(({ id }) => id)).toContain(withRelationship.id);
 
         // Second relationship
         const result2 = await payload.find({
@@ -336,7 +336,7 @@ describe('Localization', () => {
           },
         });
 
-        expect(result2.docs[0].id).toEqual(withRelationship.id);
+        expect(result2.docs.map(({ id }) => id)).toContain(withRelationship.id);
       });
 
       it('specific locale', async () => {

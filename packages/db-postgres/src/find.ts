@@ -48,18 +48,8 @@ export const find: Find = async function find(
 
   const orderedIDMap: Record<number | string, number> = {};
 
-  // const localSelectFields: Record<string, GenericColumn> = {
-  //   id: table.id,
-  // };
-  // if (orderBy.column) {
-  //   selectFields.sort = orderBy.column;
-  // }
-  // initial query
   const selectQuery = this.db.selectDistinct(selectFields)
     .from(table);
-  // if (orderBy.order && orderBy.column) {
-  //   selectQuery.orderBy(orderBy.order(orderBy.column));
-  // }
 
   const findManyArgs = buildFindManyArgs({
     adapter: this,
