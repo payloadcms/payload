@@ -7,10 +7,10 @@ export type Props = Omit<RichTextField, 'type'> & {
 
 export type RichTextAdapter<AdapterProps = unknown> = {
   afterReadPromise?: (data: {
-    currentDepth: number
+    currentDepth?: number
     depth: number
     field: RichTextField<AdapterProps>
-    overrideAccess: boolean
+    overrideAccess?: boolean
     req: PayloadRequest
     showHiddenFields: boolean
     siblingDoc: Record<string, unknown>

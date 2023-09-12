@@ -427,15 +427,14 @@ function buildObjectType({
           let depth = payload.config.defaultDepth
           if (typeof args.depth !== 'undefined') depth = args.depth
 
-          if (depth > 0) {
-            //TODO
-            /*await createRichTextRelationshipPromise({
+          if (field?.adapter?.afterReadPromise) {
+            await field?.adapter?.afterReadPromise({
               depth,
               field,
               req: context.req,
               showHiddenFields: false,
               siblingDoc: parent,
-            })*/
+            })
           }
 
           return parent[field.name]
