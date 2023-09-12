@@ -55,3 +55,9 @@ export async function saveDocAndAssert(page: Page, selector = '#action-save'): P
   await expect(page.locator('.Toastify')).toContainText('successfully')
   expect(page.url()).not.toContain('create')
 }
+
+export async function openMainMenu(page: Page): Promise<void> {
+  await page.locator('.payload__modal-toggler--slug-main-menu').click()
+  const mainMenuModal = page.locator('#main-menu')
+  await expect(mainMenuModal).toBeVisible()
+}
