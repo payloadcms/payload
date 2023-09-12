@@ -231,6 +231,7 @@ const Form: React.FC<Props> = (props) => {
         body: formData,
         headers: {
           'Accept-Language': i18n.language,
+          'x-payload-admin': 'true',
         },
       });
 

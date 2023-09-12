@@ -43,6 +43,7 @@ export const PreferencesProvider: React.FC<{children?: React.ReactNode}> = ({ ch
         const request = await requests.get(`${serverURL}${api}/_preferences/${key}`, {
           headers: {
             'Accept-Language': i18n.language,
+            'x-payload-admin': 'true',
           },
         });
         let value = null;

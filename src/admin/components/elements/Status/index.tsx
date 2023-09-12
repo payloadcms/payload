@@ -78,6 +78,7 @@ const Status: React.FC = () => {
       headers: {
         'Content-Type': 'application/json',
         'Accept-Language': i18n.language,
+        'x-payload-admin': 'true',
       },
       body: JSON.stringify(body),
     });

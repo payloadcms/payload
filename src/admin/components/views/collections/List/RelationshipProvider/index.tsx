@@ -64,6 +64,7 @@ export const RelationshipProvider: React.FC<{ children?: React.ReactNode }> = ({
           credentials: 'include',
           headers: {
             'Accept-Language': i18n.language,
+            'x-payload-admin': 'true',
           },
         });
 

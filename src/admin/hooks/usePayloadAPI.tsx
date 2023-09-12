@@ -54,6 +54,7 @@ const usePayloadAPI: UsePayloadAPI = (url, options = {}) => {
           signal: abortController.signal,
           headers: {
             'Accept-Language': i18n.language,
+            'x-payload-admin': 'true',
           },
         });
 

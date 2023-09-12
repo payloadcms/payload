@@ -60,6 +60,7 @@ const Routes: React.FC = () => {
       requests.get(`${routes.api}/${slug}/init`, {
         headers: {
           'Accept-Language': i18n.language,
+          'x-payload-admin': 'true',
         },
       }).then((res) => res.json().then((data) => {
         if (data && 'initialized' in data) {

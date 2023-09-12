@@ -81,6 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`, {
             headers: {
               'Accept-Language': i18n.language,
+              'x-payload-admin': 'true',
             },
           });
 
@@ -104,6 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const request = await requests.post(`${serverURL}${api}/${userSlug}/refresh-token`, {
         headers: {
           'Accept-Language': i18n.language,
+          'x-payload-admin': 'true',
         },
       });
 
@@ -136,6 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const request = await requests.get(`${serverURL}${api}/access`, {
         headers: {
           'Accept-Language': i18n.language,
+          'x-payload-admin': 'true',
         },
       });
 
@@ -155,6 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const request = await requests.get(`${serverURL}${api}/${userSlug}/me`, {
         headers: {
           'Accept-Language': i18n.language,
+          'x-payload-admin': 'true',
         },
       });
 
@@ -177,6 +181,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             headers: {
               'Accept-Language': i18n.language,
               'Content-Type': 'application/json',
+              'x-payload-admin': 'true',
             },
           });
           if (autoLoginResult.status === 200) {

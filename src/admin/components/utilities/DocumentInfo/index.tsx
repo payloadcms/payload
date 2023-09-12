@@ -134,6 +134,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
           credentials: 'include',
           headers: {
             'Accept-Language': i18n.language,
+            'x-payload-admin': 'true',
           },
         }).then((res) => res.json());
 
@@ -147,6 +148,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
           credentials: 'include',
           headers: {
             'Accept-Language': i18n.language,
+            'x-payload-admin': 'true',
           },
         }).then((res) => res.json());
 
@@ -171,6 +173,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
             credentials: 'include',
             headers: {
               'Accept-Language': i18n.language,
+              'x-payload-admin': 'true',
             },
           });
 
@@ -199,6 +202,7 @@ export const DocumentInfoProvider: React.FC<Props> = ({
         credentials: 'include',
         headers: {
           'Accept-Language': i18n.language,
+          'x-payload-admin': 'true',
         },
       });
       const json = await res.json();

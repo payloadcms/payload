@@ -43,6 +43,7 @@ const Restore: React.FC<Props> = ({ collection, global, className, versionID, or
     const res = await requests.post(fetchURL, {
       headers: {
         'Accept-Language': i18n.language,
+        'x-payload-admin': 'true',
       },
     });
 

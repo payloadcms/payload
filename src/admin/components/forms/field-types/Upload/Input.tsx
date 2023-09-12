@@ -105,6 +105,7 @@ const UploadInput: React.FC<UploadInputProps> = (props) => {
           credentials: 'include',
           headers: {
             'Accept-Language': i18n.language,
+            'x-payload-admin': 'true',
           },
         });
         if (response.ok) {

@@ -51,6 +51,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
       headers: {
         'Content-Type': 'application/json',
         'Accept-Language': i18n.language,
+        'x-payload-admin': 'true',
       },
       body: JSON.stringify({}),
     });
@@ -109,6 +110,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
                 headers: {
                   'Content-Type': 'application/json',
                   'Accept-Language': i18n.language,
+                  'x-payload-admin': 'true',
                 },
                 body: JSON.stringify(body),
               });

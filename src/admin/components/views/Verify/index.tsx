@@ -32,6 +32,7 @@ const Verify: React.FC<{ collection: SanitizedCollectionConfig }> = ({ collectio
         credentials: 'include',
         headers: {
           'Accept-Language': i18n.language,
+          'x-payload-admin': 'true',
         },
       });
       setVerifyResult(result);

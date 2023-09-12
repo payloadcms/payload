@@ -43,6 +43,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         },
         headers: {
           'Accept-Language': i18n.language,
+          'x-payload-admin': 'true',
         },
       });
       let data = await response.json();
@@ -61,6 +62,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         headers: {
           'Content-Type': 'application/json',
           'Accept-Language': i18n.language,
+          'x-payload-admin': 'true',
         },
         body: JSON.stringify(data),
       });
@@ -88,6 +90,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
               },
               headers: {
                 'Accept-Language': i18n.language,
+                'x-payload-admin': 'true',
               },
             });
             let localizedDoc = await res.json();
@@ -103,6 +106,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
               headers: {
                 'Content-Type': 'application/json',
                 'Accept-Language': i18n.language,
+                'x-payload-admin': 'true',
               },
               body: JSON.stringify(localizedDoc),
             });
@@ -118,6 +122,7 @@ const Duplicate: React.FC<Props> = ({ slug, collection, id }) => {
         await requests.delete(`${serverURL}${api}/${slug}/${id}`, {
           headers: {
             'Accept-Language': i18n.language,
+            'x-payload-admin': 'true',
           },
         });
       }

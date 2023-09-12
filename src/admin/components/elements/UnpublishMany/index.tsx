@@ -53,6 +53,7 @@ const UnpublishMany: React.FC<Props> = (props) => {
       headers: {
         'Content-Type': 'application/json',
         'Accept-Language': i18n.language,
+        'x-payload-admin': 'true',
       },
     }).then(async (res) => {
       try {
