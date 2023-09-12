@@ -23,6 +23,7 @@ type Result = {
     order: typeof asc | typeof desc
   }
   joins: BuildQueryJoins
+  selectFields: Record<string, GenericColumn>
 }
 const buildQuery = async function buildQuery({
   adapter,
@@ -32,6 +33,9 @@ const buildQuery = async function buildQuery({
   tableName,
   where: incomingWhere,
 }: BuildQueryArgs): Promise<Result> {
+  const selectFields: Record<string, GenericColumn> = {
+    id: adapter.tables[tableName].id,
+  };
   const joins: BuildQueryJoins = {};
   const orderBy: Result['orderBy'] = {
     column: null,
@@ -58,9 +62,15 @@ const buildQuery = async function buildQuery({
       fields,
       pathSegments: sortPath.split('.'),
       joins,
+      selectFields,
       locale,
       tableName,
     });
+
+    // TODO: add to selectFields
+    if (orderBy.column) {
+      selectFields.sort = orderBy.column;
+    }
 
     orderBy.column = sortTable[sortTableColumnName];
   }
@@ -75,6 +85,7 @@ const buildQuery = async function buildQuery({
       locale,
       tableName,
       where: incomingWhere,
+      selectFields,
     });
   }
 
@@ -82,6 +93,7 @@ const buildQuery = async function buildQuery({
     joins,
     orderBy,
     where,
+    selectFields,
   };
 };
 

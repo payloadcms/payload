@@ -6,7 +6,7 @@ import type { SanitizedCollectionConfig, TypeWithID } from 'payload/dist/collect
 import buildQuery from './queries/buildQuery';
 import { buildFindManyArgs } from './find/buildFindManyArgs';
 import { transform } from './transform/read';
-import { GenericColumn, PostgresAdapter } from './types';
+import { PostgresAdapter } from './types';
 
 export const find: Find = async function find(
   this: PostgresAdapter, {
@@ -35,6 +35,7 @@ export const find: Find = async function find(
     where,
     orderBy,
     joins,
+    selectFields,
   } = await buildQuery({
     adapter: this,
     fields: collectionConfig.fields,
@@ -46,19 +47,18 @@ export const find: Find = async function find(
 
   const orderedIDMap: Record<number | string, number> = {};
 
-  const selectFields: Record<string, GenericColumn> = {
-    id: table.id,
-  };
-  if (orderBy.column) {
-    selectFields.sort = orderBy.column;
-  }
-
+  // const localSelectFields: Record<string, GenericColumn> = {
+  //   id: table.id,
+  // };
+  // if (orderBy.column) {
+  //   selectFields.sort = orderBy.column;
+  // }
   // initial query
   const selectQuery = this.db.selectDistinct(selectFields)
     .from(table);
-  if (orderBy.order && orderBy.column) {
-    selectQuery.orderBy(orderBy.order(orderBy.column));
-  }
+  // if (orderBy.order && orderBy.column) {
+  //   selectQuery.orderBy(orderBy.order(orderBy.column));
+  // }
 
   const findManyArgs = buildFindManyArgs({
     adapter: this,
@@ -74,8 +74,9 @@ export const find: Find = async function find(
     }
     Object.entries(joins)
       .forEach(([joinTable, condition]) => {
-        selectQuery.leftJoin(this.tables[joinTable], condition);
+        selectQuery.leftJoin(this.tables[joinTable.split('.')[0]], condition);
       });
+    const sql = await selectQuery.toSQL();
     const result = await selectQuery
       .offset((page - 1) * limit)
       .limit(limit === 0 ? undefined : limit);

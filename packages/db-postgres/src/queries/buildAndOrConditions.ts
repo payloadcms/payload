@@ -2,7 +2,7 @@ import { Where } from 'payload/types';
 import { Field } from 'payload/dist/fields/config/types';
 import { SQL } from 'drizzle-orm';
 import { parseParams } from './parseParams';
-import { PostgresAdapter } from '../types';
+import { GenericColumn, PostgresAdapter } from '../types';
 import { BuildQueryJoins } from './buildQuery';
 
 export async function buildAndOrConditions({
@@ -12,6 +12,7 @@ export async function buildAndOrConditions({
   locale,
   fields,
   tableName,
+  selectFields,
 }: {
   joins: BuildQueryJoins,
   where: Where[],
@@ -21,6 +22,7 @@ export async function buildAndOrConditions({
   locale?: string,
   fields: Field[],
   tableName: string,
+  selectFields: Record<string, GenericColumn>
 }): Promise<SQL[]> {
   const completedConditions = [];
   // Loop over all AND / OR operations and add them to the AND / OR query param
@@ -37,8 +39,9 @@ export async function buildAndOrConditions({
         locale,
         fields,
         tableName,
+        selectFields,
       });
-      if (Object.keys(result).length > 0) {
+      if (result && Object.keys(result).length > 0) {
         completedConditions.push(result);
       }
     }

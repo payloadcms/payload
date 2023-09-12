@@ -5,12 +5,13 @@ import { and, eq } from 'drizzle-orm';
 import { APIError } from 'payload/errors';
 import flattenFields from 'payload/dist/utilities/flattenTopLevelFields';
 import { BuildQueryJoins } from './buildQuery';
-import { GenericTable, PostgresAdapter } from '../types';
+import { GenericColumn, GenericTable, PostgresAdapter } from '../types';
 
 type TableColumn = {
   table: GenericTable
   columnName: string
-  collectionPath: string
+  collectionPath?: string
+  locale?: string
   field: FieldAffectingData
 }
 
@@ -20,6 +21,7 @@ type Args = {
   columnPrefix?: string
   fields: (Field | TabAsField)[]
   joins: BuildQueryJoins
+  selectFields: Record<string, GenericColumn>
   locale?: string
   pathSegments: string[]
   tableName: string
@@ -35,6 +37,7 @@ export const getTableColumnFromPath = ({
   columnPrefix = '',
   fields,
   joins,
+  selectFields,
   locale,
   pathSegments,
   tableName,
@@ -45,6 +48,7 @@ export const getTableColumnFromPath = ({
   let newTableName = tableName;
 
   if (!field && fieldPath === 'id') {
+    selectFields.id = adapter.tables[newTableName].id;
     return {
       collectionPath,
       field: {
@@ -71,6 +75,7 @@ export const getTableColumnFromPath = ({
           locale,
           pathSegments: pathSegments.slice(1),
           tableName: newTableName,
+          selectFields,
         });
       }
       case 'tab': {
@@ -84,6 +89,7 @@ export const getTableColumnFromPath = ({
             locale,
             pathSegments: pathSegments.slice(1),
             tableName: newTableName,
+            selectFields,
           });
         }
         return getTableColumnFromPath({
@@ -95,6 +101,7 @@ export const getTableColumnFromPath = ({
           locale,
           pathSegments: pathSegments.slice(1),
           tableName: newTableName,
+          selectFields,
         });
       }
 
@@ -112,6 +119,7 @@ export const getTableColumnFromPath = ({
           locale,
           pathSegments: pathSegments.slice(1),
           tableName: newTableName,
+          selectFields,
         });
       }
 
@@ -133,6 +141,7 @@ export const getTableColumnFromPath = ({
           locale,
           pathSegments: pathSegments.slice(1),
           tableName: newTableName,
+          selectFields,
         });
       }
 
@@ -144,30 +153,26 @@ export const getTableColumnFromPath = ({
       case 'relationship':
       case 'upload': {
         let relationshipFields;
+        const newCollectionPath = `${tableName}_relationships`;
         if (typeof field.relationTo === 'string') {
           newTableName = `${toSnakeCase(field.relationTo)}`;
-          joins[newTableName] = eq(adapter.tables[newTableName].id, adapter.tables[`${toSnakeCase(tableName)}_relationships`][`${toSnakeCase(field.relationTo)}ID`]);
+          // parent to relationship join table
+          joins[`${tableName}_relationships.${pathSegments.slice(1).join('.')}`] = eq(adapter.tables[tableName].id, adapter.tables[`${toSnakeCase(tableName)}_relationships`].parent);
           relationshipFields = adapter.payload.collections[field.relationTo].config.fields;
-          if (locale && field.localized && adapter.payload.config.localization) {
-            joins[newTableName] = and(
-              eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
-              eq(adapter[newTableName]._locale, locale),
-            );
-          } else {
-            joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
-          }
+          joins[`${newTableName}.${pathSegments.join('.')}`] = eq(adapter.tables[newTableName].id, adapter.tables[`${toSnakeCase(tableName)}_relationships`][`${toSnakeCase(field.relationTo)}ID`]);
         } else {
           throw new APIError('Not supported');
         }
         return getTableColumnFromPath({
           adapter,
-          collectionPath: pathSegments.slice(1)
-            .join('.'),
+          collectionPath: newCollectionPath,
           fields: relationshipFields,
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
           tableName: newTableName,
+          selectFields,
+
         });
       }
 
@@ -187,11 +192,9 @@ export const getTableColumnFromPath = ({
         if (fieldAffectsData(field)) {
           if (locale && field.localized && adapter.payload.config.localization) {
             newTableName = `${tableName}_locales`;
-            joins[newTableName] = and(
-              eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
-              eq(adapter.tables[newTableName]._locale, locale),
-            );
+            joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
           }
+          selectFields[`${tableName}.${field.name}`] = adapter.tables[tableName][field.name];
           return {
             collectionPath,
             field,

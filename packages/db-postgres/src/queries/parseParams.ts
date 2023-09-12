@@ -5,7 +5,7 @@ import { Field } from 'payload/dist/fields/config/types';
 import { validOperators } from 'payload/dist/types/constants';
 import { and, SQL } from 'drizzle-orm';
 import { buildAndOrConditions } from './buildAndOrConditions';
-import { PostgresAdapter } from '../types';
+import { GenericColumn, PostgresAdapter } from '../types';
 import { operatorMap } from './operatorMap';
 import { BuildQueryJoins } from './buildQuery';
 import { getTableColumnFromPath } from './getTableColumnFromPath';
@@ -16,8 +16,9 @@ type Args = {
   where: Where
   adapter: PostgresAdapter
   locale: string
-  tableName: string,
+  tableName: string
   fields: Field[]
+  selectFields: Record<string, GenericColumn>
 }
 
 export async function parseParams({
@@ -27,6 +28,7 @@ export async function parseParams({
   locale,
   fields,
   tableName,
+  selectFields,
 }: Args): Promise<SQL> {
   let result: SQL;
   const constraints: SQL[] = [];
@@ -50,6 +52,7 @@ export async function parseParams({
             locale,
             tableName,
             where: condition,
+            selectFields,
           });
           if (builtConditions.length > 0) {
             if (result) {
@@ -66,7 +69,7 @@ export async function parseParams({
           if (typeof pathOperators === 'object') {
             for (const operator of Object.keys(pathOperators)) {
               if (validOperators.includes(operator as Operator)) {
-                const tableColumn = getTableColumnFromPath({
+                const { field, table, columnName, collectionPath, locale } = getTableColumnFromPath({
                   adapter,
                   collectionPath: relationOrPath,
                   fields,
@@ -74,13 +77,24 @@ export async function parseParams({
                   locale,
                   pathSegments: relationOrPath.split('.'),
                   tableName,
+                  selectFields,
                 });
                 const queryValue = sanitizeQueryValue({
-                  field: tableColumn.field,
+                  field,
                   operator,
                   val: where[relationOrPath][operator],
+                  path: collectionPath,
                 });
-                constraints.push(operatorMap[operator](tableColumn.table[tableColumn.columnName], queryValue));
+                // if (joinKey && joinConstraints.length > 0) {
+                //   // eslint-disable-next-line no-param-reassign
+                //   joins[joinKey] = and(
+                //     ...joinConstraints,
+                //     operatorMap[operator](table[columnName], queryValue),
+                //   );
+                // } else {
+                // nothing was added to joins, did not use constraints
+                // }
+                constraints.push(operatorMap[operator](table[columnName], queryValue));
               }
             }
           }
@@ -94,6 +108,9 @@ export async function parseParams({
     } else {
       result = and(...constraints);
     }
+  }
+  if (constraints.length === 1 && !result) {
+    [result] = constraints;
   }
 
 
