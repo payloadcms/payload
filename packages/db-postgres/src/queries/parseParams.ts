@@ -69,7 +69,7 @@ export async function parseParams({
           if (typeof pathOperators === 'object') {
             for (const operator of Object.keys(pathOperators)) {
               if (validOperators.includes(operator as Operator)) {
-                const { field, table, columnName, collectionPath, locale } = getTableColumnFromPath({
+                const { field, table, columnName, constraints } = getTableColumnFromPath({
                   adapter,
                   collectionPath: relationOrPath,
                   fields,
@@ -79,12 +79,14 @@ export async function parseParams({
                   tableName,
                   selectFields,
                 });
+
                 const queryValue = sanitizeQueryValue({
                   field,
                   operator,
                   val: where[relationOrPath][operator],
-                  path: collectionPath,
                 });
+
+
                 // if (joinKey && joinConstraints.length > 0) {
                 //   // eslint-disable-next-line no-param-reassign
                 //   joins[joinKey] = and(

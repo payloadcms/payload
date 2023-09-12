@@ -7,11 +7,16 @@ import flattenFields from 'payload/dist/utilities/flattenTopLevelFields';
 import { BuildQueryJoins } from './buildQuery';
 import { GenericColumn, GenericTable, PostgresAdapter } from '../types';
 
+type Constraint = {
+  table: GenericTable
+  columnName: string
+  value: unknown
+}
+
 type TableColumn = {
   table: GenericTable
   columnName: string
-  collectionPath?: string
-  locale?: string
+  constraints: Constraint[]
   field: FieldAffectingData
 }
 
@@ -19,6 +24,7 @@ type Args = {
   adapter: PostgresAdapter,
   collectionPath: string
   columnPrefix?: string
+  constraints?: Constraint[]
   fields: (Field | TabAsField)[]
   joins: BuildQueryJoins
   selectFields: Record<string, GenericColumn>
@@ -35,6 +41,7 @@ export const getTableColumnFromPath = ({
   adapter,
   collectionPath,
   columnPrefix = '',
+  constraints = [],
   fields,
   joins,
   selectFields,
@@ -50,13 +57,13 @@ export const getTableColumnFromPath = ({
   if (!field && fieldPath === 'id') {
     selectFields.id = adapter.tables[newTableName].id;
     return {
-      collectionPath,
+      columnName: 'id',
+      constraints,
       field: {
         name: 'id',
         type: 'number',
       },
       table: adapter.tables[newTableName],
-      columnName: 'id',
     };
   }
 
@@ -153,11 +160,14 @@ export const getTableColumnFromPath = ({
       case 'relationship':
       case 'upload': {
         let relationshipFields;
-        const newCollectionPath = `${tableName}_relationships`;
+        const relationTableName = `${tableName}_relationships`;
+
+        // Join in the relationships table
+        joins[relationTableName] = eq(adapter.tables[tableName].id, adapter.tables[relationTableName].parent);
+
         if (typeof field.relationTo === 'string') {
           newTableName = `${toSnakeCase(field.relationTo)}`;
           // parent to relationship join table
-          joins[`${tableName}_relationships.${pathSegments.slice(1).join('.')}`] = eq(adapter.tables[tableName].id, adapter.tables[`${toSnakeCase(tableName)}_relationships`].parent);
           relationshipFields = adapter.payload.collections[field.relationTo].config.fields;
           joins[`${newTableName}.${pathSegments.join('.')}`] = eq(adapter.tables[newTableName].id, adapter.tables[`${toSnakeCase(tableName)}_relationships`][`${toSnakeCase(field.relationTo)}ID`]);
         } else {
@@ -194,12 +204,14 @@ export const getTableColumnFromPath = ({
             newTableName = `${tableName}_locales`;
             joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
           }
+
           selectFields[`${tableName}.${field.name}`] = adapter.tables[tableName][field.name];
+
           return {
-            collectionPath,
+            columnName: `${columnPrefix}${field.name}`,
+            constraints,
             field,
             table: adapter.tables[newTableName],
-            columnName: `${columnPrefix}${field.name}`,
           };
         }
       }
