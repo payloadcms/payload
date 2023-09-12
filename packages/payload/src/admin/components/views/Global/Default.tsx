@@ -7,7 +7,6 @@ import { getTranslation } from '../../../../utilities/getTranslation'
 import { formatDate } from '../../../utilities/formatDate'
 import Autosave from '../../elements/Autosave'
 import CopyToClipboard from '../../elements/CopyToClipboard'
-import Eyebrow from '../../elements/Eyebrow'
 import { Gutter } from '../../elements/Gutter'
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import PreviewButton from '../../elements/PreviewButton'
@@ -68,7 +67,6 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                   keywords={`${getTranslation(label, i18n)}, Payload, CMS`}
                   title={getTranslation(label, i18n)}
                 />
-                <Eyebrow />
                 {!(global.versions?.drafts && global.versions?.drafts?.autosave) && (
                   <LeaveWithoutSaving />
                 )}

@@ -135,7 +135,6 @@ const Content: React.FC<DocumentDrawerProps> = ({
         ),
         data,
         disableActions: true,
-        disableEyebrow: true,
         disableLeaveWithoutSaving: true,
         hasSavePermission,
         id,

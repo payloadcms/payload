@@ -6,9 +6,6 @@
   width: 100%;
   height: calc(var(--base) * 3);
   z-index: $z-status;
-  // TODO: remove this once the nav has been refactored
-  // eventually it will contain nav items with click events
-  pointer-events: none;
 
   &__bg {
     @include blur-bg;
@@ -35,15 +32,27 @@
     .nav__modalToggler {
       pointer-events: all;
     }
+
+    .nav__nav {
+      display: none;
+    }
   }
 
   &__content {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     height: 100%;
     padding: 0 calc(var(--gutter-h) / 2);
     position: relative;
+    flex-grow: 1;
+  }
+
+  &__nav {
+    margin-left: calc(var(--base) / 1.25);
+    display: flex;
+    align-items: center;
+    height: 100%;
+    flex-grow: 1;
   }
 
   &__modalToggler {

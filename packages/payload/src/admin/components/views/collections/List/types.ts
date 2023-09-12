@@ -9,7 +9,6 @@ export type Props = {
   collection: SanitizedCollectionConfig
   customHeader?: React.ReactNode
   data: PaginatedDocs<any>
-  disableEyebrow?: boolean
   handleDelete?: () => void
   handlePageChange?: PaginatorProps['onChange']
   handlePerPageChange?: PerPageProps['handleChange']

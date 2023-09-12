@@ -9,7 +9,6 @@ import { getTranslation } from '../../../../../utilities/getTranslation'
 import Button from '../../../elements/Button'
 import DeleteMany from '../../../elements/DeleteMany'
 import EditMany from '../../../elements/EditMany'
-import Eyebrow from '../../../elements/Eyebrow'
 import { Gutter } from '../../../elements/Gutter'
 import ListControls from '../../../elements/ListControls'
 import ListSelection from '../../../elements/ListSelection'
@@ -40,7 +39,6 @@ const DefaultList: React.FC<Props> = (props) => {
     collection,
     customHeader,
     data,
-    disableEyebrow,
     handlePageChange,
     handlePerPageChange,
     handleSortChange,
@@ -74,7 +72,6 @@ const DefaultList: React.FC<Props> = (props) => {
 
       <Meta title={getTranslation(collection.labels.plural, i18n)} />
       <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
-        {!disableEyebrow && <Eyebrow />}
         <Gutter className={`${baseClass}__wrap`}>
           <header className={`${baseClass}__header`}>
             {customHeader && customHeader}

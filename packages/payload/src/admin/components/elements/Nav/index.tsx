@@ -6,6 +6,7 @@ import { useConfig } from '../../utilities/Config'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 import Hamburger from '../Hamburger'
 import { MainMenuDrawer, mainMenuSlug } from '../MainMenu'
+import StepNav from '../StepNav'
 import './index.scss'
 
 const baseClass = 'nav'
@@ -39,6 +40,9 @@ const DefaultNav = () => {
           <ModalToggler className={`${baseClass}__modalToggler`} slug={mainMenuSlug}>
             <Hamburger isActive={isOpen} />
           </ModalToggler>
+          <div className={`${baseClass}__nav`}>
+            <StepNav />
+          </div>
         </div>
       </header>
       <MainMenuDrawer />

@@ -4,7 +4,6 @@ import { Redirect } from 'react-router-dom'
 import type { AdminView } from '../../../../../packages/payload/src/config/types'
 
 import Button from '../../../../../packages/payload/src/admin/components/elements/Button'
-import Eyebrow from '../../../../../packages/payload/src/admin/components/elements/Eyebrow'
 import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
 // As this is the demo project, we import our dependencies from the `src` directory.
 import DefaultTemplate from '../../../../../packages/payload/src/admin/components/templates/Default'
@@ -48,11 +47,10 @@ const CustomDefaultRoute: AdminView = ({ canAccessAdmin, user }) => {
         keywords="Custom React Components, Payload, CMS"
         title="Custom Route with Default Template"
       />
-      <Eyebrow />
       <div
         style={{
-          paddingRight: 'var(--gutter-h)',
           paddingLeft: 'var(--gutter-h)',
+          paddingRight: 'var(--gutter-h)',
         }}
       >
         <h1>Custom Route</h1>

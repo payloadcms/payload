@@ -5,6 +5,7 @@
 
   &__form {
     height: 100%;
+    display: flex;
   }
 
   &__main {
@@ -33,6 +34,7 @@
       [dir='ltr'] & {
         margin-right: base(0.75);
       }
+
       [dir='rtl'] & {
         margin-left: base(0.75);
       }
@@ -46,15 +48,17 @@
   }
 
   &__sidebar-wrap {
-    position: fixed;
+    position: sticky;
+    height: calc(100vh - (var(--base) * 3));
+    top: 0;
     width: base(15);
-    height: 100%;
-    overflow: visible;
+
     [dir='ltr'] & {
       top: 0;
       right: 0;
       border-left: 1px solid var(--theme-elevation-100);
     }
+
     [dir='rtl'] & {
       top: 0;
       left: 0;
@@ -81,21 +85,24 @@
     [dir='ltr'] & {
       padding-left: base(1.5);
     }
+
     [dir='rtl'] & {
       padding-right: base(1.5);
     }
   }
 
   &__document-actions {
-    [dir='ltr'] & {
-      padding-right: $baseline;
-    }
-    [dir='rtl'] & {
-      padding-left: $baseline;
-    }
     position: sticky;
     top: 0;
     z-index: var(--z-nav);
+
+    [dir='ltr'] & {
+      padding-right: $baseline;
+    }
+
+    [dir='rtl'] & {
+      padding-left: $baseline;
+    }
 
     > * {
       position: relative;
@@ -118,6 +125,7 @@
       [dir='ltr'] & {
         margin-right: base(0.5);
       }
+
       [dir='rtl'] & {
         margin-left: base(0.5);
       }
@@ -127,6 +135,7 @@
       [dir='ltr'] & {
         margin-left: base(0.5);
       }
+
       [dir='rtl'] & {
         margin-right: base(0.5);
       }
@@ -152,15 +161,17 @@
   }
 
   &__sidebar-fields {
-    [dir='ltr'] & {
-      padding-right: $baseline;
-    }
-    [dir='rtl'] & {
-      padding-left: $baseline;
-    }
     display: flex;
     flex-direction: column;
     gap: $baseline;
+
+    [dir='ltr'] & {
+      padding-right: $baseline;
+    }
+
+    [dir='rtl'] & {
+      padding-left: $baseline;
+    }
 
     .preview-btn {
       display: inline-block;
@@ -178,13 +189,15 @@
   &__meta {
     margin: auto 0 $baseline 0;
     padding-top: $baseline;
+    list-style: none;
+
     [dir='ltr'] & {
       padding-right: $baseline;
     }
+
     [dir='rtl'] & {
       padding-left: $baseline;
     }
-    list-style: none;
 
     li {
       margin-bottom: base(0.5);
@@ -234,9 +247,11 @@
 
     &__meta {
       border-top: 1px solid var(--theme-elevation-100);
+
       [dir='ltr'] & {
         padding-right: var(--gutter-h);
       }
+
       [dir='rtl'] & {
         padding-left: var(--gutter-h);
       }
@@ -273,13 +288,15 @@
 
     &__sidebar-fields {
       padding-top: 0;
+      gap: base(0.5);
+
       [dir='ltr'] & {
         padding-right: var(--gutter-h);
       }
+
       [dir='rtl'] & {
         padding-left: var(--gutter-h);
       }
-      gap: base(0.5);
 
       .preview-btn {
         width: 100%;

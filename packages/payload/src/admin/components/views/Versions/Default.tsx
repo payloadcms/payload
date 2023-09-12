@@ -5,7 +5,6 @@ import type { StepNavItem } from '../../elements/StepNav/types'
 import type { Props } from './types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
-import Eyebrow from '../../elements/Eyebrow'
 import { Gutter } from '../../elements/Gutter'
 import IDLabel from '../../elements/IDLabel'
 import { LoadingOverlayToggle } from '../../elements/Loading'
@@ -108,7 +107,6 @@ export const DefaultVersionsView: React.FC<Props> = (props) => {
       <LoadingOverlayToggle name="versions" show={isLoadingVersions} />
       <div className={baseClass}>
         <Meta description={metaDesc} title={metaTitle} />
-        <Eyebrow />
         <Gutter className={`${baseClass}__wrap`}>
           <header className={`${baseClass}__header`}>
             <div className={`${baseClass}__intro`}>{t('showingVersionsFor')}</div>

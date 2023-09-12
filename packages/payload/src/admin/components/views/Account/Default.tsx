@@ -7,7 +7,6 @@ import type { Props } from './types'
 
 import { formatDate } from '../../../utilities/formatDate'
 import CopyToClipboard from '../../elements/CopyToClipboard'
-import Eyebrow from '../../elements/Eyebrow'
 import { Gutter } from '../../elements/Gutter'
 import { LoadingOverlayToggle } from '../../elements/Loading'
 import PreviewButton from '../../elements/PreviewButton'
@@ -91,7 +90,6 @@ const DefaultAccount: React.FC<Props> = (props) => {
                   keywords={t('account')}
                   title={t('account')}
                 />
-                <Eyebrow />
                 {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) && (
                   <LeaveWithoutSaving />
                 )}

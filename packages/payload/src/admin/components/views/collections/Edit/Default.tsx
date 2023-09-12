@@ -10,7 +10,6 @@ import Autosave from '../../../elements/Autosave'
 import CopyToClipboard from '../../../elements/CopyToClipboard'
 import DeleteDocument from '../../../elements/DeleteDocument'
 import DuplicateDocument from '../../../elements/DuplicateDocument'
-import Eyebrow from '../../../elements/Eyebrow'
 import { Gutter } from '../../../elements/Gutter'
 import { FormLoadingOverlayToggle } from '../../../elements/Loading'
 import PreviewButton from '../../../elements/PreviewButton'
@@ -30,7 +29,6 @@ import { useDocumentInfo } from '../../../utilities/DocumentInfo'
 import Meta from '../../../utilities/Meta'
 import { OperationContext } from '../../../utilities/OperationProvider'
 import Auth from './Auth'
-import { SetStepNav } from './SetStepNav'
 import Upload from './Upload'
 import './index.scss'
 
@@ -52,7 +50,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
     customHeader,
     data,
     disableActions,
-    disableEyebrow,
     disableLeaveWithoutSaving,
     hasSavePermission,
     id,
@@ -113,13 +110,8 @@ const DefaultEditView: React.FC<Props> = (props) => {
               name={`collection-edit--${collection.labels.singular}`}
               type="withoutNav"
             />
-
             {!isLoading && (
               <React.Fragment>
-                {!disableEyebrow && (
-                  <SetStepNav collection={collection} id={data?.id} isEditing={isEditing} />
-                )}
-
                 <div className={`${baseClass}__main`}>
                   <Meta
                     description={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
@@ -132,11 +124,8 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       i18n,
                     )}`}
                   />
-                  {!disableEyebrow && <Eyebrow />}
-
                   {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) &&
                     !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
-
                   <Gutter className={`${baseClass}__edit`}>
                     <header className={`${baseClass}__header`}>
                       {customHeader && customHeader}
