@@ -69,7 +69,7 @@ export async function parseParams({
           if (typeof pathOperators === 'object') {
             for (const operator of Object.keys(pathOperators)) {
               if (validOperators.includes(operator as Operator)) {
-                const { field, table, columnName, constraints } = getTableColumnFromPath({
+                const { field, table, columnName, constraints: queryConstraints } = getTableColumnFromPath({
                   adapter,
                   collectionPath: relationOrPath,
                   fields,
@@ -86,16 +86,13 @@ export async function parseParams({
                   val: where[relationOrPath][operator],
                 });
 
-
-                // if (joinKey && joinConstraints.length > 0) {
-                //   // eslint-disable-next-line no-param-reassign
-                //   joins[joinKey] = and(
-                //     ...joinConstraints,
-                //     operatorMap[operator](table[columnName], queryValue),
-                //   );
-                // } else {
-                // nothing was added to joins, did not use constraints
-                // }
+                queryConstraints.forEach(({
+                  table: constraintTable,
+                  columnName: col,
+                  value,
+                }) => {
+                  constraints.push(operatorMap.equals(constraintTable[col], value));
+                });
                 constraints.push(operatorMap[operator](table[columnName], queryValue));
               }
             }

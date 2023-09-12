@@ -67,12 +67,11 @@ const buildQuery = async function buildQuery({
       tableName,
     });
 
-    // TODO: add to selectFields
+    orderBy.column = sortTable[sortTableColumnName];
+
     if (orderBy.column) {
       selectFields.sort = orderBy.column;
     }
-
-    orderBy.column = sortTable[sortTableColumnName];
   }
 
   let where: SQL;

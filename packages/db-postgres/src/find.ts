@@ -30,6 +30,7 @@ export const find: Find = async function find(
   let hasPrevPage: boolean;
   let hasNextPage: boolean;
   let pagingCounter: number;
+  let selectDistinctResult;
 
   const {
     where,
@@ -74,14 +75,16 @@ export const find: Find = async function find(
     }
     Object.entries(joins)
       .forEach(([joinTable, condition]) => {
-        selectQuery.leftJoin(this.tables[joinTable.split('.')[0]], condition);
+        if (joinTable) {
+          selectQuery.leftJoin(this.tables[joinTable], condition);
+        }
       });
-    const sql = await selectQuery.toSQL();
-    const result = await selectQuery
+
+    selectDistinctResult = await selectQuery
       .offset((page - 1) * limit)
       .limit(limit === 0 ? undefined : limit);
 
-    if (result.length === 0) {
+    if (selectDistinctResult.length === 0) {
       return {
         docs: [],
         totalDocs: 0,
@@ -96,11 +99,14 @@ export const find: Find = async function find(
       };
     }
     // set the id in an object for sorting later
-    result.forEach(({ id }, i) => {
+    selectDistinctResult.forEach(({ id }, i) => {
       orderedIDMap[id as (number | string)] = i;
     });
+    const findWhere = Object.keys(orderedIDMap);
     findManyArgs.where = inArray(this.tables[tableName].id, Object.keys(orderedIDMap));
   } else {
+    findManyArgs.limit = limitArg === 0 ? undefined : limitArg;
+    findManyArgs.offset = (page - 1) * limitArg;
     if (where) {
       findManyArgs.where = where;
     }
@@ -116,17 +122,22 @@ export const find: Find = async function find(
 
   const findPromise = this.db.query[tableName].findMany(findManyArgs);
 
-  if (pagination !== false) {
-    const countResult = await this.db.select({ count: sql<number>`count(*)` })
+  if (pagination !== false || selectDistinctResult.length > limit) {
+    const selectCount = this.db.select({ count: sql<number>`count(*)` })
       .from(table)
       .where(where);
+    Object.entries(joins)
+      .forEach(([joinTable, condition]) => {
+        if (joinTable) {
+          selectCount.leftJoin(this.tables[joinTable], condition);
+        }
+      });
+    const countResult = await selectCount;
     totalDocs = Number(countResult[0].count);
     totalPages = typeof limit === 'number' ? Math.ceil(totalDocs / limit) : 1;
     hasPrevPage = page > 1;
     hasNextPage = totalPages > page;
     pagingCounter = ((page - 1) * limit) + 1;
-    findManyArgs.limit = limitArg === 0 ? undefined : limitArg;
-    findManyArgs.offset = (page - 1) * limitArg;
   }
 
   const rawDocs = await findPromise;

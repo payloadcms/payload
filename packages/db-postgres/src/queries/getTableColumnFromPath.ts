@@ -74,6 +74,7 @@ export const getTableColumnFromPath = ({
           adapter,
           collectionPath,
           columnPrefix,
+          constraints,
           fields: field.tabs.map((tab) => ({
             ...tab,
             type: 'tab',
@@ -91,6 +92,7 @@ export const getTableColumnFromPath = ({
             adapter,
             collectionPath,
             columnPrefix: `${columnPrefix}${field.name}_`,
+            constraints,
             fields: field.fields as Field[],
             joins,
             locale,
@@ -103,6 +105,7 @@ export const getTableColumnFromPath = ({
           adapter,
           collectionPath,
           columnPrefix,
+          constraints,
           fields: field.fields as Field[],
           joins,
           locale,
@@ -121,6 +124,7 @@ export const getTableColumnFromPath = ({
           adapter,
           collectionPath,
           columnPrefix: `${columnPrefix}${field.name}_`,
+          constraints,
           fields: field.fields as Field[],
           joins,
           locale,
@@ -143,6 +147,7 @@ export const getTableColumnFromPath = ({
         return getTableColumnFromPath({
           adapter,
           collectionPath,
+          constraints,
           fields: field.fields as Field[],
           joins,
           locale,
@@ -161,28 +166,35 @@ export const getTableColumnFromPath = ({
       case 'upload': {
         let relationshipFields;
         const relationTableName = `${tableName}_relationships`;
+        const newCollectionPath = pathSegments.slice(1).join('.');
 
         // Join in the relationships table
         joins[relationTableName] = eq(adapter.tables[tableName].id, adapter.tables[relationTableName].parent);
+        selectFields[`${relationTableName}.path`] = adapter.tables[relationTableName].path;
+        constraints.push({
+          columnName: 'path',
+          table: adapter.tables[relationTableName],
+          value: field.name,
+        });
 
         if (typeof field.relationTo === 'string') {
           newTableName = `${toSnakeCase(field.relationTo)}`;
           // parent to relationship join table
           relationshipFields = adapter.payload.collections[field.relationTo].config.fields;
-          joins[`${newTableName}.${pathSegments.join('.')}`] = eq(adapter.tables[newTableName].id, adapter.tables[`${toSnakeCase(tableName)}_relationships`][`${toSnakeCase(field.relationTo)}ID`]);
+          joins[newTableName] = eq(adapter.tables[newTableName].id, adapter.tables[`${toSnakeCase(tableName)}_relationships`][`${field.relationTo}ID`]);
         } else {
           throw new APIError('Not supported');
         }
         return getTableColumnFromPath({
           adapter,
           collectionPath: newCollectionPath,
+          constraints,
           fields: relationshipFields,
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
           tableName: newTableName,
           selectFields,
-
         });
       }
 
@@ -204,8 +216,7 @@ export const getTableColumnFromPath = ({
             newTableName = `${tableName}_locales`;
             joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
           }
-
-          selectFields[`${tableName}.${field.name}`] = adapter.tables[tableName][field.name];
+          selectFields[`${newTableName}.${field.name}`] = adapter.tables[newTableName][field.name];
 
           return {
             columnName: `${columnPrefix}${field.name}`,
