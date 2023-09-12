@@ -52,7 +52,7 @@ export type RichTextLeaf =
   | RichTextCustomLeaf
 
 export type AdapterArguments = {
-  admin: {
+  admin?: {
     elements?: RichTextElement[]
     hideGutter?: boolean
     leaves?: RichTextLeaf[]
