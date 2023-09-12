@@ -3,6 +3,7 @@
 .nav-group {
   width: 100%;
   display: flex;
+  align-items: flex-start;
   flex-direction: column;
   gap: calc(var(--base) * 0.25);
 
@@ -11,9 +12,8 @@
     color: var(--theme-elevation-400);
     background: transparent;
     border: 0;
-    margin-top: base(0.25);
-    width: 100%;
     display: flex;
+    align-items: center;
     padding: 0;
 
     [dir='ltr'] & {
@@ -30,7 +30,6 @@
 
     svg {
       flex-shrink: 0;
-      margin-top: base(-0.2);
     }
 
     &:hover,
