@@ -45,6 +45,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       beginTransaction,
       rollbackTransaction,
       commitTransaction,
+      ...(args.migrationDir && { migrationDir: args.migrationDir }),
       queryDrafts,
       findOne,
       find,

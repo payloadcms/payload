@@ -55,11 +55,13 @@ export function createDatabaseAdapter<T extends DatabaseAdapter>(
     migrateFresh: async () => null,
     migrateRefresh,
     migrateReset,
-
     migrateStatus,
     rollbackTransaction,
     transaction,
 
     ...args,
+
+    // Ensure migrationDir is set
+    migrationDir: args.migrationDir || '.migrations',
   } as T
 }
