@@ -351,44 +351,10 @@ export const blocks = baseField.keys({
 })
 
 export const richText = baseField.keys({
-  admin: baseAdminFields.keys({
-    elements: joi.array().items(
-      joi.alternatives().try(
-        joi.string(),
-        joi.object({
-          Button: componentSchema,
-          Element: componentSchema,
-          name: joi.string().required(),
-          plugins: joi.array().items(componentSchema),
-        }),
-      ),
-    ),
-    hideGutter: joi.boolean().default(true),
-    leaves: joi.array().items(
-      joi.alternatives().try(
-        joi.string(),
-        joi.object({
-          Button: componentSchema,
-          Leaf: componentSchema,
-          name: joi.string().required(),
-          plugins: joi.array().items(componentSchema),
-        }),
-      ),
-    ),
-    link: joi.object({
-      fields: joi.alternatives(joi.array().items(joi.link('#field')), joi.func()),
-    }),
-    placeholder: joi.string(),
-    rtl: joi.boolean(),
-    upload: joi.object({
-      collections: joi.object().pattern(
-        joi.string(),
-        joi.object().keys({
-          fields: joi.array().items(joi.link('#field')),
-        }),
-      ),
-    }),
+  adapter: joi.object().keys({
+    component: componentSchema,
   }),
+  admin: baseAdminFields.default(),
   defaultValue: joi.alternatives().try(joi.array().items(joi.object()), joi.func()),
   name: joi.string().required(),
   type: joi.string().valid('richText').required(),
