@@ -97,7 +97,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const apiURL = id ? `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}` : null
   const action = `${serverURL}${api}/${collectionSlug}${
     id ? `/${id}` : ''
-  }?locale=${locale}&depth=0&fallback-locale=null`
+  }?locale=${locale}&fallback-locale=null`
   const hasSavePermission =
     (isEditing && docPermissions?.update?.permission) ||
     (!isEditing && (docPermissions as CollectionPermission)?.create?.permission)
