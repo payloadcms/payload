@@ -1,6 +1,6 @@
-import type { SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload/types'
 
-import { useConfig } from 'payload'
+import { useConfig } from 'payload/components/utilities'
 import * as React from 'react'
 
 type options = { uploads: boolean }

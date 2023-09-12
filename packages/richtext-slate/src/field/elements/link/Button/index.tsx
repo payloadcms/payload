@@ -1,13 +1,15 @@
 import type { Fields } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
-import { useDrawerSlug } from 'payload'
-import { useAuth } from 'payload'
-import { useConfig } from 'payload'
-import { useDocumentInfo } from 'payload'
-import { useLocale } from 'payload'
-import { buildStateFromSchema } from 'payload'
-import { reduceFieldsToValues } from 'payload'
+import { useDrawerSlug } from 'payload/components/elements'
+import { reduceFieldsToValues } from 'payload/components/forms'
+import {
+  buildStateFromSchema,
+  useAuth,
+  useConfig,
+  useDocumentInfo,
+  useLocale,
+} from 'payload/components/utilities'
 import React, { Fragment, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Editor, Range, Transforms } from 'slate'

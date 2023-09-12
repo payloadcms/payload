@@ -1,8 +1,7 @@
-import { useAuth } from 'payload'
-import { useConfig } from 'payload'
-import { useFormFields } from 'payload'
 import { RelationshipComponent } from 'payload/components/fields/Relationship'
 import { SelectComponent } from 'payload/components/fields/Select'
+import { useFormFields } from 'payload/components/forms'
+import { useAuth, useConfig } from 'payload/components/utilities'
 import React, { Fragment, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 

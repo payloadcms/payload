@@ -1,4 +1,4 @@
-import { useListDrawer } from 'payload'
+import { useListDrawer } from 'payload/components/elements'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ReactEditor, useSlate } from 'slate-react'

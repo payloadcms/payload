@@ -1,6 +1,6 @@
 import type { ElementType } from 'react'
 
-import { Tooltip } from 'payload'
+import { Tooltip } from 'payload/components'
 import React, { useCallback, useState } from 'react'
 import { useSlate } from 'slate-react'
 

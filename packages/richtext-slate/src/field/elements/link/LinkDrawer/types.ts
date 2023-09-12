@@ -1,5 +1,4 @@
-import type { Field } from 'payload'
-import type { Fields } from 'payload'
+import type { Field, Fields } from 'payload/types'
 
 export type Props = {
   drawerSlug: string

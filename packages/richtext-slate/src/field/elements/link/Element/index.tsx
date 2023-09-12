@@ -1,18 +1,18 @@
-import type { Fields } from 'payload'
+import type { Fields } from 'payload/types'
 import type { HTMLAttributes } from 'react'
 
 import { useModal } from '@faceless-ui/modal'
-import { deepCopyObject } from 'payload'
-import { getTranslation } from 'payload'
-import { Button } from 'payload'
-import { useDrawerSlug } from 'payload'
-import { Popup } from 'payload'
-import { useAuth } from 'payload'
-import { useConfig } from 'payload'
-import { useDocumentInfo } from 'payload'
-import { useLocale } from 'payload'
-import { buildStateFromSchema } from 'payload'
-import { reduceFieldsToValues } from 'payload'
+import { Button, Popup } from 'payload/components'
+import { useDrawerSlug } from 'payload/components/elements'
+import { reduceFieldsToValues } from 'payload/components/forms'
+import {
+  buildStateFromSchema,
+  useAuth,
+  useConfig,
+  useDocumentInfo,
+  useLocale,
+} from 'payload/components/utilities'
+import { deepCopyObject, getTranslation } from 'payload/utilities'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Editor, Node, Transforms } from 'slate'

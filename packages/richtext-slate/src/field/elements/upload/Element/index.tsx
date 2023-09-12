@@ -1,16 +1,17 @@
-import type { SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload/types'
 import type { HTMLAttributes } from 'react'
 
-import { getTranslation } from 'payload'
-import { usePayloadAPI } from 'payload'
-import { useThumbnail } from 'payload'
-import { Button } from 'payload'
-import { useDocumentDrawer } from 'payload'
-import { DrawerToggler } from 'payload'
-import { useDrawerSlug } from 'payload'
-import { useListDrawer } from 'payload'
-import { FileGraphic } from 'payload'
-import { useConfig } from 'payload'
+import { Button } from 'payload/components'
+import {
+  DrawerToggler,
+  useDocumentDrawer,
+  useDrawerSlug,
+  useListDrawer,
+} from 'payload/components/elements'
+import { FileGraphic } from 'payload/components/graphics'
+import { usePayloadAPI, useThumbnail } from 'payload/components/hooks'
+import { useConfig } from 'payload/components/utilities'
+import { getTranslation } from 'payload/utilities'
 import React, { useCallback, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Transforms } from 'slate'

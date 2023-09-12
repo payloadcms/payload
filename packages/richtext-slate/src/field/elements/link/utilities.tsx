@@ -1,6 +1,6 @@
 import type { i18n } from 'i18next'
-import type { Field } from 'payload'
 import type { SanitizedConfig } from 'payload/config'
+import type { Field } from 'payload/types'
 import type { Editor } from 'slate'
 
 import { Element, Range, Transforms } from 'slate'
