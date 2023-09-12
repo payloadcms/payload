@@ -14,7 +14,6 @@
     "src/**/*.json",
     "**/*.ts",
     "test/**/*.tsx",
-    "../packages/**/src/**/*.ts",
-    "../packages/**/src/**/*.tsx"
+    "../packages/**/src/**/*.ts"
   ]
 }

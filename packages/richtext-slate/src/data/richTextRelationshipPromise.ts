@@ -122,7 +122,7 @@ export const recurseRichText = ({
   }
 }
 
-const richTextRelationshipPromise = async ({
+export const richTextRelationshipPromise = async ({
   currentDepth,
   depth,
   field,
@@ -146,5 +146,3 @@ const richTextRelationshipPromise = async ({
 
   await Promise.all(promises)
 }
-
-export default richTextRelationshipPromise
