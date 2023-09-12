@@ -8,13 +8,25 @@ import deepmerge from 'deepmerge';
 // how to load monaco editor as an npm package
 // https://github.com/suren-atoyan/monaco-react#use-monaco-editor-as-an-npm-package
 import * as monaco from 'monaco-editor';
-import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker.js'; // eslint-disable-line
-import JSONWorker from 'monaco-editor/esm/vs/language/json/json.worker.js'; // eslint-disable-line
-import CSSWorker from 'monaco-editor/esm/vs/language/css/css.worker.js'; // eslint-disable-line
-import HTMLWorker from 'monaco-editor/esm/vs/language/html/html.worker.js'; // eslint-disable-line
-import TSWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker.js'; // eslint-disable-line
-import { useConfig } from '../Config';
+// eslint-disable-next-line
+// @ts-ignore
+import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'; // eslint-disable-line
+// eslint-disable-next-line
+// @ts-ignore
+import JSONWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'; // eslint-disable-line
+// eslint-disable-next-line
+// @ts-ignore
+import CSSWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker'; // eslint-disable-line
+// eslint-disable-next-line
+// @ts-ignore
+import HTMLWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'; // eslint-disable-line
+// eslint-disable-next-line
+// @ts-ignore
+import TSWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'; // eslint-disable-line
+
+
 import { defaultOptions } from '../../../../translations/defaultOptions';
+import { useConfig } from '../Config';
 
 // eslint-disable-next-line
 self.MonacoEnvironment = {
