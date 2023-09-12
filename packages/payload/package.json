@@ -198,14 +198,15 @@
       "require": "./src/index.ts",
       "types": "./src/index.ts"
     },
+    "./scss": {
+      "import": "./src/exports/scss.scss",
+      "require": "./src/exports/scss.scss",
+      "default": "./src/exports/scss.scss"
+    },
     "./*": {
       "import": "./src/exports/*.ts",
       "require": "./src/exports/*.ts",
       "types": "./src/exports/*.ts"
-    },
-    "./scss": {
-      "import": "./src/exports/scss.scss",
-      "require": "./src/exports/scss.scss"
     }
   },
   "files": [
