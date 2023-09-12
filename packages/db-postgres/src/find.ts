@@ -50,6 +50,9 @@ export const find: Find = async function find(
 
   const selectQuery = this.db.selectDistinct(selectFields)
     .from(table);
+  if (orderBy?.order && orderBy?.column) {
+    selectQuery.orderBy(orderBy.order(orderBy.column));
+  }
 
   const findManyArgs = buildFindManyArgs({
     adapter: this,
@@ -70,6 +73,7 @@ export const find: Find = async function find(
         }
       });
 
+    const sql = await selectQuery.toSQL();
     selectDistinctResult = await selectQuery
       .offset((page - 1) * limit)
       .limit(limit === 0 ? undefined : limit);
@@ -92,7 +96,6 @@ export const find: Find = async function find(
     selectDistinctResult.forEach(({ id }, i) => {
       orderedIDMap[id as (number | string)] = i;
     });
-    const findWhere = Object.keys(orderedIDMap);
     findManyArgs.where = inArray(this.tables[tableName].id, Object.keys(orderedIDMap));
   } else {
     findManyArgs.limit = limitArg === 0 ? undefined : limitArg;

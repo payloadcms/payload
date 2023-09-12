@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { Field, FieldAffectingData, fieldAffectsData, TabAsField, tabHasName } from 'payload/dist/fields/config/types';
 import toSnakeCase from 'to-snake-case';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, SQL, sql } from 'drizzle-orm';
 import { APIError } from 'payload/errors';
 import flattenFields from 'payload/dist/utilities/flattenTopLevelFields';
 import { BuildQueryJoins } from './buildQuery';
@@ -15,9 +15,10 @@ type Constraint = {
 
 type TableColumn = {
   table: GenericTable
-  columnName: string
+  columnName?: string
   constraints: Constraint[]
   field: FieldAffectingData
+  rawColumn?: SQL
 }
 
 type Args = {
@@ -182,6 +183,18 @@ export const getTableColumnFromPath = ({
           // parent to relationship join table
           relationshipFields = adapter.payload.collections[field.relationTo].config.fields;
           joins[newTableName] = eq(adapter.tables[newTableName].id, adapter.tables[`${tableName}_relationships`][`${field.relationTo}ID`]);
+        } else if (newCollectionPath === 'value') {
+          // selectFields;
+          const tableColumnsNames = field.relationTo.map((relationTo) => `"${relationTableName}"."${toSnakeCase(relationTo)}_id"`);
+          // constraints.push({
+          //    AND COALESCE("with_localized_relationship_relationships"."localized_posts_id", "with_localized_relationship_relationships"."dummy_id");
+          // });
+          return {
+            table: adapter.tables[relationTableName],
+            constraints,
+            field,
+            rawColumn: sql.raw(`COALESCE(${tableColumnsNames.join(', ')})`),
+          };
         } else {
           throw new APIError('Not supported');
         }

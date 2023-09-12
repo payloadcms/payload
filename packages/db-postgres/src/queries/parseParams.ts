@@ -69,7 +69,7 @@ export async function parseParams({
           if (typeof pathOperators === 'object') {
             for (const operator of Object.keys(pathOperators)) {
               if (validOperators.includes(operator as Operator)) {
-                const { field, table, columnName, constraints: queryConstraints } = getTableColumnFromPath({
+                const { field, table, columnName, constraints: queryConstraints, rawColumn } = getTableColumnFromPath({
                   adapter,
                   collectionPath: relationOrPath,
                   fields,
@@ -93,7 +93,7 @@ export async function parseParams({
                 }) => {
                   constraints.push(operatorMap.equals(constraintTable[col], value));
                 });
-                constraints.push(operatorMap[operator](table[columnName], queryValue));
+                constraints.push(operatorMap[operator](rawColumn || table[columnName], queryValue));
               }
             }
           }
