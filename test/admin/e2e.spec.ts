@@ -8,7 +8,7 @@ import type { Post } from './config'
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
+import { openMainMenu, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { globalSlug, slug } from './shared'
@@ -20,12 +20,6 @@ const description = 'description'
 
 let url: AdminUrlUtil
 let serverURL: string
-
-const openMainMenu = async (page: Page) => {
-  await page.locator('.payload__modal-toggler--slug-main-menu').click()
-  const mainMenuModal = page.locator('#main-menu')
-  await expect(mainMenuModal).toBeVisible()
-}
 
 describe('admin', () => {
   let page: Page
