@@ -248,6 +248,12 @@ export const addFieldStatePromise = async ({
       case 'relationship': {
         if (field.hasMany) {
           const relationshipValue = Array.isArray(valueWithDefault) ? valueWithDefault.map((relationship) => {
+            if (Array.isArray(field.relationTo)) {
+              return {
+                relationTo: relationship.relationTo,
+                value: typeof relationship.value === 'string' ? relationship.value : relationship.value?.id,
+              };
+            }
             if (typeof relationship === 'object' && relationship !== null) {
               return relationship.id;
             }
@@ -256,15 +262,23 @@ export const addFieldStatePromise = async ({
 
           fieldState.value = relationshipValue;
           fieldState.initialValue = relationshipValue;
-
-          state[`${path}${field.name}`] = fieldState;
+        } else if (Array.isArray(field.relationTo)) {
+          if (valueWithDefault && typeof valueWithDefault === 'object' && 'relationTo' in valueWithDefault && 'value' in valueWithDefault) {
+            const value = typeof valueWithDefault?.value === 'object' && 'id' in valueWithDefault.value ? valueWithDefault.value.id : valueWithDefault.value;
+            const relationshipValue = {
+              relationTo: valueWithDefault?.relationTo,
+              value,
+            };
+            fieldState.value = relationshipValue;
+            fieldState.initialValue = relationshipValue;
+          }
         } else {
           const relationshipValue = valueWithDefault && typeof valueWithDefault === 'object' && 'id' in valueWithDefault ? valueWithDefault.id : valueWithDefault;
           fieldState.value = relationshipValue;
           fieldState.initialValue = relationshipValue;
-
-          state[`${path}${field.name}`] = fieldState;
         }
+
+        state[`${path}${field.name}`] = fieldState;
 
         break;
       }
