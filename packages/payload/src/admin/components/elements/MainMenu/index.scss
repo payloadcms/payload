@@ -114,6 +114,7 @@ $transTime: 200ms;
       }
 
       &__content {
+        width: 100%;
         padding-top: calc(var(--base) * 2);
 
         &::after {
