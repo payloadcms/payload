@@ -446,4 +446,4 @@ const RichText: React.FC<Props> = (props) => {
     </div>
   )
 }
-export const RichTextEditor = withCondition(RichText)
+export default withCondition(RichText)

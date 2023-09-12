@@ -2,10 +2,10 @@ import type { RichTextAdapter } from 'payload/types'
 
 import type { AdapterArguments } from './types'
 
-import { RichTextEditor } from './field/RichText'
+import RichTextField from './field'
 
 export function createSlate(args: AdapterArguments): RichTextAdapter {
   return {
-    component: RichTextEditor,
+    component: RichTextField,
   }
 }
