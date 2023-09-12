@@ -26,12 +26,7 @@
   "license": "MIT",
   "main": "./src/index.ts",
   "publishConfig": {
-    "exports": {
-      ".": {
-        "default": "./dist/index.js",
-        "types": "./dist/index.js"
-      }
-    },
+    "exports": null,
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
