@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { createSlate } from '../../packages/richtext-slate/src'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 
@@ -17,6 +18,7 @@ export default buildConfigWithDefaults({
                 {
                   name: 'richText',
                   type: 'richText',
+                  adapter: createSlate({}),
                 },
                 {
                   name: 'field1',

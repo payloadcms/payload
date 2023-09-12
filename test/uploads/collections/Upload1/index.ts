@@ -2,6 +2,8 @@ import path from 'path'
 
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { createSlate } from '../../../../packages/richtext-slate/src'
+
 export const Uploads1: CollectionConfig = {
   slug: 'uploads-1',
   upload: {
@@ -21,6 +23,7 @@ export const Uploads1: CollectionConfig = {
     {
       type: 'richText',
       name: 'richText',
+      adapter: createSlate({}),
     },
   ],
 }

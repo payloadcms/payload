@@ -1,6 +1,8 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 import type { Field } from '../../../../packages/payload/src/fields/config/types'
 
+import { createSlate } from '../../../../packages/richtext-slate/src'
+
 export const errorFieldsSlug = 'error-fields'
 
 const errorFields: Field[] = [
@@ -118,6 +120,7 @@ const errorFields: Field[] = [
           {
             type: 'richText',
             name: 'richtext',
+            adapter: createSlate({}),
             required: true,
           },
           {

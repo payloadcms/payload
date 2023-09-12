@@ -1,5 +1,6 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { createSlate } from '../../../../packages/richtext-slate/src'
 import { loremIpsum } from './loremIpsum'
 
 const RichTextFields: CollectionConfig = {
@@ -51,143 +52,154 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richText',
       type: 'richText',
-      required: true,
-      admin: {
-        elements: [
-          'h1',
-          'h2',
-          'h3',
-          'h4',
-          'h5',
-          'h6',
-          'ul',
-          'ol',
-          'textAlign',
-          'indent',
-          'link',
-          'relationship',
-          'upload',
-        ],
-        link: {
-          fields: [
-            {
-              name: 'rel',
-              label: 'Rel Attribute',
-              type: 'select',
-              hasMany: true,
-              options: ['noopener', 'noreferrer', 'nofollow'],
-              admin: {
-                description:
-                  'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
-              },
-            },
+      adapter: createSlate({
+        admin: {
+          elements: [
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'ul',
+            'ol',
+            'textAlign',
+            'indent',
+            'link',
+            'relationship',
+            'upload',
           ],
-        },
-        upload: {
-          collections: {
-            uploads: {
-              fields: [
-                {
-                  name: 'caption',
-                  type: 'richText',
+          link: {
+            fields: [
+              {
+                name: 'rel',
+                label: 'Rel Attribute',
+                type: 'select',
+                hasMany: true,
+                options: ['noopener', 'noreferrer', 'nofollow'],
+                admin: {
+                  description:
+                    'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
                 },
-              ],
+              },
+            ],
+          },
+          upload: {
+            collections: {
+              uploads: {
+                fields: [
+                  {
+                    name: 'caption',
+                    type: 'richText',
+                    adapter: createSlate({}),
+                  },
+                ],
+              },
             },
           },
         },
-      },
+      }),
+      required: true,
     },
     {
       name: 'richTextCustomFields',
       type: 'richText',
-      admin: {
-        elements: [
-          'h1',
-          'h2',
-          'h3',
-          'h4',
-          'h5',
-          'h6',
-          'ul',
-          'ol',
-          'indent',
-          'link',
-          'relationship',
-          'upload',
-        ],
-        link: {
-          fields: ({ defaultFields }) => {
-            return [
-              ...defaultFields,
-              {
-                label: 'Custom',
-                name: 'customLinkField',
-                type: 'text',
-              },
-            ]
-          },
-        },
-        upload: {
-          collections: {
-            uploads: {
-              fields: [
+      adapter: createSlate({
+        admin: {
+          elements: [
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'ul',
+            'ol',
+            'indent',
+            'link',
+            'relationship',
+            'upload',
+          ],
+          link: {
+            fields: ({ defaultFields }) => {
+              return [
+                ...defaultFields,
                 {
-                  name: 'caption',
-                  type: 'richText',
+                  label: 'Custom',
+                  name: 'customLinkField',
+                  type: 'text',
                 },
-              ],
+              ]
+            },
+          },
+          upload: {
+            collections: {
+              uploads: {
+                fields: [
+                  {
+                    name: 'caption',
+                    type: 'richText',
+                    adapter: createSlate({}),
+                  },
+                ],
+              },
             },
           },
         },
-      },
+      }),
     },
     {
       name: 'richTextReadOnly',
       type: 'richText',
       admin: {
         readOnly: true,
-        elements: [
-          'h1',
-          'h2',
-          'h3',
-          'h4',
-          'h5',
-          'h6',
-          'ul',
-          'ol',
-          'indent',
-          'link',
-          'relationship',
-          'upload',
-        ],
-        link: {
-          fields: [
-            {
-              name: 'rel',
-              label: 'Rel Attribute',
-              type: 'select',
-              hasMany: true,
-              options: ['noopener', 'noreferrer', 'nofollow'],
-              admin: {
-                description:
-                  'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
-              },
-            },
+      },
+      adapter: createSlate({
+        admin: {
+          elements: [
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'ul',
+            'ol',
+            'indent',
+            'link',
+            'relationship',
+            'upload',
           ],
-        },
-        upload: {
-          collections: {
-            uploads: {
-              fields: [
-                {
-                  name: 'caption',
-                  type: 'richText',
+          link: {
+            fields: [
+              {
+                name: 'rel',
+                label: 'Rel Attribute',
+                type: 'select',
+                hasMany: true,
+                options: ['noopener', 'noreferrer', 'nofollow'],
+                admin: {
+                  description:
+                    'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
                 },
-              ],
+              },
+            ],
+          },
+          upload: {
+            collections: {
+              uploads: {
+                fields: [
+                  {
+                    name: 'caption',
+                    type: 'richText',
+                    adapter: createSlate({}),
+                  },
+                ],
+              },
             },
           },
         },
-      },
+      }),
     },
     {
       name: 'blocks',
@@ -208,6 +220,7 @@ const RichTextFields: CollectionConfig = {
             {
               name: 'text',
               type: 'richText',
+              adapter: createSlate({}),
             },
           ],
         },
