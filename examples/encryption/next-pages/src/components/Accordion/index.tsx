@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { CollapsibleContent, CollapsibleToggler, useCollapsible } from '@faceless-ui/collapsibles'
-
 import { ChevronIcon } from '../icons/ChevronIcon'
 import { EyeIcon } from '../icons/EyeIcon'
 

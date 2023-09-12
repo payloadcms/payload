@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import React from 'react';
-import { Page } from '../../../../payload/src/payload-types';
+import Link from 'next/link';
 import { Button } from '../Button';
+import { Page } from '../../../../payload/src/payload-types';
 
 type CMSLinkType = {
   type?: 'custom' | 'reference'

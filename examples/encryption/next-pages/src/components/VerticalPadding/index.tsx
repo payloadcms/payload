@@ -1,4 +1,5 @@
 import React from 'react';
+
 import classes from './index.module.scss';
 
 export type VerticalPaddingOptions = 'large' | 'medium' | 'small' | 'none';

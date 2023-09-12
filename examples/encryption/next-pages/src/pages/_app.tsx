@@ -1,8 +1,7 @@
+import React from 'react';
 import App, { AppContext, AppProps } from 'next/app';
 import { ModalContainer, ModalProvider } from '@faceless-ui/modal';
-import React from 'react';
 import { Header } from '../components/Header';
-import { GlobalsProvider } from '../providers/Globals';
 import { CloseModalOnRouteChange } from '../components/CloseModalOnRouteChange';
 import { MainMenu } from "../../../payload/src/payload-types";
 
@@ -35,18 +34,16 @@ const PayloadApp = (appProps: AppProps & {
 
   return (
     <React.Fragment>
-      <GlobalsProvider {...globals}>
-        <ModalProvider
-          classPrefix="form"
-          transTime={0}
-          zIndex="var(--modal-z-index)"
-        >
-          <CloseModalOnRouteChange />
-          <Header />
-          <Component {...pageProps} />
-          <ModalContainer />
-        </ModalProvider>
-      </GlobalsProvider>
+      <ModalProvider
+        classPrefix="form"
+        transTime={0}
+        zIndex="var(--modal-z-index)"
+      >
+        <CloseModalOnRouteChange />
+        <Header globals={globals} />
+        <Component {...pageProps} />
+        <ModalContainer />
+      </ModalProvider>
     </React.Fragment>
   )
 }

@@ -1,12 +1,12 @@
 import React from 'react';
-import { useGlobals } from '../../providers/Globals';
+import Link from 'next/link';
+import { ModalToggler } from '@faceless-ui/modal';
+import { MainMenu } from '../../payload-types';
 import { CMSLink } from '../Link';
 import { Gutter } from '../Gutter';
 import { MenuIcon } from '../icons/Menu';
 import { Logo } from '../Logo';
 import { MobileMenuModal, slug as menuModalSlug } from './MobileMenuModal';
-import { ModalToggler } from '@faceless-ui/modal';
-import Link from 'next/link';
 
 import classes from './index.module.scss';
 
@@ -19,9 +19,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
     <header className={classes.header}>
       <Gutter className={classes.wrap}>
         <Link href="/">
-          <a>
-            <Logo />
-          </a>
+          <Logo />
         </Link>
 
         {children}
@@ -34,13 +32,23 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ children }) => {
   )
 }
 
-export const Header: React.FC = () => {
-  const { mainMenu: { navItems } } = useGlobals();
+export const Header: React.FC<{
+  globals: {
+    mainMenu: MainMenu
+  }
+}> = props => {
+  const { globals } = props
+
+  const {
+    mainMenu: { navItems },
+  } = globals
+
+  const hasNavItems = navItems && Array.isArray(navItems) && navItems.length > 0
 
   return (
     <>
       <HeaderBar>
-        {navItems && (
+        {hasNavItems && (
           <nav className={classes.nav}>
             {navItems.map(({ link }, i) => {
               return <CMSLink key={i} {...link} />

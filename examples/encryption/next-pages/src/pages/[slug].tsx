@@ -10,10 +10,9 @@ import { Gutter } from '../components/Gutter'
 import RichText from '../components/RichText'
 import { TextArea } from '../components/Textarea';
 import { VerticalPadding } from '../components/VerticalPadding'
-import { User, Page, MainMenu } from '../payload-types'
+import { User, Page } from '../payload-types'
 
 const Page: React.FC<{
-  mainMenu: MainMenu
   page: Page
   user: User
 }> = (props) => {
