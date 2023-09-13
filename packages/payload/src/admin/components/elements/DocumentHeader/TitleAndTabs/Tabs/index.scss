@@ -14,6 +14,16 @@
         background-color: var(--theme-elevation-100);
       }
     }
+
+    .doc-tabs__count {
+      background-color: var(--theme-elevation-150);
+    }
+
+    &:hover {
+      .doc-tabs__count {
+        background-color: var(--theme-elevation-150);
+      }
+    }
   }
 
   &__tab-link {

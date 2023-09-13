@@ -2,7 +2,8 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-import type { DocumentHeaderProps } from '..'
+import type { CollectionPermission } from '../../../../../auth'
+import type { SanitizedCollectionConfig } from '../../../../../exports/types'
 
 import { formatDate } from '../../../../utilities/formatDate'
 import { useConfig } from '../../../utilities/Config'
@@ -19,21 +20,19 @@ import { SaveDraft } from '../../SaveDraft'
 import Status from '../../Status'
 import './index.scss'
 
-export const MetaAndActions: React.FC<
-  DocumentHeaderProps & {
-    baseClass: string
-  }
-> = (props) => {
-  const {
-    baseClass: rootBaseClass,
-    collection,
-    data,
-    disableActions,
-    hasSavePermission,
-    id,
-    isEditing,
-    permissions,
-  } = props
+const baseClass = 'meta-and-actions'
+
+export const MetaAndActions: React.FC<{
+  apiURL: string
+  collection: SanitizedCollectionConfig
+  data?: any
+  disableActions?: boolean
+  hasSavePermission?: boolean
+  id: string
+  isEditing: boolean
+  permissions?: CollectionPermission
+}> = (props) => {
+  const { collection, data, disableActions, hasSavePermission, id, isEditing, permissions } = props
 
   const {
     admin: { disableDuplicate, preview },
@@ -50,116 +49,120 @@ export const MetaAndActions: React.FC<
 
   const { i18n, t } = useTranslation('general')
 
-  const baseClass = `${rootBaseClass}__meta-and-actions`
-
   return (
     <Gutter className={baseClass}>
-      {collection.versions?.drafts && (
-        <React.Fragment>
-          <Status />
-          {collection.versions?.drafts.autosave && hasSavePermission && (
-            <Autosave
-              collection={collection}
-              id={id}
-              publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
-            />
-          )}
-        </React.Fragment>
-      )}
-      {timestamps && (
-        <ul className={`${baseClass}__timestamps`}>
-          {data?.updatedAt && (
-            <li className={`${baseClass}__timestamp`}>
-              <div className={`${baseClass}__label`}>{`${t('lastModified')}:`}</div>
-              <p
-                className={`${baseClass}__stamp`}
-                title={formatDate(data.updatedAt, dateFormat, i18n?.language)}
-              >
-                {formatDate(data.updatedAt, dateFormat, i18n?.language)}
-              </p>
-            </li>
-          )}
-          {(publishedDoc?.createdAt || data?.createdAt) && (
-            <li className={`${baseClass}__timestamp`}>
-              <div className={`${baseClass}__label`}>{`${t('created')}:`}</div>
-              <p
-                className={`${baseClass}__stamp`}
-                title={formatDate(
-                  publishedDoc?.createdAt || data?.createdAt,
-                  dateFormat,
-                  i18n?.language,
-                )}
-              >
-                {formatDate(publishedDoc?.createdAt || data?.createdAt, dateFormat, i18n?.language)}
-              </p>
-            </li>
-          )}
-        </ul>
-      )}
-      <div className={`${baseClass}__controls-wrapper`}>
-        <div className={`${baseClass}__controls`}>
-          {isEditing &&
-            preview &&
-            collection.versions?.drafts &&
-            !collection.versions?.drafts?.autosave && (
-              <PreviewButton
-                CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
-                generatePreviewURL={preview}
+      <div className={`${baseClass}__wrapper`}>
+        {collection.versions?.drafts && (
+          <React.Fragment>
+            <Status />
+            {collection.versions?.drafts.autosave && hasSavePermission && (
+              <Autosave
+                collection={collection}
+                id={id}
+                publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
               />
             )}
-          {hasSavePermission && (
-            <React.Fragment>
-              {collection.versions?.drafts ? (
-                <React.Fragment>
-                  {!collection.versions.drafts.autosave && (
-                    <SaveDraft
-                      CustomComponent={collection?.admin?.components?.edit?.SaveDraftButton}
-                    />
+          </React.Fragment>
+        )}
+        {timestamps && (
+          <ul className={`${baseClass}__timestamps`}>
+            {data?.updatedAt && (
+              <li className={`${baseClass}__timestamp`}>
+                <div className={`${baseClass}__label`}>{t('lastModified')}:&nbsp;</div>
+                <p
+                  className={`${baseClass}__stamp`}
+                  title={formatDate(data.updatedAt, dateFormat, i18n?.language)}
+                >
+                  {formatDate(data.updatedAt, dateFormat, i18n?.language)}
+                </p>
+              </li>
+            )}
+            {(publishedDoc?.createdAt || data?.createdAt) && (
+              <li className={`${baseClass}__timestamp`}>
+                <div className={`${baseClass}__label`}>{t('created')}:&nbsp;</div>
+                <p
+                  className={`${baseClass}__stamp`}
+                  title={formatDate(
+                    publishedDoc?.createdAt || data?.createdAt,
+                    dateFormat,
+                    i18n?.language,
                   )}
-
-                  <Publish CustomComponent={collection?.admin?.components?.edit?.PublishButton} />
-                </React.Fragment>
-              ) : (
-                <Save CustomComponent={collection?.admin?.components?.edit?.SaveButton} />
+                >
+                  {formatDate(
+                    publishedDoc?.createdAt || data?.createdAt,
+                    dateFormat,
+                    i18n?.language,
+                  )}
+                </p>
+              </li>
+            )}
+          </ul>
+        )}
+        <div className={`${baseClass}__controls-wrapper`}>
+          <div className={`${baseClass}__controls`}>
+            {isEditing &&
+              preview &&
+              collection.versions?.drafts &&
+              !collection.versions?.drafts?.autosave && (
+                <PreviewButton
+                  CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
+                  generatePreviewURL={preview}
+                />
               )}
-            </React.Fragment>
+            {hasSavePermission && (
+              <React.Fragment>
+                {collection.versions?.drafts ? (
+                  <React.Fragment>
+                    {!collection.versions.drafts.autosave && (
+                      <SaveDraft
+                        CustomComponent={collection?.admin?.components?.edit?.SaveDraftButton}
+                      />
+                    )}
+
+                    <Publish CustomComponent={collection?.admin?.components?.edit?.PublishButton} />
+                  </React.Fragment>
+                ) : (
+                  <Save CustomComponent={collection?.admin?.components?.edit?.SaveButton} />
+                )}
+              </React.Fragment>
+            )}
+          </div>
+          {!disableActions && (
+            <Popup
+              button={
+                <div className={`${baseClass}__dots`}>
+                  <div />
+                  <div />
+                  <div />
+                </div>
+              }
+              className={`${baseClass}__popup`}
+              verticalAlign="bottom"
+            >
+              <ul className={`${baseClass}__popup-actions`}>
+                {permissions?.create?.permission && (
+                  <React.Fragment>
+                    <li>
+                      <Link id="action-create" to={`${adminRoute}/collections/${slug}/create`}>
+                        {t('createNew')}
+                      </Link>
+                    </li>
+                    {!disableDuplicate && isEditing && (
+                      <li>
+                        <DuplicateDocument collection={collection} id={id} slug={slug} />
+                      </li>
+                    )}
+                  </React.Fragment>
+                )}
+                {permissions?.delete?.permission && (
+                  <li>
+                    <DeleteDocument buttonId="action-delete" collection={collection} id={id} />
+                  </li>
+                )}
+              </ul>
+            </Popup>
           )}
         </div>
-        {!disableActions && (
-          <Popup
-            button={
-              <div className={`${baseClass}__dots`}>
-                <div />
-                <div />
-                <div />
-              </div>
-            }
-            className={`${baseClass}__popup`}
-            verticalAlign="bottom"
-          >
-            <ul className={`${baseClass}__popup-actions`}>
-              {permissions?.create?.permission && (
-                <React.Fragment>
-                  <li>
-                    <Link id="action-create" to={`${adminRoute}/collections/${slug}/create`}>
-                      {t('createNew')}
-                    </Link>
-                  </li>
-                  {!disableDuplicate && isEditing && (
-                    <li>
-                      <DuplicateDocument collection={collection} id={id} slug={slug} />
-                    </li>
-                  )}
-                </React.Fragment>
-              )}
-              {permissions?.delete?.permission && (
-                <li>
-                  <DeleteDocument buttonId="action-delete" collection={collection} id={id} />
-                </li>
-              )}
-            </ul>
-          </Popup>
-        )}
       </div>
     </Gutter>
   )

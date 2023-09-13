@@ -1,14 +1,33 @@
 @import '../../../../scss/styles.scss';
 
-.doc-header__meta-and-actions {
+.meta-and-actions {
+  @include blur-bg;
   position: sticky;
   top: 0;
-  display: flex;
-  align-items: center;
   width: 100%;
-  gap: var(--base);
-  padding-top: calc(var(--base) / 2);
-  padding-bottom: calc(var(--base) / 2);
+  z-index: 1;
+
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    height: 1px;
+    background: var(--theme-elevation-100);
+    width: calc(100% + var(--gutter-h));
+    left: calc(var(--gutter-h) * -1);
+    top: 100%;
+  }
+
+  &__wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--base);
+    padding-top: calc(var(--base) / 2);
+    padding-bottom: calc((var(--base) / 2) + 1px);
+    z-index: 1;
+  }
 
   &__timestamps {
     flex-grow: 1;
@@ -23,7 +42,6 @@
   &__timestamp {
     display: flex;
     align-items: center;
-    gap: calc(var(--base) / 2);
     margin: 0;
     overflow: hidden;
   }
@@ -33,6 +51,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     margin: 0;
+    font-weight: 600;
   }
 
   &__label {
@@ -99,25 +118,43 @@
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: calc(var(--base) / 2);
-  }
+    gap: calc(var(--base) / 4);
 
-  &::before,
-  &::after {
-    content: '';
-    display: block;
-    position: absolute;
-    height: 1px;
-    background: var(--theme-elevation-100);
-    width: calc(100% + var(--gutter-h));
-    left: calc(var(--gutter-h) * -1);
-  }
+    a {
+      text-decoration: none;
+    }
 
-  &::before {
-    bottom: 100%;
-  }
+    li {
+      position: relative;
 
-  &::after {
-    top: 100%;
+      &::before {
+        content: '';
+        display: block;
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        border-radius: 1px;
+        background: var(--theme-elevation-100);
+        width: calc(100% + (var(--base) / 2));
+        left: calc(var(--base) / -4);
+        top: 0;
+        opacity: 0;
+        transition: opacity 50ms linear;
+      }
+
+      &:hover::before {
+        opacity: 1;
+      }
+
+      > * {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: left;
+        font-size: inherit;
+        line-height: inherit;
+        font-family: inherit;
+      }
+    }
   }
 }

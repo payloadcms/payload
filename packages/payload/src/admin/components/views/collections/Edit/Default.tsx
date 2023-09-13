@@ -4,25 +4,18 @@ import { useTranslation } from 'react-i18next'
 import type { Props } from './types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
-import { DocumentHeader } from '../../../elements/DocumentHeader'
-import { Gutter } from '../../../elements/Gutter'
+import { TitleAndTabs } from '../../../elements/DocumentHeader/TitleAndTabs'
 import { FormLoadingOverlayToggle } from '../../../elements/Loading'
 import Form from '../../../forms/Form'
-import RenderFields from '../../../forms/RenderFields'
-import fieldTypes from '../../../forms/field-types'
-import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving'
 import { useAuth } from '../../../utilities/Auth'
-import Meta from '../../../utilities/Meta'
 import { OperationContext } from '../../../utilities/OperationProvider'
-import Auth from './Auth'
-import { SetStepNav } from './SetStepNav'
-import Upload from './Upload'
+import { CollectionRoutes } from './Routes'
 import './index.scss'
 
 const baseClass = 'collection-edit'
 
 const DefaultEditView: React.FC<Props> = (props) => {
-  const { i18n, t } = useTranslation('general')
+  const { i18n } = useTranslation('general')
   const { refreshCookieAsync, user } = useAuth()
 
   const {
@@ -31,18 +24,15 @@ const DefaultEditView: React.FC<Props> = (props) => {
     collection,
     customHeader,
     data,
-    disableActions,
-    disableLeaveWithoutSaving,
     hasSavePermission,
     id,
     internalState,
     isEditing,
     isLoading,
     onSave: onSaveFromProps,
-    permissions,
   } = props
 
-  const { auth, fields, upload } = collection
+  const { auth } = collection
 
   const classes = [baseClass, isEditing && `${baseClass}--is-editing`].filter(Boolean).join(' ')
 
@@ -80,80 +70,23 @@ const DefaultEditView: React.FC<Props> = (props) => {
               action={isLoading ? 'loading' : operation}
               formIsLoading={isLoading}
               loadingSuffix={getTranslation(collection.labels.singular, i18n)}
-              name={`collection-edit--${collection.labels.singular}`}
+              name={`collection-edit--${
+                typeof collection?.labels?.singular === 'string'
+                  ? collection.labels.singular
+                  : 'document'
+              }`}
               type="withoutNav"
             />
             {!isLoading && (
               <React.Fragment>
-                <SetStepNav collection={collection} id={id} isEditing={isEditing} />
-                <DocumentHeader
+                <TitleAndTabs
                   apiURL={apiURL}
                   collection={collection}
                   customHeader={customHeader}
                   data={data}
-                  disableActions={disableActions}
-                  hasSavePermission={hasSavePermission}
                   id={id}
-                  isEditing={isEditing}
-                  permissions={permissions}
                 />
-                <div className={`${baseClass}__wrapper`}>
-                  <div className={`${baseClass}__main`}>
-                    <Meta
-                      description={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
-                        collection.labels.singular,
-                        i18n,
-                      )}`}
-                      keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
-                      title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
-                        collection.labels.singular,
-                        i18n,
-                      )}`}
-                    />
-                    {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) &&
-                      !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
-                    <Gutter className={`${baseClass}__edit`}>
-                      {auth && (
-                        <Auth
-                          collection={collection}
-                          email={data?.email}
-                          operation={operation}
-                          readOnly={!hasSavePermission}
-                          requirePassword={!isEditing}
-                          useAPIKey={auth.useAPIKey}
-                          verify={auth.verify}
-                        />
-                      )}
-                      {upload && (
-                        <Upload collection={collection} data={data} internalState={internalState} />
-                      )}
-                      <RenderFields
-                        fieldSchema={fields}
-                        fieldTypes={fieldTypes}
-                        filter={(field) =>
-                          !field?.admin?.position || field?.admin?.position !== 'sidebar'
-                        }
-                        permissions={permissions.fields}
-                        readOnly={!hasSavePermission}
-                      />
-                    </Gutter>
-                  </div>
-                  <div className={`${baseClass}__sidebar-wrap`}>
-                    <div className={`${baseClass}__sidebar`}>
-                      <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                        <div className={`${baseClass}__sidebar-fields`}>
-                          <RenderFields
-                            fieldSchema={fields}
-                            fieldTypes={fieldTypes}
-                            filter={(field) => field?.admin?.position === 'sidebar'}
-                            permissions={permissions.fields}
-                            readOnly={!hasSavePermission}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <CollectionRoutes {...props} />
               </React.Fragment>
             )}
           </Form>

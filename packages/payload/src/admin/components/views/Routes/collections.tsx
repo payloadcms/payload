@@ -8,10 +8,7 @@ import type { Permissions, User } from '../../../../auth'
 import type { SanitizedCollectionConfig } from '../../../../collections/config/types'
 
 import { DocumentInfoProvider } from '../../utilities/DocumentInfo'
-import Version from '../Version'
-import Versions from '../Versions'
 import List from '../collections/List'
-import { childRoutes } from './child'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Edit = lazy(() => import('../collections/Edit'))
@@ -63,7 +60,6 @@ export const collectionRoutes = (props: {
           )}
         </Route>,
         <Route
-          exact
           key={`${collection.slug}-edit`}
           path={`${match.url}/collections/${collection.slug}/:id`}
         >
@@ -75,46 +71,7 @@ export const collectionRoutes = (props: {
             <Unauthorized />
           )}
         </Route>,
-        childRoutes({
-          collection,
-          match,
-          permissions,
-          user,
-        }),
       ]
-
-      // Version routes
-      if (collection.versions) {
-        routesToReturn.push(
-          <Route
-            exact
-            key={`${collection.slug}-versions`}
-            path={`${match.url}/collections/${collection.slug}/:id/versions`}
-          >
-            {permissions?.collections?.[collection.slug]?.readVersions?.permission ? (
-              <Versions collection={collection} />
-            ) : (
-              <Unauthorized />
-            )}
-          </Route>,
-        )
-
-        routesToReturn.push(
-          <Route
-            exact
-            key={`${collection.slug}-view-version`}
-            path={`${match.url}/collections/${collection.slug}/:id/versions/:versionID`}
-          >
-            {permissions?.collections?.[collection.slug]?.readVersions?.permission ? (
-              <DocumentInfoProvider collection={collection} idFromParams>
-                <Version collection={collection} />
-              </DocumentInfoProvider>
-            ) : (
-              <Unauthorized />
-            )}
-          </Route>,
-        )
-      }
 
       return routesToReturn
     }, [])

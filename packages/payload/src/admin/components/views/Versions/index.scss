@@ -5,7 +5,8 @@
   margin-bottom: base(2);
 
   &__wrap {
-    padding-top: base(1);
+    padding-top: 0;
+    padding-bottom: base(4);
   }
 
   &__header {

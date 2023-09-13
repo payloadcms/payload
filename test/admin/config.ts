@@ -60,6 +60,9 @@ export default buildConfigWithDefaults({
       },
     },
   },
+  localization: {
+    locales: ['en', 'es'],
+  },
   collections: [
     {
       slug: 'users',

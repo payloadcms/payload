@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useRouteMatch } from 'react-router-dom'
+import { Link, useLocation, useRouteMatch } from 'react-router-dom'
 
 import type {
   SanitizedCollectionConfig,
@@ -32,10 +32,12 @@ export const DocumentTabs: React.FC<{
 }> = (props) => {
   const { apiURL, collection, global, id } = props
   const match = useRouteMatch()
+  const location = useLocation()
   const { t } = useTranslation('general')
 
   const {
     admin: { hideAPIURL },
+    versions: versionsConfig,
   } = collection
 
   const {
@@ -66,7 +68,13 @@ export const DocumentTabs: React.FC<{
     return (
       <ul className={baseClass}>
         <li
-          className={[`${baseClass}__tab`, match.url === docURL && `${baseClass}__tab--active`]
+          className={[
+            `${baseClass}__tab`,
+            (location.pathname === `${admin}/collections/${collection.slug}` ||
+              location.pathname === `${admin}/collections/${collection.slug}/create` ||
+              location.pathname === docURL) &&
+              `${baseClass}__tab--active`,
+          ]
             .filter(Boolean)
             .join(' ')}
         >
@@ -74,23 +82,28 @@ export const DocumentTabs: React.FC<{
             <div className={`${baseClass}__tab-label`}>{t('edit')}</div>
           </Link>
         </li>
-        <li
-          className={[`${baseClass}__tab`, match.url === versionsURL && `${baseClass}__tab--active`]
-            .filter(Boolean)
-            .join(' ')}
-        >
-          <Link className={`${baseClass}__tab-link`} to={versionsURL}>
-            <div className={`${baseClass}__tab-label`}>
-              {t('version:versions')}
-              {typeof versions?.totalDocs === 'number' && versions?.totalDocs > 0 && (
-                <Fragment>
-                  &nbsp;
-                  <span className={`${baseClass}__count`}>{versions?.totalDocs}</span>
-                </Fragment>
-              )}
-            </div>
-          </Link>
-        </li>
+        {versionsConfig && (
+          <li
+            className={[
+              `${baseClass}__tab`,
+              location.pathname === versionsURL && `${baseClass}__tab--active`,
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
+            <Link className={`${baseClass}__tab-link`} to={versionsURL}>
+              <div className={`${baseClass}__tab-label`}>
+                {t('version:versions')}
+                {typeof versions?.totalDocs === 'number' && versions?.totalDocs > 0 && (
+                  <Fragment>
+                    &nbsp;
+                    <span className={`${baseClass}__count`}>{versions?.totalDocs}</span>
+                  </Fragment>
+                )}
+              </div>
+            </Link>
+          </li>
+        )}
         {!hideAPIURL && (
           <li
             className={[`${baseClass}__tab`, match.url === apiURL && `${baseClass}__tab--active`]

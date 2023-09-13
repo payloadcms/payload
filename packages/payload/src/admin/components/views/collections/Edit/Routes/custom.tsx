@@ -3,21 +3,20 @@ import type { match } from 'react-router-dom'
 import React from 'react'
 import { Route } from 'react-router-dom'
 
-import type { Permissions, User } from '../../../../auth'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
+import type { CollectionPermission, User } from '../../../../../../auth'
+import type { SanitizedCollectionConfig } from '../../../../../../exports/types'
 
-import Unauthorized from '../Unauthorized'
+import Unauthorized from '../../../Unauthorized'
 
-export const childRoutes = (props: {
+export const collectionCustomRoutes = (props: {
   collection?: SanitizedCollectionConfig
-  global?: SanitizedGlobalConfig
   match: match<{
     [key: string]: string | undefined
   }>
-  permissions: Permissions
+  permissions: CollectionPermission
   user: User
 }): React.ReactElement[] => {
-  const { collection, global, match, permissions, user } = props
+  const { collection, match, permissions, user } = props
 
   let customViews = []
   const internalViews = ['Default', 'Versions']
@@ -49,24 +48,8 @@ export const childRoutes = (props: {
           key={`${collection.slug}-${path}`}
           path={`${match.url}/collections/${collection.slug}/:id${path}`}
         >
-          {permissions?.collections?.[collection.slug]?.read?.permission ? (
+          {permissions?.read?.permission ? (
             <Component collection={collection} user={user} />
-          ) : (
-            <Unauthorized />
-          )}
-        </Route>,
-      )
-    }
-
-    if (global) {
-      routesToReturn.push(
-        <Route
-          exact
-          key={`${global.slug}-${path}`}
-          path={`${match.url}/globals/${global.slug}${path}`}
-        >
-          {permissions?.globals?.[global.slug]?.read?.permission ? (
-            <Component global={global} />
           ) : (
             <Unauthorized />
           )}
