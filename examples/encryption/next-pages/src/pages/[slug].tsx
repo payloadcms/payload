@@ -12,6 +12,8 @@ import { TextArea } from '../components/Textarea';
 import { VerticalPadding } from '../components/VerticalPadding'
 import { User, Page } from '../payload-types'
 
+import classes from './[slug].module.scss'
+
 const Page: React.FC<{
   page: Page
   user: User
@@ -56,9 +58,10 @@ const Page: React.FC<{
         <Gutter>
           <h1>{title}</h1>
           <RichText content={content} />
-          <h2>Date of Birth</h2>
+          <p className={classes.dobTitle}>Date of Birth</p>
           <Collapsible>
             <Accordion
+              className={classes.accordion}
               onToggle={fetchUserDOB}
               label={
                 <>
@@ -69,6 +72,7 @@ const Page: React.FC<{
               <TextArea value={fetchedUserDOB} disabled />
             </Accordion>
           </Collapsible>
+          <p>This approach is useful for adding a layer of security for sensitive data. The database will store the encrypted value and the client will need to specifically request the data. To take this further you can add <a href='https://payloadcms.com/docs/access-control/fields' target='_blank'>field level access control</a> to these fields.</p>
         </Gutter>
       </VerticalPadding>
     </React.Fragment>

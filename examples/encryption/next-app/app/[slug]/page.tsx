@@ -9,6 +9,8 @@ import RichText from '../_components/RichText'
 import { VerticalPadding } from '../_components/VerticalPadding'
 import { DateOfBirth } from '../_components/DateOfBirth'
 
+import classes from './index.module.scss'
+
 interface PageParams {
   params: { slug: string }
 }
@@ -26,8 +28,9 @@ export const PageTemplate: React.FC<{
         <Gutter>
           <h1>{page?.title}</h1>
           <RichText content={page?.content} />
-          <h2>Date of Birth</h2>
+          <p className={classes.dobTitle}>Date of Birth</p>
           <DateOfBirth user={user} />
+          <p>This approach is useful for adding a layer of security for sensitive data. The database will store the encrypted value and the client will need to specifically request the data. To take this further you can add <a href='https://payloadcms.com/docs/access-control/fields' target='_blank'>field level access control</a> to these fields.</p>
         </Gutter>
       </VerticalPadding>
     </React.Fragment>

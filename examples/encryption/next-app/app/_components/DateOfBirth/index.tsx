@@ -6,6 +6,8 @@ import { User } from '../../../payload-types';
 import { Accordion } from '../Accordion'
 import { TextArea } from '../Textarea';
 
+import classes from './index.module.scss'
+
 export const DateOfBirth: React.FC<{
   user: User
 }> = ({ user }) => {
@@ -36,6 +38,7 @@ export const DateOfBirth: React.FC<{
     <Fragment>
       <Collapsible>
         <Accordion
+          className={classes.accordion}
           onToggle={fetchUserDOB}
           label={
             <>

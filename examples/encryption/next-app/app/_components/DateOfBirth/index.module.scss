@@ -1,0 +1,5 @@
+@use "../../css/common.scss" as *;
+
+.accordion {
+  margin-bottom: calc(var(--base) * 2);
+}

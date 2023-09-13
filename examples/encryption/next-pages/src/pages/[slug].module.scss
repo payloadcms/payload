@@ -1,0 +1,10 @@
+@use "../../src/css/common.scss" as *;
+
+.dobTitle {
+  font-weight: bold;
+  margin: calc(var(--base) * 2) 0 calc(var(--base) * 0.25) 0;
+}
+
+.accordion {
+  margin-bottom: calc(var(--base) * 2);
+}

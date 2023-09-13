@@ -4,6 +4,7 @@ const defaultLeaves: RichTextLeaf[] = [
   'bold',
   'italic',
   'underline',
+  'code'
 ];
 
 export default defaultLeaves;
