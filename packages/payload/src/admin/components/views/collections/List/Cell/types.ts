@@ -13,3 +13,11 @@ export type Props = {
     [path: string]: unknown
   }
 }
+
+export type CellComponentProps<Field = FieldAffectingData | UIField, Data = unknown> = Pick<
+  Props,
+  'collection' | 'rowData'
+> & {
+  data: Data
+  field: Field
+}
