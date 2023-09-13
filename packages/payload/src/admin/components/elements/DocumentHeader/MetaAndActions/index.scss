@@ -1,0 +1,123 @@
+@import '../../../../scss/styles.scss';
+
+.doc-header__meta-and-actions {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--base);
+  padding-top: calc(var(--base) / 2);
+  padding-bottom: calc(var(--base) / 2);
+
+  &__timestamps {
+    flex-grow: 1;
+    display: flex;
+    list-style: none;
+    padding: 0;
+    gap: var(--base);
+    margin: 0;
+    overflow: hidden;
+  }
+
+  &__timestamp {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) / 2);
+    margin: 0;
+    overflow: hidden;
+  }
+
+  &__stamp {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0;
+  }
+
+  &__label {
+    color: var(--theme-elevation-500);
+    white-space: nowrap;
+  }
+
+  &__controls-wrapper {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    // move to the right to account for the padding on the dots
+    // this will make sure the alignment is correct
+    // while still keeping a large button hitbox
+    transform: translate3d(var(--base), 0, 0);
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    gap: calc(var(--base) / 2);
+
+    > button {
+      margin: 0;
+    }
+  }
+
+  .form-submit button {
+    margin: 0;
+  }
+
+  &__popup {
+    .popup-button {
+      padding: var(--base);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--theme-elevation-500);
+
+      &:hover {
+        color: var(--theme-text);
+      }
+    }
+  }
+
+  &__dots {
+    display: flex;
+    gap: 2px;
+    background-color: transparent;
+    padding: 0;
+
+    > div {
+      width: 3px;
+      height: 3px;
+      border-radius: 100%;
+      background-color: currentColor;
+    }
+  }
+
+  &__popup-actions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) / 2);
+  }
+
+  &::before,
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    height: 1px;
+    background: var(--theme-elevation-100);
+    width: calc(100% + var(--gutter-h));
+    left: calc(var(--gutter-h) * -1);
+  }
+
+  &::before {
+    bottom: 100%;
+  }
+
+  &::after {
+    top: 100%;
+  }
+}

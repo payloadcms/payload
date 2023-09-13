@@ -80,30 +80,20 @@ export default buildConfigWithDefaults({
     },
     {
       slug,
-      labels: {
-        singular: {
-          en: 'Post en',
-          es: 'Post es',
-        },
-        plural: {
-          en: 'Posts en',
-          es: 'Posts es',
-        },
-      },
       admin: {
-        description: { en: 'Description en', es: 'Description es' },
+        description: 'Description',
         listSearchableFields: ['title', 'description', 'number'],
-        group: { en: 'One', es: 'Una' },
+        group: 'One',
         useAsTitle: 'title',
         defaultColumns: ['id', 'number', 'title', 'description', 'demoUIField'],
+        preview: () => 'https://payloadcms.com',
+      },
+      versions: {
+        drafts: true,
       },
       fields: [
         {
           name: 'title',
-          label: {
-            en: 'Title en',
-            es: 'Title es',
-          },
           type: 'text',
         },
         {
@@ -124,7 +114,7 @@ export default buildConfigWithDefaults({
         {
           type: 'ui',
           name: 'demoUIField',
-          label: { en: 'Demo UI Field', de: 'Demo UI Field de' },
+          label: 'Demo UI Field',
           admin: {
             components: {
               Field: DemoUIFieldField,
@@ -179,7 +169,7 @@ export default buildConfigWithDefaults({
     {
       slug: 'group-one-collection-ones',
       admin: {
-        group: { en: 'One', es: 'Una' },
+        group: 'One',
       },
       fields: [
         {
@@ -191,7 +181,7 @@ export default buildConfigWithDefaults({
     {
       slug: 'group-one-collection-twos',
       admin: {
-        group: { en: 'One', es: 'Una' },
+        group: 'One',
       },
       fields: [
         {
@@ -249,10 +239,6 @@ export default buildConfigWithDefaults({
     },
     {
       slug: globalSlug,
-      label: {
-        en: 'Global en',
-        es: 'Global es',
-      },
       admin: {
         group: 'Group',
       },

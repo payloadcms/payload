@@ -8,8 +8,6 @@ import CopyToClipboard from '../../../elements/CopyToClipboard'
 import { DocumentHeader } from '../../../elements/DocumentHeader'
 import { Gutter } from '../../../elements/Gutter'
 import { FormLoadingOverlayToggle } from '../../../elements/Loading'
-import PreviewButton from '../../../elements/PreviewButton'
-import RenderTitle from '../../../elements/RenderTitle'
 import VersionsCount from '../../../elements/VersionsCount'
 import Form from '../../../forms/Form'
 import RenderFields from '../../../forms/RenderFields'
@@ -46,7 +44,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
   } = props
 
   const {
-    admin: { hideAPIURL, preview, useAsTitle },
+    admin: { hideAPIURL },
     auth,
     fields,
     upload,
@@ -76,15 +74,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
   return (
     <React.Fragment>
       <div className={classes}>
-        <DocumentHeader
-          collection={collection}
-          data={data}
-          disableActions={disableActions}
-          hasSavePermission={hasSavePermission}
-          id={id}
-          isEditing={isEditing}
-          permissions={permissions}
-        />
         <OperationContext.Provider value={operation}>
           <Form
             action={action}
@@ -103,100 +92,90 @@ const DefaultEditView: React.FC<Props> = (props) => {
             />
             {!isLoading && (
               <React.Fragment>
-                <div className={`${baseClass}__main`}>
-                  <Meta
-                    description={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
-                      collection.labels.singular,
-                      i18n,
-                    )}`}
-                    keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
-                    title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
-                      collection.labels.singular,
-                      i18n,
-                    )}`}
-                  />
-                  {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) &&
-                    !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
-                  <Gutter className={`${baseClass}__edit`}>
-                    <header className={`${baseClass}__header`}>
-                      {customHeader && customHeader}
-                      {!customHeader && (
-                        <h1>
-                          <RenderTitle
-                            collection={collection}
-                            data={data}
-                            fallback={`[${t('untitled')}]`}
-                            useAsTitle={useAsTitle}
-                          />
-                        </h1>
-                      )}
-                    </header>
-                    {auth && (
-                      <Auth
-                        collection={collection}
-                        email={data?.email}
-                        operation={operation}
-                        readOnly={!hasSavePermission}
-                        requirePassword={!isEditing}
-                        useAPIKey={auth.useAPIKey}
-                        verify={auth.verify}
-                      />
-                    )}
-                    {upload && (
-                      <Upload collection={collection} data={data} internalState={internalState} />
-                    )}
-                    <RenderFields
-                      fieldSchema={fields}
-                      fieldTypes={fieldTypes}
-                      filter={(field) =>
-                        !field?.admin?.position || field?.admin?.position !== 'sidebar'
-                      }
-                      permissions={permissions.fields}
-                      readOnly={!hasSavePermission}
+                <DocumentHeader
+                  collection={collection}
+                  customHeader={customHeader}
+                  data={data}
+                  disableActions={disableActions}
+                  hasSavePermission={hasSavePermission}
+                  id={id}
+                  isEditing={isEditing}
+                  permissions={permissions}
+                />
+                <div className={`${baseClass}__wrapper`}>
+                  <div className={`${baseClass}__main`}>
+                    <Meta
+                      description={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
+                        collection.labels.singular,
+                        i18n,
+                      )}`}
+                      keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
+                      title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
+                        collection.labels.singular,
+                        i18n,
+                      )}`}
                     />
-                  </Gutter>
-                </div>
-                <div className={`${baseClass}__sidebar-wrap`}>
-                  <div className={`${baseClass}__sidebar`}>
-                    <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                      <div className={`${baseClass}__sidebar-fields`}>
-                        {isEditing &&
-                          preview &&
-                          collection.versions?.drafts &&
-                          !collection.versions?.drafts?.autosave && (
-                            <PreviewButton
-                              CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
-                              generatePreviewURL={preview}
-                            />
-                          )}
-                        <RenderFields
-                          fieldSchema={fields}
-                          fieldTypes={fieldTypes}
-                          filter={(field) => field?.admin?.position === 'sidebar'}
-                          permissions={permissions.fields}
+                    {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) &&
+                      !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
+                    <Gutter className={`${baseClass}__edit`}>
+                      {auth && (
+                        <Auth
+                          collection={collection}
+                          email={data?.email}
+                          operation={operation}
                           readOnly={!hasSavePermission}
+                          requirePassword={!isEditing}
+                          useAPIKey={auth.useAPIKey}
+                          verify={auth.verify}
                         />
-                      </div>
-                      {isEditing && (
-                        <ul className={`${baseClass}__meta`}>
-                          {!hideAPIURL && (
-                            <li className={`${baseClass}__api-url`}>
-                              <span className={`${baseClass}__label`}>
-                                API URL <CopyToClipboard value={apiURL} />
-                              </span>
-                              <a href={apiURL} rel="noopener noreferrer" target="_blank">
-                                {apiURL}
-                              </a>
-                            </li>
-                          )}
-                          {versions && (
-                            <li>
-                              <div className={`${baseClass}__label`}>{t('version:versions')}</div>
-                              <VersionsCount collection={collection} id={id} />
-                            </li>
-                          )}
-                        </ul>
                       )}
+                      {upload && (
+                        <Upload collection={collection} data={data} internalState={internalState} />
+                      )}
+                      <RenderFields
+                        fieldSchema={fields}
+                        fieldTypes={fieldTypes}
+                        filter={(field) =>
+                          !field?.admin?.position || field?.admin?.position !== 'sidebar'
+                        }
+                        permissions={permissions.fields}
+                        readOnly={!hasSavePermission}
+                      />
+                    </Gutter>
+                  </div>
+                  <div className={`${baseClass}__sidebar-wrap`}>
+                    <div className={`${baseClass}__sidebar`}>
+                      <div className={`${baseClass}__sidebar-sticky-wrap`}>
+                        <div className={`${baseClass}__sidebar-fields`}>
+                          <RenderFields
+                            fieldSchema={fields}
+                            fieldTypes={fieldTypes}
+                            filter={(field) => field?.admin?.position === 'sidebar'}
+                            permissions={permissions.fields}
+                            readOnly={!hasSavePermission}
+                          />
+                        </div>
+                        {isEditing && (
+                          <ul className={`${baseClass}__meta`}>
+                            {!hideAPIURL && (
+                              <li className={`${baseClass}__api-url`}>
+                                <span className={`${baseClass}__label`}>
+                                  API URL <CopyToClipboard value={apiURL} />
+                                </span>
+                                <a href={apiURL} rel="noopener noreferrer" target="_blank">
+                                  {apiURL}
+                                </a>
+                              </li>
+                            )}
+                            {versions && (
+                              <li>
+                                <div className={`${baseClass}__label`}>{t('version:versions')}</div>
+                                <VersionsCount collection={collection} id={id} />
+                              </li>
+                            )}
+                          </ul>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

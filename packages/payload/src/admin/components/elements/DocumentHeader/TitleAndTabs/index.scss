@@ -1,0 +1,14 @@
+@import '../../../../scss/styles.scss';
+
+.doc-header__title-and-tabs {
+  width: 100%;
+  padding-bottom: var(--base);
+
+  &__title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+    margin: 0;
+  }
+}

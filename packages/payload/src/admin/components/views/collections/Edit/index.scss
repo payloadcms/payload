@@ -5,6 +5,9 @@
 
   &__form {
     height: 100%;
+  }
+
+  &__wrapper {
     display: flex;
   }
 
@@ -13,15 +16,6 @@
     display: flex;
     flex-direction: column;
     min-height: 100%;
-  }
-
-  &__header {
-    h1 {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      line-height: 1.25;
-    }
   }
 
   &__edit {

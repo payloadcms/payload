@@ -29,7 +29,13 @@ const DefaultPreviewButton: React.FC<DefaultPreviewButtonProps> = ({
   preview,
 }) => {
   return (
-    <Button buttonStyle="secondary" className={baseClass} disabled={disabled} onClick={preview}>
+    <Button
+      buttonStyle="secondary"
+      className={baseClass}
+      disabled={disabled}
+      onClick={preview}
+      size="small"
+    >
       {label}
     </Button>
   )

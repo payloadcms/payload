@@ -95,14 +95,12 @@ const DefaultAccount: React.FC<Props> = (props) => {
                 )}
                 <div className={`${baseClass}__edit`}>
                   <Gutter className={`${baseClass}__header`}>
-                    <h1>
-                      <RenderTitle
-                        collection={collection}
-                        data={data}
-                        fallback={`[${t('general:untitled')}]`}
-                        useAsTitle={useAsTitle}
-                      />
-                    </h1>
+                    <RenderTitle
+                      collection={collection}
+                      data={data}
+                      fallback={`[${t('general:untitled')}]`}
+                      useAsTitle={useAsTitle}
+                    />
                     <Auth
                       collection={collection}
                       email={data?.email}

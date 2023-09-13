@@ -22,7 +22,7 @@ const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
   publish,
 }) => {
   return (
-    <FormSubmit disabled={disabled} onClick={publish} type="button">
+    <FormSubmit disabled={disabled} onClick={publish} size="small" type="button">
       {label}
     </FormSubmit>
   )
@@ -31,6 +31,7 @@ const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
 type Props = {
   CustomComponent?: CustomPublishButtonProps
 }
+
 export const Publish: React.FC<Props> = ({ CustomComponent }) => {
   const { publishedDoc, unpublishedVersions } = useDocumentInfo()
   const { submit } = useForm()
