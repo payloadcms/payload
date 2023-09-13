@@ -1,12 +1,13 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import type { PayloadRequest } from 'payload/types'
 import type { Collection, Field, RichTextField } from 'payload/types'
+
+import type { AdapterArguments } from '../types'
 
 type Arguments = {
   currentDepth?: number
   data: unknown
   depth: number
-  field: RichTextField
+  field: RichTextField<AdapterArguments>
   key: number | string
   overrideAccess?: boolean
   req: PayloadRequest

@@ -1,9 +1,6 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
-import type { Field, PayloadRequest, RichTextField } from 'payload/types'
+import type { Field, PayloadRequest } from 'payload/types'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/types'
-
-import type { AdapterArguments } from '../types'
 
 import { populate } from './populate'
 import { recurseRichText } from './richTextRelationshipPromise'
@@ -192,7 +189,7 @@ export const recurseNestedFields = ({
             children: node.children,
             currentDepth,
             depth,
-            field: field as RichTextField<AdapterArguments>,
+            field,
             overrideAccess,
             promises,
             req,
