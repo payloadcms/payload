@@ -1,11 +1,9 @@
 @import '../../../scss/styles.scss';
 
 .render-title {
-  // when the title is the id, an inline-flex element is rendered
-  // this means that the font-size of the tag is inherited from the parent
-  // this means that extra space appears above the id when it is the title
-  // set the font-size to 0 to remove the extra space
-  &--is-id {
-    font-size: 0;
+  &__id {
+    vertical-align: middle;
+    position: relative;
+    top: -3px;
   }
 }

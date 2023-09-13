@@ -11,4 +11,8 @@
     line-height: 1.25;
     margin: 0;
   }
+
+  @include mid-break {
+    padding-bottom: calc(var(--base) / 2);
+  }
 }
