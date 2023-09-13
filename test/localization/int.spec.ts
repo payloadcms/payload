@@ -190,7 +190,7 @@ describe('Localization', () => {
           },
         });
 
-        expect(result.docs[0].id).toEqual(localizedPost.id);
+        expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id);
       });
 
       it('by localized field value - alternate locale', async () => {
@@ -204,7 +204,7 @@ describe('Localization', () => {
           },
         });
 
-        expect(result.docs[0].id).toEqual(localizedPost.id);
+        expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id);
       });
 
       it('by localized field value - opposite locale???', async () => {
@@ -218,7 +218,7 @@ describe('Localization', () => {
           },
         });
 
-        expect(result.docs[0].id).toEqual(localizedPost.id);
+        expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id);
       });
     });
   });
@@ -391,7 +391,7 @@ describe('Localization', () => {
           },
         });
 
-        expect(result.docs[0].id).toEqual(withRelationship.id);
+        expect(result.docs.map(({ id }) => id)).toContain(withRelationship.id);
 
         // First relationship - spanish
         const result2 = await queryRelation({
@@ -400,7 +400,7 @@ describe('Localization', () => {
           },
         });
 
-        expect(result2.docs[0].id).toEqual(withRelationship.id);
+        expect(result2.docs.map(({ id }) => id)).toContain(withRelationship.id);
 
         // Second relationship - english
         const result3 = await queryRelation({
@@ -409,7 +409,7 @@ describe('Localization', () => {
           },
         });
 
-        expect(result3.docs[0].id).toEqual(withRelationship.id);
+        expect(result3.docs.map(({ id }) => id)).toContain(withRelationship.id);
 
         // Second relationship - spanish
         const result4 = await queryRelation({

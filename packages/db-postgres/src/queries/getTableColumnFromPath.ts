@@ -228,6 +228,13 @@ export const getTableColumnFromPath = ({
           if (locale && field.localized && adapter.payload.config.localization) {
             newTableName = `${tableName}_locales`;
             joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
+            if (locale !== 'all') {
+              constraints.push({
+                columnName: '_locale',
+                table: adapter.tables[newTableName],
+                value: locale,
+              });
+            }
           }
           selectFields[`${newTableName}.${field.name}`] = adapter.tables[newTableName][field.name];
 

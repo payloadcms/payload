@@ -73,7 +73,6 @@ export const find: Find = async function find(
         }
       });
 
-    const sql = await selectQuery.toSQL();
     selectDistinctResult = await selectQuery
       .offset((page - 1) * limit)
       .limit(limit === 0 ? undefined : limit);
