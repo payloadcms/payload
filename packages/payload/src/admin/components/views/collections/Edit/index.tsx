@@ -117,8 +117,7 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const action = `${serverURL}${api}/${collectionSlug}${
     isEditing ? `/${id}` : ''
-  }?locale=${locale}&fallback-locale=null`
-
+  }?locale=${locale}&depth=0&fallback-locale=null`
   const hasSavePermission =
     (isEditing && docPermissions?.update?.permission) ||
     (!isEditing && (docPermissions as CollectionPermission)?.create?.permission)
