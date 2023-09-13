@@ -18,7 +18,7 @@ export default buildConfigWithDefaults({
                 {
                   name: 'richText',
                   type: 'richText',
-                  adapter: createSlate({}),
+                  editor: createSlate({}),
                 },
                 {
                   name: 'field1',

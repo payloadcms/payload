@@ -25,7 +25,7 @@ const Uploads3: CollectionConfig = {
     {
       type: 'richText',
       name: 'richText',
-      adapter: createSlate({}),
+      editor: createSlate({}),
     },
   ],
 }

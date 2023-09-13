@@ -52,7 +52,7 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richText',
       type: 'richText',
-      adapter: createSlate({
+      editor: createSlate({
         admin: {
           elements: [
             'h1',
@@ -91,7 +91,7 @@ const RichTextFields: CollectionConfig = {
                   {
                     name: 'caption',
                     type: 'richText',
-                    adapter: createSlate({}),
+                    editor: createSlate({}),
                   },
                 ],
               },
@@ -104,7 +104,7 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richTextCustomFields',
       type: 'richText',
-      adapter: createSlate({
+      editor: createSlate({
         admin: {
           elements: [
             'h1',
@@ -139,7 +139,7 @@ const RichTextFields: CollectionConfig = {
                   {
                     name: 'caption',
                     type: 'richText',
-                    adapter: createSlate({}),
+                    editor: createSlate({}),
                   },
                 ],
               },
@@ -154,7 +154,7 @@ const RichTextFields: CollectionConfig = {
       admin: {
         readOnly: true,
       },
-      adapter: createSlate({
+      editor: createSlate({
         admin: {
           elements: [
             'h1',
@@ -192,7 +192,7 @@ const RichTextFields: CollectionConfig = {
                   {
                     name: 'caption',
                     type: 'richText',
-                    adapter: createSlate({}),
+                    editor: createSlate({}),
                   },
                 ],
               },
@@ -220,7 +220,7 @@ const RichTextFields: CollectionConfig = {
             {
               name: 'text',
               type: 'richText',
-              adapter: createSlate({}),
+              editor: createSlate({}),
             },
           ],
         },

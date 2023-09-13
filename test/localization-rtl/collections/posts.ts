@@ -43,7 +43,7 @@ export const Posts: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
-      adapter: createSlate({}),
+      editor: createSlate({}),
       localized: true,
     },
   ],

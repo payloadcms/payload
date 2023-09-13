@@ -58,7 +58,7 @@ export const blocksField: Field = {
         {
           name: 'richText',
           type: 'richText',
-          adapter: createSlate({}),
+          editor: createSlate({}),
         },
       ],
     },

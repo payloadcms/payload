@@ -120,7 +120,7 @@ const errorFields: Field[] = [
           {
             type: 'richText',
             name: 'richtext',
-            adapter: createSlate({}),
+            editor: createSlate({}),
             required: true,
           },
           {

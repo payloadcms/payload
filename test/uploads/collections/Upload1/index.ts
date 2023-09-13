@@ -23,7 +23,7 @@ export const Uploads1: CollectionConfig = {
     {
       type: 'richText',
       name: 'richText',
-      adapter: createSlate({}),
+      editor: createSlate({}),
     },
   ],
 }

@@ -37,7 +37,7 @@ export default buildConfigWithDefaults({
         {
           name: 'richText',
           type: 'richText',
-          adapter: createSlate({}),
+          editor: createSlate({}),
         },
       ],
     },
@@ -56,7 +56,7 @@ export default buildConfigWithDefaults({
         {
           name: 'richText',
           type: 'richText',
-          adapter: createSlate({}),
+          editor: createSlate({}),
         },
       ],
     },

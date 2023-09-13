@@ -427,8 +427,8 @@ function buildObjectType({
           let depth = payload.config.defaultDepth
           if (typeof args.depth !== 'undefined') depth = args.depth
 
-          if (field?.adapter?.afterReadPromise) {
-            await field?.adapter?.afterReadPromise({
+          if (field?.editor?.afterReadPromise) {
+            await field?.editor?.afterReadPromise({
               depth,
               field,
               req: context.req,

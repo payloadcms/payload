@@ -351,12 +351,12 @@ export const blocks = baseField.keys({
 })
 
 export const richText = baseField.keys({
-  adapter: joi.object().keys({
+  admin: baseAdminFields.default(),
+  defaultValue: joi.alternatives().try(joi.array().items(joi.object()), joi.func()),
+  editor: joi.object().keys({
     afterReadPromise: joi.func(),
     component: componentSchema,
   }),
-  admin: baseAdminFields.default(),
-  defaultValue: joi.alternatives().try(joi.array().items(joi.object()), joi.func()),
   name: joi.string().required(),
   type: joi.string().valid('richText').required(),
 })
