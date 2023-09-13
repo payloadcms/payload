@@ -64,7 +64,6 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       filename: path.normalize('./index.html'),
       template: payloadConfig.admin.indexHTML,
     }),
-    new webpack.HotModuleReplacementPlugin(),
   ],
   resolve: {
     alias: {

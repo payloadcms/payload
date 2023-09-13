@@ -57,7 +57,7 @@ const AccountView: React.FC = () => {
   const dataToRender = locationState?.data || data
   const apiURL = `${serverURL}${api}/${slug}/${data?.id}?locale=${locale}`
 
-  const action = `${serverURL}${api}/${slug}/${data?.id}?locale=${locale}&depth=0`
+  const action = `${serverURL}${api}/${slug}/${data?.id}?locale=${locale}`
 
   const onSave = React.useCallback(
     async (json: any) => {
