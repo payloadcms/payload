@@ -1,0 +1,58 @@
+@keyframes breatheLeft {
+  0%, 100% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1);
+  }
+}
+
+@keyframes breatheRight {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.8);
+  }
+}
+
+.breatheAnimation {
+  animation: breatheLeft 30s infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.circleLeft {
+  width: 113vw;
+  height: 113vw;
+  position: absolute;
+  top: 60%;
+  left: -28vw;
+  flex-shrink: 0;
+  border-radius: 113vw;
+  background: radial-gradient(50% 50.00% at 50% 50.00%, rgba(165, 243, 252, 0.08) 0%, rgba(217, 70, 239, 0.00) 100%) hsl(var(--background));
+}
+
+.circleRight {
+  width: 120vw;
+  height: 120vw;
+  position: absolute;
+  right: -40vw;
+  top: -30vw;
+  flex-shrink: 0;
+  border-radius: 120vw;
+  background: radial-gradient(50% 50.00% at 50% 50.00%, rgba(219, 39, 119, 0.14) 0%, rgba(220, 38, 38, 0.00) 100%) hsl(var(--background));
+  animation-name: breatheRight; 
+}
+
+
+@media (min-width: 1024px) {
+  .circleLeft {
+    top: 33%;
+    left: -56vw;
+  }
+
+  .circleRight {
+    top: -60vw;
+    right: -80vw;
+  }
+}
