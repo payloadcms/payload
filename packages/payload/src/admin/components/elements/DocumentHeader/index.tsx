@@ -9,6 +9,7 @@ import { TitleAndTabs } from './TitleAndTabs'
 const baseClass = 'doc-header'
 
 export type DocumentHeaderProps = {
+  apiURL: string
   collection: SanitizedCollectionConfig
   customHeader?: React.ReactNode
   data?: any

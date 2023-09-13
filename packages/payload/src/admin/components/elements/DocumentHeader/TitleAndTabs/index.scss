@@ -3,8 +3,11 @@
 .doc-header__title-and-tabs {
   width: 100%;
   padding-bottom: var(--base);
+  display: flex;
+  align-items: center;
 
   &__title {
+    flex-grow: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

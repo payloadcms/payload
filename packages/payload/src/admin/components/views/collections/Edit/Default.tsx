@@ -4,11 +4,9 @@ import { useTranslation } from 'react-i18next'
 import type { Props } from './types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
-import CopyToClipboard from '../../../elements/CopyToClipboard'
 import { DocumentHeader } from '../../../elements/DocumentHeader'
 import { Gutter } from '../../../elements/Gutter'
 import { FormLoadingOverlayToggle } from '../../../elements/Loading'
-import VersionsCount from '../../../elements/VersionsCount'
 import Form from '../../../forms/Form'
 import RenderFields from '../../../forms/RenderFields'
 import fieldTypes from '../../../forms/field-types'
@@ -44,13 +42,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
     permissions,
   } = props
 
-  const {
-    admin: { hideAPIURL },
-    auth,
-    fields,
-    upload,
-    versions,
-  } = collection
+  const { auth, fields, upload } = collection
 
   const classes = [baseClass, isEditing && `${baseClass}--is-editing`].filter(Boolean).join(' ')
 
@@ -95,6 +87,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
               <React.Fragment>
                 <SetStepNav collection={collection} id={id} isEditing={isEditing} />
                 <DocumentHeader
+                  apiURL={apiURL}
                   collection={collection}
                   customHeader={customHeader}
                   data={data}
@@ -157,26 +150,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
                             readOnly={!hasSavePermission}
                           />
                         </div>
-                        {isEditing && (
-                          <ul className={`${baseClass}__meta`}>
-                            {!hideAPIURL && (
-                              <li className={`${baseClass}__api-url`}>
-                                <span className={`${baseClass}__label`}>
-                                  API URL <CopyToClipboard value={apiURL} />
-                                </span>
-                                <a href={apiURL} rel="noopener noreferrer" target="_blank">
-                                  {apiURL}
-                                </a>
-                              </li>
-                            )}
-                            {versions && (
-                              <li>
-                                <div className={`${baseClass}__label`}>{t('version:versions')}</div>
-                                <VersionsCount collection={collection} id={id} />
-                              </li>
-                            )}
-                          </ul>
-                        )}
                       </div>
                     </div>
                   </div>

@@ -14,7 +14,6 @@ import { Publish } from '../../elements/Publish'
 import { Save } from '../../elements/Save'
 import { SaveDraft } from '../../elements/SaveDraft'
 import Status from '../../elements/Status'
-import VersionsCount from '../../elements/VersionsCount'
 import ViewDescription from '../../elements/ViewDescription'
 import Form from '../../forms/Form'
 import RenderFields from '../../forms/RenderFields'
@@ -161,12 +160,6 @@ const DefaultGlobalView: React.FC<Props> = (props) => {
                       />
                     </div>
                     <ul className={`${baseClass}__meta`}>
-                      {versions && (
-                        <li>
-                          <div className={`${baseClass}__label`}>{t('version:versions')}</div>
-                          <VersionsCount global={global} />
-                        </li>
-                      )}
                       {data && !hideAPIURL && (
                         <li className={`${baseClass}__api-url`}>
                           <span className={`${baseClass}__label`}>
