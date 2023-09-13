@@ -7,7 +7,12 @@ export type {
   FormFieldsContext,
 } from '../admin/components/forms/Form/types'
 
-export type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
+export type {
+  RichTextAdapter,
+  RichTextFieldProps,
+} from '../admin/components/forms/field-types/RichText/types'
+
+export type { CellComponentProps } from '../admin/components/views/collections/List/Cell/types'
 
 export {
   CustomPublishButtonProps,
@@ -107,7 +112,6 @@ export {
   tabHasName,
   valueIsValueWithRelation,
 } from './../fields/config/types'
-
 export {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
@@ -117,4 +121,5 @@ export {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './../globals/config/types'
+
 export { validOperators } from './../types/constants'

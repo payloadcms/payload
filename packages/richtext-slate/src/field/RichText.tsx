@@ -12,7 +12,7 @@ import { Node, Element as SlateElement, Text, Transforms, createEditor } from 's
 import { withHistory } from 'slate-history'
 import { Editable, Slate, withReact } from 'slate-react'
 
-import type { ElementNode, Props, RichTextElement, RichTextLeaf, TextNode } from '../types'
+import type { ElementNode, FieldProps, RichTextElement, RichTextLeaf, TextNode } from '../types'
 
 import { defaultRichTextValue } from '../data/defaultValue'
 import { richText } from '../data/validation'
@@ -53,7 +53,7 @@ declare module 'slate' {
   }
 }
 
-const RichText: React.FC<Props> = (props) => {
+const RichText: React.FC<FieldProps> = (props) => {
   const {
     admin: {
       className,

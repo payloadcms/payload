@@ -1,6 +1,6 @@
 import type { i18n as Ii18n } from 'i18next'
 import type { SanitizedConfig } from 'payload/config'
-import type { Field, RichTextField } from 'payload/types'
+import type { Field, RichTextField, RichTextFieldProps } from 'payload/types'
 import type { Editor } from 'slate'
 
 export type TextNode = { [x: string]: unknown; text: string }
@@ -73,6 +73,4 @@ export type AdapterArguments = {
   }
 }
 
-export type Props = Omit<RichTextField<AdapterArguments>, 'type'> & {
-  path?: string
-}
+export type FieldProps = RichTextFieldProps<AdapterArguments>

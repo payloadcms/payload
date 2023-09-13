@@ -3,10 +3,13 @@ import type { RichTextAdapter } from 'payload/types'
 import type { AdapterArguments } from './types'
 
 import { richTextRelationshipPromise } from './data/richTextRelationshipPromise'
-import { getSlateComponent } from './getSlateComponent'
+import { getSlateCellComponent } from './getSlateCellComponent'
+import { getSlateFieldComponent } from './getSlateFieldComponent'
 
 export function createSlate(args: AdapterArguments): RichTextAdapter<AdapterArguments> {
   return {
+    CellComponent: getSlateCellComponent(args),
+    FieldComponent: getSlateFieldComponent(args),
     afterReadPromise({
       currentDepth,
       depth,
@@ -34,6 +37,5 @@ export function createSlate(args: AdapterArguments): RichTextAdapter<AdapterArgu
       }
       return null
     },
-    component: getSlateComponent(args),
   }
 }
