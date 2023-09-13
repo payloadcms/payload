@@ -183,12 +183,16 @@ export const getTableColumnFromPath = ({
           // parent to relationship join table
           relationshipFields = adapter.payload.collections[field.relationTo].config.fields;
           joins[newTableName] = eq(adapter.tables[newTableName].id, adapter.tables[`${tableName}_relationships`][`${field.relationTo}ID`]);
+          if (newCollectionPath === '') {
+            return {
+              table: adapter.tables[relationTableName],
+              constraints,
+              field,
+              columnName: `${field.relationTo}ID`,
+            };
+          }
         } else if (newCollectionPath === 'value') {
-          // selectFields;
           const tableColumnsNames = field.relationTo.map((relationTo) => `"${relationTableName}"."${toSnakeCase(relationTo)}_id"`);
-          // constraints.push({
-          //    AND COALESCE("with_localized_relationship_relationships"."localized_posts_id", "with_localized_relationship_relationships"."dummy_id");
-          // });
           return {
             table: adapter.tables[relationTableName],
             constraints,
@@ -198,6 +202,7 @@ export const getTableColumnFromPath = ({
         } else {
           throw new APIError('Not supported');
         }
+
         return getTableColumnFromPath({
           adapter,
           collectionPath: newCollectionPath,

@@ -114,7 +114,7 @@ export const find: Find = async function find(
 
   const findPromise = this.db.query[tableName].findMany(findManyArgs);
 
-  if (pagination !== false || selectDistinctResult.length > limit) {
+  if (pagination !== false || selectDistinctResult?.length > limit) {
     const selectCount = this.db.select({ count: sql<number>`count(*)` })
       .from(table)
       .where(where);
