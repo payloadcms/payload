@@ -17,6 +17,7 @@ import { useAuth } from '../../../utilities/Auth'
 import Meta from '../../../utilities/Meta'
 import { OperationContext } from '../../../utilities/OperationProvider'
 import Auth from './Auth'
+import { SetStepNav } from './SetStepNav'
 import Upload from './Upload'
 import './index.scss'
 
@@ -92,6 +93,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
             />
             {!isLoading && (
               <React.Fragment>
+                <SetStepNav collection={collection} id={id} isEditing={isEditing} />
                 <DocumentHeader
                   collection={collection}
                   customHeader={customHeader}
