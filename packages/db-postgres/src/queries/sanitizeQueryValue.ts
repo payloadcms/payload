@@ -8,7 +8,8 @@ type SanitizeQueryValueArgs = {
   val: any
 }
 
-export const sanitizeQueryValue = ({ field, operator, val }: SanitizeQueryValueArgs): unknown => {
+export const sanitizeQueryValue = ({ field, operator: operatorArg, val }: SanitizeQueryValueArgs): { operator: string, value: unknown } => {
+  let operator = operatorArg;
   let formattedValue = val;
 
   // // Disregard invalid _ids
@@ -51,7 +52,7 @@ export const sanitizeQueryValue = ({ field, operator, val }: SanitizeQueryValueA
   if (field.type === 'date' && typeof val === 'string') {
     formattedValue = new Date(val);
     if (Number.isNaN(Date.parse(formattedValue))) {
-      return undefined;
+      return { operator, value: undefined };
     }
   }
 
@@ -89,7 +90,10 @@ export const sanitizeQueryValue = ({ field, operator, val }: SanitizeQueryValueA
 
   if (operator === 'exists') {
     formattedValue = (formattedValue === 'true' || formattedValue === true);
+    if (formattedValue === false) {
+      operator = 'isNull';
+    }
   }
 
-  return formattedValue;
+  return { operator, value: formattedValue };
 };

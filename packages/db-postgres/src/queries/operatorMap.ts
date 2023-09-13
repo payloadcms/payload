@@ -1,4 +1,4 @@
-import { and, eq, gt, gte, ilike, inArray, isNotNull, lt, lte, ne, notInArray, or } from 'drizzle-orm';
+import { and, eq, gt, gte, ilike, inArray, isNotNull, isNull, lt, lte, ne, notInArray, or } from 'drizzle-orm';
 
 export const operatorMap = {
   greater_than_equal: gte,
@@ -11,11 +11,13 @@ export const operatorMap = {
   // all: all,
   not_in: notInArray,
   not_equals: ne,
-  // TODO: isNotNull isn't right as it depends on if the query value is true or false
   exists: isNotNull,
+  isNull, // handles exists: false
   equals: eq,
-  // TODO:
+  // TODO: geojson queries
   // near: near,
+  // within: within,
+  // intersects: intersects,
   and,
   or,
 };

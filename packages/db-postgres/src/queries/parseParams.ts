@@ -86,7 +86,7 @@ export async function parseParams({
                   selectFields,
                 });
 
-                const queryValue = sanitizeQueryValue({
+                const { operator: queryOperator, value: queryValue } = sanitizeQueryValue({
                   field,
                   operator,
                   val: where[relationOrPath][operator],
@@ -99,7 +99,7 @@ export async function parseParams({
                 }) => {
                   constraints.push(operatorMap.equals(constraintTable[col], value));
                 });
-                constraints.push(operatorMap[operator](rawColumn || table[columnName], queryValue));
+                constraints.push(operatorMap[queryOperator](rawColumn || table[columnName], queryValue));
               }
             }
           }
