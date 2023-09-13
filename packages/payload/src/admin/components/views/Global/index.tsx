@@ -105,7 +105,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
       CustomComponent={CustomEdit}
       DefaultComponent={DefaultGlobal}
       componentProps={{
-        action: `${serverURL}${api}/globals/${slug}?locale=${locale}&fallback-locale=null`,
+        action: `${serverURL}${api}/globals/${slug}?locale=${locale}&depth=0&fallback-locale=null`,
         apiURL: `${serverURL}${api}/globals/${slug}?locale=${locale}${
           global.versions?.drafts ? '&draft=true' : ''
         }`,
