@@ -1,0 +1,26 @@
+@import '../../../scss/styles.scss';
+
+.document-header {
+  display: flex;
+  position: sticky;
+  top: 0;
+
+  &__timestamps {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    gap: var(--base);
+  }
+
+  &__timestamp {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) / 2);
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) / 2);
+  }
+}

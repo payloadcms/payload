@@ -1,31 +1,21 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 
 import type { Props } from './types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
-import { formatDate } from '../../../../utilities/formatDate'
-import Autosave from '../../../elements/Autosave'
 import CopyToClipboard from '../../../elements/CopyToClipboard'
-import DeleteDocument from '../../../elements/DeleteDocument'
-import DuplicateDocument from '../../../elements/DuplicateDocument'
+import { DocumentHeader } from '../../../elements/DocumentHeader'
 import { Gutter } from '../../../elements/Gutter'
 import { FormLoadingOverlayToggle } from '../../../elements/Loading'
 import PreviewButton from '../../../elements/PreviewButton'
-import { Publish } from '../../../elements/Publish'
 import RenderTitle from '../../../elements/RenderTitle'
-import { Save } from '../../../elements/Save'
-import { SaveDraft } from '../../../elements/SaveDraft'
-import Status from '../../../elements/Status'
 import VersionsCount from '../../../elements/VersionsCount'
 import Form from '../../../forms/Form'
 import RenderFields from '../../../forms/RenderFields'
 import fieldTypes from '../../../forms/field-types'
 import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving'
 import { useAuth } from '../../../utilities/Auth'
-import { useConfig } from '../../../utilities/Config'
-import { useDocumentInfo } from '../../../utilities/DocumentInfo'
 import Meta from '../../../utilities/Meta'
 import { OperationContext } from '../../../utilities/OperationProvider'
 import Auth from './Auth'
@@ -35,11 +25,6 @@ import './index.scss'
 const baseClass = 'collection-edit'
 
 const DefaultEditView: React.FC<Props> = (props) => {
-  const {
-    admin: { dateFormat },
-    routes: { admin },
-  } = useConfig()
-  const { publishedDoc } = useDocumentInfo()
   const { i18n, t } = useTranslation('general')
   const { refreshCookieAsync, user } = useAuth()
 
@@ -58,15 +43,12 @@ const DefaultEditView: React.FC<Props> = (props) => {
     isLoading,
     onSave: onSaveFromProps,
     permissions,
-    updatedAt,
   } = props
 
   const {
-    admin: { disableDuplicate, hideAPIURL, preview, useAsTitle },
+    admin: { hideAPIURL, preview, useAsTitle },
     auth,
     fields,
-    slug,
-    timestamps,
     upload,
     versions,
   } = collection
@@ -94,6 +76,15 @@ const DefaultEditView: React.FC<Props> = (props) => {
   return (
     <React.Fragment>
       <div className={classes}>
+        <DocumentHeader
+          collection={collection}
+          data={data}
+          disableActions={disableActions}
+          hasSavePermission={hasSavePermission}
+          id={id}
+          isEditing={isEditing}
+          permissions={permissions}
+        />
         <OperationContext.Provider value={operation}>
           <Form
             action={action}
@@ -140,7 +131,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         </h1>
                       )}
                     </header>
-
                     {auth && (
                       <Auth
                         collection={collection}
@@ -152,11 +142,9 @@ const DefaultEditView: React.FC<Props> = (props) => {
                         verify={auth.verify}
                       />
                     )}
-
                     {upload && (
                       <Upload collection={collection} data={data} internalState={internalState} />
                     )}
-
                     <RenderFields
                       fieldSchema={fields}
                       fieldTypes={fieldTypes}
@@ -171,84 +159,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
                 <div className={`${baseClass}__sidebar-wrap`}>
                   <div className={`${baseClass}__sidebar`}>
                     <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                      {!disableActions && (
-                        <ul className={`${baseClass}__collection-actions`}>
-                          {permissions?.create?.permission && (
-                            <React.Fragment>
-                              <li>
-                                <Link id="action-create" to={`${admin}/collections/${slug}/create`}>
-                                  {t('createNew')}
-                                </Link>
-                              </li>
-
-                              {!disableDuplicate && isEditing && (
-                                <li>
-                                  <DuplicateDocument collection={collection} id={id} slug={slug} />
-                                </li>
-                              )}
-                            </React.Fragment>
-                          )}
-
-                          {permissions?.delete?.permission && (
-                            <li>
-                              <DeleteDocument
-                                buttonId="action-delete"
-                                collection={collection}
-                                id={id}
-                              />
-                            </li>
-                          )}
-                        </ul>
-                      )}
-
-                      <div
-                        className={[
-                          `${baseClass}__document-actions`,
-                          ((collection.versions?.drafts &&
-                            !collection.versions?.drafts?.autosave) ||
-                            (isEditing && preview)) &&
-                            `${baseClass}__document-actions--has-2`,
-                        ]
-                          .filter(Boolean)
-                          .join(' ')}
-                      >
-                        {isEditing &&
-                          preview &&
-                          (!collection.versions?.drafts ||
-                            collection.versions?.drafts?.autosave) && (
-                            <PreviewButton
-                              CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
-                              generatePreviewURL={preview}
-                            />
-                          )}
-
-                        {hasSavePermission && (
-                          <React.Fragment>
-                            {collection.versions?.drafts ? (
-                              <React.Fragment>
-                                {!collection.versions.drafts.autosave && (
-                                  <SaveDraft
-                                    CustomComponent={
-                                      collection?.admin?.components?.edit?.SaveDraftButton
-                                    }
-                                  />
-                                )}
-
-                                <Publish
-                                  CustomComponent={
-                                    collection?.admin?.components?.edit?.PublishButton
-                                  }
-                                />
-                              </React.Fragment>
-                            ) : (
-                              <Save
-                                CustomComponent={collection?.admin?.components?.edit?.SaveButton}
-                              />
-                            )}
-                          </React.Fragment>
-                        )}
-                      </div>
-
                       <div className={`${baseClass}__sidebar-fields`}>
                         {isEditing &&
                           preview &&
@@ -259,20 +169,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
                               generatePreviewURL={preview}
                             />
                           )}
-
-                        {collection.versions?.drafts && (
-                          <React.Fragment>
-                            <Status />
-                            {collection.versions?.drafts.autosave && hasSavePermission && (
-                              <Autosave
-                                collection={collection}
-                                id={id}
-                                publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
-                              />
-                            )}
-                          </React.Fragment>
-                        )}
-
                         <RenderFields
                           fieldSchema={fields}
                           fieldTypes={fieldTypes}
@@ -281,7 +177,6 @@ const DefaultEditView: React.FC<Props> = (props) => {
                           readOnly={!hasSavePermission}
                         />
                       </div>
-
                       {isEditing && (
                         <ul className={`${baseClass}__meta`}>
                           {!hideAPIURL && (
@@ -294,37 +189,11 @@ const DefaultEditView: React.FC<Props> = (props) => {
                               </a>
                             </li>
                           )}
-
                           {versions && (
                             <li>
                               <div className={`${baseClass}__label`}>{t('version:versions')}</div>
                               <VersionsCount collection={collection} id={id} />
                             </li>
-                          )}
-
-                          {timestamps && (
-                            <React.Fragment>
-                              {updatedAt && (
-                                <li>
-                                  <div className={`${baseClass}__label`}>{t('lastModified')}</div>
-                                  <div>
-                                    {formatDate(data.updatedAt, dateFormat, i18n?.language)}
-                                  </div>
-                                </li>
-                              )}
-                              {(publishedDoc?.createdAt || data?.createdAt) && (
-                                <li>
-                                  <div className={`${baseClass}__label`}>{t('created')}</div>
-                                  <div>
-                                    {formatDate(
-                                      publishedDoc?.createdAt || data?.createdAt,
-                                      dateFormat,
-                                      i18n?.language,
-                                    )}
-                                  </div>
-                                </li>
-                              )}
-                            </React.Fragment>
                           )}
                         </ul>
                       )}

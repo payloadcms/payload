@@ -24,23 +24,6 @@
     }
   }
 
-  &__collection-actions {
-    list-style: none;
-    margin: 0;
-    padding: base(1.5) 0 base(0.5);
-    display: flex;
-
-    li {
-      [dir='ltr'] & {
-        margin-right: base(0.75);
-      }
-
-      [dir='rtl'] & {
-        margin-left: base(0.75);
-      }
-    }
-  }
-
   &__edit {
     padding-top: base(1);
     padding-bottom: base(2);
@@ -78,8 +61,6 @@
     min-height: 100%;
   }
 
-  &__collection-actions,
-  &__document-actions,
   &__meta,
   &__sidebar-fields {
     [dir='ltr'] & {
@@ -88,65 +69,6 @@
 
     [dir='rtl'] & {
       padding-right: base(1.5);
-    }
-  }
-
-  &__document-actions {
-    position: sticky;
-    top: 0;
-    z-index: var(--z-nav);
-
-    [dir='ltr'] & {
-      padding-right: $baseline;
-    }
-
-    [dir='rtl'] & {
-      padding-left: $baseline;
-    }
-
-    > * {
-      position: relative;
-      z-index: 1;
-    }
-
-    @include mid-break {
-      @include blur-bg;
-    }
-  }
-
-  &__document-actions--has-2 {
-    display: flex;
-
-    > * {
-      width: calc(50% - #{base(0.5)});
-    }
-
-    > *:first-child {
-      [dir='ltr'] & {
-        margin-right: base(0.5);
-      }
-
-      [dir='rtl'] & {
-        margin-left: base(0.5);
-      }
-    }
-
-    > *:last-child {
-      [dir='ltr'] & {
-        margin-left: base(0.5);
-      }
-
-      [dir='rtl'] & {
-        margin-right: base(0.5);
-      }
-    }
-
-    .form-submit {
-      .btn {
-        width: 100%;
-        padding-left: base(0.5);
-        padding-right: base(0.5);
-      }
     }
   }
 
@@ -212,7 +134,6 @@
     color: var(--theme-elevation-400);
   }
 
-  &__collection-actions,
   &__api-url {
     a,
     button {
@@ -266,16 +187,6 @@
       padding-bottom: 0;
     }
 
-    &__document-actions {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      top: auto;
-      z-index: var(--z-nav);
-    }
-
-    &__document-actions,
     &__meta,
     &__sidebar-fields {
       padding-left: var(--gutter-h);
@@ -300,16 +211,6 @@
 
       .preview-btn {
         width: 100%;
-      }
-    }
-
-    &__collection-actions {
-      border-top: 1px solid var(--theme-elevation-100);
-      padding: base(1) 0 0 var(--gutter-h);
-      order: 1;
-
-      li {
-        margin: 0 base(0.5) 0 0;
       }
     }
 

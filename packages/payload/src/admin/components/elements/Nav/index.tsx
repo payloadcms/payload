@@ -1,11 +1,14 @@
 import { ModalToggler, useModal } from '@faceless-ui/modal'
 import React, { Fragment, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { Link, useHistory } from 'react-router-dom'
 
+import Account from '../../graphics/Account'
 import { useConfig } from '../../utilities/Config'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 import Hamburger from '../Hamburger'
-import { MainMenuDrawer, mainMenuSlug } from '../MainMenu'
+import Localizer from '../Localizer'
+import { MainMenu, mainMenuSlug } from '../MainMenu'
 import StepNav from '../StepNav'
 import './index.scss'
 
@@ -14,7 +17,11 @@ const baseClass = 'nav'
 const DefaultNav = () => {
   const history = useHistory()
   const { closeModal, isModalOpen } = useModal()
+  const { t } = useTranslation()
   const isOpen = isModalOpen(mainMenuSlug)
+  const {
+    routes: { admin: adminRoute },
+  } = useConfig()
 
   useEffect(
     () =>
@@ -40,12 +47,22 @@ const DefaultNav = () => {
           <ModalToggler className={`${baseClass}__modalToggler`} slug={mainMenuSlug}>
             <Hamburger isActive={isOpen} />
           </ModalToggler>
-          <div className={`${baseClass}__nav`}>
-            <StepNav />
+          <div className={`${baseClass}__nav-wrapper`}>
+            <StepNav className={`${baseClass}__step-nav`} />
+            <div className={`${baseClass}__controls`}>
+              <Localizer className={`${baseClass}__localizer`} />
+              <Link
+                aria-label={t('authentication:account')}
+                className={`${baseClass}__account`}
+                to={`${adminRoute}/account`}
+              >
+                <Account />
+              </Link>
+            </div>
           </div>
         </div>
       </header>
-      <MainMenuDrawer />
+      <MainMenu />
     </Fragment>
   )
 }

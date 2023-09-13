@@ -1,8 +1,6 @@
 @import '../../../scss/styles.scss';
 
 .nav {
-  position: sticky;
-  top: 0;
   width: 100%;
   height: calc(var(--base) * 3);
   z-index: $z-status;
@@ -33,7 +31,7 @@
       pointer-events: all;
     }
 
-    .nav__nav {
+    .nav__nav-wrapper {
       display: none;
     }
   }
@@ -47,12 +45,14 @@
     flex-grow: 1;
   }
 
-  &__nav {
+  &__nav-wrapper {
     margin-left: calc(var(--base) / 1.25);
     display: flex;
+    gap: calc(var(--base) / 2);
     align-items: center;
     height: 100%;
     flex-grow: 1;
+    justify-content: space-between;
   }
 
   &__modalToggler {
@@ -69,23 +69,42 @@
     }
   }
 
-  &__scrollable {
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
+  &__account {
+    transform: translate3d(50%, 0, 0);
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) / 2);
+    flex-grow: 1;
+    justify-content: flex-end;
+  }
+
+  // the icon has padding so we need to transform slightly
+  // so that it's bounding box aligns with the other elements
+  // this can be removed if we ever reformat our SVG icons
+  &__localizer {
+    transform: translate3d(8px, 0, 0);
   }
 
   @include mid-break {
     height: calc(var(--base) * 2);
+  }
 
+  @include small-break {
     .nav {
       &__content {
         padding: 0 var(--gutter-h);
       }
 
-      &__modalToggler {
+      &__modalToggler,
+      &__account {
         transform: unset;
+      }
+
+      &__step-nav {
+        display: none;
       }
     }
   }

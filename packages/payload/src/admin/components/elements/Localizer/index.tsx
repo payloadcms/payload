@@ -3,6 +3,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
+import { Chevron } from '../..'
 import { useConfig } from '../../utilities/Config'
 import { useLocale } from '../../utilities/Locale'
 import { useSearchParams } from '../../utilities/SearchParams'
@@ -11,7 +12,10 @@ import './index.scss'
 
 const baseClass = 'localizer'
 
-const Localizer: React.FC = () => {
+const Localizer: React.FC<{
+  className?: string
+}> = (props) => {
+  const { className } = props
   const config = useConfig()
   const { localization } = config
 
@@ -23,9 +27,16 @@ const Localizer: React.FC = () => {
     const { locales } = localization
 
     return (
-      <div className={baseClass}>
+      <div className={[baseClass, className].filter(Boolean).join(' ')}>
+        <div className={`${baseClass}__label`}>{`${t('locale')}:`}</div>
+        &nbsp;&nbsp;
         <Popup
-          button={locale.label}
+          button={
+            <div className={`${baseClass}__button`}>
+              {`${locale.label}`}
+              <Chevron className={`${baseClass}__chevron`} />
+            </div>
+          }
           horizontalAlign="left"
           render={({ close }) => (
             <div>
