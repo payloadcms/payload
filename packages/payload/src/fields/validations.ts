@@ -11,7 +11,6 @@ import type {
   RadioField,
   RelationshipField,
   RelationshipValue,
-  RichTextField,
   SelectField,
   TextField,
   TextareaField,
