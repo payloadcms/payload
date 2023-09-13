@@ -289,7 +289,15 @@ describe('collections-rest', () => {
           expect(foundDoc.id).toEqual(doc.id);
         });
 
-        it('should query', async () => {
+        it('should query - equals', async () => {
+          const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`;
+          const { doc } = await client.create({ slug: customIdSlug, data: { id: customId, name: 'custom-id-name' } });
+          const { result } = await client.find({ slug: customIdSlug, query: { id: { equals: customId } } });
+
+          expect(result.docs.map(({ id }) => id)).toContain(doc.id);
+        });
+
+        it('should query - like', async () => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`;
           const { doc } = await client.create({ slug: customIdSlug, data: { id: customId, name: 'custom-id-name' } });
           const { result } = await client.find({ slug: customIdSlug, query: { id: { like: 'custom' } } });
