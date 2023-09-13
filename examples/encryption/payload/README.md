@@ -4,7 +4,7 @@ This example demonstrates how to integrate encryption and decryption into Payloa
 
 ## Demo Context:
 
-To keep the demo simple and straightforward, we manually entered the userDOB field in the CMS for a user document. After inputting the data, we updated the collection to make the field hidden. Subsequently, our hooks encrypted the field to ensure data protection. We then use a custom endpoint to fetch the hidden data on the front-end.
+To keep the demo simple and straightforward, we manually entered the `userDOB` field in the CMS for a `users` document. After inputting the data, we updated the collection to make the field `hidden`. Subsequently, our hooks encrypted the field to ensure data protection. We then use a custom endpoint to fetch the hidden data on the front-end.
 
 In our demo, we've modeled a scenario often encountered in real-world web applications. Imagine users signing up on a platform, providing not just basic details like name and email, but also sensitive data such as date of birth. Once they opt to 'Save' or 'Update Profile', their data is relayed to the backend. At this juncture, before the data finds its way into the database, our hooks step in to encrypt it. This encryption ensures that the user's information remains shielded from potential threats. When needed, the front-end can then securely fetch the hidden data for display or editing, mimicking the practical flow of many digital platforms today.
 
