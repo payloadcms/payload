@@ -1,15 +1,23 @@
 import type { RichTextAdapter } from 'payload/types'
 
+import { withMergedProps } from 'payload/components/utilities'
+
 import type { AdapterArguments } from './types'
 
+import RichTextCell from './cell'
 import { richTextRelationshipPromise } from './data/richTextRelationshipPromise'
-import { getSlateCellComponent } from './getSlateCellComponent'
-import { getSlateFieldComponent } from './getSlateFieldComponent'
+import RichTextField from './field'
 
 export function createSlate(args: AdapterArguments): RichTextAdapter<AdapterArguments> {
   return {
-    CellComponent: getSlateCellComponent(args),
-    FieldComponent: getSlateFieldComponent(args),
+    CellComponent: withMergedProps({
+      Component: RichTextCell,
+      toMergeIntoProps: args,
+    }),
+    FieldComponent: withMergedProps({
+      Component: RichTextField,
+      toMergeIntoProps: args,
+    }),
     afterReadPromise({
       currentDepth,
       depth,
