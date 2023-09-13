@@ -354,8 +354,9 @@ export const richText = baseField.keys({
   admin: baseAdminFields.default(),
   defaultValue: joi.alternatives().try(joi.array().items(joi.object()), joi.func()),
   editor: joi.object().keys({
+    CellComponent: componentSchema,
+    FieldComponent: componentSchema,
     afterReadPromise: joi.func(),
-    component: componentSchema,
   }),
   name: joi.string().required(),
   type: joi.string().valid('richText').required(),
