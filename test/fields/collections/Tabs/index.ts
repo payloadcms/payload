@@ -3,12 +3,7 @@ import type { CollectionConfig } from '../../../../packages/payload/src/collecti
 
 import { blocksField, blocksFieldSeedData } from '../Blocks'
 import { UIField } from './UIField'
-
-export const tabsSlug = 'tabs-fields'
-
-export const namedTabText = 'Some text in a named tab'
-export const namedTabDefaultValue = 'default text inside of a named tab'
-export const localizedTextValue = 'localized text'
+import { localizedTextValue, namedTabDefaultValue, namedTabText, tabsSlug } from './constants'
 
 const TabsFields: CollectionConfig = {
   slug: tabsSlug,
