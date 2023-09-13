@@ -20,7 +20,11 @@ First you'll need a running Payload app. If you have not done so already, open u
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-Once running, you will land on the Home page. Here you will find a User's Date of birth field that has been encrypted and then decrypted to be view on the front-end.
+Once running, you will land on the Home page. Here you will find a User's `Date of Birth` field that has been encrypted and decrypted to be viewed on the front-end.
+
+Since the data is being hidden in the CMS, we cannot access the decrypted value through the typical user's api url: `http://localhost:8000/api/users/${id}`
+
+Instead we fetch the hidden data through a custom endpoint: `http://localhost:8000/api/users/${user.id}/userDOB`
 
 ## Learn More
 
