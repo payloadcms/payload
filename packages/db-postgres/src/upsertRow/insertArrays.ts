@@ -26,7 +26,7 @@ export const insertArrays = async ({
   parentRows,
 }: Args): Promise<void> => {
   // Maintain a map of flattened rows by table
-  const rowsByTable: RowsByTable = {}
+  const rowsByTable: RowsByTable = {};
 
   arrays.forEach((arraysByTable, parentRowIndex) => {
     Object.entries(arraysByTable).forEach(([tableName, arrayRows]) => {
@@ -39,13 +39,13 @@ export const insertArrays = async ({
         };
       }
 
-      const parentID = parentRows[parentRowIndex].id
+      const parentID = parentRows[parentRowIndex].id;
 
       // Add any sub arrays that need to be created
       // We will call this recursively below
       arrayRows.forEach((arrayRow) => {
         if (Object.keys(arrayRow.arrays).length > 0) {
-          rowsByTable[tableName].arrays.push(arrayRow.arrays)
+          rowsByTable[tableName].arrays.push(arrayRow.arrays);
         }
 
         // Set up parent IDs for both row and locale row

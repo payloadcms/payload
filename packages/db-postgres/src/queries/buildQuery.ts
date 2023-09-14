@@ -96,4 +96,4 @@ const buildQuery = async function buildQuery({
   };
 };
 
-export default buildQuery
+export default buildQuery;

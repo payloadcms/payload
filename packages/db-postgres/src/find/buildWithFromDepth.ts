@@ -1,15 +1,13 @@
 /* eslint-disable no-param-reassign */
-import type { SanitizedConfig } from 'payload/config'
-
-import type { PostgresAdapter } from '../types'
-
-import { buildFindManyArgs } from './buildFindManyArgs'
+import { SanitizedConfig } from 'payload/config';
+import { buildFindManyArgs } from './buildFindManyArgs';
+import { PostgresAdapter } from '../types';
 
 type BuildWithFromDepthArgs = {
   adapter: PostgresAdapter
   config: SanitizedConfig
   depth: number
-  fallbackLocale?: false | string
+  fallbackLocale?: string | false
   locale?: string
 }
 
@@ -21,23 +19,23 @@ export const buildWithFromDepth = ({
   locale,
 }: BuildWithFromDepthArgs): Record<string, unknown> | undefined => {
   const result = config.collections.reduce((slugs, coll) => {
-    const { slug } = coll
+    const { slug } = coll;
 
     if (depth >= 1) {
       const args = buildFindManyArgs({
         adapter,
-        collection: coll,
         config,
+        collection: coll,
         depth: depth - 1,
         fallbackLocale,
         locale,
-      })
+      });
 
-      slugs[`${slug}ID`] = args
+      slugs[`${slug}ID`] = args;
     }
 
-    return slugs
-  }, {})
+    return slugs;
+  }, {});
 
-  return result
-}
+  return result;
+};

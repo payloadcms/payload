@@ -9,7 +9,7 @@ import { createBlocksMap } from '../../utilities/createBlocksMap';
 type TransformArgs = {
   config: SanitizedConfig
   data: Record<string, unknown>
-  fallbackLocale?: false | string
+  fallbackLocale?: string | false
   fields: Field[]
   locale?: string
 }
@@ -21,14 +21,14 @@ export const transform = <T extends TypeWithID>({
   data,
   fields,
 }: TransformArgs): T => {
-  let relationships: Record<string, Record<string, unknown>[]> = {}
+  let relationships: Record<string, Record<string, unknown>[]> = {};
 
   if ('_relationships' in data) {
-    relationships = createRelationshipMap(data._relationships)
-    delete data._relationships
+    relationships = createRelationshipMap(data._relationships);
+    delete data._relationships;
   }
 
-  const blocks = createBlocksMap(data)
+  const blocks = createBlocksMap(data);
 
   const result = traverseFields<T>({
     blocks,

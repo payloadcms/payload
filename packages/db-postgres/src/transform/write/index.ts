@@ -1,9 +1,7 @@
 /* eslint-disable no-param-reassign */
-import type { Field } from 'payload/types'
-
-import type { RowToInsert } from './types'
-
-import { traverseFields } from './traverseFields'
+import { Field } from 'payload/types';
+import { traverseFields } from './traverseFields';
+import { RowToInsert } from './types';
 
 type Args = {
   data: Record<string, unknown>
@@ -24,8 +22,9 @@ export const transformForWrite = ({
     row: {},
     locales: {},
     relationships: [],
-    row: {},
-  }
+    blocks: {},
+    arrays: {},
+  };
 
   // This function is responsible for building up the
   // above rowToInsert
@@ -41,7 +40,7 @@ export const transformForWrite = ({
     path,
     relationships: rowToInsert.relationships,
     row: rowToInsert.row,
-  })
+  });
 
-  return rowToInsert
-}
+  return rowToInsert;
+};

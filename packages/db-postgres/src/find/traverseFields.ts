@@ -12,26 +12,20 @@ type TraverseFieldArgs = {
   depth?: number,
   fields: Field[]
   _locales: Record<string, unknown>
-  adapter: PostgresAdapter
-  config: SanitizedConfig
-  currentArgs: Record<string, unknown>
-  currentTableName: string
-  depth?: number
-  fields: Field[]
-  locatedArrays: { [path: string]: ArrayField }
-  locatedBlocks: Block[]
-  path: string
-  topLevelArgs: Record<string, unknown>
+  locatedArrays: { [path: string]: ArrayField },
+  locatedBlocks: Block[],
+  path: string,
+  topLevelArgs: Record<string, unknown>,
   topLevelTableName: string
 }
 
 export const traverseFields = ({
-  _locales,
   adapter,
   currentArgs,
   currentTableName,
   depth,
   fields,
+  _locales,
   locatedArrays,
   locatedBlocks,
   path,
@@ -43,39 +37,39 @@ export const traverseFields = ({
       switch (field.type) {
         case 'array': {
           const withArray: Result = {
-            columns: {
-              _order: false,
-              _parentID: false,
-            },
             orderBy: ({ _order }, { asc }) => [asc(_order)],
+            columns: {
+              _parentID: false,
+              _order: false,
+            },
             with: {},
-          }
+          };
 
-          const arrayTableName = `${currentTableName}_${toSnakeCase(field.name)}`
+          const arrayTableName = `${currentTableName}_${toSnakeCase(field.name)}`;
 
-          if (adapter.tables[`${arrayTableName}_locales`]) withArray.with._locales = _locales
-          currentArgs.with[`${path}${field.name}`] = withArray
+          if (adapter.tables[`${arrayTableName}_locales`]) withArray.with._locales = _locales;
+          currentArgs.with[`${path}${field.name}`] = withArray;
 
           traverseFields({
-            _locales,
             adapter,
             currentArgs: withArray,
             currentTableName: arrayTableName,
             depth,
             fields: field.fields,
+            _locales,
             locatedArrays,
             locatedBlocks,
             path: '',
             topLevelArgs,
             topLevelTableName,
-          })
+          });
 
-          break
+          break;
         }
 
         case 'blocks':
           field.blocks.forEach((block) => {
-            const blockKey = `_blocks_${block.slug}`
+            const blockKey = `_blocks_${block.slug}`;
 
             if (!topLevelArgs[blockKey]) {
               const withBlock: Result = {
@@ -84,52 +78,52 @@ export const traverseFields = ({
                 },
                 orderBy: ({ _order }, { asc }) => [asc(_order)],
                 with: {},
-              }
+              };
 
               if (adapter.tables[`${topLevelTableName}_${toSnakeCase(block.slug)}_locales`]) withBlock.with._locales = _locales;
               topLevelArgs.with[blockKey] = withBlock;
 
               traverseFields({
-                _locales,
                 adapter,
                 currentArgs: withBlock,
                 currentTableName,
                 depth,
                 fields: block.fields,
+                _locales,
                 locatedArrays,
                 locatedBlocks,
                 path,
                 topLevelArgs,
                 topLevelTableName,
-              })
+              });
             }
-          })
+          });
 
-          break
+          break;
 
         case 'group':
           traverseFields({
-            _locales,
             adapter,
             currentArgs,
             currentTableName,
             depth,
             fields: field.fields,
+            _locales,
             locatedArrays,
             locatedBlocks,
             path: `${path}${field.name}_`,
             topLevelArgs,
             topLevelTableName,
-          })
+          });
 
-          break
+          break;
 
         default: {
-          break
+          break;
         }
       }
     }
-  })
+  });
 
-  return topLevelArgs
-}
+  return topLevelArgs;
+};

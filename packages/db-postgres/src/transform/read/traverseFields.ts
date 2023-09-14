@@ -55,7 +55,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
   siblingData,
   table,
 }: TraverseFieldsArgs): T => {
-  const sanitizedPath = path ? `${path}.` : path
+  const sanitizedPath = path ? `${path}.` : path;
 
   const formatted = fields.reduce((result, field) => {
     if (fieldAffectsData(field)) {
@@ -160,8 +160,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 });
               }
 
-              return {}
-            })
+              return {};
+            });
           }
         }
 
@@ -181,7 +181,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
               if (!relationsByLocale[row.locale]) relationsByLocale[row.locale] = [];
               relationsByLocale[row.locale].push(row);
             }
-          })
+          });
 
           Object.entries(relationsByLocale).forEach(([locale, relations]) => {
             transformRelationship({
@@ -233,7 +233,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   delete table[subFieldKey];
                 }
               }
-            })
+            });
 
             if (field.localized) {
               Object.entries(ref).forEach(([groupLocale, groupLocaleData]) => {
@@ -310,11 +310,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
         result[field.name] = localizedFieldData;
       }
 
-      return result
+      return result;
     }
 
-    return siblingData
-  }, siblingData)
+    return siblingData;
+  }, siblingData);
 
-  return formatted as T
-}
+  return formatted as T;
+};

@@ -1,17 +1,16 @@
 /* eslint-disable no-param-reassign */
-import { index, uniqueIndex } from 'drizzle-orm/pg-core'
-
-import type { GenericColumn } from '../types'
+import { uniqueIndex, index } from 'drizzle-orm/pg-core';
+import { GenericColumn } from '../types';
 
 type CreateIndexArgs = {
-  columnName: string
   name: string
+  columnName: string
   unique?: boolean
 }
 
-export const createIndex = ({ columnName, name, unique }: CreateIndexArgs) => {
+export const createIndex = ({ name, columnName, unique }: CreateIndexArgs) => {
   return (table: { [x: string]: GenericColumn }) => {
-    if (unique) return uniqueIndex(`${columnName}_idx`).on(table[name])
-    return index(`${columnName}_idx`).on(table[name])
-  }
-}
+    if (unique) return uniqueIndex(`${columnName}_idx`).on(table[name]);
+    return index(`${columnName}_idx`).on(table[name]);
+  };
+};

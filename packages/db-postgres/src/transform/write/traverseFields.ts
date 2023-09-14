@@ -159,7 +159,7 @@ export const traverseFields = ({
             path: `${path || ''}${field.name}.`,
             relationships,
             row,
-          })
+          });
         }
       }
 
@@ -320,5 +320,5 @@ export const traverseFields = ({
         }
       });
     }
-  })
-}
+  });
+};
