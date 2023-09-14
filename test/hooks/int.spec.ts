@@ -247,6 +247,24 @@ describe('Hooks', () => {
       expect(retrievedDoc.value).toEqual('data from local API');
     });
 
+    it('should pass context from local findByID API to hooks', async () => {
+      const document = await payload.create({
+        collection: contextHooksSlug,
+        data: {
+          value: 'originalvalue',
+        },
+      });
+
+      const retrievedDoc = await payload.findByID({
+        collection: contextHooksSlug,
+        id: document.id,
+        context: {
+          secretFindValue: 'data from local API',
+        },
+      });
+
+      expect(retrievedDoc.value).toEqual('data from local API');
+    });
     it('should pass context from rest API to hooks', async () => {
       const params = new URLSearchParams({
         context_secretValue: 'data from rest API',

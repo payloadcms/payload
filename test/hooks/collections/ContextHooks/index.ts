@@ -55,6 +55,14 @@ const ContextHooks: CollectionConfig = {
         },
       });
     }],
+    afterRead: [
+      async ({ context, doc }) => {
+        if (context?.secretFindValue) {
+          doc.value = context.secretFindValue;
+        }
+        return doc;
+      }
+    ]
   },
   fields: [
     {

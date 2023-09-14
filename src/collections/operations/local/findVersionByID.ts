@@ -43,7 +43,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     req = {} as PayloadRequest,
     context,
   } = options;
-  setRequestContext(options.req, context);
+  setRequestContext(req, context);
 
   const collection = payload.collections[collectionSlug];
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;

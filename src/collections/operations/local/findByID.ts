@@ -46,7 +46,7 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
     draft = false,
     context,
   } = options;
-  setRequestContext(options.req, context);
+  setRequestContext(req, context);
 
   const collection = payload.collections[collectionSlug];
   const defaultLocale = payload?.config?.localization ? payload?.config?.localization?.defaultLocale : null;
