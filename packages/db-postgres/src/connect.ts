@@ -1,21 +1,21 @@
-import fs from 'fs';
-import { v4 as uuid } from 'uuid';
+import type { Connect } from 'payload/database';
+
+import { generateDrizzleJson, pushSchema } from 'drizzle-kit/utils';
 import { eq, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import type { Connect } from 'payload/dist/database/types';
-import { Client, Pool } from 'pg';
-import { generateDrizzleJson, pushSchema } from 'drizzle-kit/utils';
-import { configToJSONSchema } from 'payload/dist/utilities/configToJSONSchema';
-import prompts from 'prompts';
-
 import { jsonb, numeric, pgTable, varchar } from 'drizzle-orm/pg-core';
-import type { PostgresAdapter } from './types';
-import { DrizzleDB } from './types';
+import fs from 'fs';
+import { configToJSONSchema } from 'payload/utilities';
+import { Client, Pool } from 'pg';
+import prompts from 'prompts';
+import { v4 as uuid } from 'uuid';
+
+import type { DrizzleDB, PostgresAdapter } from './types';
 
 // Migration table def in order to use query using drizzle
 const migrationsSchema = pgTable('payload_migrations', {
-  name: varchar('name'),
   batch: numeric('batch'),
+  name: varchar('name'),
   schema: jsonb('schema'),
 });
 
@@ -67,13 +67,13 @@ export const connect: Connect = async function connect(
   if (process.env.NODE_ENV === 'production') return;
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
-  const { hasDataLoss, warnings, statementsToExecute, apply } = await pushSchema(this.schema, this.db);
+  const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(this.schema, this.db);
 
   this.payload.logger.debug({
-    msg: 'Schema push results',
     hasDataLoss,
-    warnings,
+    msg: 'Schema push results',
     statementsToExecute,
+    warnings,
   });
 
   if (warnings.length) {
@@ -90,10 +90,10 @@ export const connect: Connect = async function connect(
 
     const { confirm: acceptWarnings } = await prompts(
       {
-        type: 'confirm',
-        name: 'confirm',
-        message: 'Accept warnings and push schema to database?',
         initial: false,
+        message: 'Accept warnings and push schema to database?',
+        name: 'confirm',
+        type: 'confirm',
       },
       {
         onCancel: () => {
@@ -134,8 +134,8 @@ export const connect: Connect = async function connect(
 
   if (!devPush.length) {
     await this.db.insert(migrationsSchema).values({
-      name: 'dev',
       batch: '-1',
+      name: 'dev',
       schema: JSON.stringify(jsonSchema),
     });
   } else {

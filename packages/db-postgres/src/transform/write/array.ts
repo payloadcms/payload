@@ -1,6 +1,8 @@
 /* eslint-disable no-param-reassign */
-import { ArrayField } from 'payload/types';
-import { ArrayRowToInsert, BlockRowToInsert } from './types';
+import type { ArrayField } from 'payload/types';
+
+import type { ArrayRowToInsert, BlockRowToInsert } from './types';
+
 import { isArrayOfRows } from '../../utilities/isArrayOfRows';
 import { traverseFields } from './traverseFields';
 

@@ -1,8 +1,11 @@
 /* eslint-disable no-param-reassign */
-import { Field } from 'payload/types';
+import type { Field } from 'payload/types';
+
+import { fieldAffectsData } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
-import { fieldAffectsData } from 'payload/dist/fields/config/types';
-import { ArrayRowToInsert, BlockRowToInsert } from './types';
+
+import type { ArrayRowToInsert, BlockRowToInsert } from './types';
+
 import { isArrayOfRows } from '../../utilities/isArrayOfRows';
 import { transformArray } from './array';
 import { transformBlocks } from './blocks';
@@ -174,8 +177,8 @@ export const traverseFields = ({
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
             transformRelationship({
               baseRow: {
-                path: relationshipPath,
                 locale: localeKey,
+                path: relationshipPath,
               },
               data: localeData,
               field,
@@ -220,7 +223,7 @@ export const traverseFields = ({
           ref = locales[forcedLocale];
         }
 
-        valuesToTransform.push({ value: fieldData, ref });
+        valuesToTransform.push({ ref, value: fieldData });
       }
 
       valuesToTransform.forEach(({ localeKey, ref, value }) => {

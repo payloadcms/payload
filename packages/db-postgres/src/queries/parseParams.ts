@@ -1,34 +1,36 @@
-/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
-import { Operator, Where } from 'payload/types';
-import { Field } from 'payload/dist/fields/config/types';
-import { validOperators } from 'payload/dist/types/constants';
-import { and, SQL } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
+import type { Field, Operator, Where } from 'payload/types';
+
+import { and } from 'drizzle-orm';
+import { validOperators } from 'payload/types';
+
+import type { GenericColumn, PostgresAdapter } from '../types';
+import type { BuildQueryJoins } from './buildQuery';
+
 import { buildAndOrConditions } from './buildAndOrConditions';
-import { GenericColumn, PostgresAdapter } from '../types';
-import { operatorMap } from './operatorMap';
-import { BuildQueryJoins } from './buildQuery';
 import { getTableColumnFromPath } from './getTableColumnFromPath';
+import { operatorMap } from './operatorMap';
 import { sanitizeQueryValue } from './sanitizeQueryValue';
 
 type Args = {
-  joins: BuildQueryJoins
-  where: Where
   adapter: PostgresAdapter
-  locale: string
-  tableName: string
   fields: Field[]
+  joins: BuildQueryJoins
+  locale: string
   selectFields: Record<string, GenericColumn>
+  tableName: string
+  where: Where
 }
 
 export async function parseParams({
-  joins,
-  where,
   adapter,
-  locale,
   fields,
-  tableName,
+  joins,
+  locale,
   selectFields,
+  tableName,
+  where,
 }: Args): Promise<SQL> {
   let result: SQL;
   const constraints: SQL[] = [];
@@ -46,13 +48,13 @@ export async function parseParams({
         }
         if (Array.isArray(condition)) {
           const builtConditions = await buildAndOrConditions({
-            joins,
-            fields,
             adapter,
+            fields,
+            joins,
             locale,
+            selectFields,
             tableName,
             where: condition,
-            selectFields,
           });
           if (builtConditions.length > 0) {
             if (result) {
@@ -70,11 +72,11 @@ export async function parseParams({
             for (const operator of Object.keys(pathOperators)) {
               if (validOperators.includes(operator as Operator)) {
                 const {
-                  field,
-                  table,
                   columnName,
                   constraints: queryConstraints,
+                  field,
                   rawColumn,
+                  table,
                 } = getTableColumnFromPath({
                   adapter,
                   collectionPath: relationOrPath,
@@ -82,8 +84,8 @@ export async function parseParams({
                   joins,
                   locale,
                   pathSegments: relationOrPath.split('.'),
-                  tableName,
                   selectFields,
+                  tableName,
                 });
 
                 const { operator: queryOperator, value: queryValue } = sanitizeQueryValue({
@@ -93,8 +95,8 @@ export async function parseParams({
                 });
 
                 queryConstraints.forEach(({
-                  table: constraintTable,
                   columnName: col,
+                  table: constraintTable,
                   value,
                 }) => {
                   constraints.push(operatorMap.equals(constraintTable[col], value));

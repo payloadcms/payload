@@ -1,7 +1,9 @@
-import { ArrayField, Block, Field } from 'payload/types';
-import { DBQueryConfig } from 'drizzle-orm';
+import type { DBQueryConfig } from 'drizzle-orm';
+import type { ArrayField, Block, Field } from 'payload/types';
+
+import type { PostgresAdapter } from '../types';
+
 import { traverseFields } from './traverseFields';
-import { PostgresAdapter } from '../types';
 
 type BuildFindQueryArgs = {
   adapter: PostgresAdapter
@@ -26,18 +28,18 @@ export const buildFindManyArgs = ({
 
   const _locales: Result = {
     columns: {
-      id: false,
       _parentID: false,
+      id: false,
     },
   };
 
   if (adapter.tables[`${tableName}_relationships`]) {
     result.with._relationships = {
-      orderBy: ({ order }, { asc: ASC }) => [ASC(order)],
       columns: {
         id: false,
         parent: false,
       },
+      orderBy: ({ order }, { asc: ASC }) => [ASC(order)],
     };
   }
 
@@ -49,12 +51,12 @@ export const buildFindManyArgs = ({
   const locatedArrays: { [path: string]: ArrayField } = {};
 
   traverseFields({
+    _locales,
     adapter,
     currentArgs: result,
     currentTableName: tableName,
     depth,
     fields,
-    _locales,
     locatedArrays,
     locatedBlocks,
     path: '',

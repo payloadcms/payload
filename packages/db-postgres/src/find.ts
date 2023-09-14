@@ -1,23 +1,25 @@
+import type { Find } from 'payload/database';
+import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payload/types';
+
 import { asc, desc, inArray, sql } from 'drizzle-orm';
 import toSnakeCase from 'to-snake-case';
-import type { Find } from 'payload/dist/database/types';
-import type { PayloadRequest } from 'payload/dist/express/types';
-import type { SanitizedCollectionConfig, TypeWithID } from 'payload/dist/collections/config/types';
-import buildQuery from './queries/buildQuery';
+
+import type { PostgresAdapter } from './types';
+
 import { buildFindManyArgs } from './find/buildFindManyArgs';
+import buildQuery from './queries/buildQuery';
 import { transform } from './transform/read';
-import { PostgresAdapter } from './types';
 
 export const find: Find = async function find(
   this: PostgresAdapter, {
     collection,
-    where: whereArg,
-    page = 1,
     limit: limitArg,
-    sort: sortArg,
     locale,
+    page = 1,
     pagination,
     req = {} as PayloadRequest,
+    sort: sortArg,
+    where: whereArg,
   },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config;
@@ -33,17 +35,17 @@ export const find: Find = async function find(
   let selectDistinctResult;
 
   const {
-    where,
-    orderBy,
     joins,
+    orderBy,
     selectFields,
+    where,
   } = await buildQuery({
     adapter: this,
     fields: collectionConfig.fields,
     locale,
-    where: whereArg,
     sort,
     tableName,
+    where: whereArg,
   });
 
   const orderedIDMap: Record<number | string, number> = {};
@@ -80,15 +82,15 @@ export const find: Find = async function find(
     if (selectDistinctResult.length === 0) {
       return {
         docs: [],
-        totalDocs: 0,
+        hasNextPage: false,
+        hasPrevPage: false,
         limit,
-        totalPages: 0,
+        nextPage: null,
         page: 1,
         pagingCounter: 0,
-        hasPrevPage: false,
-        hasNextPage: false,
         prevPage: null,
-        nextPage: null,
+        totalDocs: 0,
+        totalPages: 0,
       };
     }
     // set the id in an object for sorting later
@@ -157,14 +159,14 @@ export const find: Find = async function find(
 
   return {
     docs,
-    totalDocs,
+    hasNextPage,
+    hasPrevPage,
     limit,
-    totalPages,
+    nextPage: hasNextPage ? page + 1 : null,
     page,
     pagingCounter,
-    hasPrevPage,
-    hasNextPage,
     prevPage: hasPrevPage ? page - 1 : null,
-    nextPage: hasNextPage ? page + 1 : null,
+    totalDocs,
+    totalPages,
   };
 };

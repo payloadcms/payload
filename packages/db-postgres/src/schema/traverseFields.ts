@@ -1,38 +1,40 @@
 /* eslint-disable no-param-reassign */
+import type { Relation } from 'drizzle-orm';
+import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core';
+import type { Field } from 'payload/types';
+
+import { relations } from 'drizzle-orm';
 import {
-  AnyPgColumnBuilder,
-  IndexBuilder,
+  PgNumericBuilder,
+  PgVarcharBuilder,
   integer,
   jsonb,
   numeric,
-  PgNumericBuilder,
-  PgVarcharBuilder,
   text,
   unique,
-  UniqueConstraintBuilder,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { Field } from 'payload/types';
+import { fieldAffectsData } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
-import { fieldAffectsData } from 'payload/dist/fields/config/types';
-import { Relation, relations } from 'drizzle-orm';
-import { GenericColumns, PostgresAdapter } from '../types';
-import { createIndex } from './createIndex';
-import { buildTable } from './build';
-import { parentIDColumnMap } from './parentIDColumnMap';
+
+import type { GenericColumns, PostgresAdapter } from '../types';
+
 import { hasLocalesTable } from '../utilities/hasLocalesTable';
+import { buildTable } from './build';
+import { createIndex } from './createIndex';
+import { parentIDColumnMap } from './parentIDColumnMap';
 
 type Args = {
   adapter: PostgresAdapter
   arrayBlockRelations: Map<string, string>
   buildRelationships: boolean
-  columns: Record<string, AnyPgColumnBuilder>
   columnPrefix?: string
+  columns: Record<string, PgColumnBuilder>
   fieldPrefix?: string
   fields: Field[]
   forceLocalized?: boolean
   indexes: Record<string, (cols: GenericColumns) => IndexBuilder>
-  localesColumns: Record<string, AnyPgColumnBuilder>
+  localesColumns: Record<string, PgColumnBuilder>
   localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder>
   newTableName: string
   parentTableName: string
@@ -85,7 +87,7 @@ export const traverseFields = ({
         targetIndexes = localesIndexes;
       }
 
-      if ((field.unique || field.index) && !['array', 'blocks', 'relationship', 'upload', 'group'].includes(field.type)) {
+      if ((field.unique || field.index) && !['array', 'blocks', 'group', 'relationship', 'upload'].includes(field.type)) {
         targetIndexes[`${field.name}Idx`] = createIndex({ columnName, name: field.name, unique: field.unique });
       }
     }
@@ -131,7 +133,7 @@ export const traverseFields = ({
       }
 
       case 'array': {
-        const baseColumns: Record<string, AnyPgColumnBuilder> = {
+        const baseColumns: Record<string, PgColumnBuilder> = {
           _order: integer('_order').notNull(),
           _parentID: parentIDColumnMap[parentIDColType]('_parent_id').references(() => adapter.tables[parentTableName].id, { onDelete: 'cascade' }).notNull(),
         };
@@ -185,10 +187,10 @@ export const traverseFields = ({
         field.blocks.forEach((block) => {
           const blockTableName = `${newTableName}_${toSnakeCase(block.slug)}`;
           if (!adapter.tables[blockTableName]) {
-            const baseColumns: Record<string, AnyPgColumnBuilder> = {
+            const baseColumns: Record<string, PgColumnBuilder> = {
               _order: integer('_order').notNull(),
-              _path: text('_path').notNull(),
               _parentID: parentIDColumnMap[parentIDColType]('_parent_id').references(() => adapter.tables[parentTableName].id, { onDelete: 'cascade' }).notNull(),
+              _path: text('_path').notNull(),
             };
 
             const baseExtraConfig: Record<string, (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder> = {};

@@ -1,28 +1,30 @@
 import type { Payload } from 'payload';
-import { createDatabaseAdapter } from 'payload/dist/database/createAdapter';
+
+import type { Args, PostgresAdapter, PostgresAdapterResult } from './types';
+
 import { connect } from './connect';
-import { init } from './init';
-import { createMigration } from './createMigration';
-import { webpack } from './webpack';
-import { Args, PostgresAdapter, PostgresAdapterResult } from './types';
 import { createGlobal } from './createGlobal';
+import { createMigration } from './createMigration';
 import { createVersion } from './createVersion';
-import { beginTransaction } from './transactions/beginTransaction';
-import { rollbackTransaction } from './transactions/rollbackTransaction';
-import { commitTransaction } from './transactions/commitTransaction';
-import { queryDrafts } from './queryDrafts';
 import { find } from './find';
+import { init } from './init';
+import { queryDrafts } from './queryDrafts';
+import { beginTransaction } from './transactions/beginTransaction';
+import { commitTransaction } from './transactions/commitTransaction';
+import { rollbackTransaction } from './transactions/rollbackTransaction';
+import { webpack } from './webpack';
 // import { findGlobalVersions } from './findGlobalVersions';
 // import { findVersions } from './findVersions';
 import { create } from './create';
+// import { updateVersion } from './updateVersion';
+import { deleteMany } from './deleteMany';
 import { deleteOne } from './deleteOne';
 // import { deleteVersions } from './deleteVersions';
 import { findGlobal } from './findGlobal';
 import { findOne } from './findOne';
-import { updateGlobal } from './updateGlobal';
 import { updateOne } from './update';
-// import { updateVersion } from './updateVersion';
-import { deleteMany } from './deleteMany';
+import { updateGlobal } from './updateGlobal';
+
 // import { destroy } from './destroy';
 
 export function postgresAdapter(args: Args): PostgresAdapterResult {
@@ -31,33 +33,33 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
     // @ts-expect-error
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
-      sessions: {},
-      enums: {},
-      relations: {},
-      tables: {},
-      payload,
-      connect,
-      db: undefined,
-      // destroy,
-      init,
-      webpack,
-      createMigration,
       beginTransaction,
-      rollbackTransaction,
       commitTransaction,
-      queryDrafts,
-      findOne,
-      find,
+      connect,
       create,
-      updateOne,
-      deleteOne,
-      deleteMany,
-      findGlobal,
       createGlobal,
-      updateGlobal,
-      // findVersions,
+      createMigration,
       // findGlobalVersions,
       createVersion,
+      db: undefined,
+      deleteMany,
+      deleteOne,
+      enums: {},
+      find,
+      findGlobal,
+      findOne,
+      // destroy,
+      init,
+      payload,
+      queryDrafts,
+      relations: {},
+      rollbackTransaction,
+      sessions: {},
+      tables: {},
+      updateGlobal,
+      updateOne,
+      // findVersions,
+      webpack,
       // updateVersion,
       // deleteVersions,
     });

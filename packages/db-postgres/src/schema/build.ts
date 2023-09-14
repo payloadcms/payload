@@ -1,28 +1,21 @@
 /* eslint-disable no-param-reassign */
-import {
-  AnyPgColumnBuilder,
-  integer,
-  pgTable,
-  serial,
-  varchar,
-  index,
-  numeric,
-  timestamp,
-  IndexBuilder,
-  unique,
-  UniqueConstraintBuilder,
-} from 'drizzle-orm/pg-core';
-import { Field } from 'payload/types';
+import type { Relation } from 'drizzle-orm';
+import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core';
+import type { Field } from 'payload/types';
+
+import { relations } from 'drizzle-orm';
+import { index, integer, numeric, pgTable, serial, timestamp, unique, varchar, } from 'drizzle-orm/pg-core';
+import { fieldAffectsData } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
-import { Relation, relations } from 'drizzle-orm';
-import { fieldAffectsData } from 'payload/dist/fields/config/types';
-import { GenericColumns, GenericTable, PostgresAdapter } from '../types';
-import { traverseFields } from './traverseFields';
+
+import type { GenericColumns, GenericTable, PostgresAdapter } from '../types';
+
 import { parentIDColumnMap } from './parentIDColumnMap';
+import { traverseFields } from './traverseFields';
 
 type Args = {
   adapter: PostgresAdapter
-  baseColumns?: Record<string, AnyPgColumnBuilder>,
+  baseColumns?: Record<string, PgColumnBuilder>,
   baseExtraConfig?: Record<string, (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder>
   buildRelationships?: boolean
   fields: Field[]
@@ -43,12 +36,12 @@ export const buildTable = ({
   tableName,
   timestamps,
 }: Args): Result => {
-  const columns: Record<string, AnyPgColumnBuilder> = baseColumns;
+  const columns: Record<string, PgColumnBuilder> = baseColumns;
   const indexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {};
 
   let hasLocalizedField = false;
   let hasLocalizedRelationshipField = false;
-  const localesColumns: Record<string, AnyPgColumnBuilder> = {};
+  const localesColumns: Record<string, PgColumnBuilder> = {};
   const localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {};
   let localesTable: GenericTable;
 
@@ -136,11 +129,11 @@ export const buildTable = ({
 
   if (buildRelationships) {
     if (relationships.size) {
-      const relationshipColumns: Record<string, AnyPgColumnBuilder> = {
+      const relationshipColumns: Record<string, PgColumnBuilder> = {
         id: serial('id').primaryKey(),
+        order: integer('order'),
         parent: parentIDColumnMap[idColType]('parent_id').references(() => table.id, { onDelete: 'cascade' }).notNull(),
         path: varchar('path').notNull(),
-        order: integer('order'),
       };
 
       if (hasLocalizedRelationshipField) {
@@ -177,9 +170,9 @@ export const buildTable = ({
       const relationshipsTableRelations = relations(relationshipsTable, ({ one }) => {
         const result: Record<string, Relation<string>> = {
           parent: one(table, {
-            relationName: '_relationships',
             fields: [relationshipsTable.parent],
             references: [table.id],
+            relationName: '_relationships',
           }),
         };
 

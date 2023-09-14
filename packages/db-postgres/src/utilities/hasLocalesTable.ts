@@ -1,5 +1,6 @@
-import { fieldAffectsData, fieldHasSubFields } from 'payload/dist/fields/config/types';
-import { Field } from 'payload/types';
+import type { Field} from 'payload/types';
+
+import { fieldAffectsData, fieldHasSubFields } from 'payload/types';
 
 export const hasLocalesTable = (fields: Field[]): boolean => {
   return fields.some((field) => {

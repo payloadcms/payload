@@ -1,8 +1,11 @@
 /* eslint-disable no-param-reassign */
-import { fieldAffectsData } from 'payload/dist/fields/config/types';
-import { Field } from 'payload/types';
-import { SanitizedConfig } from 'payload/config';
-import { BlocksMap } from '../../utilities/createBlocksMap';
+import type { SanitizedConfig } from 'payload/config';
+import type { Field} from 'payload/types';
+
+import { fieldAffectsData } from 'payload/types';
+
+import type { BlocksMap } from '../../utilities/createBlocksMap';
+
 import { transformRelationship } from './relationship';
 
 type TraverseFieldsArgs = {
@@ -223,7 +226,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
             field.fields.forEach((subField) => {
               if (fieldAffectsData(subField)) {
-                const subFieldKey = `${sanitizedPath.replace(/[.]/g, '_')}${field.name}_${subField.name}`;
+                const subFieldKey = `${sanitizedPath.replace(/\./g, '_')}${field.name}_${subField.name}`;
 
                 if (typeof locale === 'string') {
                   if (!ref[locale]) ref[locale] = {};

@@ -1,9 +1,12 @@
-import { Where } from 'payload/dist/types';
-import { Field } from 'payload/dist/fields/config/types';
-import { asc, desc, SQL } from 'drizzle-orm';
-import { parseParams } from './parseParams';
-import { GenericColumn, PostgresAdapter } from '../types';
+import type { SQL } from 'drizzle-orm';
+import type { Field, Where } from 'payload/types';
+
+import { asc, desc } from 'drizzle-orm';
+
+import type { GenericColumn, PostgresAdapter } from '../types';
+
 import { getTableColumnFromPath } from './getTableColumnFromPath';
+import { parseParams } from './parseParams';
 
 export type BuildQueryJoins = Record<string, SQL>
 
@@ -17,13 +20,13 @@ type BuildQueryArgs = {
 }
 
 type Result = {
-  where: SQL
+  joins: BuildQueryJoins
   orderBy: {
     column: GenericColumn
     order: typeof asc | typeof desc
   }
-  joins: BuildQueryJoins
   selectFields: Record<string, GenericColumn>
+  where: SQL
 }
 const buildQuery = async function buildQuery({
   adapter,
@@ -54,16 +57,16 @@ const buildQuery = async function buildQuery({
     }
 
     const {
-      table: sortTable,
       columnName: sortTableColumnName,
+      table: sortTable,
     } = getTableColumnFromPath({
       adapter,
       collectionPath: sortPath,
       fields,
-      pathSegments: sortPath.split('.'),
       joins,
-      selectFields,
       locale,
+      pathSegments: sortPath.split('.'),
+      selectFields,
       tableName,
     });
 
@@ -82,17 +85,17 @@ const buildQuery = async function buildQuery({
       fields,
       joins,
       locale,
+      selectFields,
       tableName,
       where: incomingWhere,
-      selectFields,
     });
   }
 
   return {
     joins,
     orderBy,
-    where,
     selectFields,
+    where,
   };
 };
 

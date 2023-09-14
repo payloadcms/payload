@@ -1,18 +1,21 @@
-import type { CreateVersion } from 'payload/dist/database/types';
-import { buildVersionCollectionFields } from 'payload/dist/versions/buildCollectionFields';
+import type { CreateVersion } from 'payload/database';
+
+import { buildVersionCollectionFields } from 'payload/versions';
 import toSnakeCase from 'to-snake-case';
+
 import type { PostgresAdapter } from './types';
+
 import { upsertRow } from './upsertRow';
 
 export const createVersion: CreateVersion = async function createVersion(
   this: PostgresAdapter,
   {
-    collectionSlug,
-    parent,
-    versionData,
     autosave,
+    collectionSlug,
     createdAt,
+    parent,
     updatedAt,
+    versionData,
   },
 ) {
   const collection = this.payload.collections[collectionSlug].config;
@@ -21,10 +24,10 @@ export const createVersion: CreateVersion = async function createVersion(
   const result = await upsertRow({
     adapter: this,
     data: {
-      parent,
-      latest: true,
       autosave,
       createdAt,
+      latest: true,
+      parent,
       updatedAt,
       version: versionData,
     },

@@ -1,10 +1,12 @@
-import type { BeginTransaction } from 'payload/dist/database/types';
-import { PgTransactionConfig } from 'drizzle-orm/pg-core';
-import { v4 as uuid } from 'uuid';
-import { Client, Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
+import type { PgTransactionConfig } from 'drizzle-orm/pg-core';
+import type { BeginTransaction } from 'payload/database';
+
 import { sql } from 'drizzle-orm';
-import { DrizzleDB } from '../types';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Client, Pool } from 'pg';
+import { v4 as uuid } from 'uuid';
+
+import type { DrizzleDB } from '../types';
 
 export const beginTransaction: BeginTransaction = async function beginTransaction(
   options: PgTransactionConfig = {},

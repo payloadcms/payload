@@ -1,4 +1,5 @@
-import { RollbackTransaction } from 'payload/dist/database/types';
+import type { RollbackTransaction } from 'payload/database';
+
 import { sql } from 'drizzle-orm';
 
 

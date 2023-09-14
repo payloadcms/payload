@@ -1,6 +1,7 @@
-import { Field } from 'payload/types';
-import { SQL } from 'drizzle-orm';
-import { GenericColumn, PostgresAdapter } from '../types';
+import type { SQL } from 'drizzle-orm';
+import type { Field } from 'payload/types';
+
+import type { GenericColumn, PostgresAdapter } from '../types';
 
 type BaseArgs = {
   adapter: PostgresAdapter
@@ -11,17 +12,17 @@ type BaseArgs = {
 }
 
 type CreateArgs = BaseArgs & {
-  upsertTarget?: never
-  where?: never
   id?: never
   operation: 'create'
+  upsertTarget?: never
+  where?: never
 }
 
 type UpdateArgs = BaseArgs & {
-  upsertTarget?: GenericColumn
+  id?: number | string
   operation: 'update'
+  upsertTarget?: GenericColumn
   where?: SQL<unknown>
-  id?: string | number
 }
 
 export type Args = CreateArgs | UpdateArgs

@@ -1,9 +1,8 @@
-import { ColumnBaseConfig, ColumnDataType, Relation, Relations } from 'drizzle-orm';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { PgColumn, PgEnum, PgTableWithColumns } from 'drizzle-orm/pg-core';
-import { Payload } from 'payload';
-import { DatabaseAdapter } from 'payload/dist/database/types';
-import { ClientConfig, PoolConfig } from 'pg';
+import type { ColumnBaseConfig, ColumnDataType, Relation, Relations } from 'drizzle-orm';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import type { PgColumn, PgEnum, PgTableWithColumns } from 'drizzle-orm/pg-core';
+import type { DatabaseAdapter, Payload } from 'payload';
+import type { ClientConfig, PoolConfig } from 'pg';
 
 export type DrizzleDB = NodePgDatabase<Record<string, never>>
 
@@ -14,7 +13,7 @@ type BaseArgs = {
 
 type ClientArgs = {
   /** Client connection options for the Node package `pg` */
-  client?: ClientConfig | string | false
+  client?: ClientConfig | false | string
 } & BaseArgs
 
 type PoolArgs = {
@@ -31,7 +30,7 @@ export type GenericColumns = {
 }
 
 export type GenericTable = PgTableWithColumns<{
-  name: string, schema: undefined, columns: GenericColumns, dialect: string
+  columns: GenericColumns, dialect: string, name: string, schema: undefined
 }>
 
 export type GenericEnum = PgEnum<[string, ...string[]]>
@@ -40,11 +39,11 @@ export type GenericRelation = Relations<string, Record<string, Relation<string>>
 
 export type PostgresAdapter = DatabaseAdapter & Args & {
   db: DrizzleDB
-  sessions: Record<string, DrizzleDB>
   enums: Record<string, GenericEnum>
   relations: Record<string, GenericRelation>
+  schema: Record<string, GenericEnum | GenericRelation | GenericTable>
+  sessions: Record<string, DrizzleDB>
   tables: Record<string, GenericTable>
-  schema: Record<string, GenericEnum | GenericTable | GenericRelation>
 }
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter

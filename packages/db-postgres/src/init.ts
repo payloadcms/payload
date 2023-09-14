@@ -1,12 +1,14 @@
 /* eslint-disable no-param-reassign */
+import type { Init } from 'payload/database';
+import type { SanitizedCollectionConfig } from 'payload/types';
+
 import { pgEnum } from 'drizzle-orm/pg-core';
+import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload/versions';
 import toSnakeCase from 'to-snake-case';
-import { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
-import type { Init } from 'payload/dist/database/types';
-import { buildVersionGlobalFields } from 'payload/dist/versions/buildGlobalFields';
-import { buildVersionCollectionFields } from 'payload/dist/versions/buildCollectionFields';
-import { buildTable } from './schema/build';
+
 import type { PostgresAdapter } from './types';
+
+import { buildTable } from './schema/build';
 
 export const init: Init = async function init(this: PostgresAdapter) {
   if (this.payload.config.localization) {

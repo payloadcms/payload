@@ -1,24 +1,28 @@
 /* eslint-disable no-param-reassign */
-import { Field, FieldAffectingData, fieldAffectsData, TabAsField, tabHasName } from 'payload/dist/fields/config/types';
-import toSnakeCase from 'to-snake-case';
-import { and, eq, SQL, sql } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
+import type { Field, FieldAffectingData, TabAsField } from 'payload/types';
+
+import { and, eq, sql } from 'drizzle-orm';
 import { APIError } from 'payload/errors';
-import flattenFields from 'payload/dist/utilities/flattenTopLevelFields';
-import { BuildQueryJoins } from './buildQuery';
-import { GenericColumn, GenericTable, PostgresAdapter } from '../types';
+import { fieldAffectsData, tabHasName } from 'payload/types';
+import { flattenTopLevelFields } from 'payload/utilities';
+import toSnakeCase from 'to-snake-case';
+
+import type { GenericColumn, GenericTable, PostgresAdapter } from '../types';
+import type { BuildQueryJoins } from './buildQuery';
 
 type Constraint = {
-  table: GenericTable
   columnName: string
+  table: GenericTable
   value: unknown
 }
 
 type TableColumn = {
-  table: GenericTable
   columnName?: string
   constraints: Constraint[]
   field: FieldAffectingData
   rawColumn?: SQL
+  table: GenericTable
 }
 
 type Args = {
@@ -28,9 +32,9 @@ type Args = {
   constraints?: Constraint[]
   fields: (Field | TabAsField)[]
   joins: BuildQueryJoins
-  selectFields: Record<string, GenericColumn>
   locale?: string
   pathSegments: string[]
+  selectFields: Record<string, GenericColumn>
   tableName: string
 }
 /**
@@ -45,13 +49,13 @@ export const getTableColumnFromPath = ({
   constraints = [],
   fields,
   joins,
-  selectFields,
   locale,
   pathSegments,
+  selectFields,
   tableName,
 }: Args): TableColumn => {
   const fieldPath = pathSegments[0];
-  const field = flattenFields(fields as Field[])
+  const field = flattenTopLevelFields(fields as Field[])
     .find((fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath) as Field | TabAsField;
   let newTableName = tableName;
 
@@ -83,8 +87,8 @@ export const getTableColumnFromPath = ({
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
-          tableName: newTableName,
           selectFields,
+          tableName: newTableName,
         });
       }
       case 'tab': {
@@ -98,8 +102,8 @@ export const getTableColumnFromPath = ({
             joins,
             locale,
             pathSegments: pathSegments.slice(1),
-            tableName: newTableName,
             selectFields,
+            tableName: newTableName,
           });
         }
         return getTableColumnFromPath({
@@ -111,8 +115,8 @@ export const getTableColumnFromPath = ({
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
-          tableName: newTableName,
           selectFields,
+          tableName: newTableName,
         });
       }
 
@@ -130,8 +134,8 @@ export const getTableColumnFromPath = ({
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
-          tableName: newTableName,
           selectFields,
+          tableName: newTableName,
         });
       }
 
@@ -153,8 +157,8 @@ export const getTableColumnFromPath = ({
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
-          tableName: newTableName,
           selectFields,
+          tableName: newTableName,
         });
       }
 
@@ -185,19 +189,19 @@ export const getTableColumnFromPath = ({
           joins[newTableName] = eq(adapter.tables[newTableName].id, adapter.tables[`${tableName}_relationships`][`${field.relationTo}ID`]);
           if (newCollectionPath === '') {
             return {
-              table: adapter.tables[relationTableName],
+              columnName: `${field.relationTo}ID`,
               constraints,
               field,
-              columnName: `${field.relationTo}ID`,
+              table: adapter.tables[relationTableName],
             };
           }
         } else if (newCollectionPath === 'value') {
           const tableColumnsNames = field.relationTo.map((relationTo) => `"${relationTableName}"."${toSnakeCase(relationTo)}_id"`);
           return {
-            table: adapter.tables[relationTableName],
             constraints,
             field,
             rawColumn: sql.raw(`COALESCE(${tableColumnsNames.join(', ')})`),
+            table: adapter.tables[relationTableName],
           };
         } else {
           throw new APIError('Not supported');
@@ -211,8 +215,8 @@ export const getTableColumnFromPath = ({
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
-          tableName: newTableName,
           selectFields,
+          tableName: newTableName,
         });
       }
 

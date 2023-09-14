@@ -1,23 +1,22 @@
 import { and, eq, gt, gte, ilike, inArray, isNotNull, isNull, lt, lte, ne, notInArray, or } from 'drizzle-orm';
 
 export const operatorMap = {
-  greater_than_equal: gte,
-  less_than_equal: lte,
-  less_than: lt,
-  greater_than: gt,
-  in: inArray,
-  like: ilike,
-  // TODO:
-  // all: all,
-  not_in: notInArray,
-  not_equals: ne,
-  exists: isNotNull,
-  isNull, // handles exists: false
+  // intersects: intersects,
+  and,
   equals: eq,
+  exists: isNotNull,
+  greater_than: gt,
+  greater_than_equal: gte,
+  in: inArray,
+  isNull, // handles exists: false
+  less_than: lt,
+  less_than_equal: lte,
+  like: ilike,
+  not_equals: ne,
   // TODO: geojson queries
   // near: near,
   // within: within,
-  // intersects: intersects,
-  and,
+  // all: all,
+  not_in: notInArray,
   or,
 };

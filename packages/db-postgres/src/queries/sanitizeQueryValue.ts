@@ -1,6 +1,7 @@
-import { Field, TabAsField } from 'payload/dist/fields/config/types';
-import { createArrayFromCommaDelineated } from 'payload/dist/utilities/createArrayFromCommaDelineated';
+import type { Field, TabAsField } from 'payload/types';
+
 import { APIError } from 'payload/errors';
+import { createArrayFromCommaDelineated } from 'payload/utilities';
 
 type SanitizeQueryValueArgs = {
   field: Field | TabAsField
@@ -37,7 +38,7 @@ export const sanitizeQueryValue = ({ field, operator: operatorArg, val }: Saniti
     if (val.toLowerCase() === 'false') formattedValue = false;
   }
 
-  if (['all', 'not_in', 'in'].includes(operator) && typeof formattedValue === 'string') {
+  if (['all', 'in', 'not_in'].includes(operator) && typeof formattedValue === 'string') {
     formattedValue = createArrayFromCommaDelineated(formattedValue);
 
     if (field.type === 'number') {

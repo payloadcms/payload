@@ -1,12 +1,15 @@
-import { PayloadRequest } from 'payload/types';
+import type { CreateGlobal } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
+
 import toSnakeCase from 'to-snake-case';
-import { CreateGlobal } from 'payload/dist/database/types';
+
+import type { PostgresAdapter } from './types';
+
 import { upsertRow } from './upsertRow';
-import { PostgresAdapter } from './types';
 
 export const createGlobal: CreateGlobal = async function createGlobal(
   this: PostgresAdapter,
-  { data, slug, req = {} as PayloadRequest },
+  { data, req = {} as PayloadRequest, slug },
 ) {
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug);
 
@@ -14,7 +17,6 @@ export const createGlobal: CreateGlobal = async function createGlobal(
     adapter: this,
     data,
     fields: globalConfig.fields,
-    locale: req.locale,
     operation: 'create',
     tableName: toSnakeCase(slug),
   });

@@ -1,22 +1,23 @@
+import type { QueryDrafts } from 'payload/database';
+import type { PayloadRequest, SanitizedCollectionConfig } from 'payload/types';
+
 import { sql } from 'drizzle-orm';
+import { buildVersionCollectionFields } from 'payload/versions';
 import toSnakeCase from 'to-snake-case';
-import type { QueryDrafts } from 'payload/dist/database/types';
-import type { PayloadRequest } from 'payload/dist/express/types';
-import type { SanitizedCollectionConfig } from 'payload/dist/collections/config/types';
-import { buildVersionCollectionFields } from 'payload/dist/versions/buildCollectionFields';
-import buildQuery from './queries/buildQuery';
+
 import { buildFindManyArgs } from './find/buildFindManyArgs';
+import buildQuery from './queries/buildQuery';
 import { transform } from './transform/read';
 
 export const queryDrafts: QueryDrafts = async function queryDrafts({
   collection,
-  where,
-  page = 1,
   limit: limitArg,
-  sort: sortArg,
   locale,
+  page = 1,
   pagination,
   req = {} as PayloadRequest,
+  sort: sortArg,
+  where,
 }) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config;
   const tableName = toSnakeCase(collection);
@@ -33,11 +34,12 @@ export const queryDrafts: QueryDrafts = async function queryDrafts({
   let pagingCounter;
 
   const query = await buildQuery({
-    collectionSlug: collection,
-    versionsFields: buildVersionCollectionFields(collectionConfig),
     adapter: this,
+    fields: buildVersionCollectionFields(collectionConfig),
     locale,
-    where,
+    sort,
+    tableName: versionsTableName,
+    where
   });
 
   if (pagination !== false) {
@@ -72,14 +74,14 @@ export const queryDrafts: QueryDrafts = async function queryDrafts({
 
   return {
     docs, // : T[]
-    totalDocs, // : number
+    hasNextPage, // : boolean
+    hasPrevPage, // : boolean
     limit, // : number
-    totalPages, // : number
+    nextPage: hasNextPage ? page + 1 : null, // ?: number | null | undefined
     page, // ?: number
     pagingCounter, // : number
-    hasPrevPage, // : boolean
-    hasNextPage, // : boolean
     prevPage: hasPrevPage ? page - 1 : null, // ?: number | null | undefined
-    nextPage: hasNextPage ? page + 1 : null, // ?: number | null | undefined
+    totalDocs, // : number
+    totalPages, // : number
   };
 };

@@ -1,28 +1,29 @@
-import { Where } from 'payload/types';
-import { Field } from 'payload/dist/fields/config/types';
-import { SQL } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
+import type { Field, Where } from 'payload/types';
+
+import type { GenericColumn, PostgresAdapter } from '../types';
+import type { BuildQueryJoins } from './buildQuery';
+
 import { parseParams } from './parseParams';
-import { GenericColumn, PostgresAdapter } from '../types';
-import { BuildQueryJoins } from './buildQuery';
 
 export async function buildAndOrConditions({
-  joins,
-  where,
   adapter,
-  locale,
   fields,
-  tableName,
+  joins,
+  locale,
   selectFields,
+  tableName,
+  where,
 }: {
-  joins: BuildQueryJoins,
-  where: Where[],
-  collectionSlug?: string,
-  globalSlug?: string,
   adapter: PostgresAdapter
-  locale?: string,
+  collectionSlug?: string,
   fields: Field[],
-  tableName: string,
+  globalSlug?: string,
+  joins: BuildQueryJoins,
+  locale?: string,
   selectFields: Record<string, GenericColumn>
+  tableName: string,
+  where: Where[],
 }): Promise<SQL[]> {
   const completedConditions = [];
   // Loop over all AND / OR operations and add them to the AND / OR query param
@@ -33,13 +34,13 @@ export async function buildAndOrConditions({
     if (typeof condition === 'object') {
       // eslint-disable-next-line no-await-in-loop
       const result = await parseParams({
-        joins,
-        where: condition,
         adapter,
-        locale,
         fields,
-        tableName,
+        joins,
+        locale,
         selectFields,
+        tableName,
+        where: condition,
       });
       if (result && Object.keys(result).length > 0) {
         completedConditions.push(result);

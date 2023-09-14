@@ -1,16 +1,19 @@
-import { DeleteMany } from 'payload/dist/database/types';
-import { PayloadRequest } from 'payload/dist/express/types';
+import type { DeleteMany } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
+
 import toSnakeCase from 'to-snake-case';
-import { PostgresAdapter } from './types';
-import buildQuery from './queries/buildQuery';
+
+import type { PostgresAdapter } from './types';
+
 import { buildFindManyArgs } from './find/buildFindManyArgs';
+import buildQuery from './queries/buildQuery';
 import { transform } from './transform/read';
 
 export const deleteMany: DeleteMany = async function deleteMany(this: PostgresAdapter,
   {
     collection,
-    where: incomingWhere,
     req = {} as PayloadRequest,
+    where: incomingWhere,
   }) {
   const collectionConfig = this.payload.collections[collection].config;
   const tableName = toSnakeCase(collection);
@@ -18,8 +21,8 @@ export const deleteMany: DeleteMany = async function deleteMany(this: PostgresAd
   const { where } = await buildQuery({
     adapter: this,
     fields: collectionConfig.fields,
-    where: incomingWhere,
     tableName,
+    where: incomingWhere,
   });
 
   const findManyArgs = buildFindManyArgs({

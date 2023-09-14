@@ -1,4 +1,5 @@
-import { CommitTransaction } from 'payload/dist/database/types';
+import type { CommitTransaction } from 'payload/database';
+
 import { sql } from 'drizzle-orm';
 
 

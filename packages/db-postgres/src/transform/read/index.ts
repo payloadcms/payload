@@ -1,15 +1,15 @@
 /* eslint-disable no-param-reassign */
-import { Field } from 'payload/types';
-import { TypeWithID } from 'payload/dist/collections/config/types';
-import { SanitizedConfig } from 'payload/config';
-import { traverseFields } from './traverseFields';
-import { createRelationshipMap } from '../../utilities/createRelationshipMap';
+import type { SanitizedConfig } from 'payload/config';
+import type { Field, TypeWithID } from 'payload/types';
+
 import { createBlocksMap } from '../../utilities/createBlocksMap';
+import { createRelationshipMap } from '../../utilities/createRelationshipMap';
+import { traverseFields } from './traverseFields';
 
 type TransformArgs = {
   config: SanitizedConfig
   data: Record<string, unknown>
-  fallbackLocale?: string | false
+  fallbackLocale?: false | string
   fields: Field[]
   locale?: string
 }

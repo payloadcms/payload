@@ -1,7 +1,10 @@
 /* eslint-disable no-param-reassign */
-import { BlockField } from 'payload/types';
+import type { BlockField } from 'payload/types';
+
 import toSnakeCase from 'to-snake-case';
-import { BlockRowToInsert } from './types';
+
+import type { BlockRowToInsert } from './types';
+
 import { traverseFields } from './traverseFields';
 
 type Args = {
@@ -33,11 +36,11 @@ export const transformBlocks = ({
 
     const newRow: BlockRowToInsert = {
       arrays: {},
+      locales: {},
       row: {
         _order: i + 1,
         _path: `${path}${field.name}`,
       },
-      locales: {},
     };
 
     if (field.localized && locale) newRow.row._locale = locale;

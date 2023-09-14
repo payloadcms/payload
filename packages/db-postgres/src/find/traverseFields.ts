@@ -1,17 +1,19 @@
 /* eslint-disable no-param-reassign */
+import type { ArrayField, Block, Field } from 'payload/types';
+
+import { fieldAffectsData } from 'payload/types';
 import toSnakeCase from 'to-snake-case';
-import { fieldAffectsData } from 'payload/dist/fields/config/types';
-import { ArrayField, Block, Field } from 'payload/types';
-import { Result } from './buildFindManyArgs';
-import { PostgresAdapter } from '../types';
+
+import type { PostgresAdapter } from '../tyfpes';
+import type { Result } from './buildFindManyArgs';
 
 type TraverseFieldArgs = {
+  _locales: Record<string, unknown>
   adapter: PostgresAdapter
   currentArgs: Record<string, unknown>,
   currentTableName: string
   depth?: number,
   fields: Field[]
-  _locales: Record<string, unknown>
   locatedArrays: { [path: string]: ArrayField },
   locatedBlocks: Block[],
   path: string,
@@ -20,12 +22,12 @@ type TraverseFieldArgs = {
 }
 
 export const traverseFields = ({
+  _locales,
   adapter,
   currentArgs,
   currentTableName,
   depth,
   fields,
-  _locales,
   locatedArrays,
   locatedBlocks,
   path,
@@ -37,11 +39,11 @@ export const traverseFields = ({
       switch (field.type) {
         case 'array': {
           const withArray: Result = {
-            orderBy: ({ _order }, { asc }) => [asc(_order)],
             columns: {
-              _parentID: false,
               _order: false,
+              _parentID: false,
             },
+            orderBy: ({ _order }, { asc }) => [asc(_order)],
             with: {},
           };
 
@@ -51,12 +53,12 @@ export const traverseFields = ({
           currentArgs.with[`${path}${field.name}`] = withArray;
 
           traverseFields({
+            _locales,
             adapter,
             currentArgs: withArray,
             currentTableName: arrayTableName,
             depth,
             fields: field.fields,
-            _locales,
             locatedArrays,
             locatedBlocks,
             path: '',
@@ -84,12 +86,12 @@ export const traverseFields = ({
               topLevelArgs.with[blockKey] = withBlock;
 
               traverseFields({
+                _locales,
                 adapter,
                 currentArgs: withBlock,
                 currentTableName,
                 depth,
                 fields: block.fields,
-                _locales,
                 locatedArrays,
                 locatedBlocks,
                 path,
@@ -103,12 +105,12 @@ export const traverseFields = ({
 
         case 'group':
           traverseFields({
+            _locales,
             adapter,
             currentArgs,
             currentTableName,
             depth,
             fields: field.fields,
-            _locales,
             locatedArrays,
             locatedBlocks,
             path: `${path}${field.name}_`,

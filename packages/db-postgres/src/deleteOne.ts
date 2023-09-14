@@ -1,17 +1,20 @@
-import { DeleteOne } from 'payload/dist/database/types';
-import { PayloadRequest } from 'payload/dist/express/types';
+import type { DeleteOne } from 'payload/database';
+import type { PayloadRequest } from 'payload/types';
+
 import toSnakeCase from 'to-snake-case';
-import { PostgresAdapter } from './types';
-import buildQuery from './queries/buildQuery';
+
+import type { PostgresAdapter } from './types';
+
 import { buildFindManyArgs } from './find/buildFindManyArgs';
+import buildQuery from './queries/buildQuery';
 import { transform } from './transform/read';
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: PostgresAdapter,
   {
     collection,
-    where: incomingWhere,
     req = {} as PayloadRequest,
+    where: incomingWhere,
   },
 ) {
   const collectionConfig = this.payload.collections[collection].config;
