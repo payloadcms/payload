@@ -222,6 +222,7 @@ describe('fields - relationship', () => {
   test('should duplicate document with relationships', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
 
+    await page.locator('.doc-controls__popup .popup-button').click()
     await page.locator('.btn.duplicate').first().click()
     await expect(page.locator('.Toastify')).toContainText('successfully')
     const field = page.locator('#field-relationship .relationship--single-value__text')
