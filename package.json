@@ -1,48 +1,10 @@
 {
   "name": "payload-monorepo",
-  "description": "Node, React and MongoDB Headless CMS and Application Framework",
-  "sideEffects": false,
-  "typings": "./dist/index.d.ts",
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "private": true,
   "workspaces:": [
     "packages/*"
   ],
-  "author": {
-    "email": "info@payloadcms.com",
-    "name": "Payload",
-    "url": "https://payloadcms.com"
-  },
-  "bin": {
-    "payload": "bin.js"
-  },
-  "bugs": {
-    "url": "https://github.com/payloadcms/payload"
-  },
-  "engines": {
-    "node": ">=14",
-    "pnpm": ">=8"
-  },
-  "homepage": "https://payloadcms.com",
-  "license": "MIT",
-  "main": "./dist/index.js",
-  "maintainers": [
-    {
-      "email": "info@payloadcms.com",
-      "name": "Payload",
-      "url": "https://payloadcms.com"
-    }
-  ],
-  "private": true,
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/payloadcms/payload.git"
-  },
-  "dependencies": {
-    "turbo": "^1.10.13"
-  },
   "scripts": {
     "build": "pnpm --filter payload run build",
     "build:all": "turbo build",
@@ -55,12 +17,12 @@
     "dev:postgres": "pnpm --filter payload run dev:postgres",
     "fix": "eslint \"src/**/*.ts\" --fix",
     "lint": "eslint \"src/**/*.ts\"",
-    "pretest": "pnpm build",
     "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.json",
     "release:canary": "release-it pre --preReleaseId=canary --npm.tag=canary --config .release-it.pre.json",
     "release:major": "release-it major",
     "release:minor": "release-it minor",
     "release:patch": "release-it patch",
+    "pretest": "pnpm build",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env jest --config=jest.components.config.js",
     "test:e2e": "ts-node -T ./test/runE2E.ts",
@@ -68,6 +30,9 @@
     "test:e2e:headed": "cross-env DISABLE_LOGGING=true playwright test --headed",
     "test:int": "cross-env DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
+  },
+  "dependencies": {
+    "turbo": "^1.10.13"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -92,36 +57,8 @@
     "typescript": "5.2.2",
     "uuid": "^9.0.0"
   },
-  "keywords": [
-    "payload",
-    "cms",
-    "content management",
-    "framework",
-    "typescript",
-    "javascript",
-    "node",
-    "express",
-    "headless",
-    "graphQL",
-    "restful",
-    "access control",
-    "dashboard",
-    "admin panel",
-    "api",
-    "MongoDB",
-    "self hosted",
-    "react",
-    "auth"
-  ],
-  "files": [
-    "bin.js",
-    "dist",
-    "docs",
-    "components",
-    "scss",
-    "*.js",
-    "*.d.ts",
-    "!jest.config.js",
-    "!jest.components.config.js"
-  ]
+  "engines": {
+    "node": ">=14",
+    "pnpm": ">=8"
+  }
 }
