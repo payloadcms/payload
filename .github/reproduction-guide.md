@@ -9,6 +9,7 @@
 **NOTE:** The goal is to isolate the problem by reducing the number of `collections/globals/fields` you add to the `test/_community` folder. This folder is _not_ meant for you to copy your project into, but rather recreate the issue you are experiencing with minimal config.
 
 ## Example test directory file tree
+
 ```text
 .
 ├── config.ts
@@ -27,9 +28,11 @@ The directory split up in this way specifically to reduce friction when creating
 <br />
 
 ## Testing is optional but encouraged
+
 An issue does not need to have failing tests — reproduction steps with your forked repo are enough at this point. Some people like to dive deeper and we want to give you the guidance/tools to do so. Read more below:
 
 ### Running integration tests (Payload API tests)
+
 First install [Jest Runner for VSVode](https://marketplace.visualstudio.com/items?itemName=firsttris.vscode-jest-runner).
 
 There are a couple ways run integration tests:
@@ -45,7 +48,9 @@ There are a couple ways run integration tests:
   ```
 
 ### Running E2E tests (Admin Panel UI tests)
+
 The easiest way to run E2E tests is to install
+
 - [Playwright Test for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright)
 - [Playwright Runner](https://marketplace.visualstudio.com/items?itemName=ortoni.ortoni)
 
@@ -53,6 +58,6 @@ Once they are installed you can open the `testing` tab in vscode sidebar and dri
 
 <img src="https://raw.githubusercontent.com/payloadcms/payload/master/src/admin/assets/images/github/e2e-debug.png" />
 
-
 #### Notes
+
 - It is recommended to add the test credentials (located in `test/credentials.ts`) to your autofill for `localhost:3000/admin` as this will be required on every nodemon restart. The default credentials are `dev@payloadcms.com` as email and `test` as password.

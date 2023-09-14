@@ -1,20 +1,20 @@
-import { devUser } from '../credentials';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
 
-export const slug = 'global';
-export const arraySlug = 'array';
+export const slug = 'global'
+export const arraySlug = 'array'
 
-export const accessControlSlug = 'access-control';
+export const accessControlSlug = 'access-control'
 
-export const englishLocale = 'en';
-export const spanishLocale = 'es';
+export const englishLocale = 'en'
+export const spanishLocale = 'es'
 
-export const globalsEndpoint = 'hello-world';
+export const globalsEndpoint = 'hello-world'
 
 const access = {
   read: () => true,
   update: () => true,
-};
+}
 
 export default buildConfigWithDefaults({
   localization: {
@@ -58,14 +58,14 @@ export default buildConfigWithDefaults({
       access: {
         read: ({ req: { user } }) => {
           if (user) {
-            return true;
+            return true
           }
 
           return {
             enabled: {
               equals: true,
             },
-          };
+          }
         },
       },
       fields: [
@@ -88,13 +88,13 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
 
     await payload.updateGlobal({
       slug: accessControlSlug,
       data: {
         title: 'hello',
       },
-    });
+    })
   },
-});
+})

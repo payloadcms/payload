@@ -1,9 +1,15 @@
-export const englishTitle = 'english';
-export const spanishTitle = 'spanish';
-export const relationEnglishTitle = 'english-relation';
-export const relationSpanishTitle = 'spanish-relation';
-export const relationEnglishTitle2 = `${relationEnglishTitle}2`;
-export const relationSpanishTitle2 = `${relationSpanishTitle}2`;
+export const englishTitle = 'english'
+export const spanishTitle = 'spanish'
+export const relationEnglishTitle = 'english-relation'
+export const relationSpanishTitle = 'spanish-relation'
+export const relationEnglishTitle2 = `${relationEnglishTitle}2`
+export const relationSpanishTitle2 = `${relationSpanishTitle}2`
 
-export const defaultLocale = 'en';
-export const spanishLocale = 'es';
+export const defaultLocale = 'en'
+export const spanishLocale = 'es'
+
+// Slugs
+export const localizedPostsSlug = 'localized-posts'
+export const withLocalizedRelSlug = 'with-localized-relationship'
+export const relationshipLocalizedSlug = 'relationship-localized'
+export const withRequiredLocalizedFields = 'localized-required'

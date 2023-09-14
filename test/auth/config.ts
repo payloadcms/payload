@@ -1,21 +1,17 @@
-import { v4 as uuid } from 'uuid';
-import { mapAsync } from '../../src/utilities/mapAsync';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
-import { AuthDebug } from './AuthDebug';
+import { v4 as uuid } from 'uuid'
 
-export const slug = 'users';
-
-export const namedSaveToJWTValue = 'namedSaveToJWT value';
-
-export const saveToJWTKey = 'x-custom-jwt-property-name';
+import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
+import { AuthDebug } from './AuthDebug'
+import { namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
 
 export default buildConfigWithDefaults({
   admin: {
     user: 'users',
     autoLogin: {
-      email: 'test@example.com',
-      password: 'test',
+      email: devUser.email,
+      password: devUser.password,
       prefillOnly: true,
     },
   },
@@ -160,9 +156,9 @@ export default buildConfigWithDefaults({
               id: {
                 equals: user.id,
               },
-            };
+            }
           }
-          return true;
+          return true
         },
       },
       auth: {
@@ -187,7 +183,7 @@ export default buildConfigWithDefaults({
         password: devUser.password,
         custom: 'Hello, world!',
       },
-    });
+    })
 
     await mapAsync([...Array(2)], async () => {
       await payload.create({
@@ -196,7 +192,7 @@ export default buildConfigWithDefaults({
           apiKey: uuid(),
           enableAPIKey: true,
         },
-      });
-    });
+      })
+    })
   },
-});
+})

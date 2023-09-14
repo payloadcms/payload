@@ -1,79 +1,73 @@
-import type { PaginateOptions } from 'mongoose';
-import type { Find } from 'payload/dist/database/types';
-import flattenWhereToOperators from 'payload/dist/database/flattenWhereToOperators';
-import { PayloadRequest } from 'payload/dist/express/types';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
-import { buildSortParam } from './queries/buildSortParam';
-import type { MongooseAdapter } from '.';
-import { withSession } from './withSession';
+import type { PaginateOptions } from 'mongoose'
+import type { Find } from 'payload/database'
+import type { PayloadRequest } from 'payload/types'
+
+import { flattenWhereToOperators } from 'payload/database'
+
+import type { MongooseAdapter } from '.'
+
+import { buildSortParam } from './queries/buildSortParam'
+import sanitizeInternalFields from './utilities/sanitizeInternalFields'
+import { withSession } from './withSession'
 
 export const find: Find = async function find(
   this: MongooseAdapter,
-  {
-    collection,
-    where,
-    page,
-    limit,
-    sort: sortArg,
-    locale,
-    pagination,
-    req = {} as PayloadRequest,
-  },
+  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
 ) {
-  const Model = this.collections[collection];
-  const collectionConfig = this.payload.collections[collection].config;
-  const options = withSession(this, req.transactionID);
+  const Model = this.collections[collection]
+  const collectionConfig = this.payload.collections[collection].config
+  const options = withSession(this, req.transactionID)
 
-  let hasNearConstraint = false;
+  let hasNearConstraint = false
 
   if (where) {
-    const constraints = flattenWhereToOperators(where);
-    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+    const constraints = flattenWhereToOperators(where)
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
   }
 
-  let sort;
+  let sort
   if (!hasNearConstraint) {
     sort = buildSortParam({
-      sort: sortArg || collectionConfig.defaultSort,
-      fields: collectionConfig.fields,
-      timestamps: true,
       config: this.payload.config,
+      fields: collectionConfig.fields,
       locale,
-    });
+      sort: sortArg || collectionConfig.defaultSort,
+      timestamps: true,
+    })
   }
 
   const query = await Model.buildQuery({
-    payload: this.payload,
     locale,
+    payload: this.payload,
     where,
-  });
+  })
 
   const paginationOptions: PaginateOptions = {
-    page,
-    sort,
+    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
-    useEstimatedCount: hasNearConstraint,
-    forceCountFn: hasNearConstraint,
-    pagination,
     options,
-  };
-
-  if (limit > 0) {
-    paginationOptions.limit = limit;
-    // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit;
+    page,
+    pagination,
+    sort,
+    useEstimatedCount: hasNearConstraint,
   }
 
-  const result = await Model.paginate(query, paginationOptions);
-  const docs = JSON.parse(JSON.stringify(result.docs));
+  if (limit > 0) {
+    paginationOptions.limit = limit
+    // limit must also be set here, it's ignored when pagination is false
+    paginationOptions.options.limit = limit
+  }
+
+  const result = await Model.paginate(query, paginationOptions)
+  const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
     ...result,
     docs: docs.map((doc) => {
       // eslint-disable-next-line no-param-reassign
-      doc.id = doc._id;
-      return sanitizeInternalFields(doc);
+      doc.id = doc._id
+      return sanitizeInternalFields(doc)
     }),
-  };
-};
+  }
+}

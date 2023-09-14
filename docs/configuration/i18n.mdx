@@ -13,47 +13,47 @@ While Payload's built-in features come translated, you may want to also translat
 Here is an example of a simple collection supporting both English and Spanish editors:
 
 ```ts
-import { CollectionConfig } from "payload/types";
+import { CollectionConfig } from 'payload/types'
 
 export const Articles: CollectionConfig = {
-  slug: "articles",
+  slug: 'articles',
   labels: {
     singular: {
-      en: "Article",
-      es: "Artículo",
+      en: 'Article',
+      es: 'Artículo',
     },
     plural: {
-      en: "Articles",
-      es: "Artículos",
+      en: 'Articles',
+      es: 'Artículos',
     },
   },
   admin: {
-    group: { en: "Content", es: "Contenido" },
+    group: { en: 'Content', es: 'Contenido' },
   },
   fields: [
     {
-      name: "title",
-      type: "text",
+      name: 'title',
+      type: 'text',
       label: {
-        en: "Title",
-        es: "Título",
+        en: 'Title',
+        es: 'Título',
       },
       admin: {
-        placeholder: { en: "Enter title", es: "Introduce el título" },
+        placeholder: { en: 'Enter title', es: 'Introduce el título' },
       },
     },
     {
-      name: "type",
-      type: "radio",
+      name: 'type',
+      type: 'radio',
       options: [
         {
-          value: "news",
-          label: { en: "News", es: "Noticias" },
+          value: 'news',
+          label: { en: 'News', es: 'Noticias' },
         }, // etc...
       ],
     },
   ],
-};
+}
 ```
 
 ### Admin UI
@@ -62,8 +62,10 @@ The Payload admin panel reads the language settings of a user's browser and disp
 After a user logs in, they can change their language selection in the `/account` view.
 
 <Banner>
-  <strong>Note:</strong><br />
-  If there is a language that Payload does not yet support, we accept code [contributions](https://github.com/payloadcms/payload/blob/master/contributing.md).
+  <strong>Note:</strong>
+  <br />
+  If there is a language that Payload does not yet support, we accept code
+  [contributions](https://github.com/payloadcms/payload/blob/master/contributing.md).
 </Banner>
 
 ### Node Express
@@ -81,28 +83,28 @@ In your Payload config, you can add translations and customize the settings in `
 **Example Payload config extending i18n:**
 
 ```ts
-import { buildConfig } from "payload/config";
+import { buildConfig } from 'payload/config'
 
 export default buildConfig({
   //...
   i18n: {
-    fallbackLng: "en", // default
+    fallbackLng: 'en', // default
     debug: false, // default
     resources: {
       en: {
         custom: {
           // namespace can be anything you want
-          key1: "Translation with {{variable}}", // translation
+          key1: 'Translation with {{variable}}', // translation
         },
         // override existing translation keys
         general: {
-          dashboard: "Home",
+          dashboard: 'Home',
         },
       },
     },
   },
   //...
-});
+})
 ```
 
 See the i18next [configuration options](https://www.i18next.com/overview/configuration-options) to learn more.

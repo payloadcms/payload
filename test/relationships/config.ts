@@ -1,15 +1,16 @@
-import type { CollectionConfig } from '../../src/collections/config/types';
-import { devUser } from '../credentials';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import type { CollectionConfig } from '../../packages/payload/src/collections/config/types'
+
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
 
 const openAccess = {
   create: () => true,
   read: () => true,
   update: () => true,
   delete: () => true,
-};
+}
 
-const defaultAccess = ({ req: { user } }) => Boolean(user);
+const defaultAccess = ({ req: { user } }) => Boolean(user)
 
 const collectionWithName = (collectionSlug: string): CollectionConfig => {
   return {
@@ -32,15 +33,15 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
         },
       },
     ],
-  };
-};
+  }
+}
 
-export const slug = 'posts';
-export const relationSlug = 'relation';
-export const defaultAccessRelSlug = 'strict-access';
-export const chainedRelSlug = 'chained-relation';
-export const customIdSlug = 'custom-id-relation';
-export const customIdNumberSlug = 'custom-id-number-relation';
+export const slug = 'posts'
+export const relationSlug = 'relation'
+export const defaultAccessRelSlug = 'strict-access'
+export const chainedRelSlug = 'chained-relation'
+export const customIdSlug = 'custom-id-relation'
+export const customIdNumberSlug = 'custom-id-number-relation'
 export default buildConfigWithDefaults({
   collections: [
     {
@@ -206,35 +207,35 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
 
     const rel1 = await payload.create({
       collection: relationSlug,
       data: {
         name: 'name',
       },
-    });
+    })
 
     const filteredRelation = await payload.create({
       collection: relationSlug,
       data: {
         name: 'filtered',
       },
-    });
+    })
 
     const defaultAccessRelation = await payload.create({
       collection: defaultAccessRelSlug,
       data: {
         name: 'name',
       },
-    });
+    })
 
     const chained3 = await payload.create({
       collection: chainedRelSlug,
       data: {
         name: 'chain3',
       },
-    });
+    })
 
     const chained2 = await payload.create({
       collection: chainedRelSlug,
@@ -242,7 +243,7 @@ export default buildConfigWithDefaults({
         name: 'chain2',
         relation: chained3.id,
       },
-    });
+    })
 
     const chained = await payload.create({
       collection: chainedRelSlug,
@@ -250,7 +251,7 @@ export default buildConfigWithDefaults({
         name: 'chain1',
         relation: chained2.id,
       },
-    });
+    })
 
     await payload.update({
       collection: chainedRelSlug,
@@ -259,7 +260,7 @@ export default buildConfigWithDefaults({
         name: 'chain3',
         relation: chained.id,
       },
-    });
+    })
 
     const customIdRelation = await payload.create({
       collection: customIdSlug,
@@ -267,7 +268,7 @@ export default buildConfigWithDefaults({
         id: 'custommmm',
         name: 'custom-id',
       },
-    });
+    })
 
     const customIdNumberRelation = await payload.create({
       collection: customIdNumberSlug,
@@ -275,7 +276,7 @@ export default buildConfigWithDefaults({
         id: 908234892340,
         name: 'custom-id',
       },
-    });
+    })
 
     // Relationship
     await payload.create({
@@ -290,6 +291,6 @@ export default buildConfigWithDefaults({
         customIdNumberRelation: customIdNumberRelation.id,
         filteredRelation: filteredRelation.id,
       },
-    });
+    })
   },
-});
+})

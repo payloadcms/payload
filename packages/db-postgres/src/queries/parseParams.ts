@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax */
+import type { SQL } from 'drizzle-orm'
 /* eslint-disable no-await-in-loop */
 import { Operator, Where } from 'payload/types';
 import { Field } from 'payload/dist/fields/config/types';
@@ -25,7 +26,7 @@ export async function parseParams({
   joins,
   where,
   adapter,
-  locale,
+  collectionSlug,
   fields,
   tableName,
   selectFields,
@@ -118,5 +119,5 @@ export async function parseParams({
     [result] = constraints;
   }
 
-  return result;
+  return result
 }

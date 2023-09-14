@@ -1,5 +1,6 @@
-import path from 'path';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
+import path from 'path'
+
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 
 export default buildConfigWithDefaults({
   graphQL: {
@@ -153,4 +154,4 @@ export default buildConfigWithDefaults({
       ],
     },
   ],
-});
+})

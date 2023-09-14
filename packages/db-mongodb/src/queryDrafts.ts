@@ -1,46 +1,39 @@
-import type { PaginateOptions } from 'mongoose';
-import type { QueryDrafts } from 'payload/dist/database/types';
-import flattenWhereToOperators from 'payload/dist/database/flattenWhereToOperators';
-import { PayloadRequest } from 'payload/dist/express/types';
-import { combineQueries } from 'payload/dist/database/combineQueries';
-import sanitizeInternalFields from './utilities/sanitizeInternalFields';
-import type { MongooseAdapter } from '.';
-import { buildSortParam } from './queries/buildSortParam';
-import { withSession } from './withSession';
+import type { PaginateOptions } from 'mongoose'
+import type { QueryDrafts } from 'payload/database'
+import type { PayloadRequest } from 'payload/types'
 
-export const queryDrafts: QueryDrafts = async function queryDrafts(
+import { flattenWhereToOperators, combineQueries } from 'payload/database'
+
+import type { MongooseAdapter } from '.'
+
+import { buildSortParam } from './queries/buildSortParam'
+import sanitizeInternalFields from './utilities/sanitizeInternalFields'
+import { withSession } from './withSession'
+
+export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
   this: MongooseAdapter,
-  {
-    collection,
-    where,
-    page,
-    limit,
-    sort: sortArg,
-    locale,
-    pagination,
-    req = {} as PayloadRequest,
-  },
+  { collection, limit, locale, page, pagination, req = {} as PayloadRequest, sort: sortArg, where },
 ) {
-  const VersionModel = this.versions[collection];
-  const collectionConfig = this.payload.collections[collection].config;
-  const options = withSession(this, req.transactionID);
+  const VersionModel = this.versions[collection]
+  const collectionConfig = this.payload.collections[collection].config
+  const options = withSession(this, req.transactionID)
 
   let hasNearConstraint;
   let sort;
 
   if (where) {
-    const constraints = flattenWhereToOperators(where);
-    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'));
+    const constraints = flattenWhereToOperators(where)
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
   }
 
   if (!hasNearConstraint) {
     sort = buildSortParam({
-      sort: sortArg || collectionConfig.defaultSort,
-      fields: collectionConfig.fields,
-      timestamps: true,
       config: this.payload.config,
+      fields: collectionConfig.fields,
       locale,
-    });
+      sort: sortArg || collectionConfig.defaultSort,
+      timestamps: true,
+    })
   }
 
   const combinedWhere = combineQueries({ latest: { equals: true } }, where);
@@ -79,11 +72,11 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
         _id: doc.parent,
         id: doc.parent,
         ...doc.version,
-        updatedAt: doc.updatedAt,
         createdAt: doc.createdAt,
-      };
+        updatedAt: doc.updatedAt,
+      }
 
-      return sanitizeInternalFields(doc);
+      return sanitizeInternalFields(doc)
     }),
-  };
-};
+  }
+}

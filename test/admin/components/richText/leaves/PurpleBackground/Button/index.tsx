@@ -1,10 +1,7 @@
-import React from 'react';
-import LeafButton from '../../../../../../../src/admin/components/forms/field-types/RichText/leaves/Button';
+import React from 'react'
 
-const Button = () => (
-  <LeafButton format="purple-background">
-    Purple Background
-  </LeafButton>
-);
+import LeafButton from '../../../../../../../packages/payload/src/admin/components/forms/field-types/RichText/leaves/Button'
 
-export default Button;
+const Button = () => <LeafButton format="purple-background">Purple Background</LeafButton>
+
+export default Button

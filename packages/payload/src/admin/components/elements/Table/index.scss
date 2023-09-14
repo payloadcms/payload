@@ -1,0 +1,45 @@
+@import '../../../scss/styles.scss';
+
+.table {
+  margin-bottom: $baseline;
+  overflow: auto;
+  max-width: 100%;
+
+  thead {
+    color: var(--theme-elevation-400);
+
+    th {
+      font-weight: normal;
+      text-align: left;
+      [dir='rtl'] & {
+        text-align: right;
+      }
+    }
+  }
+
+  th,
+  td {
+    padding: base(0.75);
+    min-width: 150px;
+  }
+
+  tbody {
+    tr {
+      &:nth-child(odd) {
+        background: var(--theme-elevation-50);
+      }
+    }
+  }
+
+  a:focus-visible {
+    outline: var(--accessibility-outline);
+    outline-offset: var(--accessibility-outline-offset);
+  }
+
+  @include mid-break {
+    th,
+    td {
+      max-width: 70vw;
+    }
+  }
+}

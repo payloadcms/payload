@@ -1,0 +1,61 @@
+@import '../../../../scss/styles.scss';
+
+.condition {
+  &__wrap {
+    display: flex;
+    align-items: center;
+  }
+
+  &__inputs {
+    display: flex;
+    flex-grow: 1;
+
+    > div {
+      flex-basis: 100%;
+    }
+  }
+
+  [dir='rtl'] &__field,
+  &__operator {
+    margin-left: $baseline;
+    margin-right: 0;
+  }
+
+  &__field,
+  &__operator {
+    margin-right: $baseline;
+  }
+
+  &__actions {
+    flex-shrink: 0;
+  }
+
+  .btn {
+    vertical-align: middle;
+    margin: 0 0 0 $baseline;
+    [dir='rtl'] & {
+      margin: 0 $baseline 0 0;
+    }
+  }
+
+  @include mid-break {
+    &__wrap {
+      align-items: initial;
+    }
+
+    &__inputs {
+      display: block;
+    }
+
+    &__actions {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    &__field,
+    &__operator {
+      margin: 0 0 base(0.5);
+    }
+  }
+}

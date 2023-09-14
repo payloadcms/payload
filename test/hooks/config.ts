@@ -1,12 +1,12 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import TransformHooks from './collections/Transform';
-import Hooks, { hooksSlug } from './collections/Hook';
-import NestedAfterReadHooks from './collections/NestedAfterReadHooks';
-import ChainingHooks from './collections/ChainingHooks';
-import Relations from './collections/Relations';
-import AfterOperation from './collections/AfterOperation';
-import Users, { seedHooksUsers } from './collections/Users';
-import ContextHooks from './collections/ContextHooks';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import AfterOperation from './collections/AfterOperation'
+import ChainingHooks from './collections/ChainingHooks'
+import ContextHooks from './collections/ContextHooks'
+import Hooks, { hooksSlug } from './collections/Hook'
+import NestedAfterReadHooks from './collections/NestedAfterReadHooks'
+import Relations from './collections/Relations'
+import TransformHooks from './collections/Transform'
+import Users, { seedHooksUsers } from './collections/Users'
 
 export default buildConfigWithDefaults({
   collections: [
@@ -20,7 +20,7 @@ export default buildConfigWithDefaults({
     Users,
   ],
   onInit: async (payload) => {
-    await seedHooksUsers(payload);
+    await seedHooksUsers(payload)
     await payload.create({
       collection: hooksSlug,
       data: {
@@ -35,6 +35,6 @@ export default buildConfigWithDefaults({
         fieldAfterRead: false,
         collectionAfterRead: false,
       },
-    });
+    })
   },
-});
+})

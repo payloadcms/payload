@@ -1,6 +1,6 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-export const defaultNumber = 5;
+export const defaultNumber = 5
 
 const NumberFields: CollectionConfig = {
   slug: 'number-fields',
@@ -60,9 +60,9 @@ const NumberFields: CollectionConfig = {
       hasMany: true,
       validate: (value: number[]) => {
         if (value && !Array.isArray(value)) {
-          return 'value should be an array';
+          return 'value should be an array'
         }
-        return true;
+        return true
       },
     },
     {
@@ -72,7 +72,7 @@ const NumberFields: CollectionConfig = {
       localized: true,
     },
   ],
-};
+}
 
 export const numberDoc = {
   number: 5,
@@ -85,6 +85,6 @@ export const numberDoc = {
   hasMany: [5, 10, 15],
   validatesHasMany: [5],
   localizedHasMany: [10],
-};
+}
 
-export default NumberFields;
+export default NumberFields

@@ -1,0 +1,15 @@
+@import '../../../../../../scss/styles.scss';
+
+.select-diff {
+  &__locale-label {
+    [dir='ltr'] & {
+      margin-right: base(0.25);
+    }
+    [dir='rtl'] & {
+      margin-left: base(0.25);
+    }
+    background: var(--theme-elevation-100);
+    padding: base(0.25);
+    border-radius: $style-radius-m;
+  }
+}

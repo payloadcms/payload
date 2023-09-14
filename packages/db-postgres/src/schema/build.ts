@@ -1,14 +1,16 @@
 /* eslint-disable no-param-reassign */
+import type { Relation } from 'drizzle-orm'
+import type { AnyPgColumnBuilder, IndexBuilder } from 'drizzle-orm/pg-core'
+import type { Field } from 'payload/types'
+
+import { relations } from 'drizzle-orm'
 import {
-  AnyPgColumnBuilder,
+  index,
   integer,
+  numeric,
   pgTable,
   serial,
-  varchar,
-  index,
-  numeric,
   timestamp,
-  IndexBuilder,
   unique,
   UniqueConstraintBuilder,
 } from 'drizzle-orm/pg-core';
@@ -46,35 +48,35 @@ export const buildTable = ({
   const columns: Record<string, AnyPgColumnBuilder> = baseColumns;
   const indexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {};
 
-  let hasLocalizedField = false;
-  let hasLocalizedRelationshipField = false;
-  const localesColumns: Record<string, AnyPgColumnBuilder> = {};
-  const localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {};
-  let localesTable: GenericTable;
+  let hasLocalizedField = false
+  let hasLocalizedRelationshipField = false
+  const localesColumns: Record<string, AnyPgColumnBuilder> = {}
+  const localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {}
+  let localesTable: GenericTable
 
-  const relationships: Set<string> = new Set();
-  let relationshipsTable: GenericTable;
+  const relationships: Set<string> = new Set()
+  let relationshipsTable: GenericTable
 
-  const arrayBlockRelations: Map<string, string> = new Map();
+  const arrayBlockRelations: Map<string, string> = new Map()
 
-  const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id');
-  let idColType = 'integer';
+  const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id')
+  let idColType = 'integer'
 
   if (idField) {
     if (idField.type === 'number') {
-      idColType = 'numeric';
-      columns.id = numeric('id').primaryKey();
+      idColType = 'numeric'
+      columns.id = numeric('id').primaryKey()
     }
 
     if (idField.type === 'text') {
-      idColType = 'varchar';
-      columns.id = varchar('id').primaryKey();
+      idColType = 'varchar'
+      columns.id = varchar('id').primaryKey()
     }
   } else {
-    columns.id = serial('id').primaryKey();
+    columns.id = serial('id').primaryKey()
   }
 
-  ({ hasLocalizedField, hasLocalizedRelationshipField } = traverseFields({
+  ;({ hasLocalizedField, hasLocalizedRelationshipField } = traverseFields({
     adapter,
     arrayBlockRelations,
     buildRelationships,
@@ -86,11 +88,11 @@ export const buildTable = ({
     newTableName: tableName,
     parentTableName: tableName,
     relationships,
-  }));
+  }))
 
   if (timestamps) {
-    columns.createdAt = timestamp('created_at').defaultNow().notNull();
-    columns.updatedAt = timestamp('updated_at').defaultNow().notNull();
+    columns.createdAt = timestamp('created_at').defaultNow().notNull()
+    columns.updatedAt = timestamp('updated_at').defaultNow().notNull()
   }
 
   const table = pgTable(tableName, columns, (cols) => {
@@ -114,24 +116,27 @@ export const buildTable = ({
     localesColumns._parentID = parentIDColumnMap[idColType]('_parent_id').references(() => table.id, { onDelete: 'cascade' }).notNull();
 
     localesTable = pgTable(localeTableName, localesColumns, (cols) => {
-      return Object.entries(localesIndexes).reduce((acc, [colName, func]) => {
-        acc[colName] = func(cols);
-        return acc;
-      }, {
-        _localeParent: unique().on(cols._locale, cols._parentID),
-      });
-    });
+      return Object.entries(localesIndexes).reduce(
+        (acc, [colName, func]) => {
+          acc[colName] = func(cols)
+          return acc
+        },
+        {
+          _localeParent: unique().on(cols._locale, cols._parentID),
+        },
+      )
+    })
 
-    adapter.tables[localeTableName] = localesTable;
+    adapter.tables[localeTableName] = localesTable
 
     const localesTableRelations = relations(localesTable, ({ one }) => ({
       _parentID: one(table, {
         fields: [localesTable._parentID],
         references: [table.id],
       }),
-    }));
+    }))
 
-    adapter.relations[`relations_${localeTableName}`] = localesTableRelations;
+    adapter.relations[`relations_${localeTableName}`] = localesTableRelations
   }
 
   if (buildRelationships) {
@@ -141,21 +146,29 @@ export const buildTable = ({
         parent: parentIDColumnMap[idColType]('parent_id').references(() => table.id, { onDelete: 'cascade' }).notNull(),
         path: varchar('path').notNull(),
         order: integer('order'),
-      };
+        parent: parentIDColumnMap[idColType]('parent_id')
+          .references(() => table.id)
+          .notNull(),
+        path: varchar('path').notNull(),
+      }
 
       if (hasLocalizedRelationshipField) {
         relationshipColumns.locale = adapter.enums._locales('locale');
       }
 
       relationships.forEach((relationTo) => {
-        const formattedRelationTo = toSnakeCase(relationTo);
-        let colType = 'integer';
-        const relatedCollectionCustomID = adapter.payload.collections[relationTo].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id');
-        if (relatedCollectionCustomID?.type === 'number') colType = 'numeric';
-        if (relatedCollectionCustomID?.type === 'text') colType = 'varchar';
+        const formattedRelationTo = toSnakeCase(relationTo)
+        let colType = 'integer'
+        const relatedCollectionCustomID = adapter.payload.collections[
+          relationTo
+        ].config.fields.find((field) => fieldAffectsData(field) && field.name === 'id')
+        if (relatedCollectionCustomID?.type === 'number') colType = 'numeric'
+        if (relatedCollectionCustomID?.type === 'text') colType = 'varchar'
 
-        relationshipColumns[`${relationTo}ID`] = parentIDColumnMap[colType](`${formattedRelationTo}_id`).references(() => adapter.tables[formattedRelationTo].id);
-      });
+        relationshipColumns[`${relationTo}ID`] = parentIDColumnMap[colType](
+          `${formattedRelationTo}_id`,
+        ).references(() => adapter.tables[formattedRelationTo].id)
+      })
 
       const relationshipsTableName = `${tableName}_relationships`;
 
@@ -172,54 +185,54 @@ export const buildTable = ({
         return result;
       });
 
-      adapter.tables[relationshipsTableName] = relationshipsTable;
+      adapter.tables[relationshipsTableName] = relationshipsTable
 
       const relationshipsTableRelations = relations(relationshipsTable, ({ one }) => {
         const result: Record<string, Relation<string>> = {
           parent: one(table, {
-            relationName: '_relationships',
             fields: [relationshipsTable.parent],
             references: [table.id],
+            relationName: '_relationships',
           }),
-        };
+        }
 
         relationships.forEach((relationTo) => {
-          const relatedTableName = toSnakeCase(relationTo);
-          const idColumnName = `${relationTo}ID`;
+          const relatedTableName = toSnakeCase(relationTo)
+          const idColumnName = `${relationTo}ID`
           result[idColumnName] = one(adapter.tables[relatedTableName], {
             fields: [relationshipsTable[idColumnName]],
             references: [adapter.tables[relatedTableName].id],
-          });
-        });
+          })
+        })
 
-        return result;
-      });
+        return result
+      })
 
-      adapter.relations[`relations_${relationshipsTableName}`] = relationshipsTableRelations;
+      adapter.relations[`relations_${relationshipsTableName}`] = relationshipsTableRelations
     }
   }
 
   const tableRelations = relations(table, ({ many }) => {
-    const result: Record<string, Relation<string>> = {};
+    const result: Record<string, Relation<string>> = {}
 
     arrayBlockRelations.forEach((val, key) => {
-      result[key] = many(adapter.tables[val]);
-    });
+      result[key] = many(adapter.tables[val])
+    })
 
     if (hasLocalizedField) {
-      result._locales = many(localesTable);
+      result._locales = many(localesTable)
     }
 
     if (relationships.size && relationshipsTable) {
       result._relationships = many(relationshipsTable, {
         relationName: '_relationships',
-      });
+      })
     }
 
-    return result;
-  });
+    return result
+  })
 
   adapter.relations[`relations_${tableName}`] = tableRelations;
 
-  return { arrayBlockRelations };
-};
+  return { arrayBlockRelations }
+}

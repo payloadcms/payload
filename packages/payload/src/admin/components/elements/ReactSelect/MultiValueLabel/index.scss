@@ -1,0 +1,16 @@
+@import '../../../../scss/styles.scss';
+
+.multi-value-label {
+  @extend %small;
+  display: flex;
+  align-items: center;
+  padding: 0 base(0.125) 0 base(0.25);
+  max-width: 150px;
+  color: currentColor;
+
+  &__text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+}

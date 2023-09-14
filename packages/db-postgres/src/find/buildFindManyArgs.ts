@@ -22,14 +22,15 @@ export const buildFindManyArgs = ({
 }: BuildFindQueryArgs): Record<string, unknown> => {
   const result: Result = {
     with: {},
-  };
+  }
 
   const _locales: Result = {
     columns: {
-      id: false,
       _parentID: false,
+      id: false,
     },
-  };
+    where: createLocaleWhereQuery({ fallbackLocale, locale }),
+  }
 
   if (adapter.tables[`${tableName}_relationships`]) {
     result.with._relationships = {
@@ -42,13 +43,14 @@ export const buildFindManyArgs = ({
   }
 
   if (adapter.tables[`${tableName}_locales`]) {
-    result.with._locales = _locales;
+    result.with._locales = _locales
   }
 
-  const locatedBlocks: Block[] = [];
-  const locatedArrays: { [path: string]: ArrayField } = {};
+  const locatedBlocks: Block[] = []
+  const locatedArrays: { [path: string]: ArrayField } = {}
 
   traverseFields({
+    _locales,
     adapter,
     currentArgs: result,
     currentTableName: tableName,
@@ -60,7 +62,7 @@ export const buildFindManyArgs = ({
     path: '',
     topLevelArgs: result,
     topLevelTableName: tableName,
-  });
+  })
 
-  return result;
-};
+  return result
+}

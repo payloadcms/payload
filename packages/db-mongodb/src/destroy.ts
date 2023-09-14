@@ -1,13 +1,13 @@
-import mongoose from 'mongoose';
-import { Destroy } from 'payload/dist/database/types';
-import { MongooseAdapter } from './index';
+import type { Destroy } from 'payload/database'
 
-export const destroy: Destroy = async function destroy(
-  this: MongooseAdapter,
-) {
+import mongoose from 'mongoose'
+
+import type { MongooseAdapter } from './index'
+
+export const destroy: Destroy = async function destroy(this: MongooseAdapter) {
   if (this.mongoMemoryServer) {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await this.mongoMemoryServer.stop();
+    await mongoose.connection.dropDatabase()
+    await mongoose.connection.close()
+    await this.mongoMemoryServer.stop()
   }
-};
+}

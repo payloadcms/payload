@@ -1,7 +1,11 @@
-import { AfterOperationHook, CollectionConfig } from '../../../../src/collections/config/types';
-import { AfterOperation } from '../../payload-types';
+import type {
+  AfterOperationHook,
+  CollectionConfig,
+} from '../../../../packages/payload/src/collections/config/types'
 
-export const afterOperationSlug = 'afterOperation';
+import { AfterOperation } from '../../payload-types'
+
+export const afterOperationSlug = 'afterOperation'
 
 const AfterOperation: CollectionConfig = {
   slug: afterOperationSlug,
@@ -17,10 +21,10 @@ const AfterOperation: CollectionConfig = {
                 ...doc,
                 title: 'Title created',
               })),
-            };
+            }
           }
 
-          return { ...result, title: 'Title created' };
+          return { ...result, title: 'Title created' }
         }
 
         if (operation === 'find') {
@@ -28,15 +32,19 @@ const AfterOperation: CollectionConfig = {
           // this is so we can test against the other operations
           return {
             ...result,
-            docs: result.docs?.map((doc, index) => (index === 0 ? {
-              ...doc,
-              title: 'Title read',
-            } : doc)),
-          };
+            docs: result.docs?.map((doc, index) =>
+              index === 0
+                ? {
+                    ...doc,
+                    title: 'Title read',
+                  }
+                : doc,
+            ),
+          }
         }
 
         if (operation === 'findByID') {
-          return { ...result, title: 'Title read' };
+          return { ...result, title: 'Title read' }
         }
 
         if (operation === 'update') {
@@ -47,15 +55,15 @@ const AfterOperation: CollectionConfig = {
                 ...doc,
                 title: 'Title updated',
               })),
-            };
+            }
           }
         }
 
         if (operation === 'updateByID') {
-          return { ...result, title: 'Title updated' };
+          return { ...result, title: 'Title updated' }
         }
 
-        return result;
+        return result
       },
     ] as AfterOperationHook<AfterOperation>[],
   },
@@ -66,6 +74,6 @@ const AfterOperation: CollectionConfig = {
       required: true,
     },
   ],
-};
+}
 
-export default AfterOperation;
+export default AfterOperation

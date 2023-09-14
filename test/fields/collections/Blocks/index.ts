@@ -1,14 +1,16 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
-import { Field } from '../../../../src/fields/config/types';
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
+import type { Field } from '../../../../packages/payload/src/fields/config/types'
 
 export const blocksFieldSeedData = [
   {
     blockName: 'First block',
     blockType: 'text',
     text: 'first block',
-    richText: [{
-      children: [{ text: '' }],
-    }],
+    richText: [
+      {
+        children: [{ text: '' }],
+      },
+    ],
   },
   {
     blockName: 'Second block',
@@ -36,7 +38,7 @@ export const blocksFieldSeedData = [
     blockType: 'i18n-text',
     text: 'first block',
   },
-] as const;
+] as const
 
 export const blocksField: Field = {
   name: 'blocks',
@@ -142,7 +144,7 @@ export const blocksField: Field = {
     },
   ],
   defaultValue: blocksFieldSeedData,
-};
+}
 
 const BlockFields: CollectionConfig = {
   slug: 'block-fields',
@@ -206,45 +208,47 @@ const BlockFields: CollectionConfig = {
     {
       type: 'blocks',
       name: 'blocksWithSimilarConfigs',
-      blocks: [{
-        slug: 'block-1',
-        fields: [
-          {
-            type: 'array',
-            name: 'items',
-            fields: [
-              {
-                type: 'text',
-                name: 'title',
-                required: true,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        slug: 'block-2',
-        fields: [
-          {
-            type: 'array',
-            name: 'items',
-            fields: [
-              {
-                type: 'text',
-                name: 'title2',
-                required: true,
-              },
-            ],
-          },
-        ],
-      }],
+      blocks: [
+        {
+          slug: 'block-1',
+          fields: [
+            {
+              type: 'array',
+              name: 'items',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'title',
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          slug: 'block-2',
+          fields: [
+            {
+              type: 'array',
+              name: 'items',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'title2',
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
   ],
-};
+}
 
 export const blocksDoc = {
   blocks: blocksFieldSeedData,
   localizedBlocks: blocksFieldSeedData,
-};
+}
 
-export default BlockFields;
+export default BlockFields

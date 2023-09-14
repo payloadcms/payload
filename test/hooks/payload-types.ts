@@ -7,90 +7,90 @@
 
 export interface Config {
   collections: {
-    afterOperation: AfterOperation;
-    transforms: Transform;
-    hooks: Hook;
-    'nested-after-read-hooks': NestedAfterReadHook;
-    'chaining-hooks': ChainingHook;
-    relations: Relation;
-    'hooks-users': HooksUser;
-  };
-  globals: {};
+    afterOperation: AfterOperation
+    transforms: Transform
+    hooks: Hook
+    'nested-after-read-hooks': NestedAfterReadHook
+    'chaining-hooks': ChainingHook
+    relations: Relation
+    'hooks-users': HooksUser
+  }
+  globals: {}
 }
 export interface AfterOperation {
-  id: string;
-  title: string;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  title: string
+  updatedAt: string
+  createdAt: string
 }
 export interface Transform {
-  id: string;
+  id: string
   /**
    * @minItems 2
    * @maxItems 2
    */
-  transform?: [number, number];
+  transform?: [number, number]
   /**
    * @minItems 2
    * @maxItems 2
    */
-  localizedTransform?: [number, number];
-  updatedAt: string;
-  createdAt: string;
+  localizedTransform?: [number, number]
+  updatedAt: string
+  createdAt: string
 }
 export interface Hook {
-  id: string;
-  fieldBeforeValidate?: boolean;
-  fieldBeforeChange?: boolean;
-  fieldAfterChange?: boolean;
-  fieldAfterRead?: boolean;
-  collectionBeforeValidate?: boolean;
-  collectionBeforeChange?: boolean;
-  collectionAfterChange?: boolean;
-  collectionBeforeRead?: boolean;
-  collectionAfterRead?: boolean;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  fieldBeforeValidate?: boolean
+  fieldBeforeChange?: boolean
+  fieldAfterChange?: boolean
+  fieldAfterRead?: boolean
+  collectionBeforeValidate?: boolean
+  collectionBeforeChange?: boolean
+  collectionAfterChange?: boolean
+  collectionBeforeRead?: boolean
+  collectionAfterRead?: boolean
+  updatedAt: string
+  createdAt: string
 }
 export interface NestedAfterReadHook {
-  id: string;
-  text?: string;
+  id: string
+  text?: string
   group?: {
     array?: {
-      input?: string;
-      afterRead?: string;
-      shouldPopulate?: string | Relation;
-      id?: string;
-    }[];
+      input?: string
+      afterRead?: string
+      shouldPopulate?: string | Relation
+      id?: string
+    }[]
     subGroup?: {
-      afterRead?: string;
-      shouldPopulate?: string | Relation;
-    };
-  };
-  updatedAt: string;
-  createdAt: string;
+      afterRead?: string
+      shouldPopulate?: string | Relation
+    }
+  }
+  updatedAt: string
+  createdAt: string
 }
 export interface Relation {
-  id: string;
-  title: string;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  title: string
+  updatedAt: string
+  createdAt: string
 }
 export interface ChainingHook {
-  id: string;
-  text?: string;
-  updatedAt: string;
-  createdAt: string;
+  id: string
+  text?: string
+  updatedAt: string
+  createdAt: string
 }
 export interface HooksUser {
-  id: string;
-  roles: ('admin' | 'user')[];
-  updatedAt: string;
-  createdAt: string;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  password?: string;
+  id: string
+  roles: ('admin' | 'user')[]
+  updatedAt: string
+  createdAt: string
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
+  password?: string
 }

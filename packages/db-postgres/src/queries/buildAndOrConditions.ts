@@ -9,7 +9,7 @@ export async function buildAndOrConditions({
   joins,
   where,
   adapter,
-  locale,
+  collectionSlug,
   fields,
   tableName,
   selectFields,
@@ -24,7 +24,7 @@ export async function buildAndOrConditions({
   tableName: string,
   selectFields: Record<string, GenericColumn>
 }): Promise<SQL[]> {
-  const completedConditions = [];
+  const completedConditions = []
   // Loop over all AND / OR operations and add them to the AND / OR query param
   // Operations should come through as an array
   // eslint-disable-next-line no-restricted-syntax
@@ -36,7 +36,7 @@ export async function buildAndOrConditions({
         joins,
         where: condition,
         adapter,
-        locale,
+        collectionSlug,
         fields,
         tableName,
         selectFields,
@@ -46,5 +46,5 @@ export async function buildAndOrConditions({
       }
     }
   }
-  return completedConditions;
+  return completedConditions
 }

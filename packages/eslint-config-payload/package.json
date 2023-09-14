@@ -1,0 +1,30 @@
+{
+  "name": "@payloadcms/eslint-config",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Payload styles for ESLint and Prettier",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@types/eslint": "8.44.2",
+    "@typescript-eslint/eslint-plugin": "6.6.0",
+    "@typescript-eslint/parser": "6.6.0",
+    "eslint": "8.48.0",
+    "eslint-config-prettier": "9.0.0",
+    "eslint-plugin-import": "2.28.1",
+    "eslint-plugin-jest": "27.2.3",
+    "eslint-plugin-jest-dom": "5.1.0",
+    "eslint-plugin-jsx-a11y": "6.7.1",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-perfectionist": "2.0.0",
+    "eslint-plugin-playwright": "0.16.0",
+    "eslint-plugin-react": "7.33.2",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "eslint-plugin-regexp": "1.15.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}

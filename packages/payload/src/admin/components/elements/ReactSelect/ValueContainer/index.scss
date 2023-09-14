@@ -1,0 +1,35 @@
+@import '../../../../scss/styles.scss';
+
+.value-container {
+  flex-grow: 1;
+  min-width: 0;
+
+  .rs__value-container {
+    padding: base(0.25) 0;
+    min-height: base(1.5);
+    overflow: visible;
+
+    > * {
+      margin: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      color: currentColor;
+    }
+
+    &--is-multi {
+      margin-left: - base(0.25);
+      width: calc(100% + base(0.5));
+      padding-top: base(0.25);
+      padding-bottom: base(0.25);
+      padding-left: base(0.25);
+
+      .rs__multi-value {
+        margin: calc(#{base(0.125)} - #{$style-stroke-width-s * 2});
+      }
+
+      &.rs__value-container--has-value {
+        padding-left: 0;
+      }
+    }
+  }
+}

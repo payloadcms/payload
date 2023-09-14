@@ -1,0 +1,10 @@
+@import '../../../scss/styles.scss';
+
+.versions-count__button {
+  font-weight: 600;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
+}

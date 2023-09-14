@@ -1,0 +1,30 @@
+@import '../../../../scss/styles.scss';
+
+.field-type.confirm-password {
+  position: relative;
+  margin-bottom: $baseline;
+
+  input {
+    @include formInput;
+  }
+}
+
+html[data-theme='light'] {
+  .field-type.field-type.confirm-password {
+    &.error {
+      input {
+        @include lightInputError;
+      }
+    }
+  }
+}
+
+html[data-theme='dark'] {
+  .field-type.field-type.confirm-password {
+    &.error {
+      input {
+        @include darkInputError;
+      }
+    }
+  }
+}

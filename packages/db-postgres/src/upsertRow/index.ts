@@ -27,29 +27,33 @@ export const upsertRow = async ({
     fields,
     path,
     tableName,
-  });
+  })
 
   // First, we insert the main row
-  let insertedRow: Record<string, unknown>;
+  let insertedRow: Record<string, unknown>
 
   if (operation === 'update') {
-    const target = upsertTarget || adapter.tables[tableName].id;
+    const target = upsertTarget || adapter.tables[tableName].id
 
     if (id) {
-      rowToInsert.row.id = id;
-      [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
+      rowToInsert.row.id = id
+      ;[insertedRow] = await adapter.db
+        .insert(adapter.tables[tableName])
         .values(rowToInsert.row)
-        .onConflictDoUpdate({ target, set: rowToInsert.row })
-        .returning();
+        .onConflictDoUpdate({ set: rowToInsert.row, target })
+        .returning()
     } else {
-      [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
+      ;[insertedRow] = await adapter.db
+        .insert(adapter.tables[tableName])
         .values(rowToInsert.row)
-        .onConflictDoUpdate({ target, set: rowToInsert.row, where })
-        .returning();
+        .onConflictDoUpdate({ set: rowToInsert.row, target, where })
+        .returning()
     }
   } else {
-    [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
-      .values(rowToInsert.row).returning();
+    ;[insertedRow] = await adapter.db
+      .insert(adapter.tables[tableName])
+      .values(rowToInsert.row)
+      .returning()
   }
 
   const localesToInsert: Record<string, unknown>[] = [];
@@ -58,7 +62,7 @@ export const upsertRow = async ({
 
   // Maintain a list of promises to run locale, blocks, and relationships
   // all in parallel
-  const promises = [];
+  const promises = []
 
   // If there are locale rows with data, add the parent and locale to each
   if (Object.keys(rowToInsert.locales).length > 0) {
@@ -72,20 +76,20 @@ export const upsertRow = async ({
   // If there are relationships, add parent to each
   if (rowToInsert.relationships.length > 0) {
     rowToInsert.relationships.forEach((relation) => {
-      relation.parent = insertedRow.id;
-      relationsToInsert.push(relation);
-    });
+      relation.parent = insertedRow.id
+      relationsToInsert.push(relation)
+    })
   }
 
   // If there are blocks, add parent to each, and then
   // store by table name and rows
   Object.keys(rowToInsert.blocks).forEach((blockName) => {
     rowToInsert.blocks[blockName].forEach((blockRow) => {
-      blockRow.row._parentID = insertedRow.id;
-      if (!blocksToInsert[blockName]) blocksToInsert[blockName] = [];
-      blocksToInsert[blockName].push(blockRow);
-    });
-  });
+      blockRow.row._parentID = insertedRow.id
+      if (!blocksToInsert[blockName]) blocksToInsert[blockName] = []
+      blocksToInsert[blockName].push(blockRow)
+    })
+  })
 
   // //////////////////////////////////
   // INSERT LOCALES
@@ -131,7 +135,7 @@ export const upsertRow = async ({
   // INSERT BLOCKS
   // //////////////////////////////////
 
-  const insertedBlockRows: Record<string, Record<string, unknown>[]> = {};
+  const insertedBlockRows: Record<string, Record<string, unknown>[]> = {}
 
   Object.entries(blocksToInsert).forEach(([blockName, blockRows]) => {
     // For each block, push insert into promises to run parallel
@@ -153,7 +157,7 @@ export const upsertRow = async ({
         blockRows[i].row = row;
       });
 
-      const blockLocaleIndexMap: number[] = [];
+      const blockLocaleIndexMap: number[] = []
 
       const blockLocaleRowsToInsert = blockRows.reduce((acc, blockRow, i) => {
         if (Object.entries(blockRow.locales).length > 0) {
@@ -167,8 +171,8 @@ export const upsertRow = async ({
           });
         }
 
-        return acc;
-      }, []);
+        return acc
+      }, [])
 
       if (blockLocaleRowsToInsert.length > 0) {
         await adapter.db.insert(adapter.tables[`${tableName}_${blockName}_locales`])
@@ -179,9 +183,9 @@ export const upsertRow = async ({
         adapter,
         arrays: blockRows.map(({ arrays }) => arrays),
         parentRows: insertedBlockRows[blockName],
-      });
-    });
-  });
+      })
+    })
+  })
 
   // //////////////////////////////////
   // INSERT ARRAYS RECURSIVELY
@@ -202,10 +206,10 @@ export const upsertRow = async ({
       adapter,
       arrays: [rowToInsert.arrays],
       parentRows: [insertedRow],
-    });
-  });
+    })
+  })
 
-  await Promise.all(promises.map((promise) => promise()));
+  await Promise.all(promises.map((promise) => promise()))
 
   // //////////////////////////////////
   // RETRIEVE NEWLY UPDATED ROW
@@ -232,5 +236,5 @@ export const upsertRow = async ({
     fields,
   });
 
-  return result;
-};
+  return result
+}

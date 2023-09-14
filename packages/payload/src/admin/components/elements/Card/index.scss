@@ -1,0 +1,42 @@
+@import '../../../scss/styles';
+
+.card {
+  background: var(--theme-elevation-50);
+  padding: base(1.25) $baseline;
+  position: relative;
+
+  &__title {
+    @extend %h5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__actions {
+    position: relative;
+    z-index: 2;
+    margin-top: base(0.5);
+    display: inline-flex;
+
+    .btn {
+      margin: 0;
+    }
+  }
+
+  &--has-onclick {
+    cursor: pointer;
+
+    &:hover {
+      background: var(--theme-elevation-100);
+    }
+  }
+
+  &__click {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}

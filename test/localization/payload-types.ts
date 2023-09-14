@@ -7,150 +7,150 @@
 
 export interface Config {
   collections: {
-    users: User;
-    'localized-posts': LocalizedPost;
-    'array-fields': ArrayField;
-    'localized-required': LocalizedRequired;
-    'with-localized-relationship': WithLocalizedRelationship;
-    'relationship-localized': RelationshipLocalized;
-    dummy: Dummy;
-  };
+    users: User
+    'localized-posts': LocalizedPost
+    'array-fields': ArrayField
+    'localized-required': LocalizedRequired
+    'with-localized-relationship': WithLocalizedRelationship
+    'relationship-localized': RelationshipLocalized
+    dummy: Dummy
+  }
   globals: {
-    'global-array': GlobalArray;
-  };
+    'global-array': GlobalArray
+  }
 }
 export interface User {
-  id: string;
-  relation?: string | LocalizedPost;
-  email?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  createdAt: string;
-  updatedAt: string;
-  password?: string;
+  id: string
+  relation?: string | LocalizedPost
+  email?: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  loginAttempts?: number
+  lockUntil?: string
+  createdAt: string
+  updatedAt: string
+  password?: string
 }
 export interface LocalizedPost {
-  id: string;
-  title?: string;
-  description?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  title?: string
+  description?: string
+  createdAt: string
+  updatedAt: string
 }
 export interface ArrayField {
-  id: string;
+  id: string
   items?: {
-    text: string;
-    id?: string;
-  }[];
-  createdAt: string;
-  updatedAt: string;
+    text: string
+    id?: string
+  }[]
+  createdAt: string
+  updatedAt: string
 }
 export interface LocalizedRequired {
-  id: string;
-  title: string;
+  id: string
+  title: string
   layout: (
     | {
-        text?: string;
-        id?: string;
-        blockName?: string;
-        blockType: 'text';
+        text?: string
+        id?: string
+        blockName?: string
+        blockType: 'text'
       }
     | {
-        number?: number;
-        id?: string;
-        blockName?: string;
-        blockType: 'number';
+        number?: number
+        id?: string
+        blockName?: string
+        blockType: 'number'
       }
-  )[];
-  createdAt: string;
-  updatedAt: string;
+  )[]
+  createdAt: string
+  updatedAt: string
 }
 export interface WithLocalizedRelationship {
-  id: string;
-  localizedRelationship?: string | LocalizedPost;
-  localizedRelationHasManyField?: string[] | LocalizedPost[];
+  id: string
+  localizedRelationship?: string | LocalizedPost
+  localizedRelationHasManyField?: string[] | LocalizedPost[]
   localizedRelationMultiRelationTo?:
     | {
-        value: string | LocalizedPost;
-        relationTo: 'localized-posts';
+        value: string | LocalizedPost
+        relationTo: 'localized-posts'
       }
     | {
-        value: string | Dummy;
-        relationTo: 'dummy';
-      };
+        value: string | Dummy
+        relationTo: 'dummy'
+      }
   localizedRelationMultiRelationToHasMany?:
     | (
         | {
-            value: string;
-            relationTo: 'localized-posts';
+            value: string
+            relationTo: 'localized-posts'
           }
         | {
-            value: string;
-            relationTo: 'dummy';
+            value: string
+            relationTo: 'dummy'
           }
       )[]
     | (
         | {
-            value: LocalizedPost;
-            relationTo: 'localized-posts';
+            value: LocalizedPost
+            relationTo: 'localized-posts'
           }
         | {
-            value: Dummy;
-            relationTo: 'dummy';
+            value: Dummy
+            relationTo: 'dummy'
           }
-      )[];
-  createdAt: string;
-  updatedAt: string;
+      )[]
+  createdAt: string
+  updatedAt: string
 }
 export interface Dummy {
-  id: string;
-  name?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  name?: string
+  createdAt: string
+  updatedAt: string
 }
 export interface RelationshipLocalized {
-  id: string;
-  relationship?: string | LocalizedPost;
-  relationshipHasMany?: string[] | LocalizedPost[];
+  id: string
+  relationship?: string | LocalizedPost
+  relationshipHasMany?: string[] | LocalizedPost[]
   relationMultiRelationTo?:
     | {
-        value: string | LocalizedPost;
-        relationTo: 'localized-posts';
+        value: string | LocalizedPost
+        relationTo: 'localized-posts'
       }
     | {
-        value: string | Dummy;
-        relationTo: 'dummy';
-      };
+        value: string | Dummy
+        relationTo: 'dummy'
+      }
   relationMultiRelationToHasMany?:
     | (
         | {
-            value: string;
-            relationTo: 'localized-posts';
+            value: string
+            relationTo: 'localized-posts'
           }
         | {
-            value: string;
-            relationTo: 'dummy';
+            value: string
+            relationTo: 'dummy'
           }
       )[]
     | (
         | {
-            value: LocalizedPost;
-            relationTo: 'localized-posts';
+            value: LocalizedPost
+            relationTo: 'localized-posts'
           }
         | {
-            value: Dummy;
-            relationTo: 'dummy';
+            value: Dummy
+            relationTo: 'dummy'
           }
-      )[];
-  createdAt: string;
-  updatedAt: string;
+      )[]
+  createdAt: string
+  updatedAt: string
 }
 export interface GlobalArray {
-  id: string;
+  id: string
   array?: {
-    text?: string;
-    id?: string;
-  }[];
+    text?: string
+    id?: string
+  }[]
 }

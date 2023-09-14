@@ -31,16 +31,17 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
     // @ts-expect-error
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
-      enums: {},
-      relations: {},
-      tables: {},
-      payload,
       connect,
+      create,
+      createMigration,
       db: undefined,
+      enums: {},
+      find,
+      // queryDrafts,
+      findOne,
       // destroy,
       init,
-      webpack,
-      createMigration,
+      payload,
       // beginTransaction,
       // rollbackTransaction,
       // commitTransaction,
@@ -59,8 +60,8 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       createVersion,
       // updateVersion,
       // deleteVersions,
-    });
+    })
   }
 
-  return adapter;
+  return adapter
 }

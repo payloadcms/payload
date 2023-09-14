@@ -1,0 +1,49 @@
+@import '../../../../../scss/styles.scss';
+
+.section-title {
+  position: relative;
+
+  &:after {
+    display: block;
+    content: attr(data-value) ' ';
+    visibility: hidden;
+    white-space: nowrap;
+    min-width: base(2.5);
+  }
+
+  &:after,
+  &__input {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: base(0.625);
+    padding: 0;
+  }
+
+  &__input {
+    color: var(--theme-elevation-800);
+    background-color: transparent;
+    border: none;
+    width: 100%;
+    text-overflow: ellipsis;
+    resize: none;
+    appearance: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    &:hover {
+      box-shadow: inset 0px -2px 0px -1px var(--theme-elevation-150);
+    }
+
+    &:hover,
+    &:focus {
+      outline: 0;
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+}

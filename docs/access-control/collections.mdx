@@ -10,23 +10,24 @@ You can define Collection-level Access Control within each Collection's `access`
 
 ## Available Controls
 
-| Function                 | Allows/Denies Access |
-| ------------------------ | -------------------- |
-| **[`create`](#create)**  | Used in the `create` operation |
-| **[`read`](#read)**      | Used in the `find` and `findByID` operations |
-| **[`update`](#update)**  | Used in the `update` operation |
-| **[`delete`](#delete)**  | Used in the `delete` operation |
+| Function                | Allows/Denies Access                         |
+| ----------------------- | -------------------------------------------- |
+| **[`create`](#create)** | Used in the `create` operation               |
+| **[`read`](#read)**     | Used in the `find` and `findByID` operations |
+| **[`update`](#update)** | Used in the `update` operation               |
+| **[`delete`](#delete)** | Used in the `delete` operation               |
 
 #### Auth-enabled Controls
 
 If a Collection supports [`Authentication`](/docs/authentication/overview), the following Access Controls become available:
 
-| Function                | Allows/Denies Access |
-| ----------------------- | -------------------- |
-| **[`admin`](#admin)**   | Used to restrict access to the Payload Admin panel |
+| Function                | Allows/Denies Access                                           |
+| ----------------------- | -------------------------------------------------------------- |
+| **[`admin`](#admin)**   | Used to restrict access to the Payload Admin panel             |
 | **[`unlock`](#unlock)** | Used to restrict which users can access the `unlock` operation |
 
 **Example Collection config:**
+
 ```ts
 import { CollectionConfig } from 'payload/types';
 
@@ -50,10 +51,10 @@ Returns a boolean which allows/denies access to the `create` request.
 
 **Available argument properties:**
 
-| Option     | Description |
-| ---------- | ----------- |
+| Option     | Description                                                                |
+| ---------- | -------------------------------------------------------------------------- |
 | **`req`**  | The Express `request` object containing the currently authenticated `user` |
-| **`data`** | The data passed to create the document with. |
+| **`data`** | The data passed to create the document with.                               |
 
 **Example:**
 
@@ -77,20 +78,20 @@ Read access functions can return a boolean result or optionally return a [query 
 
 **Available argument properties:**
 
-| Option    | Description |
-| --------- | ----------- |
+| Option    | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
 | **`req`** | The Express `request` object containing the currently authenticated `user` |
-| **`id`**  | `id` of document requested, if within `findByID` |
+| **`id`**  | `id` of document requested, if within `findByID`                           |
 
 **Example:**
 
 ```ts
-import { Access } from 'payload/config';
+import { Access } from 'payload/config'
 
 const canReadPage: Access = ({ req: { user } }) => {
   // allow authenticated users
   if (user) {
-    return true;
+    return true
   }
   // using a query constraint, guest users can access when a field named 'isPublic' is set to true
   return {
@@ -99,7 +100,7 @@ const canReadPage: Access = ({ req: { user } }) => {
       equals: true,
     },
   }
-};
+}
 ```
 
 ### Update
@@ -108,25 +109,25 @@ Update access functions can return a boolean result or optionally return a [quer
 
 **Available argument properties:**
 
-| Option     | Description |
-| ---------- | ----------- |
+| Option     | Description                                                                |
+| ---------- | -------------------------------------------------------------------------- |
 | **`req`**  | The Express `request` object containing the currently authenticated `user` |
-| **`id`**   | `id` of document requested to update |
-| **`data`** | The data passed to update the document with |
+| **`id`**   | `id` of document requested to update                                       |
+| **`data`** | The data passed to update the document with                                |
 
 **Example:**
 
 ```ts
-import { Access } from 'payload/config';
+import { Access } from 'payload/config'
 
 const canUpdateUser: Access = ({ req: { user }, id }) => {
   // allow users with a role of 'admin'
-  if (user.roles && user.roles.some(role => role === 'admin')) {
-    return true;
+  if (user.roles && user.roles.some((role) => role === 'admin')) {
+    return true
   }
   // allow any other users to update only oneself
-  return user.id === id;
-};
+  return user.id === id
+}
 ```
 
 ### Delete
@@ -135,10 +136,10 @@ Similarly to the Update function, returns a boolean or a [query constraint](/doc
 
 **Available argument properties:**
 
-| Option    | Description |
-| --------- | ----------- |
+| Option    | Description                                                                                         |
+| --------- | --------------------------------------------------------------------------------------------------- |
 | **`req`** | The Express `request` object with additional `user` property, which is the currently logged in user |
-| **`id`**  | `id` of document requested to delete |
+| **`id`**  | `id` of document requested to delete                                                                |
 
 **Example:**
 
@@ -148,7 +149,7 @@ import { Access } from 'payload/config'
 const canDeleteCustomer: Access = async ({ req, id }) => {
   if (!id) {
     // allow the admin UI to show controls to delete since it is indeterminate without the id
-    return true;
+    return true
   }
   // query another collection using the id
   const result = await req.payload.find({
@@ -158,10 +159,10 @@ const canDeleteCustomer: Access = async ({ req, id }) => {
     where: {
       customer: { equals: id },
     },
-  });
+  })
 
-  return result.totalDocs === 0;
-};
+  return result.totalDocs === 0
+}
 ```
 
 ### Admin
@@ -170,8 +171,8 @@ If the Collection is [used to access the Payload Admin panel](/docs/admin/overvi
 
 **Available argument properties:**
 
-| Option    | Description |
-| --------- | ----------- |
+| Option    | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
 | **`req`** | The Express `request` object containing the currently authenticated `user` |
 
 ### Unlock
@@ -180,6 +181,6 @@ Determines which users can [unlock](/docs/authentication/operations#unlock) othe
 
 **Available argument properties:**
 
-| Option    | Description |
-| --------- | ----------- |
+| Option    | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
 | **`req`** | The Express `request` object containing the currently authenticated `user` |

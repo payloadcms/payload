@@ -1,20 +1,25 @@
-import type { BeforeDuplicate, CollectionConfig } from '../../../../src/collections/config/types';
-import { IndexedField } from '../../payload-types';
+import type {
+  BeforeDuplicate,
+  CollectionConfig,
+} from '../../../../packages/payload/src/collections/config/types'
+import type { IndexedField } from '../../payload-types'
 
 const beforeDuplicate: BeforeDuplicate<IndexedField> = ({ data }) => {
   return {
     ...data,
     uniqueText: data.uniqueText ? `${data.uniqueText}-copy` : '',
     group: {
-      ...data.group || {},
+      ...(data.group || {}),
       localizedUnique: data.group?.localizedUnique ? `${data.group?.localizedUnique}-copy` : '',
     },
     collapsibleTextUnique: data.collapsibleTextUnique ? `${data.collapsibleTextUnique}-copy` : '',
-    collapsibleLocalizedUnique: data.collapsibleLocalizedUnique ? `${data.collapsibleLocalizedUnique}-copy` : '',
+    collapsibleLocalizedUnique: data.collapsibleLocalizedUnique
+      ? `${data.collapsibleLocalizedUnique}-copy`
+      : '',
     partOne: data.partOne ? `${data.partOne}-copy` : '',
     partTwo: data.partTwo ? `${data.partTwo}-copy` : '',
-  };
-};
+  }
+}
 
 const IndexedFields: CollectionConfig = {
   slug: 'indexed-fields',
@@ -90,6 +95,6 @@ const IndexedFields: CollectionConfig = {
       options: { unique: true, name: 'compound-index', sparse: true },
     },
   ],
-};
+}
 
-export default IndexedFields;
+export default IndexedFields

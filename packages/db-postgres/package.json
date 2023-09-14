@@ -1,30 +1,38 @@
 {
   "name": "@payloadcms/db-postgres",
-  "version": "0.0.1",
   "description": "The officially supported Postgres database adapter for Payload",
-  "main": "index.js",
-  "repository": "https://github.com/payloadcms/payload",
-  "author": "Payload CMS, Inc.",
   "license": "MIT",
-  "scripts": {
-    "build": "tsc"
-  },
+  "author": "Payload CMS, Inc.",
   "peerDependencies": {
     "better-sqlite3": "^8.5.0"
   },
   "dependencies": {
     "@libsql/client": "^0.3.1",
-    "drizzle-kit": "^0.19.13-a511135",
-    "drizzle-orm": "^0.28.0",
-    "pg": "^8.11.1",
-    "prompts": "^2.4.2",
-    "to-snake-case": "^1.0.0"
+    "drizzle-kit": "0.19.13-e99bac1",
+    "drizzle-orm": "0.28.5",
+    "pg": "8.11.3",
+    "prompts": "2.4.2",
+    "to-snake-case": "1.0.0"
   },
   "devDependencies": {
-    "@types/pg": "^8.10.2",
-    "@types/to-snake-case": "^1.0.0",
+    "@payloadcms/eslint-config": "workspace:*",
+    "@types/pg": "8.10.2",
+    "@types/to-snake-case": "1.0.0",
     "better-sqlite3": "^8.5.0",
-    "payload": "payloadcms/payload#build/chore/update-2.0",
-    "typescript": "^4.9.4"
-  }
+    "payload": "workspace:*"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  },
+  "repository": "https://github.com/payloadcms/payload",
+  "scripts": {
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "builddisabled": "pnpm build:swc && pnpm build:types"
+  },
+  "version": "0.0.1"
 }

@@ -7,42 +7,42 @@
 
 export interface Config {
   collections: {
-    users: User;
-    'payload-preferences': PayloadPreference;
-  };
-  globals: {};
+    users: User
+    'payload-preferences': PayloadPreference
+  }
+  globals: {}
 }
 export interface User {
-  id: string;
-  custom?: string;
-  checkbox?: boolean;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string;
-  resetPasswordExpiration?: string;
-  salt?: string;
-  hash?: string;
-  loginAttempts?: number;
-  lockUntil?: string;
-  password?: string;
+  id: string
+  custom?: string
+  checkbox?: boolean
+  updatedAt: string
+  createdAt: string
+  email: string
+  resetPasswordToken?: string
+  resetPasswordExpiration?: string
+  salt?: string
+  hash?: string
+  loginAttempts?: number
+  lockUntil?: string
+  password?: string
 }
 export interface PayloadPreference {
-  id: string;
+  id: string
   user: {
-    value: string | User;
-    relationTo: 'users';
-  };
-  key?: string;
+    value: string | User
+    relationTo: 'users'
+  }
+  key?: string
   value?:
     | {
-        [k: string]: unknown;
+        [k: string]: unknown
       }
     | unknown[]
     | string
     | number
     | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    | null
+  updatedAt: string
+  createdAt: string
 }

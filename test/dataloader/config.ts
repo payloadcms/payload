@@ -1,5 +1,5 @@
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
 
 export default buildConfigWithDefaults({
   collections: [
@@ -16,12 +16,9 @@ export default buildConfigWithDefaults({
           type: 'relationship',
           relationTo: 'users',
           hooks: {
-            beforeChange: [
-              ({ req: { user } }) => user?.id,
-            ],
+            beforeChange: [({ req: { user } }) => user?.id],
           },
         },
-
       ],
     },
     {
@@ -68,16 +65,16 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
 
     await payload.create({
       user,
       collection: 'posts',
       data: postDoc,
-    });
+    })
   },
-});
+})
 
 export const postDoc = {
   title: 'test post',
-};
+}

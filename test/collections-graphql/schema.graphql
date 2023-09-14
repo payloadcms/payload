@@ -18,6 +18,7 @@ type Query {
   docAccessDummy(id: String!): dummyDocAccess
   Preference(key: String): Preference
   Access: Access
+  QueryWithInternalError: QueryWithInternalError
 }
 
 type User {
@@ -40,7 +41,8 @@ scalar DateTime
 """
 A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
 """
-scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
+scalar EmailAddress
+  @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
 
 type Users {
   docs: [User]
@@ -2842,6 +2844,10 @@ type DummyDeleteAccess {
   where: JSONObject
 }
 
+type QueryWithInternalError {
+  text: String
+}
+
 type Mutation {
   createUser(data: mutationUserInput!, draft: Boolean): User
   updateUser(id: String!, data: mutationUserUpdateInput!, draft: Boolean, autosave: Boolean): User
@@ -2857,13 +2863,28 @@ type Mutation {
   updatePost(id: String!, data: mutationPostUpdateInput!, draft: Boolean, autosave: Boolean): Post
   deletePost(id: String!): Post
   createCustomId(data: mutationCustomIdInput!, draft: Boolean): CustomId
-  updateCustomId(id: Int!, data: mutationCustomIdUpdateInput!, draft: Boolean, autosave: Boolean): CustomId
+  updateCustomId(
+    id: Int!
+    data: mutationCustomIdUpdateInput!
+    draft: Boolean
+    autosave: Boolean
+  ): CustomId
   deleteCustomId(id: Int!): CustomId
   createRelation(data: mutationRelationInput!, draft: Boolean): Relation
-  updateRelation(id: String!, data: mutationRelationUpdateInput!, draft: Boolean, autosave: Boolean): Relation
+  updateRelation(
+    id: String!
+    data: mutationRelationUpdateInput!
+    draft: Boolean
+    autosave: Boolean
+  ): Relation
   deleteRelation(id: String!): Relation
   createDummy(data: mutationDummyInput!, draft: Boolean): Dummy
-  updateDummy(id: String!, data: mutationDummyUpdateInput!, draft: Boolean, autosave: Boolean): Dummy
+  updateDummy(
+    id: String!
+    data: mutationDummyUpdateInput!
+    draft: Boolean
+    autosave: Boolean
+  ): Dummy
   deleteDummy(id: String!): Dummy
   updatePreference(key: String!, value: JSON): Preference
   deletePreference(key: String!): Preference

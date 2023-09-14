@@ -1,40 +1,40 @@
-import { devUser } from '../credentials';
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { FieldAccess } from '../../src/fields/config/types';
-import { firstArrayText, secondArrayText } from './shared';
+import type { FieldAccess } from '../../packages/payload/src/fields/config/types'
 
-export const slug = 'posts';
-export const unrestrictedSlug = 'unrestricted';
-export const readOnlySlug = 'read-only-collection';
-
-export const userRestrictedSlug = 'user-restricted';
-export const restrictedSlug = 'restricted';
-export const restrictedVersionsSlug = 'restricted-versions';
-export const siblingDataSlug = 'sibling-data';
-export const relyOnRequestHeadersSlug = 'rely-on-request-headers';
-export const docLevelAccessSlug = 'doc-level-access';
-export const hiddenFieldsSlug = 'hidden-fields';
-
-export const hiddenAccessSlug = 'hidden-access';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
+import { firstArrayText, secondArrayText } from './shared'
+import {
+  docLevelAccessSlug,
+  hiddenAccessSlug,
+  hiddenFieldsSlug,
+  readOnlySlug,
+  relyOnRequestHeadersSlug,
+  restrictedSlug,
+  restrictedVersionsSlug,
+  siblingDataSlug,
+  slug,
+  unrestrictedSlug,
+  userRestrictedSlug,
+} from './shared'
 
 const openAccess = {
   create: () => true,
   read: () => true,
   update: () => true,
   delete: () => true,
-};
+}
 
 const PublicReadabilityAccess: FieldAccess = ({ req: { user }, siblingData }) => {
-  if (user) return true;
-  if (siblingData?.allowPublicReadability) return true;
+  if (user) return true
+  if (siblingData?.allowPublicReadability) return true
 
-  return false;
-};
+  return false
+}
 
-export const requestHeaders = { authorization: 'Bearer testBearerToken' };
+export const requestHeaders = { authorization: 'Bearer testBearerToken' }
 const UseRequestHeadersAccess: FieldAccess = ({ req: { headers } }) => {
-  return !!headers && headers.authorization === requestHeaders.authorization;
-};
+  return !!headers && headers.authorization === requestHeaders.authorization
+}
 
 export default buildConfigWithDefaults({
   admin: {
@@ -46,10 +46,11 @@ export default buildConfigWithDefaults({
       auth: true,
       access: {
         // admin: () => true,
-        admin: async () => new Promise((resolve) => {
-          // Simulate a request to an external service to determine access, i.e. another instance of Payload
-          setTimeout(resolve, 50, true); // set to 'true' or 'false' here to simulate the response
-        }),
+        admin: async () =>
+          new Promise((resolve) => {
+            // Simulate a request to an external service to determine access, i.e. another instance of Payload
+            setTimeout(resolve, 50, true) // set to 'true' or 'false' here to simulate the response
+          }),
       },
       fields: [],
     },
@@ -197,22 +198,22 @@ export default buildConfigWithDefaults({
       ],
       access: {
         read: ({ req: { user } }) => {
-          if (user) return true;
+          if (user) return true
 
           return {
             hidden: {
               not_equals: true,
             },
-          };
+          }
         },
         readVersions: ({ req: { user } }) => {
-          if (user) return true;
+          if (user) return true
 
           return {
             'version.hidden': {
               not_equals: true,
             },
-          };
+          }
         },
       },
     },
@@ -293,9 +294,9 @@ export default buildConfigWithDefaults({
           access: {
             update: (args) => {
               if (args?.doc?.lockTitle) {
-                return false;
+                return false
               }
-              return true;
+              return true
             },
           },
         },
@@ -355,13 +356,13 @@ export default buildConfigWithDefaults({
       slug: hiddenAccessSlug,
       access: {
         read: ({ req: { user } }) => {
-          if (user) return true;
+          if (user) return true
 
           return {
             hidden: {
               not_equals: true,
             },
-          };
+          }
         },
       },
       fields: [
@@ -385,28 +386,28 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
 
     await payload.create({
       collection: slug,
       data: {
         restrictedField: 'restricted',
       },
-    });
+    })
 
     await payload.create({
       collection: readOnlySlug,
       data: {
         name: 'read-only',
       },
-    });
+    })
 
     await payload.create({
       collection: restrictedVersionsSlug,
       data: {
         name: 'versioned',
       },
-    });
+    })
 
     await payload.create({
       collection: siblingDataSlug,
@@ -422,6 +423,6 @@ export default buildConfigWithDefaults({
           },
         ],
       },
-    });
+    })
   },
-});
+})

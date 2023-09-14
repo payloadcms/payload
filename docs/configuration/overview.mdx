@@ -13,8 +13,8 @@ Payload is a _config-based_, code-first CMS and application framework. The Paylo
 <Banner type="warning">
   <strong>Important:</strong>
   <br />
-  This file is included in the Payload admin bundle, so make sure you do not
-  embed any sensitive information.
+  This file is included in the Payload admin bundle, so make sure you do not embed any sensitive
+  information.
 </Banner>
 
 ## Options
@@ -48,21 +48,21 @@ Payload is a _config-based_, code-first CMS and application framework. The Paylo
 #### Simple example
 
 ```ts
-import { buildConfig } from "payload/config";
+import { buildConfig } from 'payload/config'
 
 export default buildConfig({
   collections: [
     {
-      slug: "pages",
+      slug: 'pages',
       fields: [
         {
-          name: "title",
-          type: "text",
+          name: 'title',
+          type: 'text',
           required: true,
         },
         {
-          name: "content",
-          type: "richText",
+          name: 'content',
+          type: 'richText',
           required: true,
         },
       ],
@@ -70,23 +70,23 @@ export default buildConfig({
   ],
   globals: [
     {
-      slug: "header",
+      slug: 'header',
       fields: [
         {
-          name: "nav",
-          type: "array",
+          name: 'nav',
+          type: 'array',
           fields: [
             {
-              name: "page",
-              type: "relationship",
-              relationTo: "pages",
+              name: 'page',
+              type: 'relationship',
+              relationTo: 'pages',
             },
           ],
         },
       ],
     },
   ],
-});
+})
 ```
 
 #### Full example config
@@ -120,10 +120,9 @@ project-name
 <Banner type="warning">
   <strong>Important:</strong>
   <br />
-  If you use an environment variable to configure any properties that are
-  required for the Admin panel to function (ex. serverURL or any routes), you
-  need to make sure that your Admin panel code can access it. [Click
-  here](/docs/admin/webpack#admin-environment-vars) for more info.
+  If you use an environment variable to configure any properties that are required for the Admin
+  panel to function (ex. serverURL or any routes), you need to make sure that your Admin panel code
+  can access it. [Click here](/docs/admin/webpack#admin-environment-vars) for more info.
 </Banner>
 
 ### Customizing & Automating Config Location Detection
@@ -145,7 +144,7 @@ In addition to the above automated detection, you can specify your own location 
 ```json
 {
   "scripts": {
-    "dev": "PAYLOAD_CONFIG_PATH=path/to/custom-config.js node server.js",
+    "dev": "PAYLOAD_CONFIG_PATH=path/to/custom-config.js node server.js"
   }
 }
 ```
@@ -161,14 +160,14 @@ Payload comes with `isomorphic-fetch` installed which means that even in Node, y
 You can import config types as follows:
 
 ```ts
-import { Config } from "payload/config";
+import { Config } from 'payload/config'
 
 // This is the type used for an incoming Payload config.
 // Only the bare minimum properties are marked as required.
 ```
 
 ```ts
-import { SanitizedConfig } from "payload/config";
+import { SanitizedConfig } from 'payload/config'
 
 // This is the type used after an incoming Payload config is fully sanitized.
 // Generally, this is only used internally by Payload.

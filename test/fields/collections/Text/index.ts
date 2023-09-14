@@ -1,7 +1,7 @@
-import type { CollectionConfig } from '../../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-export const defaultText = 'default-text';
-export const textFieldsSlug = 'text-fields';
+export const defaultText = 'default-text'
+export const textFieldsSlug = 'text-fields'
 
 const TextFields: CollectionConfig = {
   slug: textFieldsSlug,
@@ -40,15 +40,17 @@ const TextFields: CollectionConfig = {
     {
       name: 'defaultFunction',
       type: 'text',
-      defaultValue: () => (defaultText),
+      defaultValue: () => defaultText,
     },
     {
       name: 'defaultAsync',
       type: 'text',
       defaultValue: async (): Promise<string> => {
-        return new Promise((resolve) => setTimeout(() => {
-          resolve(defaultText);
-        }, 1));
+        return new Promise((resolve) =>
+          setTimeout(() => {
+            resolve(defaultText)
+          }, 1),
+        )
       },
     },
     {
@@ -61,9 +63,9 @@ const TextFields: CollectionConfig = {
       name: 'fieldWithDefaultValue',
       type: 'text',
       defaultValue: async () => {
-        const defaultValue = new Promise((resolve) => setTimeout(() => resolve('some-value'), 1000));
+        const defaultValue = new Promise((resolve) => setTimeout(() => resolve('some-value'), 1000))
 
-        return defaultValue;
+        return defaultValue
       },
     },
     {
@@ -72,17 +74,17 @@ const TextFields: CollectionConfig = {
       hooks: {
         beforeChange: [
           ({ data }) => {
-            return data?.fieldWithDefaultValue || '';
+            return data?.fieldWithDefaultValue || ''
           },
         ],
       },
     },
   ],
-};
+}
 
 export const textDoc = {
   text: 'Seeded text document',
   localizedText: 'Localized text',
-};
+}
 
-export default TextFields;
+export default TextFields

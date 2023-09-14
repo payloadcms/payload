@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { devUser } from '../credentials';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { devUser } from '../credentials'
 
 export default buildConfigWithDefaults({
   collections: [
@@ -68,29 +68,30 @@ export default buildConfigWithDefaults({
         email: devUser.email,
         password: devUser.password,
       },
-    });
+    })
 
     await payload.create({
       collection: 'blocks-collection',
       data: {
-        layout:
-          [...Array(100)].map((row, i) => ({
-            blockName: `Block ${i}`,
-            blockType: 'content',
-            richText: [{
+        layout: [...Array(100)].map((row, i) => ({
+          blockName: `Block ${i}`,
+          blockType: 'content',
+          richText: [
+            {
               children: [{ text: '' }],
-            }],
-            field1: 'text field 1',
-            field2: 'text field 2',
-            field3: 'text field 3',
-            field4: 'text field 4',
-            field5: 'text field 5',
-            field6: 'text field 6',
-            field7: 'text field 7',
-            field8: 'text field 8',
-            field9: 'text field 9',
-          })),
+            },
+          ],
+          field1: 'text field 1',
+          field2: 'text field 2',
+          field3: 'text field 3',
+          field4: 'text field 4',
+          field5: 'text field 5',
+          field6: 'text field 6',
+          field7: 'text field 7',
+          field8: 'text field 8',
+          field9: 'text field 9',
+        })),
       },
-    });
+    })
   },
-});
+})

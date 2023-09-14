@@ -1,32 +1,36 @@
-import type { TransactionOptions } from 'mongodb';
-import { v4 as uuid } from 'uuid';
-import { BeginTransaction } from 'payload/dist/database/types';
-import { APIError } from 'payload/errors';
+// @ts-expect-error // TODO: Fix this import
+import type { TransactionOptions } from 'mongodb'
+import type { BeginTransaction } from 'payload/database'
 
-let transactionsNotAvailable: boolean;
+import { APIError } from 'payload/errors'
+import { v4 as uuid } from 'uuid'
+
+let transactionsNotAvailable: boolean
 export const beginTransaction: BeginTransaction = async function beginTransaction(
   options: TransactionOptions = {},
 ) {
-  let id = null;
+  let id = null
   if (!this.connection) {
-    throw new APIError('beginTransaction called while no connection to the database exists');
+    throw new APIError('beginTransaction called while no connection to the database exists')
   }
 
-  if (transactionsNotAvailable) return id;
+  if (transactionsNotAvailable) return id
 
   if (!this.connection.get('replicaSet')) {
-    transactionsNotAvailable = true;
-    this.payload.logger.warn('Database transactions for MongoDB are only available when connecting to a replica set. Operations will continue without using transactions.');
+    transactionsNotAvailable = true
+    this.payload.logger.warn(
+      'Database transactions for MongoDB are only available when connecting to a replica set. Operations will continue without using transactions.',
+    )
   } else {
-    id = uuid();
+    id = uuid()
     if (!this.sessions[id]) {
-      this.sessions[id] = await this.connection.getClient().startSession();
+      this.sessions[id] = await this.connection.getClient().startSession()
     }
     if (this.sessions[id].inTransaction()) {
-      this.payload.logger.warn('beginTransaction called while transaction already exists');
+      this.payload.logger.warn('beginTransaction called while transaction already exists')
     } else {
-      await this.sessions[id].startTransaction(options);
+      await this.sessions[id].startTransaction(options)
     }
   }
-  return id;
-};
+  return id
+}
