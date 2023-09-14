@@ -13,16 +13,18 @@ export type CustomPublishButtonProps = React.ComponentType<
 >
 export type DefaultPublishButtonProps = {
   disabled: boolean
+  id?: string
   label: string
   publish: () => void
 }
 const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
   disabled,
+  id,
   label,
   publish,
 }) => {
   return (
-    <FormSubmit disabled={disabled} onClick={publish} size="small" type="button">
+    <FormSubmit buttonId={id} disabled={disabled} onClick={publish} size="small" type="button">
       {label}
     </FormSubmit>
   )
@@ -56,6 +58,7 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
       componentProps={{
         DefaultButton: DefaultPublishButton,
         disabled: !canPublish,
+        id: 'action-save',
         label: t('publishChanges'),
         publish,
       }}
