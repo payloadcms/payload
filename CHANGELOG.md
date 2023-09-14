@@ -1,5 +1,14 @@
 
 
+## [1.15.6](https://github.com/payloadcms/payload/compare/v1.15.5...v1.15.6) (2023-09-13)
+
+
+### Bug Fixes
+
+* **#3289:** removes HMR plugin from prod webpack configs ([#3319](https://github.com/payloadcms/payload/issues/3319)) ([8ca67d5](https://github.com/payloadcms/payload/commit/8ca67d5aaa99f0f45eac56766fe42e07ab4a41f1)), closes [#3289](https://github.com/payloadcms/payload/issues/3289)
+* fields with relationTo[] correctly load returned data from form submission ([#3317](https://github.com/payloadcms/payload/issues/3317)) ([096d337](https://github.com/payloadcms/payload/commit/096d33718d28cb5207027f6737982b29a0ced90d))
+* greater than equal admin filter not working ([#3306](https://github.com/payloadcms/payload/issues/3306)) ([0bd3353](https://github.com/payloadcms/payload/commit/0bd335303dff71977b46b373fbee859d11c33337))
+
 ## [1.15.5](https://github.com/payloadcms/payload/compare/v1.15.4...v1.15.5) (2023-09-09)
 
 
