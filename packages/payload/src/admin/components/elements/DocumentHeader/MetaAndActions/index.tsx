@@ -30,7 +30,7 @@ export const MetaAndActions: React.FC<{
   global?: SanitizedGlobalConfig
   hasSavePermission?: boolean
   id?: string
-  isEditing: boolean
+  isEditing?: boolean
   permissions?: CollectionPermission | GlobalPermission
 }> = (props) => {
   const {

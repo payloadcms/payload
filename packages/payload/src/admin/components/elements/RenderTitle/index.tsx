@@ -18,6 +18,8 @@ const RenderTitle: React.FC<Props> = (props) => {
     title: titleFromProps,
   } = props
 
+  console.log(props)
+
   const titleFromForm = useTitle(collection)
 
   let title = titleFromForm
