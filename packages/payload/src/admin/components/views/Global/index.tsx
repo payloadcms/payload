@@ -14,7 +14,7 @@ import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
 import { usePreferences } from '../../utilities/Preferences'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
-import { DefaultGlobalView } from './Default'
+import DefaultGlobalView from './Default'
 
 const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{ data?: Record<string, unknown> }>()
