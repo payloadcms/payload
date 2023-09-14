@@ -62,6 +62,7 @@ const Localizer: React.FC<{
                     <li className={localeClasses} key={localeOption.code}>
                       <Link onClick={close} to={{ search }}>
                         {localeOption.label}
+                        {localeOption.label !== localeOption.code && ` (${localeOption.code})`}
                       </Link>
                     </li>
                   )

@@ -1,9 +1,14 @@
 @import '../../../scss/styles.scss';
 
 .nav {
+  position: relative;
   width: 100%;
   height: calc(var(--base) * 3);
-  z-index: $z-status;
+  z-index: var(--z-modal);
+
+  &--modal-open {
+    z-index: calc(var(--z-modal) + 2);
+  }
 
   &__bg {
     @include blur-bg;
@@ -36,10 +41,6 @@
     }
   }
 
-  &--hide {
-    display: none;
-  }
-
   &__content {
     display: flex;
     align-items: center;
@@ -65,7 +66,6 @@
     border: 0;
     padding: 0;
     cursor: pointer;
-    z-index: 999999;
     transform: translate3d(-50%, 0, 0);
 
     &:focus {

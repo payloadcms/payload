@@ -39,7 +39,7 @@ const DefaultNav = () => {
           baseClass,
           !isMainMenuOpen && `${baseClass}--show-bg`,
           isMainMenuOpen && `${baseClass}--main-menu-open`,
-          oneModalIsOpen && !isMainMenuOpen && `${baseClass}--hide`,
+          oneModalIsOpen && `${baseClass}--modal-open`,
         ]
           .filter(Boolean)
           .join(' ')}

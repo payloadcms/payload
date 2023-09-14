@@ -13,7 +13,7 @@ import type {
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { saveDocAndAssert } from '../helpers'
+import { openDocControls, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {
@@ -222,8 +222,8 @@ describe('fields - relationship', () => {
   test('should duplicate document with relationships', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
 
-    await page.locator('.doc-controls__popup .popup-button').click()
-    await page.locator('.btn.duplicate').first().click()
+    await openDocControls(page)
+    await page.locator('#action-duplicate').click()
     await expect(page.locator('.Toastify')).toContainText('successfully')
     const field = page.locator('#field-relationship .relationship--single-value__text')
 

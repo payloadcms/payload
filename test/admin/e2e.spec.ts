@@ -8,7 +8,7 @@ import type { Post } from './config'
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { openMainMenu, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
+import { openDocControls, openMainMenu, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { globalSlug, slug } from './shared'
@@ -192,7 +192,7 @@ describe('admin', () => {
     test('should delete existing', async () => {
       const { id, title } = await createPost()
       await page.goto(url.edit(id))
-      await page.locator('.doc-controls__popup .popup-button').click()
+      await openDocControls(page)
       await page.locator('#action-delete').click()
       await page.locator('#confirm-delete').click()
       await expect(page.locator(`text=Post "${title}" successfully deleted.`)).toBeVisible()
