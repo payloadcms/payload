@@ -1,6 +1,6 @@
-@import '../../../../scss/styles.scss';
+@import '../../../scss/styles.scss';
 
-.meta-and-actions {
+.doc-controls {
   @include blur-bg;
   position: sticky;
   top: 0;
@@ -75,13 +75,10 @@
     margin: 0;
     gap: calc(var(--base) / 2);
 
-    > button {
+    button {
       margin: 0;
+      white-space: nowrap;
     }
-  }
-
-  .form-submit button {
-    margin: 0;
   }
 
   &__popup {

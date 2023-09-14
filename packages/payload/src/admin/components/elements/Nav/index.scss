@@ -36,6 +36,10 @@
     }
   }
 
+  &--hide {
+    display: none;
+  }
+
   &__content {
     display: flex;
     align-items: center;
@@ -71,6 +75,9 @@
 
   &__account {
     transform: translate3d(50%, 0, 0);
+    &:focus:not(:focus-visible) {
+      opacity: 1;
+    }
   }
 
   &__controls {

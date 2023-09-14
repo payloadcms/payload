@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { Props } from '../types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
-import { MetaAndActions } from '../../../elements/DocumentHeader/MetaAndActions'
+import { DocumentControls } from '../../../elements/DocumentControls'
 import { Gutter } from '../../../elements/Gutter'
 import ViewDescription from '../../../elements/ViewDescription'
 import RenderFields from '../../../forms/RenderFields'
@@ -27,7 +27,7 @@ export const DefaultGlobalView: React.FC<Props> = (props) => {
   return (
     <React.Fragment>
       {/* <SetStepNav collection={collection} id={id} isEditing={isEditing} /> */}
-      <MetaAndActions
+      <DocumentControls
         apiURL={apiURL}
         data={data}
         global={global}

@@ -2,27 +2,27 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-import type { CollectionPermission, GlobalPermission } from '../../../../../auth'
-import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../../exports/types'
+import type { CollectionPermission, GlobalPermission } from '../../../../auth'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
 
-import { formatDate } from '../../../../utilities/formatDate'
-import { useConfig } from '../../../utilities/Config'
-import { useDocumentInfo } from '../../../utilities/DocumentInfo'
-import Autosave from '../../Autosave'
-import DeleteDocument from '../../DeleteDocument'
-import DuplicateDocument from '../../DuplicateDocument'
-import { Gutter } from '../../Gutter'
-import Popup from '../../Popup'
-import PreviewButton from '../../PreviewButton'
-import { Publish } from '../../Publish'
-import { Save } from '../../Save'
-import { SaveDraft } from '../../SaveDraft'
-import Status from '../../Status'
+import { formatDate } from '../../../utilities/formatDate'
+import { useConfig } from '../../utilities/Config'
+import { useDocumentInfo } from '../../utilities/DocumentInfo'
+import Autosave from '../Autosave'
+import DeleteDocument from '../DeleteDocument'
+import DuplicateDocument from '../DuplicateDocument'
+import { Gutter } from '../Gutter'
+import Popup from '../Popup'
+import PreviewButton from '../PreviewButton'
+import { Publish } from '../Publish'
+import { Save } from '../Save'
+import { SaveDraft } from '../SaveDraft'
+import Status from '../Status'
 import './index.scss'
 
-const baseClass = 'meta-and-actions'
+const baseClass = 'doc-controls'
 
-export const MetaAndActions: React.FC<{
+export const DocumentControls: React.FC<{
   apiURL: string
   collection?: SanitizedCollectionConfig
   data?: any
@@ -92,27 +92,27 @@ export const MetaAndActions: React.FC<{
         {collection?.timestamps && (
           <ul className={`${baseClass}__timestamps`}>
             {data?.updatedAt && (
-              <li className={`${baseClass}__timestamp`}>
+              <li
+                className={`${baseClass}__timestamp`}
+                title={formatDate(data.updatedAt, dateFormat, i18n?.language)}
+              >
                 <div className={`${baseClass}__label`}>{t('lastModified')}:&nbsp;</div>
-                <p
-                  className={`${baseClass}__stamp`}
-                  title={formatDate(data.updatedAt, dateFormat, i18n?.language)}
-                >
+                <p className={`${baseClass}__stamp`}>
                   {formatDate(data.updatedAt, dateFormat, i18n?.language)}
                 </p>
               </li>
             )}
             {(publishedDoc?.createdAt || data?.createdAt) && (
-              <li className={`${baseClass}__timestamp`}>
+              <li
+                className={`${baseClass}__timestamp`}
+                title={formatDate(
+                  publishedDoc?.createdAt || data?.createdAt,
+                  dateFormat,
+                  i18n?.language,
+                )}
+              >
                 <div className={`${baseClass}__label`}>{t('created')}:&nbsp;</div>
-                <p
-                  className={`${baseClass}__stamp`}
-                  title={formatDate(
-                    publishedDoc?.createdAt || data?.createdAt,
-                    dateFormat,
-                    i18n?.language,
-                  )}
-                >
+                <p className={`${baseClass}__stamp`}>
                   {formatDate(
                     publishedDoc?.createdAt || data?.createdAt,
                     dateFormat,

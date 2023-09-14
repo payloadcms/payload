@@ -9,6 +9,10 @@
     font-weight: 600;
   }
 
+  &__value-wrap {
+    white-space: nowrap;
+  }
+
   &__action {
     text-decoration: underline;
   }

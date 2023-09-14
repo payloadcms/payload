@@ -16,9 +16,10 @@ const baseClass = 'nav'
 
 const DefaultNav = () => {
   const history = useHistory()
-  const { closeModal, isModalOpen } = useModal()
+  const { closeModal, isModalOpen, oneModalIsOpen } = useModal()
   const { t } = useTranslation()
-  const isOpen = isModalOpen(mainMenuSlug)
+  const isMainMenuOpen = isModalOpen(mainMenuSlug)
+
   const {
     routes: { admin: adminRoute },
   } = useConfig()
@@ -36,8 +37,9 @@ const DefaultNav = () => {
       <header
         className={[
           baseClass,
-          !isOpen && `${baseClass}--show-bg`,
-          isOpen && `${baseClass}--main-menu-open`,
+          !isMainMenuOpen && `${baseClass}--show-bg`,
+          isMainMenuOpen && `${baseClass}--main-menu-open`,
+          oneModalIsOpen && !isMainMenuOpen && `${baseClass}--hide`,
         ]
           .filter(Boolean)
           .join(' ')}
@@ -45,7 +47,7 @@ const DefaultNav = () => {
         <div className={`${baseClass}__bg`} />
         <div className={`${baseClass}__content`}>
           <ModalToggler className={`${baseClass}__modalToggler`} slug={mainMenuSlug}>
-            <Hamburger isActive={isOpen} />
+            <Hamburger isActive={isMainMenuOpen} />
           </ModalToggler>
           <div className={`${baseClass}__nav-wrapper`}>
             <StepNav className={`${baseClass}__step-nav`} />

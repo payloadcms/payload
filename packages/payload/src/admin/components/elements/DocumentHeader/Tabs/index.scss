@@ -16,6 +16,10 @@
     align-items: center;
     padding: calc(var(--base) / 2) calc(var(--base));
 
+    &:focus:not(:focus-visible) {
+      opacity: 1;
+    }
+
     &::before {
       content: '';
       display: block;
@@ -47,12 +51,12 @@
     }
 
     .doc-tabs__count {
-      background-color: var(--theme-elevation-200);
+      background-color: var(--theme-elevation-250);
     }
 
     &:hover {
       .doc-tabs__count {
-        background-color: var(--theme-elevation-200);
+        background-color: var(--theme-elevation-250);
       }
     }
   }

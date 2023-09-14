@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next'
 import type { Translation } from '../../../../translations/type'
 import type { Props } from './types'
 
+import { DocumentControls } from '../../elements/DocumentControls'
 import { DocumentHeader } from '../../elements/DocumentHeader'
-import { MetaAndActions } from '../../elements/DocumentHeader/MetaAndActions'
 import { Gutter } from '../../elements/Gutter'
 import { LoadingOverlayToggle } from '../../elements/Loading'
 import ReactSelect from '../../elements/ReactSelect'
@@ -70,7 +70,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
               onSuccess={onSave}
             >
               <DocumentHeader apiURL={apiURL} collection={collection} data={data} />
-              <MetaAndActions
+              <DocumentControls
                 apiURL={apiURL}
                 collection={collection}
                 data={data}

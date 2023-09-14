@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { Props } from '../types'
 
 import { getTranslation } from '../../../../../../utilities/getTranslation'
-import { MetaAndActions } from '../../../../elements/DocumentHeader/MetaAndActions'
+import { DocumentControls } from '../../../../elements/DocumentControls'
 import { Gutter } from '../../../../elements/Gutter'
 import RenderFields from '../../../../forms/RenderFields'
 import fieldTypes from '../../../../forms/field-types'
@@ -40,7 +40,7 @@ export const DefaultEdit: React.FC<Props> = (props) => {
   return (
     <Fragment>
       <SetStepNav collection={collection} id={id} isEditing={isEditing} />
-      <MetaAndActions
+      <DocumentControls
         apiURL={apiURL}
         collection={collection}
         data={data}

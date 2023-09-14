@@ -96,14 +96,24 @@ export const DefaultVersionsView: React.FC<Props> = (props) => {
     metaDesc = t('viewingVersionsGlobal', { entityLabel })
   }
 
+  const versionCount = versionsData?.totalDocs || 0
+
   return (
     <React.Fragment>
       <LoadingOverlayToggle name="versions" show={isLoadingVersions} />
       <div className={baseClass}>
         <Meta description={metaDesc} title={metaTitle} />
         <Gutter className={`${baseClass}__wrap`}>
-          {versionsData?.totalDocs > 0 && (
+          {versionCount === 0 && (
+            <div className={`${baseClass}__no-versions`}>{t('noFurtherVersionsFound')}</div>
+          )}
+          {versionCount > 0 && (
             <React.Fragment>
+              {/* <div className={`${baseClass}__version-count`}>
+                {t(versionCount === 1 ? 'versionCount_one' : 'versionCount_many', {
+                  count: versionCount,
+                })}
+              </div> */}
               <Table
                 columns={buildVersionColumns(collection, global, t)}
                 data={versionsData?.docs}
@@ -136,9 +146,6 @@ export const DefaultVersionsView: React.FC<Props> = (props) => {
                 )}
               </div>
             </React.Fragment>
-          )}
-          {versionsData?.totalDocs === 0 && (
-            <div className={`${baseClass}__no-versions`}>{t('noFurtherVersionsFound')}</div>
           )}
         </Gutter>
       </div>
