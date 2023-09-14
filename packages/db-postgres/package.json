@@ -30,6 +30,7 @@
   },
   "repository": "https://github.com/payloadcms/payload",
   "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
     "builddisabled": "pnpm build:swc && pnpm build:types"
