@@ -25,7 +25,7 @@ export async function migrateReset(this: DatabaseAdapter): Promise<void> {
       (existing) => existing.name === migration.name,
     )
     if (existingMigration) {
-      payload.logger.info({ msg: `Migrating: ${migration.name}` })
+      payload.logger.info({ msg: `Migrating down: ${migration.name}` })
       try {
         const start = Date.now()
         transactionID = await this.beginTransaction()
@@ -40,7 +40,7 @@ export async function migrateReset(this: DatabaseAdapter): Promise<void> {
           },
         })
         await this.commitTransaction(transactionID)
-        payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
+        payload.logger.info({ msg: `Migrated down:  ${migration.name} (${Date.now() - start}ms)` })
       } catch (err: unknown) {
         await this.rollbackTransaction(transactionID)
         payload.logger.error({ err, msg: `Error running migration ${migration.name}` })

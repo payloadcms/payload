@@ -12,7 +12,12 @@ export const readMigrationFiles = async ({
 }: {
   payload: Payload
 }): Promise<Migration[]> => {
-  if (!fs.existsSync(payload.db.migrationDir)) return []
+  if (!fs.existsSync(payload.db.migrationDir)) {
+    payload.logger.debug({
+      msg: `No migration directory found at ${payload.db.migrationDir}`,
+    })
+    return []
+  }
 
   const files = fs
     .readdirSync(payload.db.migrationDir)
