@@ -1,17 +1,20 @@
 /* eslint-disable no-param-reassign */
 import { eq } from 'drizzle-orm';
-import { transform } from '../transform/read';
-import { BlockRowToInsert } from '../transform/write/types';
-import { insertArrays } from './insertArrays';
-import { transformForWrite } from '../transform/write';
-import { Args } from './types';
-import { deleteExistingRowsByPath } from './deleteExistingRowsByPath';
-import { deleteExistingArrayRows } from './deleteExistingArrayRows';
+
+import type { BlockRowToInsert } from '../transform/write/types';
+import type { Args } from './types';
+
 import { buildFindManyArgs } from '../find/buildFindManyArgs';
+import { transform } from '../transform/read';
+import { transformForWrite } from '../transform/write';
+import { deleteExistingArrayRows } from './deleteExistingArrayRows';
+import { deleteExistingRowsByPath } from './deleteExistingRowsByPath';
+import { insertArrays } from './insertArrays';
 
 export const upsertRow = async ({
   adapter,
   data,
+  db,
   fields,
   id,
   operation,
@@ -37,18 +40,18 @@ export const upsertRow = async ({
 
     if (id) {
       rowToInsert.row.id = id;
-      [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
+      [insertedRow] = await db.insert(adapter.tables[tableName])
         .values(rowToInsert.row)
-        .onConflictDoUpdate({ target, set: rowToInsert.row })
+        .onConflictDoUpdate({ set: rowToInsert.row, target })
         .returning();
     } else {
-      [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
+      [insertedRow] = await db.insert(adapter.tables[tableName])
         .values(rowToInsert.row)
-        .onConflictDoUpdate({ target, set: rowToInsert.row, where })
+        .onConflictDoUpdate({ set: rowToInsert.row, target, where })
         .returning();
     }
   } else {
-    [insertedRow] = await adapter.db.insert(adapter.tables[tableName])
+    [insertedRow] = await db.insert(adapter.tables[tableName])
       .values(rowToInsert.row).returning();
   }
 
@@ -96,10 +99,10 @@ export const upsertRow = async ({
 
     promises.push(async () => {
       if (operation === 'update') {
-        await adapter.db.delete(localeTable).where(eq(localeTable._parentID, insertedRow.id));
+        await db.delete(localeTable).where(eq(localeTable._parentID, insertedRow.id));
       }
 
-      await adapter.db.insert(localeTable).values(localesToInsert);
+      await db.insert(localeTable).values(localesToInsert);
     });
   }
 
@@ -114,15 +117,15 @@ export const upsertRow = async ({
         await deleteExistingRowsByPath({
           adapter,
           localeColumnName: 'locale',
+          newRows: relationsToInsert,
           parentColumnName: 'parent',
           parentID: insertedRow.id,
           pathColumnName: 'path',
-          newRows: relationsToInsert,
           tableName: relationshipsTableName,
         });
       }
 
-      await adapter.db.insert(adapter.tables[relationshipsTableName])
+      await db.insert(adapter.tables[relationshipsTableName])
         .values(relationsToInsert).returning();
     });
   }
@@ -139,14 +142,14 @@ export const upsertRow = async ({
       if (operation === 'update') {
         await deleteExistingRowsByPath({
           adapter,
+          newRows: blockRows.map(({ row }) => row),
           parentID: insertedRow.id,
           pathColumnName: '_path',
-          newRows: blockRows.map(({ row }) => row),
           tableName: `${tableName}_${blockName}`,
         });
       }
 
-      insertedBlockRows[blockName] = await adapter.db.insert(adapter.tables[`${tableName}_${blockName}`])
+      insertedBlockRows[blockName] = await db.insert(adapter.tables[`${tableName}_${blockName}`])
         .values(blockRows.map(({ row }) => row)).returning();
 
       insertedBlockRows[blockName].forEach((row, i) => {
@@ -171,7 +174,7 @@ export const upsertRow = async ({
       }, []);
 
       if (blockLocaleRowsToInsert.length > 0) {
-        await adapter.db.insert(adapter.tables[`${tableName}_${blockName}_locales`])
+        await db.insert(adapter.tables[`${tableName}_${blockName}_locales`])
           .values(blockLocaleRowsToInsert).returning();
       }
 
@@ -220,7 +223,7 @@ export const upsertRow = async ({
 
   findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id);
 
-  const doc = await adapter.db.query[tableName].findFirst(findManyArgs);
+  const doc = await db.query[tableName].findFirst(findManyArgs);
 
   // //////////////////////////////////
   // TRANSFORM DATA

@@ -10,8 +10,9 @@ import { transform } from './transform/read';
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: PostgresAdapter,
-  { locale, slug, where },
+  { locale, req, slug, where },
 ) {
+  const db = req.transactionID ? this.sessions[req.transactionID] : this.db;
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug);
   const tableName = toSnakeCase(slug);
 
@@ -32,7 +33,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
 
   findManyArgs.where = query;
 
-  const doc = await this.db.query[tableName].findFirst(findManyArgs);
+  const doc = await db.query[tableName].findFirst(findManyArgs);
 
   if (doc) {
     const result = transform({

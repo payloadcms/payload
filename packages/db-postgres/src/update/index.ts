@@ -12,30 +12,30 @@ export const updateOne: UpdateOne = async function updateOne({
   id,
   locale,
   req,
-  where,
+  where: whereArg,
 }) {
+  const db = req.transactionID ? this.sessions[req.transactionID] : this.db;
   const collection = this.payload.collections[collectionSlug].config;
+  const tableName = toSnakeCase(collection);
+  const whereToUse = whereArg || { id: { equals: id } };
 
-  let query: Result;
-
-  if (where) {
-    query = await buildQuery({
-      adapter: this,
-      collectionSlug,
-      locale,
-      where,
-    });
-  }
+  const { where } = await buildQuery({
+    adapter: this,
+    fields: collection.fields,
+    locale,
+    tableName,
+    where: whereToUse
+  });
 
   const result = await upsertRow({
     adapter: this,
     data,
+    db,
     fields: collection.fields,
     id,
-    locale: req.locale,
     operation: 'update',
     tableName: toSnakeCase(collectionSlug),
-    where: query,
+    where,
   });
 
   return result;

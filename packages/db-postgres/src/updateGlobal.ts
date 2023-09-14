@@ -11,6 +11,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
   this: PostgresAdapter,
   { data, req = {} as PayloadRequest, slug },
 ) {
+  const db = req.transactionID ? this.sessions[req.transactionID] : this.db;
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug);
   const tableName = toSnakeCase(slug);
 
@@ -19,6 +20,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
   const result = await upsertRow({
     adapter: this,
     data,
+    db,
     fields: globalConfig.fields,
     id: existingGlobal.id,
     operation: 'update',

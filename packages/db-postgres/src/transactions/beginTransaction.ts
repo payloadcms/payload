@@ -29,7 +29,7 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
 
     this.sessions[id] = db;
 
-    await db.execute(sql`BEGIN;`);
+    await this.sessions[id].execute(sql`BEGIN;`);
   } catch (err) {
     this.payload.logger.error(
       `Error: cannot begin transaction: ${err.message}`,

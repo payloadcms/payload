@@ -17,8 +17,9 @@ export const queryDrafts: QueryDrafts = async function queryDrafts({
   pagination,
   req = {} as PayloadRequest,
   sort: sortArg,
-  where,
+  where: whereArg,
 }) {
+  const db = req.transactionID ? this.sessions[req.transactionID] : this.db;
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config;
   const tableName = toSnakeCase(collection);
   const versionsTableName = `_${tableName}_versions`;
@@ -33,17 +34,17 @@ export const queryDrafts: QueryDrafts = async function queryDrafts({
   let hasNextPage;
   let pagingCounter;
 
-  const query = await buildQuery({
+  const { where } = await buildQuery({
     adapter: this,
     fields: buildVersionCollectionFields(collectionConfig),
     locale,
     sort,
     tableName: versionsTableName,
-    where
+    where: whereArg
   });
 
   if (pagination !== false) {
-    const countResult = await this.db.select({ count: sql<number>`count(*)` }).from(table).where(query);
+    const countResult = await db.select({ count: sql<number>`count(*)` }).from(table).where(where);
     totalDocs = Number(countResult[0].count);
     totalPages = Math.ceil(totalDocs / limit);
     hasPrevPage = page > 1;
@@ -60,9 +61,9 @@ export const queryDrafts: QueryDrafts = async function queryDrafts({
 
   findManyArgs.limit = limit === 0 ? undefined : limit;
   findManyArgs.offset = (page - 1) * limit;
-  findManyArgs.where = query;
+  findManyArgs.where = where;
 
-  const rawDocs = await this.db.query[tableName].findMany(findManyArgs);
+  const rawDocs = await db.query[tableName].findMany(findManyArgs);
 
   const docs = rawDocs.map((data) => {
     return transform({

@@ -47,10 +47,11 @@ export const find: Find = async function find(
     tableName,
     where: whereArg,
   });
+  const db = req.transactionID ? this.sessions[req.transactionID] : this.db;
 
   const orderedIDMap: Record<number | string, number> = {};
 
-  const selectQuery = this.db.selectDistinct(selectFields)
+  const selectQuery = db.selectDistinct(selectFields)
     .from(table);
   if (orderBy?.order && orderBy?.column) {
     selectQuery.orderBy(orderBy.order(orderBy.column));
@@ -114,10 +115,10 @@ export const find: Find = async function find(
     }
   }
 
-  const findPromise = this.db.query[tableName].findMany(findManyArgs);
+  const findPromise = db.query[tableName].findMany(findManyArgs);
 
   if (pagination !== false || selectDistinctResult?.length > limit) {
-    const selectCount = this.db.select({ count: sql<number>`count(*)` })
+    const selectCount = db.select({ count: sql<number>`count(*)` })
       .from(table)
       .where(where);
     Object.entries(joins)
