@@ -1,0 +1,19 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false /* Do not emit outputs. */,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist" /* Specify an output folder for all emitted files. */,
+    "rootDir": "../" /* Specify the root folder within your source files. */
+  },
+  "exclude": ["dist", "build", "node_modules", ".eslintrc.js"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    "src/**/*.json",
+    "**/*.ts",
+    "test/**/*.tsx",
+    "../packages/**/src/**/*.ts"
+  ]
+}

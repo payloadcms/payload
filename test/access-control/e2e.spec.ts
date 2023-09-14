@@ -15,7 +15,7 @@ import {
   restrictedVersionsSlug,
   slug,
   unrestrictedSlug,
-} from './config'
+} from './shared'
 
 /**
  * TODO: Access Control

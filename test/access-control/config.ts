@@ -3,20 +3,19 @@ import type { FieldAccess } from '../../packages/payload/src/fields/config/types
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import { firstArrayText, secondArrayText } from './shared'
-
-export const slug = 'posts'
-export const unrestrictedSlug = 'unrestricted'
-export const readOnlySlug = 'read-only-collection'
-
-export const userRestrictedSlug = 'user-restricted'
-export const restrictedSlug = 'restricted'
-export const restrictedVersionsSlug = 'restricted-versions'
-export const siblingDataSlug = 'sibling-data'
-export const relyOnRequestHeadersSlug = 'rely-on-request-headers'
-export const docLevelAccessSlug = 'doc-level-access'
-export const hiddenFieldsSlug = 'hidden-fields'
-
-export const hiddenAccessSlug = 'hidden-access'
+import {
+  docLevelAccessSlug,
+  hiddenAccessSlug,
+  hiddenFieldsSlug,
+  readOnlySlug,
+  relyOnRequestHeadersSlug,
+  restrictedSlug,
+  restrictedVersionsSlug,
+  siblingDataSlug,
+  slug,
+  unrestrictedSlug,
+  userRestrictedSlug,
+} from './shared'
 
 const openAccess = {
   create: () => true,
