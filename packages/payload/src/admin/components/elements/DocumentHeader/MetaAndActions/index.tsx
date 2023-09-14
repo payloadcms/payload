@@ -2,8 +2,8 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-import type { CollectionPermission } from '../../../../../auth'
-import type { SanitizedCollectionConfig } from '../../../../../exports/types'
+import type { CollectionPermission, GlobalPermission } from '../../../../../auth'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../../exports/types'
 
 import { formatDate } from '../../../../utilities/formatDate'
 import { useConfig } from '../../../utilities/Config'
@@ -24,21 +24,25 @@ const baseClass = 'meta-and-actions'
 
 export const MetaAndActions: React.FC<{
   apiURL: string
-  collection: SanitizedCollectionConfig
+  collection?: SanitizedCollectionConfig
   data?: any
   disableActions?: boolean
+  global?: SanitizedGlobalConfig
   hasSavePermission?: boolean
-  id: string
+  id?: string
   isEditing: boolean
-  permissions?: CollectionPermission
+  permissions?: CollectionPermission | GlobalPermission
 }> = (props) => {
-  const { collection, data, disableActions, hasSavePermission, id, isEditing, permissions } = props
-
   const {
-    admin: { disableDuplicate, preview },
-    slug,
-    timestamps,
-  } = collection
+    collection,
+    data,
+    disableActions,
+    global,
+    hasSavePermission,
+    id,
+    isEditing,
+    permissions,
+  } = props
 
   const { publishedDoc } = useDocumentInfo()
 
@@ -49,22 +53,43 @@ export const MetaAndActions: React.FC<{
 
   const { i18n, t } = useTranslation('general')
 
+  let showPreviewButton = false
+
+  if (collection) {
+    showPreviewButton =
+      isEditing &&
+      collection?.admin?.preview &&
+      collection?.versions?.drafts &&
+      !collection?.versions?.drafts?.autosave
+  }
+
+  if (global) {
+    showPreviewButton =
+      isEditing &&
+      global?.admin?.preview &&
+      global?.versions?.drafts &&
+      !global?.versions?.drafts?.autosave
+  }
+
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
-        {collection.versions?.drafts && (
+        {(collection?.versions?.drafts || global?.versions?.drafts) && (
           <React.Fragment>
             <Status />
-            {collection.versions?.drafts.autosave && hasSavePermission && (
-              <Autosave
-                collection={collection}
-                id={id}
-                publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
-              />
-            )}
+            {((collection?.versions?.drafts && collection?.versions?.drafts?.autosave) ||
+              (global?.versions?.drafts && global?.versions?.drafts?.autosave)) &&
+              hasSavePermission && (
+                <Autosave
+                  collection={collection}
+                  global={global}
+                  id={id}
+                  publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
+                />
+              )}
           </React.Fragment>
         )}
-        {timestamps && (
+        {collection?.timestamps && (
           <ul className={`${baseClass}__timestamps`}>
             {data?.updatedAt && (
               <li className={`${baseClass}__timestamp`}>
@@ -100,25 +125,22 @@ export const MetaAndActions: React.FC<{
         )}
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
-            {isEditing &&
-              preview &&
-              collection.versions?.drafts &&
-              !collection.versions?.drafts?.autosave && (
-                <PreviewButton
-                  CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
-                  generatePreviewURL={preview}
-                />
-              )}
+            {showPreviewButton && (
+              <PreviewButton
+                CustomComponent={collection?.admin?.components?.edit?.PreviewButton}
+                generatePreviewURL={collection?.admin?.preview || global?.admin?.preview}
+              />
+            )}
             {hasSavePermission && (
               <React.Fragment>
-                {collection.versions?.drafts ? (
+                {collection?.versions?.drafts || global?.versions?.drafts ? (
                   <React.Fragment>
-                    {!collection.versions.drafts.autosave && (
+                    {((collection?.versions?.drafts && !collection?.versions?.drafts?.autosave) ||
+                      (global?.versions?.drafts && !global?.versions?.drafts?.autosave)) && (
                       <SaveDraft
                         CustomComponent={collection?.admin?.components?.edit?.SaveDraftButton}
                       />
                     )}
-
                     <Publish CustomComponent={collection?.admin?.components?.edit?.PublishButton} />
                   </React.Fragment>
                 ) : (
@@ -127,7 +149,7 @@ export const MetaAndActions: React.FC<{
               </React.Fragment>
             )}
           </div>
-          {!disableActions && (
+          {Boolean(collection && !disableActions) && (
             <Popup
               button={
                 <div className={`${baseClass}__dots`}>
@@ -140,21 +162,28 @@ export const MetaAndActions: React.FC<{
               verticalAlign="bottom"
             >
               <ul className={`${baseClass}__popup-actions`}>
-                {permissions?.create?.permission && (
+                {'create' in permissions && permissions?.create?.permission && (
                   <React.Fragment>
                     <li>
-                      <Link id="action-create" to={`${adminRoute}/collections/${slug}/create`}>
+                      <Link
+                        id="action-create"
+                        to={`${adminRoute}/collections/${collection?.slug}/create`}
+                      >
                         {t('createNew')}
                       </Link>
                     </li>
-                    {!disableDuplicate && isEditing && (
+                    {!collection?.admin?.disableDuplicate && isEditing && (
                       <li>
-                        <DuplicateDocument collection={collection} id={id} slug={slug} />
+                        <DuplicateDocument
+                          collection={collection}
+                          id={id}
+                          slug={collection?.slug}
+                        />
                       </li>
                     )}
                   </React.Fragment>
                 )}
-                {permissions?.delete?.permission && (
+                {'delete' in permissions && permissions?.delete?.permission && (
                   <li>
                     <DeleteDocument buttonId="action-delete" collection={collection} id={id} />
                   </li>

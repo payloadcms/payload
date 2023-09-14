@@ -2,13 +2,10 @@ import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useRouteMatch } from 'react-router-dom'
 
-import type {
-  SanitizedCollectionConfig,
-  SanitizedGlobalConfig,
-} from '../../../../../../exports/types'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../../exports/types'
 
-import { useConfig } from '../../../../utilities/Config'
-import { useDocumentInfo } from '../../../../utilities/DocumentInfo'
+import { useConfig } from '../../../utilities/Config'
+import { useDocumentInfo } from '../../../utilities/DocumentInfo'
 import './index.scss'
 
 const baseClass = 'doc-tabs'
@@ -29,16 +26,12 @@ export const DocumentTabs: React.FC<{
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
   id: string
+  isEditing?: boolean
 }> = (props) => {
-  const { apiURL, collection, global, id } = props
+  const { apiURL, collection, global, id, isEditing } = props
   const match = useRouteMatch()
   const location = useLocation()
   const { t } = useTranslation('general')
-
-  const {
-    admin: { hideAPIURL },
-    versions: versionsConfig,
-  } = collection
 
   const {
     routes: { admin },
@@ -53,28 +46,30 @@ export const DocumentTabs: React.FC<{
 
   let docURL: string
   let versionsURL: string
+  let editTabActive = false
 
   if (collection) {
     docURL = `${admin}/collections/${collection.slug}/${id}`
     versionsURL = `${docURL}/versions`
+    editTabActive =
+      location.pathname === `${admin}/collections/${collection.slug}` ||
+      location.pathname === `${admin}/collections/${collection.slug}/create` ||
+      location.pathname === docURL
   }
 
   if (global) {
     docURL = `${admin}/globals/${global.slug}`
     versionsURL = `${docURL}/versions`
+    editTabActive =
+      location.pathname === `${admin}/globals/${global.slug}` || location.pathname === docURL
   }
 
-  if (tabs) {
+  // Don't show tabs when creating new documents
+  if ((tabs && collection && isEditing) || global) {
     return (
       <ul className={baseClass}>
         <li
-          className={[
-            `${baseClass}__tab`,
-            (location.pathname === `${admin}/collections/${collection.slug}` ||
-              location.pathname === `${admin}/collections/${collection.slug}/create` ||
-              location.pathname === docURL) &&
-              `${baseClass}__tab--active`,
-          ]
+          className={[`${baseClass}__tab`, editTabActive && `${baseClass}__tab--active`]
             .filter(Boolean)
             .join(' ')}
         >
@@ -82,11 +77,11 @@ export const DocumentTabs: React.FC<{
             <div className={`${baseClass}__tab-label`}>{t('edit')}</div>
           </Link>
         </li>
-        {versionsConfig && (
+        {(collection?.versions || global?.versions) && (
           <li
             className={[
               `${baseClass}__tab`,
-              location.pathname === versionsURL && `${baseClass}__tab--active`,
+              location.pathname.startsWith(versionsURL) && `${baseClass}__tab--active`,
             ]
               .filter(Boolean)
               .join(' ')}
@@ -104,7 +99,7 @@ export const DocumentTabs: React.FC<{
             </Link>
           </li>
         )}
-        {!hideAPIURL && (
+        {(!collection?.admin?.hideAPIURL || !global?.admin?.hideAPIURL) && (
           <li
             className={[`${baseClass}__tab`, match.url === apiURL && `${baseClass}__tab--active`]
               .filter(Boolean)

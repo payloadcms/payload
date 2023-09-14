@@ -3,7 +3,7 @@ import React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 
 import { useAuth } from '../../../../utilities/Auth'
-import { DocumentInfoProvider } from '../../../../utilities/DocumentInfo'
+import { useConfig } from '../../../../utilities/Config'
 import Version from '../../../Version'
 import VersionsView from '../../../Versions'
 import { DefaultEdit } from '../Default/index'
@@ -15,14 +15,24 @@ const Unauthorized = lazy(() => import('../../../Unauthorized'))
 
 export const CollectionRoutes: React.FC<Props> = (props) => {
   const { collection, id, permissions } = props
+
   const match = useRouteMatch()
+
+  const {
+    routes: { admin: adminRoute },
+  } = useConfig()
+
   const { user } = useAuth()
 
   return (
     <Switch>
-      <Route exact key={`${collection.slug}-versions`} path={`${match.url}/versions`}>
+      <Route
+        exact
+        key={`${collection.slug}-versions`}
+        path={`${adminRoute}/collections/${collection.slug}/:id/versions`}
+      >
         {permissions?.readVersions?.permission ? (
-          <VersionsView collection={collection} />
+          <VersionsView collection={collection} id={id} />
         ) : (
           <Unauthorized />
         )}
@@ -30,12 +40,10 @@ export const CollectionRoutes: React.FC<Props> = (props) => {
       <Route
         exact
         key={`${collection.slug}-view-version`}
-        path={`${match.url}/versions/:versionID`}
+        path={`${adminRoute}/collections/${collection.slug}/:id/versions/:versionID`}
       >
         {permissions?.readVersions?.permission ? (
-          <DocumentInfoProvider collection={collection} idFromParams>
-            <Version collection={collection} />
-          </DocumentInfoProvider>
+          <Version collection={collection} />
         ) : (
           <Unauthorized />
         )}

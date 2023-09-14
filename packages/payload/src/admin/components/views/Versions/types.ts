@@ -6,6 +6,7 @@ import type { Version } from '../../utilities/DocumentInfo/types'
 export type IndexProps = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
+  id?: string
 }
 
 export type Props = IndexProps & {

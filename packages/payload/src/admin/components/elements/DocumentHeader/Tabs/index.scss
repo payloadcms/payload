@@ -1,4 +1,4 @@
-@import '../../../../../scss/styles.scss';
+@import '../../../../scss/styles.scss';
 
 .doc-tabs {
   display: flex;
@@ -6,25 +6,6 @@
   list-style: none;
   align-items: center;
   margin: 0;
-
-  &__tab--active {
-    .doc-tabs__tab-link {
-      &::before {
-        opacity: 1;
-        background-color: var(--theme-elevation-100);
-      }
-    }
-
-    .doc-tabs__count {
-      background-color: var(--theme-elevation-150);
-    }
-
-    &:hover {
-      .doc-tabs__count {
-        background-color: var(--theme-elevation-150);
-      }
-    }
-  }
 
   &__tab-link {
     @extend %h5;
@@ -53,6 +34,25 @@
 
       .doc-tabs__count {
         background-color: var(--theme-elevation-150);
+      }
+    }
+  }
+
+  &__tab--active {
+    .doc-tabs__tab-link {
+      &::before {
+        opacity: 1;
+        background-color: var(--theme-elevation-100);
+      }
+    }
+
+    .doc-tabs__count {
+      background-color: var(--theme-elevation-200);
+    }
+
+    &:hover {
+      .doc-tabs__count {
+        background-color: var(--theme-elevation-200);
       }
     }
   }

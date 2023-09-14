@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useRouteMatch } from 'react-router-dom'
 
 import type { IndexProps } from './types'
 
@@ -14,7 +13,7 @@ import { useSearchParams } from '../../utilities/SearchParams'
 import { DefaultVersionsView } from './Default'
 
 const VersionsView: React.FC<IndexProps> = (props) => {
-  const { collection, global } = props
+  const { collection, global, id } = props
 
   const { permissions, user } = useAuth()
 
@@ -28,10 +27,6 @@ const VersionsView: React.FC<IndexProps> = (props) => {
   const { i18n } = useTranslation('version')
 
   const { limit, page, sort } = useSearchParams()
-
-  const {
-    params: { id },
-  } = useRouteMatch<{ id: string }>()
 
   let CustomVersionsView: React.ComponentType | null = null
   let docURL: string

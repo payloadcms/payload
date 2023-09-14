@@ -245,6 +245,9 @@ export default buildConfigWithDefaults({
       admin: {
         group: 'Group',
       },
+      versions: {
+        drafts: true,
+      },
       fields: [
         {
           name: 'title',

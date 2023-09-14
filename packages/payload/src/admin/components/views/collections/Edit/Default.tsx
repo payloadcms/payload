@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { Props } from './types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
-import { TitleAndTabs } from '../../../elements/DocumentHeader/TitleAndTabs'
+import { DocumentHeader } from '../../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../../elements/Loading'
 import Form from '../../../forms/Form'
 import { useAuth } from '../../../utilities/Auth'
@@ -79,12 +79,13 @@ const DefaultEditView: React.FC<Props> = (props) => {
             />
             {!isLoading && (
               <React.Fragment>
-                <TitleAndTabs
+                <DocumentHeader
                   apiURL={apiURL}
                   collection={collection}
                   customHeader={customHeader}
                   data={data}
                   id={id}
+                  isEditing={isEditing}
                 />
                 <CollectionRoutes {...props} />
               </React.Fragment>

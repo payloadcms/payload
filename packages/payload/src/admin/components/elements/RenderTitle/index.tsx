@@ -17,6 +17,7 @@ const RenderTitle: React.FC<Props> = (props) => {
     fallback = '[untitled]',
     title: titleFromProps,
   } = props
+
   const titleFromForm = useTitle(collection)
 
   let title = titleFromForm

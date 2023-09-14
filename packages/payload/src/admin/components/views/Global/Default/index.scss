@@ -1,6 +1,6 @@
-@import '../../../../../scss/styles.scss';
+@import '../../../../scss/styles.scss';
 
-.collection-edit {
+.global-edit {
   width: 100%;
 
   &__wrapper {
@@ -75,7 +75,7 @@
   }
 
   &--is-editing {
-    .collection-edit__sidebar {
+    .global-edit__sidebar {
       padding-top: 0;
     }
   }
