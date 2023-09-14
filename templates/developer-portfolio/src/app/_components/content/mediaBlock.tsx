@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, Fragment } from 'react'
 import { cva } from 'class-variance-authority'
 import Image from 'next/image'
 
@@ -53,12 +53,12 @@ export const MediaBlock: FC<MediaBlockProps> = ({
   captionSize,
 }) => {
   return (
-    <>
+    <Fragment>
       {mediaFields.map(({ media, size, mediaFit = 'cover' }) => {
         const mediaInfo = media as Media
 
         const base = (
-          <>
+          <Fragment>
             <div
               className={cn(
                 'flex-0 flex relative',
@@ -78,7 +78,7 @@ export const MediaBlock: FC<MediaBlockProps> = ({
                 priority={priority}
               />
             </div>
-          </>
+          </Fragment>
         )
 
         const containerClassNames = cn(
@@ -114,6 +114,6 @@ export const MediaBlock: FC<MediaBlockProps> = ({
           </Block>
         )
       })}
-    </>
+    </Fragment>
   )
 }

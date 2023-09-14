@@ -1,5 +1,5 @@
 'use client'
-import React, { FC, useState } from 'react'
+import React, { FC, Fragment, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Data } from 'payload/dist/admin/components/forms/Form/types'
 
@@ -170,7 +170,7 @@ export const FormBlock: FC<FormBlockProps> = props => {
               }
 
               return (
-                <>
+                <Fragment key={`row-${index}`}>
                   <style
                     key={`style-${index}`}
                     dangerouslySetInnerHTML={{
@@ -189,7 +189,7 @@ export const FormBlock: FC<FormBlockProps> = props => {
                   />
                   <div
                     id={`formField__${props.id}`}
-                    key={index}
+                    key={`${formID}-${field.name}-${index}`}
                     className="inline-flex flex-col gap-2 mt-4 first:mt-0 content-box pb-4 last:pb-0 lg:pb-0 pr-0 lg:pr-5 last:pr-0 "
                   >
                     <label htmlFor={props.id} className="text-sm text-primary">
@@ -202,7 +202,7 @@ export const FormBlock: FC<FormBlockProps> = props => {
                       </div>
                     )}
                   </div>
-                </>
+                </Fragment>
               )
             })}
           </div>

@@ -25,7 +25,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const [profile, header] = await Promise.all([fetchProfile(), fetchHeader()])
 
   return (
-    <html lang="en" className={`dark ${inter.className}`}>
+    <html lang="en" className={`${inter.className} dark`}>
       <body className="w-full overflow-x-hidden">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Backdrop />

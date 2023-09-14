@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, Fragment } from 'react'
 
 import { Block, BlockProps } from '../ui/block'
 import { PayloadLink, PayloadLinkType } from './link'
@@ -16,7 +16,7 @@ interface ContentBlockProps {
 
 export const ContentBlock: FC<ContentBlockProps> = ({ contentFields }) => {
   return (
-    <>
+    <Fragment>
       {contentFields.map(({ richText, size, id, enableLink, link }) => {
         let content = <RichText content={richText} />
 
@@ -30,6 +30,6 @@ export const ContentBlock: FC<ContentBlockProps> = ({ contentFields }) => {
           </Block>
         )
       })}
-    </>
+    </Fragment>
   )
 }

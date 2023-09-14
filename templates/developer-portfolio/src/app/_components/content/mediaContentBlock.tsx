@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, Fragment } from 'react'
 
 import { Media } from '../../../payload-types'
 import { ContentBlock } from './contentBlock'
@@ -31,7 +31,7 @@ const complimentSizes: Record<LayoutSize, LayoutSize> = {
 
 export const MediaContentBlock: FC<MediaContentBlockProps> = ({ mediaContentFields, priority }) => {
   return (
-    <>
+    <Fragment>
       {mediaContentFields?.map(
         ({ alignment, mediaSize, media, richText, link, enableLink, mediaFit }) => {
           const mediaBlock = (
@@ -62,17 +62,17 @@ export const MediaContentBlock: FC<MediaContentBlockProps> = ({ mediaContentFiel
           let content
           if (alignment === 'contentMedia') {
             content = (
-              <>
+              <Fragment>
                 {contentBlock}
                 {mediaBlock}
-              </>
+              </Fragment>
             )
           } else {
             content = (
-              <>
+              <Fragment>
                 {mediaBlock}
                 {contentBlock}
-              </>
+              </Fragment>
             )
           }
 
@@ -90,6 +90,6 @@ export const MediaContentBlock: FC<MediaContentBlockProps> = ({ mediaContentFiel
           return content
         },
       )}
-    </>
+    </Fragment>
   )
 }
