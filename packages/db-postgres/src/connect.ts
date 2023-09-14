@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { v4 as uuid } from 'uuid';
 import { eq, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import type { Connect } from 'payload/dist/database/types';
@@ -31,6 +32,7 @@ export const connect: Connect = async function connect(
   };
 
   try {
+    const sessionID = uuid();
     if ('pool' in this && this.pool !== false) {
       const pool = new Pool(this.pool);
       db = drizzle(pool, { schema: this.schema });
@@ -42,6 +44,8 @@ export const connect: Connect = async function connect(
       db = drizzle(client, { schema: this.schema });
       await client.connect();
     }
+
+    this.sessions[sessionID] = db;
 
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
       this.payload.logger.info('---- DROPPING TABLES ----');

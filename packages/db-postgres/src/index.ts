@@ -7,9 +7,9 @@ import { webpack } from './webpack';
 import { Args, PostgresAdapter, PostgresAdapterResult } from './types';
 import { createGlobal } from './createGlobal';
 import { createVersion } from './createVersion';
-// import { beginTransaction } from './transactions/beginTransaction';
-// import { rollbackTransaction } from './transactions/rollbackTransaction';
-// import { commitTransaction } from './transactions/commitTransaction';
+import { beginTransaction } from './transactions/beginTransaction';
+import { rollbackTransaction } from './transactions/rollbackTransaction';
+import { commitTransaction } from './transactions/commitTransaction';
 import { queryDrafts } from './queryDrafts';
 import { find } from './find';
 // import { findGlobalVersions } from './findGlobalVersions';
@@ -31,6 +31,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
     // @ts-expect-error
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
+      sessions: {},
       enums: {},
       relations: {},
       tables: {},
@@ -41,9 +42,9 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       init,
       webpack,
       createMigration,
-      // beginTransaction,
-      // rollbackTransaction,
-      // commitTransaction,
+      beginTransaction,
+      rollbackTransaction,
+      commitTransaction,
       queryDrafts,
       findOne,
       find,

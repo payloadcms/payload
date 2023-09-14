@@ -1,3 +1,4 @@
+import { PayloadRequest } from 'payload/types';
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { LocalizedArrays } from './collections/LocalizedArrays';
 import { LocalizedBlocks } from './collections/LocalizedBlocks';
@@ -31,8 +32,12 @@ const config = buildConfigWithDefaults({
     //     password: devUser.password,
     //   },
     // });
+    const req = {} as PayloadRequest;
+
+    req.transactionID = await payload.db.beginTransaction();
 
     const page1 = await payload.create({
+      req,
       collection: 'pages',
       data: {
         slug: 'first',
@@ -40,11 +45,15 @@ const config = buildConfigWithDefaults({
     })
 
     const page2 = await payload.create({
+      req,
       collection: 'pages',
       data: {
         slug: 'second',
       },
     })
+
+    await payload.db.commitTransaction(req.transactionID);
+
 
     const findResult = await payload.find({
       collection: 'pages',
@@ -63,7 +72,10 @@ const config = buildConfigWithDefaults({
       },
     })
 
+    req.transactionID = await payload.db.beginTransaction();
+
     const person2 = await payload.create({
+      req,
       collection: 'people',
       data: {
         fullName: 'Elliot DeNolf',
@@ -71,8 +83,10 @@ const config = buildConfigWithDefaults({
     })
 
     const post = await payload.create({
+      req,
       collection: 'posts',
       data: {
+        throw: true,
         title: 'hello',
         number: 1337,
         myGroup: {
@@ -152,7 +166,7 @@ const config = buildConfigWithDefaults({
         ],
       },
     })
-
+    await payload.db.commitTransaction(req.transactionID);
     await payload.update({
       collection: 'posts',
       id: post.id,
