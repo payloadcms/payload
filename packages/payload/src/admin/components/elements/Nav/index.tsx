@@ -16,7 +16,7 @@ const baseClass = 'nav'
 
 const DefaultNav = () => {
   const history = useHistory()
-  const { closeModal, isModalOpen, oneModalIsOpen } = useModal()
+  const { closeModal, isModalOpen } = useModal()
   const { t } = useTranslation()
   const isMainMenuOpen = isModalOpen(mainMenuSlug)
 
@@ -39,7 +39,6 @@ const DefaultNav = () => {
           baseClass,
           !isMainMenuOpen && `${baseClass}--show-bg`,
           isMainMenuOpen && `${baseClass}--main-menu-open`,
-          oneModalIsOpen && `${baseClass}--modal-open`,
         ]
           .filter(Boolean)
           .join(' ')}

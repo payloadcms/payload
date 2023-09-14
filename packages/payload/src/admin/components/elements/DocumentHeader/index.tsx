@@ -9,7 +9,6 @@ import { DocumentTabs } from './Tabs'
 import './index.scss'
 
 const baseClass = `doc-header`
-
 export const DocumentHeader: React.FC<{
   apiURL: string
   collection?: SanitizedCollectionConfig

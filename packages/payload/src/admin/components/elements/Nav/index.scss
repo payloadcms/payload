@@ -6,10 +6,6 @@
   height: calc(var(--base) * 3);
   z-index: var(--z-modal);
 
-  &--modal-open {
-    z-index: calc(var(--z-modal) + 2);
-  }
-
   &__bg {
     @include blur-bg;
     opacity: 0;
@@ -31,6 +27,7 @@
   // but reenable them on the modal toggler
   &--main-menu-open {
     pointer-events: none;
+    z-index: calc(var(--z-modal) + 2);
 
     .nav__modalToggler {
       pointer-events: all;

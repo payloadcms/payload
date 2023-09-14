@@ -91,27 +91,31 @@ export const DocumentControls: React.FC<{
         )}
         {collection?.timestamps && (
           <ul className={`${baseClass}__timestamps`}>
-            {data?.updatedAt && (
-              <li
-                className={`${baseClass}__timestamp`}
-                title={formatDate(data.updatedAt, dateFormat, i18n?.language)}
-              >
-                <div className={`${baseClass}__label`}>{t('lastModified')}:&nbsp;</div>
+            <li
+              className={`${baseClass}__timestamp`}
+              title={data?.updatedAt ? formatDate(data?.updatedAt, dateFormat, i18n?.language) : ''}
+            >
+              <div className={`${baseClass}__label`}>{t('lastModified')}:&nbsp;</div>
+              {data?.updatedAt && (
                 <p className={`${baseClass}__stamp`}>
                   {formatDate(data.updatedAt, dateFormat, i18n?.language)}
                 </p>
-              </li>
-            )}
-            {(publishedDoc?.createdAt || data?.createdAt) && (
-              <li
-                className={`${baseClass}__timestamp`}
-                title={formatDate(
-                  publishedDoc?.createdAt || data?.createdAt,
-                  dateFormat,
-                  i18n?.language,
-                )}
-              >
-                <div className={`${baseClass}__label`}>{t('created')}:&nbsp;</div>
+              )}
+            </li>
+            <li
+              className={`${baseClass}__timestamp`}
+              title={
+                publishedDoc?.createdAt || data?.createdAt
+                  ? formatDate(
+                      publishedDoc?.createdAt || data?.createdAt,
+                      dateFormat,
+                      i18n?.language,
+                    )
+                  : ''
+              }
+            >
+              <div className={`${baseClass}__label`}>{t('created')}:&nbsp;</div>
+              {(publishedDoc?.createdAt || data?.createdAt) && (
                 <p className={`${baseClass}__stamp`}>
                   {formatDate(
                     publishedDoc?.createdAt || data?.createdAt,
@@ -119,8 +123,8 @@ export const DocumentControls: React.FC<{
                     i18n?.language,
                   )}
                 </p>
-              </li>
-            )}
+              )}
+            </li>
           </ul>
         )}
         <div className={`${baseClass}__controls-wrapper`}>
@@ -158,7 +162,10 @@ export const DocumentControls: React.FC<{
                   <div />
                 </div>
               }
+              caret={false}
               className={`${baseClass}__popup`}
+              horizontalAlign="center"
+              size="large"
               verticalAlign="bottom"
             >
               <ul className={`${baseClass}__popup-actions`}>
@@ -183,7 +190,7 @@ export const DocumentControls: React.FC<{
                     )}
                   </React.Fragment>
                 )}
-                {'delete' in permissions && permissions?.delete?.permission && (
+                {'delete' in permissions && permissions?.delete?.permission && id && (
                   <li>
                     <DeleteDocument buttonId="action-delete" collection={collection} id={id} />
                   </li>

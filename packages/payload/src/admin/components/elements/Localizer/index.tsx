@@ -37,6 +37,7 @@ const Localizer: React.FC<{
               <Chevron className={`${baseClass}__chevron`} />
             </div>
           }
+          caret={false}
           horizontalAlign="left"
           render={({ close }) => (
             <ul>

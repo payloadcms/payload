@@ -53,15 +53,8 @@
   &__sidebar-fields {
     display: flex;
     flex-direction: column;
-    gap: $baseline;
-
-    [dir='ltr'] & {
-      padding-right: $baseline;
-    }
-
-    [dir='rtl'] & {
-      padding-left: $baseline;
-    }
+    gap: var(--base);
+    padding: var(--base);
 
     .render-fields {
       & > *:last-child {

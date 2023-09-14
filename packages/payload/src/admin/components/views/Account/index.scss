@@ -12,6 +12,12 @@
     margin-top: calc(var(--base) * 3);
   }
 
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--base);
+  }
+
   &__payload-settings {
     margin-top: base(3);
     padding-top: base(3);
