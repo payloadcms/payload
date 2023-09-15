@@ -283,49 +283,49 @@ export const promise = async <T>({
       if (Array.isArray(rows)) {
         const promises = []
         rows.forEach((row, i) => {
-          promises.push(
-            traverseFields({
-              context,
+          promises.push(traverseFields({
+            data,
+            doc,
+            fields: field.fields,
+            id,
+            operation,
+            overrideAccess,
+            req,
+            siblingData: row,
+            siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
+            context,
+          }));
+        });
+        await Promise.all(promises);
+      }
+      break;
+    }
+
+    case 'blocks': {
+      const rows = siblingData[field.name];
+
+      if (Array.isArray(rows)) {
+        const promises = [];
+        rows.forEach((row, i) => {
+          const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name]);
+          const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType;
+          const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch);
+
+          if (block) {
+            row.blockType = blockTypeToMatch;
+
+            promises.push(traverseFields({
               data,
               doc,
-              fields: field.fields,
+              fields: block.fields,
               id,
               operation,
               overrideAccess,
               req,
               siblingData: row,
-              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
-            }),
-          )
-        })
-        await Promise.all(promises)
-      }
-      break
-    }
-
-    case 'blocks': {
-      const rows = siblingData[field.name]
-
-      if (Array.isArray(rows)) {
-        const promises = []
-        rows.forEach((row, i) => {
-          const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
-
-          if (block) {
-            promises.push(
-              traverseFields({
-                context,
-                data,
-                doc,
-                fields: block.fields,
-                id,
-                operation,
-                overrideAccess,
-                req,
-                siblingData: row,
-                siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
-              }),
-            )
+              siblingDoc: rowSiblingDoc,
+              context,
+            }));
           }
         })
         await Promise.all(promises)

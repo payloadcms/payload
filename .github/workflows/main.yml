@@ -1,0 +1,155 @@
+name: build
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  push:
+    branches: ['master', '2.0']
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: https://registry.npmjs.org
+          scope: '@payloadcms'
+          always-auth: true
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Debug print versions
+        run: |
+          node -v
+          pnpm -v
+
+      - name: Install dependencies
+        run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Build
+        run: pnpm build
+
+      - name: Component Tests
+        run: pnpm test:components
+
+      - name: E2E Tests
+        run: pnpm test:e2e --bail
+
+      - name: Integration Tests
+        run: pnpm test:int
+
+      - name: Generate Payload Types
+        run: pnpm dev:generate-types fields
+
+      - name: Generate GraphQL schema file
+        run: pnpm dev:generate-graphql-schema graphql-schema-gen
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 30
+
+  db_mongodb:
+      runs-on: ubuntu-latest
+
+      steps:
+        - uses: actions/checkout@v4
+        - name: Use Node.js 18
+          uses: actions/setup-node@v3
+          with:
+            node-version: 18
+            registry-url: https://registry.npmjs.org
+            scope: '@payloadcms'
+            always-auth: true
+
+        - uses: pnpm/action-setup@v2
+          name: Install pnpm
+          with:
+            version: 8
+            run_install: false
+
+        - name: Get pnpm store directory
+          shell: bash
+          run: |
+            echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+        - uses: actions/cache@v3
+          name: Setup pnpm cache
+          with:
+            path: ${{ env.STORE_PATH }}
+            key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+            restore-keys: |
+              ${{ runner.os }}-pnpm-store-
+
+        - name: Install dependencies
+          run: pnpm install
+          env:
+            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+        - name: Build db-mongodb
+          run: ./node_modules/.bin/turbo run build --filter=db-mongodb
+
+  db_postgres:
+      runs-on: ubuntu-latest
+
+      steps:
+        - uses: actions/checkout@v4
+        - name: Use Node.js 18
+          uses: actions/setup-node@v3
+          with:
+            node-version: 18
+            registry-url: https://registry.npmjs.org
+            scope: '@payloadcms'
+            always-auth: true
+
+        - uses: pnpm/action-setup@v2
+          name: Install pnpm
+          with:
+            version: 8
+            run_install: false
+
+        - name: Get pnpm store directory
+          shell: bash
+          run: |
+            echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+        - uses: actions/cache@v3
+          name: Setup pnpm cache
+          with:
+            path: ${{ env.STORE_PATH }}
+            key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+            restore-keys: |
+              ${{ runner.os }}-pnpm-store-
+
+        - name: Install dependencies
+          run: pnpm install
+          env:
+            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+        - name: Build db-postgres
+          run: ./node_modules/.bin/turbo run build --filter=db-postgres

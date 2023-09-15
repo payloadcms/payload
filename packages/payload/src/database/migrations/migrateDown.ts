@@ -34,10 +34,12 @@ export async function migrateDown(this: DatabaseAdapter): Promise<void> {
     let transactionID
 
     try {
-      payload.logger.info({ msg: `Migrating: ${migrationFile.name}` })
+      payload.logger.info({ msg: `Migrating down: ${migrationFile.name}` })
       transactionID = await this.beginTransaction()
       await migrationFile.down({ payload })
-      payload.logger.info({ msg: `Migrated:  ${migrationFile.name} (${Date.now() - start}ms)` })
+      payload.logger.info({
+        msg: `Migrated down:  ${migrationFile.name} (${Date.now() - start}ms)`,
+      })
       // Waiting for implementation here
       await payload.delete({
         collection: 'payload-migrations',

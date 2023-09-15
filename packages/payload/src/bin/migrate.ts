@@ -1,5 +1,17 @@
 import payload from '..'
 
+const availableCommands = [
+  'migrate',
+  'migrate:create',
+  'migrate:down',
+  'migrate:refresh',
+  'migrate:reset',
+  'migrate:status',
+  'migration:fresh',
+]
+
+const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
+
 export const migrate = async (args: string[]): Promise<void> => {
   // Barebones instance to access database adapter
   await payload.init({
@@ -11,6 +23,13 @@ export const migrate = async (args: string[]): Promise<void> => {
 
   if (!adapter) {
     throw new Error('No database adapter found')
+  }
+
+  if (!args.length) {
+    payload.logger.error({
+      msg: `No migration command provided. ${availableCommandsMsg}`,
+    })
+    process.exit(1)
   }
 
   switch (args[0]) {
@@ -41,7 +60,10 @@ export const migrate = async (args: string[]): Promise<void> => {
       break
 
     default:
-      throw new Error(`Unknown migration command: ${args[0]}`)
+      payload.logger.error({
+        msg: `Unknown migration command: ${args[0]}. ${availableCommandsMsg}`,
+      })
+      process.exit(1)
   }
 }
 
