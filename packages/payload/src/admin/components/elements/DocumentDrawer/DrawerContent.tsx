@@ -35,13 +35,30 @@ const Content: React.FC<DocumentDrawerProps> = ({
   } = useConfig()
   const { closeModal, modalState, toggleModal } = useModal()
   const { code: locale } = useLocale()
-  const { permissions, user } = useAuth()
+  const { user } = useAuth()
   const [internalState, setInternalState] = useState<Fields>()
   const { i18n, t } = useTranslation(['fields', 'general'])
   const hasInitializedState = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
   const [collectionConfig] = useRelatedCollections(collectionSlug)
+
+  const { admin: { components: { views: { Edit } = {} } = {} } = {} } = collectionConfig
+
   const { docPermissions, getDocPreferences, id } = useDocumentInfo()
+
+  // The component definition could come from multiple places in the config
+  // we need to cascade into the proper component from the top-down
+  // 1. "components.Edit"
+  // 2. "components.Edit.Default"
+  // 3. "components.Edit.Default.Component"
+  const CustomEditView =
+    typeof Edit === 'function'
+      ? Edit
+      : typeof Edit === 'object' && typeof Edit.Default === 'function'
+      ? Edit.Default
+      : typeof Edit?.Default === 'object' && typeof Edit.Default.Component === 'function'
+      ? Edit.Default.Component
+      : undefined
 
   const [fields, setFields] = useState(() => formatFields(collectionConfig, true))
 
@@ -105,7 +122,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
   return (
     <RenderCustomComponent
-      CustomComponent={collectionConfig.admin?.components?.views?.Edit}
+      CustomComponent={CustomEditView}
       DefaultComponent={DefaultEdit}
       componentProps={{
         action,
@@ -143,7 +160,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
         isLoading,
         me: true,
         onSave,
-        permissions: permissions.collections[collectionConfig.slug],
+        permissions: docPermissions,
       }}
     />
   )

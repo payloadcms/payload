@@ -7,6 +7,7 @@ import { getTranslation } from '../../../../../../utilities/getTranslation'
 import { DocumentControls } from '../../../../elements/DocumentControls'
 import { Gutter } from '../../../../elements/Gutter'
 import RenderFields from '../../../../forms/RenderFields'
+import { filterFields } from '../../../../forms/RenderFields/filterFields'
 import fieldTypes from '../../../../forms/field-types'
 import LeaveWithoutSaving from '../../../../modals/LeaveWithoutSaving'
 import Meta from '../../../../utilities/Meta'
@@ -37,6 +38,16 @@ export const DefaultEdit: React.FC<Props> = (props) => {
 
   const operation = isEditing ? 'update' : 'create'
 
+  const sidebarFields = filterFields({
+    fieldSchema: fields,
+    fieldTypes,
+    filter: (field) => field?.admin?.position === 'sidebar',
+    permissions: permissions.fields,
+    readOnly: !hasSavePermission,
+  })
+
+  const hasSidebar = sidebarFields && sidebarFields.length > 0
+
   return (
     <Fragment>
       <SetStepNav collection={collection} id={id} isEditing={isEditing} />
@@ -50,7 +61,11 @@ export const DefaultEdit: React.FC<Props> = (props) => {
         isEditing={isEditing}
         permissions={permissions}
       />
-      <div className={`${baseClass}__wrapper`}>
+      <div
+        className={[`${baseClass}__wrapper`, hasSidebar && `${baseClass}__wrapper--has-sidebar`]
+          .filter(Boolean)
+          .join(' ')}
+      >
         <div className={`${baseClass}__main`}>
           <Meta
             description={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
@@ -87,21 +102,17 @@ export const DefaultEdit: React.FC<Props> = (props) => {
             />
           </Gutter>
         </div>
-        <div className={`${baseClass}__sidebar-wrap`}>
-          <div className={`${baseClass}__sidebar`}>
-            <div className={`${baseClass}__sidebar-sticky-wrap`}>
-              <div className={`${baseClass}__sidebar-fields`}>
-                <RenderFields
-                  fieldSchema={fields}
-                  fieldTypes={fieldTypes}
-                  filter={(field) => field?.admin?.position === 'sidebar'}
-                  permissions={permissions.fields}
-                  readOnly={!hasSavePermission}
-                />
+        {sidebarFields && sidebarFields.length > 0 && (
+          <div className={`${baseClass}__sidebar-wrap`}>
+            <div className={`${baseClass}__sidebar`}>
+              <div className={`${baseClass}__sidebar-sticky-wrap`}>
+                <div className={`${baseClass}__sidebar-fields`}>
+                  <RenderFields fieldTypes={fieldTypes} fields={sidebarFields} />
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </Fragment>
   )
