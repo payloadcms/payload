@@ -8,7 +8,7 @@ const mockDotENVPath = path.resolve(__dirname, '../mocks/dotENV.js')
 
 const nodeModulesPath = path.resolve(__dirname, '../../node_modules')
 const adminFolderPath = path.resolve(nodeModulesPath, 'payload/dist/admin')
-const bundlerPath = path.resolve(__dirname, '../bundler')
+const bundlerPath = path.resolve(__dirname, '../')
 
 export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => ({
   entry: {
