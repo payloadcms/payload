@@ -20,7 +20,7 @@ import './index.scss'
 const baseClass = 'versions'
 
 export const DefaultVersionsView: React.FC<Props> = (props) => {
-  const { collection, data, editURL, entityLabel, global, id, isLoadingVersions, versionsData } =
+  const { id, collection, data, editURL, entityLabel, global, isLoadingVersions, versionsData } =
     props
 
   const {

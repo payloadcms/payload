@@ -13,7 +13,7 @@ import { useSearchParams } from '../../utilities/SearchParams'
 import { DefaultVersionsView } from './Default'
 
 const VersionsView: React.FC<IndexProps> = (props) => {
-  const { collection, global, id } = props
+  const { id, collection, global } = props
 
   const { permissions, user } = useAuth()
 
@@ -120,6 +120,7 @@ const VersionsView: React.FC<IndexProps> = (props) => {
         CustomComponent={CustomVersionsView}
         DefaultComponent={DefaultVersionsView}
         componentProps={{
+          id,
           canAccessAdmin: permissions?.canAccessAdmin,
           collection,
           data,
@@ -127,7 +128,6 @@ const VersionsView: React.FC<IndexProps> = (props) => {
           entityLabel,
           fetchURL,
           global,
-          id,
           isLoading,
           isLoadingVersions,
           user,

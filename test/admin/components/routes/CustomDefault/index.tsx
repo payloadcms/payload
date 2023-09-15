@@ -47,10 +47,18 @@ const CustomDefaultRoute: AdminView = ({ canAccessAdmin, user }) => {
         keywords="Custom React Components, Payload, CMS"
         title="Custom Route with Default Template"
       />
+<<<<<<< HEAD
       <div
         style={{
           paddingLeft: 'var(--gutter-h)',
           paddingRight: 'var(--gutter-h)',
+=======
+      <Eyebrow />
+      <div
+        style={{
+          paddingRight: 'var(--gutter-h)',
+          paddingLeft: 'var(--gutter-h)',
+>>>>>>> 2.0
         }}
       >
         <h1>Custom Route</h1>

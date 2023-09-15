@@ -6,7 +6,11 @@ import type { ReadOnlyCollection, RestrictedVersion } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
+<<<<<<< HEAD
 import { openDocControls, openMainMenu } from '../helpers'
+=======
+import { openMainMenu } from '../helpers'
+>>>>>>> 2.0
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {

@@ -58,6 +58,8 @@
     "prettier": "^3.0.3",
     "qs": "6.11.2",
     "react": "18.2.0",
+    "react-i18next": "11.18.6",
+    "react-router-dom": "5.3.4",
     "rimraf": "3.0.2",
     "react-i18next": "11.18.6",
     "react-router-dom": "5.3.4",

@@ -1,3 +1,5 @@
+import type { NestedAfterReadHook } from './payload-types'
+
 import payload from '../../packages/payload/src'
 import { AuthenticationError } from '../../packages/payload/src/errors'
 import { devUser, regularUser } from '../credentials'
@@ -77,7 +79,7 @@ describe('Hooks', () => {
     })
 
     it('should save data generated with afterRead hooks in nested field structures', async () => {
-      const document = await payload.create({
+      const document: NestedAfterReadHook = await payload.create({
         collection: nestedAfterReadHooksSlug,
         data: {
           text: 'ok',
