@@ -1,18 +1,18 @@
-import path from 'path';
+import path from 'path'
 
-import type { Config, SanitizedConfig } from '../packages/payload/src/config/types';
+import type { Config, SanitizedConfig } from '../packages/payload/src/config/types'
 
-import { mongooseAdapter } from '../packages/db-mongodb/src/index';
-import { postgresAdapter } from '../packages/db-postgres/src/index';
-import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build';
+import { mongooseAdapter } from '../packages/db-mongodb/src/index'
+import { postgresAdapter } from '../packages/db-postgres/src/index'
+import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({
-    url: process.env.MONGO_URL || 'mongodb://127.0.0.1/payload',
+    url: 'mongodb://127.0.0.1/payloadtests',
   }),
   postgres: postgresAdapter({
     client: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payload',
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
   }),
 }

@@ -26,14 +26,11 @@
     "pretest": "pnpm build",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env jest --config=jest.components.config.js",
-    "test:e2e": "ts-node -T ./test/runE2E.ts",
+    "test:e2e": "npx playwright install --with-deps && ts-node -T ./test/runE2E.ts",
     "test:e2e:debug": "cross-env PWDEBUG=1 DISABLE_LOGGING=true playwright test",
     "test:e2e:headed": "cross-env DISABLE_LOGGING=true playwright test --headed",
     "test:int": "cross-env DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
     "translateNewKeys": "pnpm --filter payload run translateNewKeys"
-  },
-  "dependencies": {
-    "turbo": "^1.10.13"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -53,8 +50,10 @@
     "jest": "29.6.4",
     "jest-environment-jsdom": "29.6.4",
     "prettier": "^3.0.3",
+    "rimraf": "3.0.2",
     "shelljs": "0.8.5",
     "ts-node": "10.9.1",
+    "turbo": "^1.10.13",
     "typescript": "5.2.2",
     "uuid": "^9.0.0"
   },
