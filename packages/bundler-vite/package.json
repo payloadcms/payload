@@ -14,10 +14,14 @@
   "scripts": {
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
     "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "builddisabled": "pnpm build:swc && pnpm build:types"
+    "build": "pnpm build:swc && pnpm build:types"
   },
   "dependencies": {
+    "@rollup/plugin-commonjs": "^25.0.4",
+    "@rollup/plugin-image": "^3.0.2",
     "@vitejs/plugin-react": "^4.0.4",
+    "get-port": "5.1.1",
+    "rollup-plugin-scss": "^4.0.0",
     "vite": "^4.4.9",
     "vite-plugin-commonjs": "^0.8.2",
     "vite-plugin-virtual": "^0.2.0"

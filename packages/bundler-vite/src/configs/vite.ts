@@ -1,34 +1,34 @@
 /* eslint-disable no-param-reassign */
-import path from 'path';
-import { InlineConfig, createLogger } from 'vite';
-import viteCommonJS from 'vite-plugin-commonjs';
-import virtual from 'vite-plugin-virtual';
-import scss from 'rollup-plugin-scss';
-import image from '@rollup/plugin-image';
-import rollupCommonJS from '@rollup/plugin-commonjs';
-import react from '@vitejs/plugin-react';
-import getPort from 'get-port';
-import type { SanitizedConfig } from '../../../config/types';
+import path from 'path'
+import { InlineConfig, createLogger } from 'vite'
+import viteCommonJS from 'vite-plugin-commonjs'
+import virtual from 'vite-plugin-virtual'
+import scss from 'rollup-plugin-scss'
+import image from '@rollup/plugin-image'
+import rollupCommonJS from '@rollup/plugin-commonjs'
+import react from '@vitejs/plugin-react'
+import getPort from 'get-port'
+import type { SanitizedConfig } from 'payload/config'
 
-const logger = createLogger('warn', { prefix: '[VITE-WARNING]', allowClearScreen: false });
-const originalWarning = logger.warn;
+const logger = createLogger('warn', { prefix: '[VITE-WARNING]', allowClearScreen: false })
+const originalWarning = logger.warn
 logger.warn = (msg, options) => {
   // TODO: fix this? removed these warnings to make debugging easier
-  if (msg.includes('Default and named imports from CSS files are deprecated')) return;
-  originalWarning(msg, options);
-};
+  if (msg.includes('Default and named imports from CSS files are deprecated')) return
+  originalWarning(msg, options)
+}
 
-const bundlerPath = path.resolve(__dirname, '../bundler');
-const mockModulePath = path.resolve(__dirname, '../../mocks/emptyModule.js');
-const mockDotENVPath = path.resolve(__dirname, '../../mocks/dotENV.js');
-const relativeAdminPath = path.resolve(__dirname, '../../../admin');
+const bundlerPath = path.resolve(__dirname, '../bundler')
+const mockModulePath = path.resolve(__dirname, '../../mocks/emptyModule.js')
+const mockDotENVPath = path.resolve(__dirname, '../../mocks/dotENV.js')
+const relativeAdminPath = path.resolve(__dirname, '../../../admin')
 
 export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<InlineConfig> => {
-  const hmrPort = await getPort();
+  const hmrPort = await getPort()
 
   const absoluteAliases = {
     [`${bundlerPath}`]: path.resolve(__dirname, '../mock.js'),
-  };
+  }
 
   const alias = [
     { find: 'path', replacement: require.resolve('path-browserify') },
@@ -37,23 +37,23 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
     { find: '~payload-user-css', replacement: payloadConfig.admin.css },
     { find: '~react-toastify', replacement: 'react-toastify' },
     { find: 'dotenv', replacement: mockDotENVPath },
-  ];
+  ]
 
   if (payloadConfig.admin.webpack && typeof payloadConfig.admin.webpack === 'function') {
     const webpackConfig = payloadConfig.admin.webpack({
       resolve: {
         alias: {},
       },
-    });
+    })
 
     if (Object.keys(webpackConfig.resolve.alias).length > 0) {
       Object.entries(webpackConfig.resolve.alias).forEach(([source, target]) => {
         if (path.isAbsolute(source)) {
-          absoluteAliases[source] = target;
+          absoluteAliases[source] = target
         } else {
-          alias[source] = target;
+          alias[source] = target
         }
-      });
+      })
     }
   }
 
@@ -96,21 +96,21 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
         name: 'absolute-aliases',
         enforce: 'pre',
         resolveId(source, importer) {
-          let fullSourcePath: string;
+          let fullSourcePath: string
 
           // TODO: need to handle this better. This is overly simple.
           if (source.startsWith('.')) {
-            fullSourcePath = path.resolve(path.dirname(importer), source);
+            fullSourcePath = path.resolve(path.dirname(importer), source)
           }
 
           if (fullSourcePath) {
-            const aliasMatch = absoluteAliases[fullSourcePath];
+            const aliasMatch = absoluteAliases[fullSourcePath]
             if (aliasMatch) {
-              return aliasMatch;
+              return aliasMatch
             }
           }
 
-          return null;
+          return null
         },
       },
       virtual({
@@ -123,14 +123,14 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       {
         name: 'init-admin-panel',
         transformIndexHtml(html) {
-          const indexFile = process.env.PAYLOAD_DEV_MODE === 'true' ? 'index.tsx' : 'index.js';
+          const indexFile = process.env.PAYLOAD_DEV_MODE === 'true' ? 'index.tsx' : 'index.js'
 
-          if (html.includes(`/${indexFile}`)) return html;
+          if (html.includes(`/${indexFile}`)) return html
 
           return html.replace(
             '</body>',
             `<script> var exports = {}; </script></script><script type="module" src="${payloadConfig.routes.admin}/${indexFile}"></script></body>`,
-          );
+          )
         },
       },
     ],
@@ -165,5 +165,5 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
         },
       },
     },
-  };
-};
+  }
+}
