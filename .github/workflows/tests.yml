@@ -7,26 +7,25 @@ on:
     branches: ['master', '2.0']
 
 jobs:
-  install_and_build_pnpm:
+  core:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16.x, 18.x, 20.x]
 
     steps:
       - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 18
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 18
           registry-url: https://registry.npmjs.org
           scope: '@payloadcms'
           always-auth: true
+
       - uses: pnpm/action-setup@v2
         name: Install pnpm
         with:
           version: 8
           run_install: false
+
       - name: Get pnpm store directory
         shell: bash
         run: |
@@ -39,15 +38,19 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
+
       - name: Debug print versions
         run: |
           node -v
           pnpm -v
+
       - name: Install dependencies
         run: pnpm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: pnpm build
+
+      - name: Build
+        run: pnpm build
 
       - name: Component Tests
         run: pnpm test:components
