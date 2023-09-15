@@ -73,3 +73,38 @@ jobs:
           name: test-results
           path: test-results/
           retention-days: 30
+
+  db_mongodb:
+      runs-on: ubuntu-latest
+
+      steps:
+        - uses: actions/checkout@v2
+        - name: Use Node.js 18
+          uses: actions/setup-node@v1
+          with:
+            node-version: 18
+            registry-url: https://registry.npmjs.org
+            scope: '@payloadcms'
+            always-auth: true
+
+        - uses: pnpm/action-setup@v2
+          name: Install pnpm
+          with:
+            version: 8
+            run_install: false
+
+        - name: Get pnpm store directory
+          shell: bash
+          run: |
+            echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+        - uses: actions/cache@v3
+          name: Setup pnpm cache
+          with:
+            path: ${{ env.STORE_PATH }}
+            key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+            restore-keys: |
+              ${{ runner.os }}-pnpm-store-
+
+        - name: Build
+          run: pnpm --filter db-mongodb run build
