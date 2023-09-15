@@ -1,13 +1,13 @@
+import type { Configuration } from 'webpack'
+
+import OptimizeCSSAssetsPlugin from 'css-minimizer-webpack-plugin'
 import MiniCSSExtractPlugin from 'mini-css-extract-plugin'
 import path from 'path'
-const terser = import('terser') // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
-import OptimizeCSSAssetsPlugin from 'css-minimizer-webpack-plugin'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const TerserPlugin = require('terser-webpack-plugin') // Needs to be require. TypeScript is too dumb to make it an import
+import TerserJSPlugin from 'terser-webpack-plugin'
 
-export default {
+const componentWebpackConfig: Configuration = {
   entry: {
-    main: [path.resolve(__dirname, '../../admin/components/index.js')],
+    main: [path.resolve(__dirname, './components/index.js')],
   },
   externals: {
     react: 'react',
@@ -29,8 +29,8 @@ export default {
           {
             loader: require.resolve('url-loader'),
             options: {
-              limit: 10000,
               name: 'static/media/[name].[hash:8].[ext]',
+              limit: 10000,
             },
             test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
           },
@@ -64,7 +64,7 @@ export default {
   },
   optimization: {
     minimizer: [
-      new TerserPlugin({
+      new TerserJSPlugin({
         extractComments: false,
       }),
       new OptimizeCSSAssetsPlugin({}),
@@ -73,7 +73,7 @@ export default {
   output: {
     filename: 'index.js',
     libraryTarget: 'commonjs2',
-    path: path.resolve(__dirname, '../../../components'),
+    path: path.resolve(__dirname, '../../components'),
     publicPath: '/',
   },
   plugins: [
@@ -84,9 +84,11 @@ export default {
   ],
   resolve: {
     alias: {
-      'payload-scss-overrides': path.resolve(__dirname, '../../admin/scss/overrides.scss'),
+      'payload-scss-overrides': path.resolve(__dirname, './scss/overrides.scss'),
     },
-    modules: ['node_modules', path.resolve(__dirname, '../../../node_modules')],
+    modules: ['node_modules', path.resolve(__dirname, '../../node_modules')],
   },
   stats: 'errors-only',
 }
+
+export default componentWebpackConfig

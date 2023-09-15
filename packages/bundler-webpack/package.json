@@ -1,0 +1,58 @@
+{
+  "name": "@payloadcms/bundler-webpack",
+  "version": "0.0.1",
+  "description": "The officially supported Webpack bundler adapter for Payload",
+  "repository": "https://github.com/payloadcms/payload",
+  "license": "MIT",
+  "author": {
+    "email": "info@payloadcms.com",
+    "name": "Payload",
+    "url": "https://payloadcms.com"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "builddisabled": "pnpm build:swc && pnpm build:types"
+  },
+  "dependencies": {
+    "compression": "1.7.4",
+    "connect-history-api-fallback": "1.6.0",
+    "css-minimizer-webpack-plugin": "^5.0.0",
+    "file-loader": "6.2.0",
+    "html-webpack-plugin": "^5.5.0",
+    "md5": "2.3.0",
+    "mini-css-extract-plugin": "1.6.2",
+    "path-browserify": "1.0.1",
+    "postcss": "8.4.27",
+    "postcss-loader": "6.2.1",
+    "postcss-preset-env": "9.0.0",
+    "style-loader": "^2.0.0",
+    "swc-loader": "^0.2.3",
+    "swc-minify-webpack-plugin": "^2.1.0",
+    "terser-webpack-plugin": "^5.3.6",
+    "url-loader": "4.1.1",
+    "webpack": "^5.78.0",
+    "webpack-bundle-analyzer": "^4.8.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-middleware": "6.0.1",
+    "webpack-hot-middleware": "^2.25.3"
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
+    "@types/extract-text-webpack-plugin": "^3.0.7",
+    "@types/html-webpack-plugin": "^3.2.6",
+    "@types/mini-css-extract-plugin": "^1.4.3",
+    "@types/optimize-css-assets-webpack-plugin": "^5.0.5",
+    "@types/webpack-bundle-analyzer": "^4.6.0",
+    "@types/webpack-env": "^1.18.0",
+    "@types/webpack-hot-middleware": "2.25.6",
+    "payload": "workspace:*"
+  },
+  "publishConfig": {
+    "main": "./dist/index.js",
+    "registry": "https://registry.npmjs.org/",
+    "types": "./dist/index.d.ts"
+  }
+}

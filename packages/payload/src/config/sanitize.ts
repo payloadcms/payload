@@ -6,11 +6,9 @@ import type {
   LocalizationConfigWithLabels,
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
-  SanitizedLocalizationConfig,
 } from './types'
 
 import { defaultUserCollection } from '../auth/defaultUser'
-import getDefaultBundler from '../bundlers/webpack/bundler'
 import sanitizeCollection from '../collections/config/sanitize'
 import { migrationsCollection } from '../database/migrations/migrationsCollection'
 import { InvalidConfiguration } from '../errors'
@@ -37,11 +35,6 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     throw new InvalidConfiguration(
       `${sanitizedConfig.admin.user} is not a valid admin user collection`,
     )
-  }
-
-  // add default bundler if none provided
-  if (!sanitizedConfig.admin.bundler) {
-    sanitizedConfig.admin.bundler = getDefaultBundler()
   }
 
   return sanitizedConfig as Partial<SanitizedConfig>

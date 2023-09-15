@@ -1,26 +1,21 @@
-import type { Configuration } from 'webpack'
-
-import md5 from 'md5'
-import webpack from 'webpack'
-
-import type { SanitizedConfig } from '../../../config/types'
-
-import { getBaseConfig } from './base'
+import webpack, { Configuration } from 'webpack';
+import md5 from 'md5';
+import { getBaseConfig } from './base';
+import { SanitizedConfig } from '../../../config/types';
 
 export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
-  const baseConfig = getBaseConfig(payloadConfig) as any
+  const baseConfig = getBaseConfig(payloadConfig) as any;
 
   let webpackConfig: Configuration = {
     ...baseConfig,
     cache: {
-      buildDependencies: {
-        config: [__filename],
-      },
       type: 'filesystem',
       // version cache when there are changes to aliases
       version: md5(Object.entries(baseConfig.resolve.alias).join()),
+      buildDependencies: {
+        config: [__filename],
+      },
     },
-    devtool: 'inline-source-map',
     entry: {
       ...baseConfig.entry,
       main: [
@@ -28,19 +23,23 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
         ...(baseConfig.entry.main as string[]),
       ],
     },
-    mode: 'development',
     output: {
-      filename: '[name].js',
-      path: '/',
       publicPath: `${payloadConfig.routes.admin}/`,
+      path: '/',
+      filename: '[name].js',
     },
-    plugins: [...baseConfig.plugins, new webpack.HotModuleReplacementPlugin()],
+    devtool: 'inline-source-map',
+    mode: 'development',
     stats: 'errors-warnings',
-  }
+    plugins: [
+      ...baseConfig.plugins,
+      new webpack.HotModuleReplacementPlugin(),
+    ],
+  };
 
   webpackConfig.module.rules.push({
-    sideEffects: true,
     test: /\.(scss|css)$/,
+    sideEffects: true,
     /*
      * The loaders here are run in reverse order. Here is how your loaders are being processed:
      * 1. sass-loader: This loader compiles your SCSS into CSS.
@@ -53,7 +52,7 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
       {
         loader: require.resolve('css-loader'),
         options: {
-          url: (url) => !url.startsWith('/'),
+          url: (url) => (!url.startsWith('/')),
         },
       },
       {
@@ -66,11 +65,11 @@ export const getDevConfig = (payloadConfig: SanitizedConfig): Configuration => {
       },
       require.resolve('sass-loader'),
     ],
-  })
+  });
 
   if (payloadConfig.admin.webpack && typeof payloadConfig.admin.webpack === 'function') {
-    webpackConfig = payloadConfig.admin.webpack(webpackConfig)
+    webpackConfig = payloadConfig.admin.webpack(webpackConfig);
   }
 
-  return webpackConfig
-}
+  return webpackConfig;
+};

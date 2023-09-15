@@ -2,6 +2,7 @@ import path from 'path'
 
 import type { Config, SanitizedConfig } from '../packages/payload/src/config/types'
 
+import webpackBundler from '../packages/bundler-webpack/src/bundler'
 import { mongooseAdapter } from '../packages/db-mongodb/src/index'
 import { postgresAdapter } from '../packages/db-postgres/src/index'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
@@ -39,6 +40,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             password: 'test',
           },
     ...(config.admin || {}),
+    bundler: webpackBundler(),
     webpack: (webpackConfig) => {
       const existingConfig =
         typeof testConfig?.admin?.webpack === 'function'
@@ -46,6 +48,13 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
           : webpackConfig
       return {
         ...existingConfig,
+        resolveLoader: {
+          ...(existingConfig.resolveLoader || {}),
+          modules: [
+            ...(existingConfig?.resolveLoader?.modules || []),
+            path.resolve(__dirname, '../packages/payload/node_modules'),
+          ],
+        },
         name,
         cache: process.env.NODE_ENV === 'test' ? { type: 'memory' } : existingConfig.cache,
         resolve: {
