@@ -736,6 +736,9 @@
         "loading": {
           "type": "string"
         },
+        "locale": {
+          "type": "string"
+        },
         "locales": {
           "type": "string"
         },

@@ -17,7 +17,6 @@ export type Props = IndexProps & {
   customHeader?: React.ReactNode
   data: Document
   disableActions?: boolean
-  disableEyebrow?: boolean
   disableLeaveWithoutSaving?: boolean
   hasSavePermission: boolean
   id?: string

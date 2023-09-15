@@ -68,8 +68,12 @@ export async function closeMainMenu(page: Page): Promise<void> {
   await expect(mainMenuModal).toBeHidden()
 }
 
+export async function openDocControls(page: Page): Promise<void> {
+  await page.locator('.doc-controls__popup .popup-button').click()
+  await expect(page.locator('.doc-controls__popup .popup__content')).toBeVisible()
+}
+
 export async function changeLocale(page: Page, newLocale: string) {
-  await openMainMenu(page)
   await page.locator('.localizer >> button').first().click()
   await page.locator(`.localizer >> a:has-text("${newLocale}")`).click()
   expect(page.url()).toContain(`locale=${newLocale}`)

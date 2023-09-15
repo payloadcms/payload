@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import Button from '../../elements/Button'
-import Eyebrow from '../../elements/Eyebrow'
 import { Gutter } from '../../elements/Gutter'
 import { useStepNav } from '../../elements/StepNav'
 import { useConfig } from '../../utilities/Config'
@@ -32,7 +31,6 @@ const NotFound: React.FC = () => {
         keywords={`404 ${t('notFound')}`}
         title={t('notFound')}
       />
-      <Eyebrow />
       <Gutter className={`${baseClass}__wrap`}>
         <h1>{t('nothingFound')}</h1>
         <p>{t('sorryNotFound')}</p>

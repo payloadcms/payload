@@ -6,6 +6,7 @@ export type Props = {
   button?: React.ReactNode
   buttonClassName?: string
   buttonType?: 'custom' | 'default' | 'none'
+  caret?: boolean
   children?: React.ReactNode
   className?: string
   color?: 'dark' | 'light'

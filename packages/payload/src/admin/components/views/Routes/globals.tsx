@@ -8,8 +8,6 @@ import type { Permissions, User } from '../../../../auth'
 import type { SanitizedGlobalConfig } from '../../../../exports/types'
 
 import { DocumentInfoProvider } from '../../utilities/DocumentInfo'
-import Version from '../Version'
-import Versions from '../Versions'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const EditGlobal = lazy(() => import('../Global'))
@@ -35,12 +33,11 @@ export const globalRoutes = (props: {
     ?.filter(({ admin: { hidden } }) => !(typeof hidden === 'function' ? hidden({ user }) : hidden))
     .reduce((acc, global) => {
       const canReadGlobal = permissions?.globals?.[global.slug]?.read?.permission
-      const canReadVersions = permissions?.globals?.[global.slug]?.readVersions?.permission
 
       // Default routes
       const routesToReturn = [
         ...acc,
-        <Route exact key={global.slug} path={`${match.url}/globals/${global.slug}`}>
+        <Route key={global.slug} path={`${match.url}/globals/${global.slug}`}>
           {canReadGlobal ? (
             <DocumentInfoProvider global={global} idFromParams key={`${global.slug}-${locale}`}>
               <EditGlobal global={global} />
@@ -50,29 +47,6 @@ export const globalRoutes = (props: {
           )}
         </Route>,
       ]
-
-      // Version routes
-      if (global.versions) {
-        routesToReturn.push(
-          <Route
-            exact
-            key={`${global.slug}-versions`}
-            path={`${match.url}/globals/${global.slug}/versions`}
-          >
-            {canReadVersions ? <Versions global={global} /> : <Unauthorized />}
-          </Route>,
-        )
-
-        routesToReturn.push(
-          <Route
-            exact
-            key={`${global.slug}-view-version`}
-            path={`${match.url}/globals/${global.slug}/versions/:versionID`}
-          >
-            {canReadVersions ? <Version global={global} /> : <Unauthorized />}
-          </Route>,
-        )
-      }
 
       return routesToReturn
     }, [])

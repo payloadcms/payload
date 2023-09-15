@@ -36,17 +36,17 @@ export default buildConfigWithDefaults({
   localization: {
     locales: [
       {
-        label: 'en',
+        label: 'English',
         code: defaultLocale,
         rtl: false,
       },
       {
-        label: 'es',
+        label: 'Spanish',
         code: spanishLocale,
         rtl: false,
       },
       {
-        label: 'ar',
+        label: 'Arabic',
         code: 'ar',
         rtl: true,
       },
