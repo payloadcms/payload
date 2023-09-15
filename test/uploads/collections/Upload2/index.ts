@@ -9,6 +9,7 @@ export const Uploads2: CollectionConfig = {
   },
   admin: {
     enableRichTextRelationship: false,
+    useAsTitle: 'title',
   },
   fields: [
     {

@@ -11,9 +11,9 @@ import { useConfig } from '../../../utilities/Config'
 
 export const SetStepNav: React.FC<{
   collection: SanitizedCollectionConfig
+  context: 'bulkUpload' | 'create' | 'edit'
   id: string
-  isEditing: boolean
-}> = ({ collection, id, isEditing }) => {
+}> = ({ collection, context, id }) => {
   const {
     admin: { useAsTitle },
     labels: { plural: pluralLabel },
@@ -36,18 +36,29 @@ export const SetStepNav: React.FC<{
       },
     ]
 
-    if (isEditing) {
-      nav.push({
-        label: useAsTitle && useAsTitle !== 'id' ? title || `[${t('untitled')}]` : id,
-      })
-    } else {
-      nav.push({
-        label: t('createNew'),
-      })
+    switch (context) {
+      case 'create':
+        nav.push({
+          label: t('createNew'),
+        })
+        break
+      case 'edit':
+        nav.push({
+          label: useAsTitle && useAsTitle !== 'id' ? title || `[${t('untitled')}]` : id,
+        })
+        break
+      case 'bulkUpload':
+        // TODO: translate bulk upload
+        nav.push({
+          label: 'Bulk Upload',
+        })
+        break
+      default:
+        break
     }
 
     setStepNav(nav)
-  }, [setStepNav, isEditing, pluralLabel, id, slug, useAsTitle, admin, t, i18n, title])
+  }, [setStepNav, context, pluralLabel, id, slug, useAsTitle, admin, t, i18n, title])
 
   return null
 }

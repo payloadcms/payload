@@ -110,14 +110,22 @@ const DefaultEditView: React.FC<Props> = (props) => {
               action={isLoading ? 'loading' : operation}
               formIsLoading={isLoading}
               loadingSuffix={getTranslation(collection.labels.singular, i18n)}
-              name={`collection-edit--${collection.labels.singular}`}
+              name={`collection-edit--${
+                typeof collection.labels.singular === 'string'
+                  ? collection.labels.singular
+                  : collection.slug
+              }`}
               type="withoutNav"
             />
 
             {!isLoading && (
               <React.Fragment>
                 {!disableEyebrow && (
-                  <SetStepNav collection={collection} id={data?.id} isEditing={isEditing} />
+                  <SetStepNav
+                    collection={collection}
+                    context={isEditing ? 'edit' : 'create'}
+                    id={data?.id}
+                  />
                 )}
 
                 <div className={`${baseClass}__main`}>
