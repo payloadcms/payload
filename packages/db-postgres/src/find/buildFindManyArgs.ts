@@ -1,23 +1,15 @@
-import type { DBQueryConfig } from 'drizzle-orm'
-import type { SanitizedConfig } from 'payload/config'
-import type { ArrayField, Block } from 'payload/types'
-import type { SanitizedCollectionConfig } from 'payload/types'
+import type { DBQueryConfig } from 'drizzle-orm';
+import type { ArrayField, Block, Field } from 'payload/types';
 
-import toSnakeCase from 'to-snake-case'
+import type { PostgresAdapter } from '../types';
 
-import type { PostgresAdapter } from '../types'
-
-import { buildWithFromDepth } from './buildWithFromDepth'
-import { createLocaleWhereQuery } from './createLocaleWhereQuery'
-import { traverseFields } from './traverseFields'
+import { traverseFields } from './traverseFields';
 
 type BuildFindQueryArgs = {
   adapter: PostgresAdapter
-  collection: SanitizedCollectionConfig
-  config: SanitizedConfig
   depth: number
-  fallbackLocale?: false | string
-  locale?: string
+  fields: Field[]
+  tableName: string
 }
 
 export type Result = DBQueryConfig<'many', true, any, any>
@@ -26,25 +18,20 @@ export type Result = DBQueryConfig<'many', true, any, any>
 // a collection field structure
 export const buildFindManyArgs = ({
   adapter,
-  collection,
-  config,
   depth,
-  fallbackLocale,
-  locale,
+  fields,
+  tableName,
 }: BuildFindQueryArgs): Record<string, unknown> => {
   const result: Result = {
     with: {},
-  }
+  };
 
   const _locales: Result = {
     columns: {
       _parentID: false,
       id: false,
     },
-    where: createLocaleWhereQuery({ fallbackLocale, locale }),
-  }
-
-  const tableName = toSnakeCase(collection.slug)
+  };
 
   if (adapter.tables[`${tableName}_relationships`]) {
     result.with._relationships = {
@@ -52,38 +39,30 @@ export const buildFindManyArgs = ({
         id: false,
         parent: false,
       },
-      orderBy: ({ order }, { asc }) => [asc(order)],
-      with: buildWithFromDepth({
-        adapter,
-        config,
-        depth,
-        fallbackLocale,
-        locale,
-      }),
-    }
+      orderBy: ({ order }, { asc: ASC }) => [ASC(order)],
+    };
   }
 
   if (adapter.tables[`${tableName}_locales`]) {
-    result.with._locales = _locales
+    result.with._locales = _locales;
   }
 
-  const locatedBlocks: Block[] = []
-  const locatedArrays: { [path: string]: ArrayField } = {}
+  const locatedBlocks: Block[] = [];
+  const locatedArrays: { [path: string]: ArrayField } = {};
 
   traverseFields({
     _locales,
     adapter,
-    config,
     currentArgs: result,
     currentTableName: tableName,
     depth,
-    fields: collection.fields,
+    fields,
     locatedArrays,
     locatedBlocks,
     path: '',
     topLevelArgs: result,
     topLevelTableName: tableName,
-  })
+  });
 
-  return result
-}
+  return result;
+};

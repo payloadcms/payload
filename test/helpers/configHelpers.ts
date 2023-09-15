@@ -34,6 +34,7 @@ export async function initPayloadTest(options: Options): Promise<{ serverURL: st
     ...(options.init || {}),
   }
 
+  process.env.PAYLOAD_DROP_DATABASE = 'true'
   process.env.NODE_ENV = 'test'
   process.env.PAYLOAD_CONFIG_PATH = path.resolve(options.__dirname, './config.ts')
 

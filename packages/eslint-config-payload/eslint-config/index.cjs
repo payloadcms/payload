@@ -53,6 +53,19 @@ module.exports = {
     'react/no-unused-prop-types': 'off',
     'react/prop-types': 'off',
     'react/require-default-props': 'off',
+
+    'perfectionist/sort-objects': [
+      'error',
+      {
+        type: 'natural',
+        order: 'asc',
+        'partition-by-comment': true,
+        groups: ['top', 'unknown'],
+        'custom-groups': {
+          top: ['_id', 'id', 'name'],
+        },
+      },
+    ],
   },
   settings: {
     'import/parsers': {

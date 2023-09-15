@@ -48,7 +48,7 @@ export * from '../database/queryValidation/types'
 
 export { combineQueries } from '../database/combineQueries'
 
-export { createDatabaseAdapter } from '../database/createAdapter'
+export { createDatabaseAdapter } from '../database/createDatabaseAdapter'
 
 export { default as flattenWhereToOperators } from '../database/flattenWhereToOperators'
 

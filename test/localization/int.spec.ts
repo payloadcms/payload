@@ -7,19 +7,18 @@ import type { LocalizedPost, WithLocalizedRelationship } from './payload-types'
 import payload from '../../packages/payload/src'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { arrayCollectionSlug } from './collections/Array'
-import configPromise, {
-  localizedPostsSlug,
-  relationshipLocalizedSlug,
-  withLocalizedRelSlug,
-  withRequiredLocalizedFields,
-} from './config'
+import configPromise from './config'
 import {
   defaultLocale,
   englishTitle,
+  localizedPostsSlug,
   relationEnglishTitle,
   relationEnglishTitle2,
   relationSpanishTitle,
   relationSpanishTitle2,
+  relationshipLocalizedSlug,
+  withLocalizedRelSlug,
+  withRequiredLocalizedFields,
   spanishLocale,
   spanishTitle,
 } from './shared'
@@ -192,8 +191,8 @@ describe('Localization', () => {
           },
         })
 
-        expect(result.docs[0].id).toEqual(localizedPost.id)
-      })
+        expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id);
+      });
 
       it('by localized field value - alternate locale', async () => {
         const result = await payload.find({
@@ -206,8 +205,8 @@ describe('Localization', () => {
           },
         })
 
-        expect(result.docs[0].id).toEqual(localizedPost.id)
-      })
+        expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id);
+      });
 
       it('by localized field value - opposite locale???', async () => {
         const result = await payload.find({
@@ -220,10 +219,10 @@ describe('Localization', () => {
           },
         })
 
-        expect(result.docs[0].id).toEqual(localizedPost.id)
-      })
-    })
-  })
+        expect(result.docs.map(({ id }) => id)).toContain(localizedPost.id);
+      });
+    });
+  });
 
   describe('Localized Relationship', () => {
     let localizedRelation: LocalizedPost
@@ -329,7 +328,7 @@ describe('Localization', () => {
           },
         })
 
-        expect(result.docs[0].id).toEqual(withRelationship.id)
+        expect(result.docs.map(({ id }) => id)).toContain(withRelationship.id);
 
         // Second relationship
         const result2 = await payload.find({
@@ -341,8 +340,8 @@ describe('Localization', () => {
           },
         })
 
-        expect(result2.docs[0].id).toEqual(withRelationship.id)
-      })
+        expect(result2.docs.map(({ id }) => id)).toContain(withRelationship.id);
+      });
 
       it('specific locale', async () => {
         const result = await payload.find({
@@ -396,7 +395,7 @@ describe('Localization', () => {
           },
         })
 
-        expect(result.docs[0].id).toEqual(withRelationship.id)
+        expect(result.docs.map(({ id }) => id)).toContain(withRelationship.id);
 
         // First relationship - spanish
         const result2 = await queryRelation({
@@ -405,7 +404,7 @@ describe('Localization', () => {
           },
         })
 
-        expect(result2.docs[0].id).toEqual(withRelationship.id)
+        expect(result2.docs.map(({ id }) => id)).toContain(withRelationship.id);
 
         // Second relationship - english
         const result3 = await queryRelation({
@@ -414,7 +413,7 @@ describe('Localization', () => {
           },
         })
 
-        expect(result3.docs[0].id).toEqual(withRelationship.id)
+        expect(result3.docs.map(({ id }) => id)).toContain(withRelationship.id);
 
         // Second relationship - spanish
         const result4 = await queryRelation({

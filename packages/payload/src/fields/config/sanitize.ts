@@ -1,3 +1,4 @@
+import type { Config } from '../../config/types'
 import type { Field } from './types'
 
 import withCondition from '../../admin/components/forms/withCondition'
@@ -8,7 +9,13 @@ import { baseIDField } from '../baseFields/baseIDField'
 import validations from '../validations'
 import { fieldAffectsData, tabHasName } from './types'
 
-const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] => {
+type Args = {
+  config: Config
+  fields: Field[]
+  validRelationships: string[]
+}
+
+const sanitizeFields = ({ config, fields, validRelationships }: Args): Field[] => {
   if (!fields) return []
 
   return fields.map((unsanitizedField) => {
@@ -80,6 +87,8 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
     }
 
     if (fieldAffectsData(field)) {
+      if (field.localized && !config.localization) delete field.localized
+
       if (typeof field.validate === 'undefined') {
         const defaultValidate = validations[field.type]
         if (defaultValidate) {
@@ -101,8 +110,13 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
       field.admin = {}
     }
 
-    if ('fields' in field && field.fields)
-      field.fields = sanitizeFields(field.fields, validRelationships)
+    if ('fields' in field && field.fields) {
+      field.fields = sanitizeFields({
+        config,
+        fields: field.fields,
+        validRelationships,
+      })
+    }
 
     if (field.type === 'tabs') {
       field.tabs = field.tabs.map((tab) => {
@@ -110,7 +124,13 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
         if (tabHasName(tab) && typeof tab.label === 'undefined') {
           unsanitizedTab.label = toWords(tab.name)
         }
-        unsanitizedTab.fields = sanitizeFields(tab.fields, validRelationships)
+
+        unsanitizedTab.fields = sanitizeFields({
+          config,
+          fields: tab.fields,
+          validRelationships,
+        })
+
         return unsanitizedTab
       })
     }
@@ -121,7 +141,13 @@ const sanitizeFields = (fields: Field[], validRelationships: string[]): Field[] 
         unsanitizedBlock.labels = !unsanitizedBlock.labels
           ? formatLabels(unsanitizedBlock.slug)
           : unsanitizedBlock.labels
-        unsanitizedBlock.fields = sanitizeFields(block.fields, validRelationships)
+
+        unsanitizedBlock.fields = sanitizeFields({
+          config,
+          fields: block.fields,
+          validRelationships,
+        })
+
         return unsanitizedBlock
       })
     }

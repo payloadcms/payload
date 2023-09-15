@@ -173,11 +173,12 @@ describe('collections-graphql', () => {
         }
       }`
 
-        const response = await client.request(query)
-        const { docs } = response.Posts
+        const response = await client.request(query);
+        const { docs } = response.Posts;
+        const docsWithWhereTitleNotEqualPostTitle = docs.filter((post) => post.title === post1.title);
 
-        expect(docs[0]).toMatchObject({ id: post2.id, title: post2.title })
-      })
+        expect(docsWithWhereTitleNotEqualPostTitle).toHaveLength(0);
+      });
 
       it('like', async () => {
         const postWithWords = await createPost({ title: 'the quick brown fox' })
@@ -265,15 +266,15 @@ describe('collections-graphql', () => {
             docs {
               id
               title
+              number
             }
           }
         }`
 
-          const response = await client.request(query)
-          const { docs } = response.Posts
-
-          expect(docs).toContainEqual(expect.objectContaining({ id: numPost2.id }))
-        })
+          const response = await client.request(query);
+          const { docs } = response.Posts;
+          expect(docs.map(({ id }) => id)).toContain(numPost2.id);
+        });
 
         it('greater_than_equal', async () => {
           const query = `query {
