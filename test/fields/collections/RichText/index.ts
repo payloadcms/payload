@@ -1,5 +1,6 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { createLexical } from '../../../../packages/richtext-lexical/src'
 import { createSlate } from '../../../../packages/richtext-slate/src'
 import { loremIpsum } from './loremIpsum'
 
@@ -13,6 +14,11 @@ const RichTextFields: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'richTextLexical',
+      type: 'richText',
+      editor: createLexical({}),
     },
     {
       name: 'selectHasMany',
