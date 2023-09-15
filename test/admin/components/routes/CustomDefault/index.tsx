@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Redirect } from 'react-router-dom'
 
-import type { AdminView } from '../../../../../packages/payload/src/config/types'
+import type { CustomAdminView } from '../../../../../packages/payload/src/config/types'
 
 import Button from '../../../../../packages/payload/src/admin/components/elements/Button'
 import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
@@ -17,7 +17,7 @@ import Meta from '../../../../../packages/payload/src/admin/components/utilities
 // import { useStepNav } from 'payload/components/hooks';
 // import { useConfig, Meta } from 'payload/components/utilities';
 
-const CustomDefaultRoute: AdminView = ({ canAccessAdmin, user }) => {
+const CustomDefaultRoute: CustomAdminView = ({ canAccessAdmin, user }) => {
   const {
     routes: { admin: adminRoute },
   } = useConfig()
@@ -47,18 +47,10 @@ const CustomDefaultRoute: AdminView = ({ canAccessAdmin, user }) => {
         keywords="Custom React Components, Payload, CMS"
         title="Custom Route with Default Template"
       />
-<<<<<<< HEAD
       <div
         style={{
           paddingLeft: 'var(--gutter-h)',
           paddingRight: 'var(--gutter-h)',
-=======
-      <Eyebrow />
-      <div
-        style={{
-          paddingRight: 'var(--gutter-h)',
-          paddingLeft: 'var(--gutter-h)',
->>>>>>> 2.0
         }}
       >
         <h1>Custom Route</h1>

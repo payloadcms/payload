@@ -301,49 +301,6 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-
-    {
-      slug: 'custom-global-views-one',
-      versions: true,
-      admin: {
-        components: {
-          views: {
-            Edit: CustomEditView,
-          },
-        },
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: 'custom-global-views-two',
-      versions: true,
-      admin: {
-        components: {
-          views: {
-            Edit: {
-              Default: CustomEditView,
-              Versions: CustomVersionsView,
-              MyCustomView: {
-                path: '/custom',
-                Component: CustomView,
-                label: 'Custom',
-              },
-            },
-          },
-        },
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
     {
       slug: 'group-globals-one',
       admin: {
