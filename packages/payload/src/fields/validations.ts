@@ -226,7 +226,7 @@ export const date: Validate<unknown, unknown, DateField> = (value, { required, t
 
 const validateFilterOptions: Validate = async (
   value,
-  { data, filterOptions, id, payload, relationTo, siblingData, t, user },
+  { id, data, filterOptions, payload, relationTo, siblingData, t, user },
 ) => {
   if (!canUseDOM && typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -241,8 +241,8 @@ const validateFilterOptions: Validate = async (
         const optionFilter =
           typeof filterOptions === 'function'
             ? await filterOptions({
-                data,
                 id,
+                data,
                 relationTo: collection,
                 siblingData,
                 user,
@@ -381,8 +381,6 @@ export const relationship: Validate<unknown, unknown, RelationshipField> = async
       } else {
         type = 'ObjectID'
       }
-
-      if (typeof requestedID === 'number') return false
 
       return !isValidID(requestedID, type)
     })
