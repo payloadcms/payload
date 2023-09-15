@@ -112,4 +112,4 @@ jobs:
             NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
         - name: Build
-          run: turbo run build --filter=db-mongodb
+          run: ./node_modules/.bin/turbo run build --filter=db-mongodb
