@@ -84,3 +84,84 @@ The following functions can be used for managing transactions:
 `payload.db.rollbackTransaction` - Takes the identifier for the transaction, discards any changes.
 
 ## Migrations
+
+Payload's migrations are accessible via the `payload` command in your project directory.
+
+Available commands:
+
+- [`migrate`](#migrate) - Performs any migrations that have not yet been run.
+- [`migrate:status`](#migrate:status) - Checks the status of migrations.
+- [`migrate:down`](#migrate:down) - Reverts the last batch of migrations.
+- [`migrate:refresh`](#migrate:refresh) - Rolls back all migrations and runs them again.
+- [`migrate:reset`](#migrate:reset) - Rolls back all migrations.
+- [`migrate:create`](#migrate:create) - Creates new migration file in migrations directory.
+
+### Migrate
+
+The `migrate` command will run any migrations that have not yet been run. This command is run automatically when you start your Payload server.
+
+`payload migrate`
+
+Example output:
+
+```text
+TODO: add example output
+```
+
+### Migrate:status
+
+The `migrate:status` command will check the status of migrations.
+
+`payload migrate:status`
+
+Example output:
+
+```text
+```
+
+### Migrate:down
+
+Revert the last batch of migrations.
+
+`payload migrate:down`
+
+Example output:
+
+```text
+```
+
+### Migrate:refresh
+
+Roll back all migrations and run them again.
+
+`payload migrate:refresh`
+
+Example output:
+
+```text
+```
+
+### Migrate:reset
+
+Roll back all migrations.
+
+`payload migrate:reset`
+
+Example output:
+
+```text
+```
+
+### Migrate:create
+
+Create a new migration file in the migrations directory.
+
+`payload migrate:create`
+
+Example output:
+
+```text
+Migration created at .migrations/20230912_131129_first.ts
+```
+
+

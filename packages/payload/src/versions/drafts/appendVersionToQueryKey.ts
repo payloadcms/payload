@@ -18,7 +18,7 @@ export const appendVersionToQueryKey = (query: Where): Where => {
 
     return {
       ...res,
-      _id: val,
-    }
-  }, {})
-}
+      parent: val,
+    };
+  }, {});
+};

@@ -28,6 +28,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 
 import wait from '../../packages/payload/src/utilities/wait'
+import { changeLocale } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { autosaveSlug, draftSlug } from './shared'
@@ -130,25 +131,19 @@ describe('versions', () => {
       await page.locator('#field-description').fill(description)
       await wait(500)
 
-      await changeLocale(spanishLocale)
+      await changeLocale(page, spanishLocale)
       await page.locator('#field-title').fill(spanishTitle)
       await wait(500)
 
-      await changeLocale(locale)
+      await changeLocale(page, locale)
       await page.locator('#field-description').fill(newDescription)
       await wait(500)
 
-      await changeLocale(spanishLocale)
+      await changeLocale(page, spanishLocale)
       await wait(500)
       await page.reload()
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
       await expect(page.locator('#field-description')).toHaveValue(newDescription)
     })
   })
-
-  async function changeLocale(newLocale: string) {
-    await page.locator('.localizer >> button').first().click()
-    await page.locator(`.localizer >> a:has-text("${newLocale}")`).click()
-    expect(page.url()).toContain(`locale=${newLocale}`)
-  }
 })

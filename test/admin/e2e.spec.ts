@@ -8,7 +8,7 @@ import type { Post } from './config'
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
+import { openMainMenu, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { globalSlug, slug } from './shared'
@@ -45,27 +45,29 @@ describe('admin', () => {
   describe('Nav', () => {
     test('should nav to collection - sidebar', async () => {
       await page.goto(url.admin)
-      const collectionLink = page.locator(`#nav-${slug}`)
-      await collectionLink.click()
-
+      await openMainMenu(page)
+      await page.locator(`#nav-${slug}`).click()
       expect(page.url()).toContain(url.list)
     })
 
     test('should nav to a global - sidebar', async () => {
       await page.goto(url.admin)
+      await openMainMenu(page)
       await page.locator(`#nav-global-${globalSlug}`).click()
-
       expect(page.url()).toContain(url.global(globalSlug))
     })
 
     test('should navigate to collection - card', async () => {
       await page.goto(url.admin)
+      await wait(200)
       await page.locator(`#card-${slug}`).click()
       expect(page.url()).toContain(url.list)
     })
 
     test('should collapse and expand collection groups', async () => {
       await page.goto(url.admin)
+      await openMainMenu(page)
+
       const navGroup = page.locator('#nav-group-One .nav-group__toggle')
       const link = page.locator('#nav-group-one-collection-ones')
 
@@ -81,6 +83,8 @@ describe('admin', () => {
 
     test('should collapse and expand globals groups', async () => {
       await page.goto(url.admin)
+      await openMainMenu(page)
+
       const navGroup = page.locator('#nav-group-Group .nav-group__toggle')
       const link = page.locator('#nav-global-group-globals-one')
 
@@ -96,12 +100,9 @@ describe('admin', () => {
 
     test('should save nav group collapse preferences', async () => {
       await page.goto(url.admin)
-
-      const navGroup = page.locator('#nav-group-One .nav-group__toggle')
-      await navGroup.click()
-
+      await openMainMenu(page)
+      await page.locator('#nav-group-One .nav-group__toggle').click()
       await page.goto(url.admin)
-
       const link = page.locator('#nav-group-one-collection-ones')
       await expect(link).toBeHidden()
     })
@@ -189,13 +190,11 @@ describe('admin', () => {
     })
 
     test('should delete existing', async () => {
-      const { id, ...post } = await createPost()
-
+      const { id, title } = await createPost()
       await page.goto(url.edit(id))
       await page.locator('#action-delete').click()
       await page.locator('#confirm-delete').click()
-
-      await expect(page.locator(`text=Post en "${post.title}" successfully deleted.`)).toBeVisible()
+      await expect(page.locator(`text=Post en "${title}" successfully deleted.`)).toBeVisible()
       expect(page.url()).toContain(url.list)
     })
 
@@ -724,7 +723,8 @@ describe('admin', () => {
     describe('custom css', () => {
       test('should see custom css in admin UI', async () => {
         await page.goto(url.admin)
-        const navControls = page.locator('.nav__controls')
+        await openMainMenu(page)
+        const navControls = page.locator('.main-menu__controls')
         await expect(navControls).toHaveCSS('font-family', 'monospace')
       })
     })

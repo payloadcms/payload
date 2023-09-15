@@ -9,11 +9,11 @@ import { createSlate } from '../packages/richtext-slate/src'
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({
-    url: 'mongodb://127.0.0.1/payload',
+    url: 'mongodb://127.0.0.1/payloadtests',
   }),
   postgres: postgresAdapter({
     client: {
-      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payload',
+      connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
   }),
 }

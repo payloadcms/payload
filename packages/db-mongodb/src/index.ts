@@ -92,7 +92,7 @@ export function mongooseAdapter({
       findVersions,
       globals: undefined,
       init,
-      migrationDir,
+      ...(migrationDir && { migrationDir }),
       mongoMemoryServer: undefined,
       payload,
       queryDrafts,
