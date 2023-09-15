@@ -70,7 +70,7 @@ describe('globals', () => {
 
   describe('local', () => {
     it('should save empty json objects', async () => {
-      const createdJSON = await payload.updateGlobal({
+      const createdJSON: any = await payload.updateGlobal({
         slug,
         data: {
           json: {

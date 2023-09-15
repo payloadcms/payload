@@ -55,3 +55,22 @@ export async function saveDocAndAssert(page: Page, selector = '#action-save'): P
   await expect(page.locator('.Toastify')).toContainText('successfully')
   expect(page.url()).not.toContain('create')
 }
+
+export async function openMainMenu(page: Page): Promise<void> {
+  await page.locator('.payload__modal-toggler--slug-main-menu').click()
+  const mainMenuModal = page.locator('#main-menu')
+  await expect(mainMenuModal).toBeVisible()
+}
+
+export async function closeMainMenu(page: Page): Promise<void> {
+  await page.locator('.payload__modal-toggler--slug-main-menu--is-open').click()
+  const mainMenuModal = page.locator('#main-menu')
+  await expect(mainMenuModal).toBeHidden()
+}
+
+export async function changeLocale(page: Page, newLocale: string) {
+  await openMainMenu(page)
+  await page.locator('.localizer >> button').first().click()
+  await page.locator(`.localizer >> a:has-text("${newLocale}")`).click()
+  expect(page.url()).toContain(`locale=${newLocale}`)
+}

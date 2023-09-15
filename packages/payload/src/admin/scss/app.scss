@@ -13,7 +13,6 @@
   --breakpoint-m-width: #{$breakpoint-m-width};
   --breakpoint-l-width: #{$breakpoint-l-width};
   --scrollbar-width: 17px;
-  --nav-width: #{base(9)};
 
   --theme-bg: var(--theme-elevation-0);
   --theme-input-bg: var(--theme-elevation-0);
@@ -36,16 +35,10 @@
   --accessibility-outline: 2px solid var(--theme-text);
   --accessibility-outline-offset: 2px;
 
-  --gutter-h: #{base(5)};
-
-  @include large-break {
-    --gutter-h: #{base(3)};
-    --nav-width: #{base(8)};
-  }
+  --gutter-h: #{base(3)};
 
   @include mid-break {
     --gutter-h: #{base(2)};
-    --nav-width: 0px;
   }
 
   @include small-break {
