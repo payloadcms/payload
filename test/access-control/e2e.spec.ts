@@ -6,7 +6,7 @@ import type { ReadOnlyCollection, RestrictedVersion } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
-import { openMainMenu } from '../helpers'
+import { openDocControls, openMainMenu } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {
@@ -217,14 +217,16 @@ describe('access control', () => {
       await page.goto(docLevelAccessURL.edit(existingDoc.id))
 
       // validate that the delete action is not displayed
-      const duplicateAction = page.locator('.collection-edit__collection-actions >> li').last()
-      await expect(duplicateAction).toContainText('Duplicate')
+      await openDocControls(page)
+      const deleteAction = page.locator('#action-delete')
+      await expect(deleteAction).toBeHidden()
 
       await page.locator('#field-approvedForRemoval').check()
       await page.locator('#action-save').click()
 
-      const deleteAction = page.locator('.collection-edit__collection-actions >> li').last()
-      await expect(deleteAction).toContainText('Delete')
+      await openDocControls(page)
+      const deleteAction2 = page.locator('#action-delete')
+      await expect(deleteAction2).toBeVisible()
     })
   })
 

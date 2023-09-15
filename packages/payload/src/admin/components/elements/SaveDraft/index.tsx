@@ -49,6 +49,7 @@ const DefaultSaveDraftButton: React.FC<DefaultSaveDraftButtonProps> = ({
       disabled={disabled}
       onClick={saveDraft}
       ref={ref}
+      size="small"
       type="button"
     >
       {label}

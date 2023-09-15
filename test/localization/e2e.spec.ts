@@ -5,7 +5,7 @@ import { expect, test } from '@playwright/test'
 import type { LocalizedPost } from './payload-types'
 
 import payload from '../../packages/payload/src'
-import { changeLocale, saveDocAndAssert } from '../helpers'
+import { changeLocale, openDocControls, saveDocAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { englishTitle, localizedPostsSlug, spanishLocale } from './shared'
@@ -146,7 +146,8 @@ describe('Localization', () => {
       })
 
       await page.goto(url.edit(id))
-      await page.locator('.btn.duplicate').first().click()
+      await openDocControls(page)
+      await page.locator('#action-duplicate').click()
       await expect(page.locator('.Toastify')).toContainText('successfully')
       await expect(page.locator('#field-title')).toHaveValue(englishTitle)
       await changeLocale(page, spanishLocale)

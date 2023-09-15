@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react'
+import React, { Fragment, createContext, useContext, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
@@ -28,7 +28,10 @@ const StepNavProvider: React.FC<{ children?: React.ReactNode }> = ({ children })
 
 const useStepNav = (): ContextType => useContext(Context)
 
-const StepNav: React.FC = () => {
+const StepNav: React.FC<{
+  className?: string
+}> = (props) => {
+  const { className } = props
   const { i18n, t } = useTranslation()
   const dashboardLabel = <span>{t('general:dashboard')}</span>
   const { stepNav } = useStepNav()
@@ -38,12 +41,12 @@ const StepNav: React.FC = () => {
   } = config
 
   return (
-    <nav className="step-nav">
+    <nav className={['step-nav', className].filter(Boolean).join(' ')}>
       {stepNav.length > 0 ? (
-        <Link to={admin}>
-          {dashboardLabel}
-          <Chevron />
-        </Link>
+        <Fragment>
+          <Link to={admin}>{dashboardLabel}</Link>
+          <span>/</span>
+        </Fragment>
       ) : (
         dashboardLabel
       )}
@@ -54,10 +57,10 @@ const StepNav: React.FC = () => {
           stepNav.length === i + 1 ? (
             StepLabel
           ) : (
-            <Link key={i} to={item.url}>
-              {StepLabel}
-              <Chevron />
-            </Link>
+            <Fragment key={i}>
+              <Link to={item.url}>{StepLabel}</Link>
+              <span>/</span>
+            </Fragment>
           )
 
         return Step

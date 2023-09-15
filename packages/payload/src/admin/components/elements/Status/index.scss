@@ -2,11 +2,15 @@
 
 .status {
   &__label {
-    color: gray;
+    color: var(--theme-elevation-500);
   }
 
   &__value {
     font-weight: 600;
+  }
+
+  &__value-wrap {
+    white-space: nowrap;
   }
 
   &__action {

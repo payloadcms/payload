@@ -130,8 +130,9 @@ const Status: React.FC = () => {
 
   if (statusToRender) {
     return (
-      <div className={baseClass}>
+      <div className={baseClass} title={`${t('status')}: ${t(statusToRender)}`}>
         <div className={`${baseClass}__value-wrap`}>
+          <span className={`${baseClass}__label`}>{t('status')}:&nbsp;</span>
           <span className={`${baseClass}__value`}>{t(statusToRender)}</span>
           {canUpdate && statusToRender === 'published' && (
             <React.Fragment>

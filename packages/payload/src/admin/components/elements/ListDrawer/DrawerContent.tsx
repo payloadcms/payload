@@ -239,7 +239,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
               </header>
             ),
             data,
-            disableEyebrow: true,
             handlePageChange: setPage,
             handlePerPageChange: setLimit,
             handleSortChange: setSort,
