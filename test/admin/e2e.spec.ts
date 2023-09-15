@@ -145,34 +145,26 @@ describe('admin', () => {
       await page.goto(url.create)
       await page.locator('#field-title').fill(title)
       await page.locator('#field-description').fill(description)
-
       await saveDocAndAssert(page)
-
       await expect(page.locator('#field-title')).toHaveValue(title)
       await expect(page.locator('#field-description')).toHaveValue(description)
     })
 
     test('should read existing', async () => {
       const { id } = await createPost()
-
       await page.goto(url.edit(id))
-
       await expect(page.locator('#field-title')).toHaveValue(title)
       await expect(page.locator('#field-description')).toHaveValue(description)
     })
 
     test('should update existing', async () => {
       const { id } = await createPost()
-
       await page.goto(url.edit(id))
-
       const newTitle = 'new title'
       const newDesc = 'new description'
       await page.locator('#field-title').fill(newTitle)
       await page.locator('#field-description').fill(newDesc)
-
       await saveDocAndAssert(page)
-
       await expect(page.locator('#field-title')).toHaveValue(newTitle)
       await expect(page.locator('#field-description')).toHaveValue(newDesc)
     })
@@ -180,12 +172,9 @@ describe('admin', () => {
     test('should save using hotkey', async () => {
       const { id } = await createPost()
       await page.goto(url.edit(id))
-
       const newTitle = 'new title'
       await page.locator('#field-title').fill(newTitle)
-
       await saveDocHotkeyAndAssert(page)
-
       await expect(page.locator('#field-title')).toHaveValue(newTitle)
     })
 
