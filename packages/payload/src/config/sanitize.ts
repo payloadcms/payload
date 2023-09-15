@@ -6,7 +6,6 @@ import type {
   LocalizationConfigWithLabels,
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
-  SanitizedLocalizationConfig,
 } from './types'
 
 import { defaultUserCollection } from '../auth/defaultUser'
@@ -96,7 +95,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   checkDuplicateCollections(config.collections)
 
   if (config.globals.length > 0) {
-    config.globals = sanitizeGlobals(config.collections, config.globals)
+    config.globals = sanitizeGlobals(config as SanitizedConfig)
   }
 
   if (typeof config.serverURL === 'undefined') {

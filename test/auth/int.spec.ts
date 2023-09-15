@@ -1,6 +1,5 @@
 import { GraphQLClient } from 'graphql-request'
 import jwtDecode from 'jwt-decode'
-import mongoose from 'mongoose'
 
 import type { User } from '../../packages/payload/src/auth'
 
@@ -8,7 +7,7 @@ import payload from '../../packages/payload/src'
 import configPromise from '../collections-graphql/config'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
-import { namedSaveToJWTValue, saveToJWTKey, slug } from './config'
+import { namedSaveToJWTValue, saveToJWTKey, slug } from './shared'
 
 require('isomorphic-fetch')
 

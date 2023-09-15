@@ -4,17 +4,18 @@ import type { Post, RelyOnRequestHeader, Restricted } from './payload-types'
 import payload from '../../packages/payload/src'
 import { Forbidden } from '../../packages/payload/src/errors'
 import { initPayloadTest } from '../helpers/configHelpers'
+import { requestHeaders } from './config'
 import {
+  firstArrayText,
   hiddenAccessSlug,
   hiddenFieldsSlug,
   relyOnRequestHeadersSlug,
-  requestHeaders,
   restrictedSlug,
   restrictedVersionsSlug,
+  secondArrayText,
   siblingDataSlug,
   slug,
-} from './config'
-import { firstArrayText, secondArrayText } from './shared'
+} from './shared'
 
 describe('Access Control', () => {
   let post1: Post

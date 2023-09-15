@@ -54,15 +54,36 @@ importers:
       get-port:
         specifier: 5.1.1
         version: 5.1.1
+      graphql-request:
+        specifier: 3.7.0
+        version: 3.7.0(graphql@16.7.1)
+      isomorphic-fetch:
+        specifier: 3.0.0
+        version: 3.0.0
       jest:
         specifier: 29.6.4
         version: 29.6.4(@types/node@20.5.7)(ts-node@10.9.1)
       jest-environment-jsdom:
         specifier: 29.6.4
         version: 29.6.4
+      jwt-decode:
+        specifier: 3.1.2
+        version: 3.1.2
+      mongodb-memory-server:
+        specifier: 8.13.0
+        version: 8.13.0
+      node-fetch:
+        specifier: 2.6.12
+        version: 2.6.12
       prettier:
         specifier: ^3.0.3
         version: 3.0.3
+      qs:
+        specifier: 6.11.2
+        version: 6.11.2
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
       shelljs:
         specifier: 0.8.5
         version: 0.8.5
@@ -696,9 +717,6 @@ importers:
       graphql-request:
         specifier: 3.7.0
         version: 3.7.0(graphql@16.7.1)
-      mongodb-memory-server:
-        specifier: 8.13.0
-        version: 8.13.0
       node-fetch:
         specifier: 2.6.12
         version: 2.6.12
@@ -9131,7 +9149,6 @@ packages:
       whatwg-fetch: 3.6.17
     transitivePeerDependencies:
       - encoding
-    dev: false
 
   /issue-parser@6.0.0:
     resolution: {integrity: sha512-zKa/Dxq2lGsBIXQ7CUZWTHfvxPC2ej0KfO7fIPqLlHB9J2hJ7rGhZ5rilhuufylr4RXYPzJUeFjKxz305OsNlA==}
@@ -9853,7 +9870,6 @@ packages:
 
   /jwt-decode@3.1.2:
     resolution: {integrity: sha512-UfpWE/VZn0iP50d8cz9NrZLM9lSWhcJ+0Gt/nm4by88UL+J1SiKN8/5dkjMmbEzwL2CAe+67GsegCbIKtbp75A==}
-    dev: false
 
   /kareem@2.5.1:
     resolution: {integrity: sha512-7jFxRVm+jD+rkq3kY0iZDJfsO2/t4BBPeEb2qKn2lR/9KhuksYk5hxzfRYWMPV8P/x2d0kHD306YyWLzjjH+uA==}
@@ -12253,7 +12269,6 @@ packages:
     engines: {node: '>=0.6'}
     dependencies:
       side-channel: 1.0.4
-    dev: false
 
   /qs@6.4.1:
     resolution: {integrity: sha512-LQy1Q1fcva/UsnP/6Iaa4lVeM49WiOitu2T4hZCyA/elLKu37L99qcBJk4VCCk+rdLvnMzfKyiN3SZTqdAZGSQ==}
@@ -14547,7 +14562,6 @@ packages:
 
   /whatwg-fetch@3.6.17:
     resolution: {integrity: sha512-c4ghIvG6th0eudYwKZY5keb81wtFz9/WeAHAoy8+r18kcWlitUIrmGFQ2rWEl4UCKUilD3zCLHOIPheHx5ypRQ==}
-    dev: false
 
   /whatwg-mimetype@3.0.0:
     resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
