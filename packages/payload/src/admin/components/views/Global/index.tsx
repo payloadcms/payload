@@ -20,7 +20,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{ data?: Record<string, unknown> }>()
   const { code: locale } = useLocale()
   const { setStepNav } = useStepNav()
-  const { user } = useAuth()
+  const { permissions, user } = useAuth()
   const [initialState, setInitialState] = useState<Fields>()
   const [updatedAt, setUpdatedAt] = useState<string>()
   const { docPermissions, getDocPermissions, getDocPreferences, getVersions, preferencesKey } =
@@ -36,11 +36,25 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { global } = props
 
   const {
-    admin: { components: { views: { Edit: CustomEdit } = {} } = {} } = {},
+    admin: { components: { views: { Edit: Edit } = {} } = {} } = {},
     fields,
     label,
     slug,
   } = global
+
+  // The component definition could come from multiple places in the config
+  // we need to cascade into the proper component from the top-down
+  // 1. "components.Edit"
+  // 2. "components.Edit.Default"
+  // 3. "components.Edit.Default.Component"
+  const CustomEditView =
+    typeof Edit === 'function'
+      ? Edit
+      : typeof Edit === 'object' && typeof Edit.Default === 'function'
+      ? Edit.Default
+      : typeof Edit?.Default === 'object' && typeof Edit.Default.Component === 'function'
+      ? Edit.Default.Component
+      : undefined
 
   const onSave = useCallback(
     async (json) => {
@@ -102,13 +116,14 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   return (
     <RenderCustomComponent
-      CustomComponent={CustomEdit}
+      CustomComponent={CustomEditView}
       DefaultComponent={DefaultGlobal}
       componentProps={{
         action: `${serverURL}${api}/globals/${slug}?locale=${locale}&fallback-locale=null`,
         apiURL: `${serverURL}${api}/globals/${slug}?locale=${locale}${
           global.versions?.drafts ? '&draft=true' : ''
         }`,
+        canAccessAdmin: permissions?.canAccessAdmin,
         data: dataToRender,
         global,
         initialState,
@@ -116,6 +131,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
         onSave,
         permissions: docPermissions,
         updatedAt: updatedAt || dataToRender?.updatedAt,
+        user,
       }}
     />
   )

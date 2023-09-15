@@ -22,8 +22,6 @@ import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/type
 import type { Payload } from '../payload'
 import type { Where } from '../types'
 
-import { Validate } from '../fields/config/types'
-
 type Prettify<T> = {
   [K in keyof T]: T[K]
 } & NonNullable<unknown>
@@ -195,13 +193,15 @@ export type Endpoint = {
   root?: boolean
 }
 
-export type AdminView = React.ComponentType<{
+export type CustomAdminView = React.ComponentType<{
   canAccessAdmin: boolean
+  collection?: SanitizedCollectionConfig
+  global?: SanitizedGlobalConfig
   user: User
 }>
 
 export type AdminRoute = {
-  Component: AdminView
+  Component: CustomAdminView
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
   path: string
