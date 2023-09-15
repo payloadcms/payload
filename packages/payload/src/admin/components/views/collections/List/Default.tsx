@@ -21,6 +21,7 @@ import { Table } from '../../../elements/Table'
 import UnpublishMany from '../../../elements/UnpublishMany'
 import ViewDescription from '../../../elements/ViewDescription'
 import Meta from '../../../utilities/Meta'
+import { BulkUploads } from './BulkUploads'
 import { RelationshipProvider } from './RelationshipProvider'
 import { SelectionProvider } from './SelectionProvider'
 import './index.scss'
@@ -56,7 +57,9 @@ const DefaultList: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation('general')
   let formattedDocs = data.docs || []
 
-  if (collection.upload) {
+  const isUploadCollection = collection?.upload
+
+  if (isUploadCollection) {
     formattedDocs = formattedDocs?.map((doc) => {
       return {
         ...doc,
@@ -86,6 +89,7 @@ const DefaultList: React.FC<Props> = (props) => {
                     {t('createNew')}
                   </Pill>
                 )}
+                {isUploadCollection && <BulkUploads collection={collection} />}
                 {!smallBreak && (
                   <ListSelection label={getTranslation(collection.labels.plural, i18n)} />
                 )}
