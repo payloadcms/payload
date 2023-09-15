@@ -17,6 +17,15 @@ describe('collections-graphql', () => {
     const config = await configPromise
     const url = `${serverURL}${config.routes.api}${config.routes.graphQL}`
     client = new GraphQLClient(url)
+
+    // Wait for indexes to be created,
+    // as we need them to query by point
+    await new Promise((resolve, reject) => {
+      payload.db.collections.point.ensureIndexes(function (err) {
+        if (err) reject(err)
+        resolve(true)
+      })
+    })
   })
 
   afterAll(async () => {
@@ -175,8 +184,11 @@ describe('collections-graphql', () => {
 
         const response = await client.request(query)
         const { docs } = response.Posts
+        const docsWithWhereTitleNotEqualPostTitle = docs.filter(
+          (post) => post.title === post1.title,
+        )
 
-        expect(docs[0]).toMatchObject({ id: post2.id, title: post2.title })
+        expect(docsWithWhereTitleNotEqualPostTitle).toHaveLength(0)
       })
 
       it('like', async () => {
@@ -265,14 +277,14 @@ describe('collections-graphql', () => {
             docs {
               id
               title
+              number
             }
           }
         }`
 
           const response = await client.request(query)
           const { docs } = response.Posts
-
-          expect(docs).toContainEqual(expect.objectContaining({ id: numPost2.id }))
+          expect(docs.map(({ id }) => id)).toContain(numPost2.id)
         })
 
         it('greater_than_equal', async () => {

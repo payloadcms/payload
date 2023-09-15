@@ -10,8 +10,11 @@ import BeforeLogin from './components/BeforeLogin'
 import DemoUIFieldCell from './components/DemoUIField/Cell'
 import DemoUIFieldField from './components/DemoUIField/Field'
 import Logout from './components/Logout'
-import CustomDefaultRoute from './components/views/CustomDefault'
-import CustomMinimalRoute from './components/views/CustomMinimal'
+import CustomDefaultRoute from './components/routes/CustomDefault'
+import CustomMinimalRoute from './components/routes/CustomMinimal'
+import CustomEditView from './components/views/CustomEdit'
+import CustomVersionsView from './components/views/CustomVersions'
+import CustomView from './components/views/CustomView'
 import { globalSlug, slug } from './shared'
 
 export interface Post {
@@ -135,6 +138,48 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: 'custom-views-one',
+      versions: true,
+      admin: {
+        components: {
+          views: {
+            Edit: CustomEditView,
+          },
+        },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'custom-views-two',
+      versions: true,
+      admin: {
+        components: {
+          views: {
+            Edit: {
+              Default: CustomEditView,
+              Versions: CustomVersionsView,
+              MyCustomView: {
+                path: '/custom',
+                Component: CustomView,
+                label: 'Custom',
+              },
+            },
+          },
+        },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
       slug: 'group-one-collection-ones',
       admin: {
         group: { en: 'One', es: 'Una' },
@@ -221,6 +266,49 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+
+    {
+      slug: 'custom-global-views-one',
+      versions: true,
+      admin: {
+        components: {
+          views: {
+            Edit: CustomEditView,
+          },
+        },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'custom-global-views-two',
+      versions: true,
+      admin: {
+        components: {
+          views: {
+            Edit: {
+              Default: CustomEditView,
+              Versions: CustomVersionsView,
+              MyCustomView: {
+                path: '/custom',
+                Component: CustomView,
+                label: 'Custom',
+              },
+            },
+          },
+        },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+      ],
+    },
     {
       slug: 'group-globals-one',
       admin: {
@@ -263,6 +351,20 @@ export default buildConfigWithDefaults({
           description: 'description',
         },
       })
+    })
+
+    await payload.create({
+      collection: 'custom-views-one',
+      data: {
+        title: 'title',
+      },
+    })
+
+    await payload.create({
+      collection: 'custom-views-two',
+      data: {
+        title: 'title',
+      },
     })
 
     await payload.create({

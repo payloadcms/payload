@@ -1,5 +1,4 @@
 import { randomBytes } from 'crypto'
-import mongoose from 'mongoose'
 
 import type { Relation } from './config'
 import type { ErrorOnHook, Post } from './payload-types'
@@ -23,6 +22,15 @@ describe('collections-rest', () => {
   beforeAll(async () => {
     const { serverURL } = await initPayloadTest({ __dirname, init: { local: false } })
     client = new RESTClient(await config, { serverURL, defaultSlug: slug })
+
+    // Wait for indexes to be created,
+    // as we need them to query by point
+    await new Promise((resolve, reject) => {
+      payload.db.collections[pointSlug].ensureIndexes(function (err) {
+        if (err) reject(err)
+        resolve(true)
+      })
+    })
   })
 
   afterAll(async () => {
@@ -245,7 +253,7 @@ describe('collections-rest', () => {
         })
 
         const { status, docs } = await client.deleteMany<Post>({
-          where: { title: { eq: 'title' } },
+          where: { title: { equals: 'title' } },
         })
 
         expect(status).toEqual(200)
@@ -306,7 +314,21 @@ describe('collections-rest', () => {
           expect(foundDoc.id).toEqual(doc.id)
         })
 
-        it('should query', async () => {
+        it('should query - equals', async () => {
+          const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
+          const { doc } = await client.create({
+            slug: customIdSlug,
+            data: { id: customId, name: 'custom-id-name' },
+          })
+          const { result } = await client.find({
+            slug: customIdSlug,
+            query: { id: { equals: customId } },
+          })
+
+          expect(result.docs.map(({ id }) => id)).toContain(doc.id)
+        })
+
+        it('should query - like', async () => {
           const customId = `custom-${randomBytes(32).toString('hex').slice(0, 12)}`
           const { doc } = await client.create({
             slug: customIdSlug,

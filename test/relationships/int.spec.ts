@@ -1,5 +1,4 @@
-import { randomBytes } from 'crypto'
-import mongoose from 'mongoose'
+import { randomBytes } from 'crypto';
 
 import type {
   ChainedRelation,
@@ -8,12 +7,12 @@ import type {
   Director,
   Post,
   Relation,
-} from './payload-types'
+} from './payload-types';
 
-import payload from '../../packages/payload/src'
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
-import { initPayloadTest } from '../helpers/configHelpers'
-import { RESTClient } from '../helpers/rest'
+import payload from '../../packages/payload/src';
+import { mapAsync } from '../../packages/payload/src/utilities/mapAsync';
+import { initPayloadTest } from '../helpers/configHelpers';
+import { RESTClient } from '../helpers/rest';
 import config, {
   chainedRelSlug,
   customIdNumberSlug,
@@ -21,7 +20,7 @@ import config, {
   defaultAccessRelSlug,
   relationSlug,
   slug,
-} from './config'
+} from './config';
 
 let client: RESTClient
 

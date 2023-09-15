@@ -24,6 +24,7 @@ export const createVersion: CreateVersion = async function createVersion(
   const [doc] = await VersionModel.create(
     [
       {
+        latest: true,
         autosave,
         createdAt,
         parent,
@@ -35,8 +36,28 @@ export const createVersion: CreateVersion = async function createVersion(
     req,
   )
 
-  const result: Document = JSON.parse(JSON.stringify(doc))
-  const verificationToken = doc._verificationToken
+  await VersionModel.updateMany({
+    $and: [
+      {
+        _id: {
+          $ne: doc._id,
+        },
+      },
+      {
+        parent: {
+          $eq: parent,
+        },
+      },
+      {
+        latest: {
+          $eq: true,
+        },
+      },
+    ],
+  }, { $unset: { latest: 1 } });
+
+  const result: Document = JSON.parse(JSON.stringify(doc));
+  const verificationToken = doc._verificationToken;
 
   // custom id type reset
   result.id = result._id

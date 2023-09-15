@@ -24,6 +24,17 @@ export const buildVersionGlobalFields = (global: SanitizedGlobalConfig): Field[]
     },
   ]
 
+  if (global?.versions?.drafts) {
+    fields.push({
+      name: 'latest',
+      type: 'checkbox',
+      index: true,
+      admin: {
+        disabled: true,
+      },
+    });
+  }
+
   if (global?.versions?.drafts && global?.versions?.drafts?.autosave) {
     fields.push({
       index: true,

@@ -156,11 +156,11 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
       result = await payload.db.find<T>({
         collection: collectionConfig.slug,
         limit: sanitizedLimit,
+        sort: sort ? sort.replace(/__/gi, '.') : undefined,
         locale,
         page: sanitizedPage,
         pagination,
         req,
-        sort,
         where: fullWhere,
       })
     }

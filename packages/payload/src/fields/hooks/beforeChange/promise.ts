@@ -212,61 +212,61 @@ export const promise = async ({
       if (Array.isArray(rows)) {
         const promises = []
         rows.forEach((row, i) => {
-          promises.push(
-            traverseFields({
+          promises.push(traverseFields({
+            data,
+            doc,
+            docWithLocales,
+            errors,
+            fields: field.fields,
+            id,
+            mergeLocaleActions,
+            operation,
+            path: `${path}${field.name}.${i}.`,
+            req,
+            siblingData: row,
+            siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
+            siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
+            skipValidation: skipValidationFromHere,
+            context,
+          }));
+        });
+
+        await Promise.all(promises);
+      }
+
+      break;
+    }
+
+    case 'blocks': {
+      const rows = siblingData[field.name];
+
+      if (Array.isArray(rows)) {
+        const promises = [];
+        rows.forEach((row, i) => {
+          const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name]);
+          const rowSiblingDocWithLocales = getExistingRowDoc(row, siblingDocWithLocales[field.name]);
+
+          const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType;
+          const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch);
+
+          if (block) {
+            promises.push(traverseFields({
               context,
               data,
               doc,
               docWithLocales,
               errors,
-              fields: field.fields,
+              fields: block.fields,
               id,
               mergeLocaleActions,
               operation,
               path: `${path}${field.name}.${i}.`,
               req,
               siblingData: row,
-              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
-              siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
+              siblingDoc: rowSiblingDoc,
+              siblingDocWithLocales: rowSiblingDocWithLocales,
               skipValidation: skipValidationFromHere,
-            }),
-          )
-        })
-
-        await Promise.all(promises)
-      }
-
-      break
-    }
-
-    case 'blocks': {
-      const rows = siblingData[field.name]
-
-      if (Array.isArray(rows)) {
-        const promises = []
-        rows.forEach((row, i) => {
-          const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
-
-          if (block) {
-            promises.push(
-              traverseFields({
-                context,
-                data,
-                doc,
-                docWithLocales,
-                errors,
-                fields: block.fields,
-                id,
-                mergeLocaleActions,
-                operation,
-                path: `${path}${field.name}.${i}.`,
-                req,
-                siblingData: row,
-                siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
-                siblingDocWithLocales: getExistingRowDoc(row, siblingDocWithLocales[field.name]),
-                skipValidation: skipValidationFromHere,
-              }),
-            )
+            }))
           }
         })
 

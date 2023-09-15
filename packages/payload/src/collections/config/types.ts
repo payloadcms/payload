@@ -164,6 +164,28 @@ type BeforeDuplicateArgs<T> = {
 
 export type BeforeDuplicate<T = any> = (args: BeforeDuplicateArgs<T>) => Promise<T> | T
 
+export type CollectionEditView =
+  | {
+      /**
+       * The component to render for this view
+       * + Replaces the default component
+       */
+      Component: React.ComponentType<EditProps>
+      /**
+       * The label rendered in the admin UI for this view
+       * + Example: `default` is `Edit`
+       */
+      label: string
+      /**
+       * The URL path to the nested collection edit views
+       * + Example: `/admin/collections/:collection/:id/:path`
+       * + The `:path` is the value of this property
+       * + Note: the default collection view uses no path
+       */
+      path?: string
+    }
+  | React.ComponentType<EditProps>
+
 export type CollectionAdminOptions = {
   /**
    * Custom admin components
@@ -199,7 +221,33 @@ export type CollectionAdminOptions = {
       SaveDraftButton?: CustomSaveDraftButtonProps
     }
     views?: {
-      Edit?: React.ComponentType<EditProps>
+      /**
+       * Replaces the "Edit" view entirely
+       */
+      Edit?:
+        | {
+            /**
+             * Replaces or adds nested views within the "Edit" view
+             * + `Default` - `/admin/collections/:collection/:id`
+             * + `API` - `/admin/collections/:collection/:id/api`
+             * + `Preview` - `/admin/collections/:collection/:id/preview`
+             * + `References` - `/admin/collections/:collection/:id/references`
+             * + `Relationships` - `/admin/collections/:collection/:id/relationships`
+             * + `Versions` - `/admin/collections/:collection/:id/versions`
+             * + `Version` - `/admin/collections/:collection/:id/versions/:version`
+             * + `:path` - `/admin/collections/:collection/:id/:path`
+             */
+            Default: CollectionEditView
+            Versions?: CollectionEditView
+            // TODO: uncomment these as they are built
+            // [key: string]: CollectionEditView
+            // API?: CollectionEditView
+            // Preview?: CollectionEditView
+            // References?: CollectionEditView
+            // Relationships?: CollectionEditView
+            // Version: CollectionEditView
+          }
+        | React.ComponentType<EditProps>
       List?: React.ComponentType<ListProps>
     }
   }
