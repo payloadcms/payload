@@ -1,14 +1,50 @@
 {
-  "author": {
-    "email": "info@payloadcms.com",
-    "name": "Payload",
-    "url": "https://payloadcms.com"
-  },
+  "name": "payload",
+  "version": "1.14.0",
+  "description": "Node, React and MongoDB Headless CMS and Application Framework",
+  "license": "MIT",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "bin": {
     "payload": "bin.js"
   },
-  "bugs": {
-    "url": "https://github.com/payloadcms/payload"
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./scss": {
+      "import": "./src/exports/scss.scss",
+      "require": "./src/exports/scss.scss",
+      "default": "./src/exports/scss.scss"
+    },
+    "./*": {
+      "import": "./src/exports/*.ts",
+      "require": "./src/exports/*.ts",
+      "types": "./src/exports/*.ts"
+    }
+  },
+  "scripts": {
+    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:components && ts-node -T ./scripts/exportPointerFiles.ts",
+    "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
+    "clean": "rimraf dist",
+    "clean:cache": "rimraf node_modules/.cache",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "dev": "nodemon",
+    "dev:postgres": "cross-env PAYLOAD_DATABASE=postgres nodemon",
+    "fix": "eslint \"src/**/*.ts\" --fix",
+    "lint": "eslint \"src/**/*.ts\"",
+    "pretest": "pnpm build",
+    "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.json",
+    "release:canary": "release-it pre --preReleaseId=canary --npm.tag=canary --config .release-it.pre.json",
+    "release:major": "release-it major",
+    "release:minor": "release-it minor",
+    "release:patch": "release-it patch",
+    "translateNewKeys": "ts-node -T ./scripts/translateNewKeys.ts"
   },
   "dependencies": {
     "@date-io/date-fns": "2.16.0",
@@ -117,7 +153,6 @@
     "webpack-dev-middleware": "6.0.1",
     "webpack-hot-middleware": "2.25.4"
   },
-  "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@release-it/conventional-changelog": "7.0.0",
@@ -192,23 +227,6 @@
     "node": ">=14",
     "pnpm": ">=8"
   },
-  "exports": {
-    ".": {
-      "import": "./src/index.ts",
-      "require": "./src/index.ts",
-      "types": "./src/index.ts"
-    },
-    "./scss": {
-      "import": "./src/exports/scss.scss",
-      "require": "./src/exports/scss.scss",
-      "default": "./src/exports/scss.scss"
-    },
-    "./*": {
-      "import": "./src/exports/*.ts",
-      "require": "./src/exports/*.ts",
-      "types": "./src/exports/*.ts"
-    }
-  },
   "files": [
     "bin.js",
     "dist",
@@ -220,7 +238,6 @@
     "!jest.config.js",
     "!jest.components.config.js"
   ],
-  "homepage": "https://payloadcms.com",
   "keywords": [
     "payload",
     "cms",
@@ -242,16 +259,6 @@
     "react",
     "auth"
   ],
-  "license": "MIT",
-  "main": "./src/index.ts",
-  "maintainers": [
-    {
-      "email": "info@payloadcms.com",
-      "name": "Payload",
-      "url": "https://payloadcms.com"
-    }
-  ],
-  "name": "payload",
   "publishConfig": {
     "access": "public",
     "exports": null,
@@ -259,32 +266,25 @@
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
   },
+  "homepage": "https://payloadcms.com",
+  "author": {
+    "email": "info@payloadcms.com",
+    "name": "Payload",
+    "url": "https://payloadcms.com"
+  },
+  "maintainers": [
+    {
+      "email": "info@payloadcms.com",
+      "name": "Payload",
+      "url": "https://payloadcms.com"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git"
   },
-  "scripts": {
-    "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types && pnpm build:components && ts-node -T ./scripts/exportPointerFiles.ts",
-    "build:components": "webpack --config dist/bundlers/webpack/components.config.js",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "build:watch": "nodemon --watch 'src/**' --ext 'ts,tsx' --exec \"pnpm build:tsc\"",
-    "clean": "rimraf dist",
-    "clean:cache": "rimraf node_modules/.cache",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "dev": "nodemon",
-    "dev:postgres": "cross-env PAYLOAD_DATABASE=postgres nodemon",
-    "fix": "eslint \"src/**/*.ts\" --fix",
-    "lint": "eslint \"src/**/*.ts\"",
-    "pretest": "pnpm build",
-    "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.json",
-    "release:canary": "release-it pre --preReleaseId=canary --npm.tag=canary --config .release-it.pre.json",
-    "release:major": "release-it major",
-    "release:minor": "release-it minor",
-    "release:patch": "release-it patch",
-    "translateNewKeys": "ts-node -T ./scripts/translateNewKeys.ts"
+  "bugs": {
+    "url": "https://github.com/payloadcms/payload"
   },
-  "sideEffects": false,
-  "types": "./src/index.ts",
-  "version": "1.14.0"
+  "sideEffects": false
 }
