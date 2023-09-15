@@ -8,6 +8,11 @@ import { readMigrationFiles } from './readMigrationFiles'
 export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
+
+  payload.logger.debug({
+    msg: `Found ${migrationFiles.length} migration files.`,
+  })
+
   const { existingMigrations } = await getMigrations({ payload })
 
   if (!migrationFiles.length) {

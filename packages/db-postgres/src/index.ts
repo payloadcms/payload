@@ -1,31 +1,32 @@
-import type { Payload } from 'payload'
+import type { Payload } from 'payload';
 
-import { createDatabaseAdapter } from 'payload/database'
-
-import type { Args, PostgresAdapter, PostgresAdapterResult } from './types'
-
-import { connect } from './connect'
-import { createMigration } from './createMigration'
-import { init } from './init'
-import { webpack } from './webpack'
-// import { createGlobal } from './createGlobal';
-// import { createVersion } from './createVersion';
-// import { beginTransaction } from './transactions/beginTransaction';
-// import { rollbackTransaction } from './transactions/rollbackTransaction';
-// import { commitTransaction } from './transactions/commitTransaction';
-// import { queryDrafts } from './queryDrafts';
-import { find } from './find'
 // import { findGlobalVersions } from './findGlobalVersions';
+import { createDatabaseAdapter } from 'payload/database';
+
+import type { Args, PostgresAdapter, PostgresAdapterResult } from './types';
+
+import { connect } from './connect';
 // import { findVersions } from './findVersions';
-import { create } from './create'
-// import { deleteOne } from './deleteOne';
-// import { deleteVersions } from './deleteVersions';
-// import { findGlobal } from './findGlobal';
-import { findOne } from './findOne'
-// import { updateGlobal } from './updateGlobal';
-import { updateOne } from './update'
+import { create } from './create';
+import { createGlobal } from './createGlobal';
+import { createMigration } from './createMigration';
+import { createVersion } from './createVersion';
 // import { updateVersion } from './updateVersion';
-// import { deleteMany } from './deleteMany';
+import { deleteMany } from './deleteMany';
+import { deleteOne } from './deleteOne';
+import { find } from './find';
+// import { deleteVersions } from './deleteVersions';
+import { findGlobal } from './findGlobal';
+import { findOne } from './findOne';
+import { init } from './init';
+import { queryDrafts } from './queryDrafts';
+import { beginTransaction } from './transactions/beginTransaction';
+import { commitTransaction } from './transactions/commitTransaction';
+import { rollbackTransaction } from './transactions/rollbackTransaction';
+import { updateOne } from './update';
+import { updateGlobal } from './updateGlobal';
+import { webpack } from './webpack';
+
 // import { destroy } from './destroy';
 
 export function postgresAdapter(args: Args): PostgresAdapterResult {
@@ -34,36 +35,38 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
     // @ts-expect-error
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
+      beginTransaction,
+      commitTransaction,
+      ...(args.migrationDir && { migrationDir: args.migrationDir }),
       connect,
       create,
+      createGlobal,
       createMigration,
+      // findGlobalVersions,
+      createVersion,
       db: undefined,
+      // destroy,
+      deleteMany,
+      deleteOne,
       enums: {},
       find,
-      // queryDrafts,
+      findGlobal,
       findOne,
-      // destroy,
       init,
       payload,
-      // beginTransaction,
-      // rollbackTransaction,
-      // commitTransaction,
+      queryDrafts,
       relations: {},
+      rollbackTransaction,
+      sessions: {},
       tables: {},
+      updateGlobal,
       updateOne,
-      webpack,
-      // deleteOne,
-      // deleteMany,
-      // findGlobal,
-      // createGlobal,
-      // updateGlobal,
       // findVersions,
-      // findGlobalVersions,
-      // createVersion,
+      webpack,
       // updateVersion,
       // deleteVersions,
-    })
+    });
   }
 
-  return adapter
+  return adapter;
 }

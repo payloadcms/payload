@@ -1,12 +1,10 @@
 /* eslint-disable no-param-reassign */
-import type { SanitizedConfig } from 'payload/config'
-import type { Field } from 'payload/types'
-import type { TypeWithID } from 'payload/types'
+import type { SanitizedConfig } from 'payload/config';
+import type { Field, TypeWithID } from 'payload/types';
 
-import { createBlocksMap } from '../../utilities/createBlocksMap'
-import { createRelationshipMap } from '../../utilities/createRelationshipMap'
-import { mergeLocales } from './mergeLocales'
-import { traverseFields } from './traverseFields'
+import { createBlocksMap } from '../../utilities/createBlocksMap';
+import { createRelationshipMap } from '../../utilities/createRelationshipMap';
+import { traverseFields } from './traverseFields';
 
 type TransformArgs = {
   config: SanitizedConfig
@@ -21,30 +19,31 @@ type TransformArgs = {
 export const transform = <T extends TypeWithID>({
   config,
   data,
-  fallbackLocale,
   fields,
-  locale,
 }: TransformArgs): T => {
-  let relationships: Record<string, Record<string, unknown>[]> = {}
+  let relationships: Record<string, Record<string, unknown>[]> = {};
 
   if ('_relationships' in data) {
-    relationships = createRelationshipMap(data._relationships)
-    delete data._relationships
+    relationships = createRelationshipMap(data._relationships);
+    delete data._relationships;
   }
 
-  const blocks = createBlocksMap(data)
+  const blocks = createBlocksMap(data);
 
-  const dataWithLocales = mergeLocales({ data, fallbackLocale, locale })
-
-  return traverseFields<T>({
+  const result = traverseFields<T>({
     blocks,
     config,
     data,
     fields,
-    locale,
     path: '',
     relationships,
-    siblingData: dataWithLocales,
-    table: dataWithLocales,
-  })
-}
+    siblingData: data,
+    table: data,
+  });
+
+  if ('_locales' in result) {
+    delete result._locales;
+  }
+
+  return result;
+};
