@@ -17,6 +17,9 @@ const databaseAdapters = {
   }),
 }
 
+// TODO: temporary
+process.env.PAYLOAD_DATABASE = 'postgres'
+
 export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<SanitizedConfig> {
   const [name] = process.argv.slice(2)
 

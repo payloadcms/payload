@@ -1,1 +1,1 @@
-exports.postgresAdapter = () => ({})
+exports.postgresAdapter = () => ({});
