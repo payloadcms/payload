@@ -1,11 +1,15 @@
 import { ModalToggler, useModal } from '@faceless-ui/modal'
 import React, { Fragment, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { Link, useHistory } from 'react-router-dom'
 
+import Account from '../../graphics/Account'
 import { useConfig } from '../../utilities/Config'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 import Hamburger from '../Hamburger'
-import { MainMenuDrawer, mainMenuSlug } from '../MainMenu'
+import Localizer from '../Localizer'
+import { MainMenu, mainMenuSlug } from '../MainMenu'
+import StepNav from '../StepNav'
 import './index.scss'
 
 const baseClass = 'nav'
@@ -13,7 +17,12 @@ const baseClass = 'nav'
 const DefaultNav = () => {
   const history = useHistory()
   const { closeModal, isModalOpen } = useModal()
-  const isOpen = isModalOpen(mainMenuSlug)
+  const { t } = useTranslation()
+  const isMainMenuOpen = isModalOpen(mainMenuSlug)
+
+  const {
+    routes: { admin: adminRoute },
+  } = useConfig()
 
   useEffect(
     () =>
@@ -28,8 +37,8 @@ const DefaultNav = () => {
       <header
         className={[
           baseClass,
-          !isOpen && `${baseClass}--show-bg`,
-          isOpen && `${baseClass}--main-menu-open`,
+          !isMainMenuOpen && `${baseClass}--show-bg`,
+          isMainMenuOpen && `${baseClass}--main-menu-open`,
         ]
           .filter(Boolean)
           .join(' ')}
@@ -37,11 +46,24 @@ const DefaultNav = () => {
         <div className={`${baseClass}__bg`} />
         <div className={`${baseClass}__content`}>
           <ModalToggler className={`${baseClass}__modalToggler`} slug={mainMenuSlug}>
-            <Hamburger isActive={isOpen} />
+            <Hamburger isActive={isMainMenuOpen} />
           </ModalToggler>
+          <div className={`${baseClass}__nav-wrapper`}>
+            <StepNav className={`${baseClass}__step-nav`} />
+            <div className={`${baseClass}__controls`}>
+              <Localizer className={`${baseClass}__localizer`} />
+              <Link
+                aria-label={t('authentication:account')}
+                className={`${baseClass}__account`}
+                to={`${adminRoute}/account`}
+              >
+                <Account />
+              </Link>
+            </div>
+          </div>
         </div>
       </header>
-      <MainMenuDrawer />
+      <MainMenu />
     </Fragment>
   )
 }

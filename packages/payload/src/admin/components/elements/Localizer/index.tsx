@@ -3,6 +3,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
+import { Chevron } from '../..'
 import { useConfig } from '../../utilities/Config'
 import { useLocale } from '../../utilities/Locale'
 import { useSearchParams } from '../../utilities/SearchParams'
@@ -11,7 +12,10 @@ import './index.scss'
 
 const baseClass = 'localizer'
 
-const Localizer: React.FC = () => {
+const Localizer: React.FC<{
+  className?: string
+}> = (props) => {
+  const { className } = props
   const config = useConfig()
   const { localization } = config
 
@@ -23,45 +27,51 @@ const Localizer: React.FC = () => {
     const { locales } = localization
 
     return (
-      <div className={baseClass}>
+      <div className={[baseClass, className].filter(Boolean).join(' ')}>
+        <div className={`${baseClass}__label`}>{`${t('locale')}:`}</div>
+        &nbsp;&nbsp;
         <Popup
-          button={locale.label}
+          button={
+            <div className={`${baseClass}__button`}>
+              {`${locale.label}`}
+              <Chevron className={`${baseClass}__chevron`} />
+            </div>
+          }
+          caret={false}
           horizontalAlign="left"
           render={({ close }) => (
-            <div>
-              <span>{t('locales')}</span>
-              <ul>
-                {locales.map((localeOption) => {
-                  const baseLocaleClass = `${baseClass}__locale`
+            <ul>
+              {locales.map((localeOption) => {
+                const baseLocaleClass = `${baseClass}__locale`
 
-                  const localeClasses = [
-                    baseLocaleClass,
-                    locale.code === localeOption.code && `${baseLocaleClass}--active`,
-                  ]
-                    .filter(Boolean)
-                    .join('')
+                const localeClasses = [
+                  baseLocaleClass,
+                  locale.code === localeOption.code && `${baseLocaleClass}--active`,
+                ]
+                  .filter(Boolean)
+                  .join('')
 
-                  const newParams = {
-                    ...searchParams,
-                    locale: localeOption.code,
-                  }
+                const newParams = {
+                  ...searchParams,
+                  locale: localeOption.code,
+                }
 
-                  const search = qs.stringify(newParams)
+                const search = qs.stringify(newParams)
 
-                  if (localeOption.code !== locale.code) {
-                    return (
-                      <li className={localeClasses} key={localeOption.code}>
-                        <Link onClick={close} to={{ search }}>
-                          {localeOption.label}
-                        </Link>
-                      </li>
-                    )
-                  }
+                if (localeOption.code !== locale.code) {
+                  return (
+                    <li className={localeClasses} key={localeOption.code}>
+                      <Link onClick={close} to={{ search }}>
+                        {localeOption.label}
+                        {localeOption.label !== localeOption.code && ` (${localeOption.code})`}
+                      </Link>
+                    </li>
+                  )
+                }
 
-                  return null
-                })}
-              </ul>
-            </div>
+                return null
+              })}
+            </ul>
           )}
           showScrollbar
         />

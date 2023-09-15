@@ -8,7 +8,7 @@ import type { Post } from './config'
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { openMainMenu, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
+import { openDocControls, openMainMenu, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { globalSlug, slug } from './shared'
@@ -145,34 +145,26 @@ describe('admin', () => {
       await page.goto(url.create)
       await page.locator('#field-title').fill(title)
       await page.locator('#field-description').fill(description)
-
       await saveDocAndAssert(page)
-
       await expect(page.locator('#field-title')).toHaveValue(title)
       await expect(page.locator('#field-description')).toHaveValue(description)
     })
 
     test('should read existing', async () => {
       const { id } = await createPost()
-
       await page.goto(url.edit(id))
-
       await expect(page.locator('#field-title')).toHaveValue(title)
       await expect(page.locator('#field-description')).toHaveValue(description)
     })
 
     test('should update existing', async () => {
       const { id } = await createPost()
-
       await page.goto(url.edit(id))
-
       const newTitle = 'new title'
       const newDesc = 'new description'
       await page.locator('#field-title').fill(newTitle)
       await page.locator('#field-description').fill(newDesc)
-
       await saveDocAndAssert(page)
-
       await expect(page.locator('#field-title')).toHaveValue(newTitle)
       await expect(page.locator('#field-description')).toHaveValue(newDesc)
     })
@@ -180,21 +172,19 @@ describe('admin', () => {
     test('should save using hotkey', async () => {
       const { id } = await createPost()
       await page.goto(url.edit(id))
-
       const newTitle = 'new title'
       await page.locator('#field-title').fill(newTitle)
-
       await saveDocHotkeyAndAssert(page)
-
       await expect(page.locator('#field-title')).toHaveValue(newTitle)
     })
 
     test('should delete existing', async () => {
       const { id, title } = await createPost()
       await page.goto(url.edit(id))
+      await openDocControls(page)
       await page.locator('#action-delete').click()
       await page.locator('#confirm-delete').click()
-      await expect(page.locator(`text=Post en "${title}" successfully deleted.`)).toBeVisible()
+      await expect(page.locator(`text=Post "${title}" successfully deleted.`)).toBeVisible()
       expect(page.url()).toContain(url.list)
     })
 
@@ -212,7 +202,7 @@ describe('admin', () => {
       await page.locator('#confirm-delete').click()
 
       await expect(page.locator('.Toastify__toast--success')).toHaveText(
-        'Deleted 3 Posts en successfully.',
+        'Deleted 3 Posts successfully.',
       )
       await expect(page.locator('.collection-list__no-results')).toBeVisible()
     })
@@ -229,9 +219,9 @@ describe('admin', () => {
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
       const options = page.locator('.rs__option')
-      const titleOption = options.locator('text=Title en')
+      const titleOption = options.locator('text=Title')
 
-      await expect(titleOption).toHaveText('Title en')
+      await expect(titleOption).toHaveText('Title')
 
       await titleOption.click()
       const titleInput = page.locator('#field-title')
@@ -240,9 +230,9 @@ describe('admin', () => {
 
       await titleInput.fill(bulkTitle)
 
-      await page.locator('.form-submit button[type="submit"]').click()
+      await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
       await expect(page.locator('.Toastify__toast--success')).toContainText(
-        'Updated 3 Posts en successfully.',
+        'Updated 3 Posts successfully.',
       )
       await expect(page.locator('.row-1 .cell-title')).toContainText(bulkTitle)
       await expect(page.locator('.row-2 .cell-title')).toContainText(bulkTitle)
@@ -409,7 +399,7 @@ describe('admin', () => {
         await createPost({ title: 'post2' })
         await page.goto(`${url.list}?limit=10&page=1&where[or][0][and][0][title][equals]=post1`)
 
-        await expect(page.locator('.react-select--single-value').first()).toContainText('Title en')
+        await expect(page.locator('.react-select--single-value').first()).toContainText('Title')
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
 
@@ -419,7 +409,7 @@ describe('admin', () => {
         // [title][equals]=post1 should be getting transformed into a valid where[or][0][and][0][title][equals]=post1
         await page.goto(`${url.list}?limit=10&page=1&where[title][equals]=post1`)
 
-        await expect(page.locator('.react-select--single-value').first()).toContainText('Title en')
+        await expect(page.locator('.react-select--single-value').first()).toContainText('Title')
         await expect(page.locator(tableRowLocator)).toHaveCount(1)
       })
 
@@ -547,11 +537,11 @@ describe('admin', () => {
           '[id^=list-drawer_1_] .list-drawer__select-collection.react-select',
         )
 
-        // select the "Post en" collection
+        // select the "Post" collection
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post en"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post"',
           )
           .click()
 
@@ -596,11 +586,11 @@ describe('admin', () => {
           )
           .click()
 
-        // select the "Post en" collection
+        // select the "Post" collection
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post en"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post"',
           )
           .click()
 
@@ -628,11 +618,11 @@ describe('admin', () => {
             .first(),
         ).not.toHaveClass('column-selector__column--active')
 
-        // select the "Post en" collection again
+        // select the "Post" collection again
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post en"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post"',
           )
           .click()
 
@@ -762,13 +752,13 @@ describe('admin', () => {
         await page.goto(url.list)
 
         // collection label
-        await expect(page.locator('#nav-posts')).toContainText('Posts en')
+        await expect(page.locator('#nav-posts')).toContainText('Posts')
 
         // global label
-        await expect(page.locator('#nav-global-global')).toContainText('Global en')
+        await expect(page.locator('#nav-global-global')).toContainText('Global')
 
         // view description
-        await expect(page.locator('.view-description')).toContainText('Description en')
+        await expect(page.locator('.view-description')).toContainText('Description')
       })
 
       test('should display translated field titles', async () => {
@@ -776,23 +766,18 @@ describe('admin', () => {
 
         // column controls
         await page.locator('.list-controls__toggle-columns').click()
-        await expect(page.locator('.column-selector__column >> text=Title en')).toHaveText(
-          'Title en',
-        )
+        await expect(page.locator('.column-selector__column >> text=Title')).toHaveText('Title')
 
         // filters
         await page.locator('.list-controls__toggle-where').click()
         await page.locator('.where-builder__add-first-filter').click()
         await page.locator('.condition__field .rs__control').click()
         const options = page.locator('.rs__option')
-        await expect(options.locator('text=Title en')).toHaveText('Title en')
+        await expect(options.locator('text=Title')).toHaveText('Title')
 
         // list columns
-        await expect(page.locator('#heading-title .sort-column__label')).toHaveText('Title en')
-        await expect(page.locator('.search-filter input')).toHaveAttribute(
-          'placeholder',
-          /(Title en)/,
-        )
+        await expect(page.locator('#heading-title .sort-column__label')).toHaveText('Title')
+        await expect(page.locator('.search-filter input')).toHaveAttribute('placeholder', /(Title)/)
       })
 
       test('should use fallback language on field titles', async () => {
@@ -806,9 +791,7 @@ describe('admin', () => {
         await page.goto(url.list)
         await page.locator('.list-controls__toggle-columns').click()
         // expecting the label to fall back to english as default fallbackLng
-        await expect(page.locator('.column-selector__column >> text=Title en')).toHaveText(
-          'Title en',
-        )
+        await expect(page.locator('.column-selector__column >> text=Title')).toHaveText('Title')
       })
     })
   })

@@ -9,7 +9,6 @@ import { getTranslation } from '../../../../utilities/getTranslation'
 import { EntityType, groupNavItems } from '../../../utilities/groupNavItems'
 import Button from '../../elements/Button'
 import Card from '../../elements/Card'
-import Eyebrow from '../../elements/Eyebrow'
 import { Gutter } from '../../elements/Gutter'
 import { useConfig } from '../../utilities/Config'
 import './index.scss'
@@ -70,7 +69,6 @@ const Dashboard: React.FC<Props> = (props) => {
 
   return (
     <div className={baseClass}>
-      <Eyebrow />
       <Gutter className={`${baseClass}__wrap`}>
         {Array.isArray(beforeDashboard) &&
           beforeDashboard.map((Component, i) => <Component key={i} />)}

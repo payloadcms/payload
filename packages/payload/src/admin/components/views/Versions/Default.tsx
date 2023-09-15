@@ -5,9 +5,7 @@ import type { StepNavItem } from '../../elements/StepNav/types'
 import type { Props } from './types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
-import Eyebrow from '../../elements/Eyebrow'
 import { Gutter } from '../../elements/Gutter'
-import IDLabel from '../../elements/IDLabel'
 import { LoadingOverlayToggle } from '../../elements/Loading'
 import Paginator from '../../elements/Paginator'
 import PerPage from '../../elements/PerPage'
@@ -22,7 +20,7 @@ import './index.scss'
 const baseClass = 'versions'
 
 export const DefaultVersionsView: React.FC<Props> = (props) => {
-  const { collection, data, editURL, entityLabel, global, id, isLoadingVersions, versionsData } =
+  const { id, collection, data, editURL, entityLabel, global, isLoadingVersions, versionsData } =
     props
 
   const {
@@ -85,38 +83,37 @@ export const DefaultVersionsView: React.FC<Props> = (props) => {
     setStepNav(nav)
   }, [setStepNav, collection, global, useAsTitle, data, admin, id, editURL, t, i18n])
 
-  let useIDLabel = data[useAsTitle] === data?.id
-  let heading: string
   let metaDesc: string
   let metaTitle: string
 
   if (collection) {
     metaTitle = `${t('versions')} - ${data[useAsTitle]} - ${entityLabel}`
     metaDesc = t('viewingVersions', { documentTitle: data[useAsTitle], entityLabel })
-    heading = data?.[useAsTitle] || `[${t('general:untitled')}]`
   }
 
   if (global) {
     metaTitle = `${t('versions')} - ${entityLabel}`
     metaDesc = t('viewingVersionsGlobal', { entityLabel })
-    heading = entityLabel
-    useIDLabel = false
   }
+
+  const versionCount = versionsData?.totalDocs || 0
 
   return (
     <React.Fragment>
       <LoadingOverlayToggle name="versions" show={isLoadingVersions} />
       <div className={baseClass}>
         <Meta description={metaDesc} title={metaTitle} />
-        <Eyebrow />
         <Gutter className={`${baseClass}__wrap`}>
-          <header className={`${baseClass}__header`}>
-            <div className={`${baseClass}__intro`}>{t('showingVersionsFor')}</div>
-            {useIDLabel && <IDLabel id={data?.id} />}
-            {!useIDLabel && <h1>{heading}</h1>}
-          </header>
-          {versionsData?.totalDocs > 0 && (
+          {versionCount === 0 && (
+            <div className={`${baseClass}__no-versions`}>{t('noFurtherVersionsFound')}</div>
+          )}
+          {versionCount > 0 && (
             <React.Fragment>
+              {/* <div className={`${baseClass}__version-count`}>
+                {t(versionCount === 1 ? 'versionCount_one' : 'versionCount_many', {
+                  count: versionCount,
+                })}
+              </div> */}
               <Table
                 columns={buildVersionColumns(collection, global, t)}
                 data={versionsData?.docs}
@@ -149,9 +146,6 @@ export const DefaultVersionsView: React.FC<Props> = (props) => {
                 )}
               </div>
             </React.Fragment>
-          )}
-          {versionsData?.totalDocs === 0 && (
-            <div className={`${baseClass}__no-versions`}>{t('noFurtherVersionsFound')}</div>
           )}
         </Gutter>
       </div>

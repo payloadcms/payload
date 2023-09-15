@@ -5,15 +5,16 @@
   margin-bottom: base(2);
 
   &__wrap {
-    padding-top: base(1);
+    padding-top: 0;
+    padding-bottom: base(4);
   }
 
   &__header {
-    margin-bottom: $baseline;
+    margin-bottom: var(--base);
   }
 
-  &__intro {
-    margin-bottom: base(0.5);
+  &__no-version {
+    margin-top: calc(var(--base) * 2);
   }
 
   &__parent-doc {

@@ -14,7 +14,7 @@ import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
 import { usePreferences } from '../../utilities/Preferences'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
-import DefaultGlobal from './Default'
+import DefaultGlobalView from './Default'
 
 const GlobalView: React.FC<IndexProps> = (props) => {
   const { state: locationState } = useLocation<{ data?: Record<string, unknown> }>()
@@ -117,7 +117,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   return (
     <RenderCustomComponent
       CustomComponent={CustomEditView}
-      DefaultComponent={DefaultGlobal}
+      DefaultComponent={DefaultGlobalView}
       componentProps={{
         action: `${serverURL}${api}/globals/${slug}?locale=${locale}&fallback-locale=null`,
         apiURL: `${serverURL}${api}/globals/${slug}?locale=${locale}${

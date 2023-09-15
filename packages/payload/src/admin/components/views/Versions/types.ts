@@ -6,6 +6,18 @@ import type { Version } from '../../utilities/DocumentInfo/types'
 export type IndexProps = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
+  id?: string
+}
+
+export type Props = IndexProps & {
+  data: Version
+  editURL: string
+  entityLabel: string
+  fetchURL: string
+  id: string
+  isLoading: boolean
+  isLoadingVersions: boolean
+  versionsData: PaginatedDocs<Version>
 }
 
 export type Props = IndexProps & {

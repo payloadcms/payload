@@ -2,7 +2,6 @@ import React, { Fragment, useEffect } from 'react'
 import { Redirect, useParams } from 'react-router-dom'
 
 import Button from '../../../../../packages/payload/src/admin/components/elements/Button'
-import Eyebrow from '../../../../../packages/payload/src/admin/components/elements/Eyebrow'
 import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
 import { useConfig } from '../../../../../packages/payload/src/admin/components/utilities/Config'
 import { type CustomAdminView } from '../../../../../packages/payload/src/config/types'
@@ -45,7 +44,6 @@ const CustomVersionsView: CustomAdminView = ({ canAccessAdmin, collection, globa
 
   return (
     <Fragment>
-      <Eyebrow />
       <div
         style={{
           paddingLeft: 'var(--gutter-h)',
