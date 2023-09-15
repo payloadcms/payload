@@ -45,23 +45,23 @@ const sanitizeCollection = (
     })
     if (!hasUpdatedAt) {
       sanitized.fields.push({
+        name: 'updatedAt',
         admin: {
           disableBulkEdit: true,
           hidden: true,
         },
         label: translations['general:updatedAt'],
-        name: 'updatedAt',
         type: 'date',
       })
     }
     if (!hasCreatedAt) {
       sanitized.fields.push({
+        name: 'createdAt',
         admin: {
           disableBulkEdit: true,
           hidden: true,
         },
         label: translations['general:createdAt'],
-        name: 'createdAt',
         type: 'date',
       })
     }
@@ -143,7 +143,11 @@ const sanitizeCollection = (
   // /////////////////////////////////
 
   const validRelationships = config.collections.map((c) => c.slug)
-  sanitized.fields = sanitizeFields(sanitized.fields, validRelationships)
+  sanitized.fields = sanitizeFields({
+    config,
+    fields: sanitized.fields,
+    validRelationships,
+  })
 
   return sanitized as SanitizedCollectionConfig
 }

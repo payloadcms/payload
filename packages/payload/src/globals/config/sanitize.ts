@@ -1,5 +1,5 @@
-import type { CollectionConfig } from '../../collections/config/types'
-import type { GlobalConfig, SanitizedGlobalConfig } from './types'
+import type { Config } from '../../config/types'
+import type { SanitizedGlobalConfig } from './types'
 
 import defaultAccess from '../../auth/defaultAccess'
 import sanitizeFields from '../../fields/config/sanitize'
@@ -9,10 +9,9 @@ import translations from '../../translations'
 import { toWords } from '../../utilities/formatLabels'
 import baseVersionFields from '../../versions/baseFields'
 
-const sanitizeGlobals = (
-  collections: CollectionConfig[],
-  globals: GlobalConfig[],
-): SanitizedGlobalConfig[] => {
+const sanitizeGlobals = (config: Config): SanitizedGlobalConfig[] => {
+  const { collections, globals } = config
+
   const sanitizedGlobals = globals.map((global) => {
     const sanitizedGlobal = { ...global }
 
@@ -72,29 +71,33 @@ const sanitizeGlobals = (
     })
     if (!hasUpdatedAt) {
       sanitizedGlobal.fields.push({
+        name: 'updatedAt',
         admin: {
           disableBulkEdit: true,
           hidden: true,
         },
         label: translations['general:updatedAt'],
-        name: 'updatedAt',
         type: 'date',
       })
     }
     if (!hasCreatedAt) {
       sanitizedGlobal.fields.push({
+        name: 'createdAt',
         admin: {
           disableBulkEdit: true,
           hidden: true,
         },
         label: translations['general:createdAt'],
-        name: 'createdAt',
         type: 'date',
       })
     }
 
     const validRelationships = collections.map((c) => c.slug)
-    sanitizedGlobal.fields = sanitizeFields(sanitizedGlobal.fields, validRelationships)
+    sanitizedGlobal.fields = sanitizeFields({
+      config,
+      fields: sanitizedGlobal.fields,
+      validRelationships,
+    })
 
     return sanitizedGlobal as SanitizedGlobalConfig
   })

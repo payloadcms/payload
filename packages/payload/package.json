@@ -213,7 +213,6 @@
     "get-port": "5.1.1",
     "glob": "8.1.0",
     "graphql-request": "3.7.0",
-    "mongodb-memory-server": "8.13.0",
     "node-fetch": "2.6.12",
     "nodemon": "3.0.1",
     "object.assign": "4.1.4",

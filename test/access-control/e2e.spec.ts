@@ -6,6 +6,7 @@ import type { ReadOnlyCollection, RestrictedVersion } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
+import { openMainMenu } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {
@@ -99,6 +100,7 @@ describe('access control', () => {
 
     test('should not show in nav', async () => {
       await page.goto(url.admin)
+      await openMainMenu(page)
       await expect(page.locator('.nav >> a:has-text("Restricteds")')).toHaveCount(0)
     })
 
@@ -137,7 +139,9 @@ describe('access control', () => {
 
     test('should show in nav', async () => {
       await page.goto(url.admin)
-      await expect(page.locator(`.nav a[href="/admin/collections/${readOnlySlug}"]`)).toHaveCount(1)
+      await expect(
+        page.locator(`.main-menu a[href="/admin/collections/${readOnlySlug}"]`),
+      ).toHaveCount(1)
     })
 
     test('should have collection url', async () => {

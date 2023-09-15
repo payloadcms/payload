@@ -1,5 +1,5 @@
-import jwtDecode from 'jwt-decode';
-import { GraphQLClient } from 'graphql-request';
+import { GraphQLClient } from 'graphql-request'
+import jwtDecode from 'jwt-decode'
 
 import type { User } from '../../packages/payload/src/auth'
 
