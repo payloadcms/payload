@@ -61,13 +61,14 @@ export const baseField = joi
   .default()
 
 export const idField = baseField.keys({
-  localized: joi.invalid(true),
   name: joi.string().valid('id'),
+  localized: joi.invalid(true),
   required: joi.not(false, 0).default(true),
   type: joi.string().valid('text', 'number'),
 })
 
 export const text = baseField.keys({
+  name: joi.string().required(),
   admin: baseAdminFields.keys({
     autoComplete: joi.string(),
     placeholder: joi
@@ -78,11 +79,11 @@ export const text = baseField.keys({
   defaultValue: joi.alternatives().try(joi.string(), joi.func()),
   maxLength: joi.number(),
   minLength: joi.number(),
-  name: joi.string().required(),
   type: joi.string().valid('text').required(),
 })
 
 export const number = baseField.keys({
+  name: joi.string().required(),
   admin: baseAdminFields.keys({
     autoComplete: joi.string(),
     placeholder: joi.string(),
@@ -94,11 +95,11 @@ export const number = baseField.keys({
   maxRows: joi.number().when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
   min: joi.number(),
   minRows: joi.number().when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
-  name: joi.string().required(),
   type: joi.string().valid('number').required(),
 })
 
 export const textarea = baseField.keys({
+  name: joi.string().required(),
   admin: baseAdminFields.keys({
     placeholder: joi.string(),
     rows: joi.number(),
@@ -107,11 +108,11 @@ export const textarea = baseField.keys({
   defaultValue: joi.alternatives().try(joi.string(), joi.func()),
   maxLength: joi.number(),
   minLength: joi.number(),
-  name: joi.string().required(),
   type: joi.string().valid('textarea').required(),
 })
 
 export const email = baseField.keys({
+  name: joi.string().required(),
   admin: baseAdminFields.keys({
     autoComplete: joi.string(),
     placeholder: joi.string(),
@@ -119,27 +120,27 @@ export const email = baseField.keys({
   defaultValue: joi.alternatives().try(joi.string(), joi.func()),
   maxLength: joi.number(),
   minLength: joi.number(),
-  name: joi.string().required(),
   type: joi.string().valid('email').required(),
 })
 
 export const code = baseField.keys({
+  name: joi.string().required(),
   admin: baseAdminFields.keys({
     editorOptions: joi.object().unknown(), // Editor['options'] @monaco-editor/react
     language: joi.string(),
   }),
   defaultValue: joi.alternatives().try(joi.string(), joi.func()),
-  name: joi.string().required(),
   type: joi.string().valid('code').required(),
 })
 
 export const json = baseField.keys({
-  defaultValue: joi.alternatives().try(joi.array(), joi.object()),
   name: joi.string().required(),
+  defaultValue: joi.alternatives().try(joi.array(), joi.object()),
   type: joi.string().valid('json').required(),
 })
 
 export const select = baseField.keys({
+  name: joi.string().required(),
   admin: baseAdminFields.keys({
     isClearable: joi.boolean().default(false),
     isSortable: joi.boolean().default(false),
@@ -148,7 +149,6 @@ export const select = baseField.keys({
     .alternatives()
     .try(joi.string().allow(''), joi.array().items(joi.string().allow('')), joi.func()),
   hasMany: joi.boolean().default(false),
-  name: joi.string().required(),
   options: joi
     .array()
     .min(1)
@@ -168,11 +168,11 @@ export const select = baseField.keys({
 })
 
 export const radio = baseField.keys({
+  name: joi.string().required(),
   admin: baseAdminFields.keys({
     layout: joi.string().valid('vertical', 'horizontal'),
   }),
   defaultValue: joi.alternatives().try(joi.string().allow(''), joi.func()),
-  name: joi.string().required(),
   options: joi
     .array()
     .min(1)
@@ -206,6 +206,7 @@ export const collapsible = baseField.keys({
 })
 
 const tab = baseField.keys({
+  name: joi.string().when('localized', { is: joi.exist(), then: joi.required() }),
   description: joi.alternatives().try(joi.string(), componentSchema),
   fields: joi.array().items(joi.link('#field')).required(),
   interfaceName: joi.string().when('name', { not: joi.exist(), then: joi.forbidden() }),
@@ -214,7 +215,6 @@ const tab = baseField.keys({
     .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()]))
     .when('name', { is: joi.not(), then: joi.required() }),
   localized: joi.boolean(),
-  name: joi.string().when('localized', { is: joi.exist(), then: joi.required() }),
   saveToJWT: joi.alternatives().try(joi.boolean(), joi.string()),
 })
 
@@ -229,17 +229,18 @@ export const tabs = baseField.keys({
 })
 
 export const group = baseField.keys({
+  name: joi.string().required(),
   admin: baseAdminFields.keys({
     hideGutter: joi.boolean().default(true),
   }),
   defaultValue: joi.alternatives().try(joi.object(), joi.func()),
   fields: joi.array().items(joi.link('#field')),
   interfaceName: joi.string(),
-  name: joi.string().required(),
   type: joi.string().valid('group').required(),
 })
 
 export const array = baseField.keys({
+  name: joi.string().required(),
   admin: baseAdminFields
     .keys({
       components: baseAdminComponentFields
@@ -262,32 +263,32 @@ export const array = baseField.keys({
   }),
   maxRows: joi.number(),
   minRows: joi.number(),
-  name: joi.string().required(),
   type: joi.string().valid('array').required(),
 })
 
 export const upload = baseField.keys({
+  name: joi.string().required(),
   defaultValue: joi.alternatives().try(joi.object(), joi.func()),
   filterOptions: joi.alternatives().try(joi.object(), joi.func()),
   maxDepth: joi.number(),
-  name: joi.string().required(),
   relationTo: joi.string().required(),
   type: joi.string().valid('upload').required(),
 })
 
 export const checkbox = baseField.keys({
-  defaultValue: joi.alternatives().try(joi.boolean(), joi.func()),
   name: joi.string().required(),
+  defaultValue: joi.alternatives().try(joi.boolean(), joi.func()),
   type: joi.string().valid('checkbox').required(),
 })
 
 export const point = baseField.keys({
-  defaultValue: joi.alternatives().try(joi.array().items(joi.number()).max(2).min(2), joi.func()),
   name: joi.string().required(),
+  defaultValue: joi.alternatives().try(joi.array().items(joi.number()).max(2).min(2), joi.func()),
   type: joi.string().valid('point').required(),
 })
 
 export const relationship = baseField.keys({
+  name: joi.string().required(),
   admin: baseAdminFields.keys({
     allowCreate: joi.boolean().default(true),
     isSortable: joi.boolean().default(false),
@@ -306,12 +307,12 @@ export const relationship = baseField.keys({
     .when('hasMany', { is: joi.not(true), then: joi.forbidden() })
     .warning('deprecated', { message: 'Use minRows instead.' }),
   minRows: joi.number().when('hasMany', { is: joi.not(true), then: joi.forbidden() }),
-  name: joi.string().required(),
   relationTo: joi.alternatives().try(joi.string().required(), joi.array().items(joi.string())),
   type: joi.string().valid('relationship').required(),
 })
 
 export const blocks = baseField.keys({
+  name: joi.string().required(),
   blocks: joi
     .array()
     .items(
@@ -346,23 +347,23 @@ export const blocks = baseField.keys({
   }),
   maxRows: joi.number(),
   minRows: joi.number(),
-  name: joi.string().required(),
   type: joi.string().valid('blocks').required(),
 })
 
 export const richText = baseField.keys({
+  name: joi.string().required(),
   admin: baseAdminFields.default(),
   defaultValue: joi.alternatives().try(joi.array().items(joi.object()), joi.func()),
   editor: joi.object().keys({
-    CellComponent: componentSchema,
-    FieldComponent: componentSchema,
-    afterReadPromise: joi.func(),
+    CellComponent: componentSchema.required(),
+    FieldComponent: componentSchema.required(),
+    afterReadPromise: joi.func().required(),
   }),
-  name: joi.string().required(),
   type: joi.string().valid('richText').required(),
 })
 
 export const date = baseField.keys({
+  name: joi.string().required(),
   admin: baseAdminFields.keys({
     date: joi.object({
       displayFormat: joi.string(),
@@ -378,11 +379,11 @@ export const date = baseField.keys({
     placeholder: joi.string(),
   }),
   defaultValue: joi.alternatives().try(joi.string(), joi.func()),
-  name: joi.string().required(),
   type: joi.string().valid('date').required(),
 })
 
 export const ui = joi.object().keys({
+  name: joi.string().required(),
   admin: joi
     .object()
     .keys({
@@ -400,7 +401,6 @@ export const ui = joi.object().keys({
     .default(),
   custom: joi.object().pattern(joi.string(), joi.any()),
   label: joi.alternatives().try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
-  name: joi.string().required(),
   type: joi.string().valid('ui').required(),
 })
 

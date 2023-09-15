@@ -397,7 +397,7 @@ export type RelationshipValue =
 
 export type RichTextField<AdapterProps = unknown> = FieldBase & {
   admin?: Admin
-  editor: RichTextAdapter<AdapterProps>
+  editor?: RichTextAdapter<AdapterProps>
   type: 'richText'
 } & AdapterProps
 

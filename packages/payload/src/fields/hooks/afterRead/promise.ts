@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+import type { RichTextAdapter } from '../../../admin/components/forms/field-types/RichText/types'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
 import type { Field, TabAsField } from '../../config/types'
 
@@ -127,8 +128,9 @@ export const promise = async ({
     }
 
     case 'richText': {
-      if (field?.editor?.afterReadPromise) {
-        const afterReadPromise = field.editor.afterReadPromise({
+      const editor: RichTextAdapter = field?.editor || req?.payload?.config?.defaultEditor
+      if (editor?.afterReadPromise) {
+        const afterReadPromise = editor.afterReadPromise({
           currentDepth,
           depth,
           field,
@@ -217,9 +219,9 @@ export const promise = async ({
       const result = overrideAccess
         ? true
         : await field.access.read({
+            id: doc.id as number | string,
             data: doc,
             doc,
-            id: doc.id as number | string,
             req,
             siblingData: siblingDoc,
           })

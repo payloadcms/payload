@@ -1,7 +1,5 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
-import { createSlate } from '../../../packages/richtext-slate/src'
-
 export const Posts: CollectionConfig = {
   slug: 'posts',
   labels: {
@@ -43,7 +41,6 @@ export const Posts: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
-      editor: createSlate({}),
       localized: true,
     },
   ],

@@ -91,7 +91,6 @@ const RichTextFields: CollectionConfig = {
                   {
                     name: 'caption',
                     type: 'richText',
-                    editor: createSlate({}),
                   },
                 ],
               },
@@ -139,7 +138,6 @@ const RichTextFields: CollectionConfig = {
                   {
                     name: 'caption',
                     type: 'richText',
-                    editor: createSlate({}),
                   },
                 ],
               },
@@ -192,7 +190,6 @@ const RichTextFields: CollectionConfig = {
                   {
                     name: 'caption',
                     type: 'richText',
-                    editor: createSlate({}),
                   },
                 ],
               },
@@ -220,7 +217,6 @@ const RichTextFields: CollectionConfig = {
             {
               name: 'text',
               type: 'richText',
-              editor: createSlate({}),
             },
           ],
         },

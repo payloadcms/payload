@@ -18,6 +18,7 @@ import { DateTimeResolver, EmailAddressResolver } from 'graphql-scalars'
 /* eslint-disable no-use-before-define */
 import { GraphQLJSON } from 'graphql-type-json'
 
+import type { RichTextAdapter } from '../../admin/components/forms/field-types/RichText/types'
 import type {
   ArrayField,
   BlockField,
@@ -78,10 +79,10 @@ type Args = {
 }
 
 function buildObjectType({
+  name,
   baseFields = {},
   fields,
   forceNullable,
-  name,
   parentName,
   payload,
 }: Args): GraphQLObjectType {
@@ -93,9 +94,9 @@ function buildObjectType({
       if (!payload.types.arrayTypes[interfaceName]) {
         // eslint-disable-next-line no-param-reassign
         payload.types.arrayTypes[interfaceName] = buildObjectType({
+          name: interfaceName,
           fields: field.fields,
           forceNullable: isFieldNullable(field, forceNullable),
-          name: interfaceName,
           parentName: interfaceName,
           payload,
         })
@@ -115,6 +116,7 @@ function buildObjectType({
             block?.interfaceName || block?.graphQL?.singularName || toWords(block.slug, true)
           // eslint-disable-next-line no-param-reassign
           payload.types.blockTypes[block.slug] = buildObjectType({
+            name: interfaceName,
             fields: [
               ...block.fields,
               {
@@ -123,7 +125,6 @@ function buildObjectType({
               },
             ],
             forceNullable,
-            name: interfaceName,
             parentName: interfaceName,
             payload,
           })
@@ -178,9 +179,9 @@ function buildObjectType({
       if (!payload.types.groupTypes[interfaceName]) {
         // eslint-disable-next-line no-param-reassign
         payload.types.groupTypes[interfaceName] = buildObjectType({
+          name: interfaceName,
           fields: field.fields,
           forceNullable: isFieldNullable(field, forceNullable),
-          name: interfaceName,
           parentName: interfaceName,
           payload,
         })
@@ -257,6 +258,7 @@ function buildObjectType({
         const types = relationTo.map((relation) => payload.collections[relation].graphQL.type)
 
         type = new GraphQLObjectType({
+          name: `${relationshipName}_Relationship`,
           fields: {
             relationTo: {
               type: relationToType,
@@ -271,7 +273,6 @@ function buildObjectType({
               }),
             },
           },
-          name: `${relationshipName}_Relationship`,
         })
       } else {
         ;({ type } = payload.collections[relationTo].graphQL)
@@ -426,9 +427,10 @@ function buildObjectType({
         async resolve(parent, args, context) {
           let depth = payload.config.defaultDepth
           if (typeof args.depth !== 'undefined') depth = args.depth
+          const editor: RichTextAdapter = field?.editor || payload?.config?.defaultEditor
 
-          if (field?.editor?.afterReadPromise) {
-            await field?.editor?.afterReadPromise({
+          if (editor?.afterReadPromise) {
+            await editor?.afterReadPromise({
               depth,
               field,
               req: context.req,
@@ -473,9 +475,9 @@ function buildObjectType({
           if (!payload.types.tabTypes[interfaceName]) {
             // eslint-disable-next-line no-param-reassign
             payload.types.tabTypes[interfaceName] = buildObjectType({
+              name: interfaceName,
               fields: tab.fields,
               forceNullable,
-              name: interfaceName,
               parentName: interfaceName,
               payload,
             })
@@ -580,6 +582,7 @@ function buildObjectType({
   }
 
   const objectSchema = {
+    name,
     fields: () =>
       fields.reduce((objectTypeConfig, field) => {
         const fieldSchema = fieldToSchemaMap[field.type]
@@ -593,7 +596,6 @@ function buildObjectType({
           ...fieldSchema(objectTypeConfig, field),
         }
       }, baseFields),
-    name,
   }
 
   const newlyCreatedBlockType = new GraphQLObjectType(objectSchema)

@@ -1,8 +1,6 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 import type { Field } from '../../../../packages/payload/src/fields/config/types'
 
-import { createSlate } from '../../../../packages/richtext-slate/src'
-
 export const blocksFieldSeedData = [
   {
     blockName: 'First block',
@@ -58,7 +56,6 @@ export const blocksField: Field = {
         {
           name: 'richText',
           type: 'richText',
-          editor: createSlate({}),
         },
       ],
     },
