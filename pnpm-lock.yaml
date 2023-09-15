@@ -66,26 +66,23 @@ importers:
         specifier: 3.1.2
         version: 3.1.2
       mongodb-memory-server:
-        specifier: 8.13.0
-        version: 8.13.0
+        specifier: 8.12.2
+        version: 8.12.2
       node-fetch:
         specifier: 2.6.12
         version: 2.6.12
       prettier:
         specifier: ^3.0.3
         version: 3.0.3
-<<<<<<< HEAD
       qs:
         specifier: 6.11.2
         version: 6.11.2
       react:
         specifier: 18.2.0
         version: 18.2.0
-=======
       rimraf:
         specifier: 3.0.2
         version: 3.0.2
->>>>>>> dd0514bd2cd312dbbc01ec8f018ff575bb93182f
       shelljs:
         specifier: 0.8.5
         version: 0.8.5
@@ -10375,6 +10372,29 @@ packages:
       '@types/whatwg-url': 8.2.2
       whatwg-url: 11.0.0
 
+  /mongodb-memory-server-core@8.12.2:
+    resolution: {integrity: sha512-bls+lroejnhbZTOm5KHtxtf9PK6xASEAsCvZCPoXrNk1f10p0jDw7Xb4GUqVi0ZuVmuLZBNgmzYeHmb3WUgvLg==}
+    engines: {node: '>=12.22.0'}
+    dependencies:
+      async-mutex: 0.3.2
+      camelcase: 6.3.0
+      debug: 4.3.4
+      find-cache-dir: 3.3.2
+      get-port: 5.1.1
+      https-proxy-agent: 5.0.1
+      md5-file: 5.0.0
+      mongodb: 4.17.1
+      new-find-package-json: 2.0.0
+      semver: 7.5.4
+      tar-stream: 2.2.0
+      tslib: 2.6.2
+      uuid: 9.0.0
+      yauzl: 2.10.0
+    transitivePeerDependencies:
+      - aws-crt
+      - supports-color
+    dev: true
+
   /mongodb-memory-server-core@8.13.0:
     resolution: {integrity: sha512-4NTOzYOlRUilwb8CxOKix/XbZmac4cLpmEU03eaHx90lgEp+ARZM2PQtIOEg3nhHo97r9THIEv6Gs4LECokp0Q==}
     engines: {node: '>=12.22.0'}
@@ -10393,6 +10413,18 @@ packages:
       tslib: 2.6.2
       uuid: 9.0.0
       yauzl: 2.10.0
+    transitivePeerDependencies:
+      - aws-crt
+      - supports-color
+    dev: true
+
+  /mongodb-memory-server@8.12.2:
+    resolution: {integrity: sha512-WM3uJnKWqhJxu3LlHfvRXRrhc+kiEGdGDHMrAG0N1E2fWbRlvSnUKau7Jdcf7cIA5HlRC/K8uVe0DCym45KfAA==}
+    engines: {node: '>=12.22.0'}
+    requiresBuild: true
+    dependencies:
+      mongodb-memory-server-core: 8.12.2
+      tslib: 2.6.2
     transitivePeerDependencies:
       - aws-crt
       - supports-color

@@ -3,14 +3,13 @@ import type { SanitizedCollectionConfig } from '../../collections/config/types'
 import type { Field, FieldAffectingData } from '../../fields/config/types'
 import type { SanitizedGlobalConfig } from '../../globals/config/types'
 /* eslint-disable no-await-in-loop */
-import type { Operator, PayloadRequest, Where } from '../../types'
+import type { Operator, PayloadRequest, Where, WhereField } from '../../types'
 import type { EntityPolicies } from './types'
 
 import QueryError from '../../errors/QueryError'
 import { validOperators } from '../../types/constants'
 import deepCopyObject from '../../utilities/deepCopyObject'
 import flattenFields from '../../utilities/flattenTopLevelFields'
-import flattenWhereToOperators from '../flattenWhereToOperators'
 import { validateSearchParam } from './validateSearchParams'
 
 type Args = {
@@ -30,6 +29,16 @@ type Args = {
       globalConfig: SanitizedGlobalConfig
     }
 )
+
+const flattenWhere = (query: Where): WhereField[] =>
+  Object.entries(query).reduce((flattenedConstraints, [key, val]) => {
+    if ((key === 'and' || key === 'or') && Array.isArray(val)) {
+      return [...flattenedConstraints, ...val.map((subVal) => flattenWhere(subVal))]
+    }
+
+    return [...flattenedConstraints, { [key]: val }]
+  }, [])
+
 export async function validateQueryPaths({
   collectionConfig,
   errors = [],
@@ -47,8 +56,7 @@ export async function validateQueryPaths({
     versionFields || (globalConfig || collectionConfig).fields,
   ) as FieldAffectingData[]
   if (typeof where === 'object') {
-    // const flattenedWhere = flattenWhere(where);
-    const whereFields = flattenWhereToOperators(where)
+    const whereFields = flattenWhere(where)
     // We need to determine if the whereKey is an AND, OR, or a schema path
     const promises = []
     whereFields.map(async (constraint) => {
