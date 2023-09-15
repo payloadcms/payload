@@ -112,4 +112,4 @@ jobs:
             NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
         - name: Build
-          run: pnpm --filter db-mongodb run build
+          run: turbo run build --filter=db-mongodb
