@@ -106,5 +106,10 @@ jobs:
             restore-keys: |
               ${{ runner.os }}-pnpm-store-
 
+        - name: Install dependencies
+          run: pnpm install
+          env:
+            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
         - name: Build
           run: pnpm --filter db-mongodb run build
