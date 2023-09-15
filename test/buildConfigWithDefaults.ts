@@ -1,10 +1,10 @@
-import path from 'path'
+import path from 'path';
 
-import type { Config, SanitizedConfig } from '../packages/payload/src/config/types'
+import type { Config, SanitizedConfig } from '../packages/payload/src/config/types';
 
-import { mongooseAdapter } from '../packages/db-mongodb/src/index'
-import { postgresAdapter } from '../packages/db-postgres/src/index'
-import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
+import { mongooseAdapter } from '../packages/db-mongodb/src/index';
+import { postgresAdapter } from '../packages/db-postgres/src/index';
+import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build';
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({
@@ -16,9 +16,6 @@ const databaseAdapters = {
     },
   }),
 }
-
-// TODO: temporary
-process.env.PAYLOAD_DATABASE = 'postgres';
 
 export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<SanitizedConfig> {
   const [name] = process.argv.slice(2)
