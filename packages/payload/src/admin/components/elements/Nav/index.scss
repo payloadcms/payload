@@ -6,6 +6,9 @@
   width: 100%;
   height: calc(var(--base) * 3);
   z-index: $z-status;
+  // TODO: remove this once the nav has been refactored
+  // eventually it will contain nav items with click events
+  pointer-events: none;
 
   &__bg {
     @include blur-bg;
@@ -15,10 +18,23 @@
     top: 0;
     width: 100%;
     height: 100%;
+    pointer-events: none;
   }
 
   &--show-bg {
     opacity: 1;
+  }
+
+  // when the modal is open, the nav overlays the top portion
+  // we need to make sure the modal content is clickable
+  // so we disable pointer events on the nav
+  // but reenable them on the modal toggler
+  &--main-menu-open {
+    pointer-events: none;
+
+    .nav__modalToggler {
+      pointer-events: all;
+    }
   }
 
   &__content {
@@ -31,6 +47,7 @@
   }
 
   &__modalToggler {
+    pointer-events: all;
     background-color: transparent;
     border: 0;
     padding: 0;

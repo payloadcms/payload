@@ -21,20 +21,11 @@ $transTime: 200ms;
   &__content {
     padding: base(1) 0 base(2);
     position: relative;
-    width: 100%;
     opacity: 0;
     transform: translateX(calc(var(--base) * -1));
     transition: transform $transTime linear;
-
-    &::after {
-      position: absolute;
-      top: 0;
-      left: 100%;
-      height: 100%;
-      width: calc(var(--base) * 4);
-      content: ' ';
-      background: linear-gradient(to right, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0) 100%);
-    }
+    overflow: auto;
+    width: 50%;
   }
 
   &__content-children {
@@ -56,11 +47,22 @@ $transTime: 200ms;
     will-change: opacity;
     transition: none;
     transition-delay: 0ms;
-    width: 50%;
+    flex-grow: 1;
+    flex-shrink: 1;
 
     &:active,
     &:focus {
       outline: 0;
+    }
+
+    &::before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: calc(var(--base) * 4);
+      content: ' ';
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0) 100%);
     }
   }
 
