@@ -1,17 +1,15 @@
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 import type { EntityToGroup, Group } from '../../../utilities/groupNavItems'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
 import { EntityType, groupNavItems } from '../../../utilities/groupNavItems'
-import Account from '../../graphics/Account'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { Gutter } from '../Gutter'
-import Localizer from '../Localizer'
 import Logout from '../Logout'
 import NavGroup from './NavGroup'
 import './index.scss'
@@ -20,7 +18,7 @@ const baseClass = 'main-menu'
 
 export const mainMenuSlug = 'main-menu'
 
-export const MainMenuDrawer: React.FC = () => {
+export const MainMenu: React.FC = () => {
   const { permissions, user } = useAuth()
   const { closeModal, modalState } = useModal()
 
@@ -129,14 +127,6 @@ export const MainMenuDrawer: React.FC = () => {
           {Array.isArray(afterNavLinks) &&
             afterNavLinks.map((Component, i) => <Component key={i} />)}
           <div className={`${baseClass}__controls`}>
-            <Localizer />
-            <Link
-              aria-label={t('authentication:account')}
-              className={`${baseClass}__account`}
-              to={`${admin}/account`}
-            >
-              <Account />
-            </Link>
             <Logout />
           </div>
         </Gutter>
@@ -144,7 +134,7 @@ export const MainMenuDrawer: React.FC = () => {
       <button
         aria-label={t('close')}
         className={`${baseClass}__close`}
-        id={`close-drawer__${mainMenuSlug}`}
+        id={`close__${mainMenuSlug}`}
         onClick={() => closeModal(mainMenuSlug)}
         type="button"
       />

@@ -11,6 +11,7 @@ import DemoUIFieldField from './components/DemoUIField/Field'
 import Logout from './components/Logout'
 import CustomDefaultRoute from './components/routes/CustomDefault'
 import CustomMinimalRoute from './components/routes/CustomMinimal'
+import CustomDefaultView from './components/views/CustomDefault'
 import CustomEditView from './components/views/CustomEdit'
 import CustomVersionsView from './components/views/CustomVersions'
 import CustomView from './components/views/CustomView'
@@ -60,10 +61,16 @@ export default buildConfigWithDefaults({
       },
     },
   },
+  localization: {
+    locales: ['en', 'es'],
+  },
   collections: [
     {
       slug: 'users',
       auth: true,
+      admin: {
+        useAsTitle: 'email',
+      },
       fields: [],
     },
     {
@@ -80,30 +87,20 @@ export default buildConfigWithDefaults({
     },
     {
       slug,
-      labels: {
-        singular: {
-          en: 'Post en',
-          es: 'Post es',
-        },
-        plural: {
-          en: 'Posts en',
-          es: 'Posts es',
-        },
-      },
       admin: {
-        description: { en: 'Description en', es: 'Description es' },
+        description: 'Description',
         listSearchableFields: ['title', 'description', 'number'],
-        group: { en: 'One', es: 'Una' },
+        group: 'One',
         useAsTitle: 'title',
         defaultColumns: ['id', 'number', 'title', 'description', 'demoUIField'],
+        preview: () => 'https://payloadcms.com',
+      },
+      versions: {
+        drafts: true,
       },
       fields: [
         {
           name: 'title',
-          label: {
-            en: 'Title en',
-            es: 'Title es',
-          },
           type: 'text',
         },
         {
@@ -124,7 +121,7 @@ export default buildConfigWithDefaults({
         {
           type: 'ui',
           name: 'demoUIField',
-          label: { en: 'Demo UI Field', de: 'Demo UI Field de' },
+          label: 'Demo UI Field',
           admin: {
             components: {
               Field: DemoUIFieldField,
@@ -140,6 +137,8 @@ export default buildConfigWithDefaults({
       admin: {
         components: {
           views: {
+            // This will override the entire Edit view including all nested views, i.e. `/edit/:id/*`
+            // To override one specific nested view, use the nested view's slug as the key
             Edit: CustomEditView,
           },
         },
@@ -158,7 +157,8 @@ export default buildConfigWithDefaults({
         components: {
           views: {
             Edit: {
-              Default: CustomEditView,
+              // This will override one specific nested view within the `/edit/:id` route, i.e. `/edit/:id/versions`
+              Default: CustomDefaultView,
               Versions: CustomVersionsView,
               MyCustomView: {
                 path: '/custom',
@@ -179,7 +179,7 @@ export default buildConfigWithDefaults({
     {
       slug: 'group-one-collection-ones',
       admin: {
-        group: { en: 'One', es: 'Una' },
+        group: 'One',
       },
       fields: [
         {
@@ -191,7 +191,7 @@ export default buildConfigWithDefaults({
     {
       slug: 'group-one-collection-twos',
       admin: {
-        group: { en: 'One', es: 'Una' },
+        group: 'One',
       },
       fields: [
         {
@@ -249,12 +249,11 @@ export default buildConfigWithDefaults({
     },
     {
       slug: globalSlug,
-      label: {
-        en: 'Global en',
-        es: 'Global es',
-      },
       admin: {
         group: 'Group',
+      },
+      versions: {
+        drafts: true,
       },
       fields: [
         {
@@ -288,7 +287,7 @@ export default buildConfigWithDefaults({
         components: {
           views: {
             Edit: {
-              Default: CustomEditView,
+              Default: CustomDefaultView,
               Versions: CustomVersionsView,
               MyCustomView: {
                 path: '/custom',

@@ -11,7 +11,6 @@ import { fieldAffectsData } from '../../../../fields/config/types'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
 import { formatDate } from '../../../utilities/formatDate'
-import Eyebrow from '../../elements/Eyebrow'
 import { Gutter } from '../../elements/Gutter'
 import { useStepNav } from '../../elements/StepNav'
 import { useAuth } from '../../utilities/Auth'
@@ -197,7 +196,6 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
     <React.Fragment>
       <div className={baseClass}>
         <Meta description={metaDesc} title={metaTitle} />
-        <Eyebrow />
         <Gutter className={`${baseClass}__wrap`}>
           <div className={`${baseClass}__intro`}>
             {t('versionCreatedOn', { version: t(doc?.autosave ? 'autosavedVersion' : 'version') })}

@@ -15,6 +15,7 @@ const Popup: React.FC<Props> = (props) => {
     button,
     buttonClassName,
     buttonType = 'default',
+    caret = true,
     children,
     className,
     color = 'light',
@@ -157,7 +158,12 @@ const Popup: React.FC<Props> = (props) => {
         )}
       </div>
 
-      <div className={`${baseClass}__content`} ref={contentRef}>
+      <div
+        className={[`${baseClass}__content`, caret && `${baseClass}__content--caret`]
+          .filter(Boolean)
+          .join(' ')}
+        ref={contentRef}
+      >
         <div className={`${baseClass}__wrap`} ref={intersectionRef}>
           <div
             className={`${baseClass}__scroll`}
