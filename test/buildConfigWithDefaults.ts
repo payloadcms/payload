@@ -2,8 +2,8 @@ import path from 'path'
 
 import type { Config, SanitizedConfig } from '../packages/payload/src/config/types'
 
-import viteBundler from '../packages/bundler-vite/src'
-// import webpackBundler from '../packages/bundler-webpack/src'
+// import viteBundler from '../packages/bundler-vite/src'
+import webpackBundler from '../packages/bundler-webpack/src'
 import { mongooseAdapter } from '../packages/db-mongodb/src/index'
 import { postgresAdapter } from '../packages/db-postgres/src/index'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
@@ -41,7 +41,8 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             password: 'test',
           },
     ...(config.admin || {}),
-    bundler: viteBundler(),
+    // bundler: viteBundler(),
+    bundler: webpackBundler(),
     webpack: (webpackConfig) => {
       const existingConfig =
         typeof testConfig?.admin?.webpack === 'function'
