@@ -2,7 +2,8 @@ import path from 'path'
 
 import type { Config, SanitizedConfig } from '../packages/payload/src/config/types'
 
-import webpackBundler from '../packages/bundler-webpack/src'
+import viteBundler from '../packages/bundler-vite/src'
+// import webpackBundler from '../packages/bundler-webpack/src'
 import { mongooseAdapter } from '../packages/db-mongodb/src/index'
 import { postgresAdapter } from '../packages/db-postgres/src/index'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
@@ -40,7 +41,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             password: 'test',
           },
     ...(config.admin || {}),
-    bundler: webpackBundler(),
+    bundler: viteBundler(),
     webpack: (webpackConfig) => {
       const existingConfig =
         typeof testConfig?.admin?.webpack === 'function'
@@ -63,11 +64,11 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             ...existingConfig.resolve?.alias,
             [path.resolve(__dirname, '../packages/db-postgres/src/index')]: path.resolve(
               __dirname,
-              '../packages/db-postgres/src/mock',
+              '../packages/db-postgres/src/mock.js',
             ),
             [path.resolve(__dirname, '../packages/db-mongodb/src/index')]: path.resolve(
               __dirname,
-              '../packages/db-mongodb/src/mock',
+              '../packages/db-mongodb/src/mock.js',
             ),
             '@payloadcms/db-mongodb': path.resolve(__dirname, '../packages/db-mongodb/src/mock'),
             '@payloadcms/db-postgres': path.resolve(__dirname, '../packages/db-postgres/src/mock'),

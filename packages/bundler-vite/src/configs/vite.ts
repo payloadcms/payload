@@ -18,10 +18,9 @@ logger.warn = (msg, options) => {
   originalWarning(msg, options)
 }
 
-const bundlerPath = path.resolve(__dirname, '../bundler')
-const mockModulePath = path.resolve(__dirname, '../../mocks/emptyModule.js')
-const mockDotENVPath = path.resolve(__dirname, '../../mocks/dotENV.js')
-const relativeAdminPath = path.resolve(__dirname, '../../../admin')
+const bundlerPath = path.resolve(__dirname, '../')
+const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js')
+const mockDotENVPath = path.resolve(__dirname, '../mocks/dotENV.js')
 
 export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<InlineConfig> => {
   const hmrPort = await getPort()
@@ -69,12 +68,12 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       include: [
         'payload/**/*.tsx',
         'payload/**/*.ts',
-        'slate',
-        'slate-react',
-        'slate-history',
-        'is-hotkey',
-        'slate-hyperscript',
-        '@monaco-editor/react',
+        // 'slate',
+        // 'slate-react',
+        // 'slate-history',
+        // 'is-hotkey',
+        // 'slate-hyperscript',
+        // '@monaco-editor/react',
       ],
     },
     server: {
@@ -90,6 +89,8 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       __dirname: '""',
       'module.hot': 'undefined',
       'process.env': '{}',
+      'process.cwd': '() => ""',
+      'process.argv': '[]',
     },
     plugins: [
       {
@@ -120,19 +121,19 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       }),
       react(),
       // viteCommonJS(),
-      {
-        name: 'init-admin-panel',
-        transformIndexHtml(html) {
-          const indexFile = process.env.PAYLOAD_DEV_MODE === 'true' ? 'index.tsx' : 'index.js'
+      // {
+      //   name: 'init-admin-panel',
+      //   transformIndexHtml(html) {
+      //     const indexFile = process.env.PAYLOAD_DEV_MODE === 'true' ? 'index.tsx' : 'index.js'
 
-          if (html.includes(`/${indexFile}`)) return html
+      //     if (html.includes(`/${indexFile}`)) return html
 
-          return html.replace(
-            '</body>',
-            `<script> var exports = {}; </script></script><script type="module" src="${payloadConfig.routes.admin}/${indexFile}"></script></body>`,
-          )
-        },
-      },
+      //     return html.replace(
+      //       '</body>',
+      //       `<script> var exports = {}; </script></script><script type="module" src="${payloadConfig.routes.admin}/${indexFile}"></script></body>`,
+      //     )
+      //   },
+      // },
     ],
     build: {
       outDir: payloadConfig.admin.buildPath,
@@ -156,12 +157,12 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
           scss({
             output: path.resolve(payloadConfig.admin.buildPath, 'styles.css'),
             outputStyle: 'compressed',
-            include: [`${relativeAdminPath}/**/*.scss`],
+            // include: [`${relativeAdminPath}/**/*.scss`],
           }),
         ],
         treeshake: true,
         input: {
-          main: path.resolve(__dirname, relativeAdminPath),
+          main: path.resolve(__dirname, '../index.html'),
         },
       },
     },
