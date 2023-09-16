@@ -5,6 +5,7 @@ import { Route } from 'react-router-dom'
 
 import type { GlobalPermission, User } from '../../../../../auth'
 import type { SanitizedGlobalConfig } from '../../../../../exports/types'
+import type { globalViewType } from './CustomComponent'
 
 import Unauthorized from '../../Unauthorized'
 
@@ -19,7 +20,16 @@ export const globalCustomRoutes = (props: {
   const { global, match, permissions, user } = props
 
   let customViews = []
-  const internalViews = ['Default', 'Versions']
+
+  const internalViews: globalViewType[] = [
+    'Default',
+    'LivePreview',
+    'Version',
+    'Versions',
+    'Relationships',
+    'References',
+    'API',
+  ]
 
   const BaseEdit = global?.admin?.components?.views?.Edit
 
@@ -29,7 +39,7 @@ export const globalCustomRoutes = (props: {
         // Remove internal views from the list of custom views
         // This way we can easily iterate over the remaining views
         return Boolean(
-          !internalViews.includes(viewKey) &&
+          !internalViews.includes(viewKey as any) &&
             typeof view !== 'function' &&
             typeof view === 'object',
         )

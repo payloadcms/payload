@@ -5,10 +5,10 @@ import { useStepNav } from '../../../../../packages/payload/src/admin/components
 import { useConfig } from '../../../../../packages/payload/src/admin/components/utilities/Config'
 import { type CustomAdminView } from '../../../../../packages/payload/src/config/types'
 
-const CustomVersionsView: CustomAdminView = ({
+const CustomDefaultView: CustomAdminView = ({
   canAccessAdmin,
   // collection,
-  // global,
+  //  global,
   user,
 }) => {
   const {
@@ -23,7 +23,7 @@ const CustomVersionsView: CustomAdminView = ({
   useEffect(() => {
     setStepNav([
       {
-        label: 'Custom Versions View',
+        label: 'Custom Default View',
       },
     ])
   }, [setStepNav])
@@ -43,30 +43,32 @@ const CustomVersionsView: CustomAdminView = ({
           paddingRight: 'var(--gutter-h)',
         }}
       >
-        <h1>Custom Versions View</h1>
-        <p>This custom Versions view was added through one of the following Payload configs:</p>
+        <h1>Custom Default View</h1>
+        <p>This custom Default view was added through one of the following Payload configs:</p>
         <ul>
           <li>
-            <code>components.views.Edit.Versions</code>
+            <code>components.views.Edit.Default</code>
             <p>
-              {'This allows you to override only the Versions edit view specifically, but '}
+              {'This allows you to override only the default edit view specifically, but '}
               <b>
                 <em>not</em>
               </b>
-              {' any other views. The document header will render above this component.'}
+              {
+                ' any nested views like versions, etc. The document header will render above this component.'
+              }
             </p>
           </li>
           <li>
-            <code>components.views.Edit.Versions.Component</code>
+            <code>components.views.Edit.Default.Component</code>
+            <p>
+              This is the most granular override, allowing you to override only the Default
+              component, or any of its other properties like path and label.
+            </p>
           </li>
-          <p>
-            This is the most granular override, allowing you to override only the Versions
-            component, or any of its other properties like path and label.
-          </p>
         </ul>
       </div>
     </Fragment>
   )
 }
 
-export default CustomVersionsView
+export default CustomDefaultView

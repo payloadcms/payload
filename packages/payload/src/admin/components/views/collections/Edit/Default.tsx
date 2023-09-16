@@ -19,13 +19,13 @@ const DefaultEditView: React.FC<Props> = (props) => {
   const { refreshCookieAsync, user } = useAuth()
 
   const {
+    id,
     action,
     apiURL,
     collection,
     customHeader,
     data,
     hasSavePermission,
-    id,
     internalState,
     isEditing,
     isLoading,

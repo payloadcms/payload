@@ -42,20 +42,6 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     slug,
   } = global
 
-  // The component definition could come from multiple places in the config
-  // we need to cascade into the proper component from the top-down
-  // 1. "components.Edit"
-  // 2. "components.Edit.Default"
-  // 3. "components.Edit.Default.Component"
-  const CustomEditView =
-    typeof Edit === 'function'
-      ? Edit
-      : typeof Edit === 'object' && typeof Edit.Default === 'function'
-      ? Edit.Default
-      : typeof Edit?.Default === 'object' && typeof Edit.Default.Component === 'function'
-      ? Edit.Default.Component
-      : undefined
-
   const onSave = useCallback(
     async (json) => {
       getVersions()
@@ -116,7 +102,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   return (
     <RenderCustomComponent
-      CustomComponent={CustomEditView}
+      CustomComponent={typeof Edit === 'function' ? Edit : undefined}
       DefaultComponent={DefaultGlobalView}
       componentProps={{
         action: `${serverURL}${api}/globals/${slug}?locale=${locale}&fallback-locale=null`,
