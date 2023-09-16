@@ -18,17 +18,17 @@ import './index.scss'
 
 const baseClass = 'collection-edit'
 
-export const DefaultEdit: React.FC<Props> = (props) => {
+export const DefaultCollectionEdit: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation('general')
 
   const {
+    id,
     apiURL,
     collection,
     data,
     disableActions,
     disableLeaveWithoutSaving,
     hasSavePermission,
-    id,
     internalState,
     isEditing,
     permissions,

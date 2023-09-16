@@ -15,7 +15,7 @@ import './index.scss'
 
 const baseClass = 'global-edit'
 
-export const DefaultGlobalView: React.FC<Props> = (props) => {
+export const DefaultGlobalEdit: React.FC<Props> = (props) => {
   const { apiURL, data, global, permissions } = props
 
   const { i18n } = useTranslation('general')
