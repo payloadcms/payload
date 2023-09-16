@@ -9,7 +9,7 @@ export const webpack: Webpack = (config) => {
       ...(config.resolve || {}),
       alias: {
         ...(config.resolve?.alias || {}),
-        [path.resolve(__dirname, './index')]: path.resolve(__dirname, 'mock'),
+        [path.resolve(__dirname, './index')]: path.resolve(__dirname, 'mock.js'),
       },
     },
   }

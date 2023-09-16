@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import type { PayloadBundler } from '../types'
-
-import { buildAdmin } from './scripts/build'
+import { PayloadBundler } from '../../payload/dist/bundlers/types'
 import { devAdmin } from './scripts/dev'
+import { buildAdmin } from './scripts/build'
 import { serveAdmin } from './scripts/serve'
 
 export default (): PayloadBundler => ({
-  build: async (payloadConfig) => buildAdmin({ payloadConfig }),
   dev: async (payload) => devAdmin({ payload }),
+  build: async (payloadConfig) => buildAdmin({ payloadConfig }),
   serve: async (payload) => serveAdmin({ payload }),
 })
