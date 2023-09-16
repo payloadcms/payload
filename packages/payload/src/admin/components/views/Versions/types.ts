@@ -19,14 +19,3 @@ export type Props = IndexProps & {
   isLoadingVersions: boolean
   versionsData: PaginatedDocs<Version>
 }
-
-export type Props = IndexProps & {
-  data: Version
-  editURL: string
-  entityLabel: string
-  fetchURL: string
-  id: string
-  isLoading: boolean
-  isLoadingVersions: boolean
-  versionsData: PaginatedDocs<Version>
-}

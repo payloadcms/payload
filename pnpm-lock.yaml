@@ -697,6 +697,9 @@ importers:
       '@types/mime':
         specifier: 2.0.3
         version: 2.0.3
+      '@types/mini-css-extract-plugin':
+        specifier: ^1.4.3
+        version: 1.4.3(@swc/core@1.3.76)(webpack-cli@4.10.0)
       '@types/minimist':
         specifier: 1.2.2
         version: 1.2.2
@@ -787,6 +790,9 @@ importers:
       graphql-request:
         specifier: 3.7.0
         version: 3.7.0(graphql@16.7.1)
+      mini-css-extract-plugin:
+        specifier: 1.6.2
+        version: 1.6.2(webpack@5.88.2)
       node-fetch:
         specifier: 2.6.12
         version: 2.6.12
@@ -10414,7 +10420,6 @@ packages:
       schema-utils: 3.3.0
       webpack: 5.88.2(@swc/core@1.3.76)(webpack-cli@4.10.0)
       webpack-sources: 1.4.3
-    dev: false
 
   /mini-svg-data-uri@1.4.4:
     resolution: {integrity: sha512-r9deDe9p5FJUPZAk3A59wGH7Ii9YrjjWw0jmw/liSbHl2CHiyXj6FcDXDu2K3TjVAXqiJdaw3xxwlZZr9E6nHg==}
@@ -13433,7 +13438,6 @@ packages:
 
   /source-list-map@2.0.1:
     resolution: {integrity: sha512-qnQ7gVMxGNxsiL4lEuJwe/To8UnK7fAnmbGEEH8RpLouuKbeEm0lhbQVFIrNSuB+G7tVrAlVsZgETT5nljf+Iw==}
-    dev: false
 
   /source-map-js@1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}
@@ -14659,7 +14663,6 @@ packages:
     dependencies:
       source-list-map: 2.0.1
       source-map: 0.6.1
-    dev: false
 
   /webpack-sources@3.2.3:
     resolution: {integrity: sha512-/DyMEOrDgLKKIG0fmvtz+4dUX/3Ghozwgm6iPp8KRhvn+eQf9+Q7GWxVNMk3+uCPWfdXYC4ExGBckIXdFEfH1w==}

@@ -1,4 +1,3 @@
-export { default as Root } from '../admin/Root'
 export { default as Banner } from '../admin/components/elements/Banner'
 export { default as Button } from '../admin/components/elements/Button'
 
