@@ -1,3 +1,4 @@
+// @ts-expect-error
 import type { InlineConfig } from 'vite'
 import { PayloadBundler } from './types'
 import { devAdmin } from './scripts/dev'

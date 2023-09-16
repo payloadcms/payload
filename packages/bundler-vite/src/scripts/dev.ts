@@ -1,5 +1,5 @@
+// @ts-expect-error
 import type { InlineConfig } from 'vite'
-import vite from 'vite'
 import express from 'express'
 import type { PayloadHandler } from 'payload/config'
 import { Payload } from '../../../payload'
@@ -13,6 +13,7 @@ type DevAdminType = (options: {
 }) => Promise<PayloadHandler>
 export const devAdmin: DevAdminType = async ({ payload, viteConfig: viteConfigArg }) => {
   // TODO: merge vite configs (https://vitejs.dev/guide/api-javascript.html#mergeconfig)
+  const vite = await import('vite')
 
   try {
     const viteConfig = await getViteConfig(payload.config)

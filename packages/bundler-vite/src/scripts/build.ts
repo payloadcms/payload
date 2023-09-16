@@ -1,4 +1,4 @@
-import vite from 'vite'
+// @ts-expect-error
 import type { InlineConfig } from 'vite'
 import { SanitizedConfig } from 'payload/config'
 import { getViteConfig } from '../configs/vite'
@@ -8,6 +8,7 @@ type BuildAdminType = (options: {
   viteConfig: InlineConfig
 }) => Promise<void>
 export const buildAdmin: BuildAdminType = async ({ payloadConfig, viteConfig: viteConfigArg }) => {
+  const vite = await import('vite')
   const viteConfig = await getViteConfig(payloadConfig)
 
   // TODO: merge vite configs (https://vitejs.dev/guide/api-javascript.html#mergeconfig)

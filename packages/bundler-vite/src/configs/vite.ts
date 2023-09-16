@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import path from 'path'
-import { InlineConfig, createLogger } from 'vite'
+// @ts-expect-error
+import type { InlineConfig } from 'vite'
 import viteCommonJS from 'vite-plugin-commonjs'
 import virtual from 'vite-plugin-virtual'
 import scss from 'rollup-plugin-scss'
@@ -10,19 +11,21 @@ import react from '@vitejs/plugin-react'
 import getPort from 'get-port'
 import type { SanitizedConfig } from 'payload/config'
 
-const logger = createLogger('warn', { prefix: '[VITE-WARNING]', allowClearScreen: false })
-const originalWarning = logger.warn
-logger.warn = (msg, options) => {
-  // TODO: fix this? removed these warnings to make debugging easier
-  if (msg.includes('Default and named imports from CSS files are deprecated')) return
-  originalWarning(msg, options)
-}
-
 const bundlerPath = path.resolve(__dirname, '../')
 const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js')
 const mockDotENVPath = path.resolve(__dirname, '../mocks/dotENV.js')
 
 export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<InlineConfig> => {
+  const { createLogger } = await import('vite')
+
+  const logger = createLogger('warn', { prefix: '[VITE-WARNING]', allowClearScreen: false })
+  const originalWarning = logger.warn
+  logger.warn = (msg, options) => {
+    // TODO: fix this? removed these warnings to make debugging easier
+    if (msg.includes('Default and named imports from CSS files are deprecated')) return
+    originalWarning(msg, options)
+  }
+
   const hmrPort = await getPort()
 
   const absoluteAliases = {
