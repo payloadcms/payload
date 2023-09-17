@@ -1,4 +1,4 @@
-import React, { KeyboardEventHandler } from 'react';
+import React, { KeyboardEventHandler, useCallback } from 'react';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import { useTranslation } from 'react-i18next';
@@ -153,27 +153,29 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
 };
 
 const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
-  const {
+  const { 
     onChange,
     value,
+    isSortable,
   } = props;
-
 
   let ids: string[] = [];
   if (value) ids = Array.isArray(value) ? value.map((item) => item?.id ?? `${item?.value}` as string) : [value?.id || `${value?.value}` as string];
 
+  const dragEnd = useCallback(
+    ({ moveFromIndex, moveToIndex }) => {
+      let sorted = value;
+      if (value && Array.isArray(value)) {
+        sorted = arrayMove(value, moveFromIndex, moveToIndex);
+      }
+      onChange(sorted);
+    }, [value, onChange]);
 
   return (
     <DraggableSortable
       ids={ids}
       className="react-select-container"
-      onDragEnd={({ moveFromIndex, moveToIndex }) => {
-        let sorted = value;
-        if (value && Array.isArray(value)) {
-          sorted = arrayMove(value, moveFromIndex, moveToIndex);
-        }
-        onChange(sorted);
-      }}
+      onDragEnd={isSortable ? dragEnd : undefined}
     >
       <SelectAdapter {...props} />
     </DraggableSortable>
@@ -181,20 +183,10 @@ const SortableSelect: React.FC<ReactSelectAdapterProps> = (props) => {
 };
 
 const ReactSelect: React.FC<ReactSelectAdapterProps> = (props) => {
-  const {
-    isMulti,
-    isSortable,
-  } = props;
-
-  if (isMulti && isSortable) {
-    return (
-      <SortableSelect {...props} />
-    );
-  }
-
-  return (
-    <SelectAdapter {...props} />
-  );
+  // Forces every select to go through the draggable
+  // This is not performant, but having this component nested in another draggable forces the parent daragable to act on the children.
+  // we either disable the parent draggable on the children or we override the draggable on the children
+  return <SortableSelect {...props} />;
 };
 
 export default ReactSelect;
