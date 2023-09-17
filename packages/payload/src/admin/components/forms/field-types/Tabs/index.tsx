@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { Tab } from '../../../../../fields/config/types'
 import type { DocumentPreferences } from '../../../../../preferences/types'
 import type { Props } from './types'
 
 import { tabHasName } from '../../../../../fields/config/types'
-import { Tab } from '../../../../../fields/config/types'
 import { getTranslation } from '../../../../../utilities/getTranslation'
 import toKebabCase from '../../../../../utilities/toKebabCase'
 import { useCollapsible } from '../../../elements/Collapsible/provider'
@@ -29,7 +29,8 @@ type TabProps = {
   setIsActive: () => void
   tab: Tab
 }
-const Tab: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, tab }) => {
+
+const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, tab }) => {
   const { i18n } = useTranslation()
   const [errorCount, setErrorCount] = useState(undefined)
   const hasName = tabHasName(tab)
@@ -140,7 +141,7 @@ const TabsField: React.FC<Props> = (props) => {
           <div className={`${baseClass}__tabs`}>
             {tabs.map((tab, tabIndex) => {
               return (
-                <Tab
+                <TabComponent
                   isActive={activeTabIndex === tabIndex}
                   key={tabIndex}
                   parentPath={path}

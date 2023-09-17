@@ -12,6 +12,7 @@ import DemoUIFieldField from './components/DemoUIField/Field'
 import Logout from './components/Logout'
 import CustomDefaultRoute from './components/routes/CustomDefault'
 import CustomMinimalRoute from './components/routes/CustomMinimal'
+import CustomDefaultView from './components/views/CustomDefault'
 import CustomEditView from './components/views/CustomEdit'
 import CustomVersionsView from './components/views/CustomVersions'
 import CustomView from './components/views/CustomView'
@@ -139,6 +140,8 @@ export default buildConfigWithDefaults({
       admin: {
         components: {
           views: {
+            // This will override the entire Edit view including all nested views, i.e. `/edit/:id/*`
+            // To override one specific nested view, use the nested view's slug as the key
             Edit: CustomEditView,
           },
         },
@@ -157,7 +160,8 @@ export default buildConfigWithDefaults({
         components: {
           views: {
             Edit: {
-              Default: CustomEditView,
+              // This will override one specific nested view within the `/edit/:id` route, i.e. `/edit/:id/versions`
+              Default: CustomDefaultView,
               Versions: CustomVersionsView,
               MyCustomView: {
                 path: '/custom',
@@ -286,7 +290,7 @@ export default buildConfigWithDefaults({
         components: {
           views: {
             Edit: {
-              Default: CustomEditView,
+              Default: CustomDefaultView,
               Versions: CustomVersionsView,
               MyCustomView: {
                 path: '/custom',

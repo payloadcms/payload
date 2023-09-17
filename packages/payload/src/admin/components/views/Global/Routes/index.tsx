@@ -4,10 +4,8 @@ import { Route, Switch, useRouteMatch } from 'react-router-dom'
 
 import { useAuth } from '../../../utilities/Auth'
 import { useConfig } from '../../../utilities/Config'
-import Version from '../../Version'
-import VersionsView from '../../Versions'
-import { DefaultGlobalView } from '../Default/index'
 import { type Props } from '../types'
+import { CustomGlobalComponent } from './CustomComponent'
 import { globalCustomRoutes } from './custom'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
@@ -32,7 +30,7 @@ export const GlobalRoutes: React.FC<Props> = (props) => {
         path={`${adminRoute}/globals/${global.slug}/versions`}
       >
         {permissions?.readVersions?.permission ? (
-          <VersionsView global={global} />
+          <CustomGlobalComponent view="Versions" {...props} />
         ) : (
           <Unauthorized />
         )}
@@ -42,7 +40,11 @@ export const GlobalRoutes: React.FC<Props> = (props) => {
         key={`${global.slug}-view-version`}
         path={`${adminRoute}/globals/${global.slug}/versions/:versionID`}
       >
-        {permissions?.readVersions?.permission ? <Version global={global} /> : <Unauthorized />}
+        {permissions?.readVersions?.permission ? (
+          <CustomGlobalComponent view="Version" {...props} />
+        ) : (
+          <Unauthorized />
+        )}
       </Route>
       {globalCustomRoutes({
         global,
@@ -51,7 +53,7 @@ export const GlobalRoutes: React.FC<Props> = (props) => {
         user,
       })}
       <Route>
-        <DefaultGlobalView {...props} />
+        <CustomGlobalComponent view="Default" {...props} />
       </Route>
     </Switch>
   )

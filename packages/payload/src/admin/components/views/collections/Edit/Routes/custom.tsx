@@ -5,6 +5,7 @@ import { Route } from 'react-router-dom'
 
 import type { CollectionPermission, User } from '../../../../../../auth'
 import type { SanitizedCollectionConfig } from '../../../../../../exports/types'
+import type { collectionViewType } from './CustomComponent'
 
 import Unauthorized from '../../../Unauthorized'
 
@@ -19,7 +20,16 @@ export const collectionCustomRoutes = (props: {
   const { collection, match, permissions, user } = props
 
   let customViews = []
-  const internalViews = ['Default', 'Versions']
+
+  const internalViews: collectionViewType[] = [
+    'Default',
+    'LivePreview',
+    'Version',
+    'Versions',
+    'Relationships',
+    'References',
+    'API',
+  ]
 
   const BaseEdit = collection?.admin?.components?.views?.Edit
 
@@ -29,7 +39,7 @@ export const collectionCustomRoutes = (props: {
         // Remove internal views from the list of custom views
         // This way we can easily iterate over the remaining views
         return Boolean(
-          !internalViews.includes(viewKey) &&
+          !internalViews.includes(viewKey as any) &&
             typeof view !== 'function' &&
             typeof view === 'object',
         )
@@ -42,11 +52,7 @@ export const collectionCustomRoutes = (props: {
 
     if (collection) {
       routesToReturn.push(
-        <Route
-          exact
-          key={`${collection.slug}-${path}`}
-          path={`${match.url}/collections/${collection.slug}/:id${path}`}
-        >
+        <Route exact key={`${collection.slug}-${path}`} path={`${match.url}${path}`}>
           {permissions?.read?.permission ? (
             <Component collection={collection} user={user} />
           ) : (
