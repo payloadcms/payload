@@ -23,20 +23,6 @@ const EditView: React.FC<IndexProps> = (props) => {
   const { admin: { components: { views: { Edit } = {} } = {} } = {}, slug: collectionSlug } =
     incomingCollection
 
-  // The component definition could come from multiple places in the config
-  // we need to cascade into the proper component from the top-down
-  // 1. "components.Edit"
-  // 2. "components.Edit.Default"
-  // 3. "components.Edit.Default.Component"
-  const CustomEditView =
-    typeof Edit === 'function'
-      ? Edit
-      : typeof Edit === 'object' && typeof Edit.Default === 'function'
-      ? Edit.Default
-      : typeof Edit?.Default === 'object' && typeof Edit.Default.Component === 'function'
-      ? Edit.Default.Component
-      : undefined
-
   const [fields] = useState(() => formatFields(incomingCollection, isEditing))
   const [collection] = useState(() => ({ ...incomingCollection, fields }))
   const [redirect, setRedirect] = useState<string>()
@@ -67,9 +53,9 @@ const EditView: React.FC<IndexProps> = (props) => {
       const preferences = await getDocPreferences()
 
       const state = await buildStateFromSchema({
+        id,
         data: doc || {},
         fieldSchema: overrides.fieldSchema,
-        id,
         locale,
         operation: 'update',
         preferences,
@@ -140,16 +126,16 @@ const EditView: React.FC<IndexProps> = (props) => {
   return (
     <EditDepthContext.Provider value={1}>
       <RenderCustomComponent
-        CustomComponent={CustomEditView}
+        CustomComponent={typeof Edit === 'function' ? Edit : undefined}
         DefaultComponent={DefaultEdit}
         componentProps={{
+          id,
           action,
           apiURL,
           canAccessAdmin: permissions?.canAccessAdmin,
           collection,
           data,
           hasSavePermission,
-          id,
           internalState,
           isEditing,
           isLoading,

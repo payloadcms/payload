@@ -43,6 +43,7 @@
     "@testing-library/react": "13.4.0",
     "@types/jest": "29.5.4",
     "@types/node": "20.5.7",
+    "@types/react": "18.2.15",
     "@types/testing-library__jest-dom": "5.14.8",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",

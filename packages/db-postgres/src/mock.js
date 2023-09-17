@@ -1,1 +1,1 @@
-exports.postgresAdapter = () => ({});
+export const postgresAdapter = () => ({})

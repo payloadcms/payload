@@ -1,18 +1,9 @@
 import React, { Fragment, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
 
-import Button from '../../../../../packages/payload/src/admin/components/elements/Button'
 import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
-import { useConfig } from '../../../../../packages/payload/src/admin/components/utilities/Config'
 import { type CustomAdminView } from '../../../../../packages/payload/src/config/types'
 
-const CustomView: CustomAdminView = ({ collection, global }) => {
-  const {
-    routes: { admin: adminRoute },
-  } = useConfig()
-
-  const params = useParams()
-
+const CustomView: CustomAdminView = () => {
   const { setStepNav } = useStepNav()
 
   // This effect will only run one time and will allow us
@@ -26,23 +17,11 @@ const CustomView: CustomAdminView = ({ collection, global }) => {
     ])
   }, [setStepNav])
 
-  let backURL = ''
-  let versionsRoute = ''
-
-  if (collection) {
-    backURL = `${adminRoute}/collections/${collection?.slug}/${params.id}`
-    versionsRoute = `${adminRoute}/collections/${collection?.slug}/${params.id}/versions`
-  }
-
-  if (global) {
-    backURL = `${adminRoute}/globals/${global?.slug}`
-    versionsRoute = `${adminRoute}/globals/${global?.slug}/versions`
-  }
-
   return (
     <Fragment>
       <div
         style={{
+          marginTop: 'calc(var(--base) * 2)',
           paddingLeft: 'var(--gutter-h)',
           paddingRight: 'var(--gutter-h)',
         }}
@@ -54,9 +33,6 @@ const CustomView: CustomAdminView = ({ collection, global }) => {
             <code>components.views[key].Component</code>
           </li>
         </ul>
-        <Button buttonStyle="secondary" el="link" to={backURL}>
-          Back
-        </Button>
       </div>
     </Fragment>
   )

@@ -1,17 +1,19 @@
 import React, { Fragment, useEffect } from 'react'
-import { Redirect, useParams } from 'react-router-dom'
+import { Redirect } from 'react-router-dom'
 
-import Button from '../../../../../packages/payload/src/admin/components/elements/Button'
 import { useStepNav } from '../../../../../packages/payload/src/admin/components/elements/StepNav'
 import { useConfig } from '../../../../../packages/payload/src/admin/components/utilities/Config'
 import { type CustomAdminView } from '../../../../../packages/payload/src/config/types'
 
-const CustomVersionsView: CustomAdminView = ({ canAccessAdmin, collection, global, user }) => {
+const CustomVersionsView: CustomAdminView = ({
+  canAccessAdmin,
+  // collection,
+  // global,
+  user,
+}) => {
   const {
     routes: { admin: adminRoute },
   } = useConfig()
-
-  const params = useParams()
 
   const { setStepNav } = useStepNav()
 
@@ -32,49 +34,36 @@ const CustomVersionsView: CustomAdminView = ({ canAccessAdmin, collection, globa
     return <Redirect to={`${adminRoute}/unauthorized`} />
   }
 
-  let backURL = adminRoute
-
-  if (collection) {
-    backURL = `${adminRoute}/collections/${collection?.slug}/${params.id}`
-  }
-
-  if (global) {
-    backURL = `${adminRoute}/globals/${global?.slug}`
-  }
-
   return (
     <Fragment>
       <div
         style={{
+          marginTop: 'calc(var(--base) * 2)',
           paddingLeft: 'var(--gutter-h)',
           paddingRight: 'var(--gutter-h)',
         }}
       >
         <h1>Custom Versions View</h1>
-        <p>This custom versions view was added through one of the following Payload configs:</p>
+        <p>This custom Versions view was added through one of the following Payload configs:</p>
         <ul>
           <li>
-            <code>components.views.Versions</code>
+            <code>components.views.Edit.Versions</code>
             <p>
-              {'This takes precedence over the default versions view, '}
-              <b>as well as all nested views like /versions/:id.</b>
+              {'This allows you to override only the Versions edit view specifically, but '}
+              <b>
+                <em>not</em>
+              </b>
+              {' any other views. The document header will render above this component.'}
             </p>
           </li>
           <li>
-            <code>components.views.Edit.versions</code>
-            <p>Same as above.</p>
-          </li>
-          <li>
-            <code>components.views.Edit.versions.Component</code>
+            <code>components.views.Edit.Versions.Component</code>
           </li>
           <p>
-            This is the most granular override, allowing you to override only the default versions
-            view&apos;s Component, and its other properties like path and label.
+            This is the most granular override, allowing you to override only the Versions
+            component, or any of its other properties like path and label.
           </p>
         </ul>
-        <Button buttonStyle="secondary" el="link" to={backURL}>
-          Back
-        </Button>
       </div>
     </Fragment>
   )
