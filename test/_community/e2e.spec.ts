@@ -23,4 +23,16 @@ describe('Admin Panel', () => {
     const textCell = page.locator('.row-1 .cell-text');
     await expect(textCell).toHaveText('example post');
   });
+
+  test('should save when ctrl + s is typed', async () => {
+    const textValue = 'hello-new-value';
+    const fieldLabelText = 'Global Text';
+    const shortCut = 'Meta+s';
+
+
+    await page.goto(url.global('menu'));
+    await page.getByLabel(fieldLabelText).type(textValue);
+    await page.keyboard.press(shortCut);
+    await expect(page.locator('.Toastify')).toContainText('successfully');
+  });
 });
