@@ -13,7 +13,7 @@ const Title: React.FC = () => <span>Dashboard</span>
 
 export const AdminBar: React.FC<{
   adminBarProps?: PayloadAdminBarProps
-}> = props => {
+}> = (props) => {
   const { adminBarProps } = props || {}
   const segments = useSelectedLayoutSegments()
   const collection = segments?.[1] === 'products' ? 'products' : 'pages'
