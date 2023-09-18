@@ -1,11 +1,11 @@
-import { GraphQLClient } from 'graphql-request'
+import { GraphQLClient } from 'graphql-request';
 
-import type { Post } from './payload-types'
+import type { Post } from './payload-types';
 
-import payload from '../../packages/payload/src'
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
-import { initPayloadTest } from '../helpers/configHelpers'
-import configPromise, { pointSlug, slug } from './config'
+import payload from '../../packages/payload/src';
+import { mapAsync } from '../../packages/payload/src/utilities/mapAsync';
+import { initPayloadTest } from '../helpers/configHelpers';
+import configPromise, { pointSlug, slug } from './config';
 
 const title = 'title'
 
@@ -20,12 +20,14 @@ describe('collections-graphql', () => {
 
     // Wait for indexes to be created,
     // as we need them to query by point
-    await new Promise((resolve, reject) => {
-      payload.db.collections.point.ensureIndexes(function (err) {
-        if (err) reject(err)
-        resolve(true)
-      })
-    })
+    if (payload.db?.collections?.point?.ensureIndexes) {
+      await new Promise((resolve, reject) => {
+        payload.db?.collections?.point?.ensureIndexes(function (err) {
+          if (err) reject(err);
+          resolve(true);
+        });
+      });
+    }
   })
 
   afterAll(async () => {

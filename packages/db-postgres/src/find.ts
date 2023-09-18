@@ -1,10 +1,12 @@
+import type { SQL } from 'drizzle-orm';
+import type { PgSelect } from 'drizzle-orm/pg-core';
 import type { Find } from 'payload/database';
 import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payload/types';
 
 import { asc, desc, inArray, sql } from 'drizzle-orm';
 import toSnakeCase from 'to-snake-case';
 
-import type { PostgresAdapter } from './types';
+import type { GenericColumn, PostgresAdapter } from './types';
 
 import { buildFindManyArgs } from './find/buildFindManyArgs';
 import buildQuery from './queries/buildQuery';
@@ -50,11 +52,16 @@ export const find: Find = async function find(
   const db = req.transactionID ? this.sessions[req.transactionID] : this.db;
 
   const orderedIDMap: Record<number | string, number> = {};
+  let selectQuery: PgSelect<string, Record<string, GenericColumn>, 'partial', Record<string, 'not-null'>>;
+  let selectCount: PgSelect<string, { count: SQL<number>; }, "partial", Record<string, "not-null">>;
 
-  const selectQuery = db.selectDistinct(selectFields)
-    .from(table);
   if (orderBy?.order && orderBy?.column) {
-    selectQuery.orderBy(orderBy.order(orderBy.column));
+    selectQuery = db.selectDistinct(selectFields)
+      .from(table)
+      .orderBy(orderBy.order(orderBy.column));
+  } else {
+    selectQuery = db.selectDistinct(selectFields)
+      .from(table)
   }
 
   const findManyArgs = buildFindManyArgs({
@@ -118,7 +125,7 @@ export const find: Find = async function find(
   const findPromise = db.query[tableName].findMany(findManyArgs);
 
   if (pagination !== false || selectDistinctResult?.length > limit) {
-    const selectCount = db.select({ count: sql<number>`count(*)` })
+    selectCount = db.select({ count: sql<number>`count(*)` })
       .from(table)
       .where(where);
     Object.entries(joins)
