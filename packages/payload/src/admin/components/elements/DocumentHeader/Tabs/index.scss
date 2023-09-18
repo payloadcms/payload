@@ -1,11 +1,17 @@
 @import '../../../../scss/styles.scss';
 
 .doc-tabs {
-  display: flex;
-  gap: calc(var(--base) / 2);
-  list-style: none;
-  align-items: center;
-  margin: 0;
+  &__tabs {
+    display: flex;
+    gap: calc(var(--base) / 2);
+    list-style: none;
+    align-items: center;
+    margin: 0;
+  }
+
+  &__tab {
+    display: flex;
+  }
 
   &__tab-link {
     @extend %h5;
@@ -72,5 +78,35 @@
     padding: 0px 6px;
     background-color: var(--theme-elevation-100);
     border-radius: 1px;
+  }
+
+  @include mid-break {
+    width: 100%;
+    padding: 0;
+    overflow: auto;
+
+    &__tabs {
+      padding: 0;
+      margin-left: var(--gutter-h);
+      margin-bottom: calc(var(--base) / 2);
+    }
+
+    &__tab {
+      &:last-child {
+        // CSS hack, give the illusion of right margin within the overflowing container
+        // margin-right, padding-right, etc are tricky within overflowing flex-boxes
+        &::after {
+          content: '';
+          padding-right: var(--gutter-h);
+          height: 1px;
+        }
+      }
+    }
+  }
+
+  @include small-break {
+    &__tabs {
+      gap: var(--gutter-h);
+    }
   }
 }
