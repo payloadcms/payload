@@ -14,9 +14,6 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
   entry: {
     main: [adminFolderPath],
   },
-  resolveLoader: {
-    modules: ['node_modules', nodeModulesPath],
-  },
   module: {
     rules: [
       {
@@ -52,7 +49,7 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       https: false,
       http: false,
     },
-    modules: ['node_modules', path.resolve(__dirname, nodeModulesPath)],
+    modules: ['node_modules', nodeModulesPath],
     alias: {
       path: require.resolve('path-browserify'),
       'payload-config': payloadConfig.paths.rawConfig,
