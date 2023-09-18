@@ -51,7 +51,12 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
       return {
         ...existingConfig,
         entry: {
-          main: [path.resolve(__dirname, '../packages/payload/src/admin')],
+          main: [
+            `webpack-hot-middleware/client?path=${
+              testConfig?.routes?.admin || '/admin'
+            }/__webpack_hmr`,
+            path.resolve(__dirname, '../packages/payload/src/admin'),
+          ],
         },
         name,
         cache: process.env.NODE_ENV === 'test' ? { type: 'memory' } : existingConfig.cache,
