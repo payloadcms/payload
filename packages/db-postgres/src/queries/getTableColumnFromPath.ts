@@ -124,6 +124,13 @@ export const getTableColumnFromPath = ({
         if (locale && field.localized && adapter.payload.config.localization) {
           newTableName = `${tableName}_locales`;
           joins[tableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
+          if (locale !== 'all') {
+            constraints.push({
+                columnName: '_locale',
+                table: adapter.tables[newTableName],
+                value: locale,
+            });
+          }
         }
         return getTableColumnFromPath({
           adapter,
@@ -144,8 +151,15 @@ export const getTableColumnFromPath = ({
         if (locale && field.localized && adapter.payload.config.localization) {
           joins[newTableName] = and(
             eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
-            eq(adapter[newTableName]._locale, locale),
+            eq(adapter.tables[newTableName]._locale, locale),
           );
+          if (locale !== 'all') {
+            constraints.push({
+              columnName: '_locale',
+              table: adapter.tables[newTableName],
+              value: locale,
+            });
+          }
         } else {
           joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
         }
@@ -163,8 +177,61 @@ export const getTableColumnFromPath = ({
       }
 
       case 'blocks': {
-        // TODO: implement blocks
-        throw new Error('not implemented');
+        let blockTableColumn: TableColumn;
+        let newTableName: string;
+        const hasBlockField = field.blocks.some((block) => {
+          newTableName = `${tableName}_${toSnakeCase(block.slug)}`;
+          let result;
+          const blockConstraints = [];
+          const blockSelectFields = {};
+          try {
+            result = getTableColumnFromPath({
+              adapter,
+              collectionPath,
+              constraints: blockConstraints,
+              fields: block.fields,
+              joins,
+              locale,
+              pathSegments: pathSegments.slice(1),
+              selectFields: blockSelectFields,
+              tableName: newTableName,
+            });
+          } catch (error) {
+            // this is fine, not every block will have the field
+          }
+        if (!result) {
+          return;
+        }
+        blockTableColumn = result;
+        constraints = constraints.concat(blockConstraints);
+        selectFields = {...selectFields, ...blockSelectFields};
+        if (field.localized && adapter.payload.config.localization) {
+          joins[newTableName] = and(
+            eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
+            eq(adapter.tables[newTableName]._locale, locale),
+          );
+          if (locale) {
+            constraints.push({
+              columnName: '_locale',
+              table: adapter.tables[newTableName],
+              value: locale,
+            });
+          }
+        } else {
+          joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
+        }
+        return result;
+        });
+        if (hasBlockField) {
+          return {
+            columnName: blockTableColumn.columnName,
+            constraints,
+            field: blockTableColumn.field,
+            rawColumn: blockTableColumn.rawColumn,
+            table: adapter.tables[newTableName],
+          };
+        }
+        break;
       }
 
       case 'relationship':
@@ -234,7 +301,7 @@ export const getTableColumnFromPath = ({
         // case 'select':
         // case 'point':
         if (fieldAffectsData(field)) {
-          if (locale && field.localized && adapter.payload.config.localization) {
+          if (field.localized && adapter.payload.config.localization) {
             newTableName = `${tableName}_locales`;
             joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
             if (locale !== 'all') {
