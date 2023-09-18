@@ -15,7 +15,7 @@ export function isObject(item: unknown): boolean {
 export default function deepMerge<T, R>(target: T, source: R): T {
   const output = { ...target }
   if (isObject(target) && isObject(source)) {
-    Object.keys(source).forEach(key => {
+    Object.keys(source).forEach((key) => {
       if (isObject(source[key])) {
         // @ts-expect-error
         if (!(key in target)) {

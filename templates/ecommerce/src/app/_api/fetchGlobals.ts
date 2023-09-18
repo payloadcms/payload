@@ -13,11 +13,11 @@ export async function fetchSettings(): Promise<Settings> {
       query: SETTINGS_QUERY,
     }),
   })
-    ?.then(res => {
+    ?.then((res) => {
       if (!res.ok) throw new Error('Error fetching doc')
       return res.json()
     })
-    ?.then(res => {
+    ?.then((res) => {
       if (res?.errors) throw new Error(res?.errors[0]?.message || 'Error fetching settings')
       return res.data?.Settings
     })
@@ -37,11 +37,11 @@ export async function fetchHeader(): Promise<Header> {
       query: HEADER_QUERY,
     }),
   })
-    ?.then(res => {
+    ?.then((res) => {
       if (!res.ok) throw new Error('Error fetching doc')
       return res.json()
     })
-    ?.then(res => {
+    ?.then((res) => {
       if (res?.errors) throw new Error(res?.errors[0]?.message || 'Error fetching header')
       return res.data?.Header
     })
@@ -61,11 +61,11 @@ export async function fetchFooter(): Promise<Footer> {
       query: FOOTER_QUERY,
     }),
   })
-    .then(res => {
+    .then((res) => {
       if (!res.ok) throw new Error('Error fetching doc')
       return res.json()
     })
-    ?.then(res => {
+    ?.then((res) => {
       if (res?.errors) throw new Error(res?.errors[0]?.message || 'Error fetching footer')
       return res.data?.Footer
     })

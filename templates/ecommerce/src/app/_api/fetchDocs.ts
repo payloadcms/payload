@@ -45,8 +45,8 @@ export const fetchDocs = async <T>(
       query: queryMap[collection].query,
     }),
   })
-    ?.then(res => res.json())
-    ?.then(res => {
+    ?.then((res) => res.json())
+    ?.then((res) => {
       if (res.errors) throw new Error(res?.errors?.[0]?.message ?? 'Error fetching docs')
 
       return res?.data?.[queryMap[collection].key]?.docs

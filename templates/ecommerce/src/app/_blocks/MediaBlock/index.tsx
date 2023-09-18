@@ -13,7 +13,7 @@ type Props = Extract<Page['layout'][0], { blockType: 'mediaBlock' }> & {
   id?: string
 }
 
-export const MediaBlock: React.FC<Props> = props => {
+export const MediaBlock: React.FC<Props> = (props) => {
   const { media, position = 'default', staticImage } = props
 
   let caption

@@ -9,7 +9,7 @@ type Props = {
   id?: string
 }
 
-export const BackgroundColor: React.FC<Props> = props => {
+export const BackgroundColor: React.FC<Props> = (props) => {
   const { id, className, children, invert } = props
 
   return (

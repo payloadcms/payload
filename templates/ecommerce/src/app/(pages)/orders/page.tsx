@@ -31,14 +31,14 @@ export default async function Orders() {
       },
       cache: 'no-store',
     })
-      ?.then(async res => {
+      ?.then(async (res) => {
         if (!res.ok) notFound()
         const json = await res.json()
         if ('error' in json && json.error) notFound()
         if ('errors' in json && json.errors) notFound()
         return json
       })
-      ?.then(json => json.docs)
+      ?.then((json) => json.docs)
   } catch (error) {
     // when deploying this template on Payload Cloud, this page needs to build before the APIs are live
     // so swallow the error here and simply render the page with fallback data where necessary
