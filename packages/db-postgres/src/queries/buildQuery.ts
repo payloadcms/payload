@@ -65,7 +65,7 @@ const buildQuery = async function buildQuery({
       fields,
       joins,
       locale,
-      pathSegments: sortPath.split('.'),
+      pathSegments: sortPath.replace(/__/g, '.').split('.'),
       selectFields,
       tableName,
     });

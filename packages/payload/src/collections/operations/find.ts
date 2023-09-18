@@ -160,7 +160,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         page: sanitizedPage,
         pagination,
         req,
-        sort: sort ? sort.replace(/__/g, '.') : undefined,
+        sort,
         where: fullWhere,
       })
     }

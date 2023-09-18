@@ -1,17 +1,17 @@
 /* eslint-disable no-await-in-loop */
-import type { SQL } from 'drizzle-orm'
-import type { Field, Operator, Where } from 'payload/types'
+import type { SQL } from 'drizzle-orm';
+import type { Field, Operator, Where } from 'payload/types';
 
-import { and } from 'drizzle-orm'
-import { validOperators } from 'payload/types'
+import { and } from 'drizzle-orm';
+import { validOperators } from 'payload/types';
 
-import type { GenericColumn, PostgresAdapter } from '../types'
-import type { BuildQueryJoins } from './buildQuery'
+import type { GenericColumn, PostgresAdapter } from '../types';
+import type { BuildQueryJoins } from './buildQuery';
 
-import { buildAndOrConditions } from './buildAndOrConditions'
-import { getTableColumnFromPath } from './getTableColumnFromPath'
-import { operatorMap } from './operatorMap'
-import { sanitizeQueryValue } from './sanitizeQueryValue'
+import { buildAndOrConditions } from './buildAndOrConditions';
+import { getTableColumnFromPath } from './getTableColumnFromPath';
+import { operatorMap } from './operatorMap';
+import { sanitizeQueryValue } from './sanitizeQueryValue';
 
 type Args = {
   adapter: PostgresAdapter
@@ -83,7 +83,7 @@ export async function parseParams({
                   fields,
                   joins,
                   locale,
-                  pathSegments: relationOrPath.split('.'),
+                  pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
                   selectFields,
                   tableName,
                 })
@@ -97,9 +97,6 @@ export async function parseParams({
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
                   constraints.push(operatorMap.equals(constraintTable[col], value))
                 })
-                if (!operatorMap[queryOperator]) {
-                  console.log('found it')
-                }
                 constraints.push(
                   operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
                 )

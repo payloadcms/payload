@@ -1,16 +1,16 @@
-import type { SQL } from 'drizzle-orm'
-import type { PgSelect } from 'drizzle-orm/pg-core'
-import type { Find } from 'payload/database'
-import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payload/types'
+import type { SQL } from 'drizzle-orm';
+import type { PgSelect } from 'drizzle-orm/pg-core';
+import type { Find } from 'payload/database';
+import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payload/types';
 
-import { asc, desc, inArray, sql } from 'drizzle-orm'
-import toSnakeCase from 'to-snake-case'
+import { asc, desc, inArray, sql } from 'drizzle-orm';
+import toSnakeCase from 'to-snake-case';
 
-import type { GenericColumn, PostgresAdapter } from './types'
+import type { PostgresAdapter } from './types';
 
-import { buildFindManyArgs } from './find/buildFindManyArgs'
-import buildQuery from './queries/buildQuery'
-import { transform } from './transform/read'
+import { buildFindManyArgs } from './find/buildFindManyArgs';
+import buildQuery from './queries/buildQuery';
+import { transform } from './transform/read';
 
 export const find: Find = async function find(
   this: PostgresAdapter,
