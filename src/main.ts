@@ -2,7 +2,7 @@ import slugify from '@sindresorhus/slugify'
 import arg from 'arg'
 import commandExists from 'command-exists'
 import { createProject } from './lib/create-project'
-import { getDatabaseConnection } from './lib/get-db-connection'
+import { selectDb } from './lib/select-db'
 import { generateSecret } from './lib/generate-secret'
 import { parseProjectName } from './lib/parse-project-name'
 import { parseTemplate } from './lib/parse-template'
@@ -62,7 +62,7 @@ export class Main {
       const packageManager = await getPackageManager(this.args)
 
       if (template.type !== 'plugin') {
-        const databaseUri = await getDatabaseConnection(this.args, projectName)
+        const dbChoice = await selectDb(this.args, projectName)
         const payloadSecret = await generateSecret()
         if (!this.args['--dry-run']) {
           await createProject({
@@ -73,7 +73,7 @@ export class Main {
             packageManager,
           })
           await writeEnvFile({
-            databaseUri,
+            databaseUri: dbChoice.dbUri,
             payloadSecret,
             template,
             projectDir,
