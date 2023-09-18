@@ -1,4 +1,5 @@
-import { PayloadRequest } from 'payload/types';
+import type { PayloadRequest } from 'payload/types';
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
 import { LocalizedArrays } from './collections/LocalizedArrays';
 import { LocalizedBlocks } from './collections/LocalizedBlocks';
@@ -248,7 +249,38 @@ const config = buildConfigWithDefaults({
           },
         ],
       },
+    });
+    const text = 'block';
+    const blockDoc = await payload.create({
+      collection: 'localized-blocks',
+      data: {
+        title: 'titled',
+        layout: [{
+          blockType: 'text',
+          text,
+        }],
+      }
     })
+
+    const nope = await payload.create({
+      collection: 'localized-blocks',
+      data: {
+        title: 'titled',
+        layout: [{
+          blockType: 'text',
+          text: 'should not be found',
+        }],
+      }
+    })
+
+    const query = await payload.find({
+      collection: 'localized-blocks',
+      where: {
+        'layout.text': { equals: text }
+      }
+    })
+
+    console.log({ query });
   },
 })
 
