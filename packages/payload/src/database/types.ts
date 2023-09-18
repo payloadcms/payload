@@ -34,6 +34,11 @@ export interface DatabaseAdapter {
 
   createVersion: CreateVersion
 
+  /**
+   * Specify if the ID is a text or number field by default within this database adapter.
+   */
+  defaultIDType: 'number' | 'text'
+
   deleteMany: DeleteMany
 
   deleteOne: DeleteOne
@@ -55,7 +60,6 @@ export interface DatabaseAdapter {
   findGlobalVersions: FindGlobalVersions
 
   findOne: FindOne
-
   // versions
   findVersions: FindVersions
 

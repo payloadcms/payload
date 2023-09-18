@@ -81,6 +81,7 @@ export function mongooseAdapter({
       createGlobal,
       createMigration,
       createVersion,
+      defaultIDType: 'text',
       deleteMany,
       deleteOne,
       deleteVersions,
