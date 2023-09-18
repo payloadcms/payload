@@ -6,6 +6,9 @@
   top: 0;
   width: 100%;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  --controlsHeight: calc(var(--base) * 3);
 
   &::after {
     content: '';
@@ -24,9 +27,16 @@
     display: flex;
     align-items: center;
     gap: var(--base);
-    padding-top: calc(var(--base) / 2);
-    padding-bottom: calc((var(--base) / 2) + 1px);
+    padding-bottom: 1px;
     z-index: 1;
+  }
+
+  &__content {
+    height: var(--controlsHeight);
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    overflow: hidden;
   }
 
   &__timestamps {
@@ -36,7 +46,7 @@
     padding: 0;
     gap: var(--base);
     margin: 0;
-    overflow: hidden;
+    width: 100%;
   }
 
   &__timestamp {
@@ -155,10 +165,58 @@
     }
   }
 
-  @include small-break {
+  @include mid-break {
+    // On mobile, only stick the controls to the top
+    // The timestamps and meta can scroll past
+    // The same container needs to the sticky, though
+    // So we use a static height with a negative top
+    --controlsHeight: calc(var(--base) * 1.5);
+    top: calc(var(--controlsHeight) * -1);
+    padding-right: 0;
+    padding-left: 0;
+
     &__wrapper {
-      padding-top: calc(var(--base) / 4);
-      padding-bottom: calc((var(--base) / 4) + 1px);
+      flex-direction: column;
+      gap: 0;
+    }
+
+    &__content {
+      width: 100%;
+      align-items: flex-start;
+      padding-top: calc(var(--base) / 2);
+      overflow: auto;
+
+      // this container has a fixed height
+      // this means the scrollbar (when present) overlaps the content
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    &__timestamps {
+      width: auto;
+      gap: calc(var(--base) / 2);
+      margin-left: var(--gutter-h);
+      margin-right: var(--gutter-h);
+    }
+
+    &__controls-wrapper {
+      width: 100%;
+      transform: translate3d(0, 0, 0);
+      padding: calc(var(--base) / 2) 0;
+      overflow: auto;
+    }
+
+    &__controls {
+      margin-left: var(--gutter-h);
+      margin-right: var(--gutter-h);
+    }
+
+    &__popup {
+      // TODO: the container needs to overflow on mobile
+      // But the popup interferes with this because it requires overflow in order to be visible
+      // So we likely need to outright show the controls nested within the popup on mobile
+      display: none;
     }
   }
 }
