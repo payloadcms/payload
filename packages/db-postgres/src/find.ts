@@ -1,14 +1,14 @@
-import type { SQL } from 'drizzle-orm';
-import type { PgSelect } from 'drizzle-orm/pg-core';
 import type { Find } from 'payload/database';
 import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payload/types';
 
 import { asc, desc, inArray, sql } from 'drizzle-orm';
 import toSnakeCase from 'to-snake-case';
 
+import type { ChainedMethods } from './find/chainMethods';
 import type { PostgresAdapter } from './types';
 
 import { buildFindManyArgs } from './find/buildFindManyArgs';
+import { chainMethods } from './find/chainMethods';
 import buildQuery from './queries/buildQuery';
 import { transform } from './transform/read';
 
@@ -47,15 +47,11 @@ export const find: Find = async function find(
   })
   const db = this.sessions?.[req.transactionID] || this.db
   const orderedIDMap: Record<number | string, number> = {}
-  let selectCount: PgSelect<string, { count: SQL<number> }, 'partial', Record<string, 'not-null'>>
 
-  const methodsToCall: {
-    args: unknown[]
-    method: string
-  }[] = []
+  const selectDistinctMethods: ChainedMethods = [];
 
   if (orderBy?.order && orderBy?.column) {
-    methodsToCall.push({
+    selectDistinctMethods.push({
       args: [orderBy.order(orderBy.column)],
       method: 'orderBy',
     })
@@ -71,23 +67,21 @@ export const find: Find = async function find(
   // only fetch IDs when a sort or where query is used that needs to be done on join tables, otherwise these can be done directly on the table in findMany
   if (Object.keys(joins).length > 0) {
     if (where) {
-      methodsToCall.push({ args: [where], method: 'where' })
+      selectDistinctMethods.push({ args: [where], method: 'where' })
     }
     Object.entries(joins).forEach(([joinTable, condition]) => {
       if (joinTable) {
-        methodsToCall.push({
+        selectDistinctMethods.push({
           args: [this.tables[joinTable], condition],
           method: 'leftJoin',
         })
       }
     })
 
-    methodsToCall.push({ args: [(page - 1) * limit], method: 'offset' })
-    methodsToCall.push({ args: [limit === 0 ? undefined : limit], method: 'limit' })
+    selectDistinctMethods.push({ args: [(page - 1) * limit], method: 'offset' })
+    selectDistinctMethods.push({ args: [limit === 0 ? undefined : limit], method: 'limit' })
 
-    selectDistinctResult = await methodsToCall.reduce((query, { args, method }) => {
-      return query[method](...args)
-    }, db.selectDistinct(selectFields).from(table))
+    selectDistinctResult = await chainMethods({ methods: selectDistinctMethods, query: db.selectDistinct(selectFields).from(table)})
 
     if (selectDistinctResult.length === 0) {
       return {
@@ -127,16 +121,22 @@ export const find: Find = async function find(
   const findPromise = db.query[tableName].findMany(findManyArgs)
 
   if (pagination !== false || selectDistinctResult?.length > limit) {
-    selectCount = db
-      .select({ count: sql<number>`count(*)` })
-      .from(table)
-      .where(where)
+    const selectCountMethods: ChainedMethods = [];
     Object.entries(joins).forEach(([joinTable, condition]) => {
       if (joinTable) {
-        selectCount.leftJoin(this.tables[joinTable], condition)
+        selectCountMethods.push({
+          args: [this.tables[joinTable], condition],
+          method: 'leftJoin',
+        })
       }
     })
-    const countResult = await selectCount
+    const countResult = await chainMethods({
+      methods: selectCountMethods,
+      query: db
+        .select({ count: sql<number>`count(*)` })
+        .from(table)
+        .where(where)
+    })
     totalDocs = Number(countResult[0].count)
     totalPages = typeof limit === 'number' ? Math.ceil(totalDocs / limit) : 1
     hasPrevPage = page > 1
