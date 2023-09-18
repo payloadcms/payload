@@ -94,6 +94,7 @@ export function mongooseAdapter({
       globals: undefined,
       init,
       ...(migrationDir && { migrationDir }),
+      name: 'mongoose',
       mongoMemoryServer: undefined,
       payload,
       queryDrafts,

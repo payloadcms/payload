@@ -47,6 +47,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       db: undefined,
       defaultIDType: 'number',
       // destroy,
+      name: 'postgres',
       deleteMany,
       deleteOne,
       enums: {},

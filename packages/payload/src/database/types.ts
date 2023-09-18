@@ -100,6 +100,10 @@ export interface DatabaseAdapter {
    */
   migrationDir?: string
   /**
+   * The name of the database adapter
+   */
+  name: string
+  /**
    * reference to the instance of payload
    */
   payload: Payload
