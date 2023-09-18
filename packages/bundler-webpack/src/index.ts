@@ -4,7 +4,7 @@ import { devAdmin } from './scripts/dev'
 import { buildAdmin } from './scripts/build'
 import { serveAdmin } from './scripts/serve'
 
-export default (): PayloadBundler => ({
+export const webpackBundler: () => PayloadBundler = () => ({
   dev: async (payload) => devAdmin({ payload }),
   build: async (payloadConfig) => buildAdmin({ payloadConfig }),
   serve: async (payload) => serveAdmin({ payload }),
