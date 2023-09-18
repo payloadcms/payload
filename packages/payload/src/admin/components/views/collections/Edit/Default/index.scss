@@ -37,7 +37,7 @@
   }
 
   &__edit {
-    padding-top: base(1);
+    padding-top: calc(var(--base) * 1.5);
     padding-bottom: base(4);
     flex-grow: 1;
   }
@@ -101,7 +101,7 @@
     }
 
     &__edit {
-      padding-top: 0;
+      padding-top: var(--base);
       padding-bottom: 0;
     }
 
@@ -123,6 +123,12 @@
     &__sidebar {
       padding-bottom: base(3.5);
       overflow: visible;
+    }
+  }
+
+  @include small-break {
+    &__edit {
+      padding-top: calc(var(--base) / 2);
     }
   }
 }

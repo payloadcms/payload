@@ -154,4 +154,11 @@
       }
     }
   }
+
+  @include small-break {
+    &__wrapper {
+      padding-top: calc(var(--base) / 4);
+      padding-bottom: calc((var(--base) / 4) + 1px);
+    }
+  }
 }
