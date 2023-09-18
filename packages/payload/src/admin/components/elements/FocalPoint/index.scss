@@ -1,0 +1,61 @@
+@import '../../../scss/styles.scss';
+
+.focal-point {
+  display: flex;
+  margin: 0 calc(var(--gutter-h) * -1);
+  border-top: 1px solid var(--theme-elevation-150);
+  padding: 0 var(--gutter-h);
+  height: 100%;
+
+  &__imageWrap {
+    border-right: 1px solid var(--theme-elevation-150);
+    padding: base(2) base(1.5) 0 0;
+  }
+
+  &__imageRef {
+    position: relative;
+  }
+
+  &__point {
+    cursor: move;
+    position: absolute;
+    transform: translate3d(-50%, -50%, 0);
+
+    & svg {
+      width: base(2);
+      height: base(2);
+    }
+  }
+
+  &__sidebar {
+    padding: base(2) 0 0 base(1.5);
+    min-width: 350px;
+  }
+
+  &__coordinates {
+    display: flex;
+    gap: base(1);
+  }
+
+  &__x,
+  &__y {
+    & input {
+      @include formInput;
+      margin-top: base(0.25);
+    }
+  }
+
+  @include small-break {
+    flex-direction: column;
+
+    &__imageWrap {
+      border-right: none;
+      padding: base(1) 0;
+    }
+
+    &__sidebar {
+      padding: 0;
+      min-width: 0;
+    }
+  }
+}

@@ -177,7 +177,45 @@ export default async function resizeAndTransformImageSizes({
         return createResult(imageResizeConfig.name)
       }
 
-      let resized = sharpBase.clone().resize(imageResizeConfig)
+      const focalPoint = {
+        x: 0.65,
+        y: 0.6,
+      }
+
+      let resized = sharpBase.clone()
+
+      if (imageResizeConfig.width && imageResizeConfig.height) {
+        const { width, height } = imageResizeConfig
+
+        const originalAspectRatio = dimensions.width / dimensions.height
+        const targetAspectRatio = imageResizeConfig.width / imageResizeConfig.height
+
+        if (originalAspectRatio !== targetAspectRatio) {
+          const prioritizeHeight = originalAspectRatio > targetAspectRatio
+
+          const { info } = await resized
+            .resize({
+              height: prioritizeHeight ? height : null,
+              width: prioritizeHeight ? null : width,
+            })
+            .toBuffer({ resolveWithObject: true })
+
+          const maxOffsetX = Math.max(info.width - width, 0)
+          const maxOffsetY = Math.max(info.height - height, 0)
+
+          const offsetX = Math.min(Math.floor(info.width * focalPoint.x - width / 2), maxOffsetX)
+          const offsetY = Math.min(Math.floor(info.height * focalPoint.y - height / 2), maxOffsetY)
+
+          resized = resized.extract({
+            width,
+            height,
+            top: offsetY,
+            left: offsetX,
+          })
+        }
+      } else {
+        resized = resized.resize(imageResizeConfig)
+      }
 
       if (imageResizeConfig.formatOptions) {
         resized = resized.toFormat(

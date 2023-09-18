@@ -105,16 +105,46 @@ export default buildConfigWithDefaults({
           'image/svg+xml',
           'audio/mpeg',
         ],
-        resizeOptions: {
-          width: 1280,
-          height: 720,
-          position: 'center',
-        },
         formatOptions: {
           format: 'png',
           options: { quality: 90 },
         },
         imageSizes: [
+          {
+            name: 'focalTest',
+            width: 400,
+            height: 300,
+          },
+          {
+            name: 'focalTest2',
+            width: 600,
+            height: 300,
+          },
+          {
+            name: 'focalTest3',
+            width: 900,
+            height: 300,
+          },
+          {
+            name: 'focalTest4',
+            width: 300,
+            height: 400,
+          },
+          {
+            name: 'focalTest5',
+            width: 300,
+            height: 600,
+          },
+          {
+            name: 'focalTest6',
+            width: 300,
+            height: 800,
+          },
+          {
+            name: 'focalTest7',
+            width: 300,
+            height: 300,
+          },
           {
             name: 'maintainedAspectRatio',
             width: 1024,
@@ -144,12 +174,15 @@ export default buildConfigWithDefaults({
             name: 'accidentalSameSize',
             width: 320,
             height: 80,
+            position: 'top',
           },
           {
             name: 'tablet',
             width: 640,
-            height: 480,
-            crop: 'left top',
+            height: 80,
+            resizeOptions: {
+              position: 'right bottom',
+            },
           },
           {
             name: 'mobile',

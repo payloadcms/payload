@@ -6,15 +6,18 @@ import type { Props } from './types'
 import Button from '../../../../elements/Button'
 import { Dropzone } from '../../../../elements/Dropzone'
 import FileDetails from '../../../../elements/FileDetails'
-import Pill from '../../../../elements/Pill'
 import Error from '../../../../forms/Error'
 import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues'
 import useField from '../../../../forms/useField'
 import FileGraphic from '../../../../graphics/File'
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo'
+import { Drawer, DrawerToggler } from '../../../../elements/Drawer'
+
 import './index.scss'
+import FocalPoint from '../../../../elements/FocalPoint'
 
 const baseClass = 'file-field'
+const drawerSlug = 'edit-upload'
 
 const validate = (value) => {
   if (!value && value !== undefined) {
@@ -126,24 +129,20 @@ export const Upload: React.FC<Props> = (props) => {
                 </div>
 
                 <div className={`${baseClass}__file-mutation`}>
-                  <Pill
-                    onClick={() => {
-                      //
-                    }}
-                  >
+                  <DrawerToggler slug={drawerSlug} className={`${baseClass}__edit`}>
                     Set Focal Point
-                  </Pill>
-                  <Pill
-                    onClick={() => {
-                      //
-                    }}
-                  >
+                  </DrawerToggler>
+                  <DrawerToggler slug={drawerSlug} className={`${baseClass}__edit`}>
                     Crop Image
-                  </Pill>
+                  </DrawerToggler>
                 </div>
               </div>
             </React.Fragment>
           )}
+
+          <Drawer slug={drawerSlug} title={`Editing ${value?.name}`}>
+            <FocalPoint fileSrc={fileSrc} value={value} />
+          </Drawer>
 
           {!value && (
             <Dropzone
