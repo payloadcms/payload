@@ -9,6 +9,7 @@ import { DocumentTabs } from './Tabs'
 import './index.scss'
 
 const baseClass = `doc-header`
+
 export const DocumentHeader: React.FC<{
   apiURL: string
   collection?: SanitizedCollectionConfig
@@ -18,7 +19,7 @@ export const DocumentHeader: React.FC<{
   id?: string
   isEditing?: boolean
 }> = (props) => {
-  const { apiURL, collection, customHeader, data, global, id, isEditing } = props
+  const { id, apiURL, collection, customHeader, data, global, isEditing } = props
   const { t } = useTranslation('general')
 
   return (
