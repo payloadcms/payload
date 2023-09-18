@@ -52,12 +52,8 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
           : webpackConfig
       return {
         ...existingConfig,
-        resolveLoader: {
-          ...(existingConfig.resolveLoader || {}),
-          modules: [
-            ...(existingConfig?.resolveLoader?.modules || []),
-            path.resolve(__dirname, '../packages/payload/node_modules'),
-          ],
+        entry: {
+          main: [path.resolve(__dirname, '../packages/payload/src/admin')],
         },
         name,
         cache: process.env.NODE_ENV === 'test' ? { type: 'memory' } : existingConfig.cache,
@@ -75,6 +71,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             ),
             '@payloadcms/db-mongodb': path.resolve(__dirname, '../packages/db-mongodb/src/mock'),
             '@payloadcms/db-postgres': path.resolve(__dirname, '../packages/db-postgres/src/mock'),
+            react: path.resolve(__dirname, '../packages/payload/node_modules/react'),
           },
         },
       }

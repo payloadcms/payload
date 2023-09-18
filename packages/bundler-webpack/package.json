@@ -19,6 +19,7 @@
   "dependencies": {
     "compression": "1.7.4",
     "connect-history-api-fallback": "1.6.0",
+    "css-loader": "5.2.7",
     "css-minimizer-webpack-plugin": "^5.0.0",
     "file-loader": "6.2.0",
     "html-webpack-plugin": "^5.5.0",
@@ -28,6 +29,8 @@
     "postcss": "8.4.27",
     "postcss-loader": "6.2.1",
     "postcss-preset-env": "9.0.0",
+    "process": "0.11.10",
+    "sass-loader": "12.6.0",
     "style-loader": "^2.0.0",
     "swc-loader": "^0.2.3",
     "swc-minify-webpack-plugin": "^2.1.0",
