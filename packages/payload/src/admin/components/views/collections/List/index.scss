@@ -2,6 +2,7 @@
 
 .collection-list {
   width: 100%;
+  margin-top: base(0.5);
   margin-bottom: base(2);
 
   &__wrap {
@@ -107,9 +108,15 @@
   }
 
   @include mid-break {
+    margin-top: base(0.25);
+
     &__wrap {
       padding-top: 0;
       padding-bottom: 0;
+    }
+
+    &__header {
+      gap: base(0.5);
     }
 
     &__search-input {
@@ -131,6 +138,7 @@
   }
 
   @include small-break {
+    margin-top: calc(var(--base) / 4);
     margin-bottom: base(3);
 
     &__header {
