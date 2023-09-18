@@ -47,6 +47,7 @@
     "@types/testing-library__jest-dom": "5.14.8",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
+    "graphql-request": "6.1.0",
     "express": "4.18.2",
     "form-data": "3.0.1",
     "get-port": "5.1.1",
