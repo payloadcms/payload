@@ -8,8 +8,6 @@ import { mongooseAdapter } from '../packages/db-mongodb/src/index'
 import { postgresAdapter } from '../packages/db-postgres/src/index'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
 
-process.env.PAYLOAD_DATABASE = 'postgres'
-
 const databaseAdapters = {
   mongoose: mongooseAdapter({
     url: 'mongodb://127.0.0.1/payloadtests',
@@ -73,6 +71,10 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             [path.resolve(__dirname, '../packages/db-mongodb/src/index')]: path.resolve(
               __dirname,
               '../packages/db-mongodb/src/mock.js',
+            ),
+            [path.resolve(__dirname, '../packages/bundler-webpack/src/index')]: path.resolve(
+              __dirname,
+              '../packages/bundler-webpack/src/mocks/emptyModule.js',
             ),
             '@payloadcms/db-mongodb': path.resolve(__dirname, '../packages/db-mongodb/src/mock'),
             '@payloadcms/db-postgres': path.resolve(__dirname, '../packages/db-postgres/src/mock'),
