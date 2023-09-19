@@ -11,6 +11,6 @@
   },
   "aliases": {
     "components": "src/app/_components",
-    "utils": "src/utilities"
+    "utils": "src/payload/utilities"
   }
 }

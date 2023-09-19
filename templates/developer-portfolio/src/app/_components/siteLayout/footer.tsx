@@ -2,7 +2,7 @@ import { FC } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { Profile } from '../../../payload-types'
+import { Profile } from '../../../payload/payload-types'
 import { PayloadLogo } from '../../_assets/payloadLogo'
 import { SocialIcons } from '../content/socialIcons'
 import { ThemeToggle } from './themeToggle'

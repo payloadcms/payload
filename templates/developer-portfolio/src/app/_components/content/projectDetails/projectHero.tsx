@@ -1,7 +1,7 @@
 'use client'
 import { FC } from 'react'
 
-import { Project } from '../../../../payload-types'
+import { Project } from '../../../../payload/payload-types'
 import { MediaBlock } from '../../../_components/content/mediaBlock'
 import { TechnologiesUsed } from './technologiesUsed'
 

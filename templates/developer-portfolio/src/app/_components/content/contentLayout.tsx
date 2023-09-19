@@ -1,7 +1,7 @@
 import { FC } from 'react'
 
-import { Form, Page, Profile, Project } from '../../../payload-types'
-import { cn } from '../../../utilities'
+import { Form, Page, Profile, Project } from '../../../payload/payload-types'
+import { cn } from '../../utilities'
 import { ContentBlock } from './contentBlock'
 import { FormBlock } from './formBlock'
 import { MediaBlock } from './mediaBlock'

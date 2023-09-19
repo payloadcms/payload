@@ -1,7 +1,7 @@
 import React from 'react'
 import { Metadata, ResolvingMetadata } from 'next'
 
-import { Media } from '../payload-types'
+import { Media } from '../payload/payload-types'
 import { ContentLayout } from './_components/content/contentLayout'
 import { fetchPage, fetchProfile } from './_utils/api'
 import { parsePreviewOptions } from './_utils/preview'

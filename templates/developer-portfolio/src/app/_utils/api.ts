@@ -1,4 +1,4 @@
-import type { Header, Page, Profile, Project } from '../../payload-types'
+import type { Header, Page, Profile, Project } from '../../payload/payload-types'
 import type { DraftOptions } from './preview'
 
 export const serverUrl = process.env.PAYLOAD_PUBLIC_SERVER_URL ?? 'http://localhost:3000'

@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { Header, Media, Profile } from '../../../payload-types'
+import { Header, Media, Profile } from '../../../payload/payload-types'
 import { PayloadLink } from '../content/link'
 import { SkipToMainContentLink } from './skipToMainContent'
 

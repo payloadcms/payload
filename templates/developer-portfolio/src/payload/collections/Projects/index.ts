@@ -2,7 +2,6 @@ import type { CollectionConfig } from 'payload/types'
 
 import { loggedIn } from '../../access/loggedIn'
 import { publishedOrLoggedIn } from '../../access/publishedOrLoggedIn'
-import { serverUrl } from '../../app/_utils/api'
 import { Content } from '../../blocks/Content'
 import { Form } from '../../blocks/Form'
 import { MediaBlock } from '../../blocks/Media'
@@ -15,7 +14,7 @@ export const Projects: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     preview: doc => {
-      return `${serverUrl}/projects/${doc.slug}?preview=true`
+      return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/projects/${doc.slug}?preview=true`
     },
   },
   versions: {

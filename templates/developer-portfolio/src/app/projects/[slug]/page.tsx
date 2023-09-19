@@ -1,7 +1,7 @@
 import { Metadata, ResolvingMetadata } from 'next'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 
-import { Media } from '../../../payload-types'
+import { Media } from '../../../payload/payload-types'
 import { ProjectDetails } from '../../_components/content/projectDetails/projectDetails'
 import { fetchProfile, fetchProject } from '../../_utils/api'
 import { parsePreviewOptions } from '../../_utils/preview'

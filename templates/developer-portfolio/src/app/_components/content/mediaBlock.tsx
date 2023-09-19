@@ -2,8 +2,8 @@ import { FC, Fragment } from 'react'
 import { cva } from 'class-variance-authority'
 import Image from 'next/image'
 
-import { Media } from '../../../payload-types'
-import { cn } from '../../../utilities'
+import { Media } from '../../../payload/payload-types'
+import { cn } from '../../utilities'
 import { Block, BlockProps } from '../ui/block'
 import { MediaDialog } from './mediaDialog'
 

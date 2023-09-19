@@ -12,8 +12,7 @@ dotenv.config({
 import express from 'express'
 import payload from 'payload'
 
-import { serverUrl } from './app/_utils/api'
-import { seed } from './seed'
+import { seed } from './payload/seed'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -36,10 +35,11 @@ const start = async (): Promise<void> => {
   if (process.env.PAYLOAD_SEED === 'true') {
     payload.logger.info('---- SEEDING DATABASE ----')
     await seed(payload)
+    process.exit()
   }
 
   app.listen(PORT, async () => {
-    payload.logger.info(`App URL: ${serverUrl}`)
+    payload.logger.info(`App URL: ${process.env.PAYLOAD_PUBLIC_SERVER_URL}`)
   })
 }
 

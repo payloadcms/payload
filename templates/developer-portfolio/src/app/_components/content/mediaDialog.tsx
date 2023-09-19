@@ -3,7 +3,7 @@
 import { FC, useState } from 'react'
 import Image from 'next/image'
 
-import { cn } from '../../../utilities'
+import { cn } from '../../utilities'
 import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog'
 
 interface MediaDialogProps {

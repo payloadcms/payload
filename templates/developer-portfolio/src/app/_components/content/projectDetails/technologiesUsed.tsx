@@ -1,6 +1,6 @@
 import { FC } from 'react'
 
-import { Project, Technology } from '../../../../payload-types'
+import { Project, Technology } from '../../../../payload/payload-types'
 
 export interface TechnologiesUsedProps {
   technologies: Project['technologiesUsed']

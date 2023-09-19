@@ -5,5 +5,5 @@ package-lock.json
 .env
 .next
 .vercel
-src/media
+/media
 .DS_Store

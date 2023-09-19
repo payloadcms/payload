@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import Link from 'next/link'
 
-import { Media, Project } from '../../../payload-types'
+import { Media, Project } from '../../../payload/payload-types'
 import { formatYear } from '../../_utils/format'
 import { Block } from '../ui/block'
 import { MediaBlock } from './mediaBlock'

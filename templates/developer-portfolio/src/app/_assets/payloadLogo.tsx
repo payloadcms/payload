@@ -1,4 +1,4 @@
-import { cn } from '../../utilities'
+import { cn } from '../utilities'
 
 export const PayloadLogo = ({ className = '' }: { className?: string }) => (
   <svg

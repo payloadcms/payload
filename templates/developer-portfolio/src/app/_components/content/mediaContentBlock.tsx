@@ -1,6 +1,6 @@
 import { FC, Fragment } from 'react'
 
-import { Media } from '../../../payload-types'
+import { Media } from '../../../payload/payload-types'
 import { ContentBlock } from './contentBlock'
 import { PayloadLink, PayloadLinkType } from './link'
 import { MediaBlock } from './mediaBlock'

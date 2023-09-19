@@ -2,7 +2,6 @@ import type { CollectionConfig } from 'payload/types'
 
 import { loggedIn } from '../../access/loggedIn'
 import { publishedOrLoggedIn } from '../../access/publishedOrLoggedIn'
-import { serverUrl } from '../../app/_utils/api'
 import { Content } from '../../blocks/Content'
 import { Form } from '../../blocks/Form'
 import { MediaBlock } from '../../blocks/Media'
@@ -14,7 +13,7 @@ import { tagRevalidator } from '../../utilities/tagRevalidator'
 
 const formatAppURL = ({ doc }): string => {
   const pathToUse = doc.slug === 'home' ? '' : doc.slug
-  const { pathname } = new URL(`${serverUrl}/${pathToUse}`)
+  const { pathname } = new URL(`${process.env.PAYLOAD_PUBLIC_SERVER_URL}/${pathToUse}`)
   return pathname
 }
 
@@ -23,7 +22,7 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     preview: doc => {
-      return `${serverUrl}${formatAppURL({ doc })}?preview=true`
+      return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}${formatAppURL({ doc })}?preview=true`
     },
   },
   versions: {

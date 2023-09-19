@@ -1,6 +1,6 @@
 import { FC } from 'react'
 
-import { Profile, Project } from '../../../../payload-types'
+import { Profile, Project } from '../../../../payload/payload-types'
 import { FadeInContent } from '../../ui/fadeInContent'
 import { ContentLayout } from '../contentLayout'
 import { ProfileCTABlock } from '../profileCTABlock'

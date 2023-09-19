@@ -2,7 +2,7 @@ import { cva } from 'class-variance-authority'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { Media, Profile } from '../../../payload-types'
+import { Media, Profile } from '../../../payload/payload-types'
 import { Block } from '../ui/block'
 import { RichText } from './richText'
 import { SocialIcons } from './socialIcons'

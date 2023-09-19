@@ -1,6 +1,6 @@
 import { FC } from 'react'
 
-import { Project } from '../../../../payload-types'
+import { Project } from '../../../../payload/payload-types'
 
 interface ProjectRolesProps {
   roles: Project['role']

@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, VariantProps } from 'class-variance-authority'
 
-import { cn } from '../../../utilities'
+import { cn } from '../../utilities'
 import { FadeInContent } from './fadeInContent'
 
 const blockVariants = cva('flex col-span-6 justify-center lg:justify-start', {

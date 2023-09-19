@@ -1,7 +1,7 @@
 import { AnchorHTMLAttributes, ReactNode } from 'react'
 import Link, { LinkProps } from 'next/link'
 
-import { Header } from '../../../payload-types'
+import { Header } from '../../../payload/payload-types'
 
 export type PayloadLinkType = Header['navItems'][0]['link']
 
