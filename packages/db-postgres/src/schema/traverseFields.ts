@@ -10,12 +10,13 @@ import {
   integer,
   jsonb,
   numeric,
+  pgEnum,
   text,
   unique,
   varchar,
 } from 'drizzle-orm/pg-core'
 import { InvalidConfiguration } from 'payload/errors'
-import { fieldAffectsData } from 'payload/types'
+import { fieldAffectsData, optionIsObject } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
 import type { GenericColumns, PostgresAdapter } from '../types'
@@ -94,7 +95,8 @@ export const traverseFields = ({
 
       if (
         (field.unique || field.index) &&
-        !['array', 'blocks', 'group', 'relationship', 'upload'].includes(field.type)
+        (!['array', 'blocks', 'group', 'relationship', 'upload'].includes(field.type) ||
+          !(field.type === 'number' && field.hasMany === true))
       ) {
         targetIndexes[`${field.name}Idx`] = createIndex({
           name: field.name,
@@ -155,6 +157,25 @@ export const traverseFields = ({
       }
 
       case 'select': {
+        const enumName = `${newTableName}_${columnPrefix || ''}${toSnakeCase(field.name)}`
+        const fieldName = `${fieldPrefix || ''}${field.name}`
+
+        adapter.enums[enumName] = pgEnum(
+          enumName,
+          field.options.map((option) => {
+            if (optionIsObject(option)) {
+              return option.value
+            }
+
+            return option
+          }) as [string, ...string[]],
+        )
+
+        if (field.hasMany) {
+          // build table here
+        } else {
+          targetTable[fieldName] = adapter.enums[enumName](fieldName)
+        }
         break
       }
 
