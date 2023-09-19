@@ -50,9 +50,13 @@ export const buildTable = ({
 
   let hasLocalizedField = false
   let hasLocalizedRelationshipField = false
+  let hasManyNumberField: 'index' | boolean = false
+  let hasLocalizedManyNumberField = false
+
   const localesColumns: Record<string, PgColumnBuilder> = {}
   const localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {}
   let localesTable: GenericTable
+  let numbersTable: GenericTable
 
   const relationships: Set<string> = new Set()
   let relationshipsTable: GenericTable
@@ -76,7 +80,12 @@ export const buildTable = ({
     columns.id = serial('id').primaryKey()
   }
 
-  ;({ hasLocalizedField, hasLocalizedRelationshipField } = traverseFields({
+  ;({
+    hasLocalizedField,
+    hasLocalizedManyNumberField,
+    hasLocalizedRelationshipField,
+    hasManyNumberField,
+  } = traverseFields({
     adapter,
     arrayBlockRelations,
     buildRelationships,
@@ -139,6 +148,50 @@ export const buildTable = ({
     }))
 
     adapter.relations[`relations_${localeTableName}`] = localesTableRelations
+  }
+
+  if (hasManyNumberField) {
+    const numbersTableName = `${tableName}_numbers`
+    const columns: Record<string, PgColumnBuilder> = {
+      id: serial('id').primaryKey(),
+      number: numeric('number'),
+      order: integer('order').notNull(),
+      parent: parentIDColumnMap[idColType]('parent_id')
+        .references(() => table.id, { onDelete: 'cascade' })
+        .notNull(),
+      path: varchar('path').notNull(),
+    }
+
+    if (hasLocalizedManyNumberField) {
+      columns.locale = adapter.enums._locales('locale')
+    }
+
+    numbersTable = pgTable(numbersTableName, columns, (cols) => {
+      const indexes: Record<string, IndexBuilder> = {
+        orderParentIdx: index('order_parent_idx').on(cols.order, cols.parent),
+      }
+
+      if (hasManyNumberField === 'index') {
+        indexes.numberIdx = index('number_idx').on(cols.number)
+      }
+
+      if (hasLocalizedManyNumberField) {
+        indexes.localeParent = index('locale_parent').on(cols.locale, cols.parent)
+      }
+
+      return indexes
+    })
+
+    adapter.tables[numbersTableName] = numbersTable
+
+    const numbersTableRelations = relations(numbersTable, ({ one }) => ({
+      parent: one(table, {
+        fields: [numbersTable.parent],
+        references: [table.id],
+      }),
+    }))
+
+    adapter.relations[`relations_${numbersTableName}`] = numbersTableRelations
   }
 
   if (buildRelationships) {
@@ -226,6 +279,10 @@ export const buildTable = ({
 
     if (hasLocalizedField) {
       result._locales = many(localesTable)
+    }
+
+    if (hasManyNumberField) {
+      result._numbers = many(numbersTable)
     }
 
     if (relationships.size && relationshipsTable) {

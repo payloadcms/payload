@@ -19,6 +19,7 @@ export const transformForWrite = ({ data, fields, path = '', tableName }: Args):
     arrays: {},
     blocks: {},
     locales: {},
+    numbers: [],
     relationships: [],
     row: {},
   }
@@ -33,6 +34,7 @@ export const transformForWrite = ({ data, fields, path = '', tableName }: Args):
     fields,
     locales: rowToInsert.locales,
     newTableName: tableName,
+    numbers: rowToInsert.numbers,
     parentTableName: tableName,
     path,
     relationships: rowToInsert.relationships,
