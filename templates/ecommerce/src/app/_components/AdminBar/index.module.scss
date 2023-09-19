@@ -10,7 +10,7 @@
   transition: opacity 150ms linear;
 }
 
-:global([data-theme="dark"]) {
+:global([data-theme='dark']) {
   .adminBar {
     background-color: var(--theme-elevation-0);
   }

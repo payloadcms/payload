@@ -14,7 +14,7 @@ export const AddToCartButton: React.FC<{
   quantity?: number
   className?: string
   appearance?: Props['appearance']
-}> = props => {
+}> = (props) => {
   const { product, quantity = 1, className, appearance = 'primary' } = props
 
   const { cart, addItemToCart, isProductInCart, hasInitializedCart } = useCart()

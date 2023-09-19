@@ -28,7 +28,7 @@ export const DocumentTabs: React.FC<{
   id: string
   isEditing?: boolean
 }> = (props) => {
-  const { apiURL, collection, global, id, isEditing } = props
+  const { id, apiURL, collection, global, isEditing } = props
   const match = useRouteMatch()
   const location = useLocation()
   const { t } = useTranslation('general')
@@ -67,55 +67,56 @@ export const DocumentTabs: React.FC<{
   // Don't show tabs when creating new documents
   if ((tabs && collection && isEditing) || global) {
     return (
-      <ul className={baseClass}>
-        <li
-          className={[`${baseClass}__tab`, editTabActive && `${baseClass}__tab--active`]
-            .filter(Boolean)
-            .join(' ')}
-        >
-          <Link className={`${baseClass}__tab-link`} to={docURL}>
-            <div className={`${baseClass}__tab-label`}>{t('edit')}</div>
-          </Link>
-        </li>
-        {(collection?.versions || global?.versions) && (
+      <div className={baseClass}>
+        <ul className={`${baseClass}__tabs`}>
           <li
-            className={[
-              `${baseClass}__tab`,
-              location.pathname.startsWith(versionsURL) && `${baseClass}__tab--active`,
-            ]
+            className={[`${baseClass}__tab`, editTabActive && `${baseClass}__tab--active`]
               .filter(Boolean)
               .join(' ')}
           >
-            <Link className={`${baseClass}__tab-link`} to={versionsURL}>
-              <div className={`${baseClass}__tab-label`}>
-                {t('version:versions')}
-                {typeof versions?.totalDocs === 'number' && versions?.totalDocs > 0 && (
-                  <Fragment>
-                    &nbsp;
-                    <span className={`${baseClass}__count`}>{versions?.totalDocs}</span>
-                  </Fragment>
-                )}
-              </div>
+            <Link className={`${baseClass}__tab-link`} to={docURL}>
+              <div className={`${baseClass}__tab-label`}>{t('edit')}</div>
             </Link>
           </li>
-        )}
-        {(!collection?.admin?.hideAPIURL || !global?.admin?.hideAPIURL) && (
-          <li
-            className={[`${baseClass}__tab`, match.url === apiURL && `${baseClass}__tab--active`]
-              .filter(Boolean)
-              .join(' ')}
-          >
-            <Link
-              className={`${baseClass}__tab-link`}
-              rel="noopener noreferrer"
-              target="_blank"
-              to={apiURL}
+          {(collection?.versions || global?.versions) && (
+            <li
+              className={[
+                `${baseClass}__tab`,
+                location.pathname.startsWith(versionsURL) && `${baseClass}__tab--active`,
+              ]
+                .filter(Boolean)
+                .join(' ')}
             >
-              <div className={`${baseClass}__tab-label`}>API</div>
-            </Link>
-          </li>
-        )}
-        {/* {tabs.map((tab) => {
+              <Link className={`${baseClass}__tab-link`} to={versionsURL}>
+                <div className={`${baseClass}__tab-label`}>
+                  {t('version:versions')}
+                  {typeof versions?.totalDocs === 'number' && versions?.totalDocs > 0 && (
+                    <Fragment>
+                      &nbsp;
+                      <span className={`${baseClass}__count`}>{versions?.totalDocs}</span>
+                    </Fragment>
+                  )}
+                </div>
+              </Link>
+            </li>
+          )}
+          {(!collection?.admin?.hideAPIURL || !global?.admin?.hideAPIURL) && (
+            <li
+              className={[`${baseClass}__tab`, match.url === apiURL && `${baseClass}__tab--active`]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              <Link
+                className={`${baseClass}__tab-link`}
+                rel="noopener noreferrer"
+                target="_blank"
+                to={apiURL}
+              >
+                <div className={`${baseClass}__tab-label`}>API</div>
+              </Link>
+            </li>
+          )}
+          {/* {tabs.map((tab) => {
           const tabHref = `${match.url}${tab.path ? `/${tab.path}` : ''}`
           const isActive = location.pathname === tabHref
 
@@ -132,7 +133,8 @@ export const DocumentTabs: React.FC<{
             </li>
           )
         })} */}
-      </ul>
+        </ul>
+      </div>
     )
   }
 

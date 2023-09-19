@@ -46,15 +46,22 @@ import combineParentName from '../utilities/combineParentName'
 import formatName from '../utilities/formatName'
 import withNullableType from './withNullableType'
 
-export const getCollectionIDType = (config: SanitizedCollectionConfig): GraphQLScalarType => {
-  const idField = config.fields.find((field) => fieldAffectsData(field) && field.name === 'id')
-  if (!idField) return GraphQLString
-  switch (idField.type) {
-    case 'number':
-      return GraphQLInt
-    default:
-      return GraphQLString
+const idFieldTypes = {
+  number: GraphQLInt,
+  text: GraphQLString,
+}
+
+export const getCollectionIDType = (
+  payload: Payload,
+  collection: SanitizedCollectionConfig,
+): GraphQLScalarType => {
+  const idField = collection.fields.find((field) => fieldAffectsData(field) && field.name === 'id')
+
+  if (!idField) {
+    return idFieldTypes[payload.db.defaultIDType]
   }
+
+  return idFieldTypes[idField.type]
 }
 
 export type InputObjectTypeConfig = {
@@ -158,6 +165,7 @@ function buildMutationInputType(
           toWords(field.name, true),
         )}RelationshipInput`
         type = new GraphQLInputObjectType({
+          name: fullName,
           fields: {
             relationTo: {
               type: new GraphQLEnumType({
@@ -175,10 +183,9 @@ function buildMutationInputType(
             },
             value: { type: GraphQLJSON },
           },
-          name: fullName,
         })
       } else {
-        type = getCollectionIDType(payload.collections[relationTo].config)
+        type = getCollectionIDType(payload, payload.collections[relationTo].config)
       }
 
       return {
@@ -272,6 +279,7 @@ function buildMutationInputType(
   const fieldName = formatName(name)
 
   return new GraphQLInputObjectType({
+    name: `mutation${fieldName}Input`,
     fields: fields.reduce((inputObjectTypeConfig, field) => {
       const fieldSchema = fieldToSchemaMap[field.type]
 
@@ -284,7 +292,6 @@ function buildMutationInputType(
         ...fieldSchema(inputObjectTypeConfig, field),
       }
     }, {}),
-    name: `mutation${fieldName}Input`,
   })
 }
 

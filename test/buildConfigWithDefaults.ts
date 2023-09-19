@@ -2,8 +2,8 @@ import path from 'path'
 
 import type { Config, SanitizedConfig } from '../packages/payload/src/config/types'
 
-// import viteBundler from '../packages/bundler-vite/src'
-import webpackBundler from '../packages/bundler-webpack/src'
+// import { viteBundler } from '../packages/bundler-vite/src'
+import { webpackBundler } from '../packages/bundler-webpack/src'
 import { mongooseAdapter } from '../packages/db-mongodb/src/index'
 import { postgresAdapter } from '../packages/db-postgres/src/index'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
@@ -53,7 +53,12 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
       return {
         ...existingConfig,
         entry: {
-          main: [path.resolve(__dirname, '../packages/payload/src/admin')],
+          main: [
+            `webpack-hot-middleware/client?path=${
+              testConfig?.routes?.admin || '/admin'
+            }/__webpack_hmr`,
+            path.resolve(__dirname, '../packages/payload/src/admin'),
+          ],
         },
         name,
         cache: process.env.NODE_ENV === 'test' ? { type: 'memory' } : existingConfig.cache,
@@ -68,6 +73,10 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
             [path.resolve(__dirname, '../packages/db-mongodb/src/index')]: path.resolve(
               __dirname,
               '../packages/db-mongodb/src/mock.js',
+            ),
+            [path.resolve(__dirname, '../packages/bundler-webpack/src/index')]: path.resolve(
+              __dirname,
+              '../packages/bundler-webpack/src/mocks/emptyModule.js',
             ),
             '@payloadcms/db-mongodb': path.resolve(__dirname, '../packages/db-mongodb/src/mock'),
             '@payloadcms/db-postgres': path.resolve(__dirname, '../packages/db-postgres/src/mock'),

@@ -34,6 +34,7 @@ const RenderTitle: React.FC<Props> = (props) => {
       className={[className, baseClass, idAsTitle && `${baseClass}--has-id`]
         .filter(Boolean)
         .join(' ')}
+      title={title}
     >
       {idAsTitle ? <IDLabel className={`${baseClass}__id`} id={data?.id} /> : title}
     </Tag>

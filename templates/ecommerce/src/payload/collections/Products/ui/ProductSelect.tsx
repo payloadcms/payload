@@ -3,7 +3,7 @@ import { Select, useFormFields } from 'payload/components/forms'
 import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
 import { TextField } from 'payload/dist/fields/config/types'
 
-export const ProductSelect: React.FC<TextField> = props => {
+export const ProductSelect: React.FC<TextField> = (props) => {
   const { name, label } = props
   const [options, setOptions] = React.useState<
     {
@@ -101,7 +101,7 @@ export const ProductSelect: React.FC<TextField> = props => {
               }}
             >
               {`Manage "${
-                options.find(option => option.value === stripeProductID)?.label || 'Unknown'
+                options.find((option) => option.value === stripeProductID)?.label || 'Unknown'
               }" in Stripe`}
             </span>
             <CopyToClipboard value={href} />

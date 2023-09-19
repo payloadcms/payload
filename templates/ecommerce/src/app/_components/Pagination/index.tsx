@@ -9,7 +9,7 @@ export const Pagination: React.FC<{
   totalPages: number
   onClick: (page: number) => void
   className?: string
-}> = props => {
+}> = (props) => {
   const { page, totalPages, onClick, className } = props
   const hasNextPage = page < totalPages
   const hasPrevPage = page > 1

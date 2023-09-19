@@ -119,6 +119,10 @@
       gap: base(0.5);
     }
 
+    &__sub-header {
+      margin-top: 0;
+    }
+
     &__search-input {
       margin: 0;
     }
@@ -138,7 +142,7 @@
   }
 
   @include small-break {
-    margin-top: calc(var(--base) / 4);
+    margin-top: 0;
     margin-bottom: base(3);
 
     &__header {

@@ -43,7 +43,7 @@ export const Price: React.FC<{
   product: Product
   quantity?: number
   button?: 'addToCart' | 'removeFromCart' | false
-}> = props => {
+}> = (props) => {
   const { product, product: { priceJSON } = {}, button = 'addToCart', quantity } = props
 
   const [price, setPrice] = useState<{

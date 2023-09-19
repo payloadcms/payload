@@ -32,19 +32,19 @@ export async function parseParams({
   tableName,
   where,
 }: Args): Promise<SQL> {
-  let result: SQL;
-  const constraints: SQL[] = [];
+  let result: SQL
+  const constraints: SQL[] = []
 
   if (typeof where === 'object' && Object.keys(where).length > 0) {
     // We need to determine if the whereKey is an AND, OR, or a schema path
     for (const relationOrPath of Object.keys(where)) {
       if (relationOrPath) {
-        const condition = where[relationOrPath];
-        let conditionOperator: 'and' | 'or';
+        const condition = where[relationOrPath]
+        let conditionOperator: 'and' | 'or'
         if (relationOrPath.toLowerCase() === 'and') {
-          conditionOperator = 'and';
+          conditionOperator = 'and'
         } else if (relationOrPath.toLowerCase() === 'or') {
-          conditionOperator = 'or';
+          conditionOperator = 'or'
         }
         if (Array.isArray(condition)) {
           const builtConditions = await buildAndOrConditions({
@@ -55,19 +55,19 @@ export async function parseParams({
             selectFields,
             tableName,
             where: condition,
-          });
+          })
           if (builtConditions.length > 0) {
             if (result) {
-              result = operatorMap[conditionOperator](result, ...builtConditions);
+              result = operatorMap[conditionOperator](result, ...builtConditions)
             } else {
-              result = operatorMap[conditionOperator](...builtConditions);
+              result = operatorMap[conditionOperator](...builtConditions)
             }
           }
         } else {
           // It's a path - and there can be multiple comparisons on a single path.
           // For example - title like 'test' and title not equal to 'tester'
           // So we need to loop on keys again here to handle each operator independently
-          const pathOperators = where[relationOrPath];
+          const pathOperators = where[relationOrPath]
           if (typeof pathOperators === 'object') {
             for (const operator of Object.keys(pathOperators)) {
               if (validOperators.includes(operator as Operator)) {
@@ -83,25 +83,23 @@ export async function parseParams({
                   fields,
                   joins,
                   locale,
-                  pathSegments: relationOrPath.split('.'),
+                  pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
                   selectFields,
                   tableName,
-                });
+                })
 
                 const { operator: queryOperator, value: queryValue } = sanitizeQueryValue({
                   field,
                   operator,
                   val: where[relationOrPath][operator],
-                });
+                })
 
-                queryConstraints.forEach(({
-                  columnName: col,
-                  table: constraintTable,
-                  value,
-                }) => {
-                  constraints.push(operatorMap.equals(constraintTable[col], value));
-                });
-                constraints.push(operatorMap[queryOperator](rawColumn || table[columnName], queryValue));
+                queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
+                  constraints.push(operatorMap.equals(constraintTable[col], value))
+                })
+                constraints.push(
+                  operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
+                )
               }
             }
           }
@@ -111,14 +109,14 @@ export async function parseParams({
   }
   if (constraints.length > 0) {
     if (result) {
-      result = and(result, ...constraints);
+      result = and(result, ...constraints)
     } else {
-      result = and(...constraints);
+      result = and(...constraints)
     }
   }
   if (constraints.length === 1 && !result) {
-    [result] = constraints;
+    ;[result] = constraints
   }
 
-  return result;
+  return result
 }
