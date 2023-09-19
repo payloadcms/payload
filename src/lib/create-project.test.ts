@@ -22,7 +22,11 @@ describe('createProject', () => {
 
   describe('#createProject', () => {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const args = { _: ['project-name'], '--no-deps': true } as CliArgs
+    const args = {
+      _: ['project-name'],
+      '--db': 'mongodb',
+      '--no-deps': true,
+    } as CliArgs
     const packageManager = 'yarn'
 
     it('creates starter project', async () => {

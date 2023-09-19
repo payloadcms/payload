@@ -6,7 +6,8 @@ import ora from 'ora'
 import degit from 'degit'
 
 import { success, error, warning } from '../utils/log'
-import type { CliArgs, ProjectTemplate } from '../types'
+import type { CliArgs, DbDetails, PackageManager, ProjectTemplate } from '../types'
+import { configurePayloadConfig } from './configure-payload-config'
 
 async function createOrFindProjectDir(projectDir: string): Promise<void> {
   const pathExists = await fse.pathExists(projectDir)
@@ -18,16 +19,22 @@ async function createOrFindProjectDir(projectDir: string): Promise<void> {
 async function installDeps(args: {
   cliArgs: CliArgs
   projectDir: string
-  packageManager: string
+  packageManager: PackageManager
 }): Promise<boolean> {
   const { cliArgs, projectDir, packageManager } = args
   if (cliArgs['--no-deps']) {
     return true
   }
-  const cmd = packageManager === 'yarn' ? 'yarn' : 'npm install --legacy-peer-deps'
+  let installCmd = 'npm install --legacy-peer-deps'
+
+  if (packageManager === 'yarn') {
+    installCmd = 'yarn'
+  } else if (packageManager === 'pnpm') {
+    installCmd = 'pnpm install'
+  }
 
   try {
-    await execa.command(cmd, {
+    await execa.command(installCmd, {
       cwd: path.resolve(projectDir),
     })
     return true
@@ -37,29 +44,16 @@ async function installDeps(args: {
   }
 }
 
-export async function updatePackageJSONName(args: {
-  projectName: string
-  projectDir: string
-}): Promise<void> {
-  const { projectName, projectDir } = args
-  const packageJsonPath = path.resolve(projectDir, 'package.json')
-  try {
-    const packageObj = await fse.readJson(packageJsonPath)
-    packageObj.name = projectName
-    await fse.writeJson(packageJsonPath, packageObj, { spaces: 2 })
-  } catch (err: unknown) {
-    warning('Unable to update name in package.json')
-  }
-}
-
 export async function createProject(args: {
   cliArgs: CliArgs
   projectName: string
   projectDir: string
   template: ProjectTemplate
-  packageManager: string
+  packageManager: PackageManager
+  dbDetails?: DbDetails
 }): Promise<void> {
-  const { cliArgs, projectName, projectDir, template, packageManager } = args
+  const { cliArgs, projectName, projectDir, template, packageManager, dbDetails } =
+    args
 
   await createOrFindProjectDir(projectDir)
 
@@ -72,7 +66,8 @@ export async function createProject(args: {
 
   const spinner = ora('Checking latest Payload version...').start()
 
-  await updatePackageJSONName({ projectName, projectDir })
+  await updatePackageJSON({ projectName, projectDir })
+  await configurePayloadConfig({ projectDir, dbDetails })
 
   // Remove yarn.lock file. This is only desired in Payload Cloud.
   const lockPath = path.resolve(projectDir, 'yarn.lock')
@@ -88,5 +83,20 @@ export async function createProject(args: {
     success('Dependencies installed')
   } else {
     error('Error installing dependencies')
+  }
+}
+
+export async function updatePackageJSON(args: {
+  projectName: string
+  projectDir: string
+}): Promise<void> {
+  const { projectName, projectDir } = args
+  const packageJsonPath = path.resolve(projectDir, 'package.json')
+  try {
+    const packageObj = await fse.readJson(packageJsonPath)
+    packageObj.name = projectName
+    await fse.writeJson(packageJsonPath, packageObj, { spaces: 2 })
+  } catch (err: unknown) {
+    warning('Unable to update name in package.json')
   }
 }

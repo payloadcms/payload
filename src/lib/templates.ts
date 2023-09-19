@@ -16,6 +16,7 @@ export async function getValidTemplates(): Promise<ProjectTemplate[]> {
     {
       name: 'blank',
       type: 'starter',
+      // url: 'https://github.com/payloadcms/payload/templates/blank#feat/2.0-template-updates',
       url: 'https://github.com/payloadcms/payload/templates/blank',
       description: 'Blank Template',
     },
