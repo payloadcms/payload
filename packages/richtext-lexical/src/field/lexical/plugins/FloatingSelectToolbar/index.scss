@@ -23,6 +23,16 @@ html[data-theme='light'] {
   height: 37.5px;
   will-change: transform;
 
+  &:after {
+    content: ' ';
+    position: absolute;
+    top: calc(100% - 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 12px solid transparent;
+    border-top-color: var(--color-base-0);
+  }
+
   .format {
     display: flex;
     gap: 2px;

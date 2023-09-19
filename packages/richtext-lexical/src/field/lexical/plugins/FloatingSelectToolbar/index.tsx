@@ -7,7 +7,6 @@ import {
   $isRangeSelection,
   $isTextNode,
   COMMAND_PRIORITY_LOW,
-  FORMAT_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -15,7 +14,6 @@ import * as React from 'react'
 import { createPortal } from 'react-dom'
 
 import { useEditorConfigContext } from '../../config/EditorConfigProvider'
-import { BoldIcon } from '../../ui/icons/Bold'
 import { getDOMRangeRect } from '../../utils/getDOMRangeRect'
 import { getSelectedNode } from '../../utils/getSelectedNode'
 import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition'
@@ -23,13 +21,13 @@ import { ToolbarButton } from './ToolbarButton'
 import './index.scss'
 
 function FloatingSelectToolbar({
+  activeStates,
   anchorElem,
   editor,
-  isBold,
 }: {
+  activeStates: Map<string, boolean>
   anchorElem: HTMLElement
   editor: LexicalEditor
-  isBold: boolean
 }): JSX.Element {
   const popupCharStylesEditorRef = useRef<HTMLDivElement | null>(null)
 
@@ -146,8 +144,21 @@ function FloatingSelectToolbar({
               editorConfig.features?.map((feature) => {
                 if (feature?.floatingSelectToolbar?.buttons?.format) {
                   return feature?.floatingSelectToolbar?.buttons?.format.map((button, i) => {
+                    if (button.componentOverride) {
+                      return (
+                        <button.componentOverride
+                          anchorElem={anchorElem}
+                          editor={editor}
+                          key={button.key}
+                        />
+                      )
+                    }
                     return (
-                      <ToolbarButton key={i}>
+                      <ToolbarButton
+                        classNames={activeStates && activeStates.get(button.key) ? ['active'] : []}
+                        key={button.key}
+                        onClick={() => button.onClick(editor)}
+                      >
                         <button.children />
                       </ToolbarButton>
                     )
@@ -156,16 +167,6 @@ function FloatingSelectToolbar({
                   return null
                 }
               })}
-
-            <ToolbarButton
-              aria-label="Format text as bold"
-              classNames={[isBold ? 'active' : '']}
-              onClick={() => {
-                editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')
-              }}
-            >
-              <BoldIcon />
-            </ToolbarButton>
           </div>
         </React.Fragment>
       )}
@@ -178,7 +179,9 @@ function useFloatingTextFormatToolbar(
   anchorElem: HTMLElement,
 ): JSX.Element | null {
   const [isText, setIsText] = useState(false)
-  const [isBold, setIsBold] = useState(false)
+  const [activeStates, setActiveStates] = useState<Map<string, boolean>>(new Map())
+
+  const { editorConfig } = useEditorConfigContext()
 
   const updatePopup = useCallback(() => {
     editor.getEditorState().read(() => {
@@ -206,8 +209,18 @@ function useFloatingTextFormatToolbar(
 
       const node = getSelectedNode(selection)
 
-      // Update text format
-      setIsBold(selection.hasFormat('bold'))
+      // Update active state of nodes
+
+      for (const feature of editorConfig?.features) {
+        if (feature?.floatingSelectToolbar?.buttons?.format) {
+          for (const button of feature?.floatingSelectToolbar?.buttons?.format) {
+            if (button.isActive) {
+              const isActive = button.isActive(editor, selection)
+              setActiveStates(activeStates.set(button.key, isActive))
+            }
+          }
+        }
+      }
 
       if (selection.getTextContent() !== '') {
         setIsText($isTextNode(node))
@@ -221,7 +234,7 @@ function useFloatingTextFormatToolbar(
         return
       }
     })
-  }, [editor])
+  }, [editor, activeStates, editorConfig])
 
   useEffect(() => {
     document.addEventListener('selectionchange', updatePopup)
@@ -248,7 +261,7 @@ function useFloatingTextFormatToolbar(
   }
 
   return createPortal(
-    <FloatingSelectToolbar anchorElem={anchorElem} editor={editor} isBold={isBold} />,
+    <FloatingSelectToolbar activeStates={activeStates} anchorElem={anchorElem} editor={editor} />,
     anchorElem,
   )
 }
