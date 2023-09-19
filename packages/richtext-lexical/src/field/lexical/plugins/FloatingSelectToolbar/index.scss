@@ -50,7 +50,7 @@ html[data-theme='light'] {
     }
 
     &.active {
-      background-color: rgba(223, 232, 250, 0.3);
+      background-color: var(--color-base-100);
 
       .icon {
         opacity: 1;
