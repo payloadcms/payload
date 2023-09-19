@@ -87,7 +87,7 @@ function initCollectionsGraphQL(payload: Payload): void {
       baseFields.id = { type: idType }
       whereInputFields.push({
         name: 'id',
-        type: 'text',
+        type: payload.db.defaultIDType as 'text',
       })
     }
 

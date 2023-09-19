@@ -114,14 +114,7 @@ export const find: Find = async function find(
     if (where) {
       findManyArgs.where = where
     }
-    // orderBy will only be set if a complex sort is needed on a relation
-    if (sort) {
-      if (sort[0] === '-') {
-        findManyArgs.orderBy = desc(this.tables[tableName][sort.substring(1)])
-      } else {
-        findManyArgs.orderBy = asc(this.tables[tableName][sort])
-      }
-    }
+    findManyArgs.orderBy = orderBy.order(orderBy.column)
   }
 
   const findPromise = db.query[tableName].findMany(findManyArgs)

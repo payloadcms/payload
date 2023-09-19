@@ -8,7 +8,7 @@ import { mongooseAdapter } from '../packages/db-mongodb/src/index'
 import { postgresAdapter } from '../packages/db-postgres/src/index'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
 
-process.env.PAYLOAD_DATABASE = 'postgres'
+// process.env.PAYLOAD_DATABASE = 'postgres'
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({

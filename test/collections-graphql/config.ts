@@ -312,7 +312,7 @@ export default buildConfigWithDefaults({
     },
   ],
   onInit: async (payload) => {
-    await payload.create({
+    const user = await payload.create({
       collection: 'users',
       data: {
         email: devUser.email,
