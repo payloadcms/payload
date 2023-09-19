@@ -80,12 +80,14 @@ export const traverseFields = ({
   fields.forEach((field) => {
     if ('name' in field && field.name === 'id') return
     let columnName: string
+    let fieldName: string
 
     let targetTable = columns
     let targetIndexes = indexes
 
     if (fieldAffectsData(field)) {
       columnName = `${columnPrefix || ''}${toSnakeCase(field.name)}`
+      fieldName = `${fieldPrefix || ''}${field.name}`
 
       // If field is localized,
       // add the column to the locale table instead of main table
@@ -97,11 +99,11 @@ export const traverseFields = ({
 
       if (
         (field.unique || field.index) &&
-        (!['array', 'blocks', 'group', 'relationship', 'upload'].includes(field.type) ||
-          !(field.type === 'number' && field.hasMany === true))
+        !['array', 'blocks', 'group', 'relationship', 'upload'].includes(field.type) &&
+        !(field.type === 'number' && field.hasMany === true)
       ) {
         targetIndexes[`${field.name}Idx`] = createIndex({
-          name: field.name,
+          name: fieldName,
           columnName,
           unique: field.unique,
         })
@@ -113,7 +115,7 @@ export const traverseFields = ({
       case 'email':
       case 'code':
       case 'textarea': {
-        targetTable[`${fieldPrefix || ''}${field.name}`] = varchar(columnName)
+        targetTable[fieldName] = varchar(columnName)
         break
       }
 
@@ -135,14 +137,14 @@ export const traverseFields = ({
             )
           }
         } else {
-          targetTable[`${fieldPrefix || ''}${field.name}`] = numeric(columnName)
+          targetTable[fieldName] = numeric(columnName)
         }
         break
       }
 
       case 'richText':
       case 'json': {
-        targetTable[`${fieldPrefix || ''}${field.name}`] = jsonb(columnName)
+        targetTable[fieldName] = jsonb(columnName)
         break
       }
 
@@ -157,7 +159,6 @@ export const traverseFields = ({
       case 'radio':
       case 'select': {
         const enumName = `enum_${newTableName}_${columnPrefix || ''}${toSnakeCase(field.name)}`
-        const fieldName = `${fieldPrefix || ''}${field.name}`
 
         adapter.enums[enumName] = pgEnum(
           enumName,
@@ -228,9 +229,9 @@ export const traverseFields = ({
       }
 
       case 'checkbox': {
-        targetTable[`${fieldPrefix || ''}${field.name}`] = boolean(columnName)
+        targetTable[fieldName] = boolean(columnName)
         if (field.required) {
-          targetTable[`${fieldPrefix || ''}${field.name}`].notNull()
+          targetTable[fieldName].notNull()
         }
         break
       }
@@ -266,7 +267,7 @@ export const traverseFields = ({
           tableName: arrayTableName,
         })
 
-        relationsToBuild.set(`${fieldPrefix || ''}${field.name}`, arrayTableName)
+        relationsToBuild.set(fieldName, arrayTableName)
 
         const arrayTableRelations = relations(adapter.tables[arrayTableName], ({ many, one }) => {
           const result: Record<string, Relation<string>> = {
@@ -368,7 +369,7 @@ export const traverseFields = ({
           buildRelationships,
           columnPrefix: `${columnName}_`,
           columns,
-          fieldPrefix: `${fieldPrefix || ''}${field.name}_`,
+          fieldPrefix: `${fieldName}_`,
           fields: field.fields,
           forceLocalized: field.localized,
           indexes,
