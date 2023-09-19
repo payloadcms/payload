@@ -153,10 +153,7 @@ export const traverseFields = ({
         break
       }
 
-      case 'radio': {
-        break
-      }
-
+      case 'radio':
       case 'select': {
         const enumName = `${newTableName}_${columnPrefix || ''}${toSnakeCase(field.name)}`
         const fieldName = `${fieldPrefix || ''}${field.name}`
@@ -172,7 +169,7 @@ export const traverseFields = ({
           }) as [string, ...string[]],
         )
 
-        if (field.hasMany) {
+        if (field.type === 'select' && field.hasMany) {
           // build table here
         } else {
           targetTable[fieldName] = adapter.enums[enumName](fieldName)
