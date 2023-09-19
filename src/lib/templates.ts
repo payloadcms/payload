@@ -16,19 +16,19 @@ export async function getValidTemplates(): Promise<ProjectTemplate[]> {
     {
       name: 'blank',
       type: 'starter',
-      url: 'https://github.com/payloadcms/payload/templates/blank',
+      url: 'https://github.com/payloadcms/payload/templates/blank#feat/2.0-template-updates',
       description: 'Blank Template',
     },
     {
       name: 'website',
       type: 'starter',
-      url: 'https://github.com/payloadcms/payload/templates/website',
+      url: 'https://github.com/payloadcms/payload/templates/website#feat/2.0-template-updates',
       description: 'Website Template',
     },
     {
       name: 'ecommerce',
       type: 'starter',
-      url: 'https://github.com/payloadcms/payload/templates/ecommerce',
+      url: 'https://github.com/payloadcms/payload/templates/ecommerce#feat/2.0-template-updates',
       description: 'E-commerce Template',
     },
     {
