@@ -1,25 +1,18 @@
-import type { CreateVersion } from 'payload/database';
+import type { CreateVersion } from 'payload/database'
 
-import { buildVersionCollectionFields } from 'payload/versions';
-import toSnakeCase from 'to-snake-case';
+import { buildVersionCollectionFields } from 'payload/versions'
+import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from './types';
+import type { PostgresAdapter } from './types'
 
-import { upsertRow } from './upsertRow';
+import { upsertRow } from './upsertRow'
 
 export const createVersion: CreateVersion = async function createVersion(
   this: PostgresAdapter,
-  {
-    autosave,
-    collectionSlug,
-    createdAt,
-    parent,
-    updatedAt,
-    versionData,
-  },
+  { autosave, collectionSlug, createdAt, parent, updatedAt, versionData },
 ) {
-  const collection = this.payload.collections[collectionSlug].config;
-  const tableName = toSnakeCase(collectionSlug);
+  const collection = this.payload.collections[collectionSlug].config
+  const tableName = toSnakeCase(collectionSlug)
 
   const result = await upsertRow({
     adapter: this,
@@ -31,10 +24,11 @@ export const createVersion: CreateVersion = async function createVersion(
       updatedAt,
       version: versionData,
     },
+    db: this.db,
     fields: buildVersionCollectionFields(collection),
     operation: 'create',
     tableName: `_${tableName}_versions`,
-  });
+  })
 
   // const [doc] = await VersionModel.create(
   //   [
@@ -71,5 +65,5 @@ export const createVersion: CreateVersion = async function createVersion(
   //   ],
   // }, { $unset: { latest: 1 } });
 
-  return result;
-};
+  return result
+}
