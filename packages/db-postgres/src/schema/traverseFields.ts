@@ -14,6 +14,7 @@ import {
   numeric,
   pgEnum,
   text,
+  timestamp,
   unique,
   varchar,
 } from 'drizzle-orm/pg-core'
@@ -149,6 +150,7 @@ export const traverseFields = ({
       }
 
       case 'date': {
+        targetTable[fieldName] = timestamp(columnName, { withTimezone: true })
         break
       }
 
@@ -250,7 +252,7 @@ export const traverseFields = ({
         > = {}
 
         if (field.localized && adapter.payload.config.localization) {
-          baseColumns._locale = adapter.enums._locales('_locale').notNull()
+          baseColumns._locale = adapter.enums.enum__locales('_locale').notNull()
           baseExtraConfig._parentOrderLocale = (cols) =>
             unique().on(cols._parentID, cols._order, cols._locale)
         } else {
@@ -311,7 +313,7 @@ export const traverseFields = ({
             > = {}
 
             if (field.localized && adapter.payload.config.localization) {
-              baseColumns._locale = adapter.enums._locales('_locale').notNull()
+              baseColumns._locale = adapter.enums.enum__locales('_locale').notNull()
               baseExtraConfig._parentPathOrderLocale = (cols) =>
                 unique().on(cols._parentID, cols._path, cols._order, cols._locale)
             } else {
