@@ -32,4 +32,7 @@ export type RowToInsert = {
   numbers: Record<string, unknown>[]
   relationships: Record<string, unknown>[]
   row: Record<string, unknown>
+  selects: {
+    [tableName: string]: Record<string, unknown>[]
+  }
 }

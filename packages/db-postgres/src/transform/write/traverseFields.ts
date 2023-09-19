@@ -11,6 +11,7 @@ import { transformArray } from './array'
 import { transformBlocks } from './blocks'
 import { transformNumbers } from './numbers'
 import { transformRelationship } from './relationships'
+import { transformSelects } from './selects'
 
 type Args = {
   arrays: {
@@ -33,6 +34,9 @@ type Args = {
   path: string
   relationships: Record<string, unknown>[]
   row: Record<string, unknown>
+  selects: {
+    [tableName: string]: Record<string, unknown>[]
+  }
 }
 
 export const traverseFields = ({
@@ -50,6 +54,7 @@ export const traverseFields = ({
   path,
   relationships,
   row,
+  selects,
 }: Args) => {
   fields.forEach((field) => {
     let columnName = ''
@@ -150,6 +155,7 @@ export const traverseFields = ({
               path: `${path || ''}${field.name}.`,
               relationships,
               row,
+              selects,
             })
           })
         } else {
@@ -167,6 +173,7 @@ export const traverseFields = ({
             path: `${path || ''}${field.name}.`,
             relationships,
             row,
+            selects,
           })
         }
       }
@@ -195,6 +202,7 @@ export const traverseFields = ({
                   path: `${path || ''}${tab.name}.`,
                   relationships,
                   row,
+                  selects,
                 })
               })
             } else {
@@ -212,6 +220,7 @@ export const traverseFields = ({
                 path: `${path || ''}${tab.name}.`,
                 relationships,
                 row,
+                selects,
               })
             }
           }
@@ -230,6 +239,7 @@ export const traverseFields = ({
             path,
             relationships,
             row,
+            selects,
           })
         }
       })
@@ -250,6 +260,7 @@ export const traverseFields = ({
         path,
         relationships,
         row,
+        selects,
       })
     }
 
@@ -308,6 +319,34 @@ export const traverseFields = ({
           data: fieldData,
           numbers,
         })
+      }
+
+      return
+    }
+
+    if (field.type === 'select' && field.hasMany && Array.isArray(fieldData)) {
+      const selectTableName = `${newTableName}_${toSnakeCase(field.name)}`
+      if (!selects[selectTableName]) selects[selectTableName] = []
+
+      if (field.localized) {
+        if (typeof data[field.name] === 'object' && data[field.name] !== null) {
+          Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
+            if (Array.isArray(localeData)) {
+              const newRows = transformSelects({
+                data: localeData,
+                locale: localeKey,
+              })
+
+              selects[selectTableName] = selects[selectTableName].concat(newRows)
+            }
+          })
+        }
+      } else {
+        const newRows = transformSelects({
+          data: data[field.name],
+        })
+
+        selects[selectTableName] = selects[selectTableName].concat(newRows)
       }
 
       return

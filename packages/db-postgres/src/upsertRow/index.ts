@@ -60,6 +60,7 @@ export const upsertRow = async ({
   const relationsToInsert: Record<string, unknown>[] = []
   const numbersToInsert: Record<string, unknown>[] = []
   const blocksToInsert: { [blockType: string]: BlockRowToInsert[] } = {}
+  const selectsToInsert: { [selectTableName: string]: Record<string, unknown>[] } = {}
 
   // Maintain a list of promises to run locale, blocks, and relationships
   // all in parallel
@@ -87,6 +88,18 @@ export const upsertRow = async ({
     rowToInsert.numbers.forEach((numberRow) => {
       numberRow.parent = insertedRow.id
       numbersToInsert.push(numberRow)
+    })
+  }
+
+  // If there are selects, add parent to each, and then
+  // store by table name and rows
+  if (Object.keys(rowToInsert.selects).length > 0) {
+    Object.entries(rowToInsert.selects).forEach(([selectTableName, selectRows]) => {
+      selectRows.forEach((row) => {
+        row.parent = insertedRow.id
+        if (!selectsToInsert[selectTableName]) selectsToInsert[selectTableName] = []
+        selectsToInsert[selectTableName].push(row)
+      })
     })
   }
 
@@ -230,7 +243,7 @@ export const upsertRow = async ({
   promises.push(async () => {
     if (operation === 'update') {
       await Promise.all(
-        Object.entries(rowToInsert.arrays).map(async ([arrayTableName, tableRows]) => {
+        Object.entries(rowToInsert.arrays).map(async ([arrayTableName]) => {
           await deleteExistingArrayRows({
             adapter,
             parentID: insertedRow.id,
@@ -245,6 +258,22 @@ export const upsertRow = async ({
       arrays: [rowToInsert.arrays],
       parentRows: [insertedRow],
     })
+  })
+
+  // //////////////////////////////////
+  // INSERT hasMany SELECTS
+  // //////////////////////////////////
+
+  promises.push(async () => {
+    await Promise.all(
+      Object.entries(selectsToInsert).map(async ([selectTableName, tableRows]) => {
+        const selectTable = adapter.tables[selectTableName]
+        if (operation === 'update') {
+          await db.delete(selectTable).where(eq(selectTable.id, insertedRow.id))
+        }
+        await db.insert(selectTable).values(tableRows).returning()
+      }),
+    )
   })
 
   await Promise.all(promises.map((promise) => promise()))

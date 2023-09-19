@@ -7,6 +7,7 @@ import { relations } from 'drizzle-orm'
 import {
   PgNumericBuilder,
   PgVarcharBuilder,
+  index,
   integer,
   jsonb,
   numeric,
@@ -28,7 +29,6 @@ import { parentIDColumnMap } from './parentIDColumnMap'
 
 type Args = {
   adapter: PostgresAdapter
-  arrayBlockRelations: Map<string, string>
   buildRelationships: boolean
   columnPrefix?: string
   columns: Record<string, PgColumnBuilder>
@@ -40,6 +40,7 @@ type Args = {
   localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder>
   newTableName: string
   parentTableName: string
+  relationsToBuild: Map<string, string>
   relationships: Set<string>
 }
 
@@ -52,7 +53,6 @@ type Result = {
 
 export const traverseFields = ({
   adapter,
-  arrayBlockRelations,
   buildRelationships,
   columnPrefix,
   columns,
@@ -64,6 +64,7 @@ export const traverseFields = ({
   localesIndexes,
   newTableName,
   parentTableName,
+  relationsToBuild,
   relationships,
 }: Args): Result => {
   let hasLocalizedField = false
@@ -157,7 +158,7 @@ export const traverseFields = ({
       }
 
       case 'select': {
-        const enumName = `${newTableName}_${columnPrefix || ''}${toSnakeCase(field.name)}`
+        const enumName = `enum_${newTableName}_${columnPrefix || ''}${toSnakeCase(field.name)}`
         const fieldName = `${fieldPrefix || ''}${field.name}`
 
         adapter.enums[enumName] = pgEnum(
@@ -172,7 +173,56 @@ export const traverseFields = ({
         )
 
         if (field.hasMany) {
-          // build table here
+          const baseColumns: Record<string, PgColumnBuilder> = {
+            order: integer('order').notNull(),
+            parent: parentIDColumnMap[parentIDColType]('parent_id')
+              .references(() => adapter.tables[parentTableName].id, { onDelete: 'cascade' })
+              .notNull(),
+            value: adapter.enums[enumName]('value'),
+          }
+
+          const baseExtraConfig: Record<
+            string,
+            (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder
+          > = {}
+
+          if (field.localized) {
+            baseColumns.locale = adapter.enums.enum__locales('locale').notNull()
+            baseExtraConfig.parentOrderLocale = (cols) =>
+              unique().on(cols.parent, cols.order, cols.locale)
+          } else {
+            baseExtraConfig.parent = (cols) => index('parent_idx').on(cols.parent)
+            baseExtraConfig.order = (cols) => index('order_idx').on(cols.order)
+          }
+
+          if (field.index) {
+            baseExtraConfig.value = (cols) => index('value_idx').on(cols.value)
+          }
+
+          const selectTableName = `${newTableName}_${toSnakeCase(fieldName)}`
+
+          buildTable({
+            adapter,
+            baseColumns,
+            baseExtraConfig,
+            fields: [],
+            tableName: selectTableName,
+          })
+
+          relationsToBuild.set(fieldName, selectTableName)
+
+          const selectTableRelations = relations(adapter.tables[selectTableName], ({ one }) => {
+            const result: Record<string, Relation<string>> = {
+              parent: one(adapter.tables[parentTableName], {
+                fields: [adapter.tables[selectTableName].parent],
+                references: [adapter.tables[parentTableName].id],
+              }),
+            }
+
+            return result
+          })
+
+          adapter.relations[`relation_${selectTableName}`] = selectTableRelations
         } else {
           targetTable[fieldName] = adapter.enums[enumName](fieldName)
         }
@@ -206,7 +256,7 @@ export const traverseFields = ({
 
         const arrayTableName = `${newTableName}_${toSnakeCase(field.name)}`
 
-        const { arrayBlockRelations: subArrayBlockRelations } = buildTable({
+        const { relationsToBuild: subRelationsToBuild } = buildTable({
           adapter,
           baseColumns,
           baseExtraConfig,
@@ -214,7 +264,7 @@ export const traverseFields = ({
           tableName: arrayTableName,
         })
 
-        arrayBlockRelations.set(`${fieldPrefix || ''}${field.name}`, arrayTableName)
+        relationsToBuild.set(`${fieldPrefix || ''}${field.name}`, arrayTableName)
 
         const arrayTableRelations = relations(adapter.tables[arrayTableName], ({ many, one }) => {
           const result: Record<string, Relation<string>> = {
@@ -228,7 +278,7 @@ export const traverseFields = ({
             result._locales = many(adapter.tables[`${arrayTableName}_locales`])
           }
 
-          subArrayBlockRelations.forEach((val, key) => {
+          subRelationsToBuild.forEach((val, key) => {
             result[key] = many(adapter.tables[val])
           })
 
@@ -266,7 +316,7 @@ export const traverseFields = ({
                 unique().on(cols._parentID, cols._path, cols._order)
             }
 
-            const { arrayBlockRelations: subArrayBlockRelations } = buildTable({
+            const { relationsToBuild: subRelationsToBuild } = buildTable({
               adapter,
               baseColumns,
               baseExtraConfig,
@@ -288,7 +338,7 @@ export const traverseFields = ({
                   result._locales = many(adapter.tables[`${blockTableName}_locales`])
                 }
 
-                subArrayBlockRelations.forEach((val, key) => {
+                subRelationsToBuild.forEach((val, key) => {
                   result[key] = many(adapter.tables[val])
                 })
 
@@ -299,7 +349,7 @@ export const traverseFields = ({
             adapter.relations[`relations_${blockTableName}`] = blockTableRelations
           }
 
-          arrayBlockRelations.set(`_blocks_${block.slug}`, blockTableName)
+          relationsToBuild.set(`_blocks_${block.slug}`, blockTableName)
         })
 
         break
@@ -313,7 +363,6 @@ export const traverseFields = ({
           hasManyNumberField: groupHasManyNumberField,
         } = traverseFields({
           adapter,
-          arrayBlockRelations,
           buildRelationships,
           columnPrefix: `${columnName}_`,
           columns,
@@ -325,6 +374,7 @@ export const traverseFields = ({
           localesIndexes,
           newTableName: `${parentTableName}_${toSnakeCase(field.name)}`,
           parentTableName,
+          relationsToBuild,
           relationships,
         })
 
@@ -345,7 +395,6 @@ export const traverseFields = ({
               hasManyNumberField: tabHasManyNumberField,
             } = traverseFields({
               adapter,
-              arrayBlockRelations,
               buildRelationships,
               columnPrefix: `${columnPrefix || ''}${toSnakeCase(tab.name)}_`,
               columns,
@@ -356,6 +405,7 @@ export const traverseFields = ({
               localesIndexes,
               newTableName: `${parentTableName}_${toSnakeCase(tab.name)}`,
               parentTableName,
+              relationsToBuild,
               relationships,
             })
 
@@ -366,7 +416,6 @@ export const traverseFields = ({
           } else {
             ;({ hasLocalizedField, hasLocalizedRelationshipField } = traverseFields({
               adapter,
-              arrayBlockRelations,
               buildRelationships,
               columnPrefix,
               columns,
@@ -377,6 +426,7 @@ export const traverseFields = ({
               localesIndexes,
               newTableName: parentTableName,
               parentTableName,
+              relationsToBuild,
               relationships,
             }))
           }
@@ -393,7 +443,6 @@ export const traverseFields = ({
           hasManyNumberField,
         } = traverseFields({
           adapter,
-          arrayBlockRelations,
           buildRelationships,
           columnPrefix,
           columns,
@@ -404,6 +453,7 @@ export const traverseFields = ({
           localesIndexes,
           newTableName: parentTableName,
           parentTableName,
+          relationsToBuild,
           relationships,
         }))
         break

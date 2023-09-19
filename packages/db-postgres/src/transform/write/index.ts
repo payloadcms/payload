@@ -22,6 +22,7 @@ export const transformForWrite = ({ data, fields, path = '', tableName }: Args):
     numbers: [],
     relationships: [],
     row: {},
+    selects: {},
   }
 
   // This function is responsible for building up the
@@ -39,6 +40,7 @@ export const transformForWrite = ({ data, fields, path = '', tableName }: Args):
     path,
     relationships: rowToInsert.relationships,
     row: rowToInsert.row,
+    selects: rowToInsert.selects,
   })
 
   return rowToInsert
