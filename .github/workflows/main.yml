@@ -55,11 +55,11 @@ jobs:
       - name: Component Tests
         run: pnpm test:components
 
-      - name: E2E Tests
-        run: pnpm test:e2e --bail
-
       - name: Integration Tests
         run: pnpm test:int
+
+      - name: E2E Tests
+        run: pnpm test:e2e --bail
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
