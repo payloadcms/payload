@@ -7,7 +7,7 @@ export type IndexProps = {
   global: SanitizedGlobalConfig
 }
 
-export type Props = {
+export type GlobalEditViewProps = {
   action: string
   apiURL: string
   autosaveEnabled: boolean

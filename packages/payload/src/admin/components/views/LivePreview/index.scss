@@ -1,0 +1,50 @@
+@import '../../../scss/styles.scss';
+
+.live-preview {
+  width: 100%;
+
+  &__wrapper {
+    display: flex;
+  }
+
+  &__main {
+    width: calc(40% + var(--gutter-h));
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+
+  &__edit {
+    padding-top: calc(var(--base) * 1.5);
+    padding-bottom: base(4);
+    flex-grow: 1;
+    padding-right: calc(var(--base) * 2);
+  }
+
+  @include mid-break {
+    &__wrapper {
+      flex-direction: column;
+    }
+
+    &__main {
+      width: 100%;
+      min-height: initial;
+    }
+
+    &__form {
+      display: block;
+    }
+
+    &__edit {
+      padding-top: var(--base);
+      padding-bottom: 0;
+      padding-right: var(--gutter-h);
+    }
+  }
+
+  @include small-break {
+    &__edit {
+      padding-top: calc(var(--base) / 2);
+    }
+  }
+}

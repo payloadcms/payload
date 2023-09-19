@@ -1,0 +1,13 @@
+@import '../../../../scss/styles.scss';
+
+.live-preview-frame {
+  width: 100%;
+
+  &__iframe {
+    width: 100%;
+    border: 0;
+    position: sticky;
+    top: var(--controls-height);
+    height: calc(100vh - var(--controls-height));
+  }
+}

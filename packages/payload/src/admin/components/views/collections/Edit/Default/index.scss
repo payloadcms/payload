@@ -73,10 +73,6 @@
     }
   }
 
-  &__label {
-    color: var(--theme-elevation-400);
-  }
-
   &--is-editing {
     .collection-edit__sidebar {
       padding-top: 0;

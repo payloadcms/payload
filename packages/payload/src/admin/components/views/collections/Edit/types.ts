@@ -10,7 +10,7 @@ export type IndexProps = {
   isEditing?: boolean
 }
 
-export type Props = IndexProps & {
+export type CollectionEditViewProps = IndexProps & {
   action: string
   apiURL: string
   autosaveEnabled: boolean

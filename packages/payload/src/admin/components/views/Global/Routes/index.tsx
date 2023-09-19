@@ -4,14 +4,14 @@ import { Route, Switch, useRouteMatch } from 'react-router-dom'
 
 import { useAuth } from '../../../utilities/Auth'
 import { useConfig } from '../../../utilities/Config'
-import { type Props } from '../types'
-import { CustomGlobalComponent } from './CustomComponent'
+import { type GlobalEditViewProps } from '../types'
+import { RenderCustomView } from './RenderCustomView'
 import { globalCustomRoutes } from './custom'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
 const Unauthorized = lazy(() => import('../../Unauthorized'))
 
-export const GlobalRoutes: React.FC<Props> = (props) => {
+export const GlobalRoutes: React.FC<GlobalEditViewProps> = (props) => {
   const { global, permissions } = props
 
   const match = useRouteMatch()
@@ -30,7 +30,7 @@ export const GlobalRoutes: React.FC<Props> = (props) => {
         path={`${adminRoute}/globals/${global.slug}/versions`}
       >
         {permissions?.readVersions?.permission ? (
-          <CustomGlobalComponent view="Versions" {...props} />
+          <RenderCustomView view="Versions" {...props} />
         ) : (
           <Unauthorized />
         )}
@@ -41,10 +41,17 @@ export const GlobalRoutes: React.FC<Props> = (props) => {
         path={`${adminRoute}/globals/${global.slug}/versions/:versionID`}
       >
         {permissions?.readVersions?.permission ? (
-          <CustomGlobalComponent view="Version" {...props} />
+          <RenderCustomView view="Version" {...props} />
         ) : (
           <Unauthorized />
         )}
+      </Route>
+      <Route
+        exact
+        key={`${global.slug}-live-preview`}
+        path={`${adminRoute}/globals/${global.slug}/preview`}
+      >
+        <RenderCustomView view="LivePreview" {...props} />
       </Route>
       {globalCustomRoutes({
         global,
@@ -53,7 +60,7 @@ export const GlobalRoutes: React.FC<Props> = (props) => {
         user,
       })}
       <Route>
-        <CustomGlobalComponent view="Default" {...props} />
+        <RenderCustomView view="Default" {...props} />
       </Route>
     </Switch>
   )

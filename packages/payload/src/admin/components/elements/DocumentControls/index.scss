@@ -8,7 +8,6 @@
   z-index: 1;
   display: flex;
   align-items: center;
-  --controlsHeight: calc(var(--base) * 3);
 
   &::after {
     content: '';
@@ -32,7 +31,7 @@
   }
 
   &__content {
-    height: var(--controlsHeight);
+    height: var(--controls-height);
     display: flex;
     align-items: center;
     flex-grow: 1;
@@ -170,8 +169,7 @@
     // The timestamps and meta can scroll past
     // The same container needs to the sticky, though
     // So we use a static height with a negative top
-    --controlsHeight: calc(var(--base) * 1.5);
-    top: calc(var(--controlsHeight) * -1);
+    top: calc(var(--controls-height) * -1);
     padding-right: 0;
     padding-left: 0;
 

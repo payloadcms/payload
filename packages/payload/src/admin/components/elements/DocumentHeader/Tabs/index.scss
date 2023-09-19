@@ -11,6 +11,7 @@
 
   &__tab {
     display: flex;
+    white-space: nowrap;
   }
 
   &__tab-link {

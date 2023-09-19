@@ -1,12 +1,12 @@
 import React from 'react'
 
-import type { Props } from '../types'
+import type { GlobalEditViewProps } from '../types'
 
-import VersionView from '../../../Version/Version'
-import VersionsView from '../../../Versions'
-import { DefaultCollectionEdit } from '../Default/index'
+import VersionView from '../../Version/Version'
+import VersionsView from '../../Versions'
+import { DefaultGlobalEdit } from '../Default/index'
 
-export type collectionViewType =
+export type globalViewType =
   | 'API'
   | 'Default'
   | 'LivePreview'
@@ -16,10 +16,10 @@ export type collectionViewType =
   | 'Versions'
 
 const defaultViews: {
-  [key in collectionViewType]: React.ComponentType<any>
+  [key in globalViewType]: React.ComponentType<any>
 } = {
   API: null,
-  Default: DefaultCollectionEdit,
+  Default: DefaultGlobalEdit,
   LivePreview: null,
   References: null,
   Relationships: null,
@@ -27,14 +27,14 @@ const defaultViews: {
   Versions: VersionsView,
 }
 
-export const CustomCollectionComponent = (
-  args: Props & {
-    view: collectionViewType
+export const RenderCustomView = (
+  args: GlobalEditViewProps & {
+    view: globalViewType
   },
 ) => {
-  const { collection, view } = args
+  const { global, view } = args
 
-  const { admin: { components: { views: { Edit } = {} } = {} } = {} } = collection
+  const { admin: { components: { views: { Edit } = {} } = {} } = {} } = global
 
   // Overriding components may come from multiple places in the config
   // Need to cascade through the hierarchy to find the correct component to render

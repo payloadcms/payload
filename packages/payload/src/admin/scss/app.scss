@@ -13,6 +13,7 @@
   --breakpoint-m-width: #{$breakpoint-m-width};
   --breakpoint-l-width: #{$breakpoint-l-width};
   --scrollbar-width: 17px;
+  --controls-height: calc(var(--base) * 3);
 
   --theme-bg: var(--theme-elevation-0);
   --theme-input-bg: var(--theme-elevation-0);
@@ -43,6 +44,7 @@
 
   @include mid-break {
     --gutter-h: #{base(2)};
+    --controls-height: calc(var(--base) * 1.5);
   }
 
   @include small-break {

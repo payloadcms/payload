@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { Props } from '../types'
+import type { GlobalEditViewProps } from '../types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
 import { DocumentControls } from '../../../elements/DocumentControls'
@@ -15,7 +15,7 @@ import './index.scss'
 
 const baseClass = 'global-edit'
 
-export const DefaultGlobalEdit: React.FC<Props> = (props) => {
+export const DefaultGlobalEdit: React.FC<GlobalEditViewProps> = (props) => {
   const { apiURL, data, global, permissions } = props
 
   const { i18n } = useTranslation('general')
@@ -26,7 +26,6 @@ export const DefaultGlobalEdit: React.FC<Props> = (props) => {
 
   return (
     <React.Fragment>
-      {/* <SetStepNav collection={collection} id={id} isEditing={isEditing} /> */}
       <DocumentControls
         apiURL={apiURL}
         data={data}
