@@ -1,5 +1,3 @@
-import mongoose from 'mongoose'
-
 import payload from '../../../packages/payload/src'
 import { devUser } from '../../credentials'
 import { initPayloadTest } from '../../helpers/configHelpers'
@@ -21,9 +19,9 @@ describe('Remove token from auth responses', () => {
   })
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase()
-    await mongoose.connection.close()
-    await payload.mongoMemoryServer.stop()
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy(payload)
+    }
   })
 
   it('should not include token in response from /login', async () => {
