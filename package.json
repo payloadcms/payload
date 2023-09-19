@@ -23,6 +23,7 @@
     "release:minor": "release-it minor",
     "release:patch": "release-it patch",
     "pretest": "pnpm build",
+    "reinstall": "./scripts/reinstall.sh",
     "test": "pnpm test:int && pnpm test:components && pnpm test:e2e",
     "test:components": "cross-env jest --config=jest.components.config.js",
     "test:e2e": "npx playwright install --with-deps && ts-node -T ./test/runE2E.ts",
