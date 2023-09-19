@@ -139,6 +139,10 @@ export const traverseFields = ({
         break
       }
 
+      case 'checkbox': {
+        break
+      }
+
       case 'array': {
         const baseColumns: Record<string, PgColumnBuilder> = {
           _order: integer('_order').notNull(),

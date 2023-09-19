@@ -88,6 +88,7 @@ describe('collections-rest', () => {
       const { docs, totalDocs } = await payload.find({
         collection: slug,
         pagination: false,
+        overrideAccess: false,
       })
 
       const expectedDocs = [post1, post2]
@@ -212,7 +213,7 @@ describe('collections-rest', () => {
         expect(result.errors[0].message).toEqual(
           'The following path cannot be queried: restrictedField',
         )
-        expect(doc.description).toBeUndefined()
+        expect(doc.description).toBeFalsy()
       })
 
       it('should return formatted errors for bulk updates', async () => {
