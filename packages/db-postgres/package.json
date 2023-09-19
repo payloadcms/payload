@@ -4,6 +4,7 @@
   "description": "The officially supported Postgres database adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
+  "homepage": "https://payloadcms.com",
   "author": {
     "email": "info@payloadcms.com",
     "name": "Payload",
@@ -14,8 +15,7 @@
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "builddisabled": "pnpm build:swc && pnpm build:types"
+    "build:types": "tsc --emitDeclarationOnly --outDir dist"
   },
   "dependencies": {
     "@libsql/client": "^0.3.1",

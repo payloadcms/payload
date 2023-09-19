@@ -67,8 +67,8 @@ importers:
         specifier: 5.1.1
         version: 5.1.1
       graphql-request:
-        specifier: 3.7.0
-        version: 3.7.0(graphql@16.7.1)
+        specifier: 6.1.0
+        version: 6.1.0(graphql@16.7.1)
       isomorphic-fetch:
         specifier: 3.0.0
         version: 3.0.0
@@ -2517,6 +2517,14 @@ packages:
   /@floating-ui/utils@0.1.4:
     resolution: {integrity: sha512-qprfWkn82Iw821mcKofJ5Pk9wgioHicxcQMxx+5zt5GSKoqdWvgG5AxVmpmUUjzTLPVSH5auBrhI93Deayn/DA==}
     dev: false
+
+  /@graphql-typed-document-node/core@3.2.0(graphql@16.7.1):
+    resolution: {integrity: sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==}
+    peerDependencies:
+      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+    dependencies:
+      graphql: 16.7.1
+    dev: true
 
   /@hapi/hoek@9.3.0:
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
@@ -8414,6 +8422,18 @@ packages:
       cross-fetch: 3.1.8
       extract-files: 9.0.0
       form-data: 3.0.1
+      graphql: 16.7.1
+    transitivePeerDependencies:
+      - encoding
+    dev: true
+
+  /graphql-request@6.1.0(graphql@16.7.1):
+    resolution: {integrity: sha512-p+XPfS4q7aIpKVcgmnZKhMNqhltk20hfXtkaIkTfjjmiKMJ5xrt5c743cL03y/K7y1rg3WrIC49xGiEQ4mxdNw==}
+    peerDependencies:
+      graphql: 14 - 16
+    dependencies:
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.7.1)
+      cross-fetch: 3.1.8
       graphql: 16.7.1
     transitivePeerDependencies:
       - encoding

@@ -4,6 +4,7 @@
   "description": "The officially supported Webpack bundler adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
+  "homepage": "https://payloadcms.com",
   "author": {
     "email": "info@payloadcms.com",
     "name": "Payload",

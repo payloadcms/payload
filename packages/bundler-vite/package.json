@@ -4,6 +4,7 @@
   "description": "The officially supported Vite bundler adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
+  "homepage": "https://payloadcms.com",
   "author": {
     "email": "info@payloadcms.com",
     "name": "Payload",
@@ -12,9 +13,9 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
-    "build": "pnpm build:swc && pnpm build:types"
+    "build:types": "tsc --emitDeclarationOnly --outDir dist"
   },
   "dependencies": {
     "@rollup/plugin-commonjs": "^25.0.4",
