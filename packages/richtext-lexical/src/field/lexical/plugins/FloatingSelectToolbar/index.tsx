@@ -30,6 +30,7 @@ function FloatingSelectToolbar({
   editor: LexicalEditor
 }): JSX.Element {
   const popupCharStylesEditorRef = useRef<HTMLDivElement | null>(null)
+  const caretRef = useRef<HTMLDivElement | null>(null)
 
   const { editorConfig } = useEditorConfigContext()
 
@@ -87,7 +88,15 @@ function FloatingSelectToolbar({
     ) {
       const rangeRect = getDOMRangeRect(nativeSelection, rootElement)
 
-      setFloatingElemPosition(rangeRect, popupCharStylesEditorElem, anchorElem)
+      const floatingElemRect = popupCharStylesEditorElem.getBoundingClientRect()
+      const position =
+        rangeRect.height > 20 || rangeRect.width > floatingElemRect.width * 1.8 ? 'center' : 'left'
+
+      setFloatingElemPosition(rangeRect, popupCharStylesEditorElem, anchorElem, position)
+
+      if (caretRef.current) {
+        setFloatingElemPosition(rangeRect, caretRef.current, popupCharStylesEditorElem, 'center')
+      }
     }
   }, [editor, anchorElem])
 
@@ -137,13 +146,14 @@ function FloatingSelectToolbar({
 
   return (
     <div className="floating-select-toolbar-popup" ref={popupCharStylesEditorRef}>
+      <div className="caret" ref={caretRef} />
       {editor.isEditable() && (
         <React.Fragment>
           <div className="format">
             {editorConfig?.features &&
               editorConfig.features?.map((feature) => {
                 if (feature?.floatingSelectToolbar?.buttons?.format) {
-                  return feature?.floatingSelectToolbar?.buttons?.format.map((button, i) => {
+                  return feature?.floatingSelectToolbar?.buttons?.format.map((button) => {
                     if (button.componentOverride) {
                       return (
                         <button.componentOverride

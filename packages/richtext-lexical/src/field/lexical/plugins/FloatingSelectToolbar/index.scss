@@ -23,14 +23,14 @@ html[data-theme='light'] {
   height: 37.5px;
   will-change: transform;
 
-  &:after {
-    content: ' ';
+  .caret {
+    z-index: 93;
     position: absolute;
-    top: calc(100% - 6px);
-    left: 50%;
-    transform: translateX(-50%);
+    top: calc(100% - 16px);
     border: 12px solid transparent;
+    pointer-events: none;
     border-top-color: var(--color-base-0);
+    //border-top-color: red;
   }
 
   .format {
