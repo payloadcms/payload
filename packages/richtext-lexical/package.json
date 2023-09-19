@@ -15,9 +15,6 @@
   },
   "dependencies": {
     "@faceless-ui/modal": "2.0.1",
-    "i18next": "23.5.1",
-    "react": "18.2.0",
-    "react-i18next": "13.2.2",
     "@lexical/clipboard": "0.12.2",
     "@lexical/code": "0.12.2",
     "@lexical/file": "0.12.2",
@@ -36,10 +33,14 @@
     "@lexical/table": "0.12.2",
     "@lexical/utils": "0.12.2",
     "classnames": "^2.3.2",
+    "i18next": "23.5.1",
     "katex": "0.16.8",
     "lexical": "0.12.2",
     "lodash": "4.17.21",
-    "openai": "4.7.1"
+    "openai": "4.7.1",
+    "react": "18.2.0",
+    "react-error-boundary": "^4.0.11",
+    "react-i18next": "13.2.2"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

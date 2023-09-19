@@ -1,5 +1,9 @@
 import type { RichTextFieldProps } from 'payload/types'
 
-export type AdapterArguments = {}
+import type { EditorConfig } from './field/lexical/config/types'
 
-export type FieldProps = RichTextFieldProps<AdapterArguments>
+export type FieldProps = RichTextFieldProps<AdapterProps>
+
+export type AdapterProps = {
+  editorConfig: EditorConfig
+}

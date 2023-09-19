@@ -1,17 +1,38 @@
+import type { SerializedEditorState } from 'lexical'
 import type { CellComponentProps, RichTextField } from 'payload/types'
 
-import React from 'react'
+import { createHeadlessEditor } from '@lexical/headless'
+import { $getRoot } from 'lexical'
+import React, { useEffect } from 'react'
 
-import type { AdapterArguments } from '../types'
+import type { AdapterProps } from '../types'
 
-const RichTextCell: React.FC<CellComponentProps<RichTextField<AdapterArguments>, any>> = ({
-  data,
-}) => {
-  if (data == null) {
-    return <span />
-  }
+import { getEnabledNodes } from '../field/lexical/nodes'
 
-  return <span>{data.preview}</span>
+export const RichTextCell: React.FC<
+  CellComponentProps<RichTextField<AdapterProps>, SerializedEditorState> & AdapterProps
+> = ({ data, editorConfig }) => {
+  const [preview, setPreview] = React.useState('Loading...')
+
+  useEffect(() => {
+    if (data == null) {
+      setPreview('')
+      return
+    }
+    // initialize headless editor
+    const headlessEditor = createHeadlessEditor({
+      namespace: editorConfig.lexical.namespace,
+      nodes: getEnabledNodes(editorConfig),
+      theme: editorConfig.lexical.theme,
+    })
+    headlessEditor.setEditorState(headlessEditor.parseEditorState(data))
+
+    const textContent = headlessEditor.getEditorState().read(() => {
+      return $getRoot().getTextContent()
+    })
+
+    setPreview(textContent)
+  }, [data, editorConfig])
+
+  return <span>{preview}</span>
 }
-
-export default RichTextCell
