@@ -30,8 +30,25 @@ export async function configurePayloadConfig(args: {
     warning('Unable to update name in package.json')
   }
 
-  const payloadConfigPath = path.resolve(args.projectDir, 'src/payload.config.ts')
   try {
+    const possiblePaths = [
+      path.resolve(args.projectDir, 'src/payload.config.ts'),
+      path.resolve(args.projectDir, 'src/payload/payload.config.ts'),
+    ]
+
+    let payloadConfigPath: string | undefined
+
+    possiblePaths.forEach(p => {
+      if (fse.pathExistsSync(p) && !payloadConfigPath) {
+        payloadConfigPath = p
+      }
+    })
+
+    if (!payloadConfigPath) {
+      warning('Unable to update payload.config.ts with plugins')
+      return
+    }
+
     const configContent = fse.readFileSync(payloadConfigPath, 'utf-8')
     const configLines = configContent.split('\n')
 
