@@ -16,12 +16,16 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
+import { useEditorConfigContext } from '../../config/EditorConfigProvider'
+import { BoldIcon } from '../../ui/icons/Bold'
+import { ItalicIcon } from '../../ui/icons/Italic'
 import { getDOMRangeRect } from '../../utils/getDOMRangeRect'
 import { getSelectedNode } from '../../utils/getSelectedNode'
 import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition'
+import { ToolbarButton } from './ToolbarButton'
 import './index.scss'
 
-function FloatSelectToolbar({
+function FloatingSelectToolbar({
   anchorElem,
   editor,
   isBold,
@@ -45,6 +49,8 @@ function FloatSelectToolbar({
   isUnderline: boolean
 }): JSX.Element {
   const popupCharStylesEditorRef = useRef<HTMLDivElement | null>(null)
+
+  const { editorConfig } = useEditorConfigContext()
 
   const insertLink = useCallback(() => {
     if (!isLink) {
@@ -157,9 +163,27 @@ function FloatSelectToolbar({
   }, [editor, updateTextFormatFloatingToolbar])
 
   return (
-    <div className="floating-text-format-popup" ref={popupCharStylesEditorRef}>
+    <div className="floating-select-toolbar-popup" ref={popupCharStylesEditorRef}>
       {editor.isEditable() && (
         <React.Fragment>
+          <div className="format">
+            {editorConfig?.features &&
+              editorConfig.features?.map((feature) => {
+                if (feature?.floatingSelectToolbar?.buttons?.format) {
+                  return feature?.floatingSelectToolbar?.buttons?.format.map((button, i) => {
+                    const ChildrenComponent = button.children
+                    return (
+                      <ToolbarButton key={i}>
+                        <ChildrenComponent />
+                      </ToolbarButton>
+                    )
+                  })
+                } else {
+                  return null
+                }
+              })}
+          </div>
+
           <button
             aria-label="Format text as bold"
             className={'popup-item spaced ' + (isBold ? 'active' : '')}
@@ -349,7 +373,7 @@ function useFloatingTextFormatToolbar(
   }
 
   return createPortal(
-    <FloatSelectToolbar
+    <FloatingSelectToolbar
       anchorElem={anchorElem}
       editor={editor}
       isBold={isBold}

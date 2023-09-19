@@ -1,9 +1,15 @@
 @import 'payload/scss';
 
-.floating-text-format-popup {
+html[data-theme='light'] {
+  .floating-select-toolbar-popup {
+    box-shadow: 0px 6px 20px 0px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.floating-select-toolbar-popup {
   display: flex;
   align-items: center;
-  background: var(--theme-text);
+  background: var(--color-base-0);
   padding: 0px 3.72px 0px 6.25px;
   gap: 6.25px;
   vertical-align: middle;
@@ -12,25 +18,32 @@
   left: 0;
   z-index: 10;
   opacity: 0;
-  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
   border-radius: 6.25px;
   transition: opacity 0.5s;
   height: 37.5px;
   will-change: transform;
 
-  button.popup-item,
-  select.popup-item {
-    height: 30px;
-    border: 0;
+  .format {
     display: flex;
-    background: none;
-    border-radius: 4px;
-    padding: 8px;
-    vertical-align: middle;
+    gap: 2px;
   }
 
-  button.popup-item {
+  &__button {
+    display: flex;
+    align-items: center;
+    vertical-align: middle;
+    height: 30px;
+    width: 30px;
+    border: 0;
+    background: none;
+    border-radius: 4px;
     cursor: pointer;
+
+    .icon {
+      min-width: 20px;
+      height: 20px;
+      color: var(--color-base-600);
+    }
 
     &.spaced {
       margin-right: 2px;
@@ -39,7 +52,7 @@
     &.active {
       background-color: rgba(223, 232, 250, 0.3);
 
-      i {
+      .icon {
         opacity: 1;
       }
     }
@@ -47,79 +60,13 @@
     &:disabled {
       cursor: not-allowed;
 
-      i.format {
+      .icon {
         opacity: 0.2;
       }
     }
 
     &:hover:not([disabled]) {
-      background-color: var(--theme-elevation-800);
-    }
-
-    i.format {
-      background-size: contain;
-      height: 18px;
-      width: 18px;
-      margin-top: 2px;
-      vertical-align: -0.25em;
-      display: flex;
-      opacity: 0.6;
-    }
-  }
-
-  select.popup-item {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    width: 70px;
-    font-size: 14px;
-    color: #777;
-    text-overflow: ellipsis;
-
-    &.code-language {
-      text-transform: capitalize;
-      width: 130px;
-    }
-  }
-
-  .popup-item {
-    .text {
-      display: flex;
-      line-height: 20px;
-      vertical-align: middle;
-      font-size: 14px;
-      color: #777;
-      text-overflow: ellipsis;
-      width: 70px;
-      overflow: hidden;
-      height: 20px;
-      text-align: left;
-    }
-
-    .icon {
-      display: flex;
-      width: 20px;
-      height: 20px;
-      user-select: none;
-      margin-right: 8px;
-      line-height: 16px;
-      background-size: contain;
-    }
-  }
-
-  i.chevron-down {
-    margin-top: 3px;
-    width: 16px;
-    height: 16px;
-    display: flex;
-    user-select: none;
-
-    &.inside {
-      width: 16px;
-      height: 16px;
-      margin-left: -25px;
-      margin-top: 11px;
-      margin-right: 10px;
-      pointer-events: none;
+      background-color: var(--color-base-100);
     }
   }
 
