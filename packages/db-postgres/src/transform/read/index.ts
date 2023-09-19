@@ -28,11 +28,11 @@ export const transform = <T extends TypeWithID>({ config, data, fields }: Transf
 
   const result = traverseFields<T>({
     blocks,
-    columnPrefix: '',
     config,
     dataRef: {
       id: data.id,
     },
+    fieldPrefix: '',
     fields,
     path: '',
     relationships,

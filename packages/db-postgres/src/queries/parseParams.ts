@@ -2,7 +2,7 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload/types'
 
-import { and } from 'drizzle-orm'
+import { and, ilike } from 'drizzle-orm'
 import { validOperators } from 'payload/types'
 
 import type { GenericColumn, PostgresAdapter } from '../types'
@@ -88,18 +88,27 @@ export async function parseParams({
                   tableName,
                 })
 
-                const { operator: queryOperator, value: queryValue } = sanitizeQueryValue({
-                  field,
-                  operator,
-                  val: where[relationOrPath][operator],
-                })
+                const val = where[relationOrPath][operator]
 
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
                   constraints.push(operatorMap.equals(constraintTable[col], value))
                 })
-                constraints.push(
-                  operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
-                )
+
+                if (operator === 'like') {
+                  constraints.push(
+                    and(...val.split(' ').map((word) => ilike(table[columnName], `%${word}%`))),
+                  )
+                } else {
+                  const { operator: queryOperator, value: queryValue } = sanitizeQueryValue({
+                    field,
+                    operator,
+                    val,
+                  })
+
+                  constraints.push(
+                    operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
+                  )
+                }
               }
             }
           }

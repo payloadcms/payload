@@ -3,7 +3,6 @@ import type { SanitizedConfig } from 'payload/config'
 import type { Field, TabAsField } from 'payload/types'
 
 import { fieldAffectsData, tabHasName } from 'payload/types'
-import toSnakeCase from 'to-snake-case'
 
 import type { BlocksMap } from '../../utilities/createBlocksMap'
 
@@ -15,10 +14,6 @@ type TraverseFieldsArgs = {
    */
   blocks: BlocksMap
   /**
-   * Column prefix can be built up by group and named tab fields
-   */
-  columnPrefix: string
-  /**
    * The full Payload config
    */
   config: SanitizedConfig
@@ -26,6 +21,10 @@ type TraverseFieldsArgs = {
    * The data reference to be mutated within this recursive function
    */
   dataRef: Record<string, unknown>
+  /**
+   * Column prefix can be built up by group and named tab fields
+   */
+  fieldPrefix: string
   /**
    * An array of Payload fields to traverse
    */
@@ -48,9 +47,9 @@ type TraverseFieldsArgs = {
 // for each field type into required Payload shape
 export const traverseFields = <T extends Record<string, unknown>>({
   blocks,
-  columnPrefix,
   config,
   dataRef,
+  fieldPrefix,
   fields,
   path,
   relationships,
@@ -59,6 +58,36 @@ export const traverseFields = <T extends Record<string, unknown>>({
   const sanitizedPath = path ? `${path}.` : path
 
   const formatted = fields.reduce((result, field) => {
+    if (field.type === 'tabs') {
+      traverseFields({
+        blocks,
+        config,
+        dataRef,
+        fieldPrefix,
+        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        path,
+        relationships,
+        table,
+      })
+    }
+
+    if (
+      field.type === 'collapsible' ||
+      field.type === 'row' ||
+      (field.type === 'tab' && !('name' in field))
+    ) {
+      traverseFields({
+        blocks,
+        config,
+        dataRef,
+        fieldPrefix,
+        fields: field.fields,
+        path,
+        relationships,
+        table,
+      })
+    }
+
     if (fieldAffectsData(field)) {
       if (field.type === 'array') {
         const fieldData = table[field.name]
@@ -71,9 +100,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
                 const rowResult = traverseFields<T>({
                   blocks,
-                  columnPrefix: '',
                   config,
                   dataRef: row,
+                  fieldPrefix: '',
                   fields: field.fields,
                   path: `${sanitizedPath}${field.name}.${row._order - 1}`,
                   relationships,
@@ -90,9 +119,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
             result[field.name] = fieldData.map((row, i) => {
               return traverseFields<T>({
                 blocks,
-                columnPrefix: '',
                 config,
                 dataRef: row,
+                fieldPrefix: '',
                 fields: field.fields,
                 path: `${sanitizedPath}${field.name}.${i}`,
                 relationships,
@@ -127,9 +156,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 if (block) {
                   const blockResult = traverseFields<T>({
                     blocks,
-                    columnPrefix: '',
                     config,
                     dataRef: row,
+                    fieldPrefix: '',
                     fields: block.fields,
                     path: `${blockFieldPath}.${row._order - 1}`,
                     relationships,
@@ -151,9 +180,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
               if (block) {
                 return traverseFields<T>({
                   blocks,
-                  columnPrefix: '',
                   config,
                   dataRef: row,
+                  fieldPrefix: '',
                   fields: block.fields,
                   path: `${blockFieldPath}.${i}`,
                   relationships,
@@ -218,32 +247,13 @@ export const traverseFields = <T extends Record<string, unknown>>({
       }
 
       valuesToTransform.forEach(({ ref, table }) => {
-        const fieldData = table[field.name]
+        const fieldData = table[`${fieldPrefix || ''}${field.name}`]
         const locale = table?._locale
 
         switch (field.type) {
           case 'tab':
           case 'group': {
-            // if (field.type === 'tab') {
-            //   console.log('got one')
-            // }
-
-            if (!tabHasName(field)) {
-              traverseFields({
-                blocks,
-                columnPrefix,
-                config,
-                dataRef,
-                fields: field.fields,
-                path: sanitizedPath,
-                relationships,
-                table,
-              })
-
-              return
-            }
-
-            const groupColumnPrefix = `${columnPrefix || ''}${toSnakeCase(field.name)}_`
+            const groupFieldPrefix = `${fieldPrefix || ''}${field.name}_`
             const groupData = {}
 
             if (field.localized) {
@@ -252,9 +262,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
               Object.entries(ref).forEach(([groupLocale, groupLocaleData]) => {
                 ref[groupLocale] = traverseFields<Record<string, unknown>>({
                   blocks,
-                  columnPrefix: groupColumnPrefix,
                   config,
                   dataRef: groupLocaleData as Record<string, unknown>,
+                  fieldPrefix: groupFieldPrefix,
                   fields: field.fields,
                   path: `${sanitizedPath}${field.name}`,
                   relationships,
@@ -264,9 +274,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
             } else {
               ref[field.name] = traverseFields<Record<string, unknown>>({
                 blocks,
-                columnPrefix: groupColumnPrefix,
                 config,
                 dataRef: groupData as Record<string, unknown>,
+                fieldPrefix: groupFieldPrefix,
                 fields: field.fields,
                 path: `${sanitizedPath}${field.name}`,
                 relationships,
@@ -326,33 +336,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
       return result
     }
 
-    if (field.type === 'tabs') {
-      traverseFields({
-        blocks,
-        columnPrefix,
-        config,
-        dataRef,
-        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
-        path: sanitizedPath,
-        relationships,
-        table,
-      })
-    }
-
-    if (field.type === 'collapsible' || field.type === 'row') {
-      traverseFields({
-        blocks,
-        columnPrefix,
-        config,
-        dataRef,
-        fields: field.fields,
-        path: sanitizedPath,
-        relationships,
-        table,
-      })
-    }
-
-    return dataRef
+    return result
   }, dataRef)
 
   return formatted as T
