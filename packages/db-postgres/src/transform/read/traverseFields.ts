@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
 import type { SanitizedConfig } from 'payload/config'
-import type { Field } from 'payload/types'
+import type { Field, TabAsField } from 'payload/types'
 
-import { fieldAffectsData } from 'payload/types'
+import { fieldAffectsData, tabHasName } from 'payload/types'
 
 import type { BlocksMap } from '../../utilities/createBlocksMap'
 
@@ -18,13 +18,17 @@ type TraverseFieldsArgs = {
    */
   config: SanitizedConfig
   /**
-   * The full data, as returned from the Drizzle query
+   * The data reference to be mutated within this recursive function
    */
-  data: Record<string, unknown>
+  dataRef: Record<string, unknown>
+  /**
+   * Column prefix can be built up by group and named tab fields
+   */
+  fieldPrefix: string
   /**
    * An array of Payload fields to traverse
    */
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   /**
    * The current field path (in dot notation), used to merge in relationships
    */
@@ -34,36 +38,59 @@ type TraverseFieldsArgs = {
    */
   relationships: Record<string, Record<string, unknown>[]>
   /**
-   * Sibling data of the fields to traverse
-   */
-  siblingData: Record<string, unknown>
-  /**
    * Data structure representing the nearest table from db
    */
   table: Record<string, unknown>
 }
-
-// TODO: clean up internal data structures:
-// _order, _path, _parentID, _locales, etc.
 
 // Traverse fields recursively, transforming data
 // for each field type into required Payload shape
 export const traverseFields = <T extends Record<string, unknown>>({
   blocks,
   config,
-  data,
+  dataRef,
+  fieldPrefix,
   fields,
   path,
   relationships,
-  siblingData,
   table,
 }: TraverseFieldsArgs): T => {
   const sanitizedPath = path ? `${path}.` : path
 
   const formatted = fields.reduce((result, field) => {
+    if (field.type === 'tabs') {
+      traverseFields({
+        blocks,
+        config,
+        dataRef,
+        fieldPrefix,
+        fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        path,
+        relationships,
+        table,
+      })
+    }
+
+    if (
+      field.type === 'collapsible' ||
+      field.type === 'row' ||
+      (field.type === 'tab' && !('name' in field))
+    ) {
+      traverseFields({
+        blocks,
+        config,
+        dataRef,
+        fieldPrefix,
+        fields: field.fields,
+        path,
+        relationships,
+        table,
+      })
+    }
+
     if (fieldAffectsData(field)) {
       if (field.type === 'array') {
-        const fieldData = result[field.name]
+        const fieldData = table[field.name]
 
         if (Array.isArray(fieldData)) {
           if (field.localized) {
@@ -74,11 +101,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 const rowResult = traverseFields<T>({
                   blocks,
                   config,
-                  data,
+                  dataRef: row,
+                  fieldPrefix: '',
                   fields: field.fields,
                   path: `${sanitizedPath}${field.name}.${row._order - 1}`,
                   relationships,
-                  siblingData: row,
                   table: row,
                 })
 
@@ -93,11 +120,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
               return traverseFields<T>({
                 blocks,
                 config,
-                data,
+                dataRef: row,
+                fieldPrefix: '',
                 fields: field.fields,
                 path: `${sanitizedPath}${field.name}.${i}`,
                 relationships,
-                siblingData: row,
                 table: row,
               })
             })
@@ -130,11 +157,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   const blockResult = traverseFields<T>({
                     blocks,
                     config,
-                    data,
+                    dataRef: row,
+                    fieldPrefix: '',
                     fields: block.fields,
                     path: `${blockFieldPath}.${row._order - 1}`,
                     relationships,
-                    siblingData: row,
                     table: row,
                   })
 
@@ -154,11 +181,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 return traverseFields<T>({
                   blocks,
                   config,
-                  data,
+                  dataRef: row,
+                  fieldPrefix: '',
                   fields: block.fields,
                   path: `${blockFieldPath}.${i}`,
                   relationships,
-                  siblingData: row,
                   table: row,
                 })
               }
@@ -207,52 +234,40 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
       const localizedFieldData = {}
       const valuesToTransform: {
-        localeRow: Record<string, unknown>
         ref: Record<string, unknown>
+        table: Record<string, unknown>
       }[] = []
 
       if (field.localized && Array.isArray(table._locales)) {
         table._locales.forEach((localeRow) => {
-          valuesToTransform.push({ localeRow, ref: localizedFieldData })
+          valuesToTransform.push({ ref: localizedFieldData, table: localeRow })
         })
       } else {
-        valuesToTransform.push({ localeRow: undefined, ref: result })
+        valuesToTransform.push({ ref: result, table })
       }
 
-      valuesToTransform.forEach(({ localeRow, ref }) => {
-        const fieldData = localeRow?.[field.name] || ref[field.name]
-        const locale = localeRow?._locale
+      valuesToTransform.forEach(({ ref, table }) => {
+        const fieldData = table[`${fieldPrefix || ''}${field.name}`]
+        const locale = table?._locale
 
         switch (field.type) {
+          case 'tab':
           case 'group': {
+            const groupFieldPrefix = `${fieldPrefix || ''}${field.name}_`
             const groupData = {}
 
-            field.fields.forEach((subField) => {
-              if (fieldAffectsData(subField)) {
-                const subFieldKey = `${sanitizedPath.replace(/\./g, '_')}${field.name}_${
-                  subField.name
-                }`
-
-                if (typeof locale === 'string') {
-                  if (!ref[locale]) ref[locale] = {}
-                  ref[locale][subField.name] = localeRow[subFieldKey]
-                } else {
-                  groupData[subField.name] = table[subFieldKey]
-                  delete table[subFieldKey]
-                }
-              }
-            })
-
             if (field.localized) {
+              if (typeof locale === 'string' && !ref[locale]) ref[locale] = {}
+
               Object.entries(ref).forEach(([groupLocale, groupLocaleData]) => {
                 ref[groupLocale] = traverseFields<Record<string, unknown>>({
                   blocks,
                   config,
-                  data,
+                  dataRef: groupLocaleData as Record<string, unknown>,
+                  fieldPrefix: groupFieldPrefix,
                   fields: field.fields,
                   path: `${sanitizedPath}${field.name}`,
                   relationships,
-                  siblingData: groupLocaleData as Record<string, unknown>,
                   table,
                 })
               })
@@ -260,11 +275,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
               ref[field.name] = traverseFields<Record<string, unknown>>({
                 blocks,
                 config,
-                data,
+                dataRef: groupData as Record<string, unknown>,
+                fieldPrefix: groupFieldPrefix,
                 fields: field.fields,
                 path: `${sanitizedPath}${field.name}`,
                 relationships,
-                siblingData: groupData as Record<string, unknown>,
                 table,
               })
             }
@@ -321,8 +336,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
       return result
     }
 
-    return siblingData
-  }, siblingData)
+    return result
+  }, dataRef)
 
   return formatted as T
 }

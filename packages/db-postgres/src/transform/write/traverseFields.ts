@@ -141,7 +141,7 @@ export const traverseFields = ({
               fields: field.fields,
               forcedLocale: localeKey,
               locales,
-              newTableName: `${parentTableName}_${toSnakeCase(field.name)}`,
+              newTableName: parentTableName,
               parentTableName,
               path: `${path || ''}${field.name}.`,
               relationships,
@@ -157,7 +157,7 @@ export const traverseFields = ({
             existingLocales,
             fields: field.fields,
             locales,
-            newTableName: `${parentTableName}_${toSnakeCase(field.name)}`,
+            newTableName: parentTableName,
             parentTableName,
             path: `${path || ''}${field.name}.`,
             relationships,
@@ -167,6 +167,81 @@ export const traverseFields = ({
       }
 
       return
+    }
+
+    if (field.type === 'tabs') {
+      field.tabs.forEach((tab) => {
+        if ('name' in tab) {
+          if (typeof data[tab.name] === 'object' && data[tab.name] !== null) {
+            if (tab.localized) {
+              Object.entries(data[tab.name]).forEach(([localeKey, localeData]) => {
+                traverseFields({
+                  arrays,
+                  blocks,
+                  columnPrefix: `${columnPrefix || ''}${tab.name}_`,
+                  data: localeData as Record<string, unknown>,
+                  existingLocales,
+                  fields: tab.fields,
+                  forcedLocale: localeKey,
+                  locales,
+                  newTableName: parentTableName,
+                  parentTableName,
+                  path: `${path || ''}${tab.name}.`,
+                  relationships,
+                  row,
+                })
+              })
+            } else {
+              traverseFields({
+                arrays,
+                blocks,
+                columnPrefix: `${columnPrefix || ''}${tab.name}_`,
+                data: data[tab.name] as Record<string, unknown>,
+                existingLocales,
+                fields: tab.fields,
+                locales,
+                newTableName: parentTableName,
+                parentTableName,
+                path: `${path || ''}${tab.name}.`,
+                relationships,
+                row,
+              })
+            }
+          }
+        } else {
+          traverseFields({
+            arrays,
+            blocks,
+            columnPrefix,
+            data,
+            existingLocales,
+            fields: tab.fields,
+            locales,
+            newTableName: parentTableName,
+            parentTableName,
+            path,
+            relationships,
+            row,
+          })
+        }
+      })
+    }
+
+    if (field.type === 'row' || field.type === 'collapsible') {
+      traverseFields({
+        arrays,
+        blocks,
+        columnPrefix,
+        data,
+        existingLocales,
+        fields: field.fields,
+        locales,
+        newTableName: parentTableName,
+        parentTableName,
+        path,
+        relationships,
+        row,
+      })
     }
 
     if (field.type === 'relationship') {
@@ -248,67 +323,6 @@ export const traverseFields = ({
 
               break
             }
-
-            // case 'tabs': {
-            //   await Promise.all(field.tabs.map(async (tab) => {
-            //     if ('name' in tab) {
-            //       if (typeof data[tab.name] === 'object' && data[tab.name] !== null) {
-            //         await traverseFields({
-            //           adapter,
-            //           arrayRowPromises,
-            //           blockRows,
-            //           columnPrefix: `${columnName}_`,
-            //           data: data[tab.name] as Record<string, unknown>,
-            //           fields: tab.fields,
-            //           locale,
-            //           localeRow,
-            //           operation,
-            //           path: `${path || ''}${tab.name}.`,
-            //           relationshipRows,
-            //           row,
-            //           tableName,
-            //         });
-            //       }
-            //     } else {
-            //       await traverseFields({
-            //         adapter,
-            //         arrayRowPromises,
-            //         blockRows,
-            //         columnPrefix,
-            //         data,
-            //         fields: tab.fields,
-            //         locale,
-            //         localeRow,
-            //         operation,
-            //         path,
-            //         relationshipRows,
-            //         row,
-            //         tableName,
-            //       });
-            //     }
-            //   }));
-            //   break;
-            // }
-
-            // case 'row':
-            // case 'collapsible': {
-            //   await traverseFields({
-            //     adapter,
-            //     arrayRowPromises,
-            //     blockRows,
-            //     columnPrefix,
-            //     data,
-            //     fields: field.fields,
-            //     locale,
-            //     localeRow,
-            //     operation,
-            //     path,
-            //     relationshipRows,
-            //     row,
-            //     tableName,
-            //   });
-            //   break;
-            // }
 
             default: {
               break

@@ -16,25 +16,6 @@ export const sanitizeQueryValue = ({
   let operator = operatorArg
   let formattedValue = val
 
-  // // Disregard invalid _ids
-  // if (path === '_id' && typeof val === 'string' && val.split(',').length === 1) {
-  //   if (!hasCustomID) {
-  //     const isValid = mongoose.Types.ObjectId.isValid(val);
-  //
-  //     if (!isValid) {
-  //       return undefined;
-  //     }
-  //   }
-  //
-  //   if (field.type === 'number') {
-  //     const parsedNumber = parseFloat(val);
-  //
-  //     if (Number.isNaN(parsedNumber)) {
-  //       return undefined;
-  //     }
-  //   }
-  // }
-
   if (!fieldAffectsData(field)) return { operator, value: formattedValue }
 
   // Cast incoming values as proper searchable types
@@ -66,21 +47,6 @@ export const sanitizeQueryValue = ({
     if (val === 'null') {
       formattedValue = null
     }
-
-    // if (operator === 'in' && Array.isArray(formattedValue)) {
-    //   formattedValue = formattedValue.reduce((formattedValues, inVal) => {
-    //     const newValues = [inVal];
-    //     if (mongoose.Types.ObjectId.isValid(inVal)) newValues.push(new mongoose.Types.ObjectId(inVal));
-    //
-    //     const parsedNumber = parseFloat(inVal);
-    //     if (!Number.isNaN(parsedNumber)) newValues.push(parsedNumber);
-    //
-    //     return [
-    //       ...formattedValues,
-    //       ...newValues,
-    //     ];
-    //   }, []);
-    // }
   }
 
   if (operator === 'near' || operator === 'within' || operator === 'intersects') {

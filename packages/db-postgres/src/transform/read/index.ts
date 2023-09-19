@@ -29,17 +29,15 @@ export const transform = <T extends TypeWithID>({ config, data, fields }: Transf
   const result = traverseFields<T>({
     blocks,
     config,
-    data,
+    dataRef: {
+      id: data.id,
+    },
+    fieldPrefix: '',
     fields,
     path: '',
     relationships,
-    siblingData: data,
     table: data,
   })
-
-  if ('_locales' in result) {
-    delete result._locales
-  }
 
   return result
 }

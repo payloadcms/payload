@@ -68,10 +68,19 @@ const buildQuery = async function buildQuery({
     })
 
     orderBy.column = sortTable[sortTableColumnName]
+  } else {
+    orderBy.order = desc
+    const createdAt = adapter.tables[tableName]?.createdAt
 
-    if (orderBy.column) {
-      selectFields.sort = orderBy.column
+    if (createdAt) {
+      orderBy.column = createdAt
+    } else {
+      orderBy.column = adapter.tables[tableName].id
     }
+  }
+
+  if (orderBy.column) {
+    selectFields.sort = orderBy.column
   }
 
   let where: SQL
