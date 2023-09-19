@@ -1,2 +1,2 @@
-export * from './dist/auth'
+export * from './dist/auth';
 //# sourceMappingURL=auth.d.ts.map

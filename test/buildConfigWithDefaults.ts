@@ -7,8 +7,9 @@ import { webpackBundler } from '../packages/bundler-webpack/src'
 import { mongooseAdapter } from '../packages/db-mongodb/src/index'
 import { postgresAdapter } from '../packages/db-postgres/src/index'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
-// process.env.PAYLOAD_DATABASE = 'postgres'
 import { createSlate } from '../packages/richtext-slate/src'
+
+process.env.PAYLOAD_DATABASE = 'postgres'
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({
