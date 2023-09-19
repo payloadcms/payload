@@ -7,28 +7,12 @@ import { MenuGlobal } from './globals/Menu'
 export default buildConfigWithDefaults({
   // ...extend config here
   collections: [
-    // PostsCollection,
-    // MediaCollection,
+    PostsCollection,
+    MediaCollection,
     // ...add more collections here
-    {
-      slug: 'posts',
-      fields: [
-        {
-          name: 'mySelect',
-          type: 'select',
-          options: ['test', 'test2', 'test3'],
-        },
-        {
-          name: 'mySelectHasMany',
-          type: 'select',
-          hasMany: true,
-          options: ['test', 'test2', 'test3'],
-        },
-      ],
-    },
   ],
   globals: [
-    // MenuGlobal,
+    MenuGlobal,
     // ...add more globals here
   ],
   graphQL: {
@@ -36,14 +20,19 @@ export default buildConfigWithDefaults({
   },
 
   onInit: async (payload) => {
-    const test = await payload.create({
-      collection: 'posts',
+    await payload.create({
+      collection: 'users',
       data: {
-        mySelect: 'test3',
-        mySelectHasMany: ['test', 'test3'],
+        email: devUser.email,
+        password: devUser.password,
       },
     })
 
-    console.log(test)
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        text: 'example post',
+      },
+    })
   },
 })

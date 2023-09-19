@@ -7,6 +7,7 @@ import { relations } from 'drizzle-orm'
 import {
   PgNumericBuilder,
   PgVarcharBuilder,
+  boolean,
   index,
   integer,
   jsonb,
@@ -153,10 +154,7 @@ export const traverseFields = ({
         break
       }
 
-      case 'radio': {
-        break
-      }
-
+      case 'radio':
       case 'select': {
         const enumName = `enum_${newTableName}_${columnPrefix || ''}${toSnakeCase(field.name)}`
         const fieldName = `${fieldPrefix || ''}${field.name}`
@@ -172,7 +170,7 @@ export const traverseFields = ({
           }) as [string, ...string[]],
         )
 
-        if (field.hasMany) {
+        if (field.type === 'select' && field.hasMany) {
           const baseColumns: Record<string, PgColumnBuilder> = {
             order: integer('order').notNull(),
             parent: parentIDColumnMap[parentIDColType]('parent_id')
@@ -230,6 +228,10 @@ export const traverseFields = ({
       }
 
       case 'checkbox': {
+        targetTable[`${fieldPrefix || ''}${field.name}`] = boolean(columnName)
+        if (field.required) {
+          targetTable[`${fieldPrefix || ''}${field.name}`].notNull()
+        }
         break
       }
 
