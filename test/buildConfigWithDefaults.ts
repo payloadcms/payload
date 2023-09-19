@@ -7,6 +7,7 @@ import { webpackBundler } from '../packages/bundler-webpack/src'
 import { mongooseAdapter } from '../packages/db-mongodb/src/index'
 import { postgresAdapter } from '../packages/db-postgres/src/index'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
+import { createSlate } from '../packages/richtext-slate/src'
 
 const databaseAdapters = {
   mongoose: mongooseAdapter({
@@ -23,6 +24,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
   const [name] = process.argv.slice(2)
 
   const config: Config = {
+    editor: createSlate({}),
     telemetry: false,
     rateLimit: {
       window: 15 * 60 * 100, // 15min default,

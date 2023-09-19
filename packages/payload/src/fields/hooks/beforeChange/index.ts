@@ -4,7 +4,7 @@ import type { SanitizedGlobalConfig } from '../../../globals/config/types'
 import type { Operation } from '../../../types'
 
 import { ValidationError } from '../../../errors'
-import deepCopyObject from '../../../utilities/deepCopyObject'
+import { deepCopyObject } from '../../../utilities/deepCopyObject'
 import { traverseFields } from './traverseFields'
 
 type Args<T> = {

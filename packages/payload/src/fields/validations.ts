@@ -11,7 +11,6 @@ import type {
   RadioField,
   RelationshipField,
   RelationshipValue,
-  RichTextField,
   SelectField,
   TextField,
   TextareaField,
@@ -23,7 +22,6 @@ import canUseDOM from '../utilities/canUseDOM'
 import { getIDType } from '../utilities/getIDType'
 import { isValidID } from '../utilities/isValidID'
 import { fieldAffectsData } from './config/types'
-import defaultRichTextValue from './richText/defaultValue'
 
 export const number: Validate<unknown, unknown, NumberField> = (
   value: number | number[],
@@ -181,16 +179,6 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
 
   if (jsonError !== undefined) {
     return t('validation:invalidInput')
-  }
-
-  return true
-}
-
-export const richText: Validate<unknown, unknown, RichTextField> = (value, { required, t }) => {
-  if (required) {
-    const stringifiedDefaultValue = JSON.stringify(defaultRichTextValue)
-    if (value && JSON.stringify(value) !== stringifiedDefaultValue) return true
-    return t('validation:required')
   }
 
   return true
@@ -519,7 +507,6 @@ export default {
   point,
   radio,
   relationship,
-  richText,
   select,
   text,
   textarea,

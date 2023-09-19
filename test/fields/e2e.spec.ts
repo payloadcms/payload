@@ -14,7 +14,7 @@ import { jsonDoc } from './collections/JSON'
 import { numberDoc } from './collections/Number'
 import { pointFieldsSlug } from './collections/Point'
 import { relationshipFieldsSlug } from './collections/Relationship'
-import { tabsSlug } from './collections/Tabs'
+import { tabsSlug } from './collections/Tabs/constants'
 import { textDoc, textFieldsSlug } from './collections/Text'
 
 const { afterEach, beforeAll, describe } = test

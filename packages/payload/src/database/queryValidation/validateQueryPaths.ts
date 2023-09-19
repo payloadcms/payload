@@ -8,7 +8,7 @@ import type { EntityPolicies } from './types'
 
 import QueryError from '../../errors/QueryError'
 import { validOperators } from '../../types/constants'
-import deepCopyObject from '../../utilities/deepCopyObject'
+import { deepCopyObject } from '../../utilities/deepCopyObject'
 import flattenFields from '../../utilities/flattenTopLevelFields'
 import { validateSearchParam } from './validateSearchParams'
 

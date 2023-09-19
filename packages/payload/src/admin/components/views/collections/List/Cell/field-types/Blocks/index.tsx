@@ -2,15 +2,11 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { BlockField } from '../../../../../../../../fields/config/types'
+import type { CellComponentProps } from '../../types'
 
 import { getTranslation } from '../../../../../../../../utilities/getTranslation'
 
-type Props = {
-  data: any
-  field: BlockField
-}
-
-const BlocksCell: React.FC<Props> = ({ data, field }: Props) => {
+const BlocksCell: React.FC<CellComponentProps<BlockField, any>> = ({ data, field }) => {
   const { i18n, t } = useTranslation('fields')
   const selectedBlocks = data ? data.map(({ blockType }) => blockType) : []
   const blockLabels = field.blocks.map((s) => ({

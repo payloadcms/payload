@@ -1,16 +1,15 @@
-import React, { Suspense, lazy } from 'react'
+import React from 'react'
 
-import type { Props } from './types'
+import type { RichTextField } from '../../../../../fields/config/types'
+import type { RichTextAdapter } from './types'
 
-import { ShimmerEffect } from '../../../elements/ShimmerEffect'
+import { useConfig } from '../../../utilities/Config'
 
-// @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
-const RichText = lazy(() => import('./RichText'))
+const RichText: React.FC<RichTextField> = (props) => {
+  const config = useConfig()
+  // eslint-disable-next-line react/destructuring-assignment
+  const editor: RichTextAdapter = props.editor || config.editor
+  return <editor.FieldComponent {...props} />
+}
 
-const RichTextField: React.FC<Props> = (props) => (
-  <Suspense fallback={<ShimmerEffect height="35vh" />}>
-    <RichText {...props} />
-  </Suspense>
-)
-
-export default RichTextField
+export default RichText

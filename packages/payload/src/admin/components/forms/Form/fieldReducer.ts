@@ -3,7 +3,7 @@ import equal from 'deep-equal'
 
 import type { FieldAction, Fields, FormField } from './types'
 
-import deepCopyObject from '../../../../utilities/deepCopyObject'
+import { deepCopyObject } from '../../../../utilities/deepCopyObject'
 import getSiblingData from './getSiblingData'
 import reduceFieldsToValues from './reduceFieldsToValues'
 import { flattenRows, separateRows } from './rows'

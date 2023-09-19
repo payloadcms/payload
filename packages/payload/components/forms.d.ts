@@ -1,3 +1,5 @@
+export { default as Error } from '../dist/admin/components/forms/Error';
+export { default as FieldDescription } from '../dist/admin/components/forms/FieldDescription';
 export { default as Form } from '../dist/admin/components/forms/Form';
 export { useAllFormFields, useForm, useFormFields, useFormModified, useFormProcessing, useFormSubmitted, 
 /**
@@ -7,7 +9,9 @@ useWatchForm, } from '../dist/admin/components/forms/Form/context';
 export { default as getSiblingData } from '../dist/admin/components/forms/Form/getSiblingData';
 export { default as reduceFieldsToValues } from '../dist/admin/components/forms/Form/reduceFieldsToValues';
 export { default as Label } from '../dist/admin/components/forms/Label';
+export { default as RenderFields } from '../dist/admin/components/forms/RenderFields';
 export { default as Submit } from '../dist/admin/components/forms/Submit';
+export { default as FormSubmit } from '../dist/admin/components/forms/Submit';
 export { default as Checkbox } from '../dist/admin/components/forms/field-types/Checkbox';
 export { default as Group } from '../dist/admin/components/forms/field-types/Group';
 export { default as Select } from '../dist/admin/components/forms/field-types/Select';
