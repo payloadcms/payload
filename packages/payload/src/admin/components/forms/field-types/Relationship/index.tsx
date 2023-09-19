@@ -35,6 +35,7 @@ const baseClass = 'relationship'
 
 const Relationship: React.FC<Props> = (props) => {
   const {
+    name,
     admin: {
       allowCreate = true,
       className,
@@ -48,7 +49,6 @@ const Relationship: React.FC<Props> = (props) => {
     filterOptions,
     hasMany,
     label,
-    name,
     path,
     relationTo,
     required,

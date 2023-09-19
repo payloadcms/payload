@@ -16,9 +16,9 @@ export default function restoreVersionHandler(globalConfig: SanitizedGlobalConfi
     next: NextFunction,
   ): Promise<Response<Document> | void> {
     const options = {
+      id: req.params.id,
       depth: Number(req.query.depth),
       globalConfig,
-      id: req.params.id,
       req,
     }
 

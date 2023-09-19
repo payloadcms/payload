@@ -4,30 +4,30 @@ import type { Field } from '../fields/config/types'
 export const buildVersionCollectionFields = (collection: SanitizedCollectionConfig): Field[] => {
   const fields: Field[] = [
     {
-      index: true,
       name: 'parent',
+      index: true,
       relationTo: collection.slug,
       type: 'relationship',
     },
     {
-      fields: collection.fields,
       name: 'version',
+      fields: collection.fields,
       type: 'group',
     },
     {
+      name: 'createdAt',
       admin: {
         disabled: true,
       },
       index: true,
-      name: 'createdAt',
       type: 'date',
     },
     {
+      name: 'updatedAt',
       admin: {
         disabled: true,
       },
       index: true,
-      name: 'updatedAt',
       type: 'date',
     },
   ]
@@ -35,18 +35,18 @@ export const buildVersionCollectionFields = (collection: SanitizedCollectionConf
   if (collection?.versions?.drafts) {
     fields.push({
       name: 'latest',
-      type: 'checkbox',
-      index: true,
       admin: {
         disabled: true,
       },
-    });
+      index: true,
+      type: 'checkbox',
+    })
   }
 
   if (collection?.versions?.drafts && collection?.versions?.drafts?.autosave) {
     fields.push({
-      index: true,
       name: 'autosave',
+      index: true,
       type: 'checkbox',
     })
   }

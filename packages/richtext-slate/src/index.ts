@@ -1,0 +1,49 @@
+import type { RichTextAdapter } from 'payload/types'
+
+import { withMergedProps } from 'payload/components/utilities'
+
+import type { AdapterArguments } from './types'
+
+import RichTextCell from './cell'
+import { richTextRelationshipPromise } from './data/richTextRelationshipPromise'
+import RichTextField from './field'
+
+export function createSlate(args: AdapterArguments): RichTextAdapter<AdapterArguments> {
+  return {
+    CellComponent: withMergedProps({
+      Component: RichTextCell,
+      toMergeIntoProps: args,
+    }),
+    FieldComponent: withMergedProps({
+      Component: RichTextField,
+      toMergeIntoProps: args,
+    }),
+    afterReadPromise({
+      currentDepth,
+      depth,
+      field,
+      overrideAccess,
+      req,
+      showHiddenFields,
+      siblingDoc,
+    }) {
+      if (
+        field.admin?.elements?.includes('relationship') ||
+        field.admin?.elements?.includes('upload') ||
+        field.admin?.elements?.includes('link') ||
+        !field?.admin?.elements
+      ) {
+        return richTextRelationshipPromise({
+          currentDepth,
+          depth,
+          field,
+          overrideAccess,
+          req,
+          showHiddenFields,
+          siblingDoc,
+        })
+      }
+      return null
+    },
+  }
+}

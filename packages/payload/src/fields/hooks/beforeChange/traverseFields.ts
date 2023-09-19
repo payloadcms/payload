@@ -23,13 +23,13 @@ type Args = {
 }
 
 export const traverseFields = async ({
+  id,
   context,
   data,
   doc,
   docWithLocales,
   errors,
   fields,
-  id,
   mergeLocaleActions,
   operation,
   path,
@@ -44,13 +44,13 @@ export const traverseFields = async ({
   fields.forEach((field) => {
     promises.push(
       promise({
+        id,
         context,
         data,
         doc,
         docWithLocales,
         errors,
         field,
-        id,
         mergeLocaleActions,
         operation,
         path,

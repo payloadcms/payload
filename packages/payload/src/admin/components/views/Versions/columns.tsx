@@ -20,7 +20,7 @@ type CreatedAtCellProps = {
   id: string
 }
 
-const CreatedAtCell: React.FC<CreatedAtCellProps> = ({ collection, date, global, id }) => {
+const CreatedAtCell: React.FC<CreatedAtCellProps> = ({ id, collection, date, global }) => {
   const {
     admin: { dateFormat },
     routes: { admin },
@@ -47,6 +47,7 @@ export const buildVersionColumns = (
   t: TFunction,
 ): Column[] => [
   {
+    name: '',
     accessor: 'updatedAt',
     active: true,
     components: {
@@ -56,9 +57,9 @@ export const buildVersionColumns = (
       ),
     },
     label: '',
-    name: '',
   },
   {
+    name: '',
     accessor: 'id',
     active: true,
     components: {
@@ -66,9 +67,9 @@ export const buildVersionColumns = (
       renderCell: (row, data) => <TextCell>{data}</TextCell>,
     },
     label: '',
-    name: '',
   },
   {
+    name: '',
     accessor: 'autosave',
     active: true,
     components: {
@@ -92,6 +93,5 @@ export const buildVersionColumns = (
       ),
     },
     label: '',
-    name: '',
   },
 ]

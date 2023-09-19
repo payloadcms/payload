@@ -14,6 +14,7 @@ import './index.scss'
 
 const Email: React.FC<Props> = (props) => {
   const {
+    name,
     admin: {
       autoComplete,
       className,
@@ -25,7 +26,6 @@ const Email: React.FC<Props> = (props) => {
       width,
     } = {},
     label,
-    name,
     path: pathFromProps,
     required,
     validate = email,

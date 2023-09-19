@@ -44,7 +44,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
   const { admin: { components: { views: { Edit } = {} } = {} } = {} } = collectionConfig
 
-  const { docPermissions, getDocPreferences, id } = useDocumentInfo()
+  const { id, docPermissions, getDocPreferences } = useDocumentInfo()
 
   // The component definition could come from multiple places in the config
   // we need to cascade into the proper component from the top-down
@@ -81,9 +81,9 @@ const Content: React.FC<DocumentDrawerProps> = ({
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
+        id,
         data,
         fieldSchema: fields,
-        id,
         locale,
         operation: id ? 'update' : 'create',
         preferences,
@@ -125,6 +125,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
       CustomComponent={CustomEditView}
       DefaultComponent={DefaultEdit}
       componentProps={{
+        id,
         action,
         apiURL,
         collection: collectionConfig,
@@ -154,7 +155,6 @@ const Content: React.FC<DocumentDrawerProps> = ({
         disableActions: true,
         disableLeaveWithoutSaving: true,
         hasSavePermission,
-        id,
         internalState,
         isEditing,
         isLoading,
@@ -171,7 +171,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
 // this drawer is used for both creating and editing documents
 // this means that the `id` may be unknown until the document is created
 export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = (props) => {
-  const { collectionSlug, id: idFromProps, onSave: onSaveFromProps } = props
+  const { id: idFromProps, collectionSlug, onSave: onSaveFromProps } = props
   const [collectionConfig] = useRelatedCollections(collectionSlug)
   const [id, setId] = useState<null | string>(idFromProps)
 

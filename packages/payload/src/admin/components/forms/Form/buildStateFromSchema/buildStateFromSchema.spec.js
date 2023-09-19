@@ -5,9 +5,9 @@ describe('Form - buildStateFromSchema', () => {
   it('populates default value - normal fields', async () => {
     const fieldSchema = [
       {
+        name: 'text',
         defaultValue,
         label: 'Text',
-        name: 'text',
         type: 'text',
       },
     ]
@@ -19,9 +19,9 @@ describe('Form - buildStateFromSchema', () => {
     const data = { text: value }
     const fieldSchema = [
       {
+        name: 'text',
         defaultValue,
         label: 'Text',
-        name: 'text',
         type: 'text',
       },
     ]
@@ -33,6 +33,7 @@ describe('Form - buildStateFromSchema', () => {
     const locale = 'en'
     const fieldSchema = [
       {
+        name: 'text',
         defaultValue: (args) => {
           if (!args.locale) {
             return 'missing locale'
@@ -43,7 +44,6 @@ describe('Form - buildStateFromSchema', () => {
           return 'Default'
         },
         label: 'Text',
-        name: 'text',
         type: 'text',
       },
     ]

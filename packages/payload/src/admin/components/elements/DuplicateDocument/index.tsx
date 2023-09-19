@@ -16,7 +16,7 @@ import './index.scss'
 
 const baseClass = 'duplicate'
 
-const Duplicate: React.FC<Props> = ({ collection, id, slug }) => {
+const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
   const { push } = useHistory()
   const modified = useFormModified()
   const { toggleModal } = useModal()

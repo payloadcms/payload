@@ -20,9 +20,9 @@ export default async function deleteByIDHandler(
 ): Promise<Response<DeleteResult> | void> {
   try {
     const doc = await deleteByID({
+      id: req.params.id,
       collection: req.collection,
       depth: parseInt(String(req.query.depth), 10),
-      id: req.params.id,
       req,
     })
 

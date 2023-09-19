@@ -27,11 +27,11 @@ async function findVersionByID<T extends TypeWithID = any>(
   args: Arguments,
 ): Promise<TypeWithVersion<T>> {
   const {
+    id,
     collection: { config: collectionConfig },
     currentDepth,
     depth,
     disableErrors,
-    id,
     overrideAccess,
     req: { locale, payload, t },
     req,
@@ -50,7 +50,7 @@ async function findVersionByID<T extends TypeWithID = any>(
     // /////////////////////////////////////
 
     const accessResults = !overrideAccess
-      ? await executeAccess({ disableErrors, id, req }, collectionConfig.access.readVersions)
+      ? await executeAccess({ id, disableErrors, req }, collectionConfig.access.readVersions)
       : true
 
     // If errors are disabled, and access returns false, return null

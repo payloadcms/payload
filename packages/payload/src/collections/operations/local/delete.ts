@@ -57,11 +57,11 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {
   const {
+    id,
     collection: collectionSlug,
     context,
     depth,
     fallbackLocale = null,
-    id,
     locale = null,
     overrideAccess = true,
     showHiddenFields,
@@ -94,9 +94,9 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   const args = {
+    id,
     collection,
     depth,
-    id,
     overrideAccess,
     req,
     showHiddenFields,

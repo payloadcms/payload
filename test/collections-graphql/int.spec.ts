@@ -38,9 +38,12 @@ describe('collections-graphql', () => {
 
   describe('CRUD', () => {
     let existingDoc: Post
+    let existingDocGraphQLID
 
     beforeEach(async () => {
       existingDoc = await createPost()
+      existingDocGraphQLID =
+        payload.db.defaultIDType === 'number' ? existingDoc.id : `"${existingDoc.id}"`
     })
 
     it('should create', async () => {
@@ -54,7 +57,7 @@ describe('collections-graphql', () => {
       const doc: Post = response.createPost
 
       expect(doc).toMatchObject({ title })
-      expect(doc.id.length).toBeGreaterThan(0)
+      expect(doc.id).toBeDefined()
     })
 
     it('should create using graphql variables', async () => {
@@ -68,12 +71,12 @@ describe('collections-graphql', () => {
       const doc: Post = response.createPost
 
       expect(doc).toMatchObject({ title })
-      expect(doc.id.length).toBeGreaterThan(0)
+      expect(doc.id).toBeDefined()
     })
 
     it('should read', async () => {
       const query = `query {
-        Post(id: "${existingDoc.id}") {
+        Post(id: ${existingDocGraphQLID}) {
           id
           title
         }
@@ -123,7 +126,7 @@ describe('collections-graphql', () => {
       const updatedTitle = 'updated title'
 
       const query = `mutation {
-        updatePost(id: "${existingDoc.id}", data: { title: "${updatedTitle}"}) {
+        updatePost(id: ${existingDocGraphQLID}, data: { title: "${updatedTitle}"}) {
           id
           title
         }
@@ -136,7 +139,7 @@ describe('collections-graphql', () => {
 
     it('should delete', async () => {
       const query = `mutation {
-        deletePost(id: "${existingDoc.id}") {
+        deletePost(id: ${existingDocGraphQLID}) {
           id
           title
         }

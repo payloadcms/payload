@@ -5,8 +5,8 @@ import './index.scss'
 const baseClass = 'id-label'
 
 const IDLabel: React.FC<{ className?: string; id: string; prefix?: string }> = ({
-  className,
   id,
+  className,
   prefix = 'ID:',
 }) => (
   <div className={[baseClass, className].filter(Boolean).join(' ')} title={id}>

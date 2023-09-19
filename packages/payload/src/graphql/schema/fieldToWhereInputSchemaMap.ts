@@ -61,6 +61,7 @@ const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => 
     if (Array.isArray(field.relationTo)) {
       return {
         type: new GraphQLInputObjectType({
+          name: `${combineParentName(parentName, field.name)}_Relation`,
           fields: {
             relationTo: {
               type: new GraphQLEnumType({
@@ -78,7 +79,6 @@ const fieldToSchemaMap = (parentName: string, nestedFieldName?: string): any => 
             },
             value: { type: GraphQLString },
           },
-          name: `${combineParentName(parentName, field.name)}_Relation`,
         }),
       }
     }

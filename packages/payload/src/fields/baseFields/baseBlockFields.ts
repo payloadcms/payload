@@ -5,11 +5,11 @@ import { baseIDField } from './baseIDField'
 export const baseBlockFields: Field[] = [
   baseIDField,
   {
+    name: 'blockName',
     admin: {
       disabled: true,
     },
     label: 'Block Name',
-    name: 'blockName',
     required: false,
     type: 'text',
   },

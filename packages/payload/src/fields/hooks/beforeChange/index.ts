@@ -4,7 +4,7 @@ import type { SanitizedGlobalConfig } from '../../../globals/config/types'
 import type { Operation } from '../../../types'
 
 import { ValidationError } from '../../../errors'
-import deepCopyObject from '../../../utilities/deepCopyObject'
+import { deepCopyObject } from '../../../utilities/deepCopyObject'
 import { traverseFields } from './traverseFields'
 
 type Args<T> = {
@@ -20,12 +20,12 @@ type Args<T> = {
 }
 
 export const beforeChange = async <T extends Record<string, unknown>>({
+  id,
   context,
   data: incomingData,
   doc,
   docWithLocales,
   entityConfig,
-  id,
   operation,
   req,
   skipValidation,
@@ -35,13 +35,13 @@ export const beforeChange = async <T extends Record<string, unknown>>({
   const errors: { field: string; message: string }[] = []
 
   await traverseFields({
+    id,
     context,
     data,
     doc,
     docWithLocales,
     errors,
     fields: entityConfig.fields,
-    id,
     mergeLocaleActions,
     operation,
     path: '',

@@ -31,11 +31,11 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   options: Options<T>,
 ): Promise<GeneratedTypes['collections'][T]> {
   const {
+    id,
     collection: collectionSlug,
     context,
     depth,
     fallbackLocale = null,
-    id,
     locale = payload.config.localization ? payload.config.localization?.defaultLocale : null,
     overrideAccess = true,
     showHiddenFields,
@@ -67,9 +67,9 @@ export default async function restoreVersionLocal<T extends keyof GeneratedTypes
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   const args = {
+    id,
     collection,
     depth,
-    id,
     overrideAccess,
     payload,
     req,

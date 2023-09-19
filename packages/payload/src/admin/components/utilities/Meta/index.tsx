@@ -49,12 +49,12 @@ const Meta: React.FC<Props> = ({
       ]}
       meta={[
         {
-          content: description,
           name: 'description',
+          content: description,
         },
         {
-          content: keywords,
           name: 'keywords',
+          content: keywords,
         },
         {
           content: `${title} ${titleSuffix}`,
@@ -73,16 +73,16 @@ const Meta: React.FC<Props> = ({
           property: 'og:type',
         },
         {
-          content: 'summary',
           name: 'twitter:card',
+          content: 'summary',
         },
         {
-          content: title,
           name: 'twitter:title',
+          content: title,
         },
         {
-          content: description,
           name: 'twitter:description',
+          content: description,
         },
       ].concat(meta)}
       title={`${title} ${titleSuffix}`}

@@ -38,6 +38,7 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
   ],
   fields: [
     {
+      name: 'user',
       hooks: {
         beforeValidate: [
           ({ req }) => {
@@ -51,7 +52,6 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
           },
         ],
       },
-      name: 'user',
       relationTo: config.collections
         .filter((collectionConfig) => collectionConfig.auth)
         .map((collectionConfig) => collectionConfig.slug),

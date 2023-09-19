@@ -277,6 +277,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <Context.Provider
       value={{
+        fetchFullUser,
         logOut,
         permissions,
         refreshCookie,
@@ -284,7 +285,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshPermissions,
         setUser,
         token: tokenInMemory,
-        fetchFullUser,
         user,
       }}
     >

@@ -96,8 +96,8 @@ const DateTime: React.FC<Props> = (props) => {
           onChange={(val) => onChange(val)}
           popperModifiers={[
             {
-              enabled: true,
               name: 'preventOverflow',
+              enabled: true,
             },
           ]}
           showMonthDropdown

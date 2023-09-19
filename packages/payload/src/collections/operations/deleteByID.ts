@@ -49,9 +49,9 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
   )
 
   const {
+    id,
     collection: { config: collectionConfig },
     depth,
-    id,
     overrideAccess,
     req: {
       payload: { config },
@@ -100,8 +100,8 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
       await priorHook
 
       return hook({
-        context: req.context,
         id,
+        context: req.context,
         req,
       })
     }, Promise.resolve())
@@ -200,9 +200,9 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
 
       result =
         (await hook({
+          id,
           context: req.context,
           doc: result,
-          id,
           req,
         })) || result
     }, Promise.resolve())

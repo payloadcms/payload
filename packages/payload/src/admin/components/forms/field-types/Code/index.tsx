@@ -20,6 +20,7 @@ const baseClass = 'code-field'
 
 const Code: React.FC<Props> = (props) => {
   const {
+    name,
     admin: {
       className,
       condition,
@@ -31,7 +32,6 @@ const Code: React.FC<Props> = (props) => {
       width,
     } = {},
     label,
-    name,
     path: pathFromProps,
     required,
     validate = code,

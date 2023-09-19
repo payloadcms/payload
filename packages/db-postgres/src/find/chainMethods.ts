@@ -1,4 +1,3 @@
-
 export type ChainedMethods = {
   args: unknown[]
   method: string
@@ -9,13 +8,10 @@ export type ChainedMethods = {
  * @param methods
  * @param query
  */
-const chainMethods = ({
-  methods,
-  query,
-}): Promise<unknown> => {
+const chainMethods = ({ methods, query }): Promise<unknown> => {
   return methods.reduce((query, { args, method }) => {
     return query[method](...args)
   }, query)
 }
 
-export { chainMethods } ;
+export { chainMethods }

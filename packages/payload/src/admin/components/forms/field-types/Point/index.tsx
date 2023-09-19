@@ -16,9 +16,9 @@ const baseClass = 'point'
 
 const PointField: React.FC<Props> = (props) => {
   const {
+    name,
     admin: { className, condition, description, placeholder, readOnly, step, style, width } = {},
     label,
-    name,
     path: pathFromProps,
     required,
     validate = point,

@@ -15,9 +15,9 @@ const baseClass = 'json-field'
 
 const JSONField: React.FC<Props> = (props) => {
   const {
+    name,
     admin: { className, condition, description, editorOptions, readOnly, style, width } = {},
     label,
-    name,
     path: pathFromProps,
     required,
     validate = json,

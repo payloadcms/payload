@@ -69,12 +69,12 @@ export const filterFields = (args: {
 
         if (FieldComponent) {
           acc.push({
+            name: 'name' in field ? field.name : '',
             FieldComponent,
             field,
             fieldIsPresentational,
             fieldPermissions,
             isFieldAffectingData,
-            name: 'name' in field ? field.name : '',
             readOnly,
           })
         }

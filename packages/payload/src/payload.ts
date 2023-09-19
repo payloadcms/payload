@@ -63,9 +63,9 @@ import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/
  * @description Payload
  */
 export class BasePayload<TGeneratedTypes extends GeneratedTypes> {
-  Mutation: { fields: { [key: string]: any }; name: string } = { fields: {}, name: 'Mutation' }
+  Mutation: { fields: { [key: string]: any }; name: string } = { name: 'Mutation', fields: {} }
 
-  Query: { fields: { [key: string]: any }; name: string } = { fields: {}, name: 'Query' }
+  Query: { fields: { [key: string]: any }; name: string } = { name: 'Query', fields: {} }
 
   authenticate: PayloadAuthenticate
 
