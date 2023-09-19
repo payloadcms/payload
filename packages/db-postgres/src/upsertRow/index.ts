@@ -58,6 +58,7 @@ export const upsertRow = async ({
 
   const localesToInsert: Record<string, unknown>[] = []
   const relationsToInsert: Record<string, unknown>[] = []
+  const numbersToInsert: Record<string, unknown>[] = []
   const blocksToInsert: { [blockType: string]: BlockRowToInsert[] } = {}
 
   // Maintain a list of promises to run locale, blocks, and relationships
@@ -78,6 +79,14 @@ export const upsertRow = async ({
     rowToInsert.relationships.forEach((relation) => {
       relation.parent = insertedRow.id
       relationsToInsert.push(relation)
+    })
+  }
+
+  // If there are numbers, add parent to each
+  if (rowToInsert.numbers.length > 0) {
+    rowToInsert.numbers.forEach((numberRow) => {
+      numberRow.parent = insertedRow.id
+      numbersToInsert.push(numberRow)
     })
   }
 
@@ -111,24 +120,48 @@ export const upsertRow = async ({
   // INSERT RELATIONSHIPS
   // //////////////////////////////////
 
-  if (relationsToInsert.length > 0) {
-    promises.push(async () => {
-      const relationshipsTableName = `${tableName}_relationships`
-      if (operation === 'update') {
-        await deleteExistingRowsByPath({
-          adapter,
-          localeColumnName: 'locale',
-          newRows: relationsToInsert,
-          parentColumnName: 'parent',
-          parentID: insertedRow.id,
-          pathColumnName: 'path',
-          tableName: relationshipsTableName,
-        })
-      }
+  promises.push(async () => {
+    const relationshipsTableName = `${tableName}_relationships`
+    if (operation === 'update') {
+      await deleteExistingRowsByPath({
+        adapter,
+        localeColumnName: 'locale',
+        newRows: relationsToInsert,
+        parentColumnName: 'parent',
+        parentID: insertedRow.id,
+        pathColumnName: 'path',
+        tableName: relationshipsTableName,
+      })
+    }
 
+    if (relationsToInsert.length > 0) {
       await db.insert(adapter.tables[relationshipsTableName]).values(relationsToInsert).returning()
-    })
-  }
+    }
+  })
+
+  // //////////////////////////////////
+  // INSERT hasMany NUMBERS
+  // //////////////////////////////////
+
+  promises.push(async () => {
+    const numbersTableName = `${tableName}_numbers`
+
+    if (operation === 'update') {
+      await deleteExistingRowsByPath({
+        adapter,
+        localeColumnName: 'locale',
+        newRows: numbersToInsert,
+        parentColumnName: 'parent',
+        parentID: insertedRow.id,
+        pathColumnName: 'path',
+        tableName: numbersTableName,
+      })
+    }
+
+    if (numbersToInsert.length > 0) {
+      await db.insert(adapter.tables[numbersTableName]).values(numbersToInsert).returning()
+    }
+  })
 
   // //////////////////////////////////
   // INSERT BLOCKS

@@ -3,7 +3,7 @@ import type { SanitizedConfig } from 'payload/config'
 import type { Field, TypeWithID } from 'payload/types'
 
 import { createBlocksMap } from '../../utilities/createBlocksMap'
-import { createRelationshipMap } from '../../utilities/createRelationshipMap'
+import { createPathMap } from '../../utilities/createPathMap'
 import { traverseFields } from './traverseFields'
 
 type TransformArgs = {
@@ -18,10 +18,16 @@ type TransformArgs = {
 // into the shape Payload expects based on field schema
 export const transform = <T extends TypeWithID>({ config, data, fields }: TransformArgs): T => {
   let relationships: Record<string, Record<string, unknown>[]> = {}
+  let numbers: Record<string, Record<string, unknown>[]> = {}
 
   if ('_relationships' in data) {
-    relationships = createRelationshipMap(data._relationships)
+    relationships = createPathMap(data._relationships)
     delete data._relationships
+  }
+
+  if ('_numbers' in data) {
+    numbers = createPathMap(data._numbers)
+    delete data._numbers
   }
 
   const blocks = createBlocksMap(data)
@@ -34,6 +40,7 @@ export const transform = <T extends TypeWithID>({ config, data, fields }: Transf
     },
     fieldPrefix: '',
     fields,
+    numbers,
     path: '',
     relationships,
     table: data,

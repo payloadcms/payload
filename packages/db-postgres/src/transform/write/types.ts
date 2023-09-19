@@ -29,6 +29,7 @@ export type RowToInsert = {
   locales: {
     [locale: string]: Record<string, unknown>
   }
+  numbers: Record<string, unknown>[]
   relationships: Record<string, unknown>[]
   row: Record<string, unknown>
 }
