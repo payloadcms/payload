@@ -1,6 +1,7 @@
 /* eslint-disable no-use-before-define */
 import type { EditorProps } from '@monaco-editor/react'
 import type { TFunction } from 'i18next'
+import type { JSONSchema4 } from 'json-schema';
 import type { CSSProperties } from 'react'
 
 import monacoeditor from 'monaco-editor' // IMPORTANT - DO NOT REMOVE: This is required for pnpm's default isolated mode to work - even though the import is not used. This is due to a typescript bug: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1519138189. (tsbugisolatedmode)
@@ -326,9 +327,11 @@ type JSONAdmin = Admin & {
   editorOptions?: EditorProps['options']
 }
 
+export type JSONFieldSchema = JSONSchema4|((field: Field, interfaceNameDefinitions: Map<string, JSONSchema4>) => JSONSchema4)
 export type JSONField = Omit<FieldBase, 'admin'> & {
-  admin?: JSONAdmin
-  type: 'json'
+  admin?: JSONAdmin,
+  jsonSchema?: JSONFieldSchema,
+  type: 'json',
 }
 
 export type SelectField = FieldBase & {

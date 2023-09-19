@@ -104,16 +104,23 @@ function fieldsToJSONSchema(
           }
 
           case 'json': {
-            // https://www.rfc-editor.org/rfc/rfc7159#section-3
-            fieldSchema = {
-              oneOf: [
-                { type: 'object' },
-                { type: 'array' },
-                { type: 'string' },
-                { type: 'number' },
-                { type: 'boolean' },
-                { type: 'null' },
-              ],
+            // Allow to define a custom schema for json structures
+            if (field.jsonSchema) {
+              fieldSchema = typeof field.jsonSchema === 'function'
+                ? field.jsonSchema(field, interfaceNameDefinitions)
+                : field.jsonSchema;
+            } else {
+              // https://www.rfc-editor.org/rfc/rfc7159#section-3
+              fieldSchema = {
+                oneOf: [
+                  { type: 'object' },
+                  { type: 'array' },
+                  { type: 'string' },
+                  { type: 'number' },
+                  { type: 'boolean' },
+                  { type: 'null' },
+                ],
+              };
             }
             break
           }
