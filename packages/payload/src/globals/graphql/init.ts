@@ -41,9 +41,9 @@ function initGlobalsGraphQL(payload: Payload): void {
         buildMutationInputType(payload, formattedName, fields, formattedName),
       ),
       type: buildObjectType({
+        name: formattedName,
         fields,
         forceNullable: forceNullableObjectType,
-        name: formattedName,
         parentName: formattedName,
         payload,
       }),
@@ -95,21 +95,21 @@ function initGlobalsGraphQL(payload: Payload): void {
           type: 'text',
         },
         {
-          label: 'Created At',
           name: 'createdAt',
+          label: 'Created At',
           type: 'date',
         },
         {
-          label: 'Updated At',
           name: 'updatedAt',
+          label: 'Updated At',
           type: 'date',
         },
       ]
 
       payload.globals.graphQL[slug].versionType = buildObjectType({
+        name: `${formattedName}Version`,
         fields: versionGlobalFields,
         forceNullable: forceNullableObjectType,
-        name: `${formattedName}Version`,
         parentName: `${formattedName}Version`,
         payload,
       })

@@ -80,6 +80,7 @@ export function transformExtraFields(
 
   if (Array.isArray(customFieldSchema) || fields.length > 0) {
     fields.push({
+      name: 'fields',
       admin: {
         style: {
           borderBottom: 0,
@@ -91,7 +92,6 @@ export function transformExtraFields(
       fields: Array.isArray(customFieldSchema)
         ? customFieldSchema.concat(extraFields)
         : extraFields,
-      name: 'fields',
       type: 'group',
     })
   }

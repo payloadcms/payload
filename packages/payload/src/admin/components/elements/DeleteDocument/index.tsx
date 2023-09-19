@@ -19,10 +19,10 @@ const baseClass = 'delete-document'
 
 const DeleteDocument: React.FC<Props> = (props) => {
   const {
+    id,
     buttonId,
     collection: { labels: { singular } = {}, slug } = {},
     collection,
-    id,
     title: titleFromProps,
   } = props
 

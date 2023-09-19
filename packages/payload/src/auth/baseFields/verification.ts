@@ -17,6 +17,7 @@ const autoRemoveVerificationToken: FieldHook = ({ data, operation, originalDoc, 
 
 export default [
   {
+    name: '_verified',
     access: {
       create: ({ req: { user } }) => Boolean(user),
       read: ({ req: { user } }) => Boolean(user),
@@ -27,15 +28,14 @@ export default [
         Field: () => null,
       },
     },
-    name: '_verified',
     type: 'checkbox',
   },
   {
+    name: '_verificationToken',
     hidden: true,
     hooks: {
       beforeChange: [autoRemoveVerificationToken],
     },
-    name: '_verificationToken',
     type: 'text',
   },
 ] as Field[]

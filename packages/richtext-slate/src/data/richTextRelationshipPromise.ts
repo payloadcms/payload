@@ -40,12 +40,12 @@ export const recurseRichText = ({
         if (collection) {
           promises.push(
             populate({
+              id: element.value.id,
               collection,
               currentDepth,
               data: element,
               depth,
               field,
-              id: element.value.id,
               key: 'value',
               overrideAccess,
               req,
@@ -77,12 +77,12 @@ export const recurseRichText = ({
           if (collection) {
             promises.push(
               populate({
+                id: element.doc.value,
                 collection,
                 currentDepth,
                 data: element.doc,
                 depth,
                 field,
-                id: element.doc.value,
                 key: 'value',
                 overrideAccess,
                 req,

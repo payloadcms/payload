@@ -6,6 +6,7 @@ import AlignRightIcon from '../../icons/AlignRight'
 import ElementButton from '../Button'
 
 export default {
+  name: 'alignment',
   Button: () => {
     return (
       <React.Fragment>
@@ -21,5 +22,4 @@ export default {
       </React.Fragment>
     )
   },
-  name: 'alignment',
 }

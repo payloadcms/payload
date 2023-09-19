@@ -20,8 +20,8 @@ const getLogger = (
 ): PayloadLogger =>
   pino(
     {
-      enabled: process.env.DISABLE_LOGGING !== 'true',
       name: options?.name || name,
+      enabled: process.env.DISABLE_LOGGING !== 'true',
       ...(options || defaultLoggerOptions),
     },
     destination,

@@ -35,8 +35,8 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read?.permission)
 
   const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen }] = useDocumentDrawer({
-    collectionSlug: relationTo,
     id: value?.toString(),
+    collectionSlug: relationTo,
   })
 
   useEffect(() => {

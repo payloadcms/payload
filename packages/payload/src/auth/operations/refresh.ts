@@ -63,9 +63,9 @@ async function refresh(incomingArgs: Arguments): Promise<Result> {
   const isGraphQL = parsedURL.pathname === config.routes.graphQL
 
   const user = await args.req.payload.findByID({
+    id: args.req.user.id,
     collection: args.req.user.collection,
     depth: isGraphQL ? 0 : args.collection.config.auth.depth,
-    id: args.req.user.id,
     req: args.req,
   })
 

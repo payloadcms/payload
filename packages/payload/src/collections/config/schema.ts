@@ -166,9 +166,9 @@ const collectionSchema = joi.object().keys({
         joi
           .object()
           .keys({
+            name: joi.string(),
             crop: joi.string(), // TODO: add further specificity with joi.xor
             height: joi.number().integer().allow(null),
-            name: joi.string(),
             width: joi.number().integer().allow(null),
           })
           .unknown(),

@@ -24,56 +24,57 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
     typeof collection.upload === 'object' ? collection.upload : {}
 
   const mimeType: Field = {
+    name: 'mimeType',
     admin: {
       hidden: true,
       readOnly: true,
     },
     label: 'MIME Type',
-    name: 'mimeType',
     type: 'text',
   }
 
   const url: Field = {
+    name: 'url',
     admin: {
       hidden: true,
       readOnly: true,
     },
     label: 'URL',
-    name: 'url',
     type: 'text',
   }
 
   const width: Field = {
+    name: 'width',
     admin: {
       hidden: true,
       readOnly: true,
     },
     label: labels['upload:width'],
-    name: 'width',
     type: 'number',
   }
 
   const height: Field = {
+    name: 'height',
     admin: {
       hidden: true,
       readOnly: true,
     },
     label: labels['upload:height'],
-    name: 'height',
     type: 'number',
   }
 
   const filesize: Field = {
+    name: 'filesize',
     admin: {
       hidden: true,
       readOnly: true,
     },
     label: labels['upload:fileSize'],
-    name: 'filesize',
     type: 'number',
   }
 
   const filename: Field = {
+    name: 'filename',
     admin: {
       disableBulkEdit: true,
       hidden: true,
@@ -81,7 +82,6 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
     },
     index: true,
     label: labels['upload:fileName'],
-    name: 'filename',
     type: 'text',
     unique: true,
   }
@@ -118,10 +118,12 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
   if (uploadOptions.imageSizes) {
     uploadFields = uploadFields.concat([
       {
+        name: 'sizes',
         admin: {
           hidden: true,
         },
         fields: uploadOptions.imageSizes.map((size) => ({
+          name: size.name,
           admin: {
             hidden: true,
           },
@@ -155,11 +157,9 @@ const getBaseUploadFields = ({ collection, config }: Options): Field[] => {
             },
           ],
           label: size.name,
-          name: size.name,
           type: 'group',
         })),
         label: labels['upload:Sizes'],
-        name: 'sizes',
         type: 'group',
       },
     ])

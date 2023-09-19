@@ -11,11 +11,11 @@ import './index.scss'
 
 const Password: React.FC<Props> = (props) => {
   const {
+    name,
     autoComplete,
     className,
     disabled,
     label,
-    name,
     path: pathFromProps,
     required,
     style,

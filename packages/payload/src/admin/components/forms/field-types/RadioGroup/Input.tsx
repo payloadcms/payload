@@ -31,12 +31,12 @@ export type RadioGroupInputProps = Omit<RadioField, 'type'> & {
 
 const RadioGroupInput: React.FC<RadioGroupInputProps> = (props) => {
   const {
+    name,
     className,
     description,
     errorMessage,
     label,
     layout = 'horizontal',
-    name,
     onChange,
     options,
     path: pathFromProps,

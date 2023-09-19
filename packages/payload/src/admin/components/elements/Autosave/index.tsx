@@ -15,7 +15,7 @@ import './index.scss'
 
 const baseClass = 'autosave'
 
-const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdatedAt }) => {
+const Autosave: React.FC<Props> = ({ id, collection, global, publishedDocUpdatedAt }) => {
   const {
     routes: { admin, api },
     serverURL,

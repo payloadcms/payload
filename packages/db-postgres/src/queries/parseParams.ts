@@ -1,17 +1,17 @@
 /* eslint-disable no-await-in-loop */
-import type { SQL } from 'drizzle-orm';
-import type { Field, Operator, Where } from 'payload/types';
+import type { SQL } from 'drizzle-orm'
+import type { Field, Operator, Where } from 'payload/types'
 
-import { and } from 'drizzle-orm';
-import { validOperators } from 'payload/types';
+import { and } from 'drizzle-orm'
+import { validOperators } from 'payload/types'
 
-import type { GenericColumn, PostgresAdapter } from '../types';
-import type { BuildQueryJoins } from './buildQuery';
+import type { GenericColumn, PostgresAdapter } from '../types'
+import type { BuildQueryJoins } from './buildQuery'
 
-import { buildAndOrConditions } from './buildAndOrConditions';
-import { getTableColumnFromPath } from './getTableColumnFromPath';
-import { operatorMap } from './operatorMap';
-import { sanitizeQueryValue } from './sanitizeQueryValue';
+import { buildAndOrConditions } from './buildAndOrConditions'
+import { getTableColumnFromPath } from './getTableColumnFromPath'
+import { operatorMap } from './operatorMap'
+import { sanitizeQueryValue } from './sanitizeQueryValue'
 
 type Args = {
   adapter: PostgresAdapter

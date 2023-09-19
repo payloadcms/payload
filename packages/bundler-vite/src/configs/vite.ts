@@ -1,15 +1,16 @@
 /* eslint-disable no-param-reassign */
-import path from 'path'
+import type { SanitizedConfig } from 'payload/config'
 // @ts-expect-error
 import type { InlineConfig } from 'vite'
-import viteCommonJS from 'vite-plugin-commonjs'
-import virtual from 'vite-plugin-virtual'
-import scss from 'rollup-plugin-scss'
-import image from '@rollup/plugin-image'
+
 import rollupCommonJS from '@rollup/plugin-commonjs'
+import image from '@rollup/plugin-image'
 import react from '@vitejs/plugin-react'
 import getPort from 'get-port'
-import type { SanitizedConfig } from 'payload/config'
+import path from 'path'
+import scss from 'rollup-plugin-scss'
+import viteCommonJS from 'vite-plugin-commonjs'
+import virtual from 'vite-plugin-virtual'
 
 const bundlerPath = path.resolve(__dirname, '../')
 const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js')
@@ -18,7 +19,7 @@ const mockDotENVPath = path.resolve(__dirname, '../mocks/dotENV.js')
 export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<InlineConfig> => {
   const { createLogger } = await import('vite')
 
-  const logger = createLogger('warn', { prefix: '[VITE-WARNING]', allowClearScreen: false })
+  const logger = createLogger('warn', { allowClearScreen: false, prefix: '[VITE-WARNING]' })
   const originalWarning = logger.warn
   logger.warn = (msg, options) => {
     // TODO: fix this? removed these warnings to make debugging easier
@@ -60,9 +61,46 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
   }
 
   return {
-    root: path.resolve(__dirname, '../'),
     base: payloadConfig.routes.admin,
+    build: {
+      commonjsOptions: {
+        include: [/payload/],
+        transformMixedEsModules: true,
+      },
+      outDir: payloadConfig.admin.buildPath,
+      rollupOptions: {
+        // output: {
+        //   manualChunks: {
+        //     jsonWorker: ['monaco-editor/esm/vs/language/json/json.worker'],
+        //     cssWorker: ['monaco-editor/esm/vs/language/css/css.worker'],
+        //     htmlWorker: ['monaco-editor/esm/vs/language/html/html.worker'],
+        //     tsWorker: ['monaco-editor/esm/vs/language/typescript/ts.worker'],
+        //     editorWorker: ['monaco-editor/esm/vs/editor/editor.worker'],
+        //   },
+        // },
+        input: {
+          main: path.resolve(__dirname, '../index.html'),
+        },
+        plugins: [
+          image(),
+          rollupCommonJS(),
+          scss({
+            output: path.resolve(payloadConfig.admin.buildPath, 'styles.css'),
+            outputStyle: 'compressed',
+            // include: [`${relativeAdminPath}/**/*.scss`],
+          }),
+        ],
+        treeshake: true,
+      },
+    },
     customLogger: logger,
+    define: {
+      __dirname: '""',
+      'module.hot': 'undefined',
+      'process.argv': '[]',
+      'process.cwd': '() => ""',
+      'process.env': '{}',
+    },
     optimizeDeps: {
       exclude: [
         // Dependencies that need aliases should be excluded
@@ -78,22 +116,6 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
         // 'slate-hyperscript',
         // '@monaco-editor/react',
       ],
-    },
-    server: {
-      middlewareMode: true,
-      hmr: {
-        port: hmrPort,
-      },
-    },
-    resolve: {
-      alias,
-    },
-    define: {
-      __dirname: '""',
-      'module.hot': 'undefined',
-      'process.env': '{}',
-      'process.cwd': '() => ""',
-      'process.argv': '[]',
     },
     plugins: [
       {
@@ -119,8 +141,8 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       },
       virtual({
         crypto: 'export default {}',
-        https: 'export default {}',
         http: 'export default {}',
+        https: 'export default {}',
       }),
       react(),
       // viteCommonJS(),
@@ -138,36 +160,15 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       //   },
       // },
     ],
-    build: {
-      outDir: payloadConfig.admin.buildPath,
-      commonjsOptions: {
-        transformMixedEsModules: true,
-        include: [/payload/],
+    resolve: {
+      alias,
+    },
+    root: path.resolve(__dirname, '../'),
+    server: {
+      hmr: {
+        port: hmrPort,
       },
-      rollupOptions: {
-        // output: {
-        //   manualChunks: {
-        //     jsonWorker: ['monaco-editor/esm/vs/language/json/json.worker'],
-        //     cssWorker: ['monaco-editor/esm/vs/language/css/css.worker'],
-        //     htmlWorker: ['monaco-editor/esm/vs/language/html/html.worker'],
-        //     tsWorker: ['monaco-editor/esm/vs/language/typescript/ts.worker'],
-        //     editorWorker: ['monaco-editor/esm/vs/editor/editor.worker'],
-        //   },
-        // },
-        plugins: [
-          image(),
-          rollupCommonJS(),
-          scss({
-            output: path.resolve(payloadConfig.admin.buildPath, 'styles.css'),
-            outputStyle: 'compressed',
-            // include: [`${relativeAdminPath}/**/*.scss`],
-          }),
-        ],
-        treeshake: true,
-        input: {
-          main: path.resolve(__dirname, '../index.html'),
-        },
-      },
+      middlewareMode: true,
     },
   }
 }

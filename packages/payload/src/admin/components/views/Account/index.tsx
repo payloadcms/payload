@@ -22,7 +22,7 @@ const AccountView: React.FC = () => {
   const { user } = useAuth()
   const userRef = useRef(user)
   const [internalState, setInternalState] = useState<Fields>()
-  const { docPermissions, getDocPermissions, getDocPreferences, id, preferencesKey, slug } =
+  const { id, docPermissions, getDocPermissions, getDocPreferences, preferencesKey, slug } =
     useDocumentInfo()
   const { getPreference } = usePreferences()
 
@@ -64,9 +64,9 @@ const AccountView: React.FC = () => {
       getDocPermissions()
       const preferences = await getDocPreferences()
       const state = await buildStateFromSchema({
+        id,
         data: json.doc,
         fieldSchema: collection.fields,
-        id,
         locale,
         operation: 'update',
         preferences,
@@ -93,9 +93,9 @@ const AccountView: React.FC = () => {
       const preferences = await getDocPreferences()
 
       const state = await buildStateFromSchema({
+        id,
         data: dataToRender,
         fieldSchema: fields,
-        id,
         locale,
         operation: 'update',
         preferences,

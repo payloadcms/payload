@@ -81,9 +81,9 @@ async function resetPassword(args: Arguments): Promise<Result> {
     }
 
     const doc = await payload.db.updateOne({
+      id: user.id,
       collection: collectionConfig.slug,
       data: user,
-      id: user.id,
       req,
     })
 
@@ -116,9 +116,9 @@ async function resetPassword(args: Arguments): Promise<Result> {
     }
 
     const fullUser = await payload.findByID({
+      id: user.id,
       collection: collectionConfig.slug,
       depth,
-      id: user.id,
       overrideAccess,
       req,
     })

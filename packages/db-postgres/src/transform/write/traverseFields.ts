@@ -1,15 +1,15 @@
 /* eslint-disable no-param-reassign */
-import type { Field } from 'payload/types';
+import type { Field } from 'payload/types'
 
-import { fieldAffectsData } from 'payload/types';
-import toSnakeCase from 'to-snake-case';
+import { fieldAffectsData } from 'payload/types'
+import toSnakeCase from 'to-snake-case'
 
-import type { ArrayRowToInsert, BlockRowToInsert } from './types';
+import type { ArrayRowToInsert, BlockRowToInsert } from './types'
 
-import { isArrayOfRows } from '../../utilities/isArrayOfRows';
-import { transformArray } from './array';
-import { transformBlocks } from './blocks';
-import { transformRelationship } from './relationships';
+import { isArrayOfRows } from '../../utilities/isArrayOfRows'
+import { transformArray } from './array'
+import { transformBlocks } from './blocks'
+import { transformRelationship } from './relationships'
 
 type Args = {
   arrays: {
@@ -49,17 +49,17 @@ export const traverseFields = ({
   row,
 }: Args) => {
   fields.forEach((field) => {
-    let columnName = '';
-    let fieldData: unknown;
+    let columnName = ''
+    let fieldData: unknown
 
     if (fieldAffectsData(field)) {
-      columnName = `${columnPrefix || ''}${field.name}`;
-      fieldData = data[field.name];
+      columnName = `${columnPrefix || ''}${field.name}`
+      fieldData = data[field.name]
     }
 
     if (field.type === 'array') {
-      const arrayTableName = `${newTableName}_${toSnakeCase(field.name)}`;
-      if (!arrays[arrayTableName]) arrays[arrayTableName] = [];
+      const arrayTableName = `${newTableName}_${toSnakeCase(field.name)}`
+      if (!arrays[arrayTableName]) arrays[arrayTableName] = []
 
       if (field.localized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
@@ -74,11 +74,11 @@ export const traverseFields = ({
                 locale: localeKey,
                 path,
                 relationships,
-              });
+              })
 
-              arrays[arrayTableName] = arrays[arrayTableName].concat(newRows);
+              arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
             }
-          });
+          })
         }
       } else {
         const newRows = transformArray({
@@ -89,12 +89,12 @@ export const traverseFields = ({
           field,
           path,
           relationships,
-        });
+        })
 
-        arrays[arrayTableName] = arrays[arrayTableName].concat(newRows);
+        arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
       }
 
-      return;
+      return
     }
 
     if (field.type === 'blocks') {
@@ -110,9 +110,9 @@ export const traverseFields = ({
                 path,
                 relationships,
                 tableName: newTableName,
-              });
+              })
             }
-          });
+          })
         }
       } else if (isArrayOfRows(fieldData)) {
         transformBlocks({
@@ -122,10 +122,10 @@ export const traverseFields = ({
           path,
           relationships,
           tableName: newTableName,
-        });
+        })
       }
 
-      return;
+      return
     }
 
     if (field.type === 'group') {
@@ -146,8 +146,8 @@ export const traverseFields = ({
               path: `${path || ''}${field.name}.`,
               relationships,
               row,
-            });
-          });
+            })
+          })
         } else {
           traverseFields({
             arrays,
@@ -162,15 +162,15 @@ export const traverseFields = ({
             path: `${path || ''}${field.name}.`,
             relationships,
             row,
-          });
+          })
         }
       }
 
-      return;
+      return
     }
 
     if (field.type === 'relationship') {
-      const relationshipPath = `${path || ''}${field.name}`;
+      const relationshipPath = `${path || ''}${field.name}`
 
       if (field.localized) {
         if (typeof fieldData === 'object') {
@@ -183,8 +183,8 @@ export const traverseFields = ({
               data: localeData,
               field,
               relationships,
-            });
-          });
+            })
+          })
         }
       } else {
         transformRelationship({
@@ -194,59 +194,59 @@ export const traverseFields = ({
           data: fieldData,
           field,
           relationships,
-        });
+        })
       }
 
-      return;
+      return
     }
 
     if (fieldAffectsData(field)) {
-      const valuesToTransform: { localeKey?: string, ref: unknown, value: unknown }[] = [];
+      const valuesToTransform: { localeKey?: string; ref: unknown; value: unknown }[] = []
 
-      if ((field.localized)) {
+      if (field.localized) {
         if (typeof fieldData === 'object' && fieldData !== null) {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
-            if (!locales[localeKey]) locales[localeKey] = {};
+            if (!locales[localeKey]) locales[localeKey] = {}
 
             valuesToTransform.push({
               localeKey,
               ref: locales,
               value: localeData,
-            });
-          });
+            })
+          })
         }
       } else {
-        let ref = row;
+        let ref = row
 
         if (forcedLocale) {
-          if (!locales[forcedLocale]) locales[forcedLocale] = {};
-          ref = locales[forcedLocale];
+          if (!locales[forcedLocale]) locales[forcedLocale] = {}
+          ref = locales[forcedLocale]
         }
 
-        valuesToTransform.push({ ref, value: fieldData });
+        valuesToTransform.push({ ref, value: fieldData })
       }
 
       valuesToTransform.forEach(({ localeKey, ref, value }) => {
         if (typeof value !== 'undefined') {
-          let formattedValue = value;
+          let formattedValue = value
 
           switch (field.type) {
             case 'number': {
               // TODO: handle hasMany
-              break;
+              break
             }
 
             case 'select': {
-              break;
+              break
             }
 
             case 'date': {
               if (typeof fieldData === 'string') {
-                const parsedDate = new Date(fieldData);
-                formattedValue = parsedDate;
+                const parsedDate = new Date(fieldData)
+                formattedValue = parsedDate
               }
 
-              break;
+              break
             }
 
             // case 'tabs': {
@@ -311,17 +311,17 @@ export const traverseFields = ({
             // }
 
             default: {
-              break;
+              break
             }
           }
 
           if (localeKey) {
-            ref[localeKey][columnName] = formattedValue;
+            ref[localeKey][columnName] = formattedValue
           } else {
-            ref[columnName] = formattedValue;
+            ref[columnName] = formattedValue
           }
         }
-      });
+      })
     }
-  });
-};
+  })
+}

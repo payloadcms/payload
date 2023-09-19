@@ -1,16 +1,16 @@
-import type { Find } from 'payload/database';
-import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payload/types';
+import type { Find } from 'payload/database'
+import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payload/types'
 
-import { asc, desc, inArray, sql } from 'drizzle-orm';
-import toSnakeCase from 'to-snake-case';
+import { asc, desc, inArray, sql } from 'drizzle-orm'
+import toSnakeCase from 'to-snake-case'
 
-import type { ChainedMethods } from './find/chainMethods';
-import type { PostgresAdapter } from './types';
+import type { ChainedMethods } from './find/chainMethods'
+import type { PostgresAdapter } from './types'
 
-import { buildFindManyArgs } from './find/buildFindManyArgs';
-import { chainMethods } from './find/chainMethods';
-import buildQuery from './queries/buildQuery';
-import { transform } from './transform/read';
+import { buildFindManyArgs } from './find/buildFindManyArgs'
+import { chainMethods } from './find/chainMethods'
+import buildQuery from './queries/buildQuery'
+import { transform } from './transform/read'
 
 export const find: Find = async function find(
   this: PostgresAdapter,
@@ -48,7 +48,7 @@ export const find: Find = async function find(
   const db = this.sessions?.[req.transactionID] || this.db
   const orderedIDMap: Record<number | string, number> = {}
 
-  const selectDistinctMethods: ChainedMethods = [];
+  const selectDistinctMethods: ChainedMethods = []
 
   if (orderBy?.order && orderBy?.column) {
     selectDistinctMethods.push({
@@ -81,7 +81,10 @@ export const find: Find = async function find(
     selectDistinctMethods.push({ args: [(page - 1) * limit], method: 'offset' })
     selectDistinctMethods.push({ args: [limit === 0 ? undefined : limit], method: 'limit' })
 
-    selectDistinctResult = await chainMethods({ methods: selectDistinctMethods, query: db.selectDistinct(selectFields).from(table)})
+    selectDistinctResult = await chainMethods({
+      methods: selectDistinctMethods,
+      query: db.selectDistinct(selectFields).from(table),
+    })
 
     if (selectDistinctResult.length === 0) {
       return {
@@ -121,7 +124,7 @@ export const find: Find = async function find(
   const findPromise = db.query[tableName].findMany(findManyArgs)
 
   if (pagination !== false || selectDistinctResult?.length > limit) {
-    const selectCountMethods: ChainedMethods = [];
+    const selectCountMethods: ChainedMethods = []
     Object.entries(joins).forEach(([joinTable, condition]) => {
       if (joinTable) {
         selectCountMethods.push({
@@ -135,7 +138,7 @@ export const find: Find = async function find(
       query: db
         .select({ count: sql<number>`count(*)` })
         .from(table)
-        .where(where)
+        .where(where),
     })
     totalDocs = Number(countResult[0].count)
     totalPages = typeof limit === 'number' ? Math.ceil(totalDocs / limit) : 1

@@ -1,3 +1,3 @@
-export { default as buildPaginatedListType } from './dist/graphql/schema/buildPaginatedListType';
-export { default as GraphQL } from 'graphql';
+export { default as buildPaginatedListType } from './dist/graphql/schema/buildPaginatedListType'
+export { default as GraphQL } from 'graphql'
 //# sourceMappingURL=graphql.d.ts.map

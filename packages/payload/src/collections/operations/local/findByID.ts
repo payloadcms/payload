@@ -34,6 +34,7 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
   options: Options<T>,
 ): Promise<GeneratedTypes['collections'][T]> {
   const {
+    id,
     collection: collectionSlug,
     context,
     currentDepth,
@@ -41,7 +42,6 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
     disableErrors = false,
     draft = false,
     fallbackLocale = null,
-    id,
     locale = null,
     overrideAccess = true,
     req = {} as PayloadRequest,
@@ -73,12 +73,12 @@ export default async function findByIDLocal<T extends keyof GeneratedTypes['coll
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   return findByID<GeneratedTypes['collections'][T]>({
+    id,
     collection,
     currentDepth,
     depth,
     disableErrors,
     draft,
-    id,
     overrideAccess,
     req,
     showHiddenFields,

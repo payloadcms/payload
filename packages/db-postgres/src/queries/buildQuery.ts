@@ -1,12 +1,12 @@
-import type { SQL } from 'drizzle-orm';
-import type { Field, Where } from 'payload/types';
+import type { SQL } from 'drizzle-orm'
+import type { Field, Where } from 'payload/types'
 
-import { asc, desc } from 'drizzle-orm';
+import { asc, desc } from 'drizzle-orm'
 
-import type { GenericColumn, PostgresAdapter } from '../types';
+import type { GenericColumn, PostgresAdapter } from '../types'
 
-import { getTableColumnFromPath } from './getTableColumnFromPath';
-import { parseParams } from './parseParams';
+import { getTableColumnFromPath } from './getTableColumnFromPath'
+import { parseParams } from './parseParams'
 
 export type BuildQueryJoins = Record<string, SQL>
 
@@ -38,28 +38,25 @@ const buildQuery = async function buildQuery({
 }: BuildQueryArgs): Promise<Result> {
   const selectFields: Record<string, GenericColumn> = {
     id: adapter.tables[tableName].id,
-  };
-  const joins: BuildQueryJoins = {};
+  }
+  const joins: BuildQueryJoins = {}
   const orderBy: Result['orderBy'] = {
     column: null,
     order: null,
-  };
+  }
 
   if (sort) {
-    let sortPath;
+    let sortPath
 
     if (sort[0] === '-') {
-      sortPath = sort.substring(1);
-      orderBy.order = desc;
+      sortPath = sort.substring(1)
+      orderBy.order = desc
     } else {
-      sortPath = sort;
-      orderBy.order = asc;
+      sortPath = sort
+      orderBy.order = asc
     }
 
-    const {
-      columnName: sortTableColumnName,
-      table: sortTable,
-    } = getTableColumnFromPath({
+    const { columnName: sortTableColumnName, table: sortTable } = getTableColumnFromPath({
       adapter,
       collectionPath: sortPath,
       fields,
@@ -68,16 +65,16 @@ const buildQuery = async function buildQuery({
       pathSegments: sortPath.replace(/__/g, '.').split('.'),
       selectFields,
       tableName,
-    });
+    })
 
-    orderBy.column = sortTable[sortTableColumnName];
+    orderBy.column = sortTable[sortTableColumnName]
 
     if (orderBy.column) {
-      selectFields.sort = orderBy.column;
+      selectFields.sort = orderBy.column
     }
   }
 
-  let where: SQL;
+  let where: SQL
 
   if (Object.keys(incomingWhere).length > 0) {
     where = await parseParams({
@@ -88,7 +85,7 @@ const buildQuery = async function buildQuery({
       selectFields,
       tableName,
       where: incomingWhere,
-    });
+    })
   }
 
   return {
@@ -96,7 +93,7 @@ const buildQuery = async function buildQuery({
     orderBy,
     selectFields,
     where,
-  };
-};
+  }
+}
 
-export default buildQuery;
+export default buildQuery

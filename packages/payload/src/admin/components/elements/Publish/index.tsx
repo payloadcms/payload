@@ -18,8 +18,8 @@ export type DefaultPublishButtonProps = {
   publish: () => void
 }
 const DefaultPublishButton: React.FC<DefaultPublishButtonProps> = ({
-  disabled,
   id,
+  disabled,
   label,
   publish,
 }) => {
@@ -56,9 +56,9 @@ export const Publish: React.FC<Props> = ({ CustomComponent }) => {
       CustomComponent={CustomComponent}
       DefaultComponent={DefaultPublishButton}
       componentProps={{
+        id: 'action-save',
         DefaultButton: DefaultPublishButton,
         disabled: !canPublish,
-        id: 'action-save',
         label: t('publishChanges'),
         publish,
       }}

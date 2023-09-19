@@ -17,11 +17,11 @@ type Args<T> = {
 }
 
 export const beforeValidate = async <T extends Record<string, unknown>>({
+  id,
   context,
   data: incomingData,
   doc,
   entityConfig,
-  id,
   operation,
   overrideAccess,
   req,
@@ -29,11 +29,11 @@ export const beforeValidate = async <T extends Record<string, unknown>>({
   const data = deepCopyObject(incomingData)
 
   await traverseFields({
+    id,
     context,
     data,
     doc,
     fields: entityConfig.fields,
-    id,
     operation,
     overrideAccess,
     req,

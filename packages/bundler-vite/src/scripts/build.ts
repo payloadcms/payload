@@ -1,6 +1,6 @@
-// @ts-expect-error
+import type { SanitizedConfig } from 'payload/config'
 import type { InlineConfig } from 'vite'
-import { SanitizedConfig } from 'payload/config'
+
 import { getViteConfig } from '../configs/vite'
 
 type BuildAdminType = (options: {

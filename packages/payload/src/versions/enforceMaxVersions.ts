@@ -14,9 +14,9 @@ type Args = {
 }
 
 export const enforceMaxVersions = async ({
+  id,
   collection,
   global,
-  id,
   max,
   payload,
   req,

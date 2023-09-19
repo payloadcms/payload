@@ -1,13 +1,20 @@
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'crypto'
 
-import type { Relation } from './config';
-import type { ErrorOnHook, Post } from './payload-types';
+import type { Relation } from './config'
+import type { ErrorOnHook, Post } from './payload-types'
 
-import payload from '../../packages/payload/src';
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync';
-import { initPayloadTest } from '../helpers/configHelpers';
-import { RESTClient } from '../helpers/rest';
-import config, { customIdNumberSlug, customIdSlug, errorOnHookSlug, pointSlug, relationSlug, slug, } from './config';
+import payload from '../../packages/payload/src'
+import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
+import { initPayloadTest } from '../helpers/configHelpers'
+import { RESTClient } from '../helpers/rest'
+import config, {
+  customIdNumberSlug,
+  customIdSlug,
+  errorOnHookSlug,
+  pointSlug,
+  relationSlug,
+  slug,
+} from './config'
 
 let client: RESTClient
 
@@ -116,7 +123,7 @@ describe('collections-rest', () => {
           data: { description },
         })
 
-        expect(errors).toHaveLength(0);
+        expect(errors).toHaveLength(0)
         expect(status).toEqual(200)
         expect(docs[0].title).toEqual('title') // Check was not modified
         expect(docs[0].description).toEqual(description)

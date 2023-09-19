@@ -100,8 +100,8 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
         collapsed={row.collapsed}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         dragHandleProps={{
-          attributes,
           id: row.id,
+          attributes,
           listeners,
         }}
         header={

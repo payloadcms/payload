@@ -13,7 +13,7 @@ export const SetStepNav: React.FC<{
   collection: SanitizedCollectionConfig
   id: string
   isEditing: boolean
-}> = ({ collection, id, isEditing }) => {
+}> = ({ id, collection, isEditing }) => {
   const {
     admin: { useAsTitle },
     labels: { plural: pluralLabel },

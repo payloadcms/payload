@@ -64,11 +64,11 @@ async function registerFirstUser<TSlug extends keyof GeneratedTypes['collections
     // auto-verify (if applicable)
     if (verify) {
       await payload.update({
+        id: result.id,
         collection: slug,
         data: {
           _verified: true,
         },
-        id: result.id,
       })
     }
 

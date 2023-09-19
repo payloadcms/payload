@@ -18,12 +18,12 @@ type Args = {
 }
 
 export const saveVersion = async ({
+  id,
   autosave,
   collection,
   docWithLocales: doc,
   draft,
   global,
-  id,
   payload,
   req,
 }: Args): Promise<TypeWithID> => {
@@ -70,8 +70,8 @@ export const saveVersion = async ({
         }
 
         result = await payload.db.updateVersion({
-          collectionSlug: entityConfig.slug,
           id: latestVersion.id,
+          collectionSlug: entityConfig.slug,
           req,
           versionData: data,
         })
@@ -108,9 +108,9 @@ export const saveVersion = async ({
 
   if (max > 0) {
     await enforceMaxVersions({
+      id,
       collection,
       global,
-      id,
       max,
       payload,
       req,

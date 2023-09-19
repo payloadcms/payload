@@ -55,6 +55,7 @@ declare module 'slate' {
 
 const RichText: React.FC<FieldProps> = (props) => {
   const {
+    name,
     admin: {
       className,
       condition,
@@ -77,7 +78,6 @@ const RichText: React.FC<FieldProps> = (props) => {
     admin,
     defaultValue: defaultValueFromProps,
     label,
-    name,
     path: pathFromProps,
     required,
     validate = richText,

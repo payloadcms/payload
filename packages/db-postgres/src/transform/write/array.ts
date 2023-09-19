@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign */
-import type { ArrayField } from 'payload/types';
+import type { ArrayField } from 'payload/types'
 
-import type { ArrayRowToInsert, BlockRowToInsert } from './types';
+import type { ArrayRowToInsert, BlockRowToInsert } from './types'
 
-import { isArrayOfRows } from '../../utilities/isArrayOfRows';
-import { traverseFields } from './traverseFields';
+import { isArrayOfRows } from '../../utilities/isArrayOfRows'
+import { traverseFields } from './traverseFields'
 
 type Args = {
   arrayTableName: string
@@ -29,7 +29,7 @@ export const transformArray = ({
   path,
   relationships,
 }: Args) => {
-  const newRows: ArrayRowToInsert[] = [];
+  const newRows: ArrayRowToInsert[] = []
 
   if (isArrayOfRows(data)) {
     data.forEach((arrayRow, i) => {
@@ -40,16 +40,16 @@ export const transformArray = ({
         row: {
           _order: i + 1,
         },
-      };
+      }
 
       if (locale) {
         newRow.locales[locale] = {
           _locale: locale,
-        };
+        }
       }
 
       if (field.localized) {
-        newRow.row._locale = locale;
+        newRow.row._locale = locale
       }
 
       traverseFields({
@@ -64,11 +64,11 @@ export const transformArray = ({
         path: `${path || ''}${field.name}.${i}.`,
         relationships,
         row: newRow.row,
-      });
+      })
 
-      newRows.push(newRow);
-    });
+      newRows.push(newRow)
+    })
   }
 
-  return newRows;
-};
+  return newRows
+}

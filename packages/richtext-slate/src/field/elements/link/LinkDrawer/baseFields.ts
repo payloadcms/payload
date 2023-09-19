@@ -16,18 +16,18 @@ const translations = extractTranslations([
 
 export const getBaseFields = (config: Config): Field[] => [
   {
-    label: translations['fields:textToDisplay'],
     name: 'text',
+    label: translations['fields:textToDisplay'],
     required: true,
     type: 'text',
   },
   {
+    name: 'linkType',
     admin: {
       description: translations['fields:chooseBetweenCustomTextOrDocument'],
     },
     defaultValue: 'custom',
     label: translations['fields:linkType'],
-    name: 'linkType',
     options: [
       {
         label: translations['fields:customURL'],
@@ -42,22 +42,22 @@ export const getBaseFields = (config: Config): Field[] => [
     type: 'radio',
   },
   {
+    name: 'url',
     admin: {
       condition: ({ linkType }) => linkType !== 'internal',
     },
     label: translations['fields:enterURL'],
-    name: 'url',
     required: true,
     type: 'text',
   },
   {
+    name: 'doc',
     admin: {
       condition: ({ linkType }) => {
         return linkType === 'internal'
       },
     },
     label: translations['fields:chooseDocumentToLink'],
-    name: 'doc',
     relationTo: config.collections
       .filter(({ admin: { enableRichTextLink } }) => enableRichTextLink)
       .map(({ slug }) => slug),
@@ -65,8 +65,8 @@ export const getBaseFields = (config: Config): Field[] => [
     type: 'relationship',
   },
   {
-    label: translations['fields:openInNewTab'],
     name: 'newTab',
+    label: translations['fields:openInNewTab'],
     type: 'checkbox',
   },
 ]

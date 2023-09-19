@@ -25,12 +25,12 @@ export const incrementLoginAttempts = async ({
     // Expired lock, restart count at 1
     if (lockUntil < Date.now()) {
       await payload.update({
+        id: doc.id,
         collection: collection.slug,
         data: {
           lockUntil: null,
           loginAttempts: 1,
         },
-        id: doc.id,
         req,
       })
     }
@@ -49,8 +49,8 @@ export const incrementLoginAttempts = async ({
   }
 
   await payload.update({
+    id: doc.id,
     collection: collection.slug,
     data,
-    id: doc.id,
   })
 }

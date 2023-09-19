@@ -32,6 +32,7 @@ const BlocksField: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation('fields')
 
   const {
+    name,
     admin: { className, condition, description, readOnly },
     blocks,
     fieldTypes,
@@ -41,7 +42,6 @@ const BlocksField: React.FC<Props> = (props) => {
     localized,
     maxRows,
     minRows,
-    name,
     path: pathFromProps,
     permissions,
     required,

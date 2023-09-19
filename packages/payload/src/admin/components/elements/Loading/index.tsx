@@ -58,8 +58,8 @@ type UseLoadingOverlayToggleT = {
   type?: LoadingOverlayTypes
 }
 export const LoadingOverlayToggle: React.FC<UseLoadingOverlayToggleT> = ({
-  loadingText,
   name: key,
+  loadingText,
   show,
   type = 'fullscreen',
 }) => {
@@ -93,10 +93,10 @@ type FormLoadingOverlayToggleT = {
   type?: LoadingOverlayTypes
 }
 export const FormLoadingOverlayToggle: React.FC<FormLoadingOverlayToggleT> = ({
+  name,
   action,
   formIsLoading = false,
   loadingSuffix,
-  name,
   type = 'fullscreen',
 }) => {
   const isProcessing = useFormProcessing()

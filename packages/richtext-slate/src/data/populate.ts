@@ -15,11 +15,11 @@ type Arguments = {
 }
 
 export const populate = async ({
+  id,
   collection,
   currentDepth,
   data,
   depth,
-  id,
   key,
   overrideAccess,
   req,

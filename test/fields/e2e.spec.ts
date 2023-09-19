@@ -1029,7 +1029,9 @@ describe('fields', () => {
     test('should display formatted date in useAsTitle', async () => {
       await page.goto(url.list)
       await page.locator('.row-1 .cell-default a').click()
-      await expect(page.locator('.collection-edit .doc-header__title.render-title')).toContainText('August')
+      await expect(page.locator('.collection-edit .doc-header__title.render-title')).toContainText(
+        'August',
+      )
     })
 
     test('should clear date', async () => {
