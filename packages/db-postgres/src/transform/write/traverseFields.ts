@@ -9,6 +9,7 @@ import type { ArrayRowToInsert, BlockRowToInsert } from './types'
 import { isArrayOfRows } from '../../utilities/isArrayOfRows'
 import { transformArray } from './array'
 import { transformBlocks } from './blocks'
+import { transformNumbers } from './numbers'
 import { transformRelationship } from './relationships'
 
 type Args = {
@@ -27,6 +28,7 @@ type Args = {
     [locale: string]: Record<string, unknown>
   }
   newTableName: string
+  numbers: Record<string, unknown>[]
   parentTableName: string
   path: string
   relationships: Record<string, unknown>[]
@@ -43,6 +45,7 @@ export const traverseFields = ({
   forcedLocale,
   locales,
   newTableName,
+  numbers,
   parentTableName,
   path,
   relationships,
@@ -142,6 +145,7 @@ export const traverseFields = ({
               forcedLocale: localeKey,
               locales,
               newTableName: parentTableName,
+              numbers,
               parentTableName,
               path: `${path || ''}${field.name}.`,
               relationships,
@@ -158,6 +162,7 @@ export const traverseFields = ({
             fields: field.fields,
             locales,
             newTableName: parentTableName,
+            numbers,
             parentTableName,
             path: `${path || ''}${field.name}.`,
             relationships,
@@ -185,6 +190,7 @@ export const traverseFields = ({
                   forcedLocale: localeKey,
                   locales,
                   newTableName: parentTableName,
+                  numbers,
                   parentTableName,
                   path: `${path || ''}${tab.name}.`,
                   relationships,
@@ -201,6 +207,7 @@ export const traverseFields = ({
                 fields: tab.fields,
                 locales,
                 newTableName: parentTableName,
+                numbers,
                 parentTableName,
                 path: `${path || ''}${tab.name}.`,
                 relationships,
@@ -218,6 +225,7 @@ export const traverseFields = ({
             fields: tab.fields,
             locales,
             newTableName: parentTableName,
+            numbers,
             parentTableName,
             path,
             relationships,
@@ -237,6 +245,7 @@ export const traverseFields = ({
         fields: field.fields,
         locales,
         newTableName: parentTableName,
+        numbers,
         parentTableName,
         path,
         relationships,
@@ -269,6 +278,35 @@ export const traverseFields = ({
           data: fieldData,
           field,
           relationships,
+        })
+      }
+
+      return
+    }
+
+    if (field.type === 'number' && field.hasMany && Array.isArray(fieldData)) {
+      const numberPath = `${path || ''}${field.name}`
+
+      if (field.localized) {
+        if (typeof fieldData === 'object') {
+          Object.entries(fieldData).forEach(([localeKey, localeData]) => {
+            transformNumbers({
+              baseRow: {
+                locale: localeKey,
+                path: numberPath,
+              },
+              data: localeData,
+              numbers,
+            })
+          })
+        }
+      } else {
+        transformNumbers({
+          baseRow: {
+            path: numberPath,
+          },
+          data: fieldData,
+          numbers,
         })
       }
 

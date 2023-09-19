@@ -14,6 +14,7 @@ import {
   unique,
   varchar,
 } from 'drizzle-orm/pg-core'
+import { InvalidConfiguration } from 'payload/errors'
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
@@ -43,7 +44,9 @@ type Args = {
 
 type Result = {
   hasLocalizedField: boolean
+  hasLocalizedManyNumberField: boolean
   hasLocalizedRelationshipField: boolean
+  hasManyNumberField: 'index' | boolean
 }
 
 export const traverseFields = ({
@@ -64,6 +67,8 @@ export const traverseFields = ({
 }: Args): Result => {
   let hasLocalizedField = false
   let hasLocalizedRelationshipField = false
+  let hasManyNumberField: 'index' | boolean = false
+  let hasLocalizedManyNumberField = false
 
   let parentIDColType = 'integer'
   if (columns.id instanceof PgNumericBuilder) parentIDColType = 'numeric'
@@ -104,16 +109,30 @@ export const traverseFields = ({
       case 'email':
       case 'code':
       case 'textarea': {
-        // TODO: handle hasMany
-        // TODO: handle min / max length
         targetTable[`${fieldPrefix || ''}${field.name}`] = varchar(columnName)
         break
       }
 
       case 'number': {
-        // TODO: handle hasMany
-        // TODO: handle min / max
-        targetTable[`${fieldPrefix || ''}${field.name}`] = numeric(columnName)
+        if (field.hasMany) {
+          if (field.localized) {
+            hasLocalizedManyNumberField = true
+          }
+
+          if (field.index) {
+            hasManyNumberField = 'index'
+          } else if (!hasManyNumberField) {
+            hasManyNumberField = true
+          }
+
+          if (field.unique) {
+            throw new InvalidConfiguration(
+              'Unique is not supported in Postgres for hasMany number fields.',
+            )
+          }
+        } else {
+          targetTable[`${fieldPrefix || ''}${field.name}`] = numeric(columnName)
+        }
         break
       }
 
@@ -268,7 +287,9 @@ export const traverseFields = ({
       case 'group': {
         const {
           hasLocalizedField: groupHasLocalizedField,
+          hasLocalizedManyNumberField: groupHasLocalizedManyNumberField,
           hasLocalizedRelationshipField: groupHasLocalizedRelationshipField,
+          hasManyNumberField: groupHasManyNumberField,
         } = traverseFields({
           adapter,
           arrayBlockRelations,
@@ -288,6 +309,8 @@ export const traverseFields = ({
 
         if (groupHasLocalizedField) hasLocalizedField = true
         if (groupHasLocalizedRelationshipField) hasLocalizedRelationshipField = true
+        if (groupHasManyNumberField) hasManyNumberField = true
+        if (groupHasLocalizedManyNumberField) hasLocalizedManyNumberField = true
         break
       }
 
@@ -296,7 +319,9 @@ export const traverseFields = ({
           if ('name' in tab) {
             const {
               hasLocalizedField: tabHasLocalizedField,
+              hasLocalizedManyNumberField: tabHasLocalizedManyNumberField,
               hasLocalizedRelationshipField: tabHasLocalizedRelationshipField,
+              hasManyNumberField: tabHasManyNumberField,
             } = traverseFields({
               adapter,
               arrayBlockRelations,
@@ -315,6 +340,8 @@ export const traverseFields = ({
 
             if (tabHasLocalizedField) hasLocalizedField = true
             if (tabHasLocalizedRelationshipField) hasLocalizedRelationshipField = true
+            if (tabHasManyNumberField) hasManyNumberField = true
+            if (tabHasLocalizedManyNumberField) hasLocalizedManyNumberField = true
           } else {
             ;({ hasLocalizedField, hasLocalizedRelationshipField } = traverseFields({
               adapter,
@@ -338,7 +365,12 @@ export const traverseFields = ({
 
       case 'row':
       case 'collapsible': {
-        ;({ hasLocalizedField, hasLocalizedRelationshipField } = traverseFields({
+        ;({
+          hasLocalizedField,
+          hasLocalizedManyNumberField,
+          hasLocalizedRelationshipField,
+          hasManyNumberField,
+        } = traverseFields({
           adapter,
           arrayBlockRelations,
           buildRelationships,
@@ -374,5 +406,10 @@ export const traverseFields = ({
     }
   })
 
-  return { hasLocalizedField, hasLocalizedRelationshipField }
+  return {
+    hasLocalizedField,
+    hasLocalizedManyNumberField,
+    hasLocalizedRelationshipField,
+    hasManyNumberField,
+  }
 }

@@ -7,12 +7,22 @@ import { MenuGlobal } from './globals/Menu'
 export default buildConfigWithDefaults({
   // ...extend config here
   collections: [
-    PostsCollection,
-    MediaCollection,
+    // PostsCollection,
+    {
+      slug: 'posts',
+      fields: [
+        {
+          name: 'myNumberField',
+          type: 'number',
+          hasMany: true,
+        },
+      ],
+    },
+    // MediaCollection,
     // ...add more collections here
   ],
   globals: [
-    MenuGlobal,
+    // MenuGlobal,
     // ...add more globals here
   ],
   graphQL: {
@@ -20,19 +30,13 @@ export default buildConfigWithDefaults({
   },
 
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
+    const numberField = await payload.create({
+      collection: 'posts',
       data: {
-        email: devUser.email,
-        password: devUser.password,
+        myNumberField: [12, 543, 54],
       },
     })
 
-    await payload.create({
-      collection: postsSlug,
-      data: {
-        text: 'example post',
-      },
-    })
+    console.log(numberField)
   },
 })

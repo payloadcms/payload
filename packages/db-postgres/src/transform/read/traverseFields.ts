@@ -2,10 +2,11 @@
 import type { SanitizedConfig } from 'payload/config'
 import type { Field, TabAsField } from 'payload/types'
 
-import { fieldAffectsData, tabHasName } from 'payload/types'
+import { fieldAffectsData } from 'payload/types'
 
 import type { BlocksMap } from '../../utilities/createBlocksMap'
 
+import { transformHasManyNumber } from './hasManyNumber'
 import { transformRelationship } from './relationship'
 
 type TraverseFieldsArgs = {
@@ -30,6 +31,10 @@ type TraverseFieldsArgs = {
    */
   fields: (Field | TabAsField)[]
   /**
+   * All hasMany number fields, as returned by Drizzle, keyed on an object by field path
+   */
+  numbers: Record<string, Record<string, unknown>[]>
+  /**
    * The current field path (in dot notation), used to merge in relationships
    */
   path: string
@@ -51,6 +56,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
   dataRef,
   fieldPrefix,
   fields,
+  numbers,
   path,
   relationships,
   table,
@@ -65,6 +71,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         dataRef,
         fieldPrefix,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        numbers,
         path,
         relationships,
         table,
@@ -82,6 +89,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         dataRef,
         fieldPrefix,
         fields: field.fields,
+        numbers,
         path,
         relationships,
         table,
@@ -104,6 +112,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   dataRef: row,
                   fieldPrefix: '',
                   fields: field.fields,
+                  numbers,
                   path: `${sanitizedPath}${field.name}.${row._order - 1}`,
                   relationships,
                   table: row,
@@ -123,6 +132,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 dataRef: row,
                 fieldPrefix: '',
                 fields: field.fields,
+                numbers,
                 path: `${sanitizedPath}${field.name}.${i}`,
                 relationships,
                 table: row,
@@ -160,6 +170,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                     dataRef: row,
                     fieldPrefix: '',
                     fields: block.fields,
+                    numbers,
                     path: `${blockFieldPath}.${row._order - 1}`,
                     relationships,
                     table: row,
@@ -184,6 +195,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   dataRef: row,
                   fieldPrefix: '',
                   fields: block.fields,
+                  numbers,
                   path: `${blockFieldPath}.${i}`,
                   relationships,
                   table: row,
@@ -232,6 +244,40 @@ export const traverseFields = <T extends Record<string, unknown>>({
         return result
       }
 
+      if (field.type === 'number' && field.hasMany) {
+        const numberPathMatch = numbers[`${sanitizedPath}${field.name}`]
+        if (!numberPathMatch) return result
+
+        if (field.localized) {
+          result[field.name] = {}
+          const numbersByLocale: Record<string, Record<string, unknown>[]> = {}
+
+          numberPathMatch.forEach((row) => {
+            if (typeof row.locale === 'string') {
+              if (!numbersByLocale[row.locale]) numbersByLocale[row.locale] = []
+              numbersByLocale[row.locale].push(row)
+            }
+          })
+
+          Object.entries(numbersByLocale).forEach(([locale, numbers]) => {
+            transformHasManyNumber({
+              field,
+              locale,
+              numberRows: numbers,
+              ref: result,
+            })
+          })
+        } else {
+          transformHasManyNumber({
+            field,
+            numberRows: numberPathMatch,
+            ref: result,
+          })
+        }
+
+        return result
+      }
+
       const localizedFieldData = {}
       const valuesToTransform: {
         ref: Record<string, unknown>
@@ -266,6 +312,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   dataRef: groupLocaleData as Record<string, unknown>,
                   fieldPrefix: groupFieldPrefix,
                   fields: field.fields,
+                  numbers,
                   path: `${sanitizedPath}${field.name}`,
                   relationships,
                   table,
@@ -278,6 +325,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 dataRef: groupData as Record<string, unknown>,
                 fieldPrefix: groupFieldPrefix,
                 fields: field.fields,
+                numbers,
                 path: `${sanitizedPath}${field.name}`,
                 relationships,
                 table,
