@@ -36,6 +36,9 @@ function FloatingSelectToolbar({
 
   function mouseMoveListener(e: MouseEvent) {
     if (popupCharStylesEditorRef?.current && (e.buttons === 1 || e.buttons === 3)) {
+      if (popupCharStylesEditorRef.current.style.opacity !== '0') {
+        popupCharStylesEditorRef.current.style.opacity = '0'
+      }
       if (popupCharStylesEditorRef.current.style.pointerEvents !== 'none') {
         const x = e.clientX
         const y = e.clientY
@@ -50,6 +53,7 @@ function FloatingSelectToolbar({
   }
   function mouseUpListener(e: MouseEvent) {
     if (popupCharStylesEditorRef?.current) {
+      popupCharStylesEditorRef.current.style.opacity = '1'
       if (popupCharStylesEditorRef.current.style.pointerEvents !== 'auto') {
         popupCharStylesEditorRef.current.style.pointerEvents = 'auto'
       }
