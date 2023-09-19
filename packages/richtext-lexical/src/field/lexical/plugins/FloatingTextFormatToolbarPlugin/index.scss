@@ -1,0 +1,138 @@
+.floating-text-format-popup {
+  display: flex;
+  background: #fff;
+  padding: 4px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  opacity: 0;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  transition: opacity 0.5s;
+  height: 35px;
+  will-change: transform;
+
+  button.popup-item,
+  select.popup-item {
+    border: 0;
+    display: flex;
+    background: none;
+    border-radius: 10px;
+    vertical-align: middle;
+
+    &:disabled {
+      cursor: not-allowed;
+
+      i.format {
+        opacity: 0.2;
+      }
+    }
+
+    &:hover:not([disabled]) {
+      background-color: #eee;
+    }
+
+    &.spaced {
+      margin-right: 2px;
+    }
+
+    &.active {
+      background-color: rgba(223, 232, 250, 0.3);
+
+      i {
+        opacity: 1;
+      }
+    }
+
+    i.format {
+      background-size: contain;
+      display: inline-block;
+      height: 18px;
+      width: 18px;
+      margin-top: 3px;
+      vertical-align: -0.25em;
+      opacity: 0.6;
+    }
+  }
+
+  select.popup-item {
+    padding: 8px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 70px;
+    font-size: 14px;
+    color: #777;
+    text-overflow: ellipsis;
+
+    &.code-language {
+      text-transform: capitalize;
+      width: 130px;
+    }
+  }
+
+  .popup-item {
+    .text {
+      display: flex;
+      line-height: 20px;
+      width: 70px;
+      vertical-align: middle;
+      font-size: 14px;
+      color: #777;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      height: 20px;
+      text-align: left;
+    }
+
+    .icon {
+      display: flex;
+      width: 20px;
+      height: 20px;
+      user-select: none;
+      margin-right: 8px;
+      line-height: 16px;
+      background-size: contain;
+    }
+  }
+
+  i.chevron-down {
+    margin-top: 3px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    user-select: none;
+
+    &.inside {
+      margin: 11px -25px 0 10px;
+      pointer-events: none;
+    }
+  }
+
+  .divider {
+    width: 1px;
+    background-color: #eee;
+    margin: 0 4px;
+  }
+
+  @media (max-width: 1024px) {
+    button.insert-comment {
+      display: none;
+    }
+  }
+}
+
+html[data-theme='dark'] {
+  .floating-text-format-popup {
+    background-color: black;
+    border: 1px solid var(--theme-elevation-150);
+
+    i {
+      filter: invert(1);
+    }
+
+    .popup-item:hover:not([disabled]) {
+      background-color: #1c1c1c;
+    }
+  }
+}
