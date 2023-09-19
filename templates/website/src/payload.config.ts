@@ -1,4 +1,6 @@
 import { payloadCloud } from '@payloadcms/plugin-cloud'
+import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
+import { webpackBundler } from '@payloadcms/bundler-webpack' // bundler-import
 import FormBuilder from '@payloadcms/plugin-form-builder'
 import nestedDocs from '@payloadcms/plugin-nested-docs'
 import redirects from '@payloadcms/plugin-redirects'
@@ -50,6 +52,12 @@ export default buildConfig({
   graphQL: {
     schemaOutputFile: path.resolve(__dirname, 'generated-schema.graphql'),
   },
+  // database-adapter-config-start
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI,
+  }),
+  // database-adapter-config-end
+  bundler: webpackBundler(), // bundler-config
   ...(process.env.PAYLOAD_PUBLIC_SITE_URL
     ? {
         cors: [process.env.PAYLOAD_PUBLIC_SITE_URL].filter(Boolean),
