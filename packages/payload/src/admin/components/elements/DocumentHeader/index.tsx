@@ -11,7 +11,7 @@ import './index.scss'
 const baseClass = `doc-header`
 
 export const DocumentHeader: React.FC<{
-  apiURL: string
+  apiURL?: string
   collection?: SanitizedCollectionConfig
   customHeader?: React.ReactNode
   data?: any
