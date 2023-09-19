@@ -18,8 +18,8 @@ type Props = {
 }
 
 export const WatchCondition: React.FC<Props> = ({
-  condition,
   name,
+  condition,
   path: pathFromProps,
   setShowField,
 }) => {

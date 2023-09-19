@@ -2,14 +2,14 @@ import type { Field } from '../../fields/config/types'
 
 export default [
   {
+    name: 'loginAttempts',
     defaultValue: 0,
     hidden: true,
-    name: 'loginAttempts',
     type: 'number',
   },
   {
-    hidden: true,
     name: 'lockUntil',
+    hidden: true,
     type: 'date',
   },
 ] as Field[]

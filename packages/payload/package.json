@@ -14,14 +14,15 @@
       "require": "./src/index.ts",
       "types": "./src/index.ts"
     },
+    "./scss": {
+      "import": "./src/exports/scss.scss",
+      "require": "./src/exports/scss.scss",
+      "default": "./src/exports/scss.scss"
+    },
     "./*": {
       "import": "./src/exports/*.ts",
       "require": "./src/exports/*.ts",
       "types": "./src/exports/*.ts"
-    },
-    "./scss": {
-      "import": "./src/exports/scss.scss",
-      "require": "./src/exports/scss.scss"
     }
   },
   "scripts": {
@@ -129,10 +130,8 @@
     "scheduler": "0.23.0",
     "scmp": "2.1.0",
     "sharp": "0.31.3",
-    "slate": "0.91.4",
-    "slate-history": "0.86.0",
-    "slate-hyperscript": "0.81.3",
-    "slate-react": "0.92.0",
+    "swc-loader": "0.2.3",
+    "terser-webpack-plugin": "5.3.9",
     "ts-essentials": "7.0.3",
     "use-context-selector": "1.4.1",
     "uuid": "8.3.2"

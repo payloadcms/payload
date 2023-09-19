@@ -16,9 +16,9 @@ export default async function findVersionByIDHandler(
   next: NextFunction,
 ): Promise<Response<FindByIDResult> | void> {
   const options = {
+    id: req.params.id,
     collection: req.collection,
     depth: parseInt(String(req.query.depth), 10),
-    id: req.params.id,
     payload: req.payload,
     req,
   }

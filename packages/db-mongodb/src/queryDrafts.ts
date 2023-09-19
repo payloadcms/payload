@@ -2,7 +2,7 @@ import type { PaginateOptions } from 'mongoose'
 import type { QueryDrafts } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
-import { flattenWhereToOperators, combineQueries } from 'payload/database'
+import { combineQueries, flattenWhereToOperators } from 'payload/database'
 
 import type { MongooseAdapter } from '.'
 
@@ -18,8 +18,8 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
   const collectionConfig = this.payload.collections[collection].config
   const options = withSession(this, req.transactionID)
 
-  let hasNearConstraint;
-  let sort;
+  let hasNearConstraint
+  let sort
 
   if (where) {
     const constraints = flattenWhereToOperators(where)
@@ -36,33 +36,33 @@ export const queryDrafts: QueryDrafts = async function queryDrafts<T>(
     })
   }
 
-  const combinedWhere = combineQueries({ latest: { equals: true } }, where);
+  const combinedWhere = combineQueries({ latest: { equals: true } }, where)
 
   const versionQuery = await VersionModel.buildQuery({
-    where: combinedWhere,
     locale,
     payload: this.payload,
-  });
+    where: combinedWhere,
+  })
 
   const paginationOptions: PaginateOptions = {
-    page,
-    sort,
+    forceCountFn: hasNearConstraint,
     lean: true,
     leanWithId: true,
-    useEstimatedCount: hasNearConstraint,
-    forceCountFn: hasNearConstraint,
-    pagination,
     options,
-  };
-
-  if (limit > 0) {
-    paginationOptions.limit = limit;
-    // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit;
+    page,
+    pagination,
+    sort,
+    useEstimatedCount: hasNearConstraint,
   }
 
-  const result = await VersionModel.paginate(versionQuery, paginationOptions);
-  const docs = JSON.parse(JSON.stringify(result.docs));
+  if (limit > 0) {
+    paginationOptions.limit = limit
+    // limit must also be set here, it's ignored when pagination is false
+    paginationOptions.options.limit = limit
+  }
+
+  const result = await VersionModel.paginate(versionQuery, paginationOptions)
+  const docs = JSON.parse(JSON.stringify(result.docs))
 
   return {
     ...result,

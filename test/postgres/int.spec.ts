@@ -1,18 +1,18 @@
-import payload from '../../src';
-import { initPayloadTest } from '../helpers/configHelpers';
+import payload from '../../packages/payload/src'
+import { initPayloadTest } from '../helpers/configHelpers'
 
 describe('Postgres', () => {
   beforeAll(async () => {
-    process.env.PAYLOAD_DROP_DATABASE = 'true';
-    await initPayloadTest({ __dirname, init: { local: false } });
-  });
+    process.env.PAYLOAD_DROP_DATABASE = 'true'
+    await initPayloadTest({ __dirname, init: { local: false } })
+  })
 
   describe('complex docs', () => {
-    let post;
-    let page1;
-    let page2;
-    let person1;
-    let person2;
+    let post
+    let page1
+    let page2
+    let person1
+    let person2
 
     beforeAll(async () => {
       page1 = await payload.create({
@@ -23,7 +23,7 @@ describe('Postgres', () => {
             title: 'abc',
           },
         },
-      });
+      })
 
       page2 = await payload.create({
         collection: 'pages',
@@ -33,25 +33,25 @@ describe('Postgres', () => {
             title: 'def',
           },
         },
-      });
+      })
 
       person1 = await payload.create({
         collection: 'people',
         data: {
           fullName: 'Dan Ribbens',
         },
-      });
+      })
 
       person2 = await payload.create({
         collection: 'people',
         data: {
           fullName: 'Elliot DeNolf',
         },
-      });
-    });
+      })
+    })
 
     it('creates a complex doc', async () => {
-      const postTitleEN = 'hello';
+      const postTitleEN = 'hello'
 
       post = await payload.create({
         collection: 'posts',
@@ -134,23 +134,23 @@ describe('Postgres', () => {
             },
           ],
         },
-      });
+      })
 
-      expect(post.title).toEqual(postTitleEN);
-      expect(post.myBlocks[0].localizedText).toStrictEqual('hello in english');
-      expect(post.relationHasOne).toStrictEqual(page1.id);
-      expect(post.relationHasOnePoly.value).toStrictEqual(person1.id);
-      expect(post.relationHasMany[0]).toStrictEqual(page1.id);
-      expect(post.relationHasMany[1]).toStrictEqual(page2.id);
-      expect(post.relationHasManyPoly[0].value).toStrictEqual(person1.id);
-      expect(post.relationHasManyPoly[1].value).toStrictEqual(page2.id);
-    });
+      expect(post.title).toEqual(postTitleEN)
+      expect(post.myBlocks[0].localizedText).toStrictEqual('hello in english')
+      expect(post.relationHasOne).toStrictEqual(page1.id)
+      expect(post.relationHasOnePoly.value).toStrictEqual(person1.id)
+      expect(post.relationHasMany[0]).toStrictEqual(page1.id)
+      expect(post.relationHasMany[1]).toStrictEqual(page2.id)
+      expect(post.relationHasManyPoly[0].value).toStrictEqual(person1.id)
+      expect(post.relationHasManyPoly[1].value).toStrictEqual(page2.id)
+    })
 
     it('adds locale to existing doc', async () => {
-      const titleES = 'hello es';
-      const arrayTitle1 = 'hello 1 spanish';
-      const arrayTitle2 = 'hello 2 spanish';
-      const blockLocalizedText = 'my block in spanish';
+      const titleES = 'hello es'
+      const arrayTitle1 = 'hello 1 spanish'
+      const arrayTitle2 = 'hello 2 spanish'
+      const blockLocalizedText = 'my block in spanish'
 
       const updatedPost = await payload.update({
         collection: 'posts',
@@ -192,23 +192,23 @@ describe('Postgres', () => {
             },
           ],
         },
-      });
+      })
 
-      expect(updatedPost.title).toStrictEqual(titleES);
-      expect(updatedPost.number).toStrictEqual(1000);
-      expect(updatedPost.myArray[0].subField).toStrictEqual(arrayTitle1);
-      expect(updatedPost.myArray[1].subField).toStrictEqual(arrayTitle2);
-      expect(updatedPost.myBlocks[0].localizedText).toStrictEqual(blockLocalizedText);
-      expect(updatedPost.relationHasOne).toStrictEqual(page2.id);
-      expect(updatedPost.relationHasOnePoly.value).toStrictEqual(person2.id);
-      expect(updatedPost.relationHasMany[0]).toStrictEqual(page2.id);
-      expect(updatedPost.relationHasMany[1]).toStrictEqual(page1.id);
-      expect(updatedPost.relationHasManyPoly[0].value).toStrictEqual(page1.id);
-      expect(updatedPost.relationHasManyPoly[1].value).toStrictEqual(person1.id);
-    });
+      expect(updatedPost.title).toStrictEqual(titleES)
+      expect(updatedPost.number).toStrictEqual(1000)
+      expect(updatedPost.myArray[0].subField).toStrictEqual(arrayTitle1)
+      expect(updatedPost.myArray[1].subField).toStrictEqual(arrayTitle2)
+      expect(updatedPost.myBlocks[0].localizedText).toStrictEqual(blockLocalizedText)
+      expect(updatedPost.relationHasOne).toStrictEqual(page2.id)
+      expect(updatedPost.relationHasOnePoly.value).toStrictEqual(person2.id)
+      expect(updatedPost.relationHasMany[0]).toStrictEqual(page2.id)
+      expect(updatedPost.relationHasMany[1]).toStrictEqual(page1.id)
+      expect(updatedPost.relationHasManyPoly[0].value).toStrictEqual(page1.id)
+      expect(updatedPost.relationHasManyPoly[1].value).toStrictEqual(person1.id)
+    })
 
     it('updates original locale', async () => {
-      const updatedTitle = 'hello 3';
+      const updatedTitle = 'hello 3'
 
       const updatedPost = await payload.update({
         collection: 'posts',
@@ -295,42 +295,42 @@ describe('Postgres', () => {
             },
           ],
         },
-      });
+      })
 
-      expect(updatedPost.title).toStrictEqual(updatedTitle);
-      expect(updatedPost.myArray[0].subField).toStrictEqual('hello 1 updated');
-      expect(updatedPost.myArray[1].subField).toStrictEqual('hello 2 updated');
-      expect(updatedPost.myBlocks[0].localizedText).toStrictEqual('hello in english updated');
-    });
+      expect(updatedPost.title).toStrictEqual(updatedTitle)
+      expect(updatedPost.myArray[0].subField).toStrictEqual('hello 1 updated')
+      expect(updatedPost.myArray[1].subField).toStrictEqual('hello 2 updated')
+      expect(updatedPost.myBlocks[0].localizedText).toStrictEqual('hello in english updated')
+    })
 
     it('retrieves doc in all locales', async () => {
       const postAllLocales = await payload.findByID({
         collection: 'posts',
         id: post.id,
         locale: 'all',
-      });
+      })
 
-      expect(postAllLocales.title.en).toStrictEqual('hello 3');
-      expect(postAllLocales.title.es).toStrictEqual('hello es');
-      expect(postAllLocales.number.en).toStrictEqual(1338);
-      expect(postAllLocales.number.es).toStrictEqual(1000);
-      expect(postAllLocales.myBlocks[0].localizedText.en).toStrictEqual('hello in english updated');
-      expect(postAllLocales.myArray[0].subField.es).toStrictEqual('hello 1 spanish');
+      expect(postAllLocales.title.en).toStrictEqual('hello 3')
+      expect(postAllLocales.title.es).toStrictEqual('hello es')
+      expect(postAllLocales.number.en).toStrictEqual(1338)
+      expect(postAllLocales.number.es).toStrictEqual(1000)
+      expect(postAllLocales.myBlocks[0].localizedText.en).toStrictEqual('hello in english updated')
+      expect(postAllLocales.myArray[0].subField.es).toStrictEqual('hello 1 spanish')
 
-      expect(postAllLocales.relationHasOne.en).toStrictEqual(page2.id);
-      expect(postAllLocales.relationHasOnePoly.en.value).toStrictEqual(person2.id);
-      expect(postAllLocales.relationHasMany.en[0]).toStrictEqual(page2.id);
-      expect(postAllLocales.relationHasMany.en[1]).toStrictEqual(page1.id);
-      expect(postAllLocales.relationHasManyPoly.en[0].value).toStrictEqual(page2.id);
-      expect(postAllLocales.relationHasManyPoly.en[1].value).toStrictEqual(person2.id);
+      expect(postAllLocales.relationHasOne.en).toStrictEqual(page2.id)
+      expect(postAllLocales.relationHasOnePoly.en.value).toStrictEqual(person2.id)
+      expect(postAllLocales.relationHasMany.en[0]).toStrictEqual(page2.id)
+      expect(postAllLocales.relationHasMany.en[1]).toStrictEqual(page1.id)
+      expect(postAllLocales.relationHasManyPoly.en[0].value).toStrictEqual(page2.id)
+      expect(postAllLocales.relationHasManyPoly.en[1].value).toStrictEqual(person2.id)
 
-      expect(postAllLocales.relationHasOne.es).toStrictEqual(page2.id);
-      expect(postAllLocales.relationHasOnePoly.es.value).toStrictEqual(person2.id);
-      expect(postAllLocales.relationHasMany.es[0]).toStrictEqual(page2.id);
-      expect(postAllLocales.relationHasMany.es[1]).toStrictEqual(page1.id);
-      expect(postAllLocales.relationHasManyPoly.es[0].value).toStrictEqual(page1.id);
-      expect(postAllLocales.relationHasManyPoly.es[1].value).toStrictEqual(person1.id);
-    });
+      expect(postAllLocales.relationHasOne.es).toStrictEqual(page2.id)
+      expect(postAllLocales.relationHasOnePoly.es.value).toStrictEqual(person2.id)
+      expect(postAllLocales.relationHasMany.es[0]).toStrictEqual(page2.id)
+      expect(postAllLocales.relationHasMany.es[1]).toStrictEqual(page1.id)
+      expect(postAllLocales.relationHasManyPoly.es[0].value).toStrictEqual(page1.id)
+      expect(postAllLocales.relationHasManyPoly.es[1].value).toStrictEqual(person1.id)
+    })
 
     // it('queries complex docs', async () => {
     //   const query = await payload.find({
@@ -369,68 +369,68 @@ describe('Postgres', () => {
       const { docs: people } = await payload.find({
         collection: 'people',
         sort: 'fullName',
-      });
-      expect(people[0].fullName).toEqual('Dan Ribbens');
-      expect(people[1].fullName).toEqual('Elliot DeNolf');
-    });
+      })
+      expect(people[0].fullName).toEqual('Dan Ribbens')
+      expect(people[1].fullName).toEqual('Elliot DeNolf')
+    })
 
     it('sort desc', async () => {
       const { docs: people } = await payload.find({
         collection: 'people',
         sort: '-fullName',
-      });
-      expect(people[0].fullName).toEqual('Elliot DeNolf');
-      expect(people[1].fullName).toEqual('Dan Ribbens');
-    });
+      })
+      expect(people[0].fullName).toEqual('Elliot DeNolf')
+      expect(people[1].fullName).toEqual('Dan Ribbens')
+    })
 
     it('sort localized asc', async () => {
       const { docs: pages } = await payload.find({
         collection: 'pages',
         sort: 'slug',
-      });
-      expect(pages[0].slug).toEqual('first');
-      expect(pages[1].slug).toEqual('second');
-    });
+      })
+      expect(pages[0].slug).toEqual('first')
+      expect(pages[1].slug).toEqual('second')
+    })
 
     it('sort nested localized field asc', async () => {
       const { docs: pages } = await payload.find({
         collection: 'pages',
         sort: 'meta.title',
-      });
-      expect(pages[0].slug).toEqual('first');
-      expect(pages[1].slug).toEqual('second');
-    });
+      })
+      expect(pages[0].slug).toEqual('first')
+      expect(pages[1].slug).toEqual('second')
+    })
 
     it('sort nested localized field desc', async () => {
       const { docs: pages } = await payload.find({
         collection: 'pages',
         sort: '-meta.title',
-      });
-      expect(pages[0].slug).toEqual('second');
-      expect(pages[1].slug).toEqual('first');
-    });
+      })
+      expect(pages[0].slug).toEqual('second')
+      expect(pages[1].slug).toEqual('first')
+    })
 
     it('sort localized desc', async () => {
       const { docs: pages } = await payload.find({
         collection: 'posts',
         sort: '-slug',
-      });
-      expect(pages[0].tableName).toEqual('second');
-      expect(pages[1].tableName).toEqual('first');
-    });
+      })
+      expect(pages[0].tableName).toEqual('second')
+      expect(pages[1].tableName).toEqual('first')
+    })
     it('find where', async () => {
       const { docs: people } = await payload.find({
         collection: 'people',
         where: {
           fullName: { equals: 'Dan Ribbens' },
         },
-      });
-      expect(people).toHaveLength(1);
-    });
-  });
+      })
+      expect(people).toHaveLength(1)
+    })
+  })
 
   describe('localized arrays', () => {
-    let localizedArray;
+    let localizedArray
 
     it('creates localized array', async () => {
       localizedArray = await payload.create({
@@ -445,11 +445,11 @@ describe('Postgres', () => {
             },
           ],
         },
-      });
+      })
 
-      expect(localizedArray.array[0].text).toStrictEqual('hello in english');
-      expect(localizedArray.array[1].text).toStrictEqual('hello 2 in english');
-    });
+      expect(localizedArray.array[0].text).toStrictEqual('hello in english')
+      expect(localizedArray.array[1].text).toStrictEqual('hello 2 in english')
+    })
 
     it('adds localized rows', async () => {
       const updated = await payload.update({
@@ -466,28 +466,28 @@ describe('Postgres', () => {
             },
           ],
         },
-      });
+      })
 
-      expect(updated.array[0].text).toStrictEqual('hello in spanish');
-      expect(updated.array[1].text).toStrictEqual('hello 2 in spanish');
-    });
+      expect(updated.array[0].text).toStrictEqual('hello in spanish')
+      expect(updated.array[1].text).toStrictEqual('hello 2 in spanish')
+    })
 
     it('retrieves array field in all locales', async () => {
       const retrievedArray = await payload.findByID({
         collection: 'localized-arrays',
         id: localizedArray.id,
         locale: 'all',
-      });
+      })
 
-      expect(retrievedArray.array.en[0].text).toStrictEqual('hello in english');
-      expect(retrievedArray.array.en[1].text).toStrictEqual('hello 2 in english');
-      expect(retrievedArray.array.es[0].text).toStrictEqual('hello in spanish');
-      expect(retrievedArray.array.es[1].text).toStrictEqual('hello 2 in spanish');
-    });
-  });
+      expect(retrievedArray.array.en[0].text).toStrictEqual('hello in english')
+      expect(retrievedArray.array.en[1].text).toStrictEqual('hello 2 in english')
+      expect(retrievedArray.array.es[0].text).toStrictEqual('hello in spanish')
+      expect(retrievedArray.array.es[1].text).toStrictEqual('hello 2 in spanish')
+    })
+  })
 
   describe('localized blocks', () => {
-    let localizedBlocks;
+    let localizedBlocks
 
     it('creates localized blocks', async () => {
       localizedBlocks = await payload.create({
@@ -505,11 +505,11 @@ describe('Postgres', () => {
             },
           ],
         },
-      });
+      })
 
-      expect(localizedBlocks.layout[0].text).toStrictEqual('hello in english');
-      expect(localizedBlocks.layout[1].number).toStrictEqual(1337);
-    });
+      expect(localizedBlocks.layout[0].text).toStrictEqual('hello in english')
+      expect(localizedBlocks.layout[1].number).toStrictEqual(1337)
+    })
 
     it('adds localized blocks', async () => {
       const updated = await payload.update({
@@ -529,28 +529,28 @@ describe('Postgres', () => {
             },
           ],
         },
-      });
+      })
 
-      expect(updated.layout[0].text).toStrictEqual('hello in spanish');
-      expect(updated.layout[1].number).toStrictEqual(1338);
-    });
+      expect(updated.layout[0].text).toStrictEqual('hello in spanish')
+      expect(updated.layout[1].number).toStrictEqual(1338)
+    })
 
     it('retrieves blocks field in all locales', async () => {
       const retrievedBlocks = await payload.findByID({
         collection: 'localized-blocks',
         id: localizedBlocks.id,
         locale: 'all',
-      });
+      })
 
-      expect(retrievedBlocks.layout.en[0].text).toStrictEqual('hello in english');
-      expect(retrievedBlocks.layout.en[1].number).toStrictEqual(1337);
-      expect(retrievedBlocks.layout.es[0].text).toStrictEqual('hello in spanish');
-      expect(retrievedBlocks.layout.es[1].number).toStrictEqual(1338);
-    });
-  });
+      expect(retrievedBlocks.layout.en[0].text).toStrictEqual('hello in english')
+      expect(retrievedBlocks.layout.en[1].number).toStrictEqual(1337)
+      expect(retrievedBlocks.layout.es[0].text).toStrictEqual('hello in spanish')
+      expect(retrievedBlocks.layout.es[1].number).toStrictEqual(1338)
+    })
+  })
 
   describe('localized group', () => {
-    let localizedGroup;
+    let localizedGroup
 
     it('creates localized group', async () => {
       localizedGroup = await payload.create({
@@ -561,11 +561,11 @@ describe('Postgres', () => {
             number: 123,
           },
         },
-      });
+      })
 
-      expect(localizedGroup.group.text).toStrictEqual('en');
-      expect(localizedGroup.group.number).toStrictEqual(123);
-    });
+      expect(localizedGroup.group.text).toStrictEqual('en')
+      expect(localizedGroup.group.number).toStrictEqual(123)
+    })
 
     it('adds localized group', async () => {
       const updated = await payload.update({
@@ -578,28 +578,28 @@ describe('Postgres', () => {
             number: 456,
           },
         },
-      });
+      })
 
-      expect(updated.group.text).toStrictEqual('es');
-      expect(updated.group.number).toStrictEqual(456);
-    });
+      expect(updated.group.text).toStrictEqual('es')
+      expect(updated.group.number).toStrictEqual(456)
+    })
 
     it('retrieves group field in all locales', async () => {
       const retrievedGroup = await payload.findByID({
         collection: 'localized-groups',
         id: localizedGroup.id,
         locale: 'all',
-      });
+      })
 
-      expect(retrievedGroup.group.en.text).toStrictEqual('en');
-      expect(retrievedGroup.group.en.number).toStrictEqual(123);
-      expect(retrievedGroup.group.es.text).toStrictEqual('es');
-      expect(retrievedGroup.group.es.number).toStrictEqual(456);
-    });
-  });
+      expect(retrievedGroup.group.en.text).toStrictEqual('en')
+      expect(retrievedGroup.group.en.number).toStrictEqual(123)
+      expect(retrievedGroup.group.es.text).toStrictEqual('es')
+      expect(retrievedGroup.group.es.number).toStrictEqual(456)
+    })
+  })
 
   describe('globals', () => {
-    let mainMenu;
+    let mainMenu
     it('creates global', async () => {
       mainMenu = await payload.updateGlobal({
         slug: 'main-menu',
@@ -615,13 +615,13 @@ describe('Postgres', () => {
             },
           ],
         },
-      });
+      })
 
-      expect(mainMenu.title).toStrictEqual('hello in english');
-      expect(mainMenu.nonLocalizedField).toStrictEqual('hello');
-      expect(mainMenu.array[0].localizedText).toStrictEqual('row 1 en');
-      expect(mainMenu.array[1].localizedText).toStrictEqual('row 2 en');
-    });
+      expect(mainMenu.title).toStrictEqual('hello in english')
+      expect(mainMenu.nonLocalizedField).toStrictEqual('hello')
+      expect(mainMenu.array[0].localizedText).toStrictEqual('row 1 en')
+      expect(mainMenu.array[1].localizedText).toStrictEqual('row 2 en')
+    })
 
     it('adds locale to global', async () => {
       const updated = await payload.updateGlobal({
@@ -640,27 +640,27 @@ describe('Postgres', () => {
             },
           ],
         },
-      });
+      })
 
-      expect(updated.title).toStrictEqual('hello in spanish');
-      expect(updated.nonLocalizedField).toStrictEqual('hello');
-      expect(updated.array[0].localizedText).toStrictEqual('row 1 es');
-      expect(updated.array[1].localizedText).toStrictEqual('row 2 es');
-    });
+      expect(updated.title).toStrictEqual('hello in spanish')
+      expect(updated.nonLocalizedField).toStrictEqual('hello')
+      expect(updated.array[0].localizedText).toStrictEqual('row 1 es')
+      expect(updated.array[1].localizedText).toStrictEqual('row 2 es')
+    })
 
     it('retrieves global in all locales', async () => {
       const retrieved = await payload.findGlobal({
         slug: 'main-menu',
         locale: 'all',
-      });
+      })
 
-      expect(retrieved.title.en).toStrictEqual('hello in english');
-      expect(retrieved.title.es).toStrictEqual('hello in spanish');
-      expect(retrieved.nonLocalizedField).toStrictEqual('hello');
-      expect(retrieved.array[0].localizedText.en).toStrictEqual('row 1 en');
-      expect(retrieved.array[1].localizedText.en).toStrictEqual('row 2 en');
-      expect(retrieved.array[0].localizedText.es).toStrictEqual('row 1 es');
-      expect(retrieved.array[1].localizedText.es).toStrictEqual('row 2 es');
-    });
-  });
-});
+      expect(retrieved.title.en).toStrictEqual('hello in english')
+      expect(retrieved.title.es).toStrictEqual('hello in spanish')
+      expect(retrieved.nonLocalizedField).toStrictEqual('hello')
+      expect(retrieved.array[0].localizedText.en).toStrictEqual('row 1 en')
+      expect(retrieved.array[1].localizedText.en).toStrictEqual('row 2 en')
+      expect(retrieved.array[0].localizedText.es).toStrictEqual('row 1 es')
+      expect(retrieved.array[1].localizedText.es).toStrictEqual('row 2 es')
+    })
+  })
+})

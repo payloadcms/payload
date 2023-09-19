@@ -35,8 +35,8 @@ export async function migrate(this: DatabaseAdapter): Promise<void> {
       await payload.create({
         collection: 'payload-migrations',
         data: {
-          batch: newBatch,
           name: migration.name,
+          batch: newBatch,
         },
         ...(transactionID && { req: { transactionID } as PayloadRequest }),
       })

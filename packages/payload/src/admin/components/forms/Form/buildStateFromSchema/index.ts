@@ -21,16 +21,16 @@ type Args = {
 }
 
 const buildStateFromSchema = async (args: Args): Promise<Fields> => {
-  const { data: fullData = {}, fieldSchema, id, locale, operation, preferences, t, user } = args
+  const { id, data: fullData = {}, fieldSchema, locale, operation, preferences, t, user } = args
 
   if (fieldSchema) {
     const state: Fields = {}
 
     await iterateFields({
+      id,
       data: fullData,
       fields: fieldSchema,
       fullData,
-      id,
       locale,
       operation,
       parentPassesCondition: true,

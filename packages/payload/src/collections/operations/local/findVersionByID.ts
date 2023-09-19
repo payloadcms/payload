@@ -34,12 +34,12 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
   options: Options<T>,
 ): Promise<TypeWithVersion<GeneratedTypes['collections'][T]>> {
   const {
+    id,
     collection: collectionSlug,
     context,
     depth,
     disableErrors = false,
     fallbackLocale = null,
-    id,
     locale = null,
     overrideAccess = true,
     req = {} as PayloadRequest,
@@ -70,10 +70,10 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   return findVersionByID({
+    id,
     collection,
     depth,
     disableErrors,
-    id,
     overrideAccess,
     req,
     showHiddenFields,

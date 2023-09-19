@@ -48,8 +48,8 @@ const Iterable: React.FC<Props & { field: ArrayField | BlockField }> = ({
             if (field.type === 'blocks') {
               subFields = [
                 {
-                  label: t('fields:blockType'),
                   name: 'blockType',
+                  label: t('fields:blockType'),
                   type: 'text',
                 },
               ]

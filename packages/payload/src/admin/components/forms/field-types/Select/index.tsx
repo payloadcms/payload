@@ -22,6 +22,7 @@ const formatOptions = (options: Option[]): OptionObject[] =>
 
 const Select: React.FC<Props> = (props) => {
   const {
+    name,
     admin: {
       className,
       condition,
@@ -34,7 +35,6 @@ const Select: React.FC<Props> = (props) => {
     } = {},
     hasMany,
     label,
-    name,
     options: optionsFromProps,
     path: pathFromProps,
     required,

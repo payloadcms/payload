@@ -39,7 +39,7 @@ const ColumnSelector: React.FC<Props> = (props) => {
       }}
     >
       {columns.map((col, i) => {
-        const { accessor, active, label, name } = col
+        const { name, accessor, active, label } = col
 
         if (col.accessor === '_select') return null
 

@@ -15,7 +15,7 @@ import { VerticalPadding } from '../VerticalPadding'
 export const PaywallBlocks: React.FC<{
   productSlug: string
   disableTopPadding?: boolean
-}> = props => {
+}> = (props) => {
   const { productSlug, disableTopPadding } = props
   const { user } = useAuth()
 
@@ -44,8 +44,8 @@ export const PaywallBlocks: React.FC<{
             },
           }),
         })
-          ?.then(res => res.json())
-          ?.then(res => res?.data?.Products.docs[0]?.paywall)
+          ?.then((res) => res.json())
+          ?.then((res) => res?.data?.Products.docs[0]?.paywall)
 
         if (paywall) {
           setBlocks(paywall)

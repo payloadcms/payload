@@ -35,8 +35,8 @@ export async function docAccess(args: Arguments): Promise<CollectionPermission> 
   }
 
   return getEntityPolicies({
-    entity: config,
     id,
+    entity: config,
     operations: collectionOperations,
     req,
     type: 'collection',

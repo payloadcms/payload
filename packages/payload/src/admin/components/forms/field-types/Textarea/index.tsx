@@ -15,6 +15,7 @@ import './index.scss'
 
 const Textarea: React.FC<Props> = (props) => {
   const {
+    name,
     admin: {
       className,
       condition,
@@ -30,7 +31,6 @@ const Textarea: React.FC<Props> = (props) => {
     localized,
     maxLength,
     minLength,
-    name,
     path: pathFromProps,
     required,
     validate = textarea,

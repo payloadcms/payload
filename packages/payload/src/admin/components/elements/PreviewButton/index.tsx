@@ -46,7 +46,7 @@ type Props = {
   generatePreviewURL?: GeneratePreviewURL
 }
 const PreviewButton: React.FC<Props> = ({ CustomComponent, generatePreviewURL }) => {
-  const { collection, global, id } = useDocumentInfo()
+  const { id, collection, global } = useDocumentInfo()
 
   const [isLoading, setIsLoading] = useState(false)
   const { code: locale } = useLocale()

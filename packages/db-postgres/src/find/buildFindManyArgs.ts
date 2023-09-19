@@ -1,9 +1,9 @@
-import type { DBQueryConfig } from 'drizzle-orm';
-import type { ArrayField, Block, Field } from 'payload/types';
+import type { DBQueryConfig } from 'drizzle-orm'
+import type { ArrayField, Block, Field } from 'payload/types'
 
-import type { PostgresAdapter } from '../types';
+import type { PostgresAdapter } from '../types'
 
-import { traverseFields } from './traverseFields';
+import { traverseFields } from './traverseFields'
 
 type BuildFindQueryArgs = {
   adapter: PostgresAdapter
@@ -24,14 +24,14 @@ export const buildFindManyArgs = ({
 }: BuildFindQueryArgs): Record<string, unknown> => {
   const result: Result = {
     with: {},
-  };
+  }
 
   const _locales: Result = {
     columns: {
-      _parentID: false,
       id: false,
+      _parentID: false,
     },
-  };
+  }
 
   if (adapter.tables[`${tableName}_relationships`]) {
     result.with._relationships = {
@@ -40,15 +40,15 @@ export const buildFindManyArgs = ({
         parent: false,
       },
       orderBy: ({ order }, { asc: ASC }) => [ASC(order)],
-    };
+    }
   }
 
   if (adapter.tables[`${tableName}_locales`]) {
-    result.with._locales = _locales;
+    result.with._locales = _locales
   }
 
-  const locatedBlocks: Block[] = [];
-  const locatedArrays: { [path: string]: ArrayField } = {};
+  const locatedBlocks: Block[] = []
+  const locatedArrays: { [path: string]: ArrayField } = {}
 
   traverseFields({
     _locales,
@@ -62,7 +62,7 @@ export const buildFindManyArgs = ({
     path: '',
     topLevelArgs: result,
     topLevelTableName: tableName,
-  });
+  })
 
-  return result;
-};
+  return result
+}

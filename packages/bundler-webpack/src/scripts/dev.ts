@@ -1,10 +1,12 @@
-import webpack from 'webpack'
+import type { Payload } from 'payload'
+import type { PayloadHandler } from 'payload/config'
+
+import history from 'connect-history-api-fallback'
 import express from 'express'
+import webpack from 'webpack'
 import webpackDevMiddleware from 'webpack-dev-middleware'
 import webpackHotMiddleware from 'webpack-hot-middleware'
-import history from 'connect-history-api-fallback'
-import type { PayloadHandler } from 'payload/config'
-import { Payload } from 'payload'
+
 import { getDevConfig } from '../configs/dev'
 
 const router = express.Router()

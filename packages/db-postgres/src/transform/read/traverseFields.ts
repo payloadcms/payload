@@ -1,9 +1,15 @@
 /* eslint-disable no-param-reassign */
 import type { SanitizedConfig } from 'payload/config'
+<<<<<<< HEAD
 import type { Field, TabAsField } from 'payload/types'
 
 import { fieldAffectsData, tabHasName } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
+=======
+import type { Field } from 'payload/types'
+
+import { fieldAffectsData } from 'payload/types'
+>>>>>>> 463a39e8223464012ef67564d46eae5a4cf83280
 
 import type { BlocksMap } from '../../utilities/createBlocksMap'
 
@@ -205,12 +211,18 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
       const localizedFieldData = {}
       const valuesToTransform: {
+<<<<<<< HEAD
         ref: Record<string, unknown>
         table: Record<string, unknown>
+=======
+        localeRow: Record<string, unknown>
+        ref: Record<string, unknown>
+>>>>>>> 463a39e8223464012ef67564d46eae5a4cf83280
       }[] = []
 
       if (field.localized && Array.isArray(table._locales)) {
         table._locales.forEach((localeRow) => {
+<<<<<<< HEAD
           valuesToTransform.push({ ref: localizedFieldData, table: localeRow })
         })
       } else {
@@ -220,10 +232,22 @@ export const traverseFields = <T extends Record<string, unknown>>({
       valuesToTransform.forEach(({ ref, table }) => {
         const fieldData = table[field.name]
         const locale = table?._locale
+=======
+          valuesToTransform.push({ localeRow, ref: localizedFieldData })
+        })
+      } else {
+        valuesToTransform.push({ localeRow: undefined, ref: result })
+      }
+
+      valuesToTransform.forEach(({ localeRow, ref }) => {
+        const fieldData = localeRow?.[field.name] || ref[field.name]
+        const locale = localeRow?._locale
+>>>>>>> 463a39e8223464012ef67564d46eae5a4cf83280
 
         switch (field.type) {
           case 'tab':
           case 'group': {
+<<<<<<< HEAD
             // if (field.type === 'tab') {
             //   console.log('got one')
             // }
@@ -245,6 +269,25 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
             const groupColumnPrefix = `${columnPrefix || ''}${toSnakeCase(field.name)}_`
             const groupData = {}
+=======
+            const groupData = {}
+
+            field.fields.forEach((subField) => {
+              if (fieldAffectsData(subField)) {
+                const subFieldKey = `${sanitizedPath.replace(/\./g, '_')}${field.name}_${
+                  subField.name
+                }`
+
+                if (typeof locale === 'string') {
+                  if (!ref[locale]) ref[locale] = {}
+                  ref[locale][subField.name] = localeRow[subFieldKey]
+                } else {
+                  groupData[subField.name] = table[subFieldKey]
+                  delete table[subFieldKey]
+                }
+              }
+            })
+>>>>>>> 463a39e8223464012ef67564d46eae5a4cf83280
 
             if (field.localized) {
               if (typeof locale === 'string' && !ref[locale]) ref[locale] = {}
@@ -326,6 +369,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
       return result
     }
 
+<<<<<<< HEAD
     if (field.type === 'tabs') {
       traverseFields({
         blocks,
@@ -355,5 +399,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
     return dataRef
   }, dataRef)
 
+=======
+    return siblingData
+  }, siblingData)
+
+>>>>>>> 463a39e8223464012ef67564d46eae5a4cf83280
   return formatted as T
 }

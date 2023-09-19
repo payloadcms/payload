@@ -1,5 +1,19 @@
 export * from './../types'
 
+export type {
+  CreateFormData,
+  Fields,
+  FormField,
+  FormFieldsContext,
+} from '../admin/components/forms/Form/types'
+
+export type {
+  RichTextAdapter,
+  RichTextFieldProps,
+} from '../admin/components/forms/field-types/RichText/types'
+
+export type { CellComponentProps } from '../admin/components/views/collections/List/Cell/types'
+
 export {
   CustomPublishButtonProps,
   CustomSaveButtonProps,
@@ -22,6 +36,7 @@ export {
   BeforeOperationHook as CollectionBeforeOperationHook,
   BeforeReadHook as CollectionBeforeReadHook,
   BeforeValidateHook as CollectionBeforeValidateHook,
+  Collection,
   CollectionConfig,
   SanitizedCollectionConfig,
   TypeWithID,
@@ -67,11 +82,7 @@ export {
   RadioField,
   RelationshipField,
   RelationshipValue,
-  RichTextCustomElement,
-  RichTextCustomLeaf,
-  RichTextElement,
   RichTextField,
-  RichTextLeaf,
   RowAdmin,
   RowField,
   SelectField,
@@ -101,7 +112,6 @@ export {
   tabHasName,
   valueIsValueWithRelation,
 } from './../fields/config/types'
-
 export {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,

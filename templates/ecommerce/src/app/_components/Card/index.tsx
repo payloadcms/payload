@@ -39,7 +39,7 @@ export const Card: React.FC<{
   title?: string
   relationTo?: 'products'
   doc?: Product
-}> = props => {
+}> = (props) => {
   const {
     showCategories,
     title: titleFromProps,

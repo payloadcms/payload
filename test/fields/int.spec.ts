@@ -21,13 +21,13 @@ import {
 } from './collections/Group'
 import { defaultNumber, numberDoc } from './collections/Number'
 import { pointDoc } from './collections/Point'
+import { tabsDoc } from './collections/Tabs'
 import {
   localizedTextValue,
   namedTabDefaultValue,
   namedTabText,
-  tabsDoc,
   tabsSlug,
-} from './collections/Tabs'
+} from './collections/Tabs/constants'
 import { defaultText } from './collections/Text'
 
 let client

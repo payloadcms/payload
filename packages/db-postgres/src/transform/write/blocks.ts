@@ -1,11 +1,11 @@
 /* eslint-disable no-param-reassign */
-import type { BlockField } from 'payload/types';
+import type { BlockField } from 'payload/types'
 
-import toSnakeCase from 'to-snake-case';
+import toSnakeCase from 'to-snake-case'
 
-import type { BlockRowToInsert } from './types';
+import type { BlockRowToInsert } from './types'
 
-import { traverseFields } from './traverseFields';
+import { traverseFields } from './traverseFields'
 
 type Args = {
   blocks: {
@@ -28,11 +28,11 @@ export const transformBlocks = ({
   tableName,
 }: Args) => {
   data.forEach((blockRow, i) => {
-    if (typeof blockRow.blockType !== 'string') return;
-    const matchedBlock = field.blocks.find(({ slug }) => slug === blockRow.blockType);
-    if (!matchedBlock) return;
+    if (typeof blockRow.blockType !== 'string') return
+    const matchedBlock = field.blocks.find(({ slug }) => slug === blockRow.blockType)
+    if (!matchedBlock) return
 
-    if (!blocks[blockRow.blockType]) blocks[blockRow.blockType] = [];
+    if (!blocks[blockRow.blockType]) blocks[blockRow.blockType] = []
 
     const newRow: BlockRowToInsert = {
       arrays: {},
@@ -41,11 +41,11 @@ export const transformBlocks = ({
         _order: i + 1,
         _path: `${path}${field.name}`,
       },
-    };
+    }
 
-    if (field.localized && locale) newRow.row._locale = locale;
+    if (field.localized && locale) newRow.row._locale = locale
 
-    const blockTableName = `${tableName}_${toSnakeCase(blockRow.blockType)}`;
+    const blockTableName = `${tableName}_${toSnakeCase(blockRow.blockType)}`
 
     traverseFields({
       arrays: newRow.arrays,
@@ -59,8 +59,8 @@ export const transformBlocks = ({
       path: `${path || ''}${field.name}.${i}.`,
       relationships,
       row: newRow.row,
-    });
+    })
 
-    blocks[blockRow.blockType].push(newRow);
-  });
-};
+    blocks[blockRow.blockType].push(newRow)
+  })
+}

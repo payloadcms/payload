@@ -17,6 +17,7 @@ export const statuses = [
 
 const baseVersionFields: Field[] = [
   {
+    name: '_status',
     admin: {
       components: {
         Field: () => null,
@@ -25,7 +26,6 @@ const baseVersionFields: Field[] = [
     },
     defaultValue: 'draft',
     label: labels['version:status'],
-    name: '_status',
     options: statuses,
     type: 'select',
   },

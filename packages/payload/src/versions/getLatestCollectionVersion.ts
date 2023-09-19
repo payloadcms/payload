@@ -15,8 +15,8 @@ type Args = {
 }
 
 export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
-  config,
   id,
+  config,
   payload,
   query,
   req,
@@ -41,8 +41,8 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
 
   return {
     ...latestVersion.version,
-    createdAt: latestVersion.createdAt,
     id,
+    createdAt: latestVersion.createdAt,
     updatedAt: latestVersion.updatedAt,
   }
 }

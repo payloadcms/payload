@@ -43,6 +43,7 @@ const buildColumns = ({
     }
     const props = cellProps?.[colIndex] || {}
     return {
+      name: field.name,
       accessor: field.name,
       active: isActive,
       components: {
@@ -73,12 +74,12 @@ const buildColumns = ({
         },
       },
       label: field.label,
-      name: field.name,
     }
   })
 
   if (cellProps?.[0]?.link !== false) {
     cols.unshift({
+      name: '',
       accessor: '_select',
       active: true,
       components: {
@@ -86,7 +87,6 @@ const buildColumns = ({
         renderCell: (rowData) => <SelectRow id={rowData.id} />,
       },
       label: null,
-      name: '',
     })
   }
 

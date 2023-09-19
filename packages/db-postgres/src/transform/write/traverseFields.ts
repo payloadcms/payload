@@ -324,26 +324,6 @@ export const traverseFields = ({
               break
             }
 
-            case 'row':
-            case 'collapsible': {
-              traverseFields({
-                adapter,
-                arrayRowPromises,
-                blockRows,
-                columnPrefix,
-                data,
-                fields: field.fields,
-                locale,
-                localeRow,
-                operation,
-                path,
-                relationshipRows,
-                row,
-                tableName,
-              })
-              break
-            }
-
             default: {
               break
             }

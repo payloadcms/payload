@@ -19,9 +19,9 @@ export default async function restoreVersionHandler(
   next: NextFunction,
 ): Promise<Response<RestoreResult> | void> {
   const options = {
+    id: req.params.id,
     collection: req.collection,
     depth: Number(req.query.depth),
-    id: req.params.id,
     payload: req.payload,
     req,
   }

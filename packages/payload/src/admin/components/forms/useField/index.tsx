@@ -105,8 +105,8 @@ const useField = <T,>(options: Options): FieldType<T> => {
         }
 
         const validateOptions = {
-          data: getData(),
           id,
+          data: getData(),
           operation,
           siblingData: getSiblingData(path),
           t,

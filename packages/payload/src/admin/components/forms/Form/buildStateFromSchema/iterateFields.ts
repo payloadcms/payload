@@ -25,10 +25,10 @@ type Args = {
 }
 
 export const iterateFields = async ({
+  id,
   data,
   fields,
   fullData,
-  id,
   locale,
   operation,
   parentPassesCondition,
@@ -50,10 +50,10 @@ export const iterateFields = async ({
 
       promises.push(
         addFieldStatePromise({
+          id,
           data,
           field,
           fullData,
-          id,
           locale,
           operation,
           passesCondition,

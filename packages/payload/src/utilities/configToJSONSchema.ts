@@ -8,7 +8,7 @@ import type { Field, FieldAffectingData, Option } from '../fields/config/types'
 import type { SanitizedGlobalConfig } from '../globals/config/types'
 
 import { fieldAffectsData, tabHasName } from '../fields/config/types'
-import deepCopyObject from './deepCopyObject'
+import { deepCopyObject } from './deepCopyObject'
 import { toWords } from './formatLabels'
 
 const propertyIsRequired = (field: Field) => {

@@ -36,8 +36,8 @@ export const GetFilterOptions = ({
 
     const getFilterOptions = async () => {
       const newFilterOptionsResult = await getFilterOptionsQuery(filterOptions, {
-        data,
         id,
+        data,
         relationTo,
         siblingData,
         user,

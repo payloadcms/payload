@@ -27,10 +27,10 @@ export default function findVersionByIDResolver(collection: Collection): Resolve
     if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
 
     const options = {
+      id: args.id,
       collection,
       depth: 0,
       draft: args.draft,
-      id: args.id,
       req: context.req,
     }
 

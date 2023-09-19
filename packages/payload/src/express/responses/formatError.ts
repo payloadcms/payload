@@ -10,9 +10,9 @@ const formatErrorResponse = (
       return {
         errors: [
           {
+            name: incoming.name,
             data: incoming.data,
             message: incoming.message,
-            name: incoming.name,
           },
         ],
       }

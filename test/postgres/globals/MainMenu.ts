@@ -1,4 +1,4 @@
-import { GlobalConfig } from '../../../src/globals/config/types';
+import type { GlobalConfig } from '../../../src/globals/config/types'
 
 export const MainMenu: GlobalConfig = {
   slug: 'main-menu',
@@ -24,4 +24,4 @@ export const MainMenu: GlobalConfig = {
       ],
     },
   ],
-};
+}

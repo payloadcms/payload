@@ -36,7 +36,7 @@ const FileDetails: React.FC<Props> = (props) => {
     upload: { imageSizes, staticURL },
   } = collection
 
-  const { filename, filesize, height, id, mimeType, sizes, url, width } = doc
+  const { id, filename, filesize, height, mimeType, sizes, url, width } = doc
 
   const [orderedSizes, setOrderedSizes] = useState<FileSizes>(() => sortSizes(sizes, imageSizes))
 

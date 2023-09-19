@@ -17,7 +17,7 @@ import './index.scss'
 const baseClass = 'status'
 
 const Status: React.FC = () => {
-  const { collection, docPermissions, getVersions, global, id, publishedDoc, unpublishedVersions } =
+  const { id, collection, docPermissions, getVersions, global, publishedDoc, unpublishedVersions } =
     useDocumentInfo()
   const { toggleModal } = useModal()
   const {

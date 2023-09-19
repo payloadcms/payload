@@ -1,15 +1,15 @@
 /* eslint-disable no-param-reassign */
-import type { SQL } from 'drizzle-orm';
-import type { Field, FieldAffectingData, TabAsField } from 'payload/types';
+import type { SQL } from 'drizzle-orm'
+import type { Field, FieldAffectingData, TabAsField } from 'payload/types'
 
-import { and, eq, sql } from 'drizzle-orm';
-import { APIError } from 'payload/errors';
-import { fieldAffectsData, tabHasName } from 'payload/types';
-import { flattenTopLevelFields } from 'payload/utilities';
-import toSnakeCase from 'to-snake-case';
+import { and, eq, sql } from 'drizzle-orm'
+import { APIError } from 'payload/errors'
+import { fieldAffectsData, tabHasName } from 'payload/types'
+import { flattenTopLevelFields } from 'payload/utilities'
+import toSnakeCase from 'to-snake-case'
 
-import type { GenericColumn, GenericTable, PostgresAdapter } from '../types';
-import type { BuildQueryJoins } from './buildQuery';
+import type { GenericColumn, GenericTable, PostgresAdapter } from '../types'
+import type { BuildQueryJoins } from './buildQuery'
 
 type Constraint = {
   columnName: string
@@ -26,7 +26,7 @@ type TableColumn = {
 }
 
 type Args = {
-  adapter: PostgresAdapter,
+  adapter: PostgresAdapter
   collectionPath: string
   columnPrefix?: string
   constraints?: Constraint[]
@@ -54,13 +54,14 @@ export const getTableColumnFromPath = ({
   selectFields,
   tableName,
 }: Args): TableColumn => {
-  const fieldPath = pathSegments[0];
-  const field = flattenTopLevelFields(fields as Field[])
-    .find((fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath) as Field | TabAsField;
-  let newTableName = tableName;
+  const fieldPath = pathSegments[0]
+  const field = flattenTopLevelFields(fields as Field[]).find(
+    (fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath,
+  ) as Field | TabAsField
+  let newTableName = tableName
 
   if (!field && fieldPath === 'id') {
-    selectFields.id = adapter.tables[newTableName].id;
+    selectFields.id = adapter.tables[newTableName].id
     return {
       columnName: 'id',
       constraints,
@@ -69,7 +70,7 @@ export const getTableColumnFromPath = ({
         type: 'number',
       },
       table: adapter.tables[newTableName],
-    };
+    }
   }
 
   if (field) {
@@ -89,7 +90,7 @@ export const getTableColumnFromPath = ({
           pathSegments: pathSegments.slice(1),
           selectFields,
           tableName: newTableName,
-        });
+        })
       }
       case 'tab': {
         if (tabHasName(field)) {
@@ -98,38 +99,41 @@ export const getTableColumnFromPath = ({
             collectionPath,
             columnPrefix: `${columnPrefix}${field.name}_`,
             constraints,
-            fields: field.fields ,
+            fields: field.fields,
             joins,
             locale,
             pathSegments: pathSegments.slice(1),
             selectFields,
             tableName: newTableName,
-          });
+          })
         }
         return getTableColumnFromPath({
           adapter,
           collectionPath,
           columnPrefix,
           constraints,
-          fields: field.fields ,
+          fields: field.fields,
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
           selectFields,
           tableName: newTableName,
-        });
+        })
       }
 
       case 'group': {
         if (locale && field.localized && adapter.payload.config.localization) {
-          newTableName = `${tableName}_locales`;
-          joins[tableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
+          newTableName = `${tableName}_locales`
+          joins[tableName] = eq(
+            adapter.tables[tableName].id,
+            adapter.tables[newTableName]._parentID,
+          )
           if (locale !== 'all') {
             constraints.push({
-                columnName: '_locale',
-                table: adapter.tables[newTableName],
-                value: locale,
-            });
+              columnName: '_locale',
+              table: adapter.tables[newTableName],
+              value: locale,
+            })
           }
         }
         return getTableColumnFromPath({
@@ -137,31 +141,34 @@ export const getTableColumnFromPath = ({
           collectionPath,
           columnPrefix: `${columnPrefix}${field.name}_`,
           constraints,
-          fields: field.fields ,
+          fields: field.fields,
           joins,
           locale,
           pathSegments: pathSegments.slice(1),
           selectFields,
           tableName: newTableName,
-        });
+        })
       }
 
       case 'array': {
-        newTableName = `${tableName}_${toSnakeCase(field.name)}`;
+        newTableName = `${tableName}_${toSnakeCase(field.name)}`
         if (locale && field.localized && adapter.payload.config.localization) {
           joins[newTableName] = and(
             eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
             eq(adapter.tables[newTableName]._locale, locale),
-          );
+          )
           if (locale !== 'all') {
             constraints.push({
               columnName: '_locale',
               table: adapter.tables[newTableName],
               value: locale,
-            });
+            })
           }
         } else {
-          joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
+          joins[newTableName] = eq(
+            adapter.tables[tableName].id,
+            adapter.tables[newTableName]._parentID,
+          )
         }
         return getTableColumnFromPath({
           adapter,
@@ -173,17 +180,17 @@ export const getTableColumnFromPath = ({
           pathSegments: pathSegments.slice(1),
           selectFields,
           tableName: newTableName,
-        });
+        })
       }
 
       case 'blocks': {
-        let blockTableColumn: TableColumn;
-        let newTableName: string;
+        let blockTableColumn: TableColumn
+        let newTableName: string
         const hasBlockField = field.blocks.some((block) => {
-          newTableName = `${tableName}_${toSnakeCase(block.slug)}`;
-          let result;
-          const blockConstraints = [];
-          const blockSelectFields = {};
+          newTableName = `${tableName}_${toSnakeCase(block.slug)}`
+          let result
+          const blockConstraints = []
+          const blockSelectFields = {}
           try {
             result = getTableColumnFromPath({
               adapter,
@@ -195,33 +202,36 @@ export const getTableColumnFromPath = ({
               pathSegments: pathSegments.slice(1),
               selectFields: blockSelectFields,
               tableName: newTableName,
-            });
+            })
           } catch (error) {
             // this is fine, not every block will have the field
           }
-        if (!result) {
-          return;
-        }
-        blockTableColumn = result;
-        constraints = constraints.concat(blockConstraints);
-        selectFields = {...selectFields, ...blockSelectFields};
-        if (field.localized && adapter.payload.config.localization) {
-          joins[newTableName] = and(
-            eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
-            eq(adapter.tables[newTableName]._locale, locale),
-          );
-          if (locale) {
-            constraints.push({
-              columnName: '_locale',
-              table: adapter.tables[newTableName],
-              value: locale,
-            });
+          if (!result) {
+            return
           }
-        } else {
-          joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
-        }
-        return result;
-        });
+          blockTableColumn = result
+          constraints = constraints.concat(blockConstraints)
+          selectFields = { ...selectFields, ...blockSelectFields }
+          if (field.localized && adapter.payload.config.localization) {
+            joins[newTableName] = and(
+              eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID),
+              eq(adapter.tables[newTableName]._locale, locale),
+            )
+            if (locale) {
+              constraints.push({
+                columnName: '_locale',
+                table: adapter.tables[newTableName],
+                value: locale,
+              })
+            }
+          } else {
+            joins[newTableName] = eq(
+              adapter.tables[tableName].id,
+              adapter.tables[newTableName]._parentID,
+            )
+          }
+          return result
+        })
         if (hasBlockField) {
           return {
             columnName: blockTableColumn.columnName,
@@ -229,49 +239,57 @@ export const getTableColumnFromPath = ({
             field: blockTableColumn.field,
             rawColumn: blockTableColumn.rawColumn,
             table: adapter.tables[newTableName],
-          };
+          }
         }
-        break;
+        break
       }
 
       case 'relationship':
       case 'upload': {
-        let relationshipFields;
-        const relationTableName = `${tableName}_relationships`;
-        const newCollectionPath = pathSegments.slice(1).join('.');
+        let relationshipFields
+        const relationTableName = `${tableName}_relationships`
+        const newCollectionPath = pathSegments.slice(1).join('.')
 
         // Join in the relationships table
-        joins[relationTableName] = eq(adapter.tables[tableName].id, adapter.tables[relationTableName].parent);
-        selectFields[`${relationTableName}.path`] = adapter.tables[relationTableName].path;
+        joins[relationTableName] = eq(
+          adapter.tables[tableName].id,
+          adapter.tables[relationTableName].parent,
+        )
+        selectFields[`${relationTableName}.path`] = adapter.tables[relationTableName].path
         constraints.push({
           columnName: 'path',
           table: adapter.tables[relationTableName],
           value: field.name,
-        });
+        })
 
         if (typeof field.relationTo === 'string') {
-          newTableName = `${toSnakeCase(field.relationTo)}`;
+          newTableName = `${toSnakeCase(field.relationTo)}`
           // parent to relationship join table
-          relationshipFields = adapter.payload.collections[field.relationTo].config.fields;
-          joins[newTableName] = eq(adapter.tables[newTableName].id, adapter.tables[`${tableName}_relationships`][`${field.relationTo}ID`]);
+          relationshipFields = adapter.payload.collections[field.relationTo].config.fields
+          joins[newTableName] = eq(
+            adapter.tables[newTableName].id,
+            adapter.tables[`${tableName}_relationships`][`${field.relationTo}ID`],
+          )
           if (newCollectionPath === '') {
             return {
               columnName: `${field.relationTo}ID`,
               constraints,
               field,
               table: adapter.tables[relationTableName],
-            };
+            }
           }
         } else if (newCollectionPath === 'value') {
-          const tableColumnsNames = field.relationTo.map((relationTo) => `"${relationTableName}"."${toSnakeCase(relationTo)}_id"`);
+          const tableColumnsNames = field.relationTo.map(
+            (relationTo) => `"${relationTableName}"."${toSnakeCase(relationTo)}_id"`,
+          )
           return {
             constraints,
             field,
             rawColumn: sql.raw(`COALESCE(${tableColumnsNames.join(', ')})`),
             table: adapter.tables[relationTableName],
-          };
+          }
         } else {
-          throw new APIError('Not supported');
+          throw new APIError('Not supported')
         }
 
         return getTableColumnFromPath({
@@ -284,7 +302,7 @@ export const getTableColumnFromPath = ({
           pathSegments: pathSegments.slice(1),
           selectFields,
           tableName: newTableName,
-        });
+        })
       }
 
       default: {
@@ -302,28 +320,31 @@ export const getTableColumnFromPath = ({
         // case 'point':
         if (fieldAffectsData(field)) {
           if (field.localized && adapter.payload.config.localization) {
-            newTableName = `${tableName}_locales`;
-            joins[newTableName] = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID);
+            newTableName = `${tableName}_locales`
+            joins[newTableName] = eq(
+              adapter.tables[tableName].id,
+              adapter.tables[newTableName]._parentID,
+            )
             if (locale !== 'all') {
               constraints.push({
                 columnName: '_locale',
                 table: adapter.tables[newTableName],
                 value: locale,
-              });
+              })
             }
           }
-          selectFields[`${newTableName}.${field.name}`] = adapter.tables[newTableName][field.name];
+          selectFields[`${newTableName}.${field.name}`] = adapter.tables[newTableName][field.name]
 
           return {
             columnName: `${columnPrefix}${field.name}`,
             constraints,
             field,
             table: adapter.tables[newTableName],
-          };
+          }
         }
       }
     }
   }
 
-  throw new APIError(`Cannot find field for path at ${fieldPath}`);
-};
+  throw new APIError(`Cannot find field for path at ${fieldPath}`)
+}

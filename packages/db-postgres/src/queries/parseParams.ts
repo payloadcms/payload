@@ -83,7 +83,7 @@ export async function parseParams({
                   fields,
                   joins,
                   locale,
-                  pathSegments: relationOrPath.split('.'),
+                  pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
                   selectFields,
                   tableName,
                 })
@@ -97,9 +97,6 @@ export async function parseParams({
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
                   constraints.push(operatorMap.equals(constraintTable[col], value))
                 })
-                if (!operatorMap[queryOperator]) {
-                  console.log('found it')
-                }
                 constraints.push(
                   operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
                 )

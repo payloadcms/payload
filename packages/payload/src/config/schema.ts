@@ -81,6 +81,11 @@ export default joi.object({
   debug: joi.boolean(),
   defaultDepth: joi.number().min(0).max(30),
   defaultMaxTextLength: joi.number(),
+  editor: joi.object().required().keys({
+    CellComponent: component.required(),
+    FieldComponent: component.required(),
+    afterReadPromise: joi.func().required(),
+  }),
   email: joi.object(),
   endpoints: endpointsSchema,
   express: joi.object().keys({

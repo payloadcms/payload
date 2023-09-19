@@ -4,40 +4,40 @@
 
 // type PushDiff = (schema: DrizzleSchemaExports) => Promise<{ warnings: string[], apply: () => Promise<void> }>
 
-
 // drizzle-kit@utils
 
-import { generateDrizzleJson, generateMigration, pushSchema } from 'drizzle-kit/utils';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { Pool } from 'pg';
+import { generateDrizzleJson, generateMigration, pushSchema } from 'drizzle-kit/utils'
+import { drizzle } from 'drizzle-orm/node-postgres'
+import { Pool } from 'pg'
 
 async function generateUsage() {
-  const schema = await import('./data/users');
-  const schemaAfter = await import('./data/users-after');
+  // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
+  const schema = await import('./data/users')
+  // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
+  const schemaAfter = await import('./data/users-after')
 
-  const drizzleJsonBefore = generateDrizzleJson(schema);
-  const drizzleJsonAfter = generateDrizzleJson(schemaAfter);
+  const drizzleJsonBefore = generateDrizzleJson(schema)
+  const drizzleJsonAfter = generateDrizzleJson(schemaAfter)
 
-  const sqlStatements = await generateMigration(drizzleJsonBefore, drizzleJsonAfter);
+  const sqlStatements = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
 
-  console.log(sqlStatements);
+  console.log(sqlStatements)
 }
 
 async function pushUsage() {
-  const schemaAfter = await import('./data/users-after');
+  // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
+  const schemaAfter = await import('./data/users-after')
 
-  const db = drizzle(
-    new Pool({ connectionString: '' }),
-  );
+  const db = drizzle(new Pool({ connectionString: '' }))
 
-  const response = await pushSchema(schemaAfter, db);
+  const response = await pushSchema(schemaAfter, db)
 
-  console.log('\n');
-  console.log('hasDataLoss: ', response.hasDataLoss);
-  console.log('warnings: ', response.warnings);
-  console.log('statements: ', response.statementsToExecute);
+  console.log('\n')
+  console.log('hasDataLoss: ', response.hasDataLoss)
+  console.log('warnings: ', response.warnings)
+  console.log('statements: ', response.statementsToExecute)
 
-  await response.apply();
+  await response.apply()
 
-  process.exit(0);
+  process.exit(0)
 }

@@ -144,8 +144,8 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
           await priorHook
 
           return hook({
-            context: req.context,
             id,
+            context: req.context,
             req,
           })
         }, Promise.resolve())
@@ -223,9 +223,9 @@ async function deleteOperation<TSlug extends keyof GeneratedTypes['collections']
 
           result =
             (await hook({
+              id,
               context: req.context,
               doc: result,
-              id,
               req,
             })) || result
         }, Promise.resolve())

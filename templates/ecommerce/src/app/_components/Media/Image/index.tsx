@@ -10,7 +10,7 @@ import classes from './index.module.scss'
 
 const { breakpoints } = cssVariables
 
-export const Image: React.FC<MediaProps> = props => {
+export const Image: React.FC<MediaProps> = (props) => {
   const {
     imgClassName,
     onClick,

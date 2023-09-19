@@ -1,18 +1,18 @@
-import type { AccessResult } from '../../config/types';
-import type { PaginatedDocs } from '../../database/types';
-import type { PayloadRequest } from '../../express/types';
-import type { Where } from '../../types';
-import type { Collection, TypeWithID } from '../config/types';
+import type { AccessResult } from '../../config/types'
+import type { PaginatedDocs } from '../../database/types'
+import type { PayloadRequest } from '../../express/types'
+import type { Where } from '../../types'
+import type { Collection, TypeWithID } from '../config/types'
 
-import executeAccess from '../../auth/executeAccess';
-import { combineQueries } from '../../database/combineQueries';
-import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths';
-import { afterRead } from '../../fields/hooks/afterRead';
-import { initTransaction } from '../../utilities/initTransaction';
-import { killTransaction } from '../../utilities/killTransaction';
-import { buildVersionCollectionFields } from '../../versions/buildCollectionFields';
-import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey';
-import { buildAfterOperation } from './utils';
+import executeAccess from '../../auth/executeAccess'
+import { combineQueries } from '../../database/combineQueries'
+import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths'
+import { afterRead } from '../../fields/hooks/afterRead'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
+import { buildVersionCollectionFields } from '../../versions/buildCollectionFields'
+import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey'
+import { buildAfterOperation } from './utils'
 
 export type Arguments = {
   collection: Collection
@@ -160,7 +160,7 @@ async function find<T extends TypeWithID & Record<string, unknown>>(
         page: sanitizedPage,
         pagination,
         req,
-        sort: sort ? sort.replace(/__/g, '.') : undefined,
+        sort,
         where: fullWhere,
       })
     }

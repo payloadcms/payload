@@ -48,6 +48,7 @@ const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
 
 const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, ref) => {
   const {
+    id,
     'aria-label': ariaLabel,
     buttonStyle = 'primary',
     children,
@@ -57,7 +58,6 @@ const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, 
     icon,
     iconPosition = 'right',
     iconStyle = 'without-border',
-    id,
     newTab,
     onClick,
     round,
@@ -93,11 +93,11 @@ const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, 
   }
 
   const buttonProps = {
+    id,
     'aria-disabled': disabled,
     'aria-label': ariaLabel,
     className: classes,
     disabled,
-    id,
     onClick: !disabled ? handleClick : undefined,
     onMouseEnter: tooltip ? () => setShowTooltip(true) : undefined,
     onMouseLeave: tooltip ? () => setShowTooltip(false) : undefined,

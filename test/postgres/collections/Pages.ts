@@ -1,4 +1,4 @@
-import { CollectionConfig } from '../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../src/collections/config/types'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -24,4 +24,4 @@ export const Pages: CollectionConfig = {
       ],
     },
   ],
-};
+}

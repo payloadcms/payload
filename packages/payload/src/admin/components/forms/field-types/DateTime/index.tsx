@@ -17,9 +17,9 @@ const baseClass = 'date-time-field'
 
 const DateTime: React.FC<Props> = (props) => {
   const {
+    name,
     admin: { className, condition, date, description, placeholder, readOnly, style, width } = {},
     label,
-    name,
     path: pathFromProps,
     required,
     validate = dateValidation,

@@ -1,26 +1,17 @@
-import type { PayloadRequest } from 'payload/types';
+import type { PayloadRequest } from 'payload/types'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults';
-import { LocalizedArrays } from './collections/LocalizedArrays';
-import { LocalizedBlocks } from './collections/LocalizedBlocks';
-import { LocalizedGroups } from './collections/LocalizedGroups';
-import { Pages } from './collections/Pages';
-import { People } from './collections/People';
-import { Posts } from './collections/Posts';
-import { MainMenu } from './globals/MainMenu';
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
+import { LocalizedArrays } from './collections/LocalizedArrays'
+import { LocalizedBlocks } from './collections/LocalizedBlocks'
+import { LocalizedGroups } from './collections/LocalizedGroups'
+import { Pages } from './collections/Pages'
+import { People } from './collections/People'
+import { Posts } from './collections/Posts'
+import { MainMenu } from './globals/MainMenu'
 
 const config = buildConfigWithDefaults({
-  collections: [
-    LocalizedArrays,
-    LocalizedBlocks,
-    LocalizedGroups,
-    Pages,
-    People,
-    Posts,
-  ],
-  globals: [
-    MainMenu,
-  ],
+  collections: [LocalizedArrays, LocalizedBlocks, LocalizedGroups, Pages, People, Posts],
+  globals: [MainMenu],
   localization: {
     locales: ['en', 'es'],
     defaultLocale: 'en',
@@ -33,9 +24,9 @@ const config = buildConfigWithDefaults({
     //     password: devUser.password,
     //   },
     // });
-    const req = {} as PayloadRequest;
+    const req = {} as PayloadRequest
 
-    req.transactionID = await payload.db.beginTransaction();
+    req.transactionID = await payload.db.beginTransaction()
 
     const page1 = await payload.create({
       req,
@@ -53,8 +44,7 @@ const config = buildConfigWithDefaults({
       },
     })
 
-    await payload.db.commitTransaction(req.transactionID);
-
+    await payload.db.commitTransaction(req.transactionID)
 
     const findResult = await payload.find({
       collection: 'pages',
@@ -73,7 +63,7 @@ const config = buildConfigWithDefaults({
       },
     })
 
-    req.transactionID = await payload.db.beginTransaction();
+    req.transactionID = await payload.db.beginTransaction()
 
     const person2 = await payload.create({
       req,
@@ -167,7 +157,7 @@ const config = buildConfigWithDefaults({
         ],
       },
     })
-    await payload.db.commitTransaction(req.transactionID);
+    await payload.db.commitTransaction(req.transactionID)
     await payload.update({
       collection: 'posts',
       id: post.id,
@@ -249,38 +239,42 @@ const config = buildConfigWithDefaults({
           },
         ],
       },
-    });
-    const text = 'block';
+    })
+    const text = 'block'
     const blockDoc = await payload.create({
       collection: 'localized-blocks',
       data: {
         title: 'titled',
-        layout: [{
-          blockType: 'text',
-          text,
-        }],
-      }
+        layout: [
+          {
+            blockType: 'text',
+            text,
+          },
+        ],
+      },
     })
 
     const nope = await payload.create({
       collection: 'localized-blocks',
       data: {
         title: 'titled',
-        layout: [{
-          blockType: 'text',
-          text: 'should not be found',
-        }],
-      }
+        layout: [
+          {
+            blockType: 'text',
+            text: 'should not be found',
+          },
+        ],
+      },
     })
 
     const query = await payload.find({
       collection: 'localized-blocks',
       where: {
-        'layout.text': { equals: text }
-      }
+        'layout.text': { equals: text },
+      },
     })
 
-    console.log({ query });
+    console.log({ query })
   },
 })
 
