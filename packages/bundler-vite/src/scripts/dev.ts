@@ -1,8 +1,10 @@
-// @ts-expect-error
-import type { InlineConfig } from 'vite'
-import express from 'express'
 import type { PayloadHandler } from 'payload/config'
-import { Payload } from '../../../payload'
+import type { InlineConfig } from 'vite'
+
+import express from 'express'
+
+import type { Payload } from '../../../payload'
+
 import { getViteConfig } from '../configs/vite'
 
 const router = express.Router()

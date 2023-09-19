@@ -67,6 +67,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {
   const {
+    id,
     autosave,
     collection: collectionSlug,
     context,
@@ -76,7 +77,6 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     fallbackLocale = null,
     file,
     filePath,
-    id,
     locale = null,
     overrideAccess = true,
     overwriteExistingFiles = false,
@@ -114,12 +114,12 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   if (!req.payloadDataLoader) req.payloadDataLoader = getDataLoader(req)
 
   const args = {
+    id,
     autosave,
     collection,
     data,
     depth,
     draft,
-    id,
     overrideAccess,
     overwriteExistingFiles,
     payload,

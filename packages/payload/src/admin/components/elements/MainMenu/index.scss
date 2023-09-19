@@ -33,6 +33,7 @@ $transTime: 200ms;
     display: flex;
     flex-direction: column;
     gap: var(--base);
+    padding-left: calc(var(--base) * 3);
   }
 
   &__close {
@@ -105,6 +106,12 @@ $transTime: 200ms;
 
   &.payload__modal-item--exitActive {
     transition: none;
+  }
+
+  @include large-break {
+    &__content-children {
+      padding-left: var(--gutter-h);
+    }
   }
 
   @include mid-break {

@@ -36,12 +36,12 @@ export const recurseNestedFields = ({
               if (collection) {
                 promises.push(
                   populate({
+                    id: value,
                     collection,
                     currentDepth,
                     data: data[field.name],
                     depth,
                     field,
-                    id: value,
                     key: i,
                     overrideAccess,
                     req,
@@ -56,12 +56,12 @@ export const recurseNestedFields = ({
               if (collection) {
                 promises.push(
                   populate({
+                    id,
                     collection,
                     currentDepth,
                     data: data[field.name],
                     depth,
                     field,
-                    id,
                     key: i,
                     overrideAccess,
                     req,
@@ -79,12 +79,12 @@ export const recurseNestedFields = ({
           const collection = req.payload.collections[data[field.name].relationTo]
           promises.push(
             populate({
+              id: data[field.name].value,
               collection,
               currentDepth,
               data: data[field.name],
               depth,
               field,
-              id: data[field.name].value,
               key: 'value',
               overrideAccess,
               req,
@@ -97,12 +97,12 @@ export const recurseNestedFields = ({
         const collection = req.payload.collections[field.relationTo]
         promises.push(
           populate({
+            id: data[field.name],
             collection,
             currentDepth,
             data,
             depth,
             field,
-            id: data[field.name],
             key: field.name,
             overrideAccess,
             req,

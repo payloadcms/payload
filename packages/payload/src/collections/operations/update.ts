@@ -206,11 +206,11 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // /////////////////////////////////////
 
         data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
+          id,
           context: req.context,
           data,
           doc: originalDoc,
           entityConfig: collectionConfig,
-          id,
           operation: 'update',
           overrideAccess,
           req,
@@ -263,12 +263,12 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // /////////////////////////////////////
 
         let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
+          id,
           context: req.context,
           data,
           doc: originalDoc,
           docWithLocales: doc,
           entityConfig: collectionConfig,
-          id,
           operation: 'update',
           req,
           skipValidation: shouldSaveDraft || data._status === 'draft',
@@ -280,9 +280,9 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
         if (!shouldSaveDraft) {
           result = await req.payload.db.updateOne({
+            id,
             collection: collectionConfig.slug,
             data: result,
-            id,
             locale,
             req,
           })
@@ -294,13 +294,13 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
         if (collectionConfig.versions) {
           result = await saveVersion({
+            id,
             collection: collectionConfig,
             docWithLocales: {
               ...result,
               createdAt: doc.createdAt,
             },
             draft: shouldSaveDraft,
-            id,
             payload,
             req,
           })

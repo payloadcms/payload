@@ -41,13 +41,13 @@ type staticTypes =
 type dynamicTypes = 'radio' | 'select'
 
 const GeoJSONObject = new GraphQLInputObjectType({
+  name: 'GeoJSONObject',
   fields: {
     coordinates: {
       type: GraphQLJSON,
     },
     type: { type: GraphQLString },
   },
-  name: 'GeoJSONObject',
 })
 
 type DefaultsType = {
@@ -288,6 +288,7 @@ export const withOperators = (
   }
 
   return new GraphQLInputObjectType({
+    name,
     fields: fieldOperators.reduce((objectTypeFields, operator) => {
       // Get the type of the operator. It can be either static, or dynamic (=> a function)
       let gqlType: GraphQLType =
@@ -317,6 +318,5 @@ export const withOperators = (
         },
       }
     }, {}),
-    name,
   })
 }

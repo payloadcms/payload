@@ -34,12 +34,12 @@ export const DocumentControls: React.FC<{
   permissions?: CollectionPermission | GlobalPermission
 }> = (props) => {
   const {
+    id,
     collection,
     data,
     disableActions,
     global,
     hasSavePermission,
-    id,
     isEditing,
     permissions,
   } = props
@@ -74,59 +74,48 @@ export const DocumentControls: React.FC<{
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
-        {(collection?.versions?.drafts || global?.versions?.drafts) && (
-          <React.Fragment>
-            <Status />
-            {((collection?.versions?.drafts && collection?.versions?.drafts?.autosave) ||
-              (global?.versions?.drafts && global?.versions?.drafts?.autosave)) &&
-              hasSavePermission && (
-                <Autosave
-                  collection={collection}
-                  global={global}
-                  id={id}
-                  publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
-                />
-              )}
-          </React.Fragment>
-        )}
-        {collection?.timestamps && (
-          <ul className={`${baseClass}__timestamps`}>
-            <li
-              className={`${baseClass}__timestamp`}
-              title={data?.updatedAt ? formatDate(data?.updatedAt, dateFormat, i18n?.language) : ''}
-            >
-              <div className={`${baseClass}__label`}>{t('lastModified')}:&nbsp;</div>
-              {data?.updatedAt && (
-                <p className={`${baseClass}__stamp`}>
-                  {formatDate(data.updatedAt, dateFormat, i18n?.language)}
-                </p>
-              )}
-            </li>
-            <li
-              className={`${baseClass}__timestamp`}
-              title={
-                publishedDoc?.createdAt || data?.createdAt
-                  ? formatDate(
+        <div className={`${baseClass}__content`}>
+          {collection?.timestamps && (
+            <ul className={`${baseClass}__timestamps`}>
+              <li
+                className={`${baseClass}__timestamp`}
+                title={
+                  data?.updatedAt ? formatDate(data?.updatedAt, dateFormat, i18n?.language) : ''
+                }
+              >
+                <div className={`${baseClass}__label`}>{t('lastModified')}:&nbsp;</div>
+                {data?.updatedAt && (
+                  <p className={`${baseClass}__stamp`}>
+                    {formatDate(data.updatedAt, dateFormat, i18n?.language)}
+                  </p>
+                )}
+              </li>
+              <li
+                className={`${baseClass}__timestamp`}
+                title={
+                  publishedDoc?.createdAt || data?.createdAt
+                    ? formatDate(
+                        publishedDoc?.createdAt || data?.createdAt,
+                        dateFormat,
+                        i18n?.language,
+                      )
+                    : ''
+                }
+              >
+                <div className={`${baseClass}__label`}>{t('created')}:&nbsp;</div>
+                {(publishedDoc?.createdAt || data?.createdAt) && (
+                  <p className={`${baseClass}__stamp`}>
+                    {formatDate(
                       publishedDoc?.createdAt || data?.createdAt,
                       dateFormat,
                       i18n?.language,
-                    )
-                  : ''
-              }
-            >
-              <div className={`${baseClass}__label`}>{t('created')}:&nbsp;</div>
-              {(publishedDoc?.createdAt || data?.createdAt) && (
-                <p className={`${baseClass}__stamp`}>
-                  {formatDate(
-                    publishedDoc?.createdAt || data?.createdAt,
-                    dateFormat,
-                    i18n?.language,
-                  )}
-                </p>
-              )}
-            </li>
-          </ul>
-        )}
+                    )}
+                  </p>
+                )}
+              </li>
+            </ul>
+          )}
+        </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>
             {showPreviewButton && (

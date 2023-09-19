@@ -11,7 +11,7 @@ export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
     id?: string
   }
-> = props => {
+> = (props) => {
   const {
     introContent,
     id,

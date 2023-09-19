@@ -2,6 +2,7 @@ import { GraphQLBoolean, GraphQLInt, GraphQLList, GraphQLObjectType } from 'grap
 
 const buildPaginatedListType = (name, docType) =>
   new GraphQLObjectType({
+    name,
     fields: {
       docs: {
         type: new GraphQLList(docType),
@@ -17,7 +18,6 @@ const buildPaginatedListType = (name, docType) =>
       totalDocs: { type: GraphQLInt },
       totalPages: { type: GraphQLInt },
     },
-    name,
   })
 
 export default buildPaginatedListType

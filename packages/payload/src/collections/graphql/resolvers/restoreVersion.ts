@@ -20,9 +20,9 @@ export type Resolver = (
 export default function restoreVersionResolver(collection: Collection): Resolver {
   async function resolver(_, args, context) {
     const options = {
+      id: args.id,
       collection,
       depth: 0,
-      id: args.id,
       req: context.req,
     }
 

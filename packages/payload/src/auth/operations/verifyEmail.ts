@@ -29,12 +29,12 @@ async function verifyEmail(args: Args): Promise<boolean> {
     throw new APIError('This account has already been activated.', httpStatus.ACCEPTED)
 
   await req.payload.db.updateOne({
+    id: user.id,
     collection: collection.config.slug,
     data: {
       _verificationToken: null,
       _verified: true,
     },
-    id: user.id,
     req,
   })
 

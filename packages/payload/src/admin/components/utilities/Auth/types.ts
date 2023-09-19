@@ -1,6 +1,7 @@
 import type { Permissions, User } from '../../../../auth/types'
 
 export type AuthContext<T = User> = {
+  fetchFullUser: () => Promise<void>
   logOut: () => void
   permissions?: Permissions
   refreshCookie: (forceRefresh?: boolean) => void
@@ -9,5 +10,4 @@ export type AuthContext<T = User> = {
   setUser: (user: T) => void
   token?: string
   user?: T | null
-  fetchFullUser: () => Promise<void>
 }

@@ -1,4 +1,4 @@
-import { CollectionConfig } from '../../../src/collections/config/types';
+import type { CollectionConfig } from '../../../src/collections/config/types'
 
 export const LocalizedBlocks: CollectionConfig = {
   slug: 'localized-blocks',
@@ -36,4 +36,4 @@ export const LocalizedBlocks: CollectionConfig = {
       ],
     },
   ],
-};
+}

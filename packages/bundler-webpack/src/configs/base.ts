@@ -1,7 +1,9 @@
-import path from 'path'
-import HtmlWebpackPlugin from 'html-webpack-plugin'
-import webpack, { Configuration } from 'webpack'
 import type { SanitizedConfig } from 'payload/config'
+import type { Configuration } from 'webpack'
+
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import path from 'path'
+import webpack from 'webpack'
 
 const mockModulePath = path.resolve(__dirname, '../mocks/emptyModule.js')
 const mockDotENVPath = path.resolve(__dirname, '../mocks/dotENV.js')
@@ -14,14 +16,11 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
   entry: {
     main: [adminFolderPath],
   },
-  resolveLoader: {
-    modules: ['node_modules', nodeModulesPath],
-  },
   module: {
     rules: [
       {
-        test: /\.(t|j)sx?$/,
         exclude: /\/node_modules\/(?!.+\.tsx?$).*$/,
+        test: /\.(t|j)sx?$/,
         use: [
           {
             loader: require.resolve('swc-loader'),
@@ -46,23 +45,6 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       },
     ],
   },
-  resolve: {
-    fallback: {
-      crypto: false,
-      https: false,
-      http: false,
-    },
-    modules: ['node_modules', path.resolve(__dirname, nodeModulesPath)],
-    alias: {
-      path: require.resolve('path-browserify'),
-      'payload-config': payloadConfig.paths.rawConfig,
-      payload$: mockModulePath,
-      'payload-user-css': payloadConfig.admin.css,
-      dotenv: mockDotENVPath,
-      [bundlerPath]: mockModulePath,
-    },
-    extensions: ['.ts', '.tsx', '.js', '.json'],
-  },
   plugins: [
     new webpack.ProvidePlugin({ process: require.resolve('process/browser') }),
     new webpack.DefinePlugin(
@@ -78,9 +60,26 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
       }, {}),
     ),
     new HtmlWebpackPlugin({
-      template: payloadConfig.admin.indexHTML,
       filename: path.normalize('./index.html'),
+      template: payloadConfig.admin.indexHTML,
     }),
     new webpack.HotModuleReplacementPlugin(),
   ],
+  resolve: {
+    alias: {
+      [bundlerPath]: mockModulePath,
+      dotenv: mockDotENVPath,
+      path: require.resolve('path-browserify'),
+      payload$: mockModulePath,
+      'payload-config': payloadConfig.paths.rawConfig,
+      'payload-user-css': payloadConfig.admin.css,
+    },
+    extensions: ['.ts', '.tsx', '.js', '.json'],
+    fallback: {
+      crypto: false,
+      http: false,
+      https: false,
+    },
+    modules: ['node_modules', nodeModulesPath],
+  },
 })

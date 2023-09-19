@@ -2,8 +2,8 @@ import path from 'path'
 
 import type { Config, SanitizedConfig } from '../packages/payload/src/config/types'
 
-// import viteBundler from '../packages/bundler-vite/src'
-import webpackBundler from '../packages/bundler-webpack/src'
+// import { viteBundler } from '../packages/bundler-vite/src'
+import { webpackBundler } from '../packages/bundler-webpack/src'
 import { mongooseAdapter } from '../packages/db-mongodb/src/index'
 import { postgresAdapter } from '../packages/db-postgres/src/index'
 import { buildConfig as buildPayloadConfig } from '../packages/payload/src/config/build'
@@ -24,7 +24,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
   const [name] = process.argv.slice(2)
 
   const config: Config = {
-    defaultEditor: createSlate({}),
+    editor: createSlate({}),
     telemetry: false,
     rateLimit: {
       window: 15 * 60 * 100, // 15min default,
@@ -52,11 +52,12 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
           : webpackConfig
       return {
         ...existingConfig,
-        resolveLoader: {
-          ...(existingConfig.resolveLoader || {}),
-          modules: [
-            ...(existingConfig?.resolveLoader?.modules || []),
-            path.resolve(__dirname, '../packages/payload/node_modules'),
+        entry: {
+          main: [
+            `webpack-hot-middleware/client?path=${
+              testConfig?.routes?.admin || '/admin'
+            }/__webpack_hmr`,
+            path.resolve(__dirname, '../packages/payload/src/admin'),
           ],
         },
         name,
@@ -73,8 +74,13 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
               __dirname,
               '../packages/db-mongodb/src/mock.js',
             ),
+            [path.resolve(__dirname, '../packages/bundler-webpack/src/index')]: path.resolve(
+              __dirname,
+              '../packages/bundler-webpack/src/mocks/emptyModule.js',
+            ),
             '@payloadcms/db-mongodb': path.resolve(__dirname, '../packages/db-mongodb/src/mock'),
             '@payloadcms/db-postgres': path.resolve(__dirname, '../packages/db-postgres/src/mock'),
+            react: path.resolve(__dirname, '../packages/payload/node_modules/react'),
           },
         },
       }

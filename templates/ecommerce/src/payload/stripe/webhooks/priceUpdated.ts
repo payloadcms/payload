@@ -7,7 +7,7 @@ export const priceUpdated: StripeWebhookHandler<{
   data: {
     object: Stripe.Price
   }
-}> = async args => {
+}> = async (args) => {
   const { event, payload, stripe } = args
 
   const stripeProduct = event.data.object.product

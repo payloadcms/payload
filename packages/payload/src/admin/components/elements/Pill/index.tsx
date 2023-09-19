@@ -11,7 +11,7 @@ import './index.scss'
 const baseClass = 'pill'
 
 const DraggablePill: React.FC<Props> = (props) => {
-  const { className, id } = props
+  const { id, className } = props
 
   const { attributes, isDragging, listeners, setNodeRef, transform } = useDraggableSortable({
     id,

@@ -66,7 +66,7 @@ export const SaveDraft: React.FC<Props> = ({ CustomComponent }) => {
     serverURL,
   } = useConfig()
   const { submit } = useForm()
-  const { collection, global, id } = useDocumentInfo()
+  const { id, collection, global } = useDocumentInfo()
   const modified = useFormModified()
   const { code: locale } = useLocale()
   const { t } = useTranslation('version')

@@ -39,20 +39,20 @@ const CreateFirstUser: React.FC<Props> = (props) => {
 
   const fields = [
     {
-      label: t('general:emailAddress'),
       name: 'email',
+      label: t('general:emailAddress'),
       required: true,
       type: 'email',
     },
     {
-      label: t('general:password'),
       name: 'password',
+      label: t('general:password'),
       required: true,
       type: 'password',
     },
     {
-      label: t('confirmPassword'),
       name: 'confirm-password',
+      label: t('confirmPassword'),
       required: true,
       type: 'confirmPassword',
     },

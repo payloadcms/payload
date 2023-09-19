@@ -22,12 +22,12 @@ type CheckboxInputProps = {
 
 export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
   const {
+    id,
+    name,
     'aria-label': ariaLabel,
     checked,
-    id,
     inputRef,
     label,
-    name,
     onToggle,
     partialChecked,
     readOnly,

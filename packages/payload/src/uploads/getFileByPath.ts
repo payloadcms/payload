@@ -13,9 +13,9 @@ const getFileByPath = async (filePath: string): Promise<File> => {
     const name = path.basename(filePath)
 
     return {
+      name,
       data,
       mimetype: (await mimetype).mime,
-      name,
       size,
     }
   }

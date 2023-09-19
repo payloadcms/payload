@@ -3,7 +3,7 @@
   color: var(--theme-bg);
 }
 
-:global([data-theme="dark"]) {
+:global([data-theme='dark']) {
   .invert {
     background-color: var(--theme-elevation-100);
     color: var(--theme-text);

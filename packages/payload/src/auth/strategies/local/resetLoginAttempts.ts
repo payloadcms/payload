@@ -16,12 +16,12 @@ export const resetLoginAttempts = async ({
   req,
 }: Args): Promise<void> => {
   await payload.update({
+    id: doc.id,
     collection: collection.slug,
     data: {
       lockUntil: null,
       loginAttempts: 0,
     },
-    id: doc.id,
     req,
   })
 }

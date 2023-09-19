@@ -13,14 +13,14 @@ import './index.scss'
 const baseClass = 'file-meta'
 
 const Meta: React.FC<Props> = (props) => {
-  const { collection, filename, filesize, height, id, mimeType, staticURL, url, width } = props
+  const { id, collection, filename, filesize, height, mimeType, staticURL, url, width } = props
 
   const [hovered, setHovered] = useState(false)
   const openInDrawer = Boolean(id && collection)
 
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
-    collectionSlug: collection,
     id,
+    collectionSlug: collection,
   })
 
   const { serverURL } = useConfig()

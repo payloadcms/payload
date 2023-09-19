@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { Editor, Range, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import type { Props as RichTextFieldProps } from '../../../../types'
+import type { FieldProps } from '../../../../types'
 
 import LinkIcon from '../../../icons/Link'
 import ElementButton from '../../Button'
@@ -62,7 +62,7 @@ const insertLink = (editor, fields) => {
 }
 
 export const LinkButton: React.FC<{
-  fieldProps: RichTextFieldProps
+  fieldProps: FieldProps
   path: string
 }> = ({ fieldProps }) => {
   const customFieldSchema = fieldProps?.admin?.link?.fields

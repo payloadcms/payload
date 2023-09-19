@@ -1,4 +1,4 @@
-@import "../../../_css/common";
+@import '../../../_css/common';
 
 .items {
   margin-bottom: var(--base);
@@ -27,7 +27,7 @@
   color: var(--theme-warning-500);
 }
 
-:global([data-theme="light"]) {
+:global([data-theme='light']) {
   .warning {
     color: var(--theme-error-500);
   }

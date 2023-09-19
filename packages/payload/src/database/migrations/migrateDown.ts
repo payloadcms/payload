@@ -42,8 +42,8 @@ export async function migrateDown(this: DatabaseAdapter): Promise<void> {
       })
       // Waiting for implementation here
       await payload.delete({
-        collection: 'payload-migrations',
         id: migration.id,
+        collection: 'payload-migrations',
         req: {
           transactionID,
         } as PayloadRequest,

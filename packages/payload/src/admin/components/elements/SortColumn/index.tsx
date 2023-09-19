@@ -14,7 +14,7 @@ import './index.scss'
 const baseClass = 'sort-column'
 
 const SortColumn: React.FC<Props> = (props) => {
-  const { disable = false, label, name } = props
+  const { name, disable = false, label } = props
   const params = useSearchParams()
   const history = useHistory()
   const { i18n, t } = useTranslation('general')

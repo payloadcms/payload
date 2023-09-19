@@ -27,6 +27,7 @@ const baseClass = 'array-field'
 
 const ArrayFieldType: React.FC<Props> = (props) => {
   const {
+    name,
     admin: { className, components, condition, description, readOnly },
     fieldTypes,
     fields,
@@ -34,7 +35,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     localized,
     maxRows,
     minRows,
-    name,
     path: pathFromProps,
     permissions,
     required,

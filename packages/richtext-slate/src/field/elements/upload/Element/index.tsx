@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
 
-import type { Props as RichTextProps } from '../../../../types'
+import type { FieldProps } from '../../../../types'
 
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition'
 import { UploadDrawer } from './UploadDrawer'
@@ -34,7 +34,7 @@ export type ElementProps = {
   children: React.ReactNode
   element: any
   enabledCollectionSlugs: string[]
-  fieldProps: RichTextProps
+  fieldProps: FieldProps
 }
 
 const Element: React.FC<ElementProps> = (props) => {
@@ -66,8 +66,8 @@ const Element: React.FC<ElementProps> = (props) => {
   })
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
-    collectionSlug: relatedCollection.slug,
     id: value?.id,
+    collectionSlug: relatedCollection.slug,
   })
 
   const editor = useSlateStatic()

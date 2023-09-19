@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
 
-import type { Props as RichTextProps } from '../../../../types'
+import type { FieldProps } from '../../../../types'
 
 import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition'
 import './index.scss'
@@ -25,7 +25,7 @@ type Props = {
   attributes: HTMLAttributes<HTMLDivElement>
   children: React.ReactNode
   element: any
-  fieldProps: RichTextProps
+  fieldProps: FieldProps
 }
 const Element: React.FC<Props> = (props) => {
   const {
@@ -60,8 +60,8 @@ const Element: React.FC<Props> = (props) => {
   )
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
-    collectionSlug: relatedCollection.slug,
     id: value?.id,
+    collectionSlug: relatedCollection.slug,
   })
 
   const [ListDrawer, ListDrawerToggler, { closeDrawer: closeListDrawer }] = useListDrawer({

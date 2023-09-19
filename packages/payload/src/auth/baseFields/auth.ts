@@ -7,36 +7,36 @@ const labels = extractTranslations(['general:email'])
 
 const baseAuthFields: Field[] = [
   {
+    name: 'email',
     admin: {
       components: {
         Field: () => null,
       },
     },
     label: labels['general:email'],
-    name: 'email',
     required: true,
     type: 'email',
     unique: true,
     validate: email,
   },
   {
-    hidden: true,
     name: 'resetPasswordToken',
+    hidden: true,
     type: 'text',
   },
   {
-    hidden: true,
     name: 'resetPasswordExpiration',
+    hidden: true,
     type: 'date',
   },
   {
-    hidden: true,
     name: 'salt',
+    hidden: true,
     type: 'text',
   },
   {
-    hidden: true,
     name: 'hash',
+    hidden: true,
     type: 'text',
   },
 ]

@@ -26,7 +26,7 @@
   color: var(--theme-success-900);
 }
 
-:global([data-theme="dark"]) {
+:global([data-theme='dark']) {
   .default {
     background-color: var(--theme-elevation-900);
     color: var(--theme-elevation-100);
