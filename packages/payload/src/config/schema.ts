@@ -80,11 +80,6 @@ export default joi.object({
   db: joi.any(),
   debug: joi.boolean(),
   defaultDepth: joi.number().min(0).max(30),
-  defaultEditor: joi.object().required().keys({
-    CellComponent: component.required(),
-    FieldComponent: component.required(),
-    afterReadPromise: joi.func().required(),
-  }),
   defaultMaxTextLength: joi.number(),
   editor: joi.object().required().keys({
     CellComponent: component.required(),
