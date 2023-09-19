@@ -31,7 +31,11 @@ export async function writeEnvFile(args: {
           const key = split[0]
           let value = split[1]
 
-          if (key === 'MONGODB_URI' || key === 'MONGO_URL' || 'DATABASE_URI') {
+          if (
+            key === 'MONGODB_URI' ||
+            key === 'MONGO_URL' ||
+            key === 'DATABASE_URI'
+          ) {
             value = databaseUri
           }
           if (key === 'PAYLOAD_SECRET' || key === 'PAYLOAD_SECRET_KEY') {
