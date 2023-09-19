@@ -9,7 +9,7 @@ import { useConfig } from '../../../../../../utilities/Config'
 const RichTextCell: React.FC<CellComponentProps<RichTextField>> = (props) => {
   const config = useConfig()
   // eslint-disable-next-line react/destructuring-assignment
-  const editor: RichTextAdapter = props.field.editor || config.defaultEditor
+  const editor: RichTextAdapter = props.field.editor || config.editor
 
   return <editor.CellComponent {...props} />
 }

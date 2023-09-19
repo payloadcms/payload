@@ -18,7 +18,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { Editor, Node, Transforms } from 'slate'
 import { ReactEditor, useSlate } from 'slate-react'
 
-import type { Props as RichTextFieldProps } from '../../../../types'
+import type { FieldProps } from '../../../../types'
 
 import { LinkDrawer } from '../LinkDrawer'
 import { transformExtraFields, unwrapLink } from '../utilities'
@@ -60,7 +60,7 @@ export const LinkElement: React.FC<{
   children: React.ReactNode
   editorRef: React.RefObject<HTMLDivElement>
   element: any
-  fieldProps: RichTextFieldProps
+  fieldProps: FieldProps
 }> = (props) => {
   const { attributes, children, editorRef, element, fieldProps } = props
 

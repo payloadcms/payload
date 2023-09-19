@@ -427,7 +427,7 @@ function buildObjectType({
         async resolve(parent, args, context) {
           let depth = payload.config.defaultDepth
           if (typeof args.depth !== 'undefined') depth = args.depth
-          const editor: RichTextAdapter = field?.editor || payload?.config?.defaultEditor
+          const editor: RichTextAdapter = field?.editor || payload?.config?.editor
 
           if (editor?.afterReadPromise) {
             await editor?.afterReadPromise({

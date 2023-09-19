@@ -450,14 +450,14 @@ export type Config = {
    * @default 2
    */
   defaultDepth?: number
-  /** Default richtext editor to use for richText fields */
-  defaultEditor: RichTextAdapter
   /**
    * The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries.
    *
    * @default 40000
    */
   defaultMaxTextLength?: number
+  /** Default richtext editor to use for richText fields */
+  editor: RichTextAdapter
   /**
    * Email configuration options. This value is overridden by `email` in Payload.init if passed.
    *

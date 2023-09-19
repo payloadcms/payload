@@ -24,7 +24,7 @@ export function buildConfigWithDefaults(testConfig?: Partial<Config>): Promise<S
   const [name] = process.argv.slice(2)
 
   const config: Config = {
-    defaultEditor: createSlate({}),
+    editor: createSlate({}),
     telemetry: false,
     rateLimit: {
       window: 15 * 60 * 100, // 15min default,
