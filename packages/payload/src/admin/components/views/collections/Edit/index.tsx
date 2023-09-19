@@ -26,6 +26,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   const [fields] = useState(() => formatFields(incomingCollection, isEditing))
   const [collection] = useState(() => ({ ...incomingCollection, fields }))
   const [redirect, setRedirect] = useState<string>()
+  const [focalPoint, setFocalPoint] = useState({ x: 50, y: 50 })
 
   const { code: locale } = useLocale()
   const {
@@ -112,7 +113,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   }`
   const action = `${serverURL}${api}/${slug}${
     isEditing ? `/${id}` : ''
-  }?locale=${locale}&depth=0&fallback-locale=null`
+  }?locale=${locale}&depth=0&fallback-locale=null${`&x=${focalPoint.x}&y=${focalPoint.y}`}`
   const hasSavePermission =
     (isEditing && docPermissions?.update?.permission) ||
     (!isEditing && (docPermissions as CollectionPermission)?.create?.permission)
@@ -134,6 +135,7 @@ const EditView: React.FC<IndexProps> = (props) => {
           isEditing,
           isLoading,
           onSave,
+          setFocalPoint,
           permissions: docPermissions,
           updatedAt: updatedAt || data?.updatedAt,
         }}

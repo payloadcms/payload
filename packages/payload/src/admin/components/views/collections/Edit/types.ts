@@ -31,6 +31,7 @@ export type Props = IndexProps & {
       operation: 'create' | 'update'
     },
   ) => void
+  setFocalPoint?: (focalPoint: { x: number; y: number }) => void
   permissions: CollectionPermission
   updatedAt?: string
 }

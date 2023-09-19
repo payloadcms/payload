@@ -177,14 +177,20 @@ export default async function resizeAndTransformImageSizes({
         return createResult(imageResizeConfig.name)
       }
 
-      const focalPoint = {
-        x: 0.65,
-        y: 0.6,
+      let focalPoint = null
+
+      if (req?.query?.x || req?.query?.y) {
+        focalPoint = {
+          x: Math.floor(Number(req?.query?.x)) / 100 || 0.5,
+          y: Math.floor(Number(req?.query?.y)) / 100 || 0.5,
+        }
       }
+
+      const hasFocalPoint = imageResizeConfig.width && imageResizeConfig.height && focalPoint
 
       let resized = sharpBase.clone()
 
-      if (imageResizeConfig.width && imageResizeConfig.height) {
+      if (hasFocalPoint) {
         const { width, height } = imageResizeConfig
 
         const originalAspectRatio = dimensions.width / dimensions.height
@@ -203,8 +209,11 @@ export default async function resizeAndTransformImageSizes({
           const maxOffsetX = Math.max(info.width - width, 0)
           const maxOffsetY = Math.max(info.height - height, 0)
 
-          const offsetX = Math.min(Math.floor(info.width * focalPoint.x - width / 2), maxOffsetX)
-          const offsetY = Math.min(Math.floor(info.height * focalPoint.y - height / 2), maxOffsetY)
+          const focalPointX = Math.floor(info.width * focalPoint.x - width / 2)
+          const focalPointY = Math.floor(info.height * focalPoint.y - height / 2)
+
+          const offsetX = Math.min(Math.max(focalPointX, 0), maxOffsetX)
+          const offsetY = Math.min(Math.max(focalPointY, 0), maxOffsetY)
 
           resized = resized.extract({
             width,

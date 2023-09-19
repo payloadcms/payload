@@ -4,5 +4,6 @@ import type { Fields } from '../../../../forms/Form/types'
 export type Props = {
   collection: SanitizedCollectionConfig
   internalState?: Fields
+  setFocalPoint?: (focalPoint: { x: number; y: number }) => void
   onChange?: (file?: File) => void
 }

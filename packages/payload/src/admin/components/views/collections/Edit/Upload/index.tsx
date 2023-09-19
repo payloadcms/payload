@@ -28,7 +28,7 @@ const validate = (value) => {
 }
 
 export const Upload: React.FC<Props> = (props) => {
-  const { collection, internalState, onChange } = props
+  const { collection, internalState, onChange, setFocalPoint } = props
 
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
@@ -141,7 +141,7 @@ export const Upload: React.FC<Props> = (props) => {
           )}
 
           <Drawer slug={drawerSlug} title={`Editing ${value?.name}`}>
-            <FocalPoint fileSrc={fileSrc} value={value} />
+            <FocalPoint fileSrc={fileSrc} value={value} setFocalPoint={setFocalPoint} />
           </Drawer>
 
           {!value && (
