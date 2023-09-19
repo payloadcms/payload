@@ -47,7 +47,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
       <div className={`${baseClass}__input`}>
         <input
           aria-label={ariaLabel}
-          checked={Boolean(checked)}
+          defaultChecked={Boolean(checked)}
           disabled={readOnly}
           id={id}
           name={name}
