@@ -7,6 +7,7 @@ import { relations } from 'drizzle-orm'
 import {
   PgNumericBuilder,
   PgVarcharBuilder,
+  boolean,
   integer,
   jsonb,
   numeric,
@@ -180,6 +181,10 @@ export const traverseFields = ({
       }
 
       case 'checkbox': {
+        targetTable[`${fieldPrefix || ''}${field.name}`] = boolean(columnName);
+        if (field.required) {
+          targetTable[`${fieldPrefix || ''}${field.name}`].notNull();
+        }
         break
       }
 
