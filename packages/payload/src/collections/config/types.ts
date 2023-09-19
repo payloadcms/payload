@@ -284,6 +284,9 @@ export type CollectionAdminOptions = {
    * Additional fields to be searched via the full text search
    */
   listSearchableFields?: string[]
+  livePreview?: {
+    url?: string
+  }
   pagination?: {
     defaultLimit?: number
     limits?: number[]

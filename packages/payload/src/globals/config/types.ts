@@ -133,6 +133,9 @@ export type GlobalAdminOptions = {
    * Hide the API URL within the Edit view
    */
   hideAPIURL?: boolean
+  livePreview?: {
+    url?: string
+  }
   /**
    * Function to generate custom preview URL
    */

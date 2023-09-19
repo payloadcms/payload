@@ -41,6 +41,9 @@ const globalSchema = joi
         .try(joi.string(), joi.object().pattern(joi.string(), [joi.string()])),
       hidden: joi.alternatives().try(joi.boolean(), joi.func()),
       hideAPIURL: joi.boolean(),
+      livePreview: joi.object({
+        url: joi.string(),
+      }),
       preview: joi.func(),
     }),
     custom: joi.object().pattern(joi.string(), joi.any()),
