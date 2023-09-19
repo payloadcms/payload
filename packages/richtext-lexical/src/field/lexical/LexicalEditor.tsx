@@ -6,6 +6,7 @@ import * as React from 'react'
 import type { LexicalProviderProps } from './LexicalProvider'
 
 import './LexicalEditor.scss'
+import { FloatingSelectToolbarPlugin } from './plugins/FloatingSelectToolbar'
 import ContentEditable from './ui/ContentEditable'
 
 export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
@@ -36,6 +37,7 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
           }
         }}
       />
+      <FloatingSelectToolbarPlugin />
     </React.Fragment>
   )
 }

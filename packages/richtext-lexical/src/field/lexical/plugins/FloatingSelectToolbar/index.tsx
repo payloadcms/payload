@@ -1,13 +1,7 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
+import type { LexicalEditor } from 'lexical'
 
-import { useModal } from '@faceless-ui/modal'
 import { $isCodeHighlightNode } from '@lexical/code'
+import { $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { mergeRegister } from '@lexical/utils'
 import {
@@ -16,19 +10,18 @@ import {
   $isTextNode,
   COMMAND_PRIORITY_LOW,
   FORMAT_TEXT_COMMAND,
-  type LexicalEditor,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
-import { formatDrawerSlug } from 'payload/components/elements'
-import { useEditDepth } from 'payload/components/utilities'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
-import { useEditorConfigContext } from '../../config/EditorConfigProvider'
+import { getDOMRangeRect } from '../../utils/getDOMRangeRect'
+import { getSelectedNode } from '../../utils/getSelectedNode'
+import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition'
 import './index.scss'
 
-function TextFormatFloatingToolbar({
+function FloatSelectToolbar({
   anchorElem,
   editor,
   isBold,
@@ -53,33 +46,16 @@ function TextFormatFloatingToolbar({
 }): JSX.Element {
   const popupCharStylesEditorRef = useRef<HTMLDivElement | null>(null)
 
-  const { editorConfig, uuid } = useEditorConfigContext()
-  const { openModal } = useModal()
-  const editDepth = useEditDepth()
-  const linkDrawerSlug = formatDrawerSlug({
-    depth: editDepth,
-    slug: `rich-text-link-lexicalRichText` + uuid,
-  })
-
   const insertLink = useCallback(() => {
     if (!isLink) {
-      const linkAttributes: LinkAttributes = {
-        linkType: 'custom',
-        url: 'https://',
-      }
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, linkAttributes)
-      openModal(linkDrawerSlug)
+      editor.dispatchCommand(TOGGLE_LINK_COMMAND, 'https://')
     } else {
       editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
     }
   }, [editor, isLink])
 
-  const insertComment = (): void => {
-    editor.dispatchCommand(INSERT_INLINE_COMMAND, undefined)
-  }
-
-  function mouseMoveListener(e: MouseEvent): void {
-    if (popupCharStylesEditorRef?.current != null && (e.buttons === 1 || e.buttons === 3)) {
+  function mouseMoveListener(e: MouseEvent) {
+    if (popupCharStylesEditorRef?.current && (e.buttons === 1 || e.buttons === 3)) {
       if (popupCharStylesEditorRef.current.style.pointerEvents !== 'none') {
         const x = e.clientX
         const y = e.clientY
@@ -92,8 +68,8 @@ function TextFormatFloatingToolbar({
       }
     }
   }
-  function mouseUpListener(e: MouseEvent): void {
-    if (popupCharStylesEditorRef?.current != null) {
+  function mouseUpListener(e: MouseEvent) {
+    if (popupCharStylesEditorRef?.current) {
       if (popupCharStylesEditorRef.current.style.pointerEvents !== 'auto') {
         popupCharStylesEditorRef.current.style.pointerEvents = 'auto'
       }
@@ -101,7 +77,7 @@ function TextFormatFloatingToolbar({
   }
 
   useEffect(() => {
-    if (popupCharStylesEditorRef?.current != null) {
+    if (popupCharStylesEditorRef?.current) {
       document.addEventListener('mousemove', mouseMoveListener)
       document.addEventListener('mouseup', mouseUpListener)
 
@@ -139,20 +115,20 @@ function TextFormatFloatingToolbar({
   useEffect(() => {
     const scrollerElem = anchorElem.parentElement
 
-    const update = (): void => {
+    const update = () => {
       editor.getEditorState().read(() => {
         updateTextFormatFloatingToolbar()
       })
     }
 
     window.addEventListener('resize', update)
-    if (scrollerElem != null) {
+    if (scrollerElem) {
       scrollerElem.addEventListener('scroll', update)
     }
 
     return () => {
       window.removeEventListener('resize', update)
-      if (scrollerElem != null) {
+      if (scrollerElem) {
         scrollerElem.removeEventListener('scroll', update)
       }
     }
@@ -186,9 +162,8 @@ function TextFormatFloatingToolbar({
         <React.Fragment>
           <button
             aria-label="Format text as bold"
-            className={`popup-item spaced ${isBold ? 'active' : ''}`}
-            onClick={(event) => {
-              event.preventDefault()
+            className={'popup-item spaced ' + (isBold ? 'active' : '')}
+            onClick={() => {
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')
             }}
             type="button"
@@ -197,9 +172,8 @@ function TextFormatFloatingToolbar({
           </button>
           <button
             aria-label="Format text as italics"
-            className={`popup-item spaced ${isItalic ? 'active' : ''}`}
-            onClick={(event) => {
-              event.preventDefault()
+            className={'popup-item spaced ' + (isItalic ? 'active' : '')}
+            onClick={() => {
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')
             }}
             type="button"
@@ -208,9 +182,8 @@ function TextFormatFloatingToolbar({
           </button>
           <button
             aria-label="Format text to underlined"
-            className={`popup-item spaced ${isUnderline ? 'active' : ''}`}
-            onClick={(event) => {
-              event.preventDefault()
+            className={'popup-item spaced ' + (isUnderline ? 'active' : '')}
+            onClick={() => {
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')
             }}
             type="button"
@@ -219,9 +192,8 @@ function TextFormatFloatingToolbar({
           </button>
           <button
             aria-label="Format text with a strikethrough"
-            className={`popup-item spaced ${isStrikethrough ? 'active' : ''}`}
-            onClick={(event) => {
-              event.preventDefault()
+            className={'popup-item spaced ' + (isStrikethrough ? 'active' : '')}
+            onClick={() => {
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')
             }}
             type="button"
@@ -230,9 +202,8 @@ function TextFormatFloatingToolbar({
           </button>
           <button
             aria-label="Format Subscript"
-            className={`popup-item spaced ${isSubscript ? 'active' : ''}`}
-            onClick={(event) => {
-              event.preventDefault()
+            className={'popup-item spaced ' + (isSubscript ? 'active' : '')}
+            onClick={() => {
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'subscript')
             }}
             title="Subscript"
@@ -242,9 +213,8 @@ function TextFormatFloatingToolbar({
           </button>
           <button
             aria-label="Format Superscript"
-            className={`popup-item spaced ${isSuperscript ? 'active' : ''}`}
-            onClick={(event) => {
-              event.preventDefault()
+            className={'popup-item spaced ' + (isSuperscript ? 'active' : '')}
+            onClick={() => {
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'superscript')
             }}
             title="Superscript"
@@ -254,9 +224,8 @@ function TextFormatFloatingToolbar({
           </button>
           <button
             aria-label="Insert code block"
-            className={`popup-item spaced ${isCode ? 'active' : ''}`}
-            onClick={(event) => {
-              event.preventDefault()
+            className={'popup-item spaced ' + (isCode ? 'active' : '')}
+            onClick={() => {
               editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code')
             }}
             type="button"
@@ -267,31 +236,19 @@ function TextFormatFloatingToolbar({
             aria-label="Insert link"
             className={'popup-item spaced ' + (isLink ? 'active' : '')}
             onClick={insertLink}
-            title="Insert link"
             type="button"
           >
             <i className="format link" />
           </button>
-          {editorConfig.features.map((feature) => {
-            if (feature?.floatingTextFormatToolbar?.components != null) {
-              return feature.floatingTextFormatToolbar?.components?.map((floatingToolbarItem) => {
-                return floatingToolbarItem(editor, editorConfig)
-              })
-            }
-            return null
-          })}
-          {editorConfig.toggles.comments.enabled && (
-            <button
-              aria-label="Insert comment"
-              className="popup-item spaced insert-comment"
-              onClick={insertComment}
-              type="button"
-            >
-              <i className="format add-comment" />
-            </button>
-          )}
         </React.Fragment>
       )}
+      <button
+        aria-label="Insert comment"
+        className="popup-item spaced insert-comment"
+        type="button"
+      >
+        <i className="format add-comment" />
+      </button>
     </div>
   )
 }
@@ -362,6 +319,7 @@ function useFloatingTextFormatToolbar(
       const rawTextContent = selection.getTextContent().replace(/\n/g, '')
       if (!selection.isCollapsed() && rawTextContent === '') {
         setIsText(false)
+        return
       }
     })
   }, [editor])
@@ -391,7 +349,7 @@ function useFloatingTextFormatToolbar(
   }
 
   return createPortal(
-    <TextFormatFloatingToolbar
+    <FloatSelectToolbar
       anchorElem={anchorElem}
       editor={editor}
       isBold={isBold}
@@ -407,7 +365,7 @@ function useFloatingTextFormatToolbar(
   )
 }
 
-export default function FloatingTextFormatToolbarPlugin({
+export function FloatingSelectToolbarPlugin({
   anchorElem = document.body,
 }: {
   anchorElem?: HTMLElement

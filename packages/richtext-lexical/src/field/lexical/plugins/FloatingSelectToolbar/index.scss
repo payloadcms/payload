@@ -1,37 +1,36 @@
+@import 'payload/scss';
+
 .floating-text-format-popup {
   display: flex;
-  background: #fff;
-  padding: 4px;
+  align-items: center;
+  background: var(--theme-text);
+  padding: 0px 3.72px 0px 6.25px;
+  gap: 6.25px;
+  vertical-align: middle;
   position: absolute;
   top: 0;
   left: 0;
   z-index: 10;
   opacity: 0;
   box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
+  border-radius: 6.25px;
   transition: opacity 0.5s;
-  height: 35px;
+  height: 37.5px;
   will-change: transform;
 
   button.popup-item,
   select.popup-item {
+    height: 30px;
     border: 0;
     display: flex;
     background: none;
-    border-radius: 10px;
+    border-radius: 4px;
+    padding: 8px;
     vertical-align: middle;
+  }
 
-    &:disabled {
-      cursor: not-allowed;
-
-      i.format {
-        opacity: 0.2;
-      }
-    }
-
-    &:hover:not([disabled]) {
-      background-color: #eee;
-    }
+  button.popup-item {
+    cursor: pointer;
 
     &.spaced {
       margin-right: 2px;
@@ -45,19 +44,30 @@
       }
     }
 
+    &:disabled {
+      cursor: not-allowed;
+
+      i.format {
+        opacity: 0.2;
+      }
+    }
+
+    &:hover:not([disabled]) {
+      background-color: var(--theme-elevation-800);
+    }
+
     i.format {
       background-size: contain;
-      display: inline-block;
       height: 18px;
       width: 18px;
-      margin-top: 3px;
+      margin-top: 2px;
       vertical-align: -0.25em;
+      display: flex;
       opacity: 0.6;
     }
   }
 
   select.popup-item {
-    padding: 8px;
     -webkit-appearance: none;
     -moz-appearance: none;
     width: 70px;
@@ -75,11 +85,11 @@
     .text {
       display: flex;
       line-height: 20px;
-      width: 70px;
       vertical-align: middle;
       font-size: 14px;
       color: #777;
       text-overflow: ellipsis;
+      width: 70px;
       overflow: hidden;
       height: 20px;
       text-align: left;
@@ -104,7 +114,11 @@
     user-select: none;
 
     &.inside {
-      margin: 11px -25px 0 10px;
+      width: 16px;
+      height: 16px;
+      margin-left: -25px;
+      margin-top: 11px;
+      margin-right: 10px;
       pointer-events: none;
     }
   }
@@ -118,21 +132,6 @@
   @media (max-width: 1024px) {
     button.insert-comment {
       display: none;
-    }
-  }
-}
-
-html[data-theme='dark'] {
-  .floating-text-format-popup {
-    background-color: black;
-    border: 1px solid var(--theme-elevation-150);
-
-    i {
-      filter: invert(1);
-    }
-
-    .popup-item:hover:not([disabled]) {
-      background-color: #1c1c1c;
     }
   }
 }
