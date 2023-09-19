@@ -92,11 +92,7 @@ function FloatingSelectToolbar({
     ) {
       const rangeRect = getDOMRangeRect(nativeSelection, rootElement)
 
-      const floatingElemRect = popupCharStylesEditorElem.getBoundingClientRect()
-      const position =
-        rangeRect.height > 20 || rangeRect.width > floatingElemRect.width * 1.8 ? 'center' : 'left'
-
-      setFloatingElemPosition(rangeRect, popupCharStylesEditorElem, anchorElem, position)
+      setFloatingElemPosition(rangeRect, popupCharStylesEditorElem, anchorElem, 'center')
 
       if (caretRef.current) {
         setFloatingElemPosition(rangeRect, caretRef.current, popupCharStylesEditorElem, 'center')
