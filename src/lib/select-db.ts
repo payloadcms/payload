@@ -1,17 +1,11 @@
 import prompts from 'prompts'
 import slugify from '@sindresorhus/slugify'
-import type { CliArgs } from '../types'
+import type { CliArgs, DbDetails, DbType } from '../types'
 
 type DbChoice = {
-  value: 'mongodb' | 'postgresql'
+  value: DbType
   title: string
-  dbConnectionPrefix: string
-}
-type DbType = DbChoice['value']
-
-type DbChoiceOutput = {
-  type: DbType
-  dbUri: string
+  dbConnectionPrefix: `${string}/`
 }
 
 const dbChoiceRecord: Record<DbType, DbChoice> = {
@@ -20,8 +14,8 @@ const dbChoiceRecord: Record<DbType, DbChoice> = {
     title: 'MongoDB',
     dbConnectionPrefix: 'mongodb://127.0.0.1/',
   },
-  postgresql: {
-    value: 'postgresql',
+  postgres: {
+    value: 'postgres',
     title: 'PostgreSQL',
     dbConnectionPrefix: 'postgres://127.0.0.1:5432/',
   },
@@ -30,7 +24,7 @@ const dbChoiceRecord: Record<DbType, DbChoice> = {
 export async function selectDb(
   args: CliArgs,
   projectName: string,
-): Promise<DbChoiceOutput> {
+): Promise<DbDetails> {
   let dbType: DbType | undefined = undefined
   if (args['--db']) {
     if (

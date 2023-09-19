@@ -7,6 +7,8 @@ export interface Args extends arg.Spec {
   '--db': StringConstructor
   '--secret': StringConstructor
   '--use-npm': BooleanConstructor
+  '--use-yarn': BooleanConstructor
+  '--use-pnpm': BooleanConstructor
   '--no-deps': BooleanConstructor
   '--dry-run': BooleanConstructor
   '--beta': BooleanConstructor
@@ -42,3 +44,14 @@ interface Template {
   type: ProjectTemplate['type']
   description?: string
 }
+
+export type PackageManager = 'npm' | 'yarn' | 'pnpm'
+
+export type DbType = 'mongodb' | 'postgres'
+
+export type DbDetails = {
+  type: DbType
+  dbUri: string
+}
+
+export type BundlerType = 'webpack' | 'vite'

@@ -8,7 +8,7 @@ import { parseProjectName } from './lib/parse-project-name'
 import { parseTemplate } from './lib/parse-template'
 import { getValidTemplates, validateTemplate } from './lib/templates'
 import { writeEnvFile } from './lib/write-env-file'
-import type { CliArgs } from './types'
+import type { CliArgs, PackageManager } from './types'
 import { success } from './utils/log'
 import { helpMessage, successMessage, welcomeMessage } from './utils/messages'
 
@@ -25,6 +25,8 @@ export class Main {
         '--db': String,
         '--secret': String,
         '--use-npm': Boolean,
+        '--use-yarn': Boolean,
+        '--use-pnpm': Boolean,
         '--no-deps': Boolean,
         '--dry-run': Boolean,
         '--beta': Boolean,
@@ -62,7 +64,7 @@ export class Main {
       const packageManager = await getPackageManager(this.args)
 
       if (template.type !== 'plugin') {
-        const dbChoice = await selectDb(this.args, projectName)
+        const dbDetails = await selectDb(this.args, projectName)
         const payloadSecret = await generateSecret()
         if (!this.args['--dry-run']) {
           await createProject({
@@ -71,9 +73,10 @@ export class Main {
             projectDir,
             template,
             packageManager,
+            dbDetails,
           })
           await writeEnvFile({
-            databaseUri: dbChoice.dbUri,
+            databaseUri: dbDetails.dbUri,
             payloadSecret,
             template,
             projectDir,
@@ -99,14 +102,22 @@ export class Main {
   }
 }
 
-async function getPackageManager(args: CliArgs): Promise<string> {
-  let packageManager: string
+async function getPackageManager(args: CliArgs): Promise<PackageManager> {
+  let packageManager: PackageManager = 'npm'
+
   if (args['--use-npm']) {
     packageManager = 'npm'
+  } else if (args['--use-yarn']) {
+    packageManager = 'yarn'
+  } else if (args['--use-pnpm']) {
+    packageManager = 'pnpm'
   } else {
     try {
-      await commandExists('yarn')
-      packageManager = 'yarn'
+      if (await commandExists('yarn')) {
+        packageManager = 'yarn'
+      } else if (await commandExists('pnpm')) {
+        packageManager = 'pnpm'
+      }
     } catch (error: unknown) {
       packageManager = 'npm'
     }

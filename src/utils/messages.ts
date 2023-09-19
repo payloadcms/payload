@@ -31,6 +31,8 @@ export async function helpMessage(): Promise<string> {
         {dim Available templates: ${formatTemplates(validTemplates)}}
 
       --use-npm                     Use npm to install dependencies
+      --use-yarn                    Use yarn to install dependencies
+      --use-pnpm                    Use pnpm to install dependencies
       --no-deps                     Do not install any dependencies
       -h                            Show help
 `
