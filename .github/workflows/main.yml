@@ -20,8 +20,8 @@ jobs:
         with:
           node-version: 18
 
-      - uses: pnpm/action-setup@v2
-        name: Install pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
         with:
           version: 8
           run_install: false
@@ -43,9 +43,8 @@ jobs:
       - run: pnpm install
       - run: pnpm run build
 
-      - uses: actions/cache@v3
-        timeout-minutes: 5
-        id: cache-build
+      - name: Cache build
+        uses: actions/cache@v3
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -60,15 +59,14 @@ jobs:
         with:
           node-version: 18
 
-      - uses: pnpm/action-setup@v2
-        name: Install pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
         with:
           version: 8
           run_install: false
 
-      - uses: actions/cache@v3
-        timeout-minutes: 5
-        id: restore-build
+      - name: Restore build
+        uses: actions/cache@v3
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -95,15 +93,14 @@ jobs:
         with:
           node-version: 18
 
-      - uses: pnpm/action-setup@v2
-        name: Install pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
         with:
           version: 8
           run_install: false
 
-      - uses: actions/cache@v3
-        timeout-minutes: 5
-        id: restore-build
+      - name: Restore build
+        uses: actions/cache@v3
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
@@ -128,18 +125,42 @@ jobs:
         with:
           node-version: 18
 
-      - uses: pnpm/action-setup@v2
-        name: Install pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
         with:
           version: 8
           run_install: false
 
-      - uses: actions/cache@v3
-        timeout-minutes: 5
-        id: restore-build
+      - name: Restore build
+        uses: actions/cache@v3
         with:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Build db-mongodb
         run: pnpm turbo run build --filter=db-mongodb
+
+  db-postgres:
+    runs-on: ubuntu-latest
+    needs: core-build
+
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Build db-postgres
+        run: pnpm turbo run build --filter=db-postgres
