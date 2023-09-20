@@ -19,7 +19,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts({
   sort: sortArg,
   where: whereArg,
 }) {
-  const db = req.transactionID ? this.sessions[req.transactionID] : this.db
+  const db = this.sessions?.[req.transactionID] || this.db
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const tableName = toSnakeCase(collection)
   const versionsTableName = `_${tableName}_versions`

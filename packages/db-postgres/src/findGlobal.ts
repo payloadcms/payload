@@ -12,7 +12,7 @@ export const findGlobal: FindGlobal = async function findGlobal(
   this: PostgresAdapter,
   { locale, req, slug, where },
 ) {
-  const db = req.transactionID ? this.sessions[req.transactionID] : this.db
+  const db = this.sessions?.[req.transactionID] || this.db
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
   const tableName = toSnakeCase(slug)
 
