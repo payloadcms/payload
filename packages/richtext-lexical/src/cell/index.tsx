@@ -27,9 +27,16 @@ export const RichTextCell: React.FC<
     })
     headlessEditor.setEditorState(headlessEditor.parseEditorState(data))
 
-    const textContent = headlessEditor.getEditorState().read(() => {
-      return $getRoot().getTextContent()
-    })
+    const textContent =
+      headlessEditor.getEditorState().read(() => {
+        return $getRoot().getTextContent()
+      }) || ''
+
+    // Limit preview to 150 characters
+    if (textContent.length > 150) {
+      setPreview(textContent.slice(0, 150) + '...')
+      return
+    }
 
     setPreview(textContent)
   }, [data, editorConfig])
