@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
-import type { LexicalEditor } from 'lexical'
+import type { LexicalEditor, LexicalNode } from 'lexical'
 import type { DragEvent as ReactDragEvent } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -14,7 +14,6 @@ import { mergeRegister } from '@lexical/utils'
 import {
   $getNearestNodeFromDOMNode,
   $getNodeByKey,
-  $getRoot,
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
   DRAGOVER_COMMAND,
@@ -24,9 +23,13 @@ import * as React from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { isHTMLElement } from '../../utils/guard'
-import { Point } from '../../utils/point'
-import { Rect } from '../../utils/rect'
+import { isHTMLElement } from '../../../utils/guard'
+import { Point } from '../../../utils/point'
+import { Rect } from '../../../utils/rect'
+import { getCollapsedMargins } from '../utils/getCollapsedMargins'
+import { getTopLevelNodeKeys } from '../utils/getTopLevelNodeKeys'
+import { isOnHandleElement } from '../utils/isOnHandleElement'
+import { setHandlePosition } from '../utils/setHandlePosition'
 import './index.scss'
 
 const SPACE = -24
@@ -52,26 +55,6 @@ function getCurrentIndex(keysLength: number): number {
   return Math.floor(keysLength / 2)
 }
 
-function getTopLevelNodeKeys(editor: LexicalEditor): string[] {
-  return editor.getEditorState().read(() => $getRoot().getChildrenKeys())
-}
-
-function getCollapsedMargins(elem: HTMLElement): {
-  marginBottom: number
-  marginTop: number
-} {
-  const getMargin = (element: Element | null, margin: 'marginBottom' | 'marginTop'): number =>
-    element ? parseFloat(window.getComputedStyle(element)[margin]) : 0
-
-  const { marginBottom, marginTop } = window.getComputedStyle(elem)
-  const prevElemSiblingMarginBottom = getMargin(elem.previousElementSibling, 'marginBottom')
-  const nextElemSiblingMarginTop = getMargin(elem.nextElementSibling, 'marginTop')
-  const collapsedTopMargin = Math.max(parseFloat(marginTop), prevElemSiblingMarginBottom)
-  const collapsedBottomMargin = Math.max(parseFloat(marginBottom), nextElemSiblingMarginTop)
-
-  return { marginBottom: collapsedBottomMargin, marginTop: collapsedTopMargin }
-}
-
 function getBlockElement(
   anchorElem: HTMLElement,
   editor: LexicalEditor,
@@ -83,7 +66,9 @@ function getBlockElement(
   const topLevelNodeKeys = getTopLevelNodeKeys(editor)
 
   let blockElem: HTMLElement | null = null
+  let blockNode: LexicalNode | null = null
 
+  // Return null if matching block element is the first or last node
   editor.getEditorState().read(() => {
     if (useEdgeAsDefault) {
       const [firstNode, lastNode] = [
@@ -109,6 +94,7 @@ function getBlockElement(
       }
     }
 
+    // Find matching block element
     let index = getCurrentIndex(topLevelNodeKeys.length)
     let direction = Indeterminate
 
@@ -136,7 +122,13 @@ function getBlockElement(
 
       if (result) {
         blockElem = elem
+        blockNode = $getNodeByKey(key)
         prevIndex = index
+
+        // Check if blockNode is an empty text node
+        if (blockNode && blockNode.getType() === 'paragraph' && blockNode.getTextContent() === '') {
+          blockElem = null
+        }
         break
       }
 
@@ -156,37 +148,6 @@ function getBlockElement(
   })
 
   return blockElem
-}
-
-function isOnMenu(element: HTMLElement): boolean {
-  return !!element.closest(`.${DRAGGABLE_BLOCK_MENU_CLASSNAME}`)
-}
-
-function setMenuPosition(
-  targetElem: HTMLElement | null,
-  floatingElem: HTMLElement,
-  anchorElem: HTMLElement,
-) {
-  if (!targetElem) {
-    floatingElem.style.opacity = '0'
-    floatingElem.style.transform = 'translate(-10000px, -10000px)'
-    return
-  }
-
-  const targetRect = targetElem.getBoundingClientRect()
-  const targetStyle = window.getComputedStyle(targetElem)
-  const floatingElemRect = floatingElem.getBoundingClientRect()
-  const anchorElementRect = anchorElem.getBoundingClientRect()
-
-  const top =
-    targetRect.top +
-    (parseInt(targetStyle.lineHeight, 10) - floatingElemRect.height) / 2 -
-    anchorElementRect.top
-
-  const left = SPACE
-
-  floatingElem.style.opacity = '1'
-  floatingElem.style.transform = `translate(${left}px, ${top}px)`
 }
 
 function setDragImage(dataTransfer: DataTransfer, draggableBlockElem: HTMLElement) {
@@ -277,7 +238,7 @@ function useDraggableBlockMenu(
         }
       }
 
-      if (isOnMenu(target)) {
+      if (isOnHandleElement(target, DRAGGABLE_BLOCK_MENU_CLASSNAME)) {
         return
       }
       const _draggableBlockElem = getBlockElement(
@@ -306,7 +267,7 @@ function useDraggableBlockMenu(
 
   useEffect(() => {
     if (menuRef.current) {
-      setMenuPosition(draggableBlockElem, menuRef.current, anchorElem)
+      setHandlePosition(draggableBlockElem, menuRef.current, anchorElem, SPACE)
     }
   }, [anchorElem, draggableBlockElem])
 
@@ -430,7 +391,7 @@ function useDraggableBlockMenu(
   )
 }
 
-export default function DraggableBlockPlugin({
+export function DraggableBlockPlugin({
   anchorElem = document.body,
 }: {
   anchorElem?: HTMLElement

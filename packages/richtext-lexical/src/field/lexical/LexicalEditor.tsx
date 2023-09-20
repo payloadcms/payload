@@ -7,8 +7,9 @@ import { useEffect, useState } from 'react'
 import type { LexicalProviderProps } from './LexicalProvider'
 
 import './LexicalEditor.scss'
-import DraggableBlockPlugin from './plugins/DraggableBlockPlugin'
 import { FloatingSelectToolbarPlugin } from './plugins/FloatingSelectToolbar'
+import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin'
+import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin'
 import ContentEditable from './ui/ContentEditable'
 
 export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
@@ -67,6 +68,7 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
       {floatingAnchorElem && !isSmallWidthViewport && (
         <React.Fragment>
           <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+          <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
         </React.Fragment>
       )}
       <FloatingSelectToolbarPlugin />
