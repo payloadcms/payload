@@ -2,12 +2,33 @@
 
 .live-preview-frame {
   width: 100%;
+  position: sticky;
+  top: var(--controls-height);
+  height: calc(100vh - var(--controls-height));
 
   &__iframe {
-    width: 100%;
     border: 0;
-    position: sticky;
-    top: var(--controls-height);
-    height: calc(100vh - var(--controls-height));
+    width: 100%;
+    height: 100%;
+  }
+
+  &::before {
+    content: ' ';
+    position: absolute;
+    top: 0;
+    right: 100%;
+    width: calc(var(--base) * 2);
+    height: 100%;
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0) 100%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  [dir='rtl'] & {
+    &::before {
+      right: initial;
+      left: 100%;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0) 100%);
+    }
   }
 }

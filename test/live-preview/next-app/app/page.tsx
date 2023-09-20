@@ -1,30 +1,24 @@
-'use client'
+import { Page, type PageType } from './page.client'
+import { notFound } from 'next/navigation'
 
-import React, { useCallback, useEffect, useState } from 'react'
-import styles from './page.module.css'
+export default async function Home() {
+  const page: PageType = await fetch('http://localhost:3000/api/pages?where[slug][equals]=home', {
+    method: 'GET',
+    cache: 'no-store',
+  })
+    .then((res) => {
+      if (!res.ok) {
+        console.error(`Error fetching page: ${res.status} ${res.statusText}`)
+        notFound()
+      }
 
-export default function Home() {
-  const [fields, setFields] = useState({})
+      return res?.json()
+    })
+    ?.then((res) => res?.docs?.[0])
 
-  const handleMessage = useCallback((event: MessageEvent) => {
-    if (event.data) {
-      const json = JSON.parse(event.data)
-      setFields(json.fields)
-    }
-  }, [])
+  if (!page) {
+    notFound()
+  }
 
-  useEffect(() => {
-    window.addEventListener('message', handleMessage)
-
-    return () => {
-      window.removeEventListener('message', handleMessage)
-    }
-  }, [])
-
-  return (
-    <main className={styles.main}>
-      <h1>Hello, world!</h1>
-      <p>Fields&nbsp;{JSON.stringify(fields)}</p>
-    </main>
-  )
+  return <Page initialPage={page} />
 }

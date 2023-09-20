@@ -1,9 +1,9 @@
-import { set } from 'date-fns'
-import React, { Fragment, useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 
 import type { LivePreviewViewProps } from '..'
 
 import { useAllFormFields } from '../../../forms/Form/context'
+import reduceFieldsToValues from '../../../forms/Form/reduceFieldsToValues'
 import './index.scss'
 
 const baseClass = 'live-preview-frame'
@@ -26,7 +26,8 @@ export const Preview: React.FC<LivePreviewViewProps> = (props) => {
 
   useEffect(() => {
     if (hasLoaded && ref.current && fields && window && 'postMessage' in window) {
-      ref.current.contentWindow?.postMessage(JSON.stringify({ fields }), '*')
+      const values = reduceFieldsToValues(fields)
+      ref.current.contentWindow?.postMessage(JSON.stringify({ data: values }), url)
     }
   }, [fields, url, hasLoaded])
 
@@ -35,16 +36,14 @@ export const Preview: React.FC<LivePreviewViewProps> = (props) => {
   }, [])
 
   return (
-    <Fragment>
-      <div className={baseClass}>
-        <iframe
-          className={`${baseClass}__iframe`}
-          onLoad={handleLoad}
-          ref={ref}
-          src={url}
-          title={url}
-        />
-      </div>
-    </Fragment>
+    <div className={baseClass}>
+      <iframe
+        className={`${baseClass}__iframe`}
+        onLoad={handleLoad}
+        ref={ref}
+        src={url}
+        title={url}
+      />
+    </div>
   )
 }

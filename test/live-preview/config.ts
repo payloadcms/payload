@@ -8,9 +8,12 @@ export interface Post {
   title: string
   updatedAt: Date
 }
-export const slug = 'live-preview'
+
+export const slug = 'pages'
 export default buildConfigWithDefaults({
   admin: {},
+  cors: ['http://localhost:3001'],
+  csrf: ['http://localhost:3001'],
   collections: [
     {
       slug: 'users',
@@ -22,6 +25,12 @@ export default buildConfigWithDefaults({
     },
     {
       slug,
+      access: {
+        read: () => true,
+        create: () => true,
+        update: () => true,
+        delete: () => true,
+      },
       admin: {
         livePreview: {
           url: 'http://localhost:3001',
@@ -31,6 +40,17 @@ export default buildConfigWithDefaults({
         {
           name: 'title',
           type: 'text',
+          required: true,
+        },
+        {
+          name: 'description',
+          type: 'textarea',
+          required: true,
+        },
+        {
+          name: 'slug',
+          type: 'text',
+          required: true,
         },
       ],
     },
@@ -47,8 +67,9 @@ export default buildConfigWithDefaults({
     await payload.create({
       collection: slug,
       data: {
-        title: 'title',
-        description: 'description',
+        title: 'Hello, world!',
+        description: 'This is an example of live preview.',
+        slug: 'home',
       },
     })
   },
