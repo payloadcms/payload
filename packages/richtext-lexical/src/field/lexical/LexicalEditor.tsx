@@ -2,15 +2,42 @@ import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 import * as React from 'react'
+import { useEffect, useState } from 'react'
 
 import type { LexicalProviderProps } from './LexicalProvider'
 
 import './LexicalEditor.scss'
+import DraggableBlockPlugin from './plugins/DraggableBlockPlugin'
 import { FloatingSelectToolbarPlugin } from './plugins/FloatingSelectToolbar'
 import ContentEditable from './ui/ContentEditable'
 
 export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
   const { onChange } = props
+
+  const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
+  const onRef = (_floatingAnchorElem: HTMLDivElement) => {
+    if (_floatingAnchorElem !== null) {
+      setFloatingAnchorElem(_floatingAnchorElem)
+    }
+  }
+
+  const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
+
+  useEffect(() => {
+    const updateViewPortWidth = () => {
+      const isNextSmallWidthViewport = window.matchMedia('(max-width: 1025px)').matches
+
+      if (isNextSmallWidthViewport !== isSmallWidthViewport) {
+        setIsSmallWidthViewport(isNextSmallWidthViewport)
+      }
+    }
+    updateViewPortWidth()
+    window.addEventListener('resize', updateViewPortWidth)
+
+    return () => {
+      window.removeEventListener('resize', updateViewPortWidth)
+    }
+  }, [isSmallWidthViewport])
 
   return (
     <React.Fragment>
@@ -18,7 +45,7 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
         ErrorBoundary={LexicalErrorBoundary}
         contentEditable={
           <div className="editor-scroller">
-            <div className="editor">
+            <div className="editor" ref={onRef}>
               <ContentEditable />
             </div>
           </div>
@@ -37,6 +64,11 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
           }
         }}
       />
+      {floatingAnchorElem && !isSmallWidthViewport && (
+        <React.Fragment>
+          <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+        </React.Fragment>
+      )}
       <FloatingSelectToolbarPlugin />
     </React.Fragment>
   )

@@ -1,0 +1,42 @@
+@import 'payload/scss';
+
+.draggable-block-menu {
+  border-radius: 4px;
+  padding: 0px;
+  cursor: grab;
+  opacity: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    .icon {
+      opacity: 1;
+    }
+  }
+
+  .icon {
+    width: 18px;
+    height: 24px;
+    opacity: 0.3;
+    background-image: url(../../ui/icons/DraggableBlock/index.svg);
+    filter: invert(1);
+  }
+}
+
+.draggable-block-target-line {
+  pointer-events: none;
+  background: var(--theme-text);
+  height: 4px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  will-change: transform;
+}
