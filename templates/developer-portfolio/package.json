@@ -35,7 +35,7 @@
     "escape-html": "^1.0.3",
     "express": "^4.17.1",
     "lucide-react": "^0.263.1",
-    "next": "13.4.19",
+    "next": "^13.5.1",
     "next-themes": "^0.2.1",
     "nodemailer": "^6.9.4",
     "payload": "1.15.2",
