@@ -49,37 +49,13 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
-  tests-mongodb:
+  tests:
     runs-on: ubuntu-latest
     needs: core-build
-
-    steps:
-      - name: Use Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
-
-      - name: Restore build
-        uses: actions/cache@v3
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Component Tests
-        run: pnpm test:components
-
-      - name: Integration Tests
-        run: pnpm test:int
-
-  tests-postgres:
-    runs-on: ubuntu-latest
-    needs: core-build
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [mongoose, postgres]
 
     steps:
       - name: Use Node.js 18
@@ -100,14 +76,17 @@ jobs:
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Start PostgreSQL
+        if: matrix.database == 'postgres'
         uses: harmon758/postgresql-action@v1
         with:
           postgresql version: 14
-          postgresql db: payload
+          postgresql db: payloadtests
           postgresql user: postgres
           postgresql password: postgres
+          postgresql password: 'postgres'
 
-      - run: psql "postgresql://postgres:postgres@localhost/payload" -c "SELECT version();"
+      - run: psql "postgresql://postgres:postgres@localhost/payloadtests" -c "SELECT version();"
+        if: matrix.database == 'postgres'
 
       - name: Component Tests
         run: pnpm test:components
@@ -115,8 +94,8 @@ jobs:
       - name: Integration Tests
         run: pnpm test:int
         env:
-          PAYLOAD_DATABASE: postgres
-          POSTGRES_URL: postgresql://postgres:postgres@localhost/payload
+          PAYLOAD_DATABASE: ${{ matrix.database }}
+          POSTGRES_URL: postgresql://postgres:postgres@localhost/payloadtests
 
   tests-e2e:
     runs-on: ubuntu-latest
