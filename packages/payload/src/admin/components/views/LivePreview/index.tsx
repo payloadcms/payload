@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
@@ -15,6 +15,7 @@ import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving'
 import Meta from '../../utilities/Meta'
 import { Preview } from './Preview'
 import './index.scss'
+import { usePopupWindow } from './usePopupWindow'
 
 const baseClass = 'live-preview'
 
@@ -28,6 +29,21 @@ export type LivePreviewViewProps =
 
 export const LivePreviewView: React.FC<LivePreviewViewProps> = (props) => {
   const { i18n, t } = useTranslation('general')
+
+  let url
+
+  if ('collection' in props) {
+    url = props?.collection.admin.livePreview.url
+  }
+
+  if ('global' in props) {
+    url = props?.global.admin.livePreview.url
+  }
+
+  const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
+    eventType: 'livePreview',
+    href: url,
+  })
 
   const { apiURL, data, permissions } = props
 
@@ -62,6 +78,13 @@ export const LivePreviewView: React.FC<LivePreviewViewProps> = (props) => {
     readOnly: !hasSavePermission,
   })
 
+  const toggleWindow = useCallback(
+    (e) => {
+      openPopupWindow(e)
+    },
+    [openPopupWindow],
+  )
+
   return (
     <Fragment>
       <DocumentControls
@@ -75,7 +98,9 @@ export const LivePreviewView: React.FC<LivePreviewViewProps> = (props) => {
         isEditing={isEditing}
         permissions={permissions}
       />
-      <div className={`${baseClass}__wrapper`}>
+      <div
+        className={[baseClass, isPopupOpen && `${baseClass}--detached`].filter(Boolean).join(' ')}
+      >
         <div className={`${baseClass}__main`}>
           <Meta
             description={t('editing')}
@@ -100,7 +125,13 @@ export const LivePreviewView: React.FC<LivePreviewViewProps> = (props) => {
             )}
           </Gutter>
         </div>
-        <Preview {...props} />
+        <Preview
+          {...props}
+          isPopupOpen={isPopupOpen}
+          popupRef={popupRef}
+          toggleWindow={toggleWindow}
+          url={url}
+        />
       </div>
     </Fragment>
   )

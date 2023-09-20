@@ -1,7 +1,7 @@
 @import '../../../../scss/styles.scss';
 
 .live-preview-frame {
-  width: 100%;
+  width: 60%;
   position: sticky;
   top: var(--controls-height);
   height: calc(100vh - var(--controls-height));
@@ -30,5 +30,9 @@
       left: 100%;
       background: linear-gradient(to right, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0) 100%);
     }
+  }
+
+  @include mid-break {
+    width: 100%;
   }
 }

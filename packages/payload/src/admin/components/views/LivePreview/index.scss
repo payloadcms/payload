@@ -2,17 +2,23 @@
 
 .live-preview {
   width: 100%;
+  display: flex;
 
-  &__wrapper {
-    display: flex;
+  [dir='rtl'] & {
+    flex-direction: row-reverse;
+  }
 
-    [dir='rtl'] & {
-      flex-direction: row-reverse;
+  &--detached {
+    .live-preview {
+      &__edit {
+        padding-right: var(--gutter-h);
+      }
     }
   }
 
   &__main {
-    width: calc(40% + var(--gutter-h));
+    flex-grow: 1;
+    flex-shrink: 1;
     display: flex;
     flex-direction: column;
     min-height: 100%;
@@ -32,12 +38,9 @@
   }
 
   @include mid-break {
-    &__wrapper {
-      flex-direction: column;
-    }
+    flex-direction: column;
 
     &__main {
-      width: 100%;
       min-height: initial;
     }
 
