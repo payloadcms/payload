@@ -2,7 +2,7 @@ import { revalidatePath, revalidateTag } from 'next/cache'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest): Promise<unknown> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   const secret = request.nextUrl.searchParams.get('secret')
   const path = request.nextUrl.searchParams.get('path')
   const tag = request.nextUrl.searchParams.get('tag')
