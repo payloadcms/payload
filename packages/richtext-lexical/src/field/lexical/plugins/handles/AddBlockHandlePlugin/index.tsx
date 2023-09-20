@@ -46,12 +46,16 @@ function getBlockElement(
   event: MouseEvent,
   useEdgeAsDefault = false,
   horizontalOffset = 0,
-): HTMLElement | null {
+): {
+  blockElem: HTMLElement | null
+  shouldRemove: boolean
+} {
   const anchorElementRect = anchorElem.getBoundingClientRect()
   const topLevelNodeKeys = getTopLevelNodeKeys(editor)
 
   let blockElem: HTMLElement | null = null
   let blockNode: LexicalNode | null = null
+  let shouldRemove = false
 
   // Return null if matching block element is the first or last node
   editor.getEditorState().read(() => {
@@ -74,7 +78,10 @@ function getBlockElement(
         }
 
         if (blockElem) {
-          return
+          return {
+            blockElem: null,
+            shouldRemove,
+          }
         }
       }
     }
@@ -117,6 +124,7 @@ function getBlockElement(
           blockNode.getTextContent() !== ''
         ) {
           blockElem = null
+          shouldRemove = true
         }
         break
       }
@@ -136,7 +144,10 @@ function getBlockElement(
     }
   })
 
-  return blockElem
+  return {
+    blockElem: blockElem,
+    shouldRemove,
+  }
 }
 
 function useAddBlockHandle(
@@ -147,7 +158,7 @@ function useAddBlockHandle(
   const scrollerElem = anchorElem.parentElement
 
   const menuRef = useRef<HTMLDivElement>(null)
-  const [draggableBlockElem, setDraggableBlockElem] = useState<HTMLElement | null>(null)
+  const [emptyBlockElem, setEmptyBlockElem] = useState<HTMLElement | null>(null)
 
   useEffect(() => {
     function onDocumentMouseMove(event: MouseEvent) {
@@ -169,11 +180,11 @@ function useAddBlockHandle(
           pageX < left - horizontalBuffer ||
           pageX > right + horizontalBuffer
         ) {
-          setDraggableBlockElem(null)
+          setEmptyBlockElem(null)
           return
         }
 
-        // This is used to allow the _draggableBlockElem to be found when the mouse is in the
+        // This is used to allow the _emptyBlockElem to be found when the mouse is in the
         // buffer zone around the scrollerElem.
         if (pageX < left || pageX > right) {
           distanceFromScrollerElem = pageX < left ? pageX - left : pageX - right
@@ -183,18 +194,17 @@ function useAddBlockHandle(
       if (isOnHandleElement(target, ADD_BLOCK_MENU_CLASSNAME)) {
         return
       }
-      const _draggableBlockElem = getBlockElement(
+      const { blockElem: _emptyBlockElem, shouldRemove } = getBlockElement(
         anchorElem,
         editor,
         event,
         false,
         -distanceFromScrollerElem,
       )
-      if (!_draggableBlockElem) {
+      if (!_emptyBlockElem && !shouldRemove) {
         return
       }
-
-      setDraggableBlockElem(_draggableBlockElem)
+      setEmptyBlockElem(_emptyBlockElem)
     }
 
     // Since the draggableBlockElem is outside the actual editor, we need to listen to the document
@@ -209,9 +219,9 @@ function useAddBlockHandle(
 
   useEffect(() => {
     if (menuRef.current) {
-      setHandlePosition(draggableBlockElem, menuRef.current, anchorElem, SPACE)
+      setHandlePosition(emptyBlockElem, menuRef.current, anchorElem, SPACE)
     }
-  }, [anchorElem, draggableBlockElem])
+  }, [anchorElem, emptyBlockElem])
 
   return createPortal(
     <React.Fragment>

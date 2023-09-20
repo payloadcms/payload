@@ -61,12 +61,16 @@ function getBlockElement(
   event: MouseEvent,
   useEdgeAsDefault = false,
   horizontalOffset = 0,
-): HTMLElement | null {
+): {
+  blockElem: HTMLElement | null
+  shouldRemove: boolean
+} {
   const anchorElementRect = anchorElem.getBoundingClientRect()
   const topLevelNodeKeys = getTopLevelNodeKeys(editor)
 
   let blockElem: HTMLElement | null = null
   let blockNode: LexicalNode | null = null
+  let shouldRemove = false
 
   // Return null if matching block element is the first or last node
   editor.getEditorState().read(() => {
@@ -89,7 +93,10 @@ function getBlockElement(
         }
 
         if (blockElem) {
-          return
+          return {
+            blockElem: null,
+            shouldRemove,
+          }
         }
       }
     }
@@ -128,6 +135,7 @@ function getBlockElement(
         // Check if blockNode is an empty text node
         if (blockNode && blockNode.getType() === 'paragraph' && blockNode.getTextContent() === '') {
           blockElem = null
+          shouldRemove = true
         }
         break
       }
@@ -147,7 +155,10 @@ function getBlockElement(
     }
   })
 
-  return blockElem
+  return {
+    blockElem: blockElem,
+    shouldRemove,
+  }
 }
 
 function setDragImage(dataTransfer: DataTransfer, draggableBlockElem: HTMLElement) {
@@ -241,14 +252,14 @@ function useDraggableBlockMenu(
       if (isOnHandleElement(target, DRAGGABLE_BLOCK_MENU_CLASSNAME)) {
         return
       }
-      const _draggableBlockElem = getBlockElement(
+      const { blockElem: _draggableBlockElem, shouldRemove } = getBlockElement(
         anchorElem,
         editor,
         event,
         false,
         -distanceFromScrollerElem,
       )
-      if (!_draggableBlockElem) {
+      if (!_draggableBlockElem && !shouldRemove) {
         return
       }
 
@@ -284,7 +295,7 @@ function useDraggableBlockMenu(
       if (!isHTMLElement(target)) {
         return false
       }
-      const targetBlockElem = getBlockElement(anchorElem, editor, event, true)
+      const { blockElem: targetBlockElem } = getBlockElement(anchorElem, editor, event, true)
       const targetLineElem = targetLineRef.current
       if (targetBlockElem === null || targetLineElem === null) {
         return false
@@ -312,7 +323,7 @@ function useDraggableBlockMenu(
       if (!isHTMLElement(target)) {
         return false
       }
-      const targetBlockElem = getBlockElement(anchorElem, editor, event, true)
+      const { blockElem: targetBlockElem } = getBlockElement(anchorElem, editor, event, true)
       if (!targetBlockElem) {
         return false
       }
