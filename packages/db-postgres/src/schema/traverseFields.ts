@@ -232,9 +232,6 @@ export const traverseFields = ({
 
       case 'checkbox': {
         targetTable[fieldName] = boolean(columnName)
-        if (field.required) {
-          targetTable[fieldName].notNull()
-        }
         break
       }
 
@@ -479,6 +476,10 @@ export const traverseFields = ({
 
       default:
         break
+    }
+
+    if (targetTable[fieldName] && 'required' in field && field.required) {
+      targetTable[fieldName].notNull()
     }
   })
 
