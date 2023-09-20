@@ -60,6 +60,12 @@ jobs:
         with:
           node-version: 18
 
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        with:
+          version: 8
+          run_install: false
+
       - uses: actions/cache@v3
         timeout-minutes: 5
         id: restore-build
