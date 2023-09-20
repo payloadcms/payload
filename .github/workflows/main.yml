@@ -93,6 +93,7 @@ jobs:
         run: |
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
+          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
         if: matrix.database == 'postgres'
 
       - name: Component Tests
@@ -102,7 +103,7 @@ jobs:
         run: pnpm test:int
         env:
           PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB
+          POSTGRES_URL: ${{ env.POSTGRES_URL }}
 
   tests-e2e:
     runs-on: ubuntu-latest
