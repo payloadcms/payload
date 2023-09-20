@@ -1,38 +1,40 @@
-import type { Find } from 'payload/database'
+import type { FindVersions } from 'payload/database'
 import type { PayloadRequest, SanitizedCollectionConfig } from 'payload/types'
 
+import { buildVersionCollectionFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types'
 
 import { findMany } from './find/findMany'
 
-export const find: Find = async function find(
+export const findVersions: FindVersions = async function findVersions(
   this: PostgresAdapter,
   {
     collection,
-    limit: limitArg,
+    limit,
     locale,
-    page = 1,
+    page,
     pagination,
     req = {} as PayloadRequest,
     sort: sortArg,
-    where: whereArg,
+    where,
   },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort
+  const fields = buildVersionCollectionFields(collectionConfig)
 
   return findMany({
     adapter: this,
-    fields: collectionConfig.fields,
-    limit: limitArg,
+    fields,
+    limit,
     locale,
     page,
     pagination,
     req,
     sort,
     tableName: toSnakeCase(collection),
-    where: whereArg,
+    where,
   });
 }

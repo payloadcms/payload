@@ -6,7 +6,6 @@ import { createDatabaseAdapter } from 'payload/database'
 import type { Args, PostgresAdapter, PostgresAdapterResult } from './types'
 
 import { connect } from './connect'
-// import { findVersions } from './findVersions';
 import { create } from './create'
 import { createGlobal } from './createGlobal'
 import { createMigration } from './createMigration'
@@ -18,6 +17,7 @@ import { find } from './find'
 // import { deleteVersions } from './deleteVersions';
 import { findGlobal } from './findGlobal'
 import { findOne } from './findOne'
+import { findVersions } from './findVersions'
 import { init } from './init'
 import { queryDrafts } from './queryDrafts'
 import { beginTransaction } from './transactions/beginTransaction'
@@ -54,6 +54,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       find,
       findGlobal,
       findOne,
+      findVersions,
       init,
       payload,
       queryDrafts,
@@ -63,7 +64,6 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       tables: {},
       updateGlobal,
       updateOne,
-      // findVersions,
       webpack,
       // updateVersion,
       // deleteVersions,
