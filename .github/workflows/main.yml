@@ -83,9 +83,8 @@ jobs:
           postgresql db: payloadtests
           postgresql user: postgres
           postgresql password: postgres
-          postgresql password: 'postgres'
 
-      - run: psql "postgresql://postgres:postgres@localhost/payloadtests" -c "SELECT version();"
+      - run: psql "postgresql://postgres:postgres@127.0.0.1:5432/payloadtests" -c "SELECT version();"
         if: matrix.database == 'postgres'
 
       - name: Component Tests
@@ -95,7 +94,7 @@ jobs:
         run: pnpm test:int
         env:
           PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: postgresql://postgres:postgres@localhost/payloadtests
+          POSTGRES_URL: postgresql://postgres:postgres@127.0.0.1:5432/payloadtests
 
   tests-e2e:
     runs-on: ubuntu-latest
@@ -157,7 +156,7 @@ jobs:
       - name: Generate GraphQL schema file
         run: pnpm dev:generate-graphql-schema graphql-schema-gen
 
-  db-mongodb:
+  build-db-mongodb:
     runs-on: ubuntu-latest
     needs: core-build
 
@@ -182,7 +181,7 @@ jobs:
       - name: Build db-mongodb
         run: pnpm turbo run build --filter=db-mongodb
 
-  db-postgres:
+  build-db-postgres:
     runs-on: ubuntu-latest
     needs: core-build
 
