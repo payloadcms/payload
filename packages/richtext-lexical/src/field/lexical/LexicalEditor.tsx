@@ -1,4 +1,5 @@
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 import * as React from 'react'
@@ -10,7 +11,7 @@ import './LexicalEditor.scss'
 import { FloatingSelectToolbarPlugin } from './plugins/FloatingSelectToolbar'
 import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin'
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin'
-import ContentEditable from './ui/ContentEditable'
+import { LexicalContentEditable } from './ui/ContentEditable'
 
 export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
   const { onChange } = props
@@ -47,7 +48,7 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
         contentEditable={
           <div className="editor-scroller">
             <div className="editor" ref={onRef}>
-              <ContentEditable />
+              <LexicalContentEditable />
             </div>
           </div>
         }
@@ -69,6 +70,7 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
         <React.Fragment>
           <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
           <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
+          <HistoryPlugin />
         </React.Fragment>
       )}
       <FloatingSelectToolbarPlugin />
