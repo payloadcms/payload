@@ -7,21 +7,21 @@ on:
     branches: ['master', '2.0']
 
 jobs:
-  core:
+  core-build:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
+
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          registry-url: https://registry.npmjs.org
-          scope: '@payloadcms'
-          always-auth: true
 
-      - uses: pnpm/action-setup@v2
-        name: Install pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
         with:
           version: 8
           run_install: false
@@ -38,34 +38,88 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Debug print versions
-        run: |
-          node -v
-          pnpm -v
+      - run: pnpm install
+      - run: pnpm run build
 
-      - name: Install dependencies
-        run: pnpm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Cache build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
 
-      - name: Build
-        run: pnpm build
+  tests:
+    runs-on: ubuntu-latest
+    needs: core-build
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [mongoose, postgres]
+
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Start PostgreSQL
+        if: matrix.database == 'postgres'
+        uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: 14
+          postgresql db: payloadtests
+          postgresql user: postgres
+          postgresql password: postgres
+
+      - run: psql "postgresql://postgres:postgres@127.0.0.1:5432/payloadtests" -c "SELECT version();"
+        if: matrix.database == 'postgres'
 
       - name: Component Tests
         run: pnpm test:components
 
-      - name: E2E Tests
-        run: pnpm test:e2e --bail
-
       - name: Integration Tests
         run: pnpm test:int
+        env:
+          PAYLOAD_DATABASE: ${{ matrix.database }}
+          POSTGRES_URL: postgresql://postgres:postgres@127.0.0.1:5432/payloadtests
 
-      - name: Generate Payload Types
-        run: pnpm dev:generate-types fields
+  tests-e2e:
+    runs-on: ubuntu-latest
+    needs: core-build
 
-      - name: Generate GraphQL schema file
-        run: pnpm dev:generate-graphql-schema graphql-schema-gen
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: E2E Tests
+        run: pnpm test:e2e --bail
 
       - uses: actions/upload-artifact@v3
         if: always()
@@ -74,82 +128,80 @@ jobs:
           path: test-results/
           retention-days: 30
 
-  db_mongodb:
-      runs-on: ubuntu-latest
+  tests-type-generation:
+    runs-on: ubuntu-latest
+    needs: core-build
 
-      steps:
-        - uses: actions/checkout@v4
-        - name: Use Node.js 18
-          uses: actions/setup-node@v3
-          with:
-            node-version: 18
-            registry-url: https://registry.npmjs.org
-            scope: '@payloadcms'
-            always-auth: true
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-        - uses: pnpm/action-setup@v2
-          name: Install pnpm
-          with:
-            version: 8
-            run_install: false
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
 
-        - name: Get pnpm store directory
-          shell: bash
-          run: |
-            echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
 
-        - uses: actions/cache@v3
-          name: Setup pnpm cache
-          with:
-            path: ${{ env.STORE_PATH }}
-            key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-            restore-keys: |
-              ${{ runner.os }}-pnpm-store-
+      - name: Generate Payload Types
+        run: pnpm dev:generate-types fields
 
-        - name: Install dependencies
-          run: pnpm install
-          env:
-            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Generate GraphQL schema file
+        run: pnpm dev:generate-graphql-schema graphql-schema-gen
 
-        - name: Build db-mongodb
-          run: ./node_modules/.bin/turbo run build --filter=db-mongodb
+  build-db-mongodb:
+    runs-on: ubuntu-latest
+    needs: core-build
 
-  db_postgres:
-      runs-on: ubuntu-latest
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-      steps:
-        - uses: actions/checkout@v4
-        - name: Use Node.js 18
-          uses: actions/setup-node@v3
-          with:
-            node-version: 18
-            registry-url: https://registry.npmjs.org
-            scope: '@payloadcms'
-            always-auth: true
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
 
-        - uses: pnpm/action-setup@v2
-          name: Install pnpm
-          with:
-            version: 8
-            run_install: false
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
 
-        - name: Get pnpm store directory
-          shell: bash
-          run: |
-            echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - name: Build db-mongodb
+        run: pnpm turbo run build --filter=db-mongodb
 
-        - uses: actions/cache@v3
-          name: Setup pnpm cache
-          with:
-            path: ${{ env.STORE_PATH }}
-            key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-            restore-keys: |
-              ${{ runner.os }}-pnpm-store-
+  build-db-postgres:
+    runs-on: ubuntu-latest
+    needs: core-build
 
-        - name: Install dependencies
-          run: pnpm install
-          env:
-            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-        - name: Build db-postgres
-          run: ./node_modules/.bin/turbo run build --filter=db-postgres
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Restore build
+        uses: actions/cache@v3
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: Build db-postgres
+        run: pnpm turbo run build --filter=db-postgres

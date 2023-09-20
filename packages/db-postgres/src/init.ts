@@ -12,7 +12,7 @@ import { buildTable } from './schema/build'
 
 export const init: Init = async function init(this: PostgresAdapter) {
   if (this.payload.config.localization) {
-    this.enums._locales = pgEnum(
+    this.enums.enum__locales = pgEnum(
       '_locales',
       // TODO: types out of sync with core, monorepo please
       // this.payload.config.localization.localeCodes,

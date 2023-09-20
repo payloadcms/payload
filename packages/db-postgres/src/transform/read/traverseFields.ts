@@ -97,9 +97,10 @@ export const traverseFields = <T extends Record<string, unknown>>({
     }
 
     if (fieldAffectsData(field)) {
-      if (field.type === 'array') {
-        const fieldData = table[field.name]
+      const fieldName = `${fieldPrefix || ''}${field.name}`
+      const fieldData = table[fieldName]
 
+      if (field.type === 'array') {
         if (Array.isArray(fieldData)) {
           if (field.localized) {
             result[field.name] = fieldData.reduce((arrayResult, row) => {
@@ -275,6 +276,23 @@ export const traverseFields = <T extends Record<string, unknown>>({
           })
         }
 
+        return result
+      }
+
+      if (field.type === 'select' && field.hasMany) {
+        if (Array.isArray(fieldData)) {
+          if (field.localized) {
+            result[field.name] = fieldData.reduce((selectResult, row) => {
+              if (typeof row._locale === 'string') {
+                selectResult[row._locale] = row.value
+              }
+
+              return selectResult
+            }, {})
+          } else {
+            result[field.name] = fieldData.map(({ value }) => value)
+          }
+        }
         return result
       }
 
