@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback } from 'react'
+import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
@@ -40,7 +40,7 @@ export const LivePreviewView: React.FC<LivePreviewViewProps> = (props) => {
     url = props?.global.admin.livePreview.url
   }
 
-  const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
+  const popupState = usePopupWindow({
     eventType: 'livePreview',
     href: url,
   })
@@ -78,13 +78,6 @@ export const LivePreviewView: React.FC<LivePreviewViewProps> = (props) => {
     readOnly: !hasSavePermission,
   })
 
-  const toggleWindow = useCallback(
-    (e) => {
-      openPopupWindow(e)
-    },
-    [openPopupWindow],
-  )
-
   return (
     <Fragment>
       <DocumentControls
@@ -99,7 +92,9 @@ export const LivePreviewView: React.FC<LivePreviewViewProps> = (props) => {
         permissions={permissions}
       />
       <div
-        className={[baseClass, isPopupOpen && `${baseClass}--detached`].filter(Boolean).join(' ')}
+        className={[baseClass, popupState?.isPopupOpen && `${baseClass}--detached`]
+          .filter(Boolean)
+          .join(' ')}
       >
         <div className={`${baseClass}__main`}>
           <Meta
@@ -125,13 +120,7 @@ export const LivePreviewView: React.FC<LivePreviewViewProps> = (props) => {
             )}
           </Gutter>
         </div>
-        <Preview
-          {...props}
-          isPopupOpen={isPopupOpen}
-          popupRef={popupRef}
-          toggleWindow={toggleWindow}
-          url={url}
-        />
+        <Preview {...props} popupState={popupState} url={url} />
       </div>
     </Fragment>
   )

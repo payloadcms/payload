@@ -20,14 +20,17 @@ export const usePopupWindow = (props: {
 }): {
   isPopupOpen: boolean
   openPopupWindow: (e: React.MouseEvent<HTMLAnchorElement>) => void
+  popupHasLoaded: boolean
   popupRef?: React.MutableRefObject<Window | null>
 } => {
   const { eventType, href, onMessage } = props
   const isReceivingMessage = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
+  const [popupHasLoaded, setPopupHasLoaded] = useState(false)
   const { serverURL } = useConfig()
   const popupRef = useRef<Window | null>(null)
 
+  // Optionally broadcast messages back out to the parent component
   useEffect(() => {
     const receiveMessage = async (event: MessageEvent): Promise<void> => {
       if (
@@ -57,6 +60,7 @@ export const usePopupWindow = (props: {
     }
   }, [onMessage, eventType, href, serverURL])
 
+  // Customize the size, position, and style of the popup window
   const openPopupWindow = useCallback(
     (e) => {
       e.preventDefault()
@@ -97,9 +101,19 @@ export const usePopupWindow = (props: {
     [href],
   )
 
-  // this is the best cross-browser way to check if a popup window is no longer open
-  // is to poll for it every x ms and use the popup window's `closed` property
-  // there are no stable events to subscribe to for this
+  // the only cross-origin way of detecting when a popup window has loaded
+  // we catch a message event that the site rendered within the popup window fires
+  // there is no way in js to add an event listener to a popup window across domains
+  useEffect(() => {
+    window.addEventListener('message', (event) => {
+      if (event.origin === href && event.data === 'ready') {
+        setPopupHasLoaded(true)
+      }
+    })
+  }, [href])
+
+  // this is the most stable and widely supported way to check if a popup window is no longer open
+  // we poll its ref every x ms and use the popup window's `closed` property
   useEffect(() => {
     let timer: NodeJS.Timeout
 
@@ -108,6 +122,7 @@ export const usePopupWindow = (props: {
         if (popupRef.current.closed) {
           clearInterval(timer)
           setIsOpen(false)
+          setPopupHasLoaded(false)
         }
       }, 1000)
     } else {
@@ -124,6 +139,7 @@ export const usePopupWindow = (props: {
   return {
     isPopupOpen: isOpen,
     openPopupWindow,
+    popupHasLoaded,
     popupRef,
   }
 }

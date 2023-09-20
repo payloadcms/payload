@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useEffect } from 'react'
 
 import type { LivePreviewViewProps } from '..'
+import type { usePopupWindow } from '../usePopupWindow'
 
 import { useAllFormFields } from '../../../forms/Form/context'
 import reduceFieldsToValues from '../../../forms/Form/reduceFieldsToValues'
@@ -11,13 +12,13 @@ const baseClass = 'live-preview-frame'
 
 export const Preview: React.FC<
   LivePreviewViewProps & {
-    isPopupOpen?: boolean
-    popupRef?: React.MutableRefObject<Window | null>
-    toggleWindow?: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void
+    popupState: ReturnType<typeof usePopupWindow>
     url?: string
   }
 > = (props) => {
-  const { isPopupOpen, popupRef, toggleWindow } = props
+  const {
+    popupState: { isPopupOpen, openPopupWindow, popupHasLoaded, popupRef },
+  } = props
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
   const [iframeHasLoaded, setIframeHasLoaded] = React.useState(false)
@@ -43,34 +44,38 @@ export const Preview: React.FC<
       const message = JSON.stringify({ data: values, type: 'livePreview' })
 
       // external window
-      if (isPopupOpen && popupRef.current) {
-        popupRef.current.postMessage(message, url)
+      if (isPopupOpen) {
+        setIframeHasLoaded(false)
+
+        if (popupHasLoaded && popupRef.current) {
+          popupRef.current.postMessage(message, url)
+        }
       }
 
       // embedded iframe
-      if (!isPopupOpen && iframeHasLoaded && iframeRef.current) {
-        iframeRef.current.contentWindow?.postMessage(message, url)
+      if (!isPopupOpen) {
+        if (iframeHasLoaded && iframeRef.current) {
+          iframeRef.current.contentWindow?.postMessage(message, url)
+        }
       }
     }
-  }, [fields, url, iframeHasLoaded, isPopupOpen, popupRef])
-
-  const handleLoad = useCallback(() => {
-    setIframeHasLoaded(true)
-  }, [])
+  }, [fields, url, iframeHasLoaded, isPopupOpen, popupRef, popupHasLoaded])
 
   if (!isPopupOpen) {
     return (
       <div
-        className={[baseClass, isPopupOpen && `${baseClass}--detached`].filter(Boolean).join(' ')}
+        className={[baseClass, isPopupOpen && `${baseClass}--popup-open`].filter(Boolean).join(' ')}
       >
         <iframe
           className={`${baseClass}__iframe`}
-          onLoad={handleLoad}
+          onLoad={() => {
+            setIframeHasLoaded(true)
+          }}
           ref={iframeRef}
           src={url}
           title={url}
         />
-        <LivePreviewToolbar {...props} toggleWindow={toggleWindow} url={url} />
+        <LivePreviewToolbar {...props} openPopupWindow={openPopupWindow} url={url} />
       </div>
     )
   }

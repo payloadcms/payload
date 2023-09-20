@@ -8,7 +8,7 @@
     flex-direction: row-reverse;
   }
 
-  &--detached {
+  &--popup-open {
     .live-preview {
       &__edit {
         padding-right: var(--gutter-h);

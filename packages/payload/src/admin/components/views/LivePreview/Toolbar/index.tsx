@@ -10,26 +10,18 @@ const baseClass = 'live-preview-toolbar'
 
 export const LivePreviewToolbar: React.FC<
   LivePreviewViewProps & {
-    toggleWindow?: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void
+    openPopupWindow?: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void
     url?: string
   }
 > = (props) => {
-  const { toggleWindow, url } = props
+  const { openPopupWindow, url } = props
 
   return (
-    <div
-      className={[baseClass, toggleWindow && `${baseClass}--detached`].filter(Boolean).join(' ')}
-    >
+    <div className={[baseClass].filter(Boolean).join(' ')}>
       <DragHandle />
       <span>Responsive</span>
       <span>100%</span>
-      <a
-        href={url}
-        onClick={(e) => {
-          toggleWindow(e)
-        }}
-        type="button"
-      >
+      <a href={url} onClick={openPopupWindow} type="button">
         <LinkIcon />
       </a>
     </div>
