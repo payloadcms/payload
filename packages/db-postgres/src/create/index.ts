@@ -5,7 +5,7 @@ import toSnakeCase from 'to-snake-case'
 import { upsertRow } from '../upsertRow'
 
 export const create: Create = async function create({ collection: collectionSlug, data, req }) {
-  const db = req.transactionID ? this.sessions[req.transactionID] : this.db
+  const db = this.sessions?.[req.transactionID] || this.db
   const collection = this.payload.collections[collectionSlug].config
 
   const result = await upsertRow({

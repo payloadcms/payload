@@ -11,7 +11,7 @@ export const createGlobal: CreateGlobal = async function createGlobal(
   this: PostgresAdapter,
   { data, req = {} as PayloadRequest, slug },
 ) {
-  const db = req.transactionID ? this.sessions[req.transactionID] : this.db
+  const db = this.sessions?.[req.transactionID] || this.db
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
 
   const result = await upsertRow({

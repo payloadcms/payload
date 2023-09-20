@@ -13,7 +13,7 @@ export const findOne: FindOne = async function findOne({
   req = {} as PayloadRequest,
   where: incomingWhere,
 }) {
-  const db = req.transactionID ? this.sessions[req.transactionID] : this.db
+  const db = this.sessions?.[req.transactionID] || this.db
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const tableName = toSnakeCase(collection)
 
