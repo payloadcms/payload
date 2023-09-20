@@ -17,12 +17,15 @@ export const findVersions: FindVersions = async function findVersions(
     page,
     pagination,
     req = {} as PayloadRequest,
+    skip,
     sort: sortArg,
     where,
   },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const sort = typeof sortArg === 'string' ? sortArg : collectionConfig.defaultSort
+
+  const tableName = `_${toSnakeCase(collection)}_versions`
   const fields = buildVersionCollectionFields(collectionConfig)
 
   return findMany({
@@ -33,8 +36,9 @@ export const findVersions: FindVersions = async function findVersions(
     page,
     pagination,
     req,
+    skip,
     sort,
-    tableName: toSnakeCase(collection),
+    tableName,
     where,
-  });
+  })
 }

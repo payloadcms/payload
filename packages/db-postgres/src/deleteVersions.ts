@@ -1,7 +1,8 @@
-import type { DeleteMany } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
+import type { DeleteVersions } from 'payload/database'
+import type { PayloadRequest, SanitizedCollectionConfig } from 'payload/types'
 
 import { inArray } from 'drizzle-orm'
+import { buildVersionCollectionFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types'
@@ -9,18 +10,20 @@ import type { PostgresAdapter } from './types'
 import { findMany } from './find/findMany'
 import { transform } from './transform/read'
 
-export const deleteMany: DeleteMany = async function deleteMany(
+export const deleteVersions: DeleteVersions = async function deleteVersion(
   this: PostgresAdapter,
-  { collection, req = {} as PayloadRequest, where },
+  { collection, locale, req = {} as PayloadRequest, where: where },
 ) {
-  const collectionConfig = this.payload.collections[collection].config
-  const tableName = toSnakeCase(collection)
+  const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
+
+  const tableName = `_${toSnakeCase(collection)}_versions`
+  const fields = buildVersionCollectionFields(collectionConfig)
 
   const { docs } = await findMany({
     adapter: this,
-    fields: collectionConfig.fields,
+    fields,
     limit: 0,
-    locale: req.locale,
+    locale,
     page: 1,
     pagination: false,
     req,

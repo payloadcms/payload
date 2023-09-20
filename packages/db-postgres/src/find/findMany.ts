@@ -14,7 +14,7 @@ import { chainMethods } from './chainMethods'
 type Args = Omit<FindArgs, 'collection'> & {
   adapter: PostgresAdapter
   fields: Field[]
-  tableName: string,
+  tableName: string
 }
 
 export const findMany = async function find({
@@ -25,12 +25,12 @@ export const findMany = async function find({
   page = 1,
   pagination,
   req = {} as PayloadRequest,
+  skip,
   sort,
   tableName,
   where: whereArg,
-  }: Args,
-) {
-  const table = adapter.tables[tableName];
+}: Args) {
+  const table = adapter.tables[tableName]
 
   let limit = limitArg
   let totalDocs: number

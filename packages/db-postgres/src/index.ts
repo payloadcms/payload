@@ -13,8 +13,8 @@ import { createVersion } from './createVersion'
 // import { updateVersion } from './updateVersion';
 import { deleteMany } from './deleteMany'
 import { deleteOne } from './deleteOne'
+import { deleteVersions } from './deleteVersions'
 import { find } from './find'
-// import { deleteVersions } from './deleteVersions';
 import { findGlobal } from './findGlobal'
 import { findOne } from './findOne'
 import { findVersions } from './findVersions'
@@ -66,7 +66,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       updateOne,
       webpack,
       // updateVersion,
-      // deleteVersions,
+      deleteVersions,
     })
   }
 
