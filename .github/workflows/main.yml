@@ -95,6 +95,12 @@ jobs:
         with:
           node-version: 18
 
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        with:
+          version: 8
+          run_install: false
+
       - uses: actions/cache@v3
         timeout-minutes: 5
         id: restore-build
@@ -112,82 +118,54 @@ jobs:
           path: test-results/
           retention-days: 30
 
-  db_mongodb:
-      runs-on: ubuntu-latest
+  db-mongodb:
+    runs-on: ubuntu-latest
+    needs: core-build
 
-      steps:
-        - uses: actions/checkout@v4
-        - name: Use Node.js 18
-          uses: actions/setup-node@v3
-          with:
-            node-version: 18
-            registry-url: https://registry.npmjs.org
-            scope: '@payloadcms'
-            always-auth: true
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-        - uses: pnpm/action-setup@v2
-          name: Install pnpm
-          with:
-            version: 8
-            run_install: false
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        with:
+          version: 8
+          run_install: false
 
-        - name: Get pnpm store directory
-          shell: bash
-          run: |
-            echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      - uses: actions/cache@v3
+        timeout-minutes: 5
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
 
-        - uses: actions/cache@v3
-          name: Setup pnpm cache
-          with:
-            path: ${{ env.STORE_PATH }}
-            key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-            restore-keys: |
-              ${{ runner.os }}-pnpm-store-
+      - name: Build db-mongodb
+        run: pnpm turbo run build --filter=db-mongodb
 
-        - name: Install dependencies
-          run: pnpm install
-          env:
-            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  db-postgres:
+    runs-on: ubuntu-latest
+    needs: core-build
 
-        - name: Build db-mongodb
-          run: pnpm turbo run build --filter=db-mongodb
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-  db_postgres:
-      runs-on: ubuntu-latest
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        with:
+          version: 8
+          run_install: false
 
-      steps:
-        - uses: actions/checkout@v4
-        - name: Use Node.js 18
-          uses: actions/setup-node@v3
-          with:
-            node-version: 18
-            registry-url: https://registry.npmjs.org
-            scope: '@payloadcms'
-            always-auth: true
-
-        - uses: pnpm/action-setup@v2
-          name: Install pnpm
-          with:
-            version: 8
-            run_install: false
-
-        - name: Get pnpm store directory
-          shell: bash
-          run: |
-            echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-        - uses: actions/cache@v3
-          name: Setup pnpm cache
-          with:
-            path: ${{ env.STORE_PATH }}
-            key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-            restore-keys: |
-              ${{ runner.os }}-pnpm-store-
-
-        - name: Install dependencies
-          run: pnpm install
-          env:
-            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - uses: actions/cache@v3
+        timeout-minutes: 5
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
 
         - name: Build db-postgres
-          run: ./node_modules/.bin/turbo run build --filter=db-postgres
+          run: pnpm turbo run build --filter=db-postgres
