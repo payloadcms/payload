@@ -18,7 +18,6 @@ export const usePopupWindow = (props: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onMessage?: (searchParams: PopupMessage['searchParams']) => Promise<void>
 }): {
-  closePopupWindow: () => void
   isPopupOpen: boolean
   openPopupWindow: (e: React.MouseEvent<HTMLAnchorElement>) => void
   popupRef?: React.MutableRefObject<Window | null>
@@ -98,12 +97,31 @@ export const usePopupWindow = (props: {
     [href],
   )
 
-  const closePopupWindow = useCallback(() => {
-    setIsOpen(false)
-  }, [])
+  // this is the best cross-browser way to check if a popup window is no longer open
+  // is to poll for it every x ms and use the popup window's `closed` property
+  // there are no stable events to subscribe to for this
+  useEffect(() => {
+    let timer: NodeJS.Timeout
+
+    if (isOpen) {
+      timer = setInterval(function () {
+        if (popupRef.current.closed) {
+          clearInterval(timer)
+          setIsOpen(false)
+        }
+      }, 1000)
+    } else {
+      clearInterval(timer)
+    }
+
+    return () => {
+      if (timer) {
+        clearInterval(timer)
+      }
+    }
+  }, [isOpen, popupRef])
 
   return {
-    closePopupWindow,
     isPopupOpen: isOpen,
     openPopupWindow,
     popupRef,
