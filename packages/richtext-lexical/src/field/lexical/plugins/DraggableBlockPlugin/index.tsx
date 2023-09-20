@@ -293,32 +293,13 @@ function useDraggableBlockMenu(
 
       setDraggableBlockElem(_draggableBlockElem)
     }
-    function onMouseMove(event: MouseEvent) {
-      const target = event.target
-      /*if (!isHTMLElement(target)) {
-        return
-      }
 
-      if (isOnMenu(target)) {
-        return
-      }
-
-      const _draggableBlockElem = getBlockElement(anchorElem, editor, event)
-      if (!_draggableBlockElem) {
-        return
-      }
-
-      setDraggableBlockElem(_draggableBlockElem)*/
-    }
-
-    scrollerElem?.addEventListener('mousemove', onMouseMove)
     // Since the draggableBlockElem is outside the actual editor, we need to listen to the document
     // to be able to detect when the mouse is outside the editor and respect a buffer around the
     // the scrollerElem to avoid the draggableBlockElem disappearing too early.
     document?.addEventListener('mousemove', onDocumentMouseMove)
 
     return () => {
-      scrollerElem?.removeEventListener('mousemove', onMouseMove)
       document?.removeEventListener('mousemove', onDocumentMouseMove)
     }
   }, [scrollerElem, anchorElem, editor])
