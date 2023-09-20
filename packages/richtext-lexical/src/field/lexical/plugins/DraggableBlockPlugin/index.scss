@@ -26,7 +26,12 @@
     height: 24px;
     opacity: 0.3;
     background-image: url(../../ui/icons/DraggableBlock/index.svg);
-    filter: invert(1);
+  }
+
+  html[data-theme='dark'] & {
+    .icon {
+      filter: invert(1);
+    }
   }
 }
 
