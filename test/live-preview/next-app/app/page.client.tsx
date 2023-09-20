@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React from 'react'
 import styles from './page.module.css'
 import { PAYLOAD_SERVER_URL, PageType } from './api'
+import { useLivePreview } from '../../../../packages/payload/src/admin/components/views/LivePreview/useLivePreview'
 
 export type Props = {
   initialPage: PageType
@@ -10,24 +11,7 @@ export type Props = {
 
 export const Page: React.FC<Props> = (props) => {
   const { initialPage } = props
-  const [data, setData] = useState<PageType>(initialPage)
-
-  const handleMessage = useCallback((event: MessageEvent) => {
-    if (event.origin === PAYLOAD_SERVER_URL && event.data) {
-      const eventData = JSON.parse(event?.data)
-      if (eventData.type === 'livePreview') {
-        setData(eventData?.data)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    window.addEventListener('message', handleMessage)
-
-    return () => {
-      window.removeEventListener('message', handleMessage)
-    }
-  }, [])
+  const data = useLivePreview({ initialPage, serverURL: PAYLOAD_SERVER_URL })
 
   return (
     <main className={styles.main}>
