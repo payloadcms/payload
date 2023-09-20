@@ -76,13 +76,12 @@ jobs:
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Start PostgreSQL
-        if: matrix.database == 'postgres'
-        uses: harmon758/postgresql-action@v1
+        uses: CasperWA/postgresql-action@v1.2
         with:
-          postgresql version: 14
+          postgresql version: '14'  # See https://hub.docker.com/_/postgres for available versions
           postgresql db: payloadtests
-          postgresql user: postgres
-          postgresql password: postgres
+          postgresql auth: trust
+        if: matrix.database == 'postgres'
 
       - run: psql "postgresql://postgres:postgres@127.0.0.1:5432/payloadtests" -c "SELECT version();"
         if: matrix.database == 'postgres'
