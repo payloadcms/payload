@@ -23,7 +23,7 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
             </div>
           </div>
         }
-        placeholder={<p>testplaceholder</p>}
+        placeholder={<p className="editor-placeholder">Start typing...</p>}
       />
       <OnChangePlugin
         // Selection changes can be ignore here, reducing the

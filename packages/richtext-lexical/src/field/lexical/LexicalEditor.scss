@@ -1,0 +1,19 @@
+.editor-shell {
+  position: relative;
+}
+
+.editor-placeholder {
+  position: absolute;
+  top: 8px;
+  left: 0px;
+  font-size: 15px;
+  color: var(--theme-elevation-500);
+  /* Prevent text selection */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+
+  /* Make it behave more like a background element (no interaction) */
+  pointer-events: none;
+}
