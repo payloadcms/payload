@@ -7,18 +7,18 @@ on:
     branches: ['master', '2.0']
 
 jobs:
-  core:
+  core-build:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 25
+
       - name: Use Node.js 18
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          registry-url: https://registry.npmjs.org
-          scope: '@payloadcms'
-          always-auth: true
 
       - uses: pnpm/action-setup@v2
         name: Install pnpm
@@ -38,19 +38,34 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Debug print versions
-        run: |
-          node -v
-          pnpm -v
+      - run: pnpm install
+      - run: pnpm run build
 
-      - name: Install dependencies
-        run: pnpm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - uses: actions/cache@v3
+        timeout-minutes: 5
+        id: cache-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
 
-      - name: Build
-        run: pnpm build
+  tests:
+    runs-on: ubuntu-latest
+    needs: core-build
+
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - uses: actions/cache@v3
+        timeout-minutes: 5
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Component Tests
         run: pnpm test:components
@@ -58,14 +73,31 @@ jobs:
       - name: Integration Tests
         run: pnpm test:int
 
-      - name: E2E Tests
-        run: pnpm test:e2e --bail
-
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
 
       - name: Generate GraphQL schema file
         run: pnpm dev:generate-graphql-schema graphql-schema-gen
+
+  tests-e2e:
+    runs-on: ubuntu-latest
+    needs: core-build
+
+    steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - uses: actions/cache@v3
+        timeout-minutes: 5
+        id: restore-build
+        with:
+          path: ./*
+          key: ${{ github.sha }}-${{ github.run_number }}
+
+      - name: E2E Tests
+        run: pnpm test:e2e --bail
 
       - uses: actions/upload-artifact@v3
         if: always()
@@ -112,7 +144,7 @@ jobs:
             NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
         - name: Build db-mongodb
-          run: ./node_modules/.bin/turbo run build --filter=db-mongodb
+          run: pnpm turbo run build --filter=db-mongodb
 
   db_postgres:
       runs-on: ubuntu-latest
