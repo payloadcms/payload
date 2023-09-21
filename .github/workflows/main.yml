@@ -56,6 +56,10 @@ jobs:
       fail-fast: false
       matrix:
         database: [mongoose, postgres]
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: payloadtests
 
     steps:
       - name: Use Node.js 18
@@ -76,15 +80,20 @@ jobs:
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Start PostgreSQL
-        if: matrix.database == 'postgres'
-        uses: harmon758/postgresql-action@v1
+        uses: CasperWA/postgresql-action@v1.2
         with:
-          postgresql version: 14
-          postgresql db: payloadtests
-          postgresql user: postgres
-          postgresql password: postgres
+          postgresql version: '14'  # See https://hub.docker.com/_/postgres for available versions
+          postgresql db: ${{ env.POSTGRES_DB }}
+          postgresql user: ${{ env.POSTGRES_USER }}
+          postgresql password: ${{ env.POSTGRES_PASSWORD }}
+        if: matrix.database == 'postgres'
 
-      - run: psql "postgresql://postgres:postgres@127.0.0.1:5432/payloadtests" -c "SELECT version();"
+      - run: sleep 30
+      - name: Configure PostgreSQL
+        run: |
+          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
+          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
+          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
         if: matrix.database == 'postgres'
 
       - name: Component Tests
@@ -94,7 +103,7 @@ jobs:
         run: pnpm test:int
         env:
           PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: postgresql://postgres:postgres@127.0.0.1:5432/payloadtests
+          POSTGRES_URL: ${{ env.POSTGRES_URL }}
 
   tests-e2e:
     runs-on: ubuntu-latest
