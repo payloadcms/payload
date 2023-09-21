@@ -1,6 +1,5 @@
 import type { Payload } from 'payload'
 
-// import { findGlobalVersions } from './findGlobalVersions';
 import { createDatabaseAdapter } from 'payload/database'
 
 import type { Args, PostgresAdapter, PostgresAdapterResult } from './types'
@@ -16,6 +15,7 @@ import { deleteOne } from './deleteOne'
 import { deleteVersions } from './deleteVersions'
 import { find } from './find'
 import { findGlobal } from './findGlobal'
+import { findGlobalVersions } from './findGlobalVersions'
 import { findOne } from './findOne'
 import { findVersions } from './findVersions'
 import { init } from './init'
@@ -42,10 +42,10 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       create,
       createGlobal,
       createMigration,
-      // findGlobalVersions,
       createVersion,
       db: undefined,
       defaultIDType: 'number',
+      findGlobalVersions,
       // destroy,
       name: 'postgres',
       deleteMany,
