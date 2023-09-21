@@ -306,18 +306,6 @@ export const getTableColumnFromPath = ({
       }
 
       default: {
-        // case 'email':
-        // case 'text':
-        // case 'number':
-        // case 'textarea':
-        // case 'checkbox':
-        // case 'date':
-        // case 'radio':
-        // case 'code':
-        // case 'json':
-        // case 'richText':
-        // case 'select':
-        // case 'point':
         if (fieldAffectsData(field)) {
           if (field.localized && adapter.payload.config.localization) {
             newTableName = `${tableName}_locales`

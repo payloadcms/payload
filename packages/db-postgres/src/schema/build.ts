@@ -100,8 +100,8 @@ export const buildTable = ({
   }))
 
   if (timestamps) {
-    columns.createdAt = timestamp('created_at').defaultNow().notNull()
-    columns.updatedAt = timestamp('updated_at').defaultNow().notNull()
+    columns.createdAt = timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
+    columns.updatedAt = timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
   }
 
   const table = pgTable(tableName, columns, (cols) => {
