@@ -29,6 +29,8 @@ export const saveVersion = async ({
 }: Args): Promise<TypeWithID> => {
   let result
   let entityConfig
+  let createNewVersion = true
+  const now = new Date().toISOString()
 
   if (collection) {
     entityConfig = collection
@@ -42,9 +44,6 @@ export const saveVersion = async ({
   if (versionData._id) delete versionData._id
 
   try {
-    let createNewVersion = true
-    const now = new Date().toISOString()
-
     if (autosave) {
       const { docs } = await payload.db.findVersions({
         collection: entityConfig.slug,
@@ -106,7 +105,7 @@ export const saveVersion = async ({
     max = collection.versions.maxPerDoc
   if (global && typeof global.versions.max === 'number') max = global.versions.max
 
-  if (max > 0) {
+  if (createNewVersion && result.version.createdAt !== result.version.updatedAt && max > 0) {
     await enforceMaxVersions({
       id,
       collection,

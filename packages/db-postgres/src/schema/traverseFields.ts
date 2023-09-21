@@ -34,6 +34,7 @@ type Args = {
   buildRelationships: boolean
   columnPrefix?: string
   columns: Record<string, PgColumnBuilder>
+  disableUnique?: boolean
   fieldPrefix?: string
   fields: Field[]
   forceLocalized?: boolean
@@ -58,6 +59,7 @@ export const traverseFields = ({
   buildRelationships,
   columnPrefix,
   columns,
+  disableUnique = false,
   fieldPrefix,
   fields,
   forceLocalized,
@@ -106,7 +108,7 @@ export const traverseFields = ({
         targetIndexes[`${field.name}Idx`] = createIndex({
           name: fieldName,
           columnName,
-          unique: field.unique,
+          unique: disableUnique !== true && field.unique,
         })
       }
     }
@@ -368,6 +370,7 @@ export const traverseFields = ({
           buildRelationships,
           columnPrefix: `${columnName}_`,
           columns,
+          disableUnique,
           fieldPrefix: `${fieldName}_`,
           fields: field.fields,
           forceLocalized: field.localized,
@@ -400,6 +403,7 @@ export const traverseFields = ({
               buildRelationships,
               columnPrefix: `${columnPrefix || ''}${toSnakeCase(tab.name)}_`,
               columns,
+              disableUnique,
               fieldPrefix: `${fieldPrefix || ''}${tab.name}_`,
               fields: tab.fields,
               indexes,
@@ -421,6 +425,7 @@ export const traverseFields = ({
               buildRelationships,
               columnPrefix,
               columns,
+              disableUnique,
               fieldPrefix,
               fields: tab.fields,
               indexes,
@@ -448,6 +453,7 @@ export const traverseFields = ({
           buildRelationships,
           columnPrefix,
           columns,
+          disableUnique,
           fieldPrefix,
           fields: field.fields,
           indexes,
