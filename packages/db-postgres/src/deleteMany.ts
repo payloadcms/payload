@@ -13,6 +13,7 @@ export const deleteMany: DeleteMany = async function deleteMany(
   this: PostgresAdapter,
   { collection, req = {} as PayloadRequest, where },
 ) {
+  const db = this.sessions?.[req.transactionID] || this.db
   const collectionConfig = this.payload.collections[collection].config
   const tableName = toSnakeCase(collection)
 
@@ -40,7 +41,7 @@ export const deleteMany: DeleteMany = async function deleteMany(
     })
   })
 
-  await this.db.delete(this.tables[tableName]).where(inArray(this.tables[tableName].id, ids))
+  await db.delete(this.tables[tableName]).where(inArray(this.tables[tableName].id, ids))
 
   return result
 }

@@ -30,6 +30,7 @@ export const findMany = async function find({
   tableName,
   where: whereArg,
 }: Args) {
+  const db = adapter.sessions?.[req.transactionID] || adapter.db
   const table = adapter.tables[tableName]
 
   let limit = limitArg
@@ -49,7 +50,6 @@ export const findMany = async function find({
     where: whereArg,
   })
 
-  const db = adapter.sessions?.[req.transactionID] || adapter.db
   const orderedIDMap: Record<number | string, number> = {}
 
   const selectDistinctMethods: ChainedMethods = []
@@ -82,7 +82,7 @@ export const findMany = async function find({
       }
     })
 
-    selectDistinctMethods.push({ args: [(page - 1) * limit], method: 'offset' })
+    selectDistinctMethods.push({ args: [skip || (page - 1) * limit], method: 'offset' })
     selectDistinctMethods.push({ args: [limit === 0 ? undefined : limit], method: 'limit' })
 
     selectDistinctResult = await chainMethods({
@@ -111,7 +111,7 @@ export const findMany = async function find({
     findManyArgs.where = inArray(adapter.tables[tableName].id, Object.keys(orderedIDMap))
   } else {
     findManyArgs.limit = limitArg === 0 ? undefined : limitArg
-    findManyArgs.offset = (page - 1) * limitArg
+    findManyArgs.offset = skip || (page - 1) * limitArg
     if (where) {
       findManyArgs.where = where
     }
