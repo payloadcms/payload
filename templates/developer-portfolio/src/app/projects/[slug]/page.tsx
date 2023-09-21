@@ -1,10 +1,14 @@
 import { Metadata, ResolvingMetadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { Media } from '../../../payload/payload-types'
+import { Media, Profile, Project } from '../../../payload/payload-types'
 import { ProjectDetails } from '../../_components/content/projectDetails/projectDetails'
-import { fetchProfile, fetchProject } from '../../_utils/api'
+import { fetchProfile, fetchProject, fetchProjects } from '../../_utils/api'
 import { parsePreviewOptions } from '../../_utils/preview'
+
+// Force this page to be dynamic so that Next.js does not cache it
+// See the note in '../../[slug]/page.tsx' about this
+export const dynamic = 'force-dynamic'
 
 interface ProjectPageProps {
   params: {
@@ -13,14 +17,48 @@ interface ProjectPageProps {
   searchParams: Record<string, string>
 }
 
+export default async function ProjectPage({ params, searchParams }: ProjectPageProps) {
+  let project: Project | null = null
+  let profile: Profile | null = null
+
+  try {
+    ;[project, profile] = await Promise.all([
+      fetchProject(params.slug, parsePreviewOptions(searchParams)),
+      fetchProfile(),
+    ])
+  } catch (error) {
+    console.error(error) // eslint-disable-line no-console
+  }
+
+  if (!project) {
+    notFound()
+  }
+
+  return <ProjectDetails project={project} profile={profile} />
+}
+
+export async function generateStaticParams() {
+  try {
+    const pages = await fetchProjects()
+    return pages.map(({ slug }) => ({ params: { slug } }))
+  } catch (error) {
+    return []
+  }
+}
+
 export async function generateMetadata(
   { params, searchParams }: ProjectPageProps,
   parent?: ResolvingMetadata,
 ): Promise<Metadata> {
-  const [project, previousTitle] = await Promise.all([
-    fetchProject(params.slug, parsePreviewOptions(searchParams)),
-    (await parent)?.title.absolute,
-  ])
+  let project: Project | null = null
+  let previousTitle: string | null = null
+
+  try {
+    ;[project, previousTitle] = await Promise.all([
+      fetchProject(params.slug, parsePreviewOptions(searchParams)),
+      (await parent)?.title.absolute,
+    ])
+  } catch (error) {}
 
   const images: string[] = []
   if (project?.meta?.image) {
@@ -43,17 +81,4 @@ export async function generateMetadata(
       modifiedTime: project.updatedAt,
     },
   }
-}
-
-export default async function ProjectPage({ params, searchParams }: ProjectPageProps) {
-  const [project, profile] = await Promise.all([
-    fetchProject(params.slug, parsePreviewOptions(searchParams)),
-    fetchProfile(),
-  ])
-
-  if (!project) {
-    notFound()
-  }
-
-  return <ProjectDetails project={project} profile={profile} />
 }

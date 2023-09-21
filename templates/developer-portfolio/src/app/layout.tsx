@@ -3,26 +3,36 @@ import { Inter } from 'next/font/google'
 
 const inter = Inter({ subsets: ['latin'] })
 
+import { Header, Profile } from '../payload/payload-types'
 import { Footer } from './_components/siteLayout/footer'
 import { NavBar } from './_components/siteLayout/navBar'
 import { Backdrop } from './_components/ui/backdrop/backdrop'
 import { ThemeProvider } from './_provider/themeProvider'
-import { fetchHeader, fetchProfile, serverUrl } from './_utils/api'
+import { fetchHeader, fetchProfile } from './_utils/api'
 
 import './globals.css'
 
 export async function generateMetadata() {
-  const profile = await fetchProfile()
+  let profile: Profile | null = null
+
+  try {
+    profile = await fetchProfile()
+  } catch (error) {}
 
   return {
-    metadataBase: new URL(serverUrl),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SERVER_URL || 'https://payloadcms.com'),
     title: `Portfolio | ${profile.name}`,
     description: 'My professional portfolio featuring past projects and contact info.',
   }
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [profile, header] = await Promise.all([fetchProfile(), fetchHeader()])
+  let profile: Profile | null = null
+  let header: Header | null = null
+
+  try {
+    ;[profile, header] = await Promise.all([fetchProfile(), fetchHeader()])
+  } catch (error) {}
 
   return (
     <html lang="en" className={`${inter.className} dark`}>
