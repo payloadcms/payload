@@ -10,7 +10,7 @@ import type {
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from '../../admin/components/elements/types'
-import type { Props as EditProps } from '../../admin/components/views/collections/Edit/types'
+import type { CollectionEditViewProps } from '../../admin/components/views/collections/Edit/types'
 import type { Props as ListProps } from '../../admin/components/views/collections/List/types'
 import type { Auth, IncomingAuthType, User } from '../../auth/types'
 import type { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types'
@@ -170,7 +170,7 @@ export type CollectionEditView =
        * The component to render for this view
        * + Replaces the default component
        */
-      Component: React.ComponentType<EditProps>
+      Component: React.ComponentType<CollectionEditViewProps>
       /**
        * The label rendered in the admin UI for this view
        * + Example: `default` is `Edit`
@@ -184,7 +184,7 @@ export type CollectionEditView =
        */
       path?: string
     }
-  | React.ComponentType<EditProps>
+  | React.ComponentType<CollectionEditViewProps>
 
 export type CollectionAdminOptions = {
   /**
@@ -247,7 +247,7 @@ export type CollectionAdminOptions = {
             // Relationships?: CollectionEditView
             // Version: CollectionEditView
           }
-        | React.ComponentType<EditProps>
+        | React.ComponentType<CollectionEditViewProps>
       List?: React.ComponentType<ListProps>
     }
   }
@@ -284,7 +284,16 @@ export type CollectionAdminOptions = {
    * Additional fields to be searched via the full text search
    */
   listSearchableFields?: string[]
+  /**
+   * Live preview options
+   */
   livePreview?: {
+    breakpoints?: {
+      height: number | string
+      label: string
+      name: string
+      width: number | string
+    }[]
     url?: string
   }
   pagination?: {

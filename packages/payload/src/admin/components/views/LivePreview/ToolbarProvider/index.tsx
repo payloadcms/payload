@@ -4,6 +4,7 @@ import { DndContext, rectIntersection } from '@dnd-kit/core'
 import React, { useCallback } from 'react'
 
 import type { LivePreviewViewProps } from '..'
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../../exports/types'
 import type { usePopupWindow } from '../usePopupWindow'
 
 import { LivePreviewToolbar } from '../Toolbar'
@@ -12,13 +13,22 @@ import './index.scss'
 
 const baseClass = 'toolbar-area'
 
-export const ToolbarProvider: React.FC<
-  LivePreviewViewProps & {
-    children: React.ReactNode
-    popupState: ReturnType<typeof usePopupWindow>
-    url?: string
+export type ToolbarProviderProps = LivePreviewViewProps & {
+  breakpoint?: string
+  breakpoints?:
+    | SanitizedCollectionConfig['admin']['livePreview']['breakpoints']
+    | SanitizedGlobalConfig['admin']['livePreview']['breakpoints']
+  children: React.ReactNode
+  deviceSize?: {
+    height: number
+    width: number
   }
-> = (props) => {
+  popupState: ReturnType<typeof usePopupWindow>
+  setBreakpoint?: (breakpoint: string) => void
+  url?: string
+}
+
+export const ToolbarProvider: React.FC<ToolbarProviderProps> = (props) => {
   const { children } = props
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
@@ -36,6 +46,9 @@ export const ToolbarProvider: React.FC<
 
   // The toolbar needs to freely drag and drop around the page
   const handleDragEnd = (ev) => {
+    // only update position if the toolbar is completely within the preview area
+    // otherwise reset it back to the previous position
+    // TODO: reset to the nearest edge of the preview area
     if (ev.over && ev.over.id === 'live-preview-area') {
       const newPos = {
         x: position.x + ev.delta.x,
@@ -43,6 +56,8 @@ export const ToolbarProvider: React.FC<
       }
 
       setPosition(newPos)
+    } else {
+      // reset
     }
   }
 

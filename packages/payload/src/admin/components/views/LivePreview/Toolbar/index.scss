@@ -2,12 +2,14 @@
 
 .live-preview-toolbar {
   display: flex;
-  gap: calc(var(--base) / 2);
   background-color: var(--theme-bg);
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: 1px;
   color: var(--theme-text);
   position: absolute;
   top: 0;
   left: 0;
+  margin: 0;
 
   &__drag-handle {
     background: transparent;
@@ -15,15 +17,65 @@
     padding: 0;
     cursor: grab;
 
+    .icon--drag-handle .fill {
+      fill: var(--theme-elevation-300);
+    }
+
     &:active {
       cursor: grabbing;
     }
   }
 
+  &__controls {
+    padding: 6px 6px 6px 0;
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) / 3);
+  }
+
   &__breakpoint {
+    border: none;
+    background: transparent;
+    height: var(--base);
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &__device-size {
+    display: flex;
+    align-items: center;
+  }
+
+  &__size {
+    width: 47px;
+    height: var(--base);
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--theme-elevation-200);
+    background: var(--theme-elevation-100);
+    border-radius: 2px;
   }
 
   &__zoom {
-    width: 47px;
+    width: 55px;
+    border: none;
+    background: transparent;
+    height: var(--base);
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &__external {
+    flex-shrink: 0;
+    display: flex;
+    width: var(--base);
+    height: var(--base);
+    align-items: center;
+    justify-content: center;
+    padding: 6px 0;
   }
 }

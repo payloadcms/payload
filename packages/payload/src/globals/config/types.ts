@@ -133,7 +133,16 @@ export type GlobalAdminOptions = {
    * Hide the API URL within the Edit view
    */
   hideAPIURL?: boolean
+  /**
+   * Live preview options
+   */
   livePreview?: {
+    breakpoints?: {
+      height: number | string
+      label: string
+      name: string
+      width: number | string
+    }[]
     url?: string
   }
   /**

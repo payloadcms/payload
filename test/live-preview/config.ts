@@ -34,6 +34,20 @@ export default buildConfigWithDefaults({
       admin: {
         livePreview: {
           url: 'http://localhost:3001',
+          breakpoints: [
+            {
+              label: 'Mobile',
+              name: 'mobile',
+              width: 375,
+              height: 667,
+            },
+            {
+              label: 'Desktop',
+              name: 'desktop',
+              width: 1440,
+              height: 900,
+            },
+          ],
         },
       },
       fields: [
