@@ -36,24 +36,30 @@ function FloatingSelectToolbar({
 
   function mouseMoveListener(e: MouseEvent) {
     if (popupCharStylesEditorRef?.current && (e.buttons === 1 || e.buttons === 3)) {
-      if (popupCharStylesEditorRef.current.style.opacity !== '0') {
-        popupCharStylesEditorRef.current.style.opacity = '0'
-      }
-      if (popupCharStylesEditorRef.current.style.pointerEvents !== 'none') {
+      const isOpacityZero = popupCharStylesEditorRef.current.style.opacity === '0'
+      const isPointerEventsNone = popupCharStylesEditorRef.current.style.pointerEvents === 'none'
+      if (!isOpacityZero || !isPointerEventsNone) {
+        // Check if the mouse is not over the popup
         const x = e.clientX
         const y = e.clientY
         const elementUnderMouse = document.elementFromPoint(x, y)
-
         if (!popupCharStylesEditorRef.current.contains(elementUnderMouse)) {
           // Mouse is not over the target element => not a normal click, but probably a drag
-          popupCharStylesEditorRef.current.style.pointerEvents = 'none'
+          if (!isOpacityZero) {
+            popupCharStylesEditorRef.current.style.opacity = '0'
+          }
+          if (!isPointerEventsNone) {
+            popupCharStylesEditorRef.current.style.pointerEvents = 'none'
+          }
         }
       }
     }
   }
   function mouseUpListener(e: MouseEvent) {
     if (popupCharStylesEditorRef?.current) {
-      popupCharStylesEditorRef.current.style.opacity = '1'
+      if (popupCharStylesEditorRef.current.style.opacity !== '1') {
+        popupCharStylesEditorRef.current.style.opacity = '1'
+      }
       if (popupCharStylesEditorRef.current.style.pointerEvents !== 'auto') {
         popupCharStylesEditorRef.current.style.pointerEvents = 'auto'
       }
