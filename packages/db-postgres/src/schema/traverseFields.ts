@@ -152,7 +152,11 @@ export const traverseFields = ({
       }
 
       case 'date': {
-        targetTable[fieldName] = timestamp(columnName, { withTimezone: true })
+        targetTable[fieldName] = timestamp(columnName, {
+          mode: 'string',
+          precision: 3,
+          withTimezone: true,
+        })
         break
       }
 

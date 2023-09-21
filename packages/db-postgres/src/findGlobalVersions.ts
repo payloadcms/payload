@@ -22,11 +22,11 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     where,
   },
 ) {
-  const collectionConfig: SanitizedGlobalConfig = this.payload.globals[global].config
+  const globalConfig: SanitizedGlobalConfig = this.payload.globals[global].config
   const sort = typeof sortArg === 'string' ? sortArg : '-createdAt'
 
   const tableName = `_${toSnakeCase(global)}_versions`
-  const fields = buildVersionGlobalFields(collectionConfig)
+  const fields = buildVersionGlobalFields(globalConfig)
 
   return findMany({
     adapter: this,

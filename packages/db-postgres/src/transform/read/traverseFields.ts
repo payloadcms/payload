@@ -370,14 +370,16 @@ export const traverseFields = <T extends Record<string, unknown>>({
           }
 
           case 'date': {
-            if (fieldData instanceof Date) {
-              const val = fieldData.toISOString()
+            let val = fieldData
 
-              if (typeof locale === 'string') {
-                ref[locale] = val
-              } else {
-                result[field.name] = val
-              }
+            if (fieldData instanceof Date) {
+              val = fieldData.toISOString()
+            }
+
+            if (typeof locale === 'string') {
+              ref[locale] = val
+            } else {
+              result[field.name] = val
             }
 
             break

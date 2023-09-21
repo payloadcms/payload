@@ -380,31 +380,22 @@ export const traverseFields = ({
 
       valuesToTransform.forEach(({ localeKey, ref, value }) => {
         if (typeof value !== 'undefined') {
-          let formattedValue = value
+          const formattedValue = value
 
-          switch (field.type) {
-            case 'number': {
-              // TODO: handle hasMany
-              break
-            }
+          // switch (field.type) {
+          //   // case 'date': {
+          //   //   if (typeof fieldData === 'string') {
+          //   //     const parsedDate = new Date(fieldData)
+          //   //     formattedValue = parsedDate
+          //   //   }
 
-            case 'select': {
-              break
-            }
+          //   //   break
+          //   // }
 
-            case 'date': {
-              if (typeof fieldData === 'string') {
-                const parsedDate = new Date(fieldData)
-                formattedValue = parsedDate
-              }
-
-              break
-            }
-
-            default: {
-              break
-            }
-          }
+          //   default: {
+          //     break
+          //   }
+          // }
 
           if (localeKey) {
             ref[localeKey][columnName] = formattedValue
