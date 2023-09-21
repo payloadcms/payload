@@ -154,9 +154,10 @@ function FloatingSelectToolbar({
               editorConfig.features?.map((feature) => {
                 if (feature?.floatingSelectToolbar?.buttons?.format) {
                   return feature?.floatingSelectToolbar?.buttons?.format.map((button) => {
-                    if (button.componentOverride) {
+                    if (button.Component) {
                       return (
-                        <button.componentOverride
+                        <button.Component
+                          activeStates={activeStates}
                           anchorElem={anchorElem}
                           editor={editor}
                           key={button.key}
@@ -169,7 +170,7 @@ function FloatingSelectToolbar({
                         key={button.key}
                         onClick={() => button.onClick(editor)}
                       >
-                        <button.children />
+                        <button.ChildComponent />
                       </ToolbarButton>
                     )
                   })

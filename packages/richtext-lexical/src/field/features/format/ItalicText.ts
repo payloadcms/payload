@@ -10,7 +10,7 @@ export function ItalicTextFeature(): Feature {
       buttons: {
         format: [
           {
-            children: ItalicIcon,
+            ChildComponent: ItalicIcon,
             isActive: (editor, selection) => selection.hasFormat('italic'),
             key: 'italic',
             onClick: (editor) => {

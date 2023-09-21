@@ -10,7 +10,7 @@ export function SubscriptTextFeature(): Feature {
       buttons: {
         format: [
           {
-            children: SubscriptIcon,
+            ChildComponent: SubscriptIcon,
             isActive: (editor, selection) => selection.hasFormat('subscript'),
             key: 'subscript',
             onClick: (editor) => {

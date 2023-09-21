@@ -10,7 +10,7 @@ export function SuperscriptTextFeature(): Feature {
       buttons: {
         format: [
           {
-            children: SuperscriptIcon,
+            ChildComponent: SuperscriptIcon,
             isActive: (editor, selection) => selection.hasFormat('superscript'),
             key: 'superscript',
             onClick: (editor) => {

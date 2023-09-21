@@ -10,7 +10,7 @@ export function CodeTextFeature(): Feature {
       buttons: {
         format: [
           {
-            children: CodeIcon,
+            ChildComponent: CodeIcon,
             isActive: (editor, selection) => selection.hasFormat('code'),
             key: 'code',
             onClick: (editor) => {

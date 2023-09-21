@@ -10,7 +10,7 @@ export function UnderlineTextFeature(): Feature {
       buttons: {
         format: [
           {
-            children: UnderlineIcon,
+            ChildComponent: UnderlineIcon,
             isActive: (editor, selection) => selection.hasFormat('underline'),
             key: 'underline',
             onClick: (editor) => {

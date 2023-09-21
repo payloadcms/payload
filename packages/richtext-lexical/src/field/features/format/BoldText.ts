@@ -10,7 +10,7 @@ export function BoldTextFeature(): Feature {
       buttons: {
         format: [
           {
-            children: BoldIcon,
+            ChildComponent: BoldIcon,
             isActive: (editor, selection) => selection.hasFormat('bold'),
             key: 'bold',
             onClick: (editor) => {

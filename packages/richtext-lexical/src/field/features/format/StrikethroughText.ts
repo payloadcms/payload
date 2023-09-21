@@ -10,7 +10,7 @@ export function StrikethroughTextFeature(): Feature {
       buttons: {
         format: [
           {
-            children: StrikethroughIcon,
+            ChildComponent: StrikethroughIcon,
             isActive: (editor, selection) => selection.hasFormat('strikethrough'),
             key: 'strikethrough',
             onClick: (editor) => {
