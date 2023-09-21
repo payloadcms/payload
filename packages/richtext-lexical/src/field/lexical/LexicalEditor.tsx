@@ -70,9 +70,9 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
         <React.Fragment>
           <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
           <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
-          <HistoryPlugin />
         </React.Fragment>
       )}
+      <HistoryPlugin />
       <FloatingSelectToolbarPlugin />
     </React.Fragment>
   )
