@@ -148,7 +148,7 @@ export default function SlashMenuPlugin(): JSX.Element {
       },
     ]
     return groups
-  }, [editor, getDynamicOptions, queryString])
+  }, [editor, getDynamicOptions, queryString, editorConfig?.features])
 
   const onSelectOption = useCallback(
     (
