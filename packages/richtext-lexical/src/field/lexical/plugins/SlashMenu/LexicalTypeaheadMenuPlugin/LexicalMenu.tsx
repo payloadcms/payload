@@ -44,7 +44,7 @@ export class SlashMenuOption {
   // For extra searching.
   keywords: Array<string>
   // What happens when you select this option?
-  onSelect: (queryString: string) => void
+  onSelect: (editor: LexicalEditor, queryString: string) => void
   ref?: MutableRefObject<HTMLElement | null>
 
   // What shows up in the editor
@@ -56,7 +56,7 @@ export class SlashMenuOption {
       Icon: React.FC
       keyboardShortcut?: string
       keywords?: Array<string>
-      onSelect: (queryString: string) => void
+      onSelect: (editor: LexicalEditor, queryString: string) => void
     },
   ) {
     this.key = title

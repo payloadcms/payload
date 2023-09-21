@@ -8,13 +8,14 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 
 import type { SlashMenuGroup } from './LexicalTypeaheadMenuPlugin/LexicalMenu'
+import type { SlashMenuOption } from './LexicalTypeaheadMenuPlugin/LexicalMenu'
 
+import { useEditorConfigContext } from '../../config/EditorConfigProvider'
 import { BoldIcon } from '../../ui/icons/Bold'
 import {
   LexicalTypeaheadMenuPlugin,
   useBasicTypeaheadTriggerMatch,
 } from './LexicalTypeaheadMenuPlugin'
-import { SlashMenuOption } from './LexicalTypeaheadMenuPlugin/LexicalMenu'
 import './index.scss'
 
 function SlashMenuItem({
@@ -45,6 +46,7 @@ function SlashMenuItem({
       ref={option.setRefElement}
       role="option"
       tabIndex={-1}
+      type="button"
     >
       <option.Icon />
       <span className="text">{option.title}</span>
@@ -55,6 +57,7 @@ function SlashMenuItem({
 export default function SlashMenuPlugin(): JSX.Element {
   const [editor] = useLexicalComposerContext()
   const [queryString, setQueryString] = useState<null | string>(null)
+  const { editorConfig } = useEditorConfigContext()
 
   const checkForTriggerMatch = useBasicTypeaheadTriggerMatch('/', {
     minLength: 0,
@@ -63,15 +66,32 @@ export default function SlashMenuPlugin(): JSX.Element {
   const getDynamicOptions = useCallback(() => {
     const options: Array<SlashMenuOption> = []
 
+    for (const feature of editorConfig?.features ?? []) {
+      if (feature?.slashMenu?.dynamicOptions?.length) {
+        options.push(
+          ...feature.slashMenu.dynamicOptions({
+            editor,
+            queryString,
+          }),
+        )
+      }
+    }
+
     if (queryString == null) {
       return options
     }
 
     return options
-  }, [editor, queryString])
+  }, [editor, queryString, editorConfig?.features])
 
   const groups: SlashMenuGroup[] = useMemo(() => {
-    const baseOptions = [
+    const baseOptions: SlashMenuOption[] = []
+    for (const feature of editorConfig?.features ?? []) {
+      if (feature?.slashMenu?.options?.length) {
+        baseOptions.push(...feature.slashMenu.options)
+      }
+    }
+    /*const baseOptions2 = [
       new SlashMenuOption('Paragraph', {
         Icon: BoldIcon,
         keywords: ['normal', 'paragraph', 'p', 'text'],
@@ -109,7 +129,7 @@ export default function SlashMenuPlugin(): JSX.Element {
         keywords: ['check list', 'todo list'],
         onSelect: () => {},
       }),
-    ]
+    ]*/
 
     const dynamicOptions = getDynamicOptions()
 
@@ -144,7 +164,7 @@ export default function SlashMenuPlugin(): JSX.Element {
         if (nodeToRemove) {
           nodeToRemove.remove()
         }
-        selectedOption.onSelect(matchingString)
+        selectedOption.onSelect(editor, matchingString)
         closeMenu()
       })
     },
@@ -157,7 +177,7 @@ export default function SlashMenuPlugin(): JSX.Element {
         groupsWithOptions={groups}
         menuRenderFn={(
           anchorElementRef,
-          { groupsWithOptions, selectOptionAndCleanUp, selectedOptionKey, setSelectedOptionKey },
+          { selectOptionAndCleanUp, selectedOptionKey, setSelectedOptionKey },
         ) =>
           anchorElementRef.current && groups.length
             ? ReactDOM.createPortal(

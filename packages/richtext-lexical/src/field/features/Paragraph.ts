@@ -1,0 +1,27 @@
+import { $setBlocksType } from '@lexical/selection'
+import { $createParagraphNode, $getSelection, $isRangeSelection } from 'lexical'
+
+import type { Feature } from './types'
+
+import { SlashMenuOption } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+import { BoldIcon } from '../lexical/ui/icons/Bold'
+
+export function ParagraphFeature(): Feature {
+  return {
+    slashMenu: {
+      options: [
+        new SlashMenuOption('Paragraph', {
+          Icon: BoldIcon,
+          keywords: ['normal', 'paragraph', 'p', 'text'],
+          onSelect: (editor) =>
+            editor.update(() => {
+              const selection = $getSelection()
+              if ($isRangeSelection(selection)) {
+                $setBlocksType(selection, () => $createParagraphNode())
+              }
+            }),
+        }),
+      ],
+    },
+  }
+}

@@ -1,6 +1,8 @@
 import type { LexicalEditor, RangeSelection } from 'lexical'
 import type React from 'react'
 
+import type { SlashMenuOption } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+
 export type Feature = {
   floatingSelectToolbar?: {
     buttons?: {
@@ -17,5 +19,15 @@ export type Feature = {
         onClick?: (editor: LexicalEditor) => void
       }[]
     }
+  }
+  slashMenu?: {
+    dynamicOptions?: ({
+      editor,
+      queryString,
+    }: {
+      editor: LexicalEditor
+      queryString: string
+    }) => SlashMenuOption[]
+    options?: SlashMenuOption[]
   }
 }

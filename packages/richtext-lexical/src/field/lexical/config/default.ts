@@ -1,5 +1,6 @@
 import type { EditorConfig } from './types'
 
+import { ParagraphFeature } from '../../features/Paragraph'
 import { BoldTextFeature } from '../../features/format/BoldText'
 import { CodeTextFeature } from '../../features/format/CodeText'
 import { ItalicTextFeature } from '../../features/format/ItalicText'
@@ -18,6 +19,7 @@ export const defaultEditorConfig: EditorConfig = {
     SubscriptTextFeature(),
     SuperscriptTextFeature(),
     CodeTextFeature(),
+    ParagraphFeature(),
   ],
   lexical: {
     namespace: 'lexical',
