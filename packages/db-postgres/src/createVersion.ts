@@ -20,10 +20,8 @@ export const createVersion: CreateVersion = async function createVersion(
     adapter: this,
     data: {
       autosave,
-      createdAt,
       latest: true,
       parent,
-      updatedAt,
       version: versionData,
     },
     db,

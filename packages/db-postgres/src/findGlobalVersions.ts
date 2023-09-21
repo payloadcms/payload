@@ -22,7 +22,7 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     where,
   },
 ) {
-  const globalConfig: SanitizedGlobalConfig = this.payload.globals[global].config
+  const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(({ slug }) => slug === global)
   const sort = typeof sortArg === 'string' ? sortArg : '-createdAt'
 
   const tableName = `_${toSnakeCase(global)}_versions`
