@@ -4,16 +4,7 @@ import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'dri
 import type { Field } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
-import {
-  index,
-  integer,
-  numeric,
-  pgTable,
-  serial,
-  timestamp,
-  unique,
-  varchar,
-} from 'drizzle-orm/pg-core'
+import { index, integer, numeric, pgTable, serial, timestamp, unique, varchar, } from 'drizzle-orm/pg-core'
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 

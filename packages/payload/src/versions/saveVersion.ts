@@ -105,7 +105,7 @@ export const saveVersion = async ({
     max = collection.versions.maxPerDoc
   if (global && typeof global.versions.max === 'number') max = global.versions.max
 
-  if (createNewVersion && result.version.createdAt !== result.version.updatedAt && max > 0) {
+  if (createNewVersion && max > 0) {
     await enforceMaxVersions({
       id,
       collection,

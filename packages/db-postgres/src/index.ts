@@ -9,7 +9,6 @@ import { create } from './create'
 import { createGlobal } from './createGlobal'
 import { createMigration } from './createMigration'
 import { createVersion } from './createVersion'
-// import { updateVersion } from './updateVersion';
 import { deleteMany } from './deleteMany'
 import { deleteOne } from './deleteOne'
 import { deleteVersions } from './deleteVersions'
@@ -25,6 +24,7 @@ import { commitTransaction } from './transactions/commitTransaction'
 import { rollbackTransaction } from './transactions/rollbackTransaction'
 import { updateOne } from './update'
 import { updateGlobal } from './updateGlobal'
+import { updateVersion } from './updateVersion'
 import { webpack } from './webpack'
 
 // import { destroy } from './destroy';
@@ -50,6 +50,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       name: 'postgres',
       deleteMany,
       deleteOne,
+      deleteVersions,
       enums: {},
       find,
       findGlobal,
@@ -64,9 +65,8 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       tables: {},
       updateGlobal,
       updateOne,
+      updateVersion,
       webpack,
-      // updateVersion,
-      deleteVersions,
     })
   }
 

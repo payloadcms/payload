@@ -138,6 +138,7 @@ export const upsertRow = async ({
     if (operation === 'update') {
       await deleteExistingRowsByPath({
         adapter,
+        db,
         localeColumnName: 'locale',
         newRows: relationsToInsert,
         parentColumnName: 'parent',
