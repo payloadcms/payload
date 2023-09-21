@@ -1,8 +1,6 @@
 import type { TextNode } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $setBlocksType } from '@lexical/selection'
-import { $createParagraphNode, $getSelection, $isRangeSelection } from 'lexical'
 import { useCallback, useMemo, useState } from 'react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
@@ -11,7 +9,6 @@ import type { SlashMenuGroup } from './LexicalTypeaheadMenuPlugin/LexicalMenu'
 import type { SlashMenuOption } from './LexicalTypeaheadMenuPlugin/LexicalMenu'
 
 import { useEditorConfigContext } from '../../config/EditorConfigProvider'
-import { BoldIcon } from '../../ui/icons/Bold'
 import {
   LexicalTypeaheadMenuPlugin,
   useBasicTypeaheadTriggerMatch,
@@ -93,7 +90,7 @@ export default function SlashMenuPlugin(): JSX.Element {
     }
     /*const baseOptions2 = [
       new SlashMenuOption('Paragraph', {
-        Icon: BoldIcon,
+        Icon: BlockIcon,
         keywords: ['normal', 'paragraph', 'p', 'text'],
         onSelect: () =>
           editor.update(() => {
@@ -105,27 +102,27 @@ export default function SlashMenuPlugin(): JSX.Element {
       }),
 
       new SlashMenuOption('Table', {
-        Icon: BoldIcon,
+        Icon: BlockIcon,
         keywords: ['table', 'grid', 'spreadsheet', 'rows', 'columns'],
         onSelect: () => {},
       }),
       new SlashMenuOption('Table (Experimental)', {
-        Icon: BoldIcon,
+        Icon: BlockIcon,
         keywords: ['table', 'grid', 'spreadsheet', 'rows', 'columns'],
         onSelect: () => {},
       }),
       new SlashMenuOption('Numbered List', {
-        Icon: BoldIcon,
+        Icon: BlockIcon,
         keywords: ['numbered list', 'ordered list', 'ol'],
         onSelect: () => {},
       }),
       new SlashMenuOption('Bulleted List', {
-        Icon: BoldIcon,
+        Icon: BlockIcon,
         keywords: ['bulleted list', 'unordered list', 'ul'],
         onSelect: () => {},
       }),
       new SlashMenuOption('Check List', {
-        Icon: BoldIcon,
+        Icon: BlockIcon,
         keywords: ['check list', 'todo list'],
         onSelect: () => {},
       }),

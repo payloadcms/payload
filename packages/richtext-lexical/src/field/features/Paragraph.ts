@@ -4,14 +4,14 @@ import { $createParagraphNode, $getSelection, $isRangeSelection } from 'lexical'
 import type { Feature } from './types'
 
 import { SlashMenuOption } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
-import { BoldIcon } from '../lexical/ui/icons/Bold'
+import { BlockIcon } from '../lexical/ui/icons/Block'
 
 export function ParagraphFeature(): Feature {
   return {
     slashMenu: {
       options: [
         new SlashMenuOption('Paragraph', {
-          Icon: BoldIcon,
+          Icon: BlockIcon,
           keywords: ['normal', 'paragraph', 'p', 'text'],
           onSelect: (editor) =>
             editor.update(() => {
