@@ -1,5 +1,18 @@
 .editor-shell {
   position: relative;
+
+  font-family: var(--font-serif);
+  font-size: base(0.625);
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-body);
+    line-height: 1.125;
+  }
 }
 
 .editor-placeholder {
