@@ -107,7 +107,7 @@ export const fetchPages = async (options?: FetchPageOptions): Promise<Page[]> =>
     initPreviewRequest(init, qs, options.payloadToken)
   }
 
-  const url = `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/api/pages?${qs.toString()}`
+  const url = `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/api/pages`
   const pages: Page[] = await fetch(url, init)
     .then(res => {
       if (!res.ok) throw new Error('Error fetching pages doc')
