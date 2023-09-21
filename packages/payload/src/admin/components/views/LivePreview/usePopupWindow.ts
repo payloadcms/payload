@@ -93,7 +93,6 @@ export const usePopupWindow = (props: {
           return strCopy
         }, '')
         .slice(0, -1) // remove last ',' (comma)
-
       const newWindow = window.open(href, '_blank', popupOptions)
       popupRef.current = newWindow
       setIsOpen(true)

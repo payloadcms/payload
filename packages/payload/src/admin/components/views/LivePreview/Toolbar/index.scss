@@ -3,9 +3,27 @@
 .live-preview-toolbar {
   display: flex;
   gap: calc(var(--base) / 2);
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
   position: absolute;
-  bottom: var(--base);
-  left: 50%;
-  transform: translate3d(-50%, 0, 0);
-  padding: 0 var(--base);
+  top: 0;
+  left: 0;
+
+  &__drag-handle {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  &__breakpoint {
+  }
+
+  &__zoom {
+    width: 47px;
+  }
 }

@@ -5,7 +5,7 @@ import type { usePopupWindow } from '../usePopupWindow'
 
 import { useAllFormFields } from '../../../forms/Form/context'
 import reduceFieldsToValues from '../../../forms/Form/reduceFieldsToValues'
-import { LivePreviewToolbar } from '../Toolbar'
+import { ToolbarProvider } from '../ToolbarProvider'
 import './index.scss'
 
 const baseClass = 'live-preview-frame'
@@ -17,7 +17,7 @@ export const Preview: React.FC<
   }
 > = (props) => {
   const {
-    popupState: { isPopupOpen, openPopupWindow, popupHasLoaded, popupRef },
+    popupState: { isPopupOpen, popupHasLoaded, popupRef },
   } = props
 
   const iframeRef = React.useRef<HTMLIFrameElement>(null)
@@ -66,16 +66,17 @@ export const Preview: React.FC<
       <div
         className={[baseClass, isPopupOpen && `${baseClass}--popup-open`].filter(Boolean).join(' ')}
       >
-        <iframe
-          className={`${baseClass}__iframe`}
-          onLoad={() => {
-            setIframeHasLoaded(true)
-          }}
-          ref={iframeRef}
-          src={url}
-          title={url}
-        />
-        <LivePreviewToolbar {...props} openPopupWindow={openPopupWindow} url={url} />
+        <ToolbarProvider {...props}>
+          <iframe
+            className={`${baseClass}__iframe`}
+            onLoad={() => {
+              setIframeHasLoaded(true)
+            }}
+            ref={iframeRef}
+            src={url}
+            title={url}
+          />
+        </ToolbarProvider>
       </div>
     )
   }
