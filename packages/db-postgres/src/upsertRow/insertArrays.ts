@@ -1,12 +1,13 @@
 /* eslint-disable no-param-reassign */
 import type { ArrayRowToInsert } from '../transform/write/types'
-import type { PostgresAdapter } from '../types'
+import type { DrizzleDB, PostgresAdapter } from '../types'
 
 type Args = {
   adapter: PostgresAdapter
   arrays: {
     [tableName: string]: ArrayRowToInsert[]
   }[]
+  db: DrizzleDB
   parentRows: Record<string, unknown>[]
 }
 
@@ -20,7 +21,7 @@ type RowsByTable = {
   }
 }
 
-export const insertArrays = async ({ adapter, arrays, parentRows }: Args): Promise<void> => {
+export const insertArrays = async ({ adapter, arrays, db, parentRows }: Args): Promise<void> => {
   // Maintain a map of flattened rows by table
   const rowsByTable: RowsByTable = {}
 
@@ -61,11 +62,11 @@ export const insertArrays = async ({ adapter, arrays, parentRows }: Args): Promi
   // (one insert per array table)
   await Promise.all(
     Object.entries(rowsByTable).map(async ([tableName, row]) => {
-      await adapter.db.insert(adapter.tables[tableName]).values(row.rows).returning()
+      await db.insert(adapter.tables[tableName]).values(row.rows).returning()
 
       // Insert locale rows
       if (adapter.tables[`${tableName}_locales`]) {
-        await adapter.db
+        await db
           .insert(adapter.tables[`${tableName}_locales`])
           .values(row.locales)
           .returning()
@@ -76,6 +77,7 @@ export const insertArrays = async ({ adapter, arrays, parentRows }: Args): Promi
         await insertArrays({
           adapter,
           arrays: row.arrays,
+          db,
           parentRows: row.rows,
         })
       }

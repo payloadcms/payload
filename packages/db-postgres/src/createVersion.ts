@@ -1,4 +1,5 @@
 import type { CreateVersion } from 'payload/database'
+import type { PayloadRequest } from 'payload/dist/express/types'
 
 import { buildVersionCollectionFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
@@ -9,8 +10,9 @@ import { upsertRow } from './upsertRow'
 
 export const createVersion: CreateVersion = async function createVersion(
   this: PostgresAdapter,
-  { autosave, collectionSlug, createdAt, parent, updatedAt, versionData },
+  { autosave, collectionSlug, createdAt, parent, req = {} as PayloadRequest, updatedAt, versionData },
 ) {
+  const db = this.sessions?.[req.transactionID] || this.db
   const collection = this.payload.collections[collectionSlug].config
   const tableName = toSnakeCase(collectionSlug)
 
@@ -18,13 +20,11 @@ export const createVersion: CreateVersion = async function createVersion(
     adapter: this,
     data: {
       autosave,
-      createdAt,
       latest: true,
       parent,
-      updatedAt,
       version: versionData,
     },
-    db: this.db,
+    db,
     fields: buildVersionCollectionFields(collection),
     operation: 'create',
     tableName: `_${tableName}_versions`,

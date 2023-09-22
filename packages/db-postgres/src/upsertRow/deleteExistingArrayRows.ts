@@ -1,16 +1,17 @@
 import { and, eq } from 'drizzle-orm'
 
-import type { PostgresAdapter } from '../types'
+import type { DrizzleDB, PostgresAdapter } from '../types'
 
 type Args = {
   adapter: PostgresAdapter
+  db: DrizzleDB
   parentID: unknown
-
   tableName: string
 }
 
 export const deleteExistingArrayRows = async ({
   adapter,
+  db,
   parentID,
   tableName,
 }: Args): Promise<void> => {
@@ -18,5 +19,5 @@ export const deleteExistingArrayRows = async ({
 
   const whereConstraints = [eq(table._parentID, parentID)]
 
-  await adapter.db.delete(table).where(and(...whereConstraints))
+  await db.delete(table).where(and(...whereConstraints))
 }

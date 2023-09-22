@@ -4,16 +4,7 @@ import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'dri
 import type { Field } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
-import {
-  index,
-  integer,
-  numeric,
-  pgTable,
-  serial,
-  timestamp,
-  unique,
-  varchar,
-} from 'drizzle-orm/pg-core'
+import { index, integer, numeric, pgTable, serial, timestamp, unique, varchar, } from 'drizzle-orm/pg-core'
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
@@ -52,6 +43,7 @@ export const buildTable = ({
   let hasLocalizedRelationshipField = false
   let hasManyNumberField: 'index' | boolean = false
   let hasLocalizedManyNumberField = false
+  const disableUnique = tableName.endsWith('_versions')
 
   const localesColumns: Record<string, PgColumnBuilder> = {}
   const localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {}
@@ -89,6 +81,7 @@ export const buildTable = ({
     adapter,
     buildRelationships,
     columns,
+    disableUnique,
     fields,
     indexes,
     localesColumns,
@@ -100,8 +93,20 @@ export const buildTable = ({
   }))
 
   if (timestamps) {
-    columns.createdAt = timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
-    columns.updatedAt = timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+    columns.createdAt = timestamp('created_at', {
+      mode: 'string',
+      precision: 3,
+      withTimezone: true,
+    })
+      .defaultNow()
+      .notNull()
+    columns.updatedAt = timestamp('updated_at', {
+      mode: 'string',
+      precision: 3,
+      withTimezone: true,
+    })
+      .defaultNow()
+      .notNull()
   }
 
   const table = pgTable(tableName, columns, (cols) => {
@@ -220,7 +225,7 @@ export const buildTable = ({
 
         relationshipColumns[`${relationTo}ID`] = parentIDColumnMap[colType](
           `${formattedRelationTo}_id`,
-        ).references(() => adapter.tables[formattedRelationTo].id)
+        ).references(() => adapter.tables[formattedRelationTo].id, { onDelete: 'cascade' })
       })
 
       const relationshipsTableName = `${tableName}_relationships`

@@ -13,6 +13,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
   this: PostgresAdapter,
   { collection, req = {} as PayloadRequest, where: incomingWhere },
 ) {
+  const db = this.sessions?.[req.transactionID] || this.db
   const collectionConfig = this.payload.collections[collection].config
   const tableName = toSnakeCase(collection)
 
@@ -32,7 +33,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   findManyArgs.where = where
 
-  const docToDelete = await this.db.query[tableName].findFirst(findManyArgs)
+  const docToDelete = await db.query[tableName].findFirst(findManyArgs)
 
   const result = transform({
     config: this.payload.config,
@@ -40,7 +41,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     fields: collectionConfig.fields,
   })
 
-  await this.db.delete(this.tables[tableName]).where(where)
+  await db.delete(this.tables[tableName]).where(where)
 
   return result
 }

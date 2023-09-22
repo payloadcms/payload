@@ -138,6 +138,7 @@ export const upsertRow = async ({
     if (operation === 'update') {
       await deleteExistingRowsByPath({
         adapter,
+        db,
         localeColumnName: 'locale',
         newRows: relationsToInsert,
         parentColumnName: 'parent',
@@ -162,6 +163,7 @@ export const upsertRow = async ({
     if (operation === 'update') {
       await deleteExistingRowsByPath({
         adapter,
+        db,
         localeColumnName: 'locale',
         newRows: numbersToInsert,
         parentColumnName: 'parent',
@@ -188,6 +190,7 @@ export const upsertRow = async ({
       if (operation === 'update') {
         await deleteExistingRowsByPath({
           adapter,
+          db,
           newRows: blockRows.map(({ row }) => row),
           parentID: insertedRow.id,
           pathColumnName: '_path',
@@ -231,6 +234,7 @@ export const upsertRow = async ({
       await insertArrays({
         adapter,
         arrays: blockRows.map(({ arrays }) => arrays),
+        db,
         parentRows: insertedBlockRows[blockName],
       })
     })
@@ -246,6 +250,7 @@ export const upsertRow = async ({
         Object.entries(rowToInsert.arrays).map(async ([arrayTableName]) => {
           await deleteExistingArrayRows({
             adapter,
+            db,
             parentID: insertedRow.id,
             tableName: arrayTableName,
           })
@@ -256,6 +261,7 @@ export const upsertRow = async ({
     await insertArrays({
       adapter,
       arrays: [rowToInsert.arrays],
+      db,
       parentRows: [insertedRow],
     })
   })

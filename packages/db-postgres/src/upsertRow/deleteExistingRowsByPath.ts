@@ -1,9 +1,10 @@
 import { and, eq, inArray } from 'drizzle-orm'
 
-import type { PostgresAdapter } from '../types'
+import type { DrizzleDB, PostgresAdapter } from '../types'
 
 type Args = {
   adapter: PostgresAdapter
+  db: DrizzleDB
   localeColumnName?: string
   newRows: Record<string, unknown>[]
   parentColumnName?: string
@@ -14,6 +15,7 @@ type Args = {
 
 export const deleteExistingRowsByPath = async ({
   adapter,
+  db,
   localeColumnName = '_locale',
   newRows,
   parentColumnName = '_parentID',
@@ -43,7 +45,7 @@ export const deleteExistingRowsByPath = async ({
     if (pathColumnName)
       whereConstraints.push(inArray(table[pathColumnName], Array.from(localizedPathsToDelete)))
 
-    await adapter.db.delete(table).where(and(...whereConstraints))
+    await db.delete(table).where(and(...whereConstraints))
   }
 
   if (pathsToDelete.size > 0) {
@@ -52,6 +54,6 @@ export const deleteExistingRowsByPath = async ({
     if (pathColumnName)
       whereConstraints.push(inArray(table[pathColumnName], Array.from(pathsToDelete)))
 
-    await adapter.db.delete(table).where(and(...whereConstraints))
+    await db.delete(table).where(and(...whereConstraints))
   }
 }
