@@ -12,6 +12,7 @@ export type Props = {
   apiURL: string
   autosaveEnabled: boolean
   data: Document
+  disableRoutes?: boolean
   global: SanitizedGlobalConfig
   initialState: Fields
   isLoading: boolean
