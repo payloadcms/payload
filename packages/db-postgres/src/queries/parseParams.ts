@@ -6,7 +6,7 @@ import { and, ilike } from 'drizzle-orm'
 import { validOperators } from 'payload/types'
 
 import type { GenericColumn, PostgresAdapter } from '../types'
-import type { BuildQueryJoins } from './buildQuery'
+import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
 
 import { buildAndOrConditions } from './buildAndOrConditions'
 import { getTableColumnFromPath } from './getTableColumnFromPath'
@@ -16,6 +16,7 @@ import { sanitizeQueryValue } from './sanitizeQueryValue'
 type Args = {
   adapter: PostgresAdapter
   fields: Field[]
+  joinAliases: BuildQueryJoinAliases
   joins: BuildQueryJoins
   locale: string
   selectFields: Record<string, GenericColumn>
@@ -26,6 +27,7 @@ type Args = {
 export async function parseParams({
   adapter,
   fields,
+  joinAliases,
   joins,
   locale,
   selectFields,
@@ -50,6 +52,7 @@ export async function parseParams({
           const builtConditions = await buildAndOrConditions({
             adapter,
             fields,
+            joinAliases,
             joins,
             locale,
             selectFields,
@@ -81,6 +84,7 @@ export async function parseParams({
                   adapter,
                   collectionPath: relationOrPath,
                   fields,
+                  joinAliases,
                   joins,
                   locale,
                   pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
