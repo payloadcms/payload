@@ -1,11 +1,7 @@
-import type { LexicalEditor, RangeSelection } from 'lexical'
+import type { Klass, LexicalEditor, LexicalNode, RangeSelection } from 'lexical'
 import type React from 'react'
-import type { DeepRequired } from 'ts-essentials'
 
-import type {
-  SlashMenuGroup,
-  SlashMenuOption,
-} from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 
 export type Feature = {
   floatingSelectToolbar?: {
@@ -24,6 +20,8 @@ export type Feature = {
       }[]
     }
   }
+
+  nodes?: Array<Klass<LexicalNode>>
   slashMenu?: {
     dynamicOptions?: ({
       editor,
@@ -53,6 +51,7 @@ export type SanitizedFeatures = {
       }[]
     }
   }
+  nodes: Array<Klass<LexicalNode>>
   slashMenu: {
     dynamicOptions: Array<
       ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => SlashMenuGroup[]

@@ -23,7 +23,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
   const initialConfig: InitialConfigType = {
     editorState: initialState != null ? JSON.stringify(initialState) : undefined,
     namespace: editorConfig.lexical.namespace,
-    nodes: [...getEnabledNodes(editorConfig)],
+    nodes: [...getEnabledNodes({ editorConfig })],
     onError: (error: Error) => {
       throw error
     },

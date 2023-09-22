@@ -22,7 +22,7 @@ export const RichTextCell: React.FC<
     // initialize headless editor
     const headlessEditor = createHeadlessEditor({
       namespace: editorConfig.lexical.namespace,
-      nodes: getEnabledNodes(editorConfig),
+      nodes: getEnabledNodes({ editorConfig }),
       theme: editorConfig.lexical.theme,
     })
     headlessEditor.setEditorState(headlessEditor.parseEditorState(data))
