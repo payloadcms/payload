@@ -13,7 +13,7 @@
     "clean:unix": "find . \\( -type d \\( -name node_modules -o -name dist -o -name .cache \\) -o -type f -name tsconfig.tsbuildinfo \\) -exec rm -rf {} +",
     "dev": "pnpm --filter payload run dev",
     "dev:generate-graphql-schema": "ts-node -T ./test/generateGraphQLSchema.ts",
-    "dev:generate-types": "pnpm --filter payload run dev:generate-types",
+    "dev:generate-types": "ts-node -T ./test/generateTypes.ts",
     "dev:postgres": "pnpm --filter payload run dev:postgres",
     "fix": "eslint \"src/**/*.ts\" --fix",
     "lint": "eslint \"src/**/*.ts\"",

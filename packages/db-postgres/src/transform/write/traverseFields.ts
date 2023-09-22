@@ -68,7 +68,7 @@ export const traverseFields = ({
     }
 
     if (field.type === 'array') {
-      const arrayTableName = `${newTableName}_${toSnakeCase(field.name)}`
+      const arrayTableName = `${newTableName}_${toSnakeCase(columnName)}`
       if (!arrays[arrayTableName]) arrays[arrayTableName] = []
 
       if (field.localized) {
