@@ -15,7 +15,7 @@ export type collectionViewType =
   | 'Version'
   | 'Versions'
 
-const defaultViews: {
+export const defaultCollectionViews: {
   [key in collectionViewType]: React.ComponentType<any>
 } = {
   API: null,
@@ -48,7 +48,7 @@ export const CustomCollectionComponent = (
         typeof Edit?.[view] === 'object' &&
         typeof Edit[view].Component === 'function'
       ? Edit[view].Component
-      : defaultViews[view]
+      : defaultCollectionViews[view]
 
   if (Component) {
     return <Component {...args} />
