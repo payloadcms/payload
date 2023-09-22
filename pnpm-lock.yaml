@@ -932,6 +932,9 @@ importers:
       react-i18next:
         specifier: 13.2.2
         version: 13.2.2(i18next@23.5.1)(react-dom@18.2.0)(react@18.2.0)
+      ts-essentials:
+        specifier: 7.0.3
+        version: 7.0.3(typescript@5.2.2)
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*

@@ -41,7 +41,8 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-error-boundary": "^4.0.11",
-    "react-i18next": "13.2.2"
+    "react-i18next": "13.2.2",
+    "ts-essentials": "7.0.3"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

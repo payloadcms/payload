@@ -2,21 +2,21 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import * as React from 'react'
 import { createContext, useContext, useMemo } from 'react'
 
-import type { EditorConfig } from './types'
+import type { SanitizedEditorConfig } from './types'
 
-import { defaultEditorConfig } from './default'
+import { defaultSanitizedEditorConfig } from './default'
 
 // Should always produce a 20 character pseudo-random string
 function generateQuickGuid(): string {
   return Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12)
 }
 interface ContextType {
-  editorConfig: EditorConfig
+  editorConfig: SanitizedEditorConfig
   uuid: string
 }
 
 const Context: React.Context<ContextType> = createContext({
-  editorConfig: defaultEditorConfig,
+  editorConfig: defaultSanitizedEditorConfig,
   uuid: generateQuickGuid(),
 })
 
@@ -25,7 +25,7 @@ export const EditorConfigProvider = ({
   editorConfig,
 }: {
   children: React.ReactNode
-  editorConfig: EditorConfig
+  editorConfig: SanitizedEditorConfig
 }): JSX.Element => {
   const [editor] = useLexicalComposerContext()
   const editorContext = useMemo(() => ({ editorConfig, uuid: generateQuickGuid() }), [editor])

@@ -1,4 +1,4 @@
-import type { EditorConfig } from './types'
+import type { EditorConfig, SanitizedEditorConfig } from './types'
 
 import { ParagraphFeature } from '../../features/Paragraph'
 import { BoldTextFeature } from '../../features/format/BoldText'
@@ -9,6 +9,7 @@ import { SubscriptTextFeature } from '../../features/format/SubscriptText'
 import { SuperscriptTextFeature } from '../../features/format/SuperscriptText'
 import { UnderlineTextFeature } from '../../features/format/UnderlineText'
 import { LexicalEditorTheme } from '../theme/EditorTheme'
+import { sanitizeEditorConfig } from './sanitize'
 
 export const defaultEditorConfig: EditorConfig = {
   features: [
@@ -26,3 +27,6 @@ export const defaultEditorConfig: EditorConfig = {
     theme: LexicalEditorTheme,
   },
 }
+
+export const defaultSanitizedEditorConfig: SanitizedEditorConfig =
+  sanitizeEditorConfig(defaultEditorConfig)

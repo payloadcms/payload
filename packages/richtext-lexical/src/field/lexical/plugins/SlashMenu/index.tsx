@@ -61,32 +61,23 @@ export default function SlashMenuPlugin(): JSX.Element {
   })
 
   const getDynamicOptions = useCallback(() => {
-    const options: Array<SlashMenuOption> = []
+    let groupWithOptions: Array<SlashMenuGroup> = []
 
-    for (const feature of editorConfig?.features ?? []) {
-      if (feature?.slashMenu?.dynamicOptions?.length) {
-        options.push(
-          ...feature.slashMenu.dynamicOptions({
-            editor,
-            queryString,
-          }),
-        )
-      }
+    for (const dynamicOption of editorConfig?.features.slashMenu.dynamicOptions) {
+      const dynamicGroupWithOptions = dynamicOption({
+        editor,
+        queryString,
+      })
+      groupWithOptions = groupWithOptions.concat(dynamicGroupWithOptions)
     }
 
-    if (queryString == null) {
-      return options
-    }
-
-    return options
+    return groupWithOptions
   }, [editor, queryString, editorConfig?.features])
 
   const groups: SlashMenuGroup[] = useMemo(() => {
-    const baseOptions: SlashMenuOption[] = []
-    for (const feature of editorConfig?.features ?? []) {
-      if (feature?.slashMenu?.options?.length) {
-        baseOptions.push(...feature.slashMenu.options)
-      }
+    let groupsWithOptions: SlashMenuGroup[] = []
+    for (const groupWithOption of editorConfig?.features.slashMenu.groupsWithOptions ?? []) {
+      groupsWithOptions.push(groupWithOption)
     }
     /*const baseOptions2 = [
       new SlashMenuOption('Paragraph', {
@@ -128,26 +119,52 @@ export default function SlashMenuPlugin(): JSX.Element {
       }),
     ]*/
 
-    const dynamicOptions = getDynamicOptions()
+    if (queryString) {
+      // Filter current groups first
+      groupsWithOptions = groupsWithOptions.map((group) => {
+        const filteredOptions = group.options.filter((option) => {
+          return new RegExp(queryString, 'gi').exec(option.title) || option.keywords != null
+            ? option.keywords.some((keyword) => new RegExp(queryString, 'gi').exec(keyword))
+            : false
+        })
+        if (filteredOptions.length) {
+          return {
+            ...group,
+            options: filteredOptions,
+          }
+        }
+        return null
+      })
 
-    const options = queryString
-      ? [
-          ...dynamicOptions,
-          ...baseOptions.filter((option) => {
-            return new RegExp(queryString, 'gi').exec(option.title) || option.keywords != null
-              ? option.keywords.some((keyword) => new RegExp(queryString, 'gi').exec(keyword))
-              : false
-          }),
-        ]
-      : baseOptions
+      groupsWithOptions = groupsWithOptions.filter((group) => group != null)
 
-    const groups: SlashMenuGroup[] = [
-      {
-        options,
-        title: 'Basic Blocks',
-      },
-    ]
-    return groups
+      // Now add dynamic groups
+      const dynamicOptionGroups = getDynamicOptions()
+
+      // merge dynamic options into groups
+      for (const dynamicGroup of dynamicOptionGroups) {
+        // 1. find the group with the same name or create new one
+        let group = groupsWithOptions.find((group) => group.title === dynamicGroup.title)
+        if (!group) {
+          group = {
+            ...dynamicGroup,
+            options: [],
+          }
+        } else {
+          groupsWithOptions = groupsWithOptions.filter(
+            (group) => group.title !== dynamicGroup.title,
+          )
+        }
+
+        // 2. Add options to group options array and add to sanitized.slashMenu.groupsWithOptions
+        if (group?.options?.length) {
+          group.options = group.options.concat(group.options)
+        }
+        groupsWithOptions.push(group)
+      }
+    }
+
+    return groupsWithOptions
   }, [editor, getDynamicOptions, queryString, editorConfig?.features])
 
   const onSelectOption = useCallback(

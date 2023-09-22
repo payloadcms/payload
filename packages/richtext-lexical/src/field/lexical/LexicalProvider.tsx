@@ -5,13 +5,13 @@ import type { LexicalEditor } from 'lexical'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import * as React from 'react'
 
-import type { EditorConfig } from './config/types'
+import type { SanitizedEditorConfig } from './config/types'
 
 import { LexicalEditor as LexicalEditorComponent } from './LexicalEditor'
 import { EditorConfigProvider } from './config/EditorConfigProvider'
 import { getEnabledNodes } from './nodes'
 export type LexicalProviderProps = {
-  editorConfig: EditorConfig
+  editorConfig: SanitizedEditorConfig
   initialState: SerializedEditorState
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
   setValue: (value: SerializedEditorState) => void

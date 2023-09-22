@@ -10,17 +10,22 @@ export function ParagraphFeature(): Feature {
   return {
     slashMenu: {
       options: [
-        new SlashMenuOption('Paragraph', {
-          Icon: BlockIcon,
-          keywords: ['normal', 'paragraph', 'p', 'text'],
-          onSelect: (editor) =>
-            editor.update(() => {
-              const selection = $getSelection()
-              if ($isRangeSelection(selection)) {
-                $setBlocksType(selection, () => $createParagraphNode())
-              }
+        {
+          options: [
+            new SlashMenuOption('Paragraph', {
+              Icon: BlockIcon,
+              keywords: ['normal', 'paragraph', 'p', 'text'],
+              onSelect: (editor) =>
+                editor.update(() => {
+                  const selection = $getSelection()
+                  if ($isRangeSelection(selection)) {
+                    $setBlocksType(selection, () => $createParagraphNode())
+                  }
+                }),
             }),
-        }),
+          ],
+          title: 'Basic',
+        },
       ],
     },
   }
