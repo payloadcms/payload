@@ -9,6 +9,7 @@ export const sanitizeFeatures = (features: Feature[]): SanitizedFeatures => {
       },
     },
     nodes: [],
+    plugins: [],
     slashMenu: {
       dynamicOptions: [],
       groupsWithOptions: [],
@@ -18,6 +19,9 @@ export const sanitizeFeatures = (features: Feature[]): SanitizedFeatures => {
   features.forEach((feature) => {
     if (feature.nodes?.length) {
       sanitized.nodes = sanitized.nodes.concat(feature.nodes)
+    }
+    if (feature.plugins?.length) {
+      sanitized.plugins = sanitized.plugins.concat(feature.plugins)
     }
 
     if (feature.floatingSelectToolbar?.buttons?.format?.length) {

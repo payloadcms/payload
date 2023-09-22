@@ -20,8 +20,13 @@ export type Feature = {
       }[]
     }
   }
-
   nodes?: Array<Klass<LexicalNode>>
+
+  plugins?: Array<{
+    // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+    Component: React.FC
+    position: 'normal' // Determines at which position the Component will be added.
+  }>
   slashMenu?: {
     dynamicOptions?: ({
       editor,
@@ -34,7 +39,7 @@ export type Feature = {
   }
 }
 
-export type SanitizedFeatures = {
+export type SanitizedFeatures = Required<Pick<Feature, 'nodes' | 'plugins'>> & {
   floatingSelectToolbar: {
     buttons: {
       format: {
@@ -51,7 +56,6 @@ export type SanitizedFeatures = {
       }[]
     }
   }
-  nodes: Array<Klass<LexicalNode>>
   slashMenu: {
     dynamicOptions: Array<
       ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => SlashMenuGroup[]

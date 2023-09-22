@@ -15,7 +15,7 @@ import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin'
 import { LexicalContentEditable } from './ui/ContentEditable'
 
 export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
-  const { onChange } = props
+  const { editorConfig, onChange } = props
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -76,6 +76,11 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
       <HistoryPlugin />
       <FloatingSelectToolbarPlugin />
       <SlashMenuPlugin />
+      {editorConfig.features.plugins.map((plugin) => {
+        if (!plugin.position || plugin.position === 'normal') {
+          return <plugin.Component />
+        }
+      })}
     </React.Fragment>
   )
 }
