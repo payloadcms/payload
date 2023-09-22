@@ -321,7 +321,7 @@ export const getTableColumnFromPath = ({
               })
             }
           }
-          selectFields[`${newTableName}.${field.name}`] = adapter.tables[newTableName][field.name]
+          selectFields[`${newTableName}.${columnPrefix}${field.name}`] = adapter.tables[newTableName][`${columnPrefix}${field.name}`]
 
           return {
             columnName: `${columnPrefix}${field.name}`,

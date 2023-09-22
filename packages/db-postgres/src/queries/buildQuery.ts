@@ -85,7 +85,7 @@ const buildQuery = async function buildQuery({
 
   let where: SQL
 
-  if (Object.keys(incomingWhere).length > 0) {
+  if (incomingWhere && Object.keys(incomingWhere).length > 0) {
     where = await parseParams({
       adapter,
       fields,
