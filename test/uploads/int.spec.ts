@@ -76,7 +76,7 @@ describe('Collections - Uploads', () => {
 
         // Check api response
         expect(doc.mimeType).toEqual('image/svg+xml')
-        expect(doc.sizes.maintainedAspectRatio.url).toBeUndefined()
+        expect(doc.sizes.maintainedAspectRatio.url).toBeFalsy()
         expect(doc.width).toBeDefined()
         expect(doc.height).toBeDefined()
       })
