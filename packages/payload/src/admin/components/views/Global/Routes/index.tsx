@@ -4,6 +4,7 @@ import { Route, Switch, useRouteMatch } from 'react-router-dom'
 
 import { useAuth } from '../../../utilities/Auth'
 import { useConfig } from '../../../utilities/Config'
+import NotFound from '../../NotFound'
 import { type Props } from '../types'
 import { CustomGlobalComponent } from './CustomComponent'
 import { globalCustomRoutes } from './custom'
@@ -52,8 +53,11 @@ export const GlobalRoutes: React.FC<Props> = (props) => {
         permissions,
         user,
       })}
-      <Route>
+      <Route exact key={`${global.slug}-view`} path={`${adminRoute}/globals/${global.slug}`}>
         <CustomGlobalComponent view="Default" {...props} />
+      </Route>
+      <Route path={`${match.url}*`}>
+        <NotFound marginTop="large" />
       </Route>
     </Switch>
   )

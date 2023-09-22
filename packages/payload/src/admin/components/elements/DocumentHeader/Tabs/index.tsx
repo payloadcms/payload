@@ -20,7 +20,7 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
         <ul className={`${baseClass}__tabs`}>
           {tabs?.map((Tab, index) => {
             return (
-              <li className={`${baseClass}__tab`} key={index}>
+              <li className={`${baseClass}__tab`} key={`tab-${index}`}>
                 <DocumentTab {...props} {...Tab} />
               </li>
             )
@@ -30,13 +30,13 @@ export const DocumentTabs: React.FC<DocumentTabProps> = (props) => {
 
             if (typeof Tab === 'function') {
               return (
-                <li className={`${baseClass}__tab`} key={index}>
+                <li className={`${baseClass}__tab`} key={`tab-custom-${index}`}>
                   <Tab path={path} {...props} />
                 </li>
               )
             }
 
-            return <DocumentTab {...props} {...Tab} />
+            return <DocumentTab {...props} {...Tab} key={`tab-custom-${index}`} />
           })}
         </ul>
       </div>
