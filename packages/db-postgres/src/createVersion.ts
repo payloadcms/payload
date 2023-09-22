@@ -1,6 +1,7 @@
 import type { CreateVersion } from 'payload/database'
 import type { PayloadRequest } from 'payload/dist/express/types'
 
+import { sql } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
@@ -10,11 +11,12 @@ import { upsertRow } from './upsertRow'
 
 export const createVersion: CreateVersion = async function createVersion(
   this: PostgresAdapter,
-  { autosave, collectionSlug, createdAt, parent, req = {} as PayloadRequest, updatedAt, versionData },
+  { autosave, collectionSlug, parent, req = {} as PayloadRequest, versionData },
 ) {
   const db = this.sessions?.[req.transactionID] || this.db
   const collection = this.payload.collections[collectionSlug].config
-  const tableName = toSnakeCase(collectionSlug)
+  const collectionTableName = toSnakeCase(collectionSlug)
+  const tableName = `_${collectionTableName}_versions`
 
   const result = await upsertRow({
     adapter: this,
@@ -27,43 +29,21 @@ export const createVersion: CreateVersion = async function createVersion(
     db,
     fields: buildVersionCollectionFields(collection),
     operation: 'create',
-    tableName: `_${tableName}_versions`,
+    tableName,
   })
 
-  // const [doc] = await VersionModel.create(
-  //   [
-  //     {
-  //       parent,
-  //       version: versionData,
-  //       latest: true,
-  //       autosave,
-  //       createdAt,
-  //       updatedAt,
-  //     },
-  //   ],
-  //   options,
-  //   req,
-  // );
+  const table = this.tables[tableName]
+  const relationshipsTable = this.tables[`${tableName}_relationships`]
 
-  // await VersionModel.updateMany({
-  //   $and: [
-  //     {
-  //       _id: {
-  //         $ne: doc._id,
-  //       },
-  //     },
-  //     {
-  //       parent: {
-  //         $eq: parent,
-  //       },
-  //     },
-  //     {
-  //       latest: {
-  //         $eq: true,
-  //       },
-  //     },
-  //   ],
-  // }, { $unset: { latest: 1 } });
+  await db.execute(sql`
+    UPDATE ${table}
+    SET latest = false
+    FROM ${relationshipsTable}
+    WHERE ${table.id} = ${relationshipsTable.parent}
+      AND ${relationshipsTable.path} = ${'parent'}
+      AND ${relationshipsTable[`${collectionSlug}ID`]} = ${parent}
+      AND ${table.id} != ${result.id};
+`)
 
   return result
 }
