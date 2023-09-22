@@ -14,8 +14,6 @@ type TraverseFieldArgs = {
   currentTableName: string
   depth?: number
   fields: Field[]
-  locatedArrays: { [path: string]: ArrayField }
-  locatedBlocks: Block[]
   path: string
   topLevelArgs: Record<string, unknown>
   topLevelTableName: string
@@ -28,8 +26,6 @@ export const traverseFields = ({
   currentTableName,
   depth,
   fields,
-  locatedArrays,
-  locatedBlocks,
   path,
   topLevelArgs,
   topLevelTableName,
@@ -59,12 +55,27 @@ export const traverseFields = ({
             currentTableName: arrayTableName,
             depth,
             fields: field.fields,
-            locatedArrays,
-            locatedBlocks,
             path: '',
             topLevelArgs,
             topLevelTableName,
           })
+
+          break
+        }
+
+        case 'select': {
+          if (field.hasMany) {
+            const withSelect: Result = {
+              columns: {
+                id: false,
+                order: false,
+                parent: false,
+              },
+              orderBy: ({ order }, { asc }) => [asc(order)],
+            }
+
+            currentArgs.with[`${path}${field.name}`] = withSelect
+          }
 
           break
         }
@@ -93,8 +104,6 @@ export const traverseFields = ({
                 currentTableName,
                 depth,
                 fields: block.fields,
-                locatedArrays,
-                locatedBlocks,
                 path,
                 topLevelArgs,
                 topLevelTableName,
@@ -112,8 +121,6 @@ export const traverseFields = ({
             currentTableName,
             depth,
             fields: field.fields,
-            locatedArrays,
-            locatedBlocks,
             path: `${path}${field.name}_`,
             topLevelArgs,
             topLevelTableName,

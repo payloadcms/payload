@@ -2,10 +2,12 @@ import { lazy } from 'react'
 import React from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 
+import type { CollectionEditViewProps } from '../types'
+
 import { useAuth } from '../../../../utilities/Auth'
 import { useConfig } from '../../../../utilities/Config'
-import { type CollectionEditViewProps } from '../types'
-import { RenderCustomView } from './RenderCustomView'
+import NotFound from '../../../NotFound'
+import { CustomCollectionComponent } from './CustomComponent'
 import { collectionCustomRoutes } from './custom'
 
 // @ts-expect-error Just TypeScript being broken // TODO: Open TypeScript issue
@@ -30,7 +32,7 @@ export const CollectionRoutes: React.FC<CollectionEditViewProps> = (props) => {
         path={`${adminRoute}/collections/${collection.slug}/:id/versions`}
       >
         {permissions?.readVersions?.permission ? (
-          <RenderCustomView view="Versions" {...props} />
+          <CustomCollectionComponent view="Versions" {...props} />
         ) : (
           <Unauthorized />
         )}
@@ -41,7 +43,7 @@ export const CollectionRoutes: React.FC<CollectionEditViewProps> = (props) => {
         path={`${adminRoute}/collections/${collection.slug}/:id/versions/:versionID`}
       >
         {permissions?.readVersions?.permission ? (
-          <RenderCustomView view="Version" {...props} />
+          <CustomCollectionComponent view="Version" {...props} />
         ) : (
           <Unauthorized />
         )}
@@ -51,7 +53,7 @@ export const CollectionRoutes: React.FC<CollectionEditViewProps> = (props) => {
         key={`${collection.slug}-live-preview`}
         path={`${adminRoute}/collections/${collection.slug}/:id/preview`}
       >
-        <RenderCustomView view="LivePreview" {...props} />
+        <CustomCollectionComponent view="LivePreview" {...props} />
       </Route>
       {collectionCustomRoutes({
         collection,
@@ -59,8 +61,15 @@ export const CollectionRoutes: React.FC<CollectionEditViewProps> = (props) => {
         permissions,
         user,
       })}
-      <Route>
-        <RenderCustomView view="Default" {...props} />
+      <Route
+        exact
+        key={`${collection.slug}-view`}
+        path={`${adminRoute}/collections/${collection.slug}/:id`}
+      >
+        <CustomCollectionComponent view="Default" {...props} />
+      </Route>
+      <Route path={`${match.url}*`}>
+        <NotFound marginTop="large" />
       </Route>
     </Switch>
   )

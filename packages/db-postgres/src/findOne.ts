@@ -13,7 +13,7 @@ export const findOne: FindOne = async function findOne({
   req = {} as PayloadRequest,
   where: incomingWhere,
 }) {
-  const db = req.transactionID ? this.sessions[req.transactionID] : this.db
+  const db = this.sessions?.[req.transactionID] || this.db
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const tableName = toSnakeCase(collection)
 
@@ -35,6 +35,10 @@ export const findOne: FindOne = async function findOne({
   findManyArgs.where = where
 
   const doc = await db.query[tableName].findFirst(findManyArgs)
+
+  if (!doc) {
+    return null
+  }
 
   return transform({
     config: this.payload.config,

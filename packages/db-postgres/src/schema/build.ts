@@ -4,16 +4,7 @@ import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'dri
 import type { Field } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
-import {
-  index,
-  integer,
-  numeric,
-  pgTable,
-  serial,
-  timestamp,
-  unique,
-  varchar,
-} from 'drizzle-orm/pg-core'
+import { index, integer, numeric, pgTable, serial, timestamp, unique, varchar, } from 'drizzle-orm/pg-core'
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
@@ -33,7 +24,7 @@ type Args = {
 }
 
 type Result = {
-  arrayBlockRelations: Map<string, string>
+  relationsToBuild: Map<string, string>
 }
 
 export const buildTable = ({
@@ -52,6 +43,7 @@ export const buildTable = ({
   let hasLocalizedRelationshipField = false
   let hasManyNumberField: 'index' | boolean = false
   let hasLocalizedManyNumberField = false
+  const disableUnique = tableName.endsWith('_versions')
 
   const localesColumns: Record<string, PgColumnBuilder> = {}
   const localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {}
@@ -61,7 +53,7 @@ export const buildTable = ({
   const relationships: Set<string> = new Set()
   let relationshipsTable: GenericTable
 
-  const arrayBlockRelations: Map<string, string> = new Map()
+  const relationsToBuild: Map<string, string> = new Map()
 
   const idField = fields.find((field) => fieldAffectsData(field) && field.name === 'id')
   let idColType = 'integer'
@@ -87,21 +79,34 @@ export const buildTable = ({
     hasManyNumberField,
   } = traverseFields({
     adapter,
-    arrayBlockRelations,
     buildRelationships,
     columns,
+    disableUnique,
     fields,
     indexes,
     localesColumns,
     localesIndexes,
     newTableName: tableName,
     parentTableName: tableName,
+    relationsToBuild,
     relationships,
   }))
 
   if (timestamps) {
-    columns.createdAt = timestamp('created_at').defaultNow().notNull()
-    columns.updatedAt = timestamp('updated_at').defaultNow().notNull()
+    columns.createdAt = timestamp('created_at', {
+      mode: 'string',
+      precision: 3,
+      withTimezone: true,
+    })
+      .defaultNow()
+      .notNull()
+    columns.updatedAt = timestamp('updated_at', {
+      mode: 'string',
+      precision: 3,
+      withTimezone: true,
+    })
+      .defaultNow()
+      .notNull()
   }
 
   const table = pgTable(tableName, columns, (cols) => {
@@ -121,7 +126,7 @@ export const buildTable = ({
   if (hasLocalizedField) {
     const localeTableName = `${tableName}_locales`
     localesColumns.id = serial('id').primaryKey()
-    localesColumns._locale = adapter.enums._locales('_locale').notNull()
+    localesColumns._locale = adapter.enums.enum__locales('_locale').notNull()
     localesColumns._parentID = parentIDColumnMap[idColType]('_parent_id')
       .references(() => table.id, { onDelete: 'cascade' })
       .notNull()
@@ -163,7 +168,7 @@ export const buildTable = ({
     }
 
     if (hasLocalizedManyNumberField) {
-      columns.locale = adapter.enums._locales('locale')
+      columns.locale = adapter.enums.enum__locales('locale')
     }
 
     numbersTable = pgTable(numbersTableName, columns, (cols) => {
@@ -206,7 +211,7 @@ export const buildTable = ({
       }
 
       if (hasLocalizedRelationshipField) {
-        relationshipColumns.locale = adapter.enums._locales('locale')
+        relationshipColumns.locale = adapter.enums.enum__locales('locale')
       }
 
       relationships.forEach((relationTo) => {
@@ -220,7 +225,7 @@ export const buildTable = ({
 
         relationshipColumns[`${relationTo}ID`] = parentIDColumnMap[colType](
           `${formattedRelationTo}_id`,
-        ).references(() => adapter.tables[formattedRelationTo].id)
+        ).references(() => adapter.tables[formattedRelationTo].id, { onDelete: 'cascade' })
       })
 
       const relationshipsTableName = `${tableName}_relationships`
@@ -273,7 +278,7 @@ export const buildTable = ({
   const tableRelations = relations(table, ({ many }) => {
     const result: Record<string, Relation<string>> = {}
 
-    arrayBlockRelations.forEach((val, key) => {
+    relationsToBuild.forEach((val, key) => {
       result[key] = many(adapter.tables[val])
     })
 
@@ -296,5 +301,5 @@ export const buildTable = ({
 
   adapter.relations[`relations_${tableName}`] = tableRelations
 
-  return { arrayBlockRelations }
+  return { relationsToBuild }
 }

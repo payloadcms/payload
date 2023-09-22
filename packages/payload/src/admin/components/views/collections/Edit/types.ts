@@ -18,6 +18,7 @@ export type CollectionEditViewProps = IndexProps & {
   data: Document
   disableActions?: boolean
   disableLeaveWithoutSaving?: boolean
+  disableRoutes?: boolean
   hasSavePermission: boolean
   id?: string
   internalState?: Fields

@@ -3,12 +3,17 @@ import type { Field, Where } from 'payload/types'
 
 import { asc, desc } from 'drizzle-orm'
 
-import type { GenericColumn, PostgresAdapter } from '../types'
+import type { GenericColumn, GenericTable, PostgresAdapter } from '../types'
 
 import { getTableColumnFromPath } from './getTableColumnFromPath'
 import { parseParams } from './parseParams'
 
 export type BuildQueryJoins = Record<string, SQL>
+
+export type BuildQueryJoinAliases = {
+  condition: SQL
+  table: GenericTable
+}[]
 
 type BuildQueryArgs = {
   adapter: PostgresAdapter
@@ -20,6 +25,7 @@ type BuildQueryArgs = {
 }
 
 type Result = {
+  joinAliases: BuildQueryJoinAliases
   joins: BuildQueryJoins
   orderBy: {
     column: GenericColumn
@@ -40,6 +46,8 @@ const buildQuery = async function buildQuery({
     id: adapter.tables[tableName].id,
   }
   const joins: BuildQueryJoins = {}
+  const joinAliases: BuildQueryJoinAliases = []
+
   const orderBy: Result['orderBy'] = {
     column: null,
     order: null,
@@ -60,6 +68,7 @@ const buildQuery = async function buildQuery({
       adapter,
       collectionPath: sortPath,
       fields,
+      joinAliases,
       joins,
       locale,
       pathSegments: sortPath.replace(/__/g, '.').split('.'),
@@ -85,10 +94,11 @@ const buildQuery = async function buildQuery({
 
   let where: SQL
 
-  if (Object.keys(incomingWhere).length > 0) {
+  if (incomingWhere && Object.keys(incomingWhere).length > 0) {
     where = await parseParams({
       adapter,
       fields,
+      joinAliases,
       joins,
       locale,
       selectFields,
@@ -98,6 +108,7 @@ const buildQuery = async function buildQuery({
   }
 
   return {
+    joinAliases,
     joins,
     orderBy,
     selectFields,

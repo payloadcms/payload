@@ -2,12 +2,14 @@ import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type React from 'react'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { DocumentTab } from '../../admin/components/elements/DocumentHeader/Tabs/types'
 import type {
   CustomPreviewButtonProps,
   CustomPublishButtonProps,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from '../../admin/components/elements/types'
+import type { GlobalEditViewProps } from '../../admin/components/views/Global/types'
 import type { User } from '../../auth/types'
 import type { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types'
 import type { PayloadRequest } from '../../express/types'
@@ -38,27 +40,17 @@ export type AfterReadHook = (args: {
   req: PayloadRequest
 }) => any
 
-export type GlobalEditView =
-  | {
-      /**
-       * The component to render for this view
-       * + Replaces the default component
-       */
-      Component: React.ComponentType<any>
-      /**
-       * The label rendered in the admin UI for this view
-       * + Example: `default` is `Edit`
-       */
-      label: string
-      /**
-       * The URL path to the nested global edit views
-       * + Example: `/admin/globals/:slug/:path`
-       * + The `:path` is the value of this property
-       * + Note: the default global view uses no path
-       */
-      path?: string
-    }
-  | React.ComponentType<any>
+export type GlobalEditViewConfig = {
+  /**
+   * The component to render for this view
+   * + Replaces the default component
+   */
+  Component: React.ComponentType<GlobalEditViewProps>
+  Tab?: DocumentTab
+  path: string
+}
+
+export type GlobalEditView = GlobalEditViewConfig | React.ComponentType<GlobalEditViewProps>
 
 export type GlobalAdminOptions = {
   /**

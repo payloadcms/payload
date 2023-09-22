@@ -13,15 +13,16 @@ type Args = {
 }
 
 export const transformForWrite = ({ data, fields, path = '', tableName }: Args): RowToInsert => {
-  // Split out the incoming data into the corresponding:
-  // base row, locales, relationships, blocks, and arrays
+  // Split out the incoming data into rows to insert / delete
   const rowToInsert: RowToInsert = {
     arrays: {},
     blocks: {},
     locales: {},
     numbers: [],
     relationships: [],
+    relationshipsToDelete: [],
     row: {},
+    selects: {},
   }
 
   // This function is responsible for building up the
@@ -38,7 +39,9 @@ export const transformForWrite = ({ data, fields, path = '', tableName }: Args):
     parentTableName: tableName,
     path,
     relationships: rowToInsert.relationships,
+    relationshipsToDelete: rowToInsert.relationshipsToDelete,
     row: rowToInsert.row,
+    selects: rowToInsert.selects,
   })
 
   return rowToInsert

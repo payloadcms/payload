@@ -3,7 +3,7 @@ import type { BlockField } from 'payload/types'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { BlockRowToInsert } from './types'
+import type { BlockRowToInsert, RelationshipToDelete } from './types'
 
 import { traverseFields } from './traverseFields'
 
@@ -14,8 +14,13 @@ type Args = {
   data: Record<string, unknown>[]
   field: BlockField
   locale?: string
+  numbers: Record<string, unknown>[]
   path: string
   relationships: Record<string, unknown>[]
+  relationshipsToDelete: RelationshipToDelete[]
+  selects: {
+    [tableName: string]: Record<string, unknown>[]
+  }
   tableName
 }
 export const transformBlocks = ({
@@ -23,8 +28,11 @@ export const transformBlocks = ({
   data,
   field,
   locale,
+  numbers,
   path,
   relationships,
+  relationshipsToDelete,
+  selects,
   tableName,
 }: Args) => {
   data.forEach((blockRow, i) => {
@@ -55,10 +63,13 @@ export const transformBlocks = ({
       fields: matchedBlock.fields,
       locales: newRow.locales,
       newTableName: blockTableName,
+      numbers,
       parentTableName: blockTableName,
       path: `${path || ''}${field.name}.${i}.`,
       relationships,
+      relationshipsToDelete,
       row: newRow.row,
+      selects,
     })
 
     blocks[blockRow.blockType].push(newRow)

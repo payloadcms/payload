@@ -1,48 +1,42 @@
 import type { DeleteMany } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
 
+import { inArray } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types'
 
-import { buildFindManyArgs } from './find/buildFindManyArgs'
-import buildQuery from './queries/buildQuery'
-import { transform } from './transform/read'
+import { findMany } from './find/findMany'
 
 export const deleteMany: DeleteMany = async function deleteMany(
   this: PostgresAdapter,
-  { collection, req = {} as PayloadRequest, where: incomingWhere },
+  { collection, req = {} as PayloadRequest, where },
 ) {
+  const db = this.sessions?.[req.transactionID] || this.db
   const collectionConfig = this.payload.collections[collection].config
   const tableName = toSnakeCase(collection)
 
-  const { where } = await buildQuery({
+  const result = await findMany({
     adapter: this,
     fields: collectionConfig.fields,
+    limit: 0,
+    locale: req.locale,
+    page: 1,
+    pagination: false,
+    req,
     tableName,
-    where: incomingWhere,
+    where,
   })
 
-  const findManyArgs = buildFindManyArgs({
-    adapter: this,
-    depth: 0,
-    fields: collectionConfig.fields,
-    tableName,
+  const ids = []
+
+  result.docs.forEach((data) => {
+    ids.push(data.id)
   })
 
-  findManyArgs.where = where
-
-  const docsToDelete = await this.db.query[tableName].findMany(findManyArgs)
-
-  const result = docsToDelete.map((data) => {
-    return transform({
-      config: this.payload.config,
-      data,
-      fields: collectionConfig.fields,
-    })
-  })
-
-  await this.db.delete(this.tables[tableName]).where(where)
+  if (ids.length > 0) {
+    await db.delete(this.tables[tableName]).where(inArray(this.tables[tableName].id, ids))
+  }
 
   return result
 }

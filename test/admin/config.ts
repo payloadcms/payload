@@ -7,6 +7,7 @@ import { devUser } from '../credentials'
 import AfterDashboard from './components/AfterDashboard'
 import AfterNavLinks from './components/AfterNavLinks'
 import BeforeLogin from './components/BeforeLogin'
+import CustomTabComponent from './components/CustomTabComponent'
 import DemoUIFieldCell from './components/DemoUIField/Cell'
 import DemoUIFieldField from './components/DemoUIField/Field'
 import Logout from './components/Logout'
@@ -164,9 +165,17 @@ export default buildConfigWithDefaults({
               Default: CustomDefaultView,
               Versions: CustomVersionsView,
               MyCustomView: {
-                path: '/custom',
+                path: '/custom-tab-view',
                 Component: CustomView,
-                label: 'Custom',
+                Tab: {
+                  label: 'Custom',
+                  href: '/custom-tab-view',
+                },
+              },
+              MyCustomViewWithCustomTab: {
+                path: '/custom-tab-component',
+                Component: CustomView,
+                Tab: CustomTabComponent,
               },
             },
           },
@@ -293,9 +302,17 @@ export default buildConfigWithDefaults({
               Default: CustomDefaultView,
               Versions: CustomVersionsView,
               MyCustomView: {
-                path: '/custom',
+                path: '/custom-tab-view',
                 Component: CustomView,
-                label: 'Custom',
+                Tab: {
+                  label: 'Custom',
+                  href: '/custom-tab-view',
+                },
+              },
+              MyCustomViewWithCustomTab: {
+                path: '/custom-tab-component',
+                Component: CustomView,
+                Tab: CustomTabComponent,
               },
             },
           },

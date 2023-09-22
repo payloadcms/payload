@@ -60,6 +60,7 @@ export const upsertRow = async ({
   const relationsToInsert: Record<string, unknown>[] = []
   const numbersToInsert: Record<string, unknown>[] = []
   const blocksToInsert: { [blockType: string]: BlockRowToInsert[] } = {}
+  const selectsToInsert: { [selectTableName: string]: Record<string, unknown>[] } = {}
 
   // Maintain a list of promises to run locale, blocks, and relationships
   // all in parallel
@@ -87,6 +88,18 @@ export const upsertRow = async ({
     rowToInsert.numbers.forEach((numberRow) => {
       numberRow.parent = insertedRow.id
       numbersToInsert.push(numberRow)
+    })
+  }
+
+  // If there are selects, add parent to each, and then
+  // store by table name and rows
+  if (Object.keys(rowToInsert.selects).length > 0) {
+    Object.entries(rowToInsert.selects).forEach(([selectTableName, selectRows]) => {
+      selectRows.forEach((row) => {
+        row.parent = insertedRow.id
+        if (!selectsToInsert[selectTableName]) selectsToInsert[selectTableName] = []
+        selectsToInsert[selectTableName].push(row)
+      })
     })
   }
 
@@ -125,11 +138,12 @@ export const upsertRow = async ({
     if (operation === 'update') {
       await deleteExistingRowsByPath({
         adapter,
+        db,
         localeColumnName: 'locale',
-        newRows: relationsToInsert,
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
+        rows: [...relationsToInsert, ...rowToInsert.relationshipsToDelete],
         tableName: relationshipsTableName,
       })
     }
@@ -149,11 +163,12 @@ export const upsertRow = async ({
     if (operation === 'update') {
       await deleteExistingRowsByPath({
         adapter,
+        db,
         localeColumnName: 'locale',
-        newRows: numbersToInsert,
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
+        rows: numbersToInsert,
         tableName: numbersTableName,
       })
     }
@@ -175,9 +190,10 @@ export const upsertRow = async ({
       if (operation === 'update') {
         await deleteExistingRowsByPath({
           adapter,
-          newRows: blockRows.map(({ row }) => row),
+          db,
           parentID: insertedRow.id,
           pathColumnName: '_path',
+          rows: blockRows.map(({ row }) => row),
           tableName: `${tableName}_${blockName}`,
         })
       }
@@ -218,6 +234,7 @@ export const upsertRow = async ({
       await insertArrays({
         adapter,
         arrays: blockRows.map(({ arrays }) => arrays),
+        db,
         parentRows: insertedBlockRows[blockName],
       })
     })
@@ -230,9 +247,10 @@ export const upsertRow = async ({
   promises.push(async () => {
     if (operation === 'update') {
       await Promise.all(
-        Object.entries(rowToInsert.arrays).map(async ([arrayTableName, tableRows]) => {
+        Object.entries(rowToInsert.arrays).map(async ([arrayTableName]) => {
           await deleteExistingArrayRows({
             adapter,
+            db,
             parentID: insertedRow.id,
             tableName: arrayTableName,
           })
@@ -243,8 +261,25 @@ export const upsertRow = async ({
     await insertArrays({
       adapter,
       arrays: [rowToInsert.arrays],
+      db,
       parentRows: [insertedRow],
     })
+  })
+
+  // //////////////////////////////////
+  // INSERT hasMany SELECTS
+  // //////////////////////////////////
+
+  promises.push(async () => {
+    await Promise.all(
+      Object.entries(selectsToInsert).map(async ([selectTableName, tableRows]) => {
+        const selectTable = adapter.tables[selectTableName]
+        if (operation === 'update') {
+          await db.delete(selectTable).where(eq(selectTable.id, insertedRow.id))
+        }
+        await db.insert(selectTable).values(tableRows).returning()
+      }),
+    )
   })
 
   await Promise.all(promises.map((promise) => promise()))

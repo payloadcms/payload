@@ -5,7 +5,7 @@ import { Route } from 'react-router-dom'
 
 import type { CollectionPermission, User } from '../../../../../../auth'
 import type { SanitizedCollectionConfig } from '../../../../../../exports/types'
-import type { collectionViewType } from './RenderCustomView'
+import type { collectionViewType } from './CustomComponent'
 
 import Unauthorized from '../../../Unauthorized'
 

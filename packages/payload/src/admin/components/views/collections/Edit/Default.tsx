@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { Props } from './types'
+import type { CollectionEditViewProps } from './types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
 import { DocumentHeader } from '../../../elements/DocumentHeader'
@@ -10,11 +10,12 @@ import Form from '../../../forms/Form'
 import { useAuth } from '../../../utilities/Auth'
 import { OperationContext } from '../../../utilities/OperationProvider'
 import { CollectionRoutes } from './Routes'
+import { CustomCollectionComponent } from './Routes/CustomComponent'
 import './index.scss'
 
 const baseClass = 'collection-edit'
 
-const DefaultEditView: React.FC<Props> = (props) => {
+const DefaultEditView: React.FC<CollectionEditViewProps> = (props) => {
   const { i18n } = useTranslation('general')
   const { refreshCookieAsync, user } = useAuth()
 
@@ -25,6 +26,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
     collection,
     customHeader,
     data,
+    disableRoutes,
     hasSavePermission,
     internalState,
     isEditing,
@@ -87,7 +89,11 @@ const DefaultEditView: React.FC<Props> = (props) => {
                   id={id}
                   isEditing={isEditing}
                 />
-                <CollectionRoutes {...props} />
+                {disableRoutes ? (
+                  <CustomCollectionComponent view="Default" {...props} />
+                ) : (
+                  <CollectionRoutes {...props} />
+                )}
               </React.Fragment>
             )}
           </Form>

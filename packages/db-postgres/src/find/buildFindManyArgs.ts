@@ -1,5 +1,5 @@
 import type { DBQueryConfig } from 'drizzle-orm'
-import type { ArrayField, Block, Field } from 'payload/types'
+import type { Field } from 'payload/types'
 
 import type { PostgresAdapter } from '../types'
 
@@ -57,9 +57,6 @@ export const buildFindManyArgs = ({
     result.with._locales = _locales
   }
 
-  const locatedBlocks: Block[] = []
-  const locatedArrays: { [path: string]: ArrayField } = {}
-
   traverseFields({
     _locales,
     adapter,
@@ -67,8 +64,6 @@ export const buildFindManyArgs = ({
     currentTableName: tableName,
     depth,
     fields,
-    locatedArrays,
-    locatedBlocks,
     path: '',
     topLevelArgs: result,
     topLevelTableName: tableName,
