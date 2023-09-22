@@ -4,7 +4,7 @@ import type { Field } from 'payload/types'
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
-import type { ArrayRowToInsert, BlockRowToInsert } from './types'
+import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows'
 import { transformArray } from './array'
@@ -33,6 +33,7 @@ type Args = {
   parentTableName: string
   path: string
   relationships: Record<string, unknown>[]
+  relationshipsToDelete: RelationshipToDelete[]
   row: Record<string, unknown>
   selects: {
     [tableName: string]: Record<string, unknown>[]
@@ -53,6 +54,7 @@ export const traverseFields = ({
   parentTableName,
   path,
   relationships,
+  relationshipsToDelete,
   row,
   selects,
 }: Args) => {
@@ -80,8 +82,11 @@ export const traverseFields = ({
                 data: localeData,
                 field,
                 locale: localeKey,
+                numbers,
                 path,
                 relationships,
+                relationshipsToDelete,
+                selects,
               })
 
               arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
@@ -95,8 +100,11 @@ export const traverseFields = ({
           columnName,
           data: data[field.name],
           field,
+          numbers,
           path,
           relationships,
+          relationshipsToDelete,
+          selects,
         })
 
         arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
@@ -115,8 +123,11 @@ export const traverseFields = ({
                 data: localeData,
                 field,
                 locale: localeKey,
+                numbers,
                 path,
                 relationships,
+                relationshipsToDelete,
+                selects,
                 tableName: newTableName,
               })
             }
@@ -127,8 +138,11 @@ export const traverseFields = ({
           blocks,
           data: fieldData,
           field,
+          numbers,
           path,
           relationships,
+          relationshipsToDelete,
+          selects,
           tableName: newTableName,
         })
       }
@@ -154,6 +168,7 @@ export const traverseFields = ({
               parentTableName,
               path: `${path || ''}${field.name}.`,
               relationships,
+              relationshipsToDelete,
               row,
               selects,
             })
@@ -172,6 +187,7 @@ export const traverseFields = ({
             parentTableName,
             path: `${path || ''}${field.name}.`,
             relationships,
+            relationshipsToDelete,
             row,
             selects,
           })
@@ -201,6 +217,7 @@ export const traverseFields = ({
                   parentTableName,
                   path: `${path || ''}${tab.name}.`,
                   relationships,
+                  relationshipsToDelete,
                   row,
                   selects,
                 })
@@ -219,6 +236,7 @@ export const traverseFields = ({
                 parentTableName,
                 path: `${path || ''}${tab.name}.`,
                 relationships,
+                relationshipsToDelete,
                 row,
                 selects,
               })
@@ -238,6 +256,7 @@ export const traverseFields = ({
             parentTableName,
             path,
             relationships,
+            relationshipsToDelete,
             row,
             selects,
           })
@@ -259,6 +278,7 @@ export const traverseFields = ({
         parentTableName,
         path,
         relationships,
+        relationshipsToDelete,
         row,
         selects,
       })
@@ -270,6 +290,14 @@ export const traverseFields = ({
       if (field.localized) {
         if (typeof fieldData === 'object') {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
+            if (localeData === null) {
+              relationshipsToDelete.push({
+                locale: localeKey,
+                path: relationshipPath,
+              })
+              return
+            }
+
             transformRelationship({
               baseRow: {
                 locale: localeKey,
@@ -282,6 +310,11 @@ export const traverseFields = ({
           })
         }
       } else {
+        if (fieldData === null) {
+          relationshipsToDelete.push({ path: relationshipPath })
+          return
+        }
+
         transformRelationship({
           baseRow: {
             path: relationshipPath,
@@ -380,10 +413,10 @@ export const traverseFields = ({
 
       valuesToTransform.forEach(({ localeKey, ref, value }) => {
         if (typeof value !== 'undefined') {
-          let formattedValue = value;
+          let formattedValue = value
 
           if (field.type === 'date' && field.name === 'updatedAt') {
-            formattedValue = new Date().toISOString();
+            formattedValue = new Date().toISOString()
           }
 
           if (localeKey) {

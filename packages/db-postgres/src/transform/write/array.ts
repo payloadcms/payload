@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { ArrayField } from 'payload/types'
 
-import type { ArrayRowToInsert, BlockRowToInsert } from './types'
+import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows'
 import { traverseFields } from './traverseFields'
@@ -15,8 +15,13 @@ type Args = {
   data: unknown
   field: ArrayField
   locale?: string
+  numbers: Record<string, unknown>[]
   path: string
   relationships: Record<string, unknown>[]
+  relationshipsToDelete: RelationshipToDelete[]
+  selects: {
+    [tableName: string]: Record<string, unknown>[]
+  }
 }
 
 export const transformArray = ({
@@ -26,8 +31,11 @@ export const transformArray = ({
   data,
   field,
   locale,
+  numbers,
   path,
   relationships,
+  relationshipsToDelete,
+  selects,
 }: Args) => {
   const newRows: ArrayRowToInsert[] = []
 
@@ -60,10 +68,13 @@ export const transformArray = ({
         fields: field.fields,
         locales: newRow.locales,
         newTableName: arrayTableName,
+        numbers,
         parentTableName: arrayTableName,
         path: `${path || ''}${field.name}.${i}.`,
         relationships,
+        relationshipsToDelete,
         row: newRow.row,
+        selects,
       })
 
       newRows.push(newRow)
