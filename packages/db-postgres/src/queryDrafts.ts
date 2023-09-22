@@ -16,7 +16,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts({
   sort,
   where,
 }) {
-  const db = this.sessions?.[req.transactionID] || this.db
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const tableName = `_${toSnakeCase(collection)}_versions`
   const fields = buildVersionCollectionFields(collectionConfig)
