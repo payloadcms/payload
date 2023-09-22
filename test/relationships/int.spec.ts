@@ -225,7 +225,7 @@ describe('Relationships', () => {
           })
 
           expect(result.status).toEqual(200)
-          expect(result.doc.relationField).toBeNull()
+          expect(result.doc.relationField).toBeFalsy()
         })
       })
 

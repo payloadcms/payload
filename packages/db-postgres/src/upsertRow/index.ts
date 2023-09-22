@@ -140,10 +140,10 @@ export const upsertRow = async ({
         adapter,
         db,
         localeColumnName: 'locale',
-        newRows: relationsToInsert,
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
+        rows: [...relationsToInsert, ...rowToInsert.relationshipsToDelete],
         tableName: relationshipsTableName,
       })
     }
@@ -165,10 +165,10 @@ export const upsertRow = async ({
         adapter,
         db,
         localeColumnName: 'locale',
-        newRows: numbersToInsert,
         parentColumnName: 'parent',
         parentID: insertedRow.id,
         pathColumnName: 'path',
+        rows: numbersToInsert,
         tableName: numbersTableName,
       })
     }
@@ -191,9 +191,9 @@ export const upsertRow = async ({
         await deleteExistingRowsByPath({
           adapter,
           db,
-          newRows: blockRows.map(({ row }) => row),
           parentID: insertedRow.id,
           pathColumnName: '_path',
+          rows: blockRows.map(({ row }) => row),
           tableName: `${tableName}_${blockName}`,
         })
       }
