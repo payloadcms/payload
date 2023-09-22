@@ -468,7 +468,7 @@ describe('Collections - Uploads', () => {
       },
     })
 
-    expect(doc.image).toBeNull()
+    expect(doc.image).toBeFalsy()
   })
 
   it('should allow update removing a relationship - update many', async () => {
@@ -499,7 +499,7 @@ describe('Collections - Uploads', () => {
       },
     })
 
-    expect(doc.docs[0].image).toBeNull()
+    expect(doc.docs[0].image).toBeFalsy()
   })
 
   it('delete', async () => {

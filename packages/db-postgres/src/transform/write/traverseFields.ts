@@ -284,7 +284,7 @@ export const traverseFields = ({
       })
     }
 
-    if (field.type === 'relationship') {
+    if (field.type === 'relationship' || field.type === 'upload') {
       const relationshipPath = `${path || ''}${field.name}`
 
       if (field.localized) {
