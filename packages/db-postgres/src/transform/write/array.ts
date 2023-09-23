@@ -8,10 +8,10 @@ import { traverseFields } from './traverseFields'
 
 type Args = {
   arrayTableName: string
+  baseTableName: string
   blocks: {
     [blockType: string]: BlockRowToInsert[]
   }
-  columnName: string
   data: unknown
   field: ArrayField
   locale?: string
@@ -26,8 +26,8 @@ type Args = {
 
 export const transformArray = ({
   arrayTableName,
+  baseTableName,
   blocks,
-  columnName,
   data,
   field,
   locale,
@@ -43,7 +43,6 @@ export const transformArray = ({
     data.forEach((arrayRow, i) => {
       const newRow: ArrayRowToInsert = {
         arrays: {},
-        columnName,
         locales: {},
         row: {
           _order: i + 1,
@@ -62,12 +61,13 @@ export const transformArray = ({
 
       traverseFields({
         arrays: newRow.arrays,
+        baseTableName,
         blocks,
         columnPrefix: '',
         data: arrayRow,
+        fieldPrefix: '',
         fields: field.fields,
         locales: newRow.locales,
-        newTableName: arrayTableName,
         numbers,
         parentTableName: arrayTableName,
         path: `${path || ''}${field.name}.${i}.`,

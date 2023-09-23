@@ -28,18 +28,20 @@ export const init: Init = async function init(this: PostgresAdapter) {
     buildTable({
       adapter: this,
       buildRelationships: true,
+      disableUnique: false,
       fields: collection.fields,
       tableName,
       timestamps: collection.timestamps,
     })
 
     if (collection.versions) {
-      const versionsTableName = `_${tableName}_versions`
+      const versionsTableName = `_${tableName}_v`
       const versionFields = buildVersionCollectionFields(collection)
 
       buildTable({
         adapter: this,
         buildRelationships: true,
+        disableUnique: true,
         fields: versionFields,
         tableName: versionsTableName,
         timestamps: true,
@@ -53,18 +55,20 @@ export const init: Init = async function init(this: PostgresAdapter) {
     buildTable({
       adapter: this,
       buildRelationships: true,
+      disableUnique: false,
       fields: global.fields,
       tableName,
       timestamps: false,
     })
 
     if (global.versions) {
-      const versionsTableName = `_${tableName}_versions`
+      const versionsTableName = `_${tableName}_v`
       const versionFields = buildVersionGlobalFields(global)
 
       buildTable({
         adapter: this,
         buildRelationships: true,
+        disableUnique: true,
         fields: versionFields,
         tableName: versionsTableName,
         timestamps: true,

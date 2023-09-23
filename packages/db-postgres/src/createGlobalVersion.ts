@@ -16,7 +16,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
   const db = this.sessions?.[req.transactionID] || this.db
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
   const globalTableName = toSnakeCase(globalSlug)
-  const tableName = `_${globalTableName}_versions`
+  const tableName = `_${globalTableName}_v`
 
   const result = await upsertRow({
     adapter: this,

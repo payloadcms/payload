@@ -16,7 +16,7 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
   const db = this.sessions?.[req.transactionID] || this.db
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
-  const tableName = `_${toSnakeCase(collection)}_versions`
+  const tableName = `_${toSnakeCase(collection)}_v`
   const fields = buildVersionCollectionFields(collectionConfig)
 
   const { docs } = await findMany({

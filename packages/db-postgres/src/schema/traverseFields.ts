@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Relation } from 'drizzle-orm'
 import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'drizzle-orm/pg-core'
-import type { Field } from 'payload/types'
+import type { Field, TabAsField } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
 import {
@@ -36,7 +36,7 @@ type Args = {
   columns: Record<string, PgColumnBuilder>
   disableUnique?: boolean
   fieldPrefix?: string
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   forceLocalized?: boolean
   indexes: Record<string, (cols: GenericColumns) => IndexBuilder>
   localesColumns: Record<string, PgColumnBuilder>
@@ -212,6 +212,7 @@ export const traverseFields = ({
             adapter,
             baseColumns,
             baseExtraConfig,
+            disableUnique,
             fields: [],
             tableName: selectTableName,
           })
@@ -268,6 +269,7 @@ export const traverseFields = ({
           adapter,
           baseColumns,
           baseExtraConfig,
+          disableUnique,
           fields: field.fields,
           tableName: arrayTableName,
         })
@@ -328,6 +330,7 @@ export const traverseFields = ({
               adapter,
               baseColumns,
               baseExtraConfig,
+              disableUnique,
               fields: block.fields,
               tableName: blockTableName,
             })
@@ -363,7 +366,39 @@ export const traverseFields = ({
         break
       }
 
+      case 'tab':
       case 'group': {
+        if (!('name' in field)) {
+          const {
+            hasLocalizedField: groupHasLocalizedField,
+            hasLocalizedManyNumberField: groupHasLocalizedManyNumberField,
+            hasLocalizedRelationshipField: groupHasLocalizedRelationshipField,
+            hasManyNumberField: groupHasManyNumberField,
+          } = traverseFields({
+            adapter,
+            buildRelationships,
+            columnPrefix,
+            columns,
+            disableUnique,
+            fieldPrefix,
+            fields: field.fields,
+            forceLocalized,
+            indexes,
+            localesColumns,
+            localesIndexes,
+            newTableName: parentTableName,
+            parentTableName,
+            relationsToBuild,
+            relationships,
+          })
+
+          if (groupHasLocalizedField) hasLocalizedField = true
+          if (groupHasLocalizedRelationshipField) hasLocalizedRelationshipField = true
+          if (groupHasManyNumberField) hasManyNumberField = true
+          if (groupHasLocalizedManyNumberField) hasLocalizedManyNumberField = true
+          break
+        }
+
         const {
           hasLocalizedField: groupHasLocalizedField,
           hasLocalizedManyNumberField: groupHasLocalizedManyNumberField,
@@ -395,63 +430,44 @@ export const traverseFields = ({
       }
 
       case 'tabs': {
-        field.tabs.forEach((tab) => {
-          if ('name' in tab) {
-            const {
-              hasLocalizedField: tabHasLocalizedField,
-              hasLocalizedManyNumberField: tabHasLocalizedManyNumberField,
-              hasLocalizedRelationshipField: tabHasLocalizedRelationshipField,
-              hasManyNumberField: tabHasManyNumberField,
-            } = traverseFields({
-              adapter,
-              buildRelationships,
-              columnPrefix: `${columnPrefix || ''}${toSnakeCase(tab.name)}_`,
-              columns,
-              disableUnique,
-              fieldPrefix: `${fieldPrefix || ''}${tab.name}_`,
-              fields: tab.fields,
-              indexes,
-              localesColumns,
-              localesIndexes,
-              newTableName: `${parentTableName}_${columnPrefix || ''}${toSnakeCase(tab.name)}`,
-              parentTableName,
-              relationsToBuild,
-              relationships,
-            })
-
-            if (tabHasLocalizedField) hasLocalizedField = true
-            if (tabHasLocalizedRelationshipField) hasLocalizedRelationshipField = true
-            if (tabHasManyNumberField) hasManyNumberField = true
-            if (tabHasLocalizedManyNumberField) hasLocalizedManyNumberField = true
-          } else {
-            ;({ hasLocalizedField, hasLocalizedRelationshipField } = traverseFields({
-              adapter,
-              buildRelationships,
-              columnPrefix,
-              columns,
-              disableUnique,
-              fieldPrefix,
-              fields: tab.fields,
-              indexes,
-              localesColumns,
-              localesIndexes,
-              newTableName: parentTableName,
-              parentTableName,
-              relationsToBuild,
-              relationships,
-            }))
-          }
+        const {
+          hasLocalizedField: tabHasLocalizedField,
+          hasLocalizedManyNumberField: tabHasLocalizedManyNumberField,
+          hasLocalizedRelationshipField: tabHasLocalizedRelationshipField,
+          hasManyNumberField: tabHasManyNumberField,
+        } = traverseFields({
+          adapter,
+          buildRelationships,
+          columnPrefix,
+          columns,
+          disableUnique,
+          fieldPrefix,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          forceLocalized,
+          indexes,
+          localesColumns,
+          localesIndexes,
+          newTableName,
+          parentTableName,
+          relationsToBuild,
+          relationships,
         })
+
+        if (tabHasLocalizedField) hasLocalizedField = true
+        if (tabHasLocalizedRelationshipField) hasLocalizedRelationshipField = true
+        if (tabHasManyNumberField) hasManyNumberField = true
+        if (tabHasLocalizedManyNumberField) hasLocalizedManyNumberField = true
+
         break
       }
 
       case 'row':
       case 'collapsible': {
-        ;({
-          hasLocalizedField,
-          hasLocalizedManyNumberField,
-          hasLocalizedRelationshipField,
-          hasManyNumberField,
+        const {
+          hasLocalizedField: rowHasLocalizedField,
+          hasLocalizedManyNumberField: rowHasLocalizedManyNumberField,
+          hasLocalizedRelationshipField: rowHasLocalizedRelationshipField,
+          hasManyNumberField: rowHasManyNumberField,
         } = traverseFields({
           adapter,
           buildRelationships,
@@ -460,6 +476,7 @@ export const traverseFields = ({
           disableUnique,
           fieldPrefix,
           fields: field.fields,
+          forceLocalized,
           indexes,
           localesColumns,
           localesIndexes,
@@ -467,7 +484,12 @@ export const traverseFields = ({
           parentTableName,
           relationsToBuild,
           relationships,
-        }))
+        })
+
+        if (rowHasLocalizedField) hasLocalizedField = true
+        if (rowHasLocalizedRelationshipField) hasLocalizedRelationshipField = true
+        if (rowHasManyNumberField) hasManyNumberField = true
+        if (rowHasLocalizedManyNumberField) hasLocalizedManyNumberField = true
         break
       }
 
