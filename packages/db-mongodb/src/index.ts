@@ -27,6 +27,7 @@ import { beginTransaction } from './transactions/beginTransaction'
 import { commitTransaction } from './transactions/commitTransaction'
 import { rollbackTransaction } from './transactions/rollbackTransaction'
 import { updateGlobal } from './updateGlobal'
+import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateOne } from './updateOne'
 import { updateVersion } from './updateVersion'
 import { webpack } from './webpack'
@@ -101,6 +102,7 @@ export function mongooseAdapter({
       rollbackTransaction,
       sessions: {},
       updateGlobal,
+      updateGlobalVersion,
       updateOne,
       updateVersion,
       url,
