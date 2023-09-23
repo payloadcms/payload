@@ -6,6 +6,8 @@ export {
   CreateArgs,
   CreateGlobal,
   CreateGlobalArgs,
+  CreateGlobalVersion,
+  CreateGlobalVersionArgs,
   CreateMigration,
   CreateVersion,
   CreateVersionArgs,

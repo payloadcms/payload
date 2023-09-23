@@ -15,7 +15,7 @@ export type globalViewType =
   | 'Version'
   | 'Versions'
 
-const defaultViews: {
+export const defaultGlobalViews: {
   [key in globalViewType]: React.ComponentType<any>
 } = {
   API: null,
@@ -48,7 +48,7 @@ export const CustomGlobalComponent = (
         typeof Edit?.[view] === 'object' &&
         typeof Edit[view].Component === 'function'
       ? Edit[view].Component
-      : defaultViews[view]
+      : defaultGlobalViews[view]
 
   if (Component) {
     return <Component {...args} />

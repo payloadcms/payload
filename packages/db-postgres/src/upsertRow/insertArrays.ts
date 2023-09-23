@@ -62,14 +62,13 @@ export const insertArrays = async ({ adapter, arrays, db, parentRows }: Args): P
   // (one insert per array table)
   await Promise.all(
     Object.entries(rowsByTable).map(async ([tableName, row]) => {
-      await db.insert(adapter.tables[tableName]).values(row.rows).returning()
+      if (row.rows.length > 0) {
+        await db.insert(adapter.tables[tableName]).values(row.rows).returning()
+      }
 
       // Insert locale rows
-      if (adapter.tables[`${tableName}_locales`]) {
-        await db
-          .insert(adapter.tables[`${tableName}_locales`])
-          .values(row.locales)
-          .returning()
+      if (adapter.tables[`${tableName}_locales`] && row.locales.length > 0) {
+        await db.insert(adapter.tables[`${tableName}_locales`]).values(row.locales).returning()
       }
 
       // If there are sub arrays, call this function recursively

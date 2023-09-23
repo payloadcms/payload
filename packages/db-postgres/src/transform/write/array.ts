@@ -1,33 +1,41 @@
 /* eslint-disable no-param-reassign */
 import type { ArrayField } from 'payload/types'
 
-import type { ArrayRowToInsert, BlockRowToInsert } from './types'
+import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows'
 import { traverseFields } from './traverseFields'
 
 type Args = {
   arrayTableName: string
+  baseTableName: string
   blocks: {
     [blockType: string]: BlockRowToInsert[]
   }
-  columnName: string
   data: unknown
   field: ArrayField
   locale?: string
+  numbers: Record<string, unknown>[]
   path: string
   relationships: Record<string, unknown>[]
+  relationshipsToDelete: RelationshipToDelete[]
+  selects: {
+    [tableName: string]: Record<string, unknown>[]
+  }
 }
 
 export const transformArray = ({
   arrayTableName,
+  baseTableName,
   blocks,
-  columnName,
   data,
   field,
   locale,
+  numbers,
   path,
   relationships,
+  relationshipsToDelete,
+  selects,
 }: Args) => {
   const newRows: ArrayRowToInsert[] = []
 
@@ -35,7 +43,6 @@ export const transformArray = ({
     data.forEach((arrayRow, i) => {
       const newRow: ArrayRowToInsert = {
         arrays: {},
-        columnName,
         locales: {},
         row: {
           _order: i + 1,
@@ -54,16 +61,20 @@ export const transformArray = ({
 
       traverseFields({
         arrays: newRow.arrays,
+        baseTableName,
         blocks,
         columnPrefix: '',
         data: arrayRow,
+        fieldPrefix: '',
         fields: field.fields,
         locales: newRow.locales,
-        newTableName: arrayTableName,
+        numbers,
         parentTableName: arrayTableName,
         path: `${path || ''}${field.name}.${i}.`,
         relationships,
+        relationshipsToDelete,
         row: newRow.row,
+        selects,
       })
 
       newRows.push(newRow)

@@ -3,7 +3,7 @@ import type { SanitizedConfig } from 'payload/config'
 import type { Field, TypeWithID } from 'payload/types'
 
 import { createBlocksMap } from '../../utilities/createBlocksMap'
-import { createPathMap } from '../../utilities/createPathMap'
+import { createPathMap } from '../../utilities/createRelationshipMap'
 import { traverseFields } from './traverseFields'
 
 type TransformArgs = {

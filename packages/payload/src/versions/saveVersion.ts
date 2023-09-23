@@ -45,8 +45,10 @@ export const saveVersion = async ({
 
   try {
     if (autosave) {
-      const { docs } = await payload.db.findVersions({
-        collection: entityConfig.slug,
+      let docs
+      const findVersionArgs = {
+        collectionSlug: collection.slug,
+        globalSlug: collection.slug,
         limit: 1,
         req,
         sort: '-updatedAt',
@@ -55,11 +57,22 @@ export const saveVersion = async ({
             equals: id,
           },
         },
-      })
+      }
+      if (collection) {
+        ;({ docs } = await payload.db.findVersions({
+          ...findVersionArgs,
+          collection: collection.slug,
+        }))
+      } else {
+        ;({ docs } = await payload.db.findGlobalVersions({
+          ...findVersionArgs,
+          global: global.slug,
+        }))
+      }
       const [latestVersion] = docs
 
       // overwrite the latest version if it's set to autosave
-      if ((latestVersion as any)?.autosave === true) {
+      if (latestVersion?.autosave === true) {
         createNewVersion = false
 
         const data: Record<string, unknown> = {
@@ -68,25 +81,49 @@ export const saveVersion = async ({
           version: versionData,
         }
 
-        result = await payload.db.updateVersion({
+        const updateVersionArgs = {
           id: latestVersion.id,
-          collectionSlug: entityConfig.slug,
           req,
           versionData: data,
-        })
+        }
+        if (collection) {
+          result = await payload.db.updateVersion({
+            ...updateVersionArgs,
+            collection: collection.slug,
+          })
+        } else {
+          result = await payload.db.updateGlobalVersion({
+            ...updateVersionArgs,
+            global: global.slug,
+          })
+        }
       }
     }
 
     if (createNewVersion) {
-      result = await payload.db.createVersion({
-        autosave: Boolean(autosave),
-        collectionSlug: entityConfig.slug,
-        createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
-        parent: collection ? id : undefined,
-        req,
-        updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
-        versionData,
-      })
+      if (collection) {
+        result = await payload.db.createVersion({
+          autosave: Boolean(autosave),
+          collectionSlug: entityConfig.slug,
+          createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
+          parent: collection ? id : undefined,
+          req,
+          updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
+          versionData,
+        })
+      }
+
+      if (global) {
+        result = await payload.db.createGlobalVersion({
+          autosave: Boolean(autosave),
+          createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
+          globalSlug: entityConfig.slug,
+          parent: collection ? id : undefined,
+          req,
+          updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),
+          versionData,
+        })
+      }
     }
   } catch (err) {
     let errorMessage: string
@@ -115,8 +152,6 @@ export const saveVersion = async ({
       req,
     })
   }
-
-  result = JSON.parse(JSON.stringify(result))
 
   let createdVersion = result.version
   createdVersion.createdAt = result.createdAt

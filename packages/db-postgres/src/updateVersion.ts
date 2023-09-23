@@ -11,12 +11,12 @@ import { upsertRow } from './upsertRow'
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: PostgresAdapter,
-  { id, collectionSlug, locale, req = {} as PayloadRequest, versionData, where: whereArg },
+  { id, collection, locale, req = {} as PayloadRequest, versionData, where: whereArg },
 ) {
   const db = this.sessions?.[req.transactionID] || this.db
-  const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collectionSlug].config
+  const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const whereToUse = whereArg || { id: { equals: id } }
-  const tableName = `_${toSnakeCase(collectionSlug)}_versions`
+  const tableName = `_${toSnakeCase(collection)}_v`
   const fields = buildVersionCollectionFields(collectionConfig)
 
   const { where } = await buildQuery({

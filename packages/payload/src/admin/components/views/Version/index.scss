@@ -38,10 +38,6 @@
   }
 
   @include mid-break {
-    &__wrap {
-      padding-top: 0;
-    }
-
     &__intro,
     &__header {
       display: block;
@@ -49,8 +45,6 @@
 
     &__controls {
       display: block;
-      margin: 0 base(-0.5) base(2);
-
       > * {
         margin-bottom: base(0.5);
       }
@@ -58,6 +52,12 @@
 
     &__restore {
       margin: base(0.5) 0 0 0;
+    }
+  }
+
+  @include small-break {
+    &__wrap {
+      padding-top: calc(var(--base) / 2);
     }
   }
 }

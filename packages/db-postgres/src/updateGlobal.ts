@@ -18,13 +18,12 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
   const existingGlobal = await this.db.query[tableName].findFirst({})
 
   const result = await upsertRow({
-    id: existingGlobal.id,
+    ...(existingGlobal ? { id: existingGlobal.id, operation: 'update' } : { operation: 'create' }),
     adapter: this,
     data,
     db,
     fields: globalConfig.fields,
-    operation: 'update',
-    tableName: toSnakeCase(slug),
+    tableName,
   })
 
   return result

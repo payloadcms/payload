@@ -7,6 +7,7 @@ import type { Args, PostgresAdapter, PostgresAdapterResult } from './types'
 import { connect } from './connect'
 import { create } from './create'
 import { createGlobal } from './createGlobal'
+import { createGlobalVersion } from './createGlobalVersion'
 import { createMigration } from './createMigration'
 import { createVersion } from './createVersion'
 import { deleteMany } from './deleteMany'
@@ -24,6 +25,7 @@ import { commitTransaction } from './transactions/commitTransaction'
 import { rollbackTransaction } from './transactions/rollbackTransaction'
 import { updateOne } from './update'
 import { updateGlobal } from './updateGlobal'
+import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateVersion } from './updateVersion'
 import { webpack } from './webpack'
 
@@ -31,8 +33,6 @@ import { webpack } from './webpack'
 
 export function postgresAdapter(args: Args): PostgresAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
       beginTransaction,
@@ -41,6 +41,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       connect,
       create,
       createGlobal,
+      createGlobalVersion,
       createMigration,
       createVersion,
       db: undefined,
@@ -61,9 +62,11 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       queryDrafts,
       relations: {},
       rollbackTransaction,
+      schema: {},
       sessions: {},
       tables: {},
       updateGlobal,
+      updateGlobalVersion,
       updateOne,
       updateVersion,
       webpack,

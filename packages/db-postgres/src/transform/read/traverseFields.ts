@@ -211,7 +211,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         return result
       }
 
-      if (field.type === 'relationship') {
+      if (field.type === 'relationship' || field.type === 'upload') {
         const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
         if (!relationPathMatch) return result
 
@@ -283,8 +283,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
         if (Array.isArray(fieldData)) {
           if (field.localized) {
             result[field.name] = fieldData.reduce((selectResult, row) => {
-              if (typeof row._locale === 'string') {
-                selectResult[row._locale] = row.value
+              if (typeof row.locale === 'string') {
+                if (!selectResult[row.locale]) selectResult[row.locale] = []
+                selectResult[row.locale].push(row.value)
               }
 
               return selectResult
@@ -372,8 +373,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
           case 'date': {
             let val = fieldData
 
-            if (fieldData instanceof Date) {
-              val = fieldData.toISOString()
+            if (typeof fieldData === 'string') {
+              val = new Date(fieldData).toISOString()
             }
 
             if (typeof locale === 'string') {

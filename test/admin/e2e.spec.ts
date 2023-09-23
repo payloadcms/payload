@@ -43,14 +43,14 @@ describe('admin', () => {
   })
 
   describe('Nav', () => {
-    test('should nav to collection - sidebar', async () => {
+    test('should nav to collection - main menu', async () => {
       await page.goto(url.admin)
       await openMainMenu(page)
       await page.locator(`#nav-${slug}`).click()
       expect(page.url()).toContain(url.list)
     })
 
-    test('should nav to a global - sidebar', async () => {
+    test('should nav to a global - main menu', async () => {
       await page.goto(url.admin)
       await openMainMenu(page)
       await page.locator(`#nav-global-${globalSlug}`).click()

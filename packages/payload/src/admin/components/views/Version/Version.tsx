@@ -18,6 +18,7 @@ import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
 import Meta from '../../utilities/Meta'
+import NotFound from '../NotFound'
 import CompareVersion from './Compare'
 import RenderFieldsToDiff from './RenderFieldsToDiff'
 import fieldComponents from './RenderFieldsToDiff/fields'
@@ -84,7 +85,7 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
       ? originalDocFetchURL
       : `${compareBaseURL}/${compareValue.value}`
 
-  const [{ data: doc, isLoading: isLoadingData }] = usePayloadAPI(versionFetchURL, {
+  const [{ data: doc, isError, isLoading: isLoadingData }] = usePayloadAPI(versionFetchURL, {
     initialParams: { depth: 1, locale: '*' },
   })
   const [{ data: publishedDoc }] = usePayloadAPI(originalDocFetchURL, {
@@ -191,6 +192,10 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
   }
 
   const canUpdate = docPermissions?.update?.permission
+
+  if (isError) {
+    return <NotFound marginTop="large" />
+  }
 
   return (
     <React.Fragment>

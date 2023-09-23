@@ -4,7 +4,7 @@ import type { Field } from 'payload/types'
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
-import type { ArrayRowToInsert, BlockRowToInsert } from './types'
+import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows'
 import { transformArray } from './array'
@@ -17,22 +17,38 @@ type Args = {
   arrays: {
     [tableName: string]: ArrayRowToInsert[]
   }
+  /**
+   * This is the name of the base table
+   */
+  baseTableName: string
   blocks: {
     [blockType: string]: BlockRowToInsert[]
   }
+  /**
+   * A snake-case field prefix, representing prior fields
+   * Ex: my_group_my_named_tab_
+   */
   columnPrefix: string
   data: Record<string, unknown>
   existingLocales?: Record<string, unknown>[]
+  /**
+   * A prefix that will retain camel-case formatting, representing prior fields
+   * Ex: myGroup_myNamedTab_
+   */
+  fieldPrefix: string
   fields: Field[]
   forcedLocale?: string
   locales: {
     [locale: string]: Record<string, unknown>
   }
-  newTableName: string
   numbers: Record<string, unknown>[]
+  /**
+   * This is the name of the parent table
+   */
   parentTableName: string
   path: string
   relationships: Record<string, unknown>[]
+  relationshipsToDelete: RelationshipToDelete[]
   row: Record<string, unknown>
   selects: {
     [tableName: string]: Record<string, unknown>[]
@@ -41,32 +57,37 @@ type Args = {
 
 export const traverseFields = ({
   arrays,
+  baseTableName,
   blocks,
   columnPrefix,
   data,
   existingLocales,
+  fieldPrefix,
   fields,
   forcedLocale,
   locales,
-  newTableName,
   numbers,
   parentTableName,
   path,
   relationships,
+  relationshipsToDelete,
   row,
   selects,
 }: Args) => {
   fields.forEach((field) => {
     let columnName = ''
+    let fieldName = ''
     let fieldData: unknown
 
     if (fieldAffectsData(field)) {
-      columnName = `${columnPrefix || ''}${field.name}`
+      columnName = `${columnPrefix || ''}${toSnakeCase(field.name)}`
+      fieldName = `${fieldPrefix || ''}${field.name}`
       fieldData = data[field.name]
     }
 
     if (field.type === 'array') {
-      const arrayTableName = `${newTableName}_${toSnakeCase(field.name)}`
+      const arrayTableName = `${parentTableName}_${columnName}`
+
       if (!arrays[arrayTableName]) arrays[arrayTableName] = []
 
       if (field.localized) {
@@ -75,13 +96,16 @@ export const traverseFields = ({
             if (Array.isArray(localeData)) {
               const newRows = transformArray({
                 arrayTableName,
+                baseTableName,
                 blocks,
-                columnName,
                 data: localeData,
                 field,
                 locale: localeKey,
+                numbers,
                 path,
                 relationships,
+                relationshipsToDelete,
+                selects,
               })
 
               arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
@@ -91,12 +115,15 @@ export const traverseFields = ({
       } else {
         const newRows = transformArray({
           arrayTableName,
+          baseTableName,
           blocks,
-          columnName,
           data: data[field.name],
           field,
+          numbers,
           path,
           relationships,
+          relationshipsToDelete,
+          selects,
         })
 
         arrays[arrayTableName] = arrays[arrayTableName].concat(newRows)
@@ -111,25 +138,31 @@ export const traverseFields = ({
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
               transformBlocks({
+                baseTableName,
                 blocks,
                 data: localeData,
                 field,
                 locale: localeKey,
+                numbers,
                 path,
                 relationships,
-                tableName: newTableName,
+                relationshipsToDelete,
+                selects,
               })
             }
           })
         }
       } else if (isArrayOfRows(fieldData)) {
         transformBlocks({
+          baseTableName,
           blocks,
           data: fieldData,
           field,
+          numbers,
           path,
           relationships,
-          tableName: newTableName,
+          relationshipsToDelete,
+          selects,
         })
       }
 
@@ -142,18 +175,20 @@ export const traverseFields = ({
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             traverseFields({
               arrays,
+              baseTableName,
               blocks,
               columnPrefix: `${columnName}_`,
               data: localeData as Record<string, unknown>,
               existingLocales,
+              fieldPrefix: `${fieldName}_`,
               fields: field.fields,
               forcedLocale: localeKey,
               locales,
-              newTableName: parentTableName,
               numbers,
               parentTableName,
               path: `${path || ''}${field.name}.`,
               relationships,
+              relationshipsToDelete,
               row,
               selects,
             })
@@ -161,17 +196,19 @@ export const traverseFields = ({
         } else {
           traverseFields({
             arrays,
+            baseTableName,
             blocks,
             columnPrefix: `${columnName}_`,
             data: data[field.name] as Record<string, unknown>,
             existingLocales,
+            fieldPrefix: `${fieldName}_`,
             fields: field.fields,
             locales,
-            newTableName: parentTableName,
             numbers,
             parentTableName,
             path: `${path || ''}${field.name}.`,
             relationships,
+            relationshipsToDelete,
             row,
             selects,
           })
@@ -189,18 +226,20 @@ export const traverseFields = ({
               Object.entries(data[tab.name]).forEach(([localeKey, localeData]) => {
                 traverseFields({
                   arrays,
+                  baseTableName,
                   blocks,
-                  columnPrefix: `${columnPrefix || ''}${tab.name}_`,
+                  columnPrefix: `${columnPrefix || ''}${toSnakeCase(tab.name)}_`,
                   data: localeData as Record<string, unknown>,
                   existingLocales,
+                  fieldPrefix: `${fieldPrefix || ''}${tab.name}_`,
                   fields: tab.fields,
                   forcedLocale: localeKey,
                   locales,
-                  newTableName: parentTableName,
                   numbers,
                   parentTableName,
                   path: `${path || ''}${tab.name}.`,
                   relationships,
+                  relationshipsToDelete,
                   row,
                   selects,
                 })
@@ -208,17 +247,19 @@ export const traverseFields = ({
             } else {
               traverseFields({
                 arrays,
+                baseTableName,
                 blocks,
-                columnPrefix: `${columnPrefix || ''}${tab.name}_`,
+                columnPrefix: `${columnPrefix || ''}${toSnakeCase(tab.name)}_`,
                 data: data[tab.name] as Record<string, unknown>,
                 existingLocales,
+                fieldPrefix: `${fieldPrefix || ''}${tab.name}_`,
                 fields: tab.fields,
                 locales,
-                newTableName: parentTableName,
                 numbers,
                 parentTableName,
                 path: `${path || ''}${tab.name}.`,
                 relationships,
+                relationshipsToDelete,
                 row,
                 selects,
               })
@@ -227,17 +268,19 @@ export const traverseFields = ({
         } else {
           traverseFields({
             arrays,
+            baseTableName,
             blocks,
             columnPrefix,
             data,
             existingLocales,
+            fieldPrefix,
             fields: tab.fields,
             locales,
-            newTableName: parentTableName,
             numbers,
             parentTableName,
             path,
             relationships,
+            relationshipsToDelete,
             row,
             selects,
           })
@@ -248,28 +291,38 @@ export const traverseFields = ({
     if (field.type === 'row' || field.type === 'collapsible') {
       traverseFields({
         arrays,
+        baseTableName,
         blocks,
         columnPrefix,
         data,
         existingLocales,
+        fieldPrefix,
         fields: field.fields,
         locales,
-        newTableName: parentTableName,
         numbers,
         parentTableName,
         path,
         relationships,
+        relationshipsToDelete,
         row,
         selects,
       })
     }
 
-    if (field.type === 'relationship') {
+    if (field.type === 'relationship' || field.type === 'upload') {
       const relationshipPath = `${path || ''}${field.name}`
 
       if (field.localized) {
         if (typeof fieldData === 'object') {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
+            if (localeData === null) {
+              relationshipsToDelete.push({
+                locale: localeKey,
+                path: relationshipPath,
+              })
+              return
+            }
+
             transformRelationship({
               baseRow: {
                 locale: localeKey,
@@ -282,6 +335,11 @@ export const traverseFields = ({
           })
         }
       } else {
+        if (fieldData === null) {
+          relationshipsToDelete.push({ path: relationshipPath })
+          return
+        }
+
         transformRelationship({
           baseRow: {
             path: relationshipPath,
@@ -295,23 +353,25 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type === 'number' && field.hasMany && Array.isArray(fieldData)) {
+    if (field.type === 'number' && field.hasMany) {
       const numberPath = `${path || ''}${field.name}`
 
       if (field.localized) {
         if (typeof fieldData === 'object') {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
-            transformNumbers({
-              baseRow: {
-                locale: localeKey,
-                path: numberPath,
-              },
-              data: localeData,
-              numbers,
-            })
+            if (Array.isArray(localeData)) {
+              transformNumbers({
+                baseRow: {
+                  locale: localeKey,
+                  path: numberPath,
+                },
+                data: localeData,
+                numbers,
+              })
+            }
           })
         }
-      } else {
+      } else if (Array.isArray(fieldData)) {
         transformNumbers({
           baseRow: {
             path: numberPath,
@@ -324,8 +384,8 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type === 'select' && field.hasMany && Array.isArray(fieldData)) {
-      const selectTableName = `${newTableName}_${toSnakeCase(field.name)}`
+    if (field.type === 'select' && field.hasMany) {
+      const selectTableName = `${parentTableName}_${columnName}`
       if (!selects[selectTableName]) selects[selectTableName] = []
 
       if (field.localized) {
@@ -341,7 +401,7 @@ export const traverseFields = ({
             }
           })
         }
-      } else {
+      } else if (Array.isArray(data[field.name])) {
         const newRows = transformSelects({
           data: data[field.name],
         })
@@ -380,16 +440,16 @@ export const traverseFields = ({
 
       valuesToTransform.forEach(({ localeKey, ref, value }) => {
         if (typeof value !== 'undefined') {
-          let formattedValue = value;
+          let formattedValue = value
 
           if (field.type === 'date' && field.name === 'updatedAt') {
-            formattedValue = new Date().toISOString();
+            formattedValue = new Date().toISOString()
           }
 
           if (localeKey) {
-            ref[localeKey][columnName] = formattedValue
+            ref[localeKey][fieldName] = formattedValue
           } else {
-            ref[columnName] = formattedValue
+            ref[fieldName] = formattedValue
           }
         }
       })

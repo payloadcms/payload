@@ -178,7 +178,7 @@ const defaults: DefaultsType = {
     operators: [
       ...[...operators.equality, ...operators.contains].map((operator) => ({
         name: operator,
-        type: GraphQLString,
+        type: GraphQLJSON,
       })),
     ],
   },

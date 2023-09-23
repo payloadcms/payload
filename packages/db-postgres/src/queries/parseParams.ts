@@ -2,11 +2,12 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload/types'
 
-import { and, ilike } from 'drizzle-orm'
+import { and, ilike, isNotNull } from 'drizzle-orm'
+import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
 import type { GenericColumn, PostgresAdapter } from '../types'
-import type { BuildQueryJoins } from './buildQuery'
+import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
 
 import { buildAndOrConditions } from './buildAndOrConditions'
 import { getTableColumnFromPath } from './getTableColumnFromPath'
@@ -16,6 +17,7 @@ import { sanitizeQueryValue } from './sanitizeQueryValue'
 type Args = {
   adapter: PostgresAdapter
   fields: Field[]
+  joinAliases: BuildQueryJoinAliases
   joins: BuildQueryJoins
   locale: string
   selectFields: Record<string, GenericColumn>
@@ -26,6 +28,7 @@ type Args = {
 export async function parseParams({
   adapter,
   fields,
+  joinAliases,
   joins,
   locale,
   selectFields,
@@ -50,6 +53,7 @@ export async function parseParams({
           const builtConditions = await buildAndOrConditions({
             adapter,
             fields,
+            joinAliases,
             joins,
             locale,
             selectFields,
@@ -75,12 +79,14 @@ export async function parseParams({
                   columnName,
                   constraints: queryConstraints,
                   field,
+                  getNotNullColumnByValue,
                   rawColumn,
                   table,
                 } = getTableColumnFromPath({
                   adapter,
                   collectionPath: relationOrPath,
                   fields,
+                  joinAliases,
                   joins,
                   locale,
                   pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
@@ -93,8 +99,14 @@ export async function parseParams({
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
                   constraints.push(operatorMap.equals(constraintTable[col], value))
                 })
-
-                if (operator === 'like') {
+                if (getNotNullColumnByValue) {
+                  const columnName = getNotNullColumnByValue(val)
+                  if (columnName) {
+                    constraints.push(isNotNull(table[columnName]))
+                  } else {
+                    throw new QueryError([{ path: relationOrPath }])
+                  }
+                } else if (operator === 'like') {
                   constraints.push(
                     and(...val.split(' ').map((word) => ilike(table[columnName], `%${word}%`))),
                   )
