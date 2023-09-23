@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Redirect, useHistory, useRouteMatch } from 'react-router-dom'
+import { useHistory, useRouteMatch } from 'react-router-dom'
 
 import type { CollectionPermission } from '../../../../../auth'
 import type { Fields } from '../../../forms/Form/types'
@@ -14,6 +14,7 @@ import { useDocumentInfo } from '../../../utilities/DocumentInfo'
 import { EditDepthContext } from '../../../utilities/EditDepth'
 import { useLocale } from '../../../utilities/Locale'
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent'
+import NotFound from '../../NotFound'
 import DefaultEdit from './Default'
 import formatFields from './formatFields'
 
@@ -106,7 +107,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   }, [history, redirect])
 
   if (isError) {
-    return <Redirect to={`${admin}/not-found`} />
+    return <NotFound marginTop="large" />
   }
 
   const apiURL = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}${

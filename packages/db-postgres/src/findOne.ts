@@ -36,6 +36,10 @@ export const findOne: FindOne = async function findOne({
 
   const doc = await db.query[tableName].findFirst(findManyArgs)
 
+  if (!doc) {
+    return null
+  }
+
   return transform({
     config: this.payload.config,
     data: doc,

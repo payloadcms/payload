@@ -1,7 +1,7 @@
 import type { CreateVersion } from 'payload/database'
 import type { PayloadRequest } from 'payload/dist/express/types'
 
-import { and, eq, ne } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
@@ -9,14 +9,14 @@ import type { PostgresAdapter } from './types'
 
 import { upsertRow } from './upsertRow'
 
-export const createVersion: CreateVersion = async function createVersion (
+export const createVersion: CreateVersion = async function createVersion(
   this: PostgresAdapter,
   { autosave, collectionSlug, parent, req = {} as PayloadRequest, versionData },
 ) {
   const db = this.sessions?.[req.transactionID] || this.db
   const collection = this.payload.collections[collectionSlug].config
-  const tableName = toSnakeCase(collectionSlug)
-  const versionTableName = `_${tableName}_versions`;
+  const collectionTableName = toSnakeCase(collectionSlug)
+  const tableName = `_${collectionTableName}_versions`
 
   const result = await upsertRow({
     adapter: this,
@@ -29,15 +29,23 @@ export const createVersion: CreateVersion = async function createVersion (
     db,
     fields: buildVersionCollectionFields(collection),
     operation: 'create',
-    tableName: versionTableName,
+    tableName,
   })
 
-  await db.update(this.tables[versionTableName])
-    .set({latest: false})
-    .where(and(
-      eq(this.tables[versionTableName].latest, true),
-      ne(this.tables[versionTableName].id, result.id),
-    ));
+  const table = this.tables[tableName]
+  const relationshipsTable = this.tables[`${tableName}_relationships`]
+
+  if (collection.versions.drafts) {
+    await db.execute(sql`
+      UPDATE ${table}
+      SET latest = false
+      FROM ${relationshipsTable}
+      WHERE ${table.id} = ${relationshipsTable.parent}
+        AND ${relationshipsTable.path} = ${'parent'}
+        AND ${relationshipsTable[`${collectionSlug}ID`]} = ${parent}
+        AND ${table.id} != ${result.id};
+  `)
+  }
 
   return result
 }

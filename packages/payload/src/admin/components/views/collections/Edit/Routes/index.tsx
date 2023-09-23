@@ -4,6 +4,7 @@ import { Route, Switch, useRouteMatch } from 'react-router-dom'
 
 import { useAuth } from '../../../../utilities/Auth'
 import { useConfig } from '../../../../utilities/Config'
+import NotFound from '../../../NotFound'
 import { type Props } from '../types'
 import { CustomCollectionComponent } from './CustomComponent'
 import { collectionCustomRoutes } from './custom'
@@ -52,8 +53,15 @@ export const CollectionRoutes: React.FC<Props> = (props) => {
         permissions,
         user,
       })}
-      <Route>
+      <Route
+        exact
+        key={`${collection.slug}-view`}
+        path={`${adminRoute}/collections/${collection.slug}/:id`}
+      >
         <CustomCollectionComponent view="Default" {...props} />
+      </Route>
+      <Route path={`${match.url}*`}>
+        <NotFound marginTop="large" />
       </Route>
     </Switch>
   )

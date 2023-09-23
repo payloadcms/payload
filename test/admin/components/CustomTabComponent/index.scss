@@ -1,0 +1,10 @@
+.custom-doc-tab {
+  text-decoration: none;
+  background-color: var(--theme-elevation-200);
+  padding: 0 6px;
+  border-radius: 2px;
+
+  &:hover {
+    background-color: var(--theme-elevation-300);
+  }
+}

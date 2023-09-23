@@ -41,7 +41,7 @@ export const findMany = async function find({
   let pagingCounter: number
   let selectDistinctResult
 
-  const { joins, orderBy, selectFields, where } = await buildQuery({
+  const { joinAliases, joins, orderBy, selectFields, where } = await buildQuery({
     adapter,
     fields,
     locale,
@@ -69,7 +69,7 @@ export const findMany = async function find({
   })
 
   // only fetch IDs when a sort or where query is used that needs to be done on join tables, otherwise these can be done directly on the table in findMany
-  if (Object.keys(joins).length > 0) {
+  if (Object.keys(joins).length > 0 || joinAliases.length > 0) {
     if (where) {
       selectDistinctMethods.push({ args: [where], method: 'where' })
     }
@@ -80,6 +80,13 @@ export const findMany = async function find({
           method: 'leftJoin',
         })
       }
+    })
+
+    joinAliases.forEach(({ condition, table }) => {
+      selectDistinctMethods.push({
+        args: [table, condition],
+        method: 'leftJoin',
+      })
     })
 
     selectDistinctMethods.push({ args: [skip || (page - 1) * limit], method: 'offset' })
@@ -130,6 +137,14 @@ export const findMany = async function find({
         })
       }
     })
+
+    joinAliases.forEach(({ condition, table }) => {
+      selectCountMethods.push({
+        args: [table, condition],
+        method: 'leftJoin',
+      })
+    })
+
     const countResult = await chainMethods({
       methods: selectCountMethods,
       query: db

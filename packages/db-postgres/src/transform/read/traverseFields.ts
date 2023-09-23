@@ -211,7 +211,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         return result
       }
 
-      if (field.type === 'relationship') {
+      if (field.type === 'relationship' || field.type === 'upload') {
         const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
         if (!relationPathMatch) return result
 
@@ -372,8 +372,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
           case 'date': {
             let val = fieldData
 
-            if (fieldData instanceof Date) {
-              val = fieldData.toISOString()
+            if (typeof fieldData === 'string') {
+              val = new Date(fieldData).toISOString()
             }
 
             if (typeof locale === 'string') {

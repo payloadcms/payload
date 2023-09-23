@@ -4,6 +4,7 @@ import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from '
 import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { DocumentTab } from '../../admin/components/elements/DocumentHeader/Tabs/types'
 import type {
   CustomPreviewButtonProps,
   CustomPublishButtonProps,
@@ -164,27 +165,17 @@ type BeforeDuplicateArgs<T> = {
 
 export type BeforeDuplicate<T = any> = (args: BeforeDuplicateArgs<T>) => Promise<T> | T
 
-export type CollectionEditView =
-  | {
-      /**
-       * The component to render for this view
-       * + Replaces the default component
-       */
-      Component: React.ComponentType<EditProps>
-      /**
-       * The label rendered in the admin UI for this view
-       * + Example: `default` is `Edit`
-       */
-      label: string
-      /**
-       * The URL path to the nested collection edit views
-       * + Example: `/admin/collections/:collection/:id/:path`
-       * + The `:path` is the value of this property
-       * + Note: the default collection view uses no path
-       */
-      path?: string
-    }
-  | React.ComponentType<EditProps>
+export type CollectionEditViewConfig = {
+  /**
+   * The component to render for this view
+   * + Replaces the default component
+   */
+  Component: React.ComponentType<EditProps>
+  Tab: DocumentTab
+  path: string
+}
+
+export type CollectionEditView = CollectionEditViewConfig | React.ComponentType<EditProps>
 
 export type CollectionAdminOptions = {
   /**
