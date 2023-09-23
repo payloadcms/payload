@@ -353,23 +353,25 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type === 'number' && field.hasMany && Array.isArray(fieldData)) {
+    if (field.type === 'number' && field.hasMany) {
       const numberPath = `${path || ''}${field.name}`
 
       if (field.localized) {
         if (typeof fieldData === 'object') {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
-            transformNumbers({
-              baseRow: {
-                locale: localeKey,
-                path: numberPath,
-              },
-              data: localeData,
-              numbers,
-            })
+            if (Array.isArray(localeData)) {
+              transformNumbers({
+                baseRow: {
+                  locale: localeKey,
+                  path: numberPath,
+                },
+                data: localeData,
+                numbers,
+              })
+            }
           })
         }
-      } else {
+      } else if (Array.isArray(fieldData)) {
         transformNumbers({
           baseRow: {
             path: numberPath,
@@ -382,7 +384,7 @@ export const traverseFields = ({
       return
     }
 
-    if (field.type === 'select' && field.hasMany && Array.isArray(fieldData)) {
+    if (field.type === 'select' && field.hasMany) {
       const selectTableName = `${parentTableName}_${columnName}`
       if (!selects[selectTableName]) selects[selectTableName] = []
 
@@ -399,7 +401,7 @@ export const traverseFields = ({
             }
           })
         }
-      } else {
+      } else if (Array.isArray(data[field.name])) {
         const newRows = transformSelects({
           data: data[field.name],
         })

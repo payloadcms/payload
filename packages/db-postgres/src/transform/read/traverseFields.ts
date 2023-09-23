@@ -283,8 +283,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
         if (Array.isArray(fieldData)) {
           if (field.localized) {
             result[field.name] = fieldData.reduce((selectResult, row) => {
-              if (typeof row._locale === 'string') {
-                selectResult[row._locale] = row.value
+              if (typeof row.locale === 'string') {
+                if (!selectResult[row.locale]) selectResult[row.locale] = []
+                selectResult[row.locale].push(row.value)
               }
 
               return selectResult
