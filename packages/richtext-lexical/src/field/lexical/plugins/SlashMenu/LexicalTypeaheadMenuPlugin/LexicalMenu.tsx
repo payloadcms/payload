@@ -247,6 +247,7 @@ export function LexicalMenu({
   anchorElementRef,
   close,
   editor,
+  // groupsWithOptions filtering is already handled in SlashMenu/index.tsx. Thus, groupsWithOptions always contains the matching options.
   groupsWithOptions,
   menuRenderFn,
   onSelectOption,
@@ -283,16 +284,13 @@ export function LexicalMenu({
   )
 
   const setSelectedOptionKeyToFirstMatchingOption = useCallback(() => {
-    // setSelectedOptionKey(null)
     // set selected option to the first of the matching ones
-
     if (groupsWithOptions !== null && matchingString != null) {
+      // groupsWithOptions filtering is already handled in SlashMenu/index.tsx. Thus, groupsWithOptions always contains the matching options.
       const allOptions = groupsWithOptions.flatMap((group) => group.options)
-      const matchingOptions = allOptions.filter((option) =>
-        option.title.toLowerCase().includes(matchingString.toLowerCase()),
-      )
-      if (matchingOptions.length) {
-        const firstMatchingOption = matchingOptions[0]
+
+      if (allOptions.length) {
+        const firstMatchingOption = allOptions[0]
         updateSelectedOption(firstMatchingOption)
       }
     }
@@ -300,7 +298,7 @@ export function LexicalMenu({
 
   useEffect(() => {
     setSelectedOptionKeyToFirstMatchingOption()
-  }, [matchingString])
+  }, [matchingString, setSelectedOptionKeyToFirstMatchingOption])
 
   const selectOptionAndCleanUp = useCallback(
     (selectedOption: SlashMenuOption) => {
@@ -336,7 +334,12 @@ export function LexicalMenu({
     } else if (selectedOptionKey === null) {
       setSelectedOptionKeyToFirstMatchingOption()
     }
-  }, [groupsWithOptions, selectedOptionKey, updateSelectedOption])
+  }, [
+    groupsWithOptions,
+    selectedOptionKey,
+    updateSelectedOption,
+    setSelectedOptionKeyToFirstMatchingOption,
+  ])
 
   useEffect(() => {
     return mergeRegister(
