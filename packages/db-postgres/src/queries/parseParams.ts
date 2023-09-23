@@ -2,7 +2,8 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload/types'
 
-import { and, ilike } from 'drizzle-orm'
+import { and, ilike, isNotNull } from 'drizzle-orm'
+import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
 import type { GenericColumn, PostgresAdapter } from '../types'
@@ -78,6 +79,7 @@ export async function parseParams({
                   columnName,
                   constraints: queryConstraints,
                   field,
+                  getNotNullColumnByValue,
                   rawColumn,
                   table,
                 } = getTableColumnFromPath({
@@ -97,8 +99,14 @@ export async function parseParams({
                 queryConstraints.forEach(({ columnName: col, table: constraintTable, value }) => {
                   constraints.push(operatorMap.equals(constraintTable[col], value))
                 })
-
-                if (operator === 'like') {
+                if (getNotNullColumnByValue) {
+                  const columnName = getNotNullColumnByValue(val)
+                  if (columnName) {
+                    constraints.push(isNotNull(table[columnName]))
+                  } else {
+                    throw new QueryError([{ path: relationOrPath }])
+                  }
+                } else if (operator === 'like') {
                   constraints.push(
                     and(...val.split(' ').map((word) => ilike(table[columnName], `%${word}%`))),
                   )

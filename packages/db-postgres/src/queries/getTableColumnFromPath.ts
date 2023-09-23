@@ -23,6 +23,7 @@ type TableColumn = {
   columnName?: string
   constraints: Constraint[]
   field: FieldAffectingData
+  getNotNullColumnByValue?: (val: unknown) => string
   rawColumn?: SQL
   table: GenericTable
 }
@@ -267,7 +268,11 @@ export const getTableColumnFromPath = ({
         const relationTableName = `${tableName}_relationships`
         const newCollectionPath = pathSegments.slice(1).join('.')
 
-        const aliasRelationshipTable = alias(adapter.tables[relationTableName], toSnakeCase(uuid()))
+        const aliasRelationshipTableName = uuid()
+        const aliasRelationshipTable = alias(
+          adapter.tables[relationTableName],
+          aliasRelationshipTableName,
+        )
 
         // Join in the relationships table
         joinAliases.push({
@@ -310,12 +315,25 @@ export const getTableColumnFromPath = ({
           }
         } else if (newCollectionPath === 'value') {
           const tableColumnsNames = field.relationTo.map(
-            (relationTo) => `"${relationTableName}"."${toSnakeCase(relationTo)}_id"`,
+            (relationTo) => `"${aliasRelationshipTableName}"."${toSnakeCase(relationTo)}_id"`,
           )
           return {
             constraints,
             field,
             rawColumn: sql.raw(`COALESCE(${tableColumnsNames.join(', ')})`),
+            table: aliasRelationshipTable,
+          }
+        } else if (newCollectionPath === 'relationTo') {
+          const relationTo = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]
+
+          return {
+            constraints,
+            field,
+            getNotNullColumnByValue: (val) => {
+              const matchedRelation = relationTo.find((relation) => relation === val)
+              if (matchedRelation) return `${matchedRelation}ID`
+              return undefined
+            },
             table: aliasRelationshipTable,
           }
         } else {
