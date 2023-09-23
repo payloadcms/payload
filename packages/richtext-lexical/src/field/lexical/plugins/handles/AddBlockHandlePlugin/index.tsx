@@ -6,14 +6,15 @@
  *
  */
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $getNodeByKey, $getRoot, type LexicalEditor, type LexicalNode } from 'lexical'
+import { $getNodeByKey, type LexicalEditor, type LexicalNode } from 'lexical'
 import * as React from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { isHTMLElement } from '../../../utils/guard'
 import { Point } from '../../../utils/point'
 import { Rect } from '../../../utils/rect'
+import { ENABLE_SLASH_MENU_COMMAND } from '../../SlashMenu/LexicalTypeaheadMenuPlugin'
 import { getCollapsedMargins } from '../utils/getCollapsedMargins'
 import { getTopLevelNodeKeys } from '../utils/getTopLevelNodeKeys'
 import { isOnHandleElement } from '../utils/isOnHandleElement'
@@ -157,7 +158,7 @@ function useAddBlockHandle(
 ): JSX.Element {
   const scrollerElem = anchorElem.parentElement
 
-  const menuRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLButtonElement>(null)
   const [emptyBlockElem, setEmptyBlockElem] = useState<HTMLElement | null>(null)
 
   useEffect(() => {
@@ -223,11 +224,39 @@ function useAddBlockHandle(
     }
   }, [anchorElem, emptyBlockElem])
 
+  const handleAddClick = useCallback(
+    (event) => {
+      if (!emptyBlockElem) {
+        return
+      }
+      editor.focus()
+
+      // Make sure this is called AFTER the editorfocus() event has been processed by the browser
+      // Otherwise, this won't work
+      setTimeout(() => {
+        editor.dispatchCommand(ENABLE_SLASH_MENU_COMMAND, {
+          rect: emptyBlockElem.getBoundingClientRect(),
+        })
+      }, 0)
+
+      event.stopPropagation()
+      event.preventDefault()
+    },
+    [editor, emptyBlockElem],
+  )
+
   return createPortal(
     <React.Fragment>
-      <div className="icon add-block-menu" ref={menuRef}>
+      <button
+        className="icon add-block-menu"
+        onClick={(event) => {
+          handleAddClick(event)
+        }}
+        ref={menuRef}
+        type="button"
+      >
         <div className={isEditable ? 'icon' : ''} />
-      </div>
+      </button>
     </React.Fragment>,
     anchorElem,
   )

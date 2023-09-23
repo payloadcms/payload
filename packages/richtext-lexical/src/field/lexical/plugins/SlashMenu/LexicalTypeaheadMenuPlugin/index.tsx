@@ -1,7 +1,14 @@
 import type { LexicalCommand, LexicalEditor, RangeSelection, TextNode } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $getSelection, $isRangeSelection, $isTextNode, createCommand } from 'lexical'
+import { mergeRegister } from '@lexical/utils'
+import {
+  $getSelection,
+  $isRangeSelection,
+  $isTextNode,
+  COMMAND_PRIORITY_LOW,
+  createCommand,
+} from 'lexical'
 import { useCallback, useEffect, useState } from 'react'
 import * as React from 'react'
 
@@ -115,11 +122,6 @@ export function getScrollParent(
 
 export { useDynamicPositioning } from './LexicalMenu'
 
-export const SCROLL_TYPEAHEAD_OPTION_INTO_VIEW_COMMAND: LexicalCommand<{
-  index: number
-  option: SlashMenuOption
-}> = createCommand('SCROLL_TYPEAHEAD_OPTION_INTO_VIEW_COMMAND')
-
 export function useBasicTypeaheadTriggerMatch(
   trigger: string,
   { maxLength = 75, minLength = 1 }: { maxLength?: number; minLength?: number },
@@ -173,6 +175,10 @@ export type TypeaheadMenuPluginProps = {
   triggerFn: TriggerFn
 }
 
+export const ENABLE_SLASH_MENU_COMMAND: LexicalCommand<{
+  rect: DOMRect
+}> = createCommand('ENABLE_SLASH_MENU_COMMAND')
+
 export function LexicalTypeaheadMenuPlugin({
   anchorClassName,
   groupsWithOptions,
@@ -203,6 +209,40 @@ export function LexicalTypeaheadMenuPlugin({
     },
     [onOpen, resolution],
   )
+
+  // This is mainly used for the AddBlockHandlePlugin, so that the slash menu can be opened from there
+  useEffect(() => {
+    return mergeRegister(
+      editor.registerCommand(
+        ENABLE_SLASH_MENU_COMMAND,
+        ({ rect }) => {
+          editor.getEditorState().read(() => {
+            const match: MenuTextMatch = {
+              leadOffset: 0,
+              matchingString: '',
+              replaceableString: '',
+            }
+            if (match !== null && !isSelectionOnEntityBoundary(editor, match.leadOffset)) {
+              if (rect !== null) {
+                startTransition(() =>
+                  openTypeahead({
+                    getRect: () => {
+                      return rect
+                    },
+                    match,
+                  }),
+                )
+                return
+              }
+            }
+          })
+
+          return true
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+    )
+  }, [editor, openTypeahead])
 
   useEffect(() => {
     const updateListener = () => {
