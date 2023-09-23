@@ -45,8 +45,10 @@ export const saveVersion = async ({
 
   try {
     if (autosave) {
-      const { docs } = await payload.db.findVersions({
-        collection: entityConfig.slug,
+      let docs
+      const findVersionArgs = {
+        collectionSlug: collection.slug,
+        globalSlug: collection.slug,
         limit: 1,
         req,
         sort: '-updatedAt',
@@ -55,11 +57,22 @@ export const saveVersion = async ({
             equals: id,
           },
         },
-      })
+      }
+      if (collection) {
+        ({ docs } = await payload.db.findVersions({
+          ...findVersionArgs,
+          collection: collection.slug
+        }))
+      } else {
+        ({ docs } = await payload.db.findGlobalVersions({
+          ...findVersionArgs,
+          global: global.slug,
+        }))
+      }
       const [latestVersion] = docs
 
       // overwrite the latest version if it's set to autosave
-      if ((latestVersion as any)?.autosave === true) {
+      if ((latestVersion)?.autosave === true) {
         createNewVersion = false
 
         const data: Record<string, unknown> = {
@@ -68,12 +81,16 @@ export const saveVersion = async ({
           version: versionData,
         }
 
-        result = await payload.db.updateVersion({
+        const updateVersionArgs = {
           id: latestVersion.id,
-          collectionSlug: entityConfig.slug,
           req,
           versionData: data,
-        })
+        }
+        if (collection) {
+          result = await payload.db.updateVersion({ ...updateVersionArgs, collection: collection.slug })
+        } else {
+          result = await payload.db.updateGlobalVersion({ ...updateVersionArgs, global: global.slug })
+        }
       }
     }
 

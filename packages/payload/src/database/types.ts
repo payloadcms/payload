@@ -119,6 +119,8 @@ export interface DatabaseAdapter {
   transaction?: Transaction
 
   updateGlobal: UpdateGlobal
+
+  updateGlobalVersion: UpdateGlobalVersion
   updateOne: UpdateOne
   updateVersion: UpdateVersion
   /**
@@ -196,8 +198,7 @@ export type FindArgs = {
 
 export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
 
-export type FindVersionsArgs = {
-  collection: string
+type BaseVersionArgs = {
   limit?: number
   locale?: string
   page?: number
@@ -209,21 +210,16 @@ export type FindVersionsArgs = {
   where?: Where
 }
 
+export type FindVersionsArgs = BaseVersionArgs & {
+  collection: string
+}
+
 export type FindVersions = <T = TypeWithID>(
   args: FindVersionsArgs,
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
-export type FindGlobalVersionsArgs = {
+export type FindGlobalVersionsArgs = BaseVersionArgs & {
   global: string
-  limit?: number
-  locale?: string
-  page?: number
-  pagination?: boolean
-  req?: PayloadRequest
-  skip?: number
-  sort?: string
-  versions?: boolean
-  where?: Where
 }
 
 export type FindGlobalArgs = {
@@ -232,6 +228,25 @@ export type FindGlobalArgs = {
   slug: string
   where?: Where
 }
+
+export type UpdateGlobalVersionArgs<T = TypeWithID> = {
+  global: string
+  locale?: string
+  req?: PayloadRequest
+  versionData: T
+} & (
+  | {
+  id: number | string
+  where?: never
+}
+  | {
+  id?: never
+  where: Where
+})
+
+export type UpdateGlobalVersion = <T = TypeWithID>(
+  args: UpdateGlobalVersionArgs<T>,
+) => Promise<TypeWithVersion<T>>
 
 export type FindGlobal = <T extends GlobalsTypeWithID = any>(args: FindGlobalArgs) => Promise<T>
 
@@ -286,20 +301,19 @@ export type CreateVersion = <T = TypeWithID>(
 export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>
 
 export type UpdateVersionArgs<T = TypeWithID> = {
-  collectionSlug: string
+  collection: string
   locale?: string
   req?: PayloadRequest
   versionData: T
 } & (
   | {
-      id: number | string
-      where?: never
-    }
+  id: number | string
+  where?: never
+}
   | {
-      id?: never
-      where: Where
-    }
-)
+  id?: never
+  where: Where
+})
 
 export type UpdateVersion = <T = TypeWithID>(
   args: UpdateVersionArgs<T>,

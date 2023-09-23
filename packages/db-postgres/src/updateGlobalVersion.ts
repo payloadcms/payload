@@ -1,7 +1,7 @@
-import type { UpdateVersion } from 'payload/database'
-import type { PayloadRequest, SanitizedCollectionConfig } from 'payload/types'
+import type { UpdateGlobalVersion } from 'payload/database'
+import type { PayloadRequest, SanitizedGlobalConfig } from 'payload/types'
 
-import { buildVersionCollectionFields } from 'payload/versions'
+import { buildVersionGlobalFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from './types'
@@ -9,15 +9,15 @@ import type { PostgresAdapter } from './types'
 import buildQuery from './queries/buildQuery'
 import { upsertRow } from './upsertRow'
 
-export const updateVersion: UpdateVersion = async function updateVersion(
+export const updateGlobalVersion: UpdateGlobalVersion = async function updateVersion (
   this: PostgresAdapter,
-  { id, collection, locale, req = {} as PayloadRequest, versionData, where: whereArg },
+  { id, global, locale, req = {} as PayloadRequest, versionData, where: whereArg },
 ) {
   const db = this.sessions?.[req.transactionID] || this.db
-  const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
+  const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(({ slug }) => slug === global)
   const whereToUse = whereArg || { id: { equals: id } }
-  const tableName = `_${toSnakeCase(collection)}_versions`
-  const fields = buildVersionCollectionFields(collectionConfig)
+  const tableName = `_${toSnakeCase(global)}_versions`
+  const fields = buildVersionGlobalFields(globalConfig)
 
   const { where } = await buildQuery({
     adapter: this,

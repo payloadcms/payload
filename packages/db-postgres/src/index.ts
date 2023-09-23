@@ -24,6 +24,7 @@ import { commitTransaction } from './transactions/commitTransaction'
 import { rollbackTransaction } from './transactions/rollbackTransaction'
 import { updateOne } from './update'
 import { updateGlobal } from './updateGlobal'
+import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateVersion } from './updateVersion'
 import { webpack } from './webpack'
 
@@ -64,6 +65,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       sessions: {},
       tables: {},
       updateGlobal,
+      updateGlobalVersion,
       updateOne,
       updateVersion,
       webpack,
