@@ -8,6 +8,7 @@ export const sanitizeFeatures = (features: Feature[]): SanitizedFeatures => {
         format: [],
       },
     },
+    markdownTransformers: [],
     nodes: [],
     plugins: [],
     slashMenu: {
@@ -22,6 +23,11 @@ export const sanitizeFeatures = (features: Feature[]): SanitizedFeatures => {
     }
     if (feature.plugins?.length) {
       sanitized.plugins = sanitized.plugins.concat(feature.plugins)
+    }
+    if (feature.markdownTransformers?.length) {
+      sanitized.markdownTransformers = sanitized.markdownTransformers.concat(
+        feature.markdownTransformers,
+      )
     }
 
     if (feature.floatingSelectToolbar?.buttons?.format?.length) {

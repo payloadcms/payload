@@ -1,3 +1,4 @@
+import type { Transformer } from '@lexical/markdown'
 import type { Klass, LexicalEditor, LexicalNode, RangeSelection } from 'lexical'
 import type React from 'react'
 
@@ -20,6 +21,7 @@ export type Feature = {
       }[]
     }
   }
+  markdownTransformers?: Transformer[]
   nodes?: Array<Klass<LexicalNode>>
 
   plugins?: Array<{
@@ -39,7 +41,9 @@ export type Feature = {
   }
 }
 
-export type SanitizedFeatures = Required<Pick<Feature, 'nodes' | 'plugins'>> & {
+export type SanitizedFeatures = Required<
+  Pick<Feature, 'markdownTransformers' | 'nodes' | 'plugins'>
+> & {
   floatingSelectToolbar: {
     buttons: {
       format: {

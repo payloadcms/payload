@@ -9,6 +9,7 @@ import type { LexicalProviderProps } from './LexicalProvider'
 
 import './LexicalEditor.scss'
 import { FloatingSelectToolbarPlugin } from './plugins/FloatingSelectToolbar'
+import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut'
 import SlashMenuPlugin from './plugins/SlashMenu'
 import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin'
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin'
@@ -81,6 +82,7 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
           return <plugin.Component />
         }
       })}
+      <MarkdownShortcutPlugin />
     </React.Fragment>
   )
 }

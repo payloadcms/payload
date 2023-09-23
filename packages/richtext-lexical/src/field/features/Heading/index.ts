@@ -3,17 +3,13 @@ import type { LexicalEditor } from 'lexical'
 
 import { $createHeadingNode, HeadingNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
-import {
-  $createParagraphNode,
-  $getSelection,
-  $isRangeSelection,
-  DEPRECATED_$isGridSelection,
-} from 'lexical'
+import { $getSelection, $isRangeSelection, DEPRECATED_$isGridSelection } from 'lexical'
 
-import type { Feature } from './types'
+import type { Feature } from '../types'
 
-import { SlashMenuOption } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
-import { BlockIcon } from '../lexical/ui/icons/Block'
+import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
+import { BlockIcon } from '../../lexical/ui/icons/Block'
+import { MarkdownTransformer } from './markdownTransformer'
 
 // For SlashMenu, NOT for floating menu, as we would have to check if the selected node is ALREADY a heading for that first
 const addHeading = (editor: LexicalEditor, headingSize: HeadingTagType) => {
@@ -33,6 +29,7 @@ export function HeadingFeature(props: Props): Feature {
   const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
 
   const toReturn: Feature = {
+    markdownTransformers: [MarkdownTransformer],
     nodes: [HeadingNode],
     slashMenu: {
       options: [],
