@@ -1,13 +1,17 @@
+import type { Payload } from '../..'
 import type { FieldWithSubFields, TabsField } from '../../fields/config/types'
 
 import { fieldAffectsData, fieldIsPresentationalOnly } from '../../fields/config/types'
 import fieldToSchemaMap from './fieldToWhereInputSchemaMap'
 
-const recursivelyBuildNestedPaths = (
-  parentName: string,
-  nestedFieldName2: string,
-  field: FieldWithSubFields | TabsField,
-) => {
+type Args = {
+  field: FieldWithSubFields | TabsField
+  nestedFieldName2: string
+  parentName: string
+  payload: Payload
+}
+
+const recursivelyBuildNestedPaths = ({ field, nestedFieldName2, parentName, payload }: Args) => {
   const fieldName = fieldAffectsData(field) ? field.name : undefined
   const nestedFieldName = fieldName || nestedFieldName2
 
@@ -16,9 +20,14 @@ const recursivelyBuildNestedPaths = (
     // otherwise, treat it as a row
     return field.tabs.reduce((tabSchema, tab: any) => {
       tabSchema.push(
-        ...recursivelyBuildNestedPaths(parentName, nestedFieldName, {
-          ...tab,
-          type: 'name' in tab ? 'group' : 'row',
+        ...recursivelyBuildNestedPaths({
+          field: {
+            ...tab,
+            type: 'name' in tab ? 'group' : 'row',
+          },
+          nestedFieldName2: nestedFieldName,
+          parentName,
+          payload,
         }),
       )
       return tabSchema
@@ -30,14 +39,23 @@ const recursivelyBuildNestedPaths = (
       if (!fieldAffectsData(nestedField)) {
         return [
           ...nestedFields,
-          ...recursivelyBuildNestedPaths(parentName, nestedFieldName, nestedField),
+          ...recursivelyBuildNestedPaths({
+            field: nestedField,
+            nestedFieldName2: nestedFieldName,
+            parentName,
+            payload,
+          }),
         ]
       }
 
       const nestedPathName = fieldAffectsData(nestedField)
         ? `${nestedFieldName ? `${nestedFieldName}__` : ''}${nestedField.name}`
         : undefined
-      const getFieldSchema = fieldToSchemaMap(parentName, nestedFieldName)[nestedField.type]
+      const getFieldSchema = fieldToSchemaMap({
+        nestedFieldName,
+        parentName,
+        payload,
+      })[nestedField.type]
 
       if (getFieldSchema) {
         const fieldSchema = getFieldSchema({

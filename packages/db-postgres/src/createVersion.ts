@@ -35,15 +35,17 @@ export const createVersion: CreateVersion = async function createVersion(
   const table = this.tables[tableName]
   const relationshipsTable = this.tables[`${tableName}_relationships`]
 
-  await db.execute(sql`
-    UPDATE ${table}
-    SET latest = false
-    FROM ${relationshipsTable}
-    WHERE ${table.id} = ${relationshipsTable.parent}
-      AND ${relationshipsTable.path} = ${'parent'}
-      AND ${relationshipsTable[`${collectionSlug}ID`]} = ${parent}
-      AND ${table.id} != ${result.id};
-`)
+  if (collection.versions.drafts) {
+    await db.execute(sql`
+      UPDATE ${table}
+      SET latest = false
+      FROM ${relationshipsTable}
+      WHERE ${table.id} = ${relationshipsTable.parent}
+        AND ${relationshipsTable.path} = ${'parent'}
+        AND ${relationshipsTable[`${collectionSlug}ID`]} = ${parent}
+        AND ${table.id} != ${result.id};
+  `)
+  }
 
   return result
 }

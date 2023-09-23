@@ -130,11 +130,12 @@ function initGlobalsGraphQL(payload: Payload): void {
       payload.Query.fields[`versions${formattedName}`] = {
         args: {
           where: {
-            type: buildWhereInputType(
-              `versions${formattedName}`,
-              versionGlobalFields,
-              `versions${formattedName}`,
-            ),
+            type: buildWhereInputType({
+              name: `versions${formattedName}`,
+              fields: versionGlobalFields,
+              parentName: `versions${formattedName}`,
+              payload,
+            }),
           },
           ...(payload.config.localization
             ? {
