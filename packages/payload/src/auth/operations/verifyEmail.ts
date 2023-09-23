@@ -19,6 +19,7 @@ async function verifyEmail(args: Args): Promise<boolean> {
 
   const user = await req.payload.db.findOne<any>({
     collection: collection.config.slug,
+    req,
     where: {
       _verificationToken: { equals: token },
     },

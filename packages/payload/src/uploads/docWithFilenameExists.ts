@@ -1,13 +1,16 @@
-import type { Payload } from '..'
+import type { PayloadRequest } from '../express/types'
 
-const docWithFilenameExists = async (
-  payload: Payload,
-  collectionSlug: string,
-  path: string,
-  filename: string,
-): Promise<boolean> => {
-  const doc = await payload.db.findOne({
+type Args = {
+  collectionSlug: string
+  filename: string
+  path: string
+  req: PayloadRequest
+}
+
+const docWithFilenameExists = async ({ collectionSlug, filename, req }: Args): Promise<boolean> => {
+  const doc = await req.payload.db.findOne({
     collection: collectionSlug,
+    req,
     where: {
       filename: {
         equals: filename,

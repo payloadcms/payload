@@ -11,6 +11,7 @@ import type { CollectionModel, GlobalModel } from './types'
 import { connect } from './connect'
 import { create } from './create'
 import { createGlobal } from './createGlobal'
+import { createGlobalVersion } from './createGlobalVersion'
 import { createVersion } from './createVersion'
 import { deleteMany } from './deleteMany'
 import { deleteOne } from './deleteOne'
@@ -80,6 +81,7 @@ export function mongooseAdapter({
       connection: undefined,
       create,
       createGlobal,
+      createGlobalVersion,
       createMigration,
       createVersion,
       defaultIDType: 'text',

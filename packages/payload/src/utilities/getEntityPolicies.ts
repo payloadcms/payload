@@ -49,6 +49,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
       if (type === 'global') {
         return req.payload.findGlobal({
           overrideAccess: true,
+          req,
           slug: entity.slug,
         })
       }

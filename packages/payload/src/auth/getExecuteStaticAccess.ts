@@ -51,6 +51,7 @@ const getExecuteStaticAccess =
 
           const doc = await req.payload.db.findOne({
             collection: config.slug,
+            req,
             where: queryToBuild,
           })
 

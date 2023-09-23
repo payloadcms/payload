@@ -122,6 +122,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
       locale,
+      req,
       where: combineQueries({ id: { equals: id } }, accessResults),
     }
 
