@@ -1,5 +1,6 @@
 import type { EditorConfig, SanitizedEditorConfig } from './types'
 
+import { HeadingFeature } from '../../features/Heading'
 import { ParagraphFeature } from '../../features/Paragraph'
 import { BoldTextFeature } from '../../features/format/BoldText'
 import { CodeTextFeature } from '../../features/format/CodeText'
@@ -21,6 +22,7 @@ export const defaultEditorConfig: EditorConfig = {
     SuperscriptTextFeature(),
     CodeTextFeature(),
     ParagraphFeature(),
+    HeadingFeature({}),
   ],
   lexical: {
     namespace: 'lexical',
