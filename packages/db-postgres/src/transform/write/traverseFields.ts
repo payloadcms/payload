@@ -63,12 +63,13 @@ export const traverseFields = ({
     let fieldData: unknown
 
     if (fieldAffectsData(field)) {
-      columnName = `${columnPrefix || ''}${field.name}`
+      columnName = `${columnPrefix || ''}${toSnakeCase(field.name)}`
       fieldData = data[field.name]
     }
 
     if (field.type === 'array') {
-      const arrayTableName = `${newTableName}_${toSnakeCase(columnName)}`
+      const arrayTableName = `${newTableName}_${columnName}`
+
       if (!arrays[arrayTableName]) arrays[arrayTableName] = []
 
       if (field.localized) {
@@ -206,7 +207,7 @@ export const traverseFields = ({
                 traverseFields({
                   arrays,
                   blocks,
-                  columnPrefix: `${columnPrefix || ''}${tab.name}_`,
+                  columnPrefix: `${columnPrefix || ''}${toSnakeCase(tab.name)}_`,
                   data: localeData as Record<string, unknown>,
                   existingLocales,
                   fields: tab.fields,
@@ -226,7 +227,7 @@ export const traverseFields = ({
               traverseFields({
                 arrays,
                 blocks,
-                columnPrefix: `${columnPrefix || ''}${tab.name}_`,
+                columnPrefix: `${columnPrefix || ''}${toSnakeCase(tab.name)}_`,
                 data: data[tab.name] as Record<string, unknown>,
                 existingLocales,
                 fields: tab.fields,

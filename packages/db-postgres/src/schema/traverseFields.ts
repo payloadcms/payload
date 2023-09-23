@@ -102,7 +102,7 @@ export const traverseFields = ({
 
       if (
         (field.unique || field.index) &&
-        !['array', 'blocks', 'group', 'relationship', 'upload'].includes(field.type) &&
+        !['array', 'blocks', 'group', 'point', 'relationship', 'upload'].includes(field.type) &&
         !(field.type === 'number' && field.hasMany === true)
       ) {
         targetIndexes[`${field.name}Idx`] = createIndex({
@@ -381,7 +381,7 @@ export const traverseFields = ({
           indexes,
           localesColumns,
           localesIndexes,
-          newTableName: `${parentTableName}_${toSnakeCase(field.name)}`,
+          newTableName: `${parentTableName}_${columnName}`,
           parentTableName,
           relationsToBuild,
           relationships,
@@ -413,7 +413,7 @@ export const traverseFields = ({
               indexes,
               localesColumns,
               localesIndexes,
-              newTableName: `${parentTableName}_${toSnakeCase(tab.name)}`,
+              newTableName: `${parentTableName}_${columnPrefix || ''}${toSnakeCase(tab.name)}`,
               parentTableName,
               relationsToBuild,
               relationships,
@@ -488,7 +488,9 @@ export const traverseFields = ({
         break
     }
 
-    if (targetTable[fieldName] && 'required' in field && field.required) {
+    const condition = field.admin && field.admin.condition
+
+    if (targetTable[fieldName] && 'required' in field && field.required && !condition) {
       targetTable[fieldName].notNull()
     }
   })
