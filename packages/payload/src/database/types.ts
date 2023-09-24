@@ -115,6 +115,12 @@ export interface DatabaseAdapter {
    */
   rollbackTransaction?: RollbackTransaction
   /**
+   * A key-value store of all sessions open (used for transactions)
+   */
+  sessions?: {
+    [id: string]: DatabaseAdapter
+  }
+  /**
    * Perform many database interactions in a single, all-or-nothing operation.
    */
   transaction?: Transaction
@@ -181,7 +187,7 @@ export type FindOneArgs = {
   where?: Where
 }
 
-export type FindOne = <T = TypeWithID>(args: FindOneArgs) => Promise<T | null>
+export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<T | null>
 
 export type FindArgs = {
   collection: string

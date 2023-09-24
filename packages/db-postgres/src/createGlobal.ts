@@ -1,4 +1,4 @@
-import type { CreateGlobal } from 'payload/database'
+import type { CreateGlobalArgs } from 'payload/database'
 import type { PayloadRequest, TypeWithID } from 'payload/types'
 
 import toSnakeCase from 'to-snake-case'
@@ -7,10 +7,10 @@ import type { PostgresAdapter } from './types'
 
 import { upsertRow } from './upsertRow'
 
-export const createGlobal: CreateGlobal = async function createGlobal<T extends TypeWithID>(
+export async function createGlobal<T extends TypeWithID>(
   this: PostgresAdapter,
-  { data, req = {} as PayloadRequest, slug },
-) {
+  { data, req = {} as PayloadRequest, slug }: CreateGlobalArgs,
+): Promise<T> {
   const db = this.sessions?.[req.transactionID] || this.db
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
 

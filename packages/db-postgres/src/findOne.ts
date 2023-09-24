@@ -1,18 +1,18 @@
-import type { FindOne } from 'payload/database'
-import type { PayloadRequest, SanitizedCollectionConfig } from 'payload/types'
+import type { FindOneArgs } from 'payload/database'
+import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payload/types'
 
 import toSnakeCase from 'to-snake-case'
+
+import type { PostgresAdapter } from './types'
 
 import { buildFindManyArgs } from './find/buildFindManyArgs'
 import buildQuery from './queries/buildQuery'
 import { transform } from './transform/read'
 
-export const findOne: FindOne = async function findOne({
-  collection,
-  locale,
-  req = {} as PayloadRequest,
-  where: incomingWhere,
-}) {
+export async function findOne<T extends TypeWithID>(
+  this: PostgresAdapter,
+  { collection, locale, req = {} as PayloadRequest, where: incomingWhere }: FindOneArgs,
+): Promise<T> {
   const db = this.sessions?.[req.transactionID] || this.db
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const tableName = toSnakeCase(collection)
@@ -40,7 +40,7 @@ export const findOne: FindOne = async function findOne({
     return null
   }
 
-  return transform({
+  return transform<T>({
     config: this.payload.config,
     data: doc,
     fields: collectionConfig.fields,
