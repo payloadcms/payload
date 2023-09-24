@@ -1,8 +1,8 @@
 /* eslint-disable no-param-reassign */
-import type { RelationshipField } from 'payload/types'
+import type { RelationshipField, UploadField } from 'payload/types'
 
 type Args = {
-  field: RelationshipField
+  field: RelationshipField | UploadField
   locale?: string
   ref: Record<string, unknown>
   relations: Record<string, unknown>[]
@@ -11,7 +11,7 @@ type Args = {
 export const transformRelationship = ({ field, locale, ref, relations }: Args) => {
   let result: unknown
 
-  if (!field.hasMany) {
+  if (!('hasMany' in field)) {
     const relation = relations[0]
 
     if (relation) {
