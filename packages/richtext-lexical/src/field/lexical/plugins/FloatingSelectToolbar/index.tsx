@@ -18,6 +18,7 @@ import { getDOMRangeRect } from '../../utils/getDOMRangeRect'
 import { getSelectedNode } from '../../utils/getSelectedNode'
 import { setFloatingElemPosition } from '../../utils/setFloatingElemPosition'
 import { ToolbarButton } from './ToolbarButton'
+import { ToolbarDropdown } from './ToolbarDropdown'
 import './index.scss'
 
 function FloatingSelectToolbar({
@@ -159,11 +160,18 @@ function FloatingSelectToolbar({
             editorConfig.features?.floatingSelectToolbar?.sections.map((section) => {
               return (
                 <div
-                  className={`floating-select-toolbar-section floating-select-toolbar-section-${section.key}`}
+                  className={`floating-select-toolbar-popup__section floating-select-toolbar-popup__section-${section.key}`}
                   key={section.key}
                 >
-                  {section.type === 'dropdown' && <section.ChildComponent />}
-                  {section.entries.length &&
+                  {section.type === 'dropdown' && section.entries.length && (
+                    <ToolbarDropdown
+                      Icon={section.ChildComponent}
+                      entries={section.entries}
+                      onClick={() => {}}
+                    />
+                  )}
+                  {section.type === 'buttons' &&
+                    section.entries.length &&
                     section.entries.map((entry) => {
                       if (entry.Component) {
                         return (

@@ -33,45 +33,11 @@ html[data-theme='light'] {
     //border-top-color: red;
   }
 
-  &__button {
-    display: flex;
-    align-items: center;
-    vertical-align: middle;
-    height: 30px;
-    width: 30px;
-    border: 0;
-    background: none;
-    border-radius: 4px;
-    cursor: pointer;
-
+  &__section {
     .icon {
       min-width: 20px;
       height: 20px;
       color: var(--color-base-600);
-    }
-
-    &.spaced {
-      margin-right: 2px;
-    }
-
-    &.active {
-      background-color: var(--color-base-100);
-
-      .icon {
-        opacity: 1;
-      }
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-
-      .icon {
-        opacity: 0.2;
-      }
-    }
-
-    &:hover:not([disabled]) {
-      background-color: var(--color-base-100);
     }
   }
 

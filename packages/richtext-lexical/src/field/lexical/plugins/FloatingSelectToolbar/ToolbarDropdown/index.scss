@@ -1,13 +1,11 @@
 @import 'payload/scss';
 
-.floating-select-toolbar-popup__button {
+.floating-select-toolbar-popup__dropdown {
   display: flex;
   align-items: center;
   vertical-align: middle;
   height: 30px;
   width: 30px;
-  border: 0;
-  background: none;
   border-radius: 4px;
   cursor: pointer;
 
