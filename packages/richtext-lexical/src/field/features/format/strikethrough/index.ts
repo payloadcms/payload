@@ -3,6 +3,7 @@ import { FORMAT_TEXT_COMMAND } from 'lexical'
 import type { FeatureProvider } from '../../types'
 
 import { StrikethroughIcon } from '../../../lexical/ui/icons/Strikethrough'
+import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 import { STRIKETHROUGH } from './markdownTransformers'
 
 export const StrikethroughTextFeature = (): FeatureProvider => {
@@ -10,8 +11,8 @@ export const StrikethroughTextFeature = (): FeatureProvider => {
     feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
       return {
         floatingSelectToolbar: {
-          buttons: {
-            format: [
+          sections: [
+            SectionWithEntries([
               {
                 ChildComponent: StrikethroughIcon,
                 isActive: (editor, selection) => selection.hasFormat('strikethrough'),
@@ -21,8 +22,8 @@ export const StrikethroughTextFeature = (): FeatureProvider => {
                 },
                 order: 4,
               },
-            ],
-          },
+            ]),
+          ],
         },
         markdownTransformers: [STRIKETHROUGH],
       }

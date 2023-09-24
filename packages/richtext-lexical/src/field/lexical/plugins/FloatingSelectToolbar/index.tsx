@@ -155,32 +155,43 @@ function FloatingSelectToolbar({
       <div className="caret" ref={caretRef} />
       {editor.isEditable() && (
         <React.Fragment>
-          <div className="format">
-            {editorConfig?.features &&
-              editorConfig.features?.floatingSelectToolbar?.buttons?.format.map((formatButton) => {
-                if (formatButton.Component) {
-                  return (
-                    <formatButton.Component
-                      activeStates={activeStates}
-                      anchorElem={anchorElem}
-                      editor={editor}
-                      key={formatButton.key}
-                    />
-                  )
-                }
-                return (
-                  <ToolbarButton
-                    classNames={
-                      activeStates && activeStates.get(formatButton.key) ? ['active'] : []
-                    }
-                    key={formatButton.key}
-                    onClick={() => formatButton.onClick(editor)}
-                  >
-                    <formatButton.ChildComponent />
-                  </ToolbarButton>
-                )
-              })}
-          </div>
+          {editorConfig?.features &&
+            editorConfig.features?.floatingSelectToolbar?.sections.map((section) => {
+              return (
+                <div
+                  className={`floating-select-toolbar-section floating-select-toolbar-section-${section.key}`}
+                  key={section.key}
+                >
+                  {section.type === 'dropdown' && <section.ChildComponent />}
+                  {section.entries.length &&
+                    section.entries.map((entry) => {
+                      if (entry.Component) {
+                        return (
+                          <entry.Component
+                            activeStates={activeStates}
+                            anchorElem={anchorElem}
+                            editor={editor}
+                            key={entry.key}
+                          />
+                        )
+                      }
+                      return (
+                        <ToolbarButton
+                          classNames={
+                            activeStates && activeStates.get(section.key + '-' + entry.key)
+                              ? ['active']
+                              : []
+                          }
+                          key={entry.key}
+                          onClick={() => entry.onClick(editor)}
+                        >
+                          <entry.ChildComponent />
+                        </ToolbarButton>
+                      )
+                    })}
+                </div>
+              )
+            })}
         </React.Fragment>
       )}
     </div>
@@ -224,10 +235,12 @@ function useFloatingTextFormatToolbar(
 
       // Update active state of nodes
 
-      for (const formatButton of editorConfig?.features?.floatingSelectToolbar?.buttons?.format) {
-        if (formatButton.isActive) {
-          const isActive = formatButton.isActive(editor, selection)
-          setActiveStates(activeStates.set(formatButton.key, isActive))
+      for (const section of editorConfig?.features?.floatingSelectToolbar?.sections) {
+        for (const entry of section.entries) {
+          if (entry.isActive) {
+            const isActive = entry.isActive(editor, selection)
+            setActiveStates(activeStates.set(section.key + '-' + entry.key, isActive))
+          }
         }
       }
 

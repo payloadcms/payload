@@ -1,27 +1,14 @@
 import type { Transformer } from '@lexical/markdown'
-import type { Klass, LexicalEditor, LexicalNode, RangeSelection } from 'lexical'
+import type { Klass, LexicalEditor, LexicalNode } from 'lexical'
 import type React from 'react'
 
 import type { EditorConfig } from '..//lexical/config/types'
+import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectToolbar/types'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 
 export type Feature = {
   floatingSelectToolbar?: {
-    buttons?: {
-      format?: {
-        ChildComponent?: React.FC
-        /** Use component to ignore the children and onClick properties. It does not use the default, pre-defined format Button component */
-        Component?: React.FC<{
-          activeStates: Map<string, boolean>
-          anchorElem: HTMLElement
-          editor: LexicalEditor
-        }>
-        isActive?: (editor: LexicalEditor, selection: RangeSelection) => boolean
-        key: string
-        onClick?: (editor: LexicalEditor) => void
-        order?: number
-      }[]
-    }
+    sections: FloatingToolbarSection[]
   }
   markdownTransformers?: Transformer[]
   nodes?: Array<Klass<LexicalNode>>
@@ -77,21 +64,7 @@ export type SanitizedFeatures = Required<
   /** The keys of all enabled features */
   enabledFeatures: string[]
   floatingSelectToolbar: {
-    buttons: {
-      format: {
-        ChildComponent?: React.FC
-        /** Use component to ignore the children and onClick properties. It does not use the default, pre-defined format Button component */
-        Component?: React.FC<{
-          activeStates: Map<string, boolean>
-          anchorElem: HTMLElement
-          editor: LexicalEditor
-        }>
-        isActive?: (editor: LexicalEditor, selection: RangeSelection) => boolean
-        key: string
-        onClick?: (editor: LexicalEditor) => void
-        order?: number
-      }[]
-    }
+    sections: FloatingToolbarSection[]
   }
   slashMenu: {
     dynamicOptions: Array<

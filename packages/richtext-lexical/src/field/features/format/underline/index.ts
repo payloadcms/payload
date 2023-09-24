@@ -3,14 +3,15 @@ import { FORMAT_TEXT_COMMAND } from 'lexical'
 import type { FeatureProvider } from '../../types'
 
 import { UnderlineIcon } from '../../../lexical/ui/icons/Underline'
+import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 
 export const UnderlineTextFeature = (): FeatureProvider => {
   return {
     feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
       return {
         floatingSelectToolbar: {
-          buttons: {
-            format: [
+          sections: [
+            SectionWithEntries([
               {
                 ChildComponent: UnderlineIcon,
                 isActive: (editor, selection) => selection.hasFormat('underline'),
@@ -20,8 +21,8 @@ export const UnderlineTextFeature = (): FeatureProvider => {
                 },
                 order: 3,
               },
-            ],
-          },
+            ]),
+          ],
         },
       }
     },

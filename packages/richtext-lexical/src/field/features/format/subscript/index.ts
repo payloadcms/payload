@@ -3,14 +3,15 @@ import { FORMAT_TEXT_COMMAND } from 'lexical'
 import type { FeatureProvider } from '../../types'
 
 import { SubscriptIcon } from '../../../lexical/ui/icons/Subscript'
+import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 
 export const SubscriptTextFeature = (): FeatureProvider => {
   return {
     feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
       return {
         floatingSelectToolbar: {
-          buttons: {
-            format: [
+          sections: [
+            SectionWithEntries([
               {
                 ChildComponent: SubscriptIcon,
                 isActive: (editor, selection) => selection.hasFormat('subscript'),
@@ -20,8 +21,8 @@ export const SubscriptTextFeature = (): FeatureProvider => {
                 },
                 order: 5,
               },
-            ],
-          },
+            ]),
+          ],
         },
       }
     },

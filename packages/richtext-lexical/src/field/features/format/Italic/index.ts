@@ -3,6 +3,7 @@ import { FORMAT_TEXT_COMMAND } from 'lexical'
 import type { FeatureProvider } from '../../types'
 
 import { ItalicIcon } from '../../../lexical/ui/icons/Italic'
+import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 import { ITALIC_STAR, ITALIC_UNDERSCORE } from './markdownTransformers'
 
 export const ItalicTextFeature = (): FeatureProvider => {
@@ -10,8 +11,8 @@ export const ItalicTextFeature = (): FeatureProvider => {
     feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
       return {
         floatingSelectToolbar: {
-          buttons: {
-            format: [
+          sections: [
+            SectionWithEntries([
               {
                 ChildComponent: ItalicIcon,
                 isActive: (editor, selection) => selection.hasFormat('italic'),
@@ -21,8 +22,8 @@ export const ItalicTextFeature = (): FeatureProvider => {
                 },
                 order: 2,
               },
-            ],
-          },
+            ]),
+          ],
         },
         markdownTransformers: [ITALIC_STAR, ITALIC_UNDERSCORE],
       }

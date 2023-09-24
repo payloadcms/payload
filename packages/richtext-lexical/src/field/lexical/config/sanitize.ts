@@ -1,4 +1,5 @@
 import type { ResolvedFeatureMap, SanitizedFeatures } from '../../features/types'
+import type { FloatingToolbarSection } from '../plugins/FloatingSelectToolbar/types'
 import type { EditorConfig, SanitizedEditorConfig } from './types'
 
 import { loadFeatures } from './loader'
@@ -7,9 +8,7 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
   const sanitized: SanitizedFeatures = {
     enabledFeatures: [],
     floatingSelectToolbar: {
-      buttons: {
-        format: [],
-      },
+      sections: [],
     },
     markdownTransformers: [],
     nodes: [],
@@ -33,11 +32,30 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
       )
     }
 
-    if (feature.floatingSelectToolbar?.buttons?.format?.length) {
-      sanitized.floatingSelectToolbar.buttons.format =
-        sanitized.floatingSelectToolbar.buttons.format.concat(
-          feature.floatingSelectToolbar.buttons.format,
+    if (feature.floatingSelectToolbar?.sections?.length) {
+      for (const section of feature.floatingSelectToolbar?.sections) {
+        // 1. find the section with the same key or create new one
+        let foundSection = sanitized.floatingSelectToolbar.sections.find(
+          (sanitizedSection) => sanitizedSection.key === section.key,
         )
+        if (!foundSection) {
+          foundSection = {
+            ...section,
+            entries: [],
+          }
+        } else {
+          sanitized.floatingSelectToolbar.sections =
+            sanitized.floatingSelectToolbar.sections.filter(
+              (sanitizedSection) => sanitizedSection.key !== section.key,
+            )
+        }
+
+        // 2. Add options to group options array and add to sanitized.slashMenu.groupsWithOptions
+        if (section?.entries?.length) {
+          foundSection.entries = foundSection.entries.concat(section.entries)
+        }
+        sanitized.floatingSelectToolbar?.sections.push(foundSection)
+      }
     }
 
     if (feature.slashMenu?.options) {
@@ -74,8 +92,8 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
     sanitized.enabledFeatures.push(feature.key)
   })
 
-  // Sort sanitized.floatingSelectToolbar.buttons.format by order property
-  sanitized.floatingSelectToolbar.buttons.format.sort((a, b) => {
+  // Sort sanitized.floatingSelectToolbar.sections by order property
+  sanitized.floatingSelectToolbar.sections.sort((a, b) => {
     if (a.order && b.order) {
       return a.order - b.order
     } else if (a.order) {
@@ -86,6 +104,21 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
       return 0
     }
   })
+
+  // Sort sanitized.floatingSelectToolbar.sections.[section].entries by order property
+  for (const section of sanitized.floatingSelectToolbar.sections) {
+    section.entries.sort((a, b) => {
+      if (a.order && b.order) {
+        return a.order - b.order
+      } else if (a.order) {
+        return -1
+      } else if (b.order) {
+        return 1
+      } else {
+        return 0
+      }
+    })
+  }
 
   return sanitized
 }

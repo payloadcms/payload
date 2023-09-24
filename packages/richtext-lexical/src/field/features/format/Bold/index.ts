@@ -3,6 +3,7 @@ import { FORMAT_TEXT_COMMAND } from 'lexical'
 import type { FeatureProvider } from '../../types'
 
 import { BoldIcon } from '../../../lexical/ui/icons/Bold'
+import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 import {
   BOLD_ITALIC_STAR,
   BOLD_ITALIC_UNDERSCORE,
@@ -21,8 +22,8 @@ export const BoldTextFeature = (): FeatureProvider => {
 
       return {
         floatingSelectToolbar: {
-          buttons: {
-            format: [
+          sections: [
+            SectionWithEntries([
               {
                 ChildComponent: BoldIcon,
                 isActive: (editor, selection) => selection.hasFormat('bold'),
@@ -32,8 +33,8 @@ export const BoldTextFeature = (): FeatureProvider => {
                 },
                 order: 1,
               },
-            ],
-          },
+            ]),
+          ],
         },
         markdownTransformers: markdownTransformers,
       }
