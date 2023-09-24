@@ -74,6 +74,19 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
     sanitized.enabledFeatures.push(feature.key)
   })
 
+  // Sort sanitized.floatingSelectToolbar.buttons.format by order property
+  sanitized.floatingSelectToolbar.buttons.format.sort((a, b) => {
+    if (a.order && b.order) {
+      return a.order - b.order
+    } else if (a.order) {
+      return -1
+    } else if (b.order) {
+      return 1
+    } else {
+      return 0
+    }
+  })
+
   return sanitized
 }
 

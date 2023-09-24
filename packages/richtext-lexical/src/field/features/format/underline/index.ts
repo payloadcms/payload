@@ -18,6 +18,7 @@ export const UnderlineTextFeature = (): FeatureProvider => {
                 onClick: (editor) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')
                 },
+                order: 3,
               },
             ],
           },

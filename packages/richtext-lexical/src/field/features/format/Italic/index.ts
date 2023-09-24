@@ -19,6 +19,7 @@ export const ItalicTextFeature = (): FeatureProvider => {
                 onClick: (editor) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')
                 },
+                order: 2,
               },
             ],
           },

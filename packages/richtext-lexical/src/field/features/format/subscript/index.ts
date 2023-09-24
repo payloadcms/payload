@@ -18,6 +18,7 @@ export const SubscriptTextFeature = (): FeatureProvider => {
                 onClick: (editor) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'subscript')
                 },
+                order: 5,
               },
             ],
           },

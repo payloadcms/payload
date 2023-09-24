@@ -19,6 +19,7 @@ export const InlineCodeTextFeature = (): FeatureProvider => {
                 onClick: (editor) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code')
                 },
+                order: 7,
               },
             ],
           },

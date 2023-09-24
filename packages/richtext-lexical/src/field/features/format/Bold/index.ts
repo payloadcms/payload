@@ -30,6 +30,7 @@ export const BoldTextFeature = (): FeatureProvider => {
                 onClick: (editor) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')
                 },
+                order: 1,
               },
             ],
           },

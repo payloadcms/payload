@@ -19,6 +19,7 @@ export const StrikethroughTextFeature = (): FeatureProvider => {
                 onClick: (editor) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')
                 },
+                order: 4,
               },
             ],
           },

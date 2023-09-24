@@ -18,6 +18,7 @@ export const SuperscriptTextFeature = (): FeatureProvider => {
                 onClick: (editor) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'superscript')
                 },
+                order: 6,
               },
             ],
           },

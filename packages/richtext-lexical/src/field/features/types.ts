@@ -19,6 +19,7 @@ export type Feature = {
         isActive?: (editor: LexicalEditor, selection: RangeSelection) => boolean
         key: string
         onClick?: (editor: LexicalEditor) => void
+        order?: number
       }[]
     }
   }
@@ -88,6 +89,7 @@ export type SanitizedFeatures = Required<
         isActive?: (editor: LexicalEditor, selection: RangeSelection) => boolean
         key: string
         onClick?: (editor: LexicalEditor) => void
+        order?: number
       }[]
     }
   }
