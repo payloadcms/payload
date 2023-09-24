@@ -13,7 +13,7 @@ import { deleteExistingArrayRows } from './deleteExistingArrayRows'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath'
 import { insertArrays } from './insertArrays'
 
-export const upsertRow = async <T extends TypeWithID>({
+export const upsertRow = async <T extends TypeWithID> ({
   id,
   adapter,
   data,
@@ -151,11 +151,7 @@ export const upsertRow = async <T extends TypeWithID>({
     }
 
     if (relationsToInsert.length > 0) {
-      try {
-        await db.insert(adapter.tables[relationshipsTableName]).values(relationsToInsert).returning()
-      } catch (e) {
-        console.log('ok');
-      }
+      await db.insert(adapter.tables[relationshipsTableName]).values(relationsToInsert).returning()
     }
   })
 

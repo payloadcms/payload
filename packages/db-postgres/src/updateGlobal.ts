@@ -15,7 +15,7 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
   const tableName = toSnakeCase(slug)
 
-  const existingGlobal = await this.db.query[tableName].findFirst({})
+  const existingGlobal = await db.query[tableName].findFirst({})
 
   const result = await upsertRow({
     ...(existingGlobal ? { id: existingGlobal.id, operation: 'update' } : { operation: 'create' }),
