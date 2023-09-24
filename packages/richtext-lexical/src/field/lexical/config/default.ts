@@ -2,7 +2,7 @@ import type { EditorConfig, SanitizedEditorConfig } from './types'
 
 import { HeadingFeature } from '../../features/Heading'
 import { ParagraphFeature } from '../../features/Paragraph'
-import { BoldTextFeature } from '../../features/format/BoldText'
+import { BoldTextFeature } from '../../features/format/Bold'
 import { CodeTextFeature } from '../../features/format/CodeText'
 import { ItalicTextFeature } from '../../features/format/ItalicText'
 import { StrikethroughTextFeature } from '../../features/format/StrikethroughText'

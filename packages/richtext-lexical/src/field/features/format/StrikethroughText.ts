@@ -1,24 +1,29 @@
 import { FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { Feature } from '../types'
+import type { FeatureProvider } from '../types'
 
 import { StrikethroughIcon } from '../../lexical/ui/icons/Strikethrough'
 
-export function StrikethroughTextFeature(): Feature {
+export const StrikethroughTextFeature = (): FeatureProvider => {
   return {
-    floatingSelectToolbar: {
-      buttons: {
-        format: [
-          {
-            ChildComponent: StrikethroughIcon,
-            isActive: (editor, selection) => selection.hasFormat('strikethrough'),
-            key: 'strikethrough',
-            onClick: (editor) => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')
-            },
+    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+      return {
+        floatingSelectToolbar: {
+          buttons: {
+            format: [
+              {
+                ChildComponent: StrikethroughIcon,
+                isActive: (editor, selection) => selection.hasFormat('strikethrough'),
+                key: 'strikethrough',
+                onClick: (editor) => {
+                  editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')
+                },
+              },
+            ],
           },
-        ],
-      },
+        },
+      }
     },
+    key: 'strikethrough',
   }
 }

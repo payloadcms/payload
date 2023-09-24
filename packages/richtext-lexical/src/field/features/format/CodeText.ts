@@ -1,24 +1,29 @@
 import { FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { Feature } from '../types'
+import type { FeatureProvider } from '../types'
 
 import { CodeIcon } from '../../lexical/ui/icons/Code'
 
-export function CodeTextFeature(): Feature {
+export const CodeTextFeature = (): FeatureProvider => {
   return {
-    floatingSelectToolbar: {
-      buttons: {
-        format: [
-          {
-            ChildComponent: CodeIcon,
-            isActive: (editor, selection) => selection.hasFormat('code'),
-            key: 'code',
-            onClick: (editor) => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code')
-            },
+    feature: ({ featureProviderMap }) => {
+      return {
+        floatingSelectToolbar: {
+          buttons: {
+            format: [
+              {
+                ChildComponent: CodeIcon,
+                isActive: (editor, selection) => selection.hasFormat('code'),
+                key: 'code',
+                onClick: (editor) => {
+                  editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code')
+                },
+              },
+            ],
           },
-        ],
-      },
+        },
+      }
     },
+    key: 'code',
   }
 }

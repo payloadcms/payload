@@ -1,24 +1,29 @@
 import { FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { Feature } from '../types'
+import type { FeatureProvider } from '../types'
 
 import { SubscriptIcon } from '../../lexical/ui/icons/Subscript'
 
-export function SubscriptTextFeature(): Feature {
+export const SubscriptTextFeature = (): FeatureProvider => {
   return {
-    floatingSelectToolbar: {
-      buttons: {
-        format: [
-          {
-            ChildComponent: SubscriptIcon,
-            isActive: (editor, selection) => selection.hasFormat('subscript'),
-            key: 'subscript',
-            onClick: (editor) => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'subscript')
-            },
+    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+      return {
+        floatingSelectToolbar: {
+          buttons: {
+            format: [
+              {
+                ChildComponent: SubscriptIcon,
+                isActive: (editor, selection) => selection.hasFormat('subscript'),
+                key: 'subscript',
+                onClick: (editor) => {
+                  editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'subscript')
+                },
+              },
+            ],
           },
-        ],
-      },
+        },
+      }
     },
+    key: 'subscript',
   }
 }

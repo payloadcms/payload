@@ -1,24 +1,29 @@
 import { FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { Feature } from '../types'
+import type { FeatureProvider } from '../types'
 
 import { ItalicIcon } from '../../lexical/ui/icons/Italic'
 
-export function ItalicTextFeature(): Feature {
+export const ItalicTextFeature = (): FeatureProvider => {
   return {
-    floatingSelectToolbar: {
-      buttons: {
-        format: [
-          {
-            ChildComponent: ItalicIcon,
-            isActive: (editor, selection) => selection.hasFormat('italic'),
-            key: 'italic',
-            onClick: (editor) => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')
-            },
+    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+      return {
+        floatingSelectToolbar: {
+          buttons: {
+            format: [
+              {
+                ChildComponent: ItalicIcon,
+                isActive: (editor, selection) => selection.hasFormat('italic'),
+                key: 'italic',
+                onClick: (editor) => {
+                  editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')
+                },
+              },
+            ],
           },
-        ],
-      },
+        },
+      }
     },
+    key: 'italic',
   }
 }

@@ -5,7 +5,7 @@ import { $createHeadingNode, HeadingNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
 import { $getSelection, $isRangeSelection, DEPRECATED_$isGridSelection } from 'lexical'
 
-import type { Feature } from '../types'
+import type { Feature, FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 import { BlockIcon } from '../../lexical/ui/icons/Block'
@@ -25,7 +25,7 @@ type Props = {
   enabledHeadingSizes?: HeadingTagType[]
 }
 
-export function HeadingFeature(props: Props): Feature {
+export const HeadingFeature = (props: Props): FeatureProvider => {
   const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
 
   const toReturn: Feature = {
@@ -51,5 +51,10 @@ export function HeadingFeature(props: Props): Feature {
     })
   }
 
-  return toReturn
+  return {
+    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+      return toReturn
+    },
+    key: 'heading',
+  }
 }

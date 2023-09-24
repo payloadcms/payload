@@ -1,8 +1,11 @@
-import type { Feature, SanitizedFeatures } from '../../features/types'
+import type { ResolvedFeatureMap, SanitizedFeatures } from '../../features/types'
 import type { EditorConfig, SanitizedEditorConfig } from './types'
 
-export const sanitizeFeatures = (features: Feature[]): SanitizedFeatures => {
+import { loadFeatures } from './loader'
+
+export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeatures => {
   const sanitized: SanitizedFeatures = {
+    enabledFeatures: [],
     floatingSelectToolbar: {
       buttons: {
         format: [],
@@ -67,14 +70,20 @@ export const sanitizeFeatures = (features: Feature[]): SanitizedFeatures => {
         sanitized.slashMenu.groupsWithOptions.push(group)
       }
     }
+
+    sanitized.enabledFeatures.push(feature.key)
   })
 
   return sanitized
 }
 
 export function sanitizeEditorConfig(editorConfig: EditorConfig): SanitizedEditorConfig {
+  const resolvedFeatureMap = loadFeatures({
+    unsanitizedEditorConfig: editorConfig,
+  })
+
   return {
-    features: sanitizeFeatures(editorConfig.features),
+    features: sanitizeFeatures(resolvedFeatureMap),
     lexical: editorConfig.lexical,
   }
 }
