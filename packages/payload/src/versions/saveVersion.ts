@@ -77,8 +77,9 @@ export const saveVersion = async ({
         const updateVersionArgs = {
           id: latestVersion.id,
           req,
-          versionData: data,
+          versionData: data as TypeWithID,
         }
+
         if (collection) {
           result = await payload.db.updateVersion({
             ...updateVersionArgs,
