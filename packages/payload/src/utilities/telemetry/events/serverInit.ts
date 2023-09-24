@@ -7,6 +7,7 @@ export type ServerInitEvent = {
 }
 
 export const serverInit = (payload: Payload): void => {
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   sendEvent({
     event: {
       type: 'server-init',

@@ -291,6 +291,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     if (collectionConfig.auth && collectionConfig.auth.verify) {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       sendVerificationEmail({
         collection: { config: collectionConfig },
         config: payload.config,

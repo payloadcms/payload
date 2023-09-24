@@ -118,6 +118,7 @@ async function forgotPassword(incomingArgs: Arguments): Promise<null | string> {
       })
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     email({
       from: `"${emailOptions.fromName}" <${emailOptions.fromAddress}>`,
       html,

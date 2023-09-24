@@ -70,6 +70,7 @@ export const migrate = async (args: string[]): Promise<void> => {
 // When launched directly call migrate
 if (module.id === require.main.id) {
   const args = process.argv.slice(2)
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   migrate(args).then(() => {
     process.exit(0)
   })
