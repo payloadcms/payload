@@ -14,9 +14,9 @@ export const SuperscriptTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: SuperscriptIcon,
-                isActive: (editor, selection) => selection.hasFormat('superscript'),
+                isActive: ({ editor, selection }) => selection.hasFormat('superscript'),
                 key: 'superscript',
-                onClick: (editor) => {
+                onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'superscript')
                 },
                 order: 6,

@@ -23,8 +23,16 @@ export type FloatingToolbarSectionEntry = {
     anchorElem: HTMLElement
     editor: LexicalEditor
   }>
-  isActive?: (editor: LexicalEditor, selection: RangeSelection) => boolean
+  isActive?: ({
+    editor,
+    selection,
+  }: {
+    editor: LexicalEditor
+    selection: RangeSelection
+  }) => boolean
   key: string
-  onClick?: (editor: LexicalEditor) => void
+  /** The label is displayed as text if the entry is part of a dropdown section */
+  label?: string
+  onClick?: ({ editor }: { editor: LexicalEditor }) => void
   order?: number
 }

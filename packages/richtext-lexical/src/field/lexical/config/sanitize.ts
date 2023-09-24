@@ -1,5 +1,4 @@
 import type { ResolvedFeatureMap, SanitizedFeatures } from '../../features/types'
-import type { FloatingToolbarSection } from '../plugins/FloatingSelectToolbar/types'
 import type { EditorConfig, SanitizedEditorConfig } from './types'
 
 import { loadFeatures } from './loader'

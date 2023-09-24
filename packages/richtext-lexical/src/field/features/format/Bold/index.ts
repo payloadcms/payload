@@ -26,9 +26,9 @@ export const BoldTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: BoldIcon,
-                isActive: (editor, selection) => selection.hasFormat('bold'),
+                isActive: ({ editor, selection }) => selection.hasFormat('bold'),
                 key: 'bold',
-                onClick: (editor) => {
+                onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')
                 },
                 order: 1,

@@ -164,11 +164,7 @@ function FloatingSelectToolbar({
                   key={section.key}
                 >
                   {section.type === 'dropdown' && section.entries.length && (
-                    <ToolbarDropdown
-                      Icon={section.ChildComponent}
-                      entries={section.entries}
-                      onClick={() => {}}
-                    />
+                    <ToolbarDropdown Icon={section.ChildComponent} entries={section.entries} />
                   )}
                   {section.type === 'buttons' &&
                     section.entries.length &&
@@ -191,7 +187,7 @@ function FloatingSelectToolbar({
                               : []
                           }
                           key={entry.key}
-                          onClick={() => entry.onClick(editor)}
+                          onClick={() => entry.onClick({ editor })}
                         >
                           <entry.ChildComponent />
                         </ToolbarButton>
@@ -246,7 +242,7 @@ function useFloatingTextFormatToolbar(
       for (const section of editorConfig?.features?.floatingSelectToolbar?.sections) {
         for (const entry of section.entries) {
           if (entry.isActive) {
-            const isActive = entry.isActive(editor, selection)
+            const isActive = entry.isActive({ editor, selection })
             setActiveStates(activeStates.set(section.key + '-' + entry.key, isActive))
           }
         }

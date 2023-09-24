@@ -14,9 +14,9 @@ export const SubscriptTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: SubscriptIcon,
-                isActive: (editor, selection) => selection.hasFormat('subscript'),
+                isActive: ({ editor, selection }) => selection.hasFormat('subscript'),
                 key: 'subscript',
-                onClick: (editor) => {
+                onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'subscript')
                 },
                 order: 5,

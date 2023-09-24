@@ -15,9 +15,9 @@ export const ItalicTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: ItalicIcon,
-                isActive: (editor, selection) => selection.hasFormat('italic'),
+                isActive: ({ editor, selection }) => selection.hasFormat('italic'),
                 key: 'italic',
-                onClick: (editor) => {
+                onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')
                 },
                 order: 2,

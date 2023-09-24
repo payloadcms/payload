@@ -5,21 +5,12 @@
   align-items: center;
   vertical-align: middle;
   height: 30px;
-  width: 30px;
+  width: 40px;
+  border: 0;
+  background: none;
   border-radius: 4px;
   cursor: pointer;
-
-  &.spaced {
-    margin-right: 2px;
-  }
-
-  &.active {
-    background-color: var(--color-base-100);
-
-    .icon {
-      opacity: 1;
-    }
-  }
+  position: relative;
 
   &:disabled {
     cursor: not-allowed;
@@ -31,5 +22,77 @@
 
   &:hover:not([disabled]) {
     background-color: var(--color-base-100);
+  }
+
+  &.active {
+    background-color: var(--color-base-100);
+
+    .floating-select-toolbar-popup__dropdown--caret {
+      &:after {
+        transform: rotate(0deg);
+      }
+    }
+  }
+
+  &--caret {
+    &:after {
+      transform: rotate(180deg);
+
+      content: ' ';
+      position: absolute;
+      top: 13px;
+
+      /* Vector 3 */
+
+      width: 7px;
+      height: 4px;
+
+      opacity: 0.3;
+      background-image: url(../../../ui/icons/Caret/index.svg);
+      background-position-y: 0px;
+      background-position-x: 0px;
+    }
+  }
+
+  &--items {
+    position: absolute;
+    background: var(--color-base-0);
+    border-radius: 4px;
+    width: 132.5px;
+    z-index: 100;
+
+    .item {
+      all: unset; // reset all default button styles
+      cursor: pointer;
+      color: var(--color-base-900);
+
+      &:hover:not([disabled]) {
+        background-color: var(--color-base-100);
+      }
+      padding-left: 6.25px;
+      padding-right: 6.25px;
+      width: 100%;
+      height: 30px;
+      border-radius: 4px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      gap: 6.25px;
+
+      .icon {
+        min-width: 20px;
+        height: 20px;
+        color: var(--color-base-600);
+      }
+    }
+  }
+}
+
+html[data-theme='light'] {
+  .floating-select-toolbar-popup__dropdown {
+    &--items {
+      position: absolute;
+      box-shadow: 0px 6px 20px 0px rgba(0, 0, 0, 0.2);
+    }
   }
 }

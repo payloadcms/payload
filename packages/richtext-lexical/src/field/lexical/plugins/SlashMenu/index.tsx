@@ -178,7 +178,7 @@ export default function SlashMenuPlugin(): JSX.Element {
         if (nodeToRemove) {
           nodeToRemove.remove()
         }
-        selectedOption.onSelect(editor, matchingString)
+        selectedOption.onSelect({ editor, queryString: matchingString })
         closeMenu()
       })
     },

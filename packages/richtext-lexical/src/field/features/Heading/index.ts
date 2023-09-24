@@ -3,23 +3,21 @@ import type { LexicalEditor } from 'lexical'
 
 import { $createHeadingNode, HeadingNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
-import {
-  $getSelection,
-  $isRangeSelection,
-  DEPRECATED_$isGridSelection,
-  FORMAT_TEXT_COMMAND,
-} from 'lexical'
+import { $getSelection, $isRangeSelection, DEPRECATED_$isGridSelection } from 'lexical'
 
 import type { Feature, FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
-import { BlockIcon } from '../../lexical/ui/icons/Block'
-import { BoldIcon } from '../../lexical/ui/icons/Bold'
+import { H1Icon } from '../../lexical/ui/icons/H1'
+import { H2Icon } from '../../lexical/ui/icons/H2'
+import { H3Icon } from '../../lexical/ui/icons/H3'
+import { H4Icon } from '../../lexical/ui/icons/H4'
+import { H5Icon } from '../../lexical/ui/icons/H5'
+import { H6Icon } from '../../lexical/ui/icons/H6'
 import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarTextDropdownSection'
 import { MarkdownTransformer } from './markdownTransformer'
 
-// For SlashMenu, NOT for floating menu, as we would have to check if the selected node is ALREADY a heading for that first
-const addHeading = (editor: LexicalEditor, headingSize: HeadingTagType) => {
+const setHeading = (editor: LexicalEditor, headingSize: HeadingTagType) => {
   editor.update(() => {
     const selection = $getSelection()
     if ($isRangeSelection(selection) || DEPRECATED_$isGridSelection(selection)) {
@@ -32,23 +30,35 @@ type Props = {
   enabledHeadingSizes?: HeadingTagType[]
 }
 
+const HeadingToIconMap: Record<HeadingTagType, React.FC> = {
+  h1: H1Icon,
+  h2: H2Icon,
+  h3: H3Icon,
+  h4: H4Icon,
+  h5: H5Icon,
+  h6: H6Icon,
+}
+
 export const HeadingFeature = (props: Props): FeatureProvider => {
   const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
 
   const toReturn: Feature = {
     floatingSelectToolbar: {
       sections: [
-        TextDropdownSectionWithEntries([
-          {
-            ChildComponent: BoldIcon,
-            isActive: (editor, selection) => selection.hasFormat('bold'),
-            key: 'bold',
-            onClick: (editor) => {
-              editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')
+        ...enabledHeadingSizes.map((headingSize, i) =>
+          TextDropdownSectionWithEntries([
+            {
+              ChildComponent: HeadingToIconMap[headingSize],
+              isActive: ({ editor, selection }) => false,
+              key: headingSize,
+              label: `Heading ${headingSize.charAt(1)}`,
+              onClick: ({ editor }) => {
+                setHeading(editor, headingSize)
+              },
+              order: i + 2,
             },
-            order: 1,
-          },
-        ]),
+          ]),
+        ),
       ],
     },
     markdownTransformers: [MarkdownTransformer],
@@ -62,10 +72,10 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
     toReturn.slashMenu.options.push({
       options: [
         new SlashMenuOption(`Heading ${headingSize.charAt(1)}`, {
-          Icon: BlockIcon,
+          Icon: HeadingToIconMap[headingSize],
           keywords: ['heading', headingSize],
-          onSelect: (editor) => {
-            addHeading(editor, headingSize)
+          onSelect: ({ editor }) => {
+            setHeading(editor, headingSize)
           },
         }),
       ],

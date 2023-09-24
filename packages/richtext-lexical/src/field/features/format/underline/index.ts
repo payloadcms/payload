@@ -14,9 +14,9 @@ export const UnderlineTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: UnderlineIcon,
-                isActive: (editor, selection) => selection.hasFormat('underline'),
+                isActive: ({ editor, selection }) => selection.hasFormat('underline'),
                 key: 'underline',
-                onClick: (editor) => {
+                onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')
                 },
                 order: 3,

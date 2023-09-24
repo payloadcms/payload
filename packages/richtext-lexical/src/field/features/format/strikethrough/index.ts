@@ -15,9 +15,9 @@ export const StrikethroughTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: StrikethroughIcon,
-                isActive: (editor, selection) => selection.hasFormat('strikethrough'),
+                isActive: ({ editor, selection }) => selection.hasFormat('strikethrough'),
                 key: 'strikethrough',
-                onClick: (editor) => {
+                onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')
                 },
                 order: 4,

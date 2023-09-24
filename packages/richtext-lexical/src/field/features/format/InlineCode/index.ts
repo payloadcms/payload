@@ -15,9 +15,9 @@ export const InlineCodeTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: CodeIcon,
-                isActive: (editor, selection) => selection.hasFormat('code'),
+                isActive: ({ editor, selection }) => selection.hasFormat('code'),
                 key: 'code',
-                onClick: (editor) => {
+                onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code')
                 },
                 order: 7,
