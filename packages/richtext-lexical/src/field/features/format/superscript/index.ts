@@ -1,8 +1,8 @@
 import { FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProvider } from '../types'
+import type { FeatureProvider } from '../../types'
 
-import { SuperscriptIcon } from '../../lexical/ui/icons/Superscript'
+import { SuperscriptIcon } from '../../../lexical/ui/icons/Superscript'
 
 export const SuperscriptTextFeature = (): FeatureProvider => {
   return {

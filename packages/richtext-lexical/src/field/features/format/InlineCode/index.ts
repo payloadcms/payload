@@ -1,10 +1,11 @@
 import { FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProvider } from '../types'
+import type { FeatureProvider } from '../../types'
 
-import { CodeIcon } from '../../lexical/ui/icons/Code'
+import { CodeIcon } from '../../../lexical/ui/icons/Code'
+import { INLINE_CODE } from './markdownTransformers'
 
-export const CodeTextFeature = (): FeatureProvider => {
+export const InlineCodeTextFeature = (): FeatureProvider => {
   return {
     feature: ({ featureProviderMap }) => {
       return {
@@ -22,8 +23,9 @@ export const CodeTextFeature = (): FeatureProvider => {
             ],
           },
         },
+        markdownTransformers: [INLINE_CODE],
       }
     },
-    key: 'code',
+    key: 'inlineCode',
   }
 }

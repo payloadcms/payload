@@ -1,8 +1,9 @@
 import { FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProvider } from '../types'
+import type { FeatureProvider } from '../../types'
 
-import { ItalicIcon } from '../../lexical/ui/icons/Italic'
+import { ItalicIcon } from '../../../lexical/ui/icons/Italic'
+import { ITALIC_STAR, ITALIC_UNDERSCORE } from './markdownTransformers'
 
 export const ItalicTextFeature = (): FeatureProvider => {
   return {
@@ -22,6 +23,7 @@ export const ItalicTextFeature = (): FeatureProvider => {
             ],
           },
         },
+        markdownTransformers: [ITALIC_STAR, ITALIC_UNDERSCORE],
       }
     },
     key: 'italic',

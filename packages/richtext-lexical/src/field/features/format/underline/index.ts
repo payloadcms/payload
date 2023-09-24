@@ -1,8 +1,8 @@
 import { FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProvider } from '../types'
+import type { FeatureProvider } from '../../types'
 
-import { UnderlineIcon } from '../../lexical/ui/icons/Underline'
+import { UnderlineIcon } from '../../../lexical/ui/icons/Underline'
 
 export const UnderlineTextFeature = (): FeatureProvider => {
   return {

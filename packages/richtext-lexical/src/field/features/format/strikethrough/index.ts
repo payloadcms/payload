@@ -1,8 +1,9 @@
 import { FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProvider } from '../types'
+import type { FeatureProvider } from '../../types'
 
-import { StrikethroughIcon } from '../../lexical/ui/icons/Strikethrough'
+import { StrikethroughIcon } from '../../../lexical/ui/icons/Strikethrough'
+import { STRIKETHROUGH } from './markdownTransformers'
 
 export const StrikethroughTextFeature = (): FeatureProvider => {
   return {
@@ -22,6 +23,7 @@ export const StrikethroughTextFeature = (): FeatureProvider => {
             ],
           },
         },
+        markdownTransformers: [STRIKETHROUGH],
       }
     },
     key: 'strikethrough',

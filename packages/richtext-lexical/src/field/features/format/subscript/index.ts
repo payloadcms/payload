@@ -1,8 +1,8 @@
 import { FORMAT_TEXT_COMMAND } from 'lexical'
 
-import type { FeatureProvider } from '../types'
+import type { FeatureProvider } from '../../types'
 
-import { SubscriptIcon } from '../../lexical/ui/icons/Subscript'
+import { SubscriptIcon } from '../../../lexical/ui/icons/Subscript'
 
 export const SubscriptTextFeature = (): FeatureProvider => {
   return {
