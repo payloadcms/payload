@@ -1,4 +1,6 @@
 /* eslint-disable no-param-reassign */
+import type { TypeWithID } from 'payload/types'
+
 import { eq } from 'drizzle-orm'
 
 import type { BlockRowToInsert } from '../transform/write/types'
@@ -11,7 +13,7 @@ import { deleteExistingArrayRows } from './deleteExistingArrayRows'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath'
 import { insertArrays } from './insertArrays'
 
-export const upsertRow = async ({
+export const upsertRow = async <T extends TypeWithID>({
   id,
   adapter,
   data,
@@ -22,7 +24,7 @@ export const upsertRow = async ({
   tableName,
   upsertTarget,
   where,
-}: Args): Promise<Record<string, unknown>> => {
+}: Args): Promise<T> => {
   // Split out the incoming data into the corresponding:
   // base row, locales, relationships, blocks, and arrays
   const rowToInsert = transformForWrite({
@@ -279,7 +281,7 @@ export const upsertRow = async ({
       Object.entries(selectsToInsert).map(async ([selectTableName, tableRows]) => {
         const selectTable = adapter.tables[selectTableName]
         if (operation === 'update') {
-          await db.delete(selectTable).where(eq(selectTable.id, insertedRow.id))
+          await db.delete(selectTable).where(eq(selectTable.parent, insertedRow.id))
         }
         await db.insert(selectTable).values(tableRows).returning()
       }),
@@ -307,7 +309,7 @@ export const upsertRow = async ({
   // TRANSFORM DATA
   // //////////////////////////////////
 
-  const result = transform({
+  const result = transform<T>({
     config: adapter.payload.config,
     data: doc,
     fields,
