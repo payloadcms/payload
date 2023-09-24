@@ -37,6 +37,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       ...args,
       beginTransaction,
       commitTransaction,
+      pool: undefined,
       ...(args.migrationDir && { migrationDir: args.migrationDir }),
       connect,
       create,

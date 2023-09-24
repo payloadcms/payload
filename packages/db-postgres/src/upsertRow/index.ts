@@ -149,7 +149,11 @@ export const upsertRow = async ({
     }
 
     if (relationsToInsert.length > 0) {
-      await db.insert(adapter.tables[relationshipsTableName]).values(relationsToInsert).returning()
+      try {
+        await db.insert(adapter.tables[relationshipsTableName]).values(relationsToInsert).returning()
+      } catch (e) {
+        console.log('ok');
+      }
     }
   })
 

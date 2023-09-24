@@ -2,26 +2,15 @@ import type { ColumnBaseConfig, ColumnDataType, Relation, Relations } from 'driz
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { PgColumn, PgEnum, PgTableWithColumns } from 'drizzle-orm/pg-core'
 import type { DatabaseAdapter, Payload } from 'payload'
-import type { ClientConfig, PoolConfig } from 'pg'
+import type { Pool, PoolConfig } from 'pg'
 
 export type DrizzleDB = NodePgDatabase<Record<string, never>>
 
-type BaseArgs = {
+export type Args = {
+  client: PoolConfig
   migrationDir?: string
   migrationName?: string
 }
-
-type ClientArgs = {
-  /** Client connection options for the Node package `pg` */
-  client?: ClientConfig | false | string
-} & BaseArgs
-
-type PoolArgs = {
-  /** Pool connection options for the Node package `pg` */
-  pool?: PoolConfig | false
-} & BaseArgs
-
-export type Args = ClientArgs | PoolArgs
 
 export type GenericColumn = PgColumn<
   ColumnBaseConfig<ColumnDataType, string>,
@@ -47,6 +36,7 @@ export type PostgresAdapter = DatabaseAdapter &
   Args & {
     db: DrizzleDB
     enums: Record<string, GenericEnum>
+    pool: Pool
     relations: Record<string, GenericRelation>
     schema: Record<string, GenericEnum | GenericRelation | GenericTable>
     sessions: Record<string, DrizzleDB>

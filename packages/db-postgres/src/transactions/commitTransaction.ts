@@ -9,9 +9,9 @@ export const commitTransaction: CommitTransaction = async function commitTransac
   }
 
   try {
-    await this.sessions[id].execute(sql`COMMIT;`)
+    await this.sessions[id].execute(sql`COMMIT`)
   } catch (err: unknown) {
-    await this.sessions[id].execute(sql`ROLLBACK;`)
+    await this.sessions[id].execute(sql`ROLLBACK`)
   }
 
   delete this.sessions[id]

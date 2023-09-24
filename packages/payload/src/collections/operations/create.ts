@@ -7,12 +7,7 @@ import { promisify } from 'util'
 
 import type { PayloadRequest } from '../../express/types'
 import type { Document } from '../../types'
-import type {
-  AfterChangeHook,
-  BeforeOperationHook,
-  BeforeValidateHook,
-  Collection,
-} from '../config/types'
+import type { AfterChangeHook, BeforeOperationHook, BeforeValidateHook, Collection, } from '../config/types'
 
 import executeAccess from '../../auth/executeAccess'
 import sendVerificationEmail from '../../auth/sendVerificationEmail'
@@ -91,7 +86,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
   try {
     const shouldCommit = await initTransaction(req)
-
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
