@@ -13,7 +13,7 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
   this: PostgresAdapter,
   { collection, locale, req = {} as PayloadRequest, where: where },
 ) {
-  const db = this.sessions?.[req.transactionID] || this.db
+  const db = this.sessions[req.transactionID] || this.db
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
 
   const tableName = `_${toSnakeCase(collection)}_v`

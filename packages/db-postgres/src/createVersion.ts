@@ -13,7 +13,7 @@ export const createVersion: CreateVersion = async function createVersion(
   this: PostgresAdapter,
   { autosave, collectionSlug, parent, req = {} as PayloadRequest, versionData },
 ) {
-  const db = this.sessions?.[req.transactionID] || this.db
+  const db = this.sessions[req.transactionID] || this.db
   const collection = this.payload.collections[collectionSlug].config
   const collectionTableName = toSnakeCase(collectionSlug)
   const tableName = `_${collectionTableName}_v`

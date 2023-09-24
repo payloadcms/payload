@@ -13,7 +13,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
   this: PostgresAdapter,
   { id, collection, locale, req = {} as PayloadRequest, versionData, where: whereArg },
 ) {
-  const db = this.sessions?.[req.transactionID] || this.db
+  const db = this.sessions[req.transactionID] || this.db
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const whereToUse = whereArg || { id: { equals: id } }
   const tableName = `_${toSnakeCase(collection)}_v`

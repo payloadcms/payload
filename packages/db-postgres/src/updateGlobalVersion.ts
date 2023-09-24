@@ -13,7 +13,7 @@ export const updateGlobalVersion: UpdateGlobalVersion = async function updateVer
   this: PostgresAdapter,
   { id, global, locale, req = {} as PayloadRequest, versionData, where: whereArg },
 ) {
-  const db = this.sessions?.[req.transactionID] || this.db
+  const db = this.sessions[req.transactionID] || this.db
   const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(
     ({ slug }) => slug === global,
   )

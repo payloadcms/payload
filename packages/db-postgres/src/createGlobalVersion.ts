@@ -13,7 +13,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
   this: PostgresAdapter,
   { autosave, globalSlug, req = {} as PayloadRequest, versionData },
 ) {
-  const db = this.sessions?.[req.transactionID] || this.db
+  const db = this.sessions[req.transactionID] || this.db
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
   const globalTableName = toSnakeCase(globalSlug)
   const tableName = `_${globalTableName}_v`
