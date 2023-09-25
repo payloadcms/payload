@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
@@ -75,46 +75,75 @@ export const DocumentControls: React.FC<{
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
-          {collection?.timestamps && (
-            <ul className={`${baseClass}__timestamps`}>
-              <li
-                className={`${baseClass}__timestamp`}
-                title={
-                  data?.updatedAt ? formatDate(data?.updatedAt, dateFormat, i18n?.language) : ''
-                }
-              >
-                <div className={`${baseClass}__label`}>{t('lastModified')}:&nbsp;</div>
-                {data?.updatedAt && (
-                  <p className={`${baseClass}__stamp`}>
-                    {formatDate(data.updatedAt, dateFormat, i18n?.language)}
-                  </p>
-                )}
-              </li>
-              <li
-                className={`${baseClass}__timestamp`}
-                title={
-                  publishedDoc?.createdAt || data?.createdAt
-                    ? formatDate(
+          <ul className={`${baseClass}__meta`}>
+            {(collection?.versions?.drafts || global?.versions?.drafts) && (
+              <Fragment>
+                <li
+                  className={[`${baseClass}__status`, `${baseClass}__list-item`]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  <Status />
+                </li>
+                {((collection?.versions?.drafts && collection?.versions?.drafts?.autosave) ||
+                  (global?.versions?.drafts && global?.versions?.drafts?.autosave)) &&
+                  hasSavePermission && (
+                    <li className={`${baseClass}__list-item`}>
+                      <Autosave
+                        collection={collection}
+                        global={global}
+                        id={id}
+                        publishedDocUpdatedAt={publishedDoc?.updatedAt || data?.createdAt}
+                      />
+                    </li>
+                  )}
+              </Fragment>
+            )}
+            {collection?.timestamps && (
+              <Fragment>
+                <li
+                  className={[`${baseClass}__list-item`, `${baseClass}__timestamp-wrap`]
+                    .filter(Boolean)
+                    .join(' ')}
+                  title={
+                    data?.updatedAt ? formatDate(data?.updatedAt, dateFormat, i18n?.language) : ''
+                  }
+                >
+                  <div className={`${baseClass}__label`}>{t('lastModified')}:&nbsp;</div>
+                  {data?.updatedAt && (
+                    <p className={`${baseClass}__timestamp`}>
+                      {formatDate(data.updatedAt, dateFormat, i18n?.language)}
+                    </p>
+                  )}
+                </li>
+                <li
+                  className={[`${baseClass}__list-item`, `${baseClass}__timestamp-wrap`]
+                    .filter(Boolean)
+                    .join(' ')}
+                  title={
+                    publishedDoc?.createdAt || data?.createdAt
+                      ? formatDate(
+                          publishedDoc?.createdAt || data?.createdAt,
+                          dateFormat,
+                          i18n?.language,
+                        )
+                      : ''
+                  }
+                >
+                  <div className={`${baseClass}__label`}>{t('created')}:&nbsp;</div>
+                  {(publishedDoc?.createdAt || data?.createdAt) && (
+                    <p className={`${baseClass}__timestamp`}>
+                      {formatDate(
                         publishedDoc?.createdAt || data?.createdAt,
                         dateFormat,
                         i18n?.language,
-                      )
-                    : ''
-                }
-              >
-                <div className={`${baseClass}__label`}>{t('created')}:&nbsp;</div>
-                {(publishedDoc?.createdAt || data?.createdAt) && (
-                  <p className={`${baseClass}__stamp`}>
-                    {formatDate(
-                      publishedDoc?.createdAt || data?.createdAt,
-                      dateFormat,
-                      i18n?.language,
-                    )}
-                  </p>
-                )}
-              </li>
-            </ul>
-          )}
+                      )}
+                    </p>
+                  )}
+                </li>
+              </Fragment>
+            )}
+          </ul>
         </div>
         <div className={`${baseClass}__controls-wrapper`}>
           <div className={`${baseClass}__controls`}>

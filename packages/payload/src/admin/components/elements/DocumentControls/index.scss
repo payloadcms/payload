@@ -39,7 +39,7 @@
     overflow: hidden;
   }
 
-  &__timestamps {
+  &__meta {
     flex-grow: 1;
     display: flex;
     list-style: none;
@@ -49,14 +49,17 @@
     width: 100%;
   }
 
-  &__timestamp {
+  &__list-item {
     display: flex;
     align-items: center;
     margin: 0;
+  }
+
+  &__timestamp-wrap {
     overflow: hidden;
   }
 
-  &__stamp {
+  &__timestamp {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -193,7 +196,7 @@
       }
     }
 
-    &__timestamps {
+    &__meta {
       width: auto;
       gap: calc(var(--base) / 2);
       margin-left: var(--gutter-h);
