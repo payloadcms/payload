@@ -14,7 +14,7 @@ import LeaveWithoutSaving from '../../../modals/LeaveWithoutSaving'
 import Meta from '../../../utilities/Meta'
 import './index.scss'
 
-const baseClass = 'global-edit'
+const baseClass = 'global-default-edit'
 
 export const DefaultGlobalEdit: React.FC<Props> = (props) => {
   const { apiURL, data, global, permissions } = props
@@ -47,7 +47,10 @@ export const DefaultGlobalEdit: React.FC<Props> = (props) => {
         permissions={permissions}
       />
       <div
-        className={[`${baseClass}__wrapper`, hasSidebar && `${baseClass}__wrapper--has-sidebar`]
+        className={[
+          baseClass,
+          hasSidebar ? `${baseClass}--has-sidebar` : `${baseClass}--no-sidebar`,
+        ]
           .filter(Boolean)
           .join(' ')}
       >

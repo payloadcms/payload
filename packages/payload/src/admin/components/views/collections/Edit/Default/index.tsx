@@ -16,7 +16,7 @@ import { SetStepNav } from '../SetStepNav'
 import Upload from '../Upload'
 import './index.scss'
 
-const baseClass = 'collection-edit'
+const baseClass = 'collection-default-edit'
 
 export const DefaultCollectionEdit: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation('general')
@@ -62,7 +62,10 @@ export const DefaultCollectionEdit: React.FC<Props> = (props) => {
         permissions={permissions}
       />
       <div
-        className={[`${baseClass}__wrapper`, hasSidebar && `${baseClass}__wrapper--has-sidebar`]
+        className={[
+          baseClass,
+          hasSidebar ? `${baseClass}--has-sidebar` : `${baseClass}--no-sidebar`,
+        ]
           .filter(Boolean)
           .join(' ')}
       >

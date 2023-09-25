@@ -1,36 +1,31 @@
 @import '../../../../scss/styles.scss';
 
-.global-edit {
+.global-default-edit {
   width: 100%;
+  display: flex;
 
-  &__wrapper {
-    display: flex;
+  &--has-sidebar {
+    .global-default-edit {
+      &__edit {
+        [dir='ltr'] & {
+          top: 0;
+          right: 0;
+          border-right: 1px solid var(--theme-elevation-100);
+          padding-right: calc(var(--base) * 2);
+        }
 
-    &--has-sidebar {
-      .global-edit {
-        // &__main {
-        //   width: calc(100% - #{base(15)});
-        // }
-
-        &__edit {
-          [dir='ltr'] & {
-            top: 0;
-            right: 0;
-            border-right: 1px solid var(--theme-elevation-100);
-          }
-
-          [dir='rtl'] & {
-            top: 0;
-            left: 0;
-            border-left: 1px solid var(--theme-elevation-100);
-          }
+        [dir='rtl'] & {
+          top: 0;
+          left: 0;
+          border-left: 1px solid var(--theme-elevation-100);
+          padding-left: calc(var(--base) * 2);
         }
       }
     }
   }
 
   &__main {
-    width: calc(100% - #{base(15)});
+    width: calc(100% - #{base(18)});
     display: flex;
     flex-direction: column;
     min-height: 100%;
@@ -64,12 +59,12 @@
     display: flex;
     flex-direction: column;
     gap: var(--base);
-    padding: var(--base);
+    padding: calc(var(--base) * 2);
+  }
 
-    .render-fields {
-      & > *:last-child {
-        margin-bottom: 0;
-      }
+  .render-fields {
+    & > .field-type:last-of-type {
+      margin-bottom: 0;
     }
   }
 
@@ -77,7 +72,39 @@
     color: var(--theme-elevation-400);
   }
 
+  @include large-break {
+    &--no-sidebar {
+      .global-default-edit {
+        &__main {
+          width: 100%;
+        }
+      }
+    }
+  }
+
   @include mid-break {
+    display: block;
+
+    &--has-sidebar {
+      .global-default-edit {
+        &__main {
+          width: 100%;
+        }
+
+        &__edit {
+          [dir='ltr'] & {
+            border-right: 0;
+            padding-right: var(--gutter-h);
+          }
+
+          [dir='rtl'] & {
+            border-left: 0;
+            padding-left: var(--gutter-h);
+          }
+        }
+      }
+    }
+
     &__main {
       width: 100%;
       min-height: initial;
@@ -88,6 +115,7 @@
       width: 100%;
       height: initial;
       border-left: 0;
+      margin-top: calc(var(--base) / 2);
     }
 
     &__form {
@@ -95,7 +123,6 @@
     }
 
     &__edit {
-      padding-top: var(--base);
       padding-bottom: 0;
     }
 

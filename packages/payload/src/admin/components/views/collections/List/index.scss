@@ -3,7 +3,6 @@
 .collection-list {
   width: 100%;
   margin-top: base(0.5);
-  margin-bottom: base(2);
 
   &__wrap {
     padding-bottom: var(--spacing-view-bottom);
@@ -29,7 +28,7 @@
 
     .pill {
       position: relative;
-      top: -8px;
+      top: -14px;
       margin: 0;
     }
   }
@@ -49,6 +48,17 @@
         min-width: unset;
         width: auto;
       }
+    }
+  }
+
+  &__no-results {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--base);
+
+    & > * {
+      margin: 0;
     }
   }
 
@@ -166,7 +176,7 @@
 
     &__header {
       .pill {
-        top: -2px;
+        top: -6px;
       }
     }
   }
