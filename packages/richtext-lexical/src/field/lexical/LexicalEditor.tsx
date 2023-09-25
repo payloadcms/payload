@@ -73,6 +73,11 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
         <React.Fragment>
           <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
           <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
+          {editorConfig.features.plugins.map((plugin) => {
+            if (plugin.position === 'floatingAnchorElem') {
+              return <plugin.Component anchorElem={floatingAnchorElem} key={plugin.key} />
+            }
+          })}
         </React.Fragment>
       )}
       <HistoryPlugin />
@@ -80,7 +85,7 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
       <SlashMenuPlugin />
       <TabIndentationPlugin />
       {editorConfig.features.plugins.map((plugin) => {
-        if (!plugin.position || plugin.position === 'normal') {
+        if (plugin.position === 'normal') {
           return <plugin.Component key={plugin.key} />
         }
       })}

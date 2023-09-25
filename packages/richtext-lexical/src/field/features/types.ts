@@ -13,11 +13,18 @@ export type Feature = {
   markdownTransformers?: Transformer[]
   nodes?: Array<Klass<LexicalNode>>
 
-  plugins?: Array<{
-    // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-    Component: React.FC
-    position: 'normal' // Determines at which position the Component will be added.
-  }>
+  plugins?: Array<
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: React.FC
+        position: 'normal' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: React.FC<{ anchorElem: HTMLElement }>
+        position: 'floatingAnchorElem' // Determines at which position the Component will be added.
+      }
+  >
   slashMenu?: {
     dynamicOptions?: ({
       editor,
@@ -66,12 +73,20 @@ export type SanitizedFeatures = Required<
   floatingSelectToolbar: {
     sections: FloatingToolbarSection[]
   }
-  plugins?: Array<{
-    // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
-    Component: React.FC
-    key: string
-    position: 'normal' // Determines at which position the Component will be added.
-  }>
+  plugins?: Array<
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: React.FC
+        key: string
+        position: 'normal' // Determines at which position the Component will be added.
+      }
+    | {
+        // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
+        Component: React.FC<{ anchorElem: HTMLElement }>
+        key: string
+        position: 'floatingAnchorElem' // Determines at which position the Component will be added.
+      }
+  >
   slashMenu: {
     dynamicOptions: Array<
       ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => SlashMenuGroup[]
