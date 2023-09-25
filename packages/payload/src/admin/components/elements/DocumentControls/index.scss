@@ -55,11 +55,11 @@
     margin: 0;
   }
 
-  &__timestamp-wrap {
+  &__value-wrap {
     overflow: hidden;
   }
 
-  &__timestamp {
+  &__value {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -70,6 +70,7 @@
   &__label {
     color: var(--theme-elevation-500);
     white-space: nowrap;
+    margin: 0;
   }
 
   &__controls-wrapper {

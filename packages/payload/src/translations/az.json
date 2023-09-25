@@ -164,6 +164,7 @@
     "create": "Yarat",
     "createNew": "Yeni yarat",
     "createNewLabel": "Yeni {{label}} yarat",
+    "creatingNewLabel": "Yeni {{label}} yaradılır",
     "created": "Yaradıldı",
     "createdAt": "Yaradıldığı tarix",
     "creating": "Yaradılır",
