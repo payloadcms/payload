@@ -4,8 +4,6 @@ import { createContext, useContext, useMemo } from 'react'
 
 import type { SanitizedEditorConfig } from './types'
 
-import { defaultSanitizedEditorConfig } from './default'
-
 // Should always produce a 20 character pseudo-random string
 function generateQuickGuid(): string {
   return Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12)
@@ -16,7 +14,7 @@ interface ContextType {
 }
 
 const Context: React.Context<ContextType> = createContext({
-  editorConfig: defaultSanitizedEditorConfig,
+  editorConfig: null,
   uuid: generateQuickGuid(),
 })
 
