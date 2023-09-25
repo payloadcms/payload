@@ -58,6 +58,9 @@ export { SubscriptTextFeature } from './field/features/format/subscript'
 export { SuperscriptTextFeature } from './field/features/format/superscript'
 export { UnderlineTextFeature } from './field/features/format/underline'
 export { IndentFeature } from './field/features/indent'
+export { CheckListFeature } from './field/features/lists/CheckList'
+export { OrderedListFeature } from './field/features/lists/OrderedList'
+export { UnoderedListFeature } from './field/features/lists/UnorderedList'
 
 export {
   Feature,

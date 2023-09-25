@@ -11,6 +11,9 @@ import { SubscriptTextFeature } from '../../features/format/subscript'
 import { SuperscriptTextFeature } from '../../features/format/superscript'
 import { UnderlineTextFeature } from '../../features/format/underline'
 import { IndentFeature } from '../../features/indent'
+import { CheckListFeature } from '../../features/lists/CheckList'
+import { OrderedListFeature } from '../../features/lists/OrderedList'
+import { UnoderedListFeature } from '../../features/lists/UnorderedList'
 import { LexicalEditorTheme } from '../theme/EditorTheme'
 import { sanitizeEditorConfig } from './sanitize'
 
@@ -27,6 +30,9 @@ export const defaultEditorConfig: EditorConfig = {
     HeadingFeature({}),
     AlignFeature(),
     IndentFeature(),
+    UnoderedListFeature(),
+    OrderedListFeature(),
+    CheckListFeature(),
   ],
   lexical: {
     namespace: 'lexical',
