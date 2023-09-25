@@ -120,7 +120,11 @@ export interface DatabaseAdapter {
    * A key-value store of all sessions open (used for transactions)
    */
   sessions?: {
-    [id: string]: DatabaseAdapter
+    [id: string]: {
+      db: DatabaseAdapter
+      reject: () => void
+      resolve: () => void
+    }
   }
   /**
    * Perform many database interactions in a single, all-or-nothing operation.

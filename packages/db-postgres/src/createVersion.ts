@@ -19,7 +19,7 @@ export async function createVersion<T extends TypeWithID>(
     versionData,
   }: CreateVersionArgs<T>,
 ) {
-  const db = this.sessions[req.transactionID] || this.db
+  const db = this.sessions[req.transactionID]?.db || this.db
   const collection = this.payload.collections[collectionSlug].config
   const collectionTableName = toSnakeCase(collectionSlug)
   const tableName = `_${collectionTableName}_v`

@@ -13,7 +13,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
   this: PostgresAdapter,
   { collection, req = {} as PayloadRequest, where: incomingWhere },
 ) {
-  const db = this.sessions[req.transactionID] || this.db
+  const db = this.sessions[req.transactionID]?.db || this.db
   const collectionConfig = this.payload.collections[collection].config
   const tableName = toSnakeCase(collection)
 
