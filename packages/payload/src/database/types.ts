@@ -6,6 +6,8 @@ import type { Payload } from '../payload'
 import type { Document, PayloadRequest, Where } from '../types'
 import type { TypeWithVersion } from '../versions/types'
 
+export type { TypeWithVersion }
+
 export interface DatabaseAdapter {
   /**
    * Start a transaction, requiring commitTransaction() to be called for any changes to be made.
@@ -115,6 +117,16 @@ export interface DatabaseAdapter {
    */
   rollbackTransaction?: RollbackTransaction
   /**
+   * A key-value store of all sessions open (used for transactions)
+   */
+  sessions?: {
+    [id: string]: {
+      db: DatabaseAdapter
+      reject: () => void
+      resolve: () => void
+    }
+  }
+  /**
    * Perform many database interactions in a single, all-or-nothing operation.
    */
   transaction?: Transaction
@@ -181,7 +193,7 @@ export type FindOneArgs = {
   where?: Where
 }
 
-export type FindOne = <T = TypeWithID>(args: FindOneArgs) => Promise<T | null>
+export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<T | null>
 
 export type FindArgs = {
   collection: string
@@ -246,7 +258,7 @@ export type UpdateGlobalVersionArgs<T = TypeWithID> = {
     }
 )
 
-export type UpdateGlobalVersion = <T = TypeWithID>(
+export type UpdateGlobalVersion = <T extends TypeWithID = TypeWithID>(
   args: UpdateGlobalVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 
@@ -296,7 +308,7 @@ export type CreateVersionArgs<T = TypeWithID> = {
   versionData: T
 }
 
-export type CreateVersion = <T = TypeWithID>(
+export type CreateVersion = <T extends TypeWithID = TypeWithID>(
   args: CreateVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 
@@ -311,7 +323,7 @@ export type CreateGlobalVersionArgs<T = TypeWithID> = {
   versionData: T
 }
 
-export type CreateGlobalVersion = <T = TypeWithID>(
+export type CreateGlobalVersion = <T extends TypeWithID = TypeWithID>(
   args: CreateGlobalVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 
@@ -333,7 +345,7 @@ export type UpdateVersionArgs<T = TypeWithID> = {
     }
 )
 
-export type UpdateVersion = <T = TypeWithID>(
+export type UpdateVersion = <T extends TypeWithID = TypeWithID>(
   args: UpdateVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 

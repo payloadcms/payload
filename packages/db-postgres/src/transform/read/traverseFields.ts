@@ -319,10 +319,12 @@ export const traverseFields = <T extends Record<string, unknown>>({
           case 'tab':
           case 'group': {
             const groupFieldPrefix = `${fieldPrefix || ''}${field.name}_`
-            const groupData = {}
 
             if (field.localized) {
-              if (typeof locale === 'string' && !ref[locale]) ref[locale] = {}
+              if (typeof locale === 'string' && !ref[locale]) {
+                ref[locale] = {}
+                delete table._locale
+              }
 
               Object.entries(ref).forEach(([groupLocale, groupLocaleData]) => {
                 ref[groupLocale] = traverseFields<Record<string, unknown>>({
@@ -338,6 +340,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 })
               })
             } else {
+              const groupData = {}
+
               ref[field.name] = traverseFields<Record<string, unknown>>({
                 blocks,
                 config,
@@ -356,7 +360,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
           case 'number': {
             let val = fieldData
-            // TODO: handle hasMany
             if (typeof fieldData === 'string') {
               val = Number.parseFloat(fieldData)
             }

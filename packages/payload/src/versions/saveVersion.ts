@@ -28,17 +28,8 @@ export const saveVersion = async ({
   req,
 }: Args): Promise<TypeWithID> => {
   let result
-  let entityConfig
   let createNewVersion = true
   const now = new Date().toISOString()
-
-  if (collection) {
-    entityConfig = collection
-  }
-
-  if (global) {
-    entityConfig = global
-  }
   const versionData = { ...doc }
   if (draft) versionData._status = 'draft'
   if (versionData._id) delete versionData._id
@@ -62,11 +53,13 @@ export const saveVersion = async ({
         ;({ docs } = await payload.db.findVersions({
           ...findVersionArgs,
           collection: collection.slug,
+          req,
         }))
       } else {
         ;({ docs } = await payload.db.findGlobalVersions({
           ...findVersionArgs,
           global: global.slug,
+          req,
         }))
       }
       const [latestVersion] = docs
@@ -84,17 +77,20 @@ export const saveVersion = async ({
         const updateVersionArgs = {
           id: latestVersion.id,
           req,
-          versionData: data,
+          versionData: data as TypeWithID,
         }
+
         if (collection) {
           result = await payload.db.updateVersion({
             ...updateVersionArgs,
             collection: collection.slug,
+            req,
           })
         } else {
           result = await payload.db.updateGlobalVersion({
             ...updateVersionArgs,
             global: global.slug,
+            req,
           })
         }
       }
@@ -104,7 +100,7 @@ export const saveVersion = async ({
       if (collection) {
         result = await payload.db.createVersion({
           autosave: Boolean(autosave),
-          collectionSlug: entityConfig.slug,
+          collectionSlug: collection.slug,
           createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
           parent: collection ? id : undefined,
           req,
@@ -117,7 +113,7 @@ export const saveVersion = async ({
         result = await payload.db.createGlobalVersion({
           autosave: Boolean(autosave),
           createdAt: doc?.createdAt ? new Date(doc.createdAt).toISOString() : now,
-          globalSlug: entityConfig.slug,
+          globalSlug: global.slug,
           parent: collection ? id : undefined,
           req,
           updatedAt: draft ? now : new Date(doc.updatedAt).toISOString(),

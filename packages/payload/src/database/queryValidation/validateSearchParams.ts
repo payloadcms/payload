@@ -124,13 +124,19 @@ export async function validateSearchParam({
           }
         } else {
           fieldAccess = policies[entityType][entitySlug].fields
-          segments.forEach((segment, pathIndex) => {
-            if (pathIndex === segments.length - 1) {
-              fieldAccess = fieldAccess[segment]
-            } else {
-              fieldAccess = fieldAccess[segment].fields
-            }
-          })
+
+          if (['json', 'richText'].includes(field.type)) {
+            fieldAccess = fieldAccess[field.name]
+          } else {
+            segments.forEach((segment, pathIndex) => {
+              if (pathIndex === segments.length - 1) {
+                fieldAccess = fieldAccess[segment]
+              } else {
+                fieldAccess = fieldAccess[segment].fields
+              }
+            })
+          }
+
           fieldAccess = fieldAccess.read.permission
         }
         if (!fieldAccess) {

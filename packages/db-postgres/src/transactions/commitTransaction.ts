@@ -1,7 +1,5 @@
 import type { CommitTransaction } from 'payload/database'
 
-import { sql } from 'drizzle-orm'
-
 export const commitTransaction: CommitTransaction = async function commitTransaction(id) {
   if (!this.sessions[id]) {
     this.payload.logger.warn('commitTransaction called when no transaction exists')
@@ -9,9 +7,9 @@ export const commitTransaction: CommitTransaction = async function commitTransac
   }
 
   try {
-    await this.sessions[id].execute(sql`COMMIT;`)
+    this.sessions[id].resolve()
   } catch (err: unknown) {
-    await this.sessions[id].execute(sql`ROLLBACK;`)
+    this.sessions[id].reject()
   }
 
   delete this.sessions[id]

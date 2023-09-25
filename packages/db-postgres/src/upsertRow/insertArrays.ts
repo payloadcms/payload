@@ -58,28 +58,26 @@ export const insertArrays = async ({ adapter, arrays, db, parentRows }: Args): P
     })
   })
 
-  // Insert all corresponding arrays in parallel
+  // Insert all corresponding arrays
   // (one insert per array table)
-  await Promise.all(
-    Object.entries(rowsByTable).map(async ([tableName, row]) => {
-      if (row.rows.length > 0) {
-        await db.insert(adapter.tables[tableName]).values(row.rows).returning()
-      }
+  for (const [tableName, row] of Object.entries(rowsByTable)) {
+    if (row.rows.length > 0) {
+      await db.insert(adapter.tables[tableName]).values(row.rows).returning()
+    }
 
-      // Insert locale rows
-      if (adapter.tables[`${tableName}_locales`] && row.locales.length > 0) {
-        await db.insert(adapter.tables[`${tableName}_locales`]).values(row.locales).returning()
-      }
+    // Insert locale rows
+    if (adapter.tables[`${tableName}_locales`] && row.locales.length > 0) {
+      await db.insert(adapter.tables[`${tableName}_locales`]).values(row.locales).returning()
+    }
 
-      // If there are sub arrays, call this function recursively
-      if (row.arrays.length > 0) {
-        await insertArrays({
-          adapter,
-          arrays: row.arrays,
-          db,
-          parentRows: row.rows,
-        })
-      }
-    }),
-  )
+    // If there are sub arrays, call this function recursively
+    if (row.arrays.length > 0) {
+      await insertArrays({
+        adapter,
+        arrays: row.arrays,
+        db,
+        parentRows: row.rows,
+      })
+    }
+  }
 }
