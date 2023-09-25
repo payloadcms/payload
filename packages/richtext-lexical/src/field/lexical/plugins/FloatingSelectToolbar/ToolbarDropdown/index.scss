@@ -4,6 +4,7 @@
   display: flex;
   align-items: center;
   vertical-align: middle;
+  justify-content: center;
   height: 30px;
   width: 40px;
   border: 0;
@@ -11,6 +12,7 @@
   border-radius: 4px;
   cursor: pointer;
   position: relative;
+  padding: 0;
 
   &:disabled {
     cursor: not-allowed;

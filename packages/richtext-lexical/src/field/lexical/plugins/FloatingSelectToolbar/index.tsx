@@ -157,7 +157,7 @@ function FloatingSelectToolbar({
       {editor.isEditable() && (
         <React.Fragment>
           {editorConfig?.features &&
-            editorConfig.features?.floatingSelectToolbar?.sections.map((section) => {
+            editorConfig.features?.floatingSelectToolbar?.sections.map((section, i) => {
               return (
                 <div
                   className={`floating-select-toolbar-popup__section floating-select-toolbar-popup__section-${section.key}`}
@@ -193,6 +193,9 @@ function FloatingSelectToolbar({
                         </ToolbarButton>
                       )
                     })}
+                  {i < editorConfig.features.floatingSelectToolbar?.sections.length - 1 && (
+                    <div className="divider" />
+                  )}
                 </div>
               )
             })}
