@@ -2,6 +2,7 @@ import type { EditorConfig, SanitizedEditorConfig } from './types'
 
 import { HeadingFeature } from '../../features/Heading'
 import { ParagraphFeature } from '../../features/Paragraph'
+import { AlignFeature } from '../../features/align'
 import { BoldTextFeature } from '../../features/format/Bold'
 import { InlineCodeTextFeature } from '../../features/format/InlineCode'
 import { ItalicTextFeature } from '../../features/format/Italic'
@@ -23,6 +24,7 @@ export const defaultEditorConfig: EditorConfig = {
     InlineCodeTextFeature(),
     ParagraphFeature(),
     HeadingFeature({}),
+    AlignFeature(),
   ],
   lexical: {
     namespace: 'lexical',
