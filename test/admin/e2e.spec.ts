@@ -11,7 +11,7 @@ import wait from '../../packages/payload/src/utilities/wait'
 import { openDocControls, openMainMenu, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { globalSlug, slug } from './shared'
+import { globalSlug, slug, slugPluralLabel } from './shared'
 
 const { afterEach, beforeAll, beforeEach, describe } = test
 
@@ -115,9 +115,10 @@ describe('admin', () => {
 
     test('breadcrumbs - from document to collection', async () => {
       const { id } = await createPost()
-
       await page.goto(url.edit(id))
-      await page.locator(`.step-nav >> text=${slug}`).click()
+      const collectionBreadcrumb = page.locator(`.step-nav a[href="/admin/collections/${slug}"]`)
+      await expect(collectionBreadcrumb).toBeVisible()
+      await expect(collectionBreadcrumb).toHaveText(slugPluralLabel)
       expect(page.url()).toContain(url.list)
     })
 
@@ -274,7 +275,7 @@ describe('admin', () => {
   })
 
   describe('list view', () => {
-    const tableRowLocator = 'table >> tbody >> tr'
+    const tableRowLocator = 'table > tbody > tr'
 
     beforeEach(async () => {
       await page.goto(url.list)
@@ -302,7 +303,7 @@ describe('admin', () => {
       })
 
       test('toggle columns', async () => {
-        const columnCountLocator = 'table >> thead >> tr >> th'
+        const columnCountLocator = 'table > thead > tr > th'
         await createPost()
 
         await page.locator('.list-controls__toggle-columns').click()
@@ -311,9 +312,9 @@ describe('admin', () => {
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
         const numberOfColumns = await page.locator(columnCountLocator).count()
-        await expect(page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID')
+        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
-        const idButton = page.locator('.column-selector >> text=ID')
+        const idButton = page.locator('.column-selector .column-selector__column:has-text("ID")')
 
         // Remove ID column
         await idButton.click()
@@ -321,14 +322,14 @@ describe('admin', () => {
         await page.locator('.cell-id').waitFor({ state: 'detached' })
 
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1)
-        await expect(page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('Number')
+        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
 
         // Add back ID column
         await idButton.click()
         await expect(page.locator('.cell-id')).toBeVisible()
 
         await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns)
-        await expect(page.locator('table >> thead >> tr >> th:nth-child(2)')).toHaveText('ID')
+        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
       })
 
       test('2nd cell is a link', async () => {
@@ -342,7 +343,7 @@ describe('admin', () => {
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
         // toggle off the ID column
-        await page.locator('.column-selector >> text=ID').click()
+        await page.locator('.column-selector .column-selector__column:has-text("ID")').click()
         // wait until .cell-id is not present on the page:
         await page.locator('.cell-id').waitFor({ state: 'detached' })
 
@@ -360,8 +361,10 @@ describe('admin', () => {
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
         // ensure the ID column is active
-        const idButton = page.locator('.column-selector >> text=ID')
+        const idButton = page.locator('.column-selector .column-selector__column:has-text("ID")')
+
         const buttonClasses = await idButton.getAttribute('class')
+
         if (buttonClasses && !buttonClasses.includes('column-selector__column--active')) {
           await idButton.click()
           await expect(page.locator(tableRowLocator).first().locator('.cell-id')).toBeVisible()
@@ -376,7 +379,7 @@ describe('admin', () => {
         await page.locator('.where-builder__add-first-filter').click()
 
         const operatorField = page.locator('.condition__operator')
-        const valueField = page.locator('.condition__value >> input')
+        const valueField = page.locator('.condition__value > input')
 
         await operatorField.click()
 
@@ -481,9 +484,11 @@ describe('admin', () => {
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
         const numberBoundingBox = await page
-          .locator('.column-selector >> text=Number')
+          .locator('.column-selector .column-selector__column:has-text("Number")')
           .boundingBox()
-        const idBoundingBox = await page.locator('.column-selector >> text=ID').boundingBox()
+        const idBoundingBox = await page
+          .locator('.column-selector .column-selector__column:has-text("ID")')
+          .boundingBox()
 
         if (!numberBoundingBox || !idBoundingBox) return
 
@@ -541,7 +546,7 @@ describe('admin', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option > text="Post"',
           )
           .click()
 
@@ -582,7 +587,7 @@ describe('admin', () => {
         // deselect the "id" column
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column >> text=ID',
+            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column:has-text("ID")',
           )
           .click()
 
@@ -590,14 +595,14 @@ describe('admin', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option > text="Post"',
           )
           .click()
 
         // deselect the "number" column
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column >> text=Number',
+            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column > text=Number',
           )
           .click()
 
@@ -605,7 +610,7 @@ describe('admin', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="User"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option > text="User"',
           )
           .click()
 
@@ -622,7 +627,7 @@ describe('admin', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option >> text="Post"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option > text="Post"',
           )
           .click()
 
@@ -639,7 +644,7 @@ describe('admin', () => {
       test('should render custom table cell component', async () => {
         await createPost()
         await page.goto(url.list)
-        await expect(page.locator('table >> thead >> tr >> th >> text=Demo UI Field')).toBeVisible()
+        await expect(page.locator('table > thead > tr > th > text=Demo UI Field')).toBeVisible()
       })
     })
 
@@ -766,7 +771,7 @@ describe('admin', () => {
 
         // column controls
         await page.locator('.list-controls__toggle-columns').click()
-        await expect(page.locator('.column-selector__column >> text=Title')).toHaveText('Title')
+        await expect(page.locator('.column-selector__column > text=Title')).toHaveText('Title')
 
         // filters
         await page.locator('.list-controls__toggle-where').click()
@@ -791,7 +796,7 @@ describe('admin', () => {
         await page.goto(url.list)
         await page.locator('.list-controls__toggle-columns').click()
         // expecting the label to fall back to english as default fallbackLng
-        await expect(page.locator('.column-selector__column >> text=Title')).toHaveText('Title')
+        await expect(page.locator('.column-selector__column > text=Title')).toHaveText('Title')
       })
     })
   })
