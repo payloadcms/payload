@@ -19,7 +19,8 @@ $transTime: 200ms;
   }
 
   &__content {
-    padding: base(1) 0 base(2);
+    padding: base(1) 0;
+    padding-bottom: var(--spacing-view-bottom);
     position: relative;
     opacity: 0;
     transform: translateX(calc(var(--base) * -1));

@@ -7,6 +7,8 @@
   display: flex;
   align-items: center;
   position: relative;
+  display: flex;
+  gap: calc(var(--base) / 2);
 
   &::after {
     content: '';

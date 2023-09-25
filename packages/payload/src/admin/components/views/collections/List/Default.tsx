@@ -159,8 +159,8 @@ const DefaultList: React.FC<Props> = (props) => {
                   modifySearchParams={modifySearchParams}
                   resetPage={data.totalDocs <= data.pagingCounter}
                 />
-                <div className={`${baseClass}__list-selection`}>
-                  {smallBreak && (
+                {smallBreak && (
+                  <div className={`${baseClass}__list-selection`}>
                     <Fragment>
                       <ListSelection label={getTranslation(collection.labels.plural, i18n)} />
                       <div className={`${baseClass}__list-selection-actions`}>
@@ -170,8 +170,8 @@ const DefaultList: React.FC<Props> = (props) => {
                         <DeleteMany collection={collection} resetParams={resetParams} />
                       </div>
                     </Fragment>
-                  )}
-                </div>
+                  </div>
+                )}
               </Fragment>
             )}
           </div>
