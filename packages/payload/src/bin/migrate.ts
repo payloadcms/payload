@@ -53,7 +53,7 @@ export const migrate = async (args: string[]): Promise<void> => {
       break
     case 'migrate:create':
       try {
-        await adapter.createMigration(payload, '.migrations', args[1])
+        await adapter.createMigration(payload, 'migrations', args[1])
       } catch (err) {
         throw new Error(`Error creating migration: ${err.message}`)
       }

@@ -91,44 +91,5 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
     }
   }
 
-  this.migrationDir = '.migrations'
-
-  // Create drizzle snapshot if it doesn't exist
-  if (!fs.existsSync(`${this.migrationDir}/drizzle-snapshot.json`)) {
-    // Ensure migration dir exists
-    if (!fs.existsSync(this.migrationDir)) {
-      fs.mkdirSync(this.migrationDir)
-    }
-
-    const drizzleJSON = generateDrizzleJson(this.schema)
-
-    fs.writeFileSync(
-      `${this.migrationDir}/drizzle-snapshot.json`,
-      JSON.stringify(drizzleJSON, null, 2),
-    )
-  }
-
-  const jsonSchema = configToJSONSchema(this.payload.config)
-
   await apply()
-
-  const devPush = await this.db
-    .select()
-    .from(migrationsSchema)
-    .where(eq(migrationsSchema.batch, '-1'))
-
-  if (!devPush.length) {
-    await this.db.insert(migrationsSchema).values({
-      name: 'dev',
-      batch: '-1',
-      schema: JSON.stringify(jsonSchema),
-    })
-  } else {
-    await this.db
-      .update(migrationsSchema)
-      .set({
-        schema: JSON.stringify(jsonSchema),
-      })
-      .where(eq(migrationsSchema.batch, '-1'))
-  }
 }
