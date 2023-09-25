@@ -5,7 +5,7 @@ import { $createHeadingNode, HeadingNode } from '@lexical/rich-text'
 import { $setBlocksType } from '@lexical/selection'
 import { $getSelection, $isRangeSelection, DEPRECATED_$isGridSelection } from 'lexical'
 
-import type { Feature, FeatureProvider } from '../types'
+import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 import { H1Icon } from '../../lexical/ui/icons/H1'
@@ -42,50 +42,48 @@ const HeadingToIconMap: Record<HeadingTagType, React.FC> = {
 export const HeadingFeature = (props: Props): FeatureProvider => {
   const { enabledHeadingSizes = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] } = props
 
-  const toReturn: Feature = {
-    floatingSelectToolbar: {
-      sections: [
-        ...enabledHeadingSizes.map((headingSize, i) =>
-          TextDropdownSectionWithEntries([
-            {
-              ChildComponent: HeadingToIconMap[headingSize],
-              isActive: ({ editor, selection }) => false,
-              key: headingSize,
-              label: `Heading ${headingSize.charAt(1)}`,
-              onClick: ({ editor }) => {
-                setHeading(editor, headingSize)
-              },
-              order: i + 2,
-            },
-          ]),
-        ),
-      ],
-    },
-    markdownTransformers: [MarkdownTransformer],
-    nodes: [HeadingNode],
-    slashMenu: {
-      options: [],
-    },
-  }
-
-  for (const headingSize of enabledHeadingSizes) {
-    toReturn.slashMenu.options.push({
-      options: [
-        new SlashMenuOption(`Heading ${headingSize.charAt(1)}`, {
-          Icon: HeadingToIconMap[headingSize],
-          keywords: ['heading', headingSize],
-          onSelect: ({ editor }) => {
-            setHeading(editor, headingSize)
-          },
-        }),
-      ],
-      title: 'Basic',
-    })
-  }
-
   return {
     feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
-      return toReturn
+      return {
+        floatingSelectToolbar: {
+          sections: [
+            ...enabledHeadingSizes.map((headingSize, i) =>
+              TextDropdownSectionWithEntries([
+                {
+                  ChildComponent: HeadingToIconMap[headingSize],
+                  isActive: ({ editor, selection }) => false,
+                  key: headingSize,
+                  label: `Heading ${headingSize.charAt(1)}`,
+                  onClick: ({ editor }) => {
+                    setHeading(editor, headingSize)
+                  },
+                  order: i + 2,
+                },
+              ]),
+            ),
+          ],
+        },
+        markdownTransformers: [MarkdownTransformer],
+        nodes: [HeadingNode],
+        slashMenu: {
+          options: [
+            ...enabledHeadingSizes.map((headingSize) => {
+              return {
+                options: [
+                  new SlashMenuOption(`Heading ${headingSize.charAt(1)}`, {
+                    Icon: HeadingToIconMap[headingSize],
+                    keywords: ['heading', headingSize],
+                    onSelect: ({ editor }) => {
+                      setHeading(editor, headingSize)
+                    },
+                  }),
+                ],
+                title: 'Basic',
+              }
+            }),
+          ],
+        },
+      }
     },
     key: 'heading',
   }
