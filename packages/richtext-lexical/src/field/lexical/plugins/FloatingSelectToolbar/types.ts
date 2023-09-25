@@ -22,8 +22,16 @@ export type FloatingToolbarSectionEntry = {
     activeStates: Map<string, boolean>
     anchorElem: HTMLElement
     editor: LexicalEditor
+    enabledStates: Map<string, boolean>
   }>
   isActive?: ({
+    editor,
+    selection,
+  }: {
+    editor: LexicalEditor
+    selection: RangeSelection
+  }) => boolean
+  isEnabled?: ({
     editor,
     selection,
   }: {

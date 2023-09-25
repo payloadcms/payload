@@ -17,6 +17,15 @@ export const IndentFeature = (): FeatureProvider => {
               {
                 ChildComponent: IndentDecreaseIcon,
                 isActive: ({ editor, selection }) => false,
+                isEnabled: ({ editor, selection }) => {
+                  for (const node of selection.getNodes()) {
+                    // If at least one node is indented, this should be active
+                    if (node.__indent > 0 || node.getParent().__indent > 0) {
+                      return true
+                    }
+                  }
+                  return false
+                },
                 key: 'indent-decrease',
                 label: `Decrease Indent`,
                 onClick: ({ editor }) => {

@@ -6,16 +6,24 @@ import './index.scss'
 export const ToolbarButton = ({
   children,
   classNames,
+  enabled,
   onClick,
 }: {
   children: React.JSX.Element
   classNames?: string[]
+  enabled?: boolean
   onClick?: () => void
 }) => {
   return (
     <button
-      className={[baseClass, ...(classNames || [])].filter(Boolean).join(' ')}
-      onClick={onClick}
+      className={[baseClass, ...(classNames || []), enabled === false ? 'disabled' : '']
+        .filter(Boolean)
+        .join(' ')}
+      onClick={() => {
+        if (enabled !== false && onClick) {
+          onClick()
+        }
+      }}
       type="button"
     >
       {children}
