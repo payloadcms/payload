@@ -23,13 +23,13 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
       sanitized.nodes = sanitized.nodes.concat(feature.nodes)
     }
     if (feature.plugins?.length) {
-      for (const plugin of feature.plugins) {
+      feature.plugins.forEach((plugin, i) => {
         sanitized.plugins.push({
           Component: plugin.Component,
-          key: feature.key,
+          key: feature.key + i,
           position: plugin.position,
         })
-      }
+      })
     }
     if (feature.markdownTransformers?.length) {
       sanitized.markdownTransformers = sanitized.markdownTransformers.concat(
