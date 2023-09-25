@@ -41,12 +41,14 @@ const Group: React.FC<Props> = (props) => {
   const groupHasErrors = submitted && errorCount > 0
 
   const path = pathFromProps || name
+  const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow || isWithinTab)
 
   return (
     <div
       className={[
         'field-type',
         baseClass,
+        isTopLevel && `${baseClass}--top-level`,
         isWithinCollapsible && `${baseClass}--within-collapsible`,
         isWithinGroup && `${baseClass}--within-group`,
         isWithinRow && `${baseClass}--within-row`,
@@ -86,6 +88,7 @@ const Group: React.FC<Props> = (props) => {
             }))}
             fieldTypes={fieldTypes}
             indexPath={indexPath}
+            margin="small"
             permissions={permissions?.fields}
             readOnly={readOnly}
           />

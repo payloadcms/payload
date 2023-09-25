@@ -172,9 +172,11 @@ const BlocksField: React.FC<Props> = (props) => {
 
   return (
     <div className={classes} id={`field-${path.replace(/\./g, '__')}`}>
-      <div className={`${baseClass}__error-wrap`}>
-        <Error message={errorMessage} showError={showError} />
-      </div>
+      {showError && (
+        <div className={`${baseClass}__error-wrap`}>
+          <Error message={errorMessage} showError={showError} />
+        </div>
+      )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__heading-with-error`}>
@@ -207,10 +209,9 @@ const BlocksField: React.FC<Props> = (props) => {
         </div>
         <FieldDescription description={description} value={value} />
       </header>
-
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
-
       <DraggableSortable
+        className={`${baseClass}__rows`}
         ids={rows.map((row) => row.id)}
         onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
       >

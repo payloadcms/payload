@@ -86,6 +86,7 @@ export const DefaultCollectionEdit: React.FC<Props> = (props) => {
           <Gutter className={`${baseClass}__edit`}>
             {auth && (
               <Auth
+                className={`${baseClass}__auth`}
                 collection={collection}
                 email={data?.email}
                 operation={operation}

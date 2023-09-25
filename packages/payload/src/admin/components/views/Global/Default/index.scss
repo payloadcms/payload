@@ -62,12 +62,6 @@
     padding: calc(var(--base) * 2);
   }
 
-  .render-fields {
-    & > .field-type:last-of-type {
-      margin-bottom: 0;
-    }
-  }
-
   &__label {
     color: var(--theme-elevation-400);
   }
@@ -120,10 +114,6 @@
 
     &__form {
       display: block;
-    }
-
-    &__edit {
-      padding-bottom: 0;
     }
 
     &__sidebar-fields {

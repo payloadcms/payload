@@ -184,6 +184,7 @@ const TabsField: React.FC<Props> = (props) => {
                   forceRender
                   indexPath={indexPath}
                   key={String(activeTabConfig.label)}
+                  margin="small"
                   permissions={
                     tabHasName(activeTabConfig)
                       ? permissions[activeTabConfig.name].fields

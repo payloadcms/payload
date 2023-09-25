@@ -2,7 +2,7 @@
 
 .file-field {
   position: relative;
-  margin: base(1.5) 0 base(2);
+  margin-bottom: var(--base);
   background: var(--theme-elevation-50);
 
   .tooltip.error-message {

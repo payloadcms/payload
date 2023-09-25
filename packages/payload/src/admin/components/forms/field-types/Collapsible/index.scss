@@ -1,8 +1,6 @@
 @import '../../../../scss/styles.scss';
 
 .collapsible-field {
-  margin: 0 0 base(2);
-
   &__row-label-wrap {
     pointer-events: none;
     display: flex;

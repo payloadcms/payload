@@ -30,6 +30,7 @@ const Row: React.FC<Props> = (props) => {
         }))}
         fieldTypes={fieldTypes}
         indexPath={indexPath}
+        margin="small"
         permissions={permissions}
         readOnly={readOnly}
       />

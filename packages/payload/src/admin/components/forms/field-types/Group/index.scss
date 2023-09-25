@@ -1,14 +1,24 @@
 @import '../../../../scss/styles.scss';
 
 .group-field {
-  margin: base(2) calc(var(--gutter-h) * -1);
-  padding: base(2) var(--gutter-h);
-  border-top: 1px solid var(--theme-elevation-100);
+  margin-left: calc(var(--gutter-h) * -1);
+  margin-right: calc(var(--gutter-h) * -1);
   border-bottom: 1px solid var(--theme-elevation-100);
+  border-top: 1px solid var(--theme-elevation-100);
+
+  &--top-level {
+    padding: base(2) var(--gutter-h);
+
+    &:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+  }
 
   &--within-collapsible {
-    margin: $baseline calc(#{$baseline} * -1);
-    padding: $baseline;
+    margin-left: calc(var(--base) * -1);
+    margin-right: calc(var(--base) * -1);
+    padding: vaR(--base);
 
     &:first-child {
       border-top: 0;
@@ -54,10 +64,16 @@
   }
 
   &__header {
-    margin-bottom: base(0.75);
+    margin-bottom: calc(var(--base) / 2);
     display: flex;
     align-items: center;
     gap: base(0.5);
+
+    > header {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--base) / 4);
+    }
   }
 
   &__title {
@@ -65,8 +81,18 @@
   }
 
   @include small-break {
-    padding-top: $baseline;
-    padding-bottom: $baseline;
+    &--top-level {
+      padding: var(--base) var(--gutter-h);
+
+      &:first-child {
+        padding-top: 0;
+        border-top: 0;
+      }
+    }
+
+    &__header {
+      margin-bottom: calc(var(--base) / 2);
+    }
 
     &--within-collapsible {
       margin-left: calc(var(--gutter-h) * -1);
@@ -84,12 +110,8 @@
 }
 
 .group-field + .group-field {
-  margin-top: base(-2);
   border-top: 0;
-}
-
-.group-field--within-collapsible + .group-field--within-collapsible {
-  margin-top: base(-1);
+  padding-top: 0;
 }
 
 .group-field--within-row + .group-field--within-row {

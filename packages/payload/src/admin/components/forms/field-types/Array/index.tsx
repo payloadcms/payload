@@ -167,18 +167,19 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   return (
     <div className={classes} id={`field-${path.replace(/\./g, '__')}`}>
-      <div className={`${baseClass}__error-wrap`}>
-        <Error message={errorMessage} showError={showError} />
-      </div>
+      {showError && (
+        <div className={`${baseClass}__error-wrap`}>
+          <Error message={errorMessage} showError={showError} />
+        </div>
+      )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
           <div className={`${baseClass}__header-content`}>
-            <h3>{getTranslation(label || name, i18n)}</h3>
+            <h3 className={`${baseClass}__title`}>{getTranslation(label || name, i18n)}</h3>
             {fieldHasErrors && fieldErrorCount > 0 && (
               <ErrorPill count={fieldErrorCount} withMessage />
             )}
           </div>
-
           <ul className={`${baseClass}__header-actions`}>
             <li>
               <button
@@ -189,7 +190,6 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                 {t('collapseAll')}
               </button>
             </li>
-
             <li>
               <button
                 className={`${baseClass}__header-action`}

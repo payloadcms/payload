@@ -1,0 +1,28 @@
+@import '../../../scss/styles.scss';
+
+.render-fields {
+  --spacing-field: var(--base);
+
+  & > * {
+    margin-bottom: var(--spacing-field);
+
+    &.group-field,
+    &.blocks-field {
+      margin-top: calc(var(--spacing-field) * 2);
+      margin-bottom: calc(var(--spacing-field) * 2);
+    }
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    // select last non-hidden field
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+
+  @include small-break {
+    --spacing-field: calc(var(--base) / 2);
+  }
+}
