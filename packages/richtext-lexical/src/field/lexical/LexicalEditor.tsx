@@ -81,7 +81,7 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
       <TabIndentationPlugin />
       {editorConfig.features.plugins.map((plugin) => {
         if (!plugin.position || plugin.position === 'normal') {
-          return <plugin.Component />
+          return <plugin.Component key={plugin.key} />
         }
       })}
       <MarkdownShortcutPlugin />
