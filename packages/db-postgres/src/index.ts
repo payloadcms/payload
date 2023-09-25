@@ -13,6 +13,7 @@ import { createVersion } from './createVersion'
 import { deleteMany } from './deleteMany'
 import { deleteOne } from './deleteOne'
 import { deleteVersions } from './deleteVersions'
+import { destroy } from './destroy'
 import { find } from './find'
 import { findGlobal } from './findGlobal'
 import { findGlobalVersions } from './findGlobalVersions'
@@ -29,16 +30,15 @@ import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateVersion } from './updateVersion'
 import { webpack } from './webpack'
 
-// import { destroy } from './destroy';
-
-export function postgresAdapter(args: Args): PostgresAdapterResult {
-  function adapter({ payload }: { payload: Payload }) {
+export function postgresAdapter (args: Args): PostgresAdapterResult {
+  function adapter ({ payload }: { payload: Payload }) {
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
       beginTransaction,
       commitTransaction,
       pool: undefined,
       ...(args.migrationDir && { migrationDir: args.migrationDir }),
+      name: 'postgres',
       connect,
       create,
       createGlobal,
@@ -47,15 +47,14 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       createVersion,
       db: undefined,
       defaultIDType: 'number',
-      findGlobalVersions,
-      // destroy,
-      name: 'postgres',
       deleteMany,
       deleteOne,
       deleteVersions,
+      destroy,
       enums: {},
       find,
       findGlobal,
+      findGlobalVersions,
       findOne,
       findVersions,
       init,
