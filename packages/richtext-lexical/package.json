@@ -47,7 +47,7 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/node": "20.6.2",
-    "@types/react": "18.2.21",
+    "@types/react": "18.2.15",
     "payload": "workspace:*"
   },
   "exports": {
