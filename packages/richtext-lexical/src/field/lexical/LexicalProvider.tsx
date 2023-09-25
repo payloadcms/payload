@@ -14,13 +14,15 @@ export type LexicalProviderProps = {
   editorConfig: SanitizedEditorConfig
   initialState: SerializedEditorState
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
+  readOnly: boolean
   setValue: (value: SerializedEditorState) => void
   value: SerializedEditorState
 }
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { editorConfig, initialState, onChange, setValue, value } = props
+  const { editorConfig, initialState, onChange, readOnly, setValue, value } = props
 
   const initialConfig: InitialConfigType = {
+    editable: readOnly === true ? false : true,
     editorState: initialState != null ? JSON.stringify(initialState) : undefined,
     namespace: editorConfig.lexical.namespace,
     nodes: [...getEnabledNodes({ editorConfig })],
@@ -38,6 +40,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
             editorConfig={editorConfig}
             initialState={initialState}
             onChange={onChange}
+            readOnly={readOnly}
             setValue={setValue}
             value={value}
           />

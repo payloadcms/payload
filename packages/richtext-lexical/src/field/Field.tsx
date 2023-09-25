@@ -78,6 +78,7 @@ const RichText: React.FC<FieldProps> = (props) => {
 
               setValue(json)
             }}
+            readOnly={readOnly}
             setValue={setValue}
             value={value}
           />
