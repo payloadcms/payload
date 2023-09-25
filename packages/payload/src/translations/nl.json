@@ -163,6 +163,7 @@
     "create": "Aanmaken",
     "createNew": "Nieuw aanmaken",
     "createNewLabel": "Nieuw(e) {{label}} aanmaken",
+    "creatingNewLabel": "Nieuw(e) {{label}} aanmaken",
     "created": "Aangemaakt",
     "createdAt": "Aangemaakt op",
     "creating": "Aanmaken",

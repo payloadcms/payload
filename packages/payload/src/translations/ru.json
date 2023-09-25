@@ -163,6 +163,7 @@
     "create": "Создать",
     "createNew": "Создать",
     "createNewLabel": "Создать новый {{label}}",
+    "creatingNewLabel": "Создание нового {{label}}",
     "created": "Создано",
     "createdAt": "Дата создания",
     "creating": "Создание",
