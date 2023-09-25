@@ -11,9 +11,11 @@ import { defaultEditorConfig, defaultSanitizedEditorConfig } from './field/lexic
 import { sanitizeEditorConfig } from './field/lexical/config/sanitize'
 import { cloneDeep } from './field/lexical/utils/cloneDeep'
 
-export function createLexical(
-  userConfig?: (defaultEditorConfig: EditorConfig) => EditorConfig,
-): RichTextAdapter<AdapterProps> {
+export function createLexical({
+  userConfig,
+}: {
+  userConfig?: (defaultEditorConfig: EditorConfig) => EditorConfig
+}): RichTextAdapter<AdapterProps> {
   const finalSanitizedEditorConfig: SanitizedEditorConfig =
     userConfig == null || typeof userConfig != 'function'
       ? cloneDeep(defaultSanitizedEditorConfig)
@@ -41,3 +43,25 @@ export function createLexical(
     },
   }
 }
+
+export { HeadingFeature } from './field/features/Heading'
+export { ParagraphFeature } from './field/features/Paragraph'
+export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
+export { TreeviewFeature } from './field/features/debug/TreeView'
+export { BoldTextFeature } from './field/features/format/Bold'
+export { InlineCodeTextFeature } from './field/features/format/InlineCode'
+export { ItalicTextFeature } from './field/features/format/Italic'
+export { SectionWithEntries as FormatSectionWithEntries } from './field/features/format/common/floatingSelectToolbarSection'
+export { StrikethroughTextFeature } from './field/features/format/strikethrough'
+export { SubscriptTextFeature } from './field/features/format/subscript'
+export { SuperscriptTextFeature } from './field/features/format/superscript'
+export { UnderlineTextFeature } from './field/features/format/underline'
+
+export {
+  Feature,
+  FeatureProvider,
+  FeatureProviderMap,
+  ResolvedFeature,
+  ResolvedFeatureMap,
+  SanitizedFeatures,
+} from './field/features/types'

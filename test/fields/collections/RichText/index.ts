@@ -1,6 +1,6 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-import { createLexical } from '../../../../packages/richtext-lexical/src'
+import { TreeviewFeature, createLexical } from '../../../../packages/richtext-lexical/src'
 import { createSlate } from '../../../../packages/richtext-slate/src'
 import { loremIpsum } from './loremIpsum'
 
@@ -21,7 +21,12 @@ const RichTextFields: CollectionConfig = {
     {
       name: 'richTextLexical',
       type: 'richText',
-      editor: createLexical({}),
+      editor: createLexical({
+        userConfig(defaultEditorConfig) {
+          defaultEditorConfig.features.push(TreeviewFeature())
+          return defaultEditorConfig
+        },
+      }),
     },
     {
       name: 'selectHasMany',
