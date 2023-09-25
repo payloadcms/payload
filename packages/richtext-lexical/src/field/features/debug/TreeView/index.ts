@@ -15,6 +15,6 @@ export const TreeviewFeature = (): FeatureProvider => {
         ],
       }
     },
-    key: 'heading',
+    key: 'debug-treeview',
   }
 }
