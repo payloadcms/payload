@@ -2,6 +2,7 @@ import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
+import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
 
@@ -77,6 +78,7 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
       <HistoryPlugin />
       <FloatingSelectToolbarPlugin />
       <SlashMenuPlugin />
+      <TabIndentationPlugin />
       {editorConfig.features.plugins.map((plugin) => {
         if (!plugin.position || plugin.position === 'normal') {
           return <plugin.Component />
