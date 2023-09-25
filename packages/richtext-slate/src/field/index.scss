@@ -11,7 +11,7 @@
     border: $style-stroke-width-s solid var(--theme-elevation-150);
     position: sticky;
     z-index: 1;
-    top: base(4);
+    top: var(--doc-controls-height);
   }
 
   &__toolbar-wrap {
