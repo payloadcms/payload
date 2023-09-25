@@ -163,6 +163,7 @@
     "create": "Opprett",
     "createNew": "Opprett ny",
     "createNewLabel": "Opprett ny {{label}}",
+    "creatingNewLabel": "Oppretter ny {{label}}",
     "created": "Opprettet",
     "createdAt": "Opprettet",
     "creating": "Oppretter",

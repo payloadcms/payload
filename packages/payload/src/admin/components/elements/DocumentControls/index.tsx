@@ -76,15 +76,29 @@ export const DocumentControls: React.FC<{
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
           <ul className={`${baseClass}__meta`}>
+            {collection && !isEditing && (
+              <li className={`${baseClass}__list-item`}>
+                <p className={`${baseClass}__value`}>
+                  {t('creatingNewLabel', {
+                    label:
+                      typeof collection?.labels?.singular === 'string'
+                        ? collection.labels.singular
+                        : 'document',
+                  })}
+                </p>
+              </li>
+            )}
             {(collection?.versions?.drafts || global?.versions?.drafts) && (
               <Fragment>
-                <li
-                  className={[`${baseClass}__status`, `${baseClass}__list-item`]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  <Status />
-                </li>
+                {(global || (collection && isEditing)) && (
+                  <li
+                    className={[`${baseClass}__status`, `${baseClass}__list-item`]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    <Status />
+                  </li>
+                )}
                 {((collection?.versions?.drafts && collection?.versions?.drafts?.autosave) ||
                   (global?.versions?.drafts && global?.versions?.drafts?.autosave)) &&
                   hasSavePermission && (
@@ -99,25 +113,25 @@ export const DocumentControls: React.FC<{
                   )}
               </Fragment>
             )}
-            {collection?.timestamps && (
+            {collection?.timestamps && isEditing && (
               <Fragment>
                 <li
-                  className={[`${baseClass}__list-item`, `${baseClass}__timestamp-wrap`]
+                  className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
                     .filter(Boolean)
                     .join(' ')}
                   title={
                     data?.updatedAt ? formatDate(data?.updatedAt, dateFormat, i18n?.language) : ''
                   }
                 >
-                  <div className={`${baseClass}__label`}>{t('lastModified')}:&nbsp;</div>
+                  <p className={`${baseClass}__label`}>{t('lastModified')}:&nbsp;</p>
                   {data?.updatedAt && (
-                    <p className={`${baseClass}__timestamp`}>
+                    <p className={`${baseClass}__value`}>
                       {formatDate(data.updatedAt, dateFormat, i18n?.language)}
                     </p>
                   )}
                 </li>
                 <li
-                  className={[`${baseClass}__list-item`, `${baseClass}__timestamp-wrap`]
+                  className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
                     .filter(Boolean)
                     .join(' ')}
                   title={
@@ -130,9 +144,9 @@ export const DocumentControls: React.FC<{
                       : ''
                   }
                 >
-                  <div className={`${baseClass}__label`}>{t('created')}:&nbsp;</div>
+                  <p className={`${baseClass}__label`}>{t('created')}:&nbsp;</p>
                   {(publishedDoc?.createdAt || data?.createdAt) && (
-                    <p className={`${baseClass}__timestamp`}>
+                    <p className={`${baseClass}__value`}>
                       {formatDate(
                         publishedDoc?.createdAt || data?.createdAt,
                         dateFormat,

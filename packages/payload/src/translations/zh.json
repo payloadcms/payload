@@ -163,6 +163,7 @@
     "create": "创建",
     "createNew": "创建新的",
     "createNewLabel": "创建新的{{label}}",
+    "creatingNewLabel": "正在创建新的{{label}}",
     "created": "已创建",
     "createdAt": "创建于",
     "creating": "创建中",
