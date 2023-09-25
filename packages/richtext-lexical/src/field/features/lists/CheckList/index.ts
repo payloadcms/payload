@@ -5,11 +5,15 @@ import type { FeatureProvider } from '../../types'
 
 import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 import { ChecklistIcon } from '../../../lexical/ui/icons/Checklist'
+import { CHECK_LIST } from './markdownTransformers'
 
+// 345
+// carbs 7
 export const CheckListFeature = (): FeatureProvider => {
   return {
     feature: ({ featureProviderMap, resolvedFeatures, unsanitizedEditorConfig }) => {
       return {
+        markdownTransformers: [CHECK_LIST],
         nodes:
           featureProviderMap.has('unorderedList') || featureProviderMap.has('orderedList')
             ? []

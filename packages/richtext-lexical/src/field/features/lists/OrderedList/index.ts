@@ -5,11 +5,13 @@ import type { FeatureProvider } from '../../types'
 
 import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 import { OrderedListIcon } from '../../../lexical/ui/icons/OrderedList'
+import { ORDERED_LIST } from './markdownTransformer'
 
 export const OrderedListFeature = (): FeatureProvider => {
   return {
     feature: ({ featureProviderMap, resolvedFeatures, unsanitizedEditorConfig }) => {
       return {
+        markdownTransformers: [ORDERED_LIST],
         nodes: featureProviderMap.has('unorderedList') ? [] : [ListItemNode, ListNode],
         plugins: featureProviderMap.has('unorderedList')
           ? []
