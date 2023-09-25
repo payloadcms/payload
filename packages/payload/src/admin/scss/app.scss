@@ -35,6 +35,8 @@
   --accessibility-outline: 2px solid var(--theme-text);
   --accessibility-outline-offset: 2px;
 
+  --spacing-view-bottom: calc(var(--base) * 4);
+
   --gutter-h: #{base(6)};
 
   @include large-break {
@@ -43,6 +45,7 @@
 
   @include mid-break {
     --gutter-h: #{base(2)};
+    --spacing-view-bottom: calc(var(--base) * 2);
   }
 
   @include small-break {

@@ -1,3 +1,12 @@
 .after-dashboard {
   border-top: 1px solid var(--theme-elevation-100);
+  padding-top: calc(var(--base) * 2);
+
+  & > *:first-child {
+    margin-top: 0;
+  }
+
+  & > *:last-child {
+    margin-bottom: 0;
+  }
 }

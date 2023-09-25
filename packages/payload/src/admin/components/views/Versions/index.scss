@@ -6,14 +6,14 @@
 
   &__wrap {
     padding-top: 0;
-    padding-bottom: base(4);
+    padding-bottom: var(--spacing-view-bottom);
   }
 
   &__header {
     margin-bottom: var(--base);
   }
 
-  &__no-version {
+  &__no-versions {
     margin-top: calc(var(--base) * 2);
   }
 
@@ -27,6 +27,7 @@
     [dir='ltr'] & {
       margin-left: auto;
     }
+
     [dir='rtl'] & {
       margin-right: auto;
     }
@@ -54,6 +55,7 @@
       margin-right: base(1);
       margin-left: auto;
     }
+
     [dir='rtl'] & {
       margin-left: base(1);
       margin-right: auto;
@@ -73,6 +75,7 @@
       [dir='ltr'] & {
         margin-left: 0;
       }
+
       [dir='rtl'] & {
         margin-right: 0;
       }

@@ -6,7 +6,7 @@
   margin-bottom: base(2);
 
   &__wrap {
-    padding-bottom: base(4);
+    padding-bottom: var(--spacing-view-bottom);
   }
 
   &__header {

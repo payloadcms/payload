@@ -2,7 +2,7 @@
 
 .account {
   width: 100%;
-  padding-bottom: calc(var(--base) * 4);
+  padding-bottom: var(--spacing-view-bottom);
 
   &__form {
     height: 100%;

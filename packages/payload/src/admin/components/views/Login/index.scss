@@ -7,4 +7,18 @@
     width: 100%;
     margin-bottom: base(2);
   }
+
+  &__wrap {
+    & > *:first-child {
+      margin-top: 0;
+    }
+
+    & > *:last-child {
+      margin-bottom: 0;
+    }
+
+    .btn {
+      margin: 0;
+    }
+  }
 }

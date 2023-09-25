@@ -38,7 +38,7 @@
 
   &__edit {
     padding-top: calc(var(--base) * 1.5);
-    padding-bottom: base(4);
+    padding-bottom: var(--spacing-view-bottom);
     flex-grow: 1;
   }
 
