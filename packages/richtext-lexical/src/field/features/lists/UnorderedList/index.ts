@@ -1,13 +1,5 @@
-import type { LexicalNode, ParagraphNode } from 'lexical'
-
-import { $createListNode, ListItemNode, ListNode } from '@lexical/list'
-import { $setBlocksType } from '@lexical/selection'
-import {
-  $createTextNode,
-  $getSelection,
-  $isRangeSelection,
-  DEPRECATED_$isGridSelection,
-} from 'lexical'
+import { INSERT_UNORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
+import { ListPlugin } from '@lexical/react/LexicalListPlugin'
 
 import type { FeatureProvider } from '../../types'
 
@@ -19,6 +11,12 @@ export const UnoderedListFeature = (): FeatureProvider => {
     feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
       return {
         nodes: [ListItemNode, ListNode],
+        plugins: [
+          {
+            Component: ListPlugin,
+            position: 'normal',
+          },
+        ],
         slashMenu: {
           options: [
             {
@@ -27,19 +25,7 @@ export const UnoderedListFeature = (): FeatureProvider => {
                   Icon: UnorderedListIcon,
                   keywords: ['unordered list', 'ul'],
                   onSelect: ({ editor }) => {
-                    const selection = $getSelection()
-                    if ($isRangeSelection(selection) || DEPRECATED_$isGridSelection(selection)) {
-                      const node: LexicalNode = selection.anchor.getNode()
-                      const isEmptyParagraph =
-                        node.getType() === 'paragraph' && node.getTextContent() === ''
-                      if (isEmptyParagraph) {
-                        ;(node as ParagraphNode).replace(
-                          $createListNode('bullet').append($createTextNode('')),
-                        )
-                      } else {
-                        $setBlocksType(selection, () => $createListNode('bullet'))
-                      }
-                    }
+                    editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
                   },
                 }),
               ],

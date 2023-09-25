@@ -1,13 +1,5 @@
-import type { LexicalNode, ParagraphNode } from 'lexical'
-
-import { $createListNode, ListItemNode, ListNode } from '@lexical/list'
-import { $setBlocksType } from '@lexical/selection'
-import {
-  $createTextNode,
-  $getSelection,
-  $isRangeSelection,
-  DEPRECATED_$isGridSelection,
-} from 'lexical'
+import { INSERT_CHECK_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
+import { CheckListPlugin } from '@lexical/react/LexicalCheckListPlugin'
 
 import type { FeatureProvider } from '../../types'
 
@@ -22,6 +14,12 @@ export const CheckListFeature = (): FeatureProvider => {
           featureProviderMap.has('unorderedList') || featureProviderMap.has('orderedList')
             ? []
             : [ListItemNode, ListNode],
+        plugins: [
+          {
+            Component: CheckListPlugin,
+            position: 'normal',
+          },
+        ],
         slashMenu: {
           options: [
             {
@@ -30,19 +28,7 @@ export const CheckListFeature = (): FeatureProvider => {
                   Icon: ChecklistIcon,
                   keywords: ['check list', 'check', 'checklist', 'cl'],
                   onSelect: ({ editor }) => {
-                    const selection = $getSelection()
-                    if ($isRangeSelection(selection) || DEPRECATED_$isGridSelection(selection)) {
-                      const node: LexicalNode = selection.anchor.getNode()
-                      const isEmptyParagraph =
-                        node.getType() === 'paragraph' && node.getTextContent() === ''
-                      if (isEmptyParagraph) {
-                        ;(node as ParagraphNode).replace(
-                          $createListNode('check').append($createTextNode('')),
-                        )
-                      } else {
-                        $setBlocksType(selection, () => $createListNode('check'))
-                      }
-                    }
+                    editor.dispatchCommand(INSERT_CHECK_LIST_COMMAND, undefined)
                   },
                 }),
               ],

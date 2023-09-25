@@ -1,13 +1,5 @@
-import type { LexicalNode, ParagraphNode } from 'lexical'
-
-import { $createListNode, ListItemNode, ListNode } from '@lexical/list'
-import { $setBlocksType } from '@lexical/selection'
-import {
-  $createTextNode,
-  $getSelection,
-  $isRangeSelection,
-  DEPRECATED_$isGridSelection,
-} from 'lexical'
+import { INSERT_ORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
+import { ListPlugin } from '@lexical/react/LexicalListPlugin'
 
 import type { FeatureProvider } from '../../types'
 
@@ -19,6 +11,14 @@ export const OrderedListFeature = (): FeatureProvider => {
     feature: ({ featureProviderMap, resolvedFeatures, unsanitizedEditorConfig }) => {
       return {
         nodes: featureProviderMap.has('unorderedList') ? [] : [ListItemNode, ListNode],
+        plugins: featureProviderMap.has('unorderedList')
+          ? []
+          : [
+              {
+                Component: ListPlugin,
+                position: 'normal',
+              },
+            ],
         slashMenu: {
           options: [
             {
@@ -27,19 +27,7 @@ export const OrderedListFeature = (): FeatureProvider => {
                   Icon: OrderedListIcon,
                   keywords: ['ordered list', 'ol'],
                   onSelect: ({ editor }) => {
-                    const selection = $getSelection()
-                    if ($isRangeSelection(selection) || DEPRECATED_$isGridSelection(selection)) {
-                      const node: LexicalNode = selection.anchor.getNode()
-                      const isEmptyParagraph =
-                        node.getType() === 'paragraph' && node.getTextContent() === ''
-                      if (isEmptyParagraph) {
-                        ;(node as ParagraphNode).replace(
-                          $createListNode('number').append($createTextNode('')),
-                        )
-                      } else {
-                        $setBlocksType(selection, () => $createListNode('number'))
-                      }
-                    }
+                    editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)
                   },
                 }),
               ],
