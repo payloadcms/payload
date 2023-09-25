@@ -121,7 +121,7 @@ export interface DatabaseAdapter {
    */
   sessions?: {
     [id: string]: {
-      db: DatabaseAdapter
+      db: unknown
       reject: () => void
       resolve: () => void
     }

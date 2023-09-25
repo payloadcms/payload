@@ -2,7 +2,7 @@ import type { BeginTransaction } from 'payload/database'
 
 import { v4 as uuid } from 'uuid'
 
-import type { PostgresAdapter } from '../types'
+import type { DrizzleTransaction, PostgresAdapter } from '../types'
 
 export const beginTransaction: BeginTransaction = async function beginTransaction(
   this: PostgresAdapter,
@@ -11,11 +11,11 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
   try {
     id = uuid()
 
-    let reject
-    let resolve
-    let transaction
+    let reject: (value?: unknown) => void
+    let resolve: (value?: unknown) => void
+    let transaction: DrizzleTransaction
 
-    let transactionReady
+    let transactionReady: (value?: unknown) => void
 
     // Drizzle only exposes a transactions API that is sufficient if you
     // can directly pass around the `tx` argument. But our operations are spread

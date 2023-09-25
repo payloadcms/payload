@@ -11,11 +11,11 @@ export async function updateGlobal<T extends TypeWithID>(
   this: PostgresAdapter,
   { data, req = {} as PayloadRequest, slug }: UpdateGlobalArgs,
 ): Promise<T> {
-  const db = this.sessions?.[req.transactionID] || this.db
+  const db = this.sessions[req.transactionID]?.db || this.db
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
   const tableName = toSnakeCase(slug)
 
-  const existingGlobal = await this.db.query[tableName].findFirst({})
+  const existingGlobal = await db.query[tableName].findFirst({})
 
   const result = await upsertRow<T>({
     ...(existingGlobal ? { id: existingGlobal.id, operation: 'update' } : { operation: 'create' }),

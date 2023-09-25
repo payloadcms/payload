@@ -1,73 +1,75 @@
-import { v4 as uuid } from 'uuid'
+export const createJSONQuery = (args: any) => 'Hello'
 
-// TARGET:
+// import { v4 as uuid } from 'uuid'
 
-// SELECT COUNT(*)
-// FROM "rich_text_fields"
-// WHERE EXISTS (
+// // TARGET:
+
+// // SELECT COUNT(*)
+// // FROM "rich_text_fields"
+// // WHERE EXISTS (
+// //   SELECT 1
+// //   FROM jsonb_array_elements(rich_text) AS rt
+// //   WHERE EXISTS (
+// //     SELECT 1
+// //     FROM jsonb_array_elements(rt -> 'children') AS child
+// //     WHERE child ->> 'text' ~* 'Hello'
+// //   )
+// // );
+
+// type FromArrayArgs = {
+//   operator: string
+//   pathSegments: string[]
+//   treatAsArray?: string[]
+//   value: unknown
+// }
+
+// const fromArray = (args: FromArrayArgs) => `EXISTS (
 //   SELECT 1
-//   FROM jsonb_array_elements(rich_text) AS rt
-//   WHERE EXISTS (
-//     SELECT 1
-//     FROM jsonb_array_elements(rt -> 'children') AS child
-//     WHERE child ->> 'text' ~* 'Hello'
-//   )
-// );
+//   FROM jsonb_array_elements(${args.pathSegments[0]}) AS ${uuid}
+//   ${createJSONQuery({
+//     ...args,
+//     pathSegments: args.pathSegments.slice(1),
+//   })}
+// )`
 
-type FromArrayArgs = {
-  operator: string
-  pathSegments: string[]
-  treatAsArray?: string[]
-  value: unknown
-}
+// const createConstraint = (args) => ``
 
-const fromArray = (args: FromArrayArgs) => `EXISTS (
-  SELECT 1
-  FROM jsonb_array_elements(${args.pathSegments[0]}) AS ${uuid}
-  ${createJSONQuery({
-    ...args,
-    pathSegments: args.pathSegments.slice(1),
-  })}
-)`
+// type Args = {
+//   operator: string
+//   pathSegments: string[]
+//   treatAsArray?: string[]
+//   treatRootAsArray?: boolean
+//   value: unknown
+// }
 
-const createConstraint = (args) => ``
+// type CreateJSONQuery = ({ operator, pathSegments, treatAsArray, treatRootAsArray, value }) => string
 
-type Args = {
-  operator: string
-  pathSegments: string[]
-  treatAsArray?: string[]
-  treatRootAsArray?: boolean
-  value: unknown
-}
+// export const createJSONQuery = ({
+//   operator,
+//   pathSegments,
+//   treatAsArray,
+//   treatRootAsArray,
+//   value,
+// }: Args): string => {
+//   if (treatRootAsArray) {
+//     return fromArray({
+//       operator,
+//       pathSegments,
+//       treatAsArray,
+//       value,
+//     })
+//   }
 
-type CreateJSONQuery = ({ operator, pathSegments, treatAsArray, treatRootAsArray, value }) => string
+//   if (treatAsArray.includes(pathSegments[0])) {
+//     return fromArray({
+//       operator,
+//       pathSegments,
+//       treatAsArray,
+//       value,
+//     })
+//   }
 
-export const createJSONQuery = ({
-  operator,
-  pathSegments,
-  treatAsArray,
-  treatRootAsArray,
-  value,
-}: Args): string => {
-  if (treatRootAsArray) {
-    return fromArray({
-      operator,
-      pathSegments,
-      treatAsArray,
-      value,
-    })
-  }
+//   return createConstraint()
+// }
 
-  if (treatAsArray.includes(pathSegments[0])) {
-    return fromArray({
-      operator,
-      pathSegments,
-      treatAsArray,
-      value,
-    })
-  }
-
-  return createConstraint()
-}
-
-// myNestedProperty.myArray.myGroup.myArray.text
+// // myNestedProperty.myArray.myGroup.myArray.text
