@@ -1,6 +1,7 @@
 import type { EditorConfig, SanitizedEditorConfig } from './types'
 
 import { HeadingFeature } from '../../features/Heading'
+import { LinkFeature } from '../../features/Link'
 import { ParagraphFeature } from '../../features/Paragraph'
 import { AlignFeature } from '../../features/align'
 import { BoldTextFeature } from '../../features/format/Bold'
@@ -33,6 +34,7 @@ export const defaultEditorConfig: EditorConfig = {
     UnoderedListFeature(),
     OrderedListFeature(),
     CheckListFeature(),
+    LinkFeature(),
   ],
   lexical: {
     namespace: 'lexical',

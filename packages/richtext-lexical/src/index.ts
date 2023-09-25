@@ -45,6 +45,7 @@ export function createLexical({
 }
 
 export { HeadingFeature } from './field/features/Heading'
+export { LinkFeature } from './field/features/Link'
 export { ParagraphFeature } from './field/features/Paragraph'
 export { AlignFeature } from './field/features/align'
 export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
