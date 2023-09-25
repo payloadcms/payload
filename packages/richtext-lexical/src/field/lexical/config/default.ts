@@ -10,6 +10,7 @@ import { StrikethroughTextFeature } from '../../features/format/strikethrough'
 import { SubscriptTextFeature } from '../../features/format/subscript'
 import { SuperscriptTextFeature } from '../../features/format/superscript'
 import { UnderlineTextFeature } from '../../features/format/underline'
+import { IndentFeature } from '../../features/indent'
 import { LexicalEditorTheme } from '../theme/EditorTheme'
 import { sanitizeEditorConfig } from './sanitize'
 
@@ -25,6 +26,7 @@ export const defaultEditorConfig: EditorConfig = {
     ParagraphFeature(),
     HeadingFeature({}),
     AlignFeature(),
+    IndentFeature(),
   ],
   lexical: {
     namespace: 'lexical',

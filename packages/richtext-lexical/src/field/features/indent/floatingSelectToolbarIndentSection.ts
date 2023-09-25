@@ -1,17 +1,17 @@
 import type {
   FloatingToolbarSection,
   FloatingToolbarSectionEntry,
-} from '../../../lexical/plugins/FloatingSelectToolbar/types'
+} from '../../lexical/plugins/FloatingSelectToolbar/types'
 
 import './index.scss'
 
-export const SectionWithEntries = (
+export const IndentSectionWithEntries = (
   entries: FloatingToolbarSectionEntry[],
 ): FloatingToolbarSection => {
   return {
     entries,
-    key: 'format',
-    order: 4,
+    key: 'indent',
+    order: 3,
     type: 'buttons',
   }
 }

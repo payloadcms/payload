@@ -46,6 +46,7 @@ export function createLexical({
 
 export { HeadingFeature } from './field/features/Heading'
 export { ParagraphFeature } from './field/features/Paragraph'
+export { AlignFeature } from './field/features/align'
 export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
 export { TreeviewFeature } from './field/features/debug/TreeView'
 export { BoldTextFeature } from './field/features/format/Bold'
@@ -56,6 +57,7 @@ export { StrikethroughTextFeature } from './field/features/format/strikethrough'
 export { SubscriptTextFeature } from './field/features/format/subscript'
 export { SuperscriptTextFeature } from './field/features/format/superscript'
 export { UnderlineTextFeature } from './field/features/format/underline'
+export { IndentFeature } from './field/features/indent'
 
 export {
   Feature,
