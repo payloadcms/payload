@@ -1,5 +1,11 @@
 @import 'payload/scss';
 
+html[data-theme='light'] {
+  .slash-menu {
+    box-shadow: 0px 6px 20px 0px rgba(0, 0, 0, 0.2);
+  }
+}
+
 .slash-menu {
   background: var(--color-base-0);
   width: 200px;
