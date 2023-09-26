@@ -1,15 +1,15 @@
 import LexicalClickableLinkPlugin from '@lexical/react/LexicalClickableLinkPlugin'
 
 import type { FeatureProvider } from '../types'
-import type { LinkAttributes } from './nodes/LinkNodeModified'
+import type { LinkAttributes } from './nodes/LinkNode'
 
 import { LinkIcon } from '../../lexical/ui/icons/Link'
 import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeaturesButtonsSection'
 import { FloatingLinkEditorPlugin } from './floatingLinkEditor'
 import './index.scss'
-import { AutoLinkNode } from './nodes/AutoLinkNodeModified'
-import { LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNodeModified'
-import { LexicalAutoLinkPlugin } from './plugins/autoLink'
+import { AutoLinkNode } from './nodes/AutoLinkNode'
+import { LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'
+import { AutoLinkPlugin } from './plugins/autoLink'
 import { LinkPlugin } from './plugins/link'
 
 export const LinkFeature = (): FeatureProvider => {
@@ -43,7 +43,7 @@ export const LinkFeature = (): FeatureProvider => {
             position: 'normal',
           },
           {
-            Component: LexicalAutoLinkPlugin,
+            Component: AutoLinkPlugin,
             position: 'normal',
           },
           {

@@ -29,7 +29,7 @@ import {
   createCommand,
 } from 'lexical'
 
-import { type SerializedAutoLinkNode } from './AutoLinkNodeModified'
+import { type SerializedAutoLinkNode } from './AutoLinkNode'
 
 export interface LinkAttributes {
   doc?: {

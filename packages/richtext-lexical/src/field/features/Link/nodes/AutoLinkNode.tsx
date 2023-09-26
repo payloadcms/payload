@@ -4,10 +4,9 @@ import {
   type ElementNode,
   type LexicalNode,
   type RangeSelection,
-  Spread,
 } from 'lexical'
 
-import { type LinkAttributes, LinkNode, type SerializedLinkNode } from './LinkNodeModified'
+import { type LinkAttributes, LinkNode, type SerializedLinkNode } from './LinkNode'
 
 export type SerializedAutoLinkNode = SerializedLinkNode
 
