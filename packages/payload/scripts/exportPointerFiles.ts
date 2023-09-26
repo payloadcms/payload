@@ -7,7 +7,7 @@ const sourceDir = path.join(baseDir, 'dist', 'exports')
 const targetDir = baseDir
 
 // Helper function to read directories recursively and exclude .map files
-function getFiles(dir: string): string[] {
+function getFiles (dir: string): string[] {
   const subDirs = fs.readdirSync(dir, { withFileTypes: true })
   const files = subDirs.map((dirEntry) => {
     const res = path.resolve(dir, dirEntry.name)
@@ -21,7 +21,7 @@ function getFiles(dir: string): string[] {
   return Array.prototype.concat(...files)
 }
 
-function fixImports(fileExtension: string, content: string, depth: number): string {
+function fixImports (fileExtension: string, content: string, depth: number): string {
   const parentDirReference = '../'.repeat(depth + 1) // +1 to account for the original reference
   const replacementPrefix = (depth === 0 ? './' : '../'.repeat(depth)) + 'dist/'
 
@@ -68,7 +68,7 @@ function fixImports(fileExtension: string, content: string, depth: number): stri
 }
 
 const calculateDepth = (pathy: string): number => {
-  const parts = pathy.split('/')
+  const parts = pathy.split(path.sep)
 
   // Find the index of "exports"
   const exportsIndex = parts.indexOf('exports')
