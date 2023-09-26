@@ -5,7 +5,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 
 import type { FloatingToolbarSectionEntry } from '../types'
 
-import DropDown, { DropDownItem } from './DropDown'
+import { DropDown, DropDownItem } from './DropDown'
 import './index.scss'
 
 export const ToolbarDropdown = ({

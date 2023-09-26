@@ -124,7 +124,7 @@ function DropDownItems({
   )
 }
 
-export default function DropDown({
+export function DropDown({
   Icon,
   buttonAriaLabel,
   buttonClassName,

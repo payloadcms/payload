@@ -51,7 +51,7 @@ function SlashMenuItem({
   )
 }
 
-export default function SlashMenuPlugin(): JSX.Element {
+export function SlashMenuPlugin(): JSX.Element {
   const [editor] = useLexicalComposerContext()
   const [queryString, setQueryString] = useState<null | string>(null)
   const { editorConfig } = useEditorConfigContext()

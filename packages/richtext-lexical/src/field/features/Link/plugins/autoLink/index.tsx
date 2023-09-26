@@ -13,7 +13,7 @@ import { mergeRegister } from '@lexical/utils'
 import { $createTextNode, $isElementNode, $isLineBreakNode, $isTextNode, TextNode } from 'lexical'
 import { useEffect } from 'react'
 
-import invariant from '../../../../lexical/utils/invariant'
+import { invariant } from '../../../../lexical/utils/invariant'
 import { $createAutoLinkNode, $isAutoLinkNode, AutoLinkNode } from '../../nodes/AutoLinkNode'
 import { $isLinkNode, type LinkAttributes } from '../../nodes/LinkNode'
 
