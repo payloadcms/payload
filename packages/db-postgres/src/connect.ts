@@ -29,8 +29,8 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
     this.pool = new Pool(this.client)
     await this.pool.connect()
 
+    this.db = drizzle(this.pool, { schema: this.schema })
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-      this.db = drizzle(this.pool, { schema: this.schema })
       this.payload.logger.info('---- DROPPING TABLES ----')
       await this.db.execute(sql`drop schema public cascade;\ncreate schema public;`)
       this.payload.logger.info('---- DROPPED TABLES ----')
@@ -43,7 +43,7 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
   this.payload.logger.info('Connected to Postgres successfully')
 
   // Only push schema if not in production
-  if (process.env.NODE_ENV === 'production') return
+  if (process.env.NODE_ENV === 'production' || process.env.PAYLOAD_MIGRATING === 'true') return
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(
@@ -91,44 +91,5 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
     }
   }
 
-  this.migrationDir = '.migrations'
-
-  // Create drizzle snapshot if it doesn't exist
-  if (!fs.existsSync(`${this.migrationDir}/drizzle-snapshot.json`)) {
-    // Ensure migration dir exists
-    if (!fs.existsSync(this.migrationDir)) {
-      fs.mkdirSync(this.migrationDir)
-    }
-
-    const drizzleJSON = generateDrizzleJson(this.schema)
-
-    fs.writeFileSync(
-      `${this.migrationDir}/drizzle-snapshot.json`,
-      JSON.stringify(drizzleJSON, null, 2),
-    )
-  }
-
-  const jsonSchema = configToJSONSchema(this.payload.config)
-
   await apply()
-
-  const devPush = await this.db
-    .select()
-    .from(migrationsSchema)
-    .where(eq(migrationsSchema.batch, '-1'))
-
-  if (!devPush.length) {
-    await this.db.insert(migrationsSchema).values({
-      name: 'dev',
-      batch: '-1',
-      schema: JSON.stringify(jsonSchema),
-    })
-  } else {
-    await this.db
-      .update(migrationsSchema)
-      .set({
-        schema: JSON.stringify(jsonSchema),
-      })
-      .where(eq(migrationsSchema.batch, '-1'))
-  }
 }

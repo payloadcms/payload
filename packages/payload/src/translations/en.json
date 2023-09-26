@@ -163,6 +163,7 @@
     "create": "Create",
     "createNew": "Create New",
     "createNewLabel": "Create new {{label}}",
+    "creatingNewLabel": "Creating new {{label}}",
     "created": "Created",
     "createdAt": "Created At",
     "creating": "Creating",

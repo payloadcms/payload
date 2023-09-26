@@ -3,7 +3,6 @@ import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload/types'
 
 import { and, ilike, isNotNull, sql } from 'drizzle-orm'
-// import createJSONQuery from 'mongo-query-to-postgres-jsonb'
 import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
@@ -12,11 +11,7 @@ import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
 
 import { buildAndOrConditions } from './buildAndOrConditions'
 import { createJSONQuery } from './createJSONQuery'
-import {
-  convertPathToJSONQuery,
-  convertPathToJSONTraversal,
-} from './createJSONQuery/convertPathToJSONTraversal'
-// import convertJSONQuery from './convertJSONQuery'
+import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal'
 import { getTableColumnFromPath } from './getTableColumnFromPath'
 import { operatorMap } from './operatorMap'
 import { sanitizeQueryValue } from './sanitizeQueryValue'

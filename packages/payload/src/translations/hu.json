@@ -163,6 +163,7 @@
     "create": "Létrehozás",
     "createNew": "Új létrehozása",
     "createNewLabel": "Új {{label}} létrehozása",
+    "creatingNewLabel": "Új {{label}} létrehozása",
     "created": "Létrehozva",
     "createdAt": "Létrehozva:",
     "creating": "Létrehozás",

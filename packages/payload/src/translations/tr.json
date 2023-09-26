@@ -163,6 +163,7 @@
     "create": "Oluştur",
     "createNew": "Yeni oluştur",
     "createNewLabel": "Yeni bir {{label}} oluştur",
+    "creatingNewLabel": "Yeni bir {{label}} oluşturuluyor",
     "created": "Oluşturma tarihi",
     "createdAt": "Oluşturma tarihi",
     "creating": "Oluşturuluyor",

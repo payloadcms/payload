@@ -89,7 +89,7 @@ export const traverseFields = ({
     let targetIndexes = indexes
 
     if (fieldAffectsData(field)) {
-      columnName = `${columnPrefix || ''}${toSnakeCase(field.name)}`
+      columnName = `${columnPrefix || ''}${field.name[0] === '_' ? '_' : ''}${toSnakeCase(field.name)}`
       fieldName = `${fieldPrefix || ''}${field.name}`
 
       // If field is localized,
