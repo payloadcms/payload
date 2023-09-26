@@ -57,7 +57,12 @@ const RenderFields: React.FC<Props> = (props) => {
   if (fieldsToRender) {
     return (
       <div
-        className={[baseClass, className, margins && `${baseClass}--margins-${margins}`]
+        className={[
+          baseClass,
+          className,
+          margins && `${baseClass}--margins-${margins}`,
+          margins === false && `${baseClass}--margins-none`,
+        ]
           .filter(Boolean)
           .join(' ')}
         ref={intersectionRef}

@@ -7,6 +7,10 @@
     --spacing-field: var(--base);
   }
 
+  &--margins-none {
+    --spacing-field: 0;
+  }
+
   & > .field-type {
     margin-bottom: var(--spacing-field);
 
