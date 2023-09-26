@@ -5,42 +5,33 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
-import type { LexicalEditor, LexicalNode } from 'lexical'
+import type { LexicalEditor } from 'lexical'
 import type { DragEvent as ReactDragEvent } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { eventFiles } from '@lexical/rich-text'
-import { mergeRegister } from '@lexical/utils'
-import {
-  $getNearestNodeFromDOMNode,
-  $getNodeByKey,
-  COMMAND_PRIORITY_HIGH,
-  COMMAND_PRIORITY_LOW,
-  DRAGOVER_COMMAND,
-  DROP_COMMAND,
-} from 'lexical'
+import { $getNearestNodeFromDOMNode, $getNodeByKey } from 'lexical'
 import * as React from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { isHTMLElement } from '../../../utils/guard'
 import { Point } from '../../../utils/point'
-import { Rect } from '../../../utils/rect'
 import { getCollapsedMargins } from '../utils/getCollapsedMargins'
 import { getTopLevelNodeKeys } from '../utils/getTopLevelNodeKeys'
 import { isOnHandleElement } from '../utils/isOnHandleElement'
 import { setHandlePosition } from '../utils/setHandlePosition'
+import { getBoundingClientRectWithoutTransform } from './getBoundingRectWithoutTransform'
+import { getNodeCloseToPoint } from './getNodeCloseToPoint'
+import { highlightElemOriginalPosition } from './highlightElemOriginalPosition'
 import './index.scss'
 
 const SPACE = -24
-const TARGET_LINE_HALF_HEIGHT = 2
+const TARGET_LINE_HALF_HEIGHT = 25
 const DRAGGABLE_BLOCK_MENU_CLASSNAME = 'draggable-block-menu'
 const DRAG_DATA_FORMAT = 'application/x-lexical-drag-block'
 const TEXT_BOX_HORIZONTAL_PADDING = -24
-
-const Downward = 1
-const Upward = -1
-const Indeterminate = 0
+const DEBUG = true
 
 let prevIndex = Infinity
 
@@ -53,112 +44,6 @@ function getCurrentIndex(keysLength: number): number {
   }
 
   return Math.floor(keysLength / 2)
-}
-
-function getBlockElement(
-  anchorElem: HTMLElement,
-  editor: LexicalEditor,
-  event: MouseEvent,
-  useEdgeAsDefault = false,
-  horizontalOffset = 0,
-): {
-  blockElem: HTMLElement | null
-  shouldRemove: boolean
-} {
-  const anchorElementRect = anchorElem.getBoundingClientRect()
-  const topLevelNodeKeys = getTopLevelNodeKeys(editor)
-
-  let blockElem: HTMLElement | null = null
-  let blockNode: LexicalNode | null = null
-  let shouldRemove = false
-
-  // Return null if matching block element is the first or last node
-  editor.getEditorState().read(() => {
-    if (useEdgeAsDefault) {
-      const [firstNode, lastNode] = [
-        editor.getElementByKey(topLevelNodeKeys[0]),
-        editor.getElementByKey(topLevelNodeKeys[topLevelNodeKeys.length - 1]),
-      ]
-
-      const [firstNodeRect, lastNodeRect] = [
-        firstNode?.getBoundingClientRect(),
-        lastNode?.getBoundingClientRect(),
-      ]
-
-      if (firstNodeRect && lastNodeRect) {
-        if (event.y < firstNodeRect.top) {
-          blockElem = firstNode
-        } else if (event.y > lastNodeRect.bottom) {
-          blockElem = lastNode
-        }
-
-        if (blockElem) {
-          return {
-            blockElem: null,
-            shouldRemove,
-          }
-        }
-      }
-    }
-
-    // Find matching block element
-    let index = getCurrentIndex(topLevelNodeKeys.length)
-    let direction = Indeterminate
-
-    while (index >= 0 && index < topLevelNodeKeys.length) {
-      const key = topLevelNodeKeys[index]
-      const elem = editor.getElementByKey(key)
-      if (elem === null) {
-        break
-      }
-      const point = new Point(event.x + horizontalOffset, event.y)
-      const domRect = Rect.fromDOM(elem)
-      const { marginBottom, marginTop } = getCollapsedMargins(elem)
-
-      const rect = domRect.generateNewRect({
-        bottom: domRect.bottom + marginBottom,
-        left: anchorElementRect.left,
-        right: anchorElementRect.right,
-        top: domRect.top - marginTop,
-      })
-
-      const {
-        reason: { isOnBottomSide, isOnTopSide },
-        result,
-      } = rect.contains(point)
-
-      if (result) {
-        blockElem = elem
-        blockNode = $getNodeByKey(key)
-        prevIndex = index
-
-        // Check if blockNode is an empty text node
-        if (blockNode && blockNode.getType() === 'paragraph' && blockNode.getTextContent() === '') {
-          blockElem = null
-          shouldRemove = true
-        }
-        break
-      }
-
-      if (direction === Indeterminate) {
-        if (isOnTopSide) {
-          direction = Upward
-        } else if (isOnBottomSide) {
-          direction = Downward
-        } else {
-          // stop search block element
-          direction = Infinity
-        }
-      }
-
-      index += direction
-    }
-  })
-
-  return {
-    blockElem: blockElem,
-    shouldRemove,
-  }
 }
 
 function setDragImage(dataTransfer: DataTransfer, draggableBlockElem: HTMLElement) {
@@ -176,11 +61,14 @@ function setDragImage(dataTransfer: DataTransfer, draggableBlockElem: HTMLElemen
 function setTargetLine(
   targetLineElem: HTMLElement,
   targetBlockElem: HTMLElement,
+  lastTargetBlockElem: HTMLElement | null,
   mouseY: number,
   anchorElem: HTMLElement,
+  event: DragEvent,
+  debugHighlightRef: React.RefObject<HTMLDivElement>,
 ) {
   const { height: targetBlockElemHeight, top: targetBlockElemTop } =
-    targetBlockElem.getBoundingClientRect()
+    getBoundingClientRectWithoutTransform(targetBlockElem)
   const { top: anchorTop, width: anchorWidth } = anchorElem.getBoundingClientRect()
 
   const { marginBottom, marginTop } = getCollapsedMargins(targetBlockElem)
@@ -197,12 +85,38 @@ function setTargetLine(
   targetLineElem.style.transform = `translate(${left}px, ${top}px)`
   targetLineElem.style.width = `${anchorWidth - (TEXT_BOX_HORIZONTAL_PADDING - SPACE) * 2}px`
   targetLineElem.style.opacity = '.4'
+
+  targetBlockElem.style.opacity = '0.4'
+  // move lastTargetBlockElem down 50px to make space for targetLineElem (which is 50px height)
+  if (event.pageY >= targetBlockElemTop) {
+    targetBlockElem.style.transform = `translate(0, ${-TARGET_LINE_HALF_HEIGHT / 1.9}px)`
+  } else {
+    targetBlockElem.style.transform = `translate(0, ${TARGET_LINE_HALF_HEIGHT / 1.9}px)`
+  }
+  if (DEBUG) {
+    //targetBlockElem.style.border = '3px solid red'
+    highlightElemOriginalPosition(debugHighlightRef, targetBlockElem, anchorElem)
+  }
+
+  if (lastTargetBlockElem && lastTargetBlockElem !== targetBlockElem) {
+    lastTargetBlockElem.style.opacity = '1'
+    lastTargetBlockElem.style.transform = 'translate(0, 0)'
+    lastTargetBlockElem.style.border = 'none'
+  }
 }
 
-function hideTargetLine(targetLineElem: HTMLElement | null) {
+function hideTargetLine(
+  targetLineElem: HTMLElement | null,
+  lastTargetBlockElem: HTMLElement | null,
+) {
   if (targetLineElem) {
     targetLineElem.style.opacity = '0'
     targetLineElem.style.transform = 'translate(-10000px, -10000px)'
+  }
+  if (lastTargetBlockElem) {
+    lastTargetBlockElem.style.opacity = '1'
+    lastTargetBlockElem.style.transform = 'translate(0, 0)'
+    lastTargetBlockElem.style.border = 'none'
   }
 }
 
@@ -215,23 +129,23 @@ function useDraggableBlockMenu(
 
   const menuRef = useRef<HTMLDivElement>(null)
   const targetLineRef = useRef<HTMLDivElement>(null)
+  const debugHighlightRef = useRef<HTMLDivElement>(null)
   const isDraggingBlockRef = useRef<boolean>(false)
   const [draggableBlockElem, setDraggableBlockElem] = useState<HTMLElement | null>(null)
+  const [lastTargetBlockElem, setLastTargetBlockElem] = useState<HTMLElement | null>(null)
 
-  useEffect(() => {
-    function onDocumentMouseMove(event: MouseEvent) {
-      const target = event.target
-      if (!isHTMLElement(target)) {
-        return
-      }
-
+  const calculateDistanceFromScrollerElem = useCallback(
+    (
+      pageX: number,
+      pageY: number,
+      target: HTMLElement,
+      horizontalBuffer: number = 50,
+      verticalBuffer: number = 25,
+    ): number => {
       let distanceFromScrollerElem = 0
       // Calculate distance between scrollerElem and target if target is not in scrollerElem
       if (scrollerElem && !scrollerElem.contains(target)) {
         const { bottom, left, right, top } = scrollerElem.getBoundingClientRect()
-        const { pageX, pageY } = event
-        const horizontalBuffer = 50
-        const verticalBuffer = 25
         if (
           pageY < top - verticalBuffer ||
           pageY > bottom + verticalBuffer ||
@@ -239,7 +153,7 @@ function useDraggableBlockMenu(
           pageX > right + horizontalBuffer
         ) {
           setDraggableBlockElem(null)
-          return
+          return distanceFromScrollerElem
         }
 
         // This is used to allow the _draggableBlockElem to be found when the mouse is in the
@@ -248,18 +162,48 @@ function useDraggableBlockMenu(
           distanceFromScrollerElem = pageX < left ? pageX - left : pageX - right
         }
       }
+      return distanceFromScrollerElem
+    },
+    [scrollerElem],
+  )
+
+  useEffect(() => {
+    /**
+     * Handles positioning of the drag handle
+     */
+    function onDocumentMouseMove(event: MouseEvent) {
+      const target = event.target
+      if (!isHTMLElement(target)) {
+        return
+      }
+
+      const distanceFromScrollerElem = calculateDistanceFromScrollerElem(
+        event.pageX,
+        event.pageY,
+        target,
+      )
 
       if (isOnHandleElement(target, DRAGGABLE_BLOCK_MENU_CLASSNAME)) {
         return
       }
-      const { blockElem: _draggableBlockElem, shouldRemove } = getBlockElement(
+
+      const topLevelNodeKeys = getTopLevelNodeKeys(editor)
+      const {
+        blockElem: _draggableBlockElem,
+        foundAtIndex,
+        isFoundNoteEmptyParagraph,
+      } = getNodeCloseToPoint({
         anchorElem,
+        cache_treshold: 2,
         editor,
-        event,
-        false,
-        -distanceFromScrollerElem,
-      )
-      if (!_draggableBlockElem && !shouldRemove) {
+        horizontalOffset: -distanceFromScrollerElem,
+        point: new Point(event.x, event.y),
+        startIndex: getCurrentIndex(topLevelNodeKeys.length),
+        useEdgeAsDefault: false,
+      })
+      prevIndex = foundAtIndex
+
+      if (!_draggableBlockElem && !isFoundNoteEmptyParagraph) {
         return
       }
 
@@ -274,7 +218,7 @@ function useDraggableBlockMenu(
     return () => {
       document?.removeEventListener('mousemove', onDocumentMouseMove)
     }
-  }, [scrollerElem, anchorElem, editor])
+  }, [scrollerElem, anchorElem, editor, calculateDistanceFromScrollerElem])
 
   useEffect(() => {
     if (menuRef.current) {
@@ -283,6 +227,9 @@ function useDraggableBlockMenu(
   }, [anchorElem, draggableBlockElem])
 
   useEffect(() => {
+    let lastFoundBlockElem: HTMLElement | null = null
+    let lastCallTime: number = 0
+
     function onDragover(event: DragEvent): boolean {
       if (!isDraggingBlockRef.current) {
         return false
@@ -291,16 +238,57 @@ function useDraggableBlockMenu(
       if (isFileTransfer) {
         return false
       }
+
       const { pageY, target } = event
       if (!isHTMLElement(target)) {
         return false
       }
-      const { blockElem: targetBlockElem } = getBlockElement(anchorElem, editor, event, true)
+
+      const distanceFromScrollerElem = calculateDistanceFromScrollerElem(
+        event.pageX,
+        event.pageY,
+        target,
+        100,
+        50,
+      )
+
+      let targetBlockElem = lastFoundBlockElem
+      if (true) {
+        const topLevelNodeKeys = getTopLevelNodeKeys(editor)
+
+        const { blockElem, foundAtIndex } = getNodeCloseToPoint({
+          anchorElem,
+          editor,
+          fuzzy: true,
+          horizontalOffset: -distanceFromScrollerElem,
+          point: new Point(event.x, event.y),
+          startIndex: getCurrentIndex(topLevelNodeKeys.length),
+          useEdgeAsDefault: true,
+          verbose: true,
+        })
+        prevIndex = foundAtIndex
+
+        targetBlockElem = blockElem
+        lastFoundBlockElem = targetBlockElem
+        lastCallTime = Date.now()
+      }
+
       const targetLineElem = targetLineRef.current
+      // TODO: targetBlockElem === null shouldnt happen (it being null). getBlockElement needs to find stuff more often
       if (targetBlockElem === null || targetLineElem === null) {
         return false
       }
-      setTargetLine(targetLineElem, targetBlockElem, pageY, anchorElem)
+
+      setTargetLine(
+        targetLineElem,
+        targetBlockElem,
+        lastTargetBlockElem,
+        pageY,
+        anchorElem,
+        event,
+        debugHighlightRef,
+      )
+      setLastTargetBlockElem(targetBlockElem)
       // Prevent default event to be able to trigger onDrop events
       event.preventDefault()
       return true
@@ -316,52 +304,64 @@ function useDraggableBlockMenu(
       }
       const { dataTransfer, pageY, target } = event
       const dragData = dataTransfer?.getData(DRAG_DATA_FORMAT) || ''
-      const draggedNode = $getNodeByKey(dragData)
-      if (!draggedNode) {
-        return false
-      }
-      if (!isHTMLElement(target)) {
-        return false
-      }
-      const { blockElem: targetBlockElem } = getBlockElement(anchorElem, editor, event, true)
-      if (!targetBlockElem) {
-        return false
-      }
-      const targetNode = $getNearestNodeFromDOMNode(targetBlockElem)
-      if (!targetNode) {
-        return false
-      }
-      if (targetNode === draggedNode) {
-        return true
-      }
-      const targetBlockElemTop = targetBlockElem.getBoundingClientRect().top
-      if (pageY >= targetBlockElemTop) {
-        targetNode.insertAfter(draggedNode)
-      } else {
-        targetNode.insertBefore(draggedNode)
-      }
-      setDraggableBlockElem(null)
+
+      editor.update(() => {
+        const draggedNode = $getNodeByKey(dragData)
+        if (!draggedNode) {
+          return false
+        }
+        if (!isHTMLElement(target)) {
+          return false
+        }
+        const distanceFromScrollerElem = calculateDistanceFromScrollerElem(
+          event.pageX,
+          event.pageY,
+          target,
+          100,
+          50,
+        )
+
+        const { blockElem: targetBlockElem } = getNodeCloseToPoint({
+          anchorElem,
+          editor,
+          fuzzy: true,
+          horizontalOffset: -distanceFromScrollerElem,
+          point: new Point(event.x, event.y),
+          useEdgeAsDefault: true,
+        })
+
+        if (!targetBlockElem) {
+          return false
+        }
+        const targetNode = $getNearestNodeFromDOMNode(targetBlockElem)
+        if (!targetNode) {
+          return false
+        }
+        if (targetNode === draggedNode) {
+          return true
+        }
+        const targetBlockElemTop = targetBlockElem.getBoundingClientRect().top
+        if (pageY >= targetBlockElemTop) {
+          targetNode.insertAfter(draggedNode)
+        } else {
+          targetNode.insertBefore(draggedNode)
+        }
+        setDraggableBlockElem(null)
+      })
 
       return true
     }
 
-    return mergeRegister(
-      editor.registerCommand(
-        DRAGOVER_COMMAND,
-        (event) => {
-          return onDragover(event)
-        },
-        COMMAND_PRIORITY_LOW,
-      ),
-      editor.registerCommand(
-        DROP_COMMAND,
-        (event) => {
-          return onDrop(event)
-        },
-        COMMAND_PRIORITY_HIGH,
-      ),
-    )
-  }, [anchorElem, editor])
+    // register onDragover event listeners:
+    document.addEventListener('dragover', onDragover)
+    // register onDrop event listeners:
+    document.addEventListener('drop', onDrop)
+
+    return () => {
+      document.removeEventListener('dragover', onDragover)
+      document.removeEventListener('drop', onDrop)
+    }
+  }, [anchorElem, editor, lastTargetBlockElem, calculateDistanceFromScrollerElem])
 
   function onDragStart(event: ReactDragEvent<HTMLDivElement>): void {
     const dataTransfer = event.dataTransfer
@@ -382,7 +382,7 @@ function useDraggableBlockMenu(
 
   function onDragEnd(): void {
     isDraggingBlockRef.current = false
-    hideTargetLine(targetLineRef.current)
+    hideTargetLine(targetLineRef.current, lastTargetBlockElem)
   }
 
   return createPortal(
@@ -397,6 +397,7 @@ function useDraggableBlockMenu(
         <div className={isEditable ? 'icon' : ''} />
       </div>
       <div className="draggable-block-target-line" ref={targetLineRef} />
+      <div className="debug-highlight" ref={debugHighlightRef} />
     </React.Fragment>,
     anchorElem,
   )

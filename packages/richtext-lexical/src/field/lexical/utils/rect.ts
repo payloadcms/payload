@@ -42,6 +42,11 @@ export class Rect {
     return Rect.fromLWTH(left, width, top, height)
   }
 
+  static fromDOMRect(domRect: DOMRect): Rect {
+    const { height, left, top, width } = domRect
+    return Rect.fromLWTH(left, width, top, height)
+  }
+
   static fromLTRB(left: number, top: number, right: number, bottom: number): Rect {
     return new Rect(left, top, right, bottom)
   }
@@ -93,6 +98,55 @@ export class Rect {
       right >= this._left &&
       right <= this._right
     )
+  }
+
+  public distanceFromPoint(point: Point): {
+    distance: number
+    isOnBottomSide: boolean
+    isOnLeftSide: boolean
+    isOnRightSide: boolean
+    isOnTopSide: boolean
+  } {
+    const containsResult = this.contains(point)
+    if (containsResult.result) {
+      return {
+        distance: 0,
+        isOnBottomSide: containsResult.reason.isOnBottomSide,
+        isOnLeftSide: containsResult.reason.isOnLeftSide,
+        isOnRightSide: containsResult.reason.isOnRightSide,
+        isOnTopSide: containsResult.reason.isOnTopSide,
+      }
+    }
+
+    let dx = 0 // Horizontal distance to the closest edge
+    let dy = 0 // Vertical distance to the closest edge
+
+    // If the point is to the left of the rectangle
+    if (point.x < this._left) {
+      dx = this._left - point.x
+    }
+    // If the point is to the right of the rectangle
+    else if (point.x > this._right) {
+      dx = point.x - this._right
+    }
+
+    // If the point is above the rectangle
+    if (point.y < this._top) {
+      dy = this._top - point.y
+    }
+    // If the point is below the rectangle
+    else if (point.y > this._bottom) {
+      dy = point.y - this._bottom
+    }
+
+    // Use the Pythagorean theorem to calculate the distance
+    return {
+      distance: Math.sqrt(dx * dx + dy * dy),
+      isOnBottomSide: point.y > this._bottom,
+      isOnLeftSide: point.x < this._left,
+      isOnRightSide: point.x > this._right,
+      isOnTopSide: point.y < this._top,
+    }
   }
 
   public equals({ bottom, left, right, top }: Rect): boolean {

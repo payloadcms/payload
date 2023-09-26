@@ -37,8 +37,10 @@
 
 .draggable-block-target-line {
   pointer-events: none;
-  background: var(--theme-text);
-  height: 4px;
+  background: var(--theme-elevation-200);
+  border: 1px solid var(--theme-elevation-650);
+  border-radius: 4px;
+  height: 50px;
   position: absolute;
   left: 0;
   top: 0;
