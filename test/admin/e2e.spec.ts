@@ -546,7 +546,7 @@ describe('admin', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option > text="Post"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option:has-text("Post")',
           )
           .click()
 
@@ -595,14 +595,14 @@ describe('admin', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option > text="Post"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option:has-text("Post")',
           )
           .click()
 
         // deselect the "number" column
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column > text=Number',
+            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column:has-text("Number")',
           )
           .click()
 
@@ -610,7 +610,7 @@ describe('admin', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option > text="User"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option:has-text("User")',
           )
           .click()
 
@@ -627,7 +627,7 @@ describe('admin', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option > text="Post"',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option:has-text("Post")',
           )
           .click()
 
@@ -644,7 +644,9 @@ describe('admin', () => {
       test('should render custom table cell component', async () => {
         await createPost()
         await page.goto(url.list)
-        await expect(page.locator('table > thead > tr > th > text=Demo UI Field')).toBeVisible()
+        await expect(
+          page.locator('table > thead > tr > th:has-text("Demo UI Field")'),
+        ).toBeVisible()
       })
     })
 
@@ -771,7 +773,7 @@ describe('admin', () => {
 
         // column controls
         await page.locator('.list-controls__toggle-columns').click()
-        await expect(page.locator('.column-selector__column > text=Title')).toHaveText('Title')
+        await expect(page.locator('.column-selector__column:has-text("Title")')).toHaveText('Title')
 
         // filters
         await page.locator('.list-controls__toggle-where').click()
@@ -796,7 +798,7 @@ describe('admin', () => {
         await page.goto(url.list)
         await page.locator('.list-controls__toggle-columns').click()
         // expecting the label to fall back to english as default fallbackLng
-        await expect(page.locator('.column-selector__column > text=Title')).toHaveText('Title')
+        await expect(page.locator('.column-selector__column:has-text("Title")')).toHaveText('Title')
       })
     })
   })
