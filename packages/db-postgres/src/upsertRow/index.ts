@@ -13,7 +13,7 @@ import { deleteExistingArrayRows } from './deleteExistingArrayRows'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath'
 import { insertArrays } from './insertArrays'
 
-export const upsertRow = async <T extends TypeWithID>({
+export const upsertRow = async <T extends TypeWithID> ({
   id,
   adapter,
   data,
