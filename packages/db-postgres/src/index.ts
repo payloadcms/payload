@@ -22,6 +22,7 @@ import { findOne } from './findOne'
 import { findVersions } from './findVersions'
 import { init } from './init'
 import { migrate } from './migrate'
+import { migrateStatus } from './migrateStatus'
 import { queryDrafts } from './queryDrafts'
 import { beginTransaction } from './transactions/beginTransaction'
 import { commitTransaction } from './transactions/commitTransaction'
@@ -32,8 +33,8 @@ import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateVersion } from './updateVersion'
 import { webpack } from './webpack'
 
-export function postgresAdapter (args: Args): PostgresAdapterResult {
-  function adapter ({ payload }: { payload: Payload }) {
+export function postgresAdapter(args: Args): PostgresAdapterResult {
+  function adapter({ payload }: { payload: Payload }) {
     const migrationDir = args.migrationDir || path.resolve(__dirname, '../../../migrations')
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
@@ -60,6 +61,7 @@ export function postgresAdapter (args: Args): PostgresAdapterResult {
       findVersions,
       init,
       migrate,
+      migrateStatus,
       migrationDir,
       payload,
       pool: undefined,
