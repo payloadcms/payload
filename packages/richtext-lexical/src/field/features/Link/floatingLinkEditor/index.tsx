@@ -310,7 +310,38 @@ function LinkEditor({
   }, [editor, updateLinkEditor])
 
   return (
-    <div className="link-editor" ref={editorRef}>
+    <React.Fragment>
+      {isLink && !isModalOpen(drawerSlug) && (
+        <div className="link-editor" ref={editorRef}>
+          <div className="link-input">
+            <a href={linkUrl} rel="noopener noreferrer" target="_blank">
+              {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
+            </a>
+            <div
+              className="link-edit"
+              onClick={() => {
+                toggleModal(drawerSlug)
+              }}
+              onMouseDown={(event) => {
+                event.preventDefault()
+              }}
+              role="button"
+              tabIndex={0}
+            />
+            <div
+              className="link-trash"
+              onClick={() => {
+                editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
+              }}
+              onMouseDown={(event) => {
+                event.preventDefault()
+              }}
+              role="button"
+              tabIndex={0}
+            />
+          </div>
+        </div>
+      )}
       <LinkDrawer // TODO: Might aswell import from payload/distadmin/components/forms/field-types/RichText/elements/link/LinkDrawer/index.tsx instead?
         drawerSlug={drawerSlug}
         fieldSchema={fieldSchema}
@@ -340,36 +371,7 @@ function LinkEditor({
         }}
         initialState={initialState}
       />
-      {isLink && !isModalOpen(drawerSlug) && (
-        <div className="link-input">
-          <a href={linkUrl} rel="noopener noreferrer" target="_blank">
-            {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
-          </a>
-          <div
-            className="link-edit"
-            onClick={() => {
-              toggleModal(drawerSlug)
-            }}
-            onMouseDown={(event) => {
-              event.preventDefault()
-            }}
-            role="button"
-            tabIndex={0}
-          />
-          <div
-            className="link-trash"
-            onClick={() => {
-              editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
-            }}
-            onMouseDown={(event) => {
-              event.preventDefault()
-            }}
-            role="button"
-            tabIndex={0}
-          />
-        </div>
-      )}
-    </div>
+    </React.Fragment>
   )
 }
 export const UseFloatingLinkEditorToolbar: React.FC<{

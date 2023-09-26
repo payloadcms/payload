@@ -1,151 +1,86 @@
 @import 'payload/scss';
 
+html[data-theme='light'] {
+  .link-editor {
+    box-shadow: 0px 6px 20px 0px rgba(0, 0, 0, 0.2);
+  }
+}
+
 .link-editor {
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  background: var(--color-base-0);
+  padding: 0px 3.72px 0px 6.25px;
+  vertical-align: middle;
   position: absolute;
   top: 0;
   left: 0;
   z-index: 10;
-  max-width: 400px;
-  width: 100%;
   opacity: 0;
-  background-color: #fff;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  transition: opacity 0.5s;
+  border-radius: 6.25px;
+  transition: opacity 0.2s;
+  height: 37.5px;
   will-change: transform;
 
-  .button {
-    width: 20px;
-    height: 20px;
-    display: inline-block;
-    padding: 6px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin: 0 2px;
-
-    &.hovered {
-      width: 20px;
-      height: 20px;
-      display: inline-block;
-      background-color: #eee;
-    }
-  }
-
   .link-input {
-    display: block;
-    width: calc(100% - 24px);
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
     min-height: 28px;
     box-sizing: border-box;
-    margin: 8px 12px;
     padding: 2px 4px;
-    border-radius: 15px;
-    background-color: #eee;
     font-size: 15px;
-    color: rgb(5, 5, 5);
     border: 0;
     outline: 0;
     position: relative;
     font-family: inherit;
+
+    a {
+      text-decoration: none;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      margin-right: 30px;
+      text-overflow: ellipsis;
+      color: rgb(102, 167, 255);
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 
-  .link-view a {
-    display: block;
-    word-break: break-word;
-    width: calc(100% - 33px);
-  }
-
-  div.link-edit {
-    //background-image: url(images/icons/pencil-fill.svg);
+  .link-edit {
+    background-image: url(../../../lexical/ui/icons/Edit/index.svg);
     background-size: 16px;
     background-position: center;
     background-repeat: no-repeat;
-    width: 35px;
-    vertical-align: -0.25em;
-    position: absolute;
-    right: 30px;
-    top: 0;
-    bottom: 0;
+    width: 30px;
+    height: 30px;
     cursor: pointer;
-  }
-
-  div.link-trash {
-    //background-image: url(images/icons/trash.svg);
-    background-size: 16px;
-    background-position: center;
-    background-repeat: no-repeat;
-    width: 35px;
-    vertical-align: -0.25em;
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    cursor: pointer;
-  }
-
-  .link-input a {
-    color: rgb(33, 111, 219);
-    text-decoration: none;
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    margin-right: 30px;
-    text-overflow: ellipsis;
-  }
-
-  .link-input a:hover {
-    text-decoration: underline;
-  }
-
-  select {
-    padding: 6px;
-    border: none;
-    background-color: rgba(0, 0, 0, 0.075);
+    color: var(--color-base-600);
     border-radius: 4px;
+
+    &:hover:not([disabled]) {
+      background-color: var(--color-base-100);
+    }
   }
 
-  .font-size-wrapper,
-  .font-family-wrapper {
-    display: flex;
-    margin: 0 4px;
+  .link-trash {
+    background-image: url(../../../lexical/ui/icons/Remove/index.svg);
+    background-size: 16px;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    color: var(--color-base-600);
+    border-radius: 4px;
+
+    &:hover:not([disabled]) {
+      background-color: var(--color-base-100);
+    }
   }
-
-  .font-size-wrapper,
-  .font-family-wrapper {
-    display: flex;
-    margin: 0 4px;
-  }
-
-  .link-input {
-    background-color: var(--theme-elevation-100);
-    color: #fff;
-  }
-
-  div.link-edit,
-  div.link-trash {
-    filter: invert(1);
-  }
-
-  .link-input a {
-    color: rgb(102, 167, 255);
-  }
-}
-
-.link-editor .button i,
-.actions i {
-  background-size: contain;
-  display: inline-block;
-  height: 20px;
-  width: 20px;
-  vertical-align: -0.25em;
-}
-
-html[data-theme='dark'] {
-  .link-editor {
-    background-color: var(--theme-elevation-100);
-  }
-}
-
-.link-editor .button.active,
-.toolbar .button.active {
-  background-color: rgb(223, 232, 250);
 }

@@ -30,6 +30,7 @@ export const LinkFeature = (): FeatureProvider => {
                     url: 'https://',
                   }
                   editor.dispatchCommand(TOGGLE_LINK_COMMAND, linkAttributes)
+                  //editor.dispatchCommand(OPEN_LINK_DRAWER_COMMAND, linkAttributes)
                 },
                 order: 1,
               },
