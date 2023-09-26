@@ -13,23 +13,121 @@
   border-radius: 8px;
   transition: opacity 0.5s;
   will-change: transform;
-}
 
-.link-editor .button {
-  width: 20px;
-  height: 20px;
-  display: inline-block;
-  padding: 6px;
-  border-radius: 8px;
-  cursor: pointer;
-  margin: 0 2px;
-}
+  .button {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    padding: 6px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 0 2px;
 
-.link-editor .button.hovered {
-  width: 20px;
-  height: 20px;
-  display: inline-block;
-  background-color: #eee;
+    &.hovered {
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      background-color: #eee;
+    }
+  }
+
+  .link-input {
+    display: block;
+    width: calc(100% - 24px);
+    min-height: 28px;
+    box-sizing: border-box;
+    margin: 8px 12px;
+    padding: 2px 4px;
+    border-radius: 15px;
+    background-color: #eee;
+    font-size: 15px;
+    color: rgb(5, 5, 5);
+    border: 0;
+    outline: 0;
+    position: relative;
+    font-family: inherit;
+  }
+
+  .link-view a {
+    display: block;
+    word-break: break-word;
+    width: calc(100% - 33px);
+  }
+
+  div.link-edit {
+    //background-image: url(images/icons/pencil-fill.svg);
+    background-size: 16px;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 35px;
+    vertical-align: -0.25em;
+    position: absolute;
+    right: 30px;
+    top: 0;
+    bottom: 0;
+    cursor: pointer;
+  }
+
+  div.link-trash {
+    //background-image: url(images/icons/trash.svg);
+    background-size: 16px;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 35px;
+    vertical-align: -0.25em;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    cursor: pointer;
+  }
+
+  .link-input a {
+    color: rgb(33, 111, 219);
+    text-decoration: none;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    margin-right: 30px;
+    text-overflow: ellipsis;
+  }
+
+  .link-input a:hover {
+    text-decoration: underline;
+  }
+
+  select {
+    padding: 6px;
+    border: none;
+    background-color: rgba(0, 0, 0, 0.075);
+    border-radius: 4px;
+  }
+
+  .font-size-wrapper,
+  .font-family-wrapper {
+    display: flex;
+    margin: 0 4px;
+  }
+
+  .font-size-wrapper,
+  .font-family-wrapper {
+    display: flex;
+    margin: 0 4px;
+  }
+
+  .link-input {
+    background-color: var(--theme-elevation-100);
+    color: #fff;
+  }
+
+  div.link-edit,
+  div.link-trash {
+    filter: invert(1);
+  }
+
+  .link-input a {
+    color: rgb(102, 167, 255);
+  }
 }
 
 .link-editor .button i,
@@ -50,95 +148,4 @@ html[data-theme='dark'] {
 .link-editor .button.active,
 .toolbar .button.active {
   background-color: rgb(223, 232, 250);
-}
-
-.link-editor .link-input {
-  display: block;
-  width: calc(100% - 24px);
-  min-height: 28px;
-  box-sizing: border-box;
-  margin: 8px 12px;
-  padding: 2px 4px;
-  border-radius: 15px;
-  background-color: #eee;
-  font-size: 15px;
-  color: rgb(5, 5, 5);
-  border: 0;
-  outline: 0;
-  position: relative;
-  font-family: inherit;
-}
-
-.link-editor .link-view a {
-  display: block;
-  word-break: break-word;
-  width: calc(100% - 33px);
-}
-
-.link-editor div.link-edit {
-  //background-image: url(images/icons/pencil-fill.svg);
-  background-size: 16px;
-  background-position: center;
-  background-repeat: no-repeat;
-  width: 35px;
-  vertical-align: -0.25em;
-  position: absolute;
-  right: 30px;
-  top: 0;
-  bottom: 0;
-  cursor: pointer;
-}
-
-.link-editor div.link-trash {
-  //background-image: url(images/icons/trash.svg);
-  background-size: 16px;
-  background-position: center;
-  background-repeat: no-repeat;
-  width: 35px;
-  vertical-align: -0.25em;
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  cursor: pointer;
-}
-
-.link-editor .link-input a {
-  color: rgb(33, 111, 219);
-  text-decoration: none;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  margin-right: 30px;
-  text-overflow: ellipsis;
-}
-
-.link-editor .link-input a:hover {
-  text-decoration: underline;
-}
-
-.link-editor .font-size-wrapper,
-.link-editor .font-family-wrapper {
-  display: flex;
-  margin: 0 4px;
-}
-
-.link-editor select {
-  padding: 6px;
-  border: none;
-  background-color: rgba(0, 0, 0, 0.075);
-  border-radius: 4px;
-}
-.link-editor .link-input {
-  background-color: var(--theme-elevation-100);
-  color: #fff;
-}
-
-.link-editor div.link-edit,
-.link-editor div.link-trash {
-  filter: invert(1);
-}
-
-.link-editor .link-input a {
-  color: rgb(102, 167, 255);
 }
