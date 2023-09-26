@@ -4,18 +4,12 @@
   &__header {
     width: 100%;
     margin-top: base(2.5);
-    margin-bottom: base(1);
-
-    @include mid-break {
-      margin-top: base(1.5);
-    }
   }
 
   &__header-content {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: base(1);
   }
 
   &__header-text {
@@ -60,6 +54,15 @@
         stroke-width: 2px;
         vector-effect: non-scaling-stroke;
       }
+    }
+  }
+
+  @include mid-break {
+    &__header {
+      margin-top: base(1.5);
+      margin-bottom: base(0.5);
+      padding-left: var(--gutter-h);
+      padding-right: var(--gutter-h);
     }
   }
 }
