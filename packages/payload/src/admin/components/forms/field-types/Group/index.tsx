@@ -88,7 +88,7 @@ const Group: React.FC<Props> = (props) => {
             }))}
             fieldTypes={fieldTypes}
             indexPath={indexPath}
-            margin="small"
+            margins="small"
             permissions={permissions?.fields}
             readOnly={readOnly}
           />

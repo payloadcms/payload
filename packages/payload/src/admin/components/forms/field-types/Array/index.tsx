@@ -152,21 +152,27 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   )
 
   const hasMaxRows = maxRows && rows.length >= maxRows
+
   const fieldErrorCount =
     rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0) + (valid ? 0 : 1)
+
   const fieldHasErrors = submitted && fieldErrorCount > 0
 
-  const classes = [
-    'field-type',
-    baseClass,
-    className,
-    fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
-  ]
-    .filter(Boolean)
-    .join(' ')
+  const showRequired = readOnly && rows.length === 0
+  const showMinRows = rows.length < minRows || (required && rows.length === 0)
 
   return (
-    <div className={classes} id={`field-${path.replace(/\./g, '__')}`}>
+    <div
+      className={[
+        'field-type',
+        baseClass,
+        className,
+        fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      id={`field-${path.replace(/\./g, '__')}`}
+    >
       {showError && (
         <div className={`${baseClass}__error-wrap`}>
           <Error message={errorMessage} showError={showError} />
@@ -209,14 +215,13 @@ const ArrayFieldType: React.FC<Props> = (props) => {
       </header>
 
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
-
-      <DraggableSortable
-        className={`${baseClass}__draggable-rows`}
-        ids={rows.map((row) => row.id)}
-        onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
-      >
-        {rows.length > 0 &&
-          rows.map((row, i) => (
+      {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
+        <DraggableSortable
+          className={`${baseClass}__draggable-rows`}
+          ids={rows.map((row) => row.id)}
+          onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
+        >
+          {rows.map((row, i) => (
             <DraggableSortableItem disabled={readOnly} id={row.id} key={row.id}>
               {(draggableSortableItemProps) => (
                 <ArrayRow
@@ -242,41 +247,38 @@ const ArrayFieldType: React.FC<Props> = (props) => {
               )}
             </DraggableSortableItem>
           ))}
-
-        {!valid && (
-          <React.Fragment>
-            {readOnly && rows.length === 0 && (
-              <Banner>
-                {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
-              </Banner>
-            )}
-
-            {(rows.length < minRows || (required && rows.length === 0)) && (
-              <Banner type="error">
-                {t('validation:requiresAtLeast', {
-                  count: minRows,
-                  label:
-                    getTranslation(minRows ? labels.plural : labels.singular, i18n) ||
-                    t(minRows > 1 ? 'general:row' : 'general:rows'),
-                })}
-              </Banner>
-            )}
-          </React.Fragment>
-        )}
-      </DraggableSortable>
-
+          {!valid && (
+            <React.Fragment>
+              {showRequired && (
+                <Banner>
+                  {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
+                </Banner>
+              )}
+              {showMinRows && (
+                <Banner type="error">
+                  {t('validation:requiresAtLeast', {
+                    count: minRows,
+                    label:
+                      getTranslation(minRows ? labels.plural : labels.singular, i18n) ||
+                      t(minRows > 1 ? 'general:row' : 'general:rows'),
+                  })}
+                </Banner>
+              )}
+            </React.Fragment>
+          )}
+        </DraggableSortable>
+      )}
       {!readOnly && !hasMaxRows && (
-        <div className={`${baseClass}__add-button-wrap`}>
-          <Button
-            buttonStyle="icon-label"
-            icon="plus"
-            iconPosition="left"
-            iconStyle="with-border"
-            onClick={() => addRow(value)}
-          >
-            {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
-          </Button>
-        </div>
+        <Button
+          buttonStyle="icon-label"
+          icon="plus"
+          iconPosition="left"
+          iconStyle="with-border"
+          onClick={() => addRow(value)}
+          className={`${baseClass}__add-row`}
+        >
+          {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
+        </Button>
       )}
     </div>
   )

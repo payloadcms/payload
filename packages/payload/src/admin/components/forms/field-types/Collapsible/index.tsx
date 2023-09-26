@@ -118,7 +118,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
           fieldTypes={fieldTypes}
           forceRender
           indexPath={indexPath}
-          margin="small"
+          margins="small"
           permissions={permissions}
           readOnly={readOnly}
         />

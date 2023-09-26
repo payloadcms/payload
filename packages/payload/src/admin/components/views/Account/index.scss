@@ -12,13 +12,13 @@
     margin-top: calc(var(--base) * 3);
   }
 
+  &__auth {
+    margin-bottom: var(--base);
+  }
+
   &__header {
     display: flex;
     flex-direction: column;
-  }
-
-  .render-fields:not(.render-fields--none-visible) {
-    margin-top: var(--base);
   }
 
   &__payload-settings {

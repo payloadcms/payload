@@ -170,6 +170,9 @@ const BlocksField: React.FC<Props> = (props) => {
     .filter(Boolean)
     .join(' ')
 
+  const showMinRows = rows.length < minRows || (required && rows.length === 0)
+  const showRequired = readOnly && rows.length === 0
+
   return (
     <div className={classes} id={`field-${path.replace(/\./g, '__')}`}>
       {showError && (
@@ -210,13 +213,13 @@ const BlocksField: React.FC<Props> = (props) => {
         <FieldDescription description={description} value={value} />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
-      <DraggableSortable
-        className={`${baseClass}__rows`}
-        ids={rows.map((row) => row.id)}
-        onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
-      >
-        {rows.length > 0 &&
-          rows.map((row, i) => {
+      {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
+        <DraggableSortable
+          className={`${baseClass}__rows`}
+          ids={rows.map((row) => row.id)}
+          onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
+        >
+          {rows.map((row, i) => {
             const { blockType } = row
             const blockToRender = blocks.find((block) => block.slug === blockType)
 
@@ -251,29 +254,30 @@ const BlocksField: React.FC<Props> = (props) => {
 
             return null
           })}
-        {!editingDefaultLocale && (
-          <React.Fragment>
-            {(rows.length < minRows || (required && rows.length === 0)) && (
-              <Banner type="error">
-                {t('validation:requiresAtLeast', {
-                  count: minRows,
-                  label: getTranslation(
-                    minRows === 1 || typeof minRows === 'undefined'
-                      ? labels.singular
-                      : labels.plural,
-                    i18n,
-                  ),
-                })}
-              </Banner>
-            )}
-            {rows.length === 0 && readOnly && (
-              <Banner>
-                {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
-              </Banner>
-            )}
-          </React.Fragment>
-        )}
-      </DraggableSortable>
+          {!editingDefaultLocale && (
+            <React.Fragment>
+              {showMinRows && (
+                <Banner type="error">
+                  {t('validation:requiresAtLeast', {
+                    count: minRows,
+                    label: getTranslation(
+                      minRows === 1 || typeof minRows === 'undefined'
+                        ? labels.singular
+                        : labels.plural,
+                      i18n,
+                    ),
+                  })}
+                </Banner>
+              )}
+              {showRequired && (
+                <Banner>
+                  {t('validation:fieldHasNo', { label: getTranslation(labels.plural, i18n) })}
+                </Banner>
+              )}
+            </React.Fragment>
+          )}
+        </DraggableSortable>
+      )}
       {!readOnly && !hasMaxRows && (
         <Fragment>
           <DrawerToggler className={`${baseClass}__drawer-toggler`} slug={drawerSlug}>

@@ -95,6 +95,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
                       operation="update"
                       readOnly={!hasSavePermission}
                       useAPIKey={auth.useAPIKey}
+                      className={`${baseClass}__auth`}
                     />
                     <RenderFields
                       fieldSchema={fields}

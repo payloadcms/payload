@@ -22,7 +22,7 @@ const intersectionObserverOptions = {
 // This is so that we can conditionally render fields before reducing them, if desired
 // See the sidebar in '../collections/Edit/Default/index.tsx' for an example
 const RenderFields: React.FC<Props> = (props) => {
-  const { className, fieldTypes, forceRender } = props
+  const { className, fieldTypes, forceRender, margins } = props
 
   const { i18n, t } = useTranslation('general')
   const [hasRendered, setHasRendered] = useState(Boolean(forceRender))
@@ -55,13 +55,9 @@ const RenderFields: React.FC<Props> = (props) => {
   }
 
   if (fieldsToRender) {
-    const hasVisibleFields = fieldsToRender.some(
-      ({ field }) => !('hidden' in field?.admin) || !field?.admin?.hidden,
-    )
-
     return (
       <div
-        className={[baseClass, className, !hasVisibleFields && `${baseClass}--none-visible`]
+        className={[baseClass, className, margins && `${baseClass}--margins-${margins}`]
           .filter(Boolean)
           .join(' ')}
         ref={intersectionRef}

@@ -6,8 +6,6 @@
   gap: calc(var(--base) / 2);
 
   &__header {
-    margin-bottom: calc(var(--base) / 2);
-
     h3 {
       margin: 0;
     }
@@ -101,12 +99,6 @@
       &:hover {
         color: var(--theme-elevation-800);
       }
-    }
-  }
-
-  @include mid-break {
-    &__header {
-      margin-bottom: 0;
     }
   }
 }

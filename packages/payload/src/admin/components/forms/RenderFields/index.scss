@@ -1,19 +1,27 @@
 @import '../../../scss/styles.scss';
 
 .render-fields {
-  --spacing-field: var(--base);
+  --spacing-field: calc(var(--base) * 2);
+
+  &--margins-small {
+    --spacing-field: var(--base);
+  }
+
+  &:not(.render-fields--margins-small) {
+    & > * {
+      &.group-field,
+      &.blocks-field {
+        margin-top: calc(var(--spacing-field) * 2);
+        margin-bottom: calc(var(--spacing-field) * 2);
+      }
+    }
+  }
 
   & > * {
     margin-bottom: var(--spacing-field);
 
     &[type='hidden'] {
       margin-bottom: 0;
-    }
-
-    &.group-field,
-    &.blocks-field {
-      margin-top: calc(var(--spacing-field) * 2);
-      margin-bottom: calc(var(--spacing-field) * 2);
     }
 
     &:first-child {
