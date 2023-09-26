@@ -107,13 +107,9 @@
   }
 
   &__link {
-    color: rgb(33, 111, 219);
+    color: var(--color-blue-600);
     text-decoration: none;
-  }
-
-  &__link:hover {
-    text-decoration: underline;
-    cursor: pointer;
+    border-bottom: 1px dotted;
   }
 
   &__code {
@@ -493,7 +489,7 @@ html[data-theme='dark'] {
     }
 
     &__link {
-      color: rgb(102, 167, 255);
+      color: var(--color-blue-600);
     }
 
     &__tableCellHeader {

@@ -44,10 +44,11 @@ html[data-theme='light'] {
       overflow: hidden;
       margin-right: 30px;
       text-overflow: ellipsis;
-      color: rgb(102, 167, 255);
+      color: var(--color-blue-600);
+      border-bottom: 1px dotted;
 
       &:hover {
-        text-decoration: underline;
+        color: var(--color-blue-400);
       }
     }
   }
