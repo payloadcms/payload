@@ -68,7 +68,7 @@ async function forgotPassword (incomingArgs: Arguments): Promise<null | string> 
 
     type UserDoc = {
       id: number | string
-      resetPasswordExpiration?: Date
+      resetPasswordExpiration?: string
       resetPasswordToken?: string
     }
 
@@ -85,7 +85,7 @@ async function forgotPassword (incomingArgs: Arguments): Promise<null | string> 
     if (!user) return null
 
     user.resetPasswordToken = token
-    user.resetPasswordExpiration = new Date(expiration || Date.now() + 3600000) // 1 hour
+    user.resetPasswordExpiration = new Date(expiration || Date.now() + 3600000).toISOString() // 1 hour
 
     user = await payload.update({
       id: user.id,
