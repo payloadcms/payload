@@ -135,7 +135,6 @@ function useDraggableBlockMenu(
         event.pageY,
         target,
       )
-      console.log('distanceFromScrollerElem', distanceFromScrollerElem)
 
       if (isOnHandleElement(target, DRAGGABLE_BLOCK_MENU_CLASSNAME)) {
         return
