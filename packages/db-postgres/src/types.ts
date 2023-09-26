@@ -62,3 +62,6 @@ export type PostgresAdapter = DatabaseAdapter &
   }
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
+
+export type MigrateUpArgs = { payload: Payload }
+export type MigrateDownArgs = { payload: Payload }

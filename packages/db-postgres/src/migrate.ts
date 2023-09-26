@@ -10,19 +10,26 @@ import type { PostgresAdapter } from './types'
 export async function migrate(this: PostgresAdapter): Promise<void> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
-  const migrationQuery = await payload.find({
-    collection: 'payload-migrations',
-    limit: 0,
-    sort: '-name',
-  })
 
-  const latestBatch = Number(migrationQuery.docs[0]?.batch ?? 0)
+  let latestBatch = 0
+  let existingMigrations = []
+  const exists = false
+  if (exists) {
+    ;({ docs: existingMigrations } = await payload.find({
+      collection: 'payload-migrations',
+      limit: 0,
+      sort: '-name',
+    }))
+    if (typeof existingMigrations[0]?.batch !== 'undefined') {
+      latestBatch = Number(existingMigrations[0]?.batch)
+    }
+  }
 
   const newBatch = latestBatch + 1
 
   // Execute 'up' function for each migration sequentially
   for (const migration of migrationFiles) {
-    const existingMigration = migrationQuery.docs.find(
+    const existingMigration = existingMigrations.find(
       (existing) => existing.name === migration.name,
     )
 

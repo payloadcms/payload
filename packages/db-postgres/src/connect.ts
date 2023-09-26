@@ -29,8 +29,8 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
     this.pool = new Pool(this.client)
     await this.pool.connect()
 
+    this.db = drizzle(this.pool, { schema: this.schema })
     if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
-      this.db = drizzle(this.pool, { schema: this.schema })
       this.payload.logger.info('---- DROPPING TABLES ----')
       await this.db.execute(sql`drop schema public cascade;\ncreate schema public;`)
       this.payload.logger.info('---- DROPPED TABLES ----')
@@ -43,7 +43,7 @@ export const connect: Connect = async function connect(this: PostgresAdapter, pa
   this.payload.logger.info('Connected to Postgres successfully')
 
   // Only push schema if not in production
-  if (process.env.NODE_ENV === 'production') return
+  if (process.env.NODE_ENV === 'production' || process.env.PAYLOAD_MIGRATING === 'true') return
 
   // This will prompt if clarifications are needed for Drizzle to push new schema
   const { apply, hasDataLoss, statementsToExecute, warnings } = await pushSchema(

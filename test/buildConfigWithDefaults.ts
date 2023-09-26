@@ -19,6 +19,7 @@ const databaseAdapters = {
     client: {
       connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
+    migrationDir: path.resolve(__dirname, '../packages/db-postgres/migrations'),
   }),
 }
 

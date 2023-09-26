@@ -8,13 +8,20 @@ import fs from 'fs'
 import type { PostgresAdapter } from './types'
 
 const migrationTemplate = (upSQL?: string) => `
-import payload, { Payload } from 'payload';
+import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/db-postgres/types'
+import { sql } from 'drizzle-orm'
 
-export async function up(payload: Payload): Promise<void> {
-  ${upSQL ? `await payload.db.db.execute(\`${upSQL}\`);` : '// Migration code'}
+export async function up({ payload }: MigrateUpArgs): Promise<void> {
+${
+  upSQL
+    ? `await payload.db.db.execute(sql\`
+${upSQL}\`);
+  `
+    : '// Migration code'
+}
 };
 
-export async function down(payload: Payload): Promise<void> {
+export async function down({ payload }: MigrateDownArgs): Promise<void> {
   // Migration code
 };
 `
@@ -22,11 +29,10 @@ export async function down(payload: Payload): Promise<void> {
 export const createMigration: CreateMigration = async function createMigration(
   this: PostgresAdapter,
   payload,
-  migrationDir,
   migrationName,
 ) {
   payload.logger.info({ msg: 'Creating migration from postgres adapter...' })
-  const dir = migrationDir || 'migrations'
+  const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
@@ -41,32 +47,36 @@ export const createMigration: CreateMigration = async function createMigration(
   const fileName = `${timestamp}_${formattedName}.ts`
   const filePath = `${dir}/${fileName}`
 
-  const migrationQuery = await payload.find({
-    collection: 'payload-migrations',
-    limit: 1,
-    sort: '-name',
-  })
-
-  const drizzleJsonBefore = migrationQuery.docs[0]?.schema as DrizzleSnapshotJSON
-
-  const drizzleJsonAfter = generateDrizzleJson(this.schema)
-  const sqlStatements = await generateMigration(
-    drizzleJsonBefore || {
-      id: '00000000-0000-0000-0000-000000000000',
-      _meta: {
-        columns: {},
-        schemas: {},
-        tables: {},
-      },
-      dialect: 'pg',
-      enums: {},
-      prevId: '00000000-0000-0000-0000-000000000000',
+  let drizzleJsonBefore: DrizzleSnapshotJSON = {
+    id: '00000000-0000-0000-0000-000000000000',
+    _meta: {
+      columns: {},
       schemas: {},
       tables: {},
-      version: '5',
     },
-    drizzleJsonAfter,
-  )
+    dialect: 'pg',
+    enums: {},
+    prevId: '00000000-0000-0000-0000-000000000000',
+    schemas: {},
+    tables: {},
+    version: '5',
+  }
+
+  const exists = false // TODO: Check if migrations table exists
+  if (exists) {
+    const migrationQuery = await payload.find({
+      collection: 'payload-migrations',
+      limit: 1,
+      sort: '-name',
+    })
+
+    if (migrationQuery.docs?.[0]?.schema) {
+      drizzleJsonBefore = migrationQuery.docs[0]?.schema as DrizzleSnapshotJSON
+    }
+  }
+
+  const drizzleJsonAfter = generateDrizzleJson(this.schema)
+  const sqlStatements = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
 
   fs.writeFileSync(
     filePath,

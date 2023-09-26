@@ -13,7 +13,14 @@ export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
     msg: `Found ${migrationFiles.length} migration files.`,
   })
 
-  const { existingMigrations } = await getMigrations({ payload })
+  // TODO: check if migrations table exists
+  const exists = false
+
+  let existingMigrations = []
+
+  if (exists) {
+    ;({ existingMigrations } = await getMigrations({ payload }))
+  }
 
   if (!migrationFiles.length) {
     payload.logger.info({ msg: 'No migrations found.' })

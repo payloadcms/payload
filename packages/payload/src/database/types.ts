@@ -101,7 +101,7 @@ export interface DatabaseAdapter {
   /**
    * Path to read and write migration files from
    */
-  migrationDir?: string
+  migrationDir: string
   /**
    * The name of the database adapter
    */
