@@ -1,6 +1,6 @@
 import type { ValidateOptions } from './config/types'
 
-import { number, password, point, relationship, select, text, textarea } from './validations'
+import {json, number, password, point, relationship, select, text, textarea} from './validations';
 
 const t = jest.fn((string) => string)
 
@@ -462,6 +462,53 @@ describe('Field Validations', () => {
       const val = [1.25, 2.5, 3.5]
       const result = number(val, { ...numberOptions, hasMany: true, maxRows: 2 })
       expect(result).toBe('validation:greaterThanMax')
+    })
+  })
+  describe('json', () => {
+    const jsonOptions = {
+      ...options,
+      name: 'test',
+      type: 'json',
+    }
+    it('should accept required any', () => {
+      const value = JSON.stringify({});
+      const result = json(value, {...jsonOptions, required: true});
+
+      expect(result).toBe(true);
+    })
+    it('should validate required', () => {
+      const value = '';
+      const result = json(value, {...jsonOptions, required: true});
+
+      expect(result).toBe('validation:required');
+    })
+    it('should validate against json schema', () => {
+      const value = JSON.stringify({});
+      const result = json(value, {...jsonOptions, jsonSchema: {
+        type: 'object',
+        properties: {
+          someKey: {
+            type: "string"
+          }
+        },
+        required: ['someKey']
+      }});
+
+      expect(result).toBe('validation:invalidInput');
+    })
+    it('should accept schema valid json', () => {
+      const value = JSON.stringify({someKey: 'some value'});
+      const result = json(value, {...jsonOptions, jsonSchema: {
+        type: 'object',
+        properties: {
+          someKey: {
+            type: "string"
+          }
+        },
+        required: ['someKey']
+      }});
+
+      expect(result).toBe(true);
     })
   })
 })

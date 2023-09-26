@@ -170,8 +170,8 @@ export const code: Validate<unknown, unknown, CodeField> = (value: string, { req
 }
 
 export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }> = (
-  value: string,
-  { jsonError, required, t },
+  value: string, // is this typing correct?
+  { jsonError, required, t, jsonSchema },
 ) => {
   if (required && !value) {
     return t('validation:required')
@@ -179,6 +179,12 @@ export const json: Validate<unknown, unknown, JSONField & { jsonError?: string }
 
   if (jsonError !== undefined) {
     return t('validation:invalidInput')
+  }
+
+  if (jsonSchema && value) {
+    if (false) { // what lib?
+      return t('validation:invalidInput');
+    }
   }
 
   return true
