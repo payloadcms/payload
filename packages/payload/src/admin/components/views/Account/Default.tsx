@@ -76,6 +76,7 @@ const DefaultAccount: React.FC<Props> = (props) => {
                 data={data}
                 hasSavePermission={hasSavePermission}
                 permissions={permissions}
+                isAccountView
               />
               <div className={`${baseClass}__main`}>
                 <Meta
