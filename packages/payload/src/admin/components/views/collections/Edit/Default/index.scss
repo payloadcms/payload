@@ -77,12 +77,6 @@
     color: var(--theme-elevation-400);
   }
 
-  &--is-editing {
-    .collection-edit__sidebar {
-      padding-top: 0;
-    }
-  }
-
   @include mid-break {
     &__main {
       width: 100%;

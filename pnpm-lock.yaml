@@ -306,6 +306,9 @@ importers:
       drizzle-orm:
         specifier: 0.28.5
         version: 0.28.5(@libsql/client@0.3.4)(@types/pg@8.10.2)(better-sqlite3@8.6.0)(pg@8.11.3)
+      mongo-query-to-postgres-jsonb:
+        specifier: ^0.2.15
+        version: 0.2.15
       pg:
         specifier: 8.11.3
         version: 8.11.3
@@ -10436,6 +10439,10 @@ packages:
 
   /monaco-editor@0.38.0:
     resolution: {integrity: sha512-11Fkh6yzEmwx7O0YoLxeae0qEGFwmyPRlVxpg7oF9czOOCB/iCjdJrG5I67da5WiXK3YJCxoz9TJFE8Tfq/v9A==}
+    dev: false
+
+  /mongo-query-to-postgres-jsonb@0.2.15:
+    resolution: {integrity: sha512-LK7M85vnUz8j2EMy72Z3vfxRPGd+TM4leA0gBLccNgnNltfCNzM0FUUUH0wQPT/U3H2NtYKSe2RRHboSKzgbJw==}
     dev: false
 
   /mongodb-connection-string-url@2.6.0:

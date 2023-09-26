@@ -102,7 +102,7 @@ export const DefaultCollectionEdit: React.FC<Props> = (props) => {
             />
           </Gutter>
         </div>
-        {sidebarFields && sidebarFields.length > 0 && (
+        {hasSidebar && (
           <div className={`${baseClass}__sidebar-wrap`}>
             <div className={`${baseClass}__sidebar`}>
               <div className={`${baseClass}__sidebar-sticky-wrap`}>

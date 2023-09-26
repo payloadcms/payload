@@ -1,10 +1,16 @@
-import type { ColumnBaseConfig, ColumnDataType, Relation, Relations } from 'drizzle-orm'
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import type { PgColumn, PgEnum, PgTableWithColumns } from 'drizzle-orm/pg-core'
+import type {
+  ColumnBaseConfig,
+  ColumnDataType,
+  ExtractTablesWithRelations,
+  Relation,
+  Relations,
+} from 'drizzle-orm'
+import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-postgres'
+import type { PgColumn, PgEnum, PgTableWithColumns, PgTransaction } from 'drizzle-orm/pg-core'
 import type { DatabaseAdapter, Payload } from 'payload'
 import type { Pool, PoolConfig } from 'pg'
 
-export type DrizzleDB = NodePgDatabase<Record<string, never>>
+export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
 
 export type Args = {
   client: PoolConfig
@@ -32,6 +38,12 @@ export type GenericEnum = PgEnum<[string, ...string[]]>
 
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
+export type DrizzleTransaction = PgTransaction<
+  NodePgQueryResultHKT,
+  Record<string, unknown>,
+  ExtractTablesWithRelations<Record<string, unknown>>
+>
+
 export type PostgresAdapter = DatabaseAdapter &
   Args & {
     db: DrizzleDB
@@ -39,8 +51,17 @@ export type PostgresAdapter = DatabaseAdapter &
     pool: Pool
     relations: Record<string, GenericRelation>
     schema: Record<string, GenericEnum | GenericRelation | GenericTable>
-    sessions: Record<string, DrizzleDB>
+    sessions: {
+      [id: string]: {
+        db: DrizzleTransaction
+        reject: () => void
+        resolve: () => void
+      }
+    }
     tables: Record<string, GenericTable>
   }
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
+
+export type MigrateUpArgs = { payload: Payload }
+export type MigrateDownArgs = { payload: Payload }

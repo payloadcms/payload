@@ -24,6 +24,7 @@ export const adminInit = (req: PayloadRequest): void => {
     userID = oneWayHash(user.id, payload.secret)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   sendEvent({
     event: {
       domainID,

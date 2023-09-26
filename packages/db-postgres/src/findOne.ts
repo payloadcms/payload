@@ -13,7 +13,7 @@ export async function findOne<T extends TypeWithID>(
   this: PostgresAdapter,
   { collection, locale, req = {} as PayloadRequest, where: incomingWhere }: FindOneArgs,
 ): Promise<T> {
-  const db = this.sessions?.[req.transactionID] || this.db
+  const db = this.sessions[req.transactionID]?.db || this.db
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const tableName = toSnakeCase(collection)
 

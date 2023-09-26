@@ -30,7 +30,7 @@ export const findMany = async function find({
   tableName,
   where: whereArg,
 }: Args) {
-  const db = adapter.sessions?.[req.transactionID] || adapter.db
+  const db = adapter.sessions[req.transactionID]?.db || adapter.db
   const table = adapter.tables[tableName]
 
   let limit = limitArg

@@ -8,6 +8,7 @@ import i18nHTTPMiddleware from 'i18next-http-middleware'
 import { defaultOptions } from '../../translations/defaultOptions'
 
 const i18nMiddleware = (options: InitOptions): Handler => {
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   i18next.use(new i18nHTTPMiddleware.LanguageDetector(defaultOptions.detection)).init({
     preload: defaultOptions.supportedLngs,
     ...deepmerge(defaultOptions, options || {}),
