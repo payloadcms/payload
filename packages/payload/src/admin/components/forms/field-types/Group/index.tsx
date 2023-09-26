@@ -42,7 +42,7 @@ const Group: React.FC<Props> = (props) => {
   const groupHasErrors = submitted && errorCount > 0
 
   const path = pathFromProps || name
-  const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow || isWithinTab)
+  const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
 
   return (
     <div
