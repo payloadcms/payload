@@ -8,6 +8,7 @@
 
   .ContentEditable__root > * {
     transition: transform 0.2s ease-in-out;
+    will-change: transform;
   }
 
   h1,
