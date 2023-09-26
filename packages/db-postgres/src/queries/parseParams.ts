@@ -3,7 +3,6 @@ import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload/types'
 
 import { and, ilike, isNotNull, sql } from 'drizzle-orm'
-// import createJSONQuery from 'mongo-query-to-postgres-jsonb'
 import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
@@ -11,9 +10,8 @@ import type { GenericColumn, PostgresAdapter } from '../types'
 import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
 
 import { buildAndOrConditions } from './buildAndOrConditions'
-import { convertPathToJSONQuery } from './convertPathToJSONQuery'
 import { createJSONQuery } from './createJSONQuery'
-// import convertJSONQuery from './convertJSONQuery'
+import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal'
 import { getTableColumnFromPath } from './getTableColumnFromPath'
 import { operatorMap } from './operatorMap'
 import { sanitizeQueryValue } from './sanitizeQueryValue'
@@ -117,11 +115,11 @@ export async function parseParams({
                       value: val,
                     })
 
-                    // constraints.push(sql.raw(jsonQuery))
+                    constraints.push(sql.raw(jsonQuery))
                   }
 
                   if (field.type === 'json') {
-                    const jsonQuery = convertPathToJSONQuery(relationOrPath)
+                    const jsonQuery = convertPathToJSONTraversal(relationOrPath)
                     constraints.push(sql.raw(`${table[columnName].name}${jsonQuery} = '%${val}%'`))
                   }
 

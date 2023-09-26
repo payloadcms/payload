@@ -7,8 +7,11 @@ import fs from 'fs'
 
 import type { PostgresAdapter } from './types'
 
-const migrationTemplate = (upSQL?: string) => `
-import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/db-postgres/types'
+import { migrationTableExists } from './utilities/migrationTableExists'
+
+const migrationTemplate = (
+  upSQL?: string,
+) => `import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/db-postgres/types'
 import { sql } from 'drizzle-orm'
 
 export async function up({ payload }: MigrateUpArgs): Promise<void> {
@@ -62,8 +65,9 @@ export const createMigration: CreateMigration = async function createMigration(
     version: '5',
   }
 
-  const exists = false // TODO: Check if migrations table exists
-  if (exists) {
+  const hasMigrationTable = await migrationTableExists(this.db)
+
+  if (hasMigrationTable) {
     const migrationQuery = await payload.find({
       collection: 'payload-migrations',
       limit: 1,
@@ -82,4 +86,5 @@ export const createMigration: CreateMigration = async function createMigration(
     filePath,
     migrationTemplate(sqlStatements.length ? sqlStatements?.join('\n') : undefined),
   )
+  payload.logger.info({ msg: `Migration created at ${filePath}` })
 }

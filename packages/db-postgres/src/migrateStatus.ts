@@ -1,11 +1,11 @@
 import { Table } from 'console-table-printer'
+import { getMigrations, readMigrationFiles } from 'payload/database'
 
-import type { DatabaseAdapter } from '../types'
+import type { PostgresAdapter } from './types'
 
-import { getMigrations } from './getMigrations'
-import { readMigrationFiles } from './readMigrationFiles'
+import { migrationTableExists } from './utilities/migrationTableExists'
 
-export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
+export async function migrateStatus(this: PostgresAdapter): Promise<void> {
   const { payload } = this
   const migrationFiles = await readMigrationFiles({ payload })
 
@@ -13,7 +13,12 @@ export async function migrateStatus(this: DatabaseAdapter): Promise<void> {
     msg: `Found ${migrationFiles.length} migration files.`,
   })
 
-  const { existingMigrations } = await getMigrations({ payload })
+  let existingMigrations = []
+  const hasMigrationTable = await migrationTableExists(this.db)
+
+  if (hasMigrationTable) {
+    ;({ existingMigrations } = await getMigrations({ payload }))
+  }
 
   if (!migrationFiles.length) {
     payload.logger.info({ msg: 'No migrations found.' })

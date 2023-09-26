@@ -90,8 +90,8 @@ const batchAndLoadDocs =
 
     const results = Object.entries(batchByFindArgs).map(async ([batchKey, ids]) => {
       const [
-        ,
-        /* transactionID */ collection,
+        transactionID,
+        collection,
         depth,
         currentDepth,
         locale,
@@ -99,6 +99,8 @@ const batchAndLoadDocs =
         overrideAccess,
         showHiddenFields,
       ] = JSON.parse(batchKey)
+
+      req.transactionID = transactionID
 
       const result = await payload.find({
         collection,
