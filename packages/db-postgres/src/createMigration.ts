@@ -7,7 +7,7 @@ import fs from 'fs'
 
 import type { PostgresAdapter } from './types'
 
-import { createMigrationTable, migrationTableExists } from './utils'
+import { migrationTableExists } from './utilities/migrationTableExists'
 
 const migrationTemplate = (
   upSQL?: string,

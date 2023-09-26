@@ -3,7 +3,7 @@ import { getMigrations, readMigrationFiles } from 'payload/database'
 
 import type { PostgresAdapter } from './types'
 
-import { migrationTableExists } from './utils'
+import { migrationTableExists } from './utilities/migrationTableExists'
 
 export async function migrateStatus(this: PostgresAdapter): Promise<void> {
   const { payload } = this
