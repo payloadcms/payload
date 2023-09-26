@@ -121,7 +121,7 @@ export async function parseParams({
                   }
 
                   if (field.type === 'json') {
-                    const jsonQuery = convertPathToJSONQuery(jsonPath)
+                    const jsonQuery = convertPathToJSONQuery(relationOrPath)
                     constraints.push(sql.raw(`${table[columnName].name}${jsonQuery} = '%${val}%'`))
                   }
 

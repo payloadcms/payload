@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
 import { createDatabaseAdapter } from 'payload/database'
 
 import type { Args, PostgresAdapter, PostgresAdapterResult } from './types'
@@ -13,12 +14,14 @@ import { createVersion } from './createVersion'
 import { deleteMany } from './deleteMany'
 import { deleteOne } from './deleteOne'
 import { deleteVersions } from './deleteVersions'
+import { destroy } from './destroy'
 import { find } from './find'
 import { findGlobal } from './findGlobal'
 import { findGlobalVersions } from './findGlobalVersions'
 import { findOne } from './findOne'
 import { findVersions } from './findVersions'
 import { init } from './init'
+import { migrate } from './migrate'
 import { queryDrafts } from './queryDrafts'
 import { beginTransaction } from './transactions/beginTransaction'
 import { commitTransaction } from './transactions/commitTransaction'
@@ -29,16 +32,14 @@ import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateVersion } from './updateVersion'
 import { webpack } from './webpack'
 
-// import { destroy } from './destroy';
-
-export function postgresAdapter(args: Args): PostgresAdapterResult {
-  function adapter({ payload }: { payload: Payload }) {
+export function postgresAdapter (args: Args): PostgresAdapterResult {
+  function adapter ({ payload }: { payload: Payload }) {
+    const migrationDir = args.migrationDir || path.resolve(__dirname, '../../../migrations')
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
+      name: 'postgres',
       beginTransaction,
       commitTransaction,
-      pool: undefined,
-      ...(args.migrationDir && { migrationDir: args.migrationDir }),
       connect,
       create,
       createGlobal,
@@ -47,19 +48,21 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       createVersion,
       db: undefined,
       defaultIDType: 'number',
-      findGlobalVersions,
-      // destroy,
-      name: 'postgres',
       deleteMany,
       deleteOne,
       deleteVersions,
+      destroy,
       enums: {},
       find,
       findGlobal,
+      findGlobalVersions,
       findOne,
       findVersions,
       init,
+      migrate,
+      migrationDir,
       payload,
+      pool: undefined,
       queryDrafts,
       relations: {},
       rollbackTransaction,

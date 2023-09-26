@@ -10,7 +10,7 @@ export const createMigration: CreateMigration = async function createMigration(
   migrationDir,
   migrationName,
 ) {
-  const dir = migrationDir || '.migrations' // TODO: Verify path after linking
+  const dir = migrationDir || 'migrations' // TODO: Verify path after linking
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
