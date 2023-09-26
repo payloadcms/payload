@@ -1,4 +1,4 @@
-import type { LexicalEditor, RangeSelection } from 'lexical'
+import type { BaseSelection, LexicalEditor } from 'lexical'
 
 export type FloatingToolbarSection =
   | {
@@ -19,28 +19,21 @@ export type FloatingToolbarSectionEntry = {
   ChildComponent?: React.FC
   /** Use component to ignore the children and onClick properties. It does not use the default, pre-defined format Button component */
   Component?: React.FC<{
-    activeStates: Map<string, boolean>
     anchorElem: HTMLElement
     editor: LexicalEditor
-    enabledStates: Map<string, boolean>
+    entry: FloatingToolbarSectionEntry
   }>
-  isActive?: ({
-    editor,
-    selection,
-  }: {
-    editor: LexicalEditor
-    selection: RangeSelection
-  }) => boolean
+  isActive?: ({ editor, selection }: { editor: LexicalEditor; selection: BaseSelection }) => boolean
   isEnabled?: ({
     editor,
     selection,
   }: {
     editor: LexicalEditor
-    selection: RangeSelection
+    selection: BaseSelection
   }) => boolean
   key: string
   /** The label is displayed as text if the entry is part of a dropdown section */
   label?: string
-  onClick?: ({ editor }: { editor: LexicalEditor }) => void
+  onClick?: ({ editor, isActive }: { editor: LexicalEditor; isActive: boolean }) => void
   order?: number
 }

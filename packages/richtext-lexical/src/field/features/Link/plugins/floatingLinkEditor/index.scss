@@ -52,8 +52,8 @@ html[data-theme='light'] {
     }
   }
 
-  .link-edit {
-    background-image: url(../../../../lexical/ui/icons/Edit/index.svg);
+  button {
+    all: unset;
     background-size: 16px;
     background-position: center;
     background-repeat: no-repeat;
@@ -68,19 +68,11 @@ html[data-theme='light'] {
     }
   }
 
+  .link-edit {
+    background-image: url(../../../../lexical/ui/icons/Edit/index.svg);
+  }
+
   .link-trash {
     background-image: url(../../../../lexical/ui/icons/Remove/index.svg);
-    background-size: 16px;
-    background-position: center;
-    background-repeat: no-repeat;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    color: var(--color-base-600);
-    border-radius: 4px;
-
-    &:hover:not([disabled]) {
-      background-color: var(--color-base-100);
-    }
   }
 }

@@ -1,4 +1,4 @@
-import { FORMAT_TEXT_COMMAND } from 'lexical'
+import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../../types'
 
@@ -15,7 +15,12 @@ export const InlineCodeTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: CodeIcon,
-                isActive: ({ editor, selection }) => selection.hasFormat('code'),
+                isActive: ({ editor, selection }) => {
+                  if ($isRangeSelection(selection)) {
+                    return selection.hasFormat('code')
+                  }
+                  return false
+                },
                 key: 'code',
                 onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code')

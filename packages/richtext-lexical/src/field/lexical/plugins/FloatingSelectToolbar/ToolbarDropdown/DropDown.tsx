@@ -1,14 +1,11 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { mergeRegister } from '@lexical/utils'
+import { $getSelection } from 'lexical'
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
+
+import type { FloatingToolbarSectionEntry } from '../types'
 
 interface DropDownContextType {
   registerItem: (ref: React.RefObject<HTMLButtonElement>) => void
@@ -18,15 +15,63 @@ const DropDownContext = React.createContext<DropDownContextType | null>(null)
 
 export function DropDownItem({
   children,
-  className,
-  onClick,
+  entry,
   title,
 }: {
   children: React.ReactNode
-  className: string
-  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void
+  entry: FloatingToolbarSectionEntry
   title?: string
 }): JSX.Element {
+  const [editor] = useLexicalComposerContext()
+  const [enabled, setEnabled] = useState<boolean>(true)
+  const [active, setActive] = useState<boolean>(false)
+  const [className, setClassName] = useState<string>('item')
+
+  const updateStates = useCallback(() => {
+    editor.getEditorState().read(() => {
+      const selection = $getSelection()
+      if (entry.isActive) {
+        const isActive = entry.isActive({ editor, selection })
+        if (active !== isActive) {
+          setActive(isActive)
+        }
+      }
+      if (entry.isEnabled) {
+        const isEnabled = entry.isEnabled({ editor, selection })
+        if (enabled !== isEnabled) {
+          setEnabled(isEnabled)
+        }
+      }
+    })
+  }, [active, editor, enabled, entry])
+
+  useEffect(() => {
+    updateStates()
+  }, [updateStates])
+
+  useEffect(() => {
+    document.addEventListener('mouseup', updateStates)
+    return () => {
+      document.removeEventListener('mouseup', updateStates)
+    }
+  }, [updateStates])
+
+  useEffect(() => {
+    return mergeRegister(
+      editor.registerUpdateListener(() => {
+        updateStates()
+      }),
+    )
+  }, [editor, updateStates])
+
+  useEffect(() => {
+    setClassName(
+      ['item', enabled === false ? 'disabled' : '', active ? 'active' : '']
+        .filter(Boolean)
+        .join(' '),
+    )
+  }, [enabled, active, className])
+
   const ref = useRef<HTMLButtonElement>(null)
 
   const dropDownContext = React.useContext(DropDownContext)
@@ -44,7 +89,20 @@ export function DropDownItem({
   }, [ref, registerItem])
 
   return (
-    <button className={className} onClick={onClick} ref={ref} title={title} type="button">
+    <button
+      className={className}
+      onClick={() => {
+        if (enabled !== false) {
+          entry.onClick({
+            editor,
+            isActive: active,
+          })
+        }
+      }}
+      ref={ref}
+      title={title}
+      type="button"
+    >
       {children}
     </button>
   )

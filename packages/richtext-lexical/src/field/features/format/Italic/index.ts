@@ -1,4 +1,4 @@
-import { FORMAT_TEXT_COMMAND } from 'lexical'
+import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../../types'
 
@@ -15,7 +15,12 @@ export const ItalicTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: ItalicIcon,
-                isActive: ({ editor, selection }) => selection.hasFormat('italic'),
+                isActive: ({ editor, selection }) => {
+                  if ($isRangeSelection(selection)) {
+                    return selection.hasFormat('italic')
+                  }
+                  return false
+                },
                 key: 'italic',
                 onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')

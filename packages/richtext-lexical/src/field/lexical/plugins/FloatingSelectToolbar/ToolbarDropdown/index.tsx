@@ -1,7 +1,6 @@
 import React from 'react'
 
 const baseClass = 'floating-select-toolbar-popup__dropdown'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 
 import type { FloatingToolbarSectionEntry } from '../types'
 
@@ -17,7 +16,6 @@ export const ToolbarDropdown = ({
   classNames?: string[]
   entries: FloatingToolbarSectionEntry[]
 }) => {
-  const [editor] = useLexicalComposerContext()
   return (
     <DropDown
       Icon={Icon}
@@ -26,13 +24,7 @@ export const ToolbarDropdown = ({
     >
       {entries.length &&
         entries.map((entry) => (
-          <DropDownItem
-            className="item"
-            key={entry.key}
-            onClick={() => {
-              entry.onClick({ editor })
-            }}
-          >
+          <DropDownItem entry={entry} key={entry.key}>
             <entry.ChildComponent />
             <span className="text">{entry.label}</span>
           </DropDownItem>

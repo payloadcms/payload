@@ -1,6 +1,4 @@
-import type { GridSelection, LexicalEditor, NodeSelection, RangeSelection } from 'lexical'
 import type { Field, Fields } from 'payload/types'
-import type { Dispatch } from 'react'
 
 import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -279,7 +277,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): JSX.Ele
           <a href={linkUrl} rel="noopener noreferrer" target="_blank">
             {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
           </a>
-          <div
+          <button
+            aria-label="Edit link"
             className="link-edit"
             onClick={() => {
               toggleModal(drawerSlug)
@@ -287,10 +286,11 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): JSX.Ele
             onMouseDown={(event) => {
               event.preventDefault()
             }}
-            role="button"
             tabIndex={0}
+            type="button"
           />
-          <div
+          <button
+            aria-label="Remove link"
             className="link-trash"
             onClick={() => {
               editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
@@ -298,8 +298,8 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): JSX.Ele
             onMouseDown={(event) => {
               event.preventDefault()
             }}
-            role="button"
             tabIndex={0}
+            type="button"
           />
         </div>
       </div>

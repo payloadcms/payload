@@ -1,4 +1,4 @@
-import { FORMAT_TEXT_COMMAND } from 'lexical'
+import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../../types'
 
@@ -14,7 +14,12 @@ export const SubscriptTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: SubscriptIcon,
-                isActive: ({ editor, selection }) => selection.hasFormat('subscript'),
+                isActive: ({ editor, selection }) => {
+                  if ($isRangeSelection(selection)) {
+                    return selection.hasFormat('subscript')
+                  }
+                  return false
+                },
                 key: 'subscript',
                 onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'subscript')

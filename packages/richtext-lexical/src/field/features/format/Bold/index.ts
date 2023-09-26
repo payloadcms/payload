@@ -1,4 +1,4 @@
-import { FORMAT_TEXT_COMMAND } from 'lexical'
+import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../../types'
 
@@ -26,7 +26,12 @@ export const BoldTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: BoldIcon,
-                isActive: ({ editor, selection }) => selection.hasFormat('bold'),
+                isActive: ({ editor, selection }) => {
+                  if ($isRangeSelection(selection)) {
+                    return selection.hasFormat('bold')
+                  }
+                  return false
+                },
                 key: 'bold',
                 onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')

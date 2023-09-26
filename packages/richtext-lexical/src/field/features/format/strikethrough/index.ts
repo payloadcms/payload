@@ -1,4 +1,4 @@
-import { FORMAT_TEXT_COMMAND } from 'lexical'
+import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../../types'
 
@@ -15,7 +15,12 @@ export const StrikethroughTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: StrikethroughIcon,
-                isActive: ({ editor, selection }) => selection.hasFormat('strikethrough'),
+                isActive: ({ editor, selection }) => {
+                  if ($isRangeSelection(selection)) {
+                    return selection.hasFormat('strikethrough')
+                  }
+                  return false
+                },
                 key: 'strikethrough',
                 onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')

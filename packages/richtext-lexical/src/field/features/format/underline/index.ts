@@ -1,4 +1,4 @@
-import { FORMAT_TEXT_COMMAND } from 'lexical'
+import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../../types'
 
@@ -14,7 +14,12 @@ export const UnderlineTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: UnderlineIcon,
-                isActive: ({ editor, selection }) => selection.hasFormat('underline'),
+                isActive: ({ editor, selection }) => {
+                  if ($isRangeSelection(selection)) {
+                    return selection.hasFormat('underline')
+                  }
+                  return false
+                },
                 key: 'underline',
                 onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')

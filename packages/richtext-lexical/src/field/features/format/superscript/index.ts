@@ -1,4 +1,4 @@
-import { FORMAT_TEXT_COMMAND } from 'lexical'
+import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../../types'
 
@@ -14,7 +14,12 @@ export const SuperscriptTextFeature = (): FeatureProvider => {
             SectionWithEntries([
               {
                 ChildComponent: SuperscriptIcon,
-                isActive: ({ editor, selection }) => selection.hasFormat('superscript'),
+                isActive: ({ editor, selection }) => {
+                  if ($isRangeSelection(selection)) {
+                    return selection.hasFormat('superscript')
+                  }
+                  return false
+                },
                 key: 'superscript',
                 onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'superscript')

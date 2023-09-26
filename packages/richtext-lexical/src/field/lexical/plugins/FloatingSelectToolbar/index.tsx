@@ -22,15 +22,11 @@ import { ToolbarDropdown } from './ToolbarDropdown'
 import './index.scss'
 
 function FloatingSelectToolbar({
-  activeStates,
   anchorElem,
   editor,
-  enabledStates,
 }: {
-  activeStates: Map<string, boolean>
   anchorElem: HTMLElement
   editor: LexicalEditor
-  enabledStates: Map<string, boolean>
 }): JSX.Element {
   const popupCharStylesEditorRef = useRef<HTMLDivElement | null>(null)
   const caretRef = useRef<HTMLDivElement | null>(null)
@@ -70,14 +66,12 @@ function FloatingSelectToolbar({
   }
 
   useEffect(() => {
-    if (popupCharStylesEditorRef?.current) {
-      document.addEventListener('mousemove', mouseMoveListener)
-      document.addEventListener('mouseup', mouseUpListener)
+    document.addEventListener('mousemove', mouseMoveListener)
+    document.addEventListener('mouseup', mouseUpListener)
 
-      return () => {
-        document.removeEventListener('mousemove', mouseMoveListener)
-        document.removeEventListener('mouseup', mouseUpListener)
-      }
+    return () => {
+      document.removeEventListener('mousemove', mouseMoveListener)
+      document.removeEventListener('mouseup', mouseUpListener)
     }
   }, [popupCharStylesEditorRef])
 
@@ -174,28 +168,15 @@ function FloatingSelectToolbar({
                       if (entry.Component) {
                         return (
                           <entry.Component
-                            activeStates={activeStates}
                             anchorElem={anchorElem}
                             editor={editor}
-                            enabledStates={enabledStates}
+                            entry={entry}
                             key={entry.key}
                           />
                         )
                       }
                       return (
-                        <ToolbarButton
-                          classNames={
-                            activeStates && activeStates.get(section.key + '-' + entry.key)
-                              ? ['active']
-                              : []
-                          }
-                          enabled={
-                            !enabledStates ||
-                            enabledStates.get(section.key + '-' + entry.key) !== false
-                          }
-                          key={entry.key}
-                          onClick={() => entry.onClick({ editor })}
-                        >
+                        <ToolbarButton entry={entry} key={entry.key}>
                           <entry.ChildComponent />
                         </ToolbarButton>
                       )
@@ -217,10 +198,6 @@ function useFloatingTextFormatToolbar(
   anchorElem: HTMLElement,
 ): JSX.Element | null {
   const [isText, setIsText] = useState(false)
-  const [activeStates, setActiveStates] = useState<Map<string, boolean>>(new Map())
-  const [enabledStates, setEnabledStates] = useState<Map<string, boolean>>(new Map())
-
-  const { editorConfig } = useEditorConfigContext()
 
   const updatePopup = useCallback(() => {
     editor.getEditorState().read(() => {
@@ -246,24 +223,19 @@ function useFloatingTextFormatToolbar(
         return
       }
 
-      const node = getSelectedNode(selection)
-
-      // Update active and enabled state of nodes
-      for (const section of editorConfig?.features?.floatingSelectToolbar?.sections) {
-        for (const entry of section.entries) {
-          if (entry.isActive) {
-            const isActive = entry.isActive({ editor, selection })
-            setActiveStates(activeStates.set(section.key + '-' + entry.key, isActive))
-          }
-          if (entry.isEnabled) {
-            const isEnabled = entry.isEnabled({ editor, selection })
-            setEnabledStates(enabledStates.set(section.key + '-' + entry.key, isEnabled))
+      if (selection.getTextContent() !== '') {
+        const nodes = selection.getNodes()
+        let foundNodeWithText = false
+        for (const node of nodes) {
+          if ($isTextNode(node)) {
+            setIsText(true)
+            foundNodeWithText = true
+            break
           }
         }
-      }
-
-      if (selection.getTextContent() !== '') {
-        setIsText($isTextNode(node))
+        if (!foundNodeWithText) {
+          setIsText(false)
+        }
       } else {
         setIsText(false)
       }
@@ -274,12 +246,14 @@ function useFloatingTextFormatToolbar(
         return
       }
     })
-  }, [editor, activeStates, enabledStates, editorConfig])
+  }, [editor])
 
   useEffect(() => {
     document.addEventListener('selectionchange', updatePopup)
+    document.addEventListener('mouseup', updatePopup)
     return () => {
       document.removeEventListener('selectionchange', updatePopup)
+      document.removeEventListener('mouseup', updatePopup)
     }
   }, [updatePopup])
 
@@ -300,15 +274,7 @@ function useFloatingTextFormatToolbar(
     return null
   }
 
-  return createPortal(
-    <FloatingSelectToolbar
-      activeStates={activeStates}
-      anchorElem={anchorElem}
-      editor={editor}
-      enabledStates={enabledStates}
-    />,
-    anchorElem,
-  )
+  return createPortal(<FloatingSelectToolbar anchorElem={anchorElem} editor={editor} />, anchorElem)
 }
 
 export function FloatingSelectToolbarPlugin({
