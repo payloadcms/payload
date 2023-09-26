@@ -18,7 +18,7 @@
   &--within-collapsible {
     margin-left: calc(var(--base) * -1);
     margin-right: calc(var(--base) * -1);
-    padding: vaR(--base);
+    padding: var(--base);
 
     &:first-child {
       border-top: 0;
