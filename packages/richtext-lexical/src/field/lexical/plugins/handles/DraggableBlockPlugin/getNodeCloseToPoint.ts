@@ -34,7 +34,7 @@ type Output = {
   blockElem: HTMLElement | null
   blockNode: LexicalNode | null
   foundAtIndex: number
-  isFoundNoteEmptyParagraph: boolean
+  isFoundNodeEmptyParagraph: boolean
 }
 
 const cache = {
@@ -72,7 +72,7 @@ export function getNodeCloseToPoint(props: Props): Output {
     isPointClose(cache.props.point, props.point, cache_treshold)
   ) {
     if (verbose) {
-      console.log('Returning cached result')
+      //console.log('Returning cached result')
     }
     return cache.result
   }
@@ -85,13 +85,13 @@ export function getNodeCloseToPoint(props: Props): Output {
     blockNode: LexicalNode | null
     distance: number
     foundAtIndex: number
-    isFoundNoteEmptyParagraph: boolean
+    isFoundNodeEmptyParagraph: boolean
   } = {
     blockElem: null,
     blockNode: null,
     distance: Infinity,
     foundAtIndex: -1,
-    isFoundNoteEmptyParagraph: false,
+    isFoundNodeEmptyParagraph: false,
   }
 
   // Return null if matching block element is the first or last node
@@ -122,12 +122,12 @@ export function getNodeCloseToPoint(props: Props): Output {
 
         if (closestBlockElem?.blockElem) {
           if (verbose) {
-            console.log('useEdgeAsDefault', useEdgeAsDefault)
+            //console.log('useEdgeAsDefault', useEdgeAsDefault)
           }
 
           return {
             blockElem: null,
-            isFoundNoteEmptyParagraph: false,
+            isFoundNodeEmptyParagraph: false,
           } as Output
         }
       }
@@ -138,7 +138,7 @@ export function getNodeCloseToPoint(props: Props): Output {
     let direction = Indeterminate
 
     if (verbose) {
-      console.log('start index', startIndex)
+      //console.log('start index', startIndex)
     }
 
     while (index >= 0 && index < topLevelNodeKeys.length) {
@@ -164,7 +164,7 @@ export function getNodeCloseToPoint(props: Props): Output {
       const { distance, isOnBottomSide, isOnTopSide } = rect.distanceFromPoint(point)
 
       if (verbose) {
-        console.log('distance', distance)
+        //console.log('distance', distance)
       }
 
       if (distance === 0) {
@@ -175,14 +175,16 @@ export function getNodeCloseToPoint(props: Props): Output {
 
         // Check if blockNode is an empty text node
         if (
-          !fuzzy &&
           closestBlockElem.blockNode &&
           closestBlockElem.blockNode.getType() === 'paragraph' &&
           closestBlockElem.blockNode.getTextContent() === ''
         ) {
-          closestBlockElem.blockElem = null
-          closestBlockElem.blockNode = null
-          closestBlockElem.isFoundNoteEmptyParagraph = true
+          if (!fuzzy) {
+            closestBlockElem.blockElem = null
+            closestBlockElem.blockNode = null
+          }
+
+          closestBlockElem.isFoundNodeEmptyParagraph = true
         }
         break
       } else if (fuzzy) {
@@ -215,13 +217,13 @@ export function getNodeCloseToPoint(props: Props): Output {
     blockElem: closestBlockElem.blockElem,
     blockNode: closestBlockElem.blockNode,
     foundAtIndex: closestBlockElem.foundAtIndex,
-    isFoundNoteEmptyParagraph: closestBlockElem.isFoundNoteEmptyParagraph,
+    isFoundNodeEmptyParagraph: closestBlockElem.isFoundNodeEmptyParagraph,
   }
 
   return {
     blockElem: closestBlockElem.blockElem,
     blockNode: closestBlockElem.blockNode,
     foundAtIndex: closestBlockElem.foundAtIndex,
-    isFoundNoteEmptyParagraph: closestBlockElem.isFoundNoteEmptyParagraph,
+    isFoundNodeEmptyParagraph: closestBlockElem.isFoundNodeEmptyParagraph,
   }
 }

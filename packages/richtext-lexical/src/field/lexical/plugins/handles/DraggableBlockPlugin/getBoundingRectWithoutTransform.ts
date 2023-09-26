@@ -3,6 +3,9 @@ export function getBoundingClientRectWithoutTransform(elem: HTMLElement): DOMRec
 
   // Extract the translation value from the transform style
   const transformValue = getComputedStyle(elem).getPropertyValue('transform')
+  if (!transformValue || transformValue === 'none') {
+    return rect
+  }
 
   const lastNumberOfTransformValue = transformValue.split(',').pop()
   rect.y = rect.y - Number(lastNumberOfTransformValue.replace(')', ''))
