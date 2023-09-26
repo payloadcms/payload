@@ -185,9 +185,12 @@ function useAddBlockHandle(
         const { pageX, pageY } = event
         const horizontalBuffer = 50
         const verticalBuffer = 25
+        const adjustedTop = top + window.scrollY
+        const adjustedBottom = bottom + window.scrollY
+
         if (
-          pageY < top - verticalBuffer ||
-          pageY > bottom + verticalBuffer ||
+          pageY < adjustedTop - verticalBuffer ||
+          pageY > adjustedBottom + verticalBuffer ||
           pageX < left - horizontalBuffer ||
           pageX > right + horizontalBuffer
         ) {
