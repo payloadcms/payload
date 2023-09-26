@@ -244,6 +244,8 @@ function useDraggableBlockMenu(
         )
 
         // Prevent default event to be able to trigger onDrop events
+        // Calling preventDefault() adds the green plus icon to the cursor,
+        // indicating that the drop is allowed.
         event.preventDefault()
       } else {
         hideTargetLine(targetLineElem, lastTargetBlockElem)
