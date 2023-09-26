@@ -1,36 +1,53 @@
-import { v4 as uuid } from 'uuid'
+import { convertPathToJSONTraversal } from './convertPathToJSONTraversal'
+import { formatJSONPathSegment } from './formatJSONPathSegment'
 
-// TARGET:
-
-// SELECT COUNT(*)
-// FROM "rich_text_fields"
-// WHERE EXISTS (
-//   SELECT 1
-//   FROM jsonb_array_elements(rich_text) AS rt
-//   WHERE EXISTS (
-//     SELECT 1
-//     FROM jsonb_array_elements(rt -> 'children') AS child
-//     WHERE child ->> 'text' ~* 'Hello'
-//   )
-// );
+const operatorMap = {
+  contains: '~*',
+  equals: '=',
+  like: '~*',
+}
 
 type FromArrayArgs = {
+  isRoot?: true
   operator: string
   pathSegments: string[]
   treatAsArray?: string[]
   value: unknown
 }
 
-const fromArray = (args: FromArrayArgs) => `EXISTS (
-  SELECT 1
-  FROM jsonb_array_elements(${args.pathSegments[0]}) AS ${uuid}
-  ${createJSONQuery({
-    ...args,
-    pathSegments: args.pathSegments.slice(1),
-  })}
-)`
+const fromArray = ({ isRoot, operator, pathSegments, treatAsArray, value }: FromArrayArgs) => {
+  const newPathSegments = pathSegments.slice(isRoot ? 1 : 2)
+  const alias = `${pathSegments[isRoot ? 0 : 1]}_alias_${newPathSegments.length}`
 
-const createConstraint = (args) => ``
+  newPathSegments.unshift(alias)
+
+  const arrayElements = isRoot
+    ? pathSegments[0]
+    : `${pathSegments[0]} -> ${formatJSONPathSegment(pathSegments[1])}`
+
+  return `EXISTS (
+    SELECT 1
+    FROM jsonb_array_elements(${arrayElements}) AS ${alias}
+    WHERE ${createJSONQuery({
+      operator,
+      pathSegments: newPathSegments,
+      treatAsArray,
+      value,
+    })}
+  )`
+}
+
+type CreateConstraintArgs = {
+  operator: string
+  pathSegments: string[]
+  treatAsArray?: string[]
+  value: unknown
+}
+
+const createConstraint = ({ operator, pathSegments, value }: CreateConstraintArgs): string => {
+  const jsonQuery = convertPathToJSONTraversal(pathSegments.join('.'))
+  return `${pathSegments[0]}${jsonQuery} ${operatorMap[operator]} '${value}'`
+}
 
 type Args = {
   operator: string
@@ -39,8 +56,6 @@ type Args = {
   treatRootAsArray?: boolean
   value: unknown
 }
-
-type CreateJSONQuery = ({ operator, pathSegments, treatAsArray, treatRootAsArray, value }) => string
 
 export const createJSONQuery = ({
   operator,
@@ -51,6 +66,7 @@ export const createJSONQuery = ({
 }: Args): string => {
   if (treatRootAsArray) {
     return fromArray({
+      isRoot: true,
       operator,
       pathSegments,
       treatAsArray,
@@ -58,7 +74,7 @@ export const createJSONQuery = ({
     })
   }
 
-  if (treatAsArray.includes(pathSegments[0])) {
+  if (treatAsArray.includes(pathSegments[1])) {
     return fromArray({
       operator,
       pathSegments,
@@ -67,7 +83,5 @@ export const createJSONQuery = ({
     })
   }
 
-  return createConstraint()
+  return createConstraint({ operator, pathSegments, treatAsArray, value })
 }
-
-// myNestedProperty.myArray.myGroup.myArray.text

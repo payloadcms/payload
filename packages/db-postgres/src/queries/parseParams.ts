@@ -11,8 +11,11 @@ import type { GenericColumn, PostgresAdapter } from '../types'
 import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
 
 import { buildAndOrConditions } from './buildAndOrConditions'
-import { convertPathToJSONQuery } from './convertPathToJSONQuery'
 import { createJSONQuery } from './createJSONQuery'
+import {
+  convertPathToJSONQuery,
+  convertPathToJSONTraversal,
+} from './createJSONQuery/convertPathToJSONTraversal'
 // import convertJSONQuery from './convertJSONQuery'
 import { getTableColumnFromPath } from './getTableColumnFromPath'
 import { operatorMap } from './operatorMap'
@@ -117,11 +120,11 @@ export async function parseParams({
                       value: val,
                     })
 
-                    // constraints.push(sql.raw(jsonQuery))
+                    constraints.push(sql.raw(jsonQuery))
                   }
 
                   if (field.type === 'json') {
-                    const jsonQuery = convertPathToJSONQuery(jsonPath)
+                    const jsonQuery = convertPathToJSONTraversal(relationOrPath)
                     constraints.push(sql.raw(`${table[columnName].name}${jsonQuery} = '%${val}%'`))
                   }
 
