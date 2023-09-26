@@ -103,6 +103,7 @@ export const DefaultCollectionEdit: React.FC<Props> = (props) => {
               filter={(field) => !field?.admin?.position || field?.admin?.position !== 'sidebar'}
               permissions={permissions.fields}
               readOnly={!hasSavePermission}
+              className={`${baseClass}__fields`}
             />
           </Gutter>
         </div>

@@ -6,6 +6,10 @@
   & > * {
     margin-bottom: var(--spacing-field);
 
+    &[type='hidden'] {
+      margin-bottom: 0;
+    }
+
     &.group-field,
     &.blocks-field {
       margin-top: calc(var(--spacing-field) * 2);
@@ -17,7 +21,7 @@
     }
 
     // select last non-hidden field
-    &:last-of-type {
+    &:last-child {
       margin-bottom: 0;
     }
   }

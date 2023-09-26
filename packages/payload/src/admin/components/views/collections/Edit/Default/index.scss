@@ -35,14 +35,14 @@
     min-height: 100%;
   }
 
-  &__auth {
-    margin-bottom: calc(var(--base) * 1.5);
-  }
-
   &__edit {
     padding-top: calc(var(--base) * 1.5);
     padding-bottom: var(--spacing-view-bottom);
     flex-grow: 1;
+
+    & > .collection-default-edit__fields:not(.render-fields--none-visible) {
+      margin-top: var(--base);
+    }
   }
 
   &__sidebar-wrap {

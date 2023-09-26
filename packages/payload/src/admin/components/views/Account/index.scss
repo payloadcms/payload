@@ -15,7 +15,10 @@
   &__header {
     display: flex;
     flex-direction: column;
-    gap: var(--base);
+  }
+
+  .render-fields:not(.render-fields--none-visible) {
+    margin-top: var(--base);
   }
 
   &__payload-settings {

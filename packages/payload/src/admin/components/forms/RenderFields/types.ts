@@ -7,7 +7,6 @@ export type Props = {
   className?: string
   fieldTypes: FieldTypes
   forceRender?: boolean
-  margin?: 'small'
 } & (
   | {
       fieldSchema: FieldWithPath[]
