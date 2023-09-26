@@ -74,15 +74,17 @@ function setTargetLine(
 
   const { marginBottom, marginTop } = getCollapsedMargins(targetBlockElem)
   let lineTop = targetBlockElemTop
+  const isBelow = mouseY >= targetBlockElemTop + targetBlockElemHeight / 2
   if (!isFoundNodeEmptyParagraph) {
-    if (mouseY >= targetBlockElemTop) {
+    if (isBelow) {
+      // below targetBlockElem
       lineTop += targetBlockElemHeight + marginBottom / 2
     } else {
+      // above targetBlockElem
       lineTop -= marginTop / 2
     }
   } else {
     lineTop += targetBlockElemHeight / 2
-    console.log('isFoundNodeEmptyParagraph', lineTop)
   }
 
   const top = lineTop - anchorTop - TARGET_LINE_HALF_HEIGHT
@@ -95,7 +97,7 @@ function setTargetLine(
   targetBlockElem.style.opacity = '0.4'
   if (!isFoundNodeEmptyParagraph) {
     // move lastTargetBlockElem down 50px to make space for targetLineElem (which is 50px height)
-    if (event.pageY >= targetBlockElemTop) {
+    if (isBelow) {
       targetBlockElem.style.transform = `translate(0, ${-TARGET_LINE_HALF_HEIGHT / 1.9}px)`
     } else {
       targetBlockElem.style.transform = `translate(0, ${TARGET_LINE_HALF_HEIGHT / 1.9}px)`
@@ -286,16 +288,21 @@ function useDraggableBlockMenu(
         return false
       }
 
-      setTargetLine(
-        targetLineElem,
-        targetBlockElem,
-        lastTargetBlockElem,
-        pageY,
-        anchorElem,
-        event,
-        debugHighlightRef,
-        isFoundNodeEmptyParagraph,
-      )
+      if (draggableBlockElem !== targetBlockElem) {
+        setTargetLine(
+          targetLineElem,
+          targetBlockElem,
+          lastTargetBlockElem,
+          pageY,
+          anchorElem,
+          event,
+          debugHighlightRef,
+          isFoundNodeEmptyParagraph,
+        )
+      } else {
+        hideTargetLine(targetLineElem, lastTargetBlockElem)
+      }
+
       console.log('AAA isFoundNodeEmptyParagraph', isFoundNodeEmptyParagraph)
       setLastTargetBlockElem(targetBlockElem)
       // Prevent default event to be able to trigger onDrop events
@@ -349,8 +356,11 @@ function useDraggableBlockMenu(
         if (targetNode === draggedNode) {
           return true
         }
-        const targetBlockElemTop = targetBlockElem.getBoundingClientRect().top
-        if (pageY >= targetBlockElemTop) {
+
+        const { height: targetBlockElemHeight, top: targetBlockElemTop } =
+          getBoundingClientRectWithoutTransform(targetBlockElem)
+
+        if (pageY >= targetBlockElemTop + targetBlockElemHeight / 2) {
           targetNode.insertAfter(draggedNode)
         } else {
           targetNode.insertBefore(draggedNode)
