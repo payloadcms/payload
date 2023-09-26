@@ -804,7 +804,13 @@ describe('Fields', () => {
         linkType: 'internal',
       })
       expect(child.doc.relationTo).toEqual('array-fields')
-      expect(typeof child.doc.value.id).toBe('string')
+
+      if (payload.db.defaultIDType === 'number') {
+        expect(typeof child.doc.value.id).toBe('number')
+      } else {
+        expect(typeof child.doc.value.id).toBe('string')
+      }
+
       expect(child.doc.value.items).toHaveLength(6)
     })
 
