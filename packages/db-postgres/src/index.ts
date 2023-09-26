@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
 import { createDatabaseAdapter } from 'payload/database'
 
 import type { Args, PostgresAdapter, PostgresAdapterResult } from './types'
@@ -19,6 +20,7 @@ import { findGlobalVersions } from './findGlobalVersions'
 import { findOne } from './findOne'
 import { findVersions } from './findVersions'
 import { init } from './init'
+import { migrate } from './migrate'
 import { queryDrafts } from './queryDrafts'
 import { beginTransaction } from './transactions/beginTransaction'
 import { commitTransaction } from './transactions/commitTransaction'
@@ -33,12 +35,12 @@ import { webpack } from './webpack'
 
 export function postgresAdapter(args: Args): PostgresAdapterResult {
   function adapter({ payload }: { payload: Payload }) {
+    const migrationDir = args.migrationDir || path.resolve(__dirname, '../../../migrations')
+
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
       beginTransaction,
       commitTransaction,
-      pool: undefined,
-      ...(args.migrationDir && { migrationDir: args.migrationDir }),
       connect,
       create,
       createGlobal,
@@ -48,6 +50,8 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       db: undefined,
       defaultIDType: 'number',
       findGlobalVersions,
+      migrationDir,
+      pool: undefined,
       // destroy,
       name: 'postgres',
       deleteMany,
@@ -59,6 +63,7 @@ export function postgresAdapter(args: Args): PostgresAdapterResult {
       findOne,
       findVersions,
       init,
+      migrate,
       payload,
       queryDrafts,
       relations: {},

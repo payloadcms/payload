@@ -13,10 +13,12 @@ const availableCommands = [
 const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`
 
 export const migrate = async (args: string[]): Promise<void> => {
+  process.env.PAYLOAD_MIGRATING = 'true'
+
   // Barebones instance to access database adapter
   await payload.init({
     local: true,
-    secret: '--unused--',
+    secret: process.env.PAYLOAD_SECRET || '--unused--',
   })
 
   const adapter = payload.db
@@ -53,7 +55,7 @@ export const migrate = async (args: string[]): Promise<void> => {
       break
     case 'migrate:create':
       try {
-        await adapter.createMigration(payload, '.migrations', args[1])
+        await adapter.createMigration(payload, 'migrations', args[1])
       } catch (err) {
         throw new Error(`Error creating migration: ${err.message}`)
       }
