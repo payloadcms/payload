@@ -56,7 +56,7 @@ const RenderFields: React.FC<Props> = (props) => {
 
   if (fieldsToRender) {
     const hasVisibleFields = fieldsToRender.some(
-      ({ field }) => 'hidden' in field?.admin && !field?.admin?.hidden,
+      ({ field }) => !('hidden' in field?.admin) || !field?.admin?.hidden,
     )
 
     return (
