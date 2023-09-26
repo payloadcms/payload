@@ -95,9 +95,13 @@ function useDraggableBlockMenu(
       // Calculate distance between scrollerElem and target if target is not in scrollerElem
       if (scrollerElem && !scrollerElem.contains(target)) {
         const { bottom, left, right, top } = scrollerElem.getBoundingClientRect()
+
+        const adjustedTop = top + window.scrollY
+        const adjustedBottom = bottom + window.scrollY
+
         if (
-          pageY < top - verticalBuffer ||
-          pageY > bottom + verticalBuffer ||
+          pageY < adjustedTop - verticalBuffer ||
+          pageY > adjustedBottom + verticalBuffer ||
           pageX < left - horizontalBuffer ||
           pageX > right + horizontalBuffer
         ) {
@@ -131,6 +135,7 @@ function useDraggableBlockMenu(
         event.pageY,
         target,
       )
+      console.log('distanceFromScrollerElem', distanceFromScrollerElem)
 
       if (isOnHandleElement(target, DRAGGABLE_BLOCK_MENU_CLASSNAME)) {
         return
