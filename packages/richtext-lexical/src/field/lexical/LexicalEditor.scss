@@ -6,11 +6,6 @@
   font-family: var(--font-serif);
   font-size: base(0.625);
 
-  .ContentEditable__root > * {
-    transition: transform 0.2s ease-in-out;
-    will-change: transform;
-  }
-
   h1,
   h2,
   h3,
