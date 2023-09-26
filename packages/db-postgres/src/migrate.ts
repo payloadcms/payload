@@ -1,11 +1,11 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { DatabaseAdapter } from 'payload/database'
-import type { PayloadRequest } from 'payload/types'
-
 import { generateDrizzleJson } from 'drizzle-kit/utils'
 import { readMigrationFiles } from 'payload/database'
 
 import type { PostgresAdapter } from './types'
+
+import { createMigrationTable } from './utilities/createMigrationTable'
+import { migrationTableExists } from './utilities/migrationTableExists'
 
 export async function migrate(this: PostgresAdapter): Promise<void> {
   const { payload } = this
@@ -13,8 +13,10 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
 
   let latestBatch = 0
   let existingMigrations = []
-  const exists = false
-  if (exists) {
+
+  const hasMigrationTable = await migrationTableExists(this.db)
+
+  if (hasMigrationTable) {
     ;({ docs: existingMigrations } = await payload.find({
       collection: 'payload-migrations',
       limit: 0,
@@ -23,6 +25,8 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
     if (typeof existingMigrations[0]?.batch !== 'undefined') {
       latestBatch = Number(existingMigrations[0]?.batch)
     }
+  } else {
+    await createMigrationTable(this.db)
   }
 
   const newBatch = latestBatch + 1

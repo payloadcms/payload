@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@libsql/client": "^0.3.1",
+    "console-table-printer": "2.11.2",
     "drizzle-kit": "0.19.13-e99bac1",
     "drizzle-orm": "0.28.5",
     "mongo-query-to-postgres-jsonb": "^0.2.15",

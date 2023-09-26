@@ -22,6 +22,7 @@ import { findOne } from './findOne'
 import { findVersions } from './findVersions'
 import { init } from './init'
 import { migrate } from './migrate'
+import { migrateStatus } from './migrateStatus'
 import { queryDrafts } from './queryDrafts'
 import { beginTransaction } from './transactions/beginTransaction'
 import { commitTransaction } from './transactions/commitTransaction'
@@ -32,12 +33,23 @@ import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateVersion } from './updateVersion'
 import { webpack } from './webpack'
 
-export function postgresAdapter (args: Args): PostgresAdapterResult {
-  function adapter ({ payload }: { payload: Payload }) {
+export function postgresAdapter(args: Args): PostgresAdapterResult {
+  function adapter({ payload }: { payload: Payload }) {
     const migrationDir = args.migrationDir || path.resolve(__dirname, '../../../migrations')
     return createDatabaseAdapter<PostgresAdapter>({
       ...args,
       name: 'postgres',
+
+      // Postgres-specific
+      db: undefined,
+      enums: {},
+      pool: undefined,
+      relations: {},
+      schema: {},
+      sessions: {},
+      tables: {},
+
+      // DatabaseAdapter
       beginTransaction,
       commitTransaction,
       connect,
@@ -46,13 +58,11 @@ export function postgresAdapter (args: Args): PostgresAdapterResult {
       createGlobalVersion,
       createMigration,
       createVersion,
-      db: undefined,
       defaultIDType: 'number',
       deleteMany,
       deleteOne,
       deleteVersions,
       destroy,
-      enums: {},
       find,
       findGlobal,
       findGlobalVersions,
@@ -60,15 +70,11 @@ export function postgresAdapter (args: Args): PostgresAdapterResult {
       findVersions,
       init,
       migrate,
+      migrateStatus,
       migrationDir,
       payload,
-      pool: undefined,
       queryDrafts,
-      relations: {},
       rollbackTransaction,
-      schema: {},
-      sessions: {},
-      tables: {},
       updateGlobal,
       updateGlobalVersion,
       updateOne,
