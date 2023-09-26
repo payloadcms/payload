@@ -242,13 +242,15 @@ function useDraggableBlockMenu(
           debugHighlightRef,
           isFoundNodeEmptyParagraph,
         )
+
+        // Prevent default event to be able to trigger onDrop events
+        event.preventDefault()
       } else {
         hideTargetLine(targetLineElem, lastTargetBlockElem)
       }
 
       setLastTargetBlockElem(targetBlockElem)
-      // Prevent default event to be able to trigger onDrop events
-      event.preventDefault()
+
       return true
     }
 
