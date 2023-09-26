@@ -532,7 +532,9 @@ export function useMenuAnchorRef(
           (top + menuHeight > window.innerHeight || top + menuHeight > rootElementRect.bottom) &&
           top - rootElementRect.top > menuHeight
         ) {
-          containerDiv.style.top = `${top - menuHeight + window.pageYOffset - (height + margin)}px`
+          containerDiv.style.top = `${
+            top + VERTICAL_OFFSET - menuHeight + window.scrollY - (height + margin)
+          }px`
         }
       }
 
