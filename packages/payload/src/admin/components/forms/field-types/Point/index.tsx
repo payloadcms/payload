@@ -11,6 +11,7 @@ import Label from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 const baseClass = 'point'
 
@@ -59,19 +60,17 @@ const PointField: React.FC<Props> = (props) => {
     [setValue, value],
   )
 
-  const classes = [
-    'field-type',
-    baseClass,
-    className,
-    showError && 'error',
-    readOnly && 'read-only',
-  ]
-    .filter(Boolean)
-    .join(' ')
-
   return (
     <div
-      className={classes}
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        showError && 'error',
+        readOnly && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={{
         ...style,
         width,

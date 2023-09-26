@@ -22,6 +22,7 @@ import useField from '../../useField'
 import withCondition from '../../withCondition'
 import { ArrayRow } from './ArrayRow'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 const baseClass = 'array-field'
 
@@ -164,7 +165,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   return (
     <div
       className={[
-        'field-type',
+        fieldBaseClass,
         baseClass,
         className,
         fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,

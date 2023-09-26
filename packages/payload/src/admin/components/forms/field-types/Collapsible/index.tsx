@@ -15,6 +15,7 @@ import { RowLabel } from '../../RowLabel'
 import { WatchChildErrors } from '../../WatchChildErrors'
 import withCondition from '../../withCondition'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 const baseClass = 'collapsible-field'
 
@@ -86,20 +87,21 @@ const CollapsibleField: React.FC<Props> = (props) => {
 
   const fieldHasErrors = submitted && errorCount > 0
 
-  const classes = [
-    'field-type',
-    baseClass,
-    className,
-    fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
-  ]
-    .filter(Boolean)
-    .join(' ')
-
   return (
-    <div id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./g, '__')}` : ''}`}>
+    <div
+      id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./g, '__')}` : ''}`}
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <WatchChildErrors fieldSchema={fields} path={path} setErrorCount={setErrorCount} />
       <Collapsible
-        className={classes}
+        className={`${baseClass}__collapsible`}
         collapsibleStyle={errorCount > 0 ? 'error' : 'default'}
         header={
           <div className={`${baseClass}__row-label-wrap`}>

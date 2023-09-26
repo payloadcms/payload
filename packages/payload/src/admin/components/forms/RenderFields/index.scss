@@ -1,23 +1,13 @@
 @import '../../../scss/styles.scss';
 
 .render-fields {
-  --spacing-field: calc(var(--base) * 2);
+  --spacing-field: var(--base);
 
   &--margins-small {
     --spacing-field: var(--base);
   }
 
-  &:not(.render-fields--margins-small) {
-    & > * {
-      &.group-field,
-      &.blocks-field {
-        margin-top: calc(var(--spacing-field) * 2);
-        margin-bottom: calc(var(--spacing-field) * 2);
-      }
-    }
-  }
-
-  & > * {
+  & > .field-type {
     margin-bottom: var(--spacing-field);
 
     &[type='hidden'] {
@@ -28,9 +18,30 @@
       margin-top: 0;
     }
 
-    // select last non-hidden field
     &:last-child {
       margin-bottom: 0;
+    }
+  }
+
+  // at the top-level, add extra margins for the following field types
+  &:not(.render-fields--margins-small) {
+    & > .field-type {
+      &.group-field,
+      &.blocks-field,
+      &.array-field,
+      &.collapsible-field,
+      &.rich-text {
+        margin-top: calc(var(--spacing-field) * 2);
+        margin-bottom: calc(var(--spacing-field) * 2);
+
+        &:first-child {
+          margin-top: 0;
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
     }
   }
 

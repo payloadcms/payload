@@ -20,6 +20,7 @@ import { WatchChildErrors } from '../../WatchChildErrors'
 import withCondition from '../../withCondition'
 import './index.scss'
 import { TabsProvider } from './provider'
+import { fieldBaseClass } from '../shared'
 
 const baseClass = 'tabs-field'
 
@@ -132,7 +133,12 @@ const TabsField: React.FC<Props> = (props) => {
 
   return (
     <div
-      className={[className, baseClass, isWithinCollapsible && `${baseClass}--within-collapsible`]
+      className={[
+        fieldBaseClass,
+        className,
+        baseClass,
+        isWithinCollapsible && `${baseClass}--within-collapsible`,
+      ]
         .filter(Boolean)
         .join(' ')}
     >
@@ -167,6 +173,7 @@ const TabsField: React.FC<Props> = (props) => {
                 <FieldDescription
                   className={`${baseClass}__description`}
                   description={activeTabConfig.description}
+                  marginPlacement="bottom"
                 />
                 <RenderFields
                   fieldSchema={activeTabConfig.fields.map((field) => {

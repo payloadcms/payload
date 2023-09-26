@@ -16,6 +16,7 @@ import { useRow } from '../Row/provider'
 import { useTabs } from '../Tabs/provider'
 import './index.scss'
 import { GroupProvider, useGroup } from './provider'
+import { fieldBaseClass } from '../shared'
 
 const baseClass = 'group-field'
 
@@ -46,7 +47,7 @@ const Group: React.FC<Props> = (props) => {
   return (
     <div
       className={[
-        'field-type',
+        fieldBaseClass,
         baseClass,
         isTopLevel && `${baseClass}--top-level`,
         isWithinCollapsible && `${baseClass}--within-collapsible`,

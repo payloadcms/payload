@@ -25,6 +25,7 @@ import withCondition from '../../withCondition'
 import { BlockRow } from './BlockRow'
 import { BlocksDrawer } from './BlocksDrawer'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 const baseClass = 'blocks-field'
 
@@ -161,20 +162,21 @@ const BlocksField: React.FC<Props> = (props) => {
   const fieldErrorCount = rows.reduce((total, row) => total + (row?.childErrorPaths?.size || 0), 0)
   const fieldHasErrors = submitted && fieldErrorCount + (valid ? 0 : 1) > 0
 
-  const classes = [
-    'field-type',
-    baseClass,
-    className,
-    fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
-  ]
-    .filter(Boolean)
-    .join(' ')
-
   const showMinRows = rows.length < minRows || (required && rows.length === 0)
   const showRequired = readOnly && rows.length === 0
 
   return (
-    <div className={classes} id={`field-${path.replace(/\./g, '__')}`}>
+    <div
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        fieldHasErrors ? `${baseClass}--has-error` : `${baseClass}--has-no-error`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      id={`field-${path.replace(/\./g, '__')}`}
+    >
       {showError && (
         <div className={`${baseClass}__error-wrap`}>
           <Error message={errorMessage} showError={showError} />
