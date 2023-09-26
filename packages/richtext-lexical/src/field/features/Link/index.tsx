@@ -5,7 +5,7 @@ import type { LinkAttributes } from './nodes/LinkNode'
 
 import { LinkIcon } from '../../lexical/ui/icons/Link'
 import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeaturesButtonsSection'
-import { FloatingLinkEditorPlugin } from './floatingLinkEditor'
+import { FloatingLinkEditorPlugin } from './plugins/floatingLinkEditor'
 import './index.scss'
 import { AutoLinkNode } from './nodes/AutoLinkNode'
 import { LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'

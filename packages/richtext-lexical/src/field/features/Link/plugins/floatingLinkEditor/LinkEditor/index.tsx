@@ -1,14 +1,6 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-
-// import { $isAutoLinkNode, $isLinkNode, TOGGLE_LINK_COMMAND } from '@lexical/link';
-
-import type { Fields } from 'payload/types'
+import type { GridSelection, LexicalEditor, NodeSelection, RangeSelection } from 'lexical'
+import type { Field, Fields } from 'payload/types'
+import type { Dispatch } from 'react'
 
 import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -16,14 +8,9 @@ import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import {
   $getSelection,
   $isRangeSelection,
-  COMMAND_PRIORITY_CRITICAL,
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
-  type GridSelection,
   KEY_ESCAPE_COMMAND,
-  type LexicalEditor,
-  type NodeSelection,
-  type RangeSelection,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
 import { formatDrawerSlug } from 'payload/components/elements'
@@ -34,40 +21,27 @@ import {
   useConfig,
   useDocumentInfo,
   useEditDepth,
+  useLocale,
 } from 'payload/components/utilities'
-import { useLocale } from 'payload/components/utilities'
-import { type Field } from 'payload/types'
-import { type Dispatch, useCallback, useEffect, useRef, useState } from 'react'
-import * as React from 'react'
-import { createPortal } from 'react-dom'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { useEditorConfigContext } from '../../../lexical/config/EditorConfigProvider'
-import { getSelectedNode } from '../../../lexical/utils/getSelectedNode'
-import { setFloatingElemPositionForLinkEditor } from '../../../lexical/utils/setFloatingElemPositionForLinkEditor'
-import { LinkDrawer } from '../drawer'
-import { getBaseFields } from '../drawer/baseFields'
-import { $isAutoLinkNode } from '../nodes/AutoLinkNode'
-import { $isLinkNode, type LinkAttributes, TOGGLE_LINK_COMMAND } from '../nodes/LinkNode'
-import './index.scss'
+import type { LinkAttributes } from '../../../nodes/LinkNode'
 
-function LinkEditor({
-  anchorElem,
-  editor,
-  isLink,
-  setIsLink,
-}: {
-  anchorElem: HTMLElement
-  editor: LexicalEditor
-  isLink: boolean
-  setIsLink: Dispatch<boolean>
-}): JSX.Element {
+import { useEditorConfigContext } from '../../../../../lexical/config/EditorConfigProvider'
+import { getSelectedNode } from '../../../../../lexical/utils/getSelectedNode'
+import { setFloatingElemPositionForLinkEditor } from '../../../../../lexical/utils/setFloatingElemPositionForLinkEditor'
+import { LinkDrawer } from '../../../drawer'
+import { getBaseFields } from '../../../drawer/baseFields'
+import { $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode'
+
+export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): JSX.Element {
+  const [editor] = useLexicalComposerContext()
+
   const editorRef = useRef<HTMLDivElement | null>(null)
   const [linkUrl, setLinkUrl] = useState('')
   const [linkLabel, setLinkLabel] = useState('')
-  const [lastSelection, setLastSelection] = useState<
-    GridSelection | NodeSelection | RangeSelection | null
-  >(null)
+
   const { uuid } = useEditorConfigContext()
 
   const customFieldSchema = false /* fieldProps?.admin?.link?.fields */ // TODO: Field props
@@ -126,6 +100,7 @@ function LinkEditor({
 
   const { closeModal, isModalOpen, toggleModal } = useModal()
   const editDepth = useEditDepth()
+  const [isLink, setIsLink] = useState(false)
 
   const drawerSlug = formatDrawerSlug({
     depth: editDepth,
@@ -136,7 +111,15 @@ function LinkEditor({
     const selection = $getSelection()
     if ($isRangeSelection(selection)) {
       const node = getSelectedNode(selection)
-      const parent = node.getParent()
+      const linkParent = $findMatchingParent(node, $isLinkNode)
+      if (linkParent != null) {
+        setIsLink(true)
+      } else {
+        setIsLink(false)
+        setLinkUrl('')
+        setLinkLabel('')
+        return
+      }
 
       // Initial state thingy
 
@@ -152,52 +135,27 @@ function LinkEditor({
         url: '',
       }
 
-      if ($isLinkNode(parent)) {
-        data = {
-          ...parent.getAttributes(),
-          fields: undefined,
-          text: parent.getTextContent(),
-        }
-
-        if (parent.getAttributes()?.linkType === 'custom') {
-          setLinkUrl(parent.getAttributes()?.url ?? '')
-          setLinkLabel('')
-        } else {
-          // internal
-          setLinkUrl(
-            `/admin/collections/${parent.getAttributes()?.doc?.relationTo}/${parent.getAttributes()
-              ?.doc?.value}`,
-          )
-          setLinkLabel(
-            `relation to ${parent.getAttributes()?.doc?.relationTo}: ${parent.getAttributes()?.doc
-              ?.value}`,
-          )
-        }
-      } else if ($isLinkNode(node)) {
-        data = {
-          ...node.getAttributes(),
-          fields: undefined,
-          text: node.getTextContent(),
-        }
-
-        if (node.getAttributes()?.linkType === 'custom') {
-          setLinkUrl(node.getAttributes()?.url ?? '')
-          setLinkLabel('')
-        } else {
-          // internal
-          setLinkUrl(
-            `/admin/collections/${parent?.getAttributes()?.doc
-              ?.relationTo}/${parent?.getAttributes()?.doc?.value}`,
-          )
-          setLinkLabel(
-            `relation to ${parent?.getAttributes()?.doc?.relationTo}: ${parent?.getAttributes()?.doc
-              ?.value}`,
-          )
-        }
-      } else {
-        setLinkUrl('')
-        setLinkLabel('')
+      data = {
+        ...linkParent.getAttributes(),
+        fields: undefined,
+        text: linkParent.getTextContent(),
       }
+
+      if (linkParent.getAttributes()?.linkType === 'custom') {
+        setLinkUrl(linkParent.getAttributes()?.url ?? '')
+        setLinkLabel('')
+      } else {
+        // internal
+        setLinkUrl(
+          `/admin/collections/${linkParent.getAttributes()?.doc
+            ?.relationTo}/${linkParent.getAttributes()?.doc?.value}`,
+        )
+        setLinkLabel(
+          `relation to ${linkParent.getAttributes()?.doc?.relationTo}: ${linkParent.getAttributes()
+            ?.doc?.value}`,
+        )
+      }
+
       void getDocPreferences().then((preferences) => {
         void buildStateFromSchema({
           data,
@@ -236,18 +194,23 @@ function LinkEditor({
         domRect.y += 40
         setFloatingElemPositionForLinkEditor(domRect, editorElem, anchorElem)
       }
-      setLastSelection(selection)
     } else if (activeElement == null || activeElement.className !== 'link-input') {
       if (rootElement !== null) {
         setFloatingElemPositionForLinkEditor(null, editorElem, anchorElem)
       }
-      setLastSelection(null)
       setLinkUrl('')
       setLinkLabel('')
     }
 
     return true
   }, [anchorElem, editor])
+
+  useEffect(() => {
+    if (!isLink && editorRef) {
+      editorRef.current.style.opacity = '0'
+      editorRef.current.style.transform = 'translate(-10000px, -10000px)'
+    }
+  }, [isLink])
 
   useEffect(() => {
     const scrollerElem = anchorElem.parentElement
@@ -311,38 +274,36 @@ function LinkEditor({
 
   return (
     <React.Fragment>
-      {isLink && !isModalOpen(drawerSlug) && (
-        <div className="link-editor" ref={editorRef}>
-          <div className="link-input">
-            <a href={linkUrl} rel="noopener noreferrer" target="_blank">
-              {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
-            </a>
-            <div
-              className="link-edit"
-              onClick={() => {
-                toggleModal(drawerSlug)
-              }}
-              onMouseDown={(event) => {
-                event.preventDefault()
-              }}
-              role="button"
-              tabIndex={0}
-            />
-            <div
-              className="link-trash"
-              onClick={() => {
-                editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
-              }}
-              onMouseDown={(event) => {
-                event.preventDefault()
-              }}
-              role="button"
-              tabIndex={0}
-            />
-          </div>
+      <div className="link-editor" ref={editorRef}>
+        <div className="link-input">
+          <a href={linkUrl} rel="noopener noreferrer" target="_blank">
+            {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
+          </a>
+          <div
+            className="link-edit"
+            onClick={() => {
+              toggleModal(drawerSlug)
+            }}
+            onMouseDown={(event) => {
+              event.preventDefault()
+            }}
+            role="button"
+            tabIndex={0}
+          />
+          <div
+            className="link-trash"
+            onClick={() => {
+              editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)
+            }}
+            onMouseDown={(event) => {
+              event.preventDefault()
+            }}
+            role="button"
+            tabIndex={0}
+          />
         </div>
-      )}
-      <LinkDrawer // TODO: Might aswell import from payload/distadmin/components/forms/field-types/RichText/elements/link/LinkDrawer/index.tsx instead?
+      </div>
+      <LinkDrawer
         drawerSlug={drawerSlug}
         fieldSchema={fieldSchema}
         handleClose={() => {
@@ -373,61 +334,4 @@ function LinkEditor({
       />
     </React.Fragment>
   )
-}
-export const UseFloatingLinkEditorToolbar: React.FC<{
-  anchorElem: HTMLElement
-}> = ({ anchorElem }) => {
-  const [editor] = useLexicalComposerContext()
-
-  const [activeEditor, setActiveEditor] = useState(editor)
-  const [isLink, setIsLink] = useState(false)
-
-  const updateToolbar = useCallback(async () => {
-    const selection = $getSelection()
-    if ($isRangeSelection(selection)) {
-      const node = getSelectedNode(selection)
-      const linkParent = $findMatchingParent(node, $isLinkNode)
-      const autoLinkParent = $findMatchingParent(node, $isAutoLinkNode)
-      if (linkParent != null || autoLinkParent != null) {
-        setIsLink(true)
-      } else {
-        setIsLink(false)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    return mergeRegister(
-      editor.registerUpdateListener(({ editorState }) => {
-        editorState.read(() => {
-          void updateToolbar()
-        })
-      }),
-      editor.registerCommand(
-        SELECTION_CHANGE_COMMAND,
-        (_payload, newEditor) => {
-          void updateToolbar()
-          setActiveEditor(newEditor)
-          return false
-        },
-        COMMAND_PRIORITY_CRITICAL,
-      ),
-    )
-  }, [editor, updateToolbar])
-
-  return createPortal(
-    <LinkEditor
-      anchorElem={anchorElem}
-      editor={activeEditor}
-      isLink={isLink}
-      setIsLink={setIsLink}
-    />,
-    anchorElem,
-  )
-}
-
-export const FloatingLinkEditorPlugin: React.FC<{
-  anchorElem?: HTMLElement
-}> = ({ anchorElem = document.body }) => {
-  return <UseFloatingLinkEditorToolbar anchorElem={anchorElem} />
 }
