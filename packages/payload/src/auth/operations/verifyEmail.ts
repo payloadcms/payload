@@ -38,6 +38,7 @@ async function verifyEmail (args: Args): Promise<boolean> {
       id: user.id,
       collection: collection.config.slug,
       data: {
+        ...user,
         _verificationToken: null,
         _verified: true,
       },

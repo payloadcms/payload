@@ -13,7 +13,7 @@ import { deleteExistingArrayRows } from './deleteExistingArrayRows'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath'
 import { insertArrays } from './insertArrays'
 
-export const upsertRow = async <T extends TypeWithID> ({
+export const upsertRow = async <T extends TypeWithID>({
   id,
   adapter,
   data,
@@ -235,7 +235,7 @@ export const upsertRow = async <T extends TypeWithID> ({
   // //////////////////////////////////
 
   if (operation === 'update') {
-    for (const [arrayTableName] of Object.keys(rowToInsert.arrays)) {
+    for (const arrayTableName of Object.keys(rowToInsert.arrays)) {
       await deleteExistingArrayRows({
         adapter,
         db,

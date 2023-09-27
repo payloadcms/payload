@@ -7,8 +7,12 @@ import fs from 'fs'
 
 import type { PostgresAdapter } from './types'
 
-const migrationTemplate = (upSQL?: string) => `
-import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/db-postgres/types'
+import { migrationTableExists } from './utilities/migrationTableExists'
+
+const migrationTemplate = (
+  upSQL?: string,
+  downSQL?: string,
+) => `import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/db-postgres/types'
 import { sql } from 'drizzle-orm'
 
 export async function up({ payload }: MigrateUpArgs): Promise<void> {
@@ -21,10 +25,31 @@ ${upSQL}\`);
 }
 };
 
-export async function down({ payload }: MigrateDownArgs): Promise<void> {
-  // Migration code
+export async function down({ payload }: MigrateUpArgs): Promise<void> {
+${
+  downSQL
+    ? `await payload.db.db.execute(sql\`
+${downSQL}\`);
+  `
+    : '// Migration code'
+}
 };
 `
+
+const getDefaultDrizzleSnapshot = (): DrizzleSnapshotJSON => ({
+  id: '00000000-0000-0000-0000-000000000000',
+  _meta: {
+    columns: {},
+    schemas: {},
+    tables: {},
+  },
+  dialect: 'pg',
+  enums: {},
+  prevId: '00000000-0000-0000-0000-00000000000',
+  schemas: {},
+  tables: {},
+  version: '5',
+})
 
 export const createMigration: CreateMigration = async function createMigration(
   this: PostgresAdapter,
@@ -47,23 +72,11 @@ export const createMigration: CreateMigration = async function createMigration(
   const fileName = `${timestamp}_${formattedName}.ts`
   const filePath = `${dir}/${fileName}`
 
-  let drizzleJsonBefore: DrizzleSnapshotJSON = {
-    id: '00000000-0000-0000-0000-000000000000',
-    _meta: {
-      columns: {},
-      schemas: {},
-      tables: {},
-    },
-    dialect: 'pg',
-    enums: {},
-    prevId: '00000000-0000-0000-0000-000000000000',
-    schemas: {},
-    tables: {},
-    version: '5',
-  }
+  let drizzleJsonBefore = getDefaultDrizzleSnapshot()
 
-  const exists = false // TODO: Check if migrations table exists
-  if (exists) {
+  const hasMigrationTable = await migrationTableExists(this.db)
+
+  if (hasMigrationTable) {
     const migrationQuery = await payload.find({
       collection: 'payload-migrations',
       limit: 1,
@@ -76,10 +89,15 @@ export const createMigration: CreateMigration = async function createMigration(
   }
 
   const drizzleJsonAfter = generateDrizzleJson(this.schema)
-  const sqlStatements = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
+  const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
+  const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
 
   fs.writeFileSync(
     filePath,
-    migrationTemplate(sqlStatements.length ? sqlStatements?.join('\n') : undefined),
+    migrationTemplate(
+      sqlStatementsUp.length ? sqlStatementsUp?.join('\n') : undefined,
+      sqlStatementsDown.length ? sqlStatementsDown?.join('\n') : undefined,
+    ),
   )
+  payload.logger.info({ msg: `Migration created at ${filePath}` })
 }
