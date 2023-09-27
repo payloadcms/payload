@@ -17,6 +17,7 @@ import RenderCustomComponent from '../../../utilities/RenderCustomComponent'
 import NotFound from '../../NotFound'
 import DefaultEdit from './Default'
 import formatFields from './formatFields'
+import { EditViewProps } from '../../types'
 
 const EditView: React.FC<IndexProps> = (props) => {
   const { collection: incomingCollection, isEditing } = props
@@ -124,27 +125,29 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   const isLoading = !internalState || !docPermissions || isLoadingData
 
+  const componentProps: EditViewProps = {
+    id,
+    action,
+    apiURL,
+    canAccessAdmin: permissions?.canAccessAdmin,
+    collection,
+    data,
+    hasSavePermission,
+    internalState,
+    isEditing,
+    isLoading,
+    onSave,
+    permissions: docPermissions as CollectionPermission,
+    updatedAt: updatedAt || data?.updatedAt,
+    user,
+  }
+
   return (
     <EditDepthContext.Provider value={1}>
       <RenderCustomComponent
         CustomComponent={typeof Edit === 'function' ? Edit : undefined}
         DefaultComponent={DefaultEdit}
-        componentProps={{
-          id,
-          action,
-          apiURL,
-          canAccessAdmin: permissions?.canAccessAdmin,
-          collection,
-          data,
-          hasSavePermission,
-          internalState,
-          isEditing,
-          isLoading,
-          onSave,
-          permissions: docPermissions,
-          updatedAt: updatedAt || data?.updatedAt,
-          user,
-        }}
+        componentProps={componentProps}
       />
     </EditDepthContext.Provider>
   )
