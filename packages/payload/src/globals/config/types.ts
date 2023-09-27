@@ -15,6 +15,7 @@ import type {
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
+  LivePreview,
 } from '../../config/types'
 import type { PayloadRequest } from '../../express/types'
 import type { Field } from '../../fields/config/types'
@@ -122,15 +123,7 @@ export type GlobalAdminOptions = {
   /**
    * Live preview options
    */
-  livePreview?: {
-    breakpoints?: {
-      height: number | string
-      label: string
-      name: string
-      width: number | string
-    }[]
-    url?: string
-  }
+  livePreview?: LivePreview
   /**
    * Function to generate custom preview URL
    */
