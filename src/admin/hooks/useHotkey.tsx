@@ -80,15 +80,15 @@ const useHotkey = (options: {
       // Autofill events, or other synthetic events, can be ignored
       return;
     }
-    if (e.code) pushToKeys(e.code);
 
     // Filter out pressed keys which have been pressed > 3 seconds ago
     pressedKeys.forEach((time, key) => {
       if (Date.now() - time > 3000) {
         pressedKeys.delete(key);
-        console.warn(`Removed ${key} from pressedKeys`);
       }
     });
+
+    if (e.code) pushToKeys(e.code);
 
     // Check for Mac and iPad
     const hasCmd = window.navigator.userAgent.includes('Mac OS X');
