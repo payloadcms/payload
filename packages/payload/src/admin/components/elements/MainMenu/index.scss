@@ -17,7 +17,7 @@ $transTime: 200ms;
     bottom: 0;
     left: 0;
     opacity: 0;
-    transition: all 300ms ease-out;
+    transition: all $transTime linear;
   }
 
   &__content {
@@ -37,18 +37,6 @@ $transTime: 200ms;
       background: linear-gradient(to right, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0) 100%);
       pointer-events: none;
     }
-  }
-
-  &__content-bg {
-    @include blur-bg();
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    opacity: 0;
-    transition: all 300ms ease-out;
   }
 
   &__content-children {
@@ -71,13 +59,13 @@ $transTime: 200ms;
       }
 
       &__close {
-        transition: opacity $transTime ease-in-out;
-        // transition-delay: $transTime;
+        transition: opacity $transTime linear;
+        transition-delay: $transTime;
       }
 
       &__content {
         transform: translateX(0);
-        transition: all 300ms ease-out;
+        transition: all $transTime linear;
       }
     }
   }
@@ -95,6 +83,7 @@ $transTime: 200ms;
     transition-delay: 0ms;
     flex-grow: 1;
     flex-shrink: 1;
+    background: rgba(0, 0, 0, 0.2);
 
     &:active,
     &:focus {
@@ -127,31 +116,27 @@ $transTime: 200ms;
   }
 
   @include mid-break {
-    .main-menu {
-      &__close {
+    &__close {
+      display: none;
+    }
+
+    &__content {
+      width: 100%;
+
+      &::after {
         display: none;
       }
+    }
 
-      &__content {
-        width: 100%;
-
-        &::after {
-          display: none;
-        }
-      }
-
-      &__content-children {
-        padding-top: calc(var(--base) * 0.5);
-      }
+    &__content-children {
+      padding-top: calc(var(--base) * 0.5);
     }
   }
 
   @include small-break {
-    .main-menu {
-      &__content-children {
-        padding-top: calc(var(--base) * 2);
-        padding-bottom: calc(var(--base) * 2);
-      }
+    &__content-children {
+      padding-top: calc(var(--base) * 2);
+      padding-bottom: calc(var(--base) * 2);
     }
   }
 }
