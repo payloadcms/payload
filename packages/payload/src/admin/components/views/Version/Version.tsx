@@ -202,22 +202,26 @@ const VersionView: React.FC<Props> = ({ collection, global }) => {
       <div className={baseClass}>
         <Meta description={metaDesc} title={metaTitle} />
         <Gutter className={`${baseClass}__wrap`}>
-          <div className={`${baseClass}__intro`}>
-            {t('versionCreatedOn', { version: t(doc?.autosave ? 'autosavedVersion' : 'version') })}
+          <div className={`${baseClass}__header-wrap`}>
+            <p className={`${baseClass}__created-at`}>
+              {t('versionCreatedOn', {
+                version: t(doc?.autosave ? 'autosavedVersion' : 'version'),
+              })}
+            </p>
+            <header className={`${baseClass}__header`}>
+              <h2>{formattedCreatedAt}</h2>
+              {canUpdate && (
+                <Restore
+                  className={`${baseClass}__restore`}
+                  collection={collection}
+                  global={global}
+                  originalDocID={id}
+                  versionDate={formattedCreatedAt}
+                  versionID={versionID}
+                />
+              )}
+            </header>
           </div>
-          <header className={`${baseClass}__header`}>
-            <h2>{formattedCreatedAt}</h2>
-            {canUpdate && (
-              <Restore
-                className={`${baseClass}__restore`}
-                collection={collection}
-                global={global}
-                originalDocID={id}
-                versionDate={formattedCreatedAt}
-                versionID={versionID}
-              />
-            )}
-          </header>
           <div className={`${baseClass}__controls`}>
             <CompareVersion
               baseURL={compareBaseURL}

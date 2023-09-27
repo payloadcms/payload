@@ -22,6 +22,8 @@ import type { PayloadRequest } from '../express/types'
 import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types'
 import type { Payload } from '../payload'
 import type { Where } from '../types'
+import { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
+import { EditViewProps } from '../admin/components/views/types'
 
 type Prettify<T> = {
   [K in keyof T]: T[K]
@@ -200,6 +202,20 @@ export type CustomAdminView = React.ComponentType<{
   global?: SanitizedGlobalConfig
   user: User
 }>
+
+export type EditViewConfig = {
+  /**
+   * The component to render for this view
+   * + Replaces the default component
+   */
+  Component: EditViewComponent
+  Tab: DocumentTab
+  path: string
+}
+
+export type EditViewComponent = React.ComponentType<EditViewProps>
+
+export type EditView = EditViewConfig | EditViewComponent
 
 export type AdminRoute = {
   Component: CustomAdminView

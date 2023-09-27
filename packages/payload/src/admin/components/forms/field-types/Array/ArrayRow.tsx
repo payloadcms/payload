@@ -129,6 +129,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
           indexPath={indexPath}
           permissions={permissions?.fields}
           readOnly={readOnly}
+          margins="small"
         />
       </Collapsible>
     </div>

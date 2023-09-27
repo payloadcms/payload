@@ -32,6 +32,16 @@
     outline-offset: var(--accessibility-outline-offset);
   }
 
+  .icon {
+    flex-shrink: 0;
+  }
+
+  &__label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   &--has-action {
     cursor: pointer;
     text-decoration: none;

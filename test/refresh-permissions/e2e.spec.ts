@@ -32,7 +32,7 @@ describe('refresh-permissions', () => {
     await closeMainMenu(page)
 
     // Allow access to test global.
-    await page.locator('.custom-checkbox:has(#field-test) input').check()
+    await page.locator('.checkbox-input:has(#field-test) input').check()
     await page.locator('#action-save').click()
 
     await openMainMenu(page)

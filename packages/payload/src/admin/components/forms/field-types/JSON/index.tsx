@@ -10,6 +10,7 @@ import Label from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 const baseClass = 'json-field'
 
@@ -59,19 +60,17 @@ const JSONField: React.FC<Props> = (props) => {
     setStringValue(JSON.stringify(initialValue, null, 2))
   }, [initialValue])
 
-  const classes = [
-    baseClass,
-    'field-type',
-    className,
-    showError && 'error',
-    readOnly && 'read-only',
-  ]
-    .filter(Boolean)
-    .join(' ')
-
   return (
     <div
-      className={classes}
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        showError && 'error',
+        readOnly && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={{
         ...style,
         width,

@@ -2,7 +2,7 @@
 
 .account {
   width: 100%;
-  padding-bottom: calc(var(--base) * 4);
+  padding-bottom: var(--spacing-view-bottom);
 
   &__form {
     height: 100%;
@@ -12,10 +12,13 @@
     margin-top: calc(var(--base) * 3);
   }
 
+  &__auth {
+    margin-bottom: var(--base);
+  }
+
   &__header {
     display: flex;
     flex-direction: column;
-    gap: var(--base);
   }
 
   &__payload-settings {

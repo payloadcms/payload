@@ -129,52 +129,53 @@ const DefaultList: React.FC<Props> = (props) => {
           )}
           {Array.isArray(AfterListTable) &&
             AfterListTable.map((Component, i) => <Component key={i} {...props} />)}
-
-          <div className={`${baseClass}__page-controls`}>
-            <Paginator
-              disableHistoryChange={modifySearchParams === false}
-              hasNextPage={data.hasNextPage}
-              hasPrevPage={data.hasPrevPage}
-              limit={data.limit}
-              nextPage={data.nextPage}
-              numberOfNeighbors={1}
-              onChange={handlePageChange}
-              page={data.page}
-              prevPage={data.prevPage}
-              totalPages={data.totalPages}
-            />
-            {data?.totalDocs > 0 && (
-              <Fragment>
-                <div className={`${baseClass}__page-info`}>
-                  {data.page * data.limit - (data.limit - 1)}-
-                  {data.totalPages > 1 && data.totalPages !== data.page
-                    ? data.limit * data.page
-                    : data.totalDocs}{' '}
-                  {t('of')} {data.totalDocs}
-                </div>
-                <PerPage
-                  handleChange={handlePerPageChange}
-                  limit={limit}
-                  limits={collection?.admin?.pagination?.limits}
-                  modifySearchParams={modifySearchParams}
-                  resetPage={data.totalDocs <= data.pagingCounter}
-                />
-                <div className={`${baseClass}__list-selection`}>
+          {data.docs && data.docs.length > 0 && (
+            <div className={`${baseClass}__page-controls`}>
+              <Paginator
+                disableHistoryChange={modifySearchParams === false}
+                hasNextPage={data.hasNextPage}
+                hasPrevPage={data.hasPrevPage}
+                limit={data.limit}
+                nextPage={data.nextPage}
+                numberOfNeighbors={1}
+                onChange={handlePageChange}
+                page={data.page}
+                prevPage={data.prevPage}
+                totalPages={data.totalPages}
+              />
+              {data?.totalDocs > 0 && (
+                <Fragment>
+                  <div className={`${baseClass}__page-info`}>
+                    {data.page * data.limit - (data.limit - 1)}-
+                    {data.totalPages > 1 && data.totalPages !== data.page
+                      ? data.limit * data.page
+                      : data.totalDocs}{' '}
+                    {t('of')} {data.totalDocs}
+                  </div>
+                  <PerPage
+                    handleChange={handlePerPageChange}
+                    limit={limit}
+                    limits={collection?.admin?.pagination?.limits}
+                    modifySearchParams={modifySearchParams}
+                    resetPage={data.totalDocs <= data.pagingCounter}
+                  />
                   {smallBreak && (
-                    <Fragment>
-                      <ListSelection label={getTranslation(collection.labels.plural, i18n)} />
-                      <div className={`${baseClass}__list-selection-actions`}>
-                        <EditMany collection={collection} resetParams={resetParams} />
-                        <PublishMany collection={collection} resetParams={resetParams} />
-                        <UnpublishMany collection={collection} resetParams={resetParams} />
-                        <DeleteMany collection={collection} resetParams={resetParams} />
-                      </div>
-                    </Fragment>
+                    <div className={`${baseClass}__list-selection`}>
+                      <Fragment>
+                        <ListSelection label={getTranslation(collection.labels.plural, i18n)} />
+                        <div className={`${baseClass}__list-selection-actions`}>
+                          <EditMany collection={collection} resetParams={resetParams} />
+                          <PublishMany collection={collection} resetParams={resetParams} />
+                          <UnpublishMany collection={collection} resetParams={resetParams} />
+                          <DeleteMany collection={collection} resetParams={resetParams} />
+                        </div>
+                      </Fragment>
+                    </div>
                   )}
-                </div>
-              </Fragment>
-            )}
-          </div>
+                </Fragment>
+              )}
+            </div>
+          )}
         </Gutter>
       </SelectionProvider>
       {Array.isArray(AfterList) &&

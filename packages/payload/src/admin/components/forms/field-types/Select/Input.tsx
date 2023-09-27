@@ -11,6 +11,7 @@ import Error from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import Label from '../../Label'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 export type SelectInputProps = Omit<SelectField, 'options' | 'type' | 'value'> & {
   className?: string
@@ -52,10 +53,6 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
 
   const { i18n } = useTranslation()
 
-  const classes = ['field-type', 'select', className, showError && 'error', readOnly && 'read-only']
-    .filter(Boolean)
-    .join(' ')
-
   let valueToRender
 
   if (hasMany && Array.isArray(value)) {
@@ -76,7 +73,15 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
 
   return (
     <div
-      className={classes}
+      className={[
+        fieldBaseClass,
+        'select',
+        className,
+        showError && 'error',
+        readOnly && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
       style={{
         ...style,

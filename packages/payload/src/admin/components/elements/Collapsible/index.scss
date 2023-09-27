@@ -10,10 +10,6 @@
     position: relative;
   }
 
-  &--nested {
-    margin-bottom: $baseline !important;
-  }
-
   &__drag {
     opacity: 0.5;
     position: absolute;
@@ -111,7 +107,7 @@
     background-color: var(--theme-elevation-0);
     border-bottom-left-radius: $style-radius-s;
     border-bottom-right-radius: $style-radius-s;
-    padding: $baseline $baseline 0 $baseline;
+    padding: var(--base);
   }
 
   @include small-break {

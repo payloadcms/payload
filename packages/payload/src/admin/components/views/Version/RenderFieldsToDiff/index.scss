@@ -1,12 +1,18 @@
 @import '../../../../scss/styles.scss';
 
 .render-field-diffs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--base);
+
   &__field {
-    margin-bottom: $baseline;
     overflow-wrap: anywhere;
+    display: flex;
+    flex-direction: column;
+    gap: var(--base);
   }
 
-  &__locale {
-    margin-bottom: base(0.5);
+  @include small-break {
+    gap: calc(var(--base) / 2);
   }
 }

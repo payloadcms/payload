@@ -32,6 +32,7 @@ export const DocumentControls: React.FC<{
   id?: string
   isEditing?: boolean
   permissions?: CollectionPermission | GlobalPermission
+  isAccountView?: boolean
 }> = (props) => {
   const {
     id,
@@ -42,6 +43,7 @@ export const DocumentControls: React.FC<{
     hasSavePermission,
     isEditing,
     permissions,
+    isAccountView,
   } = props
 
   const { publishedDoc } = useDocumentInfo()
@@ -76,7 +78,7 @@ export const DocumentControls: React.FC<{
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
           <ul className={`${baseClass}__meta`}>
-            {collection && !isEditing && (
+            {collection && !isEditing && !isAccountView && (
               <li className={`${baseClass}__list-item`}>
                 <p className={`${baseClass}__value`}>
                   {t('creatingNewLabel', {
@@ -113,7 +115,7 @@ export const DocumentControls: React.FC<{
                   )}
               </Fragment>
             )}
-            {collection?.timestamps && isEditing && (
+            {collection?.timestamps && (isEditing || isAccountView) && (
               <Fragment>
                 <li
                   className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]

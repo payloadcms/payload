@@ -8,6 +8,7 @@ import GenerateConfirmation from '../../../../elements/GenerateConfirmation'
 import { useFormFields } from '../../../../forms/Form/context'
 import Label from '../../../../forms/Label'
 import useField from '../../../../forms/useField'
+import { fieldBaseClass } from '../../../../forms/field-types/shared'
 
 const path = 'apiKey'
 const baseClass = 'api-key'
@@ -67,11 +68,9 @@ const APIKey: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
     }
   }, [highlightedField])
 
-  const classes = ['field-type', 'api-key', 'read-only'].filter(Boolean).join(' ')
-
   return (
     <React.Fragment>
-      <div className={classes}>
+      <div className={[fieldBaseClass, 'api-key', 'read-only'].filter(Boolean).join(' ')}>
         <Label htmlFor={path} label={APIKeyLabel} />
         <input
           className={highlightedField ? 'highlight' : undefined}

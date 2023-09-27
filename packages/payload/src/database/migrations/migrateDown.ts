@@ -21,7 +21,7 @@ export async function migrateDown(this: DatabaseAdapter): Promise<void> {
     return
   }
   payload.logger.info({
-    msg: `Rolling back batch ${latestBatch} consisting of ${migrationsToRollback.length} migrations.`,
+    msg: `Rolling back batch ${latestBatch} consisting of ${migrationsToRollback.length} migration(s).`,
   })
 
   for (const migration of migrationsToRollback) {
