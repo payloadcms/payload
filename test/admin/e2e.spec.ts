@@ -658,18 +658,18 @@ describe('admin', () => {
       })
 
       test('should select multiple rows', async () => {
-        const selectAll = page.locator('.custom-checkbox:has(#select-all)')
+        const selectAll = page.locator('.checkbox-input:has(#select-all)')
         await page.locator('.row-1 .cell-_select input').check()
 
-        const indeterminateSelectAll = selectAll.locator('.custom-checkbox__icon.partial')
+        const indeterminateSelectAll = selectAll.locator('.checkbox-input__icon.partial')
         expect(indeterminateSelectAll).toBeDefined()
 
         await selectAll.locator('input').click()
-        const emptySelectAll = selectAll.locator('.custom-checkbox__icon:not(.check):not(.partial)')
+        const emptySelectAll = selectAll.locator('.checkbox-input__icon:not(.check):not(.partial)')
         await expect(emptySelectAll).toHaveCount(0)
 
         await selectAll.locator('input').click()
-        const checkSelectAll = selectAll.locator('.custom-checkbox__icon.check')
+        const checkSelectAll = selectAll.locator('.checkbox-input__icon.check')
         expect(checkSelectAll).toBeDefined()
       })
 
