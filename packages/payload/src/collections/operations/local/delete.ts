@@ -64,6 +64,7 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
     fallbackLocale = null,
     locale = null,
     overrideAccess = true,
+    req: incomingReq,
     showHiddenFields,
     user,
     where,
@@ -86,6 +87,7 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
     locale: locale ?? defaultLocale,
     payload,
     payloadAPI: 'local',
+    transactionID: incomingReq.transactionID,
     user,
   } as PayloadRequest
   setRequestContext(req, context)

@@ -80,6 +80,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     locale = null,
     overrideAccess = true,
     overwriteExistingFiles = false,
+    req: incomingReq,
     showHiddenFields,
     user,
     where,
@@ -106,6 +107,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     locale: locale ?? defaultLocale,
     payload,
     payloadAPI: 'local',
+    transactionID: incomingReq?.transactionID,
     user,
   } as PayloadRequest
   setRequestContext(req, context)
