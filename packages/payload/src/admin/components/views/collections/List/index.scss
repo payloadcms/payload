@@ -140,7 +140,8 @@
       margin: 0;
     }
 
-    // the table needs to extend edge to edge on mobile to visually indicate overflowing content
+    // on mobile, extend the table all the way to the viewport edges
+    // this is to visually indicate overflowing content
     .table {
       display: flex;
       width: calc(100% + calc(var(--gutter-h) * 2));
