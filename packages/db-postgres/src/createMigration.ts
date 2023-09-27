@@ -19,8 +19,9 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
 ${
   upSQL
     ? `await payload.db.db.execute(sql\`
+
 ${upSQL}\`);
-  `
+`
     : '// Migration code'
 }
 };
@@ -29,8 +30,9 @@ export async function down({ payload }: MigrateUpArgs): Promise<void> {
 ${
   downSQL
     ? `await payload.db.db.execute(sql\`
+
 ${downSQL}\`);
-  `
+`
     : '// Migration code'
 }
 };
@@ -56,7 +58,7 @@ export const createMigration: CreateMigration = async function createMigration(
   payload,
   migrationName,
 ) {
-  payload.logger.info({ msg: 'Creating migration from postgres adapter...' })
+  payload.logger.info({ msg: 'Creating new migration...' })
   const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)

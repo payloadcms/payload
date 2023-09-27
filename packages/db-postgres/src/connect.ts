@@ -1,22 +1,12 @@
 import type { Connect } from 'payload/database'
 
-import { generateDrizzleJson, pushSchema } from 'drizzle-kit/utils'
-import { eq, sql } from 'drizzle-orm'
+import { pushSchema } from 'drizzle-kit/utils'
+import { sql } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { jsonb, numeric, pgTable, varchar } from 'drizzle-orm/pg-core'
-import fs from 'fs'
-import { configToJSONSchema } from 'payload/utilities'
 import { Pool } from 'pg'
 import prompts from 'prompts'
 
 import type { PostgresAdapter } from './types'
-
-// Migration table def in order to use query using drizzle
-const migrationsSchema = pgTable('payload_migrations', {
-  name: varchar('name'),
-  batch: numeric('batch'),
-  schema: jsonb('schema'),
-})
 
 export const connect: Connect = async function connect(this: PostgresAdapter, payload) {
   this.schema = {
