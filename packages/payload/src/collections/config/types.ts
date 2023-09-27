@@ -4,22 +4,27 @@ import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from '
 import type { Config as GeneratedTypes } from 'payload/generated-types'
 import type { DeepRequired } from 'ts-essentials'
 
-import type { DocumentTab } from '../../admin/components/elements/DocumentHeader/Tabs/types'
 import type {
   CustomPreviewButtonProps,
   CustomPublishButtonProps,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from '../../admin/components/elements/types'
-import type { CollectionEditViewProps } from '../../admin/components/views/collections/Edit/types'
 import type { Props as ListProps } from '../../admin/components/views/collections/List/types'
 import type { Auth, IncomingAuthType, User } from '../../auth/types'
-import type { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types'
+import type {
+  Access,
+  EditViewComponent,
+  Endpoint,
+  EntityDescription,
+  GeneratePreviewURL,
+} from '../../config/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { Field } from '../../fields/config/types'
 import type { IncomingUploadType, Upload } from '../../uploads/types'
 import type { IncomingCollectionVersions, SanitizedCollectionVersions } from '../../versions/types'
 import type { AfterOperationArg, AfterOperationMap } from '../operations/utils'
+import type { EditView } from '../../config/types'
 
 export type HookOperationType =
   | 'autosave'
@@ -165,20 +170,6 @@ type BeforeDuplicateArgs<T> = {
 
 export type BeforeDuplicate<T = any> = (args: BeforeDuplicateArgs<T>) => Promise<T> | T
 
-export type CollectionEditViewConfig = {
-  /**
-   * The component to render for this view
-   * + Replaces the default component
-   */
-  Component: React.ComponentType<CollectionEditViewProps>
-  Tab: DocumentTab
-  path: string
-}
-
-export type CollectionEditView =
-  | CollectionEditViewConfig
-  | React.ComponentType<CollectionEditViewProps>
-
 export type CollectionAdminOptions = {
   /**
    * Custom admin components
@@ -215,32 +206,33 @@ export type CollectionAdminOptions = {
     }
     views?: {
       /**
-       * Replaces the "Edit" view entirely
+       * Set to a React component to replace the entire "Edit" view, including all nested routes.
+       * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
       Edit?:
         | {
             /**
-             * Replaces or adds nested views within the "Edit" view
+             * Replace or modify individual nested routes, or add new ones:
              * + `Default` - `/admin/collections/:collection/:id`
              * + `API` - `/admin/collections/:collection/:id/api`
-             * + `Preview` - `/admin/collections/:collection/:id/preview`
+             * + `LivePreview` - `/admin/collections/:collection/:id/preview`
              * + `References` - `/admin/collections/:collection/:id/references`
              * + `Relationships` - `/admin/collections/:collection/:id/relationships`
              * + `Versions` - `/admin/collections/:collection/:id/versions`
              * + `Version` - `/admin/collections/:collection/:id/versions/:version`
              * + `:path` - `/admin/collections/:collection/:id/:path`
              */
-            Default: CollectionEditView
-            Versions?: CollectionEditView
+            Default?: EditView
+            Versions?: EditView
+            [key: string]: EditView
             // TODO: uncomment these as they are built
-            // [key: string]: CollectionEditView
-            // API?: CollectionEditView
-            // Preview?: CollectionEditView
-            // References?: CollectionEditView
-            // Relationships?: CollectionEditView
-            // Version: CollectionEditView
+            // API?: EditView
+            // LivePreview?: EditView
+            // References?: EditView
+            // Relationships?: EditView
+            // Version: EditView
           }
-        | React.ComponentType<CollectionEditViewProps>
+        | EditViewComponent
       List?: React.ComponentType<ListProps>
     }
   }

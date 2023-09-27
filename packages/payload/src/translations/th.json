@@ -163,6 +163,7 @@
     "create": "สร้าง",
     "createNew": "สร้างใหม่",
     "createNewLabel": "สร้าง {{label}} ใหม่",
+    "creatingNewLabel": "กำลังสร้าง {{label}} ใหม่",
     "created": "ถูกสร้างเมื่อ",
     "createdAt": "สร้างเมื่อ",
     "creating": "กำลังสร้าง",

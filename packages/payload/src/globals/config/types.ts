@@ -1,20 +1,25 @@
 import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type React from 'react'
 import type { DeepRequired } from 'ts-essentials'
 
-import type { DocumentTab } from '../../admin/components/elements/DocumentHeader/Tabs/types'
 import type {
   CustomPreviewButtonProps,
   CustomPublishButtonProps,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from '../../admin/components/elements/types'
-import type { GlobalEditViewProps } from '../../admin/components/views/Global/types'
 import type { User } from '../../auth/types'
-import type { Access, Endpoint, EntityDescription, GeneratePreviewURL } from '../../config/types'
+import type {
+  Access,
+  EditView,
+  EditViewComponent,
+  Endpoint,
+  EntityDescription,
+  GeneratePreviewURL,
+} from '../../config/types'
 import type { PayloadRequest } from '../../express/types'
 import type { Field } from '../../fields/config/types'
 import type { Where } from '../../types'
+
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types'
 
 export type TypeWithID = {
@@ -39,18 +44,6 @@ export type AfterReadHook = (args: {
   query?: Where
   req: PayloadRequest
 }) => any
-
-export type GlobalEditViewConfig = {
-  /**
-   * The component to render for this view
-   * + Replaces the default component
-   */
-  Component: React.ComponentType<GlobalEditViewProps>
-  Tab?: DocumentTab
-  path: string
-}
-
-export type GlobalEditView = GlobalEditViewConfig | React.ComponentType<GlobalEditViewProps>
 
 export type GlobalAdminOptions = {
   /**
@@ -81,32 +74,33 @@ export type GlobalAdminOptions = {
     }
     views?: {
       /**
-       * Replaces the "Edit" view
+       * Set to a React component to replace the entire "Edit" view, including all nested routes.
+       * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
       Edit?:
         | {
             /**
-             * Replaces or adds nested routes within the "Edit" view
+             * Replace or modify individual nested routes, or add new ones:
              * + `Default` - `/admin/globals/:slug`
              * + `API` - `/admin/globals/:id/api`
-             * + `Preview` - `/admin/globals/:id/preview`
+             * + `LivePreview` - `/admin/globals/:id/preview`
              * + `References` - `/admin/globals/:id/references`
              * + `Relationships` - `/admin/globals/:id/relationships`
              * + `Versions` - `/admin/globals/:id/versions`
              * + `Version` - `/admin/globals/:id/versions/:version`
              * + `:path` - `/admin/globals/:id/:path`
              */
-            Default: GlobalEditView
-            Versions?: GlobalEditView
+            Default?: EditView
+            Versions?: EditView
+            [name: string]: EditView
             // TODO: uncomment these as they are built
-            // [name: string]: GlobalEditView
-            // API?: GlobalEditView
-            // Preview?: GlobalEditView
-            // References?: GlobalEditView
-            // Relationships?: GlobalEditView
-            // Version?: GlobalEditView
+            // API?: EditView
+            // LivePreview?: EditView
+            // References?: EditView
+            // Relationships?: EditView
+            // Version?: EditView
           }
-        | React.ComponentType<any>
+        | EditViewComponent
     }
   }
   /**

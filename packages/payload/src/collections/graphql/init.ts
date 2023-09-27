@@ -104,11 +104,12 @@ function initCollectionsGraphQL(payload: Payload): void {
 
     collection.graphQL.paginatedType = buildPaginatedListType(pluralName, collection.graphQL.type)
 
-    collection.graphQL.whereInputType = buildWhereInputType(
-      singularName,
-      whereInputFields,
-      singularName,
-    )
+    collection.graphQL.whereInputType = buildWhereInputType({
+      name: singularName,
+      fields: whereInputFields,
+      parentName: singularName,
+      payload,
+    })
 
     if (config.auth && !config.auth.disableLocalStrategy) {
       fields.push({
@@ -218,11 +219,12 @@ function initCollectionsGraphQL(payload: Payload): void {
     }
 
     if (config.versions) {
+      const versionIDType = payload.db.defaultIDType === 'text' ? GraphQLString : GraphQLInt
       const versionCollectionFields: Field[] = [
         ...buildVersionCollectionFields(config),
         {
           name: 'id',
-          type: 'text',
+          type: payload.db.defaultIDType as 'text',
         },
         {
           name: 'createdAt',
@@ -246,7 +248,7 @@ function initCollectionsGraphQL(payload: Payload): void {
 
       payload.Query.fields[`version${formatName(singularName)}`] = {
         args: {
-          id: { type: GraphQLString },
+          id: { type: versionIDType },
           ...(payload.config.localization
             ? {
                 fallbackLocale: { type: payload.types.fallbackLocaleInputType },
@@ -260,11 +262,12 @@ function initCollectionsGraphQL(payload: Payload): void {
       payload.Query.fields[`versions${pluralName}`] = {
         args: {
           where: {
-            type: buildWhereInputType(
-              `versions${singularName}`,
-              versionCollectionFields,
-              `versions${singularName}`,
-            ),
+            type: buildWhereInputType({
+              name: `versions${singularName}`,
+              fields: versionCollectionFields,
+              parentName: `versions${singularName}`,
+              payload,
+            }),
           },
           ...(payload.config.localization
             ? {
@@ -284,7 +287,7 @@ function initCollectionsGraphQL(payload: Payload): void {
       }
       payload.Mutation.fields[`restoreVersion${formatName(singularName)}`] = {
         args: {
-          id: { type: GraphQLString },
+          id: { type: versionIDType },
         },
         resolve: restoreVersionResolver(collection),
         type: collection.graphQL.type,

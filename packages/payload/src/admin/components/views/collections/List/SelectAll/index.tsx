@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next'
 
 import { CheckboxInput } from '../../../../forms/field-types/Checkbox/Input'
 import { SelectAllStatus, useSelection } from '../SelectionProvider'
+import './index.scss'
+
+const baseClass = 'select-all'
 
 const SelectAll: React.FC = () => {
   const { t } = useTranslation('general')
@@ -17,6 +20,7 @@ const SelectAll: React.FC = () => {
       id="select-all"
       onToggle={() => toggleAll()}
       partialChecked={selectAll === SelectAllStatus.Some}
+      className={`${baseClass}__checkbox`}
     />
   )
 }

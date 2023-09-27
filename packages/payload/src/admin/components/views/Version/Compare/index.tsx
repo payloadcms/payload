@@ -11,6 +11,7 @@ import ReactSelect from '../../../elements/ReactSelect'
 import { useConfig } from '../../../utilities/Config'
 import { mostRecentVersionOption, publishedVersionOption } from '../shared'
 import './index.scss'
+import { fieldBaseClass } from '../../../forms/field-types/shared'
 
 const baseClass = 'compare-version'
 
@@ -85,10 +86,6 @@ const CompareVersion: React.FC<Props> = (props) => {
     [dateFormat, baseURL, parentID, versionID, t, i18n],
   )
 
-  const classes = ['field-type', baseClass, errorLoading && 'error-loading']
-    .filter(Boolean)
-    .join(' ')
-
   useEffect(() => {
     getResults({ lastLoadedPage: 1 })
   }, [getResults])
@@ -99,7 +96,11 @@ const CompareVersion: React.FC<Props> = (props) => {
   }, [publishedDoc])
 
   return (
-    <div className={classes}>
+    <div
+      className={[fieldBaseClass, baseClass, errorLoading && 'error-loading']
+        .filter(Boolean)
+        .join(' ')}
+    >
       <div className={`${baseClass}__label`}>{t('compareVersion')}</div>
       {!errorLoading && (
         <ReactSelect

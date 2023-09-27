@@ -18,6 +18,7 @@ const baseClass = 'auth-fields'
 
 const Auth: React.FC<Props> = (props) => {
   const {
+    className,
     collection,
     collection: { slug },
     email,
@@ -27,6 +28,7 @@ const Auth: React.FC<Props> = (props) => {
     useAPIKey,
     verify,
   } = props
+
   const [changingPassword, setChangingPassword] = useState(requirePassword)
   const enableAPIKey = useFormFields(([fields]) => fields.enableAPIKey)
   const dispatchFields = useFormFields((reducer) => reducer[1])
@@ -82,7 +84,7 @@ const Auth: React.FC<Props> = (props) => {
   }
 
   return (
-    <div className={baseClass}>
+    <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!collection.auth.disableLocalStrategy && (
         <React.Fragment>
           <Email
@@ -113,26 +115,30 @@ const Auth: React.FC<Props> = (props) => {
               )}
             </div>
           )}
-          {!changingPassword && !requirePassword && (
-            <Button
-              buttonStyle="secondary"
-              disabled={readOnly}
-              id="change-password"
-              onClick={() => handleChangePassword(true)}
-              size="small"
-            >
-              {t('changePassword')}
-            </Button>
-          )}
-          {operation === 'update' && (
-            <Button
-              buttonStyle="secondary"
-              disabled={readOnly}
-              onClick={() => unlock()}
-              size="small"
-            >
-              {t('forceUnlock')}
-            </Button>
+          {((!changingPassword && !requirePassword) || operation === 'update') && (
+            <div className={`${baseClass}__controls`}>
+              {!changingPassword && !requirePassword && (
+                <Button
+                  buttonStyle="secondary"
+                  disabled={readOnly}
+                  id="change-password"
+                  onClick={() => handleChangePassword(true)}
+                  size="small"
+                >
+                  {t('changePassword')}
+                </Button>
+              )}
+              {operation === 'update' && (
+                <Button
+                  buttonStyle="secondary"
+                  disabled={readOnly}
+                  onClick={() => unlock()}
+                  size="small"
+                >
+                  {t('forceUnlock')}
+                </Button>
+              )}
+            </div>
           )}
         </React.Fragment>
       )}

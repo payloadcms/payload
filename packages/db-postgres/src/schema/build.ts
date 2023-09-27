@@ -4,7 +4,16 @@ import type { IndexBuilder, PgColumnBuilder, UniqueConstraintBuilder } from 'dri
 import type { Field } from 'payload/types'
 
 import { relations } from 'drizzle-orm'
-import { index, integer, numeric, pgTable, serial, timestamp, unique, varchar, } from 'drizzle-orm/pg-core'
+import {
+  index,
+  integer,
+  numeric,
+  pgTable,
+  serial,
+  timestamp,
+  unique,
+  varchar,
+} from 'drizzle-orm/pg-core'
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
@@ -18,6 +27,7 @@ type Args = {
   baseColumns?: Record<string, PgColumnBuilder>
   baseExtraConfig?: Record<string, (cols: GenericColumns) => IndexBuilder | UniqueConstraintBuilder>
   buildRelationships?: boolean
+  disableUnique: boolean
   fields: Field[]
   tableName: string
   timestamps?: boolean
@@ -32,6 +42,7 @@ export const buildTable = ({
   baseColumns = {},
   baseExtraConfig = {},
   buildRelationships,
+  disableUnique = false,
   fields,
   tableName,
   timestamps,
@@ -43,7 +54,6 @@ export const buildTable = ({
   let hasLocalizedRelationshipField = false
   let hasManyNumberField: 'index' | boolean = false
   let hasLocalizedManyNumberField = false
-  const disableUnique = tableName.endsWith('_versions')
 
   const localesColumns: Record<string, PgColumnBuilder> = {}
   const localesIndexes: Record<string, (cols: GenericColumns) => IndexBuilder> = {}

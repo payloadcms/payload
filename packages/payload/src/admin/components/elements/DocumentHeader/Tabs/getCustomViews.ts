@@ -1,6 +1,5 @@
-import type { CollectionEditViewConfig } from '../../../../../collections/config/types'
+import { EditViewComponent, EditViewConfig } from '../../../../../exports/config'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../../exports/types'
-import type { GlobalEditViewConfig } from '../../../../../globals/config/types'
 
 import { defaultGlobalViews } from '../../../views/Global/Routes/CustomComponent'
 import { defaultCollectionViews } from '../../../views/collections/Edit/Routes/CustomComponent'
@@ -8,10 +7,10 @@ import { defaultCollectionViews } from '../../../views/collections/Edit/Routes/C
 export const getCustomViews = (args: {
   collection: SanitizedCollectionConfig
   global: SanitizedGlobalConfig
-}): (CollectionEditViewConfig | GlobalEditViewConfig)[] => {
+}): EditViewConfig[] => {
   const { collection, global } = args
 
-  let customViews: (CollectionEditViewConfig | GlobalEditViewConfig)[]
+  let customViews: EditViewConfig[]
 
   if (collection) {
     const collectionViewsConfig =

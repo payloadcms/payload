@@ -2,13 +2,16 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload/types'
 
-import { and, ilike } from 'drizzle-orm'
+import { and, ilike, isNotNull, sql } from 'drizzle-orm'
+import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
 import type { GenericColumn, PostgresAdapter } from '../types'
 import type { BuildQueryJoinAliases, BuildQueryJoins } from './buildQuery'
 
 import { buildAndOrConditions } from './buildAndOrConditions'
+import { createJSONQuery } from './createJSONQuery'
+import { convertPathToJSONTraversal } from './createJSONQuery/convertPathToJSONTraversal'
 import { getTableColumnFromPath } from './getTableColumnFromPath'
 import { operatorMap } from './operatorMap'
 import { sanitizeQueryValue } from './sanitizeQueryValue'
@@ -78,6 +81,7 @@ export async function parseParams({
                   columnName,
                   constraints: queryConstraints,
                   field,
+                  getNotNullColumnByValue,
                   rawColumn,
                   table,
                 } = getTableColumnFromPath({
@@ -98,21 +102,56 @@ export async function parseParams({
                   constraints.push(operatorMap.equals(constraintTable[col], value))
                 })
 
+                if (['json', 'richText'].includes(field.type)) {
+                  const pathSegments = relationOrPath.split('.').slice(1)
+                  pathSegments.unshift(table[columnName].name)
+
+                  if (field.type === 'richText') {
+                    const jsonQuery = createJSONQuery({
+                      operator,
+                      pathSegments,
+                      treatAsArray: ['children'],
+                      treatRootAsArray: true,
+                      value: val,
+                    })
+
+                    constraints.push(sql.raw(jsonQuery))
+                  }
+
+                  if (field.type === 'json') {
+                    const jsonQuery = convertPathToJSONTraversal(relationOrPath)
+                    constraints.push(sql.raw(`${table[columnName].name}${jsonQuery} = '%${val}%'`))
+                  }
+
+                  break
+                }
+
+                if (getNotNullColumnByValue) {
+                  const columnName = getNotNullColumnByValue(val)
+                  if (columnName) {
+                    constraints.push(isNotNull(table[columnName]))
+                  } else {
+                    throw new QueryError([{ path: relationOrPath }])
+                  }
+                  break
+                }
+
                 if (operator === 'like') {
                   constraints.push(
                     and(...val.split(' ').map((word) => ilike(table[columnName], `%${word}%`))),
                   )
-                } else {
-                  const { operator: queryOperator, value: queryValue } = sanitizeQueryValue({
-                    field,
-                    operator,
-                    val,
-                  })
-
-                  constraints.push(
-                    operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
-                  )
+                  break
                 }
+
+                const { operator: queryOperator, value: queryValue } = sanitizeQueryValue({
+                  field,
+                  operator,
+                  val,
+                })
+
+                constraints.push(
+                  operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
+                )
               }
             }
           }

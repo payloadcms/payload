@@ -283,8 +283,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
         if (Array.isArray(fieldData)) {
           if (field.localized) {
             result[field.name] = fieldData.reduce((selectResult, row) => {
-              if (typeof row._locale === 'string') {
-                selectResult[row._locale] = row.value
+              if (typeof row.locale === 'string') {
+                if (!selectResult[row.locale]) selectResult[row.locale] = []
+                selectResult[row.locale].push(row.value)
               }
 
               return selectResult
@@ -318,10 +319,12 @@ export const traverseFields = <T extends Record<string, unknown>>({
           case 'tab':
           case 'group': {
             const groupFieldPrefix = `${fieldPrefix || ''}${field.name}_`
-            const groupData = {}
 
             if (field.localized) {
-              if (typeof locale === 'string' && !ref[locale]) ref[locale] = {}
+              if (typeof locale === 'string' && !ref[locale]) {
+                ref[locale] = {}
+                delete table._locale
+              }
 
               Object.entries(ref).forEach(([groupLocale, groupLocaleData]) => {
                 ref[groupLocale] = traverseFields<Record<string, unknown>>({
@@ -337,6 +340,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 })
               })
             } else {
+              const groupData = {}
+
               ref[field.name] = traverseFields<Record<string, unknown>>({
                 blocks,
                 config,
@@ -355,7 +360,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
           case 'number': {
             let val = fieldData
-            // TODO: handle hasMany
             if (typeof fieldData === 'string') {
               val = Number.parseFloat(fieldData)
             }
@@ -372,8 +376,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
           case 'date': {
             let val = fieldData
 
-            if (fieldData instanceof Date) {
-              val = fieldData.toISOString()
+            if (typeof fieldData === 'string') {
+              val = new Date(fieldData).toISOString()
             }
 
             if (typeof locale === 'string') {

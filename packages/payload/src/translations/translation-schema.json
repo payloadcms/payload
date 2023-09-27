@@ -631,6 +631,9 @@
         "createNewLabel": {
           "type": "string"
         },
+        "creatingNewLabel": {
+          "type": "string"
+        },
         "created": {
           "type": "string"
         },
@@ -925,6 +928,7 @@
         "create",
         "createNew",
         "createNewLabel",
+        "creatingNewLabel",
         "created",
         "createdAt",
         "creating",

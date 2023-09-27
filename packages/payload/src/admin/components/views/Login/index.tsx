@@ -57,7 +57,6 @@ const Login: React.FC = () => {
                 <Link to={`${admin}${logoutRoute}`}>{t('logOut')}</Link>
               </Trans>
             </p>
-            <br />
             <Button buttonStyle="secondary" el="link" to={admin}>
               {t('general:backToDashboard')}
             </Button>
@@ -74,6 +73,7 @@ const Login: React.FC = () => {
           {!collection.auth.disableLocalStrategy && (
             <Form
               action={`${serverURL}${api}/${userSlug}/login`}
+              className={`${baseClass}__form`}
               disableSuccessStatus
               initialData={{
                 email: autoLogin && autoLogin.prefillOnly ? autoLogin.email : undefined,

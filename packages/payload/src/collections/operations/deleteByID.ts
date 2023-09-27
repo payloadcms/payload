@@ -142,7 +142,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // Delete Preferences
     // /////////////////////////////////////
 
-    deleteUserPreferences({
+    await deleteUserPreferences({
       collectionConfig,
       ids: [id],
       payload,
@@ -154,7 +154,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     if (collectionConfig.versions) {
-      deleteCollectionVersions({
+      await deleteCollectionVersions({
         id,
         payload,
         req,

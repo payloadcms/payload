@@ -163,6 +163,7 @@
     "create": "Tạo",
     "createNew": "Tạo mới",
     "createNewLabel": "Tạo mới {{label}}",
+    "creatingNewLabel": "Đang tạo mới {{label}}",
     "created": "Đã tạo",
     "createdAt": "Ngày tạo",
     "creating": "Đang tạo",

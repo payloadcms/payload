@@ -62,6 +62,6 @@ export function createDatabaseAdapter<T extends DatabaseAdapter>(
     ...args,
 
     // Ensure migrationDir is set
-    migrationDir: args.migrationDir || '.migrations',
+    migrationDir: args.migrationDir || 'migrations',
   } as T
 }

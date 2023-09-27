@@ -34,7 +34,7 @@
       "command": "ts-node ./packages/payload/src/bin/index.ts migrate",
       "env": {
         "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_DATABASE": "mongoose",
+        "PAYLOAD_DATABASE": "postgres",
         "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
         // "PAYLOAD_DROP_DATABASE": "true",
       },
@@ -47,7 +47,7 @@
       "command": "ts-node ./packages/payload/src/bin/index.ts migrate:status",
       "env": {
         "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_DATABASE": "mongoose",
+        "PAYLOAD_DATABASE": "postgres",
         "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
         // "PAYLOAD_DROP_DATABASE": "true",
       },
@@ -60,7 +60,7 @@
       "command": "ts-node ./packages/payload/src/bin/index.ts migrate:create yass",
       "env": {
         "PAYLOAD_CONFIG_PATH": "test/migrations-cli/config.ts",
-        "PAYLOAD_DATABASE": "mongoose",
+        "PAYLOAD_DATABASE": "postgres",
         "DISABLE_SWC": "true" // SWC messes up debugging the bin scripts
         // "PAYLOAD_DROP_DATABASE": "true",
       },

@@ -163,6 +163,7 @@
     "create": "Creează",
     "createNew": "Creați unul nou",
     "createNewLabel": "Creați un nou {{label}}",
+    "creatingNewLabel": "Crearea unui nou {{label}}",
     "created": "Creat",
     "createdAt": "Creat la",
     "creating": "Creare",

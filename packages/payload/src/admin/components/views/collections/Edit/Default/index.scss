@@ -1,36 +1,35 @@
 @import '../../../../../scss/styles.scss';
 
-.collection-edit {
+.collection-default-edit {
   width: 100%;
+  display: flex;
 
-  &__wrapper {
-    display: flex;
+  &--has-sidebar {
+    .collection-default-edit {
+      &__main {
+        width: 66.66%;
+      }
 
-    &--has-sidebar {
-      .collection-edit {
-        // &__main {
-        //   width: calc(100% - #{base(15)});
-        // }
+      &__edit {
+        [dir='ltr'] & {
+          top: 0;
+          right: 0;
+          border-right: 1px solid var(--theme-elevation-100);
+          padding-right: calc(var(--base) * 2);
+        }
 
-        &__edit {
-          [dir='ltr'] & {
-            top: 0;
-            right: 0;
-            border-right: 1px solid var(--theme-elevation-100);
-          }
-
-          [dir='rtl'] & {
-            top: 0;
-            left: 0;
-            border-left: 1px solid var(--theme-elevation-100);
-          }
+        [dir='rtl'] & {
+          top: 0;
+          left: 0;
+          border-left: 1px solid var(--theme-elevation-100);
+          padding-left: calc(var(--base) * 2);
         }
       }
     }
   }
 
   &__main {
-    width: calc(100% - #{base(15)});
+    width: 100%;
     display: flex;
     flex-direction: column;
     min-height: 100%;
@@ -38,14 +37,18 @@
 
   &__edit {
     padding-top: calc(var(--base) * 1.5);
-    padding-bottom: base(4);
+    padding-bottom: var(--spacing-view-bottom);
     flex-grow: 1;
+  }
+
+  &__auth {
+    margin-bottom: var(--base);
   }
 
   &__sidebar-wrap {
     position: sticky;
     top: 0;
-    width: base(15);
+    flex-grow: 1;
   }
 
   &__sidebar {
@@ -64,22 +67,39 @@
     display: flex;
     flex-direction: column;
     gap: var(--base);
-    padding: var(--base);
-
-    .render-fields {
-      & > *:last-child {
-        margin-bottom: 0;
-      }
-    }
+    padding-top: calc(var(--base) * 1.5);
+    padding-left: calc(var(--base) * 2);
+    padding-right: var(--gutter-h);
+    padding-bottom: var(--spacing-view-bottom);
   }
 
-  &--is-editing {
-    .collection-edit__sidebar {
-      padding-top: 0;
-    }
+  &__label {
+    color: var(--theme-elevation-400);
   }
 
   @include mid-break {
+    display: block;
+
+    &--has-sidebar {
+      .collection-default-edit {
+        &__main {
+          width: 100%;
+        }
+
+        &__edit {
+          [dir='ltr'] & {
+            border-right: 0;
+            padding-right: var(--gutter-h);
+          }
+
+          [dir='rtl'] & {
+            border-left: 0;
+            padding-left: var(--gutter-h);
+          }
+        }
+      }
+    }
+
     &__main {
       width: 100%;
       min-height: initial;
@@ -90,15 +110,11 @@
       width: 100%;
       height: initial;
       border-left: 0;
+      margin-top: calc(var(--base) / 2);
     }
 
     &__form {
       display: block;
-    }
-
-    &__edit {
-      padding-top: var(--base);
-      padding-bottom: 0;
     }
 
     &__sidebar-fields {

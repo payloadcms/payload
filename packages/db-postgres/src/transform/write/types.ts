@@ -2,7 +2,6 @@ export type ArrayRowToInsert = {
   arrays: {
     [tableName: string]: ArrayRowToInsert[]
   }
-  columnName: string
   locales: {
     [locale: string]: Record<string, unknown>
   }

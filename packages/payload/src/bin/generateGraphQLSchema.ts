@@ -24,5 +24,6 @@ export async function generateGraphQLSchema(): Promise<void> {
 
 // when generateGraphQLSchema.js is launched directly
 if (module.id === require.main.id) {
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   generateGraphQLSchema()
 }

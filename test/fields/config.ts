@@ -125,8 +125,11 @@ export default buildConfigWithDefaults({
       file: jpgFile,
     })
 
+    const formattedID =
+      payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
+
     const richTextDocWithRelId = JSON.parse(
-      JSON.stringify(richTextDoc).replace(/\{\{ARRAY_DOC_ID\}\}/g, createdArrayDoc.id),
+      JSON.stringify(richTextDoc).replace(/"\{\{ARRAY_DOC_ID\}\}"/g, formattedID),
     )
     const richTextDocWithRelationship = { ...richTextDocWithRelId }
 

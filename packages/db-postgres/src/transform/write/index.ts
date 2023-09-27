@@ -29,12 +29,13 @@ export const transformForWrite = ({ data, fields, path = '', tableName }: Args):
   // above rowToInsert
   traverseFields({
     arrays: rowToInsert.arrays,
+    baseTableName: tableName,
     blocks: rowToInsert.blocks,
     columnPrefix: '',
     data,
+    fieldPrefix: '',
     fields,
     locales: rowToInsert.locales,
-    newTableName: tableName,
     numbers: rowToInsert.numbers,
     parentTableName: tableName,
     path,

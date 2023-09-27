@@ -11,6 +11,7 @@ import type { CollectionModel, GlobalModel } from './types'
 import { connect } from './connect'
 import { create } from './create'
 import { createGlobal } from './createGlobal'
+import { createGlobalVersion } from './createGlobalVersion'
 import { createVersion } from './createVersion'
 import { deleteMany } from './deleteMany'
 import { deleteOne } from './deleteOne'
@@ -27,6 +28,7 @@ import { beginTransaction } from './transactions/beginTransaction'
 import { commitTransaction } from './transactions/commitTransaction'
 import { rollbackTransaction } from './transactions/rollbackTransaction'
 import { updateGlobal } from './updateGlobal'
+import { updateGlobalVersion } from './updateGlobalVersion'
 import { updateOne } from './updateOne'
 import { updateVersion } from './updateVersion'
 import { webpack } from './webpack'
@@ -79,6 +81,7 @@ export function mongooseAdapter({
       connection: undefined,
       create,
       createGlobal,
+      createGlobalVersion,
       createMigration,
       createVersion,
       defaultIDType: 'text',
@@ -101,6 +104,7 @@ export function mongooseAdapter({
       rollbackTransaction,
       sessions: {},
       updateGlobal,
+      updateGlobalVersion,
       updateOne,
       updateVersion,
       url,

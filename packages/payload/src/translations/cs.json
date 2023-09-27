@@ -163,6 +163,7 @@
     "create": "Vytvořit",
     "createNew": "Vytvořit nové",
     "createNewLabel": "Vytvořit nový {{label}}",
+    "creatingNewLabel": "Vytváření nového {{label}}",
     "created": "Vytvořeno",
     "createdAt": "Vytvořeno v",
     "creating": "Vytváření",

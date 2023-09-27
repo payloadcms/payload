@@ -1,27 +1,22 @@
-import type { ColumnBaseConfig, ColumnDataType, Relation, Relations } from 'drizzle-orm'
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import type { PgColumn, PgEnum, PgTableWithColumns } from 'drizzle-orm/pg-core'
+import type {
+  ColumnBaseConfig,
+  ColumnDataType,
+  ExtractTablesWithRelations,
+  Relation,
+  Relations,
+} from 'drizzle-orm'
+import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-postgres'
+import type { PgColumn, PgEnum, PgTableWithColumns, PgTransaction } from 'drizzle-orm/pg-core'
 import type { DatabaseAdapter, Payload } from 'payload'
-import type { ClientConfig, PoolConfig } from 'pg'
+import type { Pool, PoolConfig } from 'pg'
 
-export type DrizzleDB = NodePgDatabase<Record<string, never>>
+export type DrizzleDB = NodePgDatabase<Record<string, unknown>>
 
-type BaseArgs = {
+export type Args = {
+  client: PoolConfig
   migrationDir?: string
   migrationName?: string
 }
-
-type ClientArgs = {
-  /** Client connection options for the Node package `pg` */
-  client?: ClientConfig | false | string
-} & BaseArgs
-
-type PoolArgs = {
-  /** Pool connection options for the Node package `pg` */
-  pool?: PoolConfig | false
-} & BaseArgs
-
-export type Args = ClientArgs | PoolArgs
 
 export type GenericColumn = PgColumn<
   ColumnBaseConfig<ColumnDataType, string>,
@@ -43,14 +38,30 @@ export type GenericEnum = PgEnum<[string, ...string[]]>
 
 export type GenericRelation = Relations<string, Record<string, Relation<string>>>
 
+export type DrizzleTransaction = PgTransaction<
+  NodePgQueryResultHKT,
+  Record<string, unknown>,
+  ExtractTablesWithRelations<Record<string, unknown>>
+>
+
 export type PostgresAdapter = DatabaseAdapter &
   Args & {
     db: DrizzleDB
     enums: Record<string, GenericEnum>
+    pool: Pool
     relations: Record<string, GenericRelation>
     schema: Record<string, GenericEnum | GenericRelation | GenericTable>
-    sessions: Record<string, DrizzleDB>
+    sessions: {
+      [id: string]: {
+        db: DrizzleTransaction
+        reject: () => void
+        resolve: () => void
+      }
+    }
     tables: Record<string, GenericTable>
   }
 
 export type PostgresAdapterResult = (args: { payload: Payload }) => PostgresAdapter
+
+export type MigrateUpArgs = { payload: Payload }
+export type MigrateDownArgs = { payload: Payload }

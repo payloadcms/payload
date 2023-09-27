@@ -300,6 +300,9 @@ importers:
       '@libsql/client':
         specifier: ^0.3.1
         version: 0.3.4
+      console-table-printer:
+        specifier: 2.11.2
+        version: 2.11.2
       drizzle-kit:
         specifier: 0.19.13-e99bac1
         version: 0.19.13-e99bac1

@@ -8,6 +8,7 @@ import type { BlockRowToInsert, RelationshipToDelete } from './types'
 import { traverseFields } from './traverseFields'
 
 type Args = {
+  baseTableName: string
   blocks: {
     [blockType: string]: BlockRowToInsert[]
   }
@@ -21,9 +22,9 @@ type Args = {
   selects: {
     [tableName: string]: Record<string, unknown>[]
   }
-  tableName
 }
 export const transformBlocks = ({
+  baseTableName,
   blocks,
   data,
   field,
@@ -33,14 +34,14 @@ export const transformBlocks = ({
   relationships,
   relationshipsToDelete,
   selects,
-  tableName,
 }: Args) => {
   data.forEach((blockRow, i) => {
     if (typeof blockRow.blockType !== 'string') return
     const matchedBlock = field.blocks.find(({ slug }) => slug === blockRow.blockType)
     if (!matchedBlock) return
+    const blockType = toSnakeCase(blockRow.blockType)
 
-    if (!blocks[blockRow.blockType]) blocks[blockRow.blockType] = []
+    if (!blocks[blockType]) blocks[blockType] = []
 
     const newRow: BlockRowToInsert = {
       arrays: {},
@@ -53,16 +54,17 @@ export const transformBlocks = ({
 
     if (field.localized && locale) newRow.row._locale = locale
 
-    const blockTableName = `${tableName}_${toSnakeCase(blockRow.blockType)}`
+    const blockTableName = `${baseTableName}_${blockType}`
 
     traverseFields({
       arrays: newRow.arrays,
+      baseTableName,
       blocks,
       columnPrefix: '',
       data: blockRow,
+      fieldPrefix: '',
       fields: matchedBlock.fields,
       locales: newRow.locales,
-      newTableName: blockTableName,
       numbers,
       parentTableName: blockTableName,
       path: `${path || ''}${field.name}.${i}.`,
@@ -72,6 +74,6 @@ export const transformBlocks = ({
       selects,
     })
 
-    blocks[blockRow.blockType].push(newRow)
+    blocks[blockType].push(newRow)
   })
 }

@@ -163,6 +163,7 @@
     "create": "Skapa",
     "createNew": "Skapa Ny",
     "createNewLabel": "Skapa ny {{label}}",
+    "creatingNewLabel": "Skapar ny {{label}}",
     "created": "Skapad",
     "createdAt": "Skapad Vid",
     "creating": "Skapar",

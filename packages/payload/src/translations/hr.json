@@ -163,6 +163,7 @@
     "create": "Kreiraj",
     "createNew": "Kreiraj novo",
     "createNewLabel": "Kreiraj novo {{label}}",
+    "creatingNewLabel": "Kreiranje novog {{label}}",
     "created": "Kreirano",
     "createdAt": "Kreirano u",
     "creating": "Kreira se",

@@ -163,6 +163,7 @@
     "create": "إنشاء",
     "createNew": "أنشاء جديد",
     "createNewLabel": "إنشاء {{label}} جديد",
+    "creatingNewLabel": "جاري إنشاء {{label}} جديد",
     "created": "تمّ الإنشاء",
     "createdAt": "تمّ الإنشاء في",
     "creating": "يتمّ الإنشاء",

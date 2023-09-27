@@ -163,6 +163,7 @@
     "create": "作成",
     "createNew": "新規作成",
     "createNewLabel": "{{label}} を新規作成",
+    "creatingNewLabel": "{{label}} を新規作成しています",
     "created": "作成",
     "createdAt": "作成日",
     "creating": "作成中",

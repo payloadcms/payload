@@ -163,6 +163,7 @@
     "create": "Criar",
     "createNew": "Criar Novo",
     "createNewLabel": "Criar novo(a) {{label}}",
+    "creatingNewLabel": "Criando novo(a) {{label}}",
     "created": "Criado",
     "createdAt": "Criado Em",
     "creating": "Criando",

@@ -163,6 +163,7 @@
     "create": "Crea",
     "createNew": "Crea Nuovo",
     "createNewLabel": "Crea nuovo {{label}}",
+    "creatingNewLabel": "Creazione di un nuovo {{label}}",
     "created": "Data di creazione",
     "createdAt": "Creato il",
     "creating": "Crea nuovo",

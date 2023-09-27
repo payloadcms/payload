@@ -15,8 +15,12 @@ import { useLocale } from '../../utilities/Locale'
 import { usePreferences } from '../../utilities/Preferences'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 import DefaultGlobalView from './Default'
+import { EditDepthContext } from '../../utilities/EditDepth'
+import { EditViewProps } from '../types'
 
 const GlobalView: React.FC<IndexProps> = (props) => {
+  const { global } = props
+
   const { state: locationState } = useLocation<{ data?: Record<string, unknown> }>()
   const { code: locale } = useLocale()
   const { setStepNav } = useStepNav()
@@ -32,8 +36,6 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     routes: { api },
     serverURL,
   } = useConfig()
-
-  const { global } = props
 
   const {
     admin: { components: { views: { Edit: Edit } = {} } = {} } = {},
@@ -100,26 +102,30 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   const isLoading = !initialState || !docPermissions || isLoadingData
 
+  const componentProps: EditViewProps = {
+    action: `${serverURL}${api}/globals/${slug}?locale=${locale}&fallback-locale=null`,
+    apiURL: `${serverURL}${api}/globals/${slug}?locale=${locale}${
+      global.versions?.drafts ? '&draft=true' : ''
+    }`,
+    canAccessAdmin: permissions?.canAccessAdmin,
+    data: dataToRender,
+    global,
+    initialState,
+    isLoading,
+    onSave,
+    permissions: docPermissions,
+    updatedAt: updatedAt || dataToRender?.updatedAt,
+    user,
+  }
+
   return (
-    <RenderCustomComponent
-      CustomComponent={typeof Edit === 'function' ? Edit : undefined}
-      DefaultComponent={DefaultGlobalView}
-      componentProps={{
-        action: `${serverURL}${api}/globals/${slug}?locale=${locale}&fallback-locale=null`,
-        apiURL: `${serverURL}${api}/globals/${slug}?locale=${locale}${
-          global.versions?.drafts ? '&draft=true' : ''
-        }`,
-        canAccessAdmin: permissions?.canAccessAdmin,
-        data: dataToRender,
-        global,
-        initialState,
-        isLoading,
-        onSave,
-        permissions: docPermissions,
-        updatedAt: updatedAt || dataToRender?.updatedAt,
-        user,
-      }}
-    />
+    <EditDepthContext.Provider value={1}>
+      <RenderCustomComponent
+        CustomComponent={typeof Edit === 'function' ? Edit : undefined}
+        DefaultComponent={DefaultGlobalView}
+        componentProps={componentProps}
+      />
+    </EditDepthContext.Provider>
   )
 }
 export default GlobalView

@@ -1,5 +1,5 @@
-import type { UpdateVersion } from 'payload/database'
-import type { PayloadRequest, SanitizedCollectionConfig } from 'payload/types'
+import type { TypeWithVersion, UpdateVersionArgs } from 'payload/database'
+import type { PayloadRequest, SanitizedCollectionConfig, TypeWithID } from 'payload/types'
 
 import { buildVersionCollectionFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
@@ -9,14 +9,21 @@ import type { PostgresAdapter } from './types'
 import buildQuery from './queries/buildQuery'
 import { upsertRow } from './upsertRow'
 
-export const updateVersion: UpdateVersion = async function updateVersion(
+export async function updateVersion<T extends TypeWithID>(
   this: PostgresAdapter,
-  { id, collectionSlug, locale, req = {} as PayloadRequest, versionData, where: whereArg },
+  {
+    id,
+    collection,
+    locale,
+    req = {} as PayloadRequest,
+    versionData,
+    where: whereArg,
+  }: UpdateVersionArgs<T>,
 ) {
-  const db = this.sessions?.[req.transactionID] || this.db
-  const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collectionSlug].config
+  const db = this.sessions[req.transactionID]?.db || this.db
+  const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const whereToUse = whereArg || { id: { equals: id } }
-  const tableName = `_${toSnakeCase(collectionSlug)}_versions`
+  const tableName = `_${toSnakeCase(collection)}_v`
   const fields = buildVersionCollectionFields(collectionConfig)
 
   const { where } = await buildQuery({
@@ -27,7 +34,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     where: whereToUse,
   })
 
-  const result = await upsertRow({
+  const result = await upsertRow<TypeWithVersion<T>>({
     id,
     adapter: this,
     data: versionData,
