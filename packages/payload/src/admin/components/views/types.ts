@@ -10,6 +10,8 @@ export type EditViewProps = (
       internalState: Fields
       initialState?: Fields
       permissions: CollectionPermission
+      disableActions: boolean
+      disableLeaveWithoutSaving: boolean
     }
   | {
       global: SanitizedGlobalConfig

@@ -3,17 +3,19 @@ import type { CollisionDetection } from '@dnd-kit/core'
 import { DndContext, rectIntersection } from '@dnd-kit/core'
 import React, { useCallback } from 'react'
 
-import type { LivePreviewViewProps } from '..'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../../exports/types'
 import type { usePopupWindow } from '../usePopupWindow'
 
 import { LivePreviewToolbar } from '../Toolbar'
 import { Droppable } from './Droppable'
+import { EditViewProps } from '../../types'
+import { LivePreviewToolbarContext } from './context'
+
 import './index.scss'
 
 const baseClass = 'toolbar-area'
 
-export type ToolbarProviderProps = LivePreviewViewProps & {
+export type ToolbarProviderProps = EditViewProps & {
   breakpoint?: string
   breakpoints?:
     | SanitizedCollectionConfig['admin']['livePreview']['breakpoints']
@@ -26,12 +28,13 @@ export type ToolbarProviderProps = LivePreviewViewProps & {
   popupState: ReturnType<typeof usePopupWindow>
   setBreakpoint?: (breakpoint: string) => void
   url?: string
+  iframeRef?: React.MutableRefObject<HTMLIFrameElement>
 }
 
-export const ToolbarProvider: React.FC<ToolbarProviderProps> = (props) => {
-  const { children } = props
+export const LivePreviewToolbarProvider: React.FC<ToolbarProviderProps> = (props) => {
+  const { children, iframeRef } = props
 
-  const iframeRef = React.useRef<HTMLIFrameElement>(null)
+  const [zoom, setZoom] = React.useState(1)
   const [position, setPosition] = React.useState({ x: 0, y: 0 })
 
   let url
@@ -96,21 +99,28 @@ export const ToolbarProvider: React.FC<ToolbarProviderProps> = (props) => {
   )
 
   return (
-    <DndContext collisionDetection={customCollisionDetectionAlgorithm} onDragEnd={handleDragEnd}>
-      <Droppable>
-        {children}
-        <div className={`${baseClass}__toolbar-wrapper`}>
-          <LivePreviewToolbar
-            {...props}
-            iframeRef={iframeRef}
-            style={{
-              left: `${position.x}px`,
-              top: `${position.y}px`,
-            }}
-            url={url}
-          />
-        </div>
-      </Droppable>
-    </DndContext>
+    <LivePreviewToolbarContext.Provider
+      value={{
+        zoom,
+        setZoom,
+      }}
+    >
+      <DndContext collisionDetection={customCollisionDetectionAlgorithm} onDragEnd={handleDragEnd}>
+        <Droppable>
+          {children}
+          <div className={`${baseClass}__toolbar-wrapper`}>
+            <LivePreviewToolbar
+              {...props}
+              iframeRef={iframeRef}
+              style={{
+                left: `${position.x}px`,
+                top: `${position.y}px`,
+              }}
+              url={url}
+            />
+          </div>
+        </Droppable>
+      </DndContext>
+    </LivePreviewToolbarContext.Provider>
   )
 }

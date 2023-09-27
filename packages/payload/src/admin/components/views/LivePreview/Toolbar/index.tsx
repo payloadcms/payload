@@ -7,6 +7,7 @@ import { X } from '../../..'
 import { ExternalLinkIcon } from '../../../graphics/ExternalLink'
 import DragHandle from '../../../icons/Drag'
 import './index.scss'
+import { useLivePreviewToolbarContext } from '../ToolbarProvider/context'
 const baseClass = 'live-preview-toolbar'
 
 export const LivePreviewToolbar: React.FC<
@@ -25,7 +26,7 @@ export const LivePreviewToolbar: React.FC<
     url,
   } = props
 
-  const [zoom, setZoom] = React.useState(100)
+  const { zoom, setZoom } = useLivePreviewToolbarContext()
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: 'live-preview-toolbar',
@@ -83,8 +84,8 @@ export const LivePreviewToolbar: React.FC<
         </div>
         <select
           className={`${baseClass}__zoom`}
-          onChange={(e) => setZoom(Number(e.target.value))}
-          value={zoom}
+          onChange={(e) => setZoom(Number(e.target.value) / 100)}
+          value={zoom * 100}
         >
           <option value={50}>50%</option>
           <option value={75}>75%</option>

@@ -2,8 +2,6 @@ import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
-import type { GlobalEditViewProps } from '../Global/types'
-import type { CollectionEditViewProps } from '../collections/Edit/types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentControls } from '../../elements/DocumentControls'
@@ -13,21 +11,14 @@ import { filterFields } from '../../forms/RenderFields/filterFields'
 import { fieldTypes } from '../../forms/field-types'
 import LeaveWithoutSaving from '../../modals/LeaveWithoutSaving'
 import Meta from '../../utilities/Meta'
-import { Preview } from './Preview'
+import { PreviewWindow } from './PreviewWindow'
 import './index.scss'
 import { usePopupWindow } from './usePopupWindow'
+import { EditViewProps } from '../types'
 
 const baseClass = 'live-preview'
 
-export type LivePreviewViewProps =
-  | ({
-      collection: SanitizedCollectionConfig
-    } & CollectionEditViewProps)
-  | ({
-      global: SanitizedGlobalConfig
-    } & GlobalEditViewProps)
-
-export const LivePreviewView: React.FC<LivePreviewViewProps> = (props) => {
+export const LivePreviewView: React.FC<EditViewProps> = (props) => {
   const { i18n, t } = useTranslation('general')
 
   let url
@@ -120,7 +111,7 @@ export const LivePreviewView: React.FC<LivePreviewViewProps> = (props) => {
             )}
           </Gutter>
         </div>
-        <Preview {...props} popupState={popupState} url={url} />
+        <PreviewWindow {...props} popupState={popupState} url={url} />
       </div>
     </Fragment>
   )

@@ -1,19 +1,21 @@
 import React, { useEffect } from 'react'
 
-import type { LivePreviewViewProps } from '..'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../../exports/types'
 import type { usePopupWindow } from '../usePopupWindow'
 
 import { useResize } from '../../../../utilities/useResize'
 import { useAllFormFields } from '../../../forms/Form/context'
 import reduceFieldsToValues from '../../../forms/Form/reduceFieldsToValues'
-import { ToolbarProvider } from '../ToolbarProvider'
+import { IFrame } from '../PreviewIFrame'
+import { EditViewProps } from '../../types'
+
 import './index.scss'
+import { LivePreviewToolbarProvider } from '../ToolbarProvider'
 
-const baseClass = 'live-preview-frame'
+const baseClass = 'live-preview-window'
 
-export const Preview: React.FC<
-  LivePreviewViewProps & {
+export const PreviewWindow: React.FC<
+  EditViewProps & {
     popupState: ReturnType<typeof usePopupWindow>
     url?: string
   }
@@ -100,23 +102,16 @@ export const Preview: React.FC<
               width: breakpoints.find((bp) => bp.name === breakpoint)?.width || '100%',
             }}
           >
-            <ToolbarProvider
+            <LivePreviewToolbarProvider
               {...props}
               breakpoint={breakpoint}
               breakpoints={breakpoints}
               deviceSize={size}
               setBreakpoint={setBreakpoint}
+              iframeRef={iframeRef}
             >
-              <iframe
-                className={`${baseClass}__iframe`}
-                onLoad={() => {
-                  setIframeHasLoaded(true)
-                }}
-                ref={iframeRef}
-                src={url}
-                title={url}
-              />
-            </ToolbarProvider>
+              <IFrame ref={iframeRef} url={url} setIframeHasLoaded={setIframeHasLoaded} />
+            </LivePreviewToolbarProvider>
           </div>
         </div>
       </div>
