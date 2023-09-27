@@ -35,11 +35,15 @@ const ResponsiveWindow: React.FC<{
       style={{
         height:
           foundBreakpoint && typeof foundBreakpoint?.height === 'number'
-            ? `${foundBreakpoint?.height / (zoom || 1)}px`
+            ? `${foundBreakpoint?.height / (typeof zoom === 'number' ? zoom : 1)}px`
+            : typeof zoom === 'number'
+            ? `${100 / zoom}%`
             : '100%',
         width:
           foundBreakpoint && typeof foundBreakpoint?.width === 'number'
-            ? `${foundBreakpoint?.width / (zoom || 1)}px`
+            ? `${foundBreakpoint?.width / (typeof zoom === 'number' ? zoom : 1)}px`
+            : typeof zoom === 'number'
+            ? `${100 / zoom}%`
             : '100%',
       }}
     >
