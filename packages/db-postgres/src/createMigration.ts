@@ -70,8 +70,10 @@ export const createMigration: CreateMigration = async function createMigration(
 
   const timestamp = `${formattedDate}_${formattedTime}`
 
-  const formattedName = migrationName.replace(/\W/g, '_')
-  const fileName = `${timestamp}_${formattedName}.ts`
+  const fileName = migrationName
+    ? `${timestamp}_${migrationName.replace(/\W/g, '_')}.ts`
+    : `${timestamp}.ts`
+
   const filePath = `${dir}/${fileName}`
 
   let drizzleJsonBefore = getDefaultDrizzleSnapshot()
