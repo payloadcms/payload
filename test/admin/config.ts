@@ -64,6 +64,7 @@ export default buildConfigWithDefaults({
     },
   },
   localization: {
+    defaultLocale: 'en',
     locales: ['en', 'es'],
   },
   collections: [
