@@ -4,6 +4,7 @@ import type { CollectionPermission } from '../../../../../auth/types'
 import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
 import type { Document } from '../../../../../types'
 import type { Fields } from '../../../forms/Form/types'
+import type { SetUploadEdits, UploadEdits } from './Upload/types'
 
 export type IndexProps = {
   collection: SanitizedCollectionConfig
@@ -31,7 +32,8 @@ export type Props = IndexProps & {
       operation: 'create' | 'update'
     },
   ) => void
-  setFocalPoint?: (focalPoint: { x: number; y: number }) => void
   permissions: CollectionPermission
+  setUploadEdits?: SetUploadEdits
   updatedAt?: string
+  uploadEdits?: UploadEdits
 }

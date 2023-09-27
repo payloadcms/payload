@@ -13,6 +13,7 @@ import type { FileData, FileToSave, ProbedImageSize } from './types'
 
 import { FileUploadError, MissingFile } from '../errors'
 import canResizeImage from './canResizeImage'
+import cropImage from './cropImage'
 import getImageSize from './getImageSize'
 import getSafeFileName from './getSafeFilename'
 import resizeAndTransformImageSizes from './imageResizer'
@@ -73,6 +74,10 @@ export const generateFileData = async <T>({
   const filesToSave: FileToSave[] = []
   const fileData: Partial<FileData> = {}
   const fileIsAnimated = file.mimetype === 'image/gif' || file.mimetype === 'image/webp'
+  const cropData =
+    typeof req.query?.uploadEdits === 'object' && 'crop' in req.query.uploadEdits
+      ? req.query?.uploadEdits.crop
+      : undefined
 
   try {
     const fileSupportsResize = canResizeImage(file.mimetype)
@@ -147,20 +152,43 @@ export const generateFileData = async <T>({
     }
 
     fileData.filename = fsSafeName
+    let fileForResize = file
 
-    // Original file
-    filesToSave.push({
-      buffer: fileBuffer?.data || file.data,
-      path: `${staticPath}/${fsSafeName}`,
-    })
+    if (cropData) {
+      const { data: croppedImage, info } = await cropImage({ cropData, dimensions, file })
+
+      filesToSave.push({
+        buffer: croppedImage,
+        path: `${staticPath}/${fsSafeName}`,
+      })
+
+      fileForResize = {
+        ...file,
+        data: croppedImage,
+        size: info.size,
+      }
+      fileData.width = info.width
+      fileData.height = info.height
+      fileData.filesize = info.size
+    } else {
+      filesToSave.push({
+        buffer: fileBuffer?.data || file.data,
+        path: `${staticPath}/${fsSafeName}`,
+      })
+    }
 
     if (Array.isArray(imageSizes) && fileSupportsResize) {
       req.payloadUploadSizes = {}
-
       const { sizeData, sizesToSave } = await resizeAndTransformImageSizes({
         config: collectionConfig,
-        dimensions,
-        file,
+        dimensions: !cropData
+          ? dimensions
+          : {
+              ...dimensions,
+              height: fileData.height,
+              width: fileData.width,
+            },
+        file: fileForResize,
         mimeType: fileData.mimeType,
         req,
         savedFilename: fsSafeName || file.name,

@@ -4,17 +4,16 @@ import { useTranslation } from 'react-i18next'
 import type { Props } from './types'
 
 import Button from '../../../../elements/Button'
+import { Drawer, DrawerToggler } from '../../../../elements/Drawer'
 import { Dropzone } from '../../../../elements/Dropzone'
+import EditUpload from '../../../../elements/EditUpload'
 import FileDetails from '../../../../elements/FileDetails'
 import Error from '../../../../forms/Error'
 import reduceFieldsToValues from '../../../../forms/Form/reduceFieldsToValues'
 import useField from '../../../../forms/useField'
 import FileGraphic from '../../../../graphics/File'
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo'
-import { Drawer, DrawerToggler } from '../../../../elements/Drawer'
-
 import './index.scss'
-import FocalPoint from '../../../../elements/FocalPoint'
 
 const baseClass = 'file-field'
 const drawerSlug = 'edit-upload'
@@ -28,8 +27,7 @@ const validate = (value) => {
 }
 
 export const Upload: React.FC<Props> = (props) => {
-  const { collection, internalState, onChange, setFocalPoint } = props
-
+  const { collection, internalState, onChange, setUploadEdits, uploadEdits } = props
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const { t } = useTranslation(['upload', 'general'])
@@ -129,11 +127,11 @@ export const Upload: React.FC<Props> = (props) => {
                 </div>
 
                 <div className={`${baseClass}__file-mutation`}>
-                  <DrawerToggler slug={drawerSlug} className={`${baseClass}__edit`}>
-                    Set Focal Point
+                  <DrawerToggler className={`${baseClass}__edit`} slug={drawerSlug}>
+                    Preview Sizes
                   </DrawerToggler>
-                  <DrawerToggler slug={drawerSlug} className={`${baseClass}__edit`}>
-                    Crop Image
+                  <DrawerToggler className={`${baseClass}__edit`} slug={drawerSlug}>
+                    Edit Image
                   </DrawerToggler>
                 </div>
               </div>
@@ -141,7 +139,11 @@ export const Upload: React.FC<Props> = (props) => {
           )}
 
           <Drawer slug={drawerSlug} title={`Editing ${value?.name}`}>
-            <FocalPoint fileSrc={fileSrc} value={value} setFocalPoint={setFocalPoint} />
+            <EditUpload
+              fileSrc={fileSrc}
+              setUploadEdits={setUploadEdits}
+              uploadEdits={uploadEdits}
+            />
           </Drawer>
 
           {!value && (

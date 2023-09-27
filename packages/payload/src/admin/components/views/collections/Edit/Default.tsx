@@ -60,9 +60,10 @@ const DefaultEditView: React.FC<Props> = (props) => {
     isEditing,
     isLoading,
     onSave: onSaveFromProps,
-    setFocalPoint,
     permissions,
+    setUploadEdits,
     updatedAt,
+    uploadEdits,
   } = props
 
   const {
@@ -169,7 +170,8 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       <Upload
                         collection={collection}
                         internalState={internalState}
-                        setFocalPoint={setFocalPoint}
+                        setUploadEdits={setUploadEdits}
+                        uploadEdits={uploadEdits}
                       />
                     )}
 

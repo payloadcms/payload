@@ -1,13 +1,17 @@
 @import '../../../scss/styles.scss';
 
-.focal-point {
+.edit-upload {
   display: flex;
   margin: 0 calc(var(--gutter-h) * -1);
   border-top: 1px solid var(--theme-elevation-150);
   padding: 0 var(--gutter-h);
   height: 100%;
 
-  &__imageWrap {
+  &__crop {
+    margin-bottom: base(2);
+  }
+
+  &__toolWrap {
     border-right: 1px solid var(--theme-elevation-150);
     padding: base(2) base(1.5) 0 0;
   }
@@ -30,15 +34,18 @@
   &__sidebar {
     padding: base(2) 0 0 base(1.5);
     min-width: 350px;
+
+    & > div:first-child {
+      margin-bottom: base(2);
+    }
   }
 
-  &__coordinates {
+  &__inputsWrap {
     display: flex;
     gap: base(1);
   }
 
-  &__x,
-  &__y {
+  &__input {
     & input {
       @include formInput;
       margin-top: base(0.25);
@@ -48,7 +55,7 @@
   @include small-break {
     flex-direction: column;
 
-    &__imageWrap {
+    &__focalPoint {
       border-right: none;
       padding: base(1) 0;
     }

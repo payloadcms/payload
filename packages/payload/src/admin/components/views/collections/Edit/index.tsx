@@ -1,9 +1,11 @@
+import queryString from 'qs'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Redirect, useHistory, useRouteMatch } from 'react-router-dom'
 
 import type { CollectionPermission } from '../../../../../auth'
 import type { Fields } from '../../../forms/Form/types'
+import type { UploadEdits } from './Upload/types'
 import type { IndexProps } from './types'
 
 import usePayloadAPI from '../../../../hooks/usePayloadAPI'
@@ -26,7 +28,12 @@ const EditView: React.FC<IndexProps> = (props) => {
   const [fields] = useState(() => formatFields(incomingCollection, isEditing))
   const [collection] = useState(() => ({ ...incomingCollection, fields }))
   const [redirect, setRedirect] = useState<string>()
-  const [focalPoint, setFocalPoint] = useState({ x: 50, y: 50 })
+  const [uploadEdits, setUploadEdits] = useState<UploadEdits>({
+    crop: undefined,
+    focalPoint: undefined,
+  })
+
+  const editQueryParams = queryString.stringify({ uploadEdits })
 
   const { code: locale } = useLocale()
   const {
@@ -113,7 +120,7 @@ const EditView: React.FC<IndexProps> = (props) => {
   }`
   const action = `${serverURL}${api}/${slug}${
     isEditing ? `/${id}` : ''
-  }?locale=${locale}&depth=0&fallback-locale=null${`&x=${focalPoint.x}&y=${focalPoint.y}`}`
+  }?locale=${locale}&depth=0&fallback-locale=null&${editQueryParams}`
   const hasSavePermission =
     (isEditing && docPermissions?.update?.permission) ||
     (!isEditing && (docPermissions as CollectionPermission)?.create?.permission)
@@ -135,9 +142,10 @@ const EditView: React.FC<IndexProps> = (props) => {
           isEditing,
           isLoading,
           onSave,
-          setFocalPoint,
           permissions: docPermissions,
+          setUploadEdits,
           updatedAt: updatedAt || data?.updatedAt,
+          uploadEdits,
         }}
       />
     </EditDepthContext.Provider>
