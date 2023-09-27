@@ -3,8 +3,8 @@
 .live-preview-frame {
   width: 60%;
   position: sticky;
-  top: var(--controls-height);
-  height: calc(100vh - var(--controls-height));
+  top: var(--doc-controls-height);
+  height: calc(100vh - var(--doc-controls-height));
 
   &__iframe {
     border: 0;
