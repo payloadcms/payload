@@ -8,7 +8,13 @@ import type { Post } from './config'
 import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import wait from '../../packages/payload/src/utilities/wait'
-import { openDocControls, openMainMenu, saveDocAndAssert, saveDocHotkeyAndAssert } from '../helpers'
+import {
+  exactText,
+  openDocControls,
+  openMainMenu,
+  saveDocAndAssert,
+  saveDocHotkeyAndAssert,
+} from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import { globalSlug, slug, slugPluralLabel } from './shared'
@@ -308,16 +314,20 @@ describe('admin', () => {
 
         await page.locator('.list-controls__toggle-columns').click()
 
-        // wait until the column toggle UI is visible and fully expanded
-        await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
-
+        // track the number of columns before manipulating toggling any
         const numberOfColumns = await page.locator(columnCountLocator).count()
+
+        // wait until the column toggle UI is visible and fully expanded
+        await expect(page.locator('.column-selector')).toBeVisible()
         await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
-        const idButton = page.locator('.column-selector .column-selector__column:has-text("ID")')
+        const idButton = page.locator(`.column-selector .column-selector__column`, {
+          hasText: exactText('ID'),
+        })
 
         // Remove ID column
         await idButton.click()
+
         // wait until .cell-id is not present on the page:
         await page.locator('.cell-id').waitFor({ state: 'detached' })
 
@@ -343,7 +353,12 @@ describe('admin', () => {
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
         // toggle off the ID column
-        await page.locator('.column-selector .column-selector__column:has-text("ID")').click()
+        await page
+          .locator('.column-selector .column-selector__column', {
+            hasText: exactText('ID'),
+          })
+          .click()
+
         // wait until .cell-id is not present on the page:
         await page.locator('.cell-id').waitFor({ state: 'detached' })
 
@@ -357,11 +372,15 @@ describe('admin', () => {
 
         // open the column controls
         await page.locator('.list-controls__toggle-columns').click()
+
         // wait until the column toggle UI is visible and fully expanded
-        await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+        await expect(page.locator('.column-selector')).toBeVisible()
+        await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
         // ensure the ID column is active
-        const idButton = page.locator('.column-selector .column-selector__column:has-text("ID")')
+        const idButton = page.locator('.column-selector .column-selector__column', {
+          hasText: exactText('ID'),
+        })
 
         const buttonClasses = await idButton.getAttribute('class')
 
@@ -484,10 +503,16 @@ describe('admin', () => {
         await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
         const numberBoundingBox = await page
-          .locator('.column-selector .column-selector__column:has-text("Number")')
+          .locator(`.column-selector .column-selector__column`, {
+            hasText: exactText('Number'),
+          })
+
           .boundingBox()
+
         const idBoundingBox = await page
-          .locator('.column-selector .column-selector__column:has-text("ID")')
+          .locator(`.column-selector .column-selector__column`, {
+            hasText: exactText('ID'),
+          })
           .boundingBox()
 
         if (!numberBoundingBox || !idBoundingBox) return
@@ -546,7 +571,10 @@ describe('admin', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option:has-text("Post")',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            {
+              hasText: exactText('Post'),
+            },
           )
           .click()
 
@@ -587,7 +615,10 @@ describe('admin', () => {
         // deselect the "id" column
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column:has-text("ID")',
+            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column',
+            {
+              hasText: exactText('ID'),
+            },
           )
           .click()
 
@@ -595,14 +626,20 @@ describe('admin', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option:has-text("Post")',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            {
+              hasText: exactText('Post'),
+            },
           )
           .click()
 
         // deselect the "number" column
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column:has-text("Number")',
+            '[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column',
+            {
+              hasText: exactText('Number'),
+            },
           )
           .click()
 
@@ -610,7 +647,10 @@ describe('admin', () => {
         await collectionSelector.click()
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option:has-text("User")',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            {
+              hasText: exactText('User'),
+            },
           )
           .click()
 
@@ -625,9 +665,13 @@ describe('admin', () => {
 
         // select the "Post" collection again
         await collectionSelector.click()
+
         await page
           .locator(
-            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option:has-text("Post")',
+            '[id^=list-drawer_1_] .list-drawer__select-collection.react-select .rs__option',
+            {
+              hasText: exactText('Post'),
+            },
           )
           .click()
 
@@ -645,7 +689,9 @@ describe('admin', () => {
         await createPost()
         await page.goto(url.list)
         await expect(
-          page.locator('table > thead > tr > th:has-text("Demo UI Field")'),
+          page.locator('table > thead > tr > th', {
+            hasText: exactText('Demo UI Field'),
+          }),
         ).toBeVisible()
       })
     })
@@ -773,7 +819,11 @@ describe('admin', () => {
 
         // column controls
         await page.locator('.list-controls__toggle-columns').click()
-        await expect(page.locator('.column-selector__column:has-text("Title")')).toHaveText('Title')
+        await expect(
+          page.locator('.column-selector__column', {
+            hasText: exactText('Title'),
+          }),
+        ).toHaveText('Title')
 
         // filters
         await page.locator('.list-controls__toggle-where').click()
@@ -798,7 +848,11 @@ describe('admin', () => {
         await page.goto(url.list)
         await page.locator('.list-controls__toggle-columns').click()
         // expecting the label to fall back to english as default fallbackLng
-        await expect(page.locator('.column-selector__column:has-text("Title")')).toHaveText('Title')
+        await expect(
+          page.locator('.column-selector__column', {
+            hasText: exactText('Title'),
+          }),
+        ).toHaveText('Title')
       })
     })
   })
