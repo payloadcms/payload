@@ -13,7 +13,7 @@ import Meta from '../../../utilities/Meta'
 import './index.scss'
 import { EditViewProps } from '../../types'
 
-const baseClass = 'global-edit'
+const baseClass = 'global-default-edit'
 
 export const DefaultGlobalEdit: React.FC<EditViewProps> = (props) => {
   if ('global' in props) {
@@ -47,7 +47,10 @@ export const DefaultGlobalEdit: React.FC<EditViewProps> = (props) => {
           permissions={permissions}
         />
         <div
-          className={[`${baseClass}__wrapper`, hasSidebar && `${baseClass}__wrapper--has-sidebar`]
+          className={[
+            baseClass,
+            hasSidebar ? `${baseClass}--has-sidebar` : `${baseClass}--no-sidebar`,
+          ]
             .filter(Boolean)
             .join(' ')}
         >

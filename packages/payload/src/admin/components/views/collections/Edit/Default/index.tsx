@@ -15,7 +15,7 @@ import Upload from '../Upload'
 import './index.scss'
 import { EditViewProps } from '../../../types'
 
-const baseClass = 'collection-edit'
+const baseClass = 'collection-default-edit'
 
 export const DefaultCollectionEdit: React.FC<
   EditViewProps & {
@@ -23,9 +23,9 @@ export const DefaultCollectionEdit: React.FC<
     disableActions?: boolean
   }
 > = (props) => {
-  const { i18n, t } = useTranslation('general')
-
   if ('collection' in props) {
+    const { i18n, t } = useTranslation('general')
+
     const {
       id,
       apiURL,
@@ -67,7 +67,10 @@ export const DefaultCollectionEdit: React.FC<
           permissions={permissions}
         />
         <div
-          className={[`${baseClass}__wrapper`, hasSidebar && `${baseClass}__wrapper--has-sidebar`]
+          className={[
+            baseClass,
+            hasSidebar ? `${baseClass}--has-sidebar` : `${baseClass}--no-sidebar`,
+          ]
             .filter(Boolean)
             .join(' ')}
         >
@@ -88,6 +91,7 @@ export const DefaultCollectionEdit: React.FC<
             <Gutter className={`${baseClass}__edit`}>
               {auth && (
                 <Auth
+                  className={`${baseClass}__auth`}
                   collection={collection}
                   email={data?.email}
                   operation={operation}
@@ -106,6 +110,7 @@ export const DefaultCollectionEdit: React.FC<
                 filter={(field) => !field?.admin?.position || field?.admin?.position !== 'sidebar'}
                 permissions={permissions.fields}
                 readOnly={!hasSavePermission}
+                className={`${baseClass}__fields`}
               />
             </Gutter>
           </div>
@@ -124,6 +129,4 @@ export const DefaultCollectionEdit: React.FC<
       </Fragment>
     )
   }
-
-  return null
 }

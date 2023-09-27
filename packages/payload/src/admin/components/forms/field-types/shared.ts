@@ -1,5 +1,7 @@
 import type { Locale, SanitizedLocalizationConfig } from '../../../../config/types'
 
+export const fieldBaseClass = 'field-type'
+
 /**
  * Determines whether a field should be displayed as right-to-left (RTL) based on its configuration, payload's localization configuration and the adming user's currently enabled locale.
 

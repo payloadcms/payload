@@ -133,6 +133,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
           indexPath={indexPath}
           permissions={permissions?.blocks?.[row.blockType]?.fields}
           readOnly={readOnly}
+          margins="small"
         />
       </Collapsible>
     </div>

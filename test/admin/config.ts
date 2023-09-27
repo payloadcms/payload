@@ -17,7 +17,7 @@ import CustomDefaultView from './components/views/CustomDefault'
 import CustomEditView from './components/views/CustomEdit'
 import CustomVersionsView from './components/views/CustomVersions'
 import CustomView from './components/views/CustomView'
-import { globalSlug, slug } from './shared'
+import { globalSlug, slug, slugPluralLabel, slugSingularLabel } from './shared'
 
 export interface Post {
   createdAt: Date
@@ -90,6 +90,10 @@ export default buildConfigWithDefaults({
     },
     {
       slug,
+      labels: {
+        singular: slugSingularLabel,
+        plural: slugPluralLabel,
+      },
       admin: {
         description: 'Description',
         listSearchableFields: ['title', 'description', 'number'],
@@ -132,6 +136,13 @@ export default buildConfigWithDefaults({
               Field: DemoUIFieldField,
               Cell: DemoUIFieldCell,
             },
+          },
+        },
+        {
+          name: 'sidebarField',
+          type: 'text',
+          admin: {
+            position: 'sidebar',
           },
         },
       ],
@@ -272,6 +283,13 @@ export default buildConfigWithDefaults({
         {
           name: 'title',
           type: 'text',
+        },
+        {
+          name: 'sidebarField',
+          type: 'text',
+          admin: {
+            position: 'sidebar',
+          },
         },
       ],
     },
