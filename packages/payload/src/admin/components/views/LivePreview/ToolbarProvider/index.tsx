@@ -1,7 +1,5 @@
-import type { CollisionDetection } from '@dnd-kit/core'
-
-import { DndContext, rectIntersection } from '@dnd-kit/core'
-import React, { useCallback } from 'react'
+import { DndContext } from '@dnd-kit/core'
+import React from 'react'
 
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../../exports/types'
 import type { usePopupWindow } from '../usePopupWindow'
@@ -12,6 +10,7 @@ import { EditViewProps } from '../../types'
 import { LivePreviewToolbarContext } from './context'
 
 import './index.scss'
+import { customCollisionDetection } from './collisionDetection'
 
 export type ToolbarProviderProps = EditViewProps & {
   breakpoint?: string
@@ -62,40 +61,6 @@ export const LivePreviewToolbarProvider: React.FC<ToolbarProviderProps> = (props
     }
   }
 
-  // If the toolbar exits the preview area, we need to reset its position
-  // This will prevent the toolbar from getting stuck outside the preview area
-  const customCollisionDetectionAlgorithm: CollisionDetection = useCallback(
-    ({ droppableContainers, ...args }) => {
-      const droppableContainer = droppableContainers.find(({ id }) => id === 'live-preview-area')
-
-      const rectIntersectionCollisions = rectIntersection({
-        ...args,
-        droppableContainers: [droppableContainer],
-      })
-
-      // Collision detection algorithms return an array of collisions
-      if (rectIntersectionCollisions.length === 0) {
-        // The preview area is not intersecting, return early
-        return rectIntersectionCollisions
-      }
-
-      // Compute whether the draggable element is completely contained within the preview area
-      const draggableRect = args.collisionRect
-      const previewAreaRect = droppableContainer?.rect?.current
-
-      const isContained =
-        draggableRect.top >= previewAreaRect.top &&
-        draggableRect.left >= previewAreaRect.left &&
-        draggableRect.bottom <= previewAreaRect.bottom &&
-        draggableRect.right <= previewAreaRect.right
-
-      if (isContained) {
-        return rectIntersectionCollisions
-      }
-    },
-    [],
-  )
-
   return (
     <LivePreviewToolbarContext.Provider
       value={{
@@ -103,7 +68,7 @@ export const LivePreviewToolbarProvider: React.FC<ToolbarProviderProps> = (props
         setZoom,
       }}
     >
-      <DndContext collisionDetection={customCollisionDetectionAlgorithm} onDragEnd={handleDragEnd}>
+      <DndContext collisionDetection={customCollisionDetection} onDragEnd={handleDragEnd}>
         <ToolbarArea>
           {children}
           <div>

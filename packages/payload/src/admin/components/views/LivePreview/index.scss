@@ -23,6 +23,18 @@
     flex-direction: column;
     min-height: 100%;
     position: relative;
+
+    &::after {
+      content: ' ';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: calc(var(--base) * 2);
+      height: 100%;
+      background: linear-gradient(to left, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0) 100%);
+      pointer-events: none;
+      z-index: -1;
+    }
   }
 
   &__edit {
