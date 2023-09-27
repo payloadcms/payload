@@ -21,12 +21,12 @@
   &__content {
     @include blur-bg();
     opacity: 0;
-    transform: translateX(#{base(4)});
+    transform: translateX(calc(var(--base) * 4));
     position: relative;
     z-index: 2;
     width: 100%;
-    transition: all 300ms ease-out;
     overflow: hidden;
+    transition: all 300ms ease-out;
   }
 
   &__content-children {
@@ -37,19 +37,21 @@
   }
 
   &--is-open {
-    .drawer__content,
-    .drawer__blur-bg,
-    .drawer__close {
-      opacity: 1;
-    }
+    .drawer {
+      &__content,
+      &__blur-bg,
+      &__close {
+        opacity: 1;
+      }
 
-    .drawer__close {
-      transition: opacity 300ms ease-in-out;
-      transition-delay: 100ms;
-    }
+      &__close {
+        transition: opacity 300ms ease-in-out;
+        transition-delay: 100ms;
+      }
 
-    .drawer__content {
-      transform: translateX(0);
+      &__content {
+        transform: translateX(0);
+      }
     }
   }
 
