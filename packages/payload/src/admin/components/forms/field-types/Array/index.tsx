@@ -187,26 +187,28 @@ const ArrayFieldType: React.FC<Props> = (props) => {
               <ErrorPill count={fieldErrorCount} withMessage />
             )}
           </div>
-          <ul className={`${baseClass}__header-actions`}>
-            <li>
-              <button
-                className={`${baseClass}__header-action`}
-                onClick={() => toggleCollapseAll(true)}
-                type="button"
-              >
-                {t('collapseAll')}
-              </button>
-            </li>
-            <li>
-              <button
-                className={`${baseClass}__header-action`}
-                onClick={() => toggleCollapseAll(false)}
-                type="button"
-              >
-                {t('showAll')}
-              </button>
-            </li>
-          </ul>
+          {rows.length > 0 && (
+            <ul className={`${baseClass}__header-actions`}>
+              <li>
+                <button
+                  className={`${baseClass}__header-action`}
+                  onClick={() => toggleCollapseAll(true)}
+                  type="button"
+                >
+                  {t('collapseAll')}
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`${baseClass}__header-action`}
+                  onClick={() => toggleCollapseAll(false)}
+                  type="button"
+                >
+                  {t('showAll')}
+                </button>
+              </li>
+            </ul>
+          )}
         </div>
         <FieldDescription
           className={`field-description-${path.replace(/\./g, '__')}`}

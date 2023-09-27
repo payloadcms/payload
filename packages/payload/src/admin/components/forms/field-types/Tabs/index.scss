@@ -52,7 +52,7 @@
     @extend %btn-reset;
     @extend %h4;
     display: flex;
-    padding-bottom: base(0.75);
+    padding-bottom: base(1);
     margin: 0 $baseline 0 0;
     cursor: pointer;
     opacity: 0.5;
@@ -106,6 +106,7 @@
 
     &__tab-button {
       margin: 0 base(0.75) 0 0;
+      padding-bottom: base(0.5);
 
       &:last-child {
         margin: 0;

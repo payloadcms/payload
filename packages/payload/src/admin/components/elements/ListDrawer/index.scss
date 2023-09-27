@@ -97,6 +97,10 @@
       margin-bottom: base(0.5);
     }
 
+    &__select-collection-wrap {
+      margin-top: calc(var(--base) / 2);
+    }
+
     &__header-content {
       button .pill {
         top: 2px;
