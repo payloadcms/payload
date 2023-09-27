@@ -4,6 +4,9 @@ import { useCallback, useEffect } from 'react'
 
 import { setsAreEqual } from '../utilities/setsAreEqual'
 
+// Required to be outside of hook, else debounce would be necessary
+// and then one could not prevent the default behaviour.
+
 // It maps the pressed keys with the time they were pressed, in order to implement a maximum time
 // for the user to press the next key in the sequence
 
