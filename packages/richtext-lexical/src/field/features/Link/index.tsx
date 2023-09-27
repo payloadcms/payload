@@ -1,6 +1,11 @@
+import type { i18n } from 'i18next'
+import type { SanitizedConfig } from 'payload/config'
+import type { Field } from 'payload/types'
+
 import LexicalClickableLinkPlugin from '@lexical/react/LexicalClickableLinkPlugin'
 import { $findMatchingParent } from '@lexical/utils'
 import { $isRangeSelection } from 'lexical'
+import { withMergedProps } from 'payload/components/utilities'
 
 import type { FeatureProvider } from '../types'
 import type { LinkAttributes } from './nodes/LinkNode'
@@ -15,7 +20,12 @@ import { AutoLinkPlugin } from './plugins/autoLink'
 import { FloatingLinkEditorPlugin } from './plugins/floatingLinkEditor'
 import { LinkPlugin } from './plugins/link'
 
-export const LinkFeature = (): FeatureProvider => {
+export type LinkProps = {
+  fields?:
+    | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: i18n }) => Field[])
+    | Field[]
+}
+export const LinkFeature = (props: LinkProps): FeatureProvider => {
   return {
     feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
       return {
@@ -68,7 +78,10 @@ export const LinkFeature = (): FeatureProvider => {
             position: 'normal',
           },
           {
-            Component: FloatingLinkEditorPlugin,
+            Component: withMergedProps({
+              Component: FloatingLinkEditorPlugin,
+              toMergeIntoProps: props,
+            }),
             position: 'floatingAnchorElem',
           },
         ],
