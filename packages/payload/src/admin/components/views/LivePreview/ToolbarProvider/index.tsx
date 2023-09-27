@@ -7,13 +7,11 @@ import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../
 import type { usePopupWindow } from '../usePopupWindow'
 
 import { LivePreviewToolbar } from '../Toolbar'
-import { Droppable } from './Droppable'
+import { ToolbarArea } from '../ToolbarArea'
 import { EditViewProps } from '../../types'
 import { LivePreviewToolbarContext } from './context'
 
 import './index.scss'
-
-const baseClass = 'toolbar-area'
 
 export type ToolbarProviderProps = EditViewProps & {
   breakpoint?: string
@@ -106,9 +104,9 @@ export const LivePreviewToolbarProvider: React.FC<ToolbarProviderProps> = (props
       }}
     >
       <DndContext collisionDetection={customCollisionDetectionAlgorithm} onDragEnd={handleDragEnd}>
-        <Droppable>
+        <ToolbarArea>
           {children}
-          <div className={`${baseClass}__toolbar-wrapper`}>
+          <div>
             <LivePreviewToolbar
               {...props}
               iframeRef={iframeRef}
@@ -119,7 +117,7 @@ export const LivePreviewToolbarProvider: React.FC<ToolbarProviderProps> = (props
               url={url}
             />
           </div>
-        </Droppable>
+        </ToolbarArea>
       </DndContext>
     </LivePreviewToolbarContext.Provider>
   )

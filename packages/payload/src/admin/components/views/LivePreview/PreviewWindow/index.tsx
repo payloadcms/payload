@@ -9,10 +9,44 @@ import reduceFieldsToValues from '../../../forms/Form/reduceFieldsToValues'
 import { IFrame } from '../PreviewIFrame'
 import { EditViewProps } from '../../types'
 
-import './index.scss'
 import { LivePreviewToolbarProvider } from '../ToolbarProvider'
+import { useLivePreviewToolbarContext } from '../ToolbarProvider/context'
+
+import './index.scss'
 
 const baseClass = 'live-preview-window'
+
+const ResponsiveWindow: React.FC<{
+  children: React.ReactNode
+  deviceFrameRef: React.RefObject<HTMLDivElement>
+  breakpoints: SanitizedCollectionConfig['admin']['livePreview']['breakpoints']
+  breakpoint: string
+}> = (props) => {
+  const { children, deviceFrameRef, breakpoints, breakpoint } = props
+
+  const { zoom } = useLivePreviewToolbarContext()
+
+  const foundBreakpoint = breakpoints.find((bp) => bp.name === breakpoint)
+
+  return (
+    <div
+      ref={deviceFrameRef}
+      className={`${baseClass}__responsive-window`}
+      style={{
+        height:
+          foundBreakpoint && typeof foundBreakpoint?.height === 'number'
+            ? `${foundBreakpoint?.height / (zoom || 1)}px`
+            : '100%',
+        width:
+          foundBreakpoint && typeof foundBreakpoint?.width === 'number'
+            ? `${foundBreakpoint?.width / (zoom || 1)}px`
+            : '100%',
+      }}
+    >
+      {children}
+    </div>
+  )
+}
 
 export const PreviewWindow: React.FC<
   EditViewProps & {
@@ -95,24 +129,22 @@ export const PreviewWindow: React.FC<
             .filter(Boolean)
             .join(' ')}
         >
-          <div
-            ref={deviceFrameRef}
-            style={{
-              height: breakpoints.find((bp) => bp.name === breakpoint)?.height || '100%',
-              width: breakpoints.find((bp) => bp.name === breakpoint)?.width || '100%',
-            }}
+          <LivePreviewToolbarProvider
+            {...props}
+            breakpoint={breakpoint}
+            breakpoints={breakpoints}
+            deviceSize={size}
+            setBreakpoint={setBreakpoint}
+            iframeRef={iframeRef}
           >
-            <LivePreviewToolbarProvider
-              {...props}
-              breakpoint={breakpoint}
+            <ResponsiveWindow
+              deviceFrameRef={deviceFrameRef}
               breakpoints={breakpoints}
-              deviceSize={size}
-              setBreakpoint={setBreakpoint}
-              iframeRef={iframeRef}
+              breakpoint={breakpoint}
             >
               <IFrame ref={iframeRef} url={url} setIframeHasLoaded={setIframeHasLoaded} />
-            </LivePreviewToolbarProvider>
-          </div>
+            </ResponsiveWindow>
+          </LivePreviewToolbarProvider>
         </div>
       </div>
     )

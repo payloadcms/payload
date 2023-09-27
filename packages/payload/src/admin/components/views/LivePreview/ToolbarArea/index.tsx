@@ -1,7 +1,11 @@
 import { useDroppable } from '@dnd-kit/core'
 import React from 'react'
 
-export const Droppable: React.FC<{
+import './index.scss'
+
+const baseClass = 'toolbar-area'
+
+export const ToolbarArea: React.FC<{
   children: React.ReactNode
 }> = (props) => {
   const { children } = props
@@ -11,7 +15,7 @@ export const Droppable: React.FC<{
   })
 
   return (
-    <div ref={setNodeRef} style={{ height: '100%' }}>
+    <div ref={setNodeRef} className={baseClass}>
       {children}
     </div>
   )

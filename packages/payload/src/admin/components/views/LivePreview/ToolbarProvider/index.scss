@@ -1,11 +1,1 @@
 @import '../../../../scss/styles.scss';
-
-.toolbar-area {
-  &__toolbar-wrapper {
-    position: absolute;
-    left: 50%;
-    top: base(2);
-    transform-origin: center center;
-    transform: translate3d(-50%, 0, 0);
-  }
-}
