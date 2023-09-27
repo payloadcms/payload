@@ -6,6 +6,10 @@
 
   &--has-sidebar {
     .global-default-edit {
+      &__main {
+        width: 66.66%;
+      }
+
       &__edit {
         [dir='ltr'] & {
           top: 0;
@@ -25,7 +29,7 @@
   }
 
   &__main {
-    width: calc(100% - #{base(18)});
+    width: 100%;
     display: flex;
     flex-direction: column;
     min-height: 100%;
@@ -40,7 +44,7 @@
   &__sidebar-wrap {
     position: sticky;
     top: 0;
-    width: base(15);
+    flex-grow: 1;
   }
 
   &__sidebar {
@@ -59,7 +63,8 @@
     display: flex;
     flex-direction: column;
     gap: var(--base);
-    padding: calc(var(--base) * 2);
+    padding: calc(var(--base) * 1.5) var(--gutter-h) var(--spacing-view-bottom)
+      calc(var(--base) * 2);
   }
 
   &__label {

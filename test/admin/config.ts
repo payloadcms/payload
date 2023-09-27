@@ -137,6 +137,13 @@ export default buildConfigWithDefaults({
             },
           },
         },
+        {
+          name: 'sidebarField',
+          type: 'text',
+          admin: {
+            position: 'sidebar',
+          },
+        },
       ],
     },
     {
@@ -275,6 +282,13 @@ export default buildConfigWithDefaults({
         {
           name: 'title',
           type: 'text',
+        },
+        {
+          name: 'sidebarField',
+          type: 'text',
+          admin: {
+            position: 'sidebar',
+          },
         },
       ],
     },
