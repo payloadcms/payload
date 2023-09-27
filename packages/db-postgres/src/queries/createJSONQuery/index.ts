@@ -45,7 +45,7 @@ type CreateConstraintArgs = {
 }
 
 const createConstraint = ({ operator, pathSegments, value }: CreateConstraintArgs): string => {
-  const jsonQuery = convertPathToJSONTraversal(pathSegments.join('.'))
+  const jsonQuery = convertPathToJSONTraversal(pathSegments)
   return `${pathSegments[0]}${jsonQuery} ${operatorMap[operator]} '${value}'`
 }
 

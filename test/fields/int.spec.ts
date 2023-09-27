@@ -11,7 +11,7 @@ import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
 import configPromise from '../uploads/config'
 import { arrayDefaultValue, arrayFieldsSlug } from './collections/Array'
-import { blocksFieldSeedData } from './collections/Blocks'
+import { blocksDoc } from './collections/Blocks'
 import { dateDoc } from './collections/Date'
 import {
   groupDefaultChild,
@@ -612,16 +612,16 @@ describe('Fields', () => {
         collection: 'block-fields',
       })
 
-      expect(blockFields.docs[0].blocks[0].blockType).toEqual(blocksFieldSeedData[0].blockType)
-      expect(blockFields.docs[0].blocks[0].text).toEqual(blocksFieldSeedData[0].text)
+      expect(blockFields.docs[0].blocks[0].blockType).toEqual(blocksDoc.blocks[0].blockType)
+      expect(blockFields.docs[0].blocks[0].text).toEqual(blocksDoc.blocks[0].text)
 
-      expect(blockFields.docs[0].blocks[2].blockType).toEqual(blocksFieldSeedData[2].blockType)
-      expect(blockFields.docs[0].blocks[2].blockName).toEqual(blocksFieldSeedData[2].blockName)
+      expect(blockFields.docs[0].blocks[2].blockType).toEqual(blocksDoc.blocks[2].blockType)
+      expect(blockFields.docs[0].blocks[2].blockName).toEqual(blocksDoc.blocks[2].blockName)
       expect(blockFields.docs[0].blocks[2].subBlocks[0].number).toEqual(
-        blocksFieldSeedData[2].subBlocks[0].number,
+        blocksDoc.blocks[2].subBlocks[0].number,
       )
       expect(blockFields.docs[0].blocks[2].subBlocks[1].text).toEqual(
-        blocksFieldSeedData[2].subBlocks[1].text,
+        blocksDoc.blocks[2].subBlocks[1].text,
       )
     })
 

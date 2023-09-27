@@ -54,7 +54,7 @@ export const transformBlocks = ({
 
     if (field.localized && locale) newRow.row._locale = locale
 
-    const blockTableName = `${baseTableName}_${blockType}`
+    const blockTableName = `${baseTableName}_blocks_${blockType}`
 
     traverseFields({
       arrays: newRow.arrays,

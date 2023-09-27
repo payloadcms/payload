@@ -185,12 +185,12 @@ export const upsertRow = async <T extends TypeWithID>({
         parentID: insertedRow.id,
         pathColumnName: '_path',
         rows: blockRows.map(({ row }) => row),
-        tableName: `${tableName}_${blockName}`,
+        tableName: `${tableName}_blocks_${blockName}`,
       })
     }
 
     insertedBlockRows[blockName] = await db
-      .insert(adapter.tables[`${tableName}_${blockName}`])
+      .insert(adapter.tables[`${tableName}_blocks_${blockName}`])
       .values(blockRows.map(({ row }) => row))
       .returning()
 
@@ -217,7 +217,7 @@ export const upsertRow = async <T extends TypeWithID>({
 
     if (blockLocaleRowsToInsert.length > 0) {
       await db
-        .insert(adapter.tables[`${tableName}_${blockName}_locales`])
+        .insert(adapter.tables[`${tableName}_blocks_${blockName}_locales`])
         .values(blockLocaleRowsToInsert)
         .returning()
     }

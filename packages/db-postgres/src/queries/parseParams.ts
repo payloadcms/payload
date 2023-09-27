@@ -82,6 +82,7 @@ export async function parseParams({
                   constraints: queryConstraints,
                   field,
                   getNotNullColumnByValue,
+                  pathSegments,
                   rawColumn,
                   table,
                 } = getTableColumnFromPath({
@@ -102,14 +103,14 @@ export async function parseParams({
                   constraints.push(operatorMap.equals(constraintTable[col], value))
                 })
 
-                if (['json', 'richText'].includes(field.type)) {
-                  const pathSegments = relationOrPath.split('.').slice(1)
-                  pathSegments.unshift(table[columnName].name)
+                if (['json', 'richText'].includes(field.type) && Array.isArray(pathSegments)) {
+                  const segments = pathSegments.slice(1)
+                  segments.unshift(table[columnName].name)
 
                   if (field.type === 'richText') {
                     const jsonQuery = createJSONQuery({
                       operator,
-                      pathSegments,
+                      pathSegments: segments,
                       treatAsArray: ['children'],
                       treatRootAsArray: true,
                       value: val,
@@ -119,7 +120,7 @@ export async function parseParams({
                   }
 
                   if (field.type === 'json') {
-                    const jsonQuery = convertPathToJSONTraversal(relationOrPath)
+                    const jsonQuery = convertPathToJSONTraversal(pathSegments)
                     constraints.push(sql.raw(`${table[columnName].name}${jsonQuery} = '%${val}%'`))
                   }
 
