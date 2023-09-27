@@ -1,0 +1,43 @@
+@import '../../../../scss/styles.scss';
+
+.popup-button-list {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+
+  &__text-align--left {
+    text-align: left;
+  }
+
+  &__text-align--center {
+    text-align: center;
+  }
+
+  &__text-align--right {
+    text-align: right;
+  }
+
+  &__button-size--small {
+    --list-button-padding: calc(var(--base) * 0.5);
+  }
+
+  &__button-size--default {
+    --list-button-padding: calc(var(--base) * 0.75);
+  }
+
+  &__button {
+    @extend %btn-reset;
+    padding-left: var(--list-button-padding);
+    padding-right: var(--list-button-padding);
+    padding-top: 0;
+    padding-bottom: 0;
+    cursor: pointer;
+    text-align: inherit;
+    line-height: var(--base);
+    text-decoration: none;
+
+    &:hover {
+      background-color: var(--theme-elevation-150);
+    }
+  }
+}

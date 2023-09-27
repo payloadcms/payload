@@ -1,38 +1,53 @@
 @import '../../../scss/styles.scss';
 
 .popup {
+  --popup-bg: var(--theme-input-bg);
+  --popup-text: var(--theme-text);
+  --popup-caret-size: 10px;
+  --popup-x-padding: 0;
+  --popup-y-padding: calc(var(--base) * 0.33);
   position: relative;
 
   &__content {
     position: absolute;
-    background: var(--theme-input-bg);
+    background: var(--popup-bg);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     z-index: var(--z-popup);
     max-width: calc(100vw - #{$baseline});
+    color: var(--popup-text);
+    border: 1px solid var(--theme-border-color);
+    border-radius: 2px;
+  }
 
-    &--caret {
-      &:after {
-        content: ' ';
-        position: absolute;
-        top: calc(100% - 1px);
-        border: 12px solid transparent;
-        border-top-color: var(--theme-input-bg);
-      }
-    }
+  &__caret {
+    position: absolute;
+    top: calc(100% - 1px);
+    border: var(--popup-caret-size) solid transparent;
+    border-top-color: var(--popup-bg);
   }
 
   &__wrap {
     overflow: hidden;
   }
 
+  .popup__scroll-pad-size--medium {
+    --popup-x-padding: calc(var(--base) * 0.5);
+  }
+
+  .popup__scroll-pad-size--large {
+    --popup-x-padding: calc(var(--base) * 1.5);
+  }
+
   .popup__scroll {
-    padding: $baseline;
     overflow-y: auto;
     white-space: nowrap;
-    padding-right: calc(var(--scrollbar-width) + #{$baseline});
-    width: calc(100% + var(--scrollbar-width));
+    width: calc(100% + var(--scrollbar-width) + var(--popup-x-padding));
+    padding-top: var(--popup-y-padding);
+    padding-bottom: var(--popup-y-padding);
+    padding-left: var(--popup-x-padding);
+    padding-right: var(--popup-x-padding);
   }
 
   &--show-scrollbar {
@@ -53,11 +68,9 @@
 
   &--size-small {
     .popup__scroll {
-      [dir='ltr'] & {
-        padding: base(0.75) calc(var(--scrollbar-width) + #{base(0.75)}) base(0.75) base(0.75);
-      }
       [dir='rtl'] & {
-        padding: base(0.75) base(0.75) base(0.75) calc(var(--scrollbar-width) + #{base(0.75)});
+        padding-left: calc(var(--scrollbar-width) + var(--popup-x-padding));
+        padding-right: var(--popup-x-padding);
       }
     }
 
@@ -68,10 +81,10 @@
     &.popup--h-align-left {
       .popup__content {
         left: - base(0.5);
+      }
 
-        &:after {
-          left: base(0.425);
-        }
+      .popup__caret {
+        left: base(0.425);
       }
     }
   }
@@ -89,11 +102,11 @@
   &--size-wide {
     .popup__content {
       @include shadow-m;
+    }
 
-      &:after {
-        border: 12px solid transparent;
-        border-top-color: var(--theme-input-bg);
-      }
+    .popup__caret {
+      border: var(--popup-caret-size) solid transparent;
+      border-top-color: var(--theme-input-bg);
     }
 
     .popup__scroll {
@@ -103,10 +116,10 @@
     &.popup--align-left {
       .popup__content {
         left: - base(0.5);
+      }
 
-        &:after {
-          left: base(0.425);
-        }
+      .popup__caret {
+        left: base(0.425);
       }
     }
   }
@@ -118,10 +131,10 @@
   &--h-align-left {
     .popup__content {
       left: - base(1.75);
+    }
 
-      &:after {
-        left: base(1.75);
-      }
+    .popup__caret {
+      left: base(1.75);
     }
   }
 
@@ -129,11 +142,11 @@
     .popup__content {
       left: 50%;
       transform: translateX(-50%);
+    }
 
-      &:after {
-        left: 50%;
-        transform: translateX(-50%);
-      }
+    .popup__caret {
+      left: 50%;
+      transform: translateX(-50%);
     }
   }
 
@@ -143,11 +156,12 @@
       [dir='rtl'] & {
         right: - base(0.75);
       }
-      &:after {
-        right: base(1.75);
-        [dir='rtl'] & {
-          right: base(0.75);
-        }
+    }
+
+    .popup__caret {
+      right: base(1.75);
+      [dir='rtl'] & {
+        right: base(0.75);
       }
     }
   }
@@ -158,44 +172,22 @@
 
   &--v-align-top {
     .popup__content {
-      bottom: calc(100% + #{$baseline});
+      @include shadow-lg;
+      bottom: calc(100% + var(--popup-caret-size));
     }
   }
 
   &--v-align-bottom {
     .popup__content {
       @include shadow-lg-top;
-      top: calc(100% + #{base(0.5)});
-
-      &:after {
-        top: unset;
-        bottom: calc(100% - 1px);
-        border-top-color: transparent !important;
-        border-bottom-color: var(--theme-input-bg);
-      }
+      top: calc(100% + var(--popup-caret-size));
     }
 
-    &.popup--color-dark {
-      .popup__content {
-        &:after {
-          border-bottom-color: var(--theme-elevation-800);
-        }
-      }
-    }
-  }
-
-  ////////////////////////////////
-  // COLOR
-  ////////////////////////////////
-
-  &--color-dark {
-    .popup__content {
-      background: var(--theme-elevation-800);
-      color: var(--theme-input-bg);
-
-      &:after {
-        border-top-color: var(--theme-elevation-800);
-      }
+    .popup__caret {
+      top: unset;
+      bottom: calc(100% - 1px);
+      border-top-color: transparent !important;
+      border-bottom-color: var(--popup-bg);
     }
   }
 
@@ -221,10 +213,10 @@
     &--h-align-left {
       .popup__content {
         left: - base(0.5);
+      }
 
-        &:after {
-          left: base(0.5);
-        }
+      .popup__caret {
+        left: base(0.5);
       }
     }
 
@@ -232,21 +224,21 @@
       .popup__content {
         left: 50%;
         transform: translateX(-0%);
+      }
 
-        &:after {
-          left: 50%;
-          transform: translateX(-0%);
-        }
+      .popup__caret {
+        left: 50%;
+        transform: translateX(-0%);
       }
     }
 
     &--h-align-right {
       .popup__content {
         right: - base(0.5);
+      }
 
-        &:after {
-          right: base(0.5);
-        }
+      .popup__caret {
+        right: base(0.5);
       }
     }
 
@@ -255,12 +247,12 @@
         left: - base(0.5);
         right: unset;
         transform: unset;
+      }
 
-        &:after {
-          left: base(0.5);
-          right: unset;
-          transform: unset;
-        }
+      .popup__caret {
+        left: base(0.5);
+        right: unset;
+        transform: unset;
       }
     }
 
@@ -269,12 +261,12 @@
         right: - base(0.5);
         left: unset;
         transform: unset;
+      }
 
-        &:after {
-          right: base(0.5);
-          left: unset;
-          transform: unset;
-        }
+      .popup__caret {
+        right: base(0.5);
+        left: unset;
+        transform: unset;
       }
     }
   }

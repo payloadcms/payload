@@ -141,6 +141,7 @@ export const LinkElement: React.FC<{
           forceOpen={renderPopup}
           horizontalAlign="left"
           onToggleOpen={handleTogglePopup}
+          padding="medium"
           render={() => (
             <div className={`${baseClass}__popup`}>
               {element.linkType === 'internal' && element.doc?.relationTo && element.doc?.value && (

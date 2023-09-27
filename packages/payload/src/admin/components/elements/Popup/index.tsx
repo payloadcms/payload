@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import type { Props } from './types'
 
 import useIntersect from '../../../hooks/useIntersect'
-import PopupButton from './PopupButton'
+import { PopupTrigger } from './PopupTrigger'
 import './index.scss'
 
 const baseClass = 'popup'
@@ -23,7 +23,7 @@ const Popup: React.FC<Props> = (props) => {
     horizontalAlign: horizontalAlignFromProps = 'left',
     initActive = false,
     onToggleOpen,
-    padding,
+    padding = 'none',
     render,
     showOnHover = false,
     showScrollbar = false,
@@ -149,24 +149,21 @@ const Popup: React.FC<Props> = (props) => {
             onMouseEnter={() => setActive(true)}
             onMouseLeave={() => setActive(false)}
           >
-            <PopupButton
+            <PopupTrigger
               {...{ active, button, buttonType, className: buttonClassName, setActive }}
             />
           </div>
         ) : (
-          <PopupButton {...{ active, button, buttonType, className: buttonClassName, setActive }} />
+          <PopupTrigger
+            {...{ active, button, buttonType, className: buttonClassName, setActive }}
+          />
         )}
       </div>
 
-      <div
-        className={[`${baseClass}__content`, caret && `${baseClass}__content--caret`]
-          .filter(Boolean)
-          .join(' ')}
-        ref={contentRef}
-      >
+      <div className={`${baseClass}__content`} ref={contentRef}>
         <div className={`${baseClass}__wrap`} ref={intersectionRef}>
           <div
-            className={`${baseClass}__scroll`}
+            className={`${baseClass}__scroll ${baseClass}__scroll-pad-size--${padding}`}
             style={{
               padding,
             }}
@@ -175,6 +172,8 @@ const Popup: React.FC<Props> = (props) => {
             {children && children}
           </div>
         </div>
+
+        {caret && <div className={`${baseClass}__caret`} />}
       </div>
     </div>
   )

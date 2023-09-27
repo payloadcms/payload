@@ -10,6 +10,7 @@ import { getTranslation } from '../../../../../../utilities/getTranslation'
 import Button from '../../../../elements/Button'
 import { useDocumentDrawer } from '../../../../elements/DocumentDrawer'
 import Popup from '../../../../elements/Popup'
+import * as PopupList from '../../../../elements/Popup/PopupList'
 import Tooltip from '../../../../elements/Tooltip'
 import Plus from '../../../../icons/Plus'
 import { useAuth } from '../../../../utilities/Auth'
@@ -85,7 +86,7 @@ export const AddNewRelation: React.FC<Props> = ({
     [relationTo, collectionConfig, dispatchOptions, i18n, hasMany, setValue, value, config],
   )
 
-  const onPopopToggle = useCallback((state) => {
+  const onPopupToggle = useCallback((state) => {
     setPopupOpen(state)
   }, [])
 
@@ -161,30 +162,28 @@ export const AddNewRelation: React.FC<Props> = ({
               }
               buttonType="custom"
               horizontalAlign="center"
-              onToggleOpen={onPopopToggle}
+              onToggleOpen={onPopupToggle}
               render={({ close: closePopup }) => (
-                <ul className={`${baseClass}__relations`}>
+                <PopupList.ButtonGroup textAlign="center">
                   {relatedCollections.map((relatedCollection) => {
                     if (permissions.collections[relatedCollection.slug].create.permission) {
                       return (
-                        <li key={relatedCollection.slug}>
-                          <button
-                            className={`${baseClass}__relation-button ${baseClass}__relation-button--${relatedCollection.slug}`}
-                            onClick={() => {
-                              closePopup()
-                              setSelectedCollection(relatedCollection.slug)
-                            }}
-                            type="button"
-                          >
-                            {getTranslation(relatedCollection.labels.singular, i18n)}
-                          </button>
-                        </li>
+                        <PopupList.Button
+                          // className={`${baseClass}__relation-button ${baseClass}__relation-button--${relatedCollection.slug}`}
+                          key={relatedCollection.slug}
+                          onClick={() => {
+                            closePopup()
+                            setSelectedCollection(relatedCollection.slug)
+                          }}
+                        >
+                          {getTranslation(relatedCollection.labels.singular, i18n)}
+                        </PopupList.Button>
                       )
                     }
 
                     return null
                   })}
-                </ul>
+                </PopupList.ButtonGroup>
               )}
             />
             {collectionConfig &&

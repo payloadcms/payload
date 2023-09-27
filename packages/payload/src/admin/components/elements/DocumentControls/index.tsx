@@ -13,6 +13,7 @@ import DeleteDocument from '../DeleteDocument'
 import DuplicateDocument from '../DuplicateDocument'
 import { Gutter } from '../Gutter'
 import Popup from '../Popup'
+import * as PopupList from '../Popup/PopupList'
 import PreviewButton from '../PreviewButton'
 import { Publish } from '../Publish'
 import { Save } from '../Save'
@@ -194,40 +195,37 @@ export const DocumentControls: React.FC<{
                   <div />
                 </div>
               }
-              caret={false}
               className={`${baseClass}__popup`}
               horizontalAlign="center"
-              size="large"
               verticalAlign="bottom"
             >
-              <ul className={`${baseClass}__popup-actions`}>
+              <PopupList.ButtonGroup>
                 {'create' in permissions && permissions?.create?.permission && (
                   <React.Fragment>
-                    <li>
-                      <Link
-                        id="action-create"
-                        to={`${adminRoute}/collections/${collection?.slug}/create`}
-                      >
-                        {t('createNew')}
-                      </Link>
-                    </li>
+                    <PopupList.Button
+                      id="action-create"
+                      to={`${adminRoute}/collections/${collection?.slug}/create`}
+                    >
+                      {t('createNew')}
+                    </PopupList.Button>
+
                     {!collection?.admin?.disableDuplicate && isEditing && (
-                      <li>
+                      <PopupList.Button>
                         <DuplicateDocument
                           collection={collection}
                           id={id}
                           slug={collection?.slug}
                         />
-                      </li>
+                      </PopupList.Button>
                     )}
                   </React.Fragment>
                 )}
                 {'delete' in permissions && permissions?.delete?.permission && id && (
-                  <li>
+                  <PopupList.Button>
                     <DeleteDocument buttonId="action-delete" collection={collection} id={id} />
-                  </li>
+                  </PopupList.Button>
                 )}
-              </ul>
+              </PopupList.ButtonGroup>
             </Popup>
           )}
         </div>

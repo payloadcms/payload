@@ -14,7 +14,7 @@ export type Props = {
   horizontalAlign?: 'center' | 'left' | 'right'
   initActive?: boolean
   onToggleOpen?: (active: boolean) => void
-  padding?: CSSProperties['padding']
+  padding?: 'large' | 'medium' | 'none'
   render?: (any) => React.ReactNode
   showOnHover?: boolean
   showScrollbar?: boolean

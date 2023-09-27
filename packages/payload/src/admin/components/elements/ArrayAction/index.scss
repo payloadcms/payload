@@ -15,8 +15,7 @@
     background: var(--theme-elevation-0);
   }
 
-  &__button,
-  &__action {
+  &__button {
     @extend %btn-reset;
     cursor: pointer;
   }
@@ -28,9 +27,6 @@
   }
 
   &__action {
-    @extend %btn-reset;
-    display: block;
-
     svg {
       position: relative;
       top: -1px;
@@ -39,10 +35,6 @@
       .stroke {
         stroke-width: 1px;
       }
-    }
-
-    &:hover {
-      opacity: 0.7;
     }
   }
 
