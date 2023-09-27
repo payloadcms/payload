@@ -4,7 +4,6 @@ import type { CollectionPermission } from '../../../../../auth/types'
 import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
 import type { Document } from '../../../../../types'
 import type { Fields } from '../../../forms/Form/types'
-import type { SetUploadEdits, UploadEdits } from './Upload/types'
 
 export type IndexProps = {
   collection: SanitizedCollectionConfig
@@ -33,7 +32,18 @@ export type Props = IndexProps & {
     },
   ) => void
   permissions: CollectionPermission
-  setUploadEdits?: SetUploadEdits
   updatedAt?: string
-  uploadEdits?: UploadEdits
+}
+
+export type UploadEdits = {
+  crop?: {
+    height?: number
+    width?: number
+    x?: number
+    y?: number
+  }
+  focalPoint?: {
+    x?: number
+    y?: number
+  }
 }

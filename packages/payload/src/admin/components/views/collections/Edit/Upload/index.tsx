@@ -27,7 +27,7 @@ const validate = (value) => {
 }
 
 export const Upload: React.FC<Props> = (props) => {
-  const { collection, internalState, onChange, setUploadEdits, uploadEdits } = props
+  const { collection, internalState, onChange } = props
   const [replacingFile, setReplacingFile] = useState(false)
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const { t } = useTranslation(['upload', 'general'])
@@ -128,9 +128,6 @@ export const Upload: React.FC<Props> = (props) => {
 
                 <div className={`${baseClass}__file-mutation`}>
                   <DrawerToggler className={`${baseClass}__edit`} slug={drawerSlug}>
-                    Preview Sizes
-                  </DrawerToggler>
-                  <DrawerToggler className={`${baseClass}__edit`} slug={drawerSlug}>
                     Edit Image
                   </DrawerToggler>
                 </div>
@@ -139,11 +136,7 @@ export const Upload: React.FC<Props> = (props) => {
           )}
 
           <Drawer slug={drawerSlug} title={`Editing ${value?.name}`}>
-            <EditUpload
-              fileSrc={fileSrc}
-              setUploadEdits={setUploadEdits}
-              uploadEdits={uploadEdits}
-            />
+            <EditUpload fileSrc={fileSrc} />
           </Drawer>
 
           {!value && (

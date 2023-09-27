@@ -5,8 +5,9 @@ import { useTranslation } from 'react-i18next'
 import type { FileSizes, Upload } from '../../../../uploads/types'
 import type { Props } from './types'
 
-import Chevron from '../../icons/Chevron'
 import Button from '../Button'
+import { Drawer, DrawerToggler } from '../Drawer'
+import EditUpload from '../EditUpload'
 import Thumbnail from '../Thumbnail'
 import Meta from './Meta'
 import './index.scss'
@@ -44,7 +45,6 @@ const FileDetails: React.FC<Props> = (props) => {
     setOrderedSizes(sortSizes(sizes, imageSizes))
   }, [sizes, imageSizes])
 
-  const [moreInfoOpen, setMoreInfoOpen] = useState(false)
   const { t } = useTranslation('upload')
 
   const hasSizes = sizes && Object.keys(sizes)?.length > 0
@@ -65,25 +65,16 @@ const FileDetails: React.FC<Props> = (props) => {
             url={url as string}
             width={width as number}
           />
+
           {hasSizes && (
-            <Button
-              buttonStyle="none"
-              className={`${baseClass}__toggle-more-info${moreInfoOpen ? ' open' : ''}`}
-              onClick={() => setMoreInfoOpen(!moreInfoOpen)}
-            >
-              {!moreInfoOpen && (
-                <React.Fragment>
-                  {t('moreInfo')}
-                  <Chevron />
-                </React.Fragment>
-              )}
-              {moreInfoOpen && (
-                <React.Fragment>
-                  {t('lessInfo')}
-                  <Chevron />
-                </React.Fragment>
-              )}
-            </Button>
+            <div className={`${baseClass}__file-mutation`}>
+              <DrawerToggler className={`${baseClass}__edit`} slug="preview-sizes">
+                Preview Sizes
+              </DrawerToggler>
+              <DrawerToggler className={`${baseClass}__edit`} slug="edit-upload">
+                Edit Image
+              </DrawerToggler>
+            </div>
           )}
         </div>
         {handleRemove && (
@@ -97,24 +88,30 @@ const FileDetails: React.FC<Props> = (props) => {
           />
         )}
       </header>
-      {hasSizes && (
-        <AnimateHeight className={`${baseClass}__more-info`} height={moreInfoOpen ? 'auto' : 0}>
-          <ul className={`${baseClass}__sizes`}>
-            {Object.entries(orderedSizes).map(([key, val]) => {
-              if (val?.filename) {
-                return (
-                  <li key={key}>
-                    <div className={`${baseClass}__size-label`}>{key}</div>
-                    <Meta {...val} mimeType={val.mimeType} staticURL={staticURL} />
-                  </li>
-                )
-              }
+      <Drawer slug="preview-sizes" title={`Sizes for ${filename}`}>
+        {hasSizes && (
+          <AnimateHeight className={`${baseClass}__more-info`}>
+            <ul className={`${baseClass}__sizes`}>
+              {Object.entries(orderedSizes).map(([key, val]) => {
+                if (val?.filename) {
+                  return (
+                    <li key={key}>
+                      <div className={`${baseClass}__size-label`}>{key}</div>
+                      <Meta {...val} mimeType={val.mimeType} staticURL={staticURL} />
+                    </li>
+                  )
+                }
 
-              return null
-            })}
-          </ul>
-        </AnimateHeight>
-      )}
+                return null
+              })}
+            </ul>
+          </AnimateHeight>
+        )}
+      </Drawer>
+
+      <Drawer slug="edit-upload" title={`Editing ${filename}`}>
+        <EditUpload fileSrc={doc.url} />
+      </Drawer>
     </div>
   )
 }

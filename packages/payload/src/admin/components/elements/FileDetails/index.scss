@@ -55,6 +55,24 @@
     color: var(--theme-elevation-400);
   }
 
+  &__file-mutation {
+    display: flex;
+    margin-top: base(0.25);
+    gap: calc(var(--base) / 2);
+  }
+
+  &__edit {
+    cursor: pointer;
+    background-color: var(--theme-elevation-150);
+    border: none;
+    border-radius: $style-radius-s;
+    padding: base(0.25) base(0.5);
+
+    &:hover {
+      background-color: var(--theme-elevation-100);
+    }
+  }
+
   @include large-break {
     &__main-detail {
       padding: $baseline;

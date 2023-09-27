@@ -4,19 +4,15 @@ import React, { useEffect, useRef, useState } from 'react'
 import ReactCrop, { type Crop as CropType } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
-import type { SetUploadEdits, UploadEdits } from '../../views/collections/Edit/Upload/types'
-
 import Plus from '../../icons/Plus'
+import { useFormQueryParams } from '../../utilities/FormQueryParams'
 import './index.scss'
 
 const baseClass = 'edit-upload'
 
-const EditUpload: React.FC<{
-  fileSrc: string
-  setUploadEdits: SetUploadEdits
-  uploadEdits: UploadEdits
-}> = (props) => {
-  const { fileSrc, setUploadEdits, uploadEdits } = props
+const EditUpload: React.FC<{ fileSrc: string }> = (props) => {
+  const { fileSrc } = props
+  const { formQueryParams, setFormQueryParams } = useFormQueryParams()
   const [crop, setCrop] = useState<CropType>(null)
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>(null)
   const [output, setOutput] = useState<null | string>(null)
@@ -42,7 +38,14 @@ const EditUpload: React.FC<{
         y = Math.max(0, Math.min(100, y))
 
         setPointPosition({ x, y })
-        setUploadEdits({ ...uploadEdits, focalPoint: { x: x, y: y } })
+
+        setFormQueryParams({
+          ...formQueryParams,
+          uploadEdits: {
+            ...formQueryParams.uploadEdits,
+            focalPoint: { x: x, y: y },
+          },
+        })
       }
     }
 
@@ -61,7 +64,7 @@ const EditUpload: React.FC<{
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [isDragging, setUploadEdits])
+  }, [isDragging, setFormQueryParams])
 
   const handlePointMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault()
@@ -86,15 +89,24 @@ const EditUpload: React.FC<{
 
       setPointPosition({ x, y })
 
-      setUploadEdits({ ...uploadEdits, focalPoint: { x: x, y: y } })
+      setFormQueryParams({
+        ...formQueryParams,
+        uploadEdits: {
+          ...formQueryParams.uploadEdits,
+          focalPoint: { x: x, y: y },
+        },
+      })
     }
   }
 
   useEffect(() => {
     if (completedCrop) {
-      setUploadEdits({ ...uploadEdits, crop: completedCrop })
+      setFormQueryParams({
+        ...formQueryParams,
+        uploadEdits: { ...formQueryParams.uploadEdits, crop: completedCrop },
+      })
     }
-  }, [completedCrop, setUploadEdits, uploadEdits])
+  }, [completedCrop, setFormQueryParams])
 
   const handleDimensionChange = (dimensionName: string, value: string) => {
     const val = parseFloat(value) / (dimensionName === 'width' ? originalWidth : originalHeight)
@@ -155,6 +167,7 @@ const EditUpload: React.FC<{
     const data = await generateCroppedPreview(newCrop)
     setOutput(data)
   }
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__toolWrap`}>
@@ -167,17 +180,22 @@ const EditUpload: React.FC<{
           <img alt="Upload Preview" ref={cropRef} src={fileSrc} />
         </ReactCrop>
 
-        {/* crop preview and focal point selector */}
         <div className={`${baseClass}__focalPoint`}>
-          <div className={`${baseClass}__imageRef`}>
-            <img alt="" onClick={handleImageClick} ref={imageRef} src={output || fileSrc} />
-            <div
-              className={`${baseClass}__point`}
-              onMouseDown={handlePointMouseDown}
-              style={{ left: `${pointPosition.x}%`, top: `${pointPosition.y}%` }}
-            >
-              <Plus />
-            </div>
+          <img
+            alt="Crop Preview and Focal Point selection"
+            className={`${baseClass}__imageRef`}
+            onClick={handleImageClick}
+            ref={imageRef}
+            role="presentation"
+            src={output || fileSrc}
+          />
+          <div
+            className={`${baseClass}__point`}
+            onMouseDown={handlePointMouseDown}
+            role="presentation"
+            style={{ left: `${pointPosition.x}%`, top: `${pointPosition.y}%` }}
+          >
+            <Plus />
           </div>
         </div>
       </div>

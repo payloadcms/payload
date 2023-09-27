@@ -5,7 +5,7 @@ import { Redirect, useHistory, useRouteMatch } from 'react-router-dom'
 
 import type { CollectionPermission } from '../../../../../auth'
 import type { Fields } from '../../../forms/Form/types'
-import type { UploadEdits } from './Upload/types'
+import type { QueryParamTypes } from '../../../utilities/FormQueryParams'
 import type { IndexProps } from './types'
 
 import usePayloadAPI from '../../../../hooks/usePayloadAPI'
@@ -14,6 +14,7 @@ import { useAuth } from '../../../utilities/Auth'
 import { useConfig } from '../../../utilities/Config'
 import { useDocumentInfo } from '../../../utilities/DocumentInfo'
 import { EditDepthContext } from '../../../utilities/EditDepth'
+import { FormQueryParams } from '../../../utilities/FormQueryParams'
 import { useLocale } from '../../../utilities/Locale'
 import RenderCustomComponent from '../../../utilities/RenderCustomComponent'
 import DefaultEdit from './Default'
@@ -28,12 +29,14 @@ const EditView: React.FC<IndexProps> = (props) => {
   const [fields] = useState(() => formatFields(incomingCollection, isEditing))
   const [collection] = useState(() => ({ ...incomingCollection, fields }))
   const [redirect, setRedirect] = useState<string>()
-  const [uploadEdits, setUploadEdits] = useState<UploadEdits>({
-    crop: undefined,
-    focalPoint: undefined,
+  const [formQueryParams, setFormQueryParams] = useState<QueryParamTypes>({
+    depth: 0,
+    'fallback-locale': 'null',
+    locale: '',
+    uploadEdits: undefined,
   })
 
-  const editQueryParams = queryString.stringify({ uploadEdits })
+  const formattedQueryParams = queryString.stringify(formQueryParams)
 
   const { code: locale } = useLocale()
   const {
@@ -111,6 +114,13 @@ const EditView: React.FC<IndexProps> = (props) => {
     }
   }, [history, redirect])
 
+  useEffect(() => {
+    setFormQueryParams((params) => ({
+      ...params,
+      locale: locale,
+    }))
+  }, [locale])
+
   if (isError) {
     return <Redirect to={`${admin}/not-found`} />
   }
@@ -118,9 +128,9 @@ const EditView: React.FC<IndexProps> = (props) => {
   const apiURL = `${serverURL}${api}/${slug}/${id}?locale=${locale}${
     collection.versions.drafts ? '&draft=true' : ''
   }`
-  const action = `${serverURL}${api}/${slug}${
-    isEditing ? `/${id}` : ''
-  }?locale=${locale}&depth=0&fallback-locale=null&${editQueryParams}`
+
+  const action = `${serverURL}${api}/${slug}${isEditing ? `/${id}` : ''}?${formattedQueryParams}`
+
   const hasSavePermission =
     (isEditing && docPermissions?.update?.permission) ||
     (!isEditing && (docPermissions as CollectionPermission)?.create?.permission)
@@ -128,26 +138,26 @@ const EditView: React.FC<IndexProps> = (props) => {
 
   return (
     <EditDepthContext.Provider value={1}>
-      <RenderCustomComponent
-        CustomComponent={CustomEdit}
-        DefaultComponent={DefaultEdit}
-        componentProps={{
-          action,
-          apiURL,
-          collection,
-          data,
-          hasSavePermission,
-          id,
-          internalState,
-          isEditing,
-          isLoading,
-          onSave,
-          permissions: docPermissions,
-          setUploadEdits,
-          updatedAt: updatedAt || data?.updatedAt,
-          uploadEdits,
-        }}
-      />
+      <FormQueryParams.Provider value={{ formQueryParams, setFormQueryParams }}>
+        <RenderCustomComponent
+          CustomComponent={CustomEdit}
+          DefaultComponent={DefaultEdit}
+          componentProps={{
+            action,
+            apiURL,
+            collection,
+            data,
+            hasSavePermission,
+            id,
+            internalState,
+            isEditing,
+            isLoading,
+            onSave,
+            permissions: docPermissions,
+            updatedAt: updatedAt || data?.updatedAt,
+          }}
+        />
+      </FormQueryParams.Provider>
     </EditDepthContext.Provider>
   )
 }

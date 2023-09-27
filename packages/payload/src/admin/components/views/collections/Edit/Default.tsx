@@ -61,9 +61,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
     isLoading,
     onSave: onSaveFromProps,
     permissions,
-    setUploadEdits,
     updatedAt,
-    uploadEdits,
   } = props
 
   const {
@@ -166,14 +164,7 @@ const DefaultEditView: React.FC<Props> = (props) => {
                       />
                     )}
 
-                    {upload && (
-                      <Upload
-                        collection={collection}
-                        internalState={internalState}
-                        setUploadEdits={setUploadEdits}
-                        uploadEdits={uploadEdits}
-                      />
-                    )}
+                    {upload && <Upload collection={collection} internalState={internalState} />}
 
                     <RenderFields
                       fieldSchema={fields}

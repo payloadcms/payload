@@ -16,8 +16,12 @@
     padding: base(2) base(1.5) 0 0;
   }
 
-  &__imageRef {
+  &__focalPoint {
     position: relative;
+  }
+
+  &__imgRef {
+    width: 100%;
   }
 
   &__point {
