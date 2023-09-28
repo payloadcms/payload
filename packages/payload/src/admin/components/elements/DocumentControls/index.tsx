@@ -193,7 +193,7 @@ export const DocumentControls: React.FC<{
           {showDotMenu && (
             <Popup
               button={
-                <Button buttonStyle="secondary" className={`${baseClass}__dots`}>
+                <Button buttonStyle="secondary" className={`${baseClass}__dots`} el="div">
                   <div />
                   <div />
                   <div />
