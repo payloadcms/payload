@@ -49,7 +49,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
     depth,
     disableVerificationEmail,
     draft,
-    fallbackLocale = null,
+    fallbackLocale,
     file,
     filePath,
     locale = null,
@@ -74,7 +74,7 @@ export default async function createLocal<TSlug extends keyof GeneratedTypes['co
 
   req.payloadAPI = req.payloadAPI || 'local'
   req.locale = locale ?? req?.locale ?? defaultLocale
-  req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale
+  req.fallbackLocale = fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale
   req.payload = payload
   req.i18n = i18nInit(payload.config.i18n)
   req.files = {

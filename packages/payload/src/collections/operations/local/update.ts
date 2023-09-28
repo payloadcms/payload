@@ -74,7 +74,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     data,
     depth,
     draft,
-    fallbackLocale = null,
+    fallbackLocale,
     file,
     filePath,
     locale = null,
@@ -99,7 +99,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   }
 
   const req = {
-    fallbackLocale: fallbackLocale ?? defaultLocale,
+    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
     files: {
       file: file ?? (await getFileByPath(filePath)),
     },

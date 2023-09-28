@@ -106,11 +106,14 @@ export const traverseFields = <T extends Record<string, unknown>>({
             result[field.name] = fieldData.reduce((arrayResult, row) => {
               if (typeof row._locale === 'string') {
                 if (!arrayResult[row._locale]) arrayResult[row._locale] = []
+                const locale = row._locale
+                const data = {}
+                delete row._locale
 
                 const rowResult = traverseFields<T>({
                   blocks,
                   config,
-                  dataRef: row,
+                  dataRef: data,
                   fieldPrefix: '',
                   fields: field.fields,
                   numbers,
@@ -119,8 +122,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   table: row,
                 })
 
-                arrayResult[row._locale].push(rowResult)
-                delete rowResult._locale
+                arrayResult[locale].push(rowResult)
               }
 
               return arrayResult
