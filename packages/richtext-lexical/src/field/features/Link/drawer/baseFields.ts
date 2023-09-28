@@ -22,51 +22,65 @@ export const getBaseFields = (config: Config): Field[] => [
     type: 'text',
   },
   {
-    name: 'linkType',
+    name: 'fields',
     admin: {
-      description: translations['fields:chooseBetweenCustomTextOrDocument'],
+      style: {
+        borderBottom: 0,
+        borderTop: 0,
+        margin: 0,
+        padding: 0,
+      },
     },
-    defaultValue: 'custom',
-    label: translations['fields:linkType'],
-    options: [
+    fields: [
       {
-        label: translations['fields:customURL'],
-        value: 'custom',
+        name: 'linkType',
+        admin: {
+          description: translations['fields:chooseBetweenCustomTextOrDocument'],
+        },
+        defaultValue: 'custom',
+        label: translations['fields:linkType'],
+        options: [
+          {
+            label: translations['fields:customURL'],
+            value: 'custom',
+          },
+          {
+            label: translations['fields:internalLink'],
+            value: 'internal',
+          },
+        ],
+        required: true,
+        type: 'radio',
       },
       {
-        label: translations['fields:internalLink'],
-        value: 'internal',
+        name: 'url',
+        admin: {
+          condition: ({ fields }) => fields?.linkType !== 'internal',
+        },
+        label: translations['fields:enterURL'],
+        required: true,
+        type: 'text',
+      },
+      {
+        name: 'doc',
+        admin: {
+          condition: ({ fields }) => {
+            return fields?.linkType === 'internal'
+          },
+        },
+        label: translations['fields:chooseDocumentToLink'],
+        relationTo: config.collections
+          .filter(({ admin: { enableRichTextLink } }) => enableRichTextLink)
+          .map(({ slug }) => slug),
+        required: true,
+        type: 'relationship',
+      },
+      {
+        name: 'newTab',
+        label: translations['fields:openInNewTab'],
+        type: 'checkbox',
       },
     ],
-    required: true,
-    type: 'radio',
-  },
-  {
-    name: 'url',
-    admin: {
-      condition: ({ linkType }) => linkType !== 'internal',
-    },
-    label: translations['fields:enterURL'],
-    required: true,
-    type: 'text',
-  },
-  {
-    name: 'doc',
-    admin: {
-      condition: ({ linkType }) => {
-        return linkType === 'internal'
-      },
-    },
-    label: translations['fields:chooseDocumentToLink'],
-    relationTo: config.collections
-      .filter(({ admin: { enableRichTextLink } }) => enableRichTextLink)
-      .map(({ slug }) => slug),
-    required: true,
-    type: 'relationship',
-  },
-  {
-    name: 'newTab',
-    label: translations['fields:openInNewTab'],
-    type: 'checkbox',
+    type: 'group',
   },
 ]

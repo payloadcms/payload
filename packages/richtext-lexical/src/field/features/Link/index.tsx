@@ -18,6 +18,7 @@ import { AutoLinkNode } from './nodes/AutoLinkNode'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'
 import { AutoLinkPlugin } from './plugins/autoLink'
 import { FloatingLinkEditorPlugin } from './plugins/floatingLinkEditor'
+import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor'
 import { LinkPlugin } from './plugins/link'
 
 export type LinkProps = {
@@ -56,7 +57,7 @@ export const LinkFeature = (props: LinkProps): FeatureProvider => {
                       newTab: false,
                       url: 'https://',
                     }
-                    editor.dispatchCommand(TOGGLE_LINK_COMMAND, {
+                    editor.dispatchCommand(TOGGLE_LINK_WITH_MODAL_COMMAND, {
                       fields: linkFields,
                       text: selectedText,
                     })

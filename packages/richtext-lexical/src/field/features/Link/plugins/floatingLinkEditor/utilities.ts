@@ -1,6 +1,6 @@
 import type { i18n } from 'i18next'
 import type { SanitizedConfig } from 'payload/config'
-import type { Field } from 'payload/types'
+import type { Field, GroupField } from 'payload/types'
 
 import { getBaseFields } from '../../drawer/baseFields'
 
@@ -38,21 +38,19 @@ export function transformExtraFields(
   })
 
   if (Array.isArray(customFieldSchema) || fields.length > 0) {
-    fields.push({
-      name: 'fields',
-      admin: {
-        style: {
-          borderBottom: 0,
-          borderTop: 0,
-          margin: 0,
-          padding: 0,
-        },
-      },
-      fields: Array.isArray(customFieldSchema)
-        ? customFieldSchema.concat(extraFields)
-        : extraFields,
-      type: 'group',
-    })
+    // find field with name 'fields' and add the extra fields to it
+    const fieldsField: GroupField = fields.find(
+      (field) => field.type === 'group' && field.name === 'fields',
+    ) as GroupField
+    if (!fieldsField) {
+      throw new Error(
+        'Could not find field with name "fields". This is required to add fields to the link field.',
+      )
+    }
+    fieldsField.fields = Array.isArray(fieldsField.fields) ? fieldsField.fields : []
+    fieldsField.fields.push(
+      ...(Array.isArray(customFieldSchema) ? customFieldSchema.concat(extraFields) : extraFields),
+    )
   }
   return fields
 }

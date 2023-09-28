@@ -1,3 +1,4 @@
+import type { LexicalCommand } from 'lexical'
 import type { Fields } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
@@ -10,6 +11,7 @@ import {
   COMMAND_PRIORITY_LOW,
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
+  createCommand,
 } from 'lexical'
 import { formatDrawerSlug } from 'payload/components/elements'
 import { reduceFieldsToValues } from 'payload/components/forms'
@@ -34,6 +36,10 @@ import { setFloatingElemPositionForLinkEditor } from '../../../../../lexical/uti
 import { LinkDrawer } from '../../../drawer'
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode'
 import { transformExtraFields } from '../utilities'
+
+export const TOGGLE_LINK_WITH_MODAL_COMMAND: LexicalCommand<LinkPayload | null> = createCommand(
+  'TOGGLE_LINK_WITH_MODAL_COMMAND',
+)
 
 export function LinkEditor({
   anchorElem,
@@ -74,10 +80,12 @@ export function LinkEditor({
 
   const updateLinkEditor = useCallback(async () => {
     const selection = $getSelection()
+    let selectedNodeDomRect: DOMRect | undefined = null
 
     // Handle the data displayed in the floating link editor & drawer when you click on a link node
     if ($isRangeSelection(selection)) {
       const node = getSelectedNode(selection)
+      selectedNodeDomRect = editor.getElementByKey(node.getKey())?.getBoundingClientRect()
       const linkParent: LinkNode = $findMatchingParent(node, $isLinkNode) as LinkNode
       if (linkParent == null) {
         setIsLink(false)
@@ -100,20 +108,6 @@ export function LinkEditor({
         text: linkParent.getTextContent(),
       }
 
-      // Set initial state of the drawer. This will basically pre-fill the drawer fields with the
-      // values saved in the link node you clicked on.
-      const preferences = await getDocPreferences()
-      const state = await buildStateFromSchema({
-        data,
-        fieldSchema,
-        locale,
-        operation: 'create',
-        preferences,
-        t,
-        user: user ?? undefined,
-      })
-      setInitialState(state)
-
       if (linkParent.getFields()?.linkType === 'custom') {
         setLinkUrl(linkParent.getFields()?.url ?? '')
         setLinkLabel('')
@@ -128,6 +122,20 @@ export function LinkEditor({
             ?.value}`,
         )
       }
+
+      // Set initial state of the drawer. This will basically pre-fill the drawer fields with the
+      // values saved in the link node you clicked on.
+      const preferences = await getDocPreferences()
+      const state = await buildStateFromSchema({
+        data,
+        fieldSchema,
+        locale,
+        operation: 'create',
+        preferences,
+        t,
+        user: user ?? undefined,
+      })
+      setInitialState(state)
       setIsLink(true)
     }
 
@@ -148,11 +156,15 @@ export function LinkEditor({
       rootElement.contains(nativeSelection.anchorNode) &&
       editor.isEditable()
     ) {
-      const domRect: DOMRect | undefined =
-        nativeSelection.focusNode?.parentElement?.getBoundingClientRect()
-      if (domRect != null) {
-        domRect.y += 40
-        setFloatingElemPositionForLinkEditor(domRect, editorElem, anchorElem)
+      if (!selectedNodeDomRect) {
+        // Get the DOM rect of the selected node using the native selection. This sometimes produces the wrong
+        // result, which is why we use lexical's selection preferably.
+        selectedNodeDomRect = nativeSelection.getRangeAt(0).getBoundingClientRect()
+      }
+
+      if (selectedNodeDomRect != null) {
+        selectedNodeDomRect.y += 40
+        setFloatingElemPositionForLinkEditor(selectedNodeDomRect, editorElem, anchorElem)
       }
     } else if (activeElement == null || activeElement.className !== 'link-input') {
       if (rootElement !== null) {
@@ -164,6 +176,28 @@ export function LinkEditor({
 
     return true
   }, [anchorElem, editor, fieldSchema])
+
+  useEffect(() => {
+    return mergeRegister(
+      editor.registerCommand(
+        TOGGLE_LINK_WITH_MODAL_COMMAND,
+        (payload: LinkPayload) => {
+          editor.dispatchCommand(TOGGLE_LINK_COMMAND, payload)
+
+          // Now, open the modal
+          updateLinkEditor()
+            .then(() => {
+              toggleModal(drawerSlug)
+            })
+            .catch((error) => {
+              throw error
+            })
+          return true
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+    )
+  }, [editor, updateLinkEditor, toggleModal, drawerSlug])
 
   useEffect(() => {
     if (!isLink && editorRef) {
@@ -273,18 +307,7 @@ export function LinkEditor({
 
           const data = reduceFieldsToValues(fields, true)
 
-          const newLinkPayload: LinkPayload = {
-            fields: {
-              doc: data.linkType === 'internal' ? data.doc : undefined,
-              linkType: data.linkType,
-              newTab: data.newTab,
-              nofollow: data.nofollow,
-              sponsored: data.sponsored,
-              url: data.linkType === 'custom' ? data.url : undefined,
-              ...(customFieldSchema && data.fields ? { fields: data.fields } : {}),
-            },
-            text: data?.text,
-          }
+          const newLinkPayload: LinkPayload = data as LinkPayload
 
           editor.dispatchCommand(TOGGLE_LINK_COMMAND, newLinkPayload)
         }}
