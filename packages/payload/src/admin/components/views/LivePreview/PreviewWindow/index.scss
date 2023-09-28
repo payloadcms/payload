@@ -14,9 +14,8 @@
     justify-content: center;
 
     &--has-breakpoint {
-      .live-preview-frame__iframe {
+      .live-preview-iframe {
         margin-top: var(--base);
-        margin-left: var(--base);
         border: 1px solid var(--theme-elevation-100);
       }
     }

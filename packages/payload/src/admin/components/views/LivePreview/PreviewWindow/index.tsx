@@ -26,7 +26,22 @@ const ResponsiveWindow: React.FC<{
 
   const { zoom } = useLivePreviewToolbarContext()
 
-  const foundBreakpoint = breakpoints.find((bp) => bp.name === breakpoint)
+  const foundBreakpoint = breakpoint && breakpoints.find((bp) => bp.name === breakpoint)
+
+  let margin = '0'
+
+  if (foundBreakpoint && breakpoint !== 'responsive') {
+    margin = '0 auto'
+
+    if (
+      typeof zoom === 'number' &&
+      typeof foundBreakpoint.width === 'number' &&
+      typeof foundBreakpoint.height === 'number'
+    ) {
+      // keep it centered horizontally
+      margin = `0 ${foundBreakpoint.width / 2 / zoom}px`
+    }
+  }
 
   return (
     <div
@@ -45,6 +60,7 @@ const ResponsiveWindow: React.FC<{
             : typeof zoom === 'number'
             ? `${100 / zoom}%`
             : '100%',
+        margin,
       }}
     >
       {children}
