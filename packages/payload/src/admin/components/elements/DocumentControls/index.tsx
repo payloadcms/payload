@@ -1,6 +1,5 @@
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 
 import type { CollectionPermission, GlobalPermission } from '../../../../auth'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
@@ -32,9 +31,9 @@ export const DocumentControls: React.FC<{
   global?: SanitizedGlobalConfig
   hasSavePermission?: boolean
   id?: string
+  isAccountView?: boolean
   isEditing?: boolean
   permissions?: CollectionPermission | GlobalPermission
-  isAccountView?: boolean
 }> = (props) => {
   const {
     id,
@@ -43,9 +42,9 @@ export const DocumentControls: React.FC<{
     disableActions,
     global,
     hasSavePermission,
+    isAccountView,
     isEditing,
     permissions,
-    isAccountView,
   } = props
 
   const { publishedDoc } = useDocumentInfo()

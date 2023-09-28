@@ -50,7 +50,7 @@ const Localizer: React.FC<{
 
                 if (localeOption.code !== locale.code) {
                   return (
-                    <PopupList.Button key={locale.code} onClick={close} to={{ search }}>
+                    <PopupList.Button key={localeOption.code} onClick={close} to={{ search }}>
                       {localeOption.label}
                       {localeOption.label !== localeOption.code && ` (${localeOption.code})`}
                     </PopupList.Button>
