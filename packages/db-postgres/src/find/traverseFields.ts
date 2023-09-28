@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { ArrayField, Block, Field } from 'payload/types'
+import type { Field } from 'payload/types'
 
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'

@@ -29,8 +29,9 @@ export async function migrateStatus(this: PostgresAdapter): Promise<void> {
   const statuses = migrationFiles.map((migration) => {
     const existingMigration = existingMigrations.find((m) => m.name === migration.name)
     return {
-      Batch: existingMigration?.batch,
       Name: migration.name,
+      // eslint-disable-next-line perfectionist/sort-objects
+      Batch: existingMigration?.batch,
       Ran: existingMigration ? 'Yes' : 'No',
     }
   })
