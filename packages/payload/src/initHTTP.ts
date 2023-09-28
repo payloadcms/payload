@@ -25,6 +25,10 @@ import { getPayload } from './payload'
 
 export const initHTTP = async (options: InitOptions): Promise<Payload> => {
   if (typeof options.local === 'undefined') options.local = false
+
+  // Disable onInit because it will be called in top-level Payload
+  options.disableOnInit = true
+
   const payload = await getPayload(options)
 
   if (!options.local) {

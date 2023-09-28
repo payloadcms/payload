@@ -46,7 +46,7 @@ const startDev = async () => {
       fromName: 'Payload',
       fromAddress: 'hello@payloadcms.com',
     },
-    onInit: async () => {
+    onInit: async (payload) => {
       payload.logger.info('Payload Dev Server Initialized')
     },
   })
