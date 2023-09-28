@@ -6,7 +6,7 @@ import {
   type RangeSelection,
 } from 'lexical'
 
-import { type LinkAttributes, LinkNode, type SerializedLinkNode } from './LinkNode'
+import { type LinkFields, LinkNode, type SerializedLinkNode } from './LinkNode'
 
 export type SerializedAutoLinkNode = SerializedLinkNode
 
@@ -15,7 +15,7 @@ export type SerializedAutoLinkNode = SerializedLinkNode
 
 export class AutoLinkNode extends LinkNode {
   static clone(node: AutoLinkNode): AutoLinkNode {
-    return new AutoLinkNode({ attributes: node.__attributes, key: node.__key })
+    return new AutoLinkNode({ fields: node.__fields, key: node.__key })
   }
 
   static getType(): string {
@@ -28,7 +28,7 @@ export class AutoLinkNode extends LinkNode {
   }
 
   static importJSON(serializedNode: SerializedAutoLinkNode): AutoLinkNode {
-    const node = $createAutoLinkNode({ attributes: serializedNode.attributes })
+    const node = $createAutoLinkNode({ fields: serializedNode.fields })
 
     node.setFormat(serializedNode.format)
     node.setIndent(serializedNode.indent)
@@ -47,7 +47,7 @@ export class AutoLinkNode extends LinkNode {
   insertNewAfter(selection: RangeSelection, restoreSelection = true): ElementNode | null {
     const element = this.getParentOrThrow().insertNewAfter(selection, restoreSelection)
     if ($isElementNode(element)) {
-      const linkNode = $createAutoLinkNode({ attributes: this.__attributes })
+      const linkNode = $createAutoLinkNode({ fields: this.__fields })
       element.append(linkNode)
       return linkNode
     }
@@ -55,8 +55,8 @@ export class AutoLinkNode extends LinkNode {
   }
 }
 
-export function $createAutoLinkNode({ attributes }: { attributes: LinkAttributes }): AutoLinkNode {
-  return $applyNodeReplacement(new AutoLinkNode({ attributes }))
+export function $createAutoLinkNode({ fields }: { fields: LinkFields }): AutoLinkNode {
+  return $applyNodeReplacement(new AutoLinkNode({ fields }))
 }
 export function $isAutoLinkNode(node: LexicalNode | null | undefined): node is AutoLinkNode {
   return node instanceof AutoLinkNode

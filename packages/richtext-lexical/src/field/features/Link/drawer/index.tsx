@@ -14,12 +14,10 @@ const baseClass = 'rich-text-link-edit-modal'
 export const LinkDrawer: React.FC<Props> = ({
   drawerSlug,
   fieldSchema,
-  handleClose,
   handleModalSubmit,
   initialState,
 }) => {
   const { t } = useTranslation('fields')
-
   return (
     <Drawer className={baseClass} slug={drawerSlug} title={t('editLink') ?? ''}>
       <Form initialState={initialState} onSubmit={handleModalSubmit}>

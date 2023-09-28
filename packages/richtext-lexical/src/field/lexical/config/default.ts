@@ -34,7 +34,7 @@ export const defaultEditorConfig: EditorConfig = {
     UnoderedListFeature(),
     OrderedListFeature(),
     CheckListFeature(),
-    LinkFeature(),
+    LinkFeature({}),
   ],
   lexical: {
     namespace: 'lexical',

@@ -29,25 +29,24 @@ import {
   createCommand,
 } from 'lexical'
 
-import { type SerializedAutoLinkNode } from './AutoLinkNode'
+import type { LinkPayload } from '../plugins/floatingLinkEditor/types'
 
-export interface LinkAttributes {
-  doc?: {
+export interface LinkFields {
+  // unknown, custom fields:
+  [key: string]: unknown
+  doc: {
     data?: any // Will be populated in afterRead hook
     relationTo: string
     value: string
   } | null
-  linkType?: 'custom' | 'internal'
-  newTab?: boolean
-  nofollow?: boolean
-  rel?: null | string
-  sponsored?: boolean
-  url?: string
+  linkType: 'custom' | 'internal'
+  newTab: boolean
+  url: string
 }
 
 export type SerializedLinkNode = Spread<
   {
-    attributes: LinkAttributes
+    fields: LinkFields
   },
   SerializedElementNode
 >
@@ -56,30 +55,27 @@ const SUPPORTED_URL_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'sms:', '
 
 /** @noInheritDoc */
 export class LinkNode extends ElementNode {
-  __attributes: LinkAttributes
+  __fields: LinkFields
 
   constructor({
-    attributes = {
+    fields = {
       doc: null,
       linkType: 'custom',
       newTab: false,
-      nofollow: false,
-      rel: null,
-      sponsored: false,
       url: undefined,
     },
     key,
   }: {
-    attributes: LinkAttributes
+    fields: LinkFields
     key?: NodeKey
   }) {
     super(key)
-    this.__attributes = attributes
+    this.__fields = fields
   }
 
   static clone(node: LinkNode): LinkNode {
     return new LinkNode({
-      attributes: node.__attributes,
+      fields: node.__fields,
       key: node.__key,
     })
   }
@@ -97,9 +93,9 @@ export class LinkNode extends ElementNode {
     }
   }
 
-  static importJSON(serializedNode: SerializedAutoLinkNode): LinkNode {
+  static importJSON(serializedNode: SerializedLinkNode): LinkNode {
     const node = $createLinkNode({
-      attributes: serializedNode.attributes,
+      fields: serializedNode.fields,
     })
     node.setFormat(serializedNode.format)
     node.setIndent(serializedNode.indent)
@@ -121,40 +117,40 @@ export class LinkNode extends ElementNode {
 
   createDOM(config: EditorConfig): HTMLAnchorElement {
     const element = document.createElement('a')
-    if (this.__attributes?.linkType === 'custom') {
-      element.href = this.sanitizeUrl(this.__attributes.url ?? '')
+    if (this.__fields?.linkType === 'custom') {
+      element.href = this.sanitizeUrl(this.__fields.url ?? '')
     }
-    if (this.__attributes?.newTab ?? false) {
+    if (this.__fields?.newTab ?? false) {
       element.target = '_blank'
     }
 
     element.rel = ''
 
-    if (this.__attributes?.newTab === true && this.__attributes?.linkType === 'custom') {
+    if (this.__fields?.newTab === true && this.__fields?.linkType === 'custom') {
       element.rel = manageRel(element.rel, 'add', 'noopener')
     }
 
-    if (this.__attributes?.sponsored ?? false) {
+    if (this.__fields?.sponsored ?? false) {
       element.rel = manageRel(element.rel, 'add', 'sponsored')
     }
 
-    if (this.__attributes?.nofollow ?? false) {
+    if (this.__fields?.nofollow ?? false) {
       element.rel = manageRel(element.rel, 'add', 'nofollow')
     }
 
-    if (this.__attributes?.rel !== null) {
+    if (this.__fields?.rel !== null) {
       element.rel += ` ${this.__rel}`
     }
     addClassNamesToElement(element, config.theme.link)
     return element
   }
 
-  exportJSON(): SerializedAutoLinkNode {
+  exportJSON(): SerializedLinkNode {
     return {
       ...super.exportJSON(),
-      attributes: this.getAttributes(),
+      fields: this.getFields(),
       type: 'link',
-      version: 2,
+      version: 1,
     }
   }
 
@@ -177,14 +173,14 @@ export class LinkNode extends ElementNode {
     )
   }
 
-  getAttributes(): LinkAttributes {
-    return this.getLatest().__attributes
+  getFields(): LinkFields {
+    return this.getLatest().__fields
   }
 
   insertNewAfter(selection: RangeSelection, restoreSelection = true): ElementNode | null {
     const element = this.getParentOrThrow().insertNewAfter(selection, restoreSelection)
     if ($isElementNode(element)) {
-      const linkNode = $createLinkNode({ attributes: this.__attributes })
+      const linkNode = $createLinkNode({ fields: this.__fields })
       element.append(linkNode)
       return linkNode
     }
@@ -208,28 +204,21 @@ export class LinkNode extends ElementNode {
     return url
   }
 
-  setAttributes(attributes: LinkAttributes): void {
+  setFields(fields: LinkFields): void {
     const writable = this.getWritable()
-    writable.__attributes = attributes
+    writable.__fields = fields
   }
 
   updateDOM(prevNode: LinkNode, anchor: HTMLAnchorElement, config: EditorConfig): boolean {
-    const url = this.__attributes?.url
-    const newTab = this.__attributes?.newTab
-    const sponsored = this.__attributes?.sponsored
-    const nofollow = this.__attributes?.nofollow
-    const rel = this.__attributes?.rel
-    if (
-      url != null &&
-      url !== prevNode.__attributes?.url &&
-      this.__attributes?.linkType === 'custom'
-    ) {
+    const url = this.__fields?.url
+    const newTab = this.__fields?.newTab
+    const sponsored = this.__fields?.sponsored
+    const nofollow = this.__fields?.nofollow
+    const rel = this.__fields?.rel
+    if (url != null && url !== prevNode.__fields?.url && this.__fields?.linkType === 'custom') {
       anchor.href = url
     }
-    if (
-      this.__attributes?.linkType === 'internal' &&
-      prevNode.__attributes?.linkType === 'custom'
-    ) {
+    if (this.__fields?.linkType === 'internal' && prevNode.__fields?.linkType === 'custom') {
       anchor.removeAttribute('href')
     }
 
@@ -239,10 +228,10 @@ export class LinkNode extends ElementNode {
       anchor.rel = ''
     }
 
-    if (newTab !== prevNode.__attributes?.newTab) {
+    if (newTab !== prevNode.__fields?.newTab) {
       if (newTab ?? false) {
         anchor.target = '_blank'
-        if (this.__attributes?.linkType === 'custom') {
+        if (this.__fields?.linkType === 'custom') {
           anchor.rel = manageRel(anchor.rel, 'add', 'noopener')
         }
       } else {
@@ -251,7 +240,7 @@ export class LinkNode extends ElementNode {
       }
     }
 
-    if (nofollow !== prevNode.__attributes.nofollow) {
+    if (nofollow !== prevNode.__fields.nofollow) {
       if (nofollow ?? false) {
         anchor.rel = manageRel(anchor.rel, 'add', 'nofollow')
       } else {
@@ -259,7 +248,7 @@ export class LinkNode extends ElementNode {
       }
     }
 
-    if (sponsored !== prevNode.__attributes.sponsored) {
+    if (sponsored !== prevNode.__fields.sponsored) {
       if (sponsored ?? false) {
         anchor.rel = manageRel(anchor.rel, 'add', 'sponsored')
       } else {
@@ -270,7 +259,7 @@ export class LinkNode extends ElementNode {
     // TODO - revisit - I don't think there can be any other rel
     // values other than nofollow and noopener - so not
     // sure why anchor.rel += rel below
-    if (rel !== prevNode.__attributes.rel) {
+    if (rel !== prevNode.__fields.rel) {
       if (rel != null) {
         anchor.rel += rel
       } else {
@@ -288,7 +277,7 @@ function convertAnchorElement(domNode: Node): DOMConversionOutput {
     const content = domNode.textContent
     if (content !== null && content !== '') {
       node = $createLinkNode({
-        attributes: {
+        fields: {
           doc: null,
           linkType: 'custom',
           newTab: domNode.getAttribute('target') === '_blank',
@@ -303,18 +292,18 @@ function convertAnchorElement(domNode: Node): DOMConversionOutput {
   return { node }
 }
 
-export function $createLinkNode({ attributes }: { attributes: LinkAttributes }): LinkNode {
-  return $applyNodeReplacement(new LinkNode({ attributes }))
+export function $createLinkNode({ fields }: { fields: LinkFields }): LinkNode {
+  return $applyNodeReplacement(new LinkNode({ fields }))
 }
 
 export function $isLinkNode(node: LexicalNode | null | undefined): node is LinkNode {
   return node instanceof LinkNode
 }
 
-export const TOGGLE_LINK_COMMAND: LexicalCommand<LinkAttributes | null> =
+export const TOGGLE_LINK_COMMAND: LexicalCommand<LinkPayload | null> =
   createCommand('TOGGLE_LINK_COMMAND')
 
-export function toggleLink(linkAttributes: LinkAttributes & { text?: string }): void {
+export function toggleLink(payload: LinkPayload): void {
   const selection = $getSelection()
 
   if (!$isRangeSelection(selection)) {
@@ -322,7 +311,7 @@ export function toggleLink(linkAttributes: LinkAttributes & { text?: string }): 
   }
   const nodes = selection.extract()
 
-  if (linkAttributes === null) {
+  if (payload === null) {
     // Remove LinkNodes
     nodes.forEach((node) => {
       const parent = node.getParent()
@@ -347,11 +336,11 @@ export function toggleLink(linkAttributes: LinkAttributes & { text?: string }): 
         ? firstNode
         : $getLinkAncestor(firstNode)
       if (linkNode !== null) {
-        linkNode.setAttributes(linkAttributes)
+        linkNode.setFields(payload.fields)
 
-        if (linkAttributes.text != null && linkAttributes.text !== linkNode.getTextContent()) {
+        if (payload.text != null && payload.text !== linkNode.getTextContent()) {
           // remove all children and add child with new textcontent:
-          linkNode.append($createTextNode(linkAttributes.text))
+          linkNode.append($createTextNode(payload.text))
           linkNode.getChildren().forEach((child) => {
             if (child !== linkNode.getLastChild()) {
               child.remove()
@@ -374,10 +363,10 @@ export function toggleLink(linkAttributes: LinkAttributes & { text?: string }): 
 
       if ($isLinkNode(parent)) {
         linkNode = parent
-        parent.setAttributes(linkAttributes)
-        if (linkAttributes.text != null && linkAttributes.text !== parent.getTextContent()) {
+        parent.setFields(payload.fields)
+        if (payload.text != null && payload.text !== parent.getTextContent()) {
           // remove all children and add child with new textcontent:
-          parent.append($createTextNode(linkAttributes.text))
+          parent.append($createTextNode(payload.text))
           parent.getChildren().forEach((child) => {
             if (child !== parent.getLastChild()) {
               child.remove()
@@ -389,7 +378,7 @@ export function toggleLink(linkAttributes: LinkAttributes & { text?: string }): 
 
       if (!parent.is(prevParent)) {
         prevParent = parent
-        linkNode = $createLinkNode({ attributes: linkAttributes })
+        linkNode = $createLinkNode({ fields: payload.fields })
 
         if ($isLinkNode(parent)) {
           if (node.getPreviousSibling() === null) {

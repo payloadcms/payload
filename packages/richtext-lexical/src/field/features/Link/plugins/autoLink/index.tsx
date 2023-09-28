@@ -15,12 +15,12 @@ import { useEffect } from 'react'
 
 import { invariant } from '../../../../lexical/utils/invariant'
 import { $createAutoLinkNode, $isAutoLinkNode, AutoLinkNode } from '../../nodes/AutoLinkNode'
-import { $isLinkNode, type LinkAttributes } from '../../nodes/LinkNode'
+import { $isLinkNode, type LinkFields } from '../../nodes/LinkNode'
 
 type ChangeHandler = (url: null | string, prevUrl: null | string) => void
 
 interface LinkMatcherResult {
-  attributes?: LinkAttributes
+  fields?: LinkFields
   index: number
   length: number
   text: string
@@ -146,13 +146,13 @@ function handleLinkCreation(
           invalidMatchEnd + matchStart + matchLength,
         )
       }
-      const attributes: LinkAttributes = {
+      const fields: LinkFields = {
         linkType: 'custom',
         url: match.url,
         ...match.attributes,
       }
 
-      const linkNode = $createAutoLinkNode({ attributes })
+      const linkNode = $createAutoLinkNode({ fields })
       const textNode = $createTextNode(match.text)
       textNode.setFormat(linkTextNode.getFormat())
       textNode.setDetail(linkTextNode.getDetail())
@@ -180,7 +180,7 @@ function handleLinkEdit(
     const child = children[i]
     if (!$isTextNode(child) || !child.isSimpleText()) {
       replaceWithChildren(linkNode)
-      onChange(null, linkNode.getAttributes()?.url ?? null)
+      onChange(null, linkNode.getFields()?.url ?? null)
       return
     }
   }
@@ -190,33 +190,23 @@ function handleLinkEdit(
   const match = findFirstMatch(text, matchers)
   if (match === null || match.text !== text) {
     replaceWithChildren(linkNode)
-    onChange(null, linkNode.getAttributes()?.url ?? null)
+    onChange(null, linkNode.getFields()?.url ?? null)
     return
   }
 
   // Check neighbors
   if (!isPreviousNodeValid(linkNode) || !isNextNodeValid(linkNode)) {
     replaceWithChildren(linkNode)
-    onChange(null, linkNode.getAttributes()?.url ?? null)
+    onChange(null, linkNode.getFields()?.url ?? null)
     return
   }
 
-  const url = linkNode.getAttributes()?.url
+  const url = linkNode.getFields()?.url
   if (url !== match?.url) {
-    const attrs = linkNode.getAttributes()
-    attrs.url = match?.url
-    linkNode.setAttributes(attrs)
+    const flds = linkNode.getFields()
+    flds.url = match?.url
+    linkNode.setFields(flds)
     onChange(match.url, url ?? null)
-  }
-
-  if (match.attributes != null) {
-    const rel = linkNode.getAttributes().rel
-    if (rel !== match.attributes.rel) {
-      const attrs = linkNode.getAttributes()
-      attrs.rel = match.attributes.rel ?? null
-      linkNode.setAttributes(attrs)
-      onChange(match.attributes.rel ?? null, rel ?? null)
-    }
   }
 }
 
@@ -234,13 +224,13 @@ function handleBadNeighbors(
   if ($isAutoLinkNode(previousSibling) && !startsWithSeparator(text)) {
     previousSibling.append(textNode)
     handleLinkEdit(previousSibling, matchers, onChange)
-    onChange(null, previousSibling.getAttributes()?.url ?? null)
+    onChange(null, previousSibling.getFields()?.url ?? null)
   }
 
   if ($isAutoLinkNode(nextSibling) && !endsWithSeparator(text)) {
     replaceWithChildren(nextSibling)
     handleLinkEdit(nextSibling, matchers, onChange)
-    onChange(null, nextSibling.getAttributes()?.url ?? null)
+    onChange(null, nextSibling.getFields()?.url ?? null)
   }
 }
 

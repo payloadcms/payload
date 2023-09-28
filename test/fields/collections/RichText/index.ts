@@ -1,6 +1,10 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
-import { TreeviewFeature, createLexical } from '../../../../packages/richtext-lexical/src'
+import {
+  LinkFeature,
+  TreeviewFeature,
+  createLexical,
+} from '../../../../packages/richtext-lexical/src'
 import { createSlate } from '../../../../packages/richtext-slate/src'
 import { loremIpsum } from './loremIpsum'
 
@@ -24,6 +28,33 @@ const RichTextFields: CollectionConfig = {
       editor: createLexical({
         userConfig(defaultEditorConfig) {
           defaultEditorConfig.features.push(TreeviewFeature())
+          return defaultEditorConfig
+        },
+      }),
+    },
+    {
+      name: 'richTextLexicalCustomFields',
+      type: 'richText',
+      editor: createLexical({
+        userConfig(defaultEditorConfig) {
+          defaultEditorConfig.features.push(TreeviewFeature())
+          defaultEditorConfig.features.push(
+            LinkFeature({
+              fields: [
+                {
+                  name: 'rel',
+                  label: 'Rel Attribute',
+                  type: 'select',
+                  hasMany: true,
+                  options: ['noopener', 'noreferrer', 'nofollow'],
+                  admin: {
+                    description:
+                      'The rel attribute defines the relationship between a linked resource and the current document. This is a custom link field.',
+                  },
+                },
+              ],
+            }),
+          )
           return defaultEditorConfig
         },
       }),

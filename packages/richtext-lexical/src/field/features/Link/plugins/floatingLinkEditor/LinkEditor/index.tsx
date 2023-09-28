@@ -1,4 +1,4 @@
-import type { Field, Fields } from 'payload/types'
+import type { Fields } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -24,16 +24,21 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { LinkAttributes } from '../../../nodes/LinkNode'
+import type { LinkProps } from '../../..'
+import type { LinkNode } from '../../../nodes/LinkNode'
+import type { LinkPayload } from '../types'
 
 import { useEditorConfigContext } from '../../../../../lexical/config/EditorConfigProvider'
 import { getSelectedNode } from '../../../../../lexical/utils/getSelectedNode'
 import { setFloatingElemPositionForLinkEditor } from '../../../../../lexical/utils/setFloatingElemPositionForLinkEditor'
 import { LinkDrawer } from '../../../drawer'
-import { getBaseFields } from '../../../drawer/baseFields'
 import { $isLinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode'
+import { transformExtraFields } from '../utilities'
 
-export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): JSX.Element {
+export function LinkEditor({
+  anchorElem,
+  fields: customFieldSchema,
+}: { anchorElem: HTMLElement } & LinkProps): JSX.Element {
   const [editor] = useLexicalComposerContext()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
@@ -42,131 +47,88 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): JSX.Ele
 
   const { uuid } = useEditorConfigContext()
 
-  const customFieldSchema = false /* fieldProps?.admin?.link?.fields */ // TODO: Field props
   const config = useConfig()
 
   const { user } = useAuth()
   const { code: locale } = useLocale()
-  const { t } = useTranslation('fields')
+  const { i18n, t } = useTranslation(['fields', 'upload', 'general'])
 
   const { getDocPreferences } = useDocumentInfo()
 
   const [initialState, setInitialState] = useState<Fields>({})
+
   const [fieldSchema] = useState(() => {
-    const fields: Field[] = [...getBaseFields(config)]
-
-    if (customFieldSchema) {
-      fields.push({
-        name: 'fields',
-        admin: {
-          style: {
-            borderBottom: 0,
-            borderTop: 0,
-            margin: 0,
-            padding: 0,
-          },
-        },
-        fields: customFieldSchema,
-        type: 'group',
-      })
-    }
-
-    fields.push({
-      name: 'sponsored',
-      admin: {
-        condition: ({ linkType }) => {
-          return linkType === 'custom'
-        },
-      },
-      label: 'Sponsored',
-      type: 'checkbox',
-    })
-
-    fields.push({
-      name: 'nofollow',
-      admin: {
-        condition: ({ linkType }) => {
-          return linkType === 'custom'
-        },
-      },
-      label: 'Nofollow',
-      type: 'checkbox',
-    })
+    const fields = transformExtraFields(customFieldSchema, config, i18n)
 
     return fields
   })
 
-  const { closeModal, isModalOpen, toggleModal } = useModal()
+  const { closeModal, toggleModal } = useModal()
   const editDepth = useEditDepth()
   const [isLink, setIsLink] = useState(false)
 
   const drawerSlug = formatDrawerSlug({
     depth: editDepth,
-    slug: `rich-text-link-lexicalRichText` + uuid,
+    slug: `lexical-rich-text-link-` + uuid,
   })
 
-  const updateLinkEditor = useCallback(() => {
+  const updateLinkEditor = useCallback(async () => {
     const selection = $getSelection()
+
+    // Handle the data displayed in the floating link editor & drawer when you click on a link node
     if ($isRangeSelection(selection)) {
       const node = getSelectedNode(selection)
-      const linkParent = $findMatchingParent(node, $isLinkNode)
-      if (linkParent != null) {
-        setIsLink(true)
-      } else {
+      const linkParent: LinkNode = $findMatchingParent(node, $isLinkNode) as LinkNode
+      if (linkParent == null) {
         setIsLink(false)
         setLinkUrl('')
         setLinkLabel('')
         return
       }
 
-      // Initial state thingy
-
       // Initial state:
-      let data: LinkAttributes & { fields: undefined; text: string } = {
-        doc: undefined,
-        fields: undefined,
-        linkType: undefined,
-        newTab: undefined,
-        nofollow: undefined,
-        sponsored: undefined,
-        text: '',
-        url: '',
-      }
-
-      data = {
-        ...linkParent.getAttributes(),
-        fields: undefined,
+      const data: LinkPayload = {
+        fields: {
+          doc: undefined,
+          linkType: undefined,
+          newTab: undefined,
+          nofollow: undefined,
+          sponsored: undefined,
+          url: '',
+          ...linkParent.getFields(),
+        },
         text: linkParent.getTextContent(),
       }
 
-      if (linkParent.getAttributes()?.linkType === 'custom') {
-        setLinkUrl(linkParent.getAttributes()?.url ?? '')
+      // Set initial state of the drawer. This will basically pre-fill the drawer fields with the
+      // values saved in the link node you clicked on.
+      const preferences = await getDocPreferences()
+      const state = await buildStateFromSchema({
+        data,
+        fieldSchema,
+        locale,
+        operation: 'create',
+        preferences,
+        t,
+        user: user ?? undefined,
+      })
+      setInitialState(state)
+
+      if (linkParent.getFields()?.linkType === 'custom') {
+        setLinkUrl(linkParent.getFields()?.url ?? '')
         setLinkLabel('')
       } else {
-        // internal
+        // internal link
         setLinkUrl(
-          `/admin/collections/${linkParent.getAttributes()?.doc
-            ?.relationTo}/${linkParent.getAttributes()?.doc?.value}`,
-        )
-        setLinkLabel(
-          `relation to ${linkParent.getAttributes()?.doc?.relationTo}: ${linkParent.getAttributes()
+          `/admin/collections/${linkParent.getFields()?.doc?.relationTo}/${linkParent.getFields()
             ?.doc?.value}`,
         )
+        setLinkLabel(
+          `relation to ${linkParent.getFields()?.doc?.relationTo}: ${linkParent.getFields()?.doc
+            ?.value}`,
+        )
       }
-
-      void getDocPreferences().then((preferences) => {
-        void buildStateFromSchema({
-          data,
-          fieldSchema,
-          locale,
-          operation: 'create',
-          preferences,
-          t,
-          user: user ?? undefined,
-        }).then((state) => {
-          setInitialState(state)
-        })
-      })
+      setIsLink(true)
     }
 
     const editorElem = editorRef.current
@@ -201,7 +163,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): JSX.Ele
     }
 
     return true
-  }, [anchorElem, editor])
+  }, [anchorElem, editor, fieldSchema])
 
   useEffect(() => {
     if (!isLink && editorRef) {
@@ -215,7 +177,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): JSX.Ele
 
     const update = (): void => {
       editor.getEditorState().read(() => {
-        updateLinkEditor()
+        void updateLinkEditor()
       })
     }
 
@@ -238,14 +200,14 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): JSX.Ele
     return mergeRegister(
       editor.registerUpdateListener(({ editorState }) => {
         editorState.read(() => {
-          updateLinkEditor()
+          void updateLinkEditor()
         })
       }),
 
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
         () => {
-          updateLinkEditor()
+          void updateLinkEditor()
           return true
         },
         COMMAND_PRIORITY_LOW,
@@ -266,7 +228,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): JSX.Ele
 
   useEffect(() => {
     editor.getEditorState().read(() => {
-      updateLinkEditor()
+      void updateLinkEditor()
     })
   }, [editor, updateLinkEditor])
 
@@ -306,29 +268,25 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): JSX.Ele
       <LinkDrawer
         drawerSlug={drawerSlug}
         fieldSchema={fieldSchema}
-        handleClose={() => {
-          closeModal(drawerSlug)
-        }}
         handleModalSubmit={(fields: Fields) => {
           closeModal(drawerSlug)
 
           const data = reduceFieldsToValues(fields, true)
 
-          const newNode: LinkAttributes & { text?: string } = {
-            doc: data.linkType === 'internal' ? data.doc : undefined,
-            linkType: data.linkType,
-            newTab: data.newTab,
-            nofollow: data.nofollow,
-            sponsored: data.sponsored,
+          const newLinkPayload: LinkPayload = {
+            fields: {
+              doc: data.linkType === 'internal' ? data.doc : undefined,
+              linkType: data.linkType,
+              newTab: data.newTab,
+              nofollow: data.nofollow,
+              sponsored: data.sponsored,
+              url: data.linkType === 'custom' ? data.url : undefined,
+              ...(customFieldSchema && data.fields ? { fields: data.fields } : {}),
+            },
             text: data?.text,
-            url: data.linkType === 'custom' ? data.url : undefined,
           }
 
-          /* if (customFieldSchema) {
-              newNode.fields += data.fields;
-            } */ // TODO
-
-          editor.dispatchCommand(TOGGLE_LINK_COMMAND, newNode)
+          editor.dispatchCommand(TOGGLE_LINK_COMMAND, newLinkPayload)
         }}
         initialState={initialState}
       />

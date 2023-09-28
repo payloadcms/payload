@@ -83,6 +83,7 @@ export type SanitizedFeatures = Required<
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
         Component: React.FC<{ anchorElem: HTMLElement }>
+        desktopOnly?: boolean
         key: string
         position: 'floatingAnchorElem' // Determines at which position the Component will be added.
       }

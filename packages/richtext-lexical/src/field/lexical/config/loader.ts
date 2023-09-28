@@ -100,6 +100,15 @@ export function loadFeatures({
 }: {
   unsanitizedEditorConfig: EditorConfig
 }): ResolvedFeatureMap {
+  // First remove all duplicate features. The LAST feature with a given key wins.
+  unsanitizedEditorConfig.features = unsanitizedEditorConfig.features
+    .reverse()
+    .filter((f, i, arr) => {
+      const firstIndex = arr.findIndex((f2) => f2.key === f.key)
+      return firstIndex === i
+    })
+    .reverse()
+
   const featureProviderMap: FeatureProviderMap = new Map(
     unsanitizedEditorConfig.features.map((f) => [f.key, f] as [string, FeatureProvider]),
   )

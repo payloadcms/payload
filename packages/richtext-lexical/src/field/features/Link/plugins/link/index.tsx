@@ -17,13 +17,10 @@ import {
 } from 'lexical'
 import { useEffect } from 'react'
 
+import type { LinkPayload } from '../floatingLinkEditor/types'
+
 import { validateUrl } from '../../../../lexical/utils/url'
-import {
-  type LinkAttributes,
-  LinkNode,
-  TOGGLE_LINK_COMMAND,
-  toggleLink,
-} from '../../nodes/LinkNode'
+import { type LinkFields, LinkNode, TOGGLE_LINK_COMMAND, toggleLink } from '../../nodes/LinkNode'
 
 export function LinkPlugin(): null {
   const [editor] = useLexicalComposerContext()
@@ -35,18 +32,17 @@ export function LinkPlugin(): null {
     return mergeRegister(
       editor.registerCommand(
         TOGGLE_LINK_COMMAND,
-        (payload: LinkAttributes & { text?: string }) => {
+        (payload: LinkPayload) => {
           console.log('Payload received:', payload)
-          const linkAttributes = payload
 
           // validate
-          if (linkAttributes?.linkType === 'custom') {
-            if (!(validateUrl === undefined || validateUrl(linkAttributes?.url))) {
+          if (payload?.fields.linkType === 'custom') {
+            if (!(validateUrl === undefined || validateUrl(payload?.fields.url))) {
               return false
             }
           }
 
-          toggleLink(linkAttributes)
+          toggleLink(payload)
           return true
         },
         COMMAND_PRIORITY_LOW,
@@ -70,11 +66,16 @@ export function LinkPlugin(): null {
               }
               // If we select nodes that are elements then avoid applying the link.
               if (!selection.getNodes().some((node) => $isElementNode(node))) {
-                const linkAttributes: LinkAttributes = {
+                const linkFields: LinkFields = {
+                  doc: null,
                   linkType: 'custom',
+                  newTab: false,
                   url: clipboardText,
                 }
-                editor.dispatchCommand(TOGGLE_LINK_COMMAND, linkAttributes)
+                editor.dispatchCommand(TOGGLE_LINK_COMMAND, {
+                  fields: linkFields,
+                  text: null,
+                })
                 event.preventDefault()
                 return true
               }

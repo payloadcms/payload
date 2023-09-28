@@ -10,6 +10,6 @@ export const FloatingLinkEditorPlugin: React.FC<
   {
     anchorElem?: HTMLElement
   } & LinkProps
-> = ({ anchorElem = document.body }) => {
-  return createPortal(<LinkEditor anchorElem={anchorElem} />, anchorElem)
+> = ({ anchorElem = document.body, fields = [] }) => {
+  return createPortal(<LinkEditor anchorElem={anchorElem} fields={fields} />, anchorElem)
 }

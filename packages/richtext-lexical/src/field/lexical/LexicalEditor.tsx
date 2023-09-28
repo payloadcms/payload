@@ -69,12 +69,19 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
           }
         }}
       />
-      {floatingAnchorElem && !isSmallWidthViewport && (
+      {floatingAnchorElem && (
         <React.Fragment>
-          <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
-          <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
+          {!isSmallWidthViewport && (
+            <React.Fragment>
+              <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
+              <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
+            </React.Fragment>
+          )}
           {editorConfig.features.plugins.map((plugin) => {
-            if (plugin.position === 'floatingAnchorElem') {
+            if (
+              plugin.position === 'floatingAnchorElem' &&
+              !(plugin.desktopOnly === true && isSmallWidthViewport)
+            ) {
               return <plugin.Component anchorElem={floatingAnchorElem} key={plugin.key} />
             }
           })}
