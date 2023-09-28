@@ -9,6 +9,8 @@ import { Props } from './types';
 import reduceFieldsToValues from '../../forms/Form/reduceFieldsToValues';
 import { useDocumentInfo } from '../../utilities/DocumentInfo';
 import useDebounce from '../../../hooks/useDebounce';
+import { formatDistanceToNow } from 'date-fns';
+import enLocale from 'date-fns/locale/en-US';
 
 import './index.scss';
 
@@ -20,6 +22,7 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
   const [fields] = useAllFormFields();
   const modified = useFormModified();
   const locale = useLocale();
+  const [importedLocale, setImportedLocale] = useState(enLocale);
   const { replace } = useHistory();
   const { t, i18n } = useTranslation('version');
 
@@ -136,13 +139,28 @@ const Autosave: React.FC<Props> = ({ collection, global, id, publishedDocUpdated
     }
   }, [publishedDocUpdatedAt, versions]);
 
+  // dynamically import date-fns locale for 'last saved' time
+
+  useEffect(() => {
+    const importLocale = async () => {
+      const localeToSet = await import(
+        `date-fns/locale/${i18n.language === 'en' ? 'en-US' : i18n.language}/index.js`
+      );
+      setImportedLocale(localeToSet.default);
+    };
+
+    importLocale();
+  }, [i18n.language]);
+
   return (
     <div className={baseClass}>
       {saving && t('saving')}
-      {(!saving && lastSaved) && (
+      {!saving && lastSaved && (
         <React.Fragment>
           {t('lastSavedAgo', {
-            distance: Math.round((Number(new Date(lastSaved)) - Number(new Date())) / 1000 / 60),
+            distance: formatDistanceToNow(lastSaved, {
+              locale: importedLocale,
+            }),
           })}
         </React.Fragment>
       )}
