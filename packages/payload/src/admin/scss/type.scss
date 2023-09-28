@@ -24,25 +24,23 @@
 %h1 {
   margin: 0 0 base(1);
   font-size: base(2);
-  line-height: 1;
+  line-height: 1.15;
   letter-spacing: -1px;
 
   @include small-break {
     letter-spacing: -0.5px;
     font-size: base(1.25);
-    line-height: base(1.25);
   }
 }
 
 %h2 {
   margin: 0 0 base(1);
   font-size: base(1.25);
-  line-height: base(1.5);
+  line-height: 1.15;
   letter-spacing: -0.5px;
 
   @include small-break {
     font-size: base(0.85);
-    line-height: base(0.85);
   }
 }
 
@@ -54,7 +52,7 @@
 
   @include small-break {
     font-size: base(0.65);
-    line-height: base(0.75);
+    line-height: 1.25;
   }
 }
 

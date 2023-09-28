@@ -29,6 +29,9 @@ type Args = {
   buildRelationships?: boolean
   disableUnique: boolean
   fields: Field[]
+  rootRelationsToBuild?: Map<string, string>
+  rootTableIDColType?: string
+  rootTableName?: string
   tableName: string
   timestamps?: boolean
 }
@@ -44,6 +47,9 @@ export const buildTable = ({
   buildRelationships,
   disableUnique = false,
   fields,
+  rootRelationsToBuild,
+  rootTableIDColType,
+  rootTableName,
   tableName,
   timestamps,
 }: Args): Result => {
@@ -100,6 +106,9 @@ export const buildTable = ({
     parentTableName: tableName,
     relationsToBuild,
     relationships,
+    rootRelationsToBuild: rootRelationsToBuild || relationsToBuild,
+    rootTableIDColType: rootTableIDColType || idColType,
+    rootTableName: rootTableName || tableName,
   }))
 
   if (timestamps) {

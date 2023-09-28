@@ -7,6 +7,7 @@
     list-style: none;
     align-items: center;
     margin: 0;
+    padding-left: 0;
   }
 
   &__tab {
@@ -21,7 +22,6 @@
     &__tabs {
       padding: 0;
       margin-left: var(--gutter-h);
-      margin-bottom: calc(var(--base) / 2);
     }
 
     &__tab {

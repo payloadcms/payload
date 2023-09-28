@@ -34,7 +34,6 @@ const Logout: React.FC<{ inactivity?: boolean }> = (props) => {
       <div className={`${baseClass}__wrap`}>
         {inactivity && <h2>{t('loggedOutInactivity')}</h2>}
         {!inactivity && <h2>{t('loggedOutSuccessfully')}</h2>}
-        <br />
         <Button
           buttonStyle="secondary"
           el="anchor"

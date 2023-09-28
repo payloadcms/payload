@@ -7,6 +7,7 @@ import RenderFields from '../../RenderFields'
 import withCondition from '../../withCondition'
 import './index.scss'
 import { RowProvider } from './provider'
+import { fieldBaseClass } from '../shared'
 
 const Row: React.FC<Props> = (props) => {
   const {
@@ -18,18 +19,17 @@ const Row: React.FC<Props> = (props) => {
     permissions,
   } = props
 
-  const classes = ['field-type', 'row', className].filter(Boolean).join(' ')
-
   return (
     <RowProvider>
       <RenderFields
-        className={classes}
+        className={[fieldBaseClass, 'row', className].filter(Boolean).join(' ')}
         fieldSchema={fields.map((field) => ({
           ...field,
           path: createNestedFieldPath(path, field),
         }))}
         fieldTypes={fieldTypes}
         indexPath={indexPath}
+        margins={false}
         permissions={permissions}
         readOnly={readOnly}
       />

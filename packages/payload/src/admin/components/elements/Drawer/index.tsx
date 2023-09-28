@@ -85,12 +85,10 @@ export const Drawer: React.FC<Props> = ({
           className={`${baseClass}__close`}
           id={`close-drawer__${slug}`}
           onClick={() => closeModal(slug)}
-          style={{
-            width: 'var(--gutter-h)',
-          }}
           type="button"
         />
         <div className={`${baseClass}__content`}>
+          <div className={`${baseClass}__blur-bg`} />
           <Gutter className={`${baseClass}__content-children`} left={gutter} right={gutter}>
             <EditDepthContext.Provider value={drawerDepth + 1}>
               {header && header}

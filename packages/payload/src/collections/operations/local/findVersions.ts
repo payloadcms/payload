@@ -39,7 +39,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
     collection: collectionSlug,
     context,
     depth,
-    fallbackLocale = null,
+    fallbackLocale,
     limit,
     locale = null,
     overrideAccess = true,
@@ -63,7 +63,7 @@ export default async function findVersionsLocal<T extends keyof GeneratedTypes['
 
   const i18n = i18nInit(payload.config.i18n)
   const req = {
-    fallbackLocale: fallbackLocale ?? defaultLocale,
+    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
     i18n,
     locale: locale ?? defaultLocale,
     payload,

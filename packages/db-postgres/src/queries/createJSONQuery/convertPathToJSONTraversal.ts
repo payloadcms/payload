@@ -1,7 +1,7 @@
 import { formatJSONPathSegment } from './formatJSONPathSegment'
 
-export const convertPathToJSONTraversal = (path: string) => {
-  const segments = path.split('.')
+export const convertPathToJSONTraversal = (incomingSegments: string[]) => {
+  const segments = [...incomingSegments]
   segments.shift()
 
   return segments.reduce((res, segment, i) => {

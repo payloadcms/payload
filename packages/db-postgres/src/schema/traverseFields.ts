@@ -28,6 +28,7 @@ import { hasLocalesTable } from '../utilities/hasLocalesTable'
 import { buildTable } from './build'
 import { createIndex } from './createIndex'
 import { parentIDColumnMap } from './parentIDColumnMap'
+import { validateExistingBlockIsIdentical } from './validateExistingBlockIsIdentical'
 
 type Args = {
   adapter: PostgresAdapter
@@ -45,6 +46,9 @@ type Args = {
   parentTableName: string
   relationsToBuild: Map<string, string>
   relationships: Set<string>
+  rootRelationsToBuild?: Map<string, string>
+  rootTableIDColType: string
+  rootTableName: string
 }
 
 type Result = {
@@ -70,6 +74,9 @@ export const traverseFields = ({
   parentTableName,
   relationsToBuild,
   relationships,
+  rootRelationsToBuild,
+  rootTableIDColType,
+  rootTableName,
 }: Args): Result => {
   let hasLocalizedField = false
   let hasLocalizedRelationshipField = false
@@ -89,7 +96,9 @@ export const traverseFields = ({
     let targetIndexes = indexes
 
     if (fieldAffectsData(field)) {
-      columnName = `${columnPrefix || ''}${field.name[0] === '_' ? '_' : ''}${toSnakeCase(field.name)}`
+      columnName = `${columnPrefix || ''}${field.name[0] === '_' ? '_' : ''}${toSnakeCase(
+        field.name,
+      )}`
       fieldName = `${fieldPrefix || ''}${field.name}`
 
       // If field is localized,
@@ -271,6 +280,9 @@ export const traverseFields = ({
           baseExtraConfig,
           disableUnique,
           fields: field.fields,
+          rootRelationsToBuild,
+          rootTableIDColType,
+          rootTableName,
           tableName: arrayTableName,
         })
 
@@ -302,12 +314,12 @@ export const traverseFields = ({
 
       case 'blocks': {
         field.blocks.forEach((block) => {
-          const blockTableName = `${newTableName}_${toSnakeCase(block.slug)}`
+          const blockTableName = `${rootTableName}_blocks_${toSnakeCase(block.slug)}`
           if (!adapter.tables[blockTableName]) {
             const baseColumns: Record<string, PgColumnBuilder> = {
               _order: integer('_order').notNull(),
-              _parentID: parentIDColumnMap[parentIDColType]('_parent_id')
-                .references(() => adapter.tables[parentTableName].id, { onDelete: 'cascade' })
+              _parentID: parentIDColumnMap[rootTableIDColType]('_parent_id')
+                .references(() => adapter.tables[rootTableName].id, { onDelete: 'cascade' })
                 .notNull(),
               _path: text('_path').notNull(),
             }
@@ -332,6 +344,9 @@ export const traverseFields = ({
               baseExtraConfig,
               disableUnique,
               fields: block.fields,
+              rootRelationsToBuild,
+              rootTableIDColType,
+              rootTableName,
               tableName: blockTableName,
             })
 
@@ -339,9 +354,9 @@ export const traverseFields = ({
               adapter.tables[blockTableName],
               ({ many, one }) => {
                 const result: Record<string, Relation<string>> = {
-                  _parentID: one(adapter.tables[parentTableName], {
+                  _parentID: one(adapter.tables[rootTableName], {
                     fields: [adapter.tables[blockTableName]._parentID],
-                    references: [adapter.tables[parentTableName].id],
+                    references: [adapter.tables[rootTableName].id],
                   }),
                 }
 
@@ -358,9 +373,16 @@ export const traverseFields = ({
             )
 
             adapter.relations[`relations_${blockTableName}`] = blockTableRelations
+          } else if (process.env.NODE_ENV !== 'production') {
+            validateExistingBlockIsIdentical({
+              block,
+              localized: field.localized,
+              rootTableName,
+              table: adapter.tables[blockTableName],
+            })
           }
 
-          relationsToBuild.set(`_blocks_${block.slug}`, blockTableName)
+          rootRelationsToBuild.set(`_blocks_${block.slug}`, blockTableName)
         })
 
         break
@@ -390,6 +412,9 @@ export const traverseFields = ({
             parentTableName,
             relationsToBuild,
             relationships,
+            rootRelationsToBuild,
+            rootTableIDColType,
+            rootTableName,
           })
 
           if (groupHasLocalizedField) hasLocalizedField = true
@@ -420,6 +445,9 @@ export const traverseFields = ({
           parentTableName,
           relationsToBuild,
           relationships,
+          rootRelationsToBuild,
+          rootTableIDColType,
+          rootTableName,
         })
 
         if (groupHasLocalizedField) hasLocalizedField = true
@@ -451,6 +479,9 @@ export const traverseFields = ({
           parentTableName,
           relationsToBuild,
           relationships,
+          rootRelationsToBuild,
+          rootTableIDColType,
+          rootTableName,
         })
 
         if (tabHasLocalizedField) hasLocalizedField = true
@@ -484,6 +515,9 @@ export const traverseFields = ({
           parentTableName,
           relationsToBuild,
           relationships,
+          rootRelationsToBuild,
+          rootTableIDColType,
+          rootTableName,
         })
 
         if (rowHasLocalizedField) hasLocalizedField = true

@@ -1,8 +1,6 @@
 @import '../../../scss/styles';
 
 .list-controls {
-  margin-bottom: $baseline;
-
   &__wrap {
     display: flex;
     align-items: center;
@@ -66,12 +64,15 @@
     }
 
     &__buttons-wrap {
-      margin-left: - base(0.25);
-      margin-right: - base(0.25);
-      width: calc(100% + #{base(0.5)});
+      [dir='ltr'] & {
+        margin-right: 0;
+      }
+
+      [dir='rtl'] & {
+        margin-left: 0;
+      }
 
       .pill {
-        margin: 0 base(0.25);
         padding: base(0.5) base(1);
 
         svg {
@@ -85,10 +86,16 @@
       width: 100%;
     }
 
+    .column-selector,
+    .where-builder,
+    .sort-complex {
+      margin-top: calc(var(--base) / 2);
+    }
+
     &__toggle-columns,
     &__toggle-where,
     &__toggle-sort {
-      flex-grow: 1;
+      flex: 1;
     }
   }
 }
