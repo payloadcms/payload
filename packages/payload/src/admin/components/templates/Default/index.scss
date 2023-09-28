@@ -2,22 +2,49 @@
 
 .template-default {
   min-height: 100vh;
+  display: flex;
+  width: 100%;
+  position: relative;
+  width: calc(100% + var(--nav-width));
+
+  &--sidebar-open {
+    transform: translate3d(0, 0, 0);
+
+    .template-default {
+      &__wrap {
+        pointer-events: none;
+        transform: translate3d(0, 0, 0);
+        transition: transform var(--nav-trans-time) linear;
+      }
+
+      &__nav-overlay {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+  }
 
   &__wrap {
     min-width: 0;
     width: 100%;
     flex-grow: 1;
+    position: relative;
+    transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
   }
 
-  @include mid-break {
+  &__nav-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-
-    [dir='ltr'] & {
-      margin-left: 0;
-    }
-
-    [dir='rtl'] & {
-      margin-right: 0;
-    }
+    height: 100%;
+    opacity: 0;
+    background: var(--theme-overlay);
+    padding: 0;
+    border: 0;
+    z-index: var(--z-modal);
+    cursor: pointer;
+    pointer-events: none;
+    transition: opacity var(--nav-trans-time) linear;
   }
 }

@@ -9,8 +9,8 @@ import { useAuth } from '../../../utilities/Auth'
 import { OperationContext } from '../../../utilities/OperationProvider'
 import { CollectionRoutes } from './Routes'
 import { CustomCollectionComponent } from './Routes/CustomComponent'
-import './index.scss'
 import { EditViewProps } from '../../types'
+import './index.scss'
 
 const baseClass = 'collection-edit'
 
@@ -62,49 +62,47 @@ const DefaultEditView: React.FC<
     const operation = isEditing ? 'update' : 'create'
 
     return (
-      <React.Fragment>
-        <div className={classes}>
-          <OperationContext.Provider value={operation}>
-            <Form
-              action={action}
-              className={`${baseClass}__form`}
-              disabled={!hasSavePermission}
-              initialState={internalState}
-              method={id ? 'patch' : 'post'}
-              onSuccess={onSave}
-            >
-              <FormLoadingOverlayToggle
-                action={isLoading ? 'loading' : operation}
-                formIsLoading={isLoading}
-                loadingSuffix={getTranslation(collection.labels.singular, i18n)}
-                name={`collection-edit--${
-                  typeof collection?.labels?.singular === 'string'
-                    ? collection.labels.singular
-                    : 'document'
-                }`}
-                type="withoutNav"
-              />
-              {!isLoading && (
-                <React.Fragment>
-                  <DocumentHeader
-                    apiURL={apiURL}
-                    collection={collection}
-                    customHeader={customHeader}
-                    data={data}
-                    id={id}
-                    isEditing={isEditing}
-                  />
-                  {disableRoutes ? (
-                    <CustomCollectionComponent view="Default" {...props} />
-                  ) : (
-                    <CollectionRoutes {...props} />
-                  )}
-                </React.Fragment>
-              )}
-            </Form>
-          </OperationContext.Provider>
-        </div>
-      </React.Fragment>
+      <main className={classes}>
+        <OperationContext.Provider value={operation}>
+          <Form
+            action={action}
+            className={`${baseClass}__form`}
+            disabled={!hasSavePermission}
+            initialState={internalState}
+            method={id ? 'patch' : 'post'}
+            onSuccess={onSave}
+          >
+            <FormLoadingOverlayToggle
+              action={isLoading ? 'loading' : operation}
+              formIsLoading={isLoading}
+              loadingSuffix={getTranslation(collection.labels.singular, i18n)}
+              name={`collection-edit--${
+                typeof collection?.labels?.singular === 'string'
+                  ? collection.labels.singular
+                  : 'document'
+              }`}
+              type="withoutNav"
+            />
+            {!isLoading && (
+              <React.Fragment>
+                <DocumentHeader
+                  apiURL={apiURL}
+                  collection={collection}
+                  customHeader={customHeader}
+                  data={data}
+                  id={id}
+                  isEditing={isEditing}
+                />
+                {disableRoutes ? (
+                  <CustomCollectionComponent view="Default" {...props} />
+                ) : (
+                  <CollectionRoutes {...props} />
+                )}
+              </React.Fragment>
+            )}
+          </Form>
+        </OperationContext.Provider>
+      </main>
     )
   }
 

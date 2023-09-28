@@ -1,74 +1,137 @@
-import { ModalToggler, useModal } from '@faceless-ui/modal'
-import React, { Fragment, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { NavLink, useHistory } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Link, useHistory } from 'react-router-dom'
-
-import Account from '../../graphics/Account'
 import { useConfig } from '../../utilities/Config'
+import { useAuth } from '../../utilities/Auth'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
-import Hamburger from '../Hamburger'
-import Localizer from '../Localizer'
-import { MainMenu, mainMenuSlug } from '../MainMenu'
-import StepNav from '../StepNav'
+import Chevron from '../../icons/Chevron'
+import Logout from '../Logout'
+import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilities/groupNavItems'
+import { getTranslation } from '../../../../utilities/getTranslation'
+import NavGroup from '../NavGroup'
+import { useSidebar } from './context'
+
 import './index.scss'
 
 const baseClass = 'nav'
 
-const DefaultNav = () => {
+const DefaultNav: React.FC = () => {
+  const { sidebarOpen, setSidebarOpen } = useSidebar()
+  const { permissions, user } = useAuth()
+  const [groups, setGroups] = useState<Group[]>([])
   const history = useHistory()
-  const { closeModal, isModalOpen } = useModal()
-  const { t } = useTranslation()
-  const isMainMenuOpen = isModalOpen(mainMenuSlug)
+  const { t, i18n } = useTranslation('general')
 
   const {
-    routes: { admin: adminRoute },
+    collections,
+    globals,
+    routes: { admin },
+    admin: {
+      components: { beforeNavLinks, afterNavLinks },
+    },
   } = useConfig()
+
+  useEffect(() => {
+    setGroups(
+      groupNavItems(
+        [
+          ...collections
+            .filter(
+              ({ admin: { hidden } }) =>
+                !(typeof hidden === 'function' ? hidden({ user }) : hidden),
+            )
+            .map((collection) => {
+              const entityToGroup: EntityToGroup = {
+                type: EntityType.collection,
+                entity: collection,
+              }
+
+              return entityToGroup
+            }),
+          ...globals
+            .filter(
+              ({ admin: { hidden } }) =>
+                !(typeof hidden === 'function' ? hidden({ user }) : hidden),
+            )
+            .map((global) => {
+              const entityToGroup: EntityToGroup = {
+                type: EntityType.global,
+                entity: global,
+              }
+
+              return entityToGroup
+            }),
+        ],
+        permissions,
+        i18n,
+      ),
+    )
+  }, [collections, globals, permissions, i18n, i18n.language, user])
 
   useEffect(
     () =>
       history.listen(() => {
-        closeModal(mainMenuSlug)
+        setSidebarOpen(false)
       }),
-    [history, closeModal],
+    [history, setSidebarOpen],
   )
 
   return (
-    <Fragment>
-      <header
-        className={[
-          baseClass,
-          !isMainMenuOpen && `${baseClass}--show-bg`,
-          isMainMenuOpen && `${baseClass}--main-menu-open`,
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        <div className={`${baseClass}__bg`} />
-        <div className={`${baseClass}__content`}>
-          <ModalToggler className={`${baseClass}__modalToggler`} slug={mainMenuSlug}>
-            <Hamburger isActive={isMainMenuOpen} />
-          </ModalToggler>
-          <div className={`${baseClass}__nav-wrapper`}>
-            <StepNav className={`${baseClass}__step-nav`} />
-            <div className={`${baseClass}__controls`}>
-              <Localizer className={`${baseClass}__localizer`} />
-              <Link
-                aria-label={t('authentication:account')}
-                className={`${baseClass}__account`}
-                to={`${adminRoute}/account`}
-              >
-                <Account />
-              </Link>
-            </div>
+    <aside
+      className={[baseClass, sidebarOpen && `${baseClass}--sidebar-open`].filter(Boolean).join(' ')}
+    >
+      <div className={`${baseClass}__scroll`}>
+        <nav className={`${baseClass}__wrap`}>
+          {Array.isArray(beforeNavLinks) &&
+            beforeNavLinks.map((Component, i) => <Component key={i} />)}
+          {groups.map(({ label, entities }, key) => {
+            return (
+              <NavGroup {...{ key, label }}>
+                {entities.map(({ entity, type }, i) => {
+                  let entityLabel: string
+                  let href: string
+                  let id: string
+
+                  if (type === EntityType.collection) {
+                    href = `${admin}/collections/${entity.slug}`
+                    entityLabel = getTranslation(entity.labels.plural, i18n)
+                    id = `nav-${entity.slug}`
+                  }
+
+                  if (type === EntityType.global) {
+                    href = `${admin}/globals/${entity.slug}`
+                    entityLabel = getTranslation(entity.label, i18n)
+                    id = `nav-global-${entity.slug}`
+                  }
+
+                  return (
+                    <NavLink
+                      id={id}
+                      className={`${baseClass}__link`}
+                      activeClassName="active"
+                      key={i}
+                      to={href}
+                    >
+                      <Chevron />
+                      {entityLabel}
+                    </NavLink>
+                  )
+                })}
+              </NavGroup>
+            )
+          })}
+          {Array.isArray(afterNavLinks) &&
+            afterNavLinks.map((Component, i) => <Component key={i} />)}
+          <div className={`${baseClass}__controls`}>
+            <Logout />
           </div>
-        </div>
-      </header>
-      <MainMenu />
-    </Fragment>
+        </nav>
+      </div>
+    </aside>
   )
 }
 
-const Nav: React.FC = () => {
+export const Nav: React.FC = () => {
   const {
     admin: {
       components: { Nav: CustomNav } = {
@@ -79,5 +142,3 @@ const Nav: React.FC = () => {
 
   return <RenderCustomComponent CustomComponent={CustomNav} DefaultComponent={DefaultNav} />
 }
-
-export default Nav

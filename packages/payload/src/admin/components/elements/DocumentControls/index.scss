@@ -15,8 +15,8 @@
     position: absolute;
     height: 1px;
     background: var(--theme-elevation-100);
-    width: calc(100% + var(--gutter-h));
-    left: calc(var(--gutter-h) * -1);
+    width: 100%;
+    left: 0;
     top: 100%;
   }
 

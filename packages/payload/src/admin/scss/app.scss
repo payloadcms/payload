@@ -17,6 +17,7 @@
   --theme-bg: var(--theme-elevation-0);
   --theme-input-bg: var(--theme-elevation-0);
   --theme-text: var(--theme-elevation-800);
+  --theme-overflow: rgba(255, 255, 255, 0.75);
   --theme-baseline: #{$baseline-px};
   --theme-baseline-body-size: #{$baseline-body-size};
   --font-body: 'Suisse Intl', system-ui;
@@ -37,7 +38,10 @@
 
   --gutter-h: #{base(6)};
   --spacing-view-bottom: var(--gutter-h);
+  --app-header-height: calc(var(--base) * 3);
   --doc-controls-height: calc(var(--base) * 3);
+  --nav-width: 400px;
+  --nav-trans-time: 150ms;
 
   @include large-break {
     --gutter-h: #{base(3)};
@@ -45,12 +49,14 @@
 
   @include mid-break {
     --gutter-h: #{base(2)};
+    --app-header-height: calc(var(--base) * 2);
     --doc-controls-height: calc(var(--base) * 1.5);
   }
 
   @include small-break {
     --gutter-h: #{base(0.5)};
     --spacing-view-bottom: calc(var(--base) * 2);
+    --nav-width: 100vw;
   }
 }
 
@@ -71,6 +77,7 @@ html {
     --theme-bg: var(--theme-elevation-0);
     --theme-text: var(--theme-elevation-1000);
     --theme-input-bg: var(--theme-elevation-50);
+    --theme-overlay: rgba(5, 5, 5, 0.75);
     color-scheme: dark;
 
     ::selection {
@@ -91,6 +98,12 @@ html,
 body,
 #app {
   height: 100%;
+}
+
+#app {
+  height: 100%;
+  // this is for the sidebar to be able to push the document over
+  overflow-x: hidden;
 }
 
 body {

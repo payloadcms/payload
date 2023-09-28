@@ -1,13 +1,18 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Props } from './types'
 
-import DefaultNav from '../../elements/Nav'
+import { AppHeader } from '../../elements/Header'
 import { useConfig } from '../../utilities/Config'
 import Meta from '../../utilities/Meta'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
+import { Nav as DefaultNav } from '../../elements/Nav'
+
 import './index.scss'
+import Hamburger from '../../elements/Hamburger'
+import { useSidebar } from '../../elements/Nav/context'
+import { NavToggler } from '../../elements/Nav/NavToggler'
 
 const baseClass = 'template-default'
 
@@ -19,20 +24,44 @@ const Default: React.FC<Props> = ({ children, className }) => {
       },
     } = {},
   } = useConfig()
+
   const { t } = useTranslation('general')
 
-  const classes = [baseClass, className].filter(Boolean).join(' ')
+  const { sidebarOpen, setSidebarOpen } = useSidebar()
 
   return (
-    <div className={classes}>
+    <Fragment>
       <Meta
         description={`${t('dashboard')} Payload`}
         keywords={`${t('dashboard')}, Payload`}
         title={t('dashboard')}
       />
-      <RenderCustomComponent CustomComponent={CustomNav} DefaultComponent={DefaultNav} />
-      <div className={`${baseClass}__wrap`}>{children}</div>
-    </div>
+      <div
+        className={[baseClass, className, sidebarOpen && `${baseClass}--sidebar-open`]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <RenderCustomComponent
+          CustomComponent={CustomNav}
+          DefaultComponent={DefaultNav}
+          componentProps={{
+            sidebarOpen: sidebarOpen,
+            setSidebarOpen: setSidebarOpen,
+          }}
+        />
+        <div className={`${baseClass}__wrap`}>
+          <AppHeader />
+          {children}
+          <button
+            type="button"
+            className={`${baseClass}__nav-overlay`}
+            aria-label={t('menu')}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          />
+        </div>
+      </div>
+      <NavToggler />
+    </Fragment>
   )
 }
 

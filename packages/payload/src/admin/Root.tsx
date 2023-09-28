@@ -22,6 +22,7 @@ import { SearchParamsProvider } from './components/utilities/SearchParams'
 import { ThemeProvider } from './components/utilities/Theme'
 import { Routes } from './components/views/Routes'
 import './scss/app.scss'
+import { SidebarProvider } from './components/elements/Nav/context'
 
 const Root = () => {
   return (
@@ -46,9 +47,11 @@ const Root = () => {
                         <LocaleProvider>
                           <StepNavProvider>
                             <LoadingOverlayProvider>
-                              <CustomProvider>
-                                <Routes />
-                              </CustomProvider>
+                              <SidebarProvider>
+                                <CustomProvider>
+                                  <Routes />
+                                </CustomProvider>
+                              </SidebarProvider>
                             </LoadingOverlayProvider>
                           </StepNavProvider>
                         </LocaleProvider>

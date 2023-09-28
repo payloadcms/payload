@@ -1,0 +1,30 @@
+@import '../../../../scss/styles.scss';
+
+.nav-toggler {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-modal);
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  height: var(--app-header-height);
+  width: var(--gutter-h);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: calc(var(--base) * 1.25);
+
+  @include mid-break {
+    width: var(--gutter-h);
+    height: var(--gutter-h);
+  }
+
+  @include mid-break {
+    width: calc(var(--base) * 2);
+    height: calc(var(--base) * 2);
+    padding-left: var(--gutter-h);
+  }
+}

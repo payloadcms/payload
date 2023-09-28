@@ -1,124 +1,108 @@
 @import '../../../scss/styles.scss';
 
 .nav {
-  position: relative;
-  width: 100%;
-  height: calc(var(--base) * 3);
-  z-index: var(--z-modal);
+  position: sticky;
+  top: 0;
+  left: 0;
+  flex-shrink: 0;
+  height: 100vh;
+  width: var(--nav-width);
+  overflow: hidden;
+  border-right: 1px solid var(--theme-elevation-100);
+  transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
 
-  &__bg {
-    @include blur-bg;
-    opacity: 0;
-    position: absolute;
-    left: 0;
-    top: 0;
+  &--sidebar-open {
+    transform: translate3d(0, 0, 0);
+    transition: transform var(--nav-trans-time) linear;
+  }
+
+  &__scroll {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: base(2.5) base(1.25) base(2) base(1.25);
+    width: calc(100% + #{base(1)});
+    overflow-y: scroll;
+  }
+
+  &__wrap {
     width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
-
-  &--show-bg {
-    opacity: 1;
-  }
-
-  // when the modal is open, the nav overlays the top portion
-  // we need to make sure the modal content is clickable
-  // so we disable pointer events on the nav
-  // but reenable them on the modal toggler
-  &--main-menu-open {
-    pointer-events: none;
-    z-index: calc(var(--z-modal) + 2);
-
-    .nav__modalToggler {
-      pointer-events: all;
-    }
-
-    .nav__nav-wrapper {
-      display: none;
-    }
-  }
-
-  &__content {
     display: flex;
-    align-items: center;
-    height: 100%;
-    padding: 0 calc(var(--base) * 1.5);
-    position: relative;
+    flex-direction: column;
+    align-items: flex-start;
     flex-grow: 1;
   }
 
-  &__nav-wrapper {
-    margin-left: calc(var(--base) / 1.25);
-    display: flex;
-    gap: calc(var(--base) / 2);
-    align-items: center;
-    height: 100%;
-    flex-grow: 1;
-    justify-content: space-between;
-  }
-
-  &__modalToggler {
-    pointer-events: all;
-    background-color: transparent;
-    border: 0;
-    padding: 0;
-    cursor: pointer;
-    transform: translate3d(-50%, 0, 0);
-
-    &:focus {
-      outline: none;
-    }
-  }
-
-  &__account {
-    transform: translate3d(50%, 0, 0);
-    &:focus:not(:focus-visible) {
-      opacity: 1;
-    }
+  &__label {
+    color: var(--theme-elevation-400);
   }
 
   &__controls {
-    display: flex;
-    align-items: center;
-    gap: calc(var(--base) / 2);
-    flex-grow: 1;
-    justify-content: flex-end;
+    margin-top: auto;
+    margin-bottom: 0;
+
+    > * {
+      margin-top: base(1);
+    }
+
+    a:focus-visible {
+      outline: var(--accessibility-outline);
+    }
   }
 
-  // the icon has padding so we need to transform slightly
-  // so that it's bounding box aligns with the other elements
-  // this can be removed if we ever reformat our SVG icons
-  &__localizer {
-    transform: translate3d(8px, 0, 0);
+  &__log-out {
+    &:hover {
+      g {
+        transform: translateX(-#{base(0.125)});
+      }
+    }
   }
 
-  @include large-break {
-    &__content {
-      padding: 0 calc(var(--gutter-h) / 2);
+  nav {
+    a {
+      position: relative;
+      padding: base(0.125) base(1.5) base(0.125) 0;
+      display: flex;
+      text-decoration: none;
+
+      &:focus:not(:focus-visible) {
+        box-shadow: none;
+        font-weight: 600;
+      }
+
+      &:hover,
+      &:focus-visible {
+        text-decoration: underline;
+      }
+
+      &.active {
+        font-weight: normal;
+        padding-left: base(0.6);
+        font-weight: 600;
+      }
+    }
+  }
+
+  &__link {
+    svg {
+      opacity: 0;
+      position: absolute;
+      left: - base(0.5);
+      transform: rotate(-90deg);
+    }
+
+    &.active {
+      svg {
+        opacity: 1;
+      }
     }
   }
 
   @include mid-break {
-    height: calc(var(--base) * 2);
-
-    &__nav-wrapper {
-      margin-left: calc(var(--base) / 2.25);
-    }
-  }
-
-  @include small-break {
-    &__content {
-      padding: 0 var(--gutter-h);
-    }
-
-    &__modalToggler,
-    &__account {
-      transform: unset;
-    }
-
-    &__step-nav {
-      // TODO: overflow the step nav instead of hide it
-      display: none;
+    nav a {
+      font-size: base(0.875);
+      line-height: base(1.25);
+      font-weight: 600;
     }
   }
 }
