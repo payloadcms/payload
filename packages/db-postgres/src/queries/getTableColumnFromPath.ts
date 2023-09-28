@@ -378,13 +378,14 @@ export const getTableColumnFromPath = ({
           if (field.localized && adapter.payload.config.localization) {
             // If localized, we go to localized table and set aliasTable to undefined
             // so it is not picked up below to be used as targetTable
-            aliasTable = undefined
             newTableName = `${tableName}_locales`
 
-            joins[newTableName] = eq(
-              adapter.tables[tableName].id,
-              adapter.tables[newTableName]._parentID,
-            )
+            const parentTable = aliasTable || adapter.tables[tableName]
+
+            joins[newTableName] = eq(parentTable.id, adapter.tables[newTableName]._parentID)
+
+            aliasTable = undefined
+
             if (locale !== 'all') {
               constraints.push({
                 columnName: '_locale',
