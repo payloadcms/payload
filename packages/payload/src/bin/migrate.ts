@@ -17,6 +17,7 @@ export const migrate = async (args: string[]): Promise<void> => {
 
   // Barebones instance to access database adapter
   await payload.init({
+    disableOnInit: true,
     local: true,
     secret: process.env.PAYLOAD_SECRET || '--unused--',
   })
