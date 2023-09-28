@@ -7,7 +7,7 @@ import { defaults } from '../../../../collections/config/defaults'
 import Chevron from '../../icons/Chevron'
 import { useSearchParams } from '../../utilities/SearchParams'
 import Popup from '../Popup'
-import * as PopupList from '../Popup/PopupList'
+import * as PopupList from '../Popup/PopupButtonList'
 import './index.scss'
 
 const baseClass = 'per-page'
@@ -74,6 +74,7 @@ const PerPage: React.FC<Props> = ({
             ))}
           </PopupList.ButtonGroup>
         )}
+        size="small"
       />
     </div>
   )

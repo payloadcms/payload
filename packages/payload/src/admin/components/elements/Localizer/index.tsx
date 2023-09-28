@@ -7,7 +7,7 @@ import { useConfig } from '../../utilities/Config'
 import { useLocale } from '../../utilities/Locale'
 import { useSearchParams } from '../../utilities/SearchParams'
 import Popup from '../Popup'
-import * as PopupList from '../Popup/PopupList'
+import * as PopupList from '../Popup/PopupButtonList'
 import './index.scss'
 
 const baseClass = 'localizer'
@@ -37,7 +37,7 @@ const Localizer: React.FC<{
               <Chevron className={`${baseClass}__chevron`} />
             </div>
           }
-          horizontalAlign="center"
+          horizontalAlign="right"
           render={({ close }) => (
             <PopupList.ButtonGroup>
               {locales.map((localeOption) => {
@@ -50,7 +50,7 @@ const Localizer: React.FC<{
 
                 if (localeOption.code !== locale.code) {
                   return (
-                    <PopupList.Button onClick={close} to={{ search }}>
+                    <PopupList.Button key={locale.code} onClick={close} to={{ search }}>
                       {localeOption.label}
                       {localeOption.label !== localeOption.code && ` (${localeOption.code})`}
                     </PopupList.Button>
@@ -62,6 +62,7 @@ const Localizer: React.FC<{
             </PopupList.ButtonGroup>
           )}
           showScrollbar
+          size="large"
         />
       </div>
     )

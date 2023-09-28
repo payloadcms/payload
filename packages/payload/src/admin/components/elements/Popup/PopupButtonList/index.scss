@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   text-align: left;
+  --list-button-padding: calc(var(--base) * 0.5);
 
   &__text-align--left {
     text-align: left;
@@ -17,27 +18,30 @@
     text-align: right;
   }
 
-  &__button-size--small {
-    --list-button-padding: calc(var(--base) * 0.5);
-  }
-
-  &__button-size--default {
-    --list-button-padding: calc(var(--base) * 0.75);
-  }
-
   &__button {
     @extend %btn-reset;
     padding-left: var(--list-button-padding);
     padding-right: var(--list-button-padding);
-    padding-top: 0;
-    padding-bottom: 0;
+    padding-top: 2px;
+    padding-bottom: 2px;
     cursor: pointer;
     text-align: inherit;
     line-height: var(--base);
     text-decoration: none;
+    border-radius: 3px;
 
-    &:hover {
-      background-color: var(--theme-elevation-150);
+    button {
+      @extend %btn-reset;
+
+      &:focus-visible {
+        outline: none;
+      }
+    }
+
+    &:hover,
+    &:focus-visible,
+    &:focus-within {
+      background-color: var(--popup-button-highlight);
     }
   }
 }

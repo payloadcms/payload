@@ -9,7 +9,7 @@ import More from '../../icons/More'
 import Plus from '../../icons/Plus'
 import X from '../../icons/X'
 import Popup from '../Popup'
-import * as PopupList from '../Popup/PopupList'
+import * as PopupList from '../Popup/PopupButtonList'
 import './index.scss'
 
 const baseClass = 'array-actions'
@@ -94,6 +94,7 @@ export const ArrayAction: React.FC<Props> = ({
           </PopupList.ButtonGroup>
         )
       }}
+      size="medium"
     />
   )
 }

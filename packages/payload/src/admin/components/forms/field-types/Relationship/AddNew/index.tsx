@@ -10,7 +10,7 @@ import { getTranslation } from '../../../../../../utilities/getTranslation'
 import Button from '../../../../elements/Button'
 import { useDocumentDrawer } from '../../../../elements/DocumentDrawer'
 import Popup from '../../../../elements/Popup'
-import * as PopupList from '../../../../elements/Popup/PopupList'
+import * as PopupList from '../../../../elements/Popup/PopupButtonList'
 import Tooltip from '../../../../elements/Tooltip'
 import Plus from '../../../../icons/Plus'
 import { useAuth } from '../../../../utilities/Auth'
@@ -164,7 +164,7 @@ export const AddNewRelation: React.FC<Props> = ({
               horizontalAlign="center"
               onToggleOpen={onPopupToggle}
               render={({ close: closePopup }) => (
-                <PopupList.ButtonGroup textAlign="center">
+                <PopupList.ButtonGroup>
                   {relatedCollections.map((relatedCollection) => {
                     if (permissions.collections[relatedCollection.slug].create.permission) {
                       return (
@@ -185,6 +185,7 @@ export const AddNewRelation: React.FC<Props> = ({
                   })}
                 </PopupList.ButtonGroup>
               )}
+              size="medium"
             />
             {collectionConfig &&
               permissions.collections[collectionConfig.slug].create.permission && (

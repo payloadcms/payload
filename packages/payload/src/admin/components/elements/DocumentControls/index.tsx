@@ -9,11 +9,12 @@ import { formatDate } from '../../../utilities/formatDate'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import Autosave from '../Autosave'
+import Button from '../Button'
 import DeleteDocument from '../DeleteDocument'
 import DuplicateDocument from '../DuplicateDocument'
 import { Gutter } from '../Gutter'
 import Popup from '../Popup'
-import * as PopupList from '../Popup/PopupList'
+import * as PopupList from '../Popup/PopupButtonList'
 import PreviewButton from '../PreviewButton'
 import { Publish } from '../Publish'
 import { Save } from '../Save'
@@ -71,6 +72,8 @@ export const DocumentControls: React.FC<{
       global?.versions?.drafts &&
       !global?.versions?.drafts?.autosave
   }
+
+  const showDotMenu = Boolean(collection && !disableActions)
 
   return (
     <Gutter className={baseClass}>
@@ -186,17 +189,18 @@ export const DocumentControls: React.FC<{
               </React.Fragment>
             )}
           </div>
-          {Boolean(collection && !disableActions) && (
+          {showDotMenu && (
             <Popup
               button={
-                <div className={`${baseClass}__dots`}>
+                <Button buttonStyle="secondary" className={`${baseClass}__dots`}>
                   <div />
                   <div />
                   <div />
-                </div>
+                </Button>
               }
               className={`${baseClass}__popup`}
-              horizontalAlign="center"
+              horizontalAlign="right"
+              size="large"
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>

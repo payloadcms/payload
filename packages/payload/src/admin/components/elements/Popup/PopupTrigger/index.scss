@@ -1,5 +1,14 @@
 @import '../../../../scss/styles.scss';
 
 .popup-button {
+  height: 100%;
+  color: currentColor;
+  padding: 0;
+  font-size: 1rem;
+  line-height: base(1);
+  background: transparent;
+  border: 0;
+  font-weight: 600;
+  cursor: pointer;
   display: inline-flex;
 }

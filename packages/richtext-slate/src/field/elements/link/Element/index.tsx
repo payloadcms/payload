@@ -141,7 +141,6 @@ export const LinkElement: React.FC<{
           forceOpen={renderPopup}
           horizontalAlign="left"
           onToggleOpen={handleTogglePopup}
-          padding="medium"
           render={() => (
             <div className={`${baseClass}__popup`}>
               {element.linkType === 'internal' && element.doc?.relationTo && element.doc?.value && (
@@ -160,6 +159,7 @@ export const LinkElement: React.FC<{
                     href={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}
                     rel="noreferrer"
                     target="_blank"
+                    title={`${config.routes.admin}/collections/${element.doc.relationTo}/${element.doc.value}`}
                   >
                     label
                   </a>
@@ -171,6 +171,7 @@ export const LinkElement: React.FC<{
                   href={element.url}
                   rel="noreferrer"
                   target="_blank"
+                  title={element.url}
                 >
                   {element.url}
                 </a>
@@ -201,7 +202,7 @@ export const LinkElement: React.FC<{
               />
             </div>
           )}
-          size="small"
+          size="fit-content"
           verticalAlign="bottom"
         />
       </span>

@@ -11,15 +11,6 @@
     }
   }
 
-  &.popup--active .array-actions__button {
-    background: var(--theme-elevation-0);
-  }
-
-  &__button {
-    @extend %btn-reset;
-    cursor: pointer;
-  }
-
   &__actions {
     list-style: none;
     margin: 0;
