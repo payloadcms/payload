@@ -96,10 +96,6 @@
     &__content {
       padding: 0 calc(var(--gutter-h) / 2);
     }
-
-    &__nav-wrapper {
-      margin-left: calc(var(--base) / 1.125);
-    }
   }
 
   @include mid-break {

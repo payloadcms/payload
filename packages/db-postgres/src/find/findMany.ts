@@ -73,6 +73,14 @@ export const findMany = async function find({
     if (where) {
       selectDistinctMethods.push({ args: [where], method: 'where' })
     }
+
+    joinAliases.forEach(({ condition, table }) => {
+      selectDistinctMethods.push({
+        args: [table, condition],
+        method: 'leftJoin',
+      })
+    })
+
     Object.entries(joins).forEach(([joinTable, condition]) => {
       if (joinTable) {
         selectDistinctMethods.push({
@@ -80,13 +88,6 @@ export const findMany = async function find({
           method: 'leftJoin',
         })
       }
-    })
-
-    joinAliases.forEach(({ condition, table }) => {
-      selectDistinctMethods.push({
-        args: [table, condition],
-        method: 'leftJoin',
-      })
     })
 
     selectDistinctMethods.push({ args: [skip || (page - 1) * limit], method: 'offset' })
@@ -129,6 +130,14 @@ export const findMany = async function find({
 
   if (pagination !== false || selectDistinctResult?.length > limit) {
     const selectCountMethods: ChainedMethods = []
+
+    joinAliases.forEach(({ condition, table }) => {
+      selectCountMethods.push({
+        args: [table, condition],
+        method: 'leftJoin',
+      })
+    })
+
     Object.entries(joins).forEach(([joinTable, condition]) => {
       if (joinTable) {
         selectCountMethods.push({
@@ -136,13 +145,6 @@ export const findMany = async function find({
           method: 'leftJoin',
         })
       }
-    })
-
-    joinAliases.forEach(({ condition, table }) => {
-      selectCountMethods.push({
-        args: [table, condition],
-        method: 'leftJoin',
-      })
     })
 
     const countResult = await chainMethods({

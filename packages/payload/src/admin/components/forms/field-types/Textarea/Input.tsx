@@ -11,6 +11,7 @@ import Error from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import Label from '../../Label'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 export type TextAreaInputProps = Omit<TextareaField, 'type'> & {
   className?: string
@@ -50,19 +51,17 @@ const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
 
   const { i18n } = useTranslation()
 
-  const classes = [
-    'field-type',
-    'textarea',
-    className,
-    showError && 'error',
-    readOnly && 'read-only',
-  ]
-    .filter(Boolean)
-    .join(' ')
-
   return (
     <div
-      className={classes}
+      className={[
+        fieldBaseClass,
+        'textarea',
+        className,
+        showError && 'error',
+        readOnly && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={{
         ...style,
         width,

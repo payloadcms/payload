@@ -56,6 +56,7 @@ const ContextHooks: CollectionConfig = {
           data: {
             value: context.secretValue ?? '',
           },
+          req,
           context: {
             triggerAfterChange: false, // Make sure we don't trigger afterChange again and again in an infinite loop. This should be done via context and not a potential disableHooks property, as we want to specifically test the context functionality here
           },

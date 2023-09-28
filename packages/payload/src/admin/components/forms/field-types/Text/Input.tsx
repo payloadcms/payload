@@ -11,6 +11,7 @@ import Error from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import Label from '../../Label'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 export type TextInputProps = Omit<TextField, 'type'> & {
   className?: string
@@ -52,13 +53,11 @@ const TextInput: React.FC<TextInputProps> = (props) => {
 
   const { i18n } = useTranslation()
 
-  const classes = ['field-type', 'text', className, showError && 'error', readOnly && 'read-only']
-    .filter(Boolean)
-    .join(' ')
-
   return (
     <div
-      className={classes}
+      className={[fieldBaseClass, 'text', className, showError && 'error', readOnly && 'read-only']
+        .filter(Boolean)
+        .join(' ')}
       style={{
         ...style,
         width,

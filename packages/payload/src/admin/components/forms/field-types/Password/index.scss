@@ -2,7 +2,6 @@
 
 .field-type.password {
   position: relative;
-  margin-bottom: $baseline;
 
   input {
     @include formInput;

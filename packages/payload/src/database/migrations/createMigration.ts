@@ -7,10 +7,9 @@ import { migrationTemplate } from './migrationTemplate'
 
 export const createMigration: CreateMigration = async function createMigration(
   payload,
-  migrationDir,
   migrationName,
 ) {
-  const dir = migrationDir || 'migrations' // TODO: Verify path after linking
+  const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }

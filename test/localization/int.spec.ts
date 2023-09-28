@@ -102,7 +102,7 @@ describe('Localization', () => {
     })
 
     it('should fallback to english translation when empty', async () => {
-      const updated = await payload.update({
+      await payload.update({
         collection,
         id: post1.id,
         locale: spanishLocale,
@@ -111,7 +111,12 @@ describe('Localization', () => {
         },
       })
 
-      expect(updated.title).toEqual(englishTitle)
+      const retrievedInEnglish = await payload.findByID({
+        collection,
+        id: post1.id,
+      })
+
+      expect(retrievedInEnglish.title).toEqual(englishTitle)
 
       const localizedFallback: any = await payload.findByID({
         collection,
@@ -657,7 +662,7 @@ describe('Localization', () => {
 
       const update = `mutation {
         updateLocalizedPost(
-          id: "${createResult.id}",
+          id: ${payload.db.defaultIDType === 'number' ? createResult.id : `"${createResult.id}"`},
           data: {
             title: "${spanishTitle}"
           }
@@ -716,6 +721,7 @@ describe('Localization', () => {
       const updatedSpanishDoc = await payload.update({
         collection: arrayCollectionSlug,
         locale: spanishLocale,
+        fallbackLocale: null,
         id: docID,
         data: {
           items: [],

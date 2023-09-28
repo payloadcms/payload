@@ -74,12 +74,13 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     data,
     depth,
     draft,
-    fallbackLocale = null,
+    fallbackLocale,
     file,
     filePath,
     locale = null,
     overrideAccess = true,
     overwriteExistingFiles = false,
+    req: incomingReq,
     showHiddenFields,
     user,
     where,
@@ -98,7 +99,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
   }
 
   const req = {
-    fallbackLocale: fallbackLocale ?? defaultLocale,
+    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
     files: {
       file: file ?? (await getFileByPath(filePath)),
     },
@@ -106,6 +107,7 @@ async function updateLocal<TSlug extends keyof GeneratedTypes['collections']>(
     locale: locale ?? defaultLocale,
     payload,
     payloadAPI: 'local',
+    transactionID: incomingReq?.transactionID,
     user,
   } as PayloadRequest
   setRequestContext(req, context)

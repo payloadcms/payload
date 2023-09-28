@@ -2,7 +2,7 @@ import type { TypeWithVersion } from 'payload/database'
 import type { PayloadRequest, TypeWithID } from 'payload/types'
 
 import { sql } from 'drizzle-orm'
-import { type CreateGlobalVersion, type CreateGlobalVersionArgs } from 'payload/database'
+import { type CreateGlobalVersionArgs } from 'payload/database'
 import { buildVersionGlobalFields } from 'payload/versions'
 import toSnakeCase from 'to-snake-case'
 
@@ -10,7 +10,7 @@ import type { PostgresAdapter } from './types'
 
 import { upsertRow } from './upsertRow'
 
-export async function createGlobalVersion<T extends TypeWithID>(
+export async function createGlobalVersion<T extends TypeWithID> (
   this: PostgresAdapter,
   { autosave, globalSlug, req = {} as PayloadRequest, versionData }: CreateGlobalVersionArgs,
 ) {
@@ -39,7 +39,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
       UPDATE ${table}
       SET latest = false
       WHERE ${table.id} != ${result.id};
-  `)
+    `)
   }
 
   return result

@@ -2,12 +2,12 @@ import type { UpdateOne } from 'payload/database'
 
 import toSnakeCase from 'to-snake-case'
 
-import type { PostgresAdapter } from '../types'
+import type { PostgresAdapter } from './types'
 
-import buildQuery from '../queries/buildQuery'
-import { upsertRow } from '../upsertRow'
+import buildQuery from './queries/buildQuery'
+import { upsertRow } from './upsertRow'
 
-export const updateOne: UpdateOne = async function updateOne(
+export const updateOne: UpdateOne = async function updateOne (
   this: PostgresAdapter,
   { id, collection: collectionSlug, data, draft, locale, req, where: whereArg },
 ) {

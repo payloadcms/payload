@@ -1,49 +1,7 @@
 @import '../../../../../scss/styles.scss';
 
 .select-row {
-  button {
-    @extend %btn-reset;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-
-    &:focus:not(:focus-visible),
-    &:active {
-      outline: none;
-    }
-
-    &:hover {
-      svg {
-        opacity: 0.2;
-      }
-    }
-
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
-    }
-  }
-
-  &__input {
-    @include formInput;
-    padding: 0;
-    line-height: 0;
-    position: relative;
-    width: $baseline;
-    height: $baseline;
-
-    svg {
-      opacity: 0;
-    }
-  }
-
-  &--checked {
-    button {
-      .select-row__input {
-        svg {
-          opacity: 1;
-        }
-      }
-    }
+  &__checkbox {
+    display: block;
   }
 }

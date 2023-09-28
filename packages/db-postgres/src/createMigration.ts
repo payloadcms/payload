@@ -19,8 +19,9 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
 ${
   upSQL
     ? `await payload.db.db.execute(sql\`
+
 ${upSQL}\`);
-  `
+`
     : '// Migration code'
 }
 };
@@ -29,8 +30,9 @@ export async function down({ payload }: MigrateUpArgs): Promise<void> {
 ${
   downSQL
     ? `await payload.db.db.execute(sql\`
+
 ${downSQL}\`);
-  `
+`
     : '// Migration code'
 }
 };
@@ -56,7 +58,7 @@ export const createMigration: CreateMigration = async function createMigration(
   payload,
   migrationName,
 ) {
-  payload.logger.info({ msg: 'Creating migration from postgres adapter...' })
+  payload.logger.info({ msg: 'Creating new migration...' })
   const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
@@ -68,8 +70,10 @@ export const createMigration: CreateMigration = async function createMigration(
 
   const timestamp = `${formattedDate}_${formattedTime}`
 
-  const formattedName = migrationName.replace(/\W/g, '_')
-  const fileName = `${timestamp}_${formattedName}.ts`
+  const fileName = migrationName
+    ? `${timestamp}_${migrationName.replace(/\W/g, '_')}.ts`
+    : `${timestamp}.ts`
+
   const filePath = `${dir}/${fileName}`
 
   let drizzleJsonBefore = getDefaultDrizzleSnapshot()

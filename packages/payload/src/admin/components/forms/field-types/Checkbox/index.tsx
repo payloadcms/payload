@@ -11,6 +11,7 @@ import useField from '../../useField'
 import withCondition from '../../withCondition'
 import { CheckboxInput } from './Input'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 const baseClass = 'checkbox'
 
@@ -56,7 +57,7 @@ const Checkbox: React.FC<Props> = (props) => {
   return (
     <div
       className={[
-        'field-type',
+        fieldBaseClass,
         baseClass,
         showError && 'error',
         className,

@@ -1,3 +1,4 @@
+export const postSlug = 'posts'
 export const draftSlug = 'draft-posts'
 export const autosaveSlug = 'autosave-posts'
 export const versionSlug = 'version-posts'

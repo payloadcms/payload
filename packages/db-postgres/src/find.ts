@@ -34,5 +34,5 @@ export const find: Find = async function find(
     sort,
     tableName: toSnakeCase(collection),
     where: whereArg,
-  });
+  })
 }

@@ -2,7 +2,6 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types'
-import type { Props as EditViewProps } from '../../../../views/collections/Edit/types'
 import type { Value } from '../types'
 import type { Props } from './types'
 
@@ -17,6 +16,7 @@ import { useAuth } from '../../../../utilities/Auth'
 import { useConfig } from '../../../../utilities/Config'
 import './index.scss'
 import { useRelatedCollections } from './useRelatedCollections'
+import { EditViewProps } from '../../../../views/types'
 
 const baseClass = 'relationship-add-new'
 

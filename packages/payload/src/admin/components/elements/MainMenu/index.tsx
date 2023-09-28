@@ -85,6 +85,7 @@ export const MainMenu: React.FC = () => {
     >
       <div className={`${baseClass}__blur-bg`} />
       <nav className={`${baseClass}__content`}>
+        <div className={`${baseClass}__blur-bg`} />
         <Gutter className={`${baseClass}__content-children`}>
           {Array.isArray(beforeNavLinks) &&
             beforeNavLinks.map((Component, i) => <Component key={i} />)}

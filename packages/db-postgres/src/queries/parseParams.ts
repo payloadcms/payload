@@ -2,7 +2,7 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload/types'
 
-import { and, ilike, isNotNull, sql } from 'drizzle-orm'
+import { and, ilike, isNotNull, isNull, ne, or, sql } from 'drizzle-orm'
 import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
@@ -27,7 +27,7 @@ type Args = {
   where: Where
 }
 
-export async function parseParams({
+export async function parseParams ({
   adapter,
   fields,
   joinAliases,
@@ -82,6 +82,7 @@ export async function parseParams({
                   constraints: queryConstraints,
                   field,
                   getNotNullColumnByValue,
+                  pathSegments,
                   rawColumn,
                   table,
                 } = getTableColumnFromPath({
@@ -102,14 +103,14 @@ export async function parseParams({
                   constraints.push(operatorMap.equals(constraintTable[col], value))
                 })
 
-                if (['json', 'richText'].includes(field.type)) {
-                  const pathSegments = relationOrPath.split('.').slice(1)
-                  pathSegments.unshift(table[columnName].name)
+                if (['json', 'richText'].includes(field.type) && Array.isArray(pathSegments)) {
+                  const segments = pathSegments.slice(1)
+                  segments.unshift(table[columnName].name)
 
                   if (field.type === 'richText') {
                     const jsonQuery = createJSONQuery({
                       operator,
-                      pathSegments,
+                      pathSegments: segments,
                       treatAsArray: ['children'],
                       treatRootAsArray: true,
                       value: val,
@@ -119,7 +120,7 @@ export async function parseParams({
                   }
 
                   if (field.type === 'json') {
-                    const jsonQuery = convertPathToJSONTraversal(relationOrPath)
+                    const jsonQuery = convertPathToJSONTraversal(pathSegments)
                     constraints.push(sql.raw(`${table[columnName].name}${jsonQuery} = '%${val}%'`))
                   }
 
@@ -149,9 +150,19 @@ export async function parseParams({
                   val,
                 })
 
-                constraints.push(
-                  operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
-                )
+                if (queryOperator === 'not_equals' && queryValue !== null) {
+                  constraints.push(
+                    or(
+                      isNull(rawColumn || table[columnName]),
+                      /* eslint-disable @typescript-eslint/no-explicit-any */
+                      ne<any>(rawColumn || table[columnName], queryValue),
+                    )
+                  )
+                } else {
+                  constraints.push(
+                    operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
+                  )
+                }
               }
             }
           }

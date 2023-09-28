@@ -11,6 +11,7 @@ import Label from '../../../../forms/Label'
 import useField from '../../../../forms/useField'
 import { useDocumentInfo } from '../../../../utilities/DocumentInfo'
 import './index.scss'
+import { fieldBaseClass } from '../../../../forms/field-types/shared'
 
 const baseClass = 'file-field'
 
@@ -133,17 +134,17 @@ const Upload: React.FC<Props> = (props) => {
     return () => null
   }, [handleDragIn, handleDragOut, handleDrop, value])
 
-  const classes = [baseClass, dragging && `${baseClass}--dragging`, 'field-type']
-    .filter(Boolean)
-    .join(' ')
-
   const canRemoveUpload =
     docPermissions?.update?.permission &&
     'delete' in docPermissions &&
     docPermissions?.delete?.permission
 
   return (
-    <div className={classes}>
+    <div
+      className={[fieldBaseClass, baseClass, dragging && `${baseClass}--dragging`]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <Error message={errorMessage} showError={showError} />
       {doc.filename && !replacingFile && (
         <FileDetails

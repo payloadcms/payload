@@ -14,6 +14,7 @@ import Label from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 const NumberField: React.FC<Props> = (props) => {
   const {
@@ -60,17 +61,6 @@ const NumberField: React.FC<Props> = (props) => {
     [setValue],
   )
 
-  const classes = [
-    'field-type',
-    'number',
-    className,
-    showError && 'error',
-    readOnly && 'read-only',
-    hasMany && 'has-many',
-  ]
-    .filter(Boolean)
-    .join(' ')
-
   const [valueToRender, setValueToRender] = useState<
     { id: string; label: string; value: { value: number } }[]
   >([]) // Only for hasMany
@@ -113,7 +103,16 @@ const NumberField: React.FC<Props> = (props) => {
 
   return (
     <div
-      className={classes}
+      className={[
+        fieldBaseClass,
+        'number',
+        className,
+        showError && 'error',
+        readOnly && 'read-only',
+        hasMany && 'has-many',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={{
         ...style,
         width,

@@ -12,6 +12,7 @@ import Label from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
 import './index.scss'
+import { fieldBaseClass } from '../shared'
 
 const baseClass = 'date-time-field'
 
@@ -42,19 +43,17 @@ const DateTime: React.FC<Props> = (props) => {
     validate: memoizedValidate,
   })
 
-  const classes = [
-    'field-type',
-    baseClass,
-    className,
-    showError && `${baseClass}--has-error`,
-    readOnly && 'read-only',
-  ]
-    .filter(Boolean)
-    .join(' ')
-
   return (
     <div
-      className={classes}
+      className={[
+        fieldBaseClass,
+        baseClass,
+        className,
+        showError && `${baseClass}--has-error`,
+        readOnly && 'read-only',
+      ]
+        .filter(Boolean)
+        .join(' ')}
       style={{
         ...style,
         width,
