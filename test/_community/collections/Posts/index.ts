@@ -20,28 +20,5 @@ export const PostsCollection: CollectionConfig = {
         update: () => false,
       },
     },
-    {
-      name: 'relation',
-      type: 'relationship',
-      relationTo: [postsSlug, mediaSlug],
-      hasMany: true,
-      admin: {
-        allowCreate: true,
-      },
-    },
-    {
-      name: 'richText',
-      type: 'richText',
-    },
-    {
-      name: 'array',
-      type: 'array',
-      fields: [
-        {
-          name: 'text',
-          type: 'text',
-        },
-      ],
-    },
   ],
 }

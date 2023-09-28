@@ -6,20 +6,6 @@ import { MenuGlobal } from './globals/Menu'
 
 export default buildConfigWithDefaults({
   // ...extend config here
-  localization: {
-    defaultLocale: 'en',
-    locales: [
-      {
-        code: 'en',
-        label: 'English',
-      },
-      {
-        code: 'de',
-        label: 'German',
-        rtl: true,
-      },
-    ],
-  },
   collections: [
     PostsCollection,
     MediaCollection,
