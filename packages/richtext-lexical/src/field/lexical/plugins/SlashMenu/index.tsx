@@ -79,45 +79,6 @@ export function SlashMenuPlugin(): JSX.Element {
     for (const groupWithOption of editorConfig?.features.slashMenu.groupsWithOptions ?? []) {
       groupsWithOptions.push(groupWithOption)
     }
-    /*const baseOptions2 = [
-      new SlashMenuOption('Paragraph', {
-        Icon: BlockIcon,
-        keywords: ['normal', 'paragraph', 'p', 'text'],
-        onSelect: () =>
-          editor.update(() => {
-            const selection = $getSelection()
-            if ($isRangeSelection(selection)) {
-              $setBlocksType(selection, () => $createParagraphNode())
-            }
-          }),
-      }),
-
-      new SlashMenuOption('Table', {
-        Icon: BlockIcon,
-        keywords: ['table', 'grid', 'spreadsheet', 'rows', 'columns'],
-        onSelect: () => {},
-      }),
-      new SlashMenuOption('Table (Experimental)', {
-        Icon: BlockIcon,
-        keywords: ['table', 'grid', 'spreadsheet', 'rows', 'columns'],
-        onSelect: () => {},
-      }),
-      new SlashMenuOption('Numbered List', {
-        Icon: BlockIcon,
-        keywords: ['numbered list', 'ordered list', 'ol'],
-        onSelect: () => {},
-      }),
-      new SlashMenuOption('Bulleted List', {
-        Icon: BlockIcon,
-        keywords: ['bulleted list', 'unordered list', 'ul'],
-        onSelect: () => {},
-      }),
-      new SlashMenuOption('Check List', {
-        Icon: BlockIcon,
-        keywords: ['check list', 'todo list'],
-        onSelect: () => {},
-      }),
-    ]*/
 
     if (queryString) {
       // Filter current groups first
@@ -165,7 +126,7 @@ export function SlashMenuPlugin(): JSX.Element {
     }
 
     return groupsWithOptions
-  }, [editor, getDynamicOptions, queryString, editorConfig?.features])
+  }, [getDynamicOptions, queryString, editorConfig?.features])
 
   const onSelectOption = useCallback(
     (
