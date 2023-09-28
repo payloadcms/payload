@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
 import { generateDrizzleJson } from 'drizzle-kit/utils'
 import { readMigrationFiles } from 'payload/database'
+import { DatabaseError } from 'pg'
 
 import type { PostgresAdapter } from './types'
 
@@ -61,7 +62,14 @@ export async function migrate(this: PostgresAdapter): Promise<void> {
         },
       })
     } catch (err: unknown) {
-      payload.logger.error({ err, msg: `Error running migration ${migration.name}` })
+      let msg = `Error running migration ${migration.name}`
+
+      if (err instanceof DatabaseError) {
+        msg += `: ${err.message}`
+        if (err.hint) msg += `. ${err.hint}`
+      }
+
+      payload.logger.error({ err, msg })
       throw err
     }
   }
