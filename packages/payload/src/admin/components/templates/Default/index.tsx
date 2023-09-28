@@ -10,7 +10,6 @@ import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 import { Nav as DefaultNav } from '../../elements/Nav'
 
 import './index.scss'
-import Hamburger from '../../elements/Hamburger'
 import { useSidebar } from '../../elements/Nav/context'
 import { NavToggler } from '../../elements/Nav/NavToggler'
 

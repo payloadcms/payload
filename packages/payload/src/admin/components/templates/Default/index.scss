@@ -3,25 +3,16 @@
 .template-default {
   min-height: 100vh;
   display: flex;
-  width: 100%;
   position: relative;
   width: calc(100% + var(--nav-width));
+  transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
 
   &--sidebar-open {
+    width: 100%;
+    transition:
+      width var(--nav-trans-time) linear,
+      transform var(--nav-trans-time) linear;
     transform: translate3d(0, 0, 0);
-
-    .template-default {
-      &__wrap {
-        pointer-events: none;
-        transform: translate3d(0, 0, 0);
-        transition: transform var(--nav-trans-time) linear;
-      }
-
-      &__nav-overlay {
-        opacity: 1;
-        pointer-events: auto;
-      }
-    }
   }
 
   &__wrap {
@@ -29,7 +20,6 @@
     width: 100%;
     flex-grow: 1;
     position: relative;
-    transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
   }
 
   &__nav-overlay {
@@ -46,5 +36,38 @@
     cursor: pointer;
     pointer-events: none;
     transition: opacity var(--nav-trans-time) linear;
+    display: none;
+  }
+
+  // on large break, push the document off the screen
+  // show an overlay to prevent clicking on the document
+  @include large-break {
+    width: calc(100% + var(--nav-width));
+    transform: translate3d(0, 0, 0);
+
+    &__wrap {
+      transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
+    }
+
+    &__nav-overlay {
+      display: block;
+    }
+
+    &--sidebar-open {
+      transform: translate3d(0, 0, 0);
+
+      .template-default {
+        &__wrap {
+          pointer-events: none;
+          transform: translate3d(0, 0, 0);
+          transition: transform var(--nav-trans-time) linear;
+        }
+
+        &__nav-overlay {
+          opacity: 1;
+          pointer-events: auto;
+        }
+      }
+    }
   }
 }

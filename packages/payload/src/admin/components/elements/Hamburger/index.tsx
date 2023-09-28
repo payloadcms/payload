@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import './index.scss'
+import { Chevron } from '../..'
 
 const baseClass = 'hamburger'
 
@@ -14,8 +15,14 @@ const Hamburger: React.FC<{
       <div className={`${baseClass}__line ${baseClass}__top`} />
       <div className={`${baseClass}__line ${baseClass}__middle`} />
       <div className={`${baseClass}__line ${baseClass}__bottom`} />
-      <div className={`${baseClass}__line ${baseClass}__x-left`} />
-      <div className={`${baseClass}__line ${baseClass}__x-right`} />
+      <Fragment>
+        <div className={`${baseClass}__line ${baseClass}__x-left`} />
+        <div className={`${baseClass}__line ${baseClass}__x-right`} />
+      </Fragment>
+      <div className={`${baseClass}__back`}>
+        <Chevron className={`${baseClass}__back-chevron`} direction="left" />
+        Collapse
+      </div>
     </div>
   )
 }

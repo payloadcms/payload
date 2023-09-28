@@ -20,9 +20,10 @@
   @include mid-break {
     width: var(--gutter-h);
     height: var(--gutter-h);
+    padding-left: calc(var(--base) / 1.5);
   }
 
-  @include mid-break {
+  @include small-break {
     width: calc(var(--base) * 2);
     height: calc(var(--base) * 2);
     padding-left: var(--gutter-h);

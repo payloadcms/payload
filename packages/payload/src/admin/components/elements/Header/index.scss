@@ -60,6 +60,10 @@
   }
 
   @include small-break {
+    &__nav-wrapper {
+      padding-left: calc(var(--gutter-h) * 2);
+    }
+
     &__step-header {
       // TODO: overflow the step header instead of hide it
       display: none;

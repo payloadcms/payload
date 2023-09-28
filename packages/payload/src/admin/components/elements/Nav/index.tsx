@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { NavLink, useHistory } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useConfig } from '../../utilities/Config'
 import { useAuth } from '../../utilities/Auth'
@@ -16,10 +16,9 @@ import './index.scss'
 const baseClass = 'nav'
 
 const DefaultNav: React.FC = () => {
-  const { sidebarOpen, setSidebarOpen } = useSidebar()
+  const { sidebarOpen } = useSidebar()
   const { permissions, user } = useAuth()
   const [groups, setGroups] = useState<Group[]>([])
-  const history = useHistory()
   const { t, i18n } = useTranslation('general')
 
   const {
@@ -67,14 +66,6 @@ const DefaultNav: React.FC = () => {
       ),
     )
   }, [collections, globals, permissions, i18n, i18n.language, user])
-
-  useEffect(
-    () =>
-      history.listen(() => {
-        setSidebarOpen(false)
-      }),
-    [history, setSidebarOpen],
-  )
 
   return (
     <aside

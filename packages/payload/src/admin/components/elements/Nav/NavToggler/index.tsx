@@ -19,7 +19,7 @@ export const NavToggler: React.FC = () => {
       aria-label={t('menu')}
       onClick={() => setSidebarOpen(!sidebarOpen)}
     >
-      <Hamburger isActive={sidebarOpen} />
+      <Hamburger isActive={sidebarOpen} closeIcon="back" />
     </button>
   )
 }

@@ -21,8 +21,7 @@
     display: flex;
     flex-direction: column;
     padding: base(2.5) base(1.25) base(2) base(1.25);
-    width: calc(100% + #{base(1)});
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 
   &__wrap {
@@ -99,6 +98,10 @@
   }
 
   @include mid-break {
+    &__scroll {
+      padding: base(2.5) base(0.75) base(2) base(0.75);
+    }
+
     nav a {
       font-size: base(0.875);
       line-height: base(1.25);
