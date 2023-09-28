@@ -31,7 +31,7 @@ import {
 
 import type { LinkPayload } from '../plugins/floatingLinkEditor/types'
 
-export interface LinkFields {
+export type LinkFields = {
   // unknown, custom fields:
   [key: string]: unknown
   doc: {
@@ -149,7 +149,7 @@ export class LinkNode extends ElementNode {
     return {
       ...super.exportJSON(),
       fields: this.getFields(),
-      type: 'link',
+      type: this.getType(),
       version: 1,
     }
   }

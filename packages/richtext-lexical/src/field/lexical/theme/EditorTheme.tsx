@@ -76,6 +76,7 @@ export const LexicalEditorTheme: EditorThemeClasses = {
   markOverlap: 'LexicalEditorTheme__markOverlap',
   paragraph: 'LexicalEditorTheme__paragraph',
   quote: 'LexicalEditorTheme__quote',
+  relationship: 'LexicalEditorTheme__relationship',
   rtl: 'LexicalEditorTheme__rtl',
   table: 'LexicalEditorTheme__table',
   tableAddColumns: 'LexicalEditorTheme__tableAddColumns',

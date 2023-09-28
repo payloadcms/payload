@@ -3,6 +3,7 @@ import type { EditorConfig, SanitizedEditorConfig } from './types'
 import { HeadingFeature } from '../../features/Heading'
 import { LinkFeature } from '../../features/Link'
 import { ParagraphFeature } from '../../features/Paragraph'
+import { RelationshipFeature } from '../../features/Relationship'
 import { AlignFeature } from '../../features/align'
 import { BoldTextFeature } from '../../features/format/Bold'
 import { InlineCodeTextFeature } from '../../features/format/InlineCode'
@@ -35,6 +36,7 @@ export const defaultEditorConfig: EditorConfig = {
     OrderedListFeature(),
     CheckListFeature(),
     LinkFeature({}),
+    RelationshipFeature(),
   ],
   lexical: {
     namespace: 'lexical',

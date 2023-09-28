@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import './index.scss'
 import { type Props } from './types'
 
-const baseClass = 'rich-text-link-edit-modal'
+const baseClass = 'lexical-link-edit-drawer'
 
 export const LinkDrawer: React.FC<Props> = ({
   drawerSlug,

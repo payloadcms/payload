@@ -47,6 +47,7 @@ export function createLexical({
 export { HeadingFeature } from './field/features/Heading'
 export { LinkFeature } from './field/features/Link'
 export { ParagraphFeature } from './field/features/Paragraph'
+export { RelationshipFeature } from './field/features/Relationship'
 export { AlignFeature } from './field/features/align'
 export { TextDropdownSectionWithEntries } from './field/features/common/floatingSelectToolbarTextDropdownSection'
 export { TreeviewFeature } from './field/features/debug/TreeView'
