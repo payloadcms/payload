@@ -68,6 +68,8 @@ export const migrate = async (args: string[]): Promise<void> => {
       })
       process.exit(1)
   }
+
+  payload.logger.info('Done.')
 }
 
 // When launched directly call migrate
