@@ -101,10 +101,8 @@ const DefaultNav: React.FC = () => {
                       key={i}
                       to={href}
                     >
-                      <div className={`${baseClass}__icon`}>
-                        <Chevron direction="right" />
-                      </div>
-                      {entityLabel}
+                      <span className={`${baseClass}__link-icon`}>&mdash;&nbsp;</span>
+                      <span className={`${baseClass}__link-label`}>{entityLabel}</span>
                     </NavLink>
                   )
                 })}

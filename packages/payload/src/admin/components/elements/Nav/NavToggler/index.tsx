@@ -9,7 +9,11 @@ import { useWindowInfo } from '@faceless-ui/window-info'
 
 const baseClass = 'nav-toggler'
 
-export const NavToggler: React.FC = () => {
+export const NavToggler: React.FC<{
+  className?: string
+}> = (props) => {
+  const { className } = props
+
   const { t } = useTranslation('general')
 
   const { setPreference } = usePreferences()
@@ -23,7 +27,7 @@ export const NavToggler: React.FC = () => {
   return (
     <button
       type="button"
-      className={baseClass}
+      className={[baseClass, className].filter(Boolean).join(' ')}
       aria-label={t('menu')}
       onClick={async () => {
         setNavOpen(!navOpen)

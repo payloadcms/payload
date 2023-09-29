@@ -21,6 +21,12 @@
     }
   }
 
+  &__nav-toggler {
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+
   &__wrap {
     min-width: 0;
     width: 100%;
@@ -73,6 +79,20 @@
           pointer-events: auto;
         }
       }
+    }
+  }
+
+  @include mid-break {
+    &__nav-toggler {
+      width: var(--gutter-h);
+      height: var(--gutter-h);
+      padding-left: calc(var(--base) / 1.5);
+    }
+  }
+
+  @include small-break {
+    &__nav-toggler {
+      display: none;
     }
   }
 }

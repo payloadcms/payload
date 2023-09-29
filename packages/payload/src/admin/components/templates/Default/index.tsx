@@ -52,7 +52,7 @@ const Default: React.FC<Props> = ({ children, className }) => {
           />
         </div>
       </div>
-      <NavToggler />
+      <NavToggler className={`${baseClass}__nav-toggler`} />
     </Fragment>
   )
 }

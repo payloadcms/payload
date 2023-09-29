@@ -5,6 +5,10 @@
   width: 100%;
   height: var(--app-header-height);
 
+  &__nav-toggler {
+    display: none;
+  }
+
   &__bg {
     @include blur-bg;
     opacity: 0;
@@ -29,7 +33,7 @@
     flex-grow: 1;
   }
 
-  &__nav-wrapper {
+  &__wrapper {
     display: flex;
     gap: calc(var(--base) / 2);
     align-items: center;
@@ -53,8 +57,8 @@
   }
 
   @include small-break {
-    &__nav-wrapper {
-      padding-left: calc(var(--gutter-h) * 2);
+    &__nav-toggler {
+      display: block;
     }
 
     &__step-header {

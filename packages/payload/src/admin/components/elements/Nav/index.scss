@@ -83,7 +83,7 @@
 
       &.active {
         font-weight: normal;
-        padding-left: base(0.75);
+        padding-left: 0;
         font-weight: 600;
       }
     }
@@ -94,16 +94,15 @@
     align-items: center;
 
     &.active {
-      .nav__icon {
-        opacity: 1;
+      .nav__link-icon {
+        display: block;
       }
     }
   }
 
-  &__icon {
-    opacity: 0;
-    position: absolute;
-    left: 0;
+  &__link-icon {
+    display: none;
+    text-decoration: none;
   }
 
   @include mid-break {

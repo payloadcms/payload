@@ -1,9 +1,7 @@
 @import '../../../../scss/styles.scss';
 
 .nav-toggler {
-  position: fixed;
-  top: 0;
-  left: 0;
+  position: relative;
   z-index: var(--z-modal);
   background: transparent;
   padding: 0;
@@ -12,18 +10,14 @@
   height: var(--app-header-height);
   width: var(--gutter-h);
   cursor: pointer;
-  padding-left: calc(var(--base) * 1.25);
 
   @include mid-break {
     width: var(--gutter-h);
     height: var(--gutter-h);
-    padding-left: calc(var(--base) / 1.5);
   }
 
   @include small-break {
-    position: absolute;
     width: calc(var(--base) * 2);
     height: calc(var(--base) * 2);
-    padding-left: var(--gutter-h);
   }
 }
