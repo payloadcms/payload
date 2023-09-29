@@ -10,9 +10,14 @@
     color: var(--theme-elevation-500);
   }
 
+  &__button {
+    display: flex;
+    align-items: center;
+  }
+
   &__chevron {
     .stroke {
-      stroke: var(--theme-elevation-500);
+      stroke: currentColor;
     }
   }
 
@@ -40,9 +45,5 @@
   &__button {
     white-space: nowrap;
     display: flex;
-  }
-
-  span {
-    color: var(--theme-elevation-400);
   }
 }

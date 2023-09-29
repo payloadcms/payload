@@ -41,7 +41,9 @@ export const ArrayAction: React.FC<Props> = ({
                   close()
                 }}
               >
-                <Chevron />
+                <div className={`${baseClass}__action-chevron`}>
+                  <Chevron direction="up" />
+                </div>
                 {t('moveUp')}
               </PopupList.Button>
             )}
@@ -53,7 +55,9 @@ export const ArrayAction: React.FC<Props> = ({
                   close()
                 }}
               >
-                <Chevron />
+                <div className={`${baseClass}__action-chevron`}>
+                  <Chevron />
+                </div>
                 {t('moveDown')}
               </PopupList.Button>
             )}

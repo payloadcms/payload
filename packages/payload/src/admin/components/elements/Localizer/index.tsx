@@ -33,7 +33,8 @@ const Localizer: React.FC<{
         <Popup
           button={
             <div className={`${baseClass}__button`}>
-              {`${locale.label}`}
+              <span className={`${baseClass}__current-label`}>{`${locale.label}`}</span>
+              &nbsp;
               <Chevron className={`${baseClass}__chevron`} />
             </div>
           }

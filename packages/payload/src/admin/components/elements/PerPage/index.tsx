@@ -37,17 +37,21 @@ const PerPage: React.FC<Props> = ({
     <div className={baseClass}>
       <Popup
         button={
-          <strong>
-            {t('perPage', { limit })}
-            <Chevron />
-          </strong>
+          <div className={`${baseClass}__base-button`}>
+            <span>{t('perPage', { limit })}</span>
+            &nbsp;
+            {<Chevron className={`${baseClass}__icon`} />}
+          </div>
         }
         horizontalAlign="right"
         render={({ close }) => (
           <PopupList.ButtonGroup>
             {limits.map((limitNumber, i) => (
               <PopupList.Button
-                className={[limitNumber === Number(limit) && `${baseClass}__button-active`]
+                className={[
+                  `${baseClass}__button`,
+                  limitNumber === Number(limit) && `${baseClass}__button-active`,
+                ]
                   .filter(Boolean)
                   .join(' ')}
                 key={i}
@@ -68,8 +72,13 @@ const PerPage: React.FC<Props> = ({
                   }
                 }}
               >
-                {limitNumber === Number(limit) && <Chevron />}
-                {limitNumber}
+                {limitNumber === Number(limit) && (
+                  <div className={`${baseClass}__chevron`}>
+                    <Chevron direction="right" />
+                  </div>
+                )}
+                &nbsp;
+                <span>{limitNumber}</span>
               </PopupList.Button>
             ))}
           </PopupList.ButtonGroup>

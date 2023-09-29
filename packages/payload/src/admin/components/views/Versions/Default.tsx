@@ -101,7 +101,7 @@ export const DefaultVersionsView: React.FC<Props> = (props) => {
   return (
     <React.Fragment>
       <LoadingOverlayToggle name="versions" show={isLoadingVersions} />
-      <div className={baseClass}>
+      <main className={baseClass}>
         <Meta description={metaDesc} title={metaTitle} />
         <Gutter className={`${baseClass}__wrap`}>
           {versionCount === 0 && (
@@ -148,7 +148,7 @@ export const DefaultVersionsView: React.FC<Props> = (props) => {
             </React.Fragment>
           )}
         </Gutter>
-      </div>
+      </main>
     </React.Fragment>
   )
 }

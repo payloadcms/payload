@@ -44,6 +44,7 @@ const AfterNavLinks: React.FC = () => {
           Minimal Template
         </NavLink>
       </h4>
+      <div id="custom-css" />
     </div>
   )
 }
