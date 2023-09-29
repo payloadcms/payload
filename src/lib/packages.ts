@@ -23,11 +23,11 @@ const mongodbReplacement: DbAdapterReplacement = {
   ],
 }
 
-const postgresqlReplacement: DbAdapterReplacement = {
-  packageName: '@payloadcms/db-postgresql',
-  importReplacement: "import { postgresqlAdapter } from '@payloadcms/db-postgresql'",
+const postgresReplacement: DbAdapterReplacement = {
+  packageName: '@payloadcms/db-postgres',
+  importReplacement: "import { postgresAdapter } from '@payloadcms/db-postgres'",
   configReplacement: [
-    '  db: postgresqlAdapter({',
+    '  db: postgresAdapter({',
     '    client: {',
     '      connectionString: process.env.DATABASE_URI,',
     '    },',
@@ -37,7 +37,7 @@ const postgresqlReplacement: DbAdapterReplacement = {
 
 export const dbPackages: Record<DbType, DbAdapterReplacement> = {
   mongodb: mongodbReplacement,
-  postgres: postgresqlReplacement,
+  postgres: postgresReplacement,
 }
 
 const webpackReplacement: BundlerReplacement = {
