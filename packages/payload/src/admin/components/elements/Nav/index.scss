@@ -141,15 +141,15 @@
     &__scroll {
       padding: var(--app-header-height) var(--gutter-h) base(2);
     }
-
-    &__mobile-close {
-      display: block;
-    }
   }
 
   @include extra-small-break {
     &--nav-open {
       transition: none;
+    }
+
+    &__mobile-close {
+      display: block;
     }
   }
 }

@@ -90,13 +90,18 @@
 
   @include small-break {
     &__nav-toggler {
-      width: calc(var(--base) * 2);
-      height: calc(var(--base) * 2);
-      display: none;
+      width: auto;
+      padding-left: var(--gutter-h);
     }
   }
 
   @include extra-small-break {
+    &__nav-toggler {
+      width: calc(var(--base) * 2);
+      height: calc(var(--base) * 2);
+      display: none;
+    }
+
     &--nav-open {
       transition: none;
     }

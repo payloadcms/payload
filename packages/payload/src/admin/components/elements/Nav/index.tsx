@@ -10,9 +10,9 @@ import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilit
 import { getTranslation } from '../../../../utilities/getTranslation'
 import NavGroup from '../NavGroup'
 import { useNav } from './context'
-import { NavIcon } from './NavIcon'
 
 import './index.scss'
+import { Hamburger } from '../Hamburger'
 
 const baseClass = 'nav'
 
@@ -127,7 +127,7 @@ const DefaultNav: React.FC = () => {
               setNavOpen(false)
             }}
           >
-            <NavIcon isActive />
+            <Hamburger isActive />
           </button>
         </div>
       </div>

@@ -19,7 +19,8 @@
   }
 
   &__icon,
-  &__x {
+  &__x,
+  &__collapse {
     position: absolute;
     left: 0;
     top: 0;
@@ -30,12 +31,12 @@
   &__line {
     background-color: var(--theme-text);
     width: 100%;
-    height: 1px;
+    height: 2px;
     position: absolute;
   }
 
   &__top {
-    top: 2px;
+    top: 1px;
     transform: translate3d(0, 0, 0) rotate(0);
   }
 
@@ -45,46 +46,73 @@
   }
 
   &__bottom {
-    bottom: 2px;
+    bottom: 1px;
     transform: translate3d(0, 0, 0) rotate(0);
   }
 
-  &__x-left {
+  &__x,
+  &__collapse {
+    display: none;
     opacity: 0;
+  }
+
+  &__x-left {
     top: 50%;
     left: 50%;
     transform: translate3d(-50%, -50%, 0) rotate(45deg);
-    display: none;
   }
 
   &__x-right {
-    opacity: 0;
     top: 50%;
     left: 50%;
     transform: translate3d(-50%, -50%, 0) rotate(-45deg);
-    display: none;
+  }
+
+  &__collapse {
+    position: relative;
+  }
+
+  &__collapse-label {
+    opacity: 0;
+    position: absolute;
+    left: calc(100% + 4px);
+    top: 50%;
+    transform: translate3d(0, -50%, 0);
+    font-weight: bold;
+  }
+
+  &__collapse-left {
+    height: 90%;
+    width: 2px;
+    left: 0;
+    top: 50%;
+    transform: translate3d(0, -50%, 0);
+  }
+
+  &__collapse-chevron {
+    position: relative;
+    top: -1px;
   }
 
   &--active {
     .hamburger {
-      &__x-left,
-      &__x-right {
+      &__x,
+      &__collapse,
+      &__collapse-label {
         display: block;
         opacity: 1;
       }
 
-      &__top,
-      &__middle,
-      &__bottom {
+      &__icon {
+        display: none;
         opacity: 0;
       }
     }
   }
 
-  @include large-break {
-    &__x-left,
-    &__x-right {
-      display: block;
+  @include mid-break {
+    &__collapse-chevron {
+      top: -2px;
     }
   }
 }

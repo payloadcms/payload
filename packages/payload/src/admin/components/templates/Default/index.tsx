@@ -54,7 +54,7 @@ const Default: React.FC<Props> = ({ children, className }) => {
         </div>
       </div>
       <NavToggler className={`${baseClass}__nav-toggler`} id="nav-toggler">
-        <Hamburger isActive={navOpen} />
+        <Hamburger isActive={navOpen} closeIcon="collapse" />
       </NavToggler>
     </Fragment>
   )
