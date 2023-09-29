@@ -1,20 +1,19 @@
+import { useWindowInfo } from '@faceless-ui/window-info'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNav } from '../context'
-import { NavIcon } from '../NavIcon'
-import { usePreferences } from '../../../utilities/Preferences'
 
+import { usePreferences } from '../../../utilities/Preferences'
+import { useNav } from '../context'
 import './index.scss'
-import { useWindowInfo } from '@faceless-ui/window-info'
 
 const baseClass = 'nav-toggler'
 
 export const NavToggler: React.FC<{
+  children?: React.ReactNode
   className?: string
   id?: string
-  children?: React.ReactNode
 }> = (props) => {
-  const { className, id, children } = props
+  const { id, children, className } = props
 
   const { t } = useTranslation('general')
 
@@ -28,9 +27,8 @@ export const NavToggler: React.FC<{
 
   return (
     <button
-      type="button"
-      className={[baseClass, className].filter(Boolean).join(' ')}
       aria-label={t('menu')}
+      className={[baseClass, className].filter(Boolean).join(' ')}
       id={id}
       onClick={async () => {
         setNavOpen(!navOpen)
@@ -43,6 +41,7 @@ export const NavToggler: React.FC<{
           })
         }
       }}
+      type="button"
     >
       {children}
     </button>

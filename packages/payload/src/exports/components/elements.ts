@@ -12,6 +12,7 @@ export { useDrawerSlug } from '../../admin/components/elements/Drawer/useDrawerS
 export { default as Eyebrow } from '../../admin/components/elements/Eyebrow'
 
 export { Gutter } from '../../admin/components/elements/Gutter'
+export { AppHeader } from '../../admin/components/elements/Header'
 export {
   ListDrawer,
   ListDrawerToggler,
@@ -19,4 +20,3 @@ export {
   formatListDrawerSlug,
   useListDrawer,
 } from '../../admin/components/elements/ListDrawer'
-export { default as Nav } from '../../admin/components/elements/Header'
