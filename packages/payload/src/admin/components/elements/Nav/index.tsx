@@ -103,7 +103,9 @@ const DefaultNav: React.FC = () => {
                       key={i}
                       to={href}
                     >
-                      <Chevron />
+                      <div className={`${baseClass}__icon`}>
+                        <Chevron direction="right" />
+                      </div>
                       {entityLabel}
                     </NavLink>
                   )
@@ -118,6 +120,7 @@ const DefaultNav: React.FC = () => {
           </div>
         </nav>
       </div>
+      <div className={`${baseClass}__header`} />
     </aside>
   )
 }

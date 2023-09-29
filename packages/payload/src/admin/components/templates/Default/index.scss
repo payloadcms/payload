@@ -13,6 +13,12 @@
       width var(--nav-trans-time) linear,
       transform var(--nav-trans-time) linear;
     transform: translate3d(0, 0, 0);
+
+    .template-default {
+      &__nav-overlay {
+        transition: opacity var(--nav-trans-time) linear;
+      }
+    }
   }
 
   &__wrap {
@@ -35,7 +41,6 @@
     z-index: var(--z-modal);
     cursor: pointer;
     pointer-events: none;
-    transition: opacity var(--nav-trans-time) linear;
     display: none;
   }
 

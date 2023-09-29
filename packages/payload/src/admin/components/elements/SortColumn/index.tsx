@@ -8,7 +8,6 @@ import type { Props } from './types'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import Chevron from '../../icons/Chevron'
 import { useSearchParams } from '../../utilities/SearchParams'
-import Button from '../Button'
 import './index.scss'
 
 const baseClass = 'sort-column'
@@ -49,32 +48,28 @@ const SortColumn: React.FC<Props> = (props) => {
     <div className={baseClass}>
       <span className={`${baseClass}__label`}>{getTranslation(label, i18n)}</span>
       {!disable && (
-        <span className={`${baseClass}__buttons`}>
-          <Button
+        <div className={`${baseClass}__buttons`}>
+          <button
             aria-label={t('sortByLabelDirection', {
               direction: t('ascending'),
               label: getTranslation(label, i18n),
             })}
-            buttonStyle="none"
-            className={ascClasses.join(' ')}
+            className={[ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => setSort(asc)}
-            round
           >
-            <Chevron />
-          </Button>
-          <Button
+            <Chevron direction="up" />
+          </button>
+          <button
             aria-label={t('sortByLabelDirection', {
               direction: t('descending'),
               label: getTranslation(label, i18n),
             })}
-            buttonStyle="none"
-            className={descClasses.join(' ')}
+            className={[descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => setSort(desc)}
-            round
           >
             <Chevron />
-          </Button>
-        </span>
+          </button>
+        </div>
       )}
     </div>
   )

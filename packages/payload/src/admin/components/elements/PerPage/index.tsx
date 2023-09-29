@@ -36,10 +36,10 @@ const PerPage: React.FC<Props> = ({
     <div className={baseClass}>
       <Popup
         button={
-          <strong>
-            {t('perPage', { limit })}
-            <Chevron />
-          </strong>
+          <div className={`${baseClass}__base-button`}>
+            <span>{t('perPage', { limit })}</span>
+            {<Chevron className={`${baseClass}__icon`} />}
+          </div>
         }
         horizontalAlign="right"
         render={({ close }) => (
@@ -72,7 +72,9 @@ const PerPage: React.FC<Props> = ({
                     }}
                     type="button"
                   >
-                    {limitNumber === Number(limit) && <Chevron />}
+                    {limitNumber === Number(limit) && (
+                      <Chevron className={`${baseClass}__popup-icon`} direction="right" />
+                    )}
                     {limitNumber}
                   </button>
                 </li>

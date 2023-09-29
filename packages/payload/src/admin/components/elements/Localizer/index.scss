@@ -10,9 +10,15 @@
     color: var(--theme-elevation-500);
   }
 
+  &__button {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--base) / 4);
+  }
+
   &__chevron {
     .stroke {
-      stroke: var(--theme-elevation-500);
+      stroke: currentColor;
     }
   }
 
@@ -39,10 +45,6 @@
 
   &__button {
     white-space: nowrap;
-  }
-
-  span {
-    color: var(--theme-elevation-400);
   }
 
   ul {

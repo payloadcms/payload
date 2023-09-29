@@ -74,13 +74,17 @@ const FileDetails: React.FC<Props> = (props) => {
               {!moreInfoOpen && (
                 <React.Fragment>
                   {t('moreInfo')}
-                  <Chevron />
+                  <div className={`${baseClass}__toggle-icon`}>
+                    <Chevron />
+                  </div>
                 </React.Fragment>
               )}
               {moreInfoOpen && (
                 <React.Fragment>
                   {t('lessInfo')}
-                  <Chevron />
+                  <div className={`${baseClass}__toggle-icon`}>
+                    <Chevron direction="up" />
+                  </div>
                 </React.Fragment>
               )}
             </Button>

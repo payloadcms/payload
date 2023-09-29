@@ -19,10 +19,7 @@ const Hamburger: React.FC<{
         <div className={`${baseClass}__line ${baseClass}__x-left`} />
         <div className={`${baseClass}__line ${baseClass}__x-right`} />
       </Fragment>
-      <div className={`${baseClass}__back`}>
-        <Chevron className={`${baseClass}__back-chevron`} direction="left" />
-        Collapse
-      </div>
+      <Chevron className={`${baseClass}__back`} direction="left" size="large" />
     </div>
   )
 }

@@ -52,13 +52,6 @@
     justify-content: flex-end;
   }
 
-  // the icon has padding so we need to transform slightly
-  // so that it's bounding box aligns with the other elements
-  // this can be removed if we ever reformat our SVG icons
-  &__localizer {
-    transform: translate3d(8px, 0, 0);
-  }
-
   @include small-break {
     &__nav-wrapper {
       padding-left: calc(var(--gutter-h) * 2);

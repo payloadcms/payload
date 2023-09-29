@@ -81,10 +81,6 @@
       border-bottom-right-radius: $style-radius-s;
       border-bottom-left-radius: $style-radius-s;
     }
-
-    .collapsible__indicator {
-      transform: rotate(0turn);
-    }
   }
 
   &__actions-wrap {
@@ -100,7 +96,9 @@
   }
 
   &__indicator {
-    transform: rotate(0.5turn);
+    padding: calc(var(--base) / 4);
+    display: flex;
+    align-items: flex-start;
   }
 
   &__content {

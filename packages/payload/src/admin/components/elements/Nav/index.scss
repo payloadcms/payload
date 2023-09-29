@@ -7,7 +7,6 @@
   flex-shrink: 0;
   height: 100vh;
   width: var(--nav-width);
-  overflow: hidden;
   border-right: 1px solid var(--theme-elevation-100);
   transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
 
@@ -16,11 +15,19 @@
     transition: transform var(--nav-trans-time) linear;
   }
 
+  &__header {
+    @include blur-bg;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: var(--app-header-height);
+  }
+
   &__scroll {
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: base(2.5) base(1.25) base(2) base(1.25);
+    padding: var(--app-header-height) base(1.5) base(2) base(1.25);
     overflow-y: auto;
   }
 
@@ -76,25 +83,27 @@
 
       &.active {
         font-weight: normal;
-        padding-left: base(0.6);
+        padding-left: base(0.75);
         font-weight: 600;
       }
     }
   }
 
   &__link {
-    svg {
-      opacity: 0;
-      position: absolute;
-      left: - base(0.5);
-      transform: rotate(-90deg);
-    }
+    display: flex;
+    align-items: center;
 
     &.active {
-      svg {
+      .nav__icon {
         opacity: 1;
       }
     }
+  }
+
+  &__icon {
+    opacity: 0;
+    position: absolute;
+    left: 0;
   }
 
   @include mid-break {

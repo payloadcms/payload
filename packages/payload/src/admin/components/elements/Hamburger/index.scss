@@ -56,15 +56,17 @@
     left: -6px;
     opacity: 0;
     position: absolute;
-    top: 50%;
-    transform: translate3d(0, -50%, 0);
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
     display: flex;
     align-items: center;
-  }
 
-  &__back-chevron {
     path {
       fill: currentColor;
+      stroke-width: 2px;
+      vector-effect: non-scaling-stroke;
     }
   }
 
@@ -93,7 +95,7 @@
       display: block;
     }
 
-    &__back-chevron {
+    &__back {
       display: none;
     }
   }

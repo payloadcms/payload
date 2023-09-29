@@ -2,7 +2,7 @@
 
 .nav-group {
   width: 100%;
-  margin-bottom: base(.5);
+  margin-bottom: base(0.5);
 
   &__toggle {
     cursor: pointer;
@@ -10,19 +10,22 @@
     background: transparent;
     padding-left: 0;
     border: 0;
-    margin-top: base(.25);
+    margin-bottom: base(0.25);
     width: 100%;
     text-align: left;
     display: flex;
     align-items: flex-start;
-    padding-right: base(.5);
+    padding: 0;
+    gap: base(0.5);
+    justify-content: space-between;
 
     svg {
       flex-shrink: 0;
-      margin-top: base(-.2);
+      margin-top: base(-0.2);
     }
 
-    &:hover, &:focus-visible {
+    &:hover,
+    &:focus-visible {
       color: var(--theme-elevation-1000);
 
       .stroke {
@@ -36,9 +39,10 @@
   }
 
   &__indicator {
-    margin-left: auto;
+    position: relative;
+    flex-shrink: 0;
 
-    .stroke {
+    svg .stroke {
       stroke: var(--theme-elevation-200);
     }
   }
@@ -48,10 +52,5 @@
       border-bottom-right-radius: $style-radius-s;
       border-bottom-left-radius: $style-radius-s;
     }
-
-    .nav-group__indicator {
-      transform: rotate(.5turn);
-    }
   }
-
 }
