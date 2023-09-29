@@ -73,13 +73,14 @@
   }
 
   &__controls-wrapper {
+    --controls-gap: calc(var(--base) / 2);
+    --dot-button-width: calc(var(--base) * 2);
     display: flex;
     align-items: center;
     margin: 0;
-    // move to the right to account for the padding on the dots
-    // this will make sure the alignment is correct
-    // while still keeping a large button hitbox
-    transform: translate3d(var(--base), 0, 0);
+    gap: var(--controls-gap);
+    padding-right: calc(var(--controls-gap) + var(--dot-button-width));
+    position: relative;
   }
 
   &__controls {
@@ -94,27 +95,20 @@
     }
   }
 
-  &__popup {
-    .popup-button {
-      padding: var(--base);
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      color: var(--theme-elevation-500);
-
-      &:hover {
-        color: var(--theme-text);
-      }
-    }
-  }
-
   &__dots {
-    display: flex;
-    gap: 2px;
-    background-color: transparent;
-    padding: 0;
+    height: 100%;
+    margin: 0;
 
-    > div {
+    .btn__label {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    > span > span > div {
       width: 3px;
       height: 3px;
       border-radius: 100%;
@@ -122,49 +116,15 @@
     }
   }
 
-  &__popup-actions {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--base) / 4);
+  &__popup {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--dot-button-width);
 
-    a {
-      text-decoration: none;
-    }
-
-    li {
-      position: relative;
-
-      &::before {
-        content: '';
-        display: block;
-        position: absolute;
-        height: 100%;
-        width: 100%;
-        border-radius: 1px;
-        background: var(--theme-elevation-100);
-        width: calc(100% + (var(--base) / 2));
-        left: calc(var(--base) / -4);
-        top: 0;
-        opacity: 0;
-        transition: opacity 50ms linear;
-      }
-
-      &:hover::before {
-        opacity: 1;
-      }
-
-      > * {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        text-align: left;
-        font-size: inherit;
-        line-height: inherit;
-        font-family: inherit;
-      }
+    .popup__trigger-wrap {
+      height: 100%;
     }
   }
 

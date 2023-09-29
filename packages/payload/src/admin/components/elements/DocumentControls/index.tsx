@@ -1,6 +1,5 @@
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 
 import type { CollectionPermission, GlobalPermission } from '../../../../auth'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
@@ -9,10 +8,12 @@ import { formatDate } from '../../../utilities/formatDate'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import Autosave from '../Autosave'
+import Button from '../Button'
 import DeleteDocument from '../DeleteDocument'
 import DuplicateDocument from '../DuplicateDocument'
 import { Gutter } from '../Gutter'
 import Popup from '../Popup'
+import * as PopupList from '../Popup/PopupButtonList'
 import PreviewButton from '../PreviewButton'
 import { Publish } from '../Publish'
 import { Save } from '../Save'
@@ -30,9 +31,9 @@ export const DocumentControls: React.FC<{
   global?: SanitizedGlobalConfig
   hasSavePermission?: boolean
   id?: string
+  isAccountView?: boolean
   isEditing?: boolean
   permissions?: CollectionPermission | GlobalPermission
-  isAccountView?: boolean
 }> = (props) => {
   const {
     id,
@@ -41,9 +42,9 @@ export const DocumentControls: React.FC<{
     disableActions,
     global,
     hasSavePermission,
+    isAccountView,
     isEditing,
     permissions,
-    isAccountView,
   } = props
 
   const { publishedDoc } = useDocumentInfo()
@@ -72,6 +73,8 @@ export const DocumentControls: React.FC<{
       global?.versions?.drafts &&
       !global?.versions?.drafts?.autosave
   }
+
+  const showDotMenu = Boolean(collection && !disableActions)
 
   return (
     <Gutter className={baseClass}>
@@ -187,49 +190,47 @@ export const DocumentControls: React.FC<{
               </React.Fragment>
             )}
           </div>
-          {Boolean(collection && !disableActions) && (
+          {showDotMenu && (
             <Popup
               button={
-                <div className={`${baseClass}__dots`}>
+                <Button buttonStyle="secondary" className={`${baseClass}__dots`} el="div">
                   <div />
                   <div />
                   <div />
-                </div>
+                </Button>
               }
-              caret={false}
               className={`${baseClass}__popup`}
-              horizontalAlign="center"
+              horizontalAlign="right"
               size="large"
               verticalAlign="bottom"
             >
-              <ul className={`${baseClass}__popup-actions`}>
+              <PopupList.ButtonGroup>
                 {'create' in permissions && permissions?.create?.permission && (
                   <React.Fragment>
-                    <li>
-                      <Link
-                        id="action-create"
-                        to={`${adminRoute}/collections/${collection?.slug}/create`}
-                      >
-                        {t('createNew')}
-                      </Link>
-                    </li>
+                    <PopupList.Button
+                      id="action-create"
+                      to={`${adminRoute}/collections/${collection?.slug}/create`}
+                    >
+                      {t('createNew')}
+                    </PopupList.Button>
+
                     {!collection?.admin?.disableDuplicate && isEditing && (
-                      <li>
+                      <PopupList.Button>
                         <DuplicateDocument
                           collection={collection}
                           id={id}
                           slug={collection?.slug}
                         />
-                      </li>
+                      </PopupList.Button>
                     )}
                   </React.Fragment>
                 )}
                 {'delete' in permissions && permissions?.delete?.permission && id && (
-                  <li>
+                  <PopupList.Button>
                     <DeleteDocument buttonId="action-delete" collection={collection} id={id} />
-                  </li>
+                  </PopupList.Button>
                 )}
-              </ul>
+              </PopupList.ButtonGroup>
             </Popup>
           )}
         </div>

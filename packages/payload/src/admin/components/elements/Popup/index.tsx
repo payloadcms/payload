@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import type { Props } from './types'
 
 import useIntersect from '../../../hooks/useIntersect'
-import PopupButton from './PopupButton'
+import { PopupTrigger } from './PopupTrigger'
 import './index.scss'
 
 const baseClass = 'popup'
@@ -18,16 +18,14 @@ const Popup: React.FC<Props> = (props) => {
     caret = true,
     children,
     className,
-    color = 'light',
     forceOpen,
     horizontalAlign: horizontalAlignFromProps = 'left',
     initActive = false,
     onToggleOpen,
-    padding,
     render,
     showOnHover = false,
     showScrollbar = false,
-    size = 'small',
+    size = 'medium',
     verticalAlign: verticalAlignFromProps = 'top',
   } = props
 
@@ -38,7 +36,6 @@ const Popup: React.FC<Props> = (props) => {
     threshold: 1,
   })
 
-  const buttonRef = useRef(null)
   const contentRef = useRef(null)
   const [active, setActive] = useState(initActive)
   const [verticalAlign, setVerticalAlign] = useState(verticalAlignFromProps)
@@ -57,8 +54,8 @@ const Popup: React.FC<Props> = (props) => {
         } = bounds
 
         let boundingTopPos = 100
-        let boundingRightPos = window.innerWidth
-        let boundingBottomPos = window.innerHeight
+        let boundingRightPos = document.documentElement.clientWidth
+        let boundingBottomPos = document.documentElement.clientHeight
         let boundingLeftPos = 0
 
         if (boundingRef?.current) {
@@ -131,7 +128,6 @@ const Popup: React.FC<Props> = (props) => {
     baseClass,
     className,
     `${baseClass}--size-${size}`,
-    `${baseClass}--color-${color}`,
     `${baseClass}--v-align-${verticalAlign}`,
     `${baseClass}--h-align-${horizontalAlign}`,
     active && `${baseClass}--active`,
@@ -142,39 +138,35 @@ const Popup: React.FC<Props> = (props) => {
 
   return (
     <div className={classes}>
-      <div className={`${baseClass}__wrapper`} ref={buttonRef}>
+      <div className={`${baseClass}__trigger-wrap`}>
         {showOnHover ? (
           <div
             className={`${baseClass}__on-hover-watch`}
             onMouseEnter={() => setActive(true)}
             onMouseLeave={() => setActive(false)}
           >
-            <PopupButton
+            <PopupTrigger
               {...{ active, button, buttonType, className: buttonClassName, setActive }}
             />
           </div>
         ) : (
-          <PopupButton {...{ active, button, buttonType, className: buttonClassName, setActive }} />
+          <PopupTrigger
+            {...{ active, button, buttonType, className: buttonClassName, setActive }}
+          />
         )}
       </div>
 
-      <div
-        className={[`${baseClass}__content`, caret && `${baseClass}__content--caret`]
-          .filter(Boolean)
-          .join(' ')}
-        ref={contentRef}
-      >
-        <div className={`${baseClass}__wrap`} ref={intersectionRef}>
-          <div
-            className={`${baseClass}__scroll`}
-            style={{
-              padding,
-            }}
-          >
-            {render && render({ close: () => setActive(false) })}
-            {children && children}
+      <div className={`${baseClass}__content`} ref={contentRef}>
+        <div className={`${baseClass}__hide-scrollbar`} ref={intersectionRef}>
+          <div className={`${baseClass}__scroll-container`}>
+            <div className={`${baseClass}__scroll-content`}>
+              {render && render({ close: () => setActive(false) })}
+              {children && children}
+            </div>
           </div>
         </div>
+
+        {caret && <div className={`${baseClass}__caret`} />}
       </div>
     </div>
   )

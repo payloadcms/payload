@@ -1,13 +1,13 @@
 import qs from 'qs'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 
 import { Chevron } from '../..'
 import { useConfig } from '../../utilities/Config'
 import { useLocale } from '../../utilities/Locale'
 import { useSearchParams } from '../../utilities/SearchParams'
 import Popup from '../Popup'
+import * as PopupList from '../Popup/PopupButtonList'
 import './index.scss'
 
 const baseClass = 'localizer'
@@ -37,20 +37,10 @@ const Localizer: React.FC<{
               <Chevron className={`${baseClass}__chevron`} />
             </div>
           }
-          caret={false}
-          horizontalAlign="left"
+          horizontalAlign="right"
           render={({ close }) => (
-            <ul>
+            <PopupList.ButtonGroup>
               {locales.map((localeOption) => {
-                const baseLocaleClass = `${baseClass}__locale`
-
-                const localeClasses = [
-                  baseLocaleClass,
-                  locale.code === localeOption.code && `${baseLocaleClass}--active`,
-                ]
-                  .filter(Boolean)
-                  .join('')
-
                 const newParams = {
                   ...searchParams,
                   locale: localeOption.code,
@@ -60,20 +50,19 @@ const Localizer: React.FC<{
 
                 if (localeOption.code !== locale.code) {
                   return (
-                    <li className={localeClasses} key={localeOption.code}>
-                      <Link onClick={close} to={{ search }}>
-                        {localeOption.label}
-                        {localeOption.label !== localeOption.code && ` (${localeOption.code})`}
-                      </Link>
-                    </li>
+                    <PopupList.Button key={localeOption.code} onClick={close} to={{ search }}>
+                      {localeOption.label}
+                      {localeOption.label !== localeOption.code && ` (${localeOption.code})`}
+                    </PopupList.Button>
                   )
                 }
 
                 return null
               })}
-            </ul>
+            </PopupList.ButtonGroup>
           )}
           showScrollbar
+          size="large"
         />
       </div>
     )

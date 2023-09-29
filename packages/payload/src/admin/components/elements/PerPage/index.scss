@@ -7,12 +7,6 @@
     margin: 0;
   }
 
-  .popup-button--default {
-    @extend %btn-reset;
-    position: relative;
-    cursor: pointer;
-  }
-
   &__button {
     @extend %btn-reset;
     cursor: pointer;
