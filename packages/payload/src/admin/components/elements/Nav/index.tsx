@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useConfig } from '../../utilities/Config'
@@ -10,15 +10,14 @@ import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilit
 import { getTranslation } from '../../../../utilities/getTranslation'
 import NavGroup from '../NavGroup'
 import { useNav } from './context'
+import { NavIcon } from './NavIcon'
 
 import './index.scss'
-import { X } from '../..'
-import { NavIcon } from './NavIcon'
 
 const baseClass = 'nav'
 
 const DefaultNav: React.FC = () => {
-  const { navOpen, setNavOpen } = useNav()
+  const { navOpen, setNavOpen, navRef } = useNav()
   const { permissions, user } = useAuth()
   const [groups, setGroups] = useState<Group[]>([])
   const { t, i18n } = useTranslation('general')
@@ -71,7 +70,7 @@ const DefaultNav: React.FC = () => {
 
   return (
     <aside className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}>
-      <div className={`${baseClass}__scroll`}>
+      <div className={`${baseClass}__scroll`} ref={navRef}>
         <nav className={`${baseClass}__wrap`}>
           {Array.isArray(beforeNavLinks) &&
             beforeNavLinks.map((Component, i) => <Component key={i} />)}

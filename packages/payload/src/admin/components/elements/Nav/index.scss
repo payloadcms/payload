@@ -43,6 +43,11 @@
     flex-direction: column;
     padding: var(--app-header-height) base(1.5) base(2) base(1.25);
     overflow-y: auto;
+
+    // remove the scrollbar here to prevent layout shift as nav groups are toggled
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   &__wrap {

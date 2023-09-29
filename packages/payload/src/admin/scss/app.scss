@@ -101,17 +101,13 @@ body,
   height: 100%;
 }
 
-#app {
-  height: 100%;
-  // this is for the nav to be able to push the document over
-  overflow-x: hidden;
-}
-
 body {
   font-family: var(--font-body);
   font-weight: 400;
   color: var(--theme-text);
   margin: 0;
+  // this is for the nav to be able to push the document over
+  overflow-x: hidden;
 }
 
 ::selection {

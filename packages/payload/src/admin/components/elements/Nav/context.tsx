@@ -1,16 +1,19 @@
 import { useWindowInfo } from '@faceless-ui/window-info'
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useHistory } from 'react-router-dom'
 import { usePreferences } from '../../utilities/Preferences'
+import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock'
 
 type NavContextType = {
   navOpen: boolean
   setNavOpen: (value: boolean) => void
+  navRef: React.RefObject<HTMLDivElement>
 }
 
 export const NavContext = React.createContext<NavContextType>({
   navOpen: false,
   setNavOpen: () => {},
+  navRef: null,
 })
 
 export const useNav = () => React.useContext(NavContext)
@@ -24,6 +27,7 @@ export const NavProvider: React.FC<{
 
   const { getPreference } = usePreferences()
   const history = useHistory()
+  const navRef = useRef(null)
 
   // initialize the nav to be closed
   // this is because getting the preference is async
@@ -70,5 +74,26 @@ export const NavProvider: React.FC<{
     }
   }, [largeBreak])
 
-  return <NavContext.Provider value={{ navOpen, setNavOpen }}>{children}</NavContext.Provider>
+  // on open and close, lock the body scroll
+  // do not do this on desktop, the sidebar is not a modal
+  useEffect(() => {
+    if (navRef.current) {
+      if (navOpen && largeBreak) {
+        disableBodyScroll(navRef.current)
+      } else {
+        enableBodyScroll(navRef.current)
+      }
+    }
+  }, [navOpen, largeBreak])
+
+  // when the component unmounts, clear all body scroll locks
+  useEffect(() => {
+    return () => {
+      clearAllBodyScrollLocks()
+    }
+  }, [])
+
+  return (
+    <NavContext.Provider value={{ navOpen, setNavOpen, navRef }}>{children}</NavContext.Provider>
+  )
 }
