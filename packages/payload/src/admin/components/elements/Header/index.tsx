@@ -24,7 +24,7 @@ export const AppHeader: React.FC = (props) => {
         <div className={`${baseClass}__bg`} />
         <div className={`${baseClass}__content`}>
           <div className={`${baseClass}__wrapper`}>
-            <NavToggler className={`${baseClass}__nav-toggler`} />
+            <NavToggler className={`${baseClass}__mobile-nav-toggler`} />
             <StepNav className={`${baseClass}__step-nav`} />
             <div className={`${baseClass}__controls`}>
               <Localizer className={`${baseClass}__localizer`} />

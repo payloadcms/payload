@@ -11,8 +11,9 @@ const baseClass = 'nav-toggler'
 
 export const NavToggler: React.FC<{
   className?: string
+  id?: string
 }> = (props) => {
-  const { className } = props
+  const { className, id } = props
 
   const { t } = useTranslation('general')
 
@@ -29,6 +30,7 @@ export const NavToggler: React.FC<{
       type="button"
       className={[baseClass, className].filter(Boolean).join(' ')}
       aria-label={t('menu')}
+      id={id}
       onClick={async () => {
         setNavOpen(!navOpen)
 

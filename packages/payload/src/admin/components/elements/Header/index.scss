@@ -5,7 +5,7 @@
   width: 100%;
   height: var(--app-header-height);
 
-  &__nav-toggler {
+  &__mobile-nav-toggler {
     display: none;
   }
 
@@ -57,7 +57,7 @@
   }
 
   @include small-break {
-    &__nav-toggler {
+    &__mobile-nav-toggler {
       display: block;
     }
 

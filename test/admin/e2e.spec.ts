@@ -767,7 +767,7 @@ describe('admin', () => {
       test('should see custom css in admin UI', async () => {
         await page.goto(url.admin)
         await openMainMenu(page)
-        const navControls = page.locator('.main-menu__controls')
+        const navControls = page.locator('#custom-css')
         await expect(navControls).toHaveCSS('font-family', 'monospace')
       })
     })
