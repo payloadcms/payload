@@ -2,6 +2,7 @@ import type { FeatureProvider } from '../types'
 
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 import { RelationshipIcon } from '../../lexical/ui/icons/Relationship'
+import { relationshipAfterReadPromise } from './afterReadPromise'
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from './drawer'
 import './index.scss'
 import { RelationshipNode } from './nodes/RelationshipNode'
@@ -13,6 +14,7 @@ export const RelationshipFeature = (): FeatureProvider => {
       return {
         nodes: [
           {
+            afterReadPromises: [relationshipAfterReadPromise],
             node: RelationshipNode,
             type: RelationshipNode.getType(),
           },

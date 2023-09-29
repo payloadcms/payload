@@ -1,28 +1,33 @@
 import type { Transformer } from '@lexical/markdown'
 import type { Klass, LexicalEditor, LexicalNode } from 'lexical'
 import type { SerializedLexicalNode } from 'lexical'
-import type { PayloadRequest } from 'payload/types'
+import type { PayloadRequest, RichTextField } from 'payload/types'
 import type React from 'react'
 
+import type { AdapterProps } from '../../types'
 import type { EditorConfig } from '..//lexical/config/types'
 import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectToolbar/types'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 
-export type AfterReadPromise = ({
+export type AfterReadPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
+  afterReadPromises,
   currentDepth,
   depth,
+  field,
   node,
   overrideAccess,
   req,
   showHiddenFields,
 }: {
+  afterReadPromises: Map<string, Array<AfterReadPromise>>
   currentDepth: number
   depth: number
-  node: SerializedLexicalNode
+  field: RichTextField<AdapterProps>
+  node: T
   overrideAccess: boolean
   req: PayloadRequest
   showHiddenFields: boolean
-}) => Promise<void>
+}) => Promise<void>[]
 export type Feature = {
   floatingSelectToolbar?: {
     sections: FloatingToolbarSection[]

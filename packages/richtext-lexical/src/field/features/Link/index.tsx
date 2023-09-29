@@ -13,6 +13,7 @@ import type { LinkFields } from './nodes/LinkNode'
 import { LinkIcon } from '../../lexical/ui/icons/Link'
 import { getSelectedNode } from '../../lexical/utils/getSelectedNode'
 import { FeaturesSectionWithEntries } from '../common/floatingSelectToolbarFeaturesButtonsSection'
+import { linkAfterReadPromiseHOC } from './afterReadPromise'
 import './index.scss'
 import { AutoLinkNode } from './nodes/AutoLinkNode'
 import { $isLinkNode, LinkNode, TOGGLE_LINK_COMMAND } from './nodes/LinkNode'
@@ -73,6 +74,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
         },
         nodes: [
           {
+            afterReadPromises: [linkAfterReadPromiseHOC(props)],
             node: LinkNode,
             type: LinkNode.getType(),
           },

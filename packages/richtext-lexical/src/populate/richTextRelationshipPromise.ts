@@ -40,7 +40,16 @@ export const recurseRichText = ({
       if (afterReadPromises?.has(node.type)) {
         for (const promise of afterReadPromises.get(node.type)) {
           promises.push(
-            promise({ currentDepth, depth, node: node, overrideAccess, req, showHiddenFields }),
+            ...promise({
+              afterReadPromises,
+              currentDepth,
+              depth,
+              field,
+              node: node,
+              overrideAccess,
+              req,
+              showHiddenFields,
+            }),
           )
         }
       }
@@ -76,7 +85,7 @@ export const richTextRelationshipPromise = async ({
 
   recurseRichText({
     afterReadPromises,
-    children: (siblingDoc[field.name] as SerializedEditorState).root.children,
+    children: (siblingDoc[field?.name] as SerializedEditorState)?.root?.children ?? [],
     currentDepth,
     depth,
     field,
