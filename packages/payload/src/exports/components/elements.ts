@@ -19,4 +19,4 @@ export {
   formatListDrawerSlug,
   useListDrawer,
 } from '../../admin/components/elements/ListDrawer'
-export { default as Nav } from '../../admin/components/elements/Nav'
+export { default as Nav } from '../../admin/components/elements/Header'

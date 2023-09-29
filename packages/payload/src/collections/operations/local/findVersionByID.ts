@@ -39,7 +39,7 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     context,
     depth,
     disableErrors = false,
-    fallbackLocale = null,
+    fallbackLocale,
     locale = null,
     overrideAccess = true,
     req = {} as PayloadRequest,
@@ -60,9 +60,19 @@ export default async function findVersionByIDLocal<T extends keyof GeneratedType
     )
   }
 
+  let fallbackLocaleToUse = defaultLocale
+
+  if (typeof req.fallbackLocale !== 'undefined') {
+    fallbackLocaleToUse = req.fallbackLocale
+  }
+
+  if (typeof fallbackLocale !== 'undefined') {
+    fallbackLocaleToUse = fallbackLocale
+  }
+
   req.payloadAPI = req.payloadAPI || 'local'
   req.locale = locale ?? req?.locale ?? defaultLocale
-  req.fallbackLocale = fallbackLocale ?? req?.fallbackLocale ?? defaultLocale
+  req.fallbackLocale = fallbackLocaleToUse
   req.i18n = i18nInit(payload.config.i18n)
   req.payload = payload
 

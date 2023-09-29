@@ -24,6 +24,7 @@ type TableColumn = {
   constraints: Constraint[]
   field: FieldAffectingData
   getNotNullColumnByValue?: (val: unknown) => string
+  pathSegments?: string[]
   rawColumn?: SQL
   table: GenericTable
 }
@@ -56,12 +57,13 @@ export const getTableColumnFromPath = ({
   fields,
   joinAliases,
   joins,
-  locale,
-  pathSegments,
+  locale: incomingLocale,
+  pathSegments: incomingSegments,
   selectFields,
   tableName,
 }: Args): TableColumn => {
-  const fieldPath = pathSegments[0]
+  const fieldPath = incomingSegments[0]
+  let locale = incomingLocale
   const field = flattenTopLevelFields(fields as Field[]).find(
     (fieldToFind) => fieldAffectsData(fieldToFind) && fieldToFind.name === fieldPath,
   ) as Field | TabAsField
@@ -81,6 +83,21 @@ export const getTableColumnFromPath = ({
   }
 
   if (field) {
+    const pathSegments = [...incomingSegments]
+
+    // If next segment is a locale,
+    // we need to take it out and use it as the locale from this point on
+    if ('localized' in field && field.localized && adapter.payload.config.localization) {
+      const matchedLocale = adapter.payload.config.localization.localeCodes.find(
+        (locale) => locale === pathSegments[1],
+      )
+
+      if (matchedLocale) {
+        locale = matchedLocale
+        pathSegments.splice(1, 1)
+      }
+    }
+
     switch (field.type) {
       case 'tabs': {
         return getTableColumnFromPath({
@@ -204,7 +221,7 @@ export const getTableColumnFromPath = ({
         let blockTableColumn: TableColumn
         let newTableName: string
         const hasBlockField = field.blocks.some((block) => {
-          newTableName = `${tableName}_${toSnakeCase(block.slug)}`
+          newTableName = `${tableName}_blocks_${toSnakeCase(block.slug)}`
           let result
           const blockConstraints = []
           const blockSelectFields = {}
@@ -255,6 +272,7 @@ export const getTableColumnFromPath = ({
             columnName: blockTableColumn.columnName,
             constraints,
             field: blockTableColumn.field,
+            pathSegments: pathSegments.slice(1),
             rawColumn: blockTableColumn.rawColumn,
             table: adapter.tables[newTableName],
           }
@@ -358,11 +376,16 @@ export const getTableColumnFromPath = ({
       default: {
         if (fieldAffectsData(field)) {
           if (field.localized && adapter.payload.config.localization) {
+            // If localized, we go to localized table and set aliasTable to undefined
+            // so it is not picked up below to be used as targetTable
             newTableName = `${tableName}_locales`
-            joins[newTableName] = eq(
-              adapter.tables[tableName].id,
-              adapter.tables[newTableName]._parentID,
-            )
+
+            const parentTable = aliasTable || adapter.tables[tableName]
+
+            joins[newTableName] = eq(parentTable.id, adapter.tables[newTableName]._parentID)
+
+            aliasTable = undefined
+
             if (locale !== 'all') {
               constraints.push({
                 columnName: '_locale',
@@ -381,6 +404,7 @@ export const getTableColumnFromPath = ({
             columnName: `${columnPrefix}${field.name}`,
             constraints,
             field,
+            pathSegments: pathSegments,
             table: targetTable,
           }
         }

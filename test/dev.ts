@@ -24,7 +24,12 @@ if (!fs.existsSync(configPath)) {
 
 process.env.PAYLOAD_CONFIG_PATH = configPath
 
-process.env.PAYLOAD_DROP_DATABASE = 'true'
+// Default to true unless explicitly set to false
+if (process.env.PAYLOAD_DROP_DATABASE === 'false') {
+  process.env.PAYLOAD_DROP_DATABASE = 'false'
+} else {
+  process.env.PAYLOAD_DROP_DATABASE = 'true'
+}
 
 if (process.argv.includes('--no-auto-login') && process.env.NODE_ENV !== 'production') {
   process.env.PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN = 'true'
@@ -41,7 +46,7 @@ const startDev = async () => {
       fromName: 'Payload',
       fromAddress: 'hello@payloadcms.com',
     },
-    onInit: async () => {
+    onInit: async (payload) => {
       payload.logger.info('Payload Dev Server Initialized')
     },
   })

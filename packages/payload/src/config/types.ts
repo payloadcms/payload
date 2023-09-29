@@ -9,7 +9,9 @@ import type React from 'react'
 import type { DeepRequired } from 'ts-essentials'
 import type { Configuration } from 'webpack'
 
+import type { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
 import type { RichTextAdapter } from '../admin/components/forms/field-types/RichText/types'
+import type { EditViewProps } from '../admin/components/views/types'
 import type { User } from '../auth/types'
 import type { PayloadBundler } from '../bundlers/types'
 import type {
@@ -22,8 +24,6 @@ import type { PayloadRequest } from '../express/types'
 import type { GlobalConfig, SanitizedGlobalConfig } from '../globals/config/types'
 import type { Payload } from '../payload'
 import type { Where } from '../types'
-import { DocumentTab } from '../admin/components/elements/DocumentHeader/Tabs/types'
-import { EditViewProps } from '../admin/components/views/types'
 
 type Prettify<T> = {
   [K in keyof T]: T[K]
@@ -113,6 +113,11 @@ export type InitOptions = {
   config?: Promise<SanitizedConfig>
 
   /**
+   * Disable running of the `onInit` function
+   */
+  disableOnInit?: boolean
+
+  /**
    * Configuration for Payload's email functionality
    *
    * @see https://payloadcms.com/docs/email/overview
@@ -131,13 +136,13 @@ export type InitOptions = {
   local?: boolean
 
   loggerDestination?: DestinationStream
-
   /**
    * Specify options for the built-in Pino logger that Payload uses for internal logging.
    *
    * See Pino Docs for options: https://getpino.io/#/docs/api?id=options
    */
   loggerOptions?: LoggerOptions
+
   /**
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
@@ -236,7 +241,7 @@ export type EditViewConfig = {
 
 export type EditViewComponent = React.ComponentType<EditViewProps>
 
-export type EditView = EditViewConfig | EditViewComponent
+export type EditView = EditViewComponent | EditViewConfig
 
 export type AdminRoute = {
   Component: CustomAdminView

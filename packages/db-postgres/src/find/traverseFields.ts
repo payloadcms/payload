@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import type { ArrayField, Block, Field } from 'payload/types'
+import type { Field } from 'payload/types'
 
 import { fieldAffectsData } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
@@ -36,7 +36,6 @@ export const traverseFields = ({
         case 'array': {
           const withArray: Result = {
             columns: {
-              _order: false,
               _parentID: false,
             },
             orderBy: ({ _order }, { asc }) => [asc(_order)],

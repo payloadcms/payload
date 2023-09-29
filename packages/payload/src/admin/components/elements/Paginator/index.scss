@@ -22,7 +22,6 @@
     margin-right: base(0.25);
   }
 
-  .clickable-arrow,
   &__page {
     @extend %btn-reset;
     width: base(2);
@@ -34,13 +33,6 @@
     padding: base(0.5);
     color: var(--theme-elevation-800);
     line-height: base(1);
-
-    &:not(.clickable-arrow--is-disabled) {
-      &:hover,
-      &:focus-visible {
-        background: var(--theme-elevation-100);
-      }
-    }
 
     &:focus-visible {
       outline: var(--accessibility-outline);

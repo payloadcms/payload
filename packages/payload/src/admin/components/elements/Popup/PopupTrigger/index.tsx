@@ -6,7 +6,7 @@ import './index.scss'
 
 const baseClass = 'popup-button'
 
-const PopupButton: React.FC<Props> = (props) => {
+export const PopupTrigger: React.FC<Props> = (props) => {
   const { active, button, buttonType, className, setActive } = props
 
   const classes = [baseClass, className, `${baseClass}--${buttonType}`].filter(Boolean).join(' ')
@@ -41,5 +41,3 @@ const PopupButton: React.FC<Props> = (props) => {
     </button>
   )
 }
-
-export default PopupButton

@@ -40,19 +40,19 @@ export type Options<TSlug extends keyof GeneratedTypes['collections']> =
   | ByIDOptions<TSlug>
   | ManyOptions<TSlug>
 
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']> (
   payload: Payload,
   options: ByIDOptions<TSlug>,
 ): Promise<GeneratedTypes['collections'][TSlug]>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']> (
   payload: Payload,
   options: ManyOptions<TSlug>,
 ): Promise<BulkOperationResult<TSlug>>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']> (
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]>
-async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
+async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']> (
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<BulkOperationResult<TSlug> | GeneratedTypes['collections'][TSlug]> {
@@ -61,9 +61,10 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
     collection: collectionSlug,
     context,
     depth,
-    fallbackLocale = null,
+    fallbackLocale,
     locale = null,
     overrideAccess = true,
+    req: incomingReq,
     showHiddenFields,
     user,
     where,
@@ -81,11 +82,12 @@ async function deleteLocal<TSlug extends keyof GeneratedTypes['collections']>(
   }
 
   const req = {
-    fallbackLocale: fallbackLocale ?? defaultLocale,
+    fallbackLocale: typeof fallbackLocale !== 'undefined' ? fallbackLocale : defaultLocale,
     i18n: i18nInit(payload.config.i18n),
     locale: locale ?? defaultLocale,
     payload,
     payloadAPI: 'local',
+    transactionID: incomingReq?.transactionID,
     user,
   } as PayloadRequest
   setRequestContext(req, context)

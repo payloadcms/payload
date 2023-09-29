@@ -10,15 +10,20 @@
     color: var(--theme-elevation-500);
   }
 
+  &__button {
+    display: flex;
+    align-items: center;
+  }
+
   &__chevron {
     .stroke {
-      stroke: var(--theme-elevation-500);
+      stroke: currentColor;
     }
   }
 
   button {
     color: currentColor;
-    padding: base(0.25) 0;
+    padding: 0;
     font-size: 1rem;
     line-height: base(1);
     background: transparent;
@@ -39,33 +44,6 @@
 
   &__button {
     white-space: nowrap;
-  }
-
-  span {
-    color: var(--theme-elevation-400);
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-    max-height: base(8);
-    margin: 0;
-
-    li a {
-      all: unset;
-      cursor: pointer;
-      padding-right: 0;
-
-      &:hover,
-      &:focus-visible {
-        text-decoration: underline;
-      }
-    }
-  }
-
-  @include mid-break {
-    .popup__content {
-      width: calc(100vw - calc(var(--gutter-h) * 2));
-    }
+    display: flex;
   }
 }

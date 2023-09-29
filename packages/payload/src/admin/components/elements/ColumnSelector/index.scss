@@ -17,6 +17,11 @@
     }
   }
 
+  // TODO: delete this once all icons have been migrated to viewbox edge-to-edge
+  .pill__icon {
+    padding: 0;
+  }
+
   @include small-break {
     padding: calc(var(--base) / 2) calc(var(--base) / 2) 0;
   }

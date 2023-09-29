@@ -17,6 +17,7 @@ export const migrate = async (args: string[]): Promise<void> => {
 
   // Barebones instance to access database adapter
   await payload.init({
+    disableOnInit: true,
     local: true,
     secret: process.env.PAYLOAD_SECRET || '--unused--',
   })
@@ -55,7 +56,7 @@ export const migrate = async (args: string[]): Promise<void> => {
       break
     case 'migrate:create':
       try {
-        await adapter.createMigration(payload, 'migrations', args[1])
+        await adapter.createMigration(payload, args[1])
       } catch (err) {
         throw new Error(`Error creating migration: ${err.message}`)
       }
@@ -67,6 +68,8 @@ export const migrate = async (args: string[]): Promise<void> => {
       })
       process.exit(1)
   }
+
+  payload.logger.info('Done.')
 }
 
 // When launched directly call migrate

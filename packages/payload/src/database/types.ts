@@ -154,11 +154,7 @@ export type Destroy = (payload: Payload) => Promise<void>
 
 export type Webpack = (config: Configuration) => Configuration
 
-export type CreateMigration = (
-  payload: Payload,
-  migrationDir?: string,
-  migrationName?: string,
-) => Promise<void>
+export type CreateMigration = (payload: Payload, migrationName?: string) => Promise<void>
 
 export type Transaction = (
   callback: () => Promise<void>,

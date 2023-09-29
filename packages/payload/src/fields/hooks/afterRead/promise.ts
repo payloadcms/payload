@@ -313,6 +313,8 @@ export const promise = async ({
             })
           }
         })
+      } else {
+        siblingDoc[field.name] = []
       }
       break
     }
@@ -368,6 +370,8 @@ export const promise = async ({
             })
           }
         })
+      } else {
+        siblingDoc[field.name] = []
       }
 
       break
