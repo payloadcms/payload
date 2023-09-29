@@ -123,6 +123,19 @@
     position: relative;
   }
 
+  .popup--active {
+    .doc-controls {
+      &__dots {
+        border: 1px solid var(--theme-elevation-500);
+        background-color: var(--theme-elevation-100);
+      }
+    }
+  }
+
+  .popup__trigger-wrap {
+    display: flex;
+  }
+
   @include mid-break {
     // On mobile, only stick the controls to the top
     // The timestamps and meta can scroll past
