@@ -4,9 +4,23 @@
   position: relative;
   width: 100%;
   height: var(--app-header-height);
+  z-index: var(--z-modal);
 
   &__mobile-nav-toggler {
     display: none;
+  }
+
+  // place the localizer outside the `overflow: hidden` container so that the popup is visible
+  // this means we need to use a placeholder div so that the space is retained in the DOM
+  &__localizer {
+    position: absolute;
+    top: 50%;
+    right: base(4.5);
+    transform: translate3d(0, -50%, 0);
+  }
+
+  &__localizer-spacing {
+    visibility: hidden;
   }
 
   &__bg {
@@ -40,6 +54,7 @@
     height: 100%;
     flex-grow: 1;
     justify-content: space-between;
+    overflow: hidden;
   }
 
   &__account {
@@ -48,15 +63,35 @@
     }
   }
 
+  &__controls-wrapper {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    overflow: hidden;
+  }
+
+  &__step-nav-wrapper {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
   &__controls {
     display: flex;
     align-items: center;
-    gap: calc(var(--base) / 2);
-    flex-grow: 1;
     justify-content: flex-end;
+    gap: calc(var(--base) / 2);
   }
 
   @include small-break {
+    &__localizer {
+      right: base(2);
+    }
+
     &__mobile-nav-toggler {
       display: block;
     }

@@ -45,7 +45,6 @@ describe('admin', () => {
     await payload.db.deleteMany({
       collection: 'payload-preferences',
       where: {},
-      req: null,
     })
   })
 
