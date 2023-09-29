@@ -488,11 +488,11 @@ describe('fields', () => {
 
         await page.locator('#potentiallyEmptyArray-row-1 .array-actions__button').click()
         await page
-          .locator('#potentiallyEmptyArray-row-1 .popup__scroll .array-actions__remove')
+          .locator('#potentiallyEmptyArray-row-1 .popup__scroll-container .array-actions__remove')
           .click()
         await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
         await page
-          .locator('#potentiallyEmptyArray-row-0 .popup__scroll .array-actions__remove')
+          .locator('#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__remove')
           .click()
 
         const rows = page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows')
@@ -511,7 +511,7 @@ describe('fields', () => {
         await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
         await page
           .locator(
-            '#potentiallyEmptyArray-row-0 .popup__scroll .array-actions__action.array-actions__remove',
+            '#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__action.array-actions__remove',
           )
           .click()
 
@@ -533,7 +533,7 @@ describe('fields', () => {
         await page.locator('#potentiallyEmptyArray-row-1 .array-actions__button').click()
         await page
           .locator(
-            '#potentiallyEmptyArray-row-1 .popup__scroll .array-actions__action.array-actions__remove',
+            '#potentiallyEmptyArray-row-1 .popup__scroll-container .array-actions__action.array-actions__remove',
           )
           .click()
         await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()
