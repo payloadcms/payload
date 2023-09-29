@@ -27,10 +27,10 @@ export const Hamburger: React.FC<{
         </div>
       )}
       {closeIcon === 'collapse' && (
-        <div className={`${baseClass}__collapse`}>
+        <div className={`${baseClass}__collapse`} aria-label={t('collapse')} title={t('collapse')}>
           <div className={`${baseClass}__line ${baseClass}__collapse-left`} />
           <Chevron className={`${baseClass}__collapse-chevron`} direction="left" />
-          <div className={`${baseClass}__collapse-label`}>{t('close')}</div>
+          {/* <div className={`${baseClass}__collapse-label`}>{t('collapse')}</div> */}
         </div>
       )}
     </div>
