@@ -321,13 +321,13 @@ describe('fields', () => {
       const firstBlockSelector = blocksDrawer
         .locator('.blocks-drawer__blocks .blocks-drawer__block')
         .first()
-      await expect(firstBlockSelector).toContainText('Text')
+      await expect(firstBlockSelector).toContainText('Content')
       await firstBlockSelector.click()
 
       // ensure the block was appended to the rows
       const addedRow = page.locator('#field-blocks .blocks-field__row').last()
       await expect(addedRow).toBeVisible()
-      await expect(addedRow.locator('.blocks-field__block-pill-text')).toContainText('Text')
+      await expect(addedRow.locator('.blocks-field__block-pill-content')).toContainText('Content')
     })
 
     test('should open blocks drawer from block row and add below', async () => {
@@ -348,13 +348,13 @@ describe('fields', () => {
       const firstBlockSelector = blocksDrawer
         .locator('.blocks-drawer__blocks .blocks-drawer__block')
         .first()
-      await expect(firstBlockSelector).toContainText('Text')
+      await expect(firstBlockSelector).toContainText('Content')
       await firstBlockSelector.click()
 
       // ensure the block was inserted beneath the first in the rows
       const addedRow = page.locator('#field-blocks #blocks-row-1')
       await expect(addedRow).toBeVisible()
-      await expect(addedRow.locator('.blocks-field__block-pill-text')).toContainText('Text') // went from `Number` to `Text`
+      await expect(addedRow.locator('.blocks-field__block-pill-content')).toContainText('Content') // went from `Number` to `Content`
     })
 
     test('should use i18n block labels', async () => {
@@ -488,18 +488,16 @@ describe('fields', () => {
 
         await page.locator('#potentiallyEmptyArray-row-1 .array-actions__button').click()
         await page
-          .locator('#potentiallyEmptyArray-row-1 .popup__scroll .array-actions__remove')
+          .locator('#potentiallyEmptyArray-row-1 .popup__scroll-container .array-actions__remove')
           .click()
         await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
         await page
-          .locator('#potentiallyEmptyArray-row-0 .popup__scroll .array-actions__remove')
+          .locator('#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__remove')
           .click()
 
-        const rows = await page.locator(
-          '#field-potentiallyEmptyArray > .array-field__draggable-rows',
-        )
+        const rows = page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows')
 
-        expect(rows).not.toBeVisible()
+        await expect(rows).toBeHidden()
       })
 
       test('should remove existing row', async () => {
@@ -513,15 +511,13 @@ describe('fields', () => {
         await page.locator('#potentiallyEmptyArray-row-0 .array-actions__button').click()
         await page
           .locator(
-            '#potentiallyEmptyArray-row-0 .popup__scroll .array-actions__action.array-actions__remove',
+            '#potentiallyEmptyArray-row-0 .popup__scroll-container .array-actions__action.array-actions__remove',
           )
           .click()
 
-        const rows = await page.locator(
-          '#field-potentiallyEmptyArray > .array-field__draggable-rows',
-        )
+        const rows = page.locator('#field-potentiallyEmptyArray > .array-field__draggable-rows')
 
-        expect(rows).not.toBeVisible()
+        await expect(rows).toBeHidden()
       })
 
       test('should add row after removing existing row', async () => {
@@ -537,7 +533,7 @@ describe('fields', () => {
         await page.locator('#potentiallyEmptyArray-row-1 .array-actions__button').click()
         await page
           .locator(
-            '#potentiallyEmptyArray-row-1 .popup__scroll .array-actions__action.array-actions__remove',
+            '#potentiallyEmptyArray-row-1 .popup__scroll-container .array-actions__action.array-actions__remove',
           )
           .click()
         await page.locator('#field-potentiallyEmptyArray > .array-field__add-row').click()

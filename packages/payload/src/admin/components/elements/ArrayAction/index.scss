@@ -11,16 +11,6 @@
     }
   }
 
-  &.popup--active .array-actions__button {
-    background: var(--theme-elevation-0);
-  }
-
-  &__button,
-  &__action {
-    @extend %btn-reset;
-    cursor: pointer;
-  }
-
   &__actions {
     list-style: none;
     margin: 0;
@@ -40,10 +30,6 @@
       .stroke {
         stroke-width: 1px;
       }
-    }
-
-    &:hover {
-      opacity: 0.7;
     }
   }
 

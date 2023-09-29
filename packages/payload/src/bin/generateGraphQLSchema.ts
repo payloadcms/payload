@@ -13,6 +13,7 @@ export async function generateGraphQLSchema(): Promise<void> {
   config.db = null
 
   await payload.init({
+    disableOnInit: true,
     local: true,
     secret: '--unused--',
   })

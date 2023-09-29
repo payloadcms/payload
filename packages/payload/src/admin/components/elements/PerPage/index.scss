@@ -10,16 +10,9 @@
     gap: calc(var(--base) / 4);
   }
 
-  .popup-button--default {
-    @extend %btn-reset;
-    position: relative;
-    cursor: pointer;
-  }
-
   &__base-button {
     display: flex;
     align-items: center;
-    gap: calc(var(--base) / 4);
     font-weight: bold;
   }
 
@@ -30,7 +23,6 @@
     width: 100%;
     display: flex;
     align-items: center;
-    gap: calc(var(--base) / 4);
     color: var(--theme-elevation-500);
 
     &:hover,
@@ -41,6 +33,10 @@
     svg .stroke {
       stroke: currentColor;
     }
+  }
+
+  &__chevron {
+    padding-left: calc(var(--base) / 4);
   }
 
   &__button-active {

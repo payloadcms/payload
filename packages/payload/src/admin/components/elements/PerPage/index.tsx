@@ -7,6 +7,7 @@ import { defaults } from '../../../../collections/config/defaults'
 import Chevron from '../../icons/Chevron'
 import { useSearchParams } from '../../utilities/SearchParams'
 import Popup from '../Popup'
+import * as PopupList from '../Popup/PopupButtonList'
 import './index.scss'
 
 const baseClass = 'per-page'
@@ -38,50 +39,51 @@ const PerPage: React.FC<Props> = ({
         button={
           <div className={`${baseClass}__base-button`}>
             <span>{t('perPage', { limit })}</span>
+            &nbsp;
             {<Chevron className={`${baseClass}__icon`} />}
           </div>
         }
         horizontalAlign="right"
         render={({ close }) => (
-          <div>
-            <ul>
-              {limits.map((limitNumber, i) => (
-                <li className={`${baseClass}-item`} key={i}>
-                  <button
-                    className={[
-                      `${baseClass}__button`,
-                      limitNumber === Number(limit) && `${baseClass}__button-active`,
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    onClick={() => {
-                      close()
-                      if (handleChange) handleChange(limitNumber)
-                      if (modifySearchParams) {
-                        history.replace({
-                          search: qs.stringify(
-                            {
-                              ...params,
-                              limit: limitNumber,
-                              page: resetPage ? 1 : params.page,
-                            },
-                            { addQueryPrefix: true },
-                          ),
-                        })
-                      }
-                    }}
-                    type="button"
-                  >
-                    {limitNumber === Number(limit) && (
-                      <Chevron className={`${baseClass}__popup-icon`} direction="right" />
-                    )}
-                    {limitNumber}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <PopupList.ButtonGroup>
+            {limits.map((limitNumber, i) => (
+              <PopupList.Button
+                className={[
+                  `${baseClass}__button`,
+                  limitNumber === Number(limit) && `${baseClass}__button-active`,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                key={i}
+                onClick={() => {
+                  close()
+                  if (handleChange) handleChange(limitNumber)
+                  if (modifySearchParams) {
+                    history.replace({
+                      search: qs.stringify(
+                        {
+                          ...params,
+                          limit: limitNumber,
+                          page: resetPage ? 1 : params.page,
+                        },
+                        { addQueryPrefix: true },
+                      ),
+                    })
+                  }
+                }}
+              >
+                {limitNumber === Number(limit) && (
+                  <div className={`${baseClass}__chevron`}>
+                    <Chevron direction="right" />
+                  </div>
+                )}
+                &nbsp;
+                <span>{limitNumber}</span>
+              </PopupList.Button>
+            ))}
+          </PopupList.ButtonGroup>
         )}
+        size="small"
       />
     </div>
   )

@@ -2,7 +2,7 @@
 import type { SQL } from 'drizzle-orm'
 import type { Field, Operator, Where } from 'payload/types'
 
-import { and, ilike, isNotNull, sql } from 'drizzle-orm'
+import { and, ilike, isNotNull, isNull, ne, or, sql } from 'drizzle-orm'
 import { QueryError } from 'payload/errors'
 import { validOperators } from 'payload/types'
 
@@ -27,7 +27,7 @@ type Args = {
   where: Where
 }
 
-export async function parseParams({
+export async function parseParams ({
   adapter,
   fields,
   joinAliases,
@@ -150,9 +150,19 @@ export async function parseParams({
                   val,
                 })
 
-                constraints.push(
-                  operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
-                )
+                if (queryOperator === 'not_equals' && queryValue !== null) {
+                  constraints.push(
+                    or(
+                      isNull(rawColumn || table[columnName]),
+                      /* eslint-disable @typescript-eslint/no-explicit-any */
+                      ne<any>(rawColumn || table[columnName], queryValue),
+                    )
+                  )
+                } else {
+                  constraints.push(
+                    operatorMap[queryOperator](rawColumn || table[columnName], queryValue),
+                  )
+                }
               }
             }
           }

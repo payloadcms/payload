@@ -13,7 +13,6 @@
   &__button {
     display: flex;
     align-items: center;
-    gap: calc(var(--base) / 4);
   }
 
   &__chevron {
@@ -24,7 +23,7 @@
 
   button {
     color: currentColor;
-    padding: base(0.25) 0;
+    padding: 0;
     font-size: 1rem;
     line-height: base(1);
     background: transparent;
@@ -45,29 +44,10 @@
 
   &__button {
     white-space: nowrap;
+    display: flex;
   }
 
-  ul {
-    list-style: none;
-    padding: 0;
-    max-height: base(8);
-    margin: 0;
-
-    li a {
-      all: unset;
-      cursor: pointer;
-      padding-right: 0;
-
-      &:hover,
-      &:focus-visible {
-        text-decoration: underline;
-      }
-    }
-  }
-
-  @include mid-break {
-    .popup__content {
-      width: calc(100vw - calc(var(--gutter-h) * 2));
-    }
+  span {
+    color: var(--theme-elevation-400);
   }
 }
