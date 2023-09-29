@@ -17,7 +17,7 @@
   --theme-bg: var(--theme-elevation-0);
   --theme-input-bg: var(--theme-elevation-0);
   --theme-text: var(--theme-elevation-800);
-  --theme-overflow: rgba(255, 255, 255, 0.75);
+  --theme-overlay: rgba(255, 255, 255, 0.75);
   --theme-baseline: #{$baseline-px};
   --theme-baseline-body-size: #{$baseline-body-size};
   --font-body: 'Suisse Intl', system-ui;
@@ -99,7 +99,7 @@ body,
 
 #app {
   height: 100%;
-  // this is for the sidebar to be able to push the document over
+  // this is for the nav to be able to push the document over
   overflow-x: hidden;
 }
 

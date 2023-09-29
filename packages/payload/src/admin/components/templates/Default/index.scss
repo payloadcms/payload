@@ -7,7 +7,7 @@
   width: calc(100% + var(--nav-width));
   transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
 
-  &--sidebar-open {
+  &--nav-open {
     width: 100%;
     transition:
       width var(--nav-trans-time) linear,
@@ -58,7 +58,7 @@
       display: block;
     }
 
-    &--sidebar-open {
+    &--nav-open {
       transform: translate3d(0, 0, 0);
 
       .template-default {

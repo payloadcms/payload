@@ -21,8 +21,9 @@ import { PreferencesProvider } from './components/utilities/Preferences'
 import { SearchParamsProvider } from './components/utilities/SearchParams'
 import { ThemeProvider } from './components/utilities/Theme'
 import { Routes } from './components/views/Routes'
+import { NavProvider } from './components/elements/Nav/context'
+
 import './scss/app.scss'
-import { SidebarProvider } from './components/elements/Nav/context'
 
 const Root = () => {
   return (
@@ -47,11 +48,11 @@ const Root = () => {
                         <LocaleProvider>
                           <StepNavProvider>
                             <LoadingOverlayProvider>
-                              <SidebarProvider>
+                              <NavProvider>
                                 <CustomProvider>
                                   <Routes />
                                 </CustomProvider>
-                              </SidebarProvider>
+                              </NavProvider>
                             </LoadingOverlayProvider>
                           </StepNavProvider>
                         </LocaleProvider>

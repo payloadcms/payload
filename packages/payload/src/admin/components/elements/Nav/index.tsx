@@ -9,14 +9,14 @@ import Logout from '../Logout'
 import { EntityToGroup, EntityType, Group, groupNavItems } from '../../../utilities/groupNavItems'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import NavGroup from '../NavGroup'
-import { useSidebar } from './context'
+import { useNav } from './context'
 
 import './index.scss'
 
 const baseClass = 'nav'
 
 const DefaultNav: React.FC = () => {
-  const { sidebarOpen } = useSidebar()
+  const { navOpen } = useNav()
   const { permissions, user } = useAuth()
   const [groups, setGroups] = useState<Group[]>([])
   const { t, i18n } = useTranslation('general')
@@ -68,9 +68,7 @@ const DefaultNav: React.FC = () => {
   }, [collections, globals, permissions, i18n, i18n.language, user])
 
   return (
-    <aside
-      className={[baseClass, sidebarOpen && `${baseClass}--sidebar-open`].filter(Boolean).join(' ')}
-    >
+    <aside className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}>
       <div className={`${baseClass}__scroll`}>
         <nav className={`${baseClass}__wrap`}>
           {Array.isArray(beforeNavLinks) &&

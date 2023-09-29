@@ -8,10 +8,10 @@ import { useConfig } from '../../utilities/Config'
 import Meta from '../../utilities/Meta'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 import { Nav as DefaultNav } from '../../elements/Nav'
+import { useNav } from '../../elements/Nav/context'
+import { NavToggler } from '../../elements/Nav/NavToggler'
 
 import './index.scss'
-import { useSidebar } from '../../elements/Nav/context'
-import { NavToggler } from '../../elements/Nav/NavToggler'
 
 const baseClass = 'template-default'
 
@@ -26,7 +26,7 @@ const Default: React.FC<Props> = ({ children, className }) => {
 
   const { t } = useTranslation('general')
 
-  const { sidebarOpen, setSidebarOpen } = useSidebar()
+  const { navOpen, setNavOpen } = useNav()
 
   return (
     <Fragment>
@@ -36,18 +36,11 @@ const Default: React.FC<Props> = ({ children, className }) => {
         title={t('dashboard')}
       />
       <div
-        className={[baseClass, className, sidebarOpen && `${baseClass}--sidebar-open`]
+        className={[baseClass, className, navOpen && `${baseClass}--nav-open`]
           .filter(Boolean)
           .join(' ')}
       >
-        <RenderCustomComponent
-          CustomComponent={CustomNav}
-          DefaultComponent={DefaultNav}
-          componentProps={{
-            sidebarOpen: sidebarOpen,
-            setSidebarOpen: setSidebarOpen,
-          }}
-        />
+        <RenderCustomComponent CustomComponent={CustomNav} DefaultComponent={DefaultNav} />
         <div className={`${baseClass}__wrap`}>
           <AppHeader />
           {children}
@@ -55,7 +48,7 @@ const Default: React.FC<Props> = ({ children, className }) => {
             type="button"
             className={`${baseClass}__nav-overlay`}
             aria-label={t('menu')}
-            onClick={() => setSidebarOpen(!sidebarOpen)}
+            onClick={() => setNavOpen(!navOpen)}
           />
         </div>
       </div>

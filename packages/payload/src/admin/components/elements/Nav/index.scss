@@ -10,7 +10,7 @@
   border-right: 1px solid var(--theme-elevation-100);
   transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
 
-  &--sidebar-open {
+  &--nav-open {
     transform: translate3d(0, 0, 0);
     transition: transform var(--nav-trans-time) linear;
   }
