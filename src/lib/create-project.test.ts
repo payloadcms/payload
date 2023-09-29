@@ -85,7 +85,7 @@ describe('createProject', () => {
         const template: ProjectTemplate = {
           name: 'blank',
           type: 'starter',
-          url: 'https://github.com/payloadcms/payload/templates/blank#feat/2.0-template-updates',
+          url: 'https://github.com/payloadcms/payload/templates/blank#2.0',
           description: 'Blank Template',
         }
         await createProject({
