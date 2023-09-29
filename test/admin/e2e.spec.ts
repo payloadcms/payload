@@ -11,7 +11,7 @@ import wait from '../../packages/payload/src/utilities/wait'
 import {
   exactText,
   openDocControls,
-  openMainMenu,
+  openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
 } from '../helpers'
@@ -45,20 +45,21 @@ describe('admin', () => {
     await payload.db.deleteMany({
       collection: 'payload-preferences',
       where: {},
+      req: null,
     })
   })
 
   describe('Nav', () => {
-    test('should nav to collection - main menu', async () => {
+    test('should nav to collection - nav', async () => {
       await page.goto(url.admin)
-      await openMainMenu(page)
+      await openNav(page)
       await page.locator(`#nav-${slug}`).click()
       expect(page.url()).toContain(url.list)
     })
 
-    test('should nav to a global - main menu', async () => {
+    test('should nav to a global - nav', async () => {
       await page.goto(url.admin)
-      await openMainMenu(page)
+      await openNav(page)
       await page.locator(`#nav-global-${globalSlug}`).click()
       expect(page.url()).toContain(url.global(globalSlug))
     })
@@ -72,7 +73,7 @@ describe('admin', () => {
 
     test('should collapse and expand collection groups', async () => {
       await page.goto(url.admin)
-      await openMainMenu(page)
+      await openNav(page)
 
       const navGroup = page.locator('#nav-group-One .nav-group__toggle')
       const link = page.locator('#nav-group-one-collection-ones')
@@ -89,7 +90,7 @@ describe('admin', () => {
 
     test('should collapse and expand globals groups', async () => {
       await page.goto(url.admin)
-      await openMainMenu(page)
+      await openNav(page)
 
       const navGroup = page.locator('#nav-group-Group .nav-group__toggle')
       const link = page.locator('#nav-global-group-globals-one')
@@ -106,7 +107,7 @@ describe('admin', () => {
 
     test('should save nav group collapse preferences', async () => {
       await page.goto(url.admin)
-      await openMainMenu(page)
+      await openNav(page)
       await page.locator('#nav-group-One .nav-group__toggle').click()
       await page.goto(url.admin)
       const link = page.locator('#nav-group-one-collection-ones')
@@ -766,7 +767,7 @@ describe('admin', () => {
     describe('custom css', () => {
       test('should see custom css in admin UI', async () => {
         await page.goto(url.admin)
-        await openMainMenu(page)
+        await openNav(page)
         const navControls = page.locator('#custom-css')
         await expect(navControls).toHaveCSS('font-family', 'monospace')
       })

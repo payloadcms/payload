@@ -56,20 +56,19 @@ export async function saveDocAndAssert(page: Page, selector = '#action-save'): P
   expect(page.url()).not.toContain('create')
 }
 
-export async function openMainMenu(page: Page): Promise<void> {
-  // check to see if the main menu is already open and if not, open it
+export async function openNav(page: Page): Promise<void> {
+  // check to see if the nav is already open and if not, open it
   // use the `--nav-open` modifier class to check if the nav is open
   // this will prevent clicking nav links that are bleeding off the screen
   if (await page.locator('.template-default.template-default--nav-open').isVisible()) return
-  // find .nav-toggler, not mobile-nav-toggler
   await page.locator('#nav-toggler').click()
   await expect(await page.locator('.template-default.template-default--nav-open')).toBeVisible()
 }
 
-export async function closeMainMenu(page: Page): Promise<void> {
-  await page.locator('.payload__modal-toggler--slug-main-menu--is-open').click()
-  const mainMenuModal = page.locator('#main-menu')
-  await expect(mainMenuModal).toBeHidden()
+export async function closeNav(page: Page): Promise<void> {
+  if (!(await page.locator('.template-default.template-default--nav-open').isVisible())) return
+  await page.locator('#nav-toggler').click()
+  await expect(await page.locator('.template-default.template-default--nav-open')).toBeHidden()
 }
 
 export async function openDocControls(page: Page): Promise<void> {
