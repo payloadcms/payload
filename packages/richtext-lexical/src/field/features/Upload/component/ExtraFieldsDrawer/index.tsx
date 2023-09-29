@@ -19,6 +19,10 @@ import type { ElementProps } from '..'
 
 import { useEditorConfigContext } from '../../../../lexical/config/EditorConfigProvider'
 
+/**
+ * This handles the extra fields, e.g. captions or alt text, which are
+ * potentially added to the upload feature.
+ */
 export const UploadDrawer: React.FC<
   ElementProps & {
     drawerSlug: string

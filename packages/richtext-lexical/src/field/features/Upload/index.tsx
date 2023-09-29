@@ -8,7 +8,7 @@ import { uploadAfterReadPromiseHOC } from './afterReadPromise'
 import './index.scss'
 import { UploadNode } from './nodes/UploadNode'
 import { UploadPlugin } from './plugin'
-import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './plugin/drawer'
+import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer'
 
 export type UploadFeatureProps = {
   collections: {

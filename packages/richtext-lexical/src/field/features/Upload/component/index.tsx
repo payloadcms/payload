@@ -4,25 +4,20 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
 import { $getNodeByKey } from 'lexical'
 import { Button } from 'payload/components'
-import {
-  DrawerToggler,
-  useDocumentDrawer,
-  useDrawerSlug,
-  useListDrawer,
-} from 'payload/components/elements'
+import { useDocumentDrawer, useDrawerSlug } from 'payload/components/elements'
 import { FileGraphic } from 'payload/components/graphics'
 import { usePayloadAPI, useThumbnail } from 'payload/components/hooks'
 import { useConfig } from 'payload/components/utilities'
 import { getTranslation } from 'payload/utilities'
-import React, { useCallback, useEffect, useReducer, useState } from 'react'
+import React, { useCallback, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { UploadFeatureProps } from '..'
 import type { UploadFields } from '../nodes/UploadNode'
 
 import { useEditorConfigContext } from '../../../lexical/config/EditorConfigProvider'
 import { EnabledRelationshipsCondition } from '../../Relationship/utils/EnabledRelationshipsCondition'
-import { UploadDrawer } from './UploadDrawer'
+import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer'
+import { UploadDrawer } from './ExtraFieldsDrawer'
 import './index.scss'
 
 const baseClass = 'lexical-upload'
@@ -61,13 +56,6 @@ const Element: React.FC<ElementProps> = (props) => {
 
   const drawerSlug = useDrawerSlug('upload-drawer')
 
-  const [ListDrawer, ListDrawerToggler, { closeDrawer: closeListDrawer, openDrawer }] =
-    useListDrawer({
-      // collectionSlugs: enabledCollectionSlugs, // TODO
-      collectionSlugs: collections.map((coll) => coll.slug),
-      selectedCollection: relatedCollection.slug,
-    })
-
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer }] = useDocumentDrawer({
     id: value?.id,
     collectionSlug: relatedCollection.slug,
@@ -100,28 +88,6 @@ const Element: React.FC<ElementProps> = (props) => {
       closeDrawer()
     },
     [setParams, cacheBust, closeDrawer],
-  )
-
-  const swapUpload = React.useCallback(
-    ({ collectionConfig, docID }) => {
-      const newNode = {
-        children: [{ text: ' ' }],
-        relationTo: collectionConfig.slug,
-        type: 'upload',
-        value: { id: docID },
-      }
-
-      // TODO:
-      //const elementPath = ReactEditor.findPath(editor, element)
-
-      setRelatedCollection(collections.find((coll) => coll.slug === collectionConfig.slug))
-
-      ////Transforms.setNodes(editor, newNode, { at: elementPath })
-
-      dispatchCacheBust()
-      closeListDrawer()
-    },
-    [closeListDrawer, editor, collections],
   )
 
   // TODO
@@ -162,22 +128,20 @@ const Element: React.FC<ElementProps> = (props) => {
                 </DrawerToggler>
                   )*/ <div />
               }
-              <ListDrawerToggler
-                className={`${baseClass}__list-drawer-toggler`}
+
+              <Button
+                buttonStyle="icon-label"
                 disabled={field?.admin?.readOnly}
-              >
-                <Button
-                  buttonStyle="icon-label"
-                  disabled={field?.admin?.readOnly}
-                  el="div"
-                  icon="swap"
-                  onClick={() => {
-                    // do nothing
-                  }}
-                  round
-                  tooltip={t('swapUpload')}
-                />
-              </ListDrawerToggler>
+                el="div"
+                icon="swap"
+                onClick={() => {
+                  editor.dispatchCommand(INSERT_UPLOAD_WITH_DRAWER_COMMAND, {
+                    replace: { nodeKey },
+                  })
+                }}
+                round
+                tooltip={t('swapUpload')}
+              />
               <Button
                 buttonStyle="icon-label"
                 className={`${baseClass}__removeButton`}
@@ -200,7 +164,6 @@ const Element: React.FC<ElementProps> = (props) => {
         </div>
       </div>
       {value?.id && <DocumentDrawer onSave={updateUpload} />}
-      <ListDrawer onSelect={swapUpload} />
       <UploadDrawer drawerSlug={drawerSlug} relatedCollection={relatedCollection} {...props} />
     </div>
   )

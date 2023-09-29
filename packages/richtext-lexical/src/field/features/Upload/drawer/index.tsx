@@ -9,9 +9,9 @@ import {
 import { useListDrawer } from 'payload/components/elements'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { INSERT_UPLOAD_COMMAND } from '..'
-import { EnabledRelationshipsCondition } from '../../../Relationship/utils/EnabledRelationshipsCondition'
-import { $createUploadNode } from '../../nodes/UploadNode'
+import { EnabledRelationshipsCondition } from '../../Relationship/utils/EnabledRelationshipsCondition'
+import { $createUploadNode } from '../nodes/UploadNode'
+import { INSERT_UPLOAD_COMMAND } from '../plugin'
 import './index.scss'
 
 const baseClass = 'lexical-upload-drawer'

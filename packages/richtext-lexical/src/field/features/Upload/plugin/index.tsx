@@ -1,20 +1,13 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { $wrapNodeInElement, mergeRegister } from '@lexical/utils'
-import {
-  $createParagraphNode,
-  $insertNodes,
-  $isRootOrShadowRoot,
-  COMMAND_PRIORITY_EDITOR,
-  type LexicalCommand,
-  createCommand,
-} from 'lexical'
+import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
+import { COMMAND_PRIORITY_EDITOR, type LexicalCommand, createCommand } from 'lexical'
 import { useConfig } from 'payload/components/utilities'
 import React, { useEffect } from 'react'
 
 import type { RawUploadPayload } from '../nodes/UploadNode'
 
 import { $createUploadNode, UploadNode } from '../nodes/UploadNode'
-import { UploadDrawer } from './drawer'
+import { UploadDrawer } from '../drawer'
 
 export type InsertUploadPayload = Readonly<RawUploadPayload>
 
@@ -38,8 +31,6 @@ export function UploadPlugin({
       editor.registerCommand<InsertUploadPayload>(
         INSERT_UPLOAD_COMMAND,
         (payload: InsertUploadPayload) => {
-          // This is run on the browser. Can't just use 'payload' object
-          console.log('Received INSERT_UPLOAD_COMMAND with payload', INSERT_UPLOAD_COMMAND)
           editor.update(() => {
             const uploadNode = $createUploadNode({
               fields: {
@@ -50,10 +41,7 @@ export function UploadPlugin({
               },
             })
 
-            $insertNodes([uploadNode])
-            if ($isRootOrShadowRoot(uploadNode.getParentOrThrow())) {
-              $wrapNodeInElement(uploadNode, $createParagraphNode).selectEnd()
-            }
+            $insertNodeToNearestRoot(uploadNode)
           })
 
           return true
