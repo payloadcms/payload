@@ -17,7 +17,7 @@ import type { UploadFields } from '../nodes/UploadNode'
 import { useEditorConfigContext } from '../../../lexical/config/EditorConfigProvider'
 import { EnabledRelationshipsCondition } from '../../Relationship/utils/EnabledRelationshipsCondition'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer'
-import { UploadDrawer } from './ExtraFieldsDrawer'
+import { ExtraFieldsUploadDrawer } from './ExtraFieldsDrawer'
 import './index.scss'
 
 const baseClass = 'lexical-upload'
@@ -32,7 +32,7 @@ export type ElementProps = {
   //uploadProps: UploadFeatureProps
 }
 
-const Element: React.FC<ElementProps> = (props) => {
+const Component: React.FC<ElementProps> = (props) => {
   const {
     fields: { relationTo, value },
     nodeKey,
@@ -164,7 +164,11 @@ const Element: React.FC<ElementProps> = (props) => {
         </div>
       </div>
       {value?.id && <DocumentDrawer onSave={updateUpload} />}
-      <UploadDrawer drawerSlug={drawerSlug} relatedCollection={relatedCollection} {...props} />
+      <ExtraFieldsUploadDrawer
+        drawerSlug={drawerSlug}
+        relatedCollection={relatedCollection}
+        {...props}
+      />
     </div>
   )
 }
@@ -172,7 +176,7 @@ const Element: React.FC<ElementProps> = (props) => {
 export default (props: ElementProps): React.ReactNode => {
   return (
     <EnabledRelationshipsCondition {...props} uploads>
-      <Element {...props} />
+      <Component {...props} />
     </EnabledRelationshipsCondition>
   )
 }

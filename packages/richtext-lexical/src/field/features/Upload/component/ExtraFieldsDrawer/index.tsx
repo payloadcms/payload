@@ -23,7 +23,7 @@ import { useEditorConfigContext } from '../../../../lexical/config/EditorConfigP
  * This handles the extra fields, e.g. captions or alt text, which are
  * potentially added to the upload feature.
  */
-export const UploadDrawer: React.FC<
+export const ExtraFieldsUploadDrawer: React.FC<
   ElementProps & {
     drawerSlug: string
     relatedCollection: SanitizedCollectionConfig
