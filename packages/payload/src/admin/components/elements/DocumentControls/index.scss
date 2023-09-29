@@ -79,7 +79,6 @@
     align-items: center;
     margin: 0;
     gap: var(--controls-gap);
-    padding-right: calc(var(--controls-gap) + var(--dot-button-width));
     position: relative;
   }
 
@@ -96,19 +95,23 @@
   }
 
   &__dots {
-    height: 100%;
     margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2px;
+    border: 1px solid var(--theme-elevation-100);
+    border-radius: $style-radius-m;
+    height: calc(var(--base) * 1.5);
+    width: calc(var(--base) * 1.5);
 
-    .btn__label {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 2px;
+    &:hover {
+      border: 1px solid var(--theme-elevation-500);
+      background-color: var(--theme-elevation-100);
     }
 
-    > span > span > div {
+    > div {
       width: 3px;
       height: 3px;
       border-radius: 100%;
@@ -117,15 +120,7 @@
   }
 
   &__popup {
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: var(--dot-button-width);
-
-    .popup__trigger-wrap {
-      height: 100%;
-    }
+    position: relative;
   }
 
   @include mid-break {
