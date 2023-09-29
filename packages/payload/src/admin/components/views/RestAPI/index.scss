@@ -1,6 +1,10 @@
 .query-inspector {
   display: flex;
-  gap: calc(var(--base) * 2);
+  gap: var(--base);
+}
+
+.query-inspector__configuration {
+  margin-top: calc(var(--base) * 2);
 }
 
 .query-inspector__results-container {
