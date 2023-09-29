@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "1.14.0",
+  "version": "2.0.0-beta.0",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "main": "./src/index.ts",
@@ -58,6 +58,7 @@
     "@swc/register": "0.1.10",
     "@types/sharp": "0.31.1",
     "body-parser": "1.20.2",
+    "body-scroll-lock": "4.0.0-beta.0",
     "bson-objectid": "2.0.4",
     "compression": "1.7.4",
     "conf": "10.2.0",

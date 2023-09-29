@@ -42,6 +42,10 @@
     text-overflow: ellipsis;
   }
 
+  &__icon {
+    padding: calc(var(--base) / 4);
+  }
+
   &--has-action {
     cursor: pointer;
     text-decoration: none;

@@ -87,7 +87,9 @@ export const Collapsible: React.FC<Props> = ({
           )}
           <div className={`${baseClass}__actions-wrap`}>
             {actions && <div className={`${baseClass}__actions`}>{actions}</div>}
-            <Chevron className={`${baseClass}__indicator`} />
+            <div className={`${baseClass}__indicator`}>
+              <Chevron direction={!collapsed ? 'up' : undefined} />
+            </div>
           </div>
         </div>
         <AnimateHeight duration={200} height={collapsed ? 0 : 'auto'}>

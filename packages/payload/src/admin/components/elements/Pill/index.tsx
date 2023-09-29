@@ -82,9 +82,9 @@ const StaticPill: React.FC<Props> = (props) => {
       to={to || undefined}
       type={Element === 'button' ? 'button' : undefined}
     >
-      {icon && alignIcon === 'left' && <React.Fragment>{icon}</React.Fragment>}
+      {icon && alignIcon === 'left' && <span className={`${baseClass}__icon`}>{icon}</span>}
       <span className={`${baseClass}__label`}>{children}</span>
-      {icon && alignIcon === 'right' && <React.Fragment>{icon}</React.Fragment>}
+      {icon && alignIcon === 'right' && <span className={`${baseClass}__icon`}>{icon}</span>}
     </Element>
   )
 }
