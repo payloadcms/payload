@@ -1,17 +1,31 @@
-@import '../../../scss/styles';
+@import '../../../../scss/styles';
 
-.hamburger {
+.nav-icon {
   position: relative;
   padding: 0;
   border: 0;
   cursor: pointer;
-  width: calc(var(--base) / 1.75);
-  height: calc(var(--base) / 1.75);
   background-color: transparent;
   outline: none;
 
   &:focus {
     outline: none;
+  }
+
+  &__icon {
+    position: relative;
+    width: calc(var(--base) / 1.75);
+    height: calc(var(--base) / 1.75);
+  }
+
+  &__hamburger,
+  &__x,
+  &__chevron {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
   }
 
   &__line {
@@ -52,33 +66,37 @@
     display: none;
   }
 
-  &__back {
-    left: -6px;
+  &__close {
     opacity: 0;
     position: absolute;
     width: 100%;
     height: 100%;
     top: 0;
-    left: 0;
+    left: calc(var(--base));
     display: flex;
     align-items: center;
+    pointer-events: none;
+  }
 
+  &__chevron {
+    opacity: 0;
     path {
-      fill: currentColor;
-      stroke-width: 2px;
+      stroke-width: 1px;
       vector-effect: non-scaling-stroke;
     }
   }
 
   &--active {
-    .hamburger {
+    .nav-icon {
       &__x-left,
       &__x-right {
         opacity: 1;
       }
 
-      &__back {
+      &__close,
+      &__chevron {
         opacity: 1;
+        pointer-events: all;
       }
 
       &__top,
@@ -95,8 +113,10 @@
       display: block;
     }
 
-    &__back {
+    &__close,
+    &__chevron {
       display: none;
+      pointer-events: none;
     }
   }
 }

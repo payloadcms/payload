@@ -12,9 +12,6 @@
   height: var(--app-header-height);
   width: var(--gutter-h);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
   padding-left: calc(var(--base) * 1.25);
 
   @include mid-break {

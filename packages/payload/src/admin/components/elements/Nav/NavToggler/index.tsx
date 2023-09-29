@@ -1,7 +1,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNav } from '../context'
-import Hamburger from '../../Hamburger'
+import { NavIcon } from '../NavIcon'
 import { usePreferences } from '../../../utilities/Preferences'
 
 import './index.scss'
@@ -29,7 +29,7 @@ export const NavToggler: React.FC = () => {
         setNavOpen(!navOpen)
       }}
     >
-      <Hamburger isActive={navOpen} />
+      <NavIcon isActive={navOpen} />
     </button>
   )
 }
