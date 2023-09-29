@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { createContext, useContext, useMemo } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
 import type { FieldProps } from '../../../types'
 import type { SanitizedEditorConfig } from './types'
@@ -29,9 +29,17 @@ export const EditorConfigProvider = ({
   editorConfig: SanitizedEditorConfig
   fieldProps: FieldProps
 }): JSX.Element => {
+  // State to store the UUID
+  const [uuid, setUuid] = useState(generateQuickGuid())
+
+  // When the component mounts, generate a new UUID only once
+  useEffect(() => {
+    setUuid(generateQuickGuid())
+  }, [])
+
   const editorContext = useMemo(
-    () => ({ editorConfig, field: fieldProps, uuid: generateQuickGuid() }),
-    [editorConfig, fieldProps],
+    () => ({ editorConfig, field: fieldProps, uuid }),
+    [editorConfig, fieldProps, uuid],
   )
 
   return <Context.Provider value={editorContext}>{children}</Context.Provider>
