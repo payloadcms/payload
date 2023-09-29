@@ -3,6 +3,8 @@ import { PayloadRequest } from '../../express/types';
 import getExtractJWT from '../getExtractJWT';
 import { User } from '../types';
 import { Collection } from '../../collections/config/types';
+import { afterRead } from '../../fields/hooks/afterRead';
+import { isNumber } from '../../utilities/isNumber';
 
 export type Result = {
   user?: User,
@@ -26,7 +28,15 @@ async function me({
   };
 
   if (req.user) {
-    const user = { ...req.user };
+    const user = await afterRead({
+      doc: req.user,
+      depth: isNumber(req.query.limit) ? Number(req.query.limit) : undefined,
+      entityConfig: collection.config,
+      overrideAccess: false,
+      req,
+      showHiddenFields: false,
+      context: req.context,
+    });
 
     if (user.collection !== collection.config.slug) {
       return {
