@@ -72,6 +72,7 @@ const RichText: React.FC<FieldProps> = (props) => {
         <ErrorBoundary fallbackRender={fallbackRender} onReset={(details) => {}}>
           <LexicalProvider
             editorConfig={editorConfig}
+            fieldProps={props}
             initialState={initialValue}
             onChange={(editorState, editor, tags) => {
               const json = editorState.toJSON()

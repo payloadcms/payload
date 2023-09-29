@@ -27,7 +27,9 @@ export const RelationshipFeature = (): FeatureProvider => {
                   keywords: ['relationship', 'relation', 'rel'],
                   onSelect: ({ editor, queryString }) => {
                     // dispatch INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND
-                    editor.dispatchCommand(INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND, null)
+                    editor.dispatchCommand(INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND, {
+                      replace: false,
+                    })
                   },
                 }),
               ],

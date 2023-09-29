@@ -1,4 +1,5 @@
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
+import type { RichTextFieldProps } from 'payload/types'
 
 import type { FeatureProvider, SanitizedFeatures } from '../../features/types'
 
