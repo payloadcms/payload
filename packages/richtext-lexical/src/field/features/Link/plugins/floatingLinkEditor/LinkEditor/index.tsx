@@ -26,7 +26,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { LinkProps } from '../../..'
+import type { LinkFeatureProps } from '../../..'
 import type { LinkNode } from '../../../nodes/LinkNode'
 import type { LinkPayload } from '../types'
 
@@ -44,7 +44,7 @@ export const TOGGLE_LINK_WITH_MODAL_COMMAND: LexicalCommand<LinkPayload | null> 
 export function LinkEditor({
   anchorElem,
   fields: customFieldSchema,
-}: { anchorElem: HTMLElement } & LinkProps): JSX.Element {
+}: { anchorElem: HTMLElement } & LinkFeatureProps): JSX.Element {
   const [editor] = useLexicalComposerContext()
 
   const editorRef = useRef<HTMLDivElement | null>(null)
