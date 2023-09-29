@@ -5,6 +5,7 @@ import { HeadingFeature } from '../../features/Heading'
 import { LinkFeature } from '../../features/Link'
 import { ParagraphFeature } from '../../features/Paragraph'
 import { RelationshipFeature } from '../../features/Relationship'
+import { UploadFeature } from '../../features/Upload'
 import { AlignFeature } from '../../features/align'
 import { BoldTextFeature } from '../../features/format/Bold'
 import { InlineCodeTextFeature } from '../../features/format/InlineCode'
@@ -39,6 +40,7 @@ export const defaultEditorConfig: EditorConfig = {
     LinkFeature({}),
     RelationshipFeature(),
     BlockQuoteFeature(),
+    UploadFeature(),
   ],
   lexical: {
     namespace: 'lexical',

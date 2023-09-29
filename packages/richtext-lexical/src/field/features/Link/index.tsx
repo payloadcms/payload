@@ -21,12 +21,12 @@ import { FloatingLinkEditorPlugin } from './plugins/floatingLinkEditor'
 import { TOGGLE_LINK_WITH_MODAL_COMMAND } from './plugins/floatingLinkEditor/LinkEditor'
 import { LinkPlugin } from './plugins/link'
 
-export type LinkProps = {
+export type LinkFeatureProps = {
   fields?:
     | ((args: { config: SanitizedConfig; defaultFields: Field[]; i18n: i18n }) => Field[])
     | Field[]
 }
-export const LinkFeature = (props: LinkProps): FeatureProvider => {
+export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
   return {
     feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
       return {
