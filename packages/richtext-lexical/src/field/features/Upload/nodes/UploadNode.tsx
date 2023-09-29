@@ -1,22 +1,13 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
+import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode'
+import type { ElementFormatType, NodeKey } from 'lexical'
 
-import type { NodeKey } from 'lexical'
-
+import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode'
 import {
   $applyNodeReplacement,
   type DOMConversionMap,
   type DOMConversionOutput,
   type DOMExportOutput,
-  DecoratorNode,
-  type EditorConfig,
   type LexicalNode,
-  type SerializedLexicalNode,
   type Spread,
 } from 'lexical'
 import * as React from 'react'
@@ -56,20 +47,29 @@ export type SerializedUploadNode = Spread<
   {
     fields: UploadFields
   },
-  SerializedLexicalNode
+  SerializedDecoratorBlockNode
 >
 
-export class UploadNode extends DecoratorNode<JSX.Element> {
+export class UploadNode extends DecoratorBlockNode {
   __fields: UploadFields
 
-  constructor({ fields, key }: { fields: UploadFields; key?: NodeKey }) {
-    super(key)
+  constructor({
+    fields,
+    format,
+    key,
+  }: {
+    fields: UploadFields
+    format?: ElementFormatType
+    key?: NodeKey
+  }) {
+    super(format, key)
     this.__fields = fields
   }
 
   static clone(node: UploadNode): UploadNode {
     return new UploadNode({
       fields: node.__fields,
+      format: node.__format,
       key: node.__key,
     })
   }
@@ -88,27 +88,22 @@ export class UploadNode extends DecoratorNode<JSX.Element> {
   }
 
   static importJSON(serializedNode: SerializedUploadNode): UploadNode {
-    const { fields } = serializedNode
     const node = $createUploadNode({
-      fields,
+      fields: serializedNode.fields,
     })
+    node.setFormat(serializedNode.format)
 
     return node
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  createDOM(config: EditorConfig): HTMLElement {
-    const span = document.createElement('span')
-    const { theme } = config
-    const className = theme.image
-    if (className !== undefined) {
-      span.className = className
-    }
-    return span
+  static isInline(): false {
+    return false
   }
 
   decorate(): JSX.Element {
-    return <RawUploadComponent fields={this.__fields} nodeKey={this.getKey()} />
+    return (
+      <RawUploadComponent fields={this.__fields} format={this.__format} nodeKey={this.getKey()} />
+    )
   }
 
   exportDOM(): DOMExportOutput {

@@ -2,6 +2,7 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
+import { $getNodeByKey } from 'lexical'
 import { Button } from 'payload/components'
 import {
   DrawerToggler,
@@ -81,8 +82,10 @@ const Element: React.FC<ElementProps> = (props) => {
   const thumbnailSRC = useThumbnail(relatedCollection, data)
 
   const removeUpload = useCallback(() => {
-    // TODO
-  }, [editor])
+    editor.update(() => {
+      $getNodeByKey(nodeKey).remove()
+    })
+  }, [editor, nodeKey])
 
   const updateUpload = useCallback(
     (json) => {
