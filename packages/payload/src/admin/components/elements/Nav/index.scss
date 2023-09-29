@@ -34,7 +34,7 @@
     background: none;
     border: 0;
     outline: 0;
-    padding: calc(var(--base) * 0.75);
+    padding: calc(var(--base) * 0.75) var(--gutter-h);
   }
 
   &__scroll {
@@ -122,6 +122,8 @@
   &__link-icon {
     display: none;
     margin-right: calc(var(--base) * 0.25);
+    top: -1px;
+    position: relative;
   }
 
   @include mid-break {
@@ -131,12 +133,15 @@
 
     nav a {
       font-size: base(0.875);
-      line-height: base(1.25);
-      font-weight: 600;
+      line-height: base(1.5);
     }
   }
 
   @include small-break {
+    &__scroll {
+      padding: var(--app-header-height) var(--gutter-h) base(2);
+    }
+
     &__mobile-close {
       display: block;
     }
