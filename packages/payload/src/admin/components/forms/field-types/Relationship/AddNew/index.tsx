@@ -2,6 +2,7 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { SanitizedCollectionConfig } from '../../../../../../collections/config/types'
+import type { EditViewProps } from '../../../../views/types'
 import type { Value } from '../types'
 import type { Props } from './types'
 
@@ -16,7 +17,6 @@ import { useAuth } from '../../../../utilities/Auth'
 import { useConfig } from '../../../../utilities/Config'
 import './index.scss'
 import { useRelatedCollections } from './useRelatedCollections'
-import { EditViewProps } from '../../../../views/types'
 
 const baseClass = 'relationship-add-new'
 
@@ -169,7 +169,7 @@ export const AddNewRelation: React.FC<Props> = ({
                     if (permissions.collections[relatedCollection.slug].create.permission) {
                       return (
                         <PopupList.Button
-                          // className={`${baseClass}__relation-button ${baseClass}__relation-button--${relatedCollection.slug}`}
+                          className={`${baseClass}__relation-button--${relatedCollection.slug}`}
                           key={relatedCollection.slug}
                           onClick={() => {
                             closePopup()
