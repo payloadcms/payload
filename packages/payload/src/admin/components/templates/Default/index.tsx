@@ -12,6 +12,7 @@ import { useNav } from '../../elements/Nav/context'
 import { NavToggler } from '../../elements/Nav/NavToggler'
 
 import './index.scss'
+import { Hamburger } from '../../elements/Hamburger'
 
 const baseClass = 'template-default'
 
@@ -52,7 +53,9 @@ const Default: React.FC<Props> = ({ children, className }) => {
           />
         </div>
       </div>
-      <NavToggler className={`${baseClass}__nav-toggler`} id="nav-toggler" />
+      <NavToggler className={`${baseClass}__nav-toggler`} id="nav-toggler">
+        <Hamburger isActive={navOpen} />
+      </NavToggler>
     </Fragment>
   )
 }

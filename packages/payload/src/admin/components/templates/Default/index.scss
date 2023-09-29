@@ -23,8 +23,14 @@
 
   &__nav-toggler {
     position: fixed;
+    z-index: var(--z-modal);
     top: 0;
     left: 0;
+    height: var(--app-header-height);
+    width: var(--gutter-h);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &__wrap {
@@ -82,16 +88,10 @@
     }
   }
 
-  @include mid-break {
-    &__nav-toggler {
-      width: var(--gutter-h);
-      height: var(--gutter-h);
-      padding-left: calc(var(--base) / 1.5);
-    }
-  }
-
   @include small-break {
     &__nav-toggler {
+      width: calc(var(--base) * 2);
+      height: calc(var(--base) * 2);
       display: none;
     }
   }

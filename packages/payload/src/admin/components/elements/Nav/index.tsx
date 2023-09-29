@@ -12,11 +12,13 @@ import NavGroup from '../NavGroup'
 import { useNav } from './context'
 
 import './index.scss'
+import { X } from '../..'
+import { NavIcon } from './NavIcon'
 
 const baseClass = 'nav'
 
 const DefaultNav: React.FC = () => {
-  const { navOpen } = useNav()
+  const { navOpen, setNavOpen } = useNav()
   const { permissions, user } = useAuth()
   const [groups, setGroups] = useState<Group[]>([])
   const { t, i18n } = useTranslation('general')
@@ -116,7 +118,18 @@ const DefaultNav: React.FC = () => {
           </div>
         </nav>
       </div>
-      <div className={`${baseClass}__header`} />
+      <div className={`${baseClass}__header`}>
+        <div className={`${baseClass}__header-content`}>
+          <button
+            className={`${baseClass}__mobile-close`}
+            onClick={() => {
+              setNavOpen(false)
+            }}
+          >
+            <NavIcon isActive />
+          </button>
+        </div>
+      </div>
     </aside>
   )
 }

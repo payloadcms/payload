@@ -12,8 +12,9 @@ const baseClass = 'nav-toggler'
 export const NavToggler: React.FC<{
   className?: string
   id?: string
+  children?: React.ReactNode
 }> = (props) => {
-  const { className, id } = props
+  const { className, id, children } = props
 
   const { t } = useTranslation('general')
 
@@ -43,7 +44,7 @@ export const NavToggler: React.FC<{
         }
       }}
     >
-      <NavIcon isActive={navOpen} />
+      {children}
     </button>
   )
 }

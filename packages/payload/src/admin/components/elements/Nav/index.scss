@@ -23,6 +23,20 @@
     height: var(--app-header-height);
   }
 
+  &__header-content {
+    z-index: 1;
+    position: relative;
+    height: 100%;
+  }
+
+  &__mobile-close {
+    display: none;
+    background: none;
+    border: 0;
+    outline: 0;
+    padding: calc(var(--base) * 0.75);
+  }
+
   &__scroll {
     height: 100%;
     display: flex;
@@ -107,13 +121,19 @@
 
   @include mid-break {
     &__scroll {
-      padding: base(2.5) base(0.75) base(2) base(0.75);
+      padding: var(--app-header-height) base(0.75) base(2) base(0.75);
     }
 
     nav a {
       font-size: base(0.875);
       line-height: base(1.25);
       font-weight: 600;
+    }
+  }
+
+  @include small-break {
+    &__mobile-close {
+      display: block;
     }
   }
 }
