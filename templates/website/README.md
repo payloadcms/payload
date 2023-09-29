@@ -227,6 +227,10 @@ That's it! The Docker instance will help you get up and running quickly while al
 
 To seed the database with a few pages, posts, and projects you can run `yarn seed`. This template also comes with a `GET /api/seed` endpoint you can use to seed the database from the admin panel.
 
+On boot, a seed script is included to create 2 users:
+1. email `demo-author@payloadcms.com`, password `password`, the role `admin`.
+2. email `demo-user@payloadcms.com`, password `password`, the role `user`
+
 > NOTICE: seeding the database is destructive because it drops your current database to populate a fresh one from the seed template. Only run this command if you are starting a new project or can afford to lose your current data.
 
 ## Production
