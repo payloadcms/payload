@@ -33,6 +33,7 @@ export const CheckListFeature = (): FeatureProvider => {
             position: 'normal',
           },
         ],
+        props: null,
         slashMenu: {
           options: [
             {

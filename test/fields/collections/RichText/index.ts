@@ -3,6 +3,7 @@ import type { CollectionConfig } from '../../../../packages/payload/src/collecti
 import {
   LinkFeature,
   TreeviewFeature,
+  UploadFeature,
   createLexical,
 } from '../../../../packages/richtext-lexical/src'
 import { createSlate } from '../../../../packages/richtext-slate/src'
@@ -53,6 +54,22 @@ const RichTextFields: CollectionConfig = {
                   },
                 },
               ],
+            }),
+          )
+
+          defaultEditorConfig.features.push(
+            UploadFeature({
+              collections: {
+                uploads: {
+                  fields: [
+                    {
+                      name: 'caption',
+                      type: 'richText',
+                      editor: createLexical({}),
+                    },
+                  ],
+                },
+              },
             }),
           )
           return defaultEditorConfig

@@ -32,6 +32,7 @@ export const ParagraphFeature = (): FeatureProvider => {
             ]),
           ],
         },
+        props: null,
         slashMenu: {
           options: [
             {

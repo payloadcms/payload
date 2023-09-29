@@ -42,6 +42,7 @@ export const BoldTextFeature = (): FeatureProvider => {
           ],
         },
         markdownTransformers: markdownTransformers,
+        props: null,
       }
     },
     key: 'bold',

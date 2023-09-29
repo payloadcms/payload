@@ -25,6 +25,7 @@ export const RelationshipFeature = (): FeatureProvider => {
             position: 'normal',
           },
         ],
+        props: null,
         slashMenu: {
           options: [
             {

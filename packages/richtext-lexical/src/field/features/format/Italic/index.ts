@@ -31,6 +31,7 @@ export const ItalicTextFeature = (): FeatureProvider => {
           ],
         },
         markdownTransformers: [ITALIC_STAR, ITALIC_UNDERSCORE],
+        props: null,
       }
     },
     key: 'italic',

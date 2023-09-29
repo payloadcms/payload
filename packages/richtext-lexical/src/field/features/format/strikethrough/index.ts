@@ -31,6 +31,8 @@ export const StrikethroughTextFeature = (): FeatureProvider => {
           ],
         },
         markdownTransformers: [STRIKETHROUGH],
+        props: null,
+        props: null,
       }
     },
     key: 'strikethrough',

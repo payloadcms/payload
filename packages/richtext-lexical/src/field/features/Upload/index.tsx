@@ -5,10 +5,10 @@ import type { FeatureProvider } from '../types'
 import { SlashMenuOption } from '../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 import { UploadIcon } from '../../lexical/ui/icons/Upload'
 import { uploadAfterReadPromiseHOC } from './afterReadPromise'
+import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer'
 import './index.scss'
 import { UploadNode } from './nodes/UploadNode'
 import { UploadPlugin } from './plugin'
-import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from './drawer'
 
 export type UploadFeatureProps = {
   collections: {
@@ -35,6 +35,7 @@ export const UploadFeature = (props?: UploadFeatureProps): FeatureProvider => {
             position: 'normal',
           },
         ],
+        props: props,
         slashMenu: {
           options: [
             {

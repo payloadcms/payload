@@ -28,6 +28,7 @@ export const UnoderedListFeature = (): FeatureProvider => {
             position: 'normal',
           },
         ],
+        props: null,
         slashMenu: {
           options: [
             {

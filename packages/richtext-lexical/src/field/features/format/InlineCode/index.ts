@@ -31,6 +31,7 @@ export const InlineCodeTextFeature = (): FeatureProvider => {
           ],
         },
         markdownTransformers: [INLINE_CODE],
+        props: null,
       }
     },
     key: 'inlineCode',

@@ -29,6 +29,7 @@ export const SuperscriptTextFeature = (): FeatureProvider => {
             ]),
           ],
         },
+        props: null,
       }
     },
     key: 'superscript',

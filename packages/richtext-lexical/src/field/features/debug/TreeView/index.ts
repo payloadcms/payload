@@ -13,6 +13,7 @@ export const TreeviewFeature = (): FeatureProvider => {
             position: 'normal',
           },
         ],
+        props: null,
       }
     },
     key: 'debug-treeview',

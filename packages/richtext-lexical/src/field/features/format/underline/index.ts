@@ -29,6 +29,7 @@ export const UnderlineTextFeature = (): FeatureProvider => {
             ]),
           ],
         },
+        props: null,
       }
     },
     key: 'underline',

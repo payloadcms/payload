@@ -42,6 +42,7 @@ export const BlockQuoteFeature = (): FeatureProvider => {
             type: QuoteNode.getType(),
           },
         ],
+        props: null,
         slashMenu: {
           options: [
             {

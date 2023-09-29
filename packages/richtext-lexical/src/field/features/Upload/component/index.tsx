@@ -4,7 +4,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
 import { $getNodeByKey } from 'lexical'
 import { Button } from 'payload/components'
-import { useDocumentDrawer, useDrawerSlug } from 'payload/components/elements'
+import { DrawerToggler, useDocumentDrawer, useDrawerSlug } from 'payload/components/elements'
 import { FileGraphic } from 'payload/components/graphics'
 import { usePayloadAPI, useThumbnail } from 'payload/components/hooks'
 import { useConfig } from 'payload/components/utilities'
@@ -12,6 +12,7 @@ import { getTranslation } from 'payload/utilities'
 import React, { useCallback, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { UploadFeatureProps } from '..'
 import type { UploadFields } from '../nodes/UploadNode'
 
 import { useEditorConfigContext } from '../../../lexical/config/EditorConfigProvider'
@@ -46,7 +47,7 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const [editor] = useLexicalComposerContext()
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
-  const { field } = useEditorConfigContext()
+  const { editorConfig, field } = useEditorConfigContext()
 
   const { i18n, t } = useTranslation('fields')
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
@@ -77,8 +78,6 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const updateUpload = useCallback(
     (json) => {
-      const { doc } = json
-
       setParams({
         ...initialParams,
         cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
@@ -90,8 +89,9 @@ const Component: React.FC<ElementProps> = (props) => {
     [setParams, cacheBust, closeDrawer],
   )
 
-  // TODO
-  //const customFields = field?.admin?.upload?.collections?.[relatedCollection.slug]?.fields
+  const customFields = (
+    editorConfig?.resolvedFeatureMap?.get('upload')?.props as UploadFeatureProps
+  )?.collections?.[relatedCollection.slug]?.fields
 
   return (
     <div
@@ -108,8 +108,7 @@ const Component: React.FC<ElementProps> = (props) => {
               {getTranslation(relatedCollection.labels.singular, i18n)}
             </div>
             <div className={`${baseClass}__actions`}>
-              {
-                /* TODO customFields?.length > 0 && (
+              {customFields?.length > 0 && (
                 <DrawerToggler
                   className={`${baseClass}__upload-drawer-toggler`}
                   disabled={field?.admin?.readOnly}
@@ -126,8 +125,7 @@ const Component: React.FC<ElementProps> = (props) => {
                     tooltip={t('fields:editRelationship')}
                   />
                 </DrawerToggler>
-                  )*/ <div />
-              }
+              )}
 
               <Button
                 buttonStyle="icon-label"

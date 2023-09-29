@@ -104,6 +104,7 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             position: 'floatingAnchorElem',
           },
         ],
+        props,
       }
     },
     key: 'link',

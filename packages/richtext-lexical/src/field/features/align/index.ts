@@ -51,6 +51,7 @@ export const AlignFeature = (): FeatureProvider => {
             ]),
           ],
         },
+        props: null,
       }
     },
     key: 'align',

@@ -2,6 +2,7 @@ import type { SanitizedCollectionConfig } from 'payload/types'
 
 import { useModal } from '@faceless-ui/modal'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { $getNodeByKey } from 'lexical'
 import { Drawer } from 'payload/components/elements'
 import { Form, FormSubmit, RenderFields } from 'payload/components/forms'
 import {
@@ -16,6 +17,8 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { ElementProps } from '..'
+import type { UploadFeatureProps } from '../..'
+import type { UploadNode } from '../../nodes/UploadNode'
 
 import { useEditorConfigContext } from '../../../../lexical/config/EditorConfigProvider'
 
@@ -29,15 +32,16 @@ export const ExtraFieldsUploadDrawer: React.FC<
     relatedCollection: SanitizedCollectionConfig
   }
 > = (props) => {
-  const [editor] = useLexicalComposerContext()
-  const { field } = useEditorConfigContext()
-
   const {
     drawerSlug,
     fields: { relationTo, value },
+    fields,
     nodeKey,
     relatedCollection,
   } = props
+
+  const [editor] = useLexicalComposerContext()
+  const { editorConfig, field } = useEditorConfigContext()
 
   const { i18n, t } = useTranslation()
   const { code: locale } = useLocale()
@@ -45,25 +49,33 @@ export const ExtraFieldsUploadDrawer: React.FC<
   const { closeModal } = useModal()
   const { getDocPreferences } = useDocumentInfo()
   const [initialState, setInitialState] = useState({})
-  //const fieldSchema = field?.admin?.upload?.collections?.[relatedCollection.slug]?.fields // TODO:
+  const fieldSchema = (editorConfig?.resolvedFeatureMap.get('upload')?.props as UploadFeatureProps)
+    ?.collections?.[relatedCollection.slug]?.fields
 
   const handleUpdateEditData = useCallback(
     (_, data) => {
-      const newNode = {
-        fields: data,
-      }
-      // TODO
+      // Update lexical node (with key nodeKey) with new data
+      editor.update(() => {
+        const uploadNode: UploadNode | null = $getNodeByKey(nodeKey)
+        if (uploadNode) {
+          const newFields = {
+            ...uploadNode.getFields(),
+            ...data,
+          }
+          uploadNode.setFields(newFields)
+        }
+      })
 
       closeModal(drawerSlug)
     },
-    [closeModal, editor, drawerSlug],
+    [closeModal, editor, drawerSlug, nodeKey],
   )
 
   useEffect(() => {
     const awaitInitialState = async () => {
       const preferences = await getDocPreferences()
-      /*const state = await buildStateFromSchema({
-        data: deepCopyObject(element?.fields || {}),
+      const state = await buildStateFromSchema({
+        data: deepCopyObject(fields || {}),
         fieldSchema,
         locale,
         operation: 'update',
@@ -71,11 +83,11 @@ export const ExtraFieldsUploadDrawer: React.FC<
         t,
         user,
       })
-      setInitialState(state)*/
+      setInitialState(state)
     }
 
-    awaitInitialState()
-  }, [user, locale, t, getDocPreferences])
+    void awaitInitialState()
+  }, [user, locale, t, getDocPreferences, fields, fieldSchema])
 
   return (
     <Drawer
@@ -85,7 +97,7 @@ export const ExtraFieldsUploadDrawer: React.FC<
       })}
     >
       <Form initialState={initialState} onSubmit={handleUpdateEditData}>
-        <RenderFields fieldSchema={null /** TODO */} fieldTypes={fieldTypes} readOnly={false} />
+        <RenderFields fieldSchema={fieldSchema} fieldTypes={fieldTypes} readOnly={false} />
         <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
       </Form>
     </Drawer>

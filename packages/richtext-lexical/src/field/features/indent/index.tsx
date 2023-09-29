@@ -51,6 +51,7 @@ export const IndentFeature = (): FeatureProvider => {
             ]),
           ],
         },
+        props: null,
       }
     },
     key: 'indent',

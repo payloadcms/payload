@@ -29,6 +29,7 @@ export const OrderedListFeature = (): FeatureProvider => {
                 position: 'normal',
               },
             ],
+        props: null,
         slashMenu: {
           options: [
             {

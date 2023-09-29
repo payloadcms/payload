@@ -38,7 +38,6 @@ export type Feature = {
     node: Klass<LexicalNode>
     type: string
   }>
-
   plugins?: Array<
     | {
         // plugins are anything which is not directly part of the editor. Like, creating a command which creates a node, or opens a modal, or some other more "outside" functionality
@@ -51,6 +50,9 @@ export type Feature = {
         position: 'floatingAnchorElem' // Determines at which position the Component will be added.
       }
   >
+
+  /** Props which were passed into your feature will have to be passed here. This will allow them to be used / read in other places of the code, e.g. wherever you can use useEditorConfigContext */
+  props: unknown
   slashMenu?: {
     dynamicOptions?: ({
       editor,
@@ -68,9 +70,9 @@ export type FeatureProvider = {
   dependencies?: string[]
   /** Keys of priority dependencies needed for this feature. These dependencies have to be loaded first and are available in the `feature` property*/
   dependenciesPriority?: string[]
-
   /** Keys of soft-dependencies needed for this feature. These dependencies are optional, but are considered as last-priority in the loading process */
   dependenciesSoft?: string[]
+
   feature: (props: {
     /** unsanitizedEditorConfig.features, but mapped */
     featureProviderMap: FeatureProviderMap
