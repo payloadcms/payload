@@ -1,5 +1,7 @@
 import type { Transformer } from '@lexical/markdown'
 import type { Klass, LexicalEditor, LexicalNode } from 'lexical'
+import type { SerializedLexicalNode } from 'lexical'
+import type { PayloadRequest } from 'payload/types'
 import type React from 'react'
 
 import type { EditorConfig } from '..//lexical/config/types'
@@ -7,6 +9,23 @@ import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectTo
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 
 export type Feature = {
+  afterReadPromises?: Array<
+    ({
+      currentDepth,
+      depth,
+      node,
+      overrideAccess,
+      req,
+      showHiddenFields,
+    }: {
+      currentDepth: number
+      depth: number
+      node: SerializedLexicalNode
+      overrideAccess: boolean
+      req: PayloadRequest
+      showHiddenFields: boolean
+    }) => Promise<void>
+  >
   floatingSelectToolbar?: {
     sections: FloatingToolbarSection[]
   }
