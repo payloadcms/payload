@@ -71,7 +71,16 @@ export const LinkFeature = (props: LinkFeatureProps): FeatureProvider => {
             ]),
           ],
         },
-        nodes: [LinkNode, AutoLinkNode],
+        nodes: [
+          {
+            node: LinkNode,
+            type: LinkNode.getType(),
+          },
+          {
+            node: AutoLinkNode,
+            type: AutoLinkNode.getType(),
+          },
+        ],
         plugins: [
           {
             Component: LinkPlugin,

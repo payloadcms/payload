@@ -64,7 +64,7 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
           ],
         },
         markdownTransformers: [MarkdownTransformer],
-        nodes: [HeadingNode],
+        nodes: [{ node: HeadingNode, type: HeadingNode.getType() }],
         slashMenu: {
           options: [
             ...enabledHeadingSizes.map((headingSize) => {

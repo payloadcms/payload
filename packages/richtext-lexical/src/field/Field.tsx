@@ -6,6 +6,7 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 import type { FieldProps } from '../types'
 
+import { richTextValidate } from '../populate/validation'
 import './index.scss'
 import { LexicalProvider } from './lexical/LexicalProvider'
 
@@ -28,7 +29,7 @@ const RichText: React.FC<FieldProps> = (props) => {
     label,
     path: pathFromProps,
     required,
-    validate = null, // TODO:
+    validate = richTextValidate,
   } = props
 
   const path = pathFromProps || name

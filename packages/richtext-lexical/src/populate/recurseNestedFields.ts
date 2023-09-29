@@ -1,11 +1,16 @@
-import type { Field, PayloadRequest } from 'payload/types'
+import type { SerializedEditorState } from 'lexical'
+import type { Field, PayloadRequest, RichTextField } from 'payload/types'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/types'
+
+import type { AfterReadPromise } from '../field/features/types'
+import type { AdapterProps } from '../types'
 
 import { populate } from './populate'
 import { recurseRichText } from './richTextRelationshipPromise'
 
 type NestedRichTextFieldsArgs = {
+  afterReadPromises: Map<string, Array<AfterReadPromise>>
   currentDepth?: number
   data: unknown
   depth: number
@@ -17,6 +22,7 @@ type NestedRichTextFieldsArgs = {
 }
 
 export const recurseNestedFields = ({
+  afterReadPromises,
   currentDepth = 0,
   data,
   depth,
@@ -113,6 +119,7 @@ export const recurseNestedFields = ({
     } else if (fieldHasSubFields(field) && !fieldIsArrayType(field)) {
       if (fieldAffectsData(field) && typeof data[field.name] === 'object') {
         recurseNestedFields({
+          afterReadPromises,
           currentDepth,
           data: data[field.name],
           depth,
@@ -124,6 +131,7 @@ export const recurseNestedFields = ({
         })
       } else {
         recurseNestedFields({
+          afterReadPromises,
           currentDepth,
           data,
           depth,
@@ -137,6 +145,7 @@ export const recurseNestedFields = ({
     } else if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         recurseNestedFields({
+          afterReadPromises,
           currentDepth,
           data,
           depth,
@@ -153,6 +162,7 @@ export const recurseNestedFields = ({
           const block = field.blocks.find(({ slug }) => slug === row?.blockType)
           if (block) {
             recurseNestedFields({
+              afterReadPromises,
               currentDepth,
               data: data[field.name][i],
               depth,
@@ -169,6 +179,7 @@ export const recurseNestedFields = ({
       if (field.type === 'array') {
         data[field.name].forEach((_, i) => {
           recurseNestedFields({
+            afterReadPromises,
             currentDepth,
             data: data[field.name][i],
             depth,
@@ -183,13 +194,14 @@ export const recurseNestedFields = ({
     }
 
     if (field.type === 'richText' && Array.isArray(data[field.name])) {
-      data[field.name].forEach((node) => {
-        if (Array.isArray(node.children)) {
+      ;(data[field.name] as SerializedEditorState).root.children.forEach((node) => {
+        if ('children' in node && Array.isArray(node.children)) {
           recurseRichText({
+            afterReadPromises,
             children: node.children,
             currentDepth,
             depth,
-            field,
+            field: field as RichTextField<AdapterProps>,
             overrideAccess,
             promises,
             req,

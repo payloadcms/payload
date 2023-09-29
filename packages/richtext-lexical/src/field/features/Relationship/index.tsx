@@ -11,7 +11,12 @@ export const RelationshipFeature = (): FeatureProvider => {
   return {
     feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
       return {
-        nodes: [RelationshipNode],
+        nodes: [
+          {
+            node: RelationshipNode,
+            type: RelationshipNode.getType(),
+          },
+        ],
         plugins: [
           {
             Component: RelationshipPlugin,

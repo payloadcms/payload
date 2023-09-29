@@ -17,7 +17,16 @@ export const CheckListFeature = (): FeatureProvider => {
         nodes:
           featureProviderMap.has('unorderedList') || featureProviderMap.has('orderedList')
             ? []
-            : [ListItemNode, ListNode],
+            : [
+                {
+                  node: ListNode,
+                  type: ListNode.getType(),
+                },
+                {
+                  node: ListItemNode,
+                  type: ListItemNode.getType(),
+                },
+              ],
         plugins: [
           {
             Component: CheckListPlugin,

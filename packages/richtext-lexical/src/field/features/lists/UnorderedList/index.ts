@@ -12,7 +12,16 @@ export const UnoderedListFeature = (): FeatureProvider => {
     feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
       return {
         markdownTransformers: [UNORDERED_LIST],
-        nodes: [ListItemNode, ListNode],
+        nodes: [
+          {
+            node: ListNode,
+            type: ListNode.getType(),
+          },
+          {
+            node: ListItemNode,
+            type: ListItemNode.getType(),
+          },
+        ],
         plugins: [
           {
             Component: ListPlugin,

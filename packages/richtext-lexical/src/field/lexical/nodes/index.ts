@@ -7,5 +7,5 @@ export function getEnabledNodes({
 }: {
   editorConfig: SanitizedEditorConfig
 }): Array<Klass<LexicalNode>> {
-  return editorConfig.features.nodes
+  return editorConfig.features.nodes.map((node) => node.node)
 }

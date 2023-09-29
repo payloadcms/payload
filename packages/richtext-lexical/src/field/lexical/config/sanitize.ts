@@ -5,6 +5,7 @@ import { loadFeatures } from './loader'
 
 export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeatures => {
   const sanitized: SanitizedFeatures = {
+    afterReadPromises: new Map(),
     enabledFeatures: [],
     floatingSelectToolbar: {
       sections: [],
@@ -21,6 +22,11 @@ export const sanitizeFeatures = (features: ResolvedFeatureMap): SanitizedFeature
   features.forEach((feature) => {
     if (feature.nodes?.length) {
       sanitized.nodes = sanitized.nodes.concat(feature.nodes)
+      feature.nodes.forEach((node) => {
+        if (node?.afterReadPromises?.length) {
+          sanitized.afterReadPromises.set(node.type, node.afterReadPromises)
+        }
+      })
     }
     if (feature.plugins?.length) {
       feature.plugins.forEach((plugin, i) => {
@@ -136,5 +142,6 @@ export function sanitizeEditorConfig(editorConfig: EditorConfig): SanitizedEdito
   return {
     features: sanitizeFeatures(resolvedFeatureMap),
     lexical: editorConfig.lexical,
+    resolvedFeatureMap: resolvedFeatureMap,
   }
 }

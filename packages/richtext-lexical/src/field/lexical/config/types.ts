@@ -1,7 +1,6 @@
 import type { EditorConfig as LexicalEditorConfig } from 'lexical/LexicalEditor'
-import type { RichTextFieldProps } from 'payload/types'
 
-import type { FeatureProvider, SanitizedFeatures } from '../../features/types'
+import type { FeatureProvider, ResolvedFeatureMap, SanitizedFeatures } from '../../features/types'
 
 export type EditorConfig = {
   features: FeatureProvider[]
@@ -11,4 +10,5 @@ export type EditorConfig = {
 export type SanitizedEditorConfig = {
   features: SanitizedFeatures
   lexical: LexicalEditorConfig
+  resolvedFeatureMap: ResolvedFeatureMap
 }

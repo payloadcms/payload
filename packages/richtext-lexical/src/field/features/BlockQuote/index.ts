@@ -36,7 +36,12 @@ export const BlockQuoteFeature = (): FeatureProvider => {
           ],
         },
         markdownTransformers: [MarkdownTransformer],
-        nodes: [QuoteNode],
+        nodes: [
+          {
+            node: QuoteNode,
+            type: QuoteNode.getType(),
+          },
+        ],
         slashMenu: {
           options: [
             {

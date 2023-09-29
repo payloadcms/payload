@@ -12,7 +12,15 @@ export const OrderedListFeature = (): FeatureProvider => {
     feature: ({ featureProviderMap, resolvedFeatures, unsanitizedEditorConfig }) => {
       return {
         markdownTransformers: [ORDERED_LIST],
-        nodes: featureProviderMap.has('unorderedList') ? [] : [ListItemNode, ListNode],
+        nodes: featureProviderMap.has('unorderedList')
+          ? []
+          : [
+              {
+                node: ListNode,
+                type: ListNode.getType(),
+              },
+              { node: ListItemNode, type: ListItemNode.getType() },
+            ],
         plugins: featureProviderMap.has('unorderedList')
           ? []
           : [

@@ -1,10 +1,10 @@
 import type { RichTextField, Validate } from 'payload/types'
 
-import type { AdapterArguments } from '../types'
+import type { AdapterProps } from '../types'
 
 import { defaultRichTextValue } from './defaultValue'
 
-export const richText: Validate<unknown, unknown, RichTextField<AdapterArguments>> = (
+export const richTextValidate: Validate<unknown, unknown, RichTextField<AdapterProps>> = (
   value,
   { required, t },
 ) => {

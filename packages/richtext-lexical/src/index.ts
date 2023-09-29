@@ -10,6 +10,7 @@ import { RichTextField } from './field'
 import { defaultEditorConfig, defaultSanitizedEditorConfig } from './field/lexical/config/default'
 import { sanitizeEditorConfig } from './field/lexical/config/sanitize'
 import { cloneDeep } from './field/lexical/utils/cloneDeep'
+import { richTextRelationshipPromise } from './populate/richTextRelationshipPromise'
 
 export function createLexical({
   userConfig,
@@ -39,6 +40,20 @@ export function createLexical({
       showHiddenFields,
       siblingDoc,
     }) {
+      // check if there are any features with nodes which have afterReadPromises for this field
+      if (finalSanitizedEditorConfig?.features?.afterReadPromises?.size) {
+        return richTextRelationshipPromise({
+          afterReadPromises: finalSanitizedEditorConfig.features.afterReadPromises,
+          currentDepth,
+          depth,
+          field,
+          overrideAccess,
+          req,
+          showHiddenFields,
+          siblingDoc,
+        })
+      }
+
       return null
     },
   }

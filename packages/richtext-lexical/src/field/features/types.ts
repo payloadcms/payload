@@ -8,29 +8,31 @@ import type { EditorConfig } from '..//lexical/config/types'
 import type { FloatingToolbarSection } from '../lexical/plugins/FloatingSelectToolbar/types'
 import type { SlashMenuGroup } from '../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
 
+export type AfterReadPromise = ({
+  currentDepth,
+  depth,
+  node,
+  overrideAccess,
+  req,
+  showHiddenFields,
+}: {
+  currentDepth: number
+  depth: number
+  node: SerializedLexicalNode
+  overrideAccess: boolean
+  req: PayloadRequest
+  showHiddenFields: boolean
+}) => Promise<void>
 export type Feature = {
-  afterReadPromises?: Array<
-    ({
-      currentDepth,
-      depth,
-      node,
-      overrideAccess,
-      req,
-      showHiddenFields,
-    }: {
-      currentDepth: number
-      depth: number
-      node: SerializedLexicalNode
-      overrideAccess: boolean
-      req: PayloadRequest
-      showHiddenFields: boolean
-    }) => Promise<void>
-  >
   floatingSelectToolbar?: {
     sections: FloatingToolbarSection[]
   }
   markdownTransformers?: Transformer[]
-  nodes?: Array<Klass<LexicalNode>>
+  nodes?: Array<{
+    afterReadPromises?: Array<AfterReadPromise>
+    node: Klass<LexicalNode>
+    type: string
+  }>
 
   plugins?: Array<
     | {
@@ -87,6 +89,8 @@ export type FeatureProviderMap = Map<string, FeatureProvider>
 export type SanitizedFeatures = Required<
   Pick<ResolvedFeature, 'markdownTransformers' | 'nodes'>
 > & {
+  /**  The node types mapped to their afterReadPromises */
+  afterReadPromises: Map<string, Array<AfterReadPromise>>
   /** The keys of all enabled features */
   enabledFeatures: string[]
   floatingSelectToolbar: {
