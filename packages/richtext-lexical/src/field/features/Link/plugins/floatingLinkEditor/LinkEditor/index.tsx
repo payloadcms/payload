@@ -187,7 +187,6 @@ export function LinkEditor({
           // Now, open the modal
           updateLinkEditor()
             .then(() => {
-              console.log('toggleModal1', drawerSlug)
               toggleModal(drawerSlug)
             })
             .catch((error) => {
@@ -279,7 +278,6 @@ export function LinkEditor({
             className="link-edit"
             onClick={() => {
               toggleModal(drawerSlug)
-              console.log('toggleModal2', drawerSlug)
             }}
             onMouseDown={(event) => {
               event.preventDefault()
