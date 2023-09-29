@@ -44,6 +44,7 @@ export function createLexical({
   }
 }
 
+export { BlockQuoteFeature } from './field/features/BlockQuote'
 export { HeadingFeature } from './field/features/Heading'
 export { LinkFeature } from './field/features/Link'
 export { ParagraphFeature } from './field/features/Paragraph'

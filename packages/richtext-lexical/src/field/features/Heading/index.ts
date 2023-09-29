@@ -18,12 +18,10 @@ import { TextDropdownSectionWithEntries } from '../common/floatingSelectToolbarT
 import { MarkdownTransformer } from './markdownTransformer'
 
 const setHeading = (editor: LexicalEditor, headingSize: HeadingTagType) => {
-  editor.update(() => {
-    const selection = $getSelection()
-    if ($isRangeSelection(selection) || DEPRECATED_$isGridSelection(selection)) {
-      $setBlocksType(selection, () => $createHeadingNode(headingSize))
-    }
-  })
+  const selection = $getSelection()
+  if ($isRangeSelection(selection) || DEPRECATED_$isGridSelection(selection)) {
+    $setBlocksType(selection, () => $createHeadingNode(headingSize))
+  }
 }
 
 type Props = {
@@ -55,7 +53,9 @@ export const HeadingFeature = (props: Props): FeatureProvider => {
                   key: headingSize,
                   label: `Heading ${headingSize.charAt(1)}`,
                   onClick: ({ editor }) => {
-                    setHeading(editor, headingSize)
+                    editor.update(() => {
+                      setHeading(editor, headingSize)
+                    })
                   },
                   order: i + 2,
                 },

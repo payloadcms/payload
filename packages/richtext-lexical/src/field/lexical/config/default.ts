@@ -1,5 +1,6 @@
 import type { EditorConfig, SanitizedEditorConfig } from './types'
 
+import { BlockQuoteFeature } from '../../features/BlockQuote'
 import { HeadingFeature } from '../../features/Heading'
 import { LinkFeature } from '../../features/Link'
 import { ParagraphFeature } from '../../features/Paragraph'
@@ -37,6 +38,7 @@ export const defaultEditorConfig: EditorConfig = {
     CheckListFeature(),
     LinkFeature({}),
     RelationshipFeature(),
+    BlockQuoteFeature(),
   ],
   lexical: {
     namespace: 'lexical',

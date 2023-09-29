@@ -61,6 +61,6 @@ export function setTargetLine(
   if (lastTargetBlockElem && lastTargetBlockElem !== targetBlockElem) {
     lastTargetBlockElem.style.opacity = '1'
     lastTargetBlockElem.style.transform = 'translate(0, 0)'
-    lastTargetBlockElem.style.border = 'none'
+    //lastTargetBlockElem.style.border = 'none'
   }
 }

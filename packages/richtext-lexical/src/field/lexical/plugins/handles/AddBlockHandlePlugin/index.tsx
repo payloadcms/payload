@@ -9,11 +9,8 @@ import type { ParagraphNode } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import {
-  $createNodeSelection,
-  $createRangeSelection,
   $getNearestNodeFromDOMNode,
   $getNodeByKey,
-  $setSelection,
   type LexicalEditor,
   type LexicalNode,
 } from 'lexical'
