@@ -8,6 +8,7 @@ import Localizer from '../Localizer'
 import StepNav from '../StepNav'
 import './index.scss'
 import { NavToggler } from '../Nav/NavToggler'
+import { Hamburger } from '../Hamburger'
 
 const baseClass = 'app-header'
 
@@ -24,7 +25,9 @@ export const AppHeader: React.FC = (props) => {
         <div className={`${baseClass}__bg`} />
         <div className={`${baseClass}__content`}>
           <div className={`${baseClass}__wrapper`}>
-            <NavToggler className={`${baseClass}__mobile-nav-toggler`} />
+            <NavToggler className={`${baseClass}__mobile-nav-toggler`}>
+              <Hamburger />
+            </NavToggler>
             <StepNav className={`${baseClass}__step-nav`} />
             <div className={`${baseClass}__controls`}>
               <Localizer className={`${baseClass}__localizer`} />

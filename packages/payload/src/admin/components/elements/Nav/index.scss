@@ -116,7 +116,7 @@
 
   &__link-icon {
     display: none;
-    text-decoration: none;
+    margin-right: calc(var(--base) * 0.25);
   }
 
   @include mid-break {
@@ -134,6 +134,12 @@
   @include small-break {
     &__mobile-close {
       display: block;
+    }
+  }
+
+  @include extra-small-break {
+    &--nav-open {
+      transition: none;
     }
   }
 }

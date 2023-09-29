@@ -95,4 +95,20 @@
       display: none;
     }
   }
+
+  @include extra-small-break {
+    &--nav-open {
+      transition: none;
+    }
+
+    .template-default {
+      &__wrap {
+        transition: none;
+      }
+
+      &__nav-overlay {
+        transition: none;
+      }
+    }
+  }
 }
