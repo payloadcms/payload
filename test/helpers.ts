@@ -57,9 +57,13 @@ export async function saveDocAndAssert(page: Page, selector = '#action-save'): P
 }
 
 export async function openMainMenu(page: Page): Promise<void> {
-  await page.locator('.payload__modal-toggler--slug-main-menu').click()
-  const mainMenuModal = page.locator('#main-menu')
-  await expect(mainMenuModal).toBeVisible()
+  // check to see if the main menu is already open and if not, open it
+  // use the `--nav-open` modifier class to check if the nav is open
+  // this will prevent clicking nav links that are bleeding off the screen
+  const navLocator = '.template-default.template-default--nav-open'
+  const nav = await page.locator(navLocator)
+  if (!nav) await page.locator('.nav-toggler').click()
+  await expect(await page.locator(navLocator)).toBeVisible()
 }
 
 export async function closeMainMenu(page: Page): Promise<void> {
