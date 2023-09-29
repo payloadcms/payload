@@ -5,6 +5,7 @@ import { NavIcon } from '../NavIcon'
 import { usePreferences } from '../../../utilities/Preferences'
 
 import './index.scss'
+import { useWindowInfo } from '@faceless-ui/window-info'
 
 const baseClass = 'nav-toggler'
 
@@ -15,18 +16,25 @@ export const NavToggler: React.FC = () => {
 
   const { navOpen, setNavOpen } = useNav()
 
+  const {
+    breakpoints: { l: largeBreak },
+  } = useWindowInfo()
+
   return (
     <button
       type="button"
       className={baseClass}
       aria-label={t('menu')}
       onClick={async () => {
-        // only when the user explicitly toggles the nav do we want to set the preference
-        // this is because the js may open or close the nav based on the window size, routing, etc
-        await setPreference('nav', {
-          open: !navOpen,
-        })
         setNavOpen(!navOpen)
+
+        // only when the user explicitly toggles the nav on desktop do we want to set the preference
+        // this is because the js may open or close the nav based on the window size, routing, etc
+        if (!largeBreak) {
+          await setPreference('nav', {
+            open: !navOpen,
+          })
+        }
       }}
     >
       <NavIcon isActive={navOpen} />
