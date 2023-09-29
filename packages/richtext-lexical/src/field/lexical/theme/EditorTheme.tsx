@@ -51,7 +51,6 @@ export const LexicalEditorTheme: EditorThemeClasses = {
     h5: 'LexicalEditorTheme__h5',
     h6: 'LexicalEditorTheme__h6',
   },
-  image: 'editor-image',
   indent: 'LexicalEditorTheme__indent',
   inlineImage: 'LexicalEditor__inline-image',
   link: 'LexicalEditorTheme__link',
@@ -102,4 +101,5 @@ export const LexicalEditorTheme: EditorThemeClasses = {
     underline: 'LexicalEditorTheme__textUnderline',
     underlineStrikethrough: 'LexicalEditorTheme__textUnderlineStrikethrough',
   },
+  upload: 'editor-upload',
 }
