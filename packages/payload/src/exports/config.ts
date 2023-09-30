@@ -5,3 +5,5 @@ export { type FieldTypes, fieldTypes } from '../admin/components/forms/field-typ
 
 export { defaults } from '../config/defaults'
 export { sanitizeConfig } from '../config/sanitize'
+export { baseBlockFields } from '../fields/baseFields/baseBlockFields'
+export { baseIDField } from '../fields/baseFields/baseIDField'

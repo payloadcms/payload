@@ -69,7 +69,7 @@ const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }
     }>(
       INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND,
       (payload) => {
-        setReplaceNodeKey(payload.replace ? payload.replace.nodeKey : null)
+        setReplaceNodeKey(payload?.replace ? payload?.replace.nodeKey : null)
         openDrawer()
         return true
       },

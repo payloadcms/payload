@@ -60,6 +60,7 @@ export function createLexical({
 }
 
 export { BlockQuoteFeature } from './field/features/BlockQuote'
+export { BlocksFeature } from './field/features/Blocks'
 export { HeadingFeature } from './field/features/Heading'
 export { LinkFeature, LinkFeatureProps } from './field/features/Link'
 export { ParagraphFeature } from './field/features/Paragraph'

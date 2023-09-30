@@ -3,6 +3,7 @@ import type { EditorThemeClasses } from 'lexical'
 import './EditorTheme.scss'
 
 export const LexicalEditorTheme: EditorThemeClasses = {
+  block: 'LexicalEditorTheme__block',
   blockCursor: 'LexicalEditorTheme__blockCursor',
   characterLimit: 'LexicalEditorTheme__characterLimit',
   code: 'LexicalEditorTheme__code',

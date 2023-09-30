@@ -1,6 +1,7 @@
 import type { EditorConfig, SanitizedEditorConfig } from './types'
 
 import { BlockQuoteFeature } from '../../features/BlockQuote'
+import { BlocksFeature } from '../../features/Blocks'
 import { HeadingFeature } from '../../features/Heading'
 import { LinkFeature } from '../../features/Link'
 import { ParagraphFeature } from '../../features/Paragraph'
@@ -41,6 +42,7 @@ export const defaultEditorConfig: EditorConfig = {
     RelationshipFeature(),
     BlockQuoteFeature(),
     UploadFeature(),
+    //BlocksFeature(), // Adding this by default makes no sense if no blocks are defined
   ],
   lexical: {
     namespace: 'lexical',

@@ -6,19 +6,15 @@ import React, { useEffect } from 'react'
 
 import type { RawUploadPayload } from '../nodes/UploadNode'
 
-import { $createUploadNode, UploadNode } from '../nodes/UploadNode'
 import { UploadDrawer } from '../drawer'
+import { $createUploadNode, UploadNode } from '../nodes/UploadNode'
 
 export type InsertUploadPayload = Readonly<RawUploadPayload>
 
 export const INSERT_UPLOAD_COMMAND: LexicalCommand<InsertUploadPayload> =
   createCommand('INSERT_UPLOAD_COMMAND')
 
-export function UploadPlugin({
-  captionsEnabled,
-}: {
-  captionsEnabled?: boolean
-}): JSX.Element | null {
+export function UploadPlugin(): JSX.Element | null {
   const [editor] = useLexicalComposerContext()
   const { collections } = useConfig()
 
@@ -49,7 +45,7 @@ export function UploadPlugin({
         COMMAND_PRIORITY_EDITOR,
       ),
     )
-  }, [captionsEnabled, editor])
+  }, [editor])
 
   return <UploadDrawer enabledCollectionSlugs={collections.map(({ slug }) => slug)} />
 }

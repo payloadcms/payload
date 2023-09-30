@@ -40,6 +40,7 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
 
   useEffect(() => {
     const searchTermToUse = searchTerm.toLowerCase()
+    console.log('blocks', blocks)
     const matchingBlocks = blocks.reduce((matchedBlocks, block) => {
       const blockLabel = getBlockLabel(block, i18n)
       if (blockLabel.includes(searchTermToUse)) matchedBlocks.push(block)

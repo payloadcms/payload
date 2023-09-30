@@ -22,10 +22,10 @@ import { useForm, useFormSubmitted } from '../../Form/context'
 import { NullifyLocaleField } from '../../NullifyField'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import { BlockRow } from './BlockRow'
 import { BlocksDrawer } from './BlocksDrawer'
 import './index.scss'
-import { fieldBaseClass } from '../shared'
 
 const baseClass = 'blocks-field'
 

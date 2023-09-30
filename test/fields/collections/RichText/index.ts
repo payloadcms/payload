@@ -1,12 +1,14 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
 import {
+  BlocksFeature,
   LinkFeature,
   TreeviewFeature,
   UploadFeature,
   createLexical,
 } from '../../../../packages/richtext-lexical/src'
 import { createSlate } from '../../../../packages/richtext-slate/src'
+import { TextBlock } from './blocks'
 import { loremIpsum } from './loremIpsum'
 
 const RichTextFields: CollectionConfig = {
@@ -22,16 +24,6 @@ const RichTextFields: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
-    },
-    {
-      name: 'richTextLexical',
-      type: 'richText',
-      editor: createLexical({
-        userConfig(defaultEditorConfig) {
-          defaultEditorConfig.features.push(TreeviewFeature())
-          return defaultEditorConfig
-        },
-      }),
     },
     {
       name: 'richTextLexicalCustomFields',
@@ -72,6 +64,22 @@ const RichTextFields: CollectionConfig = {
               },
             }),
           )
+
+          defaultEditorConfig.features.push(
+            BlocksFeature({
+              blocks: [TextBlock],
+            }),
+          )
+          return defaultEditorConfig
+        },
+      }),
+    },
+    {
+      name: 'richTextLexical',
+      type: 'richText',
+      editor: createLexical({
+        userConfig(defaultEditorConfig) {
+          defaultEditorConfig.features.push(TreeviewFeature())
           return defaultEditorConfig
         },
       }),
