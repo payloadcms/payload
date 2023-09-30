@@ -16,7 +16,10 @@ import React from 'react'
 import { BlockComponent } from '../component'
 
 export type BlockFields = {
+  /** Block data */
   data: null | unknown
+  /** Block type. This is the slug of the block added to the Blocks Feature */
+  type: string
 }
 
 export type SerializedBlockNode = Spread<

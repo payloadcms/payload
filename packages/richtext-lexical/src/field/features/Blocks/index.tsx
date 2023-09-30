@@ -60,7 +60,7 @@ export const BlocksFeature = (props?: BlocksFeatureProps): FeatureProvider => {
           options: [
             {
               options: [
-                new SlashMenuOption('Blocks', {
+                new SlashMenuOption('Block', {
                   Icon: BlockIcon,
                   keywords: ['block', 'blocks'],
                   onSelect: ({ editor }) => {

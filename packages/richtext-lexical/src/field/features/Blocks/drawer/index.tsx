@@ -26,15 +26,18 @@ export const INSERT_BLOCK_WITH_DRAWER_COMMAND: LexicalCommand<{
 }> = createCommand('INSERT_BLOCK_WITH_DRAWER_COMMAND')
 
 const insertBlock = ({
+  blockType,
   editor,
   replaceNodeKey,
 }: {
+  blockType: string
   editor: LexicalEditor
   replaceNodeKey: null | string
 }) => {
   if (!replaceNodeKey) {
     editor.dispatchCommand(INSERT_BLOCK_COMMAND, {
       data: null,
+      type: blockType,
     })
   } else {
     editor.update(() => {
@@ -43,6 +46,7 @@ const insertBlock = ({
         node.replace(
           $createBlockNode({
             data: null,
+            type: blockType,
           }),
         )
       }
@@ -64,7 +68,17 @@ export const BlocksDrawerComponent: React.FC = () => {
     singular: t('block') || 'Block',
   }
 
-  const addRow = useCallback(async (rowIndex: number, blockType: string) => {}, [])
+  const addRow = useCallback(
+    async (rowIndex: number, blockType: string) => {
+      console.log('addRow', rowIndex, blockType)
+      insertBlock({
+        blockType: blockType,
+        editor,
+        replaceNodeKey,
+      })
+    },
+    [editor, replaceNodeKey],
+  )
 
   const drawerSlug = formatDrawerSlug({
     depth: editDepth,
@@ -87,17 +101,6 @@ export const BlocksDrawerComponent: React.FC = () => {
       COMMAND_PRIORITY_EDITOR,
     )
   }, [editor, drawerSlug, openModal])
-
-  const onSelect = useCallback(
-    ({}) => {
-      insertBlock({
-        editor,
-        replaceNodeKey,
-      })
-      closeModal(drawerSlug)
-    },
-    [editor, closeModal, replaceNodeKey, drawerSlug],
-  )
 
   return (
     <BlocksDrawer
