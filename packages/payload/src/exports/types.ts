@@ -2,6 +2,7 @@ export * from './../types'
 
 export type {
   CreateFormData,
+  Data,
   Fields,
   FormField,
   FormFieldsContext,

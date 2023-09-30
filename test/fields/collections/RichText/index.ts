@@ -8,7 +8,7 @@ import {
   createLexical,
 } from '../../../../packages/richtext-lexical/src'
 import { createSlate } from '../../../../packages/richtext-slate/src'
-import { TextBlock } from './blocks'
+import { TextBlock, UploadAndRichTextBlock } from './blocks'
 import { loremIpsum } from './loremIpsum'
 
 const RichTextFields: CollectionConfig = {
@@ -67,7 +67,7 @@ const RichTextFields: CollectionConfig = {
 
           defaultEditorConfig.features.push(
             BlocksFeature({
-              blocks: [TextBlock],
+              blocks: [TextBlock, UploadAndRichTextBlock],
             }),
           )
           return defaultEditorConfig

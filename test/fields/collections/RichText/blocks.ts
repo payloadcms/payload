@@ -27,5 +27,5 @@ export const UploadAndRichTextBlock: Block = {
       editor: createLexical({}),
     },
   ],
-  slug: 'text',
+  slug: 'uploadAndRichText',
 }
