@@ -23,7 +23,7 @@ export default function RelationshipPlugin(): JSX.Element | null {
       throw new Error('RelationshipPlugin: RelationshipNode not registered on editor')
     }
 
-    editor.registerCommand<RelationshipFields>(
+    return editor.registerCommand<RelationshipFields>(
       INSERT_RELATIONSHIP_COMMAND,
       (payload) => {
         const relationshipNode = $createRelationshipNode(payload)

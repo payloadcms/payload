@@ -64,7 +64,7 @@ const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }
   })
 
   useEffect(() => {
-    editor.registerCommand<{
+    return editor.registerCommand<{
       replace: { nodeKey: string } | false
     }>(
       INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND,

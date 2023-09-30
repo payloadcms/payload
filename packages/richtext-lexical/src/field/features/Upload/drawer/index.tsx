@@ -70,7 +70,7 @@ const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   })
 
   useEffect(() => {
-    editor.registerCommand<{
+    return editor.registerCommand<{
       replace: { nodeKey: string } | false
     }>(
       INSERT_UPLOAD_WITH_DRAWER_COMMAND,

@@ -56,13 +56,13 @@ export const BlocksDrawerComponent: React.FC = () => {
 
   const [replaceNodeKey, setReplaceNodeKey] = useState<null | string>(null)
   const editDepth = useEditDepth()
-  const { i18n, t } = useTranslation('fields')
+  const { t } = useTranslation('fields')
+  const { closeModal, openModal } = useModal()
 
   const labels = {
     plural: t('blocks') || 'Blocks',
     singular: t('block') || 'Block',
   }
-  console.log('labels', labels)
 
   const addRow = useCallback(async (rowIndex: number, blockType: string) => {}, [])
 
@@ -70,13 +70,12 @@ export const BlocksDrawerComponent: React.FC = () => {
     depth: editDepth,
     slug: `lexical-rich-text-blocks-` + uuid,
   })
-  const { closeModal, openModal } = useModal()
 
   const blocks = (editorConfig?.resolvedFeatureMap?.get('blocks')?.props as BlocksFeatureProps)
     ?.blocks
 
   useEffect(() => {
-    editor.registerCommand<{
+    return editor.registerCommand<{
       replace: { nodeKey: string } | false
     }>(
       INSERT_BLOCK_WITH_DRAWER_COMMAND,
@@ -87,7 +86,7 @@ export const BlocksDrawerComponent: React.FC = () => {
       },
       COMMAND_PRIORITY_EDITOR,
     )
-  }, [editor, openModal, drawerSlug])
+  }, [editor, drawerSlug, openModal])
 
   const onSelect = useCallback(
     ({}) => {
