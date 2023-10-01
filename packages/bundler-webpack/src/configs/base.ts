@@ -67,6 +67,7 @@ export const getBaseConfig = (payloadConfig: SanitizedConfig): Configuration => 
   ],
   resolve: {
     alias: {
+      '@payloadcms/bundler-webpack': mockModulePath,
       [bundlerPath]: mockModulePath,
       dotenv: mockDotENVPath,
       path: require.resolve('path-browserify'),
