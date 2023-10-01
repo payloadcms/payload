@@ -33,8 +33,6 @@ export function LinkPlugin(): null {
       editor.registerCommand(
         TOGGLE_LINK_COMMAND,
         (payload: LinkPayload) => {
-          console.log('Payload received:', payload)
-
           // validate
           if (payload?.fields.linkType === 'custom') {
             if (!(validateUrl === undefined || validateUrl(payload?.fields.url))) {

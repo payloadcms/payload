@@ -55,15 +55,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
       editor.update(() => {
         const node: BlockNode = $getNodeByKey(nodeKey)
         if (node) {
-          console.log(
-            'onFormChange',
-            formData,
-            'schema',
-            block.fields.map((field) => ({
-              ...field,
-              path: createNestedFieldPath(null, field),
-            })),
-          )
           node.setFields({
             blockName: blockName,
             collapsed: collapsed,

@@ -15,9 +15,6 @@ export const FormSavePlugin: React.FC<Props> = (props) => {
   const { onChange } = props
 
   const [fields, dispatchFields] = useAllFormFields()
-  useEffect(() => {
-    console.log('fields', fields)
-  }, [fields])
 
   // Pass in fields, and indicate if you'd like to "unflatten" field data.
   // The result below will reflect the data stored in the form at the given time
