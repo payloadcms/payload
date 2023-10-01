@@ -3,12 +3,10 @@ import type { SanitizedConfig } from 'payload/config'
 // @ts-expect-error
 import type { InlineConfig } from 'vite'
 
-import rollupCommonJS from '@rollup/plugin-commonjs'
 import image from '@rollup/plugin-image'
 import react from '@vitejs/plugin-react'
 import getPort from 'get-port'
 import path from 'path'
-import scss from 'rollup-plugin-scss'
 import virtual from 'vite-plugin-virtual'
 
 const bundlerPath = path.resolve(__dirname, './')
@@ -65,39 +63,16 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
   return {
     base: payloadConfig.routes.admin,
     build: {
-      commonjsOptions: {
-        include: [/payload/],
-        transformMixedEsModules: true,
-      },
+      chunkSizeWarningLimit: 4000,
       outDir: payloadConfig.admin.buildPath,
       rollupOptions: {
-        // output: {
-        //   manualChunks: {
-        //     jsonWorker: ['monaco-editor/esm/vs/language/json/json.worker'],
-        //     cssWorker: ['monaco-editor/esm/vs/language/css/css.worker'],
-        //     htmlWorker: ['monaco-editor/esm/vs/language/html/html.worker'],
-        //     tsWorker: ['monaco-editor/esm/vs/language/typescript/ts.worker'],
-        //     editorWorker: ['monaco-editor/esm/vs/editor/editor.worker'],
-        //   },
-        // },
-        input: {
-          main: path.resolve(__dirname, './index.html'),
-        },
-        plugins: [
-          image(),
-          rollupCommonJS(),
-          scss({
-            output: path.resolve(payloadConfig.admin.buildPath, 'styles.css'),
-            outputStyle: 'compressed',
-            // include: [`${relativeAdminPath}/**/*.scss`],
-          }),
-        ],
+        plugins: [image()],
         treeshake: true,
       },
     },
     customLogger: logger,
     define: {
-      __dirname: '""',
+      __dirname: '"/"',
       'module.hot': 'undefined',
       'process.argv': '[]',
       'process.cwd': '() => ""',
@@ -107,18 +82,6 @@ export const getViteConfig = async (payloadConfig: SanitizedConfig): Promise<Inl
       exclude: [
         // Dependencies that need aliases should be excluded
         // from pre-bundling
-      ],
-      include: [
-        // 'payload/**/*.tsx',
-        // 'payload/**/*.ts',
-        // 'payload/**/*.js',
-        // 'payload/*.js',
-        // 'slate',
-        // 'slate-react',
-        // 'slate-history',
-        // 'is-hotkey',
-        // 'slate-hyperscript',
-        // '@monaco-editor/react',
       ],
     },
     plugins: [
