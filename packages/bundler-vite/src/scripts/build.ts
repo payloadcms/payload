@@ -1,4 +1,5 @@
 import type { SanitizedConfig } from 'payload/config'
+// @ts-expect-error
 import type { InlineConfig } from 'vite'
 
 import { getViteConfig } from '../configs/vite'

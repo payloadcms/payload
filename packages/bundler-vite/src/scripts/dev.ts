@@ -1,4 +1,5 @@
 import type { PayloadHandler } from 'payload/config'
+// @ts-expect-error
 import type { InlineConfig } from 'vite'
 
 import express from 'express'
