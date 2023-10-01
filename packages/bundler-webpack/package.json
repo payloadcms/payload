@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/bundler-webpack",
-  "version": "0.0.1",
+  "version": "1.0.0-beta.0",
   "description": "The officially supported Webpack bundler adapter for Payload",
   "repository": "https://github.com/payloadcms/payload",
   "license": "MIT",
@@ -58,5 +58,8 @@
     "main": "./dist/index.js",
     "registry": "https://registry.npmjs.org/",
     "types": "./dist/index.d.ts"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }

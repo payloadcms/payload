@@ -1,0 +1,35 @@
+@import 'payload/scss';
+
+.add-block-menu {
+  all: unset; // reset all default button styles
+  border-radius: 4px;
+  padding: 0px;
+  cursor: pointer;
+  opacity: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    .icon {
+      opacity: 1;
+    }
+  }
+
+  .icon {
+    width: 18px;
+    height: 24px;
+    opacity: 0.3;
+    background-image: url(../../../ui/icons/Add/index.svg);
+    background-position-y: 2.5px;
+    background-position-x: 0px;
+  }
+
+  html[data-theme='dark'] & {
+    .icon {
+      filter: invert(1);
+    }
+  }
+}

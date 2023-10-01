@@ -1,0 +1,39 @@
+@import 'payload/scss';
+
+.floating-select-toolbar-popup__button {
+  display: flex;
+  align-items: center;
+  vertical-align: middle;
+  justify-content: center;
+  height: 30px;
+  width: 30px;
+  border: 0;
+  background: none;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+
+  &.spaced {
+    margin-right: 2px;
+  }
+
+  &.active {
+    background-color: var(--color-base-100);
+
+    .icon {
+      opacity: 1;
+    }
+  }
+
+  &.disabled {
+    cursor: not-allowed;
+
+    .icon {
+      opacity: 0.2;
+    }
+  }
+
+  &:hover:not([disabled]) {
+    background-color: var(--color-base-100);
+  }
+}
