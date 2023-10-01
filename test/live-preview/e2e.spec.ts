@@ -2,33 +2,31 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
-import type { Post } from './config'
-
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
-import { slug } from './config'
+import { startLivePreviewDemo } from './startLivePreviewDemo'
 
-const { afterEach, beforeAll, describe } = test
-
-const title = 'title'
-const description = 'description'
-
+const { beforeAll, describe } = test
 let url: AdminUrlUtil
-let serverURL: string
 
-describe('live-preview', () => {
+describe('Live Preview', () => {
   let page: Page
 
   beforeAll(async ({ browser }) => {
-    serverURL = (await initPayloadE2E(__dirname)).serverURL
-    url = new AdminUrlUtil(serverURL, slug)
+    const { serverURL, expressApp, payload } = await initPayloadE2E(__dirname)
+    url = new AdminUrlUtil(serverURL, 'posts')
+
     const context = await browser.newContext()
     page = await context.newPage()
+
+    await startLivePreviewDemo({
+      expressApp,
+      payload,
+    })
   })
 
-  describe('Preview', () => {
-    test('should show preview tab in collection', async () => {
-      // TODO: test preview tab
-    })
+  test('example test', async () => {
+    await page.goto(url.list)
+    await expect(true).toBe(true)
   })
 })
